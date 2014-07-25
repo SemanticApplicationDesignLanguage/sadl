@@ -1,0 +1,266 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Model Names, Namespaces, and Aliases</title>
+</head>
+
+<body>
+
+<h1 dir="ltr">Model Names, Namespaces, and Aliases in SADL</h1>
+
+<h5 dir="ltr">Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/04/2014<!--webbot bot="Timestamp" endspan i-checksum="12561" -->.</h5>
+
+<h2 dir="ltr">The Basics</h2>
+
+<p>One of the important capabilities of OWL is allow one ontology to import 
+another using owl:imports. In order for this to be possible, each OWL ontology 
+must have an identifier that can be used in the owl:imports statement. 
+Consistent with Semantic Web identification, an ontology is identified by a URI.</p>
+
+<p>SADL model files are converted to OWL model files when the model is saved, 
+provided there are no fatal translation in translating to OWL. Since the OWL 
+model is identified by URI, the SADL model file requires that a valid URI be given after the &quot;uri&quot; keyword as 
+the first non-comment statement in the model. This URI serves as the model name 
+in SADL and can be used to import this model into another model. (This is 
+importing a model by model name; a SADL file can also be imported to another 
+SADL file using the SADL file name.) The model's URI becomes the base URI of the 
+OWL model file. In this sense the model URI identifies an XML namespace in which 
+the concepts of the model are defined.&nbsp; It is also the URI that is used in another OWL file to import 
+this OWL file. (We are currently using OWL 1; OWL 2 modifies the import 
+mechanism by introducing a version IRI and rules about accessing the current 
+versus a previous ontology version.)</p>
+<p>A valid URI for a model name is required to have the following two parts:</p>
+<ol>
+  <li>A Scheme: this is the first element of the URI preceding the colon, e.g., 
+  in &quot;<a href="http://com.ge.research">http://com.ge.research</a>&quot; the scheme is 
+  &quot;http&quot;. A SADL model name requires an &quot;http&quot; scheme.</li>
+  <li>The Path: this is the rest of the URI and the format depends upon the 
+  scheme. In a path, the slash character (&quot;/&quot;) is reserved for delimiting 
+  substrings whose relationship is hierarchical. </li>
+</ol>
+<p>In general, a valid URI may contain a hash character (&quot;#&quot;). The hash is 
+reserved as a delimiter to separate the URI of a whole from a fragment 
+identifier. A fragment identifier represents &quot;a part of, fragment of, or a 
+sub-function within, an object&quot; (see
+<a href="http://www.w3.org/Addressing/URL/4_2_Fragments.html">
+http://www.w3.org/Addressing/URL/4_2_Fragments.html</a>). In the case of our 
+generated OWL model, we will use the the model name as the part of the path 
+preceding the hash (&quot;#&quot;) and name of a particular concept (class, property, or 
+instance) as the fragment identifier, which we also call else where the local 
+name. For example, the following SADL model generates the OWL model shown in 
+XML/RDF format.</p>
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p ALIGN="LEFT">uri</font><font SIZE="2"> <b>&quot;http://sadl.imp/shapes&quot;</b>
+  </font><font SIZE="2" COLOR="#800080">version</font><font SIZE="2"> 
+  &quot;$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:06:20 $&quot;.</font></p>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Shape</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">.</font></p>
+  <p ALIGN="LEFT"><font SIZE="2"></p>
+  <span LANG="EN">
+  <p>&lt;rdf:RDF<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xmlns:rdf=&quot;<a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#">http://www.w3.org/1999/02/22-rdf-syntax-ns#</a>&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xmlns=&quot;<a href="http://sadl.imp/shapes#">http://sadl.imp/shapes#</a>&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xmlns:owl=&quot;<a href="http://www.w3.org/2002/07/owl#">http://www.w3.org/2002/07/owl#</a>&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xmlns:rdfs=&quot;<a href="http://www.w3.org/2000/01/rdf-schema#">http://www.w3.org/2000/01/rdf-schema#</a>&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xml:base=&quot;http://sadl.imp/shapes&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Ontology rdf:about=&quot;http://sadl.imp/shapes#&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;owl:versionInfo&gt;$Revision: 1.1 $ Last modified on $Date: 2009/03/06 14:37:54 
+  $&lt;/owl:versionInfo&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;rdfs:comment xml:lang=&quot;en&quot;&gt;This ontology was created from a SADL file 'shapes.sadl' 
+  and should not be edited.&lt;/rdfs:comment&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:Ontology&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Class rdf:ID=&quot;Shape&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:FunctionalProperty rdf:ID=&quot;area&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;rdfs:domain rdf:resource=&quot;http://sadl.imp/shapes#Shape&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;rdfs:subPropertyOf rdf:resource=&quot;http://www.w3.org/2002/07/owl#FunctionalProperty&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;rdfs:range rdf:resource=&quot;http://www.w3.org/2001/XMLSchema#float&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;rdf:type rdf:resource=&quot;http://www.w3.org/2002/07/owl#DatatypeProperty&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:FunctionalProperty&gt;<br>
+  &lt;/rdf:RDF&gt;</p>
+</blockquote>
+</span></font>
+<p>The question of whether to include or not include the hash (&quot;#&quot;) on the end 
+of the URI for the whole (the model in this case) seems somewhat unclear--&quot;If 
+the fragment-id is void, the hash sign may be omitted: A void fragment-id with 
+or without the hash sign means that the URL refers to the whole object.&quot; (ibid.) 
+We will take the approach of not including the hash when referring to the model 
+as a whole by model name, such as when referencing the model in an owl:imports 
+statement or when the model is mapped in the policy file from the model name 
+(public URI) to actual model location (alternate URL). However, when referring 
+to the namespace of the model, as in the third line of the OWL model above, the 
+hash will be included. When a SADL model imports an OWL file, the inclusion of 
+the hash is beyond our control and we will attempt to properly handle whatever 
+approach is used in the OWL model(s) imported.</p>
+<p>A concept in an OWL model is identified by its URI. Because URIs can be 
+rather long and can make models hard to read, the base URI (the namespace) may 
+be replaced with a <i>prefix</i>, also known in SADL as an <i>alias </i>for the 
+model (namespace). The combination of the prefix and the localname or fragment, 
+separated by a colon, is called a Qualified Name or QName. The OWL model above 
+uses the QNames owl:Ontology, rdf:about, owl:versionInfo, etc. </p>
+<p>An alias for the name of an imported model allows a shortened although still explicit referencing of 
+imported concepts. For example, if another model imported the model shown above 
+we might wish to reference the Shape class. If no other import contains a 
+concept with local name &quot;Shape&quot; then just referencing Shape is unambiguous 
+and is allowed in SADL but 
+it is conceivable that other imports might include other concepts with local name 
+&quot;Shape&quot;. To disambiguate we can use an alias, e.g., &quot;shapes&quot;. Then the reference 
+would be &quot;shapes:Shape&quot;. For example,</p>
+<blockquote>
+  <font SIZE="2"><font SIZE="2" COLOR="#000080"><b>
+  <p>Circle</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>shapes:Shape</b></font><font SIZE="2">.</p>
+  </font>
+</font>
+</blockquote>
+<p>There are two ways to provide an alias for a model name (namespace). A global 
+alias can be provided in the aliased model itself. For example, the first line 
+of the model above could be</p>
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p ALIGN="LEFT">uri</font><font SIZE="2"> <b>&quot;http://sadl.imp/shapes&quot;</b>
+  </font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> shapes
+  </font><font SIZE="2" COLOR="#800080">version</font><font SIZE="2"> 
+  &quot;$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:06:20 $&quot;.</font></p>
+  </blockquote>
+<p>This will create a global alias in the Jena policy file, ont-policy.rdf 
+(located in the OwlModels folder of a SADL-IDE project). </p>
+<p>When a global alias is given as part of a model name, imports of that model 
+do not need an alias. For example, the model above could then be imported with 
+either of these statements:</p>
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>import</font><font SIZE="2"> <b>&quot;Decl1.sadl&quot;</b>.</font></p>
+  <p><font SIZE="2" COLOR="#800080">import</font><font SIZE="2"> <b>&quot;http://sadl.imp/shapes&quot;</b>.</font></p>
+</blockquote>
+<p>It is also possible to specify a local alias, for use only in the importing 
+model, on the import statement line. For example, if the model above has no 
+alias we could import it with either of these statements:</p>
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>import</font><font SIZE="2"> <b>&quot;Decl1.sadl&quot; </b></font>
+  <font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> shapes.</font></p>
+  <p><font SIZE="2" COLOR="#800080">import</font><font SIZE="2"> <b>&quot;http://sadl.imp/shapes&quot;
+  </b></font><font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> shapes.</font></p>
+</blockquote>
+<p>This creates a local prefix for that 
+model which can be used to unambiguously refer to concepts from the imported 
+ontology but only within the importing model. The difficulty with using local 
+aliases occurs when there are indirect imports, e.g., model A imports model B 
+with local alias &quot;b&quot;, and model B imports model C with local alias &quot;c&quot;. If model 
+A uses a concept from model C, its prefix is ambiguous if only local alias are 
+used and there can even be conflicts. For example, suppose model C imports model 
+D with alias &quot;b&quot;.</p>
+<p>Note that a template is available 
+if content assistance is requested (control-space). The import template will 
+either show the model names (http scheme) of known models or the actual SADL 
+file name 
+(file scheme), depending upon the setting in the SADL preferences (Window -&gt; 
+Preferences -&gt; Sadl).</p>
+<h2>Jena TDB, Default and Named Graphs</h2>
+<p>The approach described above works well when each SADL model file generates 
+an OWL model file. The mapping between an actual OWL model file, identified by a 
+URL (file or http schema) and the model's URI is captured in the Jena policy 
+file, ont-policy.rdf. However, models stored in &quot;flat files&quot; have limited 
+scalability. Therefore one of the OWL model format options available in the SADL-IDE 
+is &quot;Jena TDB&quot;. Jena TDB is a triple store capable of efficiently handling much 
+larger models. It supports named graphs and as long as no inference is required, 
+supports execution of SPARQL queries against the triple store without having to 
+create an in-memory OWL model. All of this facilitates greater performance and 
+scalability.</p>
+<p>When Jena TDB is chosen as the OWL model format in the SADL-IDE, each model 
+of the project, whether a SADL model with generated OWL, or an OWL file imported 
+by a SADL model, directly or indirectly, but not generated from SADL, is added 
+to the TDB repository as a named graph. The TDB repository is created in a &quot;TDB&quot; 
+subfolder of the OwlModels folder of the project. The Jena policy file is used 
+to find and add models to the TDB repository. It is also used to find the rule 
+files if a SADL file contains rules. </p>
+<p>Jena TDB has the concept of a &quot;default graph&quot; as well as named graphs. The 
+SADL-IDE using the OWL model format &quot;Jena TDB&quot; only creates named graphs. 
+However, it is possible to configure TDB so that the union of all the named 
+graphs is available to the query engine as the default graph (see
+<a href="http://jena.apache.org/documentation/tdb/datasets.html">
+http://jena.apache.org/documentation/tdb/datasets.html</a>). When querying from 
+the SADL environment, the matching of queries to the appropriate TDB graph is 
+handled automatically.</p>
+<h2>Cached Inferred Models</h2>
+<p>When a Jena Rules Engine-based reasoner is used in SADL, inference requires 
+that the OWL model be loaded into memory before any reasoning/rule processing 
+can occur. For large models and/or extensive reasoning, this can be quite time 
+and computing resource intensive. In those situations in which the instance data 
+is not dynamic, it can be a significant boost to performance to cache the 
+resulting inferred model for reuse in querying. In those instances it is 
+beneficial to capture the inferred model in a Jena TDB repository so that 
+queries can be executed against the triple store without having to create an 
+in-memory model. When an inferred model is cached in its own TDB repository, the 
+model is stored as the default graph and the URI associated with the model is 
+the namespace identified as the namespace of the [first] input data. </p>
+<p>Caching of inferred models is only reasonable if there is some mechanism by 
+which we can determine that the cached model is not made obsolete by new 
+instance data. Several approaches come to mind.</p>
+<ol>
+  <li>Record the timestamp of the input data and compare this timestamp to that 
+  of the TDB repository to determine if the data is newer than the cached model. 
+  This is a viable option when the data is in a file whose timestamp is 
+  available to the reasoner plug-in for comparison. For example, a SADL test 
+  case would fall in this category as the test data is in an OWL file on the 
+  local file system so the date of the input data file can be compared with that 
+  of the cached inferred model.</li>
+  <li>Another approach is to save a hash of the serialized input data used to 
+  create the cached model. Whenever new data is received a hash is also 
+  generated and the new hash is compared to the old hash to see if the instance 
+  data is different. If the hash values are the same the cached inferred model 
+  may be used. Note that multiple input data sets could be handled by including 
+  the hash of the previous data set in each subsequent input data serialization 
+  before hashing. Note that for large amounts of input data serializing and 
+  hashing could be expensive.</li>
+  <li>Leave clearing of the cache up to the client and use the cached inferred 
+  model until the client clears the cache.</li>
+</ol>
+<h2>Using a TDB Default Graph as a Named Model in SADL</h2>
+<p>The previous section introduced the concept of a cached inferred model in a 
+dedicated TDB repository default graph. But what if we wished to access a TDB 
+repository default graph in a more persistent manner? How could we map from a 
+URI or set of URIs to the TDB repository? The default graph can contain concepts 
+from multiple namespaces. To be able to query this default graph, we must have 
+some way to identify the repository (and its default graph) as the &quot;target&quot; of 
+the query. The question probably only makes sense in the context of having 
+multiple TDB repositories, each with a default graph, and wanting to execute a 
+query against the &quot;correct&quot; repository. It seems that the solution is to have a 
+mapping from one or more URIs to the TDB repository, which can be thought of as 
+having an actual file-based URL. One approach might be to have the actual URL 
+associated with one or more URIs in the Jena policy file be the folder 
+containing the repository. Then the query mechanism could check, for a given 
+query graph name or names, the policy file for the actual URL and if that URL is 
+a TDB repository, execute the query against a Dataset opened on the repository.</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

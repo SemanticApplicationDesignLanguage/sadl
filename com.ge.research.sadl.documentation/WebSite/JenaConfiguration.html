@@ -1,0 +1,258 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Jena Reasoner Configuration</title>
+</head>
+
+<body>
+
+<font SIZE="2">
+<h1 ALIGN="LEFT">Jena Reasoner Configuration</h1>
+</font>
+<p ALIGN="LEFT">To select a reasoner for a SADL project, open the project and 
+with the project selected in the Project Explorer pane, select Project 
+  -&gt; Properties. In the resulting dialog, click on the &quot;+&quot; in front of &quot;Sadl&quot; in the left-hand pane and click on &quot;Reasoner 
+  Preferences&quot;. </p>
+<blockquote>
+<p ALIGN="LEFT"><span dir="ltr">
+<img border="0" src="images/JenaCo1.jpg" width="564" height="326"></span></p>
+</blockquote>
+<p ALIGN="LEFT">The currently selected reasoner will have a check in front of it 
+as shown above. To configure the reasoner select it and click on &quot;Edit&quot;. The 
+contents of the resulting dialog will depend on the reasoner selected. For the 
+default Jena Reasoner the options are as shown below.</p>
+<blockquote>
+<p ALIGN="LEFT">
+<img border="0" src="images/JenaCo1.jpg" width="625" height="364"></p>
+</blockquote>
+<p ALIGN="LEFT">&nbsp;Reasoner configuration is saved in the &quot;configuration.rdf&quot; 
+  file in the OwlModels folder of the project.</p>
+<h2 ALIGN="LEFT">Jena Reasoner Mode</h2>
+<p ALIGN="LEFT">The Jena reasoner can be configured to run in forward, RETE 
+forward, backward, or hybrid modes. The default is hybrid.</p>
+
+<font SIZE="2">
+<h2 ALIGN="LEFT">Track and Display Derivations</h2>
+<p ALIGN="LEFT">Derivation tracking with Jena can be Deep, Shallow, or None. 
+Shallow and Deep will result in the creation of derivation logs. See
+<a href="tutorial/Derivation.html">Derivation Logging and Creating a Derived 
+Model Snapshot</a> for more information.</p>
+<h2 ALIGN="LEFT">Jena Ontology Model Specification</h2>
+</font>
+<span LANG="EN">
+<p>This value determines the kind of reasoning that will occur over the models. The following are legal values of the Jena 
+ontology model specification:</p>
+</span>
+<p ALIGN="LEFT"><font SIZE="2" COLOR="#0000c0"><i>OWL_MEM</i></font><font SIZE="2"> 
+: </font><font SIZE="2" COLOR="#3f5fbf">&nbsp;A specification for OWL models 
+that are stored in memory and do no additional entailment reasoning</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_MEM_RDFS</i></font><font SIZE="2"> 
+:</font><font SIZE="2" COLOR="#3f5fbf"> A specification for OWL models that are 
+stored in memory and use the RDFS inferencer for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_MEM_TRANS</i></font><font SIZE="2"> 
+:</font><font SIZE="2" COLOR="#3f5fbf"> A specification for OWL models that are 
+stored in memory and use the transitive inferencer for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_MEM_RULE:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL models that are stored in memory and use the OWL rules 
+inference engine for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_MEM_MICRO_RULE:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL models that are stored in memory and use the micro OWL 
+rules inference engine for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_MEM_MINI_RULE:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL models that are stored in memory and use the mini OWL 
+rules inference engine for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_DL_MEM</i></font><font SIZE="2"> 
+:</font><font SIZE="2" COLOR="#3f5fbf"> A specification for OWL DL models that 
+are stored in memory and do no additional entailment reasoning</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_DL_MEM_RDFS:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL DL models that are stored in memory and use the RDFS 
+inferencer for additional entailments</font></p>
+<p ALIGN="LEFT"><font SIZE="2" COLOR="#0000c0"><i>OWL_DL_MEM_TRANS:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL DL models that are stored in memory and use the 
+transitive inferencer for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_DL_MEM_RULE: </i>
+</font><font SIZE="2" COLOR="#3f5fbf">A specification for OWL DL models that are 
+stored in memory and use the OWL rules inference engine for additional 
+entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_LITE_MEM</i></font><font SIZE="2">:</font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL Lite models that are stored in memory and do no 
+entailment additional reasoning</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_LITE_MEM_TRANS:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL Lite models that are stored in memory and use the 
+transitive inferencer for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_LITE_MEM_RDFS:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL Lite models that are stored in memory and use the RDFS 
+inferencer for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>OWL_LITE_MEM_RULE:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for OWL Lite models that are stored in memory and use the OWL 
+rules inference engine for additional entailments</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>RDFS_MEM</i></font><font SIZE="2">:</font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for RDFS ontology models that are stored in memory and do no 
+additional entailment reasoning. Note that this model specification does not 
+support IMPORT and so can not be used for models that import other models.</p>
+</font><font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>RDFS_MEM_TRANS</i></font><font SIZE="2">:</font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for RDFS ontology models that are stored in memory and use the 
+transitive reasoner for entailments. Note that this model specification does not 
+support IMPORT and so can not be used for models that import other models.</font></p>
+<font SIZE="2">
+<p ALIGN="LEFT"></p>
+<p ALIGN="LEFT"></font><font SIZE="2" COLOR="#0000c0"><i>RDFS_MEM_RDFS:</i></font><font SIZE="2" COLOR="#3f5fbf"> 
+A specification for RDFS ontology models that are stored in memory and use the 
+RDFS inferencer for additional entailments. Note that this model specification 
+does not support IMPORT and so can not be used for models that import other 
+models.</font></p>
+
+<p>It is important in some models to use a reasoner that provides at least 
+transitive closure on the class hierarchy. If Circle is a subclass of Shape and 
+MyCircle is an instance of Circle (MyCircle isa Circle.) , then a transitive 
+reasoner will also infer that MyCircle is an instance of a Shape. The table 
+below indicates which ModelSpec options provide transitive reasoning. Of course 
+different ModelSpec settings support various other inferencing as well.</p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="65%">
+  <tr>
+    <td width="33%">
+    <p align="center"><b>ModelSpec</b></td>
+    <td width="38%" align="center"><b>Supports Transitive Reasoning</b></td>
+    <td width="29%">
+    <p align="center"><b>Time for ??</b></td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_MEM</td>
+    <td width="38%" align="center">No</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_MEM_RDFS</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_MEM_TRANS</td>
+    <td width="38%" align="center">No</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_MEM_RULE</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_MEM_MICRO_RULE</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_MEM_MINI_RULE</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_DL_MEM</td>
+    <td width="38%" align="center">No</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_DL_MEM_RDFS</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_DL_MEM_TRANS</td>
+    <td width="38%" align="center">No</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_DL_MEM_RULE</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_LITE_MEM</td>
+    <td width="38%" align="center">No</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_LITE_MEM_RDFS</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_LITE_MEM_TRANS</td>
+    <td width="38%" align="center">No</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="33%">OWL_LITE_MEM_RULE</td>
+    <td width="38%" align="center">Yes</td>
+    <td width="29%">&nbsp;</td>
+  </tr>
+</table>
+
+<p>The fourth, sixth, and seventh options correspond to Jena reasoner settings and can be used 
+as desired.</p>
+
+<h2>Use Custom Lucene Indexer</h2>
+
+<p>The Jena Reasoner in SADL supports querying with LARQ, a combination of 
+Lucene and SPARQL (see
+<a href="http://jena.apache.org/documentation/larq/index.html">
+http://jena.apache.org/documentation/larq/index.html</a>). It is possible to use 
+a custom Lucene indexer to index the Jena model for querying with LARQ. The 
+default customer indexer is 
+com.ge.research.sadl.jena.reasoner.LuceneModelIndexerImp, which implements the 
+Java interface class com.ge.research.sadl.jena.reasoner.ILuceneModelIndexer. To 
+use a different indexer, create the indexer class so that it implements this 
+same Java interface class and then set the indexer class by adding a line like 
+the following, but with your new class specified, to the configuration.rdf file 
+in the OwlModels folder. (Note that this must be done manually at this time.)</p>
+
+<font SIZE="2">
+<p>&lt;pLuceneIndexerClass r<span LANG="EN">df:datatype=&quot;http://www.w3.org/2001/XMLSchema#string&quot;&gt;com.ge.research.sadl.jena.reasoner.</span>LuceneModelIndexerImp<span LANG="EN">&lt;/pLuceneIndexerClass 
+&gt;</p>
+</span></font>
+<p>The default indexer provides the following capability. For all non-bnode 
+properties and classes in the model, excluding those in RDF, RDFS, and OWL 
+namespaces, if the property or class has no labels, take the localname and 
+convert camel case to lowercase words with spaces, convert underscores to 
+spaces, and drop any leading &quot;has&quot;. If property and class names are generated 
+either using camel case or underscores, the result will be labels that contain 
+meaningful English words for text search.</p>
+
+<p>&nbsp;</p>
+
+</body>
+
+</html>

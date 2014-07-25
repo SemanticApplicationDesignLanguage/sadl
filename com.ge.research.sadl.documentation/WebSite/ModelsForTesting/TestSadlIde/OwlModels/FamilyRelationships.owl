@@ -1,0 +1,60 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.imp/familyrelationships#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/familyrelationships">
+  <owl:Ontology rdf:about="http://sadl.imp/familyrelationships">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'FamilyRelationships.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Woman">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Person"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Man">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Gender">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <Gender rdf:ID="Male"/>
+          <Gender rdf:ID="Female"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="cousin">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="child">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="grandChild">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="gender">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Gender"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="uncle">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="aunt">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="ancestor">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="sibling">
+    <rdfs:domain rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/familyrelationships#Person"/>
+  </owl:ObjectProperty>
+</rdf:RDF>

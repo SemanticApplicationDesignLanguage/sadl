@@ -1,0 +1,52 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://com.ge.research.sadlSwitchedSV#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research.sadlSwitchedSV">
+  <owl:Ontology rdf:about="http://com.ge.research.sadlSwitchedSV">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'SwitchedSV.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="RangeClass"/>
+  <owl:Class rdf:ID="DomainClass">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="objProperty"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://com.ge.research.sadlSwitchedSV#objProperty"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="objPropertyInv">
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="http://com.ge.research.sadlSwitchedSV#objProperty"/>
+    </owl:inverseOf>
+    <rdfs:domain rdf:resource="http://com.ge.research.sadlSwitchedSV#RangeClass"/>
+    <rdfs:range rdf:resource="http://com.ge.research.sadlSwitchedSV#DomainClass"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://com.ge.research.sadlSwitchedSV#objProperty">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadlSwitchedSV#DomainClass"/>
+    <rdfs:range rdf:resource="http://com.ge.research.sadlSwitchedSV#RangeClass"/>
+  </owl:ObjectProperty>
+  <RangeClass rdf:ID="InstRC">
+    <objProperty>
+      <DomainClass rdf:ID="InstDC">
+        <objProperty>
+          <RangeClass rdf:ID="InstRC2"/>
+        </objProperty>
+        <objProperty rdf:resource="http://com.ge.research.sadlSwitchedSV#InstRC"/>
+      </DomainClass>
+    </objProperty>
+  </RangeClass>
+</rdf:RDF>

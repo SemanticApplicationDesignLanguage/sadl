@@ -1,0 +1,10 @@
+<http://sadl.imp/TransitiveClosureOnClasses#Dog> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/TransitiveClosureOnClasses#Mammal> .
+<http://sadl.imp/TransitiveClosureOnClasses#Dog> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/TransitiveClosureOnClasses> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'TransitiveClosureOnClasses.sadl' and should not be edited."@en .
+<http://sadl.imp/TransitiveClosureOnClasses> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/TransitiveClosureOnClasses#Spot> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/TransitiveClosureOnClasses#Pet> .
+<http://sadl.imp/TransitiveClosureOnClasses#LivingThing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/TransitiveClosureOnClasses#Mammal> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/TransitiveClosureOnClasses#LivingThing> .
+<http://sadl.imp/TransitiveClosureOnClasses#Mammal> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/TransitiveClosureOnClasses#Lassie> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/TransitiveClosureOnClasses#Dog> .
+<http://sadl.imp/TransitiveClosureOnClasses#Pet> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

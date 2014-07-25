@@ -1,0 +1,63 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.imp/ThingyMaGigNS#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/ThingyMaGigNS">
+  <owl:Ontology rdf:about="http://sadl.imp/ThingyMaGigNS">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'ThingyMaGig.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Categorical">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <Categorical rdf:ID="Zero"/>
+          <Categorical rdf:ID="One"/>
+          <Categorical rdf:ID="Two"/>
+          <Categorical rdf:ID="Three"/>
+          <Categorical rdf:ID="Four"/>
+          <Categorical rdf:ID="Five"/>
+          <Categorical rdf:ID="Six"/>
+          <Categorical rdf:ID="Seven"/>
+          <Categorical rdf:ID="Eight"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="ThingyMaGig"/>
+  <owl:Class rdf:ID="Profile">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <Profile rdf:ID="High"/>
+          <Profile rdf:ID="Medium"/>
+          <Profile rdf:ID="Low"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="valueThree">
+    <rdfs:domain rdf:resource="http://sadl.imp/ThingyMaGigNS#ThingyMaGig"/>
+    <rdfs:range rdf:resource="http://sadl.imp/ThingyMaGigNS#Categorical"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="profile">
+    <rdfs:domain rdf:resource="http://sadl.imp/ThingyMaGigNS#ThingyMaGig"/>
+    <rdfs:range rdf:resource="http://sadl.imp/ThingyMaGigNS#Profile"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="valueTwo">
+    <rdfs:domain rdf:resource="http://sadl.imp/ThingyMaGigNS#ThingyMaGig"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="color">
+    <rdfs:domain rdf:resource="http://sadl.imp/ThingyMaGigNS#ThingyMaGig"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="valueOne">
+    <rdfs:domain rdf:resource="http://sadl.imp/ThingyMaGigNS#ThingyMaGig"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="rating">
+    <rdfs:domain rdf:resource="http://sadl.imp/ThingyMaGigNS#ThingyMaGig"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>

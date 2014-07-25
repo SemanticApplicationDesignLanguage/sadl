@@ -1,0 +1,35 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:tg="http://sadl.org/TestGeSadl/TurbineGenerator#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/templates/exampletempate">
+  <owl:Ontology rdf:about="http://sadl.org/templates/exampletempate">
+    <owl:imports rdf:resource="http://sadl.org/TestGeSadl/TurbineGenerator"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'SampleData.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <tg:Turbine rdf:ID="T123456">
+    <tg:speed>
+      <tg:Speed/>
+    </tg:speed>
+    <tg:speed>
+      <tg:Speed/>
+    </tg:speed>
+    <tg:speed>
+      <tg:Speed/>
+    </tg:speed>
+    <tg:drives>
+      <tg:Generator rdf:ID="Gen123456">
+        <tg:power>
+          <tg:Power/>
+        </tg:power>
+        <tg:power>
+          <tg:Power/>
+        </tg:power>
+        <tg:power>
+          <tg:Power/>
+        </tg:power>
+      </tg:Generator>
+    </tg:drives>
+  </tg:Turbine>
+</rdf:RDF>

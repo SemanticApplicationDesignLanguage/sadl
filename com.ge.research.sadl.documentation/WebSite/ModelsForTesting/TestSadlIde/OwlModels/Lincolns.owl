@@ -1,0 +1,40 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:gen="http://sadl.org/TestSadlIde/genealogy#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/Lincolns">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/Lincolns">
+    <owl:imports rdf:resource="http://sadl.org/TestSadlIde/genealogy"/>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:37 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Lincolns.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <gen:Person rdf:ID="Thomas">
+    <gen:child>
+      <gen:Man rdf:ID="Tommy"/>
+    </gen:child>
+    <gen:child>
+      <rdf:Description rdf:ID="Abraham">
+        <gen:child>
+          <gen:Person rdf:ID="Robert">
+            <gen:birthdate rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+            >1843-08-01</gen:birthdate>
+          </gen:Person>
+        </gen:child>
+        <gen:married>
+          <gen:Woman rdf:ID="Mary">
+            <gen:child rdf:resource="http://sadl.org/TestSadlIde/Lincolns#Robert"/>
+          </gen:Woman>
+        </gen:married>
+        <rdf:type>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://sadl.org/TestSadlIde/genealogy#Man"/>
+              <rdf:Description rdf:about="http://sadl.org/TestSadlIde/genealogy#US_President"/>
+            </owl:intersectionOf>
+          </owl:Class>
+        </rdf:type>
+      </rdf:Description>
+    </gen:child>
+  </gen:Person>
+</rdf:RDF>

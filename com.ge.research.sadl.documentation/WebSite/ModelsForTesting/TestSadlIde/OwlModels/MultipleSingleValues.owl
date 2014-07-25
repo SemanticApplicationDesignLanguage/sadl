@@ -1,0 +1,197 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/MultipleSingleValues">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'MultipleSingleValues.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Fork">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Part"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Seat">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues#Part"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Class3">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="prop2"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="prop1"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Class2">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop2"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop1"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Class1">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop2"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop1"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Bicycle">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="part"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#part"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Frame">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues#Part"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Class4">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="prop3"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop3"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop3"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="RangeClass1"/>
+  <owl:Class rdf:ID="RangeClass3"/>
+  <owl:Class rdf:ID="Crank">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues#Part"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Wheel">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues#Part"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Handlebar">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues#Part"/>
+  </owl:Class>
+  <owl:Class rdf:ID="RangeClass2"/>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop2">
+    <rdfs:range>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#RangeClass1"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#RangeClass2"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#RangeClass3"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:range>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Class1"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Class2"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Class3"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop3">
+    <rdfs:range>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#RangeClass1"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#RangeClass2"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#RangeClass3"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:range>
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues#Class4"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#part">
+    <rdfs:range>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Seat"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Handlebar"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:range>
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues#Bicycle"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#prop1">
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Class1"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Class2"/>
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/MultipleSingleValues#Class3"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>

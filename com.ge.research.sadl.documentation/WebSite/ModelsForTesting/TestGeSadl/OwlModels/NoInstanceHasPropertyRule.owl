@@ -1,0 +1,48 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:defs="http://research.ge.com/Acuity/defaults.owl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule">
+  <owl:Ontology rdf:about="http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule">
+    <owl:imports rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:41 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'NoInstanceHasPropertyRule.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Dog"/>
+  <owl:Class rdf:ID="DogInfo">
+    <rdfs:seeAlso>
+      <defs:DataDefault rdf:ID="DogInfo_noDogHasName_default">
+        <defs:hasDataDefault rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+        >true</defs:hasDataDefault>
+        <defs:appliesToProperty>
+          <owl:DatatypeProperty rdf:ID="noDogHasName"/>
+        </defs:appliesToProperty>
+      </defs:DataDefault>
+    </rdfs:seeAlso>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:about="http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#noDogHasName"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment>Information about the Dog class, needed to remain OWL DL</rdfs:comment>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:ID="name">
+    <rdfs:domain rdf:resource="http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#Dog"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#noDogHasName">
+    <rdfs:domain rdf:resource="http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#DogInfo"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </owl:DatatypeProperty>
+  <Dog rdf:ID="Boots"/>
+  <DogInfo rdf:ID="MyDogInfo"/>
+  <Dog rdf:ID="Fido"/>
+  <Dog rdf:ID="Lassie"/>
+  <Dog rdf:ID="Spot"/>
+</rdf:RDF>

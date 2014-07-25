@@ -1,0 +1,108 @@
+module com.ge.research.sadl.Sadl
+
+import org.eclipse.emf.mwe.utils.*
+import org.eclipse.xtext.generator.*
+import org.eclipse.xtext.ui.generator.*
+
+var grammarURI = "classpath:/com/ge/research/sadl/Sadl.xtext"
+var file.extensions = "sadl"
+var projectName = "com.ge.research.sadl"
+var runtimeProject = "../${projectName}"
+
+Workflow {
+  bean = StandaloneSetup {
+    platformUri = "${runtimeProject}/.."
+  }
+
+  component = DirectoryCleaner {
+    directory = "${runtimeProject}/src-gen"
+  }
+
+  component = DirectoryCleaner {
+    directory = "${runtimeProject}.ui/src-gen"
+  }
+
+  component = Generator {
+    pathRtProject = runtimeProject
+    pathUiProject = "${runtimeProject}.ui"
+    projectNameRt = projectName
+    projectNameUi = "${projectName}.ui"
+
+    language = {
+      uri = grammarURI
+      fileExtensions = file.extensions
+
+      // Java API to access grammar elements (required by several other fragments)
+      fragment = grammarAccess.GrammarAccessFragment {}
+
+      // generates Java API for the generated EPackages
+      fragment = ecore.EMFGeneratorFragment auto-inject {
+//      	referencedGenModels = "uri to genmodel, uri to next genmodel"
+      }
+
+      // the serialization component
+      // fragment = parseTreeConstructor.ParseTreeConstructorFragment {}
+      fragment = serializer.SerializerFragment {}
+
+      // a custom ResourceFactory for use with EMF
+      fragment = resourceFactory.ResourceFactoryFragment {
+        fileExtensions = file.extensions
+      }
+
+      // The antlr parser generator fragment.
+      fragment = parser.antlr.XtextAntlrGeneratorFragment {
+        antlrParam = "-Xconversiontimeout" antlrParam = "10000"
+        antlrParam = "-Xmaxinlinedfastates" antlrParam = "100"
+        options = { backtrack = true memoize = true classSplitting=true}
+      }
+
+      // Check based validation 
+      //fragment = validation.CheckFragment {}
+
+      // java-based API for validation
+      fragment = validation.JavaValidatorFragment {
+                composedCheck = "org.eclipse.xtext.validation.ImportUriValidator"
+                // composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
+                // registerForImportedPackages = true
+            }
+
+      // scoping and exporting API (Xtext 0.7)
+      fragment = scoping.ImportURIScopingFragment {}
+      // fragment = exporting.SimpleNamesFragment {}
+
+      // scoping and exporting API (Xtext 1.0, but we like the 0.7 better)
+      // fragment = scoping.ImportNamespacesScopingFragment {}
+      // fragment = exporting.QualifiedNamesFragment {}
+
+      // formatter API
+      fragment = formatting.FormatterFragment {}
+
+      // labeling API
+      fragment = labeling.LabelProviderFragment {}
+
+      // outline API
+      //fragment = outline.TransformerFragment {}
+      //fragment = outline.OutlineNodeAdapterFactoryFragment {}
+      fragment = outline.QuickOutlineFragment {}
+
+      // java-based API for content assistance
+      fragment = contentAssist.JavaBasedContentAssistFragment {}
+      fragment = parser.antlr.XtextAntlrUiGeneratorFragment {
+      	antlrParam = "-Xconversiontimeout" antlrParam = "10000"
+		antlrParam = "-Xmaxinlinedfastates" antlrParam = "100"
+        options = { backtrack = true memoize = true  classSplitting=true}
+      }
+
+      fragment = builder.BuilderIntegrationFragment {}
+
+      // project wizard (optional)
+      // fragment = projectWizard.SimpleProjectWizardFragment {
+      //   generatorProjectName = "${projectName}.generator"
+      //   modelFileExtension = file.extensions
+      // }
+
+      // quickfix API
+      fragment = quickfix.QuickfixProviderFragment {}
+    }
+  }
+}

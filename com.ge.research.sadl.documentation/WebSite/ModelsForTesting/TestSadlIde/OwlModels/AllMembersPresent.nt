@@ -1,0 +1,45 @@
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac6 <http://com.ge.research.sadl/AllMembersPresent#color> <http://com.ge.research.sadl/AllMembersPresent#Blue> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac6 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Shirt> .
+<http://com.ge.research.sadl/AllMembersPresent#Shirt> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://com.ge.research.sadl/AllMembersPresent#Clothing> .
+<http://com.ge.research.sadl/AllMembersPresent#Shirt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/AllMembersPresent> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $" .
+<http://com.ge.research.sadl/AllMembersPresent> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'AllMembersPresent.sadl' and should not be edited."@en .
+<http://com.ge.research.sadl/AllMembersPresent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://com.ge.research.sadl/AllMembersPresent#Clothing> <http://www.w3.org/2000/01/rdf-schema#label> "a piece of clothing" .
+<http://com.ge.research.sadl/AllMembersPresent#Clothing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/AllMembersPresent#ShirtCollection> <http://com.ge.research.sadl/AllMembersPresent#includes> _:A236a7e36X3aX14039f40781X3aXX2dX6ac6 .
+<http://com.ge.research.sadl/AllMembersPresent#ShirtCollection> <http://com.ge.research.sadl/AllMembersPresent#includes> _:A236a7e36X3aX14039f40781X3aXX2dX6ac7 .
+<http://com.ge.research.sadl/AllMembersPresent#ShirtCollection> <http://com.ge.research.sadl/AllMembersPresent#includes> _:A236a7e36X3aX14039f40781X3aXX2dX6ac8 .
+<http://com.ge.research.sadl/AllMembersPresent#ShirtCollection> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#ClothingCollection> .
+<http://com.ge.research.sadl/AllMembersPresent#ClothingCollection> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:A236a7e36X3aX14039f40781X3aXX2dX6acb .
+<http://com.ge.research.sadl/AllMembersPresent#ClothingCollection> <http://www.w3.org/2000/01/rdf-schema#label> "a collection of pieces of clothing" .
+<http://com.ge.research.sadl/AllMembersPresent#ClothingCollection> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac9 <http://com.ge.research.sadl/AllMembersPresent#color> <http://com.ge.research.sadl/AllMembersPresent#Red> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac9 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Pants> .
+<http://com.ge.research.sadl/AllMembersPresent#Red> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Color> .
+<http://com.ge.research.sadl/AllMembersPresent#PantsCollection> <http://com.ge.research.sadl/AllMembersPresent#includes> _:A236a7e36X3aX14039f40781X3aXX2dX6ac9 .
+<http://com.ge.research.sadl/AllMembersPresent#PantsCollection> <http://com.ge.research.sadl/AllMembersPresent#includes> _:A236a7e36X3aX14039f40781X3aXX2dX6aca .
+<http://com.ge.research.sadl/AllMembersPresent#PantsCollection> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#ClothingCollection> .
+<http://com.ge.research.sadl/AllMembersPresent#color> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadl/AllMembersPresent#Clothing> .
+<http://com.ge.research.sadl/AllMembersPresent#color> <http://www.w3.org/2000/01/rdf-schema#range> <http://com.ge.research.sadl/AllMembersPresent#Color> .
+<http://com.ge.research.sadl/AllMembersPresent#color> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://com.ge.research.sadl/AllMembersPresent#Pants> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://com.ge.research.sadl/AllMembersPresent#Clothing> .
+<http://com.ge.research.sadl/AllMembersPresent#Pants> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/AllMembersPresent#Color> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac8 <http://com.ge.research.sadl/AllMembersPresent#color> <http://com.ge.research.sadl/AllMembersPresent#Green> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac8 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Shirt> .
+<http://com.ge.research.sadl/AllMembersPresent#hasAllColors> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadl/AllMembersPresent#ClothingCollection> .
+<http://com.ge.research.sadl/AllMembersPresent#hasAllColors> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+<http://com.ge.research.sadl/AllMembersPresent#hasAllColors> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://com.ge.research.sadl/AllMembersPresent#includes> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadl/AllMembersPresent#ClothingCollection> .
+<http://com.ge.research.sadl/AllMembersPresent#includes> <http://www.w3.org/2000/01/rdf-schema#range> <http://com.ge.research.sadl/AllMembersPresent#Clothing> .
+<http://com.ge.research.sadl/AllMembersPresent#includes> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6acb <http://www.w3.org/2002/07/owl#maxCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6acb <http://www.w3.org/2002/07/owl#onProperty> <http://com.ge.research.sadl/AllMembersPresent#hasAllColors> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6acb <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac7 <http://com.ge.research.sadl/AllMembersPresent#color> <http://com.ge.research.sadl/AllMembersPresent#Red> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6ac7 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Shirt> .
+<http://com.ge.research.sadl/AllMembersPresent#Green> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Color> .
+<http://com.ge.research.sadl/AllMembersPresent#Blue> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Color> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6aca <http://com.ge.research.sadl/AllMembersPresent#color> <http://com.ge.research.sadl/AllMembersPresent#Green> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6aca <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/AllMembersPresent#Pants> .

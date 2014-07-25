@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.ge.research.sadl.feature"
+      label="SADL Feature"
+      version="2.2.0.qualifier"
+      provider-name="GE Research">
+
+   <description url="http://www.example.com/description">
+      The Semantic Application Design Language (SADL) is a controlled
+English grammar and Eclipse IDE for building, testing, and deploying
+semantic models.
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      Copyright General Electric, 2007-2014.
+   </copyright>
+
+   <license url="http://sadl.sourceforge.net">
+      SADL is available under the Eclipse Public License.
+
+SADL includes Apache Jena licensed under Apache License V2.0:
+Apache Jena
+Copyright 2011, 2012, 2013 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of this software were originally based on the following:
+  - Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Hewlett-Packard Development Company, LP
+  - Copyright 2010, 2011 Epimorphics Ltd.
+  - Copyright 2010, 2011 Talis Systems Ltd.
+These have been licensed to the Apache Software Foundation under a software grant.
+
+This product includes software developed by
+PluggedIn Software under a BSD license.
+
+This product includes software developed by Mort Bay Consulting Pty. Ltd.
+   Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
+
+SADL also includes POJava licensed under Apache License V2.0.
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.xtext" version="2.4.3" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.xtext.util" version="2.4.3" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.emf.ecore" version="2.9.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.emf.common" version="2.9.1" match="greaterOrEqual"/>
+      <import plugin="org.antlr.runtime" version="3.2.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.xtext.builder" version="2.4.3" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime" version="3.9.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.jobs"/>
+      <import plugin="org.apache.log4j"/>
+      <import plugin="com.ge.research.sadl" version="2.2.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.xtext.ui" version="2.4.3" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.console" version="3.5.200" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.editors" version="3.5.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.ide" version="3.5.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.xtext.ui.shared" version="2.4.3" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui"/>
+   </requires>
+
+   <plugin
+         id="com.ge.research.sadl"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.ge.research.sadl.jena-plugin"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.ge.research.sadl.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

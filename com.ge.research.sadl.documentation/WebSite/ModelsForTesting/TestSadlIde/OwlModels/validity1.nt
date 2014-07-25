@@ -1,0 +1,17 @@
+<http://com.ge.research.sadlvalidity1#dp2> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadlvalidity1#Thingy> .
+<http://com.ge.research.sadlvalidity1#dp2> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://com.ge.research.sadlvalidity1#dp2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://com.ge.research.sadlvalidity1#dp> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadlvalidity1#Thingy> .
+<http://com.ge.research.sadlvalidity1#dp> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#int> .
+<http://com.ge.research.sadlvalidity1#dp> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69e8 <http://www.w3.org/2002/07/owl#maxCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69e8 <http://www.w3.org/2002/07/owl#onProperty> <http://com.ge.research.sadlvalidity1#dp> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69e8 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+<http://com.ge.research.sadlvalidity1> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'validity1.sadl' and should not be edited."@en .
+<http://com.ge.research.sadlvalidity1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://com.ge.research.sadlvalidity1#Thingy> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:A236a7e36X3aX14039f40781X3aXX2dX69e8 .
+<http://com.ge.research.sadlvalidity1#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadlvalidity1#MyThingy> <http://com.ge.research.sadlvalidity1#dp2> "2.0"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://com.ge.research.sadlvalidity1#MyThingy> <http://com.ge.research.sadlvalidity1#dp> "3"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://com.ge.research.sadlvalidity1#MyThingy> <http://com.ge.research.sadlvalidity1#dp> "2"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://com.ge.research.sadlvalidity1#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadlvalidity1#Thingy> .

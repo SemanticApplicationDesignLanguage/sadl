@@ -1,0 +1,13 @@
+<http://sadl.imp/TestDirect#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/TestDirect#D> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/TestDirect#C> .
+<http://sadl.imp/TestDirect#D> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/TestDirect> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'TestDirect.sadl' and should not be edited."@en .
+<http://sadl.imp/TestDirect> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/TestDirect#B> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/TestDirect#A> .
+<http://sadl.imp/TestDirect#B> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/TestDirect#dd> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/TestDirect#D> .
+<http://sadl.imp/TestDirect#cc> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/TestDirect#C> .
+<http://sadl.imp/TestDirect#bb> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/TestDirect#B> .
+<http://sadl.imp/TestDirect#aa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/TestDirect#A> .
+<http://sadl.imp/TestDirect#C> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/TestDirect#B> .
+<http://sadl.imp/TestDirect#C> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

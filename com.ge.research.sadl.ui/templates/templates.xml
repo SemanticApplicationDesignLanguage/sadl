@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<templates>
+<!--  templates, valid in Statement context unless otherwise noted -->
+  <!-- Model Name -->
+	<template autoinsert="false" id="101"
+		context="com.ge.research.sadl.Sadl.ModelName" deleted="false"
+		description="URI." enabled="true"
+		name="model name">uri "${class:ResourceName('MODELNAME')}". ${cursor}</template>		
+	<template autoinsert="false" id="102"
+		context="com.ge.research.sadl.Sadl.ModelName" deleted="false"
+		description="URI with global alias." enabled="true"
+		name="model name">uri "${class:ResourceName('MODELNAME')}" alias ${Name}. ${cursor}</template>		
+	<template autoinsert="false" id="103"
+		context="com.ge.research.sadl.Sadl.ModelName" deleted="false"
+		description="URI with alias and version." enabled="true"
+		name="model name">uri "${class:ResourceName('MODELNAME')}" alias ${Name} version "${func:ResourceName('VERSION')}". ${cursor}</template>		
+
+  <!-- Import a Model -->
+	<template autoinsert="false" id="110"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Another model." enabled="true"
+		name="import">import "${class:ResourceName('MODELNAME')}". ${cursor}</template>		
+	<template autoinsert="false" id="111"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Another model with local alias." enabled="true"
+		name="import">import "${class:ResourceName('MODELNAME')}" as ${Name}. ${cursor}</template>
+
+  <!-- Add a note (rdf:comment) to any concept -->
+    <template autoinsert="true" id="114"
+    	context="com.ge.research.sadl.Sadl.ResourceName" deleted="false"
+		description="Add a note (rdf:comment) to this concept" enabled="true" 
+		name="note"> (note "${cursor}") </template>
+
+  <!-- Add an alias (rdf:label) to any concept -->
+    <template autoinsert="true" id="115"
+    	context="com.ge.research.sadl.Sadl.ResourceName" deleted="false"
+		description="Add an alias (rdf:label) to this concept" enabled="true" 
+		name="alias"> (alias "${cursor}") </template>
+
+  <!--  Class Declaration templates -->
+	<!--  <NewClass> is a class. -->
+	<template autoinsert="false" id="200"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a top-level class" enabled="true" 
+		name="class">${ClassName} is a class${cursor}.</template>
+
+	<!--  <NewSubClass> is a type of <OntClass>. -->
+	<template autoinsert="false" id="201"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a sub class (type of)" enabled="true" 
+		name="class-subtype">${ClassName} is a type of ${class:ResourceName('ONTCLASS')}${cursor}.</template>
+
+	<!--  {NewSubClass1, NewSubClass2, ...} are types of <OntClass>. -->
+	<template autoinsert="false" id="202"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare multiple subclasses in a single statement" enabled="true"
+		name="class-subtypes">{${Class1Name},${Class2Name}} are types of ${class:ResourceName('ONTCLASS')}${cursor}.</template>
+	
+	<!--  {NewClass1, NewClass2, ...} are classes. -->
+	<template autoinsert="false" id="203"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare multiple classes in a single statement" enabled="true"
+		name="classes">{${Class1Name},${Class2Name},${cursor}} are classes.</template>
+  
+	<!--  <NewClass> is a class, described by <DatatypeProperty|newDatatypeProperty> with a single value of type <DataType>. -->
+	<template autoinsert="false" id="204"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a class described by a single-valued data property" enabled="true"
+		name="class-single-valued attribute">${ClassName} is a class, described by ${PropertyName:ResourceName('DATATYPEPROPERTY')} with a single value of type ${dataType:Enum('DataType')}${cursor}.</template>		
+
+	<!--  <NewClass> is a class, described by <DatatypeProperty|newDatatypeProperty> with values of type <DataType>. -->
+	<template autoinsert="false" id="205"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a class described by a multi-valued attribute" enabled="true"
+		name="class-multi-valued attribute">${ClassName} is a class, described by ${PropertyName:ResourceName('DATATYPEPROPERTY')} with values of type ${dataType:Enum('DataType')}${cursor}.</template>		
+
+	<!--  <NewClass> is a class, described by <ObjectProperty|newProperty> with a single value of type <OntClass>. -->
+	<template autoinsert="false" id="206"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a class described by a single-valued relationship" enabled="true"
+		name="class-single-valued relationship">${ClassName} is a class, described by ${PropertyName:ResourceName('OBJECTPROPERTY')} with a single value of type ${dataType:Enum('ONTCLASS')${cursor}.</template>		
+	
+	<!--  <NewClass> is a class, described by <ObjectProperty|newProperty> with values of type <OntClass>. -->
+	<template autoinsert="false" id="207"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a class described by a multi-valued relationship" enabled="true"
+		name="class-multi-valued relationship">${ClassName} is a class, described by ${PropertyName:ResourceName('OBJECTPROPERTY')} with values of type ${dataType:Enum('ONTCLASS')}${cursor}.</template>		
+
+  <!--  Class Restriction templates -->
+  	<!--  PropertyOfClass:
+  		<Property> of <OntClass> <restriction>
+  			can this be a template in the Statement context and one of the following templates be in 
+  			this context of PropertyOfClass context -->
+	<template autoinsert="false" id="300"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a restriction on a relationship of a class" enabled="true"
+		name="restrict">${PropertyName:ResourceName('OBJECTPROPERTY')} of ${class:ResourceName('ONTCLASS')}${cursor}.</template>		
+	
+	  		
+    <!--  NecessaryAndSufficient:
+    	a <OntClass> is a <OntClass> only if <Property> <restriction>. -->
+    
+  	<!-- The <restriction> in the above two situations is one of (a follow-on template?): -->	
+  
+    <!--  only has values of type <OntClass>. // context of PropertyOfClass 
+    	Note: template below needs rework this construct only applies to ObjectProperty-->
+	<template autoinsert="false" id="301"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a relationship on a class to a particular class." enabled="true"
+		name="only of type"> only has values of type ${class:ResourceName('ONTCLASS')}${cursor}</template>											
+    
+    <!--  can only be one of {<Instance>, <Instance>,...}>. // context of PropertyOfClass 
+    		last arg is list of Instances -->
+	<template autoinsert="false" id="302"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a relationship on a class to a list of instances." enabled="true"
+		name="only from list, attribute"> can only be one of {${Inst1:ResourceName('INDIVIDUAL')},${Inst2:ResourceName('INDIVIDUAL')},${cursor}}</template>											
+    
+    <!--  can only be one of {<userValue>, <userValue>,...}>. // context of PropertyOfClass 
+    		last arg is list of literal values-->
+	<template autoinsert="false" id="303"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a Property to be one of a list of user values." enabled="true"
+		name="only from list, relationship"> can only be one of {${cursor}}</template>					
+    
+    <!--  has at least one value of type <OntClass>. // context of PropertyOfClass 
+    		 only applies to ObjectProperty, range is an OntClass -->
+      <template autoinsert="false" id="304"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a relationship on a class to have some values of a specified type." enabled="true"
+		name="at least one of type"> has at least one value of type ${class:ResourceName('ONTCLASS')}${cursor}</template>						
+	
+	<!--  has at least one value each of type <OntClass> // context of PropertyOfClass
+			 only applies to ObjectProperty, range is an OntClass -->
+	<template autoinsert="false" id="305"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a relationship on a class to have some values of each of a specified set of types." enabled="true"
+		name="at least one of each"> has at least one value each of types ${class:ResourceName('ONTCLASS')}${cursor}</template>
+  
+    <!--  always has value <Instance>. // context of PropertyOfClass -->
+ 	<template autoinsert="false" id="306"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a relationship on a class to always have a particular value." enabled="true"
+		name="has value, relationship"> always has value ${class:ResourceName('INDIVIDUAL')}${cursor}</template>
+     
+    <!--  always has value <userValue>. // context of PropertyOfClass -->
+ 	<template autoinsert="false" id="307"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts an attribute on a class to always have a particular value" enabled="true"
+		name="has value, attribute"> always has value ${value}${cursor}</template>
+     
+    <!--  has at least <NUMBER> values. -->
+	<template autoinsert="false" id="308"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a property of a class to have a minimum number of values" enabled="true"
+		name="cardinality-min"> has at least ${NUMBER} values${cursor}</template>	
+    
+    <!--  has at most <NUMBER> values. -->
+	<template autoinsert="false" id="309"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a property of a class to have a maximum number of values" enabled="true"
+		name="cardinality-max"> has at most ${NUMBER} values${cursor}</template>	
+    
+    <!--  has exactly <NUMBER> values. -->
+	<template autoinsert="false" id="310"
+		context="com.ge.research.sadl.Sadl.OfPhrase" deleted="false"
+		description="Restricts a property of a class to have a specific number of values." enabled="true"
+		name="cardinality"> has exactly ${NUMBER} values${cursor}</template>
+    
+  <!--  Other Class templates -->
+  
+  	<!-- <OntClass> is the same as <OntClass>. -->
+	<template autoinsert="false" id="400"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Two classes are known to be equivalent sets." enabled="true"
+		name="same as">${class1:ResourceName('ONTCLASS')} is the same as ${class2:ResourceName('ONTCLASS')}${cursor}.</template>	
+	
+  	<!--  <OntClass|NewName> is the same as not <OntClass>. -->
+	<template autoinsert="false" id="401"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="A class is known to be the complement of another class (everything not in the first class)." enabled="true"
+		name="same as not">${class1:ResourceName('ONTCLASS')} is the same as not ${class2:ResourceName('ONTCLASS')}${cursor}.</template>
+	
+    <!--  <OntClass> and <OntClass> are disjoint. -->
+	<template autoinsert="false" id="402"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Two classes are known to be disjoint sets." enabled="true"
+		name="disjoint">${class1:ResourceName('ONTCLASS')} and ${class2:ResourceName('ONTCLASS')} are disjoint${cursor}.</template>    
+  
+  	<!--  described by <DataTypeProperty|newPropertyName> with values of type <DataType>. 
+  				// context of Class Declaration, can be repeated -->
+	<template autoinsert="false" id="403"
+		context="com.ge.research.sadl.Sadl.DescribedBy" deleted="false"
+		description="is described by a multi-valued attribute" enabled="true"
+		name="described by, attribute-mv">, described by ${PropertyName:ResourceName('DATATYPEPROPERTY')} with values of type ${dataType:Enum('DataType')}${cursor}</template>
+	
+	<!--  described by <ObjectProperty>|newProperyName> with values of type <OntClass>. 
+				// context of Class Declaration, can be repeated -->
+	<template autoinsert="false" id="404"
+		context="com.ge.research.sadl.Sadl.DescribedBy" deleted="false"
+		description="is described by a multi-valued relationship" enabled="true"
+		name="described by, relationship-mv">, described by ${PropertyName:ResourceName('OBJECTPROPERTY')} with values of type ${class:ResourceName('ONTCLASS')}${cursor}</template>
+					
+  	<!--  described by <DataTypeProperty|newPropertyName> with a single value of type <DataType>. 
+  				// context of Class Declaration, can be repeated -->
+	<template autoinsert="false" id="405"
+		context="com.ge.research.sadl.Sadl.DescribedBy" deleted="false"
+		description="is described by a single-valued attribute" enabled="true"
+		name="described by, attribute-sv">, described by ${PropertyName:ResourceName('DATATYPEPROPERTY')} with a single value of type ${dataType:Enum('DataType')}${cursor}</template>
+	
+	<!--  described by <ObjectProperty>|newProperyName> with a single value of type <OntClass>. 
+				// context of Class Declaration, can be repeated -->
+	<template autoinsert="false" id="406"
+		context="com.ge.research.sadl.Sadl.DescribedBy" deleted="false"
+		description="is described by a single-valued relationship" enabled="true"
+		name="described by, relationship-sv">, described by ${PropertyName:ResourceName('OBJECTPROPERTY')} with a single value of type ${class:ResourceName('ONTCLASS')}${cursor}</template>
+					
+	<!--  , must be one  of {<Instance>, <Instance>,...}	// in context of ClassDeclaration
+				needs modification to last arg to be a list		 -->
+ 	<template autoinsert="false" id="407"
+		context="com.ge.research.sadl.Sadl.EnumeratedInstances" deleted="false"
+		description="Declare an enumerated set of allowed values" enabled="true"
+		name="must be">, must be one of {${Inst1:ResourceName('INDIVIDUAL')},${Inst2:ResourceName('INDIVIDUAL')},${cursor}}</template>		
+  
+  <!--  Property Declaration templates -->
+  
+    <!--  <NewDatatypeProperty> describes <OntClass> with values of type <DataType>. -->
+	<template autoinsert="false" id="500"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a single-valued (functional) attribute" enabled="true" 
+		name="attribute, multi-valued">${PropertyName} describes ${class:ResourceName('ONTCLASS')} with values of type ${dataType:Enum('DataType')}${cursor}.</template>
+    
+    <!--  <NewDatatypeProperty> describes <OntClass> with a single value of type <DataType>. -->
+	<template autoinsert="false" id="501"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a single-valued (functional) attribute" enabled="true"
+		name="attribute, single-valued">${PropertyName} describes ${class:ResourceName('ONTCLASS')} with a single value of type ${dataType:Enum('DataType')}${cursor}.</template>
+  
+	<!--  <NewObjectProperty> describes <OntClass> with values of type <OntClass>. -->
+	<template autoinsert="false" id="502"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a multi-valued relationship" enabled="true"
+		name="relationship, multi-valued">${ObjectProperty} describes ${class1:ResourceName('ONTCLASS')} with values of type ${class2:ResourceName('ONTCLASS')}${cursor}.</template>
+	
+	<!--  <NewObjectProperty> describes <OntClass> with a single value of type <OntClass>. -->
+	<template autoinsert="false" id="503"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare single-valued relationship" enabled="true"
+		name="relationship, single-valued">${ObjectProperty} describes ${class1:ResourceName('ONTCLASS')} with a single value of type ${class2:ResourceName('ONTCLASS')}${cursor}.</template>
+	
+	<!--  <NewDatatypeProperty> is a type of <DatatypeProperty>. -->
+	<template autoinsert="false" id="504"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a new data property as a type of another data property." enabled="true"
+		name="attribute-subtype">${DataProperty} describes ${class:ResourceName('DATATYPEPROPERTY')}${cursor}.</template>
+	
+	<!--  <NewObjectProperty> is a type of <ObjectProperty>. -->
+	<template autoinsert="false" id="505"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a new object property as a type of another object property." enabled="true"
+		name="relationship-subtype">${ObjectProperty} is a type of ${class:ResourceName('OBJECTPROPERTY')}${cursor}.</template>
+	
+	<!--  relationship of <OntClass> to <OntClass> is <ObjectProperty>. -->
+	<template autoinsert="false" id="506"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a relationship between two entities." enabled="true"
+		name="relationship">relationship of ${class1:ResourceName('ONTCLASS')} to ${class2:ResourceName('ONTCLASS')} is  ${ObjectProperty:ResourceName('OBJECTPROPERTY')}${cursor}.</template>		
+	
+	<!--  <newAnnotation> is a type of annotation. -->
+	<template autoinsert="false" id="507"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare an annotation." enabled="true"
+		name="annotation">${AnnotationName} is a type of annotation${cursor}.</template>	
+		
+  
+  <!--  Other Property templates -->
+  
+    <!--  At the end of a property declaration of the form  <NewProperty> describes <OntClass> with... we can have one of the following
+    	has a single value
+    	has a single subject
+    	is symmetric
+    	is transitive
+    	is the inverse of <Property>-->
+	<template autoinsert="false" id="600"
+		context="com.ge.research.sadl.Sadl.IsFunctional" deleted="false"
+		description="Declare a property to be functional (single-valued)" enabled="true"
+		name="functional">, has a single value${cursor}</template>	
+
+	<template autoinsert="false" id="601"
+		context="com.ge.research.sadl.Sadl.IsInverseFunctional" deleted="false"
+		description="Declare a relationship to be inverse functional" enabled="true"
+		name="inverse functional">, has a single subject${cursor}</template>			    	
+    
+	<template autoinsert="false" id="602"
+		context="com.ge.research.sadl.Sadl.IsSymmetrical" deleted="false"
+		description="Declare a relationship to be symmetrical" enabled="true"
+		name="symmetrical">, is symmetrical${cursor}</template>	    
+  
+	<template autoinsert="false" id="603"
+		context="com.ge.research.sadl.Sadl.IsTransitive" deleted="false"
+		description="Declare a relationship to be transitive" enabled="true"
+		name="transitive">, is transitive${cursor}</template>	
+		
+	<template autoinsert="false" id="604"
+		context="com.ge.research.sadl.Sadl.IsInverseOf" deleted="false"
+		description="Declare a relationship to be the inverse of another" enabled="true"
+		name="inverse of">, is the inverse of ${class:ResourceName('OBJECTPROPERTY')}${cursor}</template>			    	
+
+	    	
+    <!-- <ObjectProperty> is the inverse of <ObjectProperty>. -->    	
+	<template autoinsert="false" id="605"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a relationship to be the inverse of another" enabled="true"
+		name="inverse of">${class1:ResourceName('OBJECTPROPERTY')} is the inverse of ${class:ResourceName('OBJECTPROPERTY')}${cursor}.</template>			    	
+
+  <!--  Instance Declaration templates -->
+  
+    <!--  <NewInstance> is a <OntClass>, has <Property> <Instance|userValue> // form #1 -->
+	<template autoinsert="false" id="700"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare an instance" enabled="true"
+		name="instance">${InstanceName} is a ${class:ResourceName('ONTCLASS')}${cursor}.</template>			    	
+
+	<template autoinsert="false" id="701"
+		context="com.ge.research.sadl.Sadl.PropValPartialTriple" deleted="false"
+		description="has a specified relationship" enabled="true"
+		name="has relationship">, has ${ObjectProperty:ResourceName('OBJECTPROPERTY')} ${Instance:ResourceName('INDIVIDUAL')}${cursor}</template>			    	
+
+	<template autoinsert="false" id="702"
+		context="com.ge.research.sadl.Sadl.PropValPartialTriple" deleted="false"
+		description="has a specified attribute value" enabled="true"
+		name="has attribute">, has ${DataTypeProperty:ResourceName('DATATYPEPROPERTY')} ${value}${cursor}</template>			    	
+
+    
+    <!--  a <OntClass> with <ObjectProperty> <Instance> // form #2 -->
+ 	<template autoinsert="false" id="703"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a new instance with a relationship" enabled="true"
+		name="instance, with relationship">a ${class:ResourceName('ONTCLASS')} ${InstanceName} with ${ObjectProperty:ResourceName('OBJECTPROPERTY')} ${Instance2:ResourceName('INDIVIDUAL')}${cursor}.</template>			    	
+ 
+    
+    <!--  a <OntClass> with <DatatypeProperty> <userValue> // form #3 -->
+ 	<template autoinsert="false" id="704"
+		context="com.ge.research.sadl.Sadl.Statement" deleted="false"
+		description="Declare a new instance with an attribute" enabled="true"
+		name="instance, with attribute">a ${class:ResourceName('ONTCLASS')} ${InstanceName} with ${DataTypeProperty:ResourceName('DATATYPEPROPERTY')} ${value}${cursor}.</template>			    	
+  
+  <!--  Other Instance-related templates -->
+   
+    <!--  In the context of a statement like the above, "... has <ObjectProperty> <Instance>"
+    		the Instance can be an embedded Instance Declaration 
+    	(<InstanceDeclaration of type form #2 or form #3> -->
+      		
+  	<template autoinsert="false" id="705"
+		context="com.ge.research.sadl.Sadl.kw_(" deleted="false"
+		description="Declare a new embedded instance with a relationship" enabled="true"
+		name="unnamed instance, with relationship"> (a ${class:ResourceName('ONTCLASS')} ${InstanceName} with ${DataTypeProperty:ResourceName('DATATYPEPROPERTY')} ${value})${cursor}</template>			    	
+
+	<template autoinsert="false" id="706"
+		context="com.ge.research.sadl.Sadl.kw_(" deleted="false"
+		description="Declare a new embedded instance with an attribute" enabled="true"
+		name="unnamed instance, with attribute"> (a ${class:ResourceName('ONTCLASS')} ${InstanceName} with ${ObjectProperty:ResourceName('OBJECTPROPERTY')} ${Instance:ResourceName('INDIVIDUAL')})${cursor}</template>			    	
+ 
+	<template autoinsert="false" id="1001"
+		context="com.ge.research.sadl.Sadl.GraphPattern" deleted="false"
+		description="subject predicate instance or variable" enabled="true"
+		name="triple pattern with object property"> ${subject} ${ObjectProperty:ResourceName('OBJECTPROPERTY')} ${object}${cursor}</template> 
+ 
+	<template autoinsert="false" id="1002"
+		context="com.ge.research.sadl.Sadl.GraphPattern" deleted="false"
+		description="subject predicate value or variable" enabled="true"
+		name="triple pattern with data property"> ${subject} ${DataTypeProperty:ResourceName('DATATYPEPROPERTY')} ${object}${cursor}</template> 
+ 
+	<template autoinsert="false" id="1003"
+		context="com.ge.research.sadl.Sadl.GraphPattern" deleted="false"
+		description="variable is a class" enabled="true"
+		name="type triple pattern"> ${varname} is a ${class:ResourceName('ONTCLASS')}${cursor}</template> 
+		
+	<template autoinsert="false" id="1004"
+		context="com.ge.research.sadl.Sadl.GraphPattern" deleted="false"
+		description="function(...)" enabled="true"
+		name="built-in function"> ${func:ResourceName('BUILTINNAME')}${cursor}</template> 
+</templates>

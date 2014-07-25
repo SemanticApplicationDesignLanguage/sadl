@@ -1,0 +1,12 @@
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#YourTruck> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.org/TestSadlIde/CustomLuceneIndexing#Truck> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#Truck> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.org/TestSadlIde/CustomLuceneIndexing#Vehicle> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#Truck> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#YourRock> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.org/TestSadlIde/CustomLuceneIndexing#Rock> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#Vehicle> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#Car> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.org/TestSadlIde/CustomLuceneIndexing#Vehicle> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#Car> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#MyCar> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.org/TestSadlIde/CustomLuceneIndexing#Car> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $" .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'CustomLuceneIndexing.sadl' and should not be edited."@en .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.org/TestSadlIde/CustomLuceneIndexing#Rock> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

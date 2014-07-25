@@ -1,0 +1,1153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>SADL Build Instructions</title>
+
+  
+  <style>
+<!--
+
+body{
+	border:0px none;
+	margin:1px;
+	padding:0;
+	font-family: Arial;
+	font-size: 11px;
+	scrollbar-highlight-color: #ffffff; 
+	scrollbar-shadow-color: #cfcfcf;
+	scrollbar-3dlight-color: #cfcfcf;
+	scrollbar-arrow-color: #4c4c4c;
+	scrollbar-track-color: #ffffff;
+	scrollbar-darkshadow-color: #ffffff;
+	scrollbar-base-color: #cfcfcf;
+	scrollbar-face-color: #cfcfcf
+}
+.msg {
+	width: 100%;
+}
+.right {
+	word-wrap: break-word;
+	margin-left: 100px;
+	padding-right: 20px;
+	padding-bottom: 1px;
+	font-size: 10pt;
+	overflow: hidden;
+}
+.ie6 .right {
+	overflow: visible !important;
+	display: inline-block;
+}
+.splitter {
+	clear: both;
+}
+.left {
+	margin-left: 5px;
+	float: left;
+	width: 91px;
+	font-weight: bold;
+	white-space: nowrap;
+}
+.sender {
+	float: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.maxWidth {
+	width: 85px;
+}
+.colon {
+	margin-left: -2px;
+	float: left;
+}
+.time {
+	font-weight: normal;
+	clear: both;
+	font-size: 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 85px;
+}
+.line {
+	border-top: 1px dashed LightGrey;
+	margin: 1px;
+}
+-->
+  </style>
+
+  
+</head><body>
+<h1>SADL-IDE Development Environment Setup and Build Instructions</h1>
+
+<p>This document describes how to set up the SADL-IDE development projects in 
+Eclipse and then build a working set of plug-ins that enables changes to the 
+grammar and/or the implementation code. There are two levels of development 
+possible. If there is no need to modify code in the two projects 
+com.ge.research.sadl.reasoner and com.ge.research.sadl.jena projects (if the 
+primary interest is in the Xtext UI and builder code), then Maven is not 
+required and these two projects do not need to be checked out. The jar files 
+corresponding to these two projects are checked in under the projects requiring 
+them, including source code for debugging. However, if these projects are part 
+of the scope of the development environment Maven must be installed and used to 
+build&nbsp; the projects.</p>
+
+<h2><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Prerequisite</span></h2>
+
+<ol>
+
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Eclipse
+Helios properly installed and configured</span></li>
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">
+  If you wish to be able to run Maven from the command line (as opposed to only 
+  within Eclipse, install the latest Maven (3.0.3) from <a href="http://maven.apache.org/download.html">http://maven.apache.org/download.html</a>.<br>
+    </span></li>
+</ol>
+
+<h2><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Build
+Steps</span></h2>
+
+<ol>
+
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Install
+    <span style="font-weight: bold;">Xtext</span> via the Eclipse
+Update Manager from the update site: <a href="http://download.eclipse.org/modeling/tmf/updates/releases">http://download.eclipse.org/modeling/tmf/updates/releases</a>&nbsp;</span></li>
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Install
+the Maven plugin, <span style="font-weight: bold;">m2eclipse</span>, </span><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">via the
+Eclipse Update Manager from the update site: <a href="http://m2eclipse.sonatype.org/sites/m2e">http://m2eclipse.sonatype.org/sites/m2e</a></span></li>
+  <li>If you use other than default repositories for Maven, configure m2eclipse (Window -&gt; Preferences : Maven -&gt;
+User Settings ). Set the User Setting file to point to the settings file in the 
+  Maven installation (Prerequisite #2). It is likely in
+C:\Program Files\Apache Software
+Foundation\apache-maven-3.0.3\conf\settings.xml (Windows) or /home/&lt;user&gt;/.m2/settings.xml 
+  (Linux).<br>
+Now edit this file to set up proxies and mirrors as follows, similar to the 
+  following:<br>
+    <pre><span style="font-size: 8pt; font-family: &quot;Courier New&quot;;">&lt;settings&gt;<o:p></o:p><!--[endif]--><o:p></o:p><br><span style="">&nbsp; </span>&lt;proxies&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp; </span>&lt;proxy&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;active&gt;true&lt;/active&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;protocol&gt;http&lt;/protocol&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;host&gt;proxy.research.ge.com&lt;/host&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;port&gt;8080&lt;/port&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;nonProxyHosts&gt;localhost|*.ge.com|3.72.112.153&lt;/nonProxyHosts&gt;<br><span style="">&nbsp;&nbsp;&nbsp; </span>&lt;/proxy&gt;<o:p></o:p><br><span style="">&nbsp; </span>&lt;/proxies&gt;<o:p></o:p><span style="">  </span><o:p></o:p><br><span style="">&nbsp; </span>&lt;mirrors&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp; </span>&lt;!-- Go to our Nexus for everything from central, c5, flex, jboss, and v99 --&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp; </span>&lt;!-- For SSI Development, use the GE Energy SSE Nexus<br>Repository --&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp; </span>&lt;mirror&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&lt;id&gt;ssi-nexus&lt;/id&gt;<o:p></o:p><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br></span>      &lt;mirrorOf&gt;central,java.net,log4j,maven2-repository.dev.java.net,open.iona,open.iona.m2&lt;/mirrorOf&gt;<o:p></o:p></span></pre>
+    <pre><span style="font-size: 8pt; font-family: &quot;Courier New&quot;;"><span>&nbsp;&nbsp;&nbsp; </span>  &lt;name&gt;GE Energy's Nexus Repository&lt;/name&gt;<o:p></o:p><span style=""><br></span>      &lt;url&gt;http://3.72.112.153/nexus/content/groups/public&lt;/url&gt;<o:p></o:p><br><span style="">&nbsp;&nbsp;&nbsp; </span>&lt;/mirror&gt;<o:p></o:p><br><span style="">&nbsp; </span>&lt;/mirrors&gt; <o:p></o:p><br>&lt;/settings&gt;</span></pre>
+  </li>
+  <li>Install the Service Loader Maven Plug-in (not part of Maven repository so 
+  requires custom install)<ul>
+    <li>Download the service loader plug-in from:
+    <a title="https://github.com/francisdb/serviceloader-maven-plugin" href="https://github.com/francisdb/serviceloader-maven-plugin" target="_self">
+    https://github.com/francisdb/serviceloader-maven-plugin</a></li>
+    <li>Add to your local Maven repository<ul>
+      <li>If using Maven outside of Eclipse, unzip to a directory of your choice 
+      and run &quot;mvn install&quot;</li>
+      <li>If using Maven within Eclipse, import the project as a Maven project 
+      within Eclipse and then do a Run As...-&gt; Maven Install on the project</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+  <li>Checkout the following projects <span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">from SADL
+(sadl.cvs.sourceforge.net)</span>.
+  <ul>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.documentation</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.feature</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.updatesite</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.</span><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">generator</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.jena&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    (not needed for limited development environment)</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.reasoner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    (not needed for limited development environment)</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.tests</span></li>
+    <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">com.ge.research.sadl.ui</span></li>
+    
+</ul>Any CVS client, e.g.,&nbsp; SmartCVS,&nbsp; to check out the projects. If 
+  you use Eclipse to check out the projects you will need to then delete the 
+  Maven projects (...reasoner, ...jena) but do not delete the content. </li>
+  <li>If you did not check out the projects within Eclipse,&nbsp; Import the 
+  remaining projects (except reasoner and jena) as &quot;Existing Projects&quot;</li>
+  <li>Build those projects (or check build automatically).</li>
+  <li>Import the reasoner and jena projects into Eclipse as Maven projects using (File-&gt;Import-&gt;Maven 
+  Existing Maven Projects) pointing to their respective folders from the checkout.</li>
+  <li>If the checked out .classpath files do not resolve all references in the reasoner and jena project, update the Java build path
+(Project-&gt;Properties-&gt;Java-&gt;Build Path) to add the JRE System
+Library and Maven dependencies.&nbsp; Also set the Maven active profile
+to pom.xml.</li>
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Right click on the com.ge.research.sadl.reasoner
+project and Select Run as -&gt; Maven Install. Then refresh the &quot;target&quot; folder 
+  and copy the two jar files to the lib folder of the ...sadl and ...sadl.ui 
+  projects. This must be done any time something changes in the reasoner 
+  project.</span></li>
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Right click on the
+com.ge.research.sadl.jena<span style="">&nbsp; </span>project and
+Select Run as -&gt; Maven Install. Refresh and copy from the &quot;target&quot; folder to 
+  the lib folder of the ...sadl and ...sadl.ui projects. Repeat any time a 
+  change is made in the jena project.</span></li>
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">In the com.ge.research.sadl project navigate to
+src/com.ge.research.sadl right click on the GenerateSadl.mwe2 file and click on
+Run as -&gt; MWE2 Workflow. This will build the necessary files in ...sadl and 
+  ...sadl.ui projects from the SADL grammar defined in src/com.ge.research.sadl.Sadl.xtext.</span></li>
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Right click on com.ge.research.sadl.ui project
+and click Run as -&gt; Eclipse Application</span></li>
+</ol>
+
+<hr>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+&nbsp;</div>
+  </div>
+  <div class="right">
+    since the settings.xml file only has GE-specific things in it, I presumed 
+    that I didn't need one at home on a linux box and that the defaults would 
+    suffice.
+    <div class="line">
+&nbsp;</div>
+    <p>I get five errors: </p>
+    <div class="line">
+&nbsp;</div>
+    <p>well, 7 errors, 5 unique: </p>
+    <div class="line">
+&nbsp;</div>
+    <div>
+      jena:<br>
+      org.eclipse.core.jobs-3.4.100.v20090429-1800.jar - /home/camfe/.m2/repository/org/... 
+      missing<br>
+      org.eclipse.equinox.common-3.5.0.v20090520-1800.jar</div>
+    <div>
+      &nbsp;</div>
+    <div>
+      reasoner:<br>
+      org.eclipse.core.jobs-3.4.100.v20100505-1235.jar<br>
+      org.eclipse.core.runtime-3.5.0.v20090525.jar<br>
+      common-2.4.0.jar - /jome..../org/eclipse/emf/common/2.4.0 (missing)<br>
+      org.eclipse.equinox.common-3.5.0.v20090520-1800.jar<br>
+      org.eclipse.equinox.registry-3.4.100.v20090520-1800.jar</div>
+    <div class="line">
+&nbsp;</div>
+    <p>so take the second for example </p>
+    <div class="line">
+&nbsp;</div>
+    <p>my local repo has equinox.common 3.3 and 3.4 in it </p>
+    <div class="line">
+&nbsp;</div>
+    <p>based on a google search, I don't find a 3.5 available </p>
+    <div class="line">
+&nbsp;</div>
+    <p>I want to both understand and document for would-be SADL builders how to 
+    resolve these issues<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:37:31&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I want to do a GAV search on
+    <a title="http://cdscilweb.crd.ge.com:8081/nexus/index.html" href="http://cdscilweb.crd.ge.com:8081/nexus/index.html" target="_self">
+    http://cdscilweb.crd.ge.com:8081/nexus/index.html</a>&nbsp;so I can determine 
+    where the missing depds are coming from
+    <div class="line">
+&nbsp;</div>
+    <p>So if we want to find org.eclipse.equinox.common-3.5.0.v20090520-1800.jar<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:39:02&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Its GAV is
+    <div class="line">
+&nbsp;</div>
+    <p>&nbsp; &lt;groupId&gt;org.eclipse.equinox&lt;/groupId&gt;<br>
+    &nbsp; &lt;artifactId&gt;org.eclipse.equinox.common&lt;/artifactId&gt;<br>
+    &nbsp; &lt;version&gt;3.5.0.v20090520-1800&lt;/version&gt;<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:39:41&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I ran &quot;locate org.eclipse.equinox.common-3.5.0.v20090520-1800.jar&quot; on my 
+    Linux desktop
+    <div class="line">
+&nbsp;</div>
+    <p>My home directory's .m2 directory is a local drive </p>
+    <div class="line">
+&nbsp;</div>
+    <p>So the locate command showed me:<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:40:31&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    /local/interran/.m2/repository/org/eclipse/equinox/org.eclipse.equinox.common/3.5.0.v20090520-1800/org.eclipse.equinox.common-3.5.0.v20090520-1800.jar<br>
+    /local/interran/.m2/repository/org/eclipse/equinox/org.eclipse.equinox.common/3.5.0.v20090520-1800/org.eclipse.equinox.common-3.5.0.v20090520-1800.jar.sha1<br>
+    /local/interran/.m2/repository/org/eclipse/equinox/org.eclipse.equinox.common/3.5.0.v20090520-1800/org.eclipse.equinox.common-3.5.0.v20090520-1800.pom<br>
+    /local/interran/.m2/repository/org/eclipse/equinox/org.eclipse.equinox.common/3.5.0.v20090520-1800/org.eclipse.equinox.common-3.5.0.v20090520-1800.pom.sha1<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:41:40&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Anyway, I opened the pom in my Emacs editor, and it contained the GAV 
+    snippet that I pasted before
+    <div class="line">
+&nbsp;</div>
+    <p>Now m next step will be to type the GAV into the search form on the GRC 
+    Nexus website<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:43:38&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    This link may reproduce my search results (yes, that is correct, you can do 
+    a search in windows)
+    <div class="line">
+&nbsp;</div>
+    <p>
+    <a title="http://cdscilweb.crd.ge.com:8081/nexus/index.html#nexus-search;gav~org.eclipse.equinox~org.eclipse.equinox.common~3.5.0.v20090520-1800" href="http://cdscilweb.crd.ge.com:8081/nexus/index.html#nexus-search;gav~org.eclipse.equinox~org.eclipse.equinox.common~3.5.0.v20090520-1800" target="_self">
+    http://cdscilweb.crd.ge.com:8081/nexus/index.html#nexus-search;gav~org.eclipse.equinox~org.eclipse.equinox.common~3.5.0.v20090520-1800</a>~~<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:44:41&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I. I opened this POM file:
+    <div class="line">
+&nbsp;</div>
+    <p>.m2/repository/org/eclipse/equinox/org.eclipse.equinox.common/3.5.0.v20090520-1800/org.eclipse.equinox.common-3.5.0.v20090520-1800.pom<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:45:59&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    So, that tells me that the jar was found in GE Energy's Nexus repo<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:46:43&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Therefore, I conclude that I must have picked a jar that isn't easily found 
+    outside GE (unfortunately)
+    <div class="line">
+&nbsp;</div>
+  </div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:48:08&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    How I got from the first part of the URL to the long part
+    <div class="line">
+&nbsp;</div>
+    <p>First I clicked on Advanced Search<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:49:14&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Then the next part is easier to show than describe, but the search form 
+    initially says Keyword Search V where the V is a black triangle
+    <div class="line">
+&nbsp;</div>
+    <p>If you click on the V, you will see a dropdown appear and you can pick 
+    GAV Search<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:50:19&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Then I entered the GAV parameters that I'd found in the pom<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      1:50:29&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    actually, I don't find &quot;Advanced Search&quot; The center screen says it's to the 
+    left but it isn't--only &quot;Artifact Search&quot; <br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:50:55&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    The URL in the browser changed to the long URL<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+  </div>
+  <div class="right">
+    No, I didn't realize that the Advanced Search is hidden inside the Artifact 
+    Search - you have to click on&nbsp;the black triangle<br>
+    <br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:52:32&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Now you should see the Keyword Search and be able to change it to GAV Search<br>
+    <br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:53:00&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Once you enter the GAV parameters (or click the 2nd link), you'll see the 
+    page I'm seeing now<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="right">
+    now, how do you know it's not available externally?&gt;<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:53:31&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    If you enter the GAV parameters, hittign Enter or clicking the search glass 
+    icon will do the search
+    <div class="line">
+&nbsp;</div>
+    <p>Oh, good question... I didn't think of that possibility </p>
+    <div class="line">
+&nbsp;</div>
+    <p>The Viewing Repository: ssi is a dropdown </p>
+    <div class="line">
+&nbsp;</div>
+    <div>
+      Let's see if there's anything else in the dropdown</div>
+    <div class="line">
+&nbsp;</div>
+    <p>Nope, ssi is the only repo<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      1:54:58&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    and what repositories does this search?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:55:17&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    So.... what I would suggest doing is to remove the version and repeat the 
+    search, see if we can find another version that is externally available and 
+    compatible with our needs
+    <div class="line">
+&nbsp;</div>
+    <p>Our GRC Nexus repo mirrors the following reps </p>
+    <div class="line">
+&nbsp;</div>
+    <p>repos<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:56:11&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Maven Central, JBoss, SSI, our own 3rd party repos<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      1:56:39&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I see that there are 3--how did you get their names?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      1:57:16&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I had to login to see the Public Repositories' configuration - there's an 
+    additional tab that appears (COnfiguration)
+    <div class="line">
+&nbsp;</div>
+    <p>It actually lists about 12 repos, but I listed the 3 most important<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      1:58:02&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    If I click on the each of the 3 in the top pane it says &quot;Maven Central&quot;, &quot;ssi&quot;, 
+    and &quot;ssi&quot;
+  </div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:00:32&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    ok
+    <div class="line">
+&nbsp;</div>
+    <p>so 3.6.0 is a good candidate?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:01:14&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Yes, it's a good candidate since it's newer and it's in Maven Central<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:01:38&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    this version was specified in the jena and reasoner pom.xml files
+    <div class="line">
+&nbsp;</div>
+    <p>could they have left off the version and would it have found the newest 
+    or used some means of trying to satisfy?&gt;<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:02:10&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I can't promise that it won't cause build problems once you put that version 
+    into the pom.xml file, I can only cross my fingers
+    <div class="line">
+&nbsp;</div>
+    <p>Well, you have to specify a version for a dependency, </p>
+    <div class="line">
+&nbsp;</div>
+    <p>although the parent pom can define the version for you in a 
+    dependencyManagement section<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:02:59&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    and what would someone on the outside do if they didn't find a jar?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:03:07&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    so that the child pom dosn't have to specify the version<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:06:01&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    the child projects nested inside that dir use that pom as a parent pom, but 
+    I realized that the jena and reasoner poms are standalone (as they should 
+    be)<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="right">
+    Now if I were Karsten, for example, trying to build this, and I didn't have 
+    access to the cil server, what would I do when I got missing jar errors?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:08:27&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I would try to search my Nexus repo, or a Maven repo search website, for the 
+    GAV (removing the version, and if that didn't work, shortening the group or 
+    the artifact)
+    <div class="line">
+&nbsp;</div>
+    <p>my goal would be to find a jar that could replace the dependency </p>
+    <div class="line">
+&nbsp;</div>
+    <p>and substitute its GAV<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:08:56&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I'd like to include in the directions some clue of where to start looking...<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:09:42&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    when you say &quot;my Nexus repo&quot; you mean my local .m2 dir?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:09:43&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Let me give you the URL of an externally available Maven repo search website<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:10:46&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I meant our CIL machine's Nexus repo,
+    <a title="http://cdscilweb.crd.ge.com:8081/" href="http://cdscilweb.crd.ge.com:8081/" target="_self">
+    http://cdscilweb.crd.ge.com:8081/</a>, but a Windows search on your .m2 repo 
+    is a very good way to get more details about existing deps you are already 
+    using
+    <div class="line">
+&nbsp;</div>
+    <p>It will find the jar and pom and everything else<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:11:17&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    right, but if it isn't found by maven then it isn't in my .m2 repo<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:11:32&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Right, then you need a search form on a website<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:12:08&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Here is a good one
+    <div class="line">
+&nbsp;</div>
+    <p>
+    <a title="http://search.maven.org/" href="http://search.maven.org/" target="_self">
+    http://search.maven.org/</a><br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:12:59&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    Our cdscilweb is internal but that other one is external<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:13:31&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    that finds a different one than the Maven Central found by our server
+    <div class="line">
+&nbsp;</div>
+    <p>it's a 3.6.0 but different build </p>
+    <div class="line">
+&nbsp;</div>
+    <p>no, it's not </p>
+    <div class="line">
+&nbsp;</div>
+    <p>the date is different than the date in the build </p>
+    <div class="line">
+&nbsp;</div>
+    <p>it's the same </p>
+    <div class="line">
+&nbsp;</div>
+    <p>ok </p>
+    <div class="line">
+&nbsp;</div>
+    <p>so when you were setting this up what motivated you to pick jars that are 
+    in the ssi repo?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:14:52&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    <a title="http://search.maven.org/#artifactdetails|org.eclipse.equinox|org.eclipse.equinox.common|3.6.0.v20100503|jar" href="http://search.maven.org/#artifactdetails|org.eclipse.equinox|org.eclipse.equinox.common|3.6.0.v20100503|jar" target="_self">
+    http://search.maven.org/#artifactdetails|org.eclipse.equinox|org.eclipse.equinox.common|3.6.0.v20100503|jar</a>&nbsp;right?<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:14:57&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    yes<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:15:52&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    I don't think I realized the jar was in the SSI repo, that was the problem - 
+    I did the search, I found the jar, I put the GAV into the repo without 
+    checking where it was from<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:16:02&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    ok<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)" style="COLOR: #2c69a5">
+      Interrante,&nbsp;John&nbsp;A&nbsp;(GE,&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #6699cc" name="time">
+      2:16:04&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    (I did the search on our cdscilweb, I mean)
+    <div class="line">
+&nbsp;</div>
+    <p>(I put the GAV into the pom, I mean)<br>
+&nbsp;</div>
+</div>
+<div class="msg">
+  <div class="splitter">
+&nbsp;</div>
+  <div class="left">
+    <div class="sender maxWidth" title="Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)" style="COLOR: #333333">
+      Crapo,&nbsp;Andrew&nbsp;(GE&nbsp;Global&nbsp;Research)</div>
+    <div class="colon">
+      &nbsp;:<br>
+&nbsp;</div>
+    <div class="time" id="time" style="COLOR: #999999" name="time">
+      2:16:33&nbsp;PM&nbsp;</div>
+  </div>
+  <div class="right">
+    this should get me to the point where I can build outside of GE and put 
+    directions on SourceForge that will allow Karsten to build the projects.</div>
+</div>
+
+</body></html>

@@ -1,0 +1,85 @@
+@prefix :        <http://sadl.org/TestGeSadl/ListTest2#> .
+@prefix addto:   <http://sadl.org/TestGeSadl/AddTo#> .
+@prefix measure:  <http://sadl.imp/measurement#> .
+@prefix test:    <http://sadl.org/MDM/test#> .
+@prefix tg:      <http://sadl.org/TestGeSadl/TurbineGenerator#> .
+@prefix listui:  <http://sadl.org/TestGeSadl/ListUnionIntersection#> .
+@prefix lt2:     <http://sadl.org/TestGeSadl/ListTest2#> .
+@prefix aggreg:  <http://sadl.imp/aggregation#> .
+@prefix drid:    <http://sadl.org/TestGeSadl/defRestrictionsIndirect#> .
+@prefix jcrnr:   <http://sadl.org/Angie/jcrnr#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ginc:    <http://sadl.org/TestGeSadl/GetInstanceNumberCreated#> .
+@prefix def:     <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix listsubtract:  <http://sadl.org/TestGeSadl/ListSubtract#> .
+@prefix BRep:    <http://sadl.org/BRep/BRep_model#> .
+@prefix listtest:  <http://sadl.org/TestGeSadl/ListTest#> .
+@prefix dr:      <http://sadl.org/TestGeSadl/defRestrictions#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/#> .
+@prefix ult:     <http://sadl.org/TestGeSadl/UniqueListTest#> .
+@prefix exampletempate:  <http://sadl.org/templates/exampletempate#> .
+@prefix sumcost:  <http://sadl.org/TestGeSadl/SummingCosts#> .
+@prefix owlrestric:  <http://sadl.org/ContextDrivenTyping/owlrestrictions#> .
+@prefix gcfce2:  <http://sadl.org/TestGeSadl/GetClassFromConstraintExample2#> .
+@prefix listadd:  <http://sadl.org/TestGeSadl/ListAdd#> .
+@prefix checktype:  <http://sadl.org/TestGeSadl/CheckType#> .
+@prefix ut1:     <http://sadl.org/TestSadlIde/UnionTest1#> .
+@prefix ut2:     <http://sadl.org/TestSadlIde/UnionTest2#> .
+@prefix fae:     <http://sadl.org/TestGeSadl/FacesAndEdges1#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix nihpr:   <http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#> .
+@prefix gcfce:   <http://sadl.org/TestGeSadl/GetClassFromConstraintExample#> .
+@prefix dfn:     <http://sadl.org/TestGeSadl/defs#> .
+
+lt2:Th1
+      a       lt2:Thingy ;
+      lt2:dpi "23"^^xsd:int , "25"^^xsd:int , "24"^^xsd:int ;
+      lt2:dps "hello"^^xsd:string , "world"^^xsd:string .
+
+lt2:numListElements
+      a       owl:DatatypeProperty ;
+      rdfs:domain lt2:CompositeThingy ;
+      rdfs:range xsd:int .
+
+lt2:Th2
+      a       lt2:Thingy ;
+      lt2:dpi "25"^^xsd:int , "26"^^xsd:int ;
+      lt2:dps "goodbye"^^xsd:string , "world"^^xsd:string .
+
+lt2:op
+      a       owl:ObjectProperty ;
+      rdfs:domain lt2:Thingy ;
+      rdfs:range lt2:Thingy .
+
+lt2:CompositeThingy
+      a       owl:Class ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty lt2:numSetElements
+              ] .
+
+lt2:dps
+      a       owl:DatatypeProperty ;
+      rdfs:domain lt2:Thingy ;
+      rdfs:range xsd:string .
+
+lt2:dpi
+      a       owl:DatatypeProperty ;
+      rdfs:domain lt2:Thingy ;
+      rdfs:range xsd:int .
+
+lt2:numSetElements
+      a       owl:DatatypeProperty ;
+      rdfs:domain lt2:CompositeThingy ;
+      rdfs:range xsd:int .
+
+<http://sadl.org/TestGeSadl/ListTest2>
+      a       owl:Ontology ;
+      rdfs:comment "This ontology was created from a SADL file 'ListTest2.sadl' and should not be edited."@en ;
+      owl:versionInfo "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:41 $" .
+
+lt2:Thingy
+      a       owl:Class .

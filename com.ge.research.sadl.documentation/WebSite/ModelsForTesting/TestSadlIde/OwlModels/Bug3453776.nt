@@ -1,0 +1,8 @@
+<http://com.ge.research.sadl/Bug3453776#aProp> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadl/Bug3453776#Thingy> .
+<http://com.ge.research.sadl/Bug3453776#aProp> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<http://com.ge.research.sadl/Bug3453776#aProp> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://com.ge.research.sadl/Bug3453776#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/Bug3453776#MyThingy> <http://com.ge.research.sadl/Bug3453776#aProp> "some value"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://com.ge.research.sadl/Bug3453776#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/Bug3453776#Thingy> .
+<http://com.ge.research.sadl/Bug3453776> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'Bug3453776.sadl' and should not be edited."@en .
+<http://com.ge.research.sadl/Bug3453776> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .

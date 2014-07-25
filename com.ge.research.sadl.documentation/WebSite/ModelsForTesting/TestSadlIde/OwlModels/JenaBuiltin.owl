@@ -1,0 +1,27 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.imp/JenaBuiltin#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/JenaBuiltin">
+  <owl:Ontology rdf:about="http://sadl.imp/JenaBuiltin">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'JenaBuiltin.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Widget"/>
+  <owl:DatatypeProperty rdf:ID="p2">
+    <rdfs:domain rdf:resource="http://sadl.imp/JenaBuiltin#Widget"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="p3">
+    <rdfs:domain rdf:resource="http://sadl.imp/JenaBuiltin#Widget"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="p1">
+    <rdfs:domain rdf:resource="http://sadl.imp/JenaBuiltin#Widget"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <Widget rdf:ID="MyWidget">
+    <p2 rdf:datatype="http://www.w3.org/2001/XMLSchema#int">4</p2>
+    <p1 rdf:datatype="http://www.w3.org/2001/XMLSchema#int">5</p1>
+  </Widget>
+</rdf:RDF>

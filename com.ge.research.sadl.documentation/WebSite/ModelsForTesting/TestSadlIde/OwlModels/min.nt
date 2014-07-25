@@ -1,0 +1,13 @@
+<http://sadl.imp/min#flVal> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/min#Thingy> .
+<http://sadl.imp/min#flVal> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/min#flVal> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/min#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/min#Thingy> .
+<http://sadl.imp/min#intVal> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/min#Thingy> .
+<http://sadl.imp/min#intVal> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/min#intVal> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/min#dblVal> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/min#Thingy> .
+<http://sadl.imp/min#dblVal> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#double> .
+<http://sadl.imp/min#dblVal> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/min> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'min.sadl' and should not be edited."@en .
+<http://sadl.imp/min> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/min#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

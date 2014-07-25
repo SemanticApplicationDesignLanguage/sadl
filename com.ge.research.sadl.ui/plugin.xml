@@ -1,0 +1,781 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<plugin>
+
+    <extension
+            point="org.eclipse.ui.editors">
+        <editor
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            default="true"
+            extensions="sadl"
+            id="com.ge.research.sadl.Sadl"
+            name="Sadl Editor">
+        </editor>
+    </extension>
+    <extension
+        point="org.eclipse.ui.handlers">
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
+            commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
+            <activeWhen>
+                <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.GraphCommand"
+            commandId="com.ge.research.sadl.ui.GraphCommand">
+            <activeWhen>
+                <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
+            commandId="com.ge.research.sadl.Sadl.validate">
+         <activeWhen>
+            <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+            </reference>
+         </activeWhen>
+      	</handler>
+      	<!-- copy qualified name -->
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
+            commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName">
+            <activeWhen>
+				<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened" />
+            </activeWhen>
+        </handler>
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
+            commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName">
+            <activeWhen>
+            	<and>
+            		<reference definitionId="com.ge.research.sadl.Sadl.XtextEditor.opened" />
+	                <iterate>
+						<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
+					</iterate>
+				</and>
+            </activeWhen>
+        </handler>
+        <!-- Our additional keyboard shortcut commands -->
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.RunQuery"
+            commandId="com.ge.research.sadl.ui.RunQuery">
+            <activeWhen>
+                <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.TestModel"
+            commandId="com.ge.research.sadl.ui.TestModel">
+            <activeWhen>
+                <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+        <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.ValidateModel"
+            commandId="com.ge.research.sadl.ui.ValidateModel">
+            <activeWhen>
+                <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+    </extension>
+    <extension point="org.eclipse.core.expressions.definitions">
+        <definition id="com.ge.research.sadl.Sadl.Editor.opened">
+            <and>
+                <reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
+                <with variable="activeEditor">
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
+                        value="com.ge.research.sadl.Sadl" 
+                        forcePluginActivation="true"/>
+                </with>        
+            </and>
+        </definition>
+        <definition id="com.ge.research.sadl.Sadl.XtextEditor.opened">
+            <and>
+                <reference definitionId="isXtextEditorActive"/>
+                <with variable="activeEditor">
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
+                        value="com.ge.research.sadl.Sadl" 
+                        forcePluginActivation="true"/>
+                </with>        
+            </and>
+        </definition>
+    </extension>
+    <extension
+            point="org.eclipse.ui.preferencePages">
+        <page
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+            id="com.ge.research.sadl.Sadl"
+            name="Sadl">
+            <keywordReference id="com.ge.research.sadl.ui.keyword_Sadl"/>
+        </page>
+        <page
+            category="com.ge.research.sadl.Sadl"
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
+            id="com.ge.research.sadl.Sadl.coloring"
+            name="Syntax Coloring">
+            <keywordReference id="com.ge.research.sadl.ui.keyword_Sadl"/>
+        </page>
+        <page
+            category="com.ge.research.sadl.Sadl"
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
+            id="com.ge.research.sadl.Sadl.templates"
+            name="Templates">
+            <keywordReference id="com.ge.research.sadl.ui.keyword_Sadl"/>
+        </page>
+    </extension>
+    <extension
+            point="org.eclipse.ui.propertyPages">
+        <page
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+            id="com.ge.research.sadl.Sadl"
+            name="Sadl">
+            <keywordReference id="com.ge.research.sadl.ui.keyword_Sadl"/>
+            <enabledWhen>
+	            <adapt type="org.eclipse.core.resources.IProject"/>
+			</enabledWhen>
+	        <filter name="projectNature" value="org.eclipse.xtext.ui.shared.xtextNature"/>
+        </page>
+    </extension>
+    <extension
+        point="org.eclipse.ui.keywords">
+        <keyword
+            id="com.ge.research.sadl.ui.keyword_Sadl"
+            label="Sadl"/>
+    </extension>
+    <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Trigger expensive validation"
+            id="com.ge.research.sadl.Sadl.validate"
+            name="Validate">
+      </command>
+      <!-- copy qualified name -->
+      <command
+            id="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
+            categoryId="org.eclipse.ui.category.edit"
+            description="Copy the qualified name for the selected element"
+            name="Copy Qualified Name">
+      </command>
+      <command
+            id="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName"
+            categoryId="org.eclipse.ui.category.edit"
+            description="Copy the qualified name for the selected element"
+            name="Copy Qualified Name">
+      </command>
+    </extension>
+    <extension point="org.eclipse.ui.menus">
+        <menuContribution
+            locationURI="popup:#TextEditorContext?after=group.edit">
+             <command
+                 commandId="com.ge.research.sadl.Sadl.validate"
+                 style="push"
+                 tooltip="Trigger expensive validation">
+            <visibleWhen checkEnabled="false">
+                <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                </reference>
+            </visibleWhen>
+         </command>  
+         </menuContribution>
+         <!-- copy qualified name -->
+         <menuContribution locationURI="popup:#TextEditorContext?after=copy">
+         	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName" 
+         		style="push" tooltip="Copy Qualified Name">
+            	<visibleWhen checkEnabled="false">
+                	<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened" />
+            	</visibleWhen>
+         	</command>  
+         </menuContribution>
+         <menuContribution locationURI="menu:edit?after=copy">
+         	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
+            	style="push" tooltip="Copy Qualified Name">
+            	<visibleWhen checkEnabled="false">
+                	<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened" />
+            	</visibleWhen>
+         	</command>  
+         </menuContribution>
+         <menuContribution locationURI="popup:org.eclipse.xtext.ui.outline?after=additions">
+			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName" 
+				style="push" tooltip="Copy Qualified Name">
+         		<visibleWhen checkEnabled="false">
+	            	<and>
+	            		<reference definitionId="com.ge.research.sadl.Sadl.XtextEditor.opened" />
+						<iterate>
+							<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
+						</iterate>
+					</and>
+				</visibleWhen>
+			</command>
+         </menuContribution>
+    </extension>
+    <extension point="org.eclipse.ui.menus">
+		<menuContribution locationURI="popup:#TextEditorContext?endof=group.find">
+			<command commandId="org.eclipse.xtext.ui.editor.FindReferences">
+				<visibleWhen checkEnabled="false">
+                	<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                	</reference>
+            	</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+	<extension point="org.eclipse.ui.handlers">
+	    <handler
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
+            commandId="org.eclipse.xtext.ui.editor.FindReferences">
+            <activeWhen>
+                <reference
+                    definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+    </extension>   
+
+<!-- adding resource factories -->
+
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="sadl">
+		</parser>
+	</extension>
+	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
+        <resourceServiceProvider
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+            uriExtension="sadl">
+        </resourceServiceProvider>
+	    <resourceServiceProvider
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          uriExtension="owl">
+	    </resourceServiceProvider>
+	    <resourceServiceProvider
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          uriExtension="nt">
+	    </resourceServiceProvider>
+	    <resourceServiceProvider
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          uriExtension="n3">
+	    </resourceServiceProvider>
+	    <resourceServiceProvider
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          uriExtension="rdf">
+	    </resourceServiceProvider>
+    </extension>
+
+
+    <!-- marker definitions for com.ge.research.sadl.Sadl -->
+    <extension
+            id="sadl.check.fast"
+            name="Sadl Problem"
+            point="org.eclipse.core.resources.markers">
+        <super type="org.eclipse.xtext.ui.check.fast"/>
+        <persistent value="true"/>
+    </extension>
+    <extension
+            id="sadl.check.normal"
+            name="Sadl Problem"
+            point="org.eclipse.core.resources.markers">
+        <super type="org.eclipse.xtext.ui.check.normal"/>
+        <persistent value="true"/>
+    </extension>
+    <extension
+            id="sadl.check.expensive"
+            name="Sadl Problem"
+            point="org.eclipse.core.resources.markers">
+        <super type="org.eclipse.xtext.ui.check.expensive"/>
+        <persistent value="true"/>
+    </extension>
+    
+    <!-- Graph Neighborhood -->
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler 
+			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.GraphCommand"
+			commandId="com.ge.research.sadl.ui.GraphCommand">
+			<activeWhen>
+				<reference
+					definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+				</reference>
+			</activeWhen>
+		</handler>
+	</extension>
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			description="Graph the local neighborhood of the selected concept."
+			id="com.ge.research.sadl.ui.GraphCommand"
+			name="Graph Neighborhood">
+		</command>
+	</extension>
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:#TextEditorContext?after=group.open">
+			<command commandId="com.ge.research.sadl.ui.GraphCommand"
+				style="push"
+				tooltip="Graph Neighborhood">
+				<visibleWhen checkEnabled="false">
+					<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened"/>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+
+	<!-- Quick Outline -->
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler 
+			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
+			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
+			<activeWhen>
+				<reference
+					definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+				</reference>
+			</activeWhen>
+		</handler>
+	</extension>
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			description="Open the quick outline."
+			id="org.eclipse.xtext.ui.editor.outline.QuickOutline"
+			name="Quick Outline">
+		</command>
+	</extension>
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:#TextEditorContext?after=group.open">
+			<command commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline"
+				style="push"
+				tooltip="Open Quick Outline">
+				<visibleWhen checkEnabled="false">
+					<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened"/>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+    <!-- quickfix marker resolution generator for com.ge.research.sadl.Sadl -->
+    <extension
+            point="org.eclipse.ui.ide.markerResolution">
+        <markerResolutionGenerator
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+            markerType="com.ge.research.sadl.ui.sadl.check.fast">
+            <attribute
+                name="FIXABLE_KEY"
+                value="true">
+            </attribute>
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+            markerType="com.ge.research.sadl.ui.sadl.check.normal">
+            <attribute
+                name="FIXABLE_KEY"
+                value="true">
+            </attribute>
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+            markerType="com.ge.research.sadl.ui.sadl.check.expensive">
+            <attribute
+                name="FIXABLE_KEY"
+                value="true">
+            </attribute>
+        </markerResolutionGenerator>
+    </extension>
+   <!-- our builder -->
+   <extension
+       point="org.eclipse.xtext.builder.participant">
+       <participant
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.builder.SadlBuilder">
+       </participant>
+   </extension>
+
+   <!-- our project-specific property page -->
+   <extension
+            point="org.eclipse.ui.propertyPages">
+        <page
+            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+            id="com.ge.research.sadl.Sadl"
+            name="Sadl">
+            <enabledWhen>
+                <instanceof value="org.eclipse.core.resources.IProject"/>
+            </enabledWhen>
+            <filter name="nature" value="org.eclipse.xtext.ui.shared.xtextNature"/>
+        </page>
+        <page
+              category="com.ge.research.sadl.Sadl"
+              class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.properties.SadlReasonerPrefrencePage"
+              id="com.ge.research.sadl.Sadl.reasoner"
+              name="Reasoner Preferences">
+           <enabledWhen>
+              <instanceof
+                    value="org.eclipse.core.resources.IProject">
+              </instanceof>
+           </enabledWhen>
+           <filter
+                 name="nature"
+                 value="org.eclipse.xtext.ui.shared.xtextNature">
+           </filter>
+        </page>
+   </extension>
+
+   <!-- our additional menu entries -->
+   <extension
+       point="org.eclipse.ui.popupMenus">
+       <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.sadl"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Run Query"
+               tooltip="Run a query against the inferred model"
+               class="com.ge.research.sadl.ui.editor.RunQuery"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.RunQuery"
+               id="SADL.ui.editor.runQuery">
+         </action>
+       </objectContribution>
+	   <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.sadl"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Test Model"
+               tooltip="Test the given model by running any specified tests with the preferred reasoner, following optional validation"
+               class="com.ge.research.sadl.ui.editor.TestModel"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.TestModel"
+               id="SADL.ui.editor.testModel">
+         </action>
+	   </objectContribution>
+	   <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.sadl"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Validate Model"
+               tooltip="Validate the given model using the preferred reasoner"
+               class="com.ge.research.sadl.ui.editor.ValidateModel"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.ValidateModel"
+               id="SADL.ui.editor.validateModel">
+         </action>
+	   </objectContribution>
+	   <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.test"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Run Test Suite"
+               tooltip="Run the Test Suite of specified models by running the tests in each model"
+               class="com.ge.research.sadl.ui.editor.TestSuite"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.TestSuite"
+               id="SADL.ui.editor.testSuite">
+         </action>
+	   </objectContribution>
+   </extension>
+   <extension point="org.eclipse.ui.menus">
+   	  <menuContribution locationURI="popup:#TextEditorContet?after=additions">
+   	  	  <command commandId="com.ge.research.sadl.ui.GraphCommand"
+   	  	  		style="push">
+   	  	  		<visibleWhen checkEnabled="false">
+   	  	  			<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+   	  	  			</reference>
+   	  	  		</visibleWhen>
+   	  	  </command>
+   	  </menuContribution>
+      <menuContribution
+            locationURI="popup:#TextEditorContext?after=group.edit">
+         <command commandId="com.ge.research.sadl.ui.RunQuery"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:#TextEditorContext?after=group.edit">
+         <command commandId="com.ge.research.sadl.ui.TestModel"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:#TextEditorContext?after=group.edit">
+         <command commandId="com.ge.research.sadl.ui.ValidateModel"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="com.ge.research.sadl.Sadl.Editor.opened">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+  <!-- our shortcut keys -->
+  <extension
+        point="org.eclipse.ui.commands">
+     <command
+           name="Graph Neighborhood"
+           description="Draw a graph of the local neighborhood of the selected concept"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.GraphCommand">
+     </command>
+     <command
+           name="Run Query"
+           description="Run a query against the inferred model"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.RunQuery">
+     </command>
+     <command
+           name="Test Model"
+           description="Test the given model by running any specified tests with the preferred reasoner, following optional validation"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.TestModel">
+     </command>
+     <command
+           name="Validate Model"
+           description="Validate the given model using the preferred reasoner"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.ValidateModel">
+     </command>
+     <command
+           name="Run Test Suite"
+           description="Run the tests in the test suite"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.TestSuite">
+     </command>
+     <category
+           name="Source"
+           description="SADL Editing Commands"
+           id="com.ge.research.sadl.ui.category.SadlEditor">
+     </category>
+  </extension>
+  <extension
+        point="org.eclipse.ui.bindings">
+     <key
+           commandId="com.ge.research.sadl.ui.RunQuery"
+           contextId="org.eclipse.xtext.ui.XtextEditorScope"
+           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           sequence="M2+M3+R">
+     </key>
+     <key
+           commandId="com.ge.research.sadl.ui.TestModel"
+           contextId="org.eclipse.xtext.ui.XtextEditorScope"
+           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           sequence="M2+M3+T">
+     </key>
+     <key
+           commandId="com.ge.research.sadl.ui.ValidateModel"
+           contextId="org.eclipse.xtext.ui.XtextEditorScope"
+           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           sequence="M2+M3+V">
+     </key>
+<!--     <key
+           commandId="com.ge.research.sadl.ui.TestSuite"
+           contextId="org.eclipse.xtext.ui.XtextEditorScope"
+           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           sequence="M2+M3+T">
+     </key> -->
+  </extension>
+
+   <extension
+       point="org.eclipse.ui.popupMenus">
+       <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.owl"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Import OWL to SADL"
+               tooltip="Create a SADL model by importing the selected OWL file"
+               class="com.ge.research.sadl.geonly.actions.ImportOwl"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.ImportOwl"
+               id="SADL.ui.editor.importOwl">
+         </action>
+       </objectContribution>
+       <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.owl"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Export OWL to Java"
+               tooltip="Create a set of Java classes that represent the content (with imports) of the OWL model"
+               class="com.ge.research.sadl.geonly.actions.OwlToJavaAction"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.OwlToJava"
+               id="SADL.ui.editor.OwlToJava">
+         </action>
+       </objectContribution>
+       <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.xls"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Lookup Table to Rules"
+               tooltip="Convert Lookup Table to SADL Rules"
+               class="com.ge.research.sadl.geonly.actions.GenerateLookupTableRules"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.ExcelToRules"
+               id="SADL.ui.editor.importOwl">
+         </action>
+       </objectContribution>
+   </extension>
+  <extension
+        point="org.eclipse.ui.commands">
+     <command
+           name="Import OWL"
+           description="Import the OWL file to a SADL model"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.ImportOwl">
+     </command>
+     <command
+           name="Graph Neighborhood"
+           description="Graph local neighborhood of selected concept"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.GraphCommand">
+     </command>
+     <command
+           name="Export OWL to Java"
+           description="Create a set of Java classes that represent the content (with imports) of the OWL model"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.OwlToJava">
+     </command>
+     <command
+           name="Excel to Rules"
+           description="Convert Lookup Table to SADL Rules"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.ExcelToRules">
+     </command>
+     <category
+           name="Source"
+           description="SADL Editing Commands"
+           id="com.ge.research.sadl.ui.category.SadlEditor">
+     </category>
+  </extension>
+  <extension point="org.eclipse.ui.importWizards"> 
+		<category id="com.ge.research.sadl" name="SADL"/>
+		<wizard 
+			id="com.ge.research.sadl.geonly.ImportCSVToSadl" 
+			name="CSV Files" 
+			class="com.ge.research.sadl.geonly.ui.imports.SadlCSVImportWizard"
+			icon="icons/import_folder.gif" 
+			category="com.ge.research.sadl">
+			<description>Import CSV files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.csv"/> 
+		</wizard> 
+<!--		<wizard 
+			id="com.ge.research.sadl.geonly.ImportXLSToSadl" 
+			name="Excel Files" 
+			class="com.ge.research.sadl.geonly.ui.imports.SadlXLSImportWizard" 
+			icon="icons/import_folder.gif" 
+			category="com.ge.research.sadl">
+			<description>Import Excel files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.xls"/> 
+		</wizard> -->
+		<wizard 
+			id="com.ge.research.sadl.geonly.ImportOwlToSadl" 
+			name="Owl Files" 
+			class="com.ge.research.sadl.geonly.ui.imports.OwlFileImportWizard" 
+			icon="icons/import_folder.gif" 
+			category="com.ge.research.sadl">
+			<description>Import Owl files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
+		</wizard> 
+   </extension> 
+
+</plugin>

@@ -1,0 +1,27 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns="http://sadl.imp/testShapeCalculations#"
+  xml:base="http://sadl.imp/testShapeCalculations">
+  <owl:Ontology rdf:about="http://sadl.imp/testShapeCalculations">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'testShapeCalculations.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <Cuboid rdf:ID="MyCuboid">
+    <length>
+      <Amount rdf:ID="MCL">
+        <unit rdf:resource="http://sadl.imp/testShapeCalculations#Inch"/>
+      </Amount>
+    </length>
+    <width>
+      <Amount rdf:ID="MCW">
+        <unit rdf:resource="http://sadl.imp/testShapeCalculations#Inch"/>
+      </Amount>
+    </width>
+    <height>
+      <Amount rdf:ID="MCH">
+        <unit rdf:resource="http://sadl.imp/testShapeCalculations#Inch"/>
+      </Amount>
+    </height>
+  </Cuboid>
+</rdf:RDF>

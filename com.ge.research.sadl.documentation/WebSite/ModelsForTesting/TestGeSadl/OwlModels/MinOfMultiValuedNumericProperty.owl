@@ -1,0 +1,27 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/MinOfMultiValuedNumericProperty#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/MinOfMultiValuedNumericProperty">
+  <owl:Ontology rdf:about="http://sadl.imp/MinOfMultiValuedNumericProperty">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'MinOfMultiValuedNumericProperty.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:DatatypeProperty rdf:ID="calcprop">
+    <rdfs:domain rdf:resource="http://sadl.imp/MinOfMultiValuedNumericProperty#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="mincalcprop">
+    <rdfs:domain rdf:resource="http://sadl.imp/MinOfMultiValuedNumericProperty#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="inprop">
+    <rdfs:domain rdf:resource="http://sadl.imp/MinOfMultiValuedNumericProperty#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="MyThingy">
+    <inprop rdf:datatype="http://www.w3.org/2001/XMLSchema#double"
+    >1.5</inprop>
+  </Thingy>
+</rdf:RDF>

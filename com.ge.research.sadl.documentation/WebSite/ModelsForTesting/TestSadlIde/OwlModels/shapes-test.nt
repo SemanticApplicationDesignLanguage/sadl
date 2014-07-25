@@ -1,0 +1,8 @@
+<http://sadl.imp/shapes_test> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:37 $" .
+<http://sadl.imp/shapes_test> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'shapes-test.sadl' and should not be edited."@en .
+<http://sadl.imp/shapes_test> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/shapes_test#MyRect> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/shapes_test#Rectangle> .
+<http://sadl.imp/shapes_test#MyCircle> <http://www.w3.org/2000/01/rdf-schema#comment> "Hello there!"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/shapes_test#MyCircle> <http://sadl.imp/shapes_test#unitOfMeasure> <http://sadl.imp/shapes_test#Foot> .
+<http://sadl.imp/shapes_test#MyCircle> <http://www.w3.org/2000/01/rdf-schema#comment> "MyCircle is for testing."^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/shapes_test#MyCircle> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/shapes_test#Circle> .
