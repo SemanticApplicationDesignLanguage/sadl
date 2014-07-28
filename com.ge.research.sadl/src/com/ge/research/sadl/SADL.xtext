@@ -511,13 +511,9 @@ AndExpression returns Expression :
 	RelationalExpression (
 		{JunctionExpression.left=current} op=('&&' | 'and') right=RelationalExpression)*;
 		
-ShallBe :
-	'shall' 'be'
-;		
-
 RelationalExpression returns Expression :
 	AdditiveExpression (
-		{BinaryOpExpression.left=current} op=('=' | '==' | 'is' | ShallBe | '!=' | '<' | '<=' | '>' | '>=') right=AdditiveExpression)*;
+		{BinaryOpExpression.left=current} op=('=' | '==' | 'is' | '!=' | '<' | '<=' | '>' | '>=') right=AdditiveExpression)*;
 
 AdditiveExpression returns Expression :
 	MultiplicativeExpression (
