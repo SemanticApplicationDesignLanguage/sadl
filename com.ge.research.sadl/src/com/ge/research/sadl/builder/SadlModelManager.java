@@ -613,7 +613,21 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     @Override
     public EObject caseModelName(ModelName object) {
     	String alias = object.getAlias();
-        annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias));
+    	EList<ContentList> cmtlist = object.getAnnContent();
+    	List<String> comments = null;
+    	if (cmtlist.size() > 0) {
+    		comments = new ArrayList();
+    		Iterator<ContentList> cliter = cmtlist.iterator();
+    		while (cliter.hasNext()) {
+    			ContentList cl = cliter.next();
+    			EList<String> cl2 = cl.getAnnContent();
+    			Iterator<String> inneritr = cl2.iterator();
+    			while (inneritr.hasNext()) {
+    				comments.add(inneritr.next().toString());
+    			}
+    		}
+    	}
+        annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, comments));
         return object;
     }
     
@@ -622,10 +636,11 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * @param _modelName
      * @param version
      * @param alias
+     * @param comments 
      * @return
      */
-    public List<ModelError> addModelName(String _modelName, String version, String alias) {
-    	return getModel().setModelName(_modelName, version, alias);
+    public List<ModelError> addModelName(String _modelName, String version, String alias, List<String> comments) {
+    	return getModel().setModelName(_modelName, version, alias, comments);
     }
 
     /**

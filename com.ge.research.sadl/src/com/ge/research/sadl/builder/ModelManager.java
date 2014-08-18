@@ -523,10 +523,11 @@ public class ModelManager {
 	 *            -- the namespace of this model (required; cannot be null)
 	 * @param version
 	 *            -- the model version information (optional; can be null)
+	 * @param comments 
 	 * @return -- errors if any else null
 	 */
 	public List<ModelError> setModelName(String _modelName, String version,
-			String alias) {
+			String alias, List<String> comments) {
 		if (_modelName == null) {
 			addError(0, "Model name (uri) cannot be null.");
 		}
@@ -605,6 +606,13 @@ public class ModelManager {
 				+ sadlFile + "' and should not be edited.", "en");
 		if (version != null) {
 			ontology.addVersionInfo(version);
+		}
+		if (comments != null) {
+			Iterator<String> cmtsitr = comments.iterator();
+			while (cmtsitr.hasNext()) {
+				String comment = cmtsitr.next();
+				ontology.addComment(comment, "en");
+			}
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Model name set to '{}'", modelName);

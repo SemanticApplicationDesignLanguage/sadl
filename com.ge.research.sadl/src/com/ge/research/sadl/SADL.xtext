@@ -29,7 +29,8 @@ Model :
 // The baseUri is the namespace of the model and should be of the form
 // "http://..."; the version is optional.
 ModelName :
-    'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? EOS;
+    'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
+    	('(' 'note' annContent+=ContentList ')')* EOS;
 
 // Every import is by actual relative URL (other SADL models) or by URI
 // (OWL files); every import has a unique alias (which becomes the "prefix" in compound names).
