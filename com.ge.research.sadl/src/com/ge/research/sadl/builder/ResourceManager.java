@@ -53,6 +53,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -61,7 +62,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.osgi.framework.internal.core.BundleURLConnection;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -911,20 +911,12 @@ public class ResourceManager {
         String symbolicName = pluginId;
         Bundle bndl = Platform.getBundle(symbolicName);
         if (bndl != null) {
-            @SuppressWarnings("unchecked")
             Enumeration<URL> en = bndl.findEntries(relPath, file, true);
             while (en != null && en.hasMoreElements()) {
                 URL bndlurl = en.nextElement();
-                URL fileUrl = null;
-                URLConnection conn = bndlurl.openConnection();
-//                throw new IllegalStateException("FIXME: Unknown Implementation with Kepler");
-                // FIXME KTH: Code invalid with Kepler
-                if (conn instanceof BundleURLConnection) {
-                    fileUrl = ((BundleURLConnection)conn).getFileURL();
-                    java.net.URI thisUri = new java.net.URI(fileUrl.toString());
-                    String path = new File(thisUri).getAbsolutePath();
-//                        path = path.replace('\\','/');
-                    File bundleFile = new File(path);
+                URL fileUrl = FileLocator.toFileURL(bndlurl);
+                if (fileUrl != null) {
+                    File bundleFile = new File(fileUrl.getFile());
                     if (bundleFile.exists()) {
                         return bundleFile;
                     }

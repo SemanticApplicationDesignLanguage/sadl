@@ -1,5 +1,6 @@
 package com.ge.research.sadl.ui.quickfix;
 
+import java.io.StringReader;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
@@ -8,6 +9,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.xtext.parser.IParseResult;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.editor.model.XtextDocument;
 import org.eclipse.xtext.ui.editor.model.edit.IModification;
@@ -18,15 +20,16 @@ import org.eclipse.xtext.ui.editor.quickfix.Fix;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
+import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.parser.antlr.SadlParser;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.sadl.PropValPartialTriple;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.ui.contentassist.SadlProposalProvider;
 import com.ge.research.sadl.utils.SadlUtils;
-import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.validation.SadlJavaValidator;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -41,6 +44,8 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 
     @Inject
     private SadlModelManager visitor;
+    @Inject
+    private SadlParser parser;
 
     @Inject
     public SadlQuickfixProvider(SadlProposalProvider proposalProvider) {
@@ -113,24 +118,30 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 	
 	@Fix(SadlJavaValidator.ADD_GLOBAL_ALIAS)
 	public void addModelGlobalAlias(final Issue issue, IssueResolutionAcceptor acceptor) {
-		acceptor.accept(issue, "Add Model Global Alias", "Add a global alias to the model", null, new ISemanticModification() {
-			public void apply(EObject element, IModificationContext context)
-					throws Exception {
-				String galias = null;
-				if (element instanceof ModelName) {
-					String uri = ((ModelName)element).getBaseUri().trim();
-					if (uri.endsWith("/")) {
-						uri = uri.substring(0, uri.length() - 1);
-					}
-					int ls = uri.lastIndexOf('/');
-					if (ls > 0) {
-						galias = uri.substring(ls + 1);
-					}
-				}
-				if (galias == null) {
-					galias = "aliasName";
-				}
-				((ModelName)element).setAlias(galias);
+		acceptor.accept(issue, "Add Model Global Alias", "Add a global alias to the model", null, new IModification() {
+			
+			@Override
+			public void apply(IModificationContext context) throws Exception {
+				final IXtextDocument doc = context.getXtextDocument();
+		        // assumption: that URI is in same line as 'uri' keyword
+				// parse the line to create a ModelName
+				String line = doc.get(issue.getOffset(), doc.getLineLength(issue.getLineNumber()-1));
+				IParseResult parseResult = parser.parse(parser.getGrammarAccess().getModelNameRule(), new StringReader(line));
+				ModelName name = (ModelName) parseResult.getRootASTElement();
+
+				// compute alias name
+				URI uri = URI.createURI(name.getBaseUri());
+				String galias = (uri.segmentCount()>1) ? uri.lastSegment() : "aliasName";
+				
+				// find insertion offset: Search for end of URI string 
+				int offset = line.indexOf(name.getBaseUri())+name.getBaseUri().length();
+				// is uri string surrounded by " or ' ?
+				char stringDelimiter = line.substring(0,offset).indexOf('"')>0 ? '"' : '\'';
+				
+				// find position of end character
+				offset = line.indexOf(stringDelimiter, offset)+1;
+
+				doc.replace(offset, 0, " alias "+galias);
 			}
 		});
 	}

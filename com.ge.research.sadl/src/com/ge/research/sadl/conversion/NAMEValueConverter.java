@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.antlr.runtime.Token;
+import org.antlr.runtime.TokenSource;
 import org.eclipse.xtext.conversion.ValueConverterException;
 import org.eclipse.xtext.conversion.impl.IDValueConverter;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
@@ -98,4 +100,31 @@ public class NAMEValueConverter extends IDValueConverter {
 			throw ex;
 		}
 	}
+
+	protected void assertTokens(String value, TokenSource tokenSource, String escapedString) {
+		if (tokenSource == null)
+			return;
+		Token token = tokenSource.nextToken();
+		if (!escapedString.equals(token.getText())) {
+			throw createTokenContentMismatchException(value, escapedString, token);
+		}
+		
+		String rule1 = getRuleName().toUpperCase();
+		String rule2 = getRuleName(token);
+		// workaround: 
+		if ("NAME".equals(rule1) && "ID".equals(rule2)) {
+			rule2 = "NAME";
+		} else if ("ID".equals(rule1) && "NAME".equals(rule2)) {
+			rule1 = "NAME";
+		}
+		// Ambiguity between NAME and ID rule
+		if (!rule1.equals(rule2)) {
+			throw createTokenTypeMismatchException(value, escapedString, token);
+		}
+		String reparsedValue = toValue(token.getText(), null);
+		if (value != reparsedValue && !value.equals(reparsedValue)) {
+			throw createTokenContentMismatchException(value, escapedString, token);
+		}
+	}
+
 }
