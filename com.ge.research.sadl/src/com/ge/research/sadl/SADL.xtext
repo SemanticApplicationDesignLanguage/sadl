@@ -82,7 +82,7 @@ ResourceName :
     name=NAME ('(' annType+=('alias'|'note') annContent+=ContentList ')')*;
 
 ContentList :
-    '{'? annContent+=STRING (',' annContent+=STRING)* '}'?;
+    annContent+=STRING (',' annContent+=STRING)*;
 
 // SADL identifiers may also be grouped into lists in some places.
 ResourceList :
