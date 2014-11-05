@@ -3943,7 +3943,7 @@ public class ModelManager {
 			return getNamedConceptsInModel(null, this.modelName, cType, scope);
 		} else {
 			// get concepts in current model
-			List<ConceptName> names = getConfigurationMgr().getNamedConceptsInModel(getJenaModel(), getModelName(), cType, scope);
+			List<ConceptName> names = getConfigurationMgr() != null ? getConfigurationMgr().getNamedConceptsInModel(getJenaModel(), getModelName(), cType, scope) : new ArrayList<ConceptName>();
 
 			if (scope.equals(Scope.INCLUDEIMPORTS) && imports != null && imports.size() > 0) {
 				// get concepts in imports
