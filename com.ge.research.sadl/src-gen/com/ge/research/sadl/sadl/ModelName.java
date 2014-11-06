@@ -2,6 +2,8 @@
  */
 package com.ge.research.sadl.sadl;
 
+import org.eclipse.emf.common.util.EList;
+
 import org.eclipse.emf.ecore.EObject;
 
 /**
@@ -15,6 +17,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link com.ge.research.sadl.sadl.ModelName#getBaseUri <em>Base Uri</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.ModelName#getAlias <em>Alias</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.ModelName#getVersion <em>Version</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.ModelName#getAnnContent <em>Ann Content</em>}</li>
  * </ul>
  * </p>
  *
@@ -101,5 +104,21 @@ public interface ModelName extends EObject
    * @generated
    */
   void setVersion(String value);
+
+  /**
+   * Returns the value of the '<em><b>Ann Content</b></em>' containment reference list.
+   * The list contents are of type {@link com.ge.research.sadl.sadl.ContentList}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>Ann Content</em>' containment reference list isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>Ann Content</em>' containment reference list.
+   * @see com.ge.research.sadl.sadl.SadlPackage#getModelName_AnnContent()
+   * @model containment="true"
+   * @generated
+   */
+  EList<ContentList> getAnnContent();
 
 } // ModelName

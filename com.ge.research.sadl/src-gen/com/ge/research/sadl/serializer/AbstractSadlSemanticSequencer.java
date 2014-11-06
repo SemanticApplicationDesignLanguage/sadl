@@ -880,7 +880,6 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	 *                 op='=' | 
 	 *                 op='==' | 
 	 *                 op='is' | 
-	 *                 op=ShallBe | 
 	 *                 op='!=' | 
 	 *                 op='<' | 
 	 *                 op='<=' | 
@@ -1552,7 +1551,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (baseUri=STRING alias=NAME? version=STRING?)
+	 *     (baseUri=STRING alias=NAME? version=STRING? annContent+=ContentList*)
 	 */
 	protected void sequence_ModelName(EObject context, ModelName semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);

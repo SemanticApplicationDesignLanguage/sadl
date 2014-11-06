@@ -32,8 +32,6 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	protected AbstractElementAlias match_CardCondition_ValueKeyword_3_0_or_ValuesKeyword_3_1;
 	protected AbstractElementAlias match_ClassDeclaration_TopLevelKeyword_0_3_q;
 	protected AbstractElementAlias match_ClassDeclaration_TopLevelKeyword_1_2_q;
-	protected AbstractElementAlias match_ContentList_LeftCurlyBracketKeyword_0_q;
-	protected AbstractElementAlias match_ContentList_RightCurlyBracketKeyword_3_q;
 	protected AbstractElementAlias match_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1;
 	protected AbstractElementAlias match_ElementSet_CommaKeyword_1_0_q;
 	protected AbstractElementAlias match_EnumeratedInstances_CommaKeyword_0_q;
@@ -80,8 +78,6 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 		match_CardCondition_ValueKeyword_3_0_or_ValuesKeyword_3_1 = new AlternativeAlias(false, false, new TokenAlias(false, false, grammarAccess.getCardConditionAccess().getValueKeyword_3_0()), new TokenAlias(false, false, grammarAccess.getCardConditionAccess().getValuesKeyword_3_1()));
 		match_ClassDeclaration_TopLevelKeyword_0_3_q = new TokenAlias(false, true, grammarAccess.getClassDeclarationAccess().getTopLevelKeyword_0_3());
 		match_ClassDeclaration_TopLevelKeyword_1_2_q = new TokenAlias(false, true, grammarAccess.getClassDeclarationAccess().getTopLevelKeyword_1_2());
-		match_ContentList_LeftCurlyBracketKeyword_0_q = new TokenAlias(false, true, grammarAccess.getContentListAccess().getLeftCurlyBracketKeyword_0());
-		match_ContentList_RightCurlyBracketKeyword_3_q = new TokenAlias(false, true, grammarAccess.getContentListAccess().getRightCurlyBracketKeyword_3());
 		match_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1 = new AlternativeAlias(false, false, new TokenAlias(false, false, grammarAccess.getDataTypeRestrictionAccess().getCommaKeyword_1_2_0_0()), new TokenAlias(false, false, grammarAccess.getDataTypeRestrictionAccess().getOrKeyword_1_2_0_1()));
 		match_ElementSet_CommaKeyword_1_0_q = new TokenAlias(false, true, grammarAccess.getElementSetAccess().getCommaKeyword_1_0());
 		match_EnumeratedInstances_CommaKeyword_0_q = new TokenAlias(false, true, grammarAccess.getEnumeratedInstancesAccess().getCommaKeyword_0());
@@ -207,10 +203,6 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 				emit_ClassDeclaration_TopLevelKeyword_0_3_q(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_ClassDeclaration_TopLevelKeyword_1_2_q.equals(syntax))
 				emit_ClassDeclaration_TopLevelKeyword_1_2_q(semanticObject, getLastNavigableState(), syntaxNodes);
-			else if(match_ContentList_LeftCurlyBracketKeyword_0_q.equals(syntax))
-				emit_ContentList_LeftCurlyBracketKeyword_0_q(semanticObject, getLastNavigableState(), syntaxNodes);
-			else if(match_ContentList_RightCurlyBracketKeyword_3_q.equals(syntax))
-				emit_ContentList_RightCurlyBracketKeyword_3_q(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1.equals(syntax))
 				emit_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_ElementSet_CommaKeyword_1_0_q.equals(syntax))
@@ -361,7 +353,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'value' | 'values'
+	 *     'values' | 'value'
 	 */
 	protected void emit_CardCondition_ValueKeyword_3_0_or_ValuesKeyword_3_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -380,22 +372,6 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	 *     'top-level'?
 	 */
 	protected void emit_ClassDeclaration_TopLevelKeyword_1_2_q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
-		acceptNodes(transition, nodes);
-	}
-	
-	/**
-	 * Syntax:
-	 *     '{'?
-	 */
-	protected void emit_ContentList_LeftCurlyBracketKeyword_0_q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
-		acceptNodes(transition, nodes);
-	}
-	
-	/**
-	 * Syntax:
-	 *     '}'?
-	 */
-	protected void emit_ContentList_RightCurlyBracketKeyword_3_q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
 	}
 	
@@ -457,7 +433,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     ('with' | 'has')?
+	 *     ('has' | 'with')?
 	 */
 	protected void emit_InstAttrSPV___HasKeyword_1_0_or_WithKeyword_1_1__q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -489,7 +465,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'value' | 'values'
+	 *     'values' | 'value'
 	 */
 	protected void emit_MinCardCondition_ValueKeyword_4_0_or_ValuesKeyword_4_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -521,7 +497,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'with' | 'has'
+	 *     'has' | 'with'
 	 */
 	protected void emit_Range_HasKeyword_0_0_or_WithKeyword_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -553,7 +529,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'has' | 'with'
+	 *     'with' | 'has'
 	 */
 	protected void emit_SomeValuesCondition_HasKeyword_0_0_or_WithKeyword_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -609,7 +585,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'has' | 'with'
+	 *     'with' | 'has'
 	 */
 	protected void emit_WithPhrase_HasKeyword_1_1_0_or_WithKeyword_1_1_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);

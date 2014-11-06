@@ -38,6 +38,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/baseUri"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/alias"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/version"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//ModelName/annContent"/>
     </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//Import">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Import/importURI"/>

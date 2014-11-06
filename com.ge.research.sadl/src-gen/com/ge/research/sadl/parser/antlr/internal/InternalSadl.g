@@ -226,9 +226,39 @@ ruleModelName returns [EObject current=null]
 	    }
 
 )
-))?this_EOS_6=RULE_EOS
+))?(	otherlv_6='(' 
+    {
+    	newLeafNode(otherlv_6, grammarAccess.getModelNameAccess().getLeftParenthesisKeyword_4_0());
+    }
+	otherlv_7='note' 
+    {
+    	newLeafNode(otherlv_7, grammarAccess.getModelNameAccess().getNoteKeyword_4_1());
+    }
+(
+(
+		{ 
+	        newCompositeNode(grammarAccess.getModelNameAccess().getAnnContentContentListParserRuleCall_4_2_0()); 
+	    }
+		lv_annContent_8_0=ruleContentList		{
+	        if ($current==null) {
+	            $current = createModelElementForParent(grammarAccess.getModelNameRule());
+	        }
+       		add(
+       			$current, 
+       			"annContent",
+        		lv_annContent_8_0, 
+        		"ContentList");
+	        afterParserOrEnumRuleCall();
+	    }
+
+)
+)	otherlv_9=')' 
+    {
+    	newLeafNode(otherlv_9, grammarAccess.getModelNameAccess().getRightParenthesisKeyword_4_3());
+    }
+)*this_EOS_10=RULE_EOS
     { 
-    newLeafNode(this_EOS_6, grammarAccess.getModelNameAccess().getEOSTerminalRuleCall_4()); 
+    newLeafNode(this_EOS_10, grammarAccess.getModelNameAccess().getEOSTerminalRuleCall_5()); 
     }
 )
 ;
@@ -871,15 +901,11 @@ ruleContentList returns [EObject current=null]
     @init { enterRule(); 
     }
     @after { leaveRule(); }:
-((	otherlv_0='{' 
-    {
-    	newLeafNode(otherlv_0, grammarAccess.getContentListAccess().getLeftCurlyBracketKeyword_0());
-    }
-)?(
+((
 (
-		lv_annContent_1_0=RULE_STRING
+		lv_annContent_0_0=RULE_STRING
 		{
-			newLeafNode(lv_annContent_1_0, grammarAccess.getContentListAccess().getAnnContentSTRINGTerminalRuleCall_1_0()); 
+			newLeafNode(lv_annContent_0_0, grammarAccess.getContentListAccess().getAnnContentSTRINGTerminalRuleCall_0_0()); 
 		}
 		{
 	        if ($current==null) {
@@ -888,20 +914,20 @@ ruleContentList returns [EObject current=null]
        		addWithLastConsumed(
        			$current, 
        			"annContent",
-        		lv_annContent_1_0, 
+        		lv_annContent_0_0, 
         		"STRING");
 	    }
 
 )
-)(	otherlv_2=',' 
+)(	otherlv_1=',' 
     {
-    	newLeafNode(otherlv_2, grammarAccess.getContentListAccess().getCommaKeyword_2_0());
+    	newLeafNode(otherlv_1, grammarAccess.getContentListAccess().getCommaKeyword_1_0());
     }
 (
 (
-		lv_annContent_3_0=RULE_STRING
+		lv_annContent_2_0=RULE_STRING
 		{
-			newLeafNode(lv_annContent_3_0, grammarAccess.getContentListAccess().getAnnContentSTRINGTerminalRuleCall_2_1_0()); 
+			newLeafNode(lv_annContent_2_0, grammarAccess.getContentListAccess().getAnnContentSTRINGTerminalRuleCall_1_1_0()); 
 		}
 		{
 	        if ($current==null) {
@@ -910,16 +936,12 @@ ruleContentList returns [EObject current=null]
        		addWithLastConsumed(
        			$current, 
        			"annContent",
-        		lv_annContent_3_0, 
+        		lv_annContent_2_0, 
         		"STRING");
 	    }
 
 )
-))*(	otherlv_4='}' 
-    {
-    	newLeafNode(otherlv_4, grammarAccess.getContentListAccess().getRightCurlyBracketKeyword_3());
-    }
-)?)
+))*)
 ;
 
 
@@ -8467,39 +8489,6 @@ ruleAndExpression returns [EObject current=null]
 
 
 
-// Entry rule entryRuleShallBe
-entryRuleShallBe returns [String current=null] 
-	:
-	{ newCompositeNode(grammarAccess.getShallBeRule()); } 
-	 iv_ruleShallBe=ruleShallBe 
-	 { $current=$iv_ruleShallBe.current.getText(); }  
-	 EOF 
-;
-
-// Rule ShallBe
-ruleShallBe returns [AntlrDatatypeRuleToken current=new AntlrDatatypeRuleToken()] 
-    @init { enterRule(); 
-    }
-    @after { leaveRule(); }:
-(
-	kw='shall' 
-    {
-        $current.merge(kw);
-        newLeafNode(kw, grammarAccess.getShallBeAccess().getShallKeyword_0()); 
-    }
-
-	kw='be' 
-    {
-        $current.merge(kw);
-        newLeafNode(kw, grammarAccess.getShallBeAccess().getBeKeyword_1()); 
-    }
-)
-    ;
-
-
-
-
-
 // Entry rule entryRuleRelationalExpression
 entryRuleRelationalExpression returns [EObject current=null] 
 	:
@@ -8574,24 +8563,21 @@ ruleRelationalExpression returns [EObject current=null]
        		setWithLastConsumed($current, "op", lv_op_2_3, null);
 	    }
 
-    |		{ 
-	        newCompositeNode(grammarAccess.getRelationalExpressionAccess().getOpShallBeParserRuleCall_1_1_0_3()); 
-	    }
-		lv_op_2_4=ruleShallBe		{
+    |		lv_op_2_4=	'!=' 
+    {
+        newLeafNode(lv_op_2_4, grammarAccess.getRelationalExpressionAccess().getOpExclamationMarkEqualsSignKeyword_1_1_0_3());
+    }
+ 
+	    {
 	        if ($current==null) {
-	            $current = createModelElementForParent(grammarAccess.getRelationalExpressionRule());
+	            $current = createModelElement(grammarAccess.getRelationalExpressionRule());
 	        }
-       		set(
-       			$current, 
-       			"op",
-        		lv_op_2_4, 
-        		"ShallBe");
-	        afterParserOrEnumRuleCall();
+       		setWithLastConsumed($current, "op", lv_op_2_4, null);
 	    }
 
-    |		lv_op_2_5=	'!=' 
+    |		lv_op_2_5=	'<' 
     {
-        newLeafNode(lv_op_2_5, grammarAccess.getRelationalExpressionAccess().getOpExclamationMarkEqualsSignKeyword_1_1_0_4());
+        newLeafNode(lv_op_2_5, grammarAccess.getRelationalExpressionAccess().getOpLessThanSignKeyword_1_1_0_4());
     }
  
 	    {
@@ -8601,9 +8587,9 @@ ruleRelationalExpression returns [EObject current=null]
        		setWithLastConsumed($current, "op", lv_op_2_5, null);
 	    }
 
-    |		lv_op_2_6=	'<' 
+    |		lv_op_2_6=	'<=' 
     {
-        newLeafNode(lv_op_2_6, grammarAccess.getRelationalExpressionAccess().getOpLessThanSignKeyword_1_1_0_5());
+        newLeafNode(lv_op_2_6, grammarAccess.getRelationalExpressionAccess().getOpLessThanSignEqualsSignKeyword_1_1_0_5());
     }
  
 	    {
@@ -8613,9 +8599,9 @@ ruleRelationalExpression returns [EObject current=null]
        		setWithLastConsumed($current, "op", lv_op_2_6, null);
 	    }
 
-    |		lv_op_2_7=	'<=' 
+    |		lv_op_2_7=	'>' 
     {
-        newLeafNode(lv_op_2_7, grammarAccess.getRelationalExpressionAccess().getOpLessThanSignEqualsSignKeyword_1_1_0_6());
+        newLeafNode(lv_op_2_7, grammarAccess.getRelationalExpressionAccess().getOpGreaterThanSignKeyword_1_1_0_6());
     }
  
 	    {
@@ -8625,9 +8611,9 @@ ruleRelationalExpression returns [EObject current=null]
        		setWithLastConsumed($current, "op", lv_op_2_7, null);
 	    }
 
-    |		lv_op_2_8=	'>' 
+    |		lv_op_2_8=	'>=' 
     {
-        newLeafNode(lv_op_2_8, grammarAccess.getRelationalExpressionAccess().getOpGreaterThanSignKeyword_1_1_0_7());
+        newLeafNode(lv_op_2_8, grammarAccess.getRelationalExpressionAccess().getOpGreaterThanSignEqualsSignKeyword_1_1_0_7());
     }
  
 	    {
@@ -8635,18 +8621,6 @@ ruleRelationalExpression returns [EObject current=null]
 	            $current = createModelElement(grammarAccess.getRelationalExpressionRule());
 	        }
        		setWithLastConsumed($current, "op", lv_op_2_8, null);
-	    }
-
-    |		lv_op_2_9=	'>=' 
-    {
-        newLeafNode(lv_op_2_9, grammarAccess.getRelationalExpressionAccess().getOpGreaterThanSignEqualsSignKeyword_1_1_0_8());
-    }
- 
-	    {
-	        if ($current==null) {
-	            $current = createModelElement(grammarAccess.getRelationalExpressionRule());
-	        }
-       		setWithLastConsumed($current, "op", lv_op_2_9, null);
 	    }
 
 )

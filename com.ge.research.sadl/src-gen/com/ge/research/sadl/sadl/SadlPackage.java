@@ -141,13 +141,22 @@ public interface SadlPackage extends EPackage
   int MODEL_NAME__VERSION = 2;
 
   /**
+   * The feature id for the '<em><b>Ann Content</b></em>' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MODEL_NAME__ANN_CONTENT = 3;
+
+  /**
    * The number of structural features of the '<em>Model Name</em>' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int MODEL_NAME_FEATURE_COUNT = 3;
+  int MODEL_NAME_FEATURE_COUNT = 4;
 
   /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.ImportImpl <em>Import</em>}' class.
@@ -4391,6 +4400,17 @@ public interface SadlPackage extends EPackage
   EAttribute getModelName_Version();
 
   /**
+   * Returns the meta object for the containment reference list '{@link com.ge.research.sadl.sadl.ModelName#getAnnContent <em>Ann Content</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference list '<em>Ann Content</em>'.
+   * @see com.ge.research.sadl.sadl.ModelName#getAnnContent()
+   * @see #getModelName()
+   * @generated
+   */
+  EReference getModelName_AnnContent();
+
+  /**
    * Returns the meta object for class '{@link com.ge.research.sadl.sadl.Import <em>Import</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -7762,6 +7782,14 @@ public interface SadlPackage extends EPackage
      * @generated
      */
     EAttribute MODEL_NAME__VERSION = eINSTANCE.getModelName_Version();
+
+    /**
+     * The meta object literal for the '<em><b>Ann Content</b></em>' containment reference list feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference MODEL_NAME__ANN_CONTENT = eINSTANCE.getModelName_AnnContent();
 
     /**
      * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.ImportImpl <em>Import</em>}' class.
