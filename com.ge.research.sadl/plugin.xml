@@ -7,7 +7,7 @@
     <package 
        uri = "http://www.ge.com/research/sadl/Sadl" 
        class = "com.ge.research.sadl.sadl.SadlPackage"
-       genModel = "model/generated/Sadl.genmodel" /> 
+       genModel = "com/ge/research/sadl/Sadl.genmodel" /> 
 	
   </extension>
 
