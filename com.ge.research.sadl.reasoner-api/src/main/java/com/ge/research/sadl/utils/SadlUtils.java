@@ -53,7 +53,7 @@ public class SadlUtils {
 	 * @param quotedString
 	 *            -- the string from which quotes are to be removed
 	 */
-	public static String stripQuotes(String quotedString) {
+	public String stripQuotes(String quotedString) {
 		if (quotedString != null && !quotedString.isEmpty()) {
 			if (quotedString.charAt(0) == '\"') {
 				while (quotedString.charAt(0) == '\"') {
@@ -79,7 +79,7 @@ public class SadlUtils {
 		return quotedString;
 	}
 
-	public static String validateHTTP_URI(String uri) throws java.net.MalformedURLException { 
+	public String validateHTTP_URI(String uri) throws java.net.MalformedURLException { 
 		final URL url; 
 		try { 
 			url = new URL(uri); 
@@ -101,7 +101,7 @@ public class SadlUtils {
 	 *            -- the concept URI string
 	 * @return
 	 */
-	public static ConceptName getConceptByUri(OntModel m, String uri) {
+	public ConceptName getConceptByUri(OntModel m, String uri) {
 		if (m == null) {
 			return null;	// this may happen on startup
 		}
@@ -177,7 +177,7 @@ public class SadlUtils {
 	 * @param cls
 	 * @return
 	 */
-	public static boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) {
+	public boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) {
 		if (subcls == null || cls == null) {
 			return false;
 		}
@@ -232,7 +232,7 @@ public class SadlUtils {
 		return false;
 	}
 
-	private static boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
+	private boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
 		ExtendedIterator<OntClass> eitr = subcls.listSuperClasses();
 		while (eitr.hasNext()) {
 			OntClass sprcls = eitr.next();
@@ -263,7 +263,7 @@ public class SadlUtils {
 	 * @return
 	 * @throws URISyntaxException 
 	 */
-	public static String fileNameToFileUrl(String fileName) throws URISyntaxException {
+	public String fileNameToFileUrl(String fileName) throws URISyntaxException {
 		if (fileName == null) {
 			return null;
 		}
@@ -296,7 +296,7 @@ public class SadlUtils {
 	 * @return
 	 * @throws MalformedURLException 
 	 */
-	public static String fileUrlToFileName(String url) throws MalformedURLException {
+	public String fileUrlToFileName(String url) throws MalformedURLException {
 		if (!url.startsWith(IConfigurationManager.FILE_SHORT_PREFIX)) {
 			return url;
 		}
@@ -315,7 +315,7 @@ public class SadlUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String fileToString(String file) throws IOException {
+	public String fileToString(String file) throws IOException {
 		String result = null;
 		DataInputStream in = null;
 
@@ -340,7 +340,7 @@ public class SadlUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String convertDataSourceToString(DataSource ds) throws IOException {
+	public String convertDataSourceToString(DataSource ds) throws IOException {
 		InputStream is = ds.getInputStream();
 		if (is != null) {
 			Writer writer = new StringWriter();
@@ -372,7 +372,7 @@ public class SadlUtils {
 	 * 
 	 * @throws IOException if problem encountered during write.
 	 */
-	public static void stringToFile(File aFile, String contents, boolean writeProtect) throws IOException {
+	public void stringToFile(File aFile, String contents, boolean writeProtect) throws IOException {
 		if (aFile == null) {
 			throw new IllegalArgumentException("File should not be null.");
 		}
@@ -418,7 +418,7 @@ public class SadlUtils {
 	 * @return
 	 * @throws MalformedURLException 
 	 */
-	public static String sadlFileNameOfOwlAltUrl(String owlAltUrl) throws MalformedURLException {
+	public String sadlFileNameOfOwlAltUrl(String owlAltUrl) throws MalformedURLException {
 		File owlfile = new File(fileUrlToFileName(owlAltUrl));
 		String fn = owlfile.getName();
 		int extLength = (fn.length() - fn.indexOf('.')) - 1;
@@ -430,7 +430,7 @@ public class SadlUtils {
 	 * @param imcf folder to be deleted recursively
 	 * @return true if successful
 	 */
-	public static boolean recursiveDelete(File imcf) {
+	public boolean recursiveDelete(File imcf) {
 		boolean stat = true;
 		File[] children = imcf.listFiles();
 		for (int i = 0; i < children.length; i++) {

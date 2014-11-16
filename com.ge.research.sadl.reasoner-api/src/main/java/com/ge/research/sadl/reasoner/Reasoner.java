@@ -18,6 +18,11 @@
 
 package com.ge.research.sadl.reasoner;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Literal;
 
@@ -30,11 +35,12 @@ import com.hp.hpl.jena.rdf.model.Literal;
  * directly.
  *  
  * $Author: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:10 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2014/10/28 14:42:28 $
  */
 public abstract class Reasoner implements IReasoner {
 
 	private static final String XSD_TYPE_ID_DELIMITED = "<" + XSDDatatype.XSD + ">";
+	protected HashMap<String, Object> configuration;
 
 	public static Object xsdStringToObject(String objValue) {
 		if ((objValue.indexOf(XSDDatatype.XSD)) > 0) {
@@ -143,6 +149,69 @@ public abstract class Reasoner implements IReasoner {
 			return val.substring(1, val.length() - 1);
 		}
 		return val;
+	}
+
+	public static String now() {
+		String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
+
+	    Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+		return sdf.format(cal.getTime());
+	}
+
+	/************ Configuration retrieval methods ***************/
+	protected boolean getBooleanConfigurationValue(List<ConfigurationItem> preferences, String configName, boolean defVal) {
+		Object derlog = findPreference(preferences, configName);
+		if (derlog != null) {
+			configure(findConfigurationItem(preferences, configName));
+		}
+		if (derlog == null && configuration != null) {
+			derlog = configuration.get(configName);
+		}
+		if (derlog != null && derlog instanceof Boolean) {
+			return ((Boolean)derlog).booleanValue();
+		}
+		return defVal;
+	}
+	
+	protected String getStringConfigurationValue(List<ConfigurationItem> preferences, String configName, String defVal) {
+		Object val = findPreference(preferences, configName);
+		if (val != null) {
+			configure(findConfigurationItem(preferences, configName));
+		}
+		if (val == null && configuration != null) {
+			val = configuration.get(configName);
+		}
+		if (val != null && val instanceof String) {
+			return (String)val;
+		}
+		return defVal;
+	}
+
+	protected Object findPreference(List<ConfigurationItem> preferences, String name) {
+		if (preferences != null) {
+			for (int i = 0; i < preferences.size(); i++) {
+				ConfigurationItem citem = preferences.get(i);
+				Object val = citem.getNamedValue(name);
+				if (val != null) {
+					return val;
+				}
+			}
+		}
+		return null;
+	}
+	
+	protected ConfigurationItem findConfigurationItem(List<ConfigurationItem> preferences, String name) {
+		if (preferences != null) {
+			for (int i = 0; i < preferences.size(); i++) {
+				ConfigurationItem citem = preferences.get(i);
+				Object val = citem.getNamedValue(name);
+				if (val != null) {
+					return citem;
+				}
+			}
+		}
+		return null;
 	}
 
 }

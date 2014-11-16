@@ -144,7 +144,42 @@ public class BuiltinElement extends GraphPatternElement {
 		return sb.toString();
 	}
 
-	public void setFuncName(String name) {
+	public String toFullyQualifiedString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getFuncName());
+		sb.append("(");
+		for (int i = 0; arguments != null && i < arguments.size(); i++) {
+			if (i > 0) {
+				sb.append(",");
+			}
+			Node arg = arguments.get(i);
+			if (arg instanceof ProxyNode &&
+					(((ProxyNode)arg).getProxyFor().equals(this) ||
+							(((ProxyNode)arg).getProxyFor() instanceof List<?> &&
+									((List<?>)((ProxyNode)arg).getProxyFor()).get(0).equals(this)))) {
+				sb.append("bi arg self-referencing!");
+			}
+			else {
+				if (arg == null){
+					sb.append("null");
+				}
+				else if (arg instanceof NamedNode){
+					sb.append(((NamedNode) arg).toFullyQualifiedString());
+				}
+				else{
+					sb.append(arg.toString());
+				}
+			}
+		}
+		sb.append(")");
+		if (getNext() != null) {
+			sb.append(" . ");
+			sb.append(getNext().toString());
+		}
+		return sb.toString();
+	}
+    
+    public void setFuncName(String name) {
 		this.funcName = name;
 		this.funcType = BuiltinType.getType(name);
 		if (funcType.isBooleanBuiltin || funcType.isUnaryBuiltin) {

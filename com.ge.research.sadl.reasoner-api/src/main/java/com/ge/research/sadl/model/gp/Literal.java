@@ -62,4 +62,9 @@ public class Literal extends Node {
 		}
 		return value.toString();
 	}
+
+	@Override
+	public String toFullyQualifiedString() {
+		return toString();
+	}
 }

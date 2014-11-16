@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:09 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2014/10/28 14:42:30 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model.gp;
@@ -113,6 +113,46 @@ public class Junction extends GraphPatternElement {
 		if (getNext() != null) {
 			sb.append(" . ");
 			sb.append(getNext().toString());
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public String toFullyQualifiedString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
+		if (getLhs() != null) {
+			Object lhs = getLhs();
+			if (lhs instanceof GraphPatternElement) {
+				sb.append(((GraphPatternElement) lhs).toFullyQualifiedString());
+			}
+			else if (lhs instanceof Node) {
+				sb.append(((Node) lhs).toFullyQualifiedString());
+			}
+			else {
+				sb.append(lhs.toString());
+			}
+			sb.append(") ");
+		}
+		sb.append(getJunctionName());
+		sb.append(" (");
+		if (getRhs() != null) {
+			Object rhs = getRhs();
+			if (rhs instanceof GraphPatternElement) {
+				sb.append(((GraphPatternElement) rhs).toFullyQualifiedString());
+			}
+			else if (rhs instanceof Node) {
+				sb.append(((Node) rhs).toFullyQualifiedString());
+			}
+			else {
+				sb.append(rhs.toString());
+			}
+		}
+		
+		sb.append(")");
+		if (getNext() != null) {
+			sb.append(" . ");
+			sb.append(getNext().toFullyQualifiedString());
 		}
 		return sb.toString();
 	}

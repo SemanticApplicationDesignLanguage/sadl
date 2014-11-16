@@ -115,4 +115,25 @@ public class ValueTableNode extends Node {
 		sb.append("}");
 		return sb.toString();
 	}
+
+	@Override
+	public String toFullyQualifiedString() {
+		StringBuilder sb = new StringBuilder("{");
+		for (int i = 0; i < rows.size(); i++) {
+			if (i > 0) {
+				sb.append(",");
+			}
+			List<Node> row = rows.get(i);
+			sb.append("[");
+			for (int j = 0; j < row.size(); j++) {
+				if (j > 0) {
+					sb.append(",");
+				}
+				sb.append(row.get(j).toFullyQualifiedString());
+			}
+			sb.append("]");
+		}
+		sb.append("}");
+		return sb.toString();
+	}
 }

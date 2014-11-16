@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.6 $ Last modified on   $Date: 2014/06/11 17:46:51 $
+ * $Revision: 1.9 $ Last modified on   $Date: 2014/09/30 21:06:10 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -111,11 +111,12 @@ public interface IReasoner {
 	 * 
 	 * @return true for success and false for failure
 	 * @throws IOException
+	 * @throws ConfigurationException 
 	 */
-	public boolean loadInstanceData(String instanceDatafile) throws IOException;
-	public boolean loadInstanceData(URI instanceDatafile) throws IOException;
-	public boolean loadInstanceData(InputStream is, String format) throws IOException;
-	public boolean loadInstanceData(OntModel model);
+	public boolean loadInstanceData(String instanceDatafile) throws IOException, ConfigurationException;
+	public boolean loadInstanceData(URI instanceDatafile) throws IOException, ConfigurationException;
+	public boolean loadInstanceData(InputStream is, String format) throws IOException, ConfigurationException;
+	public boolean loadInstanceData(OntModel model) throws ConfigurationException;
 	public boolean addRules(List<String> rules);
 
 	/**
@@ -123,26 +124,29 @@ public interface IReasoner {
 	 * @param instance data(format?)
 	 * @param modelName
 	 * @return boolean value
+	 * @throws ConfigurationException 
 	 * @throws NameNotFoundException
 	 */
-	public boolean addTriple(String sub, String pred, String obj) throws TripleNotFoundException;
+	public boolean addTriple(String sub, String pred, String obj) throws TripleNotFoundException, ConfigurationException;
 	
 	/**
 	 * 
 	 * @param modelName
 	 * @return
+	 * @throws ConfigurationException 
 	 * @throws NameNotFoundException
 	 */
-	public boolean deleteTriple(String sub, String pred, String obj) throws TripleNotFoundException;
+	public boolean deleteTriple(String sub, String pred, String obj) throws TripleNotFoundException, ConfigurationException;
 	
 	/**
 	 * 
 	 * @param oldTriple
 	 * @param newTriple
 	 * @param modelName
+	 * @throws ConfigurationException 
 	 * @throws NameNotFoundException
 	 */
-	public void updateTriple(String oldSub, String oldPred, String oldObj, String newSub, String newPred, String newObj) throws TripleNotFoundException;
+	public void updateTriple(String oldSub, String oldPred, String oldObj, String newSub, String newPred, String newObj) throws TripleNotFoundException, ConfigurationException;
 	
 	/**
 	 * Method to execute a SPARQL select query
@@ -273,8 +277,9 @@ public interface IReasoner {
 	 * Obtain a list of derived triples with explanation of each.
 	 * 
 	 * @return
+	 * @throws ConfigurationException 
 	 */
-	public DataSource getDerivations() throws InvalidDerivationException;
+	public DataSource getDerivations() throws InvalidDerivationException, ConfigurationException;
 		
 	/**
 	 * Check the validity of the inferred model (including data model) and report any conflicts
@@ -313,8 +318,9 @@ public interface IReasoner {
 	 * @param objValue
 	 * @param predicate 
 	 * @return
+	 * @throws ConfigurationException 
 	 */
-	public String objectValueToStringValue(Object objValue, String predicate);
+	public String objectValueToStringValue(Object objValue, String predicate) throws ConfigurationException;
 	
 	/**
 	 * Method to get a list of implicit (not registered as a service) builts.

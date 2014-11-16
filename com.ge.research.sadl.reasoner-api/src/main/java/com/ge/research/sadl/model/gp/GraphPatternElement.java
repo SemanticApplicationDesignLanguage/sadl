@@ -18,7 +18,7 @@
 
 package com.ge.research.sadl.model.gp;
 
-public class GraphPatternElement {
+public abstract class GraphPatternElement {
 	private int lineNo;
 	private int length;
 	private int offset;
@@ -69,4 +69,7 @@ public class GraphPatternElement {
 	public boolean isEmbedded() {
 		return isEmbedded;
 	}
+
+	public abstract String toFullyQualifiedString();
+	
 }

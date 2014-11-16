@@ -18,22 +18,30 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:10 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2014/10/28 11:56:07 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
 
 public class ModelError {
-    public enum ErrorType{WARNING, ERROR}
+    public enum ErrorType{INFO, WARNING, ERROR}
 
     public String errorMsg;
 	public ErrorType errorType;
+    private String hyperLinkFileName = null;
+
 
 	public ModelError(String msg, ErrorType etype) {
 		setErrorMsg(msg);
 		setErrorType(etype);
 	}
 	
+    public ModelError(String msg, ErrorType etype, String hyperlinkFilename) {
+		setErrorMsg(msg);
+		setErrorType(etype);
+    	setHyperLinkFileName(hyperlinkFilename);
+    }
+
 	public boolean equals(Object me) {
 		if (me instanceof ModelError && errorType.equals(((ModelError)me).errorType) &&
 				errorMsg.equals(((ModelError)me).errorMsg)) {
@@ -59,7 +67,17 @@ public class ModelError {
     }
 
     public String toString() {
+    	if (getHyperLinkFileName() != null) {
+    		return errorType.toString() + ": " + errorMsg + getHyperLinkFileName();
+    	}
     	return errorType.toString() + ": " + errorMsg;
     }
 
+	public String getHyperLinkFileName() {
+		return hyperLinkFileName;
+	}
+
+	private void setHyperLinkFileName(String hyperLinkFileName) {
+		this.hyperLinkFileName = hyperLinkFileName;
+	}
 }

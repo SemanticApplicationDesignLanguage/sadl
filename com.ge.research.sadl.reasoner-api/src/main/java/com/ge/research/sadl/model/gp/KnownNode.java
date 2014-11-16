@@ -32,4 +32,9 @@ public class KnownNode extends Node {
 	public String toString() {
 		return value;
 	}
+
+	@Override
+	public String toFullyQualifiedString() {
+		return toString();
+	}
 }

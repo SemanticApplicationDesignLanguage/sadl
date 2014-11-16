@@ -16,7 +16,8 @@ public class TestSadlUtils {
 
 	@Test
 	public void testSripQuotes() {
-		assertTrue(SadlUtils.stripQuotes("\"test\"").equals("test"));
+		SadlUtils su = new SadlUtils();
+		assertTrue(su.stripQuotes("\"test\"").equals("test"));
 		logger.info("it passed");
 	}
 

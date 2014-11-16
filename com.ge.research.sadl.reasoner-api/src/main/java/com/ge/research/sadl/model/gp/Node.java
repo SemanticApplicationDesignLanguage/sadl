@@ -19,5 +19,7 @@
 package com.ge.research.sadl.model.gp;
 
 public abstract class Node {
+	
+	public abstract String toFullyQualifiedString();
 
 }

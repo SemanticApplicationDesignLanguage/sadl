@@ -61,4 +61,38 @@ public class ProxyNode extends Node {
 	public Node getReplacementNode() {
 		return replacementNode;
 	}
+
+	@Override
+	public String toFullyQualifiedString() {
+		try {
+			if (proxyFor != null) {
+				if (proxyFor instanceof List<?>) {
+					if (((List<?>)proxyFor).size() == 1) {
+						Object pfr = ((List<?>)proxyFor).get(0);
+						if (pfr instanceof Node) {
+							return "(" + ((Node) pfr).toFullyQualifiedString() + ")";					
+						}
+						else {
+							return "(" +  ((List<?>)proxyFor).get(0).toString() + ")";					
+						}
+					}
+					else {
+						return "(invalid ProxyNode)";
+					}
+				}
+				if (proxyFor instanceof Node) {
+					return "(" + ((Node) proxyFor).toFullyQualifiedString() + ")";
+				}
+				else {
+					return "(" + proxyFor.toString() + ")";
+					
+				}
+			}
+			return "(null proxy content)";
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			return "(Exception encountered: " + t.getMessage() + ")";
+		}
+	}
 }
