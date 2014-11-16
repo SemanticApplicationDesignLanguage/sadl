@@ -28,7 +28,7 @@ public class SadlHighlightingConfiguration extends DefaultHighlightingConfigurat
         acceptor.acceptDefaultHighlighting(DATA_PROPERTY_ID, "Data Property", dataPropertyTextStyle());
         acceptor.acceptDefaultHighlighting(OBJECT_PROPERTY_ID, "Object Property", objectPropertyTextStyle());
         acceptor.acceptDefaultHighlighting(ANNOTATION_PROPERTY_ID, "Annotation Property", annotationPropertyTextStyle());
-        acceptor.acceptDefaultHighlighting(RDFDATATYPE_ID, "RDF Data Type", uriTextStyle());
+//        acceptor.acceptDefaultHighlighting(RDFDATATYPE_ID, "RDF Data Type", uriTextStyle());
     } 
 
     // SADL V1 used SWT.COLOR_BLACK and SWT.BOLD.

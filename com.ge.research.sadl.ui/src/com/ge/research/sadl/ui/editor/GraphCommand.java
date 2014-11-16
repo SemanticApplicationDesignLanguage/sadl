@@ -24,8 +24,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 
+import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.ui.SadlConsole;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -66,11 +68,12 @@ public class GraphCommand extends AbstractHandler implements IHandler {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			SadlConsole.displayMessages(visitor);
         }
         IFile file = (IFile) activeEditor.getEditorInput().getAdapter(IFile.class);
         if (file != null) {
             IProject project = file.getProject();
-            IFolder tempFolder = project.getFolder("Temp");
+            IFolder tempFolder = project.getFolder(ResourceManager.TEMPDIR);
             if (!tempFolder.exists()) {
                 try {
                     tempFolder.create(true, true,

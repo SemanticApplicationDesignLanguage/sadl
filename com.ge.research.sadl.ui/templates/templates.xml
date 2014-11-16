@@ -374,7 +374,7 @@
 	<template autoinsert="false" id="1003"
 		context="com.ge.research.sadl.Sadl.GraphPattern" deleted="false"
 		description="variable is a class" enabled="true"
-		name="type triple pattern"> ${varname} is a ${class:ResourceName('ONTCLASS')}${cursor}</template> 
+		name="triple pattern with is a type"> ${varname} is a ${class:ResourceName('ONTCLASS')}${cursor}</template> 
 		
 	<template autoinsert="false" id="1004"
 		context="com.ge.research.sadl.Sadl.GraphPattern" deleted="false"

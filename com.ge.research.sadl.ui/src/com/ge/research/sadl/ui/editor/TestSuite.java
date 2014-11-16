@@ -37,7 +37,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
@@ -70,6 +73,12 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
 
 	@Override
 	protected void run(final IPath testFilePath) {
+		IWorkbenchPage page =  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IEditorPart editorPart = page.getActiveEditor();
+		if (editorPart != null && editorPart.isDirty()) {
+		    SadlConsole.writeToConsole(MessageType.ERROR, "Model has unsaved changes. Please save before running tests.\n");
+		}
+		
 		errorCnt = 0;
     	IPreferencesService service = Platform.getPreferencesService();
 		final boolean validateBeforeTesting = service.getBoolean("com.ge.research.sadl.Sadl", "validateBeforeTest", false, null);
@@ -172,7 +181,8 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
         							ConfigurationManagerForIDE.getOWLFormat());
         					absfn = cmgr.getAltUrlFromPublicUri(sadlFileName);
         				}
-						URI actualUri = URI.createFileURI(SadlUtils.fileUrlToFileName(absfn));
+        				SadlUtils su = new SadlUtils();
+        				URI actualUri = URI.createFileURI(su.fileUrlToFileName(absfn));
 						String sadlfn = actualUri.trimFileExtension().appendFileExtension(ResourceManager.SADLEXT).segment(actualUri.segmentCount() - 1);
 						absfn = ResourceManager.findSadlFileInProject(prjdir, sadlfn);
 					} catch (ConfigurationException e) {

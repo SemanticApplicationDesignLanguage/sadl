@@ -18,12 +18,11 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2014/01/22 20:32:53 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2014/11/03 20:13:28 $
  ***********************************************************************/
 
 package com.ge.research.sadl.ui.properties;
 
-import com.ge.research.sadl.reasoner.AvailablePlugin;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -31,11 +30,8 @@ import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.IReasoner;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.Dialog;
@@ -443,8 +439,8 @@ public class SadlReasonerPrefrencePage extends PreferencePage implements IWorkbe
 				((ITranslator)obj[i]).getClass().getName().equals(translatorName)) {
 				checkedTranslator = (ITranslator) obj[i];
 				break;
+				}
 			}
-		}
 		translatorTableViewer.setAllChecked(false);
 		if (checkedTranslator != null)
 			translatorTableViewer.setChecked(checkedTranslator, true);
@@ -508,7 +504,7 @@ public class SadlReasonerPrefrencePage extends PreferencePage implements IWorkbe
 			public void checkStateChanged(CheckStateChangedEvent e) {
 				checkNewDefaultTranslator(e.getElement());
 				checkedTranslator = (ITranslator) e.getElement();
-			}
+				}
 		});
 
 		IStructuredSelection selet = ((IStructuredSelection) translatorTableViewer.getSelection());
@@ -614,39 +610,41 @@ public class SadlReasonerPrefrencePage extends PreferencePage implements IWorkbe
 	public boolean performOk() {
 		boolean success = true;
 		IPreferenceStore ps = this.getPreferenceStore();
-		if (checkedReasoner != null) {
-			try {
+		try {
+			if (checkedReasoner != null) {
 				ps.setDefault(this.getQualifier()+".ReasonerName", checkedReasoner.getClass().getName());
 				saveReasonerSpec();
+			} else {
+				ps.setDefault(this.getQualifier()+".ReasonerName", "");
+				saveReasonerSpec();
 			}
-			catch (Throwable t) {
-				t.printStackTrace();
-				String msg = t.getLocalizedMessage();
-				if (msg == null) {
-					msg = t.getClass().getSimpleName();
-				}
-				SadlConsole.writeToConsole(MessageType.ERROR, "Error saving Reasoner selection: " + msg + "\n");
-				success = false;
-			}
-		} else {
-			ps.setDefault(this.getQualifier()+".ReasonerName", "");
 		}
-		if (checkedTranslator != null) {
-			try {
+		catch (Throwable t) {
+			t.printStackTrace();
+			String msg = t.getLocalizedMessage();
+			if (msg == null) {
+				msg = t.getClass().getSimpleName();
+			}
+			SadlConsole.writeToConsole(MessageType.ERROR, "Error saving Reasoner selection: " + msg + "\n");
+			success = false;
+		}
+		try {
+			if (checkedTranslator != null) {
 				ps.setDefault(this.getQualifier()+".TranslatorName", checkedTranslator.getClass().getName());
 				saveTranslatorSpec();
-			} catch (Throwable t) {
-				t.printStackTrace();
-				String msg = t.getLocalizedMessage();
-				if (msg == null) {
-					msg = t.getClass().getSimpleName();
-				}
-				SadlConsole.writeToConsole(MessageType.ERROR, "Error saving Translator selection: " + msg + "\n");
-				success = false;;
 			}
-		}
-		else {
-			ps.setDefault(this.getQualifier()+".TranslatorName", "");
+			else {
+				ps.setDefault(this.getQualifier()+".TranslatorName", "");
+				saveTranslatorSpec();
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+			String msg = t.getLocalizedMessage();
+			if (msg == null) {
+				msg = t.getClass().getSimpleName();
+			}
+			SadlConsole.writeToConsole(MessageType.ERROR, "Error saving Translator selection: " + msg + "\n");
+			success = false;;
 		}
 		return success;
 	}
@@ -725,12 +723,13 @@ public class SadlReasonerPrefrencePage extends PreferencePage implements IWorkbe
 	}
 
 	private void saveReasonerSpec() {
-		this.configurationManager.setReasonerClassName(this.checkedReasoner.getClass().getName());
+		this.configurationManager.clearReasoner();	// need to remove any residual reasoner so it won't "stick"
+		this.configurationManager.setReasonerClassName(checkedReasoner != null ? checkedReasoner.getClass().getName() : null);
 		this.configurationManager.saveConfiguration();
 	}
 	
 	private void saveTranslatorSpec() throws ConfigurationException {
-		this.configurationManager.setTranslatorClassName(this.checkedTranslator.getClass().getName());
+		this.configurationManager.setTranslatorClassName(checkedTranslator != null ? checkedTranslator.getClass().getName() : null);
 		this.configurationManager.saveConfiguration();
 	}
 

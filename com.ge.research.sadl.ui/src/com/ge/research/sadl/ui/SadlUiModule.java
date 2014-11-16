@@ -11,6 +11,8 @@ import java.io.PrintStream;
 
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.xtext.ui.editor.DirtyStateEditorSupport;
+import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
+import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider;
 import org.eclipse.xtext.ui.editor.hyperlinking.IHyperlinkHelper;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
@@ -31,6 +33,7 @@ import com.ge.research.sadl.ui.quickfix.TemplateQuickAssistProcessor;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper;
+import com.google.inject.name.Names;
 
 /**
  * Use this class to register components to be used within the IDE.
@@ -93,5 +96,9 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
     // Registers our own custom issue resolution acceptor to support templates.
     public Class<? extends IssueResolutionAcceptor> bindIssueResolutionAcceptor() {
         return TemplateIssueResolutionAcceptor.class;
+    }
+    
+    public void configureXtextEditorErrorTickUpdater(com.google.inject.Binder binder) {
+    	binder.bind(IXtextEditorCallback.class).annotatedWith(Names.named("editor.tracker")).to(SadlSemanticHighlightingCalculator.class);
     }
 }
