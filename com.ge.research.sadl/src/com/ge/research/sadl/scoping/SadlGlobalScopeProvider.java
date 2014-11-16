@@ -151,41 +151,41 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
     /**
      * For each imported owl resource, import also the accoring sadl resource to have the elements on the global scope
      */
-    @Override
-    protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
-    	// copied from super method
-		return cache.get(ImportUriGlobalScopeProvider.class.getName(), resource, new Provider<LinkedHashSet<URI>>(){
-			public LinkedHashSet<URI> get() {
-				TreeIterator<EObject> iterator = resource.getAllContents();
-				final LinkedHashSet<URI> uniqueImportURIs = new LinkedHashSet<URI>(10);
-				while (iterator.hasNext()) {
-					EObject object = iterator.next();
-					String uri = importResolver.apply(object);
-					if (uri != null) {
-						URI importUri = URI.createURI(uri);
-						uniqueImportURIs.add(importUri);
-					}
-				}
-				Iterator<URI> uriIter = uniqueImportURIs.iterator();
-				while(uriIter.hasNext()) {
-					if (!EcoreUtil2.isValidUri(resource, uriIter.next()))
-						uriIter.remove();
-				}
-				// start customizing
-				uriIter = uniqueImportURIs.iterator();
-				while(uriIter.hasNext()) {
-					URI uri = uriIter.next();
-					if ("owl".equals(uri.fileExtension())) {
-						String resourceName = uri.trimFileExtension().appendFileExtension("sadl").lastSegment();
-						URI sadlUri = uri.trimSegments(2).appendSegment(resourceName);
-						if (EcoreUtil2.isValidUri(resource, sadlUri)) {
-							uniqueImportURIs.add(sadlUri);
-						}
-					}
-				}
-				
-				return uniqueImportURIs;
-			}
-		});
-    }
+//    @Override
+//    protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
+//    	// copied from super method
+//		return cache.get(ImportUriGlobalScopeProvider.class.getName(), resource, new Provider<LinkedHashSet<URI>>(){
+//			public LinkedHashSet<URI> get() {
+//				TreeIterator<EObject> iterator = resource.getAllContents();
+//				final LinkedHashSet<URI> uniqueImportURIs = new LinkedHashSet<URI>(10);
+//				while (iterator.hasNext()) {
+//					EObject object = iterator.next();
+//					String uri = importResolver.apply(object);
+//					if (uri != null) {
+//						URI importUri = URI.createURI(uri);
+//						uniqueImportURIs.add(importUri);
+//					}
+//				}
+//				Iterator<URI> uriIter = uniqueImportURIs.iterator();
+//				while(uriIter.hasNext()) {
+//					if (!EcoreUtil2.isValidUri(resource, uriIter.next()))
+//						uriIter.remove();
+//				}
+//				// start customizing
+//				uriIter = uniqueImportURIs.iterator();
+//				while(uriIter.hasNext()) {
+//					URI uri = uriIter.next();
+//					if ("owl".equals(uri.fileExtension())) {
+//						String resourceName = uri.trimFileExtension().appendFileExtension("sadl").lastSegment();
+//						URI sadlUri = uri.trimSegments(2).appendSegment(resourceName);
+//						if (EcoreUtil2.isValidUri(resource, sadlUri)) {
+//							uniqueImportURIs.add(sadlUri);
+//						}
+//					}
+//				}
+//				
+//				return uniqueImportURIs;
+//			}
+//		});
+//    }
 }

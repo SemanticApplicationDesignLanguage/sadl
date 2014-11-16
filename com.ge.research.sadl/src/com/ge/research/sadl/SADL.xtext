@@ -74,7 +74,7 @@ Statement :
     |   ExistingInstanceAttribution
     |   InstanceDifferentFrom
     |   InstancesAllDifferent
-    |	UserDefinedDataType
+//    |	UserDefinedDataType
     ;
 
 // SADL identifiers may name classes, instances, and properties.
@@ -152,25 +152,25 @@ Range :
 
 RangeType :
         classIdentifier=ResourceIdentifier
-//    |   dataType=DataType
+    |   dataType=DataType
 //	  | dataType=ResourceName
     ;
 
-UserDefinedDataType :
-		udt=NAME 'is' 'a' 'data' 'type' 'based' 'on' restriction=DataTypeRestriction EOS
-;   
-
-DataTypeRestriction :
-		basetype=NAME 'restricted' 'to' facets=Facets
-	|	'{' basetypes += NAME ((','|'or') basetypes+=NAME)+ '}'
-	;
-	
-Facets :	
-		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
-	|	regex=STRING
-	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
-	|	'{' values+=(STRING|NUMBER) ((',')? values+=(STRING|NUMBER))* '}'
-;
+//UserDefinedDataType :
+//		udt=NAME 'is' 'a' 'data' 'type' 'based' 'on' restriction=DataTypeRestriction EOS
+//;   
+//
+//DataTypeRestriction :
+//		basetype=NAME 'restricted' 'to' facets=Facets
+//	|	'{' basetypes += NAME ((','|'or') basetypes+=NAME)+ '}'
+//	;
+//	
+//Facets :	
+//		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
+//	|	regex=STRING
+//	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
+//	|	'{' values+=(STRING|NUMBER) ((',')? values+=(STRING|NUMBER))* '}'
+//;
  
 enum DataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |

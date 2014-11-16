@@ -159,6 +159,7 @@ public class IntermediateFormTranslator {
     
     private List<ConceptName> namedNodes = null;
     private boolean collectNamedNodes = false;
+    private List<String> userDefinedVariables = new ArrayList<String>();
     
     /**
      * The constructor takes a ModelManager argument
@@ -174,7 +175,14 @@ public class IntermediateFormTranslator {
     }
     
 	protected String getNewVar() {
-		return "v" + vNum++;
+		String proposedName = "v" + vNum;
+		while (userDefinedVariables.contains(proposedName) ||
+				!modelManager.getConceptType(proposedName).equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
+			vNum++;
+			proposedName = "v" + vNum;
+		}
+		vNum++;
+		return proposedName;
 	}
 	
 	/**
@@ -529,16 +537,19 @@ public class IntermediateFormTranslator {
 				return pattern;
 			}
 			BuiltinElement bin = null;
+			boolean binOnRight = false;
 			Object retObj = null;
 			if (lobj instanceof Node && robj instanceof BuiltinElement) {
 				assignedNode = validateNode((Node)lobj);
 				bin = (BuiltinElement)robj;
 				retObj = robj;
+				binOnRight = true;
 			}
 			else if (robj instanceof Node && lobj instanceof BuiltinElement) {
 				assignedNode = validateNode((Node)robj);
 				bin = (BuiltinElement)lobj;
 				retObj = lobj;
+				binOnRight = false;
 			}
 			if (bin != null && assignedNode != null) {
 				if ((assignedNode instanceof VariableNode ||
@@ -557,7 +568,7 @@ public class IntermediateFormTranslator {
 				else if (assignedNode instanceof Node && isComparisonBuiltin(bin.getFuncName())) {
 					// this is a comparison with an extra "is"
 					if (bin.getArguments().size() == 1) {
-						if (bin.isCreatedFromInterval()) {
+						if (bin.isCreatedFromInterval() || binOnRight) {
 							bin.addArgument(0, assignedNode);
 						}
 						else {
@@ -1440,6 +1451,7 @@ public class IntermediateFormTranslator {
 			if (!((NamedNode)node).isValidated()) {
 				if (node instanceof VariableNode) {
 					((VariableNode) node).setNodeType(NodeType.VariableNode);
+					userDefinedVariables.add(((NamedNode) node).getName());
 				}
 				else if (node instanceof RDFTypeNode) {
 					((RDFTypeNode) node).setNodeType(NodeType.PropertyNode);
@@ -1468,6 +1480,7 @@ public class IntermediateFormTranslator {
 			    	if (ctype.equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
 			    		modelManager.addToVariableNamesCache(cname);
 			    		node = new VariableNode(((NamedNode)node).getName());
+			    		userDefinedVariables.add(((NamedNode) node).getName());
 			    	}
 			    	else if (ctype.equals(ConceptType.ANNOTATIONPROPERTY)){
 			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
@@ -2953,9 +2966,12 @@ public class IntermediateFormTranslator {
 	 * @return
 	 */
 	public List<ConceptName> getNamedNodes() {
-		List<ConceptName> x = new ArrayList<ConceptName>(namedNodes);
-		namedNodes.clear();
-		return x;
+		if (namedNodes != null) {
+			List<ConceptName> x = new ArrayList<ConceptName>(namedNodes);
+			namedNodes.clear();
+			return x;
+		}
+		return null;
 	}
 
 	private void setNamedNodes(List<ConceptName> namedNodes) {
