@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.4 $ Last modified on   $Date: 2014/06/17 13:45:46 $
+ * $Revision: 1.6 $ Last modified on   $Date: 2014/11/03 20:09:04 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -190,7 +190,8 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
             String altUrl = OntDocumentManager.getInstance().doAltURLMapping(uri);
             if (altUrl != null && altUrl.endsWith(".TDB/")) {
             	try {
-            		Dataset tmpds = TDBFactory.createDataset(SadlUtils.fileUrlToFileName(altUrl));
+            		SadlUtils su = new SadlUtils();
+            		Dataset tmpds = TDBFactory.createDataset(su.fileUrlToFileName(altUrl));
             		tmpds.begin(ReadWrite.READ);
 					m = tmpds.getDefaultModel();
 					tmpds.end();
@@ -297,7 +298,8 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 //			// is there some way to test this now?
 //			return true;
 		}
-		File f = new File(SadlUtils.fileUrlToFileName(altUrl));
+		SadlUtils su = new SadlUtils();
+		File f = new File(su.fileUrlToFileName(altUrl));
 		if (f.exists()) {
 			return true;
 		}
