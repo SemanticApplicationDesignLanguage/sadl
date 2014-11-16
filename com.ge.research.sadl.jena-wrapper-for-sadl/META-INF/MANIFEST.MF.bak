@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Jena-plugin
+Bundle-SymbolicName: com.ge.research.sadl.jena-plugin;singleton:=true
+Bundle-Version: 2.3.0.qualifier
+Bundle-Activator: com.ge.research.sadl.jena_plugin.Activator
+Bundle-Vendor: GE Global Research
+Require-Bundle: org.eclipse.core.runtime,
+ com.ge.research.sadl;bundle-version="2.2.0",
+ org.apache.log4j,
+ org.eclipse.osgi
+Eclipse-RegisterBuddy: com.ge.research.sadl
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Export-Package: com.ge.research.sadl.jena.reasoner;version="2.3.0",
+ com.ge.research.sadl.jena.reasoner.builtin;version="2.3.0",
+ com.ge.research.sadl.jena.translator;version="2.3.0"

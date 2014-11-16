@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.3 $ Last modified on   $Date: 2014/02/05 21:27:52 $
+ * $Revision: 1.7 $ Last modified on   $Date: 2014/11/03 19:33:17 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.translator;
@@ -118,7 +118,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 
 	public List<ModelError> translateAndSaveModel(OntModel model, String translationFolder,
-			String modelName, String saveFilename) throws TranslationException, IOException, URISyntaxException {
+			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException {
 		
 		// Jena models have been saved to the OwlModels folder by the ModelManager prior to calling the translator. For Jena
 		//	reasoners, no additional saving of OWL models is need so we can continue on to rule translation and saving.
@@ -143,14 +143,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 
 	public List<ModelError> translateAndSaveModel(OntModel model, List<Rule> ruleList,
-			String translationFolder, String modelName, String saveFilename)
+			String translationFolder, String modelName, List<String> orderedImports, String saveFilename)
 			throws TranslationException, IOException, URISyntaxException {
 		if (errors != null) {
 			errors.clear();
 		}
 		saveRuleFileAfterModelSave = false;
 		// a Jena model simply writes out the OWL file
-		translateAndSaveModel(model, translationFolder, modelName, saveFilename);
+		translateAndSaveModel(model, translationFolder, modelName, orderedImports, saveFilename);
 		
 		String ruleFilename = createDerivedFilename(saveFilename, "rules");
 		String fullyQualifiedRulesFilename = translationFolder + File.separator + ruleFilename;
@@ -640,7 +640,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 			}
 		}
 		String jenaRules = translateAndSaveRules(model, ruleList, modelName) ;
-		SadlUtils.stringToFile(ruleFile, jenaRules, true);
+		SadlUtils su = new SadlUtils();
+		su.stringToFile(ruleFile, jenaRules, true);
 		return (errors== null || errors.size() == 0) ? true : false;
 	}
 	
@@ -771,7 +772,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 				}
 			}
 			else {
-				throw new TranslationException("Jena rules do not currently support disjunction (OR).");
+				System.err.println("Encountered unhandled OR in rule '" + ruleInTranslation.getRuleName() + "'");
+//				throw new TranslationException("Jena rules do not currently support disjunction (OR).");
 			}
 		}
 		else {
@@ -1437,6 +1439,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return errors;
 	}
 
+	protected List<ModelError> addError(ModelError err) {
+		if (errors == null) {
+			errors = new ArrayList<ModelError>();
+		}
+		errors.add(err);
+		return errors;
+	}
 
 	public String getReasonerFamily() {
 		return ReasonerFamily;
@@ -1511,6 +1520,216 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	private void setModelName(String modelName) {
 		this.modelName = modelName;
+	}
+
+
+	@Override
+	public List<ModelError> translateAndSaveModelWithOtherStructure(
+			OntModel model, Object otherStructure, String translationFolder,
+			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
+			IOException, URISyntaxException {
+		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+	}
+
+	public List<ModelError> validateRule(com.ge.research.sadl.model.gp.Rule rule) {
+		List<ModelError> errors = null;
+		
+		// conclusion binding tests
+		List<GraphPatternElement> thens = rule.getThens();
+		for (int i = 0; thens != null && i < thens.size(); i++) {
+			GraphPatternElement gpe = thens.get(i);
+			if (gpe instanceof BuiltinElement) {
+				List<Node> args = ((BuiltinElement)gpe).getArguments();
+				if (args == null) {
+					ModelError me = new ModelError("Built-in '" + ((BuiltinElement)gpe).getFuncName() + 
+							"' with no arguments not legal in rule conclusion", ErrorType.ERROR);
+					if (errors == null) {
+						errors = new ArrayList<ModelError>();
+					}
+					errors.add(me);
+				}
+				else {
+					for (int j = 0; j < args.size(); j++) {
+						Node arg = args.get(j);
+						if (arg instanceof VariableNode) {
+							if (!variableIsBoundInOtherElement(rule.getGivens(), 0, gpe, false, false, arg) && 
+									!variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, arg)) {
+								ModelError me = new ModelError("Conclusion built-in '" + ((BuiltinElement)gpe).getFuncName() + 
+										"', variable argument '" + arg.toString() + "' is not bound in rule premises", ErrorType.ERROR);
+								if (errors == null) {
+									errors = new ArrayList<ModelError>();
+								}
+								errors.add(me);
+							}
+						}
+					}
+				}
+			}
+			else if (gpe instanceof TripleElement) {
+				if (((TripleElement)gpe).getSubject() instanceof VariableNode && 
+						!variableIsBoundInOtherElement(rule.getGivens(), 0, gpe, false, false, ((TripleElement)gpe).getSubject())
+						&& !variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, ((TripleElement)gpe).getSubject())) {
+					ModelError me = new ModelError("Subject of conclusion triple '" + gpe.toString() + 
+							"' is not bound in rule premises", ErrorType.ERROR);
+					addError(me);
+				}
+				if (((TripleElement)gpe).getObject() instanceof VariableNode && 
+						!variableIsBoundInOtherElement(rule.getGivens(), 0, gpe, false, false, ((TripleElement)gpe).getObject())
+						&& !variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, ((TripleElement)gpe).getObject())) {
+					ModelError me = new ModelError("Object of conclusion triple '" + gpe.toString() + 
+							"' is not bound in rule premises", ErrorType.ERROR);
+					if (errors == null) {
+						errors = new ArrayList<ModelError>();
+					}
+					errors.add(me);
+				}
+			}
+		}
+		return errors;
+	}
+	
+	private Map<String, NamedNode> getTypedVars(com.ge.research.sadl.model.gp.Rule rule) {
+		Map<String, NamedNode> results = getTypedVars(rule.getGivens());
+		Map<String, NamedNode> moreResults = getTypedVars(rule.getIfs());
+		if (moreResults != null) {
+			if (results == null) {
+				results = moreResults;
+			}
+			else {
+				results.putAll(moreResults);
+			}
+		}
+		moreResults = getTypedVars(rule.getThens());
+		if (moreResults != null) {
+			if (results == null) {
+				results = moreResults;
+			}
+			else {
+				results.putAll(moreResults);
+			}
+		}
+		return results;
+	}
+	
+	private Map<String, NamedNode> getTypedVars(List<GraphPatternElement> gpes) {
+		Map<String, NamedNode> results = null;
+		for (int i = 0; gpes != null && i < gpes.size(); i++) {
+			GraphPatternElement gpe = gpes.get(i);
+			if (gpe instanceof TripleElement && 
+					(((TripleElement)gpe).getModifierType() == null || 
+					((TripleElement)gpe).getModifierType().equals(TripleModifierType.None) ||
+					((TripleElement)gpe).getModifierType().equals(TripleModifierType.Not)) &&
+					((TripleElement)gpe).getSubject() instanceof VariableNode &&
+					((TripleElement)gpe).getPredicate() instanceof RDFTypeNode &&
+					((TripleElement)gpe).getObject() instanceof NamedNode) {
+				if (results == null) {
+					results = new HashMap<String, NamedNode>();
+				}
+				String varName = ((VariableNode)((TripleElement)gpe).getSubject()).getName();
+				NamedNode varType = (NamedNode) ((TripleElement)gpe).getObject();
+				if (results.containsKey(varName)) {
+					NamedNode nn = results.get(varName);
+					if (!nn.equals(varType) && !(nn instanceof VariableNode || varType instanceof VariableNode)) {
+						addError(new ModelError("Variable '" + varName + "' is typed more than once in the rule.", ErrorType.WARNING));
+					}
+				}
+				results.put(varName, varType);
+			}
+			else if (gpe instanceof Junction) {
+				Object lobj = ((Junction)gpe).getLhs();
+				Object robj = ((Junction)gpe).getRhs();
+				if (lobj instanceof GraphPatternElement || robj instanceof GraphPatternElement) {
+					List<GraphPatternElement> junctgpes = new ArrayList<GraphPatternElement>();
+					if (lobj instanceof GraphPatternElement) {
+						junctgpes.add((GraphPatternElement) lobj);
+					}
+					if (robj instanceof GraphPatternElement) {
+						junctgpes.add((GraphPatternElement) robj);
+					}
+					if (results == null) {
+						results = getTypedVars(junctgpes);
+					}
+					else {
+						Map<String, NamedNode> moreresults = getTypedVars(junctgpes);
+						if (moreresults != null) {
+							results.putAll(moreresults);
+						}
+					}
+				}
+			}
+		}
+		return results;
+	}
+
+	/**
+	 * This method checks the list of GraphPatternElements to see if the specified variable is bound in these elements
+	 * 
+	 * @param gpes - list of GraphPatternElements to check
+	 * @param startingIndex - where to start in the list
+	 * @param gp - the element in which this variable appears 
+	 * @param boundIfEqual - use the current element for test?
+	 * @param matchMustBeAfter - must the binding be after the current element
+	 * @param v - the variable Node being checked
+	 * @return - true if the variable is bound else false
+	 */
+	public static boolean variableIsBoundInOtherElement(List<GraphPatternElement> gpes, int startingIndex, GraphPatternElement gp, 
+			boolean boundIfEqual, boolean matchMustBeAfter, Node v) {
+		boolean reachedSame = false;
+		for (int i = startingIndex; gpes != null && i < gpes.size(); i++) {
+			GraphPatternElement gpe = gpes.get(i);
+			while (gpe != null) {
+				boolean same = gp == null ? false : gp.equals(gpe);
+				if (same) {
+					reachedSame = true;
+				}
+				boolean okToTest = false;
+				if (matchMustBeAfter && reachedSame && !same) {
+					okToTest = true;
+				}
+				if (!matchMustBeAfter && (!same || (same && boundIfEqual))) {
+					okToTest = true;
+				}
+				if (okToTest && variableIsBound(gpe, v)) {
+					return true;
+				}
+				gpe = gpe.getNext();
+			}
+		}
+		return false;
+	}
+	
+	private static boolean variableIsBound(GraphPatternElement gpe, Node v) {
+		if (gpe instanceof TripleElement) {
+			if ((((TripleElement)gpe).getSubject() != null &&((TripleElement)gpe).getSubject().equals(v)) || 
+					(((TripleElement)gpe).getObject() != null && ((TripleElement)gpe).getObject().equals(v))) {
+				return true;
+			}
+		}
+		else if (gpe instanceof BuiltinElement) {
+			List<Node> args = ((BuiltinElement)gpe).getArguments();
+			// TODO built-ins can actually have more than the last argument as output, but we can only tell this
+			//	if we have special knowledge of the builtin. Current SADL grammar doesn't allow this to occur.
+			if (args != null && args.get(args.size() - 1) != null && args.get(args.size() - 1).equals(v)) {
+				return true;
+			}
+		}
+		else if (gpe instanceof Junction) {
+			Object lhsobj = ((Junction)gpe).getLhs();
+			if (lhsobj instanceof GraphPatternElement && variableIsBound((GraphPatternElement)lhsobj, v)) {
+				return true;
+			}
+			else if (lhsobj instanceof VariableNode && ((VariableNode)lhsobj).equals(v)) {
+				return true;
+			}
+			Object rhsobj = ((Junction)gpe).getRhs();
+			if (rhsobj instanceof GraphPatternElement && variableIsBound((GraphPatternElement)rhsobj, v)) {
+				return true;
+			}
+			else if (rhsobj instanceof VariableNode && ((VariableNode)rhsobj).equals(v)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
