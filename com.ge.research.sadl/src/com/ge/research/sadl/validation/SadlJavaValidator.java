@@ -115,7 +115,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 		}
 		// do we have a global alias?
 		try {
-    		ConfigurationManager configMgr = visitor.getConfigurationMgr(null);
+    		ConfigurationManager configMgr = visitor.getConfigurationMgr((String)null);
     		
     		if (configMgr != null) {
     			if (uri.endsWith(ResourceManager.SADLEXTWITHPREFIX)) {

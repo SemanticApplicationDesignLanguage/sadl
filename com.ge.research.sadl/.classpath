@@ -26,7 +26,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl-2.11.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/reasoner-api-2.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl-2.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-api-2.3.0.jar" sourcepath="lib/reasoner-api-2.3.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl-2.3.0.jar" sourcepath="lib/reasoner-impl-2.3.0-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

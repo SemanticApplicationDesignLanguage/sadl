@@ -23,6 +23,7 @@ package com.ge.research.sadl;
 import org.eclipse.xtext.linking.ILinkingService;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
+import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IGlobalScopeProvider;
 import org.eclipse.xtext.scoping.impl.ImportUriResolver;
@@ -30,6 +31,7 @@ import org.eclipse.xtext.service.SingletonBinding;
 
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.conversion.SadlTerminalConverters;
+import com.ge.research.sadl.resource.SadlResourceDescriptionManager;
 import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy;
 import com.ge.research.sadl.scoping.SadlGlobalScopeProvider;
 import com.ge.research.sadl.scoping.SadlImportUriResolver;
@@ -57,11 +59,11 @@ public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeM
         return SadlGlobalScopeProvider.class;
     }
 
-    @Override
-    public Class<? extends ILinkingService> bindILinkingService() {
-        return SadlLinkingService.class;
-    }
-
+//    @Override
+//    public Class<? extends ILinkingService> bindILinkingService() {
+//        return SadlLinkingService.class;
+//    }
+//
 	public Class<? extends org.eclipse.xtext.conversion.IValueConverterService> bindIValueConverterService() {
 		return SadlTerminalConverters.class;
 	}
@@ -71,6 +73,10 @@ public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeM
 		return SadlResource.class;
 	}
 
+	public Class<? extends IResourceDescription.Manager> bindIResourceDescriptionManager () {
+		return SadlResourceDescriptionManager.class;
+	}
+	
 	public Class<? extends IDefaultResourceDescriptionStrategy> bindIDefaultResourceDescriptionStrategy() {
 		return SadlResourceDescriptionStrategy.class;
 	}

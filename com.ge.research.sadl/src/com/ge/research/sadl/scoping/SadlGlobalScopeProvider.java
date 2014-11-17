@@ -39,6 +39,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.impl.DefaultGlobalScopeProvider;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
@@ -48,6 +49,9 @@ import org.eclipse.xtext.util.IResourceScopeCache;
 
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ImportMapping;
+import com.ge.research.sadl.resource.SadlEObjectDescription;
+import com.ge.research.sadl.resource.SadlResourceDescription;
+import com.ge.research.sadl.sadl.SadlPackage;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
@@ -68,6 +72,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	@Inject
 	private IResourceScopeCache cache;
     @Inject DefaultGlobalScopeProvider defaultGlobalScopeProvider;
+    @Inject IResourceDescription.Manager resourceDescriptionManager;
 
     public IScope getScope(EObject context, EReference reference) {
     	Collection<ImportMapping> imports = visitor.getModelImportMappings();
@@ -150,9 +155,17 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
     /**
      * For each imported owl resource, import also the accoring sadl resource to have the elements on the global scope
      */
-//    @Override
-//    protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
-//    	// copied from super method
+    @Override
+    protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
+    	// copied from super method
+    	IResourceDescription description = resourceDescriptionManager.getResourceDescription(resource);
+    	if (description!=null && description instanceof SadlResourceDescription) {
+    		LinkedHashSet<URI> uris = ((SadlResourceDescription)description).getImportedURIs();
+    		return uris;
+    	} else {
+    		return super.getImportedUris(resource);
+    	}
+    	
 //		return cache.get(ImportUriGlobalScopeProvider.class.getName(), resource, new Provider<LinkedHashSet<URI>>(){
 //			public LinkedHashSet<URI> get() {
 //				TreeIterator<EObject> iterator = resource.getAllContents();
@@ -186,5 +199,5 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 //				return uniqueImportURIs;
 //			}
 //		});
-//    }
+    }
 }

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -35,14 +36,14 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -50,7 +51,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -69,7 +69,6 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.PendingModelError;
-import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlEnumeratedClass;
 import com.ge.research.sadl.model.SadlIntersectionClass;
 import com.ge.research.sadl.model.SadlResourceByRestriction;
@@ -86,24 +85,19 @@ import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
-import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
-import com.ge.research.sadl.reasoner.QueryCancelledException;
-import com.ge.research.sadl.reasoner.QueryParseException;
-import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
-import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.sadl.AdditionalPropertyInfo;
@@ -122,7 +116,6 @@ import com.ge.research.sadl.sadl.ContentList;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
-import com.ge.research.sadl.sadl.ElementSet;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EquivalentConcepts;
@@ -173,9 +166,6 @@ import com.ge.research.sadl.sadl.VariableList;
 import com.ge.research.sadl.sadl.util.SadlSwitch;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.vocabulary.OWL;
 
 
@@ -502,28 +492,24 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     public List<ConceptName> getNamedConceptsInNamedModel(URI uri) throws InvalidNameException, IOException {
     	String publicUri = null;
 		try {
-	   		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-	   		IPath workspaceDirectory = workspace.getRoot().getLocation().makeAbsolute();
-	   		String modelFolderName = null;
-			ConfigurationManagerForIDE cmgr = getConfigurationMgr(modelFolderName);
+	   		if (uri.isPlatform()) {
+	   			URL fileUri = FileLocator.toFileURL(new URL(uri.toString()));
+	   			uri = URI.createURI(fileUri.toString());
+	   		}
+			ConfigurationManagerForIDE cmgr = getConfigurationMgr(uri);
 			if (cmgr != null) {
 				publicUri = cmgr.getPublicUriFromActualUrl(uri.toString());
 			}
 			else {
 				throw new InvalidNameException("Unable to find a model with URL '" + uri + "'");
 			}
-	   		if (uri.toString().startsWith(cmgr.getSadlUtils().fileNameToFileUrl(workspaceDirectory.toString()))) {
-	   			modelFolderName = ResourceManager.getOwlModelsFolder(uri);
-	   		} 
 			return getModel().getNamedConceptsInNamedModel(publicUri, null);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 			throw new InvalidNameException("Error finding a model with actual URL '" + uri + "': " + e.getLocalizedMessage());
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -3141,40 +3127,45 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
             // What project is this? There should be one ConfigurationManager per project.
 			SadlUtils su = new SadlUtils();
 			URI mfuri = URI.createURI(su.fileNameToFileUrl(modelFolderName));
-            URI projectUri = ResourceManager.getProjectUri(mfuri);
-            ConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
-            // See if we already have a ConfigurationManager for this project and if so use it.
-            String owlModelsFolder = ResourceManager.getOwlModelsFolder(mfuri);
-    		if (configurationMgr == null) {
-    			ResourceManager.validateOwlModelsFolder(owlModelsFolder);
-    			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-    			configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
-    			configurationMgrMap.put(projectUri, configurationMgr);
-    	    	IPreferencesService service = Platform.getPreferencesService();
-    	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
-    	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr.getTdbFolder(), format);
-    	    	configurationMgr.setModelGetter(modelGetter);
-    		}
-    		else if (configurationMgr.isConfigurationStale()) {
-				configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-				configurationMgrMap.put(projectUri, configurationMgr);
-    	    	IPreferencesService service = Platform.getPreferencesService();
-    	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
-    	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr.getTdbFolder(), format);
-    	    	configurationMgr.setModelGetter(modelGetter);
-				configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
-			} else if (!configurationMgr.getModelFolderPath().equals(new File(owlModelsFolder))) {
-				if (configurationMgr.isConfigChanged()) {
-					configurationMgr.saveConfiguration();
-				}
-				configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-				configurationMgrMap.put(projectUri, configurationMgr);
-				configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
-			}
+            ConfigurationManagerForIDE configurationMgr = getConfigurationMgr(mfuri);
     		lastConfigMgr = configurationMgr;	// this is for when Xtext springs a call on us without a project identifier
     		return configurationMgr;
 		}
 		return lastConfigMgr;
+	}
+
+	public synchronized ConfigurationManagerForIDE getConfigurationMgr(URI mfuri) throws ConfigurationException, URISyntaxException, IOException {
+        URI projectUri = ResourceManager.getProjectUri(mfuri);
+        ConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
+        // See if we already have a ConfigurationManager for this project and if so use it.
+        String owlModelsFolder = ResourceManager.getOwlModelsFolder(mfuri);
+		if (configurationMgr == null) {
+			ResourceManager.validateOwlModelsFolder(owlModelsFolder);
+			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+			configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
+			configurationMgrMap.put(projectUri, configurationMgr);
+	    	IPreferencesService service = Platform.getPreferencesService();
+	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
+	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr.getTdbFolder(), format);
+	    	configurationMgr.setModelGetter(modelGetter);
+		}
+		else if (configurationMgr.isConfigurationStale()) {
+			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+			configurationMgrMap.put(projectUri, configurationMgr);
+	    	IPreferencesService service = Platform.getPreferencesService();
+	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
+	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr.getTdbFolder(), format);
+	    	configurationMgr.setModelGetter(modelGetter);
+			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
+		} else if (!configurationMgr.getModelFolderPath().equals(new File(owlModelsFolder))) {
+			if (configurationMgr.isConfigChanged()) {
+				configurationMgr.saveConfiguration();
+			}
+			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+			configurationMgrMap.put(projectUri, configurationMgr);
+			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
+		}
+		return configurationMgr;
 	}
 	
 	private ModelManager getModel(Resource resource) {

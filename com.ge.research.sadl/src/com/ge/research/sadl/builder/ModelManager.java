@@ -1478,7 +1478,12 @@ public class ModelManager {
 		 * 			Subsystem is type of System.
 		 */
 		if (cls.isURIResource()) {
-			cls = m.getOntClass(cls.getURI());
+			String uri = cls.getURI();
+			cls = m.getOntClass(uri);
+			if (cls == null) {
+				logger.warn("Failed to retrieve ontology class for uri '"+uri+"'.");
+				return false;
+			}
 		}
 		if (cls.canAs(UnionClass.class)) {
 			List<OntResource> uclses = getOntResourcesInUnionClass(m, cls.as(UnionClass.class));	

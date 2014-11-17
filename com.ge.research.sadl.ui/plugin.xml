@@ -253,25 +253,53 @@
 			type="sadl">
 		</parser>
 	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="owl">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="nt">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="n3">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="rdf">
+		</parser>
+	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
         <resourceServiceProvider
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
             uriExtension="sadl">
         </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="owl">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="nt">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="n3">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="rdf">
 	    </resourceServiceProvider>
     </extension>

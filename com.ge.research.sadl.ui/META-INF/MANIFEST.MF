@@ -18,7 +18,8 @@ Require-Bundle: com.ge.research.sadl;bundle-version="2.2.0";visibility:=reexport
  org.eclipse.xtext.builder;bundle-version="2.4.3",
  org.eclipse.xtext.util,
  org.eclipse.ui.workbench,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.eclipse.xtext.ui.ecore
 Import-Package: org.apache.log4j
 Eclipse-RegisterBuddy: com.ge.research.sadl.lib
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -143,6 +144,6 @@ Export-Package: com.ge.research.sadl.ui;
    org.apache.poi.poifs.dev",
  org.apache.poi.poifs.storage;uses:="org.apache.poi.poifs.property,org.apache.poi.poifs.filesystem",
  org.apache.poi.util;uses:="new org.apache.poi.util"
-Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
+Bundle-Activator: com.ge.research.sadl.ui.SadlActivatorExt
 Bundle-ClassPath: lib/poi-3.0.2-FINAL-20080204.jar,
  .
