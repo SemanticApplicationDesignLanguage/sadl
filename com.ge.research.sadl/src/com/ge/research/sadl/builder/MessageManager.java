@@ -28,7 +28,8 @@ public class MessageManager {
 		public HyperlinkInfo(String fname, int lineno, int foffset, int flength, int offsetInLnk, int lnkLength) {
 			URI location;
 			try {
-				location = new URI(SadlUtils.fileNameToFileUrl(fname));
+				SadlUtils su = new SadlUtils();
+				location = new URI(su.fileNameToFileUrl(fname));
 		        IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(location);
 		        if (files != null && files.length > 0) {
 					linkFile = files[0];

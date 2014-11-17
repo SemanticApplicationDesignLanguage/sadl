@@ -18,10 +18,12 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:07 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2014/10/28 11:56:09 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model;
+
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 
 /**
  * This class encapsulates the important information describing an error in a call to ModelManager to create 
@@ -46,22 +48,16 @@ public class ModelError extends com.ge.research.sadl.reasoner.ModelError {
     private int argumentIndex;
     private int listIndex;
     private ExistingNamePart existingNameIndex;
-
+    
 	public ModelError(String msg, ErrorType typ) {
 		super(msg, typ);
     	setArgumentIndex(0);
     	setExistingNameIndex(ExistingNamePart.NOTAPPLICABLE);
     }
 	
-	public boolean equals(Object me) {
-		if (super.equals(me)) {
-			if (me instanceof ModelError && offset == ((ModelError)me).offset) {
-				return true;
-			}
-		}
-		return false;
-	}
-    
+    public ModelError(String msg, ErrorType etype, String hyperlinkFilename) {
+		super(msg, etype, hyperlinkFilename);
+    }
     public ModelError(int argIdx, ExistingNamePart extNameIdx, String msg) {
 		super(msg, ErrorType.ERROR);
         setArgumentIndex(argIdx);
@@ -87,7 +83,16 @@ public class ModelError extends com.ge.research.sadl.reasoner.ModelError {
         setListIndex(lstIdx);
         setExistingNameIndex(extNameIdx);
     }
-
+    
+	public boolean equals(Object me) {
+		if (super.equals(me)) {
+			if (me instanceof ModelError && offset == ((ModelError)me).offset) {
+				return true;
+			}
+		}
+		return false;
+	}
+    
     private void setArgumentIndex(int argumentIndex) {
         this.argumentIndex = argumentIndex;
     }
@@ -135,5 +140,4 @@ public class ModelError extends com.ge.research.sadl.reasoner.ModelError {
 	public int getOffset() {
 		return offset;
 	}
-
 }

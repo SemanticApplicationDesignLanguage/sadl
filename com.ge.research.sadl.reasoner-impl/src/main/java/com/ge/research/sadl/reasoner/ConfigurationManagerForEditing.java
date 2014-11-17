@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.9 $ Last modified on   $Date: 2014/06/12 14:44:48 $
+ * $Revision: 1.14 $ Last modified on   $Date: 2014/11/03 20:09:04 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -89,7 +89,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 	public boolean setTranslatorClassName(String translatorClassName) throws ConfigurationException {
 		boolean bChanged = false;
         Property translatorClassNameProperty = getConfigModel().createProperty(pTRANSLATOR_CLASSNAME);
-        Literal tcn = getConfigModel().createTypedLiteral(translatorClassName);
+        Literal tcn = translatorClassName != null ? getConfigModel().createTypedLiteral(translatorClassName) : null;
 		IReasoner reasonerInst = getReasonerInstance();
 		Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
         List<Statement> stmts = new ArrayList<Statement>();
@@ -100,10 +100,11 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
         	Statement stmtToChange = null;
 	        while (sitr.hasNext()) {
 	            Statement s = sitr.nextStatement();
-	            if (!s.getObject().equals(tcn)) {
+	            if (tcn == null || !s.getObject().equals(tcn)) {
 	            	if (stmtcntr++ == 0) {
 	            		stmtToChange = s;
 	            		bChanged = true;
+	            		setTranslator(null);
 	            	}
 	            	else {
 	            		stmts.add(s);
@@ -113,7 +114,12 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 	        sitr.close();
 	        
 	        if (stmtToChange != null) {
-	        	stmtToChange.changeObject(tcn);
+	        	if (tcn != null) {
+	        		stmtToChange.changeObject(tcn);
+	        	}
+	        	else {
+	        		getConfigModel().remove(stmtToChange);
+	        	}
 	        }
 	        
 	        // remove triple for each stmt after first (only one translator allowed)
@@ -184,6 +190,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 	            	if (stmtcntr++ == 0) {
 	            		stmtToChange = s;
 	            		bChanged = true;
+	            		setReasoner(null);
+	            		setTranslator(null);	// if you change reasoner you remove translator as it may change as well
 	            	}
 	            	else {
 	            		stmts.add(s);
@@ -290,7 +298,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#replaceJenaModelCache(com.hp.hpl.jena.ontology.OntModel, java.lang.String)
 	 */
     public boolean replaceJenaModelCache(OntModel model, String publicUri) {
-    	model.getDocumentManager().setCacheModels(true);
+//    	model.getDocumentManager().setCacheModels(true);
     	Model oldModel = model.getDocumentManager().getFileManager().getFromCache(publicUri);
     	if (oldModel != null && !model.equals(oldModel)) {
     		model.getDocumentManager().getFileManager().removeCacheModel(publicUri);
@@ -299,7 +307,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 		if (model.getImportModelMaker().hasModel(publicUri)) {
 			model.getImportModelMaker().removeModel(publicUri);
 		}
-		model.getDocumentManager().setCacheModels(false);
+//		model.getDocumentManager().setCacheModels(false);
     	return true;
     }
     
@@ -335,7 +343,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#addMapping(java.lang.String, java.lang.String, java.lang.String)
 	 */
     public boolean addMapping(String altUrl, String publicUri, String globalPrefix, String source) throws ConfigurationException, IOException, URISyntaxException {
-    	SadlUtils.validateHTTP_URI(publicUri);
+		SadlUtils su = new SadlUtils();
+    	su.validateHTTP_URI(publicUri);
 		Resource pubv = getMappingModel().createResource(publicUri);
 		Resource altv = getMappingModel().createResource(altUrl);
 		Literal pref = null;
@@ -462,8 +471,24 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
     		}
     	}
     	
+    	// remove extra and obsolete entries
+    	if (pendingDeletions != null && pendingDeletions.size() > 0) {
+    		for (int i = 0; i < pendingDeletions.size(); i++) {
+    			Statement s = pendingDeletions.get(i);
+    			getMappingModel().remove(s);
+    			bChanged = true;
+    		}
+    	}
+    	
     	if (!mappingFound) {
     		// create a new entry from scratch
+        	if (sadlNode == null) {
+        		sadlNode = getMappingModel().createTypedLiteral(SADL);
+        		createdBy = getMappingModel().createProperty(ONT_MANAGER_CREATED_BY);
+        		altUrlProp = getMappingModel().createProperty(ONT_MANAGER_ALT_URL);
+        		publicUrlProp = getMappingModel().createProperty(ONT_MANAGER_PUBLIC_URI);
+        		prefixProp = getMappingModel().createProperty(ONT_MANAGER_PREFIX);
+        	}
     		com.hp.hpl.jena.rdf.model.Resource type = getMappingModel().createResource(ONT_MANAGER_ONTOLOGY_SPEC);
     		com.hp.hpl.jena.rdf.model.Resource newOntSpec = getMappingModel().createResource(type);
     		Property langp = getMappingModel().getProperty(ONT_MANAGER_LANGUAGE);
@@ -477,19 +502,27 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
     		else {
     			getMappingModel().add(newOntSpec, createdBy, SADL);
     		}
-    		
     		if (prefix != null) {
     			getMappingModel().add(newOntSpec, prefixProp, prefix);
     		}
     		logger.debug("Created new mapping for '" + pubv.toString() + "', '" + altv.toString() + "'");
     		bChanged = true;
     	}
-
-    	// add mapping to Jena OntDocumentManager
-		if (addJenaMapping(pubv.getURI().toString(), altv.getURI().toString())) {
-			bChanged = true;
+    	try {
+    		// add mapping to Jena OntDocumentManager
+			if (addJenaMapping(pubv.getURI().toString(), altv.getURI().toString())) {
+				bChanged = true;
+			}
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
 		if (bChanged) {
 			setMappingChanged(true);
         	logger.debug("Modified mapping for '" + pubv.toString() + "', '" + altv.toString() + "'");
@@ -563,7 +596,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
     			throw new IOException("Can't delete a model with only an 'http://' URL");
     		}
     		else {
-		     	File modelFile = new File(SadlUtils.fileUrlToFileName(altUrl));
+    			SadlUtils su = new SadlUtils();
+		     	File modelFile = new File(su.fileUrlToFileName(altUrl));
 		    	if (modelFile.exists()) {
 		    		if (!modelFile.delete()) {
 		    			throw new IOException("Unable to delete '" + altUrl + "'");
@@ -1010,7 +1044,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 	public String getProjectFolderPath() throws URISyntaxException {
 		if (projectFolderPath == null) {
 			if (modelFolderPath != null) {
-				projectFolderPath = SadlUtils.fileNameToFileUrl(modelFolderPath.getParent());
+				SadlUtils su = new SadlUtils();
+				projectFolderPath = su.fileNameToFileUrl(modelFolderPath.getParent());
 			}
 		}
 		return projectFolderPath;
@@ -1035,6 +1070,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#addGlobalPrefix(java.lang.String, java.lang.String)
 	 */
 	public void addGlobalPrefix(String modelName, String globalPrefix) {
+		String policyFilePrefix = getMappingPrefix(modelName);
 		if (globalPrefix != null) {
 			if (globalPrefixes == null) {
     			globalPrefixes = new HashMap<String, String>();
@@ -1045,18 +1081,13 @@ public class ConfigurationManagerForEditing extends ConfigurationManager impleme
 			globalPrefixes.remove(modelName);
 		}
 		
-		String policyFilePrefix = getMappingPrefix(modelName);
 		boolean bChanged = false;
-		if (!(globalPrefix == null && policyFilePrefix == null)) {
-			if (globalPrefix == null && policyFilePrefix != null) {
-				bChanged = true;
-			}
-			else if (policyFilePrefix == null && globalPrefix != null) {
-				bChanged = true;
-			}
-			else if (!policyFilePrefix.equals(globalPrefix)) {
-				bChanged = true;
-			}
+		if ((globalPrefix != null && policyFilePrefix == null) ||
+				(globalPrefix == null && policyFilePrefix != null)) {
+			bChanged = true;
+		}
+		else if (globalPrefix != null && policyFilePrefix != null && !policyFilePrefix.equals(globalPrefix)) {
+			bChanged = true;
 		}
 		if (bChanged) {
 			setMappingPrefix(modelName, globalPrefix);

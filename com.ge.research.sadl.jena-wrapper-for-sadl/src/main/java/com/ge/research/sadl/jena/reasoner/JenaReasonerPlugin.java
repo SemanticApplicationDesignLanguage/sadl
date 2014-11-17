@@ -167,12 +167,12 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * 4. The configuration manager is responsible for setting up mappings, etc.
  * 
  * $Author: crapo $ 
- * $Revision: 1.6 $ Last modified on   $Date: 2014/06/17 16:56:01 $
+ * $Revision: 1.11 $ Last modified on   $Date: 2014/11/03 19:33:55 $
  */
 public class JenaReasonerPlugin extends Reasoner{
     protected static final Logger logger = LoggerFactory.getLogger(JenaReasonerPlugin.class);
 	public static String ReasonerFamily="Jena-Based";
-	public static final String version = "$Revision: 1.6 $";
+	public static final String version = "$Revision: 1.11 $";
 	private static String ReasonerCategory = "Jena";
 	public static final String pModelSpec = "pModelSpec";
 	public static final String pTimeOut = "pTimeOut";
@@ -224,7 +224,6 @@ public class JenaReasonerPlugin extends Reasoner{
 	protected List<ImportMapping> imports = null;
 	protected List<String> ruleFilesLoaded;
 	protected List<Rule> ruleList;
-	protected HashMap<String, Object> configuration;
 	protected OntModelSpec modelSpec;
 	protected String tbox;
 	protected OntModel schemaModel;
@@ -253,7 +252,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	
 //	// repo stuff
 	private String repoType = null;
-	private List<ConfigurationItem> preferences = null;
+	protected List<ConfigurationItem> preferences = null;
 	private OntModel tboxModelWithSpec;
 	
 	public JenaReasonerPlugin() {
@@ -337,7 +336,8 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			if (!tbox.startsWith("file:") && !tbox.startsWith("http:")) {
 				//assume local file
-				tbox = SadlUtils.fileNameToFileUrl(tbox);
+				SadlUtils su = new SadlUtils();
+				tbox = su.fileNameToFileUrl(tbox);
 				logger.debug("JenaReasonerPlugin.initializeReasoner, modified tbox = "+tbox);
 			}
 
@@ -407,7 +407,8 @@ public class JenaReasonerPlugin extends Reasoner{
 			// configure the appender here, with file location, etc
 			File tboxfile = null;
 			try {
-				tboxfile = new File(SadlUtils.fileUrlToFileName(tbox));
+				SadlUtils su = new SadlUtils();
+				tboxfile = new File(su.fileUrlToFileName(tbox));
 			} catch (MalformedURLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -689,14 +690,16 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public boolean loadInstanceData(String instanceDatafile) throws IOException {		
+	public boolean loadInstanceData(String instanceDatafile) throws IOException, ConfigurationException {		
 		if (!instanceDatafile.startsWith("file:") && !instanceDatafile.startsWith("http:")) {
 			try {
-				instanceDatafile = SadlUtils.fileNameToFileUrl(instanceDatafile);
+				SadlUtils su = new SadlUtils();
+				instanceDatafile = su.fileNameToFileUrl(instanceDatafile);
 			} catch (URISyntaxException e) {
 				throw new IOException(e);
 			}		
 		}
+		getReasonerOnlyWhenNeeded();
 		initializeDataModel();
 		dataModel.add(dataModel.getDocumentManager().getFileManager().loadModel(instanceDatafile));
 		addModelNamespaceToJenaMapAsEmptyPrefix(dataModel);
@@ -709,7 +712,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public boolean loadInstanceData(URI instanceDatafile) throws IOException {
+	public boolean loadInstanceData(URI instanceDatafile) throws IOException, ConfigurationException {
 		initializeDataModel();
 		dataModel.add(FileManager.get().loadModel(instanceDatafile.toString()));
 		addModelNamespaceToJenaMapAsEmptyPrefix(dataModel);
@@ -721,7 +724,8 @@ public class JenaReasonerPlugin extends Reasoner{
 		return true;
 	}
 	
-	public boolean loadInstanceData(OntModel model) {
+	public boolean loadInstanceData(OntModel model) throws ConfigurationException {
+		getReasonerOnlyWhenNeeded();
 		if (dataModel == null) {
 			initializeDataModel();
 		}
@@ -732,7 +736,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public boolean loadInstanceData(InputStream is, String format) throws IOException {		
+	public boolean loadInstanceData(InputStream is, String format) throws IOException, ConfigurationException {		
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(is));
 			String base = null;
@@ -789,7 +793,8 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	public boolean addTriple(String sub, String pred, String obj)
-			throws TripleNotFoundException {
+			throws TripleNotFoundException, ConfigurationException {
+		getReasonerOnlyWhenNeeded();
 		initializeDataModel();
 		Statement s = null;
 		try {
@@ -805,8 +810,11 @@ public class JenaReasonerPlugin extends Reasoner{
 		return true;
 	}
 
-	protected void initializeDataModel() {
+	protected void initializeDataModel() throws ConfigurationException {
 		if (dataModel == null) {
+			if (schemaModel == null) {
+				getReasonerOnlyWhenNeeded();
+			}
 			dataModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 			String instNS = getInstanceDataNS();
 			if (instNS != null) {
@@ -825,8 +833,9 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	public boolean deleteTriple(String sub, String pred, String obj)
-			throws TripleNotFoundException {
+			throws TripleNotFoundException, ConfigurationException {
 		try {
+			getReasonerOnlyWhenNeeded();
 			if (dataModel != null) {
 				RDFNode[] spo = prepareSubjectPredicateObject(sub, pred, obj);
 				if (spo != null) {
@@ -862,7 +871,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	public void updateTriple(String oldSub, String oldPred, String oldObj,
 			String newSub, String newPred, String newObj)
-			throws TripleNotFoundException {
+			throws TripleNotFoundException, ConfigurationException {
 		this.deleteTriple(oldSub, oldPred, oldObj);
 		this.addTriple(newSub, newPred, newObj);
 		dataModelSourceCount++;
@@ -2266,12 +2275,13 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 				// so we've failed to here; check to see if the t-box is stale (
 				if (tboxLoadTime > 0) {
+					SadlUtils su = new SadlUtils();
 					for (int i = 0; i < imports.size(); i++) {
 						ImportMapping im = imports.get(i);
 						if (im != null) {
 							String actualUrl = im.getActualURL();
 							if (actualUrl.startsWith("file:")) {
-								File impFile = new File(SadlUtils.fileUrlToFileName(actualUrl));
+								File impFile = new File(su.fileUrlToFileName(actualUrl));
 								if (impFile.exists()) {
 									if (impFile.lastModified() > tboxLoadTime) {
 										// reload the file
@@ -2342,35 +2352,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		map.put(pUseLuceneIndexer, 
 				new ConfigurationOption(categoryHierarchy, pUseLuceneIndexer, "Use Custom Lucene Indexer", false, booleanOptions));
 		return map;
-	}
-
-	/************ Configuration retrieval methods ***************/
-	protected boolean getBooleanConfigurationValue(List<ConfigurationItem> preferences, String configName, boolean defVal) {
-		Object derlog = findPreference(preferences, configName);
-		if (derlog != null) {
-			configure(findConfigurationItem(preferences, configName));
-		}
-		if (derlog == null && configuration != null) {
-			derlog = configuration.get(configName);
-		}
-		if (derlog != null && derlog instanceof Boolean) {
-			return ((Boolean)derlog).booleanValue();
-		}
-		return defVal;
-	}
-	
-	protected String getStringConfigurationValue(List<ConfigurationItem> preferences, String configName, String defVal) {
-		Object val = findPreference(preferences, configName);
-		if (val != null) {
-			configure(findConfigurationItem(preferences, configName));
-		}
-		if (val == null && configuration != null) {
-			val = configuration.get(configName);
-		}
-		if (val != null && val instanceof String) {
-			return (String)val;
-		}
-		return defVal;
 	}
 
 	protected String getDerivationLevel() {
@@ -2444,32 +2425,6 @@ public class JenaReasonerPlugin extends Reasoner{
 			return OntModelSpec.RDFS_MEM_TRANS_INF;
 		}
 		return OntModelSpec.OWL_MEM;
-	}
-
-	protected Object findPreference(List<ConfigurationItem> preferences, String name) {
-		if (preferences != null) {
-			for (int i = 0; i < preferences.size(); i++) {
-				ConfigurationItem citem = preferences.get(i);
-				Object val = citem.getNamedValue(name);
-				if (val != null) {
-					return val;
-				}
-			}
-		}
-		return null;
-	}
-	
-	protected ConfigurationItem findConfigurationItem(List<ConfigurationItem> preferences, String name) {
-		if (preferences != null) {
-			for (int i = 0; i < preferences.size(); i++) {
-				ConfigurationItem citem = preferences.get(i);
-				Object val = citem.getNamedValue(name);
-				if (val != null) {
-					return citem;
-				}
-			}
-		}
-		return null;
 	}
 
 	protected com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner.RuleMode getRuleMode(List<ConfigurationItem> preferences) throws ConfigurationException {
@@ -2563,13 +2518,18 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (!initialized) {
 			return false;
 		}
-		if (dataModel != null) {
+//		if (dataModel != null) {
 //			System.out.println("Before removeAll, dataModel size is: " + dataModel.size());
-			dataModel.removeAll();
-//			System.out.println("After removeAll, dataModel size is: " + dataModel.size());
-		}
-//		infModel = null;
-//		dataModel = null;
+//			dataModel.getBaseModel().removeAll();
+//			System.out.println("Before removeAll, tboxModelWithSpec size is: " + tboxModelWithSpec.size());
+//			tboxModelWithSpec.removeAll();
+//			System.out.println("After basemodel removeAll, dataModel size is: " + dataModel.size());
+////			dataModel.removeAll();
+////			System.out.println("After removeAll, dataModel size is: " + dataModel.size());
+//		}
+		infModel = null;
+		dataModel = null;
+		tboxModelWithSpec = null;
 //		prepareInfModel();
 		if (infModel != null && infModel instanceof InfModel) {
 			((InfModel)infModel).rebind();
@@ -2601,7 +2561,8 @@ public class JenaReasonerPlugin extends Reasoner{
 //		return true;
 //	}	
 
-	public String objectValueToStringValue(Object objValue, String predicate) {
+	public String objectValueToStringValue(Object objValue, String predicate) throws ConfigurationException {
+		getReasonerOnlyWhenNeeded();
 		if (schemaModel != null) {
 			OntProperty pred = null;
 			Property nonOntPred = null;
@@ -2758,7 +2719,8 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public DataSource getDerivations() throws InvalidDerivationException {
+	public DataSource getDerivations() throws InvalidDerivationException, ConfigurationException {
+		getReasonerOnlyWhenNeeded();
 		if (getDerivationLevel().equals(DERIVATION_NONE)){
 			return null;
 		}
@@ -2787,14 +2749,6 @@ public class JenaReasonerPlugin extends Reasoner{
 			e.printStackTrace();
 		}		
 		return null;
-	}
-
-	public static String now() {
-		String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
-
-	    Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
-		return sdf.format(cal.getTime());
 	}
 
 	protected void writeStatementDerivations(PrintWriter out, HashSet<Derivation> seen, StmtIterator sitr) throws InvalidDerivationException {

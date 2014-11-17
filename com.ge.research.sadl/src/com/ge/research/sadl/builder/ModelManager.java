@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/06/12 14:48:51 $
+ * $Revision: 1.8 $ Last modified on   $Date: 2014/11/11 14:31:33 $
  ***********************************************************************/
 
 package com.ge.research.sadl.builder;
@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.activation.DataSource;
 
@@ -48,6 +50,7 @@ import org.eclipse.emf.common.util.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.MessageManager.HyperlinkInfo;
 import com.ge.research.sadl.model.ClassRestrictionCondition;
 import com.ge.research.sadl.model.ClassRestrictionCondition.RestrictionType;
 import com.ge.research.sadl.model.ConceptIdentifier;
@@ -105,6 +108,8 @@ import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.ge.research.sadl.utils.UtilsForJena;
+import com.ge.research.sadl.visualize.GraphGenerator;
+import com.ge.research.sadl.visualize.GraphGenerator.Orientation;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -210,6 +215,8 @@ public class ModelManager {
 	private URI modelActualUrl;
 	private String modelBaseUri;
 	private String modelVersion;
+	private Object otherKnowledgeStructure = null;
+//    private final Lock lock = new ReentrantLock();
 	
 	public class ValidationStatement {
 		private Object modelEObject;
@@ -283,6 +290,7 @@ public class ModelManager {
 	// indirect imports
 	
 	private List<String> orderedImportUris = null;			// an ordered set of import URIs to search; ordered for efficiency of search
+	private List<String> importsInOrderOfAppearance = null;	// an ordered set of import URIs, ordered by appearance in file.
 	private Map<String, ImportMapping> imports = null;
 
 	private ConfigurationManagerForIDE configurationMgr = null;
@@ -382,6 +390,9 @@ public class ModelManager {
 		}
 		if (imports != null) {
 			imports.clear();
+		}
+		if (importsInOrderOfAppearance != null) {
+			importsInOrderOfAppearance.clear();
 		}
 		if (namespacesAndPrefixes != null) {
 			namespacesAndPrefixes.clear();
@@ -729,7 +740,7 @@ public class ModelManager {
 					try {
 						String sfn = getOwlModelsFolderPath() + File.separator
 								+ "SadlServicesConfigurationConcepts.owl";
-						actualUrl = SadlUtils.fileNameToFileUrl(sfn);
+						actualUrl = getConfigurationMgr().getSadlUtils().fileNameToFileUrl(sfn);
 						boolean copied = ResourceManager
 								.copyServicesConfigurationFileToOwlModelsDirectory(sfn);
 						if (copied) {
@@ -839,6 +850,7 @@ public class ModelManager {
 						+ this.getModelName()
 						+ "' indirectly imports itself; removed submodel from Model under construction.");
 			}
+			addImportInOrderOfAppearance(publicUri);
 		} catch (ConfigurationException e) {
 			addError(0, "Unexpected error: " + e.getMessage());
 		} catch (MalformedURLException e) {
@@ -1045,6 +1057,13 @@ public class ModelManager {
 				if (!it.equals(ConceptType.INDIVIDUAL)) {
 					addError(0, "'" + instName + "' already exists and is of type " + it.toString());
 					instNameOK = false;
+				}
+			}
+			else {
+				// we don't have an explicit namespace; check that this hasn't been already used as a variable...
+				ConceptName cached = variableNamesCache.get(nin.toString());
+				if (cached != null) {
+					addError(new ModelError("'" + nin.toString() + "' is already used as a variable and is now being declared as an instance. Is the name used in a rule before it is defined, making it a rule variable?", ErrorType.WARNING));
 				}
 			}
 			OntClass cls = conceptIdentifierToOntClass(1, 0, clsName);
@@ -1458,6 +1477,9 @@ public class ModelManager {
 		 * 			Network is a type of Subsystem.
 		 * 			Subsystem is type of System.
 		 */
+		if (cls.isURIResource()) {
+			cls = m.getOntClass(cls.getURI());
+		}
 		if (cls.canAs(UnionClass.class)) {
 			List<OntResource> uclses = getOntResourcesInUnionClass(m, cls.as(UnionClass.class));	
 			for (int i = 0; i < uclses.size(); i++) {
@@ -1977,6 +1999,28 @@ public class ModelManager {
 	}
 
 	/**
+	 * Call this method to declare a set of disjoint classes
+	 * @param conceptIds
+	 * @return
+	 */
+	public List<ModelError> addDisjointClasses(List<ConceptIdentifier> conceptIds) {
+		OntClass[] array = new OntClass[conceptIds.size()];
+		Iterator<ConceptIdentifier> itr = conceptIds.iterator();
+		int idx = 0;
+		while (itr.hasNext()) {
+			array[idx++] = conceptIdentifierToOntClass(0,0,itr.next());
+		}
+		// must set them disjoint pairwise
+		for (int i = 0; i < array.length; i++) {
+			for (int j = i + 1; j < array.length; j++) {
+				array[i].addDisjointWith(array[j]);
+			}
+		}
+		
+		return getErrorsFinal();
+	}
+	
+	/**
 	 * Call this method to declare that two classes are equivalent
 	 * 
 	 * @param cl1
@@ -2162,7 +2206,8 @@ public class ModelManager {
 							}
 						}
 						if (xsdRange != null) {
-							String rngUri = new ConceptName(xsdRange).getUri(getConfigurationMgr());
+//							String rngUri = new ConceptName(xsdRange).getUri(getConfigurationMgr());
+							String rngUri = XSD_NS + xsdRange;
 							Resource r = getJenaModel().getResource(rngUri);
 							if (r != null) {
 								OntResource existingRange = prop.getRange();
@@ -2193,12 +2238,12 @@ public class ModelManager {
 				} catch (PrefixNotFoundException e) {
 					addError(0, "Unable to create data type property '" + propName
 							+ "': " + e.getMessage());
-				} catch (MalformedURLException e) {
-					addError(0, "Unable to create data type property '" + propName
-							+ "': " + e.getMessage());
-				} catch (InvalidNameException e) {
-					addError(0, "Unable to create data type property '" + propName
-							+ "': " + e.getMessage());
+//				} catch (MalformedURLException e) {
+//					addError(0, "Unable to create data type property '" + propName
+//							+ "': " + e.getMessage());
+//				} catch (InvalidNameException e) {
+//					addError(0, "Unable to create data type property '" + propName
+//							+ "': " + e.getMessage());
 				}
 			}
 		} catch (ConfigurationException e1) {
@@ -3497,14 +3542,14 @@ public class ModelManager {
 	 */
 	public ConceptType getConceptType(String name) {
 		ConceptName cn = new ConceptName(name);
-		if (isRDFDataType(cn)) {
-			return ConceptType.RDFDATATYPE;
-		}
 		Resource r;
 		try {
 			r = getOntResourceInExistingModel(cn);
 			if (r != null) {
 				return getOntResourceConceptType(r);
+			}
+			if (isRDFDataType(cn)) {
+				return ConceptType.RDFDATATYPE;
 			}
 		} catch (ConfigurationException e) {
 			logger.error("Unexpected error getting concept type of '" + name + "': " + e.getMessage());
@@ -3570,7 +3615,7 @@ public class ModelManager {
 		return name;
 	}
 	
-	private Resource getOntResourceInExistingModel(ConceptName name) throws ConfigurationException {
+	public Resource getOntResourceInExistingModel(ConceptName name) throws ConfigurationException {
 		String uri = null;
 		// first handle explicit namespace or prefix
 		if (name.getNamespace() != null) {
@@ -3592,6 +3637,10 @@ public class ModelManager {
 			if (uri.equals(RDF.type.getURI())) {
 				return RDF.type;
 			}
+// TODO this is part of OWL Full extension
+//			else if (uri.equals(RDF.Property.getURI())) {
+//				return RDF.Property;
+//			}
 			String base = getUriXmlBase(uri);
 			OntResource rsrc = null;
 			if (base.equals(getModelName())) {
@@ -3738,6 +3787,10 @@ public class ModelManager {
 			else if (r.equals(RDFS.subClassOf)) {
 				ctype = ConceptType.OBJECTPROPERTY;
 			}
+			// TODO this doesn't work because of trying to actually get as OntCLass.
+//			else if (r.equals(RDF.Property)) {
+//				ctype = ConceptType.ONTCLASS;
+//			}
 			else if (r.canAs(Individual.class)) {
 				ctype = ConceptType.INDIVIDUAL;
 			}
@@ -3957,6 +4010,9 @@ public class ModelManager {
 								names.add(imNames.get(i));
 							}
 						}
+					}
+					else {
+						throw new ConfigurationException("How can we have an import iwth a null model (" + im.getPublicURI() + ")");
 					}
 				}
 			}
@@ -4224,8 +4280,7 @@ public class ModelManager {
 									.getAltUrlFromPublicUri(mname);
 							if (altUrl != null) {
 								File owlFile = new File(
-										SadlUtils
-												.fileUrlToFileName(altUrl));
+										getConfigurationMgr().getSadlUtils().fileUrlToFileName(altUrl));
 								if (owlFile.exists()) {
 									mname = owlFile.getName();
 									if (mname
@@ -4306,11 +4361,16 @@ public class ModelManager {
 							.getTranslator();
 					List<ModelError> results = translator
 							.translateAndSaveModel(getJenaModel(), rules,
-									modelFolderName, getModelName(),
+									modelFolderName, getModelName(), getImportsInOrderOfAppearance(), 
 									owlFile.getName());
 					if (results != null) {
-						for (int i = 0; i < results.size(); i++) {
-							addError(results.get(i));
+						modelErrorsToOutput(results);
+					}
+					else if (getOtherKnowledgeStructure() != null) {
+						results = translator.translateAndSaveModelWithOtherStructure(getJenaModel(), getOtherKnowledgeStructure(), 
+								modelFolderName, getModelName(), getImportsInOrderOfAppearance(), owlFile.getName());
+						if (results != null) {
+							modelErrorsToOutput(results);
 						}
 					}
 				}
@@ -4344,6 +4404,32 @@ public class ModelManager {
 			e.printStackTrace();
 		}
 		return getErrorsFinal();
+	}
+
+	private void modelErrorsToOutput(List<ModelError> results) {
+		for (int i = 0; i < results.size(); i++) {
+			ModelError merr = results.get(i);
+			if (merr.getHyperLinkFileName() != null) {
+				ErrorType merrtype = merr.getErrorType();
+				String fn = merr.getHyperLinkFileName();
+				HyperlinkInfo hyperlinkInfo = getMessageManager().new HyperlinkInfo(merr.toString(), 0, 0, 0, merr.getErrorMsg().length(), fn.length());
+				if (merrtype.equals(ErrorType.INFO)) {
+					getMessageManager().info(merr.getErrorMsg(), hyperlinkInfo);
+					System.out.println(merr.toString());
+				}
+				else if (merrtype.equals(ErrorType.WARNING)) {
+					getMessageManager().warn(merr.getErrorMsg(), hyperlinkInfo);
+					System.out.println(merr.toString());
+				}
+				else {
+					getMessageManager().error(merr.getErrorMsg(), hyperlinkInfo);
+					System.err.println(merr.toString());
+				}
+			}
+			else {
+				addError(results.get(i));
+			}
+		}
 	}
 
 	private List<ModelError> saveJenaModelForSadlIde(File owlFile)
@@ -4397,8 +4483,7 @@ public class ModelManager {
 			try {
 				getConfigurationMgr()
 						.addMapping(
-								SadlUtils
-										.fileNameToFileUrl(fullyQualifiedOwlFilename),
+								getConfigurationMgr().getSadlUtils().fileNameToFileUrl(fullyQualifiedOwlFilename),
 								modelName, globalPrefix, IConfigurationManager.SADL);
 			} catch (Exception e) {
 				return addError(errors, new ModelError(
@@ -5203,36 +5288,72 @@ public class ModelManager {
 	}
 	
 	public boolean graphNeighborhood(ConceptName conceptName) {
-		ResultSet rs = null;
 		String query = null;
 		try {
+			GraphGenerator gg = new GraphGenerator(this, getJenaModel(), conceptName);
 			if (conceptName.getType().equals(ConceptType.ONTCLASS)) {
-				query = "select (<" + conceptName.getUri() + "> as ?s) ?p ?v where {<" + conceptName.getUri() + "> ?p ?v}";
+//				query = "select (<" + conceptName.getUri() + "> as ?s) ?p ?v where {<" + conceptName.getUri() + "> ?p ?v}";
+//				// Class Hierarchy: what we really want to do is generate the lattice of superclasses "above" this node and the lattice (or tree?) of subclasses
+//				//	the ideal would be to show the Union and Intersection classes as a single node.
+//				// Neighborhood: show properties for which this class is in the domain emminating from this class node and properties for which this class is in the range converging to this node
+				ResultSet rs = gg.generateClassHierarchy(-1);
+				String bfn1 = conceptName.getName() + "_Class_Hierarchy";
+				generateNeighborhoodGraph(conceptName, rs, "class hierarchy", conceptName.getName(), bfn1 , Orientation.TD);
+				
+				ResultSet rs2 = gg.generateClassNeighborhood(-1);
+				String bfn2 = conceptName.getName() + "_Class_Neighborhood";
+				generateNeighborhoodGraph(conceptName, rs2, "class neighborhood", conceptName.getName(), bfn2, Orientation.LR);
+				
 			}
 			else if (conceptName.getType().equals(ConceptType.OBJECTPROPERTY) || 
 					conceptName.getType().equals(ConceptType.DATATYPEPROPERTY)) {
-				query = "select (<" + conceptName.getUri() + "> as ?s) ?p ?v where {<" + conceptName.getUri() + "> ?p ?v}";
+//				query = "select (<" + conceptName.getUri() + "> as ?s) ?p ?v where {<" + conceptName.getUri() + "> ?p ?v}";
+//				// show domain classes to the right, range classes to the left, super-properties above, sub-properties below.
+//				QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(query, Syntax.syntaxARQ), getJenaModel());
+//				qexec.setTimeout(1000);
+//				com.hp.hpl.jena.query.ResultSet	results = qexec.execSelect();
+//				rs = convertFromJenaResultSetToReasonerResultSet(results);
+				ResultSet rs = gg.generatePropertyNeighborhood(-1);
+				String bfn = conceptName.getName() + "_Property_Neighborhood";
+				generateNeighborhoodGraph(conceptName, rs, "property neighborhood", conceptName.getName(), bfn, Orientation.LR);
 			}
 			else if (conceptName.getType().equals(ConceptType.INDIVIDUAL)) {
-//				query = "select ?s ?p ?v where { VALUES ?x {<" + conceptName.getUri() + ">} (?x as ?s) ?p ?v} UNION {?s ?p (?x as ?v)}}";
-				query = "select ?s ?p ?v where { VALUES ?s {<" + conceptName.getUri() + ">} ?s ?p ?v}";
-}
-			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(query, Syntax.syntaxARQ), getJenaModel());
-			qexec.setTimeout(1000);
-			com.hp.hpl.jena.query.ResultSet	results = qexec.execSelect();
-			rs = convertFromJenaResultSetToReasonerResultSet(results);
-			rs.setShowNamespaces(getShowNamespaces());
-			File tmpdir = getProjectTempDir();
-			if (tmpdir != null) {
-				File dotfile = constructResultSetToDotFile(rs, tmpdir, null, conceptName.getName());
-				createGraphVizGraph(dotfile.getAbsolutePath());
+////				query = "select ?s ?p ?v where { VALUES ?x {<" + conceptName.getUri() + ">} (?x as ?s) ?p ?v} UNION {?s ?p (?x as ?v)}}";
+//				query = "select ?s ?p ?v where { VALUES ?s {<" + conceptName.getUri() + ">} ?s ?p ?v}";
+//				// show class(es) to which this individual belongs, show triples with this individual as either subject or object
+//				QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(query, Syntax.syntaxARQ), getJenaModel());
+//				qexec.setTimeout(1000);
+//				com.hp.hpl.jena.query.ResultSet	results = qexec.execSelect();
+//				rs = convertFromJenaResultSetToReasonerResultSet(results);
+				ResultSet rs = gg.generateIndividualNeighborhood(-1);
+				String bfn = conceptName.getName() + "_Individual_Neighborhood";
+				generateNeighborhoodGraph(conceptName, rs, "individual neighborhood", conceptName.getName(), bfn, Orientation.TD);
+			}
+			else {
+				getMessageManager().error("Concept '" + conceptName.toFQString() + "' was not found in the model.");
 			}
 		}
 		catch (Throwable t) {
+			t.printStackTrace();
 			getMessageManager().error("Unable to visualize graph: " + t.getMessage());
 			return false;
 		}
 		return true;
+	}
+
+	private void generateNeighborhoodGraph(ConceptName conceptName, ResultSet rs, String description, String anchorNodeLabel, String bfn, Orientation orientation)
+			throws IOException {
+		if (rs != null) {
+			rs.setShowNamespaces(getShowNamespaces());
+			File tmpdir = getProjectTempDir();
+			if (tmpdir != null) {
+				File dotfile = constructResultSetToDotFile(rs, tmpdir, bfn, conceptName.getName(), anchorNodeLabel, description, orientation);
+				createGraphVizGraph(dotfile.getAbsolutePath());
+			}
+		}
+		else {
+			getMessageManager().error("Failed to generate " + description + " graph of '" + conceptName.getName() + "'; no subclasses or superclasses found.");
+		}
 	}
 
 	public static ResultSet convertFromJenaResultSetToReasonerResultSet(com.hp.hpl.jena.query.ResultSet results) {
@@ -5821,6 +5942,9 @@ public class ModelManager {
 		IReasoner reasoner = null;
 		try {
 			configMgr = getConfigurationMgr();
+			if (configMgr == null) {
+				getMessageManager().error("Unable to get a ConfigurationManager; aborting model testing.");
+			}
 			configMgr.setInferenceCanceled(false);	// initialize for this run
 			if (validateBeforeTesting
 					|| (sadlCommands != null && sadlCommands.size() > 0)) {
@@ -5828,12 +5952,12 @@ public class ModelManager {
 				if (actualUrl.startsWith(ResourceManager.FILE_SHORT_PREFIX)) {
 					// check to make sure that the OWL file has been built
 					if (!configMgr.getModelGetter().getFormat().equals(IConfigurationManager.JENA_TDB)) {
-						File mf = new File(SadlUtils.fileUrlToFileName(actualUrl));
+						File mf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(actualUrl));
 						if (mf.exists()) {
 							long owlTS = mf.lastModified();
 							String sadlFN = ResourceManager.sadlFileNameOfOwlAltUrl(actualUrl);
-							sadlFN = ResourceManager.findSadlFileInProject(SadlUtils.fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString()), sadlFN);
-							File sf = new File(SadlUtils.fileUrlToFileName(sadlFN));
+							sadlFN = ResourceManager.findSadlFileInProject(getConfigurationMgr().getSadlUtils().fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString()), sadlFN);
+							File sf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(sadlFN));
 							if (sf.exists()) {
 								long sadlTS = sf.lastModified();
 								if (sadlTS > owlTS) {
@@ -5846,6 +5970,7 @@ public class ModelManager {
 				}
 				configMgr.clearReasoner();
 				reasoner = configMgr.getReasoner();
+				getMessageManager().info("Using reasoner '" + reasoner.getConfigurationCategory() + "'.");
 				reasoner.collectTimingInformation(showReasonerTimingInformation);
 				int iStatus = reasoner.initializeReasoner(
 						getOwlModelsFolderPath(), modelName, ConfigurationManagerForIDE.getOWLFormat());
@@ -5983,7 +6108,7 @@ public class ModelManager {
 										bfn = modelName;
 									}
 									rs.setShowNamespaces(getShowNamespaces());
-									File dotfile = constructResultSetToDotFile(rs, tmpdir, bfn, ("" + queryCnt));
+									File dotfile = constructResultSetToDotFile(rs, tmpdir, bfn + "query" + queryCnt, ("" + queryCnt), null, null, Orientation.TD);
 									createGraphVizGraph(dotfile.getAbsolutePath());
 								}
 							}
@@ -6268,9 +6393,8 @@ public class ModelManager {
     	if (exec == null) {
     		return;
     	}
-//		String exec = "e:\\win32app\\release\\bin\\dotty.exe";
     	if (!exec.endsWith("dotty") && !exec.endsWith("dotty.exe")) {
-//    		dotexec = exec + File.separator + "dot";
+    		dotexec = exec + File.separator + "dot";
     		exec = exec + File.separator + "dotty";
     	}
 		ProcessBuilder pb = new ProcessBuilder(exec, dotfilepath);
@@ -6280,7 +6404,8 @@ public class ModelManager {
 			throw new IOException("Unable to run GraphViz dotty; is GraphViz installed and on path? (" + e.getMessage() + ")");
 		}
 		if (dotexec != null) {
-			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tpng", dotfilepath,">", dotfilepath + ".png");
+			// dot -Tps filename.dot -o outfile.ps
+			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tpng", dotfilepath,"-o", dotfilepath + ".png");
 			try {
 				bppng.start();
 			} catch (IOException e) {
@@ -6289,13 +6414,22 @@ public class ModelManager {
 		}
 	}
 
-	private File constructResultSetToDotFile(ResultSet rs, File tmpdir, String bfn, String queryCnt) throws IOException {
+	private File constructResultSetToDotFile(ResultSet rs, File tmpdir, String bfn, String queryCnt, String anchorNodeLabel, String description, Orientation orientation) throws IOException {
 		StringBuilder sb = new StringBuilder("digraph g");
 		sb.append(queryCnt);
 		sb.append(" {\n");
+		if (orientation != Orientation.TD){
+			sb.append("   rankdir=LR\n");
+		}
 		List<String> nodes = new ArrayList<String>();
-		sb.append("    label=\"Construct ");
-		sb.append(queryCnt + 1);
+		sb.append("    label=\"");
+		if (description != null) {
+			sb.append(description);
+		}
+		else {
+			sb.append("Construct ");
+			sb.append(queryCnt + 1);
+		}
 		sb.append("\";\n    labelloc=top;\n    labeljust=left;\n");
 		
 		int nothingCount = 0;
@@ -6307,6 +6441,10 @@ public class ModelManager {
 			String slbl;			// name of start of directed edge
 			String olbl;			// name of end of directed edge
 			Object s;
+			if (row[0] == null || row[1] == null || row[2] == null) {
+				continue;
+			}
+			
 			if (row[0].equals(OWL.Nothing.getURI())) {
 				s = OWL.Nothing;
 				slbl = OWL.Nothing.getLocalName() + nothingCount;
@@ -6354,7 +6492,12 @@ public class ModelManager {
 					sb.append("[shape=box label=\"");
 				}
 				sb.append(s.toString());
-				sb.append("\"];\n");
+				sb.append("\"");
+				if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
+					// color the "anchor" node
+					sb.append(" color=lightblue style=filled fontcolor=navyblue");
+				}
+				sb.append("];\n");
 			}
 			if (!repeatObjNode) {
 				sb.append("     ");
@@ -6363,32 +6506,56 @@ public class ModelManager {
 					sb.append("[shape=point label=\"");
 				}
 				else {
-					sb.append("[shape=box label=\"");
+					sb.append("[shape=box label=");
+				}
+				String ostr = o.toString();
+				boolean includeQuotes = true;
+				if (ostr.startsWith("\"")) {
+					includeQuotes = false;
+				}
+				else {
+					sb.append("\"");
 				}
 				sb.append(o.toString());
-				sb.append("\"];\n");
+				if (includeQuotes) {
+					sb.append("\"");
+				}
+				if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
+					// color the "anchor" node
+					sb.append(" color=lightblue style=filled fontcolor=navyblue");
+				}
+				sb.append("];\n");
 			}
 			sb.append("     ");
 			sb.append(slbl);
 			sb.append("->");
 			sb.append(olbl);
 			sb.append("[label=\"");
-			sb.append(rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]));
-			sb.append("\"];\n");
+			String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
+			sb.append(edgeLbl);
+			sb.append("\"");
+			// color the "anchor" edge
+			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
+				sb.append(" color=red");
+			}
+			sb.append("];\n");
 		}
 		sb.append("}\n");
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
-				((bfn != null ? bfn : "") + "query" + queryCnt + "Graph.dot"));
+				((bfn != null ? bfn : "") + "Graph.dot"));
 		ResourceManager.stringToFile(dotFile, sb.toString(), false);
 		return dotFile;
 	}
 
-	private File getProjectTempDir() throws Exception {
+	/*
+	 * Method to get the Temp folder as a File.
+	 */
+	public File getProjectTempDir() throws IOException {
 		String owlModelDir = ResourceManager
 				.getOwlModelsFolder(this
 						.getModelActualUrl());
 		if (owlModelDir == null) {
-			throw new Exception("Failed to find OwlModel folder. This should not happen!");
+			throw new IOException("Failed to find OwlModel folder. This should not happen!");
 		}
 		try {
 			owlModelDir = ResourceManager
@@ -6402,17 +6569,10 @@ public class ModelManager {
 		if (omd != null) {
 			File prjdir = omd.getParentFile();
 			if (prjdir.exists()) {
-				File tmpdir = new File(
+				File tmpdir = ResourceManager.createFolderIfNotExists(
 						prjdir.getAbsoluteFile()
 								+ File.separator
-								+ "Temp");
-				if (!tmpdir.exists()) {
-					boolean bdirok = tmpdir.mkdir();
-					if (!bdirok) {
-						throw new Exception(
-								"Failed to create Temp folder.");
-					}
-				}
+								+ ResourceManager.TEMPDIR);
 				return tmpdir;
 			}
 		}
@@ -6597,7 +6757,7 @@ public class ModelManager {
 								TripleModifierType.None)) {
 							OntProperty oprop = getJenaModel().getOntProperty(
 									predicate);
-							if (oprop != null && oprop.isDatatypeProperty()) {
+							if (!(on instanceof ValueTableNode) && oprop != null && oprop.isDatatypeProperty()) {
 								OntResource rngrsrc = null;
 								if (oprop != null) {
 									rngrsrc = oprop.getRange();
@@ -6842,7 +7002,8 @@ public class ModelManager {
 
 	public static boolean isSparqlQuery(String litObj) {
 		litObj = litObj.trim();
-		litObj = SadlUtils.stripQuotes(litObj);
+		SadlUtils su = new SadlUtils();
+		litObj = su.stripQuotes(litObj);
 		litObj = litObj.trim();
 		if (litObj.toLowerCase().indexOf("where") > 0 &&
 				(( litObj.toLowerCase().indexOf("select ") == 0 && ((String) litObj).indexOf("?") > 0) ||
@@ -7255,7 +7416,7 @@ public class ModelManager {
 			getConfigurationMgr().setDefaultsAltUrlMapping();
 			addImportToModel(ResourceManager.ACUITY_DEFAULTS_URI,
 					IConfigurationManager.ACUITY_DEFAULTS_PREFIX,
-					SadlUtils.fileNameToFileUrl(defaultsFile
+					getConfigurationMgr().getSadlUtils().fileNameToFileUrl(defaultsFile
 							.getAbsolutePath()));
 		}
 	}
@@ -7551,9 +7712,10 @@ public class ModelManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (uri != null && TypeMapper.getInstance().getSafeTypeByName(uri) != null) {
-				return true;
-			}
+//			if (uri != null && TypeMapper.getInstance().getSafeTypeByName(uri) != null) {
+//				return true;	// this treats all URIs as RDFDataTypes!! awc 9/20/14
+//				return false;	
+//			}
 		}
 		else {
 			Iterator<RDFDatatype> rdfdtiter = TypeMapper.getInstance().listTypes();
@@ -7621,7 +7783,7 @@ public class ModelManager {
 		File xsdFile;
 		try {
 			xsdFile = new File(getConfigurationMgr().getModelFolder() + "/" + name + ".xsd");
-			SadlUtils.stringToFile(xsdFile, sb.toString(), false);
+			getConfigurationMgr().getSadlUtils().stringToFile(xsdFile, sb.toString(), false);
 	        XSDDatatype.loadUserDefined(uri, new FileReader(xsdFile), null, TypeMapper.getInstance());
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
@@ -7638,4 +7800,37 @@ public class ModelManager {
 		}
 		return getErrorsFinal();
 	}
+
+	public Object getOtherKnowledgeStructure() {
+		return otherKnowledgeStructure;
+	}
+
+	public void setOtherKnowledgeStructure(Object otherKnowledgeStructure) {
+		this.otherKnowledgeStructure = otherKnowledgeStructure;
+	}
+
+	/**
+	 * Method to retrieve a list of the model's imports ordered according to appearance
+	 * @return
+	 */
+	public List<String> getImportsInOrderOfAppearance() {
+		return importsInOrderOfAppearance;
+	}
+
+	/** Method to add an import to the list of imports in order of appearance
+	 * 
+	 * @param impUri
+	 * @return
+	 */
+	public boolean addImportInOrderOfAppearance(String impUri) {
+		if (importsInOrderOfAppearance == null) {
+			importsInOrderOfAppearance = new ArrayList<String>();
+		}
+		if (!importsInOrderOfAppearance.contains(impUri)) {
+			importsInOrderOfAppearance.add(impUri);
+			return true;
+		}
+		return false;
+	}
+
 }

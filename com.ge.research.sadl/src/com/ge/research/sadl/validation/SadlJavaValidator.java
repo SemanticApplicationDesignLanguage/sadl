@@ -128,7 +128,8 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
     				}
     				
 					URI projectUri = ResourceManager.getProjectUri(visitor.getModelResource().getURI());
-					URI sadlUri = URI.createURI(SadlUtils.fileNameToFileUrl(ResourceManager.findSadlFileInProject(projectUri.toFileString(), uri)));
+					SadlUtils su = new SadlUtils();
+					URI sadlUri = URI.createURI(su.fileNameToFileUrl(ResourceManager.findSadlFileInProject(projectUri.toFileString(), uri)));
 					URI owlUri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(sadlUri);
 					uri = configMgr.findPublicUriOfOwlFile(owlUri.toString());
 	    		}

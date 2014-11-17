@@ -944,6 +944,16 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  public EReference getModelName_AnnContent()
+  {
+    return (EReference)modelNameEClass.getEStructuralFeatures().get(3);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public EClass getImport()
   {
     return importEClass;
@@ -4048,6 +4058,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     createEAttribute(modelNameEClass, MODEL_NAME__BASE_URI);
     createEAttribute(modelNameEClass, MODEL_NAME__ALIAS);
     createEAttribute(modelNameEClass, MODEL_NAME__VERSION);
+    createEReference(modelNameEClass, MODEL_NAME__ANN_CONTENT);
 
     importEClass = createEClass(IMPORT);
     createEAttribute(importEClass, IMPORT__IMPORT_URI);
@@ -4550,6 +4561,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEAttribute(getModelName_BaseUri(), ecorePackage.getEString(), "baseUri", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getModelName_Alias(), ecorePackage.getEString(), "alias", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getModelName_Version(), ecorePackage.getEString(), "version", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getModelName_AnnContent(), this.getContentList(), null, "annContent", null, 0, -1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(importEClass, Import.class, "Import", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getImport_ImportURI(), ecorePackage.getEString(), "importURI", null, 0, 1, Import.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

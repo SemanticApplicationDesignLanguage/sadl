@@ -69,15 +69,21 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Keyword cVersionKeyword_3_0 = (Keyword)cGroup_3.eContents().get(0);
 		private final Assignment cVersionAssignment_3_1 = (Assignment)cGroup_3.eContents().get(1);
 		private final RuleCall cVersionSTRINGTerminalRuleCall_3_1_0 = (RuleCall)cVersionAssignment_3_1.eContents().get(0);
-		private final RuleCall cEOSTerminalRuleCall_4 = (RuleCall)cGroup.eContents().get(4);
+		private final Group cGroup_4 = (Group)cGroup.eContents().get(4);
+		private final Keyword cLeftParenthesisKeyword_4_0 = (Keyword)cGroup_4.eContents().get(0);
+		private final Keyword cNoteKeyword_4_1 = (Keyword)cGroup_4.eContents().get(1);
+		private final Assignment cAnnContentAssignment_4_2 = (Assignment)cGroup_4.eContents().get(2);
+		private final RuleCall cAnnContentContentListParserRuleCall_4_2_0 = (RuleCall)cAnnContentAssignment_4_2.eContents().get(0);
+		private final Keyword cRightParenthesisKeyword_4_3 = (Keyword)cGroup_4.eContents().get(3);
+		private final RuleCall cEOSTerminalRuleCall_5 = (RuleCall)cGroup.eContents().get(5);
 		
 		//// The baseUri is the namespace of the model and should be of the form
 		//// "http://..."; the version is optional.
 		//ModelName:
-		//	"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? EOS;
+		//	"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? ("(" "note" annContent+=ContentList ")")* EOS;
 		public ParserRule getRule() { return rule; }
 
-		//"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? EOS
+		//"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? ("(" "note" annContent+=ContentList ")")* EOS
 		public Group getGroup() { return cGroup; }
 
 		//"uri"
@@ -113,8 +119,26 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//STRING
 		public RuleCall getVersionSTRINGTerminalRuleCall_3_1_0() { return cVersionSTRINGTerminalRuleCall_3_1_0; }
 
+		//("(" "note" annContent+=ContentList ")")*
+		public Group getGroup_4() { return cGroup_4; }
+
+		//"("
+		public Keyword getLeftParenthesisKeyword_4_0() { return cLeftParenthesisKeyword_4_0; }
+
+		//"note"
+		public Keyword getNoteKeyword_4_1() { return cNoteKeyword_4_1; }
+
+		//annContent+=ContentList
+		public Assignment getAnnContentAssignment_4_2() { return cAnnContentAssignment_4_2; }
+
+		//ContentList
+		public RuleCall getAnnContentContentListParserRuleCall_4_2_0() { return cAnnContentContentListParserRuleCall_4_2_0; }
+
+		//")"
+		public Keyword getRightParenthesisKeyword_4_3() { return cRightParenthesisKeyword_4_3; }
+
 		//EOS
-		public RuleCall getEOSTerminalRuleCall_4() { return cEOSTerminalRuleCall_4; }
+		public RuleCall getEOSTerminalRuleCall_5() { return cEOSTerminalRuleCall_5; }
 	}
 
 	public class ImportElements extends AbstractParserRuleElementFinder {
@@ -255,8 +279,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		
 		//// These are the things that translate directly to OWL.
 		//Statement:
-		//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue
-		//	| MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
+		//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
+		//	MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 		//	DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
 		//	InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
 		//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType;
@@ -265,8 +289,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
 		//MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 		//DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
-		//InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
-		//ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType
+		//InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement | ExistingInstanceAttribution
+		//| InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType
 		public Alternatives getAlternatives() { return cAlternatives; }
 
 		//ClassDeclaration
@@ -405,45 +429,37 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	public class ContentListElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "ContentList");
 		private final Group cGroup = (Group)rule.eContents().get(1);
-		private final Keyword cLeftCurlyBracketKeyword_0 = (Keyword)cGroup.eContents().get(0);
-		private final Assignment cAnnContentAssignment_1 = (Assignment)cGroup.eContents().get(1);
-		private final RuleCall cAnnContentSTRINGTerminalRuleCall_1_0 = (RuleCall)cAnnContentAssignment_1.eContents().get(0);
-		private final Group cGroup_2 = (Group)cGroup.eContents().get(2);
-		private final Keyword cCommaKeyword_2_0 = (Keyword)cGroup_2.eContents().get(0);
-		private final Assignment cAnnContentAssignment_2_1 = (Assignment)cGroup_2.eContents().get(1);
-		private final RuleCall cAnnContentSTRINGTerminalRuleCall_2_1_0 = (RuleCall)cAnnContentAssignment_2_1.eContents().get(0);
-		private final Keyword cRightCurlyBracketKeyword_3 = (Keyword)cGroup.eContents().get(3);
+		private final Assignment cAnnContentAssignment_0 = (Assignment)cGroup.eContents().get(0);
+		private final RuleCall cAnnContentSTRINGTerminalRuleCall_0_0 = (RuleCall)cAnnContentAssignment_0.eContents().get(0);
+		private final Group cGroup_1 = (Group)cGroup.eContents().get(1);
+		private final Keyword cCommaKeyword_1_0 = (Keyword)cGroup_1.eContents().get(0);
+		private final Assignment cAnnContentAssignment_1_1 = (Assignment)cGroup_1.eContents().get(1);
+		private final RuleCall cAnnContentSTRINGTerminalRuleCall_1_1_0 = (RuleCall)cAnnContentAssignment_1_1.eContents().get(0);
 		
 		//ContentList:
-		//	"{"? annContent+=STRING ("," annContent+=STRING)* "}"?;
+		//	annContent+=STRING ("," annContent+=STRING)*;
 		public ParserRule getRule() { return rule; }
 
-		//"{"? annContent+=STRING ("," annContent+=STRING)* "}"?
+		//annContent+=STRING ("," annContent+=STRING)*
 		public Group getGroup() { return cGroup; }
 
-		//"{"?
-		public Keyword getLeftCurlyBracketKeyword_0() { return cLeftCurlyBracketKeyword_0; }
-
 		//annContent+=STRING
-		public Assignment getAnnContentAssignment_1() { return cAnnContentAssignment_1; }
+		public Assignment getAnnContentAssignment_0() { return cAnnContentAssignment_0; }
 
 		//STRING
-		public RuleCall getAnnContentSTRINGTerminalRuleCall_1_0() { return cAnnContentSTRINGTerminalRuleCall_1_0; }
+		public RuleCall getAnnContentSTRINGTerminalRuleCall_0_0() { return cAnnContentSTRINGTerminalRuleCall_0_0; }
 
 		//("," annContent+=STRING)*
-		public Group getGroup_2() { return cGroup_2; }
+		public Group getGroup_1() { return cGroup_1; }
 
 		//","
-		public Keyword getCommaKeyword_2_0() { return cCommaKeyword_2_0; }
+		public Keyword getCommaKeyword_1_0() { return cCommaKeyword_1_0; }
 
 		//annContent+=STRING
-		public Assignment getAnnContentAssignment_2_1() { return cAnnContentAssignment_2_1; }
+		public Assignment getAnnContentAssignment_1_1() { return cAnnContentAssignment_1_1; }
 
 		//STRING
-		public RuleCall getAnnContentSTRINGTerminalRuleCall_2_1_0() { return cAnnContentSTRINGTerminalRuleCall_2_1_0; }
-
-		//"}"?
-		public Keyword getRightCurlyBracketKeyword_3() { return cRightCurlyBracketKeyword_3; }
+		public RuleCall getAnnContentSTRINGTerminalRuleCall_1_1_0() { return cAnnContentSTRINGTerminalRuleCall_1_1_0; }
 	}
 
 	public class ResourceListElements extends AbstractParserRuleElementFinder {
@@ -5193,26 +5209,6 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		public RuleCall getRightRelationalExpressionParserRuleCall_1_2_0() { return cRightRelationalExpressionParserRuleCall_1_2_0; }
 	}
 
-	public class ShallBeElements extends AbstractParserRuleElementFinder {
-		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "ShallBe");
-		private final Group cGroup = (Group)rule.eContents().get(1);
-		private final Keyword cShallKeyword_0 = (Keyword)cGroup.eContents().get(0);
-		private final Keyword cBeKeyword_1 = (Keyword)cGroup.eContents().get(1);
-		
-		//ShallBe:
-		//	"shall" "be";
-		public ParserRule getRule() { return rule; }
-
-		//"shall" "be"
-		public Group getGroup() { return cGroup; }
-
-		//"shall"
-		public Keyword getShallKeyword_0() { return cShallKeyword_0; }
-
-		//"be"
-		public Keyword getBeKeyword_1() { return cBeKeyword_1; }
-	}
-
 	public class RelationalExpressionElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "RelationalExpression");
 		private final Group cGroup = (Group)rule.eContents().get(1);
@@ -5224,38 +5220,36 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Keyword cOpEqualsSignKeyword_1_1_0_0 = (Keyword)cOpAlternatives_1_1_0.eContents().get(0);
 		private final Keyword cOpEqualsSignEqualsSignKeyword_1_1_0_1 = (Keyword)cOpAlternatives_1_1_0.eContents().get(1);
 		private final Keyword cOpIsKeyword_1_1_0_2 = (Keyword)cOpAlternatives_1_1_0.eContents().get(2);
-		private final RuleCall cOpShallBeParserRuleCall_1_1_0_3 = (RuleCall)cOpAlternatives_1_1_0.eContents().get(3);
-		private final Keyword cOpExclamationMarkEqualsSignKeyword_1_1_0_4 = (Keyword)cOpAlternatives_1_1_0.eContents().get(4);
-		private final Keyword cOpLessThanSignKeyword_1_1_0_5 = (Keyword)cOpAlternatives_1_1_0.eContents().get(5);
-		private final Keyword cOpLessThanSignEqualsSignKeyword_1_1_0_6 = (Keyword)cOpAlternatives_1_1_0.eContents().get(6);
-		private final Keyword cOpGreaterThanSignKeyword_1_1_0_7 = (Keyword)cOpAlternatives_1_1_0.eContents().get(7);
-		private final Keyword cOpGreaterThanSignEqualsSignKeyword_1_1_0_8 = (Keyword)cOpAlternatives_1_1_0.eContents().get(8);
+		private final Keyword cOpExclamationMarkEqualsSignKeyword_1_1_0_3 = (Keyword)cOpAlternatives_1_1_0.eContents().get(3);
+		private final Keyword cOpLessThanSignKeyword_1_1_0_4 = (Keyword)cOpAlternatives_1_1_0.eContents().get(4);
+		private final Keyword cOpLessThanSignEqualsSignKeyword_1_1_0_5 = (Keyword)cOpAlternatives_1_1_0.eContents().get(5);
+		private final Keyword cOpGreaterThanSignKeyword_1_1_0_6 = (Keyword)cOpAlternatives_1_1_0.eContents().get(6);
+		private final Keyword cOpGreaterThanSignEqualsSignKeyword_1_1_0_7 = (Keyword)cOpAlternatives_1_1_0.eContents().get(7);
 		private final Assignment cRightAssignment_1_2 = (Assignment)cGroup_1.eContents().get(2);
 		private final RuleCall cRightAdditiveExpressionParserRuleCall_1_2_0 = (RuleCall)cRightAssignment_1_2.eContents().get(0);
 		
 		//RelationalExpression returns Expression:
-		//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | ShallBe | "!=" | "<" | "<=" | ">" |
-		//	">=") right=AdditiveExpression)*;
+		//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
+		//	right=AdditiveExpression)*;
 		public ParserRule getRule() { return rule; }
 
-		//AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | ShallBe | "!=" | "<" | "<=" | ">" | ">=")
+		//AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
 		//right=AdditiveExpression)*
 		public Group getGroup() { return cGroup; }
 
 		//AdditiveExpression
 		public RuleCall getAdditiveExpressionParserRuleCall_0() { return cAdditiveExpressionParserRuleCall_0; }
 
-		//({BinaryOpExpression.left=current} op=("=" | "==" | "is" | ShallBe | "!=" | "<" | "<=" | ">" | ">=")
-		//right=AdditiveExpression)*
+		//({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=") right=AdditiveExpression)*
 		public Group getGroup_1() { return cGroup_1; }
 
 		//{BinaryOpExpression.left=current}
 		public Action getBinaryOpExpressionLeftAction_1_0() { return cBinaryOpExpressionLeftAction_1_0; }
 
-		//op=("=" | "==" | "is" | ShallBe | "!=" | "<" | "<=" | ">" | ">=")
+		//op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
 		public Assignment getOpAssignment_1_1() { return cOpAssignment_1_1; }
 
-		//"=" | "==" | "is" | ShallBe | "!=" | "<" | "<=" | ">" | ">="
+		//"=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">="
 		public Alternatives getOpAlternatives_1_1_0() { return cOpAlternatives_1_1_0; }
 
 		//"="
@@ -5267,23 +5261,20 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//"is"
 		public Keyword getOpIsKeyword_1_1_0_2() { return cOpIsKeyword_1_1_0_2; }
 
-		//ShallBe
-		public RuleCall getOpShallBeParserRuleCall_1_1_0_3() { return cOpShallBeParserRuleCall_1_1_0_3; }
-
 		//"!="
-		public Keyword getOpExclamationMarkEqualsSignKeyword_1_1_0_4() { return cOpExclamationMarkEqualsSignKeyword_1_1_0_4; }
+		public Keyword getOpExclamationMarkEqualsSignKeyword_1_1_0_3() { return cOpExclamationMarkEqualsSignKeyword_1_1_0_3; }
 
 		//"<"
-		public Keyword getOpLessThanSignKeyword_1_1_0_5() { return cOpLessThanSignKeyword_1_1_0_5; }
+		public Keyword getOpLessThanSignKeyword_1_1_0_4() { return cOpLessThanSignKeyword_1_1_0_4; }
 
 		//"<="
-		public Keyword getOpLessThanSignEqualsSignKeyword_1_1_0_6() { return cOpLessThanSignEqualsSignKeyword_1_1_0_6; }
+		public Keyword getOpLessThanSignEqualsSignKeyword_1_1_0_5() { return cOpLessThanSignEqualsSignKeyword_1_1_0_5; }
 
 		//">"
-		public Keyword getOpGreaterThanSignKeyword_1_1_0_7() { return cOpGreaterThanSignKeyword_1_1_0_7; }
+		public Keyword getOpGreaterThanSignKeyword_1_1_0_6() { return cOpGreaterThanSignKeyword_1_1_0_6; }
 
 		//">="
-		public Keyword getOpGreaterThanSignEqualsSignKeyword_1_1_0_8() { return cOpGreaterThanSignEqualsSignKeyword_1_1_0_8; }
+		public Keyword getOpGreaterThanSignEqualsSignKeyword_1_1_0_7() { return cOpGreaterThanSignEqualsSignKeyword_1_1_0_7; }
 
 		//right=AdditiveExpression
 		public Assignment getRightAssignment_1_2() { return cRightAssignment_1_2; }
@@ -7028,7 +7019,6 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	private ExpressionElements pExpression;
 	private OrExpressionElements pOrExpression;
 	private AndExpressionElements pAndExpression;
-	private ShallBeElements pShallBe;
 	private RelationalExpressionElements pRelationalExpression;
 	private AdditiveExpressionElements pAdditiveExpression;
 	private MultiplicativeExpressionElements pMultiplicativeExpression;
@@ -7114,7 +7104,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	//// The baseUri is the namespace of the model and should be of the form
 	//// "http://..."; the version is optional.
 	//ModelName:
-	//	"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? EOS;
+	//	"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? ("(" "note" annContent+=ContentList ")")* EOS;
 	public ModelNameElements getModelNameAccess() {
 		return (pModelName != null) ? pModelName : (pModelName = new ModelNameElements());
 	}
@@ -7154,8 +7144,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 
 	//// These are the things that translate directly to OWL.
 	//Statement:
-	//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue
-	//	| MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
+	//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
+	//	MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 	//	DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
 	//	InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
 	//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType;
@@ -7179,7 +7169,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	}
 
 	//ContentList:
-	//	"{"? annContent+=STRING ("," annContent+=STRING)* "}"?;
+	//	annContent+=STRING ("," annContent+=STRING)*;
 	public ContentListElements getContentListAccess() {
 		return (pContentList != null) ? pContentList : (pContentList = new ContentListElements());
 	}
@@ -8148,19 +8138,9 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getAndExpressionAccess().getRule();
 	}
 
-	//ShallBe:
-	//	"shall" "be";
-	public ShallBeElements getShallBeAccess() {
-		return (pShallBe != null) ? pShallBe : (pShallBe = new ShallBeElements());
-	}
-	
-	public ParserRule getShallBeRule() {
-		return getShallBeAccess().getRule();
-	}
-
 	//RelationalExpression returns Expression:
-	//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | ShallBe | "!=" | "<" | "<=" | ">" |
-	//	">=") right=AdditiveExpression)*;
+	//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
+	//	right=AdditiveExpression)*;
 	public RelationalExpressionElements getRelationalExpressionAccess() {
 		return (pRelationalExpression != null) ? pRelationalExpression : (pRelationalExpression = new RelationalExpressionElements());
 	}

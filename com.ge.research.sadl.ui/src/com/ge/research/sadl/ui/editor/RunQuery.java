@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/02/05 21:38:48 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2014/10/16 17:11:49 $
  ***********************************************************************/
 
 package com.ge.research.sadl.ui.editor;
@@ -55,7 +55,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.parser.IParseResult;
 import org.eclipse.xtext.parser.IParser;
@@ -134,6 +137,12 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 
 	@Override
 	protected void run(final IPath testFilePath) {
+		IWorkbenchPage page =  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IEditorPart editorPart = page.getActiveEditor();
+		if (editorPart.isDirty()) {
+		    SadlConsole.writeToConsole(MessageType.ERROR, "Model has unsaved changes. Please save before running query.\n");
+		}
+		
 		XtextResourceSet resourceSet = new XtextResourceSet();
 		prepareModel(visitor, testFilePath, resourceSet);
 		final String modelName = visitor.getModelName();

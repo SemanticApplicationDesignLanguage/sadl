@@ -2,8 +2,10 @@ package com.ge.research.sadl.utils;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.regex.Matcher;
 
 import org.junit.Test;
 
@@ -11,12 +13,17 @@ public class TestFileUrlToFileName {
 
 	@Test
 	public void test() throws URISyntaxException, MalformedURLException {
-		String fn = "/C:\\Users\\200005201\\git\\sadl-os\\com.ge.research.sadl.reasoner-api\\src\\test\\java\\com\\ge\\research\\sadl\\utils\\TestFileUrlToFileName.java";
+		String dir = System.getProperty("testSourceDir");
+		String fname = System.getProperty("fileName");
+		String fn = dir + File.separator + "com" + File.separator + "ge" + File.separator + "research"
+				 + File.separator + "sadl" + File.separator + "utils" + File.separator + fname;
 		System.out.println(fn);
-		String url = SadlUtils.fileNameToFileUrl(fn);
+		SadlUtils su = new SadlUtils();
+		String url = su.fileNameToFileUrl(fn);
 		System.out.println(url);
-		fn = SadlUtils.fileUrlToFileName(url);
-		System.out.println(fn);
+		String fn2 = su.fileUrlToFileName(url);
+		System.out.println(fn2);
+		assertTrue(fn2.substring(1).equals(fn.replace('\\', '/')));
 	}
 
 }

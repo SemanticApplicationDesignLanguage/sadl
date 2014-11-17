@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.11 $ Last modified on   $Date: 2014/06/17 13:45:46 $
+ * $Revision: 1.16 $ Last modified on   $Date: 2014/10/28 11:56:34 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -331,6 +331,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	public boolean clearReasoner() {
 		if (reasoner != null) {
 			reasoner = null;
+			translator = null;	// don't keep around a translator that might be an incorrect type.
 			return true;
 		}
 		return false;
@@ -641,7 +642,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	    	Resource importedOntology = importingModel.createResource(publicImportUri);
 	    	importingOntology.addImport(importedOntology);
     	}
-    	this.getJenaDocumentMgr().setCacheModels(true);
+//    	this.getJenaDocumentMgr().setCacheModels(true);
    		this.getJenaDocumentMgr().setProcessImports(true);
    		getModelGetter().configureToModel(importingModel);
 		importingModel.loadImports();
@@ -677,7 +678,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			map.add(im);
 		}	
 		this.getJenaDocumentMgr().setProcessImports(false);
-		this.getJenaDocumentMgr().setCacheModels(false);
+//		this.getJenaDocumentMgr().setCacheModels(false);
     	return map;
     }
     
@@ -800,14 +801,14 @@ public class ConfigurationManager implements IConfigurationManager {
 				 					if (!siblingFound) {
 				 						if (getModelFolderPath() != null) {
 								 			String folderPath = fileNameToFileUrl(getModelFolderPath().getAbsolutePath());
-						 					testName = folderPath.substring(0, folderPath.length() - (1 + lastToken.length())) + lastToken + "/" + fileName;
+						 					testName = folderPath.substring(0, folderPath.length() - (1 + lastToken.length())) + "/" + fileName;
 						 					testFile = new File(fileUrlToFileName(testName));
 						 					if (testFile.exists()) {
 						 						// folder above??
 						 						actualFilePath = testName;
 						 					}
 						 					else {
-						 						logger.warn("Mapping file has actual URL '" + actualFilePath + "' but it does not appear to exist.");
+						 						logger.warn("Mapping file has actual URL '" + testName + "' but it does not appear to exist and could not be found in adjacent folders.");
 						 					}
 				 						}
 				 						else {

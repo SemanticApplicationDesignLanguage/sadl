@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $
- * $Revision: 1.2 $ Last modified on   $Date: 2014/05/05 13:27:33 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2014/09/05 15:45:52 $
  ***********************************************************************/
 
 package com.ge.research.sadl.utils;
@@ -86,14 +86,14 @@ public class UtilsForJena {
         Literal val = null;
         String errMsg = null;
         RDFDatatype rdftype = TypeMapper.getInstance().getSafeTypeByName(rnguri);
-        if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
-        		!rdftype.getURI().equals(XSD.date.getURI()) && 
-        		!rdftype.getURI().equals(XSD.dateTime.getURI())) {
-        	val = m.createTypedLiteral(v, rdftype);
-        	if (val != null) {
-        		return val;
-        	}
-        }
+//        if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
+//        		!rdftype.getURI().equals(XSD.date.getURI()) && 
+//        		!rdftype.getURI().equals(XSD.dateTime.getURI())) {
+//        	val = m.createTypedLiteral(v, rdftype);
+//        	if (val != null) {
+//        		return val;
+//        	}
+//        }
     	if (rnguri != null) {
 	        if (rnguri.contains("float")) {
 	        	if (v instanceof String) {

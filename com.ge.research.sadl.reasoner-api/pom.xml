@@ -21,7 +21,8 @@
 	<dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
-		<version>4.10</version>
+		<version>4.11</version>
+		<scope>test</scope>
 	</dependency>
   	<dependency>
   		<groupId>org.apache.jena</groupId>
@@ -38,12 +39,12 @@
   	<dependency>
   		<groupId>org.slf4j</groupId>
   		<artifactId>slf4j-api</artifactId>
-  		<version>1.6.4</version>
+  		<version>1.7.7</version>
   	</dependency>
 	<dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-log4j12</artifactId>
-		<version>1.6.4</version>
+		<version>1.7.7</version>
 	</dependency>
 <!--     <dependency> -->
 <!-- 		<groupId>ch.qos.logback</groupId> -->
@@ -107,8 +108,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.17</version>
+				<configuration>
+					<systemPropertyVariables>
+						<testSourceDir>${project.build.testSourceDirectory}</testSourceDir>
+						<fileName>TestFileUrlToFileName.java</fileName>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
   
-	<version>2.2.0</version>
+	<version>2.3.0</version>
 </project>

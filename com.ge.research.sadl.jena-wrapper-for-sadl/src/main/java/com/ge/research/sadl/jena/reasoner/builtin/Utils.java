@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Author: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/02/05 21:27:48 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2014/11/03 19:32:40 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.reasoner.builtin;
@@ -498,5 +498,7 @@ public class Utils {
 //        return Node.createLiteral(new LiteralLabel(new Float(value)));
     }
     
-
+    public static Node makeBooleanNode(boolean value) {
+    	return NodeFactory.createLiteral(LiteralLabelFactory.create(new Boolean(value)));
+    }
 }

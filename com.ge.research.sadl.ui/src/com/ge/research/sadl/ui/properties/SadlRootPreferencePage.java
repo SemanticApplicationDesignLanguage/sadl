@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.4 $ Last modified on   $Date: 2014/06/12 14:49:43 $
+ * $Revision: 1.5 $ Last modified on   $Date: 2014/10/16 17:14:25 $
  ***********************************************************************/
 
 package com.ge.research.sadl.ui.properties;
@@ -59,7 +59,6 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
     protected void createFieldEditors() {
         addField(new LabelFieldEditor("General SADL Settings", getFieldEditorParent()));
         addField(new StringFieldEditor("baseUri", "Base URI", getFieldEditorParent()));
-//        addField(new RadioGroupFieldEditor("OWL_Format", "Saved OWL model format :", 6, 
         addField(new RadioGroupFieldEditor("OWL_Format", "Saved OWL model format :", 5, 
         		new String[][] {
         		{ConfigurationManager.RDF_XML_ABBREV_FORMAT, ConfigurationManager.RDF_XML_ABBREV_FORMAT}, 
@@ -67,7 +66,6 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
         		{ConfigurationManager.N3_FORMAT, ConfigurationManager.N3_FORMAT}, 
         		{ConfigurationManager.N_TRIPLE_FORMAT, ConfigurationManager.N_TRIPLE_FORMAT}, 
         		{ConfigurationManager.JENA_TDB, ConfigurationManager.JENA_TDB},
-//        		{ConfigurationManager.OWL_Func_SWRL, ConfigurationManager.OWL_Func_SWRL}
         		}, 
         		getFieldEditorParent()));
         addField(new RadioGroupFieldEditor("importBy", "Show import model list as:", 2, 

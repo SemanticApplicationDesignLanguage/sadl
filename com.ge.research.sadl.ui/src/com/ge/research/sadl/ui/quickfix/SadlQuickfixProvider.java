@@ -1,7 +1,7 @@
 package com.ge.research.sadl.ui.quickfix;
 
-import java.io.StringReader;
 import java.util.Map;
+import java.io.StringReader;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -20,7 +20,6 @@ import org.eclipse.xtext.ui.editor.quickfix.Fix;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
-import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.parser.antlr.SadlParser;
@@ -30,6 +29,7 @@ import com.ge.research.sadl.sadl.PropValPartialTriple;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.ui.contentassist.SadlProposalProvider;
 import com.ge.research.sadl.utils.SadlUtils;
+import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.validation.SadlJavaValidator;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -44,6 +44,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 
     @Inject
     private SadlModelManager visitor;
+    
     @Inject
     private SadlParser parser;
 
@@ -119,11 +120,11 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 	@Fix(SadlJavaValidator.ADD_GLOBAL_ALIAS)
 	public void addModelGlobalAlias(final Issue issue, IssueResolutionAcceptor acceptor) {
 		acceptor.accept(issue, "Add Model Global Alias", "Add a global alias to the model", null, new IModification() {
-			
+
 			@Override
 			public void apply(IModificationContext context) throws Exception {
 				final IXtextDocument doc = context.getXtextDocument();
-		        // assumption: that URI is in same line as 'uri' keyword
+				// assumption: that URI is in same line as 'uri' keyword
 				// parse the line to create a ModelName
 				String line = doc.get(issue.getOffset(), doc.getLineLength(issue.getLineNumber()-1));
 				IParseResult parseResult = parser.parse(parser.getGrammarAccess().getModelNameRule(), new StringReader(line));
@@ -132,12 +133,12 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 				// compute alias name
 				URI uri = URI.createURI(name.getBaseUri());
 				String galias = (uri.segmentCount()>1) ? uri.lastSegment() : "aliasName";
-				
+
 				// find insertion offset: Search for end of URI string 
 				int offset = line.indexOf(name.getBaseUri())+name.getBaseUri().length();
 				// is uri string surrounded by " or ' ?
 				char stringDelimiter = line.substring(0,offset).indexOf('"')>0 ? '"' : '\'';
-				
+
 				// find position of end character
 				offset = line.indexOf(stringDelimiter, offset)+1;
 
@@ -209,7 +210,8 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
     				}
     				
 					URI projectUri = ResourceManager.getProjectUri(visitor.getModelResource().getURI());
-					URI sadlUri = URI.createURI(SadlUtils.fileNameToFileUrl(ResourceManager.findSadlFileInProject(projectUri.toFileString(), uri)));
+					SadlUtils su = new SadlUtils();
+					URI sadlUri = URI.createURI(su.fileNameToFileUrl(ResourceManager.findSadlFileInProject(projectUri.toFileString(), uri)));
 					URI owlUri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(sadlUri);
 					uri = visitor.getConfigurationMgr(ResourceManager.getOwlModelsFolder(sadlUri)).findPublicUriOfOwlFile(owlUri.toString());
 					((com.ge.research.sadl.sadl.Import)element).setImportURI(uri);

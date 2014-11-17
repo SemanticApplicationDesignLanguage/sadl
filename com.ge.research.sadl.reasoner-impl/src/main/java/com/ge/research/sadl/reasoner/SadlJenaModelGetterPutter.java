@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.3 $ Last modified on   $Date: 2014/06/12 14:44:48 $
+ * $Revision: 1.4 $ Last modified on   $Date: 2014/11/03 20:09:04 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -97,7 +97,8 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
     		boolean status = true;
     		File folder = new File(tdbFolder);
     		if (folder.exists()) {
-    			if (!SadlUtils.recursiveDelete(folder)) {
+    			SadlUtils su = new SadlUtils();
+    			if (!su.recursiveDelete(folder)) {
     				status = false;
     			}
     			return status;

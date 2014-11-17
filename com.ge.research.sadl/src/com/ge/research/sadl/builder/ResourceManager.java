@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $
- * $Revision: 1.2 $ Last modified on   $Date: 2014/06/12 14:31:20 $
+ * $Revision: 1.4 $ Last modified on   $Date: 2014/11/03 19:20:22 $
  ***********************************************************************/
 
 package com.ge.research.sadl.builder;
@@ -26,9 +26,6 @@ package com.ge.research.sadl.builder;
 //import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-//import java.io.FileNotFoundException;
-import java.io.DataInputStream;
-//import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +36,6 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -69,14 +65,10 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.utils.SadlUtils;
-//import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.rdf.model.impl.Util;
 import com.hp.hpl.jena.util.LocationMapper;
-//import org.eclipse.core.resources.IProject;
 
-// TODO find out why BundleURLConnection is not accessible due to restriction
-// on required library org.eclipse.osgi_3.6.0.v20100517.jar, but code works anyway?
 public class ResourceManager {
 	private static final Logger logger = LoggerFactory.getLogger(ResourceManager.class);
 
@@ -86,6 +78,7 @@ public class ResourceManager {
     public static final String FILE_ABS_URL_PREFIX = "file:///";
     public static final String HTTP_URL_PREFIX = "http://";
     public static final String OWLDIR = "OwlModels";
+    public static final String TEMPDIR = "Temp";
 //    public static final String OWLFILEEXT = "owl";
 //    public static final String OWLFILEEXTWITHPREFIX = ".owl";
     public static final String SADLEXT = "sadl";
@@ -117,20 +110,6 @@ public class ResourceManager {
         String s1 = owlFile.toFileString();
         File retFile = new File(s1);
         return retFile;
-//        java.net.URI uri = null;
-//		try {
-//			uri = new java.net.URI(owlFile.toString());
-//		}
-//		catch (URISyntaxException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//        IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(uri);
-//        if (files != null && files.length > 0) {
-//        	return files[0];
-//        }
-//        IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(s1));
-//        return file;
     }
 
     /**
@@ -316,7 +295,8 @@ public class ResourceManager {
      * @throws MalformedURLException
      */
     public static String sadlFileNameOfOwlAltUrl(String owlAltUrl) throws MalformedURLException {
-		File owlfile = new File(SadlUtils.fileUrlToFileName(owlAltUrl));
+    	SadlUtils su = new SadlUtils();
+    	File owlfile = new File(su.fileUrlToFileName(owlAltUrl));
 		String fn = owlfile.getName();
 		int extLength = (fn.length() - fn.indexOf('.')) - 1;
     	return owlfile.getName().substring(0, fn.length() - extLength) + "sadl";
@@ -815,7 +795,8 @@ public class ResourceManager {
 	}
 
     public static String getPolicyFileUrlForModel(String someModelFile) throws IOException {
-    	File mfile = new File(SadlUtils.fileUrlToFileName(someModelFile));
+    	SadlUtils su = new SadlUtils();
+    	File mfile = new File(su.fileUrlToFileName(someModelFile));
     	File modeldir = mfile.getParentFile();
     	return modeldir.getCanonicalPath() + File.separator + IConfigurationManager.ONT_POLICY_RDF;
     }
@@ -823,15 +804,17 @@ public class ResourceManager {
     public static String getOwlModelsFolder(URI someModelUri) throws MalformedURLException {
     	URI prjUri = getProjectUri(someModelUri);
     	String existingOwlModelsFolder = findFolderInFolder(prjUri.toString(), getOwlDirName());
+    	SadlUtils su = new SadlUtils();
     	if (existingOwlModelsFolder == null) {
     		// this is ok; it might not exist yet in a new project
-    		return SadlUtils.fileUrlToFileName(prjUri.appendSegment(getOwlDirName()).toString());
+    		return su.fileUrlToFileName(prjUri.appendSegment(getOwlDirName()).toString());
     	}
-		return SadlUtils.fileUrlToFileName(existingOwlModelsFolder);
+		return su.fileUrlToFileName(existingOwlModelsFolder);
     }
 
     private static String findFolderInFolder(String containingFolder, String findFolder) throws MalformedURLException {
-    	File someModelFolder = new File(SadlUtils.fileUrlToFileName(containingFolder));
+    	SadlUtils su = new SadlUtils();
+    	File someModelFolder = new File(su.fileUrlToFileName(containingFolder));
     	File[] contents = someModelFolder.listFiles();
     	for (int i = 0; contents != null && i < contents.length; i++) {
     		File thisfile = contents[i];
@@ -916,7 +899,7 @@ public class ResourceManager {
                 URL bndlurl = en.nextElement();
                 URL fileUrl = FileLocator.toFileURL(bndlurl);
                 if (fileUrl != null) {
-                    File bundleFile = new File(fileUrl.getFile());
+                	File bundleFile = new File(fileUrl.getFile());
                     if (bundleFile.exists()) {
                         return bundleFile;
                     }
@@ -1187,6 +1170,7 @@ public class ResourceManager {
 					}
 				}
 			} while (modelname == null && line != null);
+			in.close();
 			return modelname;
 		}
 		return null;
@@ -1233,5 +1217,22 @@ public class ResourceManager {
      */
     public static String getOwlFileExtensionWithPrefix() {
     	return "." + getOwlFileExtension();
+    }
+    
+    /**
+     * Method to create a folder if it doesn't already exists
+     * @param fullPath -- complete path to folder to be created
+     * @return - true if created else false if already exists
+     * @throws IOException 
+     */
+    public static File createFolderIfNotExists(String fullPath) throws IOException {
+		File tmpdir = new File(fullPath);
+		if (!tmpdir.exists()) {
+			boolean bdirok = tmpdir.mkdir();
+			if (!bdirok) {
+				throw new IOException("Failed to create folder '" + fullPath + "'.");
+			}
+		}
+		return tmpdir;
     }
 }

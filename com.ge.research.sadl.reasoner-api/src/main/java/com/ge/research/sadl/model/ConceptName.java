@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/06/03 17:41:46 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2014/09/05 15:45:53 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model;
@@ -71,7 +71,7 @@ public class ConceptName extends ConceptIdentifier {
     	}
     	else {
 		    int colon = _name.indexOf(':');
-		    if (colon > 0 && colon < _name.length() - 1) {
+		    if (!_name.startsWith("http:") && !_name.startsWith("file:") && colon > 0 && colon < _name.length() - 1) {
 		        setPrefix(_name.substring(0, colon));
 		        setName(_name.substring(colon + 1));
 		    }

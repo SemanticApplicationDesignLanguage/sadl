@@ -25,20 +25,26 @@ package com.ge.research.sadl.scoping;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
+import org.eclipse.xtext.scoping.impl.DefaultGlobalScopeProvider;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
+import org.eclipse.xtext.scoping.impl.ImportUriResolver;
 import org.eclipse.xtext.scoping.impl.SimpleScope;
+import org.eclipse.xtext.util.IResourceScopeCache;
 
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ImportMapping;
@@ -47,6 +53,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
@@ -55,11 +62,18 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
     @Inject
     private SadlModelManager visitor;
+    
+	@Inject
+	private ImportUriResolver importResolver;
+	@Inject
+	private IResourceScopeCache cache;
+    @Inject DefaultGlobalScopeProvider defaultGlobalScopeProvider;
 
     public IScope getScope(EObject context, EReference reference) {
     	Collection<ImportMapping> imports = visitor.getModelImportMappings();
     	Iterator<ImportMapping> mappingsItr = imports != null ? imports.iterator() : null;
         IScope scope = IScope.NULLSCOPE;
+//        IScope scope = IScope.NULLSCOPE;
         if (mappingsItr != null) {
 	    	while (mappingsItr.hasNext()) {
 	            // expose the names in the Jena model for this import.
@@ -133,4 +147,45 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
         return null;
     }
 
+    
+    /**
+     * For each imported owl resource, import also the accoring sadl resource to have the elements on the global scope
+     */
+//    @Override
+//    protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
+//    	// copied from super method
+//		return cache.get(ImportUriGlobalScopeProvider.class.getName(), resource, new Provider<LinkedHashSet<URI>>(){
+//			public LinkedHashSet<URI> get() {
+//				TreeIterator<EObject> iterator = resource.getAllContents();
+//				final LinkedHashSet<URI> uniqueImportURIs = new LinkedHashSet<URI>(10);
+//				while (iterator.hasNext()) {
+//					EObject object = iterator.next();
+//					String uri = importResolver.apply(object);
+//					if (uri != null) {
+//						URI importUri = URI.createURI(uri);
+//						uniqueImportURIs.add(importUri);
+//					}
+//				}
+//				Iterator<URI> uriIter = uniqueImportURIs.iterator();
+//				while(uriIter.hasNext()) {
+//					if (!EcoreUtil2.isValidUri(resource, uriIter.next()))
+//						uriIter.remove();
+//				}
+//				// start customizing
+//				uriIter = uniqueImportURIs.iterator();
+//				while(uriIter.hasNext()) {
+//					URI uri = uriIter.next();
+//					if ("owl".equals(uri.fileExtension())) {
+//						String resourceName = uri.trimFileExtension().appendFileExtension("sadl").lastSegment();
+//						URI sadlUri = uri.trimSegments(2).appendSegment(resourceName);
+//						if (EcoreUtil2.isValidUri(resource, sadlUri)) {
+//							uniqueImportURIs.add(sadlUri);
+//						}
+//					}
+//				}
+//				
+//				return uniqueImportURIs;
+//			}
+//		});
+//    }
 }

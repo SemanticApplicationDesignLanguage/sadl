@@ -95,6 +95,24 @@ public class TripleElement extends GraphPatternElement {
 		return sb.toString();
 	}
 	
+	public String toFullyQualifiedString() {
+		StringBuilder sb = new StringBuilder(subject != null ? subject.toFullyQualifiedString() : "null");
+		sb.append(", ");
+		sb.append(predicate != null ? predicate.toFullyQualifiedString() : "null");
+		sb.append(", ");
+		sb.append(object != null ? object.toFullyQualifiedString() : "null");
+		if (getNext() != null) {
+			sb.append(" . ");
+			sb.append(getNext().toFullyQualifiedString());
+		}
+		if (!getModifierType().equals(TripleModifierType.None)) {
+			sb.insert(0, "(");
+			sb.insert(0, getModifierType().toString());
+			sb.append(")");
+		}
+		return sb.toString();
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (other == null || !(other instanceof TripleElement)) {

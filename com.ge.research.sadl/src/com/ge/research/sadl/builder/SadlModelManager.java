@@ -50,6 +50,11 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.slf4j.Logger;
@@ -64,6 +69,7 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.PendingModelError;
+import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlEnumeratedClass;
 import com.ge.research.sadl.model.SadlIntersectionClass;
 import com.ge.research.sadl.model.SadlResourceByRestriction;
@@ -90,9 +96,14 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.sadl.AdditionalPropertyInfo;
@@ -107,10 +118,11 @@ import com.ge.research.sadl.sadl.ComplementOfClass;
 import com.ge.research.sadl.sadl.Condition;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
-import com.ge.research.sadl.sadl.DataTypeRestriction;
+//import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
+import com.ge.research.sadl.sadl.ElementSet;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EquivalentConcepts;
@@ -120,7 +132,7 @@ import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
-import com.ge.research.sadl.sadl.Facets;
+//import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.GraphPattern;
 import com.ge.research.sadl.sadl.HasValue;
@@ -156,7 +168,7 @@ import com.ge.research.sadl.sadl.SomeValuesFrom;
 import com.ge.research.sadl.sadl.SymmetricalProperty;
 import com.ge.research.sadl.sadl.TransitiveProperty;
 import com.ge.research.sadl.sadl.UnionResource;
-import com.ge.research.sadl.sadl.UserDefinedDataType;
+//import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.VariableList;
 import com.ge.research.sadl.sadl.util.SadlSwitch;
 import com.ge.research.sadl.utils.SadlUtils;
@@ -166,16 +178,19 @@ import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.vocabulary.OWL;
 
+
 /**
  * Visits a SADL document's Ecore model and makes ModelManager calls
  * to turn it into a Jena model.
  * 
  * $Author: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/06/12 14:48:51 $
+ * $Revision: 1.4 $ Last modified on   $Date: 2014/11/03 19:20:22 $
  */
-public class SadlModelManager extends SadlSwitch<EObject> {
+public class SadlModelManager extends SadlSwitch<EObject> implements IPartListener2{
 
     private static final Logger logger = LoggerFactory.getLogger(SadlModelManager.class);
+    
+    // additions for Context and Requirements:
     
     private int errorCount = 0;
     private boolean markErrors = true;
@@ -189,6 +204,8 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     private ConfigurationManagerForIDE lastConfigMgr = null;
     
     private boolean savingModel = false;	// true if this is part of build (or save)
+    private boolean editorOpen = false;
+    private boolean addedAsListener = false;
 
     class ModelInfo {
     	private ModelManager model;
@@ -220,11 +237,12 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * Constructs the Ecore model visitor.
      */
     public SadlModelManager() {
-    	OntDocumentManager.getInstance().setCacheModels(false);
+//    	OntDocumentManager.getInstance().setCacheModels(false);
     }
     
     public synchronized boolean processModel(Resource resource, boolean persistModel, boolean editorOpen, SubMonitor progress) throws CoreException {
         logger.debug("SMM.processModel called from " + (editorOpen ? "Highlighting Calculator" : "Builder") + " for '" + resource.toString() + "'");
+        this.editorOpen = editorOpen;
         boolean modelPreExists = hasModelManager(resource);
 		ModelInfo minfo = getModelInfo(resource);
     	TreeIterator<EObject> iter = null;
@@ -283,7 +301,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	            catch (Throwable t) {
 	        		String msg = "Unexpected error: file '" + file.getAbsolutePath() + "' doesn't exist but can't be created: " + t.getLocalizedMessage();
 	        		logger.error(msg);
-	        		System.out.println(msg);
+	        		System.err.println(msg);
 	            }
 	        }
 	        String path = file.getAbsolutePath();
@@ -296,7 +314,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	        		}
 	        		else {
 	        			logger.error(error.toString());
-	        			System.out.println(error.toString());
+	        			System.err.println(error.toString());
 	        		}
 	        	}
 	        }
@@ -487,9 +505,6 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	   		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 	   		IPath workspaceDirectory = workspace.getRoot().getLocation().makeAbsolute();
 	   		String modelFolderName = null;
-	   		if (uri.toString().startsWith(SadlUtils.fileNameToFileUrl(workspaceDirectory.toString()))) {
-	   			modelFolderName = ResourceManager.getOwlModelsFolder(uri);
-	   		} 
 			ConfigurationManagerForIDE cmgr = getConfigurationMgr(modelFolderName);
 			if (cmgr != null) {
 				publicUri = cmgr.getPublicUriFromActualUrl(uri.toString());
@@ -497,6 +512,9 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			else {
 				throw new InvalidNameException("Unable to find a model with URL '" + uri + "'");
 			}
+	   		if (uri.toString().startsWith(cmgr.getSadlUtils().fileNameToFileUrl(workspaceDirectory.toString()))) {
+	   			modelFolderName = ResourceManager.getOwlModelsFolder(uri);
+	   		} 
 			return getModel().getNamedConceptsInNamedModel(publicUri, null);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
@@ -627,7 +645,18 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     			}
     		}
     	}
-        annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, comments));
+        annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, comments));   
+        if (!addedAsListener) {
+        	IWorkbenchWindow wndw = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        	if (wndw != null) {
+        		wndw.getPartService().addPartListener(this);
+        		addedAsListener = true;
+//        		System.out.println("Added part listener");
+        	}
+//        	else {
+//        		System.out.println("Failed to add part listener");
+//        	}
+        }
         return object;
     }
     
@@ -826,15 +855,15 @@ public class SadlModelManager extends SadlSwitch<EObject> {
             		        // An object property was declared.
             		    	objRange = createConceptIdentifier(range.getType().getClassIdentifier());
             		    }
-//            		    else {
-//            		        // A datatype property was declared.
-////            		        objRange = range.getType().getDataType().getLiteral();
-//            		    	String rng = range.getType().getClassIdentifier()
-//            		    	RDFDatatype dt = TypeMapper.getInstance().getTypeByName(rng);
-//            		    	if (dt != null) {
-//            		    		objRange = dt;
-//            		    	}
-//            		    }
+            		    else {
+////            		        // A datatype property was declared.
+	           		        objRange = range.getType().getDataType().getLiteral();
+////            		    	String rng = range.getType().getClassIdentifier()
+////            		    	RDFDatatype dt = TypeMapper.getInstance().getTypeByName(rng);
+////            		    	if (dt != null) {
+////            		    		objRange = dt;
+////            		    	}
+            		    }
             		}
                     addProperty(object, newClassNames, propName, singleValuedOnClass, objRange);
         		    addAnnotations(describedBy.getPropertyName());
@@ -869,14 +898,27 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 
 	private void addProperty(ClassDeclaration object, List<String> newClassNames, 
 			String propName, boolean singleValuedOnClass , Object range) {
-		boolean isRDFDataType = getModel().isRDFDataType(range);
-		if (isRDFDataType) {
-			range = range.toString();
-		}
-	    if (!isRDFDataType && range instanceof ResourceIdentifier) {
+//		boolean isRDFDataType = getModel().isRDFDataType(range);
+//		if (isRDFDataType) {
+//			range = range.toString();
+//		}
+//	    if (!isRDFDataType && range instanceof ResourceIdentifier) {
+//	    	range = createConceptIdentifier((ResourceIdentifier)range);
+//	    }
+//	    if (!isRDFDataType && range instanceof ConceptIdentifier) {
+//	        // An object property was declared.
+//	        for (String newClassName : newClassNames) {
+//	            ConceptName superPropName = null;
+//	            annotateErrors(object, getModel().addObjectProperty(propName, superPropName, (ConceptIdentifier) range, false));
+//	            ConceptName pName = new ConceptName(propName);
+//	            ConceptName newClsName = new ConceptName(newClassName);
+//	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, range));
+//	        }
+//	    }
+	    if (range instanceof ResourceIdentifier) {
 	    	range = createConceptIdentifier((ResourceIdentifier)range);
 	    }
-	    if (!isRDFDataType && range instanceof ConceptIdentifier) {
+	    if (range instanceof ConceptIdentifier) {
 	        // An object property was declared.
 	        for (String newClassName : newClassNames) {
 	            ConceptName superPropName = null;
@@ -960,22 +1002,22 @@ public class SadlModelManager extends SadlSwitch<EObject> {
                             isObjProp = true;
                             rangeCls = createConceptIdentifier(range.getType().getClassIdentifier());
                         }
-                        boolean isRDFDataType = false;
-                        if (rangeCls != null) {
-                        	isRDFDataType = getModel().isRDFDataType(rangeCls);
-                        	if (isRDFDataType) {
-                        		xsdRange = rangeCls.toString();
-                        		isObjProp = false;
-                        	}
-                        }
-//                        if (range.getType().getDataType() != null) {
-////                        	xsdRange = range.getType().getDataType().getLiteral();
+//                        boolean isRDFDataType = false;
+//                        if (rangeCls != null) {
+//                        	isRDFDataType = getModel().isRDFDataType(rangeCls);
+//                        	if (isRDFDataType) {
+//                        		xsdRange = rangeCls.toString();
+//                        		isObjProp = false;
+//                        	}
+//                        }
+            			else if (range.getType().getDataType() != null) {
+                        	xsdRange = range.getType().getDataType().getLiteral();
 //                        	xsdRange = range.getType().getDataType();
 //                        	RDFDatatype dt = TypeMapper.getInstance().getTypeByName(xsdRange);
 //            		    	if (dt != null) {
 //            		    		xsdRange = dt.toString();
 //            		    	}
-//                        }
+                        }
             		}
             		else if (api.getCond() != null) {
             			cond = api.getCond();
@@ -1430,7 +1472,19 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	public EObject caseDisjointClasses(DisjointClasses object) {
 		ConceptName cl1 = createConceptIdentifier(object.getClass1());
 		ConceptIdentifier cl2 = createConceptIdentifier(object.getClass2());
-		annotateErrors(object, getModel().addDisjointClasses(cl1, cl2));
+		if (cl1 != null && cl2 != null) {
+			annotateErrors(object, getModel().addDisjointClasses(cl1, cl2));
+		}
+		else {
+			Iterator<ResourceIdentifier> itr = object.getClasses().getNames().iterator();
+			if (itr.hasNext()) {
+				List<ConceptIdentifier> conceptIds = new ArrayList<ConceptIdentifier>();
+				while (itr.hasNext()) {
+					conceptIds.add(createConceptIdentifier(itr.next()));
+				}
+				annotateErrors(object, getModel().addDisjointClasses(conceptIds));
+			}
+		}
 		return object;
 	}
 
@@ -2027,7 +2081,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * @param object -- the EObject with which the error is associated
      * @param errorMsg
      */
-	protected void reportError(EObject object, String errorMsg) {
+	public void reportError(EObject object, String errorMsg) {
 		setTranslationErrors(getNumTranslationErrors() + 1);
 		ICompositeNode node = NodeModelUtils.findActualNodeFor(object);
 		if (node != null) {
@@ -2411,7 +2465,12 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	@Override
 	public EObject caseRule(Rule object) {
 		com.ge.research.sadl.model.gp.Rule rule = translateRule(object);
-		validateRule(object, rule);
+		try {
+			validateRule(object, rule);
+		} catch (MalformedURLException | ConfigurationException e) {
+			e.printStackTrace();
+			reportError(object, "Unexpected exception: " + e.getMessage());
+		}
 		List<IFTranslationError> transErrors = getIfTranslator().getErrors();
 		for (int i = 0; transErrors != null && i < transErrors.size(); i++) {
 			IFTranslationError err = transErrors.get(i);
@@ -2786,7 +2845,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 		return numErrors;
 	}
 
-	private int validateRule(Rule object, com.ge.research.sadl.model.gp.Rule rule) {
+	private int validateRule(Rule object, com.ge.research.sadl.model.gp.Rule rule) throws MalformedURLException, ConfigurationException {
 		int numErrors = 0;
 		// check typed variable consistency with property domain/range
 		Map<String, NamedNode> typedVars = getTypedVars(rule);
@@ -2796,53 +2855,17 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 				for (int i = 0; i < errors.size(); i++) {
 					getModel().addError(errors.get(i));
 				}
+				numErrors += errors.size();
 			}
 		}
 		
-		// conclusion binding tests
-		List<GraphPatternElement> thens = rule.getThens();
-		for (int i = 0; thens != null && i < thens.size(); i++) {
-			GraphPatternElement gpe = thens.get(i);
-			if (gpe instanceof BuiltinElement) {
-				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				if (args == null) {
-					ModelError me = new ModelError("Built-in '" + ((BuiltinElement)gpe).getFuncName() + 
-							"' with no arguments not legal in rule conclusion", ErrorType.ERROR);
-					getModel().addError(me);
-					numErrors++;
-				}
-				else {
-					for (int j = 0; j < args.size(); j++) {
-						Node arg = args.get(j);
-						if (arg instanceof VariableNode) {
-							if (!IntermediateFormTranslator.variableIsBoundInOtherElement(rule.getGivens(), 0, gpe, false, false, arg) && 
-									!IntermediateFormTranslator.variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, arg)) {
-								ModelError me = new ModelError("Conclusion built-in '" + ((BuiltinElement)gpe).getFuncName() + 
-										"', variable argument '" + arg.toString() + "' is not bound in rule premises", ErrorType.ERROR);
-								getModel().addError(me);
-								numErrors++;
-							}
-						}
-					}
-				}
+		// conclusion binding tests are done in specific translator
+		List<ModelError> errors = getModel().getConfigurationMgr().getTranslator().validateRule(rule);
+		if (errors != null) {
+			for (int i = 0; i < errors.size(); i++) {
+				getModel().addError(errors.get(i));
 			}
-			else if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getSubject() instanceof VariableNode && 
-						!IntermediateFormTranslator.variableIsBoundInOtherElement(rule.getGivens(), 0, gpe, false, false, ((TripleElement)gpe).getSubject())
-						&& !IntermediateFormTranslator.variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, ((TripleElement)gpe).getSubject())) {
-					ModelError me = new ModelError("Subject of conclusion triple '" + gpe.toString() + 
-							"' is not bound in rule premises", ErrorType.ERROR);
-					getModel().addError(me);
-				}
-				if (((TripleElement)gpe).getObject() instanceof VariableNode && 
-						!IntermediateFormTranslator.variableIsBoundInOtherElement(rule.getGivens(), 0, gpe, false, false, ((TripleElement)gpe).getObject())
-						&& !IntermediateFormTranslator.variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, ((TripleElement)gpe).getObject())) {
-					ModelError me = new ModelError("Object of conclusion triple '" + gpe.toString() + 
-							"' is not bound in rule premises", ErrorType.ERROR);
-					getModel().addError(me);
-					numErrors++;
-				}
-			}
+			numErrors += errors.size();
 		}
 		return numErrors;
 	}
@@ -3116,7 +3139,8 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	public synchronized ConfigurationManagerForIDE getConfigurationMgr(String modelFolderName) throws ConfigurationException, URISyntaxException, IOException {
 		if (modelFolderName != null) {
             // What project is this? There should be one ConfigurationManager per project.
-			URI mfuri = URI.createURI(SadlUtils.fileNameToFileUrl(modelFolderName));
+			SadlUtils su = new SadlUtils();
+			URI mfuri = URI.createURI(su.fileNameToFileUrl(modelFolderName));
             URI projectUri = ResourceManager.getProjectUri(mfuri);
             ConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
             // See if we already have a ConfigurationManager for this project and if so use it.
@@ -3222,7 +3246,8 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			if (minfo == null) {
 				logger.debug("Creating new ModelInfo for Resource '" + resource.toString());
 				minfo = new ModelInfo();
-				minfo.setModel(new ModelManager());
+				ModelManager mmgr = new ModelManager();
+				minfo.setModel(mmgr);
 				modelMgrs.put(resource.getURI(), minfo);
 			}
 			return minfo;
@@ -3280,38 +3305,39 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     public void deleteMarkers (Resource resource, boolean all) {
         //this gives the relative path in the workspace
         URI uri = resource.getURI();
-
-        try {
-	        //to resolve this we need the workspace root
-	        IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-	
-	        //create an new IPath from the URI
-	        IPath path = new Path(uri.toPlatformString(false));
-	
-	        //finally resolve the file with the workspace
-	        IFile file = myWorkspaceRoot.getFile(path);
-	
-	        // delete the markers
+        if (uri != null) {
 	        try {
-	        	if (savingModel) {
-					file.deleteMarkers(null, true, IResource.DEPTH_INFINITE);		// this seems to remove too much but if not here some "quick" error markers seem too sticky...	        		
-	        	}
-	        	else {
-	        		file.deleteMarkers("com.ge.research.sadl.problem", true, IResource.DEPTH_INFINITE);
-	        		file.deleteMarkers("com.ge.research.sadl.ui.sadl.check.fast", true, IResource.DEPTH_INFINITE);
-	        		if (all) {
-	        			// file.deleteMarkers("org.eclipse.xtext.ui.check.fast", true, IResource.DEPTH_INFINITE);
-	        			 file.deleteMarkers(null, true, IResource.DEPTH_INFINITE);
-	        		}
-	        	}
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-	        setErrorCount(0);
-	        setMarkErrors(true);
-        }
-        catch (IllegalStateException e) {
-        	// ignore this--standalone testing is unable to find the Workspace and throws this exception
+		        //to resolve this we need the workspace root
+		        IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+		
+		        //create an new IPath from the URI
+		        IPath path = new Path(uri.toPlatformString(false));
+		
+		        //finally resolve the file with the workspace
+		        IFile file = myWorkspaceRoot.getFile(path);
+		
+		        // delete the markers
+		        try {
+		        	if (savingModel) {
+						file.deleteMarkers(null, true, IResource.DEPTH_INFINITE);		// this seems to remove too much but if not here some "quick" error markers seem too sticky...	        		
+		        	}
+		        	else {
+		        		file.deleteMarkers("com.ge.research.sadl.problem", true, IResource.DEPTH_INFINITE);
+		        		file.deleteMarkers("com.ge.research.sadl.ui.sadl.check.fast", true, IResource.DEPTH_INFINITE);
+		        		if (all) {
+		        			// file.deleteMarkers("org.eclipse.xtext.ui.check.fast", true, IResource.DEPTH_INFINITE);
+		        			 file.deleteMarkers(null, true, IResource.DEPTH_INFINITE);
+		        		}
+		        	}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+		        setErrorCount(0);
+		        setMarkErrors(true);
+	        }
+	        catch (IllegalStateException e) {
+	        	// ignore this--standalone testing is unable to find the Workspace and throws this exception
+	        }
         }
     }
     
@@ -3502,32 +3528,79 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 		this.currentResource = currentResource;
 	}
 
+//	@Override
+//	public EObject caseUserDefinedDataType(UserDefinedDataType object) {
+//		String name = object.getUdt();
+//		DataTypeRestriction dtr = object.getRestriction();
+//		if (dtr != null) {
+//			String baseType = dtr.getBasetype();
+//			EList<String> unionOfTypes = dtr.getBasetypes();
+//			Facets fcts = dtr.getFacets();
+//			String minexin = null;
+//			String min = null;
+//			String maxexin = null;
+//			String max = null;
+//			String regex = null;
+//			EList<String> values = null;
+//			if (fcts != null) {
+//				minexin = fcts.getMinexin();
+//				min = fcts.getMin();
+//				maxexin = fcts.getMaxexin();
+//				max = fcts.getMax();
+//				regex = fcts.getRegex();
+//				values = fcts.getValues();
+//			}
+//			annotateErrors(object, getModel().addUserDefinedDataType(name, unionOfTypes, baseType, minexin, min, maxexin, max, regex, values));
+//			return super.caseUserDefinedDataType(object);
+//		}
+//		return null;
+//	}
+
 	@Override
-	public EObject caseUserDefinedDataType(UserDefinedDataType object) {
-		String name = object.getUdt();
-		DataTypeRestriction dtr = object.getRestriction();
-		if (dtr != null) {
-			String baseType = dtr.getBasetype();
-			EList<String> unionOfTypes = dtr.getBasetypes();
-			Facets fcts = dtr.getFacets();
-			String minexin = null;
-			String min = null;
-			String maxexin = null;
-			String max = null;
-			String regex = null;
-			EList<String> values = null;
-			if (fcts != null) {
-				minexin = fcts.getMinexin();
-				min = fcts.getMin();
-				maxexin = fcts.getMaxexin();
-				max = fcts.getMax();
-				regex = fcts.getRegex();
-				values = fcts.getValues();
-			}
-			annotateErrors(object, getModel().addUserDefinedDataType(name, unionOfTypes, baseType, minexin, min, maxexin, max, regex, values));
-			return super.caseUserDefinedDataType(object);
-		}
-		return null;
+	public void partActivated(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partBroughtToTop(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partClosed(IWorkbenchPartReference partRef) {
+		// TODO
+	}
+
+	@Override
+	public void partDeactivated(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partOpened(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partHidden(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partVisible(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partInputChanged(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:10 $
+ * $Revision: 1.4 $ Last modified on   $Date: 2014/10/28 14:42:28 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -55,12 +55,13 @@ public interface ITranslator {
 	 * @param model--Jena OntModel to be saved
 	 * @param translationFolder--folder in which file-based saving is to place save files
 	 * @param modelName--the URI of the model to be saved
+	 * @param orderedImports--the URIs, if any, of the imported models in order of appearance
 	 * @return saveFilename--the file name to which the model is to be saved if file-based 
 	 * @throws TranslationException
 	 * @throws IOException 
 	 * @throws URISyntaxException 
 	 */
-	public abstract List<ModelError> translateAndSaveModel(OntModel model, String translationFolder, String modelName, String saveFilename) throws TranslationException, IOException, URISyntaxException;
+	public List<ModelError> translateAndSaveModel(OntModel model, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
 	
 	/**
 	 * Method to translate and save a model when there are no rules
@@ -69,12 +70,28 @@ public interface ITranslator {
 	 * @param ruleList--the list of rules (SADL Intermediate Form) to be saved
 	 * @param translationFolder--folder in which file-based saving is to place save files
 	 * @param modelName--the URI of the model to be saved
+	 * @param orderedImports--the URIs, if any, of the imported models in order of appearance
 	 * @return saveFilename--the file name to which the model is to be saved if file-based 
 	 * @throws TranslationException
 	 * @throws IOException 
 	 * @throws URISyntaxException 
 	 */
-	public abstract List<ModelError> translateAndSaveModel(OntModel model, List<Rule> ruleList, String translationFolder, String modelName, String saveFilename) throws TranslationException, IOException, URISyntaxException;
+	public List<ModelError> translateAndSaveModel(OntModel model, List<Rule> ruleList, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
+
+	
+	/**
+	 * Method to translate and save a model when there are other knowledge structures besides rules
+	 * @param model--Jena OntModel to be saved
+	 * @param otherStructure -- the other knowledge structures
+	 * @param translationFolder--folder in which file-based saving is to place save files
+	 * @param modelName--the URI of the model to be saved
+	 * @param orderedImports--the URIs, if any, of the imported models in order of appearance
+	 * @return saveFilename--the file name to which the model is to be saved if file-based 
+	 * @throws TranslationException
+	 * @throws IOException 
+	 * @throws URISyntaxException 
+	 */
+	public List<ModelError> translateAndSaveModelWithOtherStructure(OntModel model, Object otherStructure, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
 
 	/**
 	 * Method to translate a rule in intermediate form to the target representation
@@ -85,7 +102,7 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 */
 	
-	public abstract String translateRule(OntModel model, Rule rule)throws TranslationException;	
+	public String translateRule(OntModel model, Rule rule)throws TranslationException;	
 	
 	/**
 	 * Method to translate a query in intermediate form to the target representation
@@ -96,7 +113,7 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 * @throws InvalidNameException 
 	 */
-	public abstract String translateQuery(OntModel model, Query query) throws TranslationException, InvalidNameException;	
+	public String translateQuery(OntModel model, Query query) throws TranslationException, InvalidNameException;	
 	
 	/**
 	 * Method to identify the family of reasoners to which this translator can be applied, e.g., "Jena-Based".
@@ -179,4 +196,11 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 */
 	public String translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName) throws TranslationException;
+	
+	/**
+	 * Method to validate a rule per the requirements of a specific translator
+	 * @param rule -- the Rule to be validated
+	 * @return -- any errors found
+	 */
+	public List<ModelError> validateRule(com.ge.research.sadl.model.gp.Rule rule);
 }
