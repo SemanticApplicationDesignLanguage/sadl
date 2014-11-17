@@ -73,7 +73,6 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
     	Collection<ImportMapping> imports = visitor.getModelImportMappings();
     	Iterator<ImportMapping> mappingsItr = imports != null ? imports.iterator() : null;
         IScope scope = IScope.NULLSCOPE;
-//        IScope scope = IScope.NULLSCOPE;
         if (mappingsItr != null) {
 	    	while (mappingsItr.hasNext()) {
 	            // expose the names in the Jena model for this import.

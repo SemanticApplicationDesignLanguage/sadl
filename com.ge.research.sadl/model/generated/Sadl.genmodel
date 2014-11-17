@@ -106,34 +106,6 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//RangeType/classIdentifier"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//RangeType/dataType"/>
     </genClasses>
-    <genClasses ecoreClass="Sadl.ecore#//UserDefinedDataType">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//UserDefinedDataType/udt"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//UserDefinedDataType/restriction"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EReference Sadl.ecore#//UserDefinedDataType/basetype"/>
-    </genClasses>
-    <genClasses ecoreClass="Sadl.ecore#//DataTypeRestriction">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/basetype"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//DataTypeRestriction/facets"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/basetypes"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/names"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/minexin"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/min"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/max"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/maxexin"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/regex"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/values"/>
-    </genClasses>
-    <genClasses ecoreClass="Sadl.ecore#//Facets">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/minexin"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/min"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/max"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/maxexin"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/regex"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/len"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/minlen"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/maxlen"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/values"/>
-    </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//EquivalentConcepts">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//EquivalentConcepts/class1"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//EquivalentConcepts/class2"/>
@@ -441,6 +413,34 @@
     </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//UnaryOpExpression">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//UnaryOpExpression/op"/>
+    </genClasses>
+    <genClasses ecoreClass="Sadl.ecore#//UserDefinedDataType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//UserDefinedDataType/udt"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//UserDefinedDataType/restriction"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EReference Sadl.ecore#//UserDefinedDataType/basetype"/>
+    </genClasses>
+    <genClasses ecoreClass="Sadl.ecore#//DataTypeRestriction">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/basetype"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//DataTypeRestriction/facets"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/basetypes"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/names"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/minexin"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/min"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/max"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/maxexin"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/regex"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//DataTypeRestriction/values"/>
+    </genClasses>
+    <genClasses ecoreClass="Sadl.ecore#//Facets">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/minexin"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/min"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/max"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/maxexin"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/regex"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/len"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/minlen"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/maxlen"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Facets/values"/>
     </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//RequirementsSection"/>
     <genClasses ecoreClass="Sadl.ecore#//RequirementContext">

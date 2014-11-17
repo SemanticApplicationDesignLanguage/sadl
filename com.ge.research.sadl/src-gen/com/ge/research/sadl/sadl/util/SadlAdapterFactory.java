@@ -15,7 +15,6 @@ import com.ge.research.sadl.sadl.ComplementOfClass;
 import com.ge.research.sadl.sadl.Condition;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
-import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
@@ -31,7 +30,6 @@ import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
-import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.GraphPattern;
 import com.ge.research.sadl.sadl.HasValue;
@@ -92,7 +90,6 @@ import com.ge.research.sadl.sadl.TypeDeclaration;
 import com.ge.research.sadl.sadl.TypedBNode;
 import com.ge.research.sadl.sadl.UnaryOpExpression;
 import com.ge.research.sadl.sadl.UnionResource;
-import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.ValueRow;
 import com.ge.research.sadl.sadl.ValueTable;
 import com.ge.research.sadl.sadl.VariableList;
@@ -273,21 +270,6 @@ public class SadlAdapterFactory extends AdapterFactoryImpl
       public Adapter caseRangeType(RangeType object)
       {
         return createRangeTypeAdapter();
-      }
-      @Override
-      public Adapter caseUserDefinedDataType(UserDefinedDataType object)
-      {
-        return createUserDefinedDataTypeAdapter();
-      }
-      @Override
-      public Adapter caseDataTypeRestriction(DataTypeRestriction object)
-      {
-        return createDataTypeRestrictionAdapter();
-      }
-      @Override
-      public Adapter caseFacets(Facets object)
-      {
-        return createFacetsAdapter();
       }
       @Override
       public Adapter caseEquivalentConcepts(EquivalentConcepts object)
@@ -982,51 +964,6 @@ public class SadlAdapterFactory extends AdapterFactoryImpl
    * @generated
    */
   public Adapter createRangeTypeAdapter()
-  {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link com.ge.research.sadl.sadl.UserDefinedDataType <em>User Defined Data Type</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see com.ge.research.sadl.sadl.UserDefinedDataType
-   * @generated
-   */
-  public Adapter createUserDefinedDataTypeAdapter()
-  {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link com.ge.research.sadl.sadl.DataTypeRestriction <em>Data Type Restriction</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see com.ge.research.sadl.sadl.DataTypeRestriction
-   * @generated
-   */
-  public Adapter createDataTypeRestrictionAdapter()
-  {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link com.ge.research.sadl.sadl.Facets <em>Facets</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see com.ge.research.sadl.sadl.Facets
-   * @generated
-   */
-  public Adapter createFacetsAdapter()
   {
     return null;
   }

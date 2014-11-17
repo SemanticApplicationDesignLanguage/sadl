@@ -212,33 +212,6 @@ public interface SadlFactory extends EFactory
   RangeType createRangeType();
 
   /**
-   * Returns a new object of class '<em>User Defined Data Type</em>'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return a new object of class '<em>User Defined Data Type</em>'.
-   * @generated
-   */
-  UserDefinedDataType createUserDefinedDataType();
-
-  /**
-   * Returns a new object of class '<em>Data Type Restriction</em>'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return a new object of class '<em>Data Type Restriction</em>'.
-   * @generated
-   */
-  DataTypeRestriction createDataTypeRestriction();
-
-  /**
-   * Returns a new object of class '<em>Facets</em>'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return a new object of class '<em>Facets</em>'.
-   * @generated
-   */
-  Facets createFacets();
-
-  /**
    * Returns a new object of class '<em>Equivalent Concepts</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->

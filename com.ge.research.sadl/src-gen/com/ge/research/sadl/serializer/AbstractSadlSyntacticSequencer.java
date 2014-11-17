@@ -32,10 +32,8 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	protected AbstractElementAlias match_CardCondition_ValueKeyword_3_0_or_ValuesKeyword_3_1;
 	protected AbstractElementAlias match_ClassDeclaration_TopLevelKeyword_0_3_q;
 	protected AbstractElementAlias match_ClassDeclaration_TopLevelKeyword_1_2_q;
-	protected AbstractElementAlias match_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1;
 	protected AbstractElementAlias match_ElementSet_CommaKeyword_1_0_q;
 	protected AbstractElementAlias match_EnumeratedInstances_CommaKeyword_0_q;
-	protected AbstractElementAlias match_Facets_CommaKeyword_3_2_0_q;
 	protected AbstractElementAlias match_HasValueCondition_HasKeyword_1_0_or_WithKeyword_1_1;
 	protected AbstractElementAlias match_InstAttrSPV_CommaKeyword_4_0_q;
 	protected AbstractElementAlias match_InstAttrSPV_HasKeyword_4_1_0_or_WithKeyword_4_1_1;
@@ -78,10 +76,8 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 		match_CardCondition_ValueKeyword_3_0_or_ValuesKeyword_3_1 = new AlternativeAlias(false, false, new TokenAlias(false, false, grammarAccess.getCardConditionAccess().getValueKeyword_3_0()), new TokenAlias(false, false, grammarAccess.getCardConditionAccess().getValuesKeyword_3_1()));
 		match_ClassDeclaration_TopLevelKeyword_0_3_q = new TokenAlias(false, true, grammarAccess.getClassDeclarationAccess().getTopLevelKeyword_0_3());
 		match_ClassDeclaration_TopLevelKeyword_1_2_q = new TokenAlias(false, true, grammarAccess.getClassDeclarationAccess().getTopLevelKeyword_1_2());
-		match_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1 = new AlternativeAlias(false, false, new TokenAlias(false, false, grammarAccess.getDataTypeRestrictionAccess().getCommaKeyword_1_2_0_0()), new TokenAlias(false, false, grammarAccess.getDataTypeRestrictionAccess().getOrKeyword_1_2_0_1()));
 		match_ElementSet_CommaKeyword_1_0_q = new TokenAlias(false, true, grammarAccess.getElementSetAccess().getCommaKeyword_1_0());
 		match_EnumeratedInstances_CommaKeyword_0_q = new TokenAlias(false, true, grammarAccess.getEnumeratedInstancesAccess().getCommaKeyword_0());
-		match_Facets_CommaKeyword_3_2_0_q = new TokenAlias(false, true, grammarAccess.getFacetsAccess().getCommaKeyword_3_2_0());
 		match_HasValueCondition_HasKeyword_1_0_or_WithKeyword_1_1 = new AlternativeAlias(false, false, new TokenAlias(false, false, grammarAccess.getHasValueConditionAccess().getHasKeyword_1_0()), new TokenAlias(false, false, grammarAccess.getHasValueConditionAccess().getWithKeyword_1_1()));
 		match_InstAttrSPV_CommaKeyword_4_0_q = new TokenAlias(false, true, grammarAccess.getInstAttrSPVAccess().getCommaKeyword_4_0());
 		match_InstAttrSPV_HasKeyword_4_1_0_or_WithKeyword_4_1_1 = new AlternativeAlias(false, false, new TokenAlias(false, false, grammarAccess.getInstAttrSPVAccess().getHasKeyword_4_1_0()), new TokenAlias(false, false, grammarAccess.getInstAttrSPVAccess().getWithKeyword_4_1_1()));
@@ -203,14 +199,10 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 				emit_ClassDeclaration_TopLevelKeyword_0_3_q(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_ClassDeclaration_TopLevelKeyword_1_2_q.equals(syntax))
 				emit_ClassDeclaration_TopLevelKeyword_1_2_q(semanticObject, getLastNavigableState(), syntaxNodes);
-			else if(match_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1.equals(syntax))
-				emit_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_ElementSet_CommaKeyword_1_0_q.equals(syntax))
 				emit_ElementSet_CommaKeyword_1_0_q(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_EnumeratedInstances_CommaKeyword_0_q.equals(syntax))
 				emit_EnumeratedInstances_CommaKeyword_0_q(semanticObject, getLastNavigableState(), syntaxNodes);
-			else if(match_Facets_CommaKeyword_3_2_0_q.equals(syntax))
-				emit_Facets_CommaKeyword_3_2_0_q(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_HasValueCondition_HasKeyword_1_0_or_WithKeyword_1_1.equals(syntax))
 				emit_HasValueCondition_HasKeyword_1_0_or_WithKeyword_1_1(semanticObject, getLastNavigableState(), syntaxNodes);
 			else if(match_InstAttrSPV_CommaKeyword_4_0_q.equals(syntax))
@@ -353,7 +345,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'values' | 'value'
+	 *     'value' | 'values'
 	 */
 	protected void emit_CardCondition_ValueKeyword_3_0_or_ValuesKeyword_3_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -377,14 +369,6 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'or' | ','
-	 */
-	protected void emit_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
-		acceptNodes(transition, nodes);
-	}
-	
-	/**
-	 * Syntax:
 	 *     ','?
 	 */
 	protected void emit_ElementSet_CommaKeyword_1_0_q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
@@ -396,14 +380,6 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	 *     ','?
 	 */
 	protected void emit_EnumeratedInstances_CommaKeyword_0_q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
-		acceptNodes(transition, nodes);
-	}
-	
-	/**
-	 * Syntax:
-	 *     ','?
-	 */
-	protected void emit_Facets_CommaKeyword_3_2_0_q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
 	}
 	
@@ -441,7 +417,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'with' | 'has'
+	 *     'has' | 'with'
 	 */
 	protected void emit_MaxCardCondition_HasKeyword_0_0_or_WithKeyword_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -449,7 +425,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'value' | 'values'
+	 *     'values' | 'value'
 	 */
 	protected void emit_MaxCardCondition_ValueKeyword_4_0_or_ValuesKeyword_4_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -457,7 +433,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'has' | 'with'
+	 *     'with' | 'has'
 	 */
 	protected void emit_MinCardCondition_HasKeyword_0_0_or_WithKeyword_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -577,7 +553,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'has' | 'with'
+	 *     'with' | 'has'
 	 */
 	protected void emit_WithPhrase_HasKeyword_0_1_0_or_WithKeyword_0_1_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -585,7 +561,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'with' | 'has'
+	 *     'has' | 'with'
 	 */
 	protected void emit_WithPhrase_HasKeyword_1_1_0_or_WithKeyword_1_1_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
