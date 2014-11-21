@@ -804,6 +804,13 @@
 			<description>Import Owl files to a SADL project</description> 
 			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
 		</wizard> 
-   </extension> 
+   </extension>
+  <extension
+        point="org.eclipse.core.contenttype.contentTypes">
+     <file-association
+           content-type="org.eclipse.emf.ecore.xmi"
+           file-extensions="owl,n3,nt,rdf">
+     </file-association>
+  </extension> 
 
 </plugin>
