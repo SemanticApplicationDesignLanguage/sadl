@@ -252,6 +252,7 @@ Export-Package: com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.
  com.hp.hpl.jena.util.iterator,
  com.hp.hpl.jena.vocabulary;uses:="com.hp.hpl.jena.ontology,com.hp.hpl.jena.graph,com.hp.hpl.jena.rdf.model",
  org.apache.jena.atlas.web,
+ org.openjena.riot,
  org.pojava.datetime,
  org.slf4j;uses:="org.slf4j.spi,org.slf4j.helpers"
 Bundle-ClassPath: lib/opencsv-2.3.jar,
