@@ -96,7 +96,7 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
   			@Override
   			protected void canceling() {
   				try {
-  					visitor.getConfigurationMgr(null).setInferenceCanceled(true);
+  					visitor.getConfigurationMgr((String)null).setInferenceCanceled(true);
   				} catch (MalformedURLException | ConfigurationException e) {
   					// TODO Auto-generated catch block
   					e.printStackTrace();

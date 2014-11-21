@@ -167,6 +167,7 @@ import com.ge.research.sadl.sadl.util.SadlSwitch;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 
 /**
@@ -492,6 +493,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     public List<ConceptName> getNamedConceptsInNamedModel(URI uri) throws InvalidNameException, IOException {
     	String publicUri = null;
 		try {
+			boolean isSadlDerived = uri.isPlatform();
 	   		if (uri.isPlatform()) {
 	   			URL fileUri = FileLocator.toFileURL(new URL(uri.toString()));
 	   			uri = URI.createURI(fileUri.toString());
@@ -503,7 +505,12 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			else {
 				throw new InvalidNameException("Unable to find a model with URL '" + uri + "'");
 			}
-			return getModel().getNamedConceptsInNamedModel(publicUri, null);
+			if (isSadlDerived) {
+				return getModel().getNamedConceptsInNamedModel(publicUri, null);
+			}
+			else {
+				return cmgr.getNamedConceptsInModel(cmgr.getModelGetter().getOntModel(publicUri, uri.toString(), null), publicUri, null, Scope.INCLUDEIMPORTS);
+			}
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 			throw new InvalidNameException("Error finding a model with actual URL '" + uri + "': " + e.getLocalizedMessage());
@@ -3302,7 +3309,12 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 		        IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 		
 		        //create an new IPath from the URI
-		        IPath path = new Path(uri.toPlatformString(false));
+		        String platformStr = uri.toPlatformString(false);
+		        if (platformStr == null) {
+		        	// will this happen only for OWL files not created from SADL?
+		        	return;
+		        }
+		        IPath path = new Path(platformStr);
 		
 		        //finally resolve the file with the workspace
 		        IFile file = myWorkspaceRoot.getFile(path);
