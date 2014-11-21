@@ -57,7 +57,6 @@ public class JenaResource extends ResourceImpl {
     @Override
     protected void doLoad(InputStream inputStream, Map<?, ?> options)
             throws IOException {
-
     	// However, we will load OWL and RDF files by querying the SadlModelManager 
         // to add the files' exported names to our resource's contents but only if
     	// it isn't an OWL file generated from a SADL file (which should already have
@@ -73,6 +72,10 @@ public class JenaResource extends ResourceImpl {
         	visitor.init(this);
         	Resource context = this.getResourceSet().getResource(thisUri, false);
             List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri);
+            if (names == null) {
+            	return;
+            }
+            
             Model model = SadlFactory.eINSTANCE.createModel();
             getContents().add(model);
 
