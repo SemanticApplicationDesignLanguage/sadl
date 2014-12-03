@@ -27,6 +27,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,12 +64,6 @@ public class JenaResource extends ResourceImpl {
     	// its names exported).
         try {
         	URI thisUri = getURI();
-//        	if (thisUri.segmentCount() > 2) {
-//        		String containingFolder = thisUri.segment(thisUri.segmentCount() - 2);
-//        		if (containingFolder.equals(ResourceManager.OWLDIR)) {
-//        			return;
-//        		}
-//        	}
         	visitor.init(this);
         	Resource context = this.getResourceSet().getResource(thisUri, false);
             List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri);
@@ -95,21 +90,21 @@ public class JenaResource extends ResourceImpl {
     				break;
     	    	case INDIVIDUAL:
                     ResourceName rnInst = SadlFactory.eINSTANCE.createResourceName();
-                    rnInst.setName(name.toString());
+                    rnInst.setName(name.getName());
                     InstanceDeclaration id = SadlFactory.eINSTANCE.createInstanceDeclaration();
                     id.setInstanceName(rnInst);
                     model.getElements().add(id);
     				break;
     	    	case OBJECTPROPERTY:
     	    	    ResourceName rnObj= SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnObj.setName(name.toString());
+    	    	    rnObj.setName(name.getName());
     	    	    PropertyDeclaration pdObj = SadlFactory.eINSTANCE.createPropertyDeclaration();
     	    	    pdObj.setPropertyName(rnObj);
     	    	    model.getElements().add(pdObj);
     				break;
     	    	case ONTCLASS:
     	    	    ResourceName rnClass = SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnClass.setName(name.toString());
+    	    	    rnClass.setName(name.getName());
     	    	    ClassDeclaration cd = SadlFactory.eINSTANCE.createClassDeclaration();
     	    	    cd.setClassName(rnClass);
     	    	    model.getElements().add(cd);
@@ -118,6 +113,7 @@ public class JenaResource extends ResourceImpl {
     				break;
                 }
             }
+            logger.info("Loaded "+thisUri.lastSegment()+" with "+model.getElements().size()+" concepts.");
         }
         catch (InvalidNameException e) {
         	logger.error("Invalid name", e);    	

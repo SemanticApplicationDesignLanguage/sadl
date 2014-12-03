@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -512,8 +513,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 				return cmgr.getNamedConceptsInModel(cmgr.getModelGetter().getOntModel(publicUri, uri.toString(), null), publicUri, null, Scope.INCLUDEIMPORTS);
 			}
 		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			throw new InvalidNameException("Error finding a model with actual URL '" + uri + "': " + e.getLocalizedMessage());
+			return Collections.emptyList();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {

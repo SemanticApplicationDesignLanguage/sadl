@@ -3956,7 +3956,7 @@ public class ModelManager {
 			return getNamedConceptsOfType(ctype, Scope.INCLUDEIMPORTS);
 		}
 
-		if (modelname.equals(modelName)) {
+		if (modelname.equals(this.modelName)) {
 			// we're getting the concept names in this ModelManager's namespace
 			// only
 			return getNamedConceptsOfType(ctype, Scope.LOCALONLY);
