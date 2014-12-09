@@ -8,6 +8,7 @@ import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
 import org.eclipse.xtext.resource.impl.DefaultResourceDescription;
 import org.eclipse.xtext.util.IResourceScopeCache;
 
+import com.ge.research.sadl.builder.SadlModelManager;
 import com.google.inject.Provider;
 
 public class SadlResourceDescription extends DefaultResourceDescription {
@@ -19,10 +20,11 @@ public class SadlResourceDescription extends DefaultResourceDescription {
 	
 	public SadlResourceDescription(Resource resource,
 			IDefaultResourceDescriptionStrategy strategy,
-			IResourceScopeCache cache) {
+			IResourceScopeCache cache, SadlModelManager visitor) {
 		super(resource, strategy, cache);
 		this.cache = cache;
 		this.strategy = strategy;
+		// get imported URIs from ConfigurationManager and cache it
 	}
 
 	public LinkedHashSet<URI> getImportedURIs () {

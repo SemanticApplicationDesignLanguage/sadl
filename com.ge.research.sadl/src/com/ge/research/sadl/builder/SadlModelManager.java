@@ -494,7 +494,13 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     public List<ConceptName> getNamedConceptsInNamedModel(URI uri) throws InvalidNameException, IOException {
     	String publicUri = null;
 		try {
-			boolean isSadlDerived = uri.isPlatform();
+			// TODO: Compute isSadlDerived
+			boolean isSadlDerived = false;
+			
+			if (uri.isPlatform() && uri.lastSegment().endsWith(".owl")) {
+				isSadlDerived = "OwlModels".equals(uri.segment(uri.segmentCount()-1));
+				int i=0;
+			}
 	   		if (uri.isPlatform()) {
 	   			URL fileUri = FileLocator.toFileURL(new URL(uri.toString()));
 	   			uri = URI.createURI(fileUri.toString());

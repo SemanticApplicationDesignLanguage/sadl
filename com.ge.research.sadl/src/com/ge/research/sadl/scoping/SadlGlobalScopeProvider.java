@@ -158,6 +158,9 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
     @Override
     protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
     	// copied from super method
+    	// access ConfigurationManager to get all accessed URIs
+//    	visitor.getConfigurationMgr(resource.getURI())
+    	
     	IResourceDescription description = resourceDescriptionManager.getResourceDescription(resource);
     	if (description!=null && description instanceof SadlResourceDescription) {
     		LinkedHashSet<URI> uris = ((SadlResourceDescription)description).getImportedURIs();

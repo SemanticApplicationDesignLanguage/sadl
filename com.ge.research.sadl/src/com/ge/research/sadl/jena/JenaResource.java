@@ -37,6 +37,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.sadl.ClassDeclaration;
 import com.ge.research.sadl.sadl.InstanceDeclaration;
 import com.ge.research.sadl.sadl.Model;
+import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.sadl.PropertyDeclaration;
 import com.ge.research.sadl.sadl.ResourceName;
 import com.ge.research.sadl.sadl.SadlFactory;
@@ -67,11 +68,22 @@ public class JenaResource extends ResourceImpl {
         	visitor.init(this);
         	Resource context = this.getResourceSet().getResource(thisUri, false);
             List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri);
-            if (names == null) {
+            if (names == null || names.isEmpty()) {
             	return;
             }
             
+            // create map ConceptName#prefix -> List<ConceptName>
+            
+            
+            
+            // TODO: create one Model per prefix
+            // add ModelName to the Model, set alias=prefix
             Model model = SadlFactory.eINSTANCE.createModel();
+            ModelName modelName = SadlFactory.eINSTANCE.createModelName();
+            String alias = names.get(0).getPrefix();
+            modelName.setAlias(alias);
+            model.setModelName(modelName);
+            
             getContents().add(model);
 
             // This may not work correctly at first, but let's try it.
