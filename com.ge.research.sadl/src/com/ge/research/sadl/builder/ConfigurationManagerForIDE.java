@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 
 import org.eclipse.core.resources.IFolder;
@@ -49,6 +50,7 @@ import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.URI;
 
+import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
@@ -56,8 +58,15 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.utils.SadlUtils;
+import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
@@ -66,6 +75,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileUtils;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
  * this class extension supports configuration tasks unique to the IDE (development environment)
@@ -534,18 +544,38 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	 */
 	public static String getOWLFormat() {
 		IPreferencesService service = Platform.getPreferencesService();
-		String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
-		return format;
+		if (service != null) {
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
+			return format;
+		}
+		else {
+			return ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+		}
 	}
 
     private boolean isOwlFileCreatedBySadl(File file) {
 		try {
-			StmtIterator sitr = getMappingModel().listStatements(null, altUrlProp, getSadlUtils().fileNameToFileUrl(file.getCanonicalPath()));
-			if (sitr.hasNext()) {
-				Resource ontSpec = sitr.nextStatement().getSubject();
-				Statement stmt = ontSpec.getProperty(createdBy);
-				if (stmt != null && stmt.getObject().equals(createdBySadlLiteral)) {
-					return true;
+			String val = getSadlUtils().fileNameToFileUrl(file.getCanonicalPath());
+			String key = null;
+			if (getMappings().containsValue(val)) {
+				Iterator<String> kitr = getMappings().keySet().iterator();
+				while (kitr.hasNext()) {
+					key = kitr.next();
+					if (getMappings().get(key).equals(val)) {
+						break;
+					}
+					key = null;
+				}
+				if (key != null) {
+					Resource r = getMappingModel().getResource(key);
+					StmtIterator sitr = getMappingModel().listStatements(null, publicUrlProp, r);
+					if (sitr.hasNext()) {
+						Resource ontSpec = sitr.nextStatement().getSubject();
+						Statement stmt = ontSpec.getProperty(createdBy);
+						if (stmt != null && stmt.getObject().equals(createdBySadlLiteral)) {
+							return true;
+						}
+					}
 				}
 			}
 		} catch (URISyntaxException e) {
@@ -885,5 +915,77 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		}
 		return sadlUtils;
 	}
+
+	@Override
+	public boolean isSadlDerived(String publicUri) throws ConfigurationException, MalformedURLException {
+		String altUrl = getAltUrlFromPublicUri(publicUri);
+		if (altUrl !=  null && !altUrl.equals(publicUri)) {
+			String altFN = getSadlUtils().fileUrlToFileName(altUrl);
+			return isOwlFileCreatedBySadl(new File(altFN));
+		}
+		return false;
+	}
+
+	@Override
+	public Map<String, String> getImports(String publicUri) throws ConfigurationException, IOException {
+		OntModel theModel = getOntModel(publicUri);
+		if (theModel != null) {
+			Ontology onto = theModel.getOntology(publicUri);
+			if (onto != null) {
+				ExtendedIterator<OntResource> importsItr = onto.listImports();
+				if (importsItr.hasNext()) {
+					Map<String, String> map = new HashMap<String, String>();
+					while (importsItr.hasNext()) {
+						OntResource or = importsItr.next();
+						String importUri = or.toString();
+						String prefix = theModel.getNsURIPrefix(importUri);
+						if (prefix == null) {
+							prefix = getGlobalPrefix(importUri);
+						}
+						logger.debug("Ontology of model '" + publicUri + "' has import '" + importUri + "' with prefix '" + prefix + "'");
+						if (!map.containsKey(importUri)) {
+							map.put(importUri, prefix);
+						}
+					}
+					return map;
+				}
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public List<ConceptName> getNamedConceptsInModel(String publicUri,
+			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException {
+		OntModel theModel = getOntModel(publicUri);
+		if (theModel != null) {
+			return getNamedConceptsInModel(theModel, publicUri, cType, scope);
+		}
+		return null;
+	}
+
+	protected OntModel getOntModel(String publicUri) throws ConfigurationException, IOException {
+		OntModel theModel = null;
+		String altUrl = getAltUrlFromPublicUri(publicUri);
+		if (repoType == null) {
+	    	repoType = ConfigurationManagerForIDE.getOWLFormat();	
+		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(getTdbFolder(), repoType);
+		    setModelGetter(modelGetter);
+		}
+		if (repoType != null && repoType.equals(IConfigurationManager.JENA_TDB)) {
+			try {
+				theModel = getModelGetter().getOntModel(publicUri, altUrl,
+						IConfigurationManager.JENA_TDB);
+			} catch (Throwable t) {
+				// ok to fail; may not exist
+			}
+		} else {
+			if (getModelGetter() != null) {
+				theModel = getModelGetter().getOntModel(publicUri, altUrl, repoType);
+			}
+		}
+		return theModel;
+	}
+
 
 }

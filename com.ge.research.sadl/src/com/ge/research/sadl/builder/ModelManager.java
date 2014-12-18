@@ -105,6 +105,7 @@ import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
+import com.ge.research.sadl.sadl.DataType;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.ge.research.sadl.utils.UtilsForJena;
@@ -6506,20 +6507,10 @@ public class ModelManager {
 					sb.append("[shape=point label=\"");
 				}
 				else {
-					sb.append("[shape=box label=");
-				}
-				String ostr = o.toString();
-				boolean includeQuotes = true;
-				if (ostr.startsWith("\"")) {
-					includeQuotes = false;
-				}
-				else {
-					sb.append("\"");
+					sb.append("[shape=box label=\"");
 				}
 				sb.append(o.toString());
-				if (includeQuotes) {
-					sb.append("\"");
-				}
+				sb.append("\"");
 				if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
 					// color the "anchor" node
 					sb.append(" color=lightblue style=filled fontcolor=navyblue");
@@ -7733,7 +7724,7 @@ public class ModelManager {
 	}
 
 	public List<ModelError> addUserDefinedDataType(String name,
-			EList<String> unionOfTypes, String baseType, String minexin, String min, String maxexin,
+			EList<DataType> unionOfTypes, String baseType, String minexin, String min, String maxexin,
 			String max, String regex, EList<String> values) {
 		String uri = getModelName();
 		

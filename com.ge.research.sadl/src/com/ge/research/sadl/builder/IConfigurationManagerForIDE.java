@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 
 import org.eclipse.core.resources.IFolder;
@@ -233,6 +234,42 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 			OntModel localModel, String modelName, ConceptType cType,
 			Scope scope) throws InvalidNameException;
 
+	/**
+	 * Method to get the Jena OntDocumentManager 
+	 */
 	public abstract OntDocumentManager getJenaDocumentMgr();
 
+	/**
+	 * Method to determine if a particular model, identified by URI, is derived
+	 * from translating a SADL model file.
+	 * 
+	 * @param publicUri
+	 * @return
+	 * @throws ConfigurationException 
+	 * @throws MalformedURLException 
+	 */
+	public abstract boolean isSadlDerived(String publicUri) throws ConfigurationException, MalformedURLException;
+
+	/**
+	 * Method to find the imports, with prefixes, for a given model identified by uri
+	 * @param publicUri
+	 * @return
+	 * @throws ConfigurationException 
+	 * @throws IOException 
+	 */
+	public abstract Map<String, String> getImports(String publicUri) throws ConfigurationException, IOException;
+
+	/**
+	 * Get the concept names of everything in the named model matching type and scope
+	 * @param localModel
+	 * @param publicUri
+	 * @param cType
+	 * @param scope
+	 * @return
+	 * @throws InvalidNameException
+	 * @throws ConfigurationException 
+	 */
+	public abstract List<ConceptName> getNamedConceptsInModel(String publicUri, 
+			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException;
+	
 }
