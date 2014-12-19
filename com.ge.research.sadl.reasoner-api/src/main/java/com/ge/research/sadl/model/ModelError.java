@@ -18,12 +18,10 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/10/28 11:56:09 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2014/12/17 17:26:33 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model;
-
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 
 /**
  * This class encapsulates the important information describing an error in a call to ModelManager to create 

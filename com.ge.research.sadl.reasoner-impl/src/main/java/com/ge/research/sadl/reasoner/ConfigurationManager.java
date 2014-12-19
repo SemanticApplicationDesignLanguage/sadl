@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.16 $ Last modified on   $Date: 2014/10/28 11:56:34 $
+ * $Revision: 1.17 $ Last modified on   $Date: 2014/12/17 17:26:29 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -325,6 +325,38 @@ public class ConfigurationManager implements IConfigurationManager {
 		return reasoner;
 	}
 	
+	public IReasoner getOtherReasoner(String reasonerClassName) throws ConfigurationException {
+		IReasoner otherReasoner = null;
+		try {
+			otherReasoner = (IReasoner) getClassInstance(reasonerClassName);
+			otherReasoner.setConfigurationManager(this);
+			if (getConfigModel() != null) {
+				// first apply configuration for the reasoner family
+				Resource family = getConfigModel().getResource(CONFIG_NAMESPACE + otherReasoner.getReasonerFamily());
+				applyConfigurationToReasoner(otherReasoner, family);
+				// then apply configuration for the specified reasoner specifically
+				Resource category = getConfigModel().getResource(CONFIG_NAMESPACE + otherReasoner.getConfigurationCategory());
+				applyConfigurationToReasoner(otherReasoner, category);
+			}
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+			throw new ConfigurationException("Unable to instantiate Reasoner '" + reasonerClassName + "'", e);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			throw new ConfigurationException("Unable to instantiate Reasoner '" + reasonerClassName + "' due to an illegal access exception", e);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new ConfigurationException("Reasoner class '" + reasonerClassName + "' not found", e);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+
+		if (otherReasoner == null) {
+			throw new ConfigurationException("Unable to instantiate Reasoner '" + reasonerClassName + "'");
+		}
+		return otherReasoner;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManager#clearReasoner()
 	 */
@@ -471,10 +503,10 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (getConfigModel() != null) {
 			// first apply configuration for the reasoner family
 			Resource family = getConfigModel().getResource(CONFIG_NAMESPACE + reasoner.getReasonerFamily());
-			applyConfigurationToReasoner(family);
+			applyConfigurationToReasoner(reasoner, family);
 			// then apply configuration for the specified reasoner specifically
 			Resource category = getConfigModel().getResource(CONFIG_NAMESPACE + reasoner.getConfigurationCategory());
-			applyConfigurationToReasoner(category);
+			applyConfigurationToReasoner(reasoner, category);
 		}
 	}
 	
@@ -535,7 +567,7 @@ public class ConfigurationManager implements IConfigurationManager {
 		return this.getClass().getClassLoader().loadClass(className).newInstance();
 	}
 
-	private void applyConfigurationToReasoner(Resource category) throws ConfigurationException {
+	private void applyConfigurationToReasoner(IReasoner theReasoner, Resource category) throws ConfigurationException {
 		if (category != null) {
 			String[] reasonerCategory = new String[1];
 			reasonerCategory[0] = category.getLocalName();
@@ -543,7 +575,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			
 			for (int i = 0; configItems != null && i < configItems.size(); i++) {
 				ConfigurationItem configItem = configItems.get(i);
-				reasoner.configure(configItem);
+				theReasoner.configure(configItem);
 			}
 		}
 	}

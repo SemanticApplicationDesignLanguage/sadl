@@ -78,14 +78,26 @@ public interface IConfigurationManager {
 
 	public abstract IReasoner getReasoner() throws ConfigurationException;
 
-	/*	added to handle cases where a copy of the reasoner is required. calling this
+	/**
+	 * Method to get a copy of the reasoner when required. Calling this
 	 * 	method should either provide a new reasoner that matches the ones previously 
 	 * 	created, at the time of their creation, or create a deep copy of the reasoner.
+	 * 
+	 * @return
+	 * @throws ConfigurationException
 	 */
-	
 	public abstract IReasoner getCloneReasoner() throws ConfigurationException;
 	
-	/** Clear the current reasoner (if any) because something may have changed and a new
+	/**
+	 * Method to get a different reasoner than the one specified in the configuration file
+	 * 
+	 * @param reasonerClassName
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	public abstract IReasoner getOtherReasoner(String reasonerClassName) throws ConfigurationException;
+
+		/** Clear the current reasoner (if any) because something may have changed and a new
 	 * reasoner needs to be created for inference to occur.
 	 * @return
 	 */

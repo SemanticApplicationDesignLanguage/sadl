@@ -211,7 +211,7 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 		if (proposal instanceof ConfigurableCompletionProposal) {
 			ConfigurableCompletionProposal configurable = (ConfigurableCompletionProposal) proposal;
 			configurable.setSelectionStart(configurable.getReplacementOffset());
-			configurable.setSelectionLength(name.length() - 1);
+			configurable.setSelectionLength(name.length());
 			configurable.setAutoInsertable(false);
 			configurable.setSimpleLinkedMode(context.getViewer(), name.charAt(0), '\t');
 		}
