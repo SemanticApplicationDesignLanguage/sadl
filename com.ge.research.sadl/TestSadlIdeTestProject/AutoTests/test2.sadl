@@ -1,0 +1,7 @@
+uri "http://com.ge.research.sadl/test2" alias tst2 version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $". 
+
+Thingy is a class, described by someBooleanProperty with values of type boolean.
+
+AnInstance is a Thingy with someBooleanProperty true.
+
+Test: someBooleanProperty of AnInstance is true.

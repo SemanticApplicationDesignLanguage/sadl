@@ -1,0 +1,32 @@
+uri "http://sadl.imp/PeircesNessesMotherhoodOne".
+
+// Firstness is the classification that something receives because of its intrinsic
+//   properties.
+Firstness is a top-level class.
+
+// Secondness is the classification that something receives because of its relationship to
+//   something else; it is also known as a Role
+Secondness is a top-level class.
+
+// Thirdness is the mediating concept that brings two other concepts into relation
+Thirdness is a top-level class.
+
+Person is a type of Firstness.
+Woman is a type of Person.	
+Mother is a type of Secondness.
+
+Motherhood is a type of Thirdness.	// puts Mother and Child into relationship
+motherIn describes Motherhood has values of type Woman.
+childIn describes Motherhood has values of type Person.
+
+child describes Person has values of type Person.
+mother describes Person has values of type Woman.
+
+a Woman is a Mother only if child has at least 1 values.
+
+Eve is a Woman.
+Cain is a Person.
+Eve has child Cain.
+
+Print: "This test will only pass if OWL entailments are enabled in the reasoner.".
+Test: Eve is a Mother.

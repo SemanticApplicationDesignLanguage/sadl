@@ -1,0 +1,7 @@
+uri "http://sadl.imp/CircularImportA".
+
+// Loading this file, which imports a file that imports this file,
+// should cause an error message about circular import to be shown
+// in the console window.
+import "file://ManualTests/CircularImportB.sadl" as CircularImportB.
+

@@ -1,0 +1,18 @@
+uri "http://sadl.imp/JenaBuiltin".
+
+Widget is a top-level class.
+p1 describes Widget has values of type int.
+p2 describes Widget has values of type int.
+p3 describes Widget has values of type int.
+
+Rule TestRule
+	given
+		w is a Widget
+	if
+		
+	then
+		p3 of w = p1 of w - p2 of w .
+		
+MyWidget is a Widget, has p1 5, has p2 4 .
+
+Test: MyWidget has p3 1 . 	

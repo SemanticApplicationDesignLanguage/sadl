@@ -1,0 +1,27 @@
+uri "http://sadl.imp/SubtractDates".
+
+Computer is a top-level class.
+purchase_date describes Computer has values of type date.
+current_date describes Computer has values of type date.
+lag describes Computer has values of type double.
+day_before describes Computer has values of type date.
+
+Rule TestRule1
+	given
+		e is a Computer
+	if
+	
+	then
+		lag of e is subtractDates(purchase_date of e, current_date of e, "Mo").
+		
+Rule TestRule2
+	given
+		e is an Computer
+	if
+	then
+		day_before of e is subtractDates(purchase_date of e, -1, "D").		
+
+MyComputer is an Computer, has purchase_date "2008-04-10", has current_date "2008-03-10".
+
+Test: MyComputer has lag 1.0 . 
+Test: MyComputer has day_before "2008-04-09".

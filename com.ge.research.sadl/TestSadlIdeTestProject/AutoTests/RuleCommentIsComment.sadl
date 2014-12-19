@@ -1,0 +1,24 @@
+uri "http://sadl.imp/RuleCommentIsComment".
+
+Thingy is a top-level class.
+madeOf describes Thingy has values of type Thingy.
+color describes Thingy has values of type string.
+
+Rule CF34-3_DJST_TMCM_Mapping_Rules_tmcm_comment_rule_1
+// generated for lookup table value in cell H5
+    given
+        x is any Thingy
+        y is any Thingy
+        z is any Thingy
+    if
+	madeOf of x == madeOf of y 
+    then
+        comment of x is comment of y
+//	has comment of x = has comment of y
+        color of x is color of y .
+        
+Mud is a Thingy.
+T1 is a Thingy, has madeOf Mud, has color "brown", has comment "This is a test" .
+T2 is a Thingy, has madeOf Mud.
+
+Test: T2 has color "brown", has comment "This is a test" .

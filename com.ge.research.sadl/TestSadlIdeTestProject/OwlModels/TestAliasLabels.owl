@@ -1,0 +1,49 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/testsadlide/testaliaslabels#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/testsadlide/testaliaslabels">
+  <owl:Ontology rdf:about="http://sadl.imp/testsadlide/testaliaslabels">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on $Date: 2014/11/26 17:19:39 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestAliasLabels.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="OtherThingy">
+    <rdfs:label>What-cha-ma-call-it</rdfs:label>
+    <rdfs:label>Other Thing-a-ma-jig</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Thingy"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.imp/testsadlide/testaliaslabels#Thingy">
+    <rdfs:label>Thing-a-ma-jig</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="Gender">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <Gender rdf:ID="Male">
+            <rdfs:label>boy</rdfs:label>
+          </Gender>
+          <Gender rdf:ID="Female">
+            <rdfs:label>girl</rdfs:label>
+          </Gender>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:ID="stone">
+    <rdfs:label>weight</rdfs:label>
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:ID="mass"/>
+    </rdfs:subPropertyOf>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.imp/testsadlide/testaliaslabels#mass">
+    <rdfs:label>weight</rdfs:label>
+    <rdfs:domain rdf:resource="http://sadl.imp/testsadlide/testaliaslabels#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="MyThing">
+    <rdfs:label>Andy's Thingy</rdfs:label>
+  </Thingy>
+</rdf:RDF>

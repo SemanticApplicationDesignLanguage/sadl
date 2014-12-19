@@ -1,0 +1,9 @@
+uri "http://com.ge.research.sadl/RuleWarnings". 
+
+RangeClass is a class, must be one of {InstRC1, InstRC2}.
+DomainClass is a class described by objproperty with values of type RangeClass.
+
+Rule TestRule
+	if	objproperty has var1 var2
+		objproperty of var1 not known
+	then InstRC1 has objproperty var2.

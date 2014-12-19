@@ -1,0 +1,45 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/Units">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/Units">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:42 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Units.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Shape"/>
+  <owl:Class rdf:ID="Rectangle">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Shape2D"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Aircraft"/>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/Units#Shape2D">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/Units#Shape"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Planting"/>
+  <owl:ObjectProperty rdf:ID="what">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/Units#Planting"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/Units#Shape"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="width">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/Units#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="maxSpeed">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/Units#Aircraft"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="height">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/Units#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="area">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/Units#Shape2D"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="duration">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/Units#Planting"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#duration"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>

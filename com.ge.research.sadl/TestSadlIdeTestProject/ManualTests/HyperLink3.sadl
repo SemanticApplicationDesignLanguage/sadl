@@ -1,0 +1,14 @@
+uri "http://com.ge.research.sadl/HyperLink3" alias hl3. 
+
+import "HyperLink2.sadl". 
+
+/* This is part of a test suite for testing hyperlinking of concepts with the following files:
+ * 	HyperLink1.sadl -- defines HL1, hlp1
+ *  HyperLink2.sadl -- defines HL2, hlp2
+ *  HyperLink3.sadl -- imports HyperLink2.sadl and uses concepts from the first two models, does not use prefixes
+ *  HyperLink4.sadl -- same as HyperLink3.sadl except that the concepts use prefixes
+ */
+
+MyHL is a HL1.
+MyHL2 is a HL1 with hlp1 MyHL.
+MyHL3 is an HL2 with hlp2 MyHL2.

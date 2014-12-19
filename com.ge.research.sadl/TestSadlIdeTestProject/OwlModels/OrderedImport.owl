@@ -1,0 +1,22 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research/testgesadl/OrderedImport">
+  <owl:Ontology rdf:about="http://com.ge.research/testgesadl/OrderedImport">
+    <owl:imports rdf:resource="http://com.ge.research/testgesadl/importB"/>
+    <owl:imports rdf:resource="http://com.ge.research/testgesadl/importA"/>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:42 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'OrderedImport.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thing3">
+    <rdfs:subClassOf>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="http://com.ge.research/testgesadl/importA#Thing1"/>
+          <rdf:Description rdf:about="http://com.ge.research/testgesadl/importB#Thing2"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:subClassOf>
+  </owl:Class>
+</rdf:RDF>

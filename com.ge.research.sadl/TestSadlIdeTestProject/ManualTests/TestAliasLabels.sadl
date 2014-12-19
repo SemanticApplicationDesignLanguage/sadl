@@ -1,0 +1,15 @@
+uri "http://sadl.imp/testsadlide/testaliaslabels" version "$Revision: 1.1 $ Last modified on $Date: 2014/11/26 17:19:39 $".
+
+// This file should load without error and the aliases should create rdfs:label
+//  annotation properties in the OWL file generated.
+
+Thingy (alias "Thing-a-ma-jig") is a top-level class.
+OtherThingy (alias "Other Thing-a-ma-jig", "What-cha-ma-call-it") is a type of Thingy.
+
+// "weight" is often [incorrectly] used by English speakers to refer to "mass"
+mass (alias "weight") describes Thingy has values of type float.
+stone (alias "weight") is a type of mass. 
+
+MyThing (alias "Andy's Thingy") is a Thingy.
+
+Gender is a top-level class must be one of {Male (alias "boy"), Female (alias "girl")}.

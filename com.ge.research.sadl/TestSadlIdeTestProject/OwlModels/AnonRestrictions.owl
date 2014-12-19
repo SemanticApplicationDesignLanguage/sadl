@@ -1,0 +1,137 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.org/TestSadlIde/AnonRestrictions#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/AnonRestrictions">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'AnonRestrictions.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Manufacturer"/>
+  <owl:Class rdf:ID="AppleComputer">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:hasValue>
+          <Manufacturer rdf:ID="Apple"/>
+        </owl:hasValue>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="manufacturer"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:ID="Computer"/>
+          <owl:Restriction>
+            <owl:hasValue rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Apple"/>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Person"/>
+  <owl:Class rdf:ID="AppleLovingStudent">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Student"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Artifact"/>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#Student">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Professor"/>
+  <owl:Class rdf:ID="AppleProfessor">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#Professor"/>
+          <owl:Restriction>
+            <owl:someValuesFrom>
+              <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                  <owl:Class rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#Student"/>
+                  <owl:Restriction>
+                    <owl:someValuesFrom>
+                      <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                          <owl:Class rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#Computer"/>
+                          <owl:Restriction>
+                            <owl:hasValue rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Apple"/>
+                            <owl:onProperty>
+                              <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer"/>
+                            </owl:onProperty>
+                          </owl:Restriction>
+                        </owl:intersectionOf>
+                      </owl:Class>
+                    </owl:someValuesFrom>
+                    <owl:onProperty>
+                      <owl:ObjectProperty rdf:ID="owns"/>
+                    </owl:onProperty>
+                  </owl:Restriction>
+                </owl:intersectionOf>
+              </owl:Class>
+            </owl:someValuesFrom>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="teaches"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#Computer">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Artifact"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Computer"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Manufacturer"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#owns">
+    <rdfs:range>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#Computer"/>
+          <owl:Restriction>
+            <owl:hasValue rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Apple"/>
+            <owl:onProperty rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer"/>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </rdfs:range>
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Artifact"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/AnonRestrictions#teaches">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Professor"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Student"/>
+  </owl:ObjectProperty>
+  <Professor rdf:ID="MyProf">
+    <teaches>
+      <Student rdf:ID="AppleCore">
+        <owns>
+          <Computer rdf:ID="AppleSkin">
+            <manufacturer rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions#Apple"/>
+          </Computer>
+        </owns>
+      </Student>
+    </teaches>
+  </Professor>
+  <AppleProfessor rdf:ID="YourProf">
+    <teaches>
+      <Student rdf:ID="DellCore">
+        <owns>
+          <Computer rdf:ID="DellSkin">
+            <manufacturer>
+              <Manufacturer rdf:ID="Dell"/>
+            </manufacturer>
+          </Computer>
+        </owns>
+      </Student>
+    </teaches>
+  </AppleProfessor>
+</rdf:RDF>

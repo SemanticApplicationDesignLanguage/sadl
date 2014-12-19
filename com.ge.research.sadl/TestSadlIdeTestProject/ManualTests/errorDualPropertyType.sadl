@@ -1,0 +1,10 @@
+uri "http://sadl.imp/errorDualPropertyType".
+
+Person is a top-level class.
+Pet is a top-level class.
+Gender is a top-level class, must be one of {Male, Female}.
+
+gender describes Person has values of type Gender.
+
+gender describes Pet has values of type string.
+

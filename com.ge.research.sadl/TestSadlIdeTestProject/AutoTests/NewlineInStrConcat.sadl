@@ -1,0 +1,14 @@
+uri "http://com.ge.research.sadlNewlineInStrConcat". 
+
+Thingy is a class described by description with values of type string.
+
+Rule TestNL
+	given x is a Thingy
+	if	  e is strConcat("First line\\\\n", "Second line: x=", x, "\\\\n", "Third line\\\\n")
+	then  x has description e
+		  print(e).
+	
+MyThingy is a Thingy.
+
+Test: description of MyThingy is known.
+Ask: select x, y where x has description y.	

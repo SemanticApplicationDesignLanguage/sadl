@@ -1,0 +1,17 @@
+uri "http://com.ge.research.sadl/Bug3453776" alias Bug3453776 . 
+
+Thingy is a class described by aProp with values of type string.
+
+MyThingy is a Thingy with aProp "some value".
+
+Rule testrule
+	if x is a Thingy
+	then print(x, rdf:^type, "This works!").
+	
+Rule testrule2
+	if x is a Thingy
+	   y is aProp of x
+	then print(x, aProp, y).	
+	
+Ask: select p, x where MyThingy has p x.
+	

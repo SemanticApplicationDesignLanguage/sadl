@@ -1,0 +1,182 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://com.ge.research.sadl.configuration#">
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Jena-Based">
+    <subcategory>
+      <rdf:Bag>
+        <rdf:li>
+
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >cos</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Cos</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Sin</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >sin</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >tan</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Tan</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Acos</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >acos</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >asin</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Asin</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Atan</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >atan</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >greaterThan</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.GreaterThan</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >lessThan</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.LessThan</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Abs</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >abs</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >subtractDates</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.SubtractDates</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Product</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >product</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >min</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Min</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Print</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >print</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >sum</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Sum</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >assign</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Assign</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >noValue</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.hp.hpl.jena.reasoner.rulesys.builtins.NoValue</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Pow</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >pow</name>
+          </Builtin>
+        </rdf:li>
+      </rdf:Bag>
+    </subcategory>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Jena">
+    <pModelSpec rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >OWL_MEM_RULE</pModelSpec>
+    <pOWLTranslation rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pOWLTranslation>
+    <pUseLuceneIndexer rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pUseLuceneIndexer>
+    <pTimeOut rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >-1</pTimeOut>
+    <pTrace rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pTrace>
+    <pRuleMode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hybrid</pRuleMode>
+    <pDerivationLogging rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >None</pDerivationLogging>
+    <pTransitiveClosureCaching rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pTransitiveClosureCaching>
+    <translatorClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.translator.JenaTranslatorPlugin</translatorClassName>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Console">
+    <pShowNamespaces rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pShowNamespaces>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#DateFormat">
+    <dmyOrder rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >mdy</dmyOrder>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#ReasonerSpec">
+    <reasonerClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin</reasonerClassName>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Builtin"/>
+</rdf:RDF>

@@ -1,0 +1,29 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns="http://sadl.imp/InferComments#"
+  xml:base="http://sadl.imp/InferComments">
+  <owl:Ontology rdf:about="http://sadl.imp/InferComments">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'InferComments.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:DatatypeProperty rdf:ID="p3">
+    <rdfs:domain rdf:resource="http://sadl.imp/InferComments#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="p2">
+    <rdfs:domain rdf:resource="http://sadl.imp/InferComments#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="p1">
+    <rdfs:domain rdf:resource="http://sadl.imp/InferComments#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="Thingy1">
+    <p2 rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >red</p2>
+    <p1 rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >blue</p1>
+  </Thingy>
+</rdf:RDF>

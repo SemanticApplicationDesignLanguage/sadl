@@ -1,0 +1,20 @@
+uri "http://sadl.imp/shapes-rules-alt".
+
+import "file://shapes-specific.sadl" as shapes_specific.
+
+areaSqIn describes Shape has values of type float.
+
+Rule Rule_referencing_Shape
+	given
+		s is a Shape
+	if
+		unitOfMeasure of s == Foot
+		af is area of s 
+	then
+		areaSqIn of s is af * 144 .
+		
+Rule R2
+	given	s is a Shape
+	if		s unitOfMeasure Foot and
+			s has area af
+	then	s areaSqIn af*144 .		

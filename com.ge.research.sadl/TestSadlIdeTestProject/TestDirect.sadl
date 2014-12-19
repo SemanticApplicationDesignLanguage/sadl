@@ -1,0 +1,19 @@
+uri "http://sadl.imp/TestDirect".
+
+^A is a top-level class.
+B is a type of ^A .
+C is a type of B .
+D is a type of C .
+
+aa is an ^A .
+bb is a B .
+cc is a C .
+dd is a D .
+
+Test: "select ?c where { <dd> <rdf:type> ?c}" is {[^A], [B], [C], [D]} .  
+
+Test: "select ?c where {<dd> <urn:x-hp-direct-predicate:http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?c}" is D .
+    
+Test: "select ?sc where {?sc <rdfs:subClassOf> <A>}" is {[^A], [B], [C], [D]}.    
+
+Test: "select ?sc where {?sc <urn:x-hp-direct-predicate:http_//www.w3.org/2000/01/rdf-schema#subClassOf> <A>}" is {[^A], [B]}.

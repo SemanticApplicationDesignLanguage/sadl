@@ -1,0 +1,169 @@
+uri "http://com.ge.research.sadlTestComparisons".
+/*
+ * The purpose of this test case is to demonstrate 
+ * and regression-test all of the various combinations
+ * that can be used in tests.
+ * 
+ * Note: run manual test TestComparisonFailures.sadl to make sure tests fail that should fail
+ */
+ 
+Thingy is a class, described by dpf with values of type float,
+	described by dpi with values of type int,
+	described by dps with values of type string,
+	described by op with values of type Thingy.
+	
+MyThingy1 is a Thingy.
+MyThingy2 is a Thingy with dpf 2.3, with dpf 3.4, with dpi 2, with dpi 3, with dpi 4,
+	with dps "Hello world", with op MyThingy1.
+MyThingy3 is a Thingy with dpf 5.6, with dpi 6 .
+MyThingy4 is a Thingy with dpf 1.2, with dpi 0, with op MyThingy1, with op MyThingy2 .
+		
+/* 
+ * Tests of triple patterns: S P V
+ */		
+// Compound tests
+Test: MyThingy2 is a Thingy, has dpf 2.3, has dpi 2, has dps "Hello world", has op MyThingy1.
+Test: MyThingy2 has dpf 3.4, has dpi 3 .
+
+Test: MyThingy2 has dpf 2.3 .		// equality tests
+// Test: MyThingy2 has dpf = 2.3 .			// syntax error
+ Test: MyThingy2 has dpf == 2.3 .
+// Test: MyThingy2 has dpf is 2.3 . 		// syntax error
+Test: MyThingy2 has op MyThingy1.
+// Test: MyThingy2 has op = MyThingy1.		// syntax error
+ Test: MyThingy2 has op == MyThingy1.
+// Test: MyThingy2 has op is MyThingy1. 	// syntax error
+
+Test: MyThingy2 has dpf not 2.4 .	// negated tests
+// Test: MyThingy2 has dpf is not 2.4 .		// syntax error
+// Test: MyThingy2 has dpf != 2.4 .			// syntax error
+// Test: MyThingy2 has dpf is != 2.4 .		// syntax error
+// Test: MyThingy2 has dpf is not = 2.4 .	// syntax error
+Test: MyThingy3 has op not MyThingy1.
+// Test: MyThingy3 has op != MyThingy1.		// syntax error
+// Test: MyThingy3 has op !== MyThingy1.	// syntax error
+// Test: MyThingy3 has op is not MyThingy1.	// syntax error
+
+Test: MyThingy3 has dpf only 5.6 .	// only tests
+// Test: MyThingy3 has dpf is only 5.6 .	// syntax error
+// Test: MyThingy3 has dpf only = 5.6 .		// syntax error
+// Test: MyThingy3 has dpf = only 5.6 .		// syntax error
+// Test: MyThingy3 has dpf is only = 5.6 .	// syntax error
+Test: MyThingy2 has op only MyThingy1.
+// Test: MyThingy2 has op is only MyThingy1.// syntax error
+// Test: MyThingy2 has op = only MyThingy1. // syntax error
+// Test: MyThingy2 has op only is MyThingy1.// syntax error
+// Test: MyThingy2 has op only = MyThingy1. // syntax error
+
+Test: MyThingy2 has dpf not only 2.3.	// not only tests
+// Test: MyThingy2 has dpf is not only 2.3. // syntax error
+// Test: MyThingy2 has dpf not only = 2.3 .	// syntax error
+// Test: MyThingy2 has dpf = not only 2.3.	// syntax error
+// Test: MyThingy2 has dpf is not only = 2.3.// syntax error
+Test: MyThingy4 has op not only MyThingy1.
+// Test: MyThingy4 has op is not only MyThingy1.// syntax error
+// Test: MyThingy4 has op = not only MyThingy1. // syntax error
+// Test: MyThingy4 has op not only is MyThingy1.// syntax error
+// Test: MyThingy4 has op not only = MyThingy1. // syntax error
+
+Test: MyThingy3 has dpf < 5.7 .		// relational tests
+Test: MyThingy3 has dpf <= 5.7 .
+Test: MyThingy3 has dpf > 1.5 .
+// Test: MyThingy3 has dpf is < 5.7 .		// syntax error
+Test: MyThingy2 has op < MyThingy2.
+Test: "select ?v0 where {<MyThingy2> <op> ?v0}" < MyThingy2.
+Test: MyThingy2 has op <= MyThingy1.
+Test: MyThingy2 has op >= MyThingy1.
+// Test: MyThingy2 has op is < MyThingy1.	// syntax error
+
+/*
+ * Tests of triple patterns: P of S V
+ */
+Test: dpf of MyThingy2 is 2.3 .		// equality tests
+Test: dpf of MyThingy2 = 2.3 .
+Test: dpf of MyThingy2 == 2.3 .
+Test: op of MyThingy2 is MyThingy1.
+Test: op of MyThingy2 = MyThingy1.
+Test: op of MyThingy2 == MyThingy1.
+
+Test: dpf of MyThingy2 is not 2.4 .	// negated tests
+// Test: dpf of MyThingy2 is != 2.4 .		// syntax error
+// Test: dpf of MyThingy2 is not = 2.4 .	// syntax error
+Test: op of MyThingy3 is not MyThingy1.
+// Test: op of MyThingy3 is != MyThingy1.	// syntax error
+// Test: op of MyThingy3 is !== MyThingy1.	// syntax error
+
+Test: dpf of MyThingy3 is only 5.6 .	// only tests
+Test: dpf of MyThingy3 = only 5.6 .
+// Test: dpf of MyThingy3 is only = 5.6 .	// syntax error
+Test: op of MyThingy2 is only MyThingy1.
+Test: op of MyThingy2 = only MyThingy1.
+Test: op of MyThingy4 is only {[MyThingy1], [MyThingy2]}.
+Test: MyThingy4 has op x is only {[MyThingy1], [MyThingy2]}.
+
+Test: dpf of MyThingy2 is not only 2.3 .	// not only tests
+Test: dpf of MyThingy2 = not only 2.3 .
+// Test: dpf of MyThingy2 is not only = 2.3. // syntax error
+Test: op of MyThingy4 is not only MyThingy1.
+Test: op of MyThingy4 = not only MyThingy1.
+
+Test: dpf of MyThingy2 is < 3.5 .		// relational tests
+Test: dpf of MyThingy2 <= 2.3 .
+Test: dpf of MyThingy2 >= 2.3 .
+Test: op of MyThingy2 is < MyThingy3.
+Test: op of MyThingy2 >= MyThingy1.
+
+/*
+ * Tests of triple patterns: V P of S
+ */
+Test: 2.3 is dpf of MyThingy2.	// equal tests
+Test: 2.3 = dpf of MyThingy2.
+Test: 2.3 == dpf of MyThingy2.
+Test: MyThingy1 is op of MyThingy2.
+
+// Test: 2.3 is != dpf of MyThingy2.	// not equal tests
+Test: 2.4 is not dpf of MyThingy2.
+Test: MyThingy4 is not op of MyThingy2.
+
+Test: 5.6 is only dpf of MyThingy3.	// only tests
+Test: MyThingy1 is only op of MyThingy2.
+
+Test: 2.3 is not only dpf of MyThingy2. // not only tests
+Test: MyThingy1 is not only op of MyThingy4.
+ 
+Test: 2.3 is <= dpf of MyThingy2.	// relational tests
+Test: 2.3 <= dpf of MyThingy2.
+Test: 2.3 >= dpf of MyThingy2.
+Test: MyThingy3 is > op of MyThingy2.
+
+/*
+ * Test of SPARQL Ask query
+ */
+ Test: "ask where {<MyThingy3> <dpi> 6}" is true.
+ 
+/*
+ * Other tests
+ */
+Test: dpi of MyThingy2 is only {[2],[3],[4]} .
+Test: dpi of MyThingy2 is not only {[2],[3]} .
+Test: dps of MyThingy2 is only "Hello world".
+Test: dpi of MyThingy2 is not only 2 .
+Test: dpf of MyThingy2 is not only 2.3 .
+Test: dps of MyThingy2 is known.
+Test: dpf of MyThingy1 is not known.
+Test: dpf of MyThingy3 > dpf of MyThingy2.
+Test: dpf of MyThingy3 is > dpf of MyThingy2.		// 5.6 > [2.3, 3.4]
+Test: dpi of MyThingy2 is not > dpi of MyThingy3.	// [2, 3, 4] !> 6 
+Test: dpi of MyThingy2 is !> dpi of MyThingy3.		// [2, 3, 4] !> 6 
+//Test: MyThingy3 has dpi > MyThingy2 has dpi. 
+Test: dpf of MyThingy3 > dpf of MyThingy4.			// 5.6 > 1.2
+Test: dpi of MyThingy4 is not > dpi of MyThingy3.	// 0 !> 6
+Test: dpi of MyThingy4 is !> dpi of MyThingy3.		// 0 !> 6
+Test: MyThingy4 has op {[MyThingy1],[MyThingy2]}.	// this test will fail
+//Test: MyThingy4 has opx {[MyThingy1],[MyThingy3]} is op.	// this will create error currently
+//Test: MyThingy3 has dpix 6  is dpi.
+
+
+
+
+	

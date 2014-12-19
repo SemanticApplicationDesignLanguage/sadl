@@ -1,0 +1,51 @@
+uri "http://sadl.imp/testsadlide/test"  version "$Revision: 1.1 $ Last modified on $Date: 2014/11/26 17:19:36 $".
+
+Thingy is a top-level class.
+dp1 describes Thingy has values of type float.
+dp2 describes Thingy has values of type float.
+dp3 describes Thingy has values of type float.
+dp4 describes Thingy has values of type float.
+dp5 describes Thingy has values of type float.
+
+Rule Rule1
+	given
+		x is a Thingy
+	if
+		
+	then
+		dp3 of x = dp2 of x .
+		
+Rule Rule2
+	given
+		x is a Thingy
+	if
+		dp1 of x == 0
+	then
+		dp4 of x = dp2 of x .
+		
+Rule Rule3
+	given
+		x is a Thingy
+	if
+		dp1 of x > 0
+	then
+		dp4 of x = dp1 of x .	
+		
+Rule Rule4
+	given
+		x is a Thingy
+	if
+		dp1 of x > 0
+	then
+		dp5 of x = 10.0 + (.25 * (dp1 of x - 1)) .			
+		
+MyThingy is a Thingy, has dp1 3.0, has dp2 4.0, has comment "This is my thing." .
+MyOtherThingy is a Thingy, has comment "This is another of my things." .
+MyOtherThingy2 is a Thingy, has comment "This is a different thingy." .
+MyOtherThingy3 is a Thingy, has dp1 3.0, has dp1 4.0.
+
+Test: MyThingy has dp3 4.0 .
+Test: MyThingy has dp4 3.0 .
+Test: MyThingy has dp5 10.5 .
+Test: "select (count(*) as ?n) where {<MyOtherThingy3> <dp1> ?d}" is 2 .
+ 

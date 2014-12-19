@@ -1,0 +1,26 @@
+<rdf:RDF
+    xmlns="http://sadl.imp/TestDirect#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/TestDirect">
+  <owl:Ontology rdf:about="http://sadl.imp/TestDirect">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestDirect.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="C">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="B"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="D">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/TestDirect#C"/>
+  </owl:Class>
+  <owl:Class rdf:ID="A"/>
+  <owl:Class rdf:about="http://sadl.imp/TestDirect#B">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/TestDirect#A"/>
+  </owl:Class>
+  <B rdf:ID="bb"/>
+  <D rdf:ID="dd"/>
+  <A rdf:ID="aa"/>
+  <C rdf:ID="cc"/>
+</rdf:RDF>

@@ -1,0 +1,18 @@
+uri "http://sadl.org/TestSadlIde/MultipleSingleValues" alias msvs version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:39 $". 
+
+Class1 is a class described by prop1 with a single value of type int.
+Class2 is a class described by prop1 with a single value of type int.
+Class3 is a class described by prop1 with a single value of type int.
+
+RangeClass1 is a class.
+RangeClass2 is a class.
+RangeClass3 is a class.
+
+Class1 is a class described by prop2 with a single value of type RangeClass1.
+Class2 is a class described by prop2 with a single value of type RangeClass2.
+Class3 is a class described by prop2 with a single value of type RangeClass3.
+
+Class4 is a class described by prop3 with a single value of type RangeClass1.
+Class4 is a class described by prop3 with a single value of type RangeClass2.
+Class4 is a class described by prop3 with a single value of type RangeClass3.
+

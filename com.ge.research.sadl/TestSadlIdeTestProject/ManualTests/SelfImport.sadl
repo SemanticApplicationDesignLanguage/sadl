@@ -1,0 +1,15 @@
+uri "http://sadl.imp/SelfImport".
+
+import "SelfImport.sadl" as si.
+
+MyThingy is a Thingy, has booleanProperty true, has objectProperty MyOtherThingy.
+
+MyOtherThingy is a OtherThingy.
+Thingy is a type of HigherThingy 
+	described by booleanProperty with values of type boolean,
+	described by objectProperty with values of type OtherThingy.
+OtherThingy is a type of HigherThingy.
+HigherThingy is a top-level class.
+
+
+

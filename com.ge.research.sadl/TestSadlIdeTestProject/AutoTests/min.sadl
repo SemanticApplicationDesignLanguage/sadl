@@ -1,0 +1,22 @@
+uri "http://sadl.imp/min".
+
+Thingy is a top-level class.
+intVal describes Thingy has values of type int.
+flVal describes Thingy has values of type float.
+dblVal describes Thingy has values of type double.
+
+Rule Rule_Name
+	given
+		x is a Thingy
+	if
+		
+	then
+		intVal of x is min(-1, 1, 3)
+		flVal of x is min(2.0, -1.0, -2.0)
+		dblVal of x is min(-1.0,0,1).
+		
+MyThingy is a Thingy.
+
+Test: MyThingy has intVal -1, has flVal -2.0, has dblVal -1.0 .
+
+		

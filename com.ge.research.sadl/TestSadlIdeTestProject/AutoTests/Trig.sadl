@@ -1,0 +1,79 @@
+uri "http://sadl.org/TestSadlIde/Trig" alias trig version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $". 
+
+Angle is a class described by angle with a single value of type float,
+	described by cos with a single value of type float,
+	described by sin with a single value of type float,
+	described by tan with a single value of type float,
+	described by acos with a single value of type float,
+	described by asin with a single value of type float,
+	described by atan with a single value of type float.
+	
+Rule TrigRule
+	given x is an Angle
+	if	  y is angle of x
+	then  cos of x is cos(y)
+		  sin of x is sin(y)
+		  tan of x is tan(y)
+		  acos of x is acos(cos(y))
+		  asin of x is asin(sin(y))
+		  atan of x is atan(tan(y)).
+
+Angle0 is an Angle with angle 0.0 .
+Angle45 is an Angle with angle 0.785398.
+Angle90 is an Angle with angle 1.5707963268.
+Angle135 is an Angle with angle 2.356194.
+Angle180 is an Angle with angle 3.1415926536.
+Angle225 is an Angle with angle 3.926991.
+Angle270 is an Angle with angle 4.71238898.
+Angle315 is an Angle with angle 5.497787.
+
+Test: cos of Angle0 = 1.0 .
+Test: cos of Angle45 is 0.707107.
+Test: cos of Angle90 = 0.0 .
+Test: cos of Angle135 = -0.707107.
+Test: cos of Angle180 = -1.0 .
+Test: cos of Angle225 = -0.707107.
+Test: cos of Angle270 = 0.0.
+Test: cos of Angle315 = 0.707107.
+Test: acos of Angle0 = 0.0 .
+Test: acos of Angle45 is 0.785398.
+Test: acos of Angle90 = 1.570796328 .
+Test: acos of Angle135 = 2.356194.
+Test: acos of Angle180 = 3.1415926536 .
+Test: acos of Angle225 = 2.35619449.
+Test: acos of Angle270 = 1.570796327.
+Test: acos of Angle315 = 0.785398163.
+
+Test: sin of Angle0 = 0.0 .
+Test: sin of Angle45 is 0.707107.
+Test: sin of Angle90 = 1.0 .
+Test: sin of Angle135 = 0.707107.
+Test: sin of Angle180 = 0.0 .
+Test: sin of Angle225 = -0.707107.
+Test: sin of Angle270 = -1.0.
+Test: sin of Angle315 = -0.707107.
+Test: asin of Angle0 = 0.0 .
+Test: asin of Angle45 is 0.785398.
+Test: asin of Angle90 = 1.570796328 .
+Test: asin of Angle135 = 0.785398.
+Test: asin of Angle180 = 0.0 .
+Test: asin of Angle225 = -0.785398163.
+Test: asin of Angle270 = -1.570796327.
+Test: asin of Angle315 = -0.785398163.
+
+Test: tan of Angle0 = 0.0 .
+Test: tan of Angle45 is 1.0.
+Test: tan of Angle90 = -2.287733242885646E7 .
+Test: tan of Angle135 = -1.0.
+Test: tan of Angle180 = 0.0 .
+Test: tan of Angle225 = 1.0.
+Test: tan of Angle270 = -8.385828300668408E7.
+Test: tan of Angle315 = -1.0.
+Test: atan of Angle0 = 0.0 .
+Test: atan of Angle45 is 0.785398.
+Test: atan of Angle90 = -1.570796328 .
+Test: atan of Angle135 = -0.785398.
+Test: atan of Angle180 = 0.0 .
+Test: atan of Angle225 = 0.785398163.
+Test: atan of Angle270 = -1.570796327.
+Test: atan of Angle315 = -0.785398163.

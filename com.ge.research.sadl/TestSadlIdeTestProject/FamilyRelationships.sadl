@@ -1,0 +1,111 @@
+uri "http://sadl.imp/familyrelationships".
+
+// This file contains a simple family relationship model
+//  and rules that infer relationships. Because it is
+//  familiar, it is easy to visually inspect derivation
+//  explanations for clarity and correctness.
+// Create a new or use the existing TestFamilyRelationships.sadl test case.
+// Turn on derivations at shallow or deep level and visually inspect results.
+
+Person is a top-level class.
+Man is a type of Person.
+Woman is a type of Person.
+child describes Person has values of type Person.
+grandChild describes Person has values of type Person.
+Gender is a top-level class, must be one of {Male, Female}.
+gender describes Person has values  of type Gender.
+sibling describes Person has values of type Person.
+cousin describes Person has values of type Person.
+uncle describes Person has values of type Person.
+aunt describes Person has values of type Person. 
+ancestor describes Person has values of type Person.
+
+Rule Ancestor_Rule_1 
+	given
+		x is a Person
+		y is a Person
+	if
+		x is child of y
+	then
+		y is ancestor of x .
+		
+Rule Ancestor_Rule_2
+	given
+		x is a Person
+		y is a Person
+		z is a Person
+	if
+		x is ancestor of y
+		y is ancestor of z
+	then
+		x is ancestor of z .
+
+Rule Man_Rule
+	given
+		x is a Person
+	if
+		gender of x is Male
+	then
+		x is a Man.
+		
+Rule Woman_Rule
+	given
+		x is a Person
+	if 
+		gender of x is Female
+	then
+		x is a Woman.
+		
+Rule GrandChild_Rule
+	given
+		x is a Person
+		y is a Person
+	if
+		y is child of x
+		z is child of y
+	then
+		grandChild of x is z .
+		
+Rule Sibling_Rule
+	given
+		x is a Person
+	if
+		y is child of x
+		z is child of x
+		y != z
+	then
+		y is sibling of z . 
+		
+Rule Cousin_Rule
+	given
+		x is a Person
+		y is a Person
+	if
+		x is sibling of y
+		c1 is child of x
+		c2 is child of y
+		c1 != c2 
+	then
+		c1 is cousin of c2.
+		
+Rule Uncle_Rule
+	given
+		x is a Man
+		y is a Person
+		z is a Person
+	if
+		x is sibling of y
+		z is child of y
+	then
+		x is uncle of z .
+		
+Rule Aunt_Rule
+	given
+		x is a Woman
+		y is a Person
+		z is a Person
+	if
+		x is sibling of y
+		z is child of y
+	then
+		x is aunt of z .

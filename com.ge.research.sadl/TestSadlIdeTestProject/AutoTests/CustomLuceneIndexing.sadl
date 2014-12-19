@@ -1,0 +1,28 @@
+uri "http://sadl.org/TestSadlIde/CustomLuceneIndexing" alias custluceneidx version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $". 
+
+Vehicle is a class.
+{Car, Truck} are types of Vehicle.
+
+Rock is a class.
+
+MyCar is a Car.
+YourTruck is a Truck.
+YourRock is a Rock.
+
+// get anything that has "Car" in a label
+Ask: "SELECT ?doc
+{
+    ?lit <http://jena.hpl.hp.com/ARQ/property#textMatch> '+car' .
+    ?doc ?p ?lit
+}
+".
+
+// get instances of classes that have "truck" in the label
+Ask: "select ?inst where {?lit <http://jena.hpl.hp.com/ARQ/property#textMatch> '+truck' .
+	?cls ?p ?lit .
+	?inst <rdf:type> ?cls}".
+
+Test: "select ?inst where {?lit <http://jena.hpl.hp.com/ARQ/property#textMatch> '+truck' .
+	?cls ?p ?lit .
+	?inst <rdf:type> ?cls}" is YourTruck.
+	

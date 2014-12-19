@@ -1,0 +1,22 @@
+uri "http://com.ge.research.sadl/Bug3434542" alias Bug3434542. 
+
+
+Aa is a class.
+
+Ab is a type of Aa.
+
+Ac is a type of Aa.
+
+_one_ is a Ab.
+_two_ is a Ac.
+
+
+Ask: x is a Ab .
+Ask: x is not a Ab .
+Ask: x is a Aa and x is not a Ab .
+Ask: select x where x is a Aa and x is not a Ab .
+
+Ask: "select ?x where {?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?t . FILTER (!EXISTS { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/Bug3434542#Ab> })}".
+
+Test: x is an Ab is _one_.
+Test: (select x where x is an Aa and x is not an Ab) is _two_.

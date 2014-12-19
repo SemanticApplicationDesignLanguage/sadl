@@ -1,0 +1,24 @@
+uri "http://sadl.imp/hasValue".
+
+// Note: this test case will only pass if there is an least a minimal OWL reasoner set
+//  e.g., OWL_DL_MEM_RULE (see Project->Properties->Sadl->Reasoner Preferences, Edit)
+
+Thingy is a top-level class.
+
+short_name describes Thingy has values of type string.
+
+short_name of Thingy always has value "thing-a-ma-jig".
+
+MyThingy is a Thingy.
+
+Print: "These tests will only pass if OWL reasoning of an appropriate level is enabled.".
+
+Test: MyThingy has short_name "thing-a-ma-jig".
+
+Color is a top-level class, must be one of {Red, Green, Blue}. 
+color describes Thingy has values of type Color. 
+color of Thingy always has value Red. 
+
+Test: MyThingy has color Red.
+
+Print: Model. 

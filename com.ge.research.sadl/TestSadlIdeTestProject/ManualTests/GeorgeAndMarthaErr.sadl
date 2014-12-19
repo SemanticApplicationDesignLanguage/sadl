@@ -1,0 +1,58 @@
+uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+
+Person is a class, described by spouse with  a single value of type Person,
+	described by friend with values of type Person,
+	described by age with a single value of type decimal,
+	described by likes with values of type string.
+Birth is a class described by child with values of type Person,
+	described by mother with a single value of type Person,
+	described by location with a single value of type Location,
+	described by ^when with a single value of type dateTime,
+	described by weight with a single value of type float.
+Location is a class, described by latitude with a single value of type double,
+	described by longitude with a single value of type double,
+	described by description with values of type string.	
+	
+Rule NorthernerAtHeart
+	if 	  x is a Birth (with location with latitude > latitude of Philadelphia)
+		  y is a child of x
+	then  y likes "cold weather in the winter".
+
+George is a Person. Mary is a Person. Martha is a Person. Samuel is a Person.
+	
+A Birth has child George, has mother Mary, 
+	has location (a Location has latitude 38.186111, has longitude -76.930556, 
+		has description "Pope's Creek Estate near present-day Colonial Beach, Virginia, USA"),
+	has ^when "1732-02-22",
+	has weight 9.45.
+
+A Birth has child (a Person with friend (a Person with friend Mary with age 23) with age 24).
+
+A Birth has child Samuel, has mother Mary.
+A Birth has child Ruby, has weight 9.45.
+
+Philadelphia is a Location with latitude 39.9522.
+NewYorkNY is a Location with latitude 40.7141667.
+Samuel is a Person.
+Ruby is a Person.
+weight describes Birth with a single value of type float.
+
+Test: George is the child of a Birth 
+	with location with latitude < the latitude of Philadelphia,
+	with mother (the mother of a Birth with child Samuel),
+	with weight (the weight of a Birth with child Ruby).
+Test: George is the child of a Birth 
+	with location with latitude < the latitude of Philadelphia,
+	with mother (the mother of a Birth with child Samuel),
+	with weight <= (the weight of a Birth with child Ruby).
+//Test: George is the child of a Birth 								// this one should fail
+//	with location with latitude < the latitude of Philadelphia,
+//	with mother (the mother of a Birth with child Samuel),
+//	with weight > (the weight of a Birth with child Ruby).
+Test: the latitude of the location of a Birth is 38.186111.	
+Test: a Birth with location with latitude 38.186111 has child George.
+
+Ask: a Birth (with location with latitude < latitude of Philadelphia) 
+	(with child George with mother == mother of a Birth with child Samuel) 
+	with weight == weight of a Birth with child Ruby.
+

@@ -1,0 +1,29 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/RDFSTransitiveClosureWithRule#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/RDFSTransitiveClosureWithRule">
+  <owl:Ontology rdf:about="http://sadl.imp/RDFSTransitiveClosureWithRule">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RDFSTransitiveClosureWithRule.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="ruleFired"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="NewThingy">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/RDFSTransitiveClosureWithRule#Thingy"/>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:about="http://sadl.imp/RDFSTransitiveClosureWithRule#ruleFired">
+    <rdfs:domain rdf:resource="http://sadl.imp/RDFSTransitiveClosureWithRule#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </owl:DatatypeProperty>
+  <NewThingy rdf:ID="SomeNewThingy"/>
+</rdf:RDF>

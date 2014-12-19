@@ -1,0 +1,21 @@
+uri "http://sadl.org/TestSadlIde/TransitiveClosureOfClassMembership" alias tccm version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:47 $". 
+
+Mammal is a class.
+Dog is a type of Mammal.
+Collie is a type of Dog.
+
+Lassie is a Collie.
+
+Test: Lassie is a Mammal.
+
+/* Results by Model Spec:
+
+	OWL MEM -- fail
+	OWL_MEM_TRANS -- fail
+	OWL_MEM_RDFS -- pass
+	OWL_MEM_RULE -- pass
+	OWL_LITE_MEM -- fail
+	RDFS_MEM_RDFS -- pass
+	OWL_MEM_MICRO_RULE -- pass
+
+*/

@@ -1,0 +1,83 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.imp/PeircesNessesMotherhoodTwo#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/PeircesNessesMotherhoodTwo">
+  <owl:Ontology rdf:about="http://sadl.imp/PeircesNessesMotherhoodTwo">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PeircesNessesMotherhoodTwo.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Mother">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:ID="Woman"/>
+          <owl:Restriction>
+            <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >1</owl:minCardinality>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="child"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Secondness"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Thirdness"/>
+  <owl:Class rdf:about="http://sadl.imp/PeircesNessesMotherhoodTwo#Woman">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Person"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Firstness"/>
+  <owl:Class rdf:ID="Motherhood">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Thirdness"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.imp/PeircesNessesMotherhoodTwo#Person">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Firstness"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Child">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.imp/PeircesNessesMotherhoodTwo#Person"/>
+          <owl:Restriction>
+            <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >1</owl:minCardinality>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="mother"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Secondness"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="motherIn">
+    <rdfs:domain rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Motherhood"/>
+    <rdfs:range rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Woman"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.imp/PeircesNessesMotherhoodTwo#child">
+    <rdfs:domain rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="childIn">
+    <rdfs:domain rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Motherhood"/>
+    <rdfs:range rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.imp/PeircesNessesMotherhoodTwo#mother">
+    <rdfs:domain rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo#Woman"/>
+  </owl:ObjectProperty>
+  <Motherhood rdf:ID="EveAndCain">
+    <childIn>
+      <Person rdf:ID="Cain"/>
+    </childIn>
+    <motherIn>
+      <Person rdf:ID="Eve"/>
+    </motherIn>
+  </Motherhood>
+</rdf:RDF>

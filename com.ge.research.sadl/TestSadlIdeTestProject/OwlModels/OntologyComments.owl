@@ -1,0 +1,13 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/OntologyComments">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/OntologyComments">
+    <rdfs:comment xml:lang="en">This is a third comment</rdfs:comment>
+    <rdfs:comment xml:lang="en">This is a second comment</rdfs:comment>
+    <rdfs:comment xml:lang="en">This is a comment on the ontology</rdfs:comment>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:39 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'OntologyComments.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+</rdf:RDF>

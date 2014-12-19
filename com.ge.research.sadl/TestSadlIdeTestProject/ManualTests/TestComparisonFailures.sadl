@@ -1,0 +1,112 @@
+uri "http://com.ge.research.sadlTestComparisonFailures".
+
+/*
+ * The purpose of this test case is to demonstrate 
+ * make sure that tests that shouldn't pass don't.
+ * All tests in this model should fail!
+ */
+ 
+Thingy is a class, described by dpf with values of type float,
+	described by dpi with values of type int,
+	described by dps with values of type string,
+	described by op with values of type Thingy.
+	
+MyThingy1 is a Thingy.
+MyThingy2 is a Thingy with dpf 2.3, with dpf 3.4, with dpi 2, with dpi 3, with dpi 4,
+	with dps "Hello world", with op MyThingy1.
+MyThingy3 is a Thingy with dpf 5.6, with dpi 6 .
+MyThingy4 is a Thingy with dpf 1.2, with dpi 0, with op MyThingy1, with op MyThingy2 .
+		
+/* 
+ * Tests of triple patterns: S P V
+ */		
+//Test: MyThingy2 has dpf 2.9 .		// equality tests
+//Test: MyThingy2 has op MyThingy3.
+//
+//Test: MyThingy2 has dpf not 2.3 .	// negated tests
+//Test: MyThingy2 has op not MyThingy1.
+//
+//Test: MyThingy2 has dpf only 2.3.	// only tests
+//Test: MyThingy4 has op only MyThingy1.
+//
+//Test: MyThingy3 has dpf not only 5.6.	// not only tests
+//Test: MyThingy2 has op not only MyThingy1.
+//
+//Test: MyThingy3 has dpf < 5.6.		// relational tests
+//Test: MyThingy3 has dpf <= 5.5.
+//Test: MyThingy3 has dpf > 5.6.
+//Test: MyThingy2 has op < MyThingy1.
+//Test: MyThingy4 has op < MyThingy1.
+//Test: MyThingy2 has op > MyThingy1.
+//
+///*
+// * Tests of triple patterns: P of S V
+// */
+//Test: dpf of MyThingy2 is 2.9 .		// equality tests
+//Test: dpf of MyThingy2 = 2.9 .
+//Test: dpf of MyThingy2 == 2.9 .
+//Test: op of MyThingy2 is MyThingy3.
+//Test: op of MyThingy2 = MyThingy3.
+//Test: op of MyThingy2 == MyThingy3.
+//
+//Test: dpf of MyThingy2 is not 2.3 .	// negated tests
+//Test: op of MyThingy2 is not MyThingy1.
+//
+//Test: dpf of MyThingy2 is only 2.3.	// only tests
+//Test: dpf of MyThingy2 = only 2.3.
+//Test: op of MyThingy4 is only MyThingy1.
+//Test: op of MyThingy4 = only MyThingy1.
+//
+//Test: dpf of MyThingy3 is not only 5.6.	// not only tests
+//Test: dpf of MyThingy3 = not only 5.6.
+//Test: op of MyThingy2 is not only MyThingy1.
+//Test: op of MyThingy2 = not only MyThingy1.
+//
+//Test: dpf of MyThingy3 is < 5.6.		// relational tests
+//Test: dpf of MyThingy3 <= 5.5.
+//Test: dpf of MyThingy3 > 5.6.
+//Test: op of MyThingy2 is < MyThingy1.
+//Test: op of MyThingy2 > MyThingy1.
+//
+///*
+// * Tests of triple patterns: V P of S
+// */
+//Test: 2.9 is dpf of MyThingy2.	// equal tests
+//Test: 2.9 = dpf of MyThingy2.
+//Test: 2.9 == dpf of MyThingy2.
+//Test: MyThingy3 is op of MyThingy2.
+
+// Test: 2.3 is != dpf of MyThingy2.	// not equal tests
+Test: 2.3 is not dpf of MyThingy2.
+Test: MyThingy1 is not op of MyThingy2.
+
+Test: 2.3 is only dpf of MyThingy2.	// only tests
+Test: MyThingy1 is only op of MyThingy4.
+
+Test: 5.6 is not only dpf of MyThingy3. // not only tests
+Test: MyThingy1 is not only op of MyThingy2.
+ 
+Test: 5.7 is <= dpf of MyThingy3.	// relational tests
+Test: 5.5 >= dpf of MyThingy3.
+Test: 5.6 > dpf of MyThingy3.
+Test: MyThingy1 is > op of MyThingy2.
+
+ 
+/*
+ * Other tests
+ */
+Test: dpi of MyThingy2 is only {[2],[3]} .
+Test: dpi of MyThingy2 is not only {[2],[3], [4]} .
+Test: dps of MyThingy2 is only "Hello world plus".
+Test: dps of MyThingy1 is known.
+Test: dpf of MyThingy2 is not known.
+Test: dpf of MyThingy3 <= dpf of MyThingy2.
+Test: dpf of MyThingy3 is < dpf of MyThingy2.		// 5.6 > [2.3, 3.4]
+Test: dpi of MyThingy2 is not < dpi of MyThingy3.	// [2, 3, 4] !> 6 
+Test: dpi of MyThingy2 is > dpi of MyThingy3.		// [2, 3, 4] !> 6 
+Test: dpf of MyThingy3 <= dpf of MyThingy4.			// 5.6 > 1.2
+Test: dpi of MyThingy4 is not < dpi of MyThingy3.	// 0 !> 6
+Test: dpi of MyThingy4 is !< dpi of MyThingy3.		// 0 !> 6
+
+
+	

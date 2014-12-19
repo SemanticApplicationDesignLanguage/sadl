@@ -1,0 +1,6 @@
+uri "http://com.ge.research/testgesadl/OrderedImport" alias ordimp version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:42 $". 
+
+import "http://com.ge.research/testgesadl/importA". 
+import "http://com.ge.research/testgesadl/importB". 
+
+Thing3 is a type of {Thing1 or Thing2}.

@@ -1,0 +1,16 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns="http://sadl.org/TestSadlIde/userdefineddatatypes#"
+  xml:base="http://sadl.org/TestSadlIde/userdefineddatatypes">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/userdefineddatatypes">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:42 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'userdefineddatatypes.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:ObjectProperty rdf:ID="shirtSize">
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/userdefineddatatypes#clothingsize"/>
+  </owl:ObjectProperty>
+  <NonChild rdf:ID="Sam"/>
+  <NonChild rdf:ID="John"/>
+</rdf:RDF>

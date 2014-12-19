@@ -1,0 +1,11 @@
+uri "http://sadl.org/TestSadlIde/TestAsk" alias tstask version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $". 
+
+Mammal is a class.
+Dog is a type of Mammal described by ^name with values of type string.
+
+Lassie is a Dog with name "Lassie".
+
+Ask: ask where Lassie is a Dog.
+
+Test: ask where Lassie is a Dog is true.
+

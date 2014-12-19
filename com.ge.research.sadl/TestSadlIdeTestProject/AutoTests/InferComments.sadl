@@ -1,0 +1,29 @@
+uri "http://sadl.imp/InferComments".
+
+Thingy is a top-level class.
+
+p1 describes Thingy has values of type string.
+p2 describes Thingy has values of type string.
+p3 describes Thingy has values of type string.
+
+Rule Rule1
+	given
+		x is a Thingy
+	if
+		p1 of x is "blue"
+	then
+		p3 of x is "green"
+		x has comment "set by Rule1".
+		
+Rule Rule2
+	given
+		x is a Thingy
+	if
+		p2 of x is "red"
+	then
+		p3 of x is "green"
+		x has comment "set by Rule2".	
+		
+Thingy1 is a Thingy, has p1 "blue", has p2 "red".
+
+Test: Thingy1 has p3 "green", has comment "set by Rule1", has comment "set by Rule2".

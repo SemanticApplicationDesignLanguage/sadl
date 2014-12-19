@@ -1,0 +1,29 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:j.0="http://sadl.imp/shapes_top#"
+    xmlns:j.1="http://sadl.imp/shapes_specific#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/shapes_test">
+  <owl:Ontology rdf:about="http://sadl.imp/shapes_test">
+    <owl:imports rdf:resource="http://sadl.imp/shapes-rules-alt"/>
+    <owl:imports rdf:resource="http://sadl.imp/shape_rules"/>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on $Date: 2014/11/26 17:19:41 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'shapes-test.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.1:Circle rdf:ID="MyCircle">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Hello there!</rdfs:comment>
+    <j.0:unitOfMeasure rdf:resource="http://sadl.imp/shapes_top#Foot"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MyCircle is for testing.</rdfs:comment>
+    <j.1:radius rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >3.5</j.1:radius>
+  </j.1:Circle>
+  <j.1:Rectangle rdf:ID="MyRect">
+    <j.1:width rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >4.5</j.1:width>
+    <j.1:height rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >3.5</j.1:height>
+  </j.1:Rectangle>
+</rdf:RDF>

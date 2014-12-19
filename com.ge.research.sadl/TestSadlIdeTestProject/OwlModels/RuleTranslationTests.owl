@@ -1,0 +1,24 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://com.ge.research.sadlRuleTranslationTests#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research.sadlRuleTranslationTests">
+  <owl:Ontology rdf:about="http://com.ge.research.sadlRuleTranslationTests">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleTranslationTests.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:ObjectProperty rdf:ID="op2">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadlRuleTranslationTests#Thingy"/>
+    <rdfs:range rdf:resource="http://com.ge.research.sadlRuleTranslationTests#Thingy"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="op1">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadlRuleTranslationTests#Thingy"/>
+    <rdfs:range rdf:resource="http://com.ge.research.sadlRuleTranslationTests#Thingy"/>
+  </owl:ObjectProperty>
+  <Thingy rdf:ID="MyThingy">
+    <op1>
+      <Thingy rdf:ID="MyThingy2"/>
+    </op1>
+  </Thingy>
+</rdf:RDF>

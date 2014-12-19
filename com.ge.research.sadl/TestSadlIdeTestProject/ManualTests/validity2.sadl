@@ -1,0 +1,7 @@
+uri "http://com.ge.research.sadl/validity2" alias v2 version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:38 $". 
+
+Thingy is a class described by dp with a single value of type int,
+	described by dp2 with values of type float.
+dp of Thingy has at most 1 value.	
+
+MyThingy is a Thingy with dp 2.3, with dp 3, with dp2 2 .

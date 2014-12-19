@@ -1,0 +1,20 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://com.ge.research.sadl/test2#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research.sadl/test2">
+  <owl:Ontology rdf:about="http://com.ge.research.sadl/test2">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'test2.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:DatatypeProperty rdf:ID="someBooleanProperty">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadl/test2#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="AnInstance">
+    <someBooleanProperty rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</someBooleanProperty>
+  </Thingy>
+</rdf:RDF>

@@ -1,0 +1,18 @@
+uri "http://com.ge.research.sadl/NotEqualRule2". 
+
+Thingy is a class described by connectedTo with values of type Thingy.
+
+T1 is a Thingy.
+T2 is a Thingy.
+T3 is a Thingy, connectedTo T1, connectedTo T2.
+
+Rule TestRule
+	given x is a Thingy
+	if x has connectedTo y
+	   x has connectedTo z
+	   z != y
+	then
+	   y has connectedTo z.
+	   
+Test: T1 connectedTo T2.
+	   

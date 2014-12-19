@@ -1,0 +1,12 @@
+uri "http://sadl.imp/shapes_test" version "$Revision: 1.1 $ Last modified on $Date: 2014/11/26 17:19:41 $".
+
+import "shape-rules.sadl" as shape-rules.
+import "shapes-rules-alt.sadl" as alt-rules.
+
+MyCircle is a Circle, has radius 3.5, has comment "MyCircle is for testing.", has unitOfMeasure Foot.
+MyCircle has comment "Hello there!".
+MyRect is a Rectangle, has height 3.5, has width 4.5.
+
+Test: MyCircle has area 38.5 .
+Test: MyRect is a Shape, has width 4.5, has area 15.75.
+Test: MyCircle has areaSqIn 5541.8 . 

@@ -1,0 +1,19 @@
+uri "http://com.ge.research.sadl/F237434" alias f237434 version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:42 $". 
+
+ZClass is a class, described by property1 with values of type ZClass,
+	described by property2 with values of type ZClass,
+	described by property2a with values of type ZClass.
+	
+Z1 is a ZClass.
+Z2 is a ZClass, has property2 Z1.
+
+//Test: Z1 has property1 not known.
+//Test: Z2 has property2 x and x has property2a not known.
+//Test: Z2 has property2 has property2a known.		// this should fail--property2a of Z1 is not known
+//Test: Z2 has property2, has property2a (not known).	// this doesn't work
+//Test: Z2 has property2, has property2a x is not Z1.	
+Test: Z2 has property2 Z1, has property2a (not Z1).	
+//Test: Z2 has property2, has property2a (not known).
+//Test: property2a of property2 of Z2 is not known.
+//Test: Z1 has property1 not known, has property2 x and x has property2a not known.
+//

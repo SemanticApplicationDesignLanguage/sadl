@@ -1,0 +1,11 @@
+uri "http://sadl.imp/TestOnlyHasValuesOfType".
+
+Professor is a top-level class.
+Student is a top-level class.
+Part-timeStudent is a type of Student.
+Full-timeStudent is a type of Student.
+
+teaches describes Professor has values of type Student. 
+
+teaches of Professor only has values of type {Part-timeStudent, Full-timeStudent}.
+ 

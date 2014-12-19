@@ -1,0 +1,23 @@
+uri "http://sadl.imp/testsadlide/error1" version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:38 $".
+
+// Loading this file in the SADL editor should cause an error to be displayed on
+//  the if clause statement: "Assignment is not allowed here; do you mean to use
+//  comparison '=='?"
+
+// Note: not an error in SADL V2
+
+Thingy is a top-level class.
+dp1 describes Thingy has values of type float.
+dp2 describes Thingy has values of type float.
+dp3 describes Thingy has values of type float.
+dp4 describes Thingy has values of type float.
+dp5 describes Thingy has values of type float.
+
+Rule Rule1
+	given
+		x is a Thingy
+	if
+		dp1 of x = 0
+	then
+		dp4 of x = dp2 of x .
+		

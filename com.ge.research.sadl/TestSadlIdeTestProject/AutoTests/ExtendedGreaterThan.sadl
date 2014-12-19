@@ -1,0 +1,43 @@
+uri "http://sadl.org/TestSadlIde/ExtendedGreaterThan" alias extendedgt version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $".
+
+Thingy is a class, described by lessThan with values of type Thingy, described by greaterThan with values of type Thingy.
+
+Rule TwoThingiesNotEqual:
+	given x1 is a Thingy
+		  x2 is a Thingy
+	if	  x1 != x2
+	then  print(x1, " != ", x2) .
+	
+Rule TwoThingiesComparedGT:
+	given x1 is a Thingy
+		  x2 is a Thingy
+	if	  x1 > x2
+	then  print(x1, " is > ", x2) 
+		  x1 has greaterThan x2 .
+
+Rule TwoThingiesComparedLT:
+	given x1 is a Thingy
+		  x2 is a Thingy
+	if	  x1 < x2
+	then  print(x1, " is < ", x2)
+		  x1 has lessThan x2 .
+
+Thing1 is a Thingy.
+Thing2 is a Thingy.
+
+Test: Thing1 lessThan Thing2 .
+Test: not(Thing2 lessThan Thing1) .
+Test: Thing2 greaterThan Thing1 .
+Test: not(Thing1 greaterThan Thing2).
+ 
+OtherThing is a class described by ^value with values of type int, described by ok with a single value of type boolean.
+
+// Make sure Jena comparables still work
+Rule TestLessThan: if x is an OtherThing and ^value of x < 1 then ok of x is true.
+Rule TestGreaterThan: if x is an OtherThing and ^value of x > 1 then ok of x is true.
+
+AnOtherThing1 is an OtherThing with ^value 0 .
+AnOtherThing2 is an OtherThing with ^value 10 .
+
+Test: AnOtherThing1 has ok true.
+Test: AnOtherThing2 has ok true.

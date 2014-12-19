@@ -1,0 +1,15 @@
+uri "http://sadl.imp/testsadlide/mustbeoftypeRestriction".
+
+// Running Validate and Test on this file should cause a model consistency warning:
+//  "possible oneof violation...Culprit = ...#Asexual..."
+
+Person is a top-level class.
+Gender is a top-level class.
+Asexual is a Gender.
+MammalGender is a type of Gender, must be one of {Male, Female}.
+gender describes Person has values of type Gender.
+
+gender of Person only has values of type MammalGender.
+
+Janie is a Person, has gender Asexual.
+

@@ -1,0 +1,36 @@
+uri "http://sadl.imp/annotation" version "$Revision: 1.1 $ $Name:  $ $Date: 2014/11/26 17:19:38 $".
+
+// In this example, the museum has samples of Rock a class in the model,
+// but also has specimens assigned to various Holdings. An annotation
+// property is used to keep track of to which Holding a specific Rock belongs.
+// In addition, various properties of rocks are of interest to different
+// categories of museum Patrons, and the properties are annotated to reflect this.
+
+Rock is a top-level class, 
+	described by color with values of type string,
+	described by hardness with values of type Hardness.
+
+Hardness is a top-level class, must be one of {Hard, Soft}. 
+
+
+Holding is a top-level class, must be one of {SouthwestCollection, NortheastCollection}.
+
+PatronType is a top-level class, must be one of {Expert, Novice, Everyone}. 
+
+holding is a type of annotation.	// Note that an annotation cannot have a specified domain and range.
+ofInterestTo is a type of annotation.
+
+color has ofInterestTo Everyone .
+hardness has ofInterestTo Expert.
+
+age (alias "AGE") describes Rock has a single value of type int. 
+
+age has holding "European".
+Holding has holding "European".
+
+ChipOfMammyGametBolder is a Rock, has holding NortheastCollection.
+
+
+Test: "select ?i where {<color> <ofInterestTo> ?i}" is Everyone.
+
+Test: "select ?c where {<ChipOfMammyGametBolder> <holding> ?c}" is NortheastCollection. 

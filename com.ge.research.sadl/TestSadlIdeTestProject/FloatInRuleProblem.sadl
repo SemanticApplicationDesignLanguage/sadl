@@ -1,0 +1,26 @@
+uri "http://sadl.imp/floatinruleproblem".
+
+Thingy is a top-level class.
+intVal describes Thingy has values of type int.
+floatVal describes Thingy has values of type float.
+result describes Thingy has values of type boolean.
+
+Rule TestRule1
+	given
+		x is a Thingy
+	if
+		intVal of x is 1.0
+	then
+		result of x is true.
+		
+Rule TestRule2
+	given
+		x is a Thingy
+	if
+		floatVal of x is 1
+	then
+		result of x is true.
+		
+MyThingy is a Thingy, has intVal 1, has floatVal 1 .
+
+Test: MyThingy has result true.		

@@ -1,0 +1,17 @@
+uri "http://sadl.imp/testsadlide/mustbeoneofdatatypeproperty" version "$Revision: 1.1 $ Last modified on $Date: 2014/11/26 17:19:39 $".
+
+// Running Validate and Test on this file should result in a model consistency warning:
+//  "possible oneof violation ... Culprit  = 'girl'...."
+
+Person is a top-level class.
+gender describes Person has values of type string.
+
+gender of Person must be one of {"Male", "Female"}.
+
+Janie is a Person, has gender "girl".
+
+Test: "select ?c where {?c <rdfs:subClassOf> ?sc .
+		?sc <owl:someValuesFrom> ?dr .
+		?dr <owl:oneOf> ?l . 
+		?l <http://jena.hpl.hp.com/ARQ/list#member> ?m .
+		FILTER(ISURI(?c) && ?m = 'Male')}" is Person.

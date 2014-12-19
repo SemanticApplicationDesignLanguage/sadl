@@ -1,0 +1,15 @@
+uri "http://com.ge.research.sadl/RuleLiterals". 
+
+Thingy is a class described by dprop with values of type float,
+	described by dprop2 with values of type int.
+
+Rule dpropvaluerule
+	if x is a Thingy
+	then dprop of x is 6.0/12.0 
+		 dprop2 of x is 6/12 .
+	
+MyThingy is a Thingy.
+
+Test: dprop of MyThingy is 0.5.
+Test: dprop2 of MyThingy is 0 .
+	

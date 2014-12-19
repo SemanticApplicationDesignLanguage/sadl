@@ -1,0 +1,44 @@
+uri "http://sadl.imp/NotEqualRule".
+
+Color is a top-level class, must be one of {Red, Yellow, Green}.
+
+Action is a top-level class, must be one of {Go, Stop}.
+
+TrafficLight is a top-level class.
+color describes TrafficLight has values of type Color.
+
+Vehicle is a top-level class.
+action describes Vehicle has values of type Action.
+approaching describes TrafficLight has values of type Vehicle.
+
+Rule Rule_Go
+	given
+		x is a Vehicle
+		y is a TrafficLight 
+	if
+		x is approaching of y
+		c is color of y
+		c == Green
+	then
+		action of x is Go . 
+		
+Rule Rule_Stop
+	given
+		x is a Vehicle
+		y is a TrafficLight 
+	if
+		x is approaching of y
+		c is color of y
+		c != Green 
+	then
+		action of x is Stop . 
+	
+MyCar is a Vehicle.	 
+ThisLight is a TrafficLight, has color Green, has approaching MyCar. 
+
+YourCar is a Vehicle.
+ThatLight is a TrafficLight has color Red, has approaching YourCar.
+
+Test: MyCar has action Go. 
+Test: YourCar has action Stop.
+ 

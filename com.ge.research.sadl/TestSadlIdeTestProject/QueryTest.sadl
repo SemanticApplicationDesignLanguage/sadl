@@ -1,0 +1,34 @@
+uri "http://sadl.imp/QueryTest".
+
+Person is a top-level class, described by name with values of type string,
+	described by age with values of type int,
+	described by spouse with a single value of type Person,
+	described by friend with values of type Person.
+	
+Tom is a Person, has name "Tom Dunham", has age 35, has spouse Betty.
+Betty is a Person, has name "Betty Dunham", has spouse Tom. 
+John is a Person, has friend Tom, has friend Betty.
+
+// It is important to verify that tests both pass and fail when they should.
+// The results of these tests should be: 7 pass of 11
+Test: "select ?s where {<Tom> <spouse> ?s}" is Betty .
+//Test: "select ?s where {<Tom> <spouse> ?s}" is Tom .				// this should fail
+Test: "select ?y where {<Tom> <age> ?y}" is 35 .
+Test: "select ?y where {<Tom> <age> ?y}" < 38 .
+Test: "select ?p ?yrs where {?p <rdf:type> <Person> . ?p <age> ?yrs}" == { [ Tom, 35 ] } . 
+Test: "select ?p ?yrs where {?p <rdf:type> <Person> . ?p <age> ?yrs}" == [ Tom, 35 ] . 
+Test: "select ?p ?n where {?p <rdf:type> <Person> . ?p <name> ?n}" == { [ Tom, "Tom Dunham"], [ Betty, "Betty Dunham"] }.
+Test: "select ?p ?n where {?p <rdf:type> <Person> . ?p <name> ?n}" == { [ Tom, "Tom Dunham"] [ Betty, "Betty Dunham"] }.
+Test: "select ?s where {<Tom> <spouse> ?s}" is only Betty.
+Test: "select ?y where {<Tom> <age> ?y}" is not 40 .
+Test: "select ?y where {<Tom> <age> ?y}" >= 33 .
+Test: "select ?y where {<Betty> <age> ?y}" is not known .
+//Test: "select ?y where {<Tom> <age> ?y}" is not known .			// this should fail
+Test: "select ?y where {<John> <friend> ?y}" is not only Tom.
+//Test: "select ?y where {<John> <friend> ?y}" is only Tom.			// this should fail
+Ask: Tom age x and x > 30 and x < 40 .
+Ask: x age y and (y > 30 or y < 40).
+Ask: "select (<Tom> as ?p) ?a where {<Tom> <age> ?a} ".
+Test: "select (<Tom> as ?p) ?a where {<Tom> <age> ?a}" == {[Tom, 35]}.
+
+
