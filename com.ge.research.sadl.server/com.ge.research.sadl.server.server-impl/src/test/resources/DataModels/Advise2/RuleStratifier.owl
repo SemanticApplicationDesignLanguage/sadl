@@ -1,0 +1,44 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:defs="http://research.ge.com/Acuity/defaults.owl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://www.illinois.edu/advise//RuleStratifier#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://www.illinois.edu/advise//RuleStratifier">
+  <owl:Ontology rdf:about="http://www.illinois.edu/advise//RuleStratifier">
+    <owl:imports rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleStratifier.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="RuleStager">
+    <rdfs:seeAlso>
+      <defs:DataDefault rdf:ID="RuleStager_phase1Complete_default">
+        <defs:hasLevel rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</defs:hasLevel>
+        <defs:hasDataDefault rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+        >true</defs:hasDataDefault>
+        <defs:appliesToProperty>
+          <owl:DatatypeProperty rdf:ID="phase1Complete"/>
+        </defs:appliesToProperty>
+      </defs:DataDefault>
+    </rdfs:seeAlso>
+    <rdfs:seeAlso>
+      <defs:DataDefault rdf:ID="RuleStager_phase0Complete_default">
+        <defs:hasDataDefault rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+        >true</defs:hasDataDefault>
+        <defs:appliesToProperty>
+          <owl:DatatypeProperty rdf:ID="phase0Complete"/>
+        </defs:appliesToProperty>
+      </defs:DataDefault>
+    </rdfs:seeAlso>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:about="http://www.illinois.edu/advise//RuleStratifier#phase0Complete">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise//RuleStratifier#RuleStager"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://www.illinois.edu/advise//RuleStratifier#phase1Complete">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise//RuleStratifier#RuleStager"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </owl:DatatypeProperty>
+  <RuleStager rdf:ID="MyRuleStager"/>
+</rdf:RDF>

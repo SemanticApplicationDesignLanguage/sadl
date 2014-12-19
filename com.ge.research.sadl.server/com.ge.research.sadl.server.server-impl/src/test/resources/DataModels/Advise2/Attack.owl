@@ -1,0 +1,320 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://www.illinois.edu/advise/Attack">
+  <owl:Ontology rdf:about="http://www.illinois.edu/advise/Attack">
+    <owl:imports rdf:resource="http://www.illinois.edu/advise/Adversary"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Attack.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="GainAccess">
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/System#Activity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="ExerciseAppFunction">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#LogicalAccess"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#prerequisiteState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ResultingConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#InformationAccess"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#possibleNextState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#Application"/>
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#OperatingSystem"/>
+            </owl:unionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#ofSystem"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/System#Activity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="GainPhysicalAccess">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#LocationKnowledge"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                      <rdf:Description rdf:about="http://www.illinois.edu/advise/Adversary#Skilled"/>
+                    </owl:intersectionOf>
+                  </owl:Class>
+                </owl:someValuesFrom>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#prerequisiteState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ResultingConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#PhysicalAccess"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#possibleNextState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#PhysicalThing"/>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#ofSystem"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/Attack#GainAccess"/>
+  </owl:Class>
+  <owl:Class rdf:ID="GainCredentials">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ResultingConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#HasCredentials"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#possibleNextState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#Application"/>
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#OperatingSystem"/>
+            </owl:unionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#ofSystem"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/Attack#GainAccess"/>
+  </owl:Class>
+  <owl:Class rdf:ID="GainLogicalAccess">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#UIAccess"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#HasCredentials"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#prerequisiteState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ResultingConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#LogicalAccess"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#possibleNextState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#Application"/>
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#OperatingSystem"/>
+            </owl:unionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#ofSystem"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:comment>this assumes that user authentication is needed</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/Attack#GainAccess"/>
+  </owl:Class>
+  <owl:Class rdf:ID="ReadData">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#LogicalAccess"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#prerequisiteState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ResultingConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                      <rdf:Description rdf:about="http://www.illinois.edu/advise/System#InformationAccess"/>
+                      <owl:Restriction>
+                        <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#Data"/>
+                        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#ofSystem"/>
+                      </owl:Restriction>
+                    </owl:intersectionOf>
+                  </owl:Class>
+                </owl:someValuesFrom>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#possibleNextState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#Data"/>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class>
+                    <owl:unionOf rdf:parseType="Collection">
+                      <rdf:Description rdf:about="http://www.illinois.edu/advise/System#Application"/>
+                      <rdf:Description rdf:about="http://www.illinois.edu/advise/System#OperatingSystem"/>
+                    </owl:unionOf>
+                  </owl:Class>
+                </owl:someValuesFrom>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#managedby"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#ofSystem"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/System#Activity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="GainLocalUIAccess">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class>
+                    <owl:intersectionOf rdf:parseType="Collection">
+                      <rdf:Description rdf:about="http://www.illinois.edu/advise/Adversary#Skilled"/>
+                    </owl:intersectionOf>
+                  </owl:Class>
+                </owl:someValuesFrom>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#prerequisiteState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#ResultingConditionSet"/>
+              <owl:Restriction>
+                <owl:someValuesFrom rdf:resource="http://www.illinois.edu/advise/System#UIAccess"/>
+                <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#condition"/>
+              </owl:Restriction>
+            </owl:intersectionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#possibleNextState"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class>
+            <owl:unionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#Application"/>
+              <rdf:Description rdf:about="http://www.illinois.edu/advise/System#OperatingSystem"/>
+            </owl:unionOf>
+          </owl:Class>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://www.illinois.edu/advise/System#ofSystem"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/Attack#GainAccess"/>
+  </owl:Class>
+</rdf:RDF>

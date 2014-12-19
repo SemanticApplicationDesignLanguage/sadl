@@ -1,0 +1,152 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >testphyacc</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/TestPhyAccess.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/TestPhyAccess"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >pinstance</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/PlanInstance.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/PlanInstance"/>
+  </OntologySpec>
+  <OntologySpec>
+    <altURL rdf:resource="http://protege.stanford.edu/plugins/owl/dc/protege-dc.owl"/>
+    <publicURI rdf:resource="http://purl.org/dc/elements/1.1/"/>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >dc</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rulestrata</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/RuleStratifier.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise//RuleStratifier"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >SadlServicesConfigurationConcepts</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/SadlServicesConfigurationConcepts.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/sadlserver/Services"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >firewall</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/Firewall.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/Firewall"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >def</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/defaults.owl"/>
+    <publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >grphs</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/graphs.owl"/>
+    <publicURI rdf:resource="http://com.ge.research/testgesadl/graphs"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sys</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/System.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/System"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >srvc</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/Service.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/Service"/>
+  </OntologySpec>
+  <OntologySpec>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <publicURI rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >owl</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >srvcfg</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/ServicesConfig.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/ServicesConfig"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >adversary</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/Adversary.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/Adversary"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >actseqgen</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/ActivitySequenceGeneration.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/ActivitySequenceGeneration"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >recloserv1</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/RecloserV1.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/RecloserV1"/>
+  </OntologySpec>
+  <DocumentManagerPolicy>
+    <cacheModels rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</cacheModels>
+    <processImports rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</processImports>
+  </DocumentManagerPolicy>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >smexample</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/SmallExample.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/SmallExample"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >attack</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/Attack.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/Attack"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >tstsmex</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/git/advise/advise/SemanticModels/Advise2.fixed/OwlModels/TestSmallExample.owl"/>
+    <publicURI rdf:resource="http://www.illinois.edu/advise/TestSmallExample"/>
+  </OntologySpec>
+</rdf:RDF>

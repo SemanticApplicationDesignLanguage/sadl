@@ -1,0 +1,11 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://www.illinois.edu/advise/TestSmallExample">
+  <owl:Ontology rdf:about="http://www.illinois.edu/advise/TestSmallExample">
+    <owl:imports rdf:resource="http://www.illinois.edu/advise/SmallExample"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestSmallExample.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+</rdf:RDF>

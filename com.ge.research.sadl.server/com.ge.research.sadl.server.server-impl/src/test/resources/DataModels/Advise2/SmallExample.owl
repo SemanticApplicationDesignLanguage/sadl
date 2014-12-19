@@ -1,0 +1,163 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sys="http://www.illinois.edu/advise/System#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:firewall="http://www.illinois.edu/advise/Firewall#"
+    xmlns="http://www.illinois.edu/advise/SmallExample#"
+    xmlns:adversary="http://www.illinois.edu/advise/Adversary#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://www.illinois.edu/advise/SmallExample">
+  <owl:Ontology rdf:about="http://www.illinois.edu/advise/SmallExample">
+    <owl:imports rdf:resource="http://www.illinois.edu/advise/ActivitySequenceGeneration"/>
+    <owl:imports rdf:resource="http://www.illinois.edu/advise/Firewall"/>
+    <owl:imports rdf:resource="http://www.illinois.edu/advise/Attack"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'SmallExample.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <sys:ConfigurationData rdf:ID="ConfigData_ControlledDevice1">
+    <sys:about>
+      <sys:Device rdf:ID="ControlledDevice1"/>
+    </sys:about>
+  </sys:ConfigurationData>
+  <adversary:GoalPriority rdf:ID="ViewControlledDeviceConfigData">
+    <adversary:goal>
+      <sys:InformationAccess>
+        <sys:ofSystem>
+          <sys:ConfigurationData>
+            <sys:about>
+              <sys:Device rdf:ID="ControlledDevice2"/>
+            </sys:about>
+            <sys:about rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice1"/>
+          </sys:ConfigurationData>
+        </sys:ofSystem>
+        <sys:ofPerformer>
+          <adversary:ThreatAgent rdf:ID="Hacker">
+            <skilledIn rdf:resource="http://www.illinois.edu/advise/Adversary#Infiltration"/>
+          </adversary:ThreatAgent>
+        </sys:ofPerformer>
+      </sys:InformationAccess>
+    </adversary:goal>
+  </adversary:GoalPriority>
+  <adversary:GoalPriority rdf:ID="DisconnectSCADA_AppFromControlledDevices"/>
+  <sys:Network rdf:ID="Internet">
+    <sys:subsystemof>
+      <sys:Host rdf:ID="OtherInternetHost"/>
+    </sys:subsystemof>
+    <sys:subsystemof>
+      <sys:Host rdf:ID="GoodHost"/>
+    </sys:subsystemof>
+    <sys:subsystemof>
+      <sys:Device rdf:ID="InternetFirewall">
+        <firewall:firewallRule>
+          <firewall:FirewallRule>
+            <firewall:permitsConnection>
+              <firewall:Connection>
+                <firewall:connectionTo>
+                  <sys:Server rdf:ID="BusinessServer">
+                    <sys:subsystemof>
+                      <sys:Application rdf:ID="ManagementApplication1"/>
+                    </sys:subsystemof>
+                    <sys:connectedTo>
+                      <sys:Network rdf:ID="BusinessNetwork">
+                        <sys:subsystemof>
+                          <sys:Host rdf:ID="OtherBNHost"/>
+                        </sys:subsystemof>
+                        <sys:subsystemof>
+                          <sys:Host rdf:ID="SCADA_NetworkFirewall">
+                            <firewall:firewallRule>
+                              <firewall:FirewallRule>
+                                <firewall:permitsConnection>
+                                  <firewall:Connection>
+                                    <firewall:connectionTo>
+                                      <sys:Server rdf:ID="MySCADA_Server">
+                                        <sys:subsystemof>
+                                          <sys:OperatingSystem rdf:ID="MySCADA_OS">
+                                            <sys:function>
+                                              <sys:Control rdf:ID="ControlDevices">
+                                                <sys:target rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice2"/>
+                                                <sys:target rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice1"/>
+                                              </sys:Control>
+                                            </sys:function>
+                                          </sys:OperatingSystem>
+                                        </sys:subsystemof>
+                                        <sys:subsystemof>
+                                          <sys:Application rdf:ID="MySCADA_Application">
+                                            <sys:function rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlDevices"/>
+                                          </sys:Application>
+                                        </sys:subsystemof>
+                                        <rdf:type rdf:resource="http://www.illinois.edu/advise/System#SCADA_Server"/>
+                                      </sys:Server>
+                                    </firewall:connectionTo>
+                                    <firewall:connectionFrom rdf:resource="http://www.illinois.edu/advise/SmallExample#BusinessServer"/>
+                                  </firewall:Connection>
+                                </firewall:permitsConnection>
+                              </firewall:FirewallRule>
+                            </firewall:firewallRule>
+                            <rdf:type rdf:resource="http://www.illinois.edu/advise/Firewall#Firewall"/>
+                          </sys:Host>
+                        </sys:subsystemof>
+                        <sys:subsystemof rdf:resource="http://www.illinois.edu/advise/SmallExample#BusinessServer"/>
+                        <sys:subsystemof rdf:resource="http://www.illinois.edu/advise/SmallExample#InternetFirewall"/>
+                      </sys:Network>
+                    </sys:connectedTo>
+                  </sys:Server>
+                </firewall:connectionTo>
+                <firewall:connectionFrom rdf:resource="http://www.illinois.edu/advise/SmallExample#GoodHost"/>
+              </firewall:Connection>
+            </firewall:permitsConnection>
+          </firewall:FirewallRule>
+        </firewall:firewallRule>
+        <rdf:type rdf:resource="http://www.illinois.edu/advise/Firewall#Firewall"/>
+      </sys:Device>
+    </sys:subsystemof>
+  </sys:Network>
+  <adversary:GoalPriority rdf:ID="ObtainAccessToSCADA_AppControlFunction">
+    <adversary:goal>
+      <sys:Access>
+        <sys:ofSystem>
+          <sys:SCADA_App>
+            <sys:function>
+              <sys:Control/>
+            </sys:function>
+          </sys:SCADA_App>
+        </sys:ofSystem>
+        <sys:ofPerformer rdf:resource="http://www.illinois.edu/advise/SmallExample#Hacker"/>
+      </sys:Access>
+    </adversary:goal>
+  </adversary:GoalPriority>
+  <sys:ConfigurationData rdf:ID="ConfigData_ControlledDevice2">
+    <sys:about rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice2"/>
+  </sys:ConfigurationData>
+  <adversary:GoalPriority rdf:ID="InstallMaliciousSoftwareOnControlledDevices">
+    <adversary:goal>
+      <sys:SoftwareInstalled rdf:ID="MaliciousSoftware">
+        <sys:hardwarePlatform rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice2"/>
+        <sys:hardwarePlatform rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice1"/>
+      </sys:SoftwareInstalled>
+    </adversary:goal>
+  </adversary:GoalPriority>
+  <adversary:GoalPriority rdf:ID="ObtainAccessToSCADA_AppControlFunction2">
+    <adversary:goal>
+      <sys:Access>
+        <sys:ofSystem>
+          <sys:Application>
+            <sys:function>
+              <sys:Control>
+                <sys:target rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice2"/>
+                <sys:target rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice1"/>
+              </sys:Control>
+            </sys:function>
+          </sys:Application>
+        </sys:ofSystem>
+        <sys:ofPerformer rdf:resource="http://www.illinois.edu/advise/SmallExample#Hacker"/>
+      </sys:Access>
+    </adversary:goal>
+  </adversary:GoalPriority>
+  <adversary:GoalPriority rdf:ID="DisableControlledDevices"/>
+  <sys:Network rdf:ID="SCADA_Network">
+    <sys:subsystemof rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice2"/>
+    <sys:subsystemof rdf:resource="http://www.illinois.edu/advise/SmallExample#ControlledDevice1"/>
+    <sys:subsystemof rdf:resource="http://www.illinois.edu/advise/SmallExample#MySCADA_Server"/>
+    <sys:subsystemof rdf:resource="http://www.illinois.edu/advise/SmallExample#SCADA_NetworkFirewall"/>
+  </sys:Network>
+</rdf:RDF>

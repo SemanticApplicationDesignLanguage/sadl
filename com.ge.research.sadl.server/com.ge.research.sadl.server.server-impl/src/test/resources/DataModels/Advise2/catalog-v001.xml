@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://com.ge.research/testgesadl/Service" uri="Service.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://research.ge.com/Acuity/defaults.owl" uri="defaults.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise//RuleStratifier" uri="RuleStratifier.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/ActivitySequenceGeneration" uri="ActivitySequenceGeneration.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/Adversary" uri="Adversary.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/Attack" uri="Attack.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/Firewall" uri="Firewall.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/SmallExample" uri="SmallExample.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/System" uri="System.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/TestPhyAccess" uri="TestPhyAccess.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1415119811713" name="http://www.illinois.edu/advise/TestSmallExample" uri="TestSmallExample.owl"/>
+    </group>
+</catalog>

@@ -1,0 +1,104 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://www.illinois.edu/advise/Firewall">
+  <owl:Ontology rdf:about="http://www.illinois.edu/advise/Firewall">
+    <owl:imports rdf:resource="http://www.illinois.edu/advise//RuleStratifier"/>
+    <owl:imports rdf:resource="http://www.illinois.edu/advise/System"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Firewall.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="ApplicationLayerFirewall">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Firewall"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="FirewallHosted">
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/System#Host"/>
+  </owl:Class>
+  <owl:Class rdf:ID="FirewallRule">
+    <rdfs:label>firewall rule</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:ID="PermittingFirewall">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="http://www.illinois.edu/advise/Firewall#Firewall"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="FirewallAppliance">
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/System#Device"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Connection"/>
+  <owl:Class rdf:ID="NetworkLayerFirewall">
+    <rdfs:label>Packet Filters</rdfs:label>
+    <rdfs:label>Network Layer Firewall</rdfs:label>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="http://www.illinois.edu/advise/Firewall#Firewall"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://www.illinois.edu/advise/Firewall#Firewall">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://www.illinois.edu/advise/Firewall#NetworkLayerFirewall"/>
+          <owl:Class rdf:about="http://www.illinois.edu/advise/Firewall#ApplicationLayerFirewall"/>
+        </owl:unionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://www.illinois.edu/advise/Firewall#FirewallHosted"/>
+          <owl:Class rdf:about="http://www.illinois.edu/advise/Firewall#FirewallAppliance"/>
+        </owl:unionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="BlockingFirewall">
+    <rdfs:subClassOf rdf:resource="http://www.illinois.edu/advise/Firewall#Firewall"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="firewallRule">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise/Firewall#Firewall"/>
+    <rdfs:range rdf:resource="http://www.illinois.edu/advise/Firewall#FirewallRule"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="blockedConnectionTo">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise/System#System"/>
+    <rdfs:range rdf:resource="http://www.illinois.edu/advise/System#System"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="implicitlyPermittedConnectionTo">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:ID="permittedConnectionTo"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="connectionTo">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise/Firewall#Connection"/>
+    <rdfs:range rdf:resource="http://www.illinois.edu/advise/System#System"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="blocksConnection">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise/Firewall#FirewallRule"/>
+    <rdfs:range rdf:resource="http://www.illinois.edu/advise/Firewall#Connection"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="implicitlyBlockedConnectionTo">
+    <rdfs:subPropertyOf rdf:resource="http://www.illinois.edu/advise/Firewall#blockedConnectionTo"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="connectionFrom">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise/Firewall#Connection"/>
+    <rdfs:range rdf:resource="http://www.illinois.edu/advise/System#System"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="explicitlyBlockedConnectionTo">
+    <rdfs:subPropertyOf rdf:resource="http://www.illinois.edu/advise/Firewall#blockedConnectionTo"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="explicitlyPermittedConnectionTo">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="http://www.illinois.edu/advise/Firewall#permittedConnectionTo"/>
+    </rdfs:subPropertyOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="permitsConnection">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise/Firewall#FirewallRule"/>
+    <rdfs:range rdf:resource="http://www.illinois.edu/advise/Firewall#Connection"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://www.illinois.edu/advise/Firewall#permittedConnectionTo">
+    <rdfs:domain rdf:resource="http://www.illinois.edu/advise/System#System"/>
+    <rdfs:range rdf:resource="http://www.illinois.edu/advise/System#System"/>
+  </owl:ObjectProperty>
+</rdf:RDF>

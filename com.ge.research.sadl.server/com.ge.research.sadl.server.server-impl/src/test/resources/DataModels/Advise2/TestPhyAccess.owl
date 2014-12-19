@@ -1,0 +1,34 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sys="http://www.illinois.edu/advise/System#"
+    xmlns="http://www.illinois.edu/advise/TestPhyAccess#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:adversary="http://www.illinois.edu/advise/Adversary#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://www.illinois.edu/advise/TestPhyAccess">
+  <owl:Ontology rdf:about="http://www.illinois.edu/advise/TestPhyAccess">
+    <owl:imports rdf:resource="http://www.illinois.edu/advise/ActivitySequenceGeneration"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestPhyAccess.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <adversary:Skilled>
+    <sys:ofPerformer>
+      <adversary:ThreatAgent rdf:ID="Hacker"/>
+    </sys:ofPerformer>
+    <skilledIn rdf:resource="http://www.illinois.edu/advise/Adversary#BreakingAndEntering"/>
+  </adversary:Skilled>
+  <sys:LocationKnowledge>
+    <sys:ofSystem>
+      <sys:Server rdf:ID="Sweden"/>
+    </sys:ofSystem>
+    <sys:ofPerformer rdf:resource="http://www.illinois.edu/advise/TestPhyAccess#Hacker"/>
+  </sys:LocationKnowledge>
+  <adversary:GoalPriority rdf:ID="Goal1">
+    <adversary:goal>
+      <sys:PhysicalAccess>
+        <sys:ofSystem rdf:resource="http://www.illinois.edu/advise/TestPhyAccess#Sweden"/>
+        <sys:ofPerformer rdf:resource="http://www.illinois.edu/advise/TestPhyAccess#Hacker"/>
+      </sys:PhysicalAccess>
+    </adversary:goal>
+  </adversary:GoalPriority>
+</rdf:RDF>
