@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -951,7 +952,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 				}
 			}
 		}
-		return null;
+		return Collections.emptyMap();
 	}
 	
 	@Override

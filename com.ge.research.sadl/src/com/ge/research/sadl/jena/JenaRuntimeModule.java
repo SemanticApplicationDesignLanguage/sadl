@@ -4,7 +4,6 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
 import org.eclipse.xtext.resource.IResourceFactory;
 import org.eclipse.xtext.resource.generic.AbstractGenericResourceRuntimeModule;
-import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy;
 
 import com.ge.research.sadl.naming.SadlSimpleNameProvider;
 
@@ -19,7 +18,7 @@ public class JenaRuntimeModule extends AbstractGenericResourceRuntimeModule {
 	}
 	
 	public Class<? extends IDefaultResourceDescriptionStrategy> bindIDefaultResourceDescriptionStrategy() {
-		return DefaultResourceDescriptionStrategy.class;
+		return JenaResourceDescriptionStrategy.class;
 	}
 
 	@Override

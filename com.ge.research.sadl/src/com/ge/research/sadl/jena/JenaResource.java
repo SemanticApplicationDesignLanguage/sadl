@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.sadl.ClassDeclaration;
 import com.ge.research.sadl.sadl.InstanceDeclaration;
@@ -67,7 +68,7 @@ public class JenaResource extends ResourceImpl {
         	URI thisUri = getURI();
         	visitor.init(this);
         	Resource context = this.getResourceSet().getResource(thisUri, false);
-            List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri);
+            List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri, Scope.LOCALONLY);
             if (names == null || names.isEmpty()) {
             	return;
             }

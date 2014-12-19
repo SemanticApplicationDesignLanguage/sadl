@@ -24,8 +24,12 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 		String name = null;
 		if (obj instanceof Import) {
 			Import imp = (Import) obj;
-			name = MATCH_TOKEN1 + replace(imp.getImportURI()) + MATCH_TOKEN2 + replace(imp.getAlias());
-		} else if (obj instanceof ResourceName) {
+			name = MATCH_TOKEN1 + replace(imp.getImportURI());
+			if (imp.getAlias()!=null) {
+				name += MATCH_TOKEN2 + replace(imp.getAlias());
+			}
+		} else 
+		if (obj instanceof ResourceName) {
 			Model m = EcoreUtil2.getContainerOfType(obj, Model.class);
 			if (m.getModelName()!=null && m.getModelName().getAlias()!=null) {
 				return QualifiedName.create(m.getModelName().getAlias(), ((ResourceName)obj).getName());
@@ -42,7 +46,7 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 
 	private String replace(String string) {
 		if(string != null) {
-			string = string.replaceAll("\\.", DOT_REPLACE_TOKEN);
+			string = string.replace(".", DOT_REPLACE_TOKEN);
 		}
 		return string;
 	}

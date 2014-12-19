@@ -12,6 +12,7 @@ import java.io.PrintStream;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.xtext.ui.editor.DirtyStateEditorSupport;
 import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
+import org.eclipse.xtext.ui.editor.XtextSourceViewerConfiguration;
 import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider;
 import org.eclipse.xtext.ui.editor.hyperlinking.IHyperlinkHelper;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
@@ -27,6 +28,7 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.ui.contentassist.SadlTemplateContextType;
 import com.ge.research.sadl.ui.editor.SadlDirtyStateEditorSupport;
 import com.ge.research.sadl.ui.editor.SadlHyperlinkHelper;
+import com.ge.research.sadl.ui.editor.SadlSourceViewerConfiguration;
 import com.ge.research.sadl.ui.properties.SadlRootPreferencePage;
 import com.ge.research.sadl.ui.quickfix.TemplateIssueResolutionAcceptor;
 import com.ge.research.sadl.ui.quickfix.TemplateQuickAssistProcessor;
@@ -59,9 +61,9 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
     }
 
     // Customizes our hyperlink helper.
-    public Class<? extends IHyperlinkHelper> bindIHyperlinkHelper() {
-        return SadlHyperlinkHelper.class;
-    }
+//    public Class<? extends IHyperlinkHelper> bindIHyperlinkHelper() {
+//        return SadlHyperlinkHelper.class;
+//    }
 
     // Customizes our language's root preference page.
       public Class<? extends LanguageRootPreferencePage> bindLanguageRootPreferencePage() {
@@ -100,5 +102,10 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
     
     public void configureXtextEditorErrorTickUpdater(com.google.inject.Binder binder) {
     	binder.bind(IXtextEditorCallback.class).annotatedWith(Names.named("editor.tracker")).to(SadlSemanticHighlightingCalculator.class);
+    }
+    
+    // Customize URL Hyperlink Detection
+    public Class<? extends XtextSourceViewerConfiguration> bindXtextSourceViewerConfiguration () {
+    	return SadlSourceViewerConfiguration.class;
     }
 }

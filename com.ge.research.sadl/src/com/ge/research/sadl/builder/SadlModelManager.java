@@ -168,7 +168,6 @@ import com.ge.research.sadl.sadl.util.SadlSwitch;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.hp.hpl.jena.vocabulary.OWL;
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 
 /**
@@ -492,31 +491,28 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
      * @throws IOException 
      */
     public List<ConceptName> getNamedConceptsInNamedModel(URI uri) throws InvalidNameException, IOException {
+    	return getNamedConceptsInNamedModel(uri, Scope.INCLUDEIMPORTS);
+    }
+    
+    public List<ConceptName> getNamedConceptsInNamedModel(URI uri, Scope scope) throws InvalidNameException, IOException {
     	String publicUri = null;
 		try {
-			// TODO: Compute isSadlDerived
-			boolean isSadlDerived = false;
-			
-			if (uri.isPlatform() && uri.lastSegment().endsWith(".owl")) {
-				isSadlDerived = "OwlModels".equals(uri.segment(uri.segmentCount()-1));
-				int i=0;
-			}
 	   		if (uri.isPlatform()) {
 	   			URL fileUri = FileLocator.toFileURL(new URL(uri.toString()));
 	   			uri = URI.createURI(fileUri.toString());
 	   		}
-			ConfigurationManagerForIDE cmgr = getConfigurationMgr(uri);
+	   		ConfigurationManagerForIDE cmgr = getConfigurationMgr(uri);
 			if (cmgr != null) {
 				publicUri = cmgr.getPublicUriFromActualUrl(uri.toString());
 			}
 			else {
 				throw new InvalidNameException("Unable to find a model with URL '" + uri + "'");
 			}
-			if (isSadlDerived) {
+			if (cmgr.isSadlDerived(publicUri)) {
 				return getModel().getNamedConceptsInNamedModel(publicUri, null);
 			}
 			else {
-				return cmgr.getNamedConceptsInModel(cmgr.getModelGetter().getOntModel(publicUri, uri.toString(), null), publicUri, null, Scope.INCLUDEIMPORTS);
+				return cmgr.getNamedConceptsInModel(cmgr.getModelGetter().getOntModel(publicUri, uri.toString(), null), publicUri, null, scope);
 			}
 		} catch (ConfigurationException e) {
 			return Collections.emptyList();
