@@ -76,7 +76,6 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 			}
 			
 			LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
-			uriSet.addAll(super.getImportedUris(resource));
 			collectImportedURIs(resource, URI.createURI(publicUri), uriSet, cmgr);
 			
 			return uriSet;
