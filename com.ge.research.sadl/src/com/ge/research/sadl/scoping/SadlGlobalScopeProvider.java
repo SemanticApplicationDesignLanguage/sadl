@@ -24,12 +24,17 @@
 package com.ge.research.sadl.scoping;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IResourceDescription;
+import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.scoping.impl.DefaultGlobalScopeProvider;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
 
@@ -38,6 +43,7 @@ import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.sadl.Model;
+import com.ge.research.sadl.sadl.SadlPackage;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -71,7 +77,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 			
 			LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
 			uriSet.addAll(super.getImportedUris(resource));
-			collectImportedURIs(URI.createURI(publicUri), uriSet, cmgr);
+			collectImportedURIs(resource, URI.createURI(publicUri), uriSet, cmgr);
 			
 			return uriSet;
 		} catch (Exception e) {
@@ -79,15 +85,36 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 		}
 	}
 	
-	
-	private void collectImportedURIs (URI publicURI, LinkedHashSet<URI> uriSet, IConfigurationManagerForIDE cmgr) throws ConfigurationException {
-		String altUrlFromPublicUri = cmgr.getAltUrlFromPublicUri(publicURI.toString());
-		if (uriSet.add(URI.createURI(altUrlFromPublicUri))) {
+
+	/**
+	 * Recursive method to resolve transitive imports. 
+	 * @param resource The context resource
+	 * @param publicURI The public URI of the imported resource
+	 * @param uriSet The result set into which the URIs are collected
+	 * @param cmgr The configuration manager for the context resource
+	 * @throws ConfigurationException
+	 * @throws MalformedURLException
+	 */
+	private void collectImportedURIs (Resource resource, URI publicURI, LinkedHashSet<URI> uriSet, IConfigurationManagerForIDE cmgr) throws ConfigurationException, MalformedURLException {
+		URI altUrlFromPublicUri = URI.createURI(cmgr.getAltUrlFromPublicUri(publicURI.toString()));
+		// For SADL derived OWL models, resolve the SADL resource URI from the index.
+		if (cmgr.isSadlDerived(publicURI.toString())) {
+			IResourceDescriptions descriptions = getResourceDescriptions(resource);
+			Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SadlPackage.Literals.MODEL, QualifiedName.create(publicURI.toString()), false);
+			Iterator<IEObjectDescription> it = matchingModels.iterator();
+			if (it.hasNext()) {
+				IEObjectDescription description = it.next();
+				// This will be the URI of the SADL file
+				altUrlFromPublicUri = description.getEObjectURI().trimFragment();
+			}
+		}
+		if (uriSet.add(altUrlFromPublicUri)) {
+			// This URI was not collected yet, thus collect its imports again
 			try {
 				Map<String, String> imports = cmgr.getImports(publicURI.toString());
 				for (String s: imports.keySet()) {
 					URI uri = URI.createURI(s);
-					collectImportedURIs(uri, uriSet, cmgr);
+					collectImportedURIs(resource, uri, uriSet, cmgr);
 				}
 			} catch (ConfigurationException e) {
 				; // TODO: Handle exception

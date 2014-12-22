@@ -32,9 +32,8 @@ import org.eclipse.xtext.scoping.impl.ImportUriResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.builder.ResourceManager;
+import com.ge.research.sadl.builder.SadlModelManager;
 import com.google.inject.Inject;
 
 /**

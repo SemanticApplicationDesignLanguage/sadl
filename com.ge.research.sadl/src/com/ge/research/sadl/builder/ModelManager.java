@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -4002,7 +4003,12 @@ public class ModelManager {
 			return getNamedConceptsInModel(null, this.modelName, cType, scope);
 		} else {
 			// get concepts in current model
-			List<ConceptName> names = getConfigurationMgr().getNamedConceptsInModel(getJenaModel(), getModelName(), cType, scope);
+			
+			ConfigurationManagerForIDE cmgr = getConfigurationMgr();
+			if (cmgr == null) {
+				return Collections.emptyList();
+			}
+			List<ConceptName> names = cmgr.getNamedConceptsInModel(getJenaModel(), getModelName(), cType, scope);
 
 			if (scope.equals(Scope.INCLUDEIMPORTS) && imports != null && imports.size() > 0) {
 				// get concepts in imports
@@ -4010,7 +4016,7 @@ public class ModelManager {
 				while (imiter.hasNext()) {
 					ImportMapping im = imiter.next();
 					if (im.getModel() != null) {
-						List<ConceptName> imNames = getConfigurationMgr().getNamedConceptsInModel(im.getModel(), im.getPublicURI(), cType, scope);
+						List<ConceptName> imNames = cmgr.getNamedConceptsInModel(im.getModel(), im.getPublicURI(), cType, scope);
 						for (int i = 0; imNames != null && i < imNames.size(); i++) {
 							if (!names.contains(imNames.get(i))) {
 								names.add(imNames.get(i));

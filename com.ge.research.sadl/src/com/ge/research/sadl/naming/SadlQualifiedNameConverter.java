@@ -15,27 +15,17 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
  ***********************************************************************/
-package com.ge.research.sadl.jena;
+package com.ge.research.sadl.naming;
 
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.xtext.resource.IEObjectDescription;
-import org.eclipse.xtext.resource.IReferenceDescription;
-import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy;
-import org.eclipse.xtext.util.IAcceptor;
+import org.eclipse.xtext.naming.IQualifiedNameConverter.DefaultImpl;
 
-public class JenaResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
-	
+/**
+ * SADL uses ':' to for qualified names, Xtext assumes '.' by default.
+ * @author thoms
+ */
+public class SadlQualifiedNameConverter extends DefaultImpl {
 	@Override
-	public boolean createEObjectDescriptions(EObject eObject,
-			IAcceptor<IEObjectDescription> acceptor) {
-		return super.createEObjectDescriptions(eObject, acceptor);
+	public String getDelimiter() {
+		return ":";
 	}
-
-	@Override
-	public boolean createReferenceDescriptions(EObject eObject,
-			URI exportedContainerURI, IAcceptor<IReferenceDescription> acceptor) {
-		return false;
-	}
-
 }

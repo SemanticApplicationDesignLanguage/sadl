@@ -3,18 +3,15 @@
  */
 package com.ge.research.sadl.ui;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-
 import java.io.PrintStream;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.eclipse.ui.console.IOConsoleOutputStream;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.xtext.ui.editor.DirtyStateEditorSupport;
 import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
 import org.eclipse.xtext.ui.editor.XtextSourceViewerConfiguration;
-import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider;
-import org.eclipse.xtext.ui.editor.hyperlinking.IHyperlinkHelper;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.ui.editor.quickfix.XtextQuickAssistProcessor;
@@ -27,7 +24,6 @@ import org.eclipse.xtext.ui.editor.templates.XtextTemplateContextType;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.ui.contentassist.SadlTemplateContextType;
 import com.ge.research.sadl.ui.editor.SadlDirtyStateEditorSupport;
-import com.ge.research.sadl.ui.editor.SadlHyperlinkHelper;
 import com.ge.research.sadl.ui.editor.SadlSourceViewerConfiguration;
 import com.ge.research.sadl.ui.properties.SadlRootPreferencePage;
 import com.ge.research.sadl.ui.quickfix.TemplateIssueResolutionAcceptor;

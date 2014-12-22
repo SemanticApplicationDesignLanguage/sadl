@@ -27,7 +27,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,16 +72,11 @@ public class JenaResource extends ResourceImpl {
             	return;
             }
             
-            // create map ConceptName#prefix -> List<ConceptName>
-            
-            
-            
-            // TODO: create one Model per prefix
             // add ModelName to the Model, set alias=prefix
             Model model = SadlFactory.eINSTANCE.createModel();
             ModelName modelName = SadlFactory.eINSTANCE.createModelName();
-            String alias = names.get(0).getPrefix();
-            modelName.setAlias(alias);
+            modelName.setAlias(names.get(0).getPrefix());
+            modelName.setBaseUri(names.get(0).getUri());
             model.setModelName(modelName);
             
             getContents().add(model);
