@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,10 +13,8 @@ import javax.inject.Inject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.URLHyperlink;
@@ -26,17 +25,14 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.xtext.ui.editor.XtextSourceViewerConfiguration;
-import org.eclipse.xtext.ui.editor.hyperlinking.XtextHyperlink;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.ui.SadlActivatorExt;
-import com.google.inject.Provider;
 
 public class SadlSourceViewerConfiguration extends
 		XtextSourceViewerConfiguration {
-
 	// copied from org.eclipse.ui.internal.editors.text.URLHyperlink
 	final class URLHyperlinkExt extends org.eclipse.jface.text.hyperlink.URLHyperlink {
 		/**
@@ -74,8 +70,6 @@ public class SadlSourceViewerConfiguration extends
 	@Inject
 	private IHyperlinkDetector detector;
 	@Inject
-	private Provider<XtextHyperlink> hyperlinkProvider;
-	@Inject
 	private SadlModelManager visitor;
 
 	@Override
@@ -90,7 +84,7 @@ public class SadlSourceViewerConfiguration extends
 							boolean canShowMultipleHyperlinks) {
 						try {
 							IHyperlink[] hyperlinks = detector.detectHyperlinks(textViewer, region, canShowMultipleHyperlinks);
-							mapURLHyperlinks(hyperlinks);
+							hyperlinks = removeURLHyperlinksOfManagedResources(hyperlinks);
 							return hyperlinks;
 						}
 						catch (Throwable e) {
@@ -111,9 +105,10 @@ public class SadlSourceViewerConfiguration extends
 	 * Map public URLs to Alt URLs. Replaces {@link URLHyperlink}s computed by default by instances with the alternative URL.
 	 * @param hyperlinks
 	 */
-	private void mapURLHyperlinks (IHyperlink[] hyperlinks) {
-		if (hyperlinks == null) return;
+	private IHyperlink[] removeURLHyperlinksOfManagedResources (IHyperlink[] hyperlinks) {
+		if (hyperlinks == null) return hyperlinks;
 		
+		List<IHyperlink> result = new ArrayList<>(hyperlinks.length);
 		for (int i=0; i<hyperlinks.length; i++) {
 			IHyperlink hyperlink = hyperlinks[i];
 			if (hyperlink instanceof URLHyperlink) {
@@ -127,21 +122,18 @@ public class SadlSourceViewerConfiguration extends
 					
 					// map the public URL to the mapped URL
 					String altUrl = cmgr.getAltUrlFromPublicUri(publicUri);
-					XtextHyperlink xtextHyperlink = hyperlinkProvider.get();
-					xtextHyperlink.setHyperlinkRegion((Region) hyperlink.getHyperlinkRegion());
-					xtextHyperlink.setHyperlinkText(altUrl);
-					
-					URI uri = URI.createURI(altUrl);
-					// TODO: Map File URI to platform URI
-					xtextHyperlink.setURI(uri);
-					
-					hyperlinks[i] = xtextHyperlink;
+					result.add(new URLHyperlinkExt(hyperlink.getHyperlinkRegion(), altUrl));
+					// TODO: Actually this hyperlink should not be added
+					// but if left out, also no Xtext hyperlink appears. Have to check out why
+					// at least this one is mapped
 				} catch (ConfigurationException | URISyntaxException
 						| IOException e) {
 				}
+			} else {
+				result.add(hyperlink);
 			}
 		}
-		
+		return result.toArray(hyperlinks);
 	}
 	
 	// 

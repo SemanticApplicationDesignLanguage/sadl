@@ -76,7 +76,7 @@ public class JenaResource extends ResourceImpl {
             Model model = SadlFactory.eINSTANCE.createModel();
             ModelName modelName = SadlFactory.eINSTANCE.createModelName();
             modelName.setAlias(names.get(0).getPrefix());
-            modelName.setBaseUri(names.get(0).getUri());
+            modelName.setBaseUri(URI.createURI(names.get(0).getUri()).trimFragment().toString());
             model.setModelName(modelName);
             
             getContents().add(model);
