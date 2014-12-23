@@ -14,11 +14,11 @@ import org.eclipse.xtext.validation.Check;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.PendingModelError;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.ModelName;
@@ -115,7 +115,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 		}
 		// do we have a global alias?
 		try {
-    		ConfigurationManager configMgr = visitor.getConfigurationMgr(null);
+    		IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr((String)null);
     		
     		if (configMgr != null) {
     			if (uri.endsWith(ResourceManager.SADLEXTWITHPREFIX)) {

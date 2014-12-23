@@ -20,56 +20,36 @@ package com.ge.research.sadl.jena;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.linking.lazy.LazyLinkingResource;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
-import com.ge.research.sadl.model.ImportMapping;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.sadl.ClassDeclaration;
 import com.ge.research.sadl.sadl.InstanceDeclaration;
 import com.ge.research.sadl.sadl.Model;
+import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.sadl.PropertyDeclaration;
 import com.ge.research.sadl.sadl.ResourceName;
 import com.ge.research.sadl.sadl.SadlFactory;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
-import com.ge.research.sadl.builder.ResourceManager;
 import com.google.inject.Inject;
 
-public class JenaResource extends LazyLinkingResource {
+public class JenaResource extends ResourceImpl {
 
     private static final Logger logger = LoggerFactory.getLogger(JenaResource.class);
 
     @Inject
     private SadlModelManager visitor;
-
-    private boolean hasSadlExtension;
-    
-    /**
-     * Provider<JenaResource> needs a parameter-less constructor.
-     */
-    public JenaResource() {}
-
-    /**
-     * {@inheritDoc}
-     * Also sets the private hasSadlExtension field true if the URI has a SADL 
-     * file extension.
-     */
-    @Override
-	public void setURI(URI uri) {
-		super.setURI(uri);
-    	String ext = getURI().fileExtension();
-    	hasSadlExtension = ResourceManager.SADLEXT.equalsIgnoreCase(ext);
-	}
 
 	/**
      * Loads SADL resources using Xtext but OWL and RDF resources using 
@@ -79,28 +59,26 @@ public class JenaResource extends LazyLinkingResource {
     @Override
     protected void doLoad(InputStream inputStream, Map<?, ?> options)
             throws IOException {
-
-    	// We will load SADL files using the default Xtext implementation. 
-    	if (hasSadlExtension) {
-    		super.doLoad(inputStream, options);
-    		return;
-    	}
-
     	// However, we will load OWL and RDF files by querying the SadlModelManager 
         // to add the files' exported names to our resource's contents but only if
     	// it isn't an OWL file generated from a SADL file (which should already have
     	// its names exported).
         try {
         	URI thisUri = getURI();
-        	if (thisUri.segmentCount() > 2) {
-        		String containingFolder = thisUri.segment(thisUri.segmentCount() - 2);
-        		if (containingFolder.equals(ResourceManager.OWLDIR)) {
-        			return;
-        		}
-        	}
+        	visitor.init(this);
         	Resource context = this.getResourceSet().getResource(thisUri, false);
-            List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri);
+            List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri, Scope.LOCALONLY);
+            if (names == null || names.isEmpty()) {
+            	return;
+            }
+            
+            // add ModelName to the Model, set alias=prefix
             Model model = SadlFactory.eINSTANCE.createModel();
+            ModelName modelName = SadlFactory.eINSTANCE.createModelName();
+            modelName.setAlias(names.get(0).getPrefix());
+            modelName.setBaseUri(URI.createURI(names.get(0).getUri()).trimFragment().toString());
+            model.setModelName(modelName);
+            
             getContents().add(model);
 
             // This may not work correctly at first, but let's try it.
@@ -112,28 +90,28 @@ public class JenaResource extends LazyLinkingResource {
     				break;
     	    	case DATATYPEPROPERTY:
     	    	    ResourceName rnData= SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnData.setName(name.toString());
+    	    	    rnData.setName(name.getName());
     	    	    PropertyDeclaration pdData = SadlFactory.eINSTANCE.createPropertyDeclaration();
     	    	    pdData.setPropertyName(rnData);
     	    	    model.getElements().add(pdData);
     				break;
     	    	case INDIVIDUAL:
                     ResourceName rnInst = SadlFactory.eINSTANCE.createResourceName();
-                    rnInst.setName(name.toString());
+                    rnInst.setName(name.getName());
                     InstanceDeclaration id = SadlFactory.eINSTANCE.createInstanceDeclaration();
                     id.setInstanceName(rnInst);
                     model.getElements().add(id);
     				break;
     	    	case OBJECTPROPERTY:
     	    	    ResourceName rnObj= SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnObj.setName(name.toString());
+    	    	    rnObj.setName(name.getName());
     	    	    PropertyDeclaration pdObj = SadlFactory.eINSTANCE.createPropertyDeclaration();
     	    	    pdObj.setPropertyName(rnObj);
     	    	    model.getElements().add(pdObj);
     				break;
     	    	case ONTCLASS:
     	    	    ResourceName rnClass = SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnClass.setName(name.toString());
+    	    	    rnClass.setName(name.getName());
     	    	    ClassDeclaration cd = SadlFactory.eINSTANCE.createClassDeclaration();
     	    	    cd.setClassName(rnClass);
     	    	    model.getElements().add(cd);
@@ -142,6 +120,7 @@ public class JenaResource extends LazyLinkingResource {
     				break;
                 }
             }
+            logger.info("Loaded "+thisUri.lastSegment()+" with "+model.getElements().size()+" concepts.");
         }
         catch (InvalidNameException e) {
         	logger.error("Invalid name", e);    	
@@ -157,7 +136,7 @@ public class JenaResource extends LazyLinkingResource {
     @Override
     public String getURIFragment(final EObject object) {
     	String result = super.getURIFragment(object);
-    	if (!hasSadlExtension && object instanceof ResourceName) {
+    	if (object instanceof ResourceName) {
     		ResourceName rName = (ResourceName) object;
     		result = rName.getName();
     		int colon = result.indexOf(':');

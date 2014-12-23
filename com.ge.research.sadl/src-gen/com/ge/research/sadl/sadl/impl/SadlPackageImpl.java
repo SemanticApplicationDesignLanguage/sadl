@@ -16,7 +16,6 @@ import com.ge.research.sadl.sadl.Condition;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
 import com.ge.research.sadl.sadl.DataType;
-import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
@@ -32,7 +31,6 @@ import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
-import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.GraphPattern;
 import com.ge.research.sadl.sadl.HasValue;
@@ -94,7 +92,6 @@ import com.ge.research.sadl.sadl.TypeDeclaration;
 import com.ge.research.sadl.sadl.TypedBNode;
 import com.ge.research.sadl.sadl.UnaryOpExpression;
 import com.ge.research.sadl.sadl.UnionResource;
-import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.ValueRow;
 import com.ge.research.sadl.sadl.ValueTable;
 import com.ge.research.sadl.sadl.VariableList;
@@ -263,27 +260,6 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * @generated
    */
   private EClass rangeTypeEClass = null;
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  private EClass userDefinedDataTypeEClass = null;
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  private EClass dataTypeRestrictionEClass = null;
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  private EClass facetsEClass = null;
 
   /**
    * <!-- begin-user-doc -->
@@ -1454,169 +1430,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EClass getUserDefinedDataType()
+  public EAttribute getRangeType_DataType()
   {
-    return userDefinedDataTypeEClass;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getUserDefinedDataType_Udt()
-  {
-    return (EAttribute)userDefinedDataTypeEClass.getEStructuralFeatures().get(0);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EReference getUserDefinedDataType_Restriction()
-  {
-    return (EReference)userDefinedDataTypeEClass.getEStructuralFeatures().get(1);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EClass getDataTypeRestriction()
-  {
-    return dataTypeRestrictionEClass;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getDataTypeRestriction_Basetype()
-  {
-    return (EAttribute)dataTypeRestrictionEClass.getEStructuralFeatures().get(0);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EReference getDataTypeRestriction_Facets()
-  {
-    return (EReference)dataTypeRestrictionEClass.getEStructuralFeatures().get(1);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getDataTypeRestriction_Basetypes()
-  {
-    return (EAttribute)dataTypeRestrictionEClass.getEStructuralFeatures().get(2);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EClass getFacets()
-  {
-    return facetsEClass;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Minexin()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(0);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Min()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(1);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Max()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(2);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Maxexin()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(3);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Regex()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(4);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Len()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(5);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Minlen()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(6);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Maxlen()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(7);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getFacets_Values()
-  {
-    return (EAttribute)facetsEClass.getEStructuralFeatures().get(8);
+    return (EAttribute)rangeTypeEClass.getEStructuralFeatures().get(1);
   }
 
   /**
@@ -4128,26 +3944,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
 
     rangeTypeEClass = createEClass(RANGE_TYPE);
     createEReference(rangeTypeEClass, RANGE_TYPE__CLASS_IDENTIFIER);
-
-    userDefinedDataTypeEClass = createEClass(USER_DEFINED_DATA_TYPE);
-    createEAttribute(userDefinedDataTypeEClass, USER_DEFINED_DATA_TYPE__UDT);
-    createEReference(userDefinedDataTypeEClass, USER_DEFINED_DATA_TYPE__RESTRICTION);
-
-    dataTypeRestrictionEClass = createEClass(DATA_TYPE_RESTRICTION);
-    createEAttribute(dataTypeRestrictionEClass, DATA_TYPE_RESTRICTION__BASETYPE);
-    createEReference(dataTypeRestrictionEClass, DATA_TYPE_RESTRICTION__FACETS);
-    createEAttribute(dataTypeRestrictionEClass, DATA_TYPE_RESTRICTION__BASETYPES);
-
-    facetsEClass = createEClass(FACETS);
-    createEAttribute(facetsEClass, FACETS__MINEXIN);
-    createEAttribute(facetsEClass, FACETS__MIN);
-    createEAttribute(facetsEClass, FACETS__MAX);
-    createEAttribute(facetsEClass, FACETS__MAXEXIN);
-    createEAttribute(facetsEClass, FACETS__REGEX);
-    createEAttribute(facetsEClass, FACETS__LEN);
-    createEAttribute(facetsEClass, FACETS__MINLEN);
-    createEAttribute(facetsEClass, FACETS__MAXLEN);
-    createEAttribute(facetsEClass, FACETS__VALUES);
+    createEAttribute(rangeTypeEClass, RANGE_TYPE__DATA_TYPE);
 
     equivalentConceptsEClass = createEClass(EQUIVALENT_CONCEPTS);
     createEReference(equivalentConceptsEClass, EQUIVALENT_CONCEPTS__CLASS1);
@@ -4500,7 +4297,6 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     unionResourceEClass.getESuperTypes().add(this.getResourceBySetOp());
     intersectionResourceEClass.getESuperTypes().add(this.getResourceBySetOp());
     classDeclarationEClass.getESuperTypes().add(this.getStatement());
-    userDefinedDataTypeEClass.getESuperTypes().add(this.getStatement());
     equivalentConceptsEClass.getESuperTypes().add(this.getStatement());
     disjointClassesEClass.getESuperTypes().add(this.getStatement());
     complementOfClassEClass.getESuperTypes().add(this.getStatement());
@@ -4631,26 +4427,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
 
     initEClass(rangeTypeEClass, RangeType.class, "RangeType", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getRangeType_ClassIdentifier(), this.getResourceIdentifier(), null, "classIdentifier", null, 0, 1, RangeType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-
-    initEClass(userDefinedDataTypeEClass, UserDefinedDataType.class, "UserDefinedDataType", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getUserDefinedDataType_Udt(), ecorePackage.getEString(), "udt", null, 0, 1, UserDefinedDataType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getUserDefinedDataType_Restriction(), this.getDataTypeRestriction(), null, "restriction", null, 0, 1, UserDefinedDataType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-
-    initEClass(dataTypeRestrictionEClass, DataTypeRestriction.class, "DataTypeRestriction", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getDataTypeRestriction_Basetype(), ecorePackage.getEString(), "basetype", null, 0, 1, DataTypeRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getDataTypeRestriction_Facets(), this.getFacets(), null, "facets", null, 0, 1, DataTypeRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getDataTypeRestriction_Basetypes(), ecorePackage.getEString(), "basetypes", null, 0, -1, DataTypeRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-
-    initEClass(facetsEClass, Facets.class, "Facets", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getFacets_Minexin(), ecorePackage.getEString(), "minexin", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Min(), ecorePackage.getEString(), "min", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Max(), ecorePackage.getEString(), "max", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Maxexin(), ecorePackage.getEString(), "maxexin", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Regex(), ecorePackage.getEString(), "regex", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Len(), ecorePackage.getEString(), "len", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Minlen(), ecorePackage.getEString(), "minlen", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Maxlen(), ecorePackage.getEString(), "maxlen", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getFacets_Values(), ecorePackage.getEString(), "values", null, 0, -1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getRangeType_DataType(), this.getDataType(), "dataType", null, 0, 1, RangeType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(equivalentConceptsEClass, EquivalentConcepts.class, "EquivalentConcepts", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getEquivalentConcepts_Class1(), this.getResourceByName(), null, "class1", null, 0, 1, EquivalentConcepts.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

@@ -275,22 +275,22 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cExistingInstanceAttributionParserRuleCall_21 = (RuleCall)cAlternatives.eContents().get(21);
 		private final RuleCall cInstanceDifferentFromParserRuleCall_22 = (RuleCall)cAlternatives.eContents().get(22);
 		private final RuleCall cInstancesAllDifferentParserRuleCall_23 = (RuleCall)cAlternatives.eContents().get(23);
-		private final RuleCall cUserDefinedDataTypeParserRuleCall_24 = (RuleCall)cAlternatives.eContents().get(24);
 		
 		//// These are the things that translate directly to OWL.
+		////    |	UserDefinedDataType
 		//Statement:
 		//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
 		//	MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 		//	DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
 		//	InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
-		//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType;
+		//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent;
 		public ParserRule getRule() { return rule; }
 
 		//ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
 		//MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 		//DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
 		//InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement | ExistingInstanceAttribution
-		//| InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType
+		//| InstanceDifferentFrom | InstancesAllDifferent
 		public Alternatives getAlternatives() { return cAlternatives; }
 
 		//ClassDeclaration
@@ -364,9 +364,6 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 
 		//InstancesAllDifferent
 		public RuleCall getInstancesAllDifferentParserRuleCall_23() { return cInstancesAllDifferentParserRuleCall_23; }
-
-		//UserDefinedDataType
-		public RuleCall getUserDefinedDataTypeParserRuleCall_24() { return cUserDefinedDataTypeParserRuleCall_24; }
 	}
 
 	public class ResourceNameElements extends AbstractParserRuleElementFinder {
@@ -1313,334 +1310,31 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 
 	public class RangeTypeElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "RangeType");
-		private final Assignment cClassIdentifierAssignment = (Assignment)rule.eContents().get(1);
-		private final RuleCall cClassIdentifierResourceIdentifierParserRuleCall_0 = (RuleCall)cClassIdentifierAssignment.eContents().get(0);
+		private final Alternatives cAlternatives = (Alternatives)rule.eContents().get(1);
+		private final Assignment cClassIdentifierAssignment_0 = (Assignment)cAlternatives.eContents().get(0);
+		private final RuleCall cClassIdentifierResourceIdentifierParserRuleCall_0_0 = (RuleCall)cClassIdentifierAssignment_0.eContents().get(0);
+		private final Assignment cDataTypeAssignment_1 = (Assignment)cAlternatives.eContents().get(1);
+		private final RuleCall cDataTypeDataTypeEnumRuleCall_1_0 = (RuleCall)cDataTypeAssignment_1.eContents().get(0);
 		
-		////    |   dataType=DataType
 		////	  | dataType=ResourceName
 		//RangeType:
-		//	classIdentifier=ResourceIdentifier;
+		//	classIdentifier=ResourceIdentifier | dataType=DataType;
 		public ParserRule getRule() { return rule; }
+
+		//classIdentifier=ResourceIdentifier | dataType=DataType
+		public Alternatives getAlternatives() { return cAlternatives; }
 
 		//classIdentifier=ResourceIdentifier
-		public Assignment getClassIdentifierAssignment() { return cClassIdentifierAssignment; }
+		public Assignment getClassIdentifierAssignment_0() { return cClassIdentifierAssignment_0; }
 
 		//ResourceIdentifier
-		public RuleCall getClassIdentifierResourceIdentifierParserRuleCall_0() { return cClassIdentifierResourceIdentifierParserRuleCall_0; }
-	}
+		public RuleCall getClassIdentifierResourceIdentifierParserRuleCall_0_0() { return cClassIdentifierResourceIdentifierParserRuleCall_0_0; }
 
-	public class UserDefinedDataTypeElements extends AbstractParserRuleElementFinder {
-		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "UserDefinedDataType");
-		private final Group cGroup = (Group)rule.eContents().get(1);
-		private final Assignment cUdtAssignment_0 = (Assignment)cGroup.eContents().get(0);
-		private final RuleCall cUdtNAMEParserRuleCall_0_0 = (RuleCall)cUdtAssignment_0.eContents().get(0);
-		private final Keyword cIsKeyword_1 = (Keyword)cGroup.eContents().get(1);
-		private final Keyword cAKeyword_2 = (Keyword)cGroup.eContents().get(2);
-		private final Keyword cDataKeyword_3 = (Keyword)cGroup.eContents().get(3);
-		private final Keyword cTypeKeyword_4 = (Keyword)cGroup.eContents().get(4);
-		private final Keyword cBasedKeyword_5 = (Keyword)cGroup.eContents().get(5);
-		private final Keyword cOnKeyword_6 = (Keyword)cGroup.eContents().get(6);
-		private final Assignment cRestrictionAssignment_7 = (Assignment)cGroup.eContents().get(7);
-		private final RuleCall cRestrictionDataTypeRestrictionParserRuleCall_7_0 = (RuleCall)cRestrictionAssignment_7.eContents().get(0);
-		private final RuleCall cEOSTerminalRuleCall_8 = (RuleCall)cGroup.eContents().get(8);
-		
-		//UserDefinedDataType:
-		//	udt=NAME "is" "a" "data" "type" "based" "on" restriction=DataTypeRestriction EOS;
-		public ParserRule getRule() { return rule; }
+		//dataType=DataType
+		public Assignment getDataTypeAssignment_1() { return cDataTypeAssignment_1; }
 
-		//udt=NAME "is" "a" "data" "type" "based" "on" restriction=DataTypeRestriction EOS
-		public Group getGroup() { return cGroup; }
-
-		//udt=NAME
-		public Assignment getUdtAssignment_0() { return cUdtAssignment_0; }
-
-		//NAME
-		public RuleCall getUdtNAMEParserRuleCall_0_0() { return cUdtNAMEParserRuleCall_0_0; }
-
-		//"is"
-		public Keyword getIsKeyword_1() { return cIsKeyword_1; }
-
-		//"a"
-		public Keyword getAKeyword_2() { return cAKeyword_2; }
-
-		//"data"
-		public Keyword getDataKeyword_3() { return cDataKeyword_3; }
-
-		//"type"
-		public Keyword getTypeKeyword_4() { return cTypeKeyword_4; }
-
-		//"based"
-		public Keyword getBasedKeyword_5() { return cBasedKeyword_5; }
-
-		//"on"
-		public Keyword getOnKeyword_6() { return cOnKeyword_6; }
-
-		//restriction=DataTypeRestriction
-		public Assignment getRestrictionAssignment_7() { return cRestrictionAssignment_7; }
-
-		//DataTypeRestriction
-		public RuleCall getRestrictionDataTypeRestrictionParserRuleCall_7_0() { return cRestrictionDataTypeRestrictionParserRuleCall_7_0; }
-
-		//EOS
-		public RuleCall getEOSTerminalRuleCall_8() { return cEOSTerminalRuleCall_8; }
-	}
-
-	public class DataTypeRestrictionElements extends AbstractParserRuleElementFinder {
-		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "DataTypeRestriction");
-		private final Alternatives cAlternatives = (Alternatives)rule.eContents().get(1);
-		private final Group cGroup_0 = (Group)cAlternatives.eContents().get(0);
-		private final Assignment cBasetypeAssignment_0_0 = (Assignment)cGroup_0.eContents().get(0);
-		private final RuleCall cBasetypeNAMEParserRuleCall_0_0_0 = (RuleCall)cBasetypeAssignment_0_0.eContents().get(0);
-		private final Keyword cRestrictedKeyword_0_1 = (Keyword)cGroup_0.eContents().get(1);
-		private final Keyword cToKeyword_0_2 = (Keyword)cGroup_0.eContents().get(2);
-		private final Assignment cFacetsAssignment_0_3 = (Assignment)cGroup_0.eContents().get(3);
-		private final RuleCall cFacetsFacetsParserRuleCall_0_3_0 = (RuleCall)cFacetsAssignment_0_3.eContents().get(0);
-		private final Group cGroup_1 = (Group)cAlternatives.eContents().get(1);
-		private final Keyword cLeftCurlyBracketKeyword_1_0 = (Keyword)cGroup_1.eContents().get(0);
-		private final Assignment cBasetypesAssignment_1_1 = (Assignment)cGroup_1.eContents().get(1);
-		private final RuleCall cBasetypesNAMEParserRuleCall_1_1_0 = (RuleCall)cBasetypesAssignment_1_1.eContents().get(0);
-		private final Group cGroup_1_2 = (Group)cGroup_1.eContents().get(2);
-		private final Alternatives cAlternatives_1_2_0 = (Alternatives)cGroup_1_2.eContents().get(0);
-		private final Keyword cCommaKeyword_1_2_0_0 = (Keyword)cAlternatives_1_2_0.eContents().get(0);
-		private final Keyword cOrKeyword_1_2_0_1 = (Keyword)cAlternatives_1_2_0.eContents().get(1);
-		private final Assignment cBasetypesAssignment_1_2_1 = (Assignment)cGroup_1_2.eContents().get(1);
-		private final RuleCall cBasetypesNAMEParserRuleCall_1_2_1_0 = (RuleCall)cBasetypesAssignment_1_2_1.eContents().get(0);
-		private final Keyword cRightCurlyBracketKeyword_1_3 = (Keyword)cGroup_1.eContents().get(3);
-		
-		//DataTypeRestriction:
-		//	basetype=NAME "restricted" "to" facets=Facets | "{" basetypes+=NAME (("," | "or") basetypes+=NAME)+ "}";
-		public ParserRule getRule() { return rule; }
-
-		//basetype=NAME "restricted" "to" facets=Facets | "{" basetypes+=NAME (("," | "or") basetypes+=NAME)+ "}"
-		public Alternatives getAlternatives() { return cAlternatives; }
-
-		//basetype=NAME "restricted" "to" facets=Facets
-		public Group getGroup_0() { return cGroup_0; }
-
-		//basetype=NAME
-		public Assignment getBasetypeAssignment_0_0() { return cBasetypeAssignment_0_0; }
-
-		//NAME
-		public RuleCall getBasetypeNAMEParserRuleCall_0_0_0() { return cBasetypeNAMEParserRuleCall_0_0_0; }
-
-		//"restricted"
-		public Keyword getRestrictedKeyword_0_1() { return cRestrictedKeyword_0_1; }
-
-		//"to"
-		public Keyword getToKeyword_0_2() { return cToKeyword_0_2; }
-
-		//facets=Facets
-		public Assignment getFacetsAssignment_0_3() { return cFacetsAssignment_0_3; }
-
-		//Facets
-		public RuleCall getFacetsFacetsParserRuleCall_0_3_0() { return cFacetsFacetsParserRuleCall_0_3_0; }
-
-		//"{" basetypes+=NAME (("," | "or") basetypes+=NAME)+ "}"
-		public Group getGroup_1() { return cGroup_1; }
-
-		//"{"
-		public Keyword getLeftCurlyBracketKeyword_1_0() { return cLeftCurlyBracketKeyword_1_0; }
-
-		//basetypes+=NAME
-		public Assignment getBasetypesAssignment_1_1() { return cBasetypesAssignment_1_1; }
-
-		//NAME
-		public RuleCall getBasetypesNAMEParserRuleCall_1_1_0() { return cBasetypesNAMEParserRuleCall_1_1_0; }
-
-		//(("," | "or") basetypes+=NAME)+
-		public Group getGroup_1_2() { return cGroup_1_2; }
-
-		//"," | "or"
-		public Alternatives getAlternatives_1_2_0() { return cAlternatives_1_2_0; }
-
-		//","
-		public Keyword getCommaKeyword_1_2_0_0() { return cCommaKeyword_1_2_0_0; }
-
-		//"or"
-		public Keyword getOrKeyword_1_2_0_1() { return cOrKeyword_1_2_0_1; }
-
-		//basetypes+=NAME
-		public Assignment getBasetypesAssignment_1_2_1() { return cBasetypesAssignment_1_2_1; }
-
-		//NAME
-		public RuleCall getBasetypesNAMEParserRuleCall_1_2_1_0() { return cBasetypesNAMEParserRuleCall_1_2_1_0; }
-
-		//"}"
-		public Keyword getRightCurlyBracketKeyword_1_3() { return cRightCurlyBracketKeyword_1_3; }
-	}
-
-	public class FacetsElements extends AbstractParserRuleElementFinder {
-		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "Facets");
-		private final Alternatives cAlternatives = (Alternatives)rule.eContents().get(1);
-		private final Group cGroup_0 = (Group)cAlternatives.eContents().get(0);
-		private final Assignment cMinexinAssignment_0_0 = (Assignment)cGroup_0.eContents().get(0);
-		private final Alternatives cMinexinAlternatives_0_0_0 = (Alternatives)cMinexinAssignment_0_0.eContents().get(0);
-		private final Keyword cMinexinLeftParenthesisKeyword_0_0_0_0 = (Keyword)cMinexinAlternatives_0_0_0.eContents().get(0);
-		private final Keyword cMinexinLeftSquareBracketKeyword_0_0_0_1 = (Keyword)cMinexinAlternatives_0_0_0.eContents().get(1);
-		private final Assignment cMinAssignment_0_1 = (Assignment)cGroup_0.eContents().get(1);
-		private final RuleCall cMinNUMBERParserRuleCall_0_1_0 = (RuleCall)cMinAssignment_0_1.eContents().get(0);
-		private final Keyword cCommaKeyword_0_2 = (Keyword)cGroup_0.eContents().get(2);
-		private final Assignment cMaxAssignment_0_3 = (Assignment)cGroup_0.eContents().get(3);
-		private final RuleCall cMaxNUMBERParserRuleCall_0_3_0 = (RuleCall)cMaxAssignment_0_3.eContents().get(0);
-		private final Assignment cMaxexinAssignment_0_4 = (Assignment)cGroup_0.eContents().get(4);
-		private final Alternatives cMaxexinAlternatives_0_4_0 = (Alternatives)cMaxexinAssignment_0_4.eContents().get(0);
-		private final Keyword cMaxexinRightSquareBracketKeyword_0_4_0_0 = (Keyword)cMaxexinAlternatives_0_4_0.eContents().get(0);
-		private final Keyword cMaxexinRightParenthesisKeyword_0_4_0_1 = (Keyword)cMaxexinAlternatives_0_4_0.eContents().get(1);
-		private final Assignment cRegexAssignment_1 = (Assignment)cAlternatives.eContents().get(1);
-		private final RuleCall cRegexSTRINGTerminalRuleCall_1_0 = (RuleCall)cRegexAssignment_1.eContents().get(0);
-		private final Group cGroup_2 = (Group)cAlternatives.eContents().get(2);
-		private final Keyword cLengthKeyword_2_0 = (Keyword)cGroup_2.eContents().get(0);
-		private final Alternatives cAlternatives_2_1 = (Alternatives)cGroup_2.eContents().get(1);
-		private final Assignment cLenAssignment_2_1_0 = (Assignment)cAlternatives_2_1.eContents().get(0);
-		private final RuleCall cLenNUMBERParserRuleCall_2_1_0_0 = (RuleCall)cLenAssignment_2_1_0.eContents().get(0);
-		private final Group cGroup_2_1_1 = (Group)cAlternatives_2_1.eContents().get(1);
-		private final Assignment cMinlenAssignment_2_1_1_0 = (Assignment)cGroup_2_1_1.eContents().get(0);
-		private final RuleCall cMinlenNUMBERParserRuleCall_2_1_1_0_0 = (RuleCall)cMinlenAssignment_2_1_1_0.eContents().get(0);
-		private final Keyword cHyphenMinusKeyword_2_1_1_1 = (Keyword)cGroup_2_1_1.eContents().get(1);
-		private final Assignment cMaxlenAssignment_2_1_1_2 = (Assignment)cGroup_2_1_1.eContents().get(2);
-		private final RuleCall cMaxlenNUMBERParserRuleCall_2_1_1_2_0 = (RuleCall)cMaxlenAssignment_2_1_1_2.eContents().get(0);
-		private final Group cGroup_3 = (Group)cAlternatives.eContents().get(3);
-		private final Keyword cLeftCurlyBracketKeyword_3_0 = (Keyword)cGroup_3.eContents().get(0);
-		private final Assignment cValuesAssignment_3_1 = (Assignment)cGroup_3.eContents().get(1);
-		private final Alternatives cValuesAlternatives_3_1_0 = (Alternatives)cValuesAssignment_3_1.eContents().get(0);
-		private final RuleCall cValuesSTRINGTerminalRuleCall_3_1_0_0 = (RuleCall)cValuesAlternatives_3_1_0.eContents().get(0);
-		private final RuleCall cValuesNUMBERParserRuleCall_3_1_0_1 = (RuleCall)cValuesAlternatives_3_1_0.eContents().get(1);
-		private final Group cGroup_3_2 = (Group)cGroup_3.eContents().get(2);
-		private final Keyword cCommaKeyword_3_2_0 = (Keyword)cGroup_3_2.eContents().get(0);
-		private final Assignment cValuesAssignment_3_2_1 = (Assignment)cGroup_3_2.eContents().get(1);
-		private final Alternatives cValuesAlternatives_3_2_1_0 = (Alternatives)cValuesAssignment_3_2_1.eContents().get(0);
-		private final RuleCall cValuesSTRINGTerminalRuleCall_3_2_1_0_0 = (RuleCall)cValuesAlternatives_3_2_1_0.eContents().get(0);
-		private final RuleCall cValuesNUMBERParserRuleCall_3_2_1_0_1 = (RuleCall)cValuesAlternatives_3_2_1_0.eContents().get(1);
-		private final Keyword cRightCurlyBracketKeyword_3_3 = (Keyword)cGroup_3.eContents().get(3);
-		
-		//Facets:
-		//	minexin=("(" | "[") min=NUMBER? "," max=NUMBER? maxexin=("]" | ")") | regex=STRING | "length" (len=NUMBER |
-		//	minlen=NUMBER "-" maxlen=NUMBER) | "{" values+=(STRING | NUMBER) (","? values+=(STRING | NUMBER))* "}";
-		public ParserRule getRule() { return rule; }
-
-		//minexin=("(" | "[") min=NUMBER? "," max=NUMBER? maxexin=("]" | ")") | regex=STRING | "length" (len=NUMBER |
-		//minlen=NUMBER "-" maxlen=NUMBER) | "{" values+=(STRING | NUMBER) (","? values+=(STRING | NUMBER))* "}"
-		public Alternatives getAlternatives() { return cAlternatives; }
-
-		//minexin=("(" | "[") min=NUMBER? "," max=NUMBER? maxexin=("]" | ")")
-		public Group getGroup_0() { return cGroup_0; }
-
-		//minexin=("(" | "[")
-		public Assignment getMinexinAssignment_0_0() { return cMinexinAssignment_0_0; }
-
-		//"(" | "["
-		public Alternatives getMinexinAlternatives_0_0_0() { return cMinexinAlternatives_0_0_0; }
-
-		//"("
-		public Keyword getMinexinLeftParenthesisKeyword_0_0_0_0() { return cMinexinLeftParenthesisKeyword_0_0_0_0; }
-
-		//"["
-		public Keyword getMinexinLeftSquareBracketKeyword_0_0_0_1() { return cMinexinLeftSquareBracketKeyword_0_0_0_1; }
-
-		//min=NUMBER?
-		public Assignment getMinAssignment_0_1() { return cMinAssignment_0_1; }
-
-		//NUMBER
-		public RuleCall getMinNUMBERParserRuleCall_0_1_0() { return cMinNUMBERParserRuleCall_0_1_0; }
-
-		//","
-		public Keyword getCommaKeyword_0_2() { return cCommaKeyword_0_2; }
-
-		//max=NUMBER?
-		public Assignment getMaxAssignment_0_3() { return cMaxAssignment_0_3; }
-
-		//NUMBER
-		public RuleCall getMaxNUMBERParserRuleCall_0_3_0() { return cMaxNUMBERParserRuleCall_0_3_0; }
-
-		//maxexin=("]" | ")")
-		public Assignment getMaxexinAssignment_0_4() { return cMaxexinAssignment_0_4; }
-
-		//"]" | ")"
-		public Alternatives getMaxexinAlternatives_0_4_0() { return cMaxexinAlternatives_0_4_0; }
-
-		//"]"
-		public Keyword getMaxexinRightSquareBracketKeyword_0_4_0_0() { return cMaxexinRightSquareBracketKeyword_0_4_0_0; }
-
-		//")"
-		public Keyword getMaxexinRightParenthesisKeyword_0_4_0_1() { return cMaxexinRightParenthesisKeyword_0_4_0_1; }
-
-		//regex=STRING
-		public Assignment getRegexAssignment_1() { return cRegexAssignment_1; }
-
-		//STRING
-		public RuleCall getRegexSTRINGTerminalRuleCall_1_0() { return cRegexSTRINGTerminalRuleCall_1_0; }
-
-		//"length" (len=NUMBER | minlen=NUMBER "-" maxlen=NUMBER)
-		public Group getGroup_2() { return cGroup_2; }
-
-		//"length"
-		public Keyword getLengthKeyword_2_0() { return cLengthKeyword_2_0; }
-
-		//len=NUMBER | minlen=NUMBER "-" maxlen=NUMBER
-		public Alternatives getAlternatives_2_1() { return cAlternatives_2_1; }
-
-		//len=NUMBER
-		public Assignment getLenAssignment_2_1_0() { return cLenAssignment_2_1_0; }
-
-		//NUMBER
-		public RuleCall getLenNUMBERParserRuleCall_2_1_0_0() { return cLenNUMBERParserRuleCall_2_1_0_0; }
-
-		//minlen=NUMBER "-" maxlen=NUMBER
-		public Group getGroup_2_1_1() { return cGroup_2_1_1; }
-
-		//minlen=NUMBER
-		public Assignment getMinlenAssignment_2_1_1_0() { return cMinlenAssignment_2_1_1_0; }
-
-		//NUMBER
-		public RuleCall getMinlenNUMBERParserRuleCall_2_1_1_0_0() { return cMinlenNUMBERParserRuleCall_2_1_1_0_0; }
-
-		//"-"
-		public Keyword getHyphenMinusKeyword_2_1_1_1() { return cHyphenMinusKeyword_2_1_1_1; }
-
-		//maxlen=NUMBER
-		public Assignment getMaxlenAssignment_2_1_1_2() { return cMaxlenAssignment_2_1_1_2; }
-
-		//NUMBER
-		public RuleCall getMaxlenNUMBERParserRuleCall_2_1_1_2_0() { return cMaxlenNUMBERParserRuleCall_2_1_1_2_0; }
-
-		//"{" values+=(STRING | NUMBER) (","? values+=(STRING | NUMBER))* "}"
-		public Group getGroup_3() { return cGroup_3; }
-
-		//"{"
-		public Keyword getLeftCurlyBracketKeyword_3_0() { return cLeftCurlyBracketKeyword_3_0; }
-
-		//values+=(STRING | NUMBER)
-		public Assignment getValuesAssignment_3_1() { return cValuesAssignment_3_1; }
-
-		//STRING | NUMBER
-		public Alternatives getValuesAlternatives_3_1_0() { return cValuesAlternatives_3_1_0; }
-
-		//STRING
-		public RuleCall getValuesSTRINGTerminalRuleCall_3_1_0_0() { return cValuesSTRINGTerminalRuleCall_3_1_0_0; }
-
-		//NUMBER
-		public RuleCall getValuesNUMBERParserRuleCall_3_1_0_1() { return cValuesNUMBERParserRuleCall_3_1_0_1; }
-
-		//(","? values+=(STRING | NUMBER))*
-		public Group getGroup_3_2() { return cGroup_3_2; }
-
-		//","?
-		public Keyword getCommaKeyword_3_2_0() { return cCommaKeyword_3_2_0; }
-
-		//values+=(STRING | NUMBER)
-		public Assignment getValuesAssignment_3_2_1() { return cValuesAssignment_3_2_1; }
-
-		//STRING | NUMBER
-		public Alternatives getValuesAlternatives_3_2_1_0() { return cValuesAlternatives_3_2_1_0; }
-
-		//STRING
-		public RuleCall getValuesSTRINGTerminalRuleCall_3_2_1_0_0() { return cValuesSTRINGTerminalRuleCall_3_2_1_0_0; }
-
-		//NUMBER
-		public RuleCall getValuesNUMBERParserRuleCall_3_2_1_0_1() { return cValuesNUMBERParserRuleCall_3_2_1_0_1; }
-
-		//"}"
-		public Keyword getRightCurlyBracketKeyword_3_3() { return cRightCurlyBracketKeyword_3_3; }
+		//DataType
+		public RuleCall getDataTypeDataTypeEnumRuleCall_1_0() { return cDataTypeDataTypeEnumRuleCall_1_0; }
 	}
 
 	public class AnArticleElements extends AbstractParserRuleElementFinder {
@@ -6797,6 +6491,21 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final EnumLiteralDeclaration cDataEnumLiteralDeclaration_19 = (EnumLiteralDeclaration)cAlternatives.eContents().get(19);
 		private final Keyword cDataDataKeyword_19_0 = (Keyword)cDataEnumLiteralDeclaration_19.eContents().get(0);
 		
+		////UserDefinedDataType :
+		////		udt=NAME 'is' 'a' 'data' 'type' 'based' 'on' restriction=DataTypeRestriction EOS
+		////;   
+		////
+		////DataTypeRestriction :
+		////		basetype=NAME 'restricted' 'to' facets=Facets
+		////	|	'{' basetypes += NAME ((','|'or') basetypes+=NAME)+ '}'
+		////	;
+		////	
+		////Facets :	
+		////		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
+		////	|	regex=STRING
+		////	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
+		////	|	'{' values+=(STRING|NUMBER) ((',')? values+=(STRING|NUMBER))* '}'
+		////;
 		//enum DataType:
 		//	string | boolean | decimal | int | long | float | double | duration | dateTime | time | date | gYearMonth | gYear |
 		//	gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
@@ -6948,9 +6657,6 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	private AddlClassInfoElements pAddlClassInfo;
 	private RangeElements pRange;
 	private RangeTypeElements pRangeType;
-	private UserDefinedDataTypeElements pUserDefinedDataType;
-	private DataTypeRestrictionElements pDataTypeRestriction;
-	private FacetsElements pFacets;
 	private DataTypeElements unknownRuleDataType;
 	private AnArticleElements pAnArticle;
 	private IndefiniteArticleElements pIndefiniteArticle;
@@ -7143,12 +6849,13 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	}
 
 	//// These are the things that translate directly to OWL.
+	////    |	UserDefinedDataType
 	//Statement:
 	//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
 	//	MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 	//	DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
 	//	InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
-	//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType;
+	//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent;
 	public StatementElements getStatementAccess() {
 		return (pStatement != null) ? pStatement : (pStatement = new StatementElements());
 	}
@@ -7323,10 +7030,9 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getRangeAccess().getRule();
 	}
 
-	////    |   dataType=DataType
 	////	  | dataType=ResourceName
 	//RangeType:
-	//	classIdentifier=ResourceIdentifier;
+	//	classIdentifier=ResourceIdentifier | dataType=DataType;
 	public RangeTypeElements getRangeTypeAccess() {
 		return (pRangeType != null) ? pRangeType : (pRangeType = new RangeTypeElements());
 	}
@@ -7335,37 +7041,21 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getRangeTypeAccess().getRule();
 	}
 
-	//UserDefinedDataType:
-	//	udt=NAME "is" "a" "data" "type" "based" "on" restriction=DataTypeRestriction EOS;
-	public UserDefinedDataTypeElements getUserDefinedDataTypeAccess() {
-		return (pUserDefinedDataType != null) ? pUserDefinedDataType : (pUserDefinedDataType = new UserDefinedDataTypeElements());
-	}
-	
-	public ParserRule getUserDefinedDataTypeRule() {
-		return getUserDefinedDataTypeAccess().getRule();
-	}
-
-	//DataTypeRestriction:
-	//	basetype=NAME "restricted" "to" facets=Facets | "{" basetypes+=NAME (("," | "or") basetypes+=NAME)+ "}";
-	public DataTypeRestrictionElements getDataTypeRestrictionAccess() {
-		return (pDataTypeRestriction != null) ? pDataTypeRestriction : (pDataTypeRestriction = new DataTypeRestrictionElements());
-	}
-	
-	public ParserRule getDataTypeRestrictionRule() {
-		return getDataTypeRestrictionAccess().getRule();
-	}
-
-	//Facets:
-	//	minexin=("(" | "[") min=NUMBER? "," max=NUMBER? maxexin=("]" | ")") | regex=STRING | "length" (len=NUMBER |
-	//	minlen=NUMBER "-" maxlen=NUMBER) | "{" values+=(STRING | NUMBER) (","? values+=(STRING | NUMBER))* "}";
-	public FacetsElements getFacetsAccess() {
-		return (pFacets != null) ? pFacets : (pFacets = new FacetsElements());
-	}
-	
-	public ParserRule getFacetsRule() {
-		return getFacetsAccess().getRule();
-	}
-
+	////UserDefinedDataType :
+	////		udt=NAME 'is' 'a' 'data' 'type' 'based' 'on' restriction=DataTypeRestriction EOS
+	////;   
+	////
+	////DataTypeRestriction :
+	////		basetype=NAME 'restricted' 'to' facets=Facets
+	////	|	'{' basetypes += NAME ((','|'or') basetypes+=NAME)+ '}'
+	////	;
+	////	
+	////Facets :	
+	////		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
+	////	|	regex=STRING
+	////	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
+	////	|	'{' values+=(STRING|NUMBER) ((',')? values+=(STRING|NUMBER))* '}'
+	////;
 	//enum DataType:
 	//	string | boolean | decimal | int | long | float | double | duration | dateTime | time | date | gYearMonth | gYear |
 	//	gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;

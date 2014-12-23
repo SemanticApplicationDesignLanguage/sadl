@@ -2,6 +2,7 @@
  */
 package com.ge.research.sadl.sadl.impl;
 
+import com.ge.research.sadl.sadl.DataType;
 import com.ge.research.sadl.sadl.RangeType;
 import com.ge.research.sadl.sadl.ResourceIdentifier;
 import com.ge.research.sadl.sadl.SadlPackage;
@@ -23,6 +24,7 @@ import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
  * The following features are implemented:
  * <ul>
  *   <li>{@link com.ge.research.sadl.sadl.impl.RangeTypeImpl#getClassIdentifier <em>Class Identifier</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.impl.RangeTypeImpl#getDataType <em>Data Type</em>}</li>
  * </ul>
  * </p>
  *
@@ -39,6 +41,26 @@ public class RangeTypeImpl extends MinimalEObjectImpl.Container implements Range
    * @ordered
    */
   protected ResourceIdentifier classIdentifier;
+
+  /**
+   * The default value of the '{@link #getDataType() <em>Data Type</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getDataType()
+   * @generated
+   * @ordered
+   */
+  protected static final DataType DATA_TYPE_EDEFAULT = DataType.STRING;
+
+  /**
+   * The cached value of the '{@link #getDataType() <em>Data Type</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getDataType()
+   * @generated
+   * @ordered
+   */
+  protected DataType dataType = DATA_TYPE_EDEFAULT;
 
   /**
    * <!-- begin-user-doc -->
@@ -114,6 +136,29 @@ public class RangeTypeImpl extends MinimalEObjectImpl.Container implements Range
    * <!-- end-user-doc -->
    * @generated
    */
+  public DataType getDataType()
+  {
+    return dataType;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public void setDataType(DataType newDataType)
+  {
+    DataType oldDataType = dataType;
+    dataType = newDataType == null ? DATA_TYPE_EDEFAULT : newDataType;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.RANGE_TYPE__DATA_TYPE, oldDataType, dataType));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   @Override
   public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
   {
@@ -137,6 +182,8 @@ public class RangeTypeImpl extends MinimalEObjectImpl.Container implements Range
     {
       case SadlPackage.RANGE_TYPE__CLASS_IDENTIFIER:
         return getClassIdentifier();
+      case SadlPackage.RANGE_TYPE__DATA_TYPE:
+        return getDataType();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -153,6 +200,9 @@ public class RangeTypeImpl extends MinimalEObjectImpl.Container implements Range
     {
       case SadlPackage.RANGE_TYPE__CLASS_IDENTIFIER:
         setClassIdentifier((ResourceIdentifier)newValue);
+        return;
+      case SadlPackage.RANGE_TYPE__DATA_TYPE:
+        setDataType((DataType)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -171,6 +221,9 @@ public class RangeTypeImpl extends MinimalEObjectImpl.Container implements Range
       case SadlPackage.RANGE_TYPE__CLASS_IDENTIFIER:
         setClassIdentifier((ResourceIdentifier)null);
         return;
+      case SadlPackage.RANGE_TYPE__DATA_TYPE:
+        setDataType(DATA_TYPE_EDEFAULT);
+        return;
     }
     super.eUnset(featureID);
   }
@@ -187,8 +240,27 @@ public class RangeTypeImpl extends MinimalEObjectImpl.Container implements Range
     {
       case SadlPackage.RANGE_TYPE__CLASS_IDENTIFIER:
         return classIdentifier != null;
+      case SadlPackage.RANGE_TYPE__DATA_TYPE:
+        return dataType != DATA_TYPE_EDEFAULT;
     }
     return super.eIsSet(featureID);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public String toString()
+  {
+    if (eIsProxy()) return super.toString();
+
+    StringBuffer result = new StringBuffer(super.toString());
+    result.append(" (dataType: ");
+    result.append(dataType);
+    result.append(')');
+    return result.toString();
   }
 
 } //RangeTypeImpl

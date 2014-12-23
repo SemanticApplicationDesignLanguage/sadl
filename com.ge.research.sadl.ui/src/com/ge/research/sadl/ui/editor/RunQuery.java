@@ -351,7 +351,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 		  			@Override
 		  			protected void canceling() {
 		  				try {
-		  					visitor.getConfigurationMgr(null).setInferenceCanceled(true);
+		  					visitor.getConfigurationMgr((String)null).setInferenceCanceled(true);
 		  				} catch (MalformedURLException | ConfigurationException e) {
 		  					// TODO Auto-generated catch block
 		  					e.printStackTrace();
@@ -383,7 +383,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 								ci.addNameValuePair(nvp);
 								visitor.addConfiguration(ci);
 								IConfigurationManagerForIDE cm = null;
-								cm = visitor.getConfigurationMgr(null);
+								cm = visitor.getConfigurationMgr((String)null);
 								if (cm != null) {
 									//TODO this should be done with a listener but I'm having trouble for plugin close awc 1/10/2011
 									cm.saveConfiguration();

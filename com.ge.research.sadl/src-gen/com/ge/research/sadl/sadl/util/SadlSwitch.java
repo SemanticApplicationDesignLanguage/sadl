@@ -15,7 +15,6 @@ import com.ge.research.sadl.sadl.ComplementOfClass;
 import com.ge.research.sadl.sadl.Condition;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
-import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
@@ -31,7 +30,6 @@ import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
-import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.GraphPattern;
 import com.ge.research.sadl.sadl.HasValue;
@@ -92,7 +90,6 @@ import com.ge.research.sadl.sadl.TypeDeclaration;
 import com.ge.research.sadl.sadl.TypedBNode;
 import com.ge.research.sadl.sadl.UnaryOpExpression;
 import com.ge.research.sadl.sadl.UnionResource;
-import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.ValueRow;
 import com.ge.research.sadl.sadl.ValueTable;
 import com.ge.research.sadl.sadl.VariableList;
@@ -321,29 +318,6 @@ public class SadlSwitch<T> extends Switch<T>
       {
         RangeType rangeType = (RangeType)theEObject;
         T result = caseRangeType(rangeType);
-        if (result == null) result = defaultCase(theEObject);
-        return result;
-      }
-      case SadlPackage.USER_DEFINED_DATA_TYPE:
-      {
-        UserDefinedDataType userDefinedDataType = (UserDefinedDataType)theEObject;
-        T result = caseUserDefinedDataType(userDefinedDataType);
-        if (result == null) result = caseStatement(userDefinedDataType);
-        if (result == null) result = caseModelElement(userDefinedDataType);
-        if (result == null) result = defaultCase(theEObject);
-        return result;
-      }
-      case SadlPackage.DATA_TYPE_RESTRICTION:
-      {
-        DataTypeRestriction dataTypeRestriction = (DataTypeRestriction)theEObject;
-        T result = caseDataTypeRestriction(dataTypeRestriction);
-        if (result == null) result = defaultCase(theEObject);
-        return result;
-      }
-      case SadlPackage.FACETS:
-      {
-        Facets facets = (Facets)theEObject;
-        T result = caseFacets(facets);
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
@@ -1261,54 +1235,6 @@ public class SadlSwitch<T> extends Switch<T>
    * @generated
    */
   public T caseRangeType(RangeType object)
-  {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>User Defined Data Type</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>User Defined Data Type</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @generated
-   */
-  public T caseUserDefinedDataType(UserDefinedDataType object)
-  {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>Data Type Restriction</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Data Type Restriction</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @generated
-   */
-  public T caseDataTypeRestriction(DataTypeRestriction object)
-  {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>Facets</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Facets</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @generated
-   */
-  public T caseFacets(Facets object)
   {
     return null;
   }

@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -294,9 +295,13 @@ public class ResourceManager {
      * @return
      * @throws MalformedURLException
      */
-    public static String sadlFileNameOfOwlAltUrl(String owlAltUrl) throws MalformedURLException {
+    public static String sadlFileNameOfOwlAltUrl(String owlAltUrl) throws IOException {
     	SadlUtils su = new SadlUtils();
     	File owlfile = new File(su.fileUrlToFileName(owlAltUrl));
+    	if (!owlfile.exists()) {
+    		throw new FileNotFoundException(owlfile.getPath());
+    	}
+    	// TODO: Check that the URI is actually SADL derived
 		String fn = owlfile.getName();
 		int extLength = (fn.length() - fn.indexOf('.')) - 1;
     	return owlfile.getName().substring(0, fn.length() - extLength) + "sadl";

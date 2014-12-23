@@ -23,169 +23,102 @@
 
 package com.ge.research.sadl.scoping;
 
-import java.util.Collection;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Map;
 
-import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
-import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
-import org.eclipse.xtext.scoping.IScope;
-import org.eclipse.xtext.scoping.impl.DefaultGlobalScopeProvider;
+import org.eclipse.xtext.resource.IResourceDescription;
+import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
-import org.eclipse.xtext.scoping.impl.ImportUriResolver;
-import org.eclipse.xtext.scoping.impl.SimpleScope;
-import org.eclipse.xtext.util.IResourceScopeCache;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.model.ImportMapping;
-import com.google.common.base.Function;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.sadl.Model;
+import com.ge.research.sadl.sadl.SadlPackage;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
-
-    @Inject
-    private IQualifiedNameProvider nameProvider;
-
-    @Inject
-    private SadlModelManager visitor;
-    
 	@Inject
-	private ImportUriResolver importResolver;
+	private SadlModelManager visitor;
+
 	@Inject
-	private IResourceScopeCache cache;
-    @Inject DefaultGlobalScopeProvider defaultGlobalScopeProvider;
+	IResourceDescription.Manager resourceDescriptionManager;
 
-    public IScope getScope(EObject context, EReference reference) {
-    	Collection<ImportMapping> imports = visitor.getModelImportMappings();
-    	Iterator<ImportMapping> mappingsItr = imports != null ? imports.iterator() : null;
-        IScope scope = IScope.NULLSCOPE;
-//        IScope scope = IScope.NULLSCOPE;
-        if (mappingsItr != null) {
-	    	while (mappingsItr.hasNext()) {
-	            // expose the names in the Jena model for this import.
-	    		ImportMapping mapping = mappingsItr.next();
-	            scope = createJenaScope(scope, context, URI.createURI(mapping.getActualURL()), mapping.getPrefix());
-	    	}
-        }
-        return scope;
-    }
+	/**
+	 * For each imported owl resource, import also the accoring sadl resource to
+	 * have the elements on the global scope
+	 */
+	@Override
+	protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
+		// access ConfigurationManager to get all accessed URIs
+		IConfigurationManagerForIDE cmgr = null;
+		try {
+			synchronized (resource) {
+				cmgr = visitor.getConfigurationMgr(resource.getURI());
+			}
+			if (cmgr==null) {
+				return super.getImportedUris(resource);
+			}
+			String publicUri = null;
+			if (!resource.getContents().isEmpty()) {
+				Model model = (Model) resource.getContents().get(0);
+				publicUri = model.getModelName().getBaseUri();
+			}
+			
+			LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
+			collectImportedURIs(resource, URI.createURI(publicUri), uriSet, cmgr);
+			
+			return uriSet;
+		} catch (Exception e) {
+			return super.getImportedUris(resource);
+		}
+	}
+	
 
-    protected IScope createJenaScope(IScope scope, EObject context, URI uri, String prefix) {
-        Resource res = context.eResource().getResourceSet()
-                .getResource(uri, true);
-        return new SimpleScope(scope, computeExportedObjects(res, prefix));
-    }
-
-    // see
-    // org.eclipse.xtext.resource.impl.DefaultResourceDescription.computeExportedObjects()
-    protected List<IEObjectDescription> computeExportedObjects(
-            final Resource res, final String prefix) {
-        Iterable<EObject> contents1 = new Iterable<EObject>() {
-            public Iterator<EObject> iterator() {
-                return EcoreUtil.getAllProperContents(res, true);
-            }
-        };
-        Iterable<EObject> contents2 = new Iterable<EObject>() {
-            public Iterator<EObject> iterator() {
-                return EcoreUtil.getAllProperContents(res, true);
-            }
-        };
-        Iterable<IEObjectDescription> pass1 = Iterables.transform(contents1,
-                new Function<EObject, IEObjectDescription>() {
-                    public IEObjectDescription apply(EObject from) {
-                        return createIEObjectDescription(from);
-                    }
-                });
-        Iterable<IEObjectDescription> pass2 = Iterables.transform(contents2,
-                new Function<EObject, IEObjectDescription>() {
-                    public IEObjectDescription apply(EObject from) {
-                        return createIEObjectDescription(from, prefix);
-                    }
-                });
-        Iterable<IEObjectDescription> result = Iterables.concat(pass1, pass2);
-        Iterable<IEObjectDescription> filter = Iterables.filter(result, Predicates.notNull());
-        return Lists.newArrayList(filter);
-    }
-
-    // see
-    // org.eclipse.xtext.resource.impl.DefaultResourceDescription.createIEObjectDescription(EObject)
-    protected IEObjectDescription createIEObjectDescription(EObject from) {
-        if (nameProvider == null)
-            return null;
-        QualifiedName qualifiedName = nameProvider.getFullyQualifiedName(from);
-        if (qualifiedName != null) {
-            return EObjectDescription.create(qualifiedName, from);
-        }
-        return null;
-    }
-
-    protected IEObjectDescription createIEObjectDescription(EObject from, String prefix) {
-        if (nameProvider == null)
-            return null;
-        QualifiedName qualifiedName = nameProvider.getFullyQualifiedName(from);
-        if (qualifiedName != null && prefix != null) {
-        	if (qualifiedName.startsWith(QualifiedName.create(prefix + ":"))) {
-        		qualifiedName = QualifiedName.create(qualifiedName.toString().substring(prefix.length() + 1));
-                return EObjectDescription.create(qualifiedName, from);
-        	}
-//            qualifiedName = prefix + ":" + qualifiedName;
-        }
-        return null;
-    }
-
-    
-    /**
-     * For each imported owl resource, import also the accoring sadl resource to have the elements on the global scope
-     */
-//    @Override
-//    protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
-//    	// copied from super method
-//		return cache.get(ImportUriGlobalScopeProvider.class.getName(), resource, new Provider<LinkedHashSet<URI>>(){
-//			public LinkedHashSet<URI> get() {
-//				TreeIterator<EObject> iterator = resource.getAllContents();
-//				final LinkedHashSet<URI> uniqueImportURIs = new LinkedHashSet<URI>(10);
-//				while (iterator.hasNext()) {
-//					EObject object = iterator.next();
-//					String uri = importResolver.apply(object);
-//					if (uri != null) {
-//						URI importUri = URI.createURI(uri);
-//						uniqueImportURIs.add(importUri);
-//					}
-//				}
-//				Iterator<URI> uriIter = uniqueImportURIs.iterator();
-//				while(uriIter.hasNext()) {
-//					if (!EcoreUtil2.isValidUri(resource, uriIter.next()))
-//						uriIter.remove();
-//				}
-//				// start customizing
-//				uriIter = uniqueImportURIs.iterator();
-//				while(uriIter.hasNext()) {
-//					URI uri = uriIter.next();
-//					if ("owl".equals(uri.fileExtension())) {
-//						String resourceName = uri.trimFileExtension().appendFileExtension("sadl").lastSegment();
-//						URI sadlUri = uri.trimSegments(2).appendSegment(resourceName);
-//						if (EcoreUtil2.isValidUri(resource, sadlUri)) {
-//							uniqueImportURIs.add(sadlUri);
-//						}
-//					}
-//				}
-//				
-//				return uniqueImportURIs;
-//			}
-//		});
-//    }
+	/**
+	 * Recursive method to resolve transitive imports. 
+	 * @param resource The context resource
+	 * @param publicURI The public URI of the imported resource
+	 * @param uriSet The result set into which the URIs are collected
+	 * @param cmgr The configuration manager for the context resource
+	 * @throws ConfigurationException
+	 * @throws MalformedURLException
+	 */
+	private void collectImportedURIs (Resource resource, URI publicURI, LinkedHashSet<URI> uriSet, IConfigurationManagerForIDE cmgr) throws ConfigurationException, MalformedURLException {
+		URI altUrlFromPublicUri = URI.createURI(cmgr.getAltUrlFromPublicUri(publicURI.toString()));
+		// For SADL derived OWL models, resolve the SADL resource URI from the index.
+		if (cmgr.isSadlDerived(publicURI.toString())) {
+			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
+			IResourceDescriptions descriptions = getResourceDescriptions(resource);
+			Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SadlPackage.Literals.MODEL, QualifiedName.create(publicURI.toString()), false);
+			Iterator<IEObjectDescription> it = matchingModels.iterator();
+			if (it.hasNext()) {
+				IEObjectDescription description = it.next();
+				// This will be the URI of the SADL file
+				altUrlFromPublicUri = description.getEObjectURI().trimFragment();
+			}
+		}
+		if (uriSet.add(altUrlFromPublicUri)) {
+			// This URI was not collected yet, thus collect its imports again
+			try {
+				Map<String, String> imports = cmgr.getImports(publicURI.toString());
+				for (String s: imports.keySet()) {
+					URI uri = URI.createURI(s);
+					collectImportedURIs(resource, uri, uriSet, cmgr);
+				}
+			} catch (ConfigurationException e) {
+				; // TODO: Handle exception
+			} catch (IOException e) {
+				; // TODO: Handle exception
+			}
+		}
+	}
 }

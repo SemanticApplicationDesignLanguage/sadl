@@ -7,11 +7,13 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestFileUrlToFileName {
 
 	@Test
+	@Ignore
 	public void test() throws URISyntaxException, MalformedURLException {
 		String dir = System.getProperty("testSourceDir");
 		String fname = System.getProperty("fileName");

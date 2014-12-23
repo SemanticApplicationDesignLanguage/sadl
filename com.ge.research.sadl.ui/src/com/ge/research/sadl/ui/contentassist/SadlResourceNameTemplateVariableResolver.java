@@ -38,13 +38,12 @@ import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.ui.editor.templates.AbstractTemplateVariableResolver;
 import org.eclipse.xtext.ui.editor.templates.XtextTemplateContext;
 
-import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ModelManager.ImportListType;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
@@ -106,50 +105,48 @@ public class SadlResourceNameTemplateVariableResolver extends
 			List<String> values = new ArrayList<String>();
 			String modelFolderName = null;
 			try {
-				ConfigurationManager configMgr = visitor.getConfigurationMgr(modelFolderName);
-				if (configMgr instanceof ConfigurationManagerForIDE) {
-					List<BuiltinInfo> builtins = ((ConfigurationManagerForIDE)configMgr).getAvailableBuiltinsForCurrentReasoner();
-					if (builtins != null) {
-						for (int i = 0; i < builtins.size(); i++) {
-							String withArgs = builtins.get(i).getName() + "(";
-							int argCnt = builtins.get(i).getNumArgs();
-							int effectiveArgCount = argCnt;
-							// this should include determination of whether this is in the premise (given, if)
-							//	or in the conclusion. Conclusion rules do not assign values to output variables so all arguments
-							//	should be retained. For a premise built-in, the number of output variables should be dropped
-							//  from the syntax constructed for the content assist.
-							if (argCnt > 1) {
-								effectiveArgCount--;
+				IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr(modelFolderName);
+				List<BuiltinInfo> builtins = ((IConfigurationManagerForIDE)configMgr).getAvailableBuiltinsForCurrentReasoner();
+				if (builtins != null) {
+					for (int i = 0; i < builtins.size(); i++) {
+						String withArgs = builtins.get(i).getName() + "(";
+						int argCnt = builtins.get(i).getNumArgs();
+						int effectiveArgCount = argCnt;
+						// this should include determination of whether this is in the premise (given, if)
+						//	or in the conclusion. Conclusion rules do not assign values to output variables so all arguments
+						//	should be retained. For a premise built-in, the number of output variables should be dropped
+						//  from the syntax constructed for the content assist.
+						if (argCnt > 1) {
+							effectiveArgCount--;
+						}
+						if (argCnt <= 0) {
+							withArgs += "v1,...";
+						}
+						else {
+							for (int j = 0; j < effectiveArgCount; j++) {
+								if (j > 0) {
+									withArgs += ", ";
+								}
+								withArgs += "v" + (j + 1);
 							}
-							if (argCnt <= 0) {
-								withArgs += "v1,...";
-							}
-							else {
-								for (int j = 0; j < effectiveArgCount; j++) {
-									if (j > 0) {
-										withArgs += ", ";
-									}
-									withArgs += "v" + (j + 1);
+						}
+						withArgs += ")";
+						if (values.size() > 0) {
+							boolean added = false;
+							for (int j = 0; j < values.size(); j++) {
+								String nextele = values.get(j);
+								if (nextele.compareToIgnoreCase(withArgs) > 0) {
+									values.add(j, withArgs);
+									added = true;
+									break;
 								}
 							}
-							withArgs += ")";
-							if (values.size() > 0) {
-								boolean added = false;
-								for (int j = 0; j < values.size(); j++) {
-									String nextele = values.get(j);
-									if (nextele.compareToIgnoreCase(withArgs) > 0) {
-										values.add(j, withArgs);
-										added = true;
-										break;
-									}
-								}
-								if (!added) {
-									values.add(withArgs);
-								}
-							}
-							else {
+							if (!added) {
 								values.add(withArgs);
 							}
+						}
+						else {
+							values.add(withArgs);
 						}
 					}
 				}

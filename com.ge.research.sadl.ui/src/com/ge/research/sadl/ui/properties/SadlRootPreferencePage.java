@@ -37,6 +37,7 @@ import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
 import org.pojava.datetime.DateTimeConfig;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -112,7 +113,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 						ConfigurationItem ci = new ConfigurationItem(itemContent);
 						ci.addNameValuePair(nvp);
 						((ConfigurationManagerForEditing)cmgr).addConfiguration(ci);
-						((ConfigurationManagerForIDE)cmgr).saveConfiguration();
+						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
 					}
 				} catch (ConfigurationException e) {
 					// TODO Auto-generated catch block
@@ -136,9 +137,9 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 			NameValuePair nvp = new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 			ConfigurationItem ci = new ConfigurationItem(itemContent);
 			ci.addNameValuePair(nvp);
-			Enumeration<ConfigurationManagerForIDE> cmgrs = visitor.getConfigurationManagers();
+			Enumeration<IConfigurationManagerForIDE> cmgrs = visitor.getConfigurationManagers();
 			while (cmgrs.hasMoreElements()) {
-				ConfigurationManagerForIDE cmgr = cmgrs.nextElement();
+				IConfigurationManagerForIDE cmgr = cmgrs.nextElement();
 				cmgr.getModelGetter().setFormat(format);
 				if (dmyOrder.equals(IConfigurationManager.dmyOrderDMY)) {
 					DateTimeConfig.getGlobalDefault().setDmyOrder(true);
@@ -146,11 +147,11 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 				else {
 					DateTimeConfig.getGlobalDefault().setDmyOrder(false);
 				}
-				if (cmgr != null && cmgr instanceof ConfigurationManagerForIDE) {
+				if (cmgr != null && cmgr instanceof IConfigurationManagerForIDE) {
 					// put date format in configuration
 					try {
-						((ConfigurationManagerForIDE)cmgr).addConfiguration(ci);
-						((ConfigurationManagerForIDE)cmgr).saveConfiguration();
+						((IConfigurationManagerForIDE)cmgr).addConfiguration(ci);
+						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
 					} catch (ConfigurationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

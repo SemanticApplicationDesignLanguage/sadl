@@ -253,25 +253,53 @@
 			type="sadl">
 		</parser>
 	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="owl">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="nt">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="n3">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="rdf">
+		</parser>
+	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
         <resourceServiceProvider
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
             uriExtension="sadl">
         </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="owl">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="nt">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="n3">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 	          uriExtension="rdf">
 	    </resourceServiceProvider>
     </extension>
@@ -776,6 +804,24 @@
 			<description>Import Owl files to a SADL project</description> 
 			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
 		</wizard> 
-   </extension> 
+   </extension>
+   <!-- Jena editor -->
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="com.ge.research.sadl.Jena"
+            name="%_UI_EcoreEditor_label"
+            icon="icons/full/obj16/EcoreModelFile.gif"
+            class="org.eclipse.emf.ecore.presentation.EcoreEditor"
+            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor">
+         <contentTypeBinding contentTypeId="org.eclipse.emf.ecore"/>
+      </editor>
+   </extension>
+  <extension
+        point="org.eclipse.core.contenttype.contentTypes">
+     <file-association
+           content-type="org.eclipse.emf.ecore"
+           file-extensions="owl,n3,nt,rdf">
+     </file-association>
+  </extension> 
 
 </plugin>

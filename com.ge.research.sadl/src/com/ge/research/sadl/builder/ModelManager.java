@@ -33,12 +33,11 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.activation.DataSource;
 
@@ -79,12 +78,12 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.Test;
-import com.ge.research.sadl.model.gp.TestResult;
-import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
-import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.model.gp.Test.ComparisonType;
+import com.ge.research.sadl.model.gp.TestResult;
 import com.ge.research.sadl.model.gp.TripleElement;
+import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
+import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -137,11 +136,7 @@ import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
 import com.hp.hpl.jena.ontology.UnionClass;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelGetter;
@@ -217,6 +212,7 @@ public class ModelManager {
 	private String modelBaseUri;
 	private String modelVersion;
 	private Object otherKnowledgeStructure = null;
+	private SadlUtils sadlUtils = new SadlUtils();
 //    private final Lock lock = new ReentrantLock();
 	
 	public class ValidationStatement {
@@ -294,7 +290,7 @@ public class ModelManager {
 	private List<String> importsInOrderOfAppearance = null;	// an ordered set of import URIs, ordered by appearance in file.
 	private Map<String, ImportMapping> imports = null;
 
-	private ConfigurationManagerForIDE configurationMgr = null;
+	private IConfigurationManagerForIDE configurationMgr = null;
 
 	private HashMap<String, ConceptName> conceptNamesCache = new HashMap<String, ConceptName>();
 	private HashMap<String, ConceptName> variableNamesCache = new HashMap<String, ConceptName>();
@@ -337,7 +333,7 @@ public class ModelManager {
 	 * 
 	 * @param resourceURI -- the Eclipse Resource URI--an actual URL, not a public URI
 	 */
-	public void init(ConfigurationManagerForIDE configMgr, URI resourceURI) {
+	public void init(IConfigurationManagerForIDE configMgr, URI resourceURI) {
 		try {
 			URI actualUrl = ResourceManager
 					.convertPlatformUriToAbsoluteUri(resourceURI);
@@ -562,7 +558,7 @@ public class ModelManager {
 			globalPrefix = alias; // the model has been given a [global] prefix
 									// to be used everywhere
 		}
-		ConfigurationManagerForIDE configMgr = null;
+		IConfigurationManagerForIDE configMgr = null;
 		try {
 			configMgr = getConfigurationMgr();
 		} catch (Exception e) {
@@ -599,7 +595,7 @@ public class ModelManager {
 				}
 			} catch (ConfigurationException e) {
 				// It's ok if there is no existingAltUrl with this model name.
-			} catch (MalformedURLException e) {
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -741,7 +737,7 @@ public class ModelManager {
 					try {
 						String sfn = getOwlModelsFolderPath() + File.separator
 								+ "SadlServicesConfigurationConcepts.owl";
-						actualUrl = getConfigurationMgr().getSadlUtils().fileNameToFileUrl(sfn);
+						actualUrl = sadlUtils.fileNameToFileUrl(sfn);
 						boolean copied = ResourceManager
 								.copyServicesConfigurationFileToOwlModelsDirectory(sfn);
 						if (copied) {
@@ -1479,7 +1475,12 @@ public class ModelManager {
 		 * 			Subsystem is type of System.
 		 */
 		if (cls.isURIResource()) {
-			cls = m.getOntClass(cls.getURI());
+			String uri = cls.getURI();
+			cls = m.getOntClass(uri);
+			if (cls == null) {
+				logger.warn("Failed to retrieve ontology class for uri '"+uri+"'.");
+				return false;
+			}
 		}
 		if (cls.canAs(UnionClass.class)) {
 			List<OntResource> uclses = getOntResourcesInUnionClass(m, cls.as(UnionClass.class));	
@@ -3952,7 +3953,7 @@ public class ModelManager {
 			return getNamedConceptsOfType(ctype, Scope.INCLUDEIMPORTS);
 		}
 
-		if (modelname.equals(modelName)) {
+		if (modelname.equals(this.modelName)) {
 			// we're getting the concept names in this ModelManager's namespace
 			// only
 			return getNamedConceptsOfType(ctype, Scope.LOCALONLY);
@@ -3997,7 +3998,12 @@ public class ModelManager {
 			return getNamedConceptsInModel(null, this.modelName, cType, scope);
 		} else {
 			// get concepts in current model
-			List<ConceptName> names = getConfigurationMgr().getNamedConceptsInModel(getJenaModel(), getModelName(), cType, scope);
+			
+			IConfigurationManagerForIDE cmgr = getConfigurationMgr();
+			if (cmgr == null) {
+				return Collections.emptyList();
+			}
+			List<ConceptName> names = cmgr.getNamedConceptsInModel(getJenaModel(), getModelName(), cType, scope);
 
 			if (scope.equals(Scope.INCLUDEIMPORTS) && imports != null && imports.size() > 0) {
 				// get concepts in imports
@@ -4005,7 +4011,7 @@ public class ModelManager {
 				while (imiter.hasNext()) {
 					ImportMapping im = imiter.next();
 					if (im.getModel() != null) {
-						List<ConceptName> imNames = getConfigurationMgr().getNamedConceptsInModel(im.getModel(), im.getPublicURI(), cType, scope);
+						List<ConceptName> imNames = cmgr.getNamedConceptsInModel(im.getModel(), im.getPublicURI(), cType, scope);
 						for (int i = 0; imNames != null && i < imNames.size(); i++) {
 							if (!names.contains(imNames.get(i))) {
 								names.add(imNames.get(i));
@@ -4281,7 +4287,7 @@ public class ModelManager {
 									.getAltUrlFromPublicUri(mname);
 							if (altUrl != null) {
 								File owlFile = new File(
-										getConfigurationMgr().getSadlUtils().fileUrlToFileName(altUrl));
+										sadlUtils.fileUrlToFileName(altUrl));
 								if (owlFile.exists()) {
 									mname = owlFile.getName();
 									if (mname
@@ -4484,7 +4490,7 @@ public class ModelManager {
 			try {
 				getConfigurationMgr()
 						.addMapping(
-								getConfigurationMgr().getSadlUtils().fileNameToFileUrl(fullyQualifiedOwlFilename),
+								sadlUtils.fileNameToFileUrl(fullyQualifiedOwlFilename),
 								modelName, globalPrefix, IConfigurationManager.SADL);
 			} catch (Exception e) {
 				return addError(errors, new ModelError(
@@ -5939,7 +5945,7 @@ public class ModelManager {
 		
 		logger.info("Running tests");
 
-		ConfigurationManagerForIDE configMgr = null;
+		IConfigurationManagerForIDE configMgr = null;
 		IReasoner reasoner = null;
 		try {
 			configMgr = getConfigurationMgr();
@@ -5953,12 +5959,12 @@ public class ModelManager {
 				if (actualUrl.startsWith(ResourceManager.FILE_SHORT_PREFIX)) {
 					// check to make sure that the OWL file has been built
 					if (!configMgr.getModelGetter().getFormat().equals(IConfigurationManager.JENA_TDB)) {
-						File mf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(actualUrl));
+						File mf = new File(sadlUtils.fileUrlToFileName(actualUrl));
 						if (mf.exists()) {
 							long owlTS = mf.lastModified();
 							String sadlFN = ResourceManager.sadlFileNameOfOwlAltUrl(actualUrl);
-							sadlFN = ResourceManager.findSadlFileInProject(getConfigurationMgr().getSadlUtils().fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString()), sadlFN);
-							File sf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(sadlFN));
+							sadlFN = ResourceManager.findSadlFileInProject(sadlUtils.fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString()), sadlFN);
+							File sf = new File(sadlUtils.fileUrlToFileName(sadlFN));
 							if (sf.exists()) {
 								long sadlTS = sf.lastModified();
 								if (sadlTS > owlTS) {
@@ -6578,7 +6584,7 @@ public class ModelManager {
 	 */
 	public int validateModel(String modelName, IReasoner reasoner) {
 		if (reasoner == null) {
-			ConfigurationManagerForIDE configMgr;
+			IConfigurationManagerForIDE configMgr;
 			try {
 				configMgr = getConfigurationMgr();
 				configMgr.clearReasoner();
@@ -7265,7 +7271,7 @@ public class ModelManager {
 		return messageManager;
 	}
 
-	private void setConfigurationMgr(ConfigurationManagerForIDE configurationMgr) {
+	private void setConfigurationMgr(IConfigurationManagerForIDE configurationMgr) {
 		this.configurationMgr = configurationMgr;
 	}
 
@@ -7278,7 +7284,7 @@ public class ModelManager {
 	 * @throws ConfigurationException
 	 * @throws MalformedURLException 
 	 */
-	public ConfigurationManagerForIDE getConfigurationMgr()
+	public IConfigurationManagerForIDE getConfigurationMgr()
 			throws ConfigurationException, MalformedURLException {
 		String knowledgeBaseIdentifier = getOwlModelsFolderPath();
 		if (knowledgeBaseIdentifier != null) {
@@ -7407,7 +7413,7 @@ public class ModelManager {
 			getConfigurationMgr().setDefaultsAltUrlMapping();
 			addImportToModel(ResourceManager.ACUITY_DEFAULTS_URI,
 					IConfigurationManager.ACUITY_DEFAULTS_PREFIX,
-					getConfigurationMgr().getSadlUtils().fileNameToFileUrl(defaultsFile
+					sadlUtils.fileNameToFileUrl(defaultsFile
 							.getAbsolutePath()));
 		}
 	}
@@ -7774,7 +7780,7 @@ public class ModelManager {
 		File xsdFile;
 		try {
 			xsdFile = new File(getConfigurationMgr().getModelFolder() + "/" + name + ".xsd");
-			getConfigurationMgr().getSadlUtils().stringToFile(xsdFile, sb.toString(), false);
+			sadlUtils.stringToFile(xsdFile, sb.toString(), false);
 	        XSDDatatype.loadUserDefined(uri, new FileReader(xsdFile), null, TypeMapper.getInstance());
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block

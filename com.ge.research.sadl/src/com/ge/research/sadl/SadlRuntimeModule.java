@@ -20,22 +20,27 @@
  */
 package com.ge.research.sadl;
 
-import org.eclipse.xtext.linking.ILinkingService;
+import org.eclipse.xtext.naming.IQualifiedNameConverter;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IGlobalScopeProvider;
+import org.eclipse.xtext.scoping.IScopeProvider;
+import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider;
 import org.eclipse.xtext.scoping.impl.ImportUriResolver;
 import org.eclipse.xtext.service.SingletonBinding;
 
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.conversion.SadlTerminalConverters;
+import com.ge.research.sadl.naming.SadlQualifiedNameConverter;
+import com.ge.research.sadl.naming.SadlSimpleNameProvider;
+import com.ge.research.sadl.resource.SadlResource;
 import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy;
 import com.ge.research.sadl.scoping.SadlGlobalScopeProvider;
 import com.ge.research.sadl.scoping.SadlImportUriResolver;
-import com.ge.research.sadl.scoping.SadlLinkingService;
-import com.ge.research.sadl.resource.SadlResource;
-import com.ge.research.sadl.naming.SadlSimpleNameProvider;
+import com.ge.research.sadl.scoping.SadlLocalScopeProvider;
+import com.google.inject.Binder;
+import com.google.inject.name.Names;
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -57,11 +62,6 @@ public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeM
         return SadlGlobalScopeProvider.class;
     }
 
-    @Override
-    public Class<? extends ILinkingService> bindILinkingService() {
-        return SadlLinkingService.class;
-    }
-
 	public Class<? extends org.eclipse.xtext.conversion.IValueConverterService> bindIValueConverterService() {
 		return SadlTerminalConverters.class;
 	}
@@ -79,5 +79,12 @@ public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeM
 		return SadlSimpleNameProvider.class;
 	}
 
+	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
+		return SadlQualifiedNameConverter.class;
+	}
+
+	public void configureIScopeProviderDelegate(Binder binder) {
+		binder.bind(IScopeProvider.class).annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE)).to(SadlLocalScopeProvider.class);
+	}
 
 }

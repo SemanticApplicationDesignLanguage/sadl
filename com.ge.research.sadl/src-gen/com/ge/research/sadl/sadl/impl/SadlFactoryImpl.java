@@ -16,7 +16,6 @@ import com.ge.research.sadl.sadl.Condition;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
 import com.ge.research.sadl.sadl.DataType;
-import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
@@ -32,7 +31,6 @@ import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
-import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.GraphPattern;
 import com.ge.research.sadl.sadl.HasValue;
@@ -94,7 +92,6 @@ import com.ge.research.sadl.sadl.TypeDeclaration;
 import com.ge.research.sadl.sadl.TypedBNode;
 import com.ge.research.sadl.sadl.UnaryOpExpression;
 import com.ge.research.sadl.sadl.UnionResource;
-import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.ValueRow;
 import com.ge.research.sadl.sadl.ValueTable;
 import com.ge.research.sadl.sadl.VariableList;
@@ -183,9 +180,6 @@ public class SadlFactoryImpl extends EFactoryImpl implements SadlFactory
       case SadlPackage.ADDL_CLASS_INFO: return createAddlClassInfo();
       case SadlPackage.RANGE: return createRange();
       case SadlPackage.RANGE_TYPE: return createRangeType();
-      case SadlPackage.USER_DEFINED_DATA_TYPE: return createUserDefinedDataType();
-      case SadlPackage.DATA_TYPE_RESTRICTION: return createDataTypeRestriction();
-      case SadlPackage.FACETS: return createFacets();
       case SadlPackage.EQUIVALENT_CONCEPTS: return createEquivalentConcepts();
       case SadlPackage.DISJOINT_CLASSES: return createDisjointClasses();
       case SadlPackage.COMPLEMENT_OF_CLASS: return createComplementOfClass();
@@ -526,39 +520,6 @@ public class SadlFactoryImpl extends EFactoryImpl implements SadlFactory
   {
     RangeTypeImpl rangeType = new RangeTypeImpl();
     return rangeType;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public UserDefinedDataType createUserDefinedDataType()
-  {
-    UserDefinedDataTypeImpl userDefinedDataType = new UserDefinedDataTypeImpl();
-    return userDefinedDataType;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public DataTypeRestriction createDataTypeRestriction()
-  {
-    DataTypeRestrictionImpl dataTypeRestriction = new DataTypeRestrictionImpl();
-    return dataTypeRestriction;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public Facets createFacets()
-  {
-    FacetsImpl facets = new FacetsImpl();
-    return facets;
   }
 
   /**
