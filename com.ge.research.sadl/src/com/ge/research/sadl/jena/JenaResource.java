@@ -90,7 +90,7 @@ public class JenaResource extends ResourceImpl {
     				break;
     	    	case DATATYPEPROPERTY:
     	    	    ResourceName rnData= SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnData.setName(name.toFQString());
+    	    	    rnData.setName(name.getName());
     	    	    PropertyDeclaration pdData = SadlFactory.eINSTANCE.createPropertyDeclaration();
     	    	    pdData.setPropertyName(rnData);
     	    	    model.getElements().add(pdData);
