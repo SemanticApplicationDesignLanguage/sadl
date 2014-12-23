@@ -37,7 +37,6 @@ import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
 
-import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;

@@ -38,8 +38,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.activation.DataSource;
 
@@ -80,12 +78,12 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.Test;
-import com.ge.research.sadl.model.gp.TestResult;
-import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
-import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.model.gp.Test.ComparisonType;
+import com.ge.research.sadl.model.gp.TestResult;
 import com.ge.research.sadl.model.gp.TripleElement;
+import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
+import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -138,11 +136,7 @@ import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
 import com.hp.hpl.jena.ontology.UnionClass;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelGetter;
@@ -601,7 +595,7 @@ public class ModelManager {
 				}
 			} catch (ConfigurationException e) {
 				// It's ok if there is no existingAltUrl with this model name.
-			} catch (MalformedURLException e) {
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
