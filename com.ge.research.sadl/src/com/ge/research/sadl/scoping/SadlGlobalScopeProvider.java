@@ -35,7 +35,6 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.IResourceDescriptions;
-import org.eclipse.xtext.scoping.impl.DefaultGlobalScopeProvider;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
@@ -52,8 +51,6 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	private SadlModelManager visitor;
 
 	@Inject
-	DefaultGlobalScopeProvider defaultGlobalScopeProvider;
-	@Inject
 	IResourceDescription.Manager resourceDescriptionManager;
 
 	/**
@@ -63,9 +60,11 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	@Override
 	protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
 		// access ConfigurationManager to get all accessed URIs
-		ConfigurationManagerForIDE cmgr = null;
+		IConfigurationManagerForIDE cmgr = null;
 		try {
-			cmgr = visitor.getConfigurationMgr(resource.getURI());
+			synchronized (resource) {
+				cmgr = visitor.getConfigurationMgr(resource.getURI());
+			}
 			if (cmgr==null) {
 				return super.getImportedUris(resource);
 			}
@@ -98,6 +97,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 		URI altUrlFromPublicUri = URI.createURI(cmgr.getAltUrlFromPublicUri(publicURI.toString()));
 		// For SADL derived OWL models, resolve the SADL resource URI from the index.
 		if (cmgr.isSadlDerived(publicURI.toString())) {
+			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
 			IResourceDescriptions descriptions = getResourceDescriptions(resource);
 			Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SadlPackage.Literals.MODEL, QualifiedName.create(publicURI.toString()), false);
 			Iterator<IEObjectDescription> it = matchingModels.iterator();

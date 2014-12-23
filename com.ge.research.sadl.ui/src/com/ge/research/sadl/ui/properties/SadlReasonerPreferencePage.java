@@ -82,10 +82,10 @@ import com.google.inject.Inject;
 /**
  * The preference page that holds SADL reasoner preferences.
  */
-public class SadlReasonerPrefrencePage extends PreferencePage implements IWorkbenchPreferencePage,
+public class SadlReasonerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage,
 																		IWorkbenchPropertyPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(SadlReasonerPrefrencePage.class);
+	private static final Logger logger = LoggerFactory.getLogger(SadlReasonerPreferencePage.class);
 
 	private IWorkbench workbench;
 	private IProject project;
@@ -206,7 +206,7 @@ public class SadlReasonerPrefrencePage extends PreferencePage implements IWorkbe
 	/**
 	 * SadlReasonerPrefrencePage constructor comment.
 	 */
-	public SadlReasonerPrefrencePage() {
+	public SadlReasonerPreferencePage() {
 		super();
 		allTranslators = ConfigurationManagerForIDE.getAvailableTranslators();
 		translators = allTranslators;

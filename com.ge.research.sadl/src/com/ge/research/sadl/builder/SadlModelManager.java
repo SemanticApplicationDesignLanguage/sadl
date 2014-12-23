@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -191,8 +193,8 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     private boolean deepValidationOff = false;
     
     // there is one ConfigurationManager per project
-    private Hashtable<URI, ConfigurationManagerForIDE> configurationMgrMap = new Hashtable<URI, ConfigurationManagerForIDE>();
-    private ConfigurationManagerForIDE lastConfigMgr = null;
+    private Hashtable<URI, IConfigurationManagerForIDE> configurationMgrMap = new Hashtable<URI, IConfigurationManagerForIDE>();
+    private IConfigurationManagerForIDE lastConfigMgr = null;
     
     private boolean savingModel = false;	// true if this is part of build (or save)
     private boolean editorOpen = false;
@@ -224,6 +226,9 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 
 	private int translationErrors = 0;
     
+	@Inject
+	private ConfigurationManagerForIDE.Provider configurationManagerProvider;
+	
     /**
      * Constructs the Ecore model visitor.
      */
@@ -352,7 +357,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
             URI projectUri = ResourceManager.getProjectUri(resource.getURI());
             logger.info("SMM called for project " + projectUri.toFileString());
 
-            ConfigurationManagerForIDE configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
+            IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
         	// Get a ModelManager instance associated with this thread and pass it the model Resource
             getModel().init(configurationMgr, resource.getURI());
             getModel().setDeepValidationOff(deepValidationOff);
@@ -501,7 +506,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	   			URL fileUri = FileLocator.toFileURL(new URL(uri.toString()));
 	   			uri = URI.createURI(fileUri.toString());
 	   		}
-	   		ConfigurationManagerForIDE cmgr = getConfigurationMgr(uri);
+	   		IConfigurationManagerForIDE cmgr = getConfigurationMgr(uri);
 			if (cmgr != null) {
 				publicUri = cmgr.getPublicUriFromActualUrl(uri.toString());
 			}
@@ -3131,26 +3136,27 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 		getModel().updateConfiguration(newItem);
 	}
 
-	public synchronized ConfigurationManagerForIDE getConfigurationMgr(String modelFolderName) throws ConfigurationException, URISyntaxException, IOException {
+	public synchronized IConfigurationManagerForIDE getConfigurationMgr(String modelFolderName) throws ConfigurationException, URISyntaxException, IOException {
 		if (modelFolderName != null) {
             // What project is this? There should be one ConfigurationManager per project.
 			SadlUtils su = new SadlUtils();
 			URI mfuri = URI.createURI(su.fileNameToFileUrl(modelFolderName));
-            ConfigurationManagerForIDE configurationMgr = getConfigurationMgr(mfuri);
+            IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(mfuri);
     		lastConfigMgr = configurationMgr;	// this is for when Xtext springs a call on us without a project identifier
     		return configurationMgr;
 		}
 		return lastConfigMgr;
 	}
 
-	public synchronized ConfigurationManagerForIDE getConfigurationMgr(URI mfuri) throws ConfigurationException, URISyntaxException, IOException {
+	public IConfigurationManagerForIDE getConfigurationMgr(URI mfuri) throws ConfigurationException, URISyntaxException, IOException {
         URI projectUri = ResourceManager.getProjectUri(mfuri);
-        ConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
+        IConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
         // See if we already have a ConfigurationManager for this project and if so use it.
         String owlModelsFolder = ResourceManager.getOwlModelsFolder(mfuri);
+        configurationManagerProvider.setModelFolder(owlModelsFolder);
 		if (configurationMgr == null) {
 			ResourceManager.validateOwlModelsFolder(owlModelsFolder);
-			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+			configurationMgr = configurationManagerProvider.get();
 			configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
 			configurationMgrMap.put(projectUri, configurationMgr);
 	    	IPreferencesService service = Platform.getPreferencesService();
@@ -3159,7 +3165,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	    	configurationMgr.setModelGetter(modelGetter);
 		}
 		else if (configurationMgr.isConfigurationStale()) {
-			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+			configurationMgr = configurationManagerProvider.get();
 			configurationMgrMap.put(projectUri, configurationMgr);
 	    	IPreferencesService service = Platform.getPreferencesService();
 	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
@@ -3170,7 +3176,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			if (configurationMgr.isConfigChanged()) {
 				configurationMgr.saveConfiguration();
 			}
-			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+			configurationMgr = configurationManagerProvider.get();
 			configurationMgrMap.put(projectUri, configurationMgr);
 			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
 		}
@@ -3518,7 +3524,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 		
 	}
 	
-	public Enumeration<ConfigurationManagerForIDE> getConfigurationManagers() {
+	public Enumeration<IConfigurationManagerForIDE> getConfigurationManagers() {
 		if (configurationMgrMap != null) {
 			return configurationMgrMap.elements();
 		}

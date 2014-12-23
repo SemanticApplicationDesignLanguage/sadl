@@ -152,7 +152,7 @@ public class SadlHyperlinkHelper extends HyperlinkHelper {
 		return normalized;
 	}
 
-	private void createXtextHyperlink(Region region,
+	public void createXtextHyperlink(Region region,
 			IHyperlinkAcceptor acceptor, final String hyperlinkText,
 			URI normalized) {
 		XtextHyperlink result = getHyperlinkProvider().get();

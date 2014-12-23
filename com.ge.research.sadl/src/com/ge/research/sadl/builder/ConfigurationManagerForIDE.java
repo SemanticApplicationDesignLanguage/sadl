@@ -50,20 +50,25 @@ import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.resource.IResourceDescriptions;
+import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
+import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
@@ -86,9 +91,35 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing 
 	implements IConfigurationManagerForIDE, IResourceChangeListener, IPropertyChangeListener {
 	
-	boolean closing = false;
-	private SadlUtils sadlUtils = null;
+	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {
+		private String modelFolder;
+		private String repoType = ConfigurationManagerForIDE.getOWLFormat();
 
+		public void setModelFolder(String modelFolder) {
+			this.modelFolder = modelFolder;
+		}
+		
+		public void setRepoType(String repoType) {
+			this.repoType = repoType;
+		}
+
+		@Override
+		public IConfigurationManagerForIDE get() {
+			try {
+				return new ConfigurationManagerForIDE(modelFolder,
+						repoType);
+			} catch (ConfigurationException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+	}
+	
+	boolean closing = false;
+	private SadlUtils sadlUtils = new SadlUtils();
+	@Inject
+	private ResourceDescriptionsProvider resourceDescriptionsProvider;
+	
+	// TODO: Do not use directly
 	public ConfigurationManagerForIDE(String modelFolderPathname, String _repoType) throws ConfigurationException {
 		super(modelFolderPathname, _repoType);
 		if (ResourcesPlugin.getPlugin() != null) {
@@ -254,15 +285,15 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
     			Statement s = pendingDeletions.get(i);
     			if (s.getPredicate().getLocalName().equals("altURL")) {
     				String sadlFileName = ResourceManager.sadlFileNameOfOwlAltUrl(s.getObject().toString());
-    				File owlfile = new File(getSadlUtils().fileUrlToFileName(s.getObject().toString()));
+    				File owlfile = new File(sadlUtils.fileUrlToFileName(s.getObject().toString()));
     				String sadlfile = ResourceManager.findSadlFileInProject(owlfile.getParentFile().getParent(), sadlFileName);
     				if (sadlfile != null) {
     					String stmtFileName = owlfile.getName();
-    					String altvFileName = new File(getSadlUtils().fileUrlToFileName(altv.toString())).getName();
+    					String altvFileName = new File(sadlUtils.fileUrlToFileName(altv.toString())).getName();
     					if (stmtFileName != null && altvFileName != null && !stmtFileName.equals(altvFileName)) {
 	    					// duplicate model uri
 	    					throw new ConfigurationException("Model name '" + pubv.toString() + "' is used by more than one SADL model: " 
-	    							+ owlfile.getName() + " and " + new File(getSadlUtils().fileUrlToFileName(altv.toString())).getName());
+	    							+ owlfile.getName() + " and " + new File(sadlUtils.fileUrlToFileName(altv.toString())).getName());
     					}
     				}
     			}
@@ -346,7 +377,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 //		File[] owlFiles = modelsFolder.listFiles(owlFilter);
 //		for (int i = 0; i < owlFiles.length; i++) {
 //			// load OWL files and dependencies into TDB repo
-//			String actualUrl = getSadlUtils().fileNameToFileUrl(owlFiles[i].getCanonicalPath());
+//			String actualUrl = sadlUtils.fileNameToFileUrl(owlFiles[i].getCanonicalPath());
 //			String publicUri = getPublicUriFromActualUrl(actualUrl);
 //			OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 //			model.getDocumentManager().setProcessImports(true);	// we don't want to do the import yet, just load the model
@@ -472,12 +503,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		if (servicesConfigConcepts != null) {
 			String gp = "SadlServicesConfigurationConcepts";
 			try {
-				addMapping(getSadlUtils().fileNameToFileUrl(servicesConfigConcepts),
+				addMapping(sadlUtils.fileNameToFileUrl(servicesConfigConcepts),
 						ResourceManager.ServicesConfigurationURI,
 						gp, SADL);
 				addJenaMapping(
 						ResourceManager.ServicesConfigurationURI,
-						getSadlUtils().fileNameToFileUrl(servicesConfigConcepts));
+						sadlUtils.fileNameToFileUrl(servicesConfigConcepts));
 				addGlobalPrefix(
 						ResourceManager.ServicesConfigurationURI,
 						gp);
@@ -556,7 +587,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 
     private boolean isOwlFileCreatedBySadl(File file) {
 		try {
-			String val = getSadlUtils().fileNameToFileUrl(file.getCanonicalPath());
+			String val = sadlUtils.fileNameToFileUrl(file.getCanonicalPath());
 			String key = null;
 			if (getMappings().containsValue(val)) {
 				Iterator<String> kitr = getMappings().keySet().iterator();
@@ -773,7 +804,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	public void setDefaultsAltUrlMapping() throws IOException, URISyntaxException, ConfigurationException {
 		if (getModelFolderPath() != null) {
 			String defaultsActual = getModelFolderPath().getAbsolutePath() + File.separator + ACUITY_DEFAULTS_OWL_FN;
-			addMapping(getSadlUtils().fileNameToFileUrl(defaultsActual), ACUITY_DEFAULTS_URI, DEFAULTS_PREFIX, SADL);
+			addMapping(sadlUtils.fileNameToFileUrl(defaultsActual), ACUITY_DEFAULTS_URI, DEFAULTS_PREFIX, SADL);
 			File defact = new File(defaultsActual);
 			if (!defact.exists()) {
 				if (!ResourceManager.copyDefaultsFileToOwlModelsDirectory(defaultsActual)) {
@@ -791,10 +822,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	 * @throws URISyntaxException
 	 * @throws ConfigurationException 
 	 */
+	@Override
 	public void setServicesConfigurationAltUrlMapping() throws IOException, URISyntaxException, ConfigurationException {
 		if (getModelFolderPath() != null) {
 			String servicesConfigurationActual = getModelFolderPath().getAbsolutePath() + File.separator + ServicesConfigurationConcepts_FN;
-			addMapping(getSadlUtils().fileNameToFileUrl(servicesConfigurationActual), ServicesConfigurationURI, null, SADL);
+			addMapping(sadlUtils.fileNameToFileUrl(servicesConfigurationActual), ServicesConfigurationURI, null, SADL);
 			File defact = new File(servicesConfigurationActual);
 			if (!defact.exists()) {
 				if (!ResourceManager.copyServicesConfigurationFileToOwlModelsDirectory(servicesConfigurationActual)) {
@@ -822,7 +854,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		} else {
 			actualPath = URI.createFileURI(actualUri.toString()).toFileString();
 		}
-		List<File> sadlFiles = ResourceManager.findSadlFilesInDir(new File(getSadlUtils().fileUrlToFileName(getProjectFolderPath())));
+		List<File> sadlFiles = ResourceManager.findSadlFilesInDir(new File(sadlUtils.fileUrlToFileName(getProjectFolderPath())));
 		for (int i = 0; i < sadlFiles.size(); i++) {
 			File aFile = sadlFiles.get(i);
 			try {
@@ -910,18 +942,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		
 	}
 
-	public SadlUtils getSadlUtils() {
-		if (sadlUtils   == null) {
-			sadlUtils = new SadlUtils();
-		}
-		return sadlUtils;
-	}
-
 	@Override
 	public boolean isSadlDerived(String publicUri) throws ConfigurationException, MalformedURLException {
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (altUrl !=  null && !altUrl.equals(publicUri)) {
-			String altFN = getSadlUtils().fileUrlToFileName(altUrl);
+			String altFN = sadlUtils.fileUrlToFileName(altUrl);
 			return isOwlFileCreatedBySadl(new File(altFN));
 		}
 		return false;
@@ -986,6 +1011,27 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 			}
 		}
 		return theModel;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public URI getSadlUriFromPublicUri(ResourceSet resourceSet, URI publicUri)
+			throws ConfigurationException, IOException {
+		if (isSadlDerived(publicUri.toString())) {
+			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
+			IResourceDescriptions descriptions = resourceDescriptionsProvider.getResourceDescriptions(resourceSet);
+			Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SadlPackage.Literals.MODEL, QualifiedName.create(publicUri.toString()), false);
+			Iterator<IEObjectDescription> it = matchingModels.iterator();
+			if (it.hasNext()) {
+				IEObjectDescription description = it.next();
+				// This will be the URI of the SADL file
+				return description.getEObjectURI().trimFragment();
+			}
+		}
+		return null;
+		
 	}
 
 

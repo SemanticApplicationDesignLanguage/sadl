@@ -96,7 +96,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
             logger.debug("OwlModels folder created: " + folder.toString());
         }
 
-    	ConfigurationManagerForIDE configMgr = null;
+    	IConfigurationManagerForIDE configMgr = null;
 		String modelFolder = ResourceManager.convertProjectRelativePathToAbsolutePath(folder.getFullPath().toPortableString());
        	try {
        		configMgr = visitor.getConfigurationMgr(modelFolder);
