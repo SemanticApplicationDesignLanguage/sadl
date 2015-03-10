@@ -20,6 +20,8 @@
  */
 package com.ge.research.sadl;
 
+import org.eclipse.xtext.linking.ILinkingService;
+import org.eclipse.xtext.linking.impl.DefaultLinkingService;
 import org.eclipse.xtext.naming.IQualifiedNameConverter;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
@@ -38,6 +40,7 @@ import com.ge.research.sadl.resource.SadlResource;
 import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy;
 import com.ge.research.sadl.scoping.SadlGlobalScopeProvider;
 import com.ge.research.sadl.scoping.SadlImportUriResolver;
+import com.ge.research.sadl.scoping.SadlLinkingService;
 import com.ge.research.sadl.scoping.SadlLocalScopeProvider;
 import com.google.inject.Binder;
 import com.google.inject.name.Names;
@@ -58,6 +61,11 @@ public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeM
     }
 
     @Override
+	public Class<? extends ILinkingService> bindILinkingService() {
+		return SadlLinkingService.class;
+	}
+
+	@Override
     public Class<? extends IGlobalScopeProvider> bindIGlobalScopeProvider() {
         return SadlGlobalScopeProvider.class;
     }

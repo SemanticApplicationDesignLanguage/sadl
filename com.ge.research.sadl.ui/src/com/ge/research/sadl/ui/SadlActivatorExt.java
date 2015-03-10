@@ -16,7 +16,7 @@ public class SadlActivatorExt extends SadlActivator {
 	
 	protected Module getUiModule(String grammar) {
 		if (COM_GE_RESEARCH_SADL_JENA.equals(grammar)) {
-			return new com.ge.research.sadl.ui.jena.JenaUiModule(this);
+			return (Module) new com.ge.research.sadl.ui.jena.JenaUiModule(this);
 		}
 		
 		return super.getUiModule(grammar);
