@@ -14,5 +14,5 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.jena.reasoner,
  com.ge.research.sadl.jena.reasoner.builtin,
  com.ge.research.sadl.jena.translator
-Bundle-ClassPath: lib/jena-wrapper-for-sadl-2.2.0.jar,
- .
+Bundle-ClassPath: .,
+ lib/jena-wrapper-for-sadl-2.3.0.jar
