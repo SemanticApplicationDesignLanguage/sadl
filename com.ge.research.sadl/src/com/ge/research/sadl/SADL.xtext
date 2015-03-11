@@ -30,7 +30,8 @@ Model :
 // "http://..."; the version is optional.
 ModelName :
     'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
-    	('(' 'note' annContent+=ContentList ')')* EOS;
+    	('(' annType+=('alias'|'note') annContent+=ContentList ')')* EOS;
+//		('(' 'note' annContent+=ContentList ')')* EOS;
 
 // Every import is by actual relative URL (other SADL models) or by URI
 // (OWL files); every import has a unique alias (which becomes the "prefix" in compound names).

@@ -3952,6 +3952,17 @@ public class ModelManager {
 			// get the matching concept names in all imported namespaces
 			return getNamedConceptsOfType(ctype, Scope.INCLUDEIMPORTS);
 		}
+		
+		if (this.modelName == null && getModelActualUrl() != null && 
+				getModelActualUrl().lastSegment().endsWith(".owl")) { 
+			// this is for an OWL file loading Jena resources
+			try {
+				return getConfigurationMgr().getNamedConceptsInModel(modelname, ctype, Scope.INCLUDEIMPORTS);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
 		if (modelname.equals(this.modelName)) {
 			// we're getting the concept names in this ModelManager's namespace

@@ -25,9 +25,13 @@ package com.ge.research.sadl.scoping;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -36,16 +40,15 @@ import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
-import org.eclipse.xtext.util.IResourceScopeCache;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.sadl.SadlPackage;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	@Inject
@@ -54,46 +57,39 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	@Inject
 	IResourceDescription.Manager resourceDescriptionManager;
 
-	@Inject
-	private IResourceScopeCache cache;
-
 	/**
 	 * For each imported owl resource, import also the accoring sadl resource to
 	 * have the elements on the global scope
 	 */
 	@Override
 	protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
-		return cache.get(ImportUriGlobalScopeProvider.class.getName(), resource, new Provider<LinkedHashSet<URI>>(){
-			public LinkedHashSet<URI> get() {
-				// access ConfigurationManager to get all accessed URIs
-				IConfigurationManagerForIDE cmgr = null;
-				try {
-					synchronized (resource) {
-						cmgr = visitor.getConfigurationMgr(resource.getURI());
-					}
-					if (cmgr==null) {
-						return SadlGlobalScopeProvider.super.getImportedUris(resource);
-					}
-					String publicUri = null;
-					if (!resource.getContents().isEmpty()) {
-						Model model = (Model) resource.getContents().get(0);
-						publicUri = model.getModelName().getBaseUri();
-					}
-
-					LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
-					collectImportedURIs(resource, URI.createURI(publicUri), uriSet, cmgr);
-
-					return uriSet;
-				} catch (Exception e) {
-					return SadlGlobalScopeProvider.super.getImportedUris(resource);
-				}
+		// access ConfigurationManager to get all accessed URIs
+		IConfigurationManagerForIDE cmgr = null;
+		try {
+			synchronized (resource) {
+				cmgr = visitor.getConfigurationMgr(resource.getURI());
 			}
-		});
+			if (cmgr==null) {
+				return super.getImportedUris(resource);
+			}
+			String publicUri = null;
+			if (!resource.getContents().isEmpty()) {
+				Model model = (Model) resource.getContents().get(0);
+				publicUri = model.getModelName().getBaseUri();
+			}
+			
+			LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
+			collectImportedURIs(resource, URI.createURI(publicUri), uriSet, cmgr, false);
+			
+			return uriSet;
+		} catch (Exception e) {
+			return super.getImportedUris(resource);
+		}
 	}
-
+	
 
 	/**
-	 * Recursive method to resolve transitive imports.
+	 * Recursive method to resolve transitive imports. 
 	 * @param resource The context resource
 	 * @param publicURI The public URI of the imported resource
 	 * @param uriSet The result set into which the URIs are collected
@@ -101,9 +97,25 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	 * @throws ConfigurationException
 	 * @throws MalformedURLException
 	 */
-	private void collectImportedURIs (Resource resource, URI publicURI, LinkedHashSet<URI> uriSet, IConfigurationManagerForIDE cmgr) throws ConfigurationException, MalformedURLException {
-		URI altUrlFromPublicUri = URI.createURI(cmgr.getAltUrlFromPublicUri(publicURI.toString()));
+	private void collectImportedURIs (Resource resource, URI publicURI, LinkedHashSet<URI> uriSet, IConfigurationManagerForIDE cmgr, boolean getImportsFromCfgMgr) throws ConfigurationException, MalformedURLException {
+		String altUrl = cmgr.getAltUrlFromPublicUri(publicURI.toString());
+		if (altUrl.equals(publicURI.toString())) {
+			// this might be in a different project
+			Enumeration<IConfigurationManagerForIDE> configMgrs = visitor.getConfigurationManagers();
+			while (configMgrs.hasMoreElements()) {
+				IConfigurationManagerForIDE aconfigmgr = configMgrs.nextElement();
+				String anAltUrl = aconfigmgr.getAltUrlFromPublicUri(publicURI.toString());
+				if (!anAltUrl.equals(publicURI.toString())) {
+					// this must be the right project
+					altUrl = anAltUrl;
+					cmgr = aconfigmgr;
+					break;
+				}
+			}
+		}
+		URI altUrlFromPublicUri = URI.createURI(altUrl);
 		// For SADL derived OWL models, resolve the SADL resource URI from the index.
+
 		if (cmgr.isSadlDerived(publicURI.toString())) {
 			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
 			IResourceDescriptions descriptions = getResourceDescriptions(resource);
@@ -118,10 +130,19 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 		if (uriSet.add(altUrlFromPublicUri)) {
 			// This URI was not collected yet, thus collect its imports again
 			try {
-				Map<String, String> imports = cmgr.getImports(publicURI.toString());
-				for (String s: imports.keySet()) {
+				Set<String> imports = null;
+				if (getImportsFromCfgMgr)
+					imports = cmgr.getImports(publicURI.toString()).keySet();
+				else {
+					imports = new HashSet<>();
+					Model m = (Model) resource.getContents().get(0);
+					for (Import imp: m.getImports()) {
+						imports.add(imp.getImportURI());
+					}
+				}
+				for (String s: imports) {
 					URI uri = URI.createURI(s);
-					collectImportedURIs(resource, uri, uriSet, cmgr);
+					collectImportedURIs(resource, uri, uriSet, cmgr, true);
 				}
 			} catch (ConfigurationException e) {
 				; // TODO: Handle exception

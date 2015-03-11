@@ -503,8 +503,8 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     	String publicUri = null;
 		try {
 	   		if (uri.isPlatform()) {
-	   			URL fileUri = FileLocator.toFileURL(new URL(uri.toString()));
-	   			uri = URI.createURI(fileUri.getFile());
+	   			IPath testpath = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(uri.toPlatformString(false))).getLocation();
+	   			uri = URI.createFileURI(testpath.toOSString());
 	   		}
 	   		IConfigurationManagerForIDE cmgr = getConfigurationMgr(uri);
 			if (cmgr != null) {
