@@ -953,8 +953,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	}
 
 	@Override
-	public Map<String, String> getImports(String publicUri) throws ConfigurationException, IOException {
-		OntModel theModel = getOntModel(publicUri);
+	public Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException {
+		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			Ontology onto = theModel.getOntology(publicUri);
 			if (onto != null) {
@@ -983,14 +983,14 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	@Override
 	public List<ConceptName> getNamedConceptsInModel(String publicUri,
 			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException {
-		OntModel theModel = getOntModel(publicUri);
+		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			return getNamedConceptsInModel(theModel, publicUri, cType, scope);
 		}
 		return null;
 	}
 
-	protected OntModel getOntModel(String publicUri) throws ConfigurationException, IOException {
+	protected OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException {
 		OntModel theModel = null;
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (repoType == null) {
@@ -1007,7 +1007,20 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 			}
 		} else {
 			if (getModelGetter() != null) {
+				boolean resetProcessImports = false;
+				boolean processImports = OntDocumentManager.getInstance().getProcessImports();
+				if (scope != null && scope.equals(Scope.LOCALONLY) && processImports) {
+					OntDocumentManager.getInstance().setProcessImports(false);
+					resetProcessImports = true;
+				}
+				else if (!processImports) {
+					OntDocumentManager.getInstance().setProcessImports(true);
+					resetProcessImports = true;
+				}
 				theModel = getModelGetter().getOntModel(publicUri, altUrl, repoType);
+				if (resetProcessImports) {
+					OntDocumentManager.getInstance().setProcessImports(processImports);
+				}
 			}
 		}
 		return theModel;

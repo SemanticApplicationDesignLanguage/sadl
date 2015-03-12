@@ -514,7 +514,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 				throw new InvalidNameException("Unable to find a model with URL '" + uri + "'");
 			}
 			if (cmgr.isSadlDerived(publicUri)) {
-				return getModel().getNamedConceptsInNamedModel(publicUri, null);
+				return getModel().getNamedConceptsInNamedModel(publicUri, null, scope);
 			}
 			else {
 				return cmgr.getNamedConceptsInModel(cmgr.getModelGetter().getOntModel(publicUri, uri.toString(), null), publicUri, null, scope);

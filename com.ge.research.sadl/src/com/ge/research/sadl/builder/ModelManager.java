@@ -456,7 +456,7 @@ public class ModelManager {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Names in model '{}', this model only",
 						modelNamespace);
-				List<ConceptName> testConcepts = getNamedConceptsInNamedModel(getModelName(), null);
+				List<ConceptName> testConcepts = getNamedConceptsInNamedModel(getModelName(), null, Scope.LOCALONLY);
 				if (testConcepts != null) {
 					for (int i = 0; i < testConcepts.size(); i++) {
 						logger.trace("  {}", testConcepts.get(i));
@@ -3946,7 +3946,7 @@ public class ModelManager {
 	 * @throws MalformedURLException 
 	 */
 	public List<ConceptName> getNamedConceptsInNamedModel(String modelname,
-			ConceptType ctype) throws InvalidNameException,
+			ConceptType ctype, Scope scope) throws InvalidNameException,
 			ConfigurationException, MalformedURLException {
 		if (modelname == null) {
 			// get the matching concept names in all imported namespaces
@@ -3957,7 +3957,7 @@ public class ModelManager {
 				getModelActualUrl().lastSegment().endsWith(".owl")) { 
 			// this is for an OWL file loading Jena resources
 			try {
-				return getConfigurationMgr().getNamedConceptsInModel(modelname, ctype, Scope.INCLUDEIMPORTS);
+				return getConfigurationMgr().getNamedConceptsInModel(modelname, ctype, scope != null ? scope : Scope.INCLUDEIMPORTS);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

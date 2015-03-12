@@ -250,11 +250,12 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	/**
 	 * Method to find the imports, with prefixes, for a given model identified by uri
 	 * @param publicUri
+	 * @param scope -- Scope.LOCALONLY or Scope.INCLUDEIMPORTS
 	 * @return
 	 * @throws ConfigurationException 
 	 * @throws IOException 
 	 */
-	public abstract Map<String, String> getImports(String publicUri) throws ConfigurationException, IOException;
+	public abstract Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException;
 
 	/**
 	 * Get the concept names of everything in the named model matching type and scope

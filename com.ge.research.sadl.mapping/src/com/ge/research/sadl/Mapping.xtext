@@ -20,11 +20,11 @@ Import :
 ;
     
 Group:
-	'{' groupLines+=(Triple | Group)+ '}' EOS
+	'{' groupLines+=(Triple | Group)+ '}' 
 ;
 
 Triple :
-	subj=(Ref|[sadl::ResourceName]) ('has')? pred=[sadl::ResourceName] (objval=(Ref|[sadl::ResourceName]|LiteralValue))
+	(subjRef=Ref|subjRsrc=[sadl::ResourceName]) ('has')? pred=[sadl::ResourceName] (=>objvalRef=Ref|=>objvalRsrc=[sadl::ResourceName]|objvalLit=LiteralValue) EOS
 ;
 
 LiteralValue :
@@ -39,8 +39,9 @@ NUMBER hidden() :
 ;
 
 Ref:
-	ref=(ColumnName) addlcols+='_'? ColumnName* (row='()')?
+	ref=ColumnName ('_'? addlcols+=ColumnName)* (row?='row()')?
 ;
+// Ref example: <A>_<B><Temp>row()
 
 ColumnName:
 	'<' ColumnID '>'

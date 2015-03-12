@@ -44,6 +44,7 @@ import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.sadl.SadlPackage;
@@ -132,7 +133,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 			try {
 				Set<String> imports = null;
 				if (getImportsFromCfgMgr)
-					imports = cmgr.getImports(publicURI.toString()).keySet();
+					imports = cmgr.getImports(publicURI.toString(), Scope.LOCALONLY).keySet();
 				else {
 					imports = new HashSet<>();
 					Model m = (Model) resource.getContents().get(0);
