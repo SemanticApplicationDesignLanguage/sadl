@@ -40,6 +40,7 @@ import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
+import org.eclipse.xtext.util.IResourceScopeCache;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
@@ -50,6 +51,7 @@ import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.sadl.SadlPackage;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	@Inject
@@ -58,39 +60,46 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	@Inject
 	IResourceDescription.Manager resourceDescriptionManager;
 
+	@Inject
+	private IResourceScopeCache cache;
+
 	/**
 	 * For each imported owl resource, import also the accoring sadl resource to
 	 * have the elements on the global scope
 	 */
 	@Override
 	protected LinkedHashSet<URI> getImportedUris(final Resource resource) {
-		// access ConfigurationManager to get all accessed URIs
-		IConfigurationManagerForIDE cmgr = null;
-		try {
-			synchronized (resource) {
-				cmgr = visitor.getConfigurationMgr(resource.getURI());
+		return cache.get(ImportUriGlobalScopeProvider.class.getName(), resource, new Provider<LinkedHashSet<URI>>(){
+			public LinkedHashSet<URI> get() {
+				// access ConfigurationManager to get all accessed URIs
+				IConfigurationManagerForIDE cmgr = null;
+				try {
+					synchronized (resource) {
+						cmgr = visitor.getConfigurationMgr(resource.getURI());
+					}
+					if (cmgr==null) {
+						return SadlGlobalScopeProvider.super.getImportedUris(resource);
+					}
+					String publicUri = null;
+					if (!resource.getContents().isEmpty()) {
+						Model model = (Model) resource.getContents().get(0);
+						publicUri = model.getModelName().getBaseUri();
+					}
+
+					LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
+					collectImportedURIs(resource, URI.createURI(publicUri), uriSet, cmgr, false);
+
+					return uriSet;
+				} catch (Exception e) {
+					return SadlGlobalScopeProvider.super.getImportedUris(resource);
+				}
 			}
-			if (cmgr==null) {
-				return super.getImportedUris(resource);
-			}
-			String publicUri = null;
-			if (!resource.getContents().isEmpty()) {
-				Model model = (Model) resource.getContents().get(0);
-				publicUri = model.getModelName().getBaseUri();
-			}
-			
-			LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
-			collectImportedURIs(resource, URI.createURI(publicUri), uriSet, cmgr, false);
-			
-			return uriSet;
-		} catch (Exception e) {
-			return super.getImportedUris(resource);
-		}
+		});
 	}
-	
+
 
 	/**
-	 * Recursive method to resolve transitive imports. 
+	 * Recursive method to resolve transitive imports.
 	 * @param resource The context resource
 	 * @param publicURI The public URI of the imported resource
 	 * @param uriSet The result set into which the URIs are collected
