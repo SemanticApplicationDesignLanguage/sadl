@@ -19,6 +19,7 @@ package com.ge.research.sadl.scoping;
 
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.impl.AliasedEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
@@ -39,7 +40,7 @@ public class SadlLocalScopeProvider extends SimpleLocalScopeProvider {
 	@Override
 	protected IScope getGlobalScope(Resource context, EReference reference) {
 		IScope globalScope = super.getGlobalScope(context, reference);
-		
+
 		// Create a filtered view on all ResourceNames from the global scope that have a 2 segment qualified name (namespace:name)
 		Iterable<IEObjectDescription> resourceNameDescriptions = Iterables.filter(globalScope.getAllElements(), new Predicate<IEObjectDescription>() {
 			@Override
@@ -51,9 +52,9 @@ public class SadlLocalScopeProvider extends SimpleLocalScopeProvider {
 		Iterable<IEObjectDescription> aliasedResourceNameDescriptions = Iterables.transform(resourceNameDescriptions, new Function<IEObjectDescription,IEObjectDescription>(){
 			@Override
 			public IEObjectDescription apply(IEObjectDescription input) {
-				return new AliasedEObjectDescription(input.getQualifiedName().skipFirst(1), input);
+				return new AliasedEObjectDescription(QualifiedName.create(input.getQualifiedName().getLastSegment()), input);
 			}});
-		
+
 		return new SimpleScope(globalScope, aliasedResourceNameDescriptions);
 	}
 }

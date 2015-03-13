@@ -126,6 +126,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 		URI altUrlFromPublicUri = URI.createURI(altUrl);
 		// For SADL derived OWL models, resolve the SADL resource URI from the index.
 
+		// http://sadl.org/SadlLinking1/GenealogyBase should be recognized as SADL derived
 		if (cmgr.isSadlDerived(publicURI.toString())) {
 			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
 			IResourceDescriptions descriptions = getResourceDescriptions(resource);
