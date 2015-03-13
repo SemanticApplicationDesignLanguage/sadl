@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.linking.impl.DefaultLinkingService;
 import org.eclipse.xtext.linking.impl.IllegalNodeException;
 import org.eclipse.xtext.nodemodel.INode;
@@ -13,6 +14,7 @@ import org.eclipse.xtext.nodemodel.INode;
 import com.ge.research.sadl.resource.SadlResource;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceName;
+import com.ge.research.sadl.sadl.Rule;
 import com.ge.research.sadl.sadl.SadlFactory;
 import com.ge.research.sadl.sadl.SadlPackage;
 
@@ -35,9 +37,7 @@ public class SadlLinkingService extends DefaultLinkingService {
 			INode node) throws IllegalNodeException {
 		List<EObject> linkedObjects = super.getLinkedObjects(context, ref, node);
 
-		// TODO: Are there any rules in which situation it is allowed to have undeclared variables?
-		// Do we have to create in any case a ResourceName, or just in certain contexts?
-		if (linkedObjects.isEmpty() && ref == SadlPackage.Literals.RESOURCE_BY_NAME__NAME) {
+		if (linkedObjects.isEmpty() && ref == SadlPackage.Literals.RESOURCE_BY_NAME__NAME && doCreateVirtualResourceName(context)) {
 			ResourceName rn = null;
 			final String crossRefString = getCrossRefNodeAsString(node);
 			for (EObject o: context.eResource().getContents()) {
@@ -54,5 +54,12 @@ public class SadlLinkingService extends DefaultLinkingService {
 			return Collections.<EObject>singletonList(rn);
 		}
 		return linkedObjects;
+	}
+	
+	/**
+	 * Decide whether a virtual ResourceName should be created for the given context for the case that scoping failed.
+	 */
+	private boolean doCreateVirtualResourceName (EObject context) {
+		return EcoreUtil2.getContainerOfType(context, Rule.class)!=null;
 	}
 }

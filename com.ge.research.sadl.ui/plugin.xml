@@ -97,20 +97,20 @@
             <and>
                 <reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
                 <with variable="activeEditor">
-                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
-                        value="com.ge.research.sadl.Sadl" 
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+                        value="com.ge.research.sadl.Sadl"
                         forcePluginActivation="true"/>
-                </with>        
+                </with>
             </and>
         </definition>
         <definition id="com.ge.research.sadl.Sadl.XtextEditor.opened">
             <and>
                 <reference definitionId="isXtextEditorActive"/>
                 <with variable="activeEditor">
-                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
-                        value="com.ge.research.sadl.Sadl" 
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+                        value="com.ge.research.sadl.Sadl"
                         forcePluginActivation="true"/>
-                </with>        
+                </with>
             </and>
         </definition>
     </extension>
@@ -189,16 +189,16 @@
                     definitionId="com.ge.research.sadl.Sadl.Editor.opened">
                 </reference>
             </visibleWhen>
-         </command>  
+         </command>
          </menuContribution>
          <!-- copy qualified name -->
          <menuContribution locationURI="popup:#TextEditorContext?after=copy">
-         	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName" 
+         	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
          		style="push" tooltip="Copy Qualified Name">
             	<visibleWhen checkEnabled="false">
                 	<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened" />
             	</visibleWhen>
-         	</command>  
+         	</command>
          </menuContribution>
          <menuContribution locationURI="menu:edit?after=copy">
          	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
@@ -206,10 +206,10 @@
             	<visibleWhen checkEnabled="false">
                 	<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened" />
             	</visibleWhen>
-         	</command>  
+         	</command>
          </menuContribution>
          <menuContribution locationURI="popup:org.eclipse.xtext.ui.outline?after=additions">
-			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName" 
+			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
          		<visibleWhen checkEnabled="false">
 	            	<and>
@@ -242,7 +242,7 @@
                 </reference>
             </activeWhen>
         </handler>
-    </extension>   
+    </extension>
 
 <!-- adding resource factories -->
 
@@ -258,27 +258,6 @@
 		<parser
 			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
 			type="owl">
-		</parser>
-	</extension>
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="nt">
-		</parser>
-	</extension>
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="n3">
-		</parser>
-	</extension>
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="rdf">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
@@ -331,7 +310,7 @@
     <!-- Graph Neighborhood -->
 	<extension
 		point="org.eclipse.ui.handlers">
-		<handler 
+		<handler
 			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.GraphCommand"
 			commandId="com.ge.research.sadl.ui.GraphCommand">
 			<activeWhen>
@@ -365,7 +344,7 @@
 	<!-- Quick Outline -->
 	<extension
 		point="org.eclipse.ui.handlers">
-		<handler 
+		<handler
 			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
 			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
 			<activeWhen>
@@ -775,35 +754,35 @@
            id="com.ge.research.sadl.ui.category.SadlEditor">
      </category>
   </extension>
-  <extension point="org.eclipse.ui.importWizards"> 
+  <extension point="org.eclipse.ui.importWizards">
 		<category id="com.ge.research.sadl" name="SADL"/>
-		<wizard 
-			id="com.ge.research.sadl.geonly.ImportCSVToSadl" 
-			name="CSV Files" 
+		<wizard
+			id="com.ge.research.sadl.geonly.ImportCSVToSadl"
+			name="CSV Files"
 			class="com.ge.research.sadl.geonly.ui.imports.SadlCSVImportWizard"
-			icon="icons/import_folder.gif" 
+			icon="icons/import_folder.gif"
 			category="com.ge.research.sadl">
-			<description>Import CSV files to a SADL project</description> 
-			<selection class="org.eclipse.core.resources.IFile" name="*.csv"/> 
-		</wizard> 
-<!--		<wizard 
-			id="com.ge.research.sadl.geonly.ImportXLSToSadl" 
-			name="Excel Files" 
-			class="com.ge.research.sadl.geonly.ui.imports.SadlXLSImportWizard" 
-			icon="icons/import_folder.gif" 
+			<description>Import CSV files to a SADL project</description>
+			<selection class="org.eclipse.core.resources.IFile" name="*.csv"/>
+		</wizard>
+<!--		<wizard
+			id="com.ge.research.sadl.geonly.ImportXLSToSadl"
+			name="Excel Files"
+			class="com.ge.research.sadl.geonly.ui.imports.SadlXLSImportWizard"
+			icon="icons/import_folder.gif"
 			category="com.ge.research.sadl">
-			<description>Import Excel files to a SADL project</description> 
-			<selection class="org.eclipse.core.resources.IFile" name="*.xls"/> 
+			<description>Import Excel files to a SADL project</description>
+			<selection class="org.eclipse.core.resources.IFile" name="*.xls"/>
 		</wizard> -->
-		<wizard 
-			id="com.ge.research.sadl.geonly.ImportOwlToSadl" 
-			name="Owl Files" 
-			class="com.ge.research.sadl.geonly.ui.imports.OwlFileImportWizard" 
-			icon="icons/import_folder.gif" 
+		<wizard
+			id="com.ge.research.sadl.geonly.ImportOwlToSadl"
+			name="Owl Files"
+			class="com.ge.research.sadl.geonly.ui.imports.OwlFileImportWizard"
+			icon="icons/import_folder.gif"
 			category="com.ge.research.sadl">
-			<description>Import Owl files to a SADL project</description> 
-			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
-		</wizard> 
+			<description>Import Owl files to a SADL project</description>
+			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/>
+		</wizard>
    </extension>
    <!-- Jena editor -->
    <extension point="org.eclipse.ui.editors">
@@ -822,6 +801,6 @@
            content-type="org.eclipse.emf.ecore"
            file-extensions="owl,n3,nt,rdf">
      </file-association>
-  </extension> 
+  </extension>
 
 </plugin>

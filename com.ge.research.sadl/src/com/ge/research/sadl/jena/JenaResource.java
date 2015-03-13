@@ -35,6 +35,7 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.sadl.ClassDeclaration;
+import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.InstanceDeclaration;
 import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.sadl.ModelName;
@@ -46,112 +47,124 @@ import com.google.inject.Inject;
 
 public class JenaResource extends ResourceImpl {
 
-    private static final Logger logger = LoggerFactory.getLogger(JenaResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(JenaResource.class);
 
-    @Inject
-    private SadlModelManager visitor;
+	@Inject
+	private SadlModelManager visitor;
 
 	/**
-     * Loads SADL resources using Xtext but OWL and RDF resources using
-     * SadlModelManager.  Assumes that the resource's URI already has been
-     * stored in our class using the setURI method.
-     */
-    @Override
-    protected void doLoad(InputStream inputStream, Map<?, ?> options)
-            throws IOException {
-    	// However, we will load OWL and RDF files by querying the SadlModelManager
-        // to add the files' exported names to our resource's contents but only if
-    	// it isn't an OWL file generated from a SADL file (which should already have
-    	// its names exported).
-        try {
-        	URI thisUri = getURI();
-        	visitor.init(this);
-        	Resource context = this.getResourceSet().getResource(thisUri, false);
-            List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri, Scope.LOCALONLY);
-            if (names == null || names.isEmpty()) {
-            	return;
-            }
+	 * Loads SADL resources using Xtext but OWL and RDF resources using
+	 * SadlModelManager.  Assumes that the resource's URI already has been
+	 * stored in our class using the setURI method.
+	 */
+	@Override
+	protected void doLoad(InputStream inputStream, Map<?, ?> options)
+			throws IOException {
+		// However, we will load OWL and RDF files by querying the SadlModelManager
+		// to add the files' exported names to our resource's contents but only if
+		// it isn't an OWL file generated from a SADL file (which should already have
+		// its names exported).
+		try {
+			URI thisUri = getURI();
+			visitor.init(this);
+			Resource context = this.getResourceSet().getResource(thisUri, false);
+			List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri, Scope.LOCALONLY);
+			if (names == null || names.isEmpty()) {
+				return;
+			}
 
-            // add ModelName to the Model, set alias=prefix
-            Model model = SadlFactory.eINSTANCE.createModel();
-            ModelName modelName = SadlFactory.eINSTANCE.createModelName();
-            modelName.setAlias(names.get(0).getPrefix());
-            modelName.setBaseUri(URI.createURI(names.get(0).getUri()).trimFragment().toString());
-            model.setModelName(modelName);
+			// add ModelName to the Model, set alias=prefix
+			Model model = SadlFactory.eINSTANCE.createModel();
+			ModelName modelName = SadlFactory.eINSTANCE.createModelName();
+			modelName.setAlias(names.get(0).getPrefix());
+			modelName.setBaseUri(URI.createURI(names.get(0).getUri()).trimFragment().toString());
+			model.setModelName(modelName);
 
-            getContents().add(model);
+			// pass in OWL model folder to get CfgMgr
+			try {
+				Map<String,String> modelImportMappings = visitor.getConfigurationMgr(thisUri.trimSegments(1)).getImports(modelName.getBaseUri(), Scope.LOCALONLY);
+				for (String importedURI: modelImportMappings.keySet()) {
+					Import imp = SadlFactory.eINSTANCE.createImport();
+					imp.setImportURI(importedURI);
+					model.getImports().add(imp);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-            // This may not work correctly at first, but let's try it.
-            for (ConceptName name : names) {
-            	name = visitor.validateConceptName(context, name);
-                ConceptType concept = name.getType();
-                switch (concept) {
-    	    	case ANNOTATIONPROPERTY:
-    				break;
-    	    	case DATATYPEPROPERTY:
-    	    	    ResourceName rnData= SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnData.setName(name.getName());
-    	    	    PropertyDeclaration pdData = SadlFactory.eINSTANCE.createPropertyDeclaration();
-    	    	    pdData.setPropertyName(rnData);
-    	    	    model.getElements().add(pdData);
-    				break;
-    	    	case INDIVIDUAL:
-                    ResourceName rnInst = SadlFactory.eINSTANCE.createResourceName();
-                    rnInst.setName(name.getName());
-                    InstanceDeclaration id = SadlFactory.eINSTANCE.createInstanceDeclaration();
-                    id.setInstanceName(rnInst);
-                    model.getElements().add(id);
-    				break;
-    	    	case OBJECTPROPERTY:
-    	    	    ResourceName rnObj= SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnObj.setName(name.getName());
-    	    	    PropertyDeclaration pdObj = SadlFactory.eINSTANCE.createPropertyDeclaration();
-    	    	    pdObj.setPropertyName(rnObj);
-    	    	    model.getElements().add(pdObj);
-    				break;
-    	    	case ONTCLASS:
-    	    	    ResourceName rnClass = SadlFactory.eINSTANCE.createResourceName();
-    	    	    rnClass.setName(name.getName());
-    	    	    ClassDeclaration cd = SadlFactory.eINSTANCE.createClassDeclaration();
-    	    	    cd.setClassName(rnClass);
-    	    	    model.getElements().add(cd);
-    				break;
-    			default:
-    				break;
-                }
-            }
-            logger.info("Loaded "+thisUri.lastSegment()+" with "+model.getElements().size()+" concepts.");
-        }
-        catch (InvalidNameException e) {
-        	logger.error("Invalid name", e);
-        	throw new IOException("Unable to resolve name: " + e.getMessage(), e);
-        }
-    }
+			getContents().add(model);
 
-    /**
-     * Returns ID-type URI fragments for ResourceNames, otherwise delegates to
-     * the default Xtext implementation.
-     * {@inheritDoc}
-     */
-    @Override
-    public String getURIFragment(final EObject object) {
-    	String result = super.getURIFragment(object);
-    	if (object instanceof ResourceName) {
-    		ResourceName rName = (ResourceName) object;
-    		result = rName.getName();
-    		int colon = result.indexOf(':');
-    		if (colon > 0 && colon < result.length() - 1) {
-    			result = result.substring(colon + 1);
-    		}
-    	}
-        return result;
-    }
+			// This may not work correctly at first, but let's try it.
+			for (ConceptName name : names) {
+				name = visitor.validateConceptName(context, name);
+				ConceptType concept = name.getType();
+				switch (concept) {
+				case ANNOTATIONPROPERTY:
+					break;
+				case DATATYPEPROPERTY:
+					ResourceName rnData= SadlFactory.eINSTANCE.createResourceName();
+					rnData.setName(name.getName());
+					PropertyDeclaration pdData = SadlFactory.eINSTANCE.createPropertyDeclaration();
+					pdData.setPropertyName(rnData);
+					model.getElements().add(pdData);
+					break;
+				case INDIVIDUAL:
+					ResourceName rnInst = SadlFactory.eINSTANCE.createResourceName();
+					rnInst.setName(name.getName());
+					InstanceDeclaration id = SadlFactory.eINSTANCE.createInstanceDeclaration();
+					id.setInstanceName(rnInst);
+					model.getElements().add(id);
+					break;
+				case OBJECTPROPERTY:
+					ResourceName rnObj= SadlFactory.eINSTANCE.createResourceName();
+					rnObj.setName(name.getName());
+					PropertyDeclaration pdObj = SadlFactory.eINSTANCE.createPropertyDeclaration();
+					pdObj.setPropertyName(rnObj);
+					model.getElements().add(pdObj);
+					break;
+				case ONTCLASS:
+					ResourceName rnClass = SadlFactory.eINSTANCE.createResourceName();
+					rnClass.setName(name.getName());
+					ClassDeclaration cd = SadlFactory.eINSTANCE.createClassDeclaration();
+					cd.setClassName(rnClass);
+					model.getElements().add(cd);
+					break;
+				default:
+					break;
+				}
+			}
+			logger.info("Loaded "+thisUri.lastSegment()+" with "+model.getElements().size()+" concepts.");
+		}
+		catch (InvalidNameException e) {
+			logger.error("Invalid name", e);
+			throw new IOException("Unable to resolve name: " + e.getMessage(), e);
+		}
+	}
 
-    /**
-     * Resolves ID-type URI fragments by searching our resource's contents, otherwise
-     * delegates to the default Xtext implementation.
-     * {@inheritDoc}
-     */
+	/**
+	 * Returns ID-type URI fragments for ResourceNames, otherwise delegates to
+	 * the default Xtext implementation.
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getURIFragment(final EObject object) {
+		String result = super.getURIFragment(object);
+		if (object instanceof ResourceName) {
+			ResourceName rName = (ResourceName) object;
+			result = rName.getName();
+			int colon = result.indexOf(':');
+			if (colon > 0 && colon < result.length() - 1) {
+				result = result.substring(colon + 1);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Resolves ID-type URI fragments by searching our resource's contents, otherwise
+	 * delegates to the default Xtext implementation.
+	 * {@inheritDoc}
+	 */
 	@Override
 	public EObject getEObject(String uriFragment) {
 		EObject object = super.getEObject(uriFragment);

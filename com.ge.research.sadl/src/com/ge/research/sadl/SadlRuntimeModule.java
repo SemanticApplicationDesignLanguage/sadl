@@ -21,7 +21,6 @@
 package com.ge.research.sadl;
 
 import org.eclipse.xtext.linking.ILinkingService;
-import org.eclipse.xtext.linking.impl.DefaultLinkingService;
 import org.eclipse.xtext.naming.IQualifiedNameConverter;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
