@@ -60,11 +60,11 @@ public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeM
         return SadlImportUriResolver.class;
     }
 
-//    @Override
-//	public Class<? extends ILinkingService> bindILinkingService() {
-//		return SadlLinkingService.class;
-//	}
-//
+    @Override
+	public Class<? extends ILinkingService> bindILinkingService() {
+		return SadlLinkingService.class;
+	}
+
 	@Override
     public Class<? extends IGlobalScopeProvider> bindIGlobalScopeProvider() {
         return SadlGlobalScopeProvider.class;

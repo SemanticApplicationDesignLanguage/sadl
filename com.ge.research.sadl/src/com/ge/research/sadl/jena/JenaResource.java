@@ -52,14 +52,14 @@ public class JenaResource extends ResourceImpl {
     private SadlModelManager visitor;
 
 	/**
-     * Loads SADL resources using Xtext but OWL and RDF resources using 
-     * SadlModelManager.  Assumes that the resource's URI already has been 
+     * Loads SADL resources using Xtext but OWL and RDF resources using
+     * SadlModelManager.  Assumes that the resource's URI already has been
      * stored in our class using the setURI method.
      */
     @Override
     protected void doLoad(InputStream inputStream, Map<?, ?> options)
             throws IOException {
-    	// However, we will load OWL and RDF files by querying the SadlModelManager 
+    	// However, we will load OWL and RDF files by querying the SadlModelManager
         // to add the files' exported names to our resource's contents but only if
     	// it isn't an OWL file generated from a SADL file (which should already have
     	// its names exported).
@@ -71,14 +71,14 @@ public class JenaResource extends ResourceImpl {
             if (names == null || names.isEmpty()) {
             	return;
             }
-            
+
             // add ModelName to the Model, set alias=prefix
             Model model = SadlFactory.eINSTANCE.createModel();
             ModelName modelName = SadlFactory.eINSTANCE.createModelName();
-//            modelName.setAlias(names.get(0).getPrefix());
+            modelName.setAlias(names.get(0).getPrefix());
             modelName.setBaseUri(URI.createURI(names.get(0).getUri()).trimFragment().toString());
             model.setModelName(modelName);
-            
+
             getContents().add(model);
 
             // This may not work correctly at first, but let's try it.
@@ -123,7 +123,7 @@ public class JenaResource extends ResourceImpl {
             logger.info("Loaded "+thisUri.lastSegment()+" with "+model.getElements().size()+" concepts.");
         }
         catch (InvalidNameException e) {
-        	logger.error("Invalid name", e);    	
+        	logger.error("Invalid name", e);
         	throw new IOException("Unable to resolve name: " + e.getMessage(), e);
         }
     }
@@ -148,13 +148,13 @@ public class JenaResource extends ResourceImpl {
     }
 
     /**
-     * Resolves ID-type URI fragments by searching our resource's contents, otherwise 
+     * Resolves ID-type URI fragments by searching our resource's contents, otherwise
      * delegates to the default Xtext implementation.
      * {@inheritDoc}
      */
 	@Override
 	public EObject getEObject(String uriFragment) {
-		EObject object = super.getEObject(uriFragment); 
+		EObject object = super.getEObject(uriFragment);
 		if (object == null) {
 			List<EObject> contents = getContents();
 			object = getEObjectFromContents(contents, uriFragment);

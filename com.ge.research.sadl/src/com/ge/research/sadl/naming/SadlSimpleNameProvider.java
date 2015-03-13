@@ -39,7 +39,7 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 
 	public QualifiedName getFullyQualifiedName(EObject obj) {
 		String name = null;
-		
+
 		if (obj instanceof Model) {
 			Model m = (Model) obj;
 			if (m.getModelName()!=null && m.getModelName().getBaseUri()!=null) {
@@ -54,6 +54,11 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 			}
 		} else if (obj instanceof ResourceName) {
 			Model m = EcoreUtil2.getContainerOfType(obj, Model.class);
+			// ResourceNames derived by SadlLinkingService for variables do not have a Model container, but are directly in the root
+			// of the resource
+			if (m == null) {
+				return null;
+			}
 			if (m.getModelName()!=null && m.getModelName().getAlias()!=null) {
 				return QualifiedName.create(m.getModelName().getAlias(), ((ResourceName)obj).getName());
 			} else {

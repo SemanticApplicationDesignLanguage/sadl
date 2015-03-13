@@ -19,23 +19,36 @@ package com.ge.research.sadl.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.xtext.linking.lazy.LazyLinkingResource;
+import org.eclipse.xtext.util.CancelIndicator;
+
+import com.ge.research.sadl.sadl.ResourceName;
 
 /**
  * Appends an artificial whitespace when reading a file to work around the problem that
  * a dot at EOF is not detected as End Of Statement.
  */
 public class SadlResource extends LazyLinkingResource {
+	/**
+	 * A queue of ResourceNames which are created during proxy resolution.
+	 */
+	private List<ResourceName> derivedResourceNames = new ArrayList<>();
+	public void addDerivedResourceName (ResourceName rn) {
+		derivedResourceNames.add(rn);
+	}
+
 	class SadlInputStream extends InputStream {
 		private InputStream delegate;
 		private boolean eof;
-		
+
 		public SadlInputStream (InputStream delegate) {
 			this.delegate = delegate;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -51,12 +64,23 @@ public class SadlResource extends LazyLinkingResource {
 				return Character.valueOf(' ').charValue();
 			}
 		}
-		
+
 	}
 	@Override
 	protected void doLoad(InputStream inputStream, Map<?, ?> options)
 			throws IOException {
 		SadlInputStream is = new SadlInputStream(inputStream);
 		super.doLoad(is, options);
+	}
+
+	@Override
+	public void resolveLazyCrossReferences(CancelIndicator mon) {
+		super.resolveLazyCrossReferences(mon);
+		// the super call might have added virtual ResourceNames, which must be added
+		// to the resource contents now. This cannot happen before since this would
+		// cause a ConcurrentModificationException while iterating over the resource
+		// contents for proxy resolving.
+		getContents().addAll(derivedResourceNames);
+		derivedResourceNames.clear();
 	}
 }
