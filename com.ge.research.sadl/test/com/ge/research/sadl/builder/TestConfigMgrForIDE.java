@@ -59,16 +59,16 @@ public class TestConfigMgrForIDE {
 		List<ConceptName> names2 = confMgr.getNamedConceptsInModel(publicUri2, cType, scope);
 		assertNotNull(names2);
 		
-		Map<String, String> importsAndPrefixes1 = confMgr.getImports(publicUri1);
+		Map<String, String> importsAndPrefixes1 = confMgr.getImports(publicUri1, Scope.LOCALONLY);
 		assertNull(importsAndPrefixes1);
-		Map<String, String> importsAndPrefixes2 = confMgr.getImports(publicUri2);
+		Map<String, String> importsAndPrefixes2 = confMgr.getImports(publicUri2, Scope.LOCALONLY);
 		assertNotNull(importsAndPrefixes2);
 		assertTrue(importsAndPrefixes2.size() == 2);
 		Iterator<String> importUriItr = importsAndPrefixes2.keySet().iterator();
 		while (importUriItr.hasNext()) {
 			String importUri = importUriItr.next();
 			List<ConceptName> names = confMgr.getNamedConceptsInModel(importUri, cType, scope);
-			assertNotNull(names);			
+			assertNotNull(names);
 		}
 		
 		displayImportsAndNamedConcepts(confMgr, cType, scope, publicUri2);
@@ -83,7 +83,7 @@ public class TestConfigMgrForIDE {
 				System.out.println("     Defines concept: " + cnitr.next().toFQString());
 			}
 		}
-		Map<String, String> importsAndPrefixes = confMgr.getImports(publicUri);
+		Map<String, String> importsAndPrefixes = confMgr.getImports(publicUri, Scope.LOCALONLY);
 		if (importsAndPrefixes != null && importsAndPrefixes.size() > 0) {
 			Iterator<String> importUriItr = importsAndPrefixes.keySet().iterator();
 			while (importUriItr.hasNext()) {
