@@ -17,22 +17,15 @@
  ***********************************************************************/
 package com.ge.research.sadl.scoping;
 
-import java.util.Iterator;
-
 import javax.inject.Inject;
 
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.naming.SimpleNameProvider;
 import org.eclipse.xtext.resource.IEObjectDescription;
-import org.eclipse.xtext.resource.ISelectable;
 import org.eclipse.xtext.resource.impl.AliasedEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
-import org.eclipse.xtext.scoping.Scopes;
-import org.eclipse.xtext.scoping.impl.MultimapBasedSelectable;
 import org.eclipse.xtext.scoping.impl.SimpleLocalScopeProvider;
 import org.eclipse.xtext.scoping.impl.SimpleScope;
 
@@ -47,8 +40,6 @@ import com.google.common.collect.Iterables;
  * @author thoms
  */
 public class SadlLocalScopeProvider extends SimpleLocalScopeProvider {
-	@Inject
-	private SimpleNameProvider nameProvider;
 	@Override
 	protected IScope getGlobalScope(Resource context, EReference reference) {
 		IScope globalScope = super.getGlobalScope(context, reference);
@@ -70,22 +61,9 @@ public class SadlLocalScopeProvider extends SimpleLocalScopeProvider {
 		return new SimpleScope(globalScope, aliasedResourceNameDescriptions);
 	}
 
-	@Override
-	protected IQualifiedNameProvider getNameProvider() {
-		return nameProvider;
+	@Inject
+	public void setNameProvider(SimpleNameProvider nameProvider) {
+		super.setNameProvider(nameProvider);
 	}
 	
-	/**
-	 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=462079
-	 */
-	@Override
-	protected ISelectable getAllDescriptions(final Resource resource) {
-		Iterable<EObject> allContents = new Iterable<EObject>(){
-			public Iterator<EObject> iterator() {
-				return resource.getAllContents();
-			}
-		};
-		Iterable<IEObjectDescription> allDescriptions = Scopes.scopedElementsFor(allContents, getNameProvider());
-		return new MultimapBasedSelectable(allDescriptions);
-	}
 }
