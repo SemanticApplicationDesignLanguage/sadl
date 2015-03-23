@@ -260,6 +260,27 @@
 			type="owl">
 		</parser>
 	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="nt">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="n3">
+		</parser>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="rdf">
+		</parser>
+	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
         <resourceServiceProvider
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
