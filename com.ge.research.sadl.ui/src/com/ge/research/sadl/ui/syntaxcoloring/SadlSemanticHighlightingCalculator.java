@@ -30,6 +30,7 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.ISemanticHighlightingCalculato
 
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.sadl.ClassDeclaration;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
 import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.Model;
@@ -62,7 +63,7 @@ public class SadlSemanticHighlightingCalculator implements
 		
 		Model model = (Model) resource.getContents().get(0);
 		
-		// Highlighting for Import URI string
+		// Highlighting for URI strings
 		for (Import imp: model.getImports()) {
 			List<INode> nodesForUri = NodeModelUtils.findNodesForFeature(imp, SadlPackage.Literals.IMPORT__IMPORT_URI);
 			for (INode node: nodesForUri) {
@@ -99,8 +100,12 @@ public class SadlSemanticHighlightingCalculator implements
 		case SadlPackage.ADDL_CLASS_INFO: return SadlHighlightingConfiguration.OBJECT_PROPERTY_ID;
 		case SadlPackage.PROPERTY_DECLARATION: return SadlHighlightingConfiguration.DATA_PROPERTY_ID; // TODO: Distinguish DATA PROPERTY and OBJECT PROPERTY
 		case SadlPackage.INSTANCE_DECLARATION: return SadlHighlightingConfiguration.INSTANCE_ID;
+		case SadlPackage.TYPE_DECLARATION: return SadlHighlightingConfiguration.INSTANCE_ID;
 		case SadlPackage.CLASS_DECLARATION: return SadlHighlightingConfiguration.CLASS_ID;
 		case SadlPackage.NECESSARY_AND_SUFFICIENT: return SadlHighlightingConfiguration.CLASS_ID;
+		case SadlPackage.CONSTRUCT_EXPRESSION: return SadlHighlightingConfiguration.VARIABLE_ID;
+		case SadlPackage.ORDER_ELEMENT: return SadlHighlightingConfiguration.VARIABLE_ID;
+		case SadlPackage.VARIABLE_LIST: return SadlHighlightingConfiguration.VARIABLE_ID;
 
 		default: break;
 		}
@@ -108,6 +113,9 @@ public class SadlSemanticHighlightingCalculator implements
 		// not found by direct parent, now try other strategies
 		if (EcoreUtil2.getContainerOfType(rn.eContainer(), EnumeratedInstances.class)!=null) {
 			return SadlHighlightingConfiguration.INSTANCE_ID;
+		}
+		if (EcoreUtil2.getContainerOfType(rn.eContainer(), ClassDeclaration.class)!=null) {
+			return SadlHighlightingConfiguration.CLASS_ID;
 		}
 		
 		return SadlHighlightingConfiguration.DEFAULT_ID;
