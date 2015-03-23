@@ -10,7 +10,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -32,6 +31,8 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.ISemanticHighlightingCalculato
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
+import com.ge.research.sadl.sadl.Import;
+import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceName;
 import com.ge.research.sadl.sadl.SadlPackage;
@@ -59,13 +60,29 @@ public class SadlSemanticHighlightingCalculator implements
 			IHighlightedPositionAcceptor acceptor) {
 		if (resource==null || resource.getContents().isEmpty()) return;
 		
-		for (ResourceName rn: EcoreUtil2.getAllContentsOfType(resource.getContents().get(0), ResourceName.class)) {
+		Model model = (Model) resource.getContents().get(0);
+		
+		// Highlighting for Import URI string
+		for (Import imp: model.getImports()) {
+			List<INode> nodesForUri = NodeModelUtils.findNodesForFeature(imp, SadlPackage.Literals.IMPORT__IMPORT_URI);
+			for (INode node: nodesForUri) {
+				acceptor.addPosition(node.getOffset(), node.getLength(), SadlHighlightingConfiguration.URI_ID);
+			}
+		}
+		if (model.getModelName()!=null && model.getModelName().getBaseUri()!=null) {
+			for (INode node: NodeModelUtils.findNodesForFeature(model.getModelName(), SadlPackage.Literals.MODEL_NAME__BASE_URI)) {
+				acceptor.addPosition(node.getOffset(), node.getLength(), SadlHighlightingConfiguration.URI_ID);
+			}
+		}
+		
+		// Highlighting for ResourceNames:
+		for (ResourceName rn: EcoreUtil2.getAllContentsOfType(model, ResourceName.class)) {
 			ICompositeNode node = NodeModelUtils.findActualNodeFor(rn);
 			String highlightingId = getHighlightingId(rn);
 			acceptor.addPosition(node.getOffset(), node.getLength(), highlightingId);
 		}
 
-		for (ResourceByName rn: EcoreUtil2.getAllContentsOfType(resource.getContents().get(0), ResourceByName.class)) {
+		for (ResourceByName rn: EcoreUtil2.getAllContentsOfType(model, ResourceByName.class)) {
 			ICompositeNode node = NodeModelUtils.findActualNodeFor(rn);
 			String highlightingId = getHighlightingId(rn.getName());
 			acceptor.addPosition(node.getOffset(), node.getLength(), highlightingId);
