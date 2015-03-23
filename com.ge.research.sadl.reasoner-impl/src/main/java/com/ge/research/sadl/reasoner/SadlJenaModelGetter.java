@@ -18,13 +18,16 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.6 $ Last modified on   $Date: 2014/11/03 20:09:04 $
+ * $Revision: 1.7 $ Last modified on   $Date: 2015/01/09 21:56:17 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -34,6 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.utils.SadlUtils;
+import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
@@ -211,12 +216,13 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 	            	TDB.sync(ds);
 	            }
             }
+            loadUserDefinedDataTypes(uri, altUrl);
         }
 
         return m;
     }
     
-    /* (non-Javadoc)
+	/* (non-Javadoc)
 	 * @see com.ge.research.sadl.reasoner.ISadlJenaModelGetter#getOntModel(java.lang.String)
 	 */
     public OntModel getOntModel(String publicUri, String altUrl, String format) {
@@ -313,5 +319,44 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 	public void setFormat(String format) {
 		this.format = format;
 	}
+
+    private void loadUserDefinedDataTypes(String uri, String altUrl) {
+		String uddtFolder;
+		try {
+			uddtFolder = getModelXsdFolder(uri, altUrl);
+			if (uddtFolder != null) {
+				File uddtFolderFile = new File(uddtFolder);
+				if (uddtFolderFile.exists() && uddtFolderFile.isDirectory()) {
+					File[] xsdFiles = uddtFolderFile.listFiles();
+					for (int i = 0; i < xsdFiles.length; i++) {
+						FileReader fr = new FileReader(xsdFiles[i]);
+				        XSDDatatype.loadUserDefined(uri, fr, null, TypeMapper.getInstance());				
+					}
+				}
+			}
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private String getModelXsdFolder(String uri, String altUrl) throws MalformedURLException {
+		String uriModified = uri.substring(7);
+		SadlUtils su = new SadlUtils();
+		String fn = su.fileUrlToFileName(altUrl);
+		if (fn.endsWith(".TDB/")) {
+			// TODO need to handle TD B
+			fn = new File(fn).getParent();
+		}
+		File f = new File(fn);
+		if (f.exists()) {
+			return f.getParent() + File.separator + uriModified;			
+		}
+		return null;
+	}
+
 
 }

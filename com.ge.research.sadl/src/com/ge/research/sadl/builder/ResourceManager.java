@@ -37,6 +37,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -708,6 +709,35 @@ public class ResourceManager {
 		}
 		return list;
 	}
+    
+    public static IProject getProject(URI someFileInProject) {
+   		// Get absolute location of workspace.
+   		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+   		// IPath workspaceDirectory = workspace.getRoot().getLocation().makeAbsolute();
+   		// int wsSegCnt = workspaceDirectory.segmentCount();
+   		// Get location of project from file URI; it's one more segment than workspace.
+   		// someFileInProject = convertPlatformUriToAbsoluteUri(someFileInProject);
+   		// int prjUrlSegCnt = someFileInProject.segmentCount();
+   		// URI prjDir = someFileInProject.trimSegments(prjUrlSegCnt - (wsSegCnt + 1));
+   		// new code
+   		if (someFileInProject.isPlatform()) {
+	   		String prjName = someFileInProject.segment(1);
+	   		IProject prj = workspace.getRoot().getProject(prjName);
+	   		return prj;
+   		} else if (someFileInProject.isFile()) {
+   			String s = someFileInProject.toFileString();
+   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
+	   		String prjName = file.getFullPath().segment(0);
+	   		IProject prj = workspace.getRoot().getProject(prjName);
+	   		return prj;
+   		} else {
+   			String s = someFileInProject.toString();
+   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
+	   		String prjName = file.getFullPath().segment(0);
+	   		IProject prj = workspace.getRoot().getProject(prjName);
+	   		return prj;
+   		}
+    }
 
     /**
      * This method takes any actual file URI in the project as input and
@@ -717,34 +747,12 @@ public class ResourceManager {
     public static URI getProjectUri(URI someFileInProject) {
    		// Get absolute location of workspace.
     	try {
-	   		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-	   		// IPath workspaceDirectory = workspace.getRoot().getLocation().makeAbsolute();
-	   		// int wsSegCnt = workspaceDirectory.segmentCount();
-	   		// Get location of project from file URI; it's one more segment than workspace.
-	   		// someFileInProject = convertPlatformUriToAbsoluteUri(someFileInProject);
-	   		// int prjUrlSegCnt = someFileInProject.segmentCount();
-	   		// URI prjDir = someFileInProject.trimSegments(prjUrlSegCnt - (wsSegCnt + 1));
-	   		// new code
-	   		if (someFileInProject.isPlatform()) {
-		   		String prjName = someFileInProject.segment(1);
-		   		IProject prj = workspace.getRoot().getProject(prjName);
-		   		URI prjDir = URI.createFileURI(prj.getLocation().toString());
+    		IProject prj = getProject(someFileInProject);
+    		if (prj != null) {
+    			URI prjDir = URI.createFileURI(prj.getLocation().toString());
 		   		return prjDir;
-	   		} else if (someFileInProject.isFile()) {
-	   			String s = someFileInProject.toFileString();
-	   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
-		   		String prjName = file.getFullPath().segment(0);
-		   		IProject prj = workspace.getRoot().getProject(prjName);
-		   		URI prjDir = URI.createFileURI(prj.getLocation().toString());
-		   		return prjDir;
-	   		} else {
-	   			String s = someFileInProject.toString();
-	   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
-		   		String prjName = file.getFullPath().segment(0);
-		   		IProject prj = workspace.getRoot().getProject(prjName);
-		   		URI prjDir = URI.createFileURI(prj.getLocation().toString());
-		   		return prjDir;
-	   		}
+    		}
+    		throw new IllegalSelectorException();
     	}
     	catch (IllegalStateException e) {
     		// this is presumably a standalone (testing) situation--take a different approach

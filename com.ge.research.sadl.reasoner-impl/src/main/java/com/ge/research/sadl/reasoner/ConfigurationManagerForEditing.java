@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.14 $ Last modified on   $Date: 2014/11/03 20:09:04 $
+ * $Revision: 1.15 $ Last modified on   $Date: 2014/12/19 22:20:46 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;

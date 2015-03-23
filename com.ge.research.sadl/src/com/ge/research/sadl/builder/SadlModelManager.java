@@ -359,7 +359,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 
             IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
         	// Get a ModelManager instance associated with this thread and pass it the model Resource
-            getModel().init(configurationMgr, resource.getURI());
+            getModel().init(configurationMgr, this, resource);
             getModel().setDeepValidationOff(deepValidationOff);
             
 		} catch (ConfigurationException e) {

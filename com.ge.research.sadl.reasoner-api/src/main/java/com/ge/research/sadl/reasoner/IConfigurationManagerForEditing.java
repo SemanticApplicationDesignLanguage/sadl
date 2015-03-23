@@ -50,13 +50,15 @@ public interface IConfigurationManagerForEditing extends IConfigurationManager {
 	 * 
 	 * @param altUrl - the actual URL of the OWL file of the model
 	 * @param publicUri - the model name (uri) of the model
+	 * @param bKeepPrefix -- if true keep the old prefix even if other things change
+	 * @param source -- an identifier of what created the mapping, e.g., SADL
 	 * @return -- true if the mappings were changed else false
 	 * @throws ConfigurationException 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
 	 */
 	public abstract boolean addMapping(String altUrl, String publicUri,
-			String globalPrefix, String source) throws ConfigurationException, IOException,
+			String globalPrefix, boolean bKeepPrefix, String source) throws ConfigurationException, IOException,
 			URISyntaxException;
 
 	/**
@@ -65,13 +67,15 @@ public interface IConfigurationManagerForEditing extends IConfigurationManager {
 	 * 
 	 * @param altv - the actual URL of the OWL file of the model
 	 * @param pubv - the model name (uri) of the model
+	 * @param bKeepPrefix -- if true keep the old prefix even if other things change
+	 * @param source -- an identifier of what created the mapping, e.g., SADL
 	 * @return - true if a change was made else false if everything was as needed
 	 * @throws ConfigurationException 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
 	 */
 	public abstract boolean addMapping(Resource altv, Resource pubv,
-			Literal prefix, String source) throws ConfigurationException, IOException,
+			Literal prefix, boolean bKeepPrefix, String source) throws ConfigurationException, IOException,
 			URISyntaxException;
 
 	/**

@@ -86,14 +86,14 @@ public class UtilsForJena {
         Literal val = null;
         String errMsg = null;
         RDFDatatype rdftype = TypeMapper.getInstance().getSafeTypeByName(rnguri);
-//        if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
-//        		!rdftype.getURI().equals(XSD.date.getURI()) && 
-//        		!rdftype.getURI().equals(XSD.dateTime.getURI())) {
-//        	val = m.createTypedLiteral(v, rdftype);
-//        	if (val != null) {
-//        		return val;
-//        	}
-//        }
+        if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
+        		!rdftype.getURI().equals(XSD.date.getURI()) && 
+        		!rdftype.getURI().equals(XSD.dateTime.getURI())) {
+        	val = m.createTypedLiteral(v, rdftype);
+        	if (val != null) {
+        		return val;
+        	}
+        }
     	if (rnguri != null) {
 	        if (rnguri.contains("float")) {
 	        	if (v instanceof String) {

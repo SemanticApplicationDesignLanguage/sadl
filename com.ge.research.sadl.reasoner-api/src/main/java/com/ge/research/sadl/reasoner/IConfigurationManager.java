@@ -30,6 +30,7 @@ public interface IConfigurationManager {
 	public static final String ACUITY_DEFAULTS_OWL_FN = "defaults.owl";
 
 	public static final String ServicesConfigurationURI = "http://com.ge.research.sadl/sadlserver/Services";
+	public static final String ServicesConfigurationPrefix = "SadlServicesConfigurationConcepts";
 	public static final String ServicesConfigurationConcepts_FN = "SadlServicesConfigurationConcepts.owl";
 	public static final String ServicesConf_FN = "ServicesConfig.owl";
 	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
@@ -260,5 +261,13 @@ public interface IConfigurationManager {
 	 * @param modelGetter
 	 */
 	public abstract void setModelGetter(ISadlJenaModelGetter modelGetter);
+
+	/**
+	 * Call this method to get the translator associated with a particular reasoner class
+	 * @param reasonerClassName
+	 * @return
+	 * @throws ConfigurationException 
+	 */
+	public abstract ITranslator getTranslatorForReasoner(String reasonerClassName) throws ConfigurationException;
 
 }

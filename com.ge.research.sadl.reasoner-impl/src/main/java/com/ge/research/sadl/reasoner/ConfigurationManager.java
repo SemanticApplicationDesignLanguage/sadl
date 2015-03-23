@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.17 $ Last modified on   $Date: 2014/12/17 17:26:29 $
+ * $Revision: 1.18 $ Last modified on   $Date: 2015/02/02 22:30:10 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -318,6 +318,28 @@ public class ConfigurationManager implements IConfigurationManager {
 		return translator;
 	}
 
+	@Override
+	public ITranslator getTranslatorForReasoner(String reasonerName) throws ConfigurationException {
+		if (getConfigModel() != null) {
+			Resource subject = getConfigModel().getResource("http://com.ge.research.sadl.configuration#" + reasonerName);
+			if (subject != null) {
+				Property predicate = getConfigModel().getProperty("http://com.ge.research.sadl.configuration#translatorClassName");
+				if (predicate != null) {
+					StmtIterator sitr = getConfigModel().listStatements(subject, predicate, (RDFNode)null);
+					if (sitr.hasNext()) {
+						RDFNode rcls = sitr.next().getObject();
+						if (rcls instanceof Literal) {
+							String clsName = rcls.asLiteral().getString();
+							return getTranslatorInstanceByClass(clsName);
+						}
+					}
+				}
+			}
+			
+		}
+		return null;
+	}
+
 	public IReasoner getReasoner() throws ConfigurationException {
 		if (reasoner == null) {
 			initializeReasoner();
@@ -477,6 +499,11 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (translatorClassName == null) {
 			translatorClassName = DEFAULT_TRANSLATOR;
 		}
+		return getTranslatorInstanceByClass(translatorClassName);
+	}
+	
+	private ITranslator getTranslatorInstanceByClass(String translatorClassName) throws ConfigurationException {
+		ITranslator translatorClass = null;
 		try {
 			translatorClass = (ITranslator) getClassInstance(translatorClassName);
 			if (translatorClass == null) {
@@ -681,6 +708,11 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (readError != null) {
 			String err = readError;
 			readError = null;
+			if (importingModel.hasLoadedImport(publicImportUri)) {
+				// this must be removed or it will prevent correct loading from another project
+				importingModel.removeLoadedImport(publicImportUri);
+			}
+	   		this.getJenaDocumentMgr().setProcessImports(false);
 			throw new ConfigurationException(err);
 		}
    		this.getJenaDocumentMgr().setProcessImports(false);
@@ -1515,5 +1547,5 @@ public class ConfigurationManager implements IConfigurationManager {
 		}
 		return cloneReasonerInstance;
 	}
-
+	
 }
