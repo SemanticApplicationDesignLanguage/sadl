@@ -1,5 +1,5 @@
-bin/
+*/bin
 *._trace
-target/
-xtend-gen/*
-src-gen/*
+*/target
+*/xtend-gen/*
+*/src-gen/*
