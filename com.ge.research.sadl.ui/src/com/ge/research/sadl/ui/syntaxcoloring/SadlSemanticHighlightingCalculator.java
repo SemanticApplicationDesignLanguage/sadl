@@ -83,6 +83,7 @@ public class SadlSemanticHighlightingCalculator implements
 		case SadlPackage.PROPERTY_DECLARATION: return SadlHighlightingConfiguration.DATA_PROPERTY_ID; // TODO: Distinguish DATA PROPERTY and OBJECT PROPERTY
 		case SadlPackage.INSTANCE_DECLARATION: return SadlHighlightingConfiguration.INSTANCE_ID;
 		case SadlPackage.CLASS_DECLARATION: return SadlHighlightingConfiguration.CLASS_ID;
+		case SadlPackage.NECESSARY_AND_SUFFICIENT: return SadlHighlightingConfiguration.CLASS_ID;
 
 		default: break;
 		}
