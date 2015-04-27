@@ -39,6 +39,7 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -63,7 +64,7 @@ import com.google.inject.Inject;
 public class SadlProposalProvider extends AbstractSadlProposalProvider {
     
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
     
     private SadlGrammarAccess g;
     private IPreferenceStoreAccess preferencesAccess;
@@ -150,6 +151,7 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 				if ("importURI".equals(feature)) {
 			        List<ConceptName> names;
 					try {
+						SadlModelManager visitor = sadlModelManagerProvider.get(model.eResource().getURI());
 						names = visitor.getNamedConceptsOfType(ConceptType.MODELNAME, Scope.INCLUDEIMPORTS);
 				        if (names != null) {
 				        	Collection<ImportMapping> impmappings = visitor.getModelImportMappings();

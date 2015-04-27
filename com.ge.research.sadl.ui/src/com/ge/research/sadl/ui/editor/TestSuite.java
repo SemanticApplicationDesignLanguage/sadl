@@ -44,6 +44,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -62,7 +63,9 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
     private XtextResourceSet resourceSet;
     
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
+    
+    private SadlModelManager visitor = null;
     
     private int errorCnt = 0;		// keep track of errors for reporting
 
@@ -84,6 +87,7 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
 		final boolean validateBeforeTesting = service.getBoolean("com.ge.research.sadl.Sadl", "validateBeforeTest", false, null);
 		final boolean showReasonerTimingInformation = service.getBoolean("com.ge.research.sadl.Sadl", "showTimingInformation", false, null);
 
+		visitor = sadlModelManagerProvider.get(URI.createURI(testFilePath.makeAbsolute().toString()));
 		if (visitor == null) {
 			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to run test suite until a SADL model file has been opened to initialize system.\n");
 			return;

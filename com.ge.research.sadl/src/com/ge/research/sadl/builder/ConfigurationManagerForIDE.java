@@ -61,6 +61,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -143,7 +144,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	        	URI altUrl = ResourceManager.validateAndReturnOwlUrlOfSadlUri(URI.createFileURI(sadlfile.getAbsolutePath()));
 	        	String publicUri = ResourceManager.getModelNameFromSadlFile(sadlfile);
 	        	if (publicUri != null) {
-	        		if (addMapping(altUrl.toString(), publicUri, null, SADL)) {
+	        		if (addMapping(altUrl.toString(), publicUri, null, true, SADL)) {
 	        			bChange = true;
 	        		}
 	        	}
@@ -285,15 +286,15 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
     			Statement s = pendingDeletions.get(i);
     			if (s.getPredicate().getLocalName().equals("altURL")) {
     				String sadlFileName = ResourceManager.sadlFileNameOfOwlAltUrl(s.getObject().toString());
-    				File owlfile = new File(sadlUtils.fileUrlToFileName(s.getObject().toString()));
+    				File owlfile = new File(getSadlUtils().fileUrlToFileName(s.getObject().toString()));
     				String sadlfile = ResourceManager.findSadlFileInProject(owlfile.getParentFile().getParent(), sadlFileName);
     				if (sadlfile != null) {
     					String stmtFileName = owlfile.getName();
-    					String altvFileName = new File(sadlUtils.fileUrlToFileName(altv.toString())).getName();
+    					String altvFileName = new File(getSadlUtils().fileUrlToFileName(altv.toString())).getName();
     					if (stmtFileName != null && altvFileName != null && !stmtFileName.equals(altvFileName)) {
 	    					// duplicate model uri
 	    					throw new ConfigurationException("Model name '" + pubv.toString() + "' is used by more than one SADL model: " 
-	    							+ owlfile.getName() + " and " + new File(sadlUtils.fileUrlToFileName(altv.toString())).getName());
+	    							+ owlfile.getName() + " and " + new File(getSadlUtils().fileUrlToFileName(altv.toString())).getName());
     					}
     				}
     			}
@@ -409,12 +410,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		// get a list of all SADL files in project
 		try {
 			IProject[] referencedProjects = project.getReferencedProjects();
-			for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
-				System.out.println("Depends on project " + referencedProjects[i].getName());
-				System.out.println("   project: " + referencedProjects[i].getWorkspace());
-				System.out.println("   fullpath: " + referencedProjects[i].getFullPath());
-				System.out.println("   location: " + referencedProjects[i].getLocation());
-				System.out.println("   locationuri: " + referencedProjects[i].getLocationURI());
+			if (referencedProjects != null && referencedProjects.length > 0) {
+				System.out.println("Project '" + project.getName() + "' depends on:");
+				for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
+					System.out.println("  Project " + referencedProjects[i].getName());
+					System.out.println("    at location: " + referencedProjects[i].getLocation());
+				}
 			}
 		} catch (CoreException e2) {
 			// TODO Auto-generated catch block
@@ -503,9 +504,9 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		if (servicesConfigConcepts != null) {
 			String gp = "SadlServicesConfigurationConcepts";
 			try {
-				addMapping(sadlUtils.fileNameToFileUrl(servicesConfigConcepts),
-						ResourceManager.ServicesConfigurationURI,
-						gp, SADL);
+				addMapping(getSadlUtils().fileNameToFileUrl(servicesConfigConcepts),
+						IConfigurationManager.ServicesConfigurationURI,
+						IConfigurationManager.ServicesConfigurationPrefix, false, SADL);
 				addJenaMapping(
 						ResourceManager.ServicesConfigurationURI,
 						sadlUtils.fileNameToFileUrl(servicesConfigConcepts));
@@ -688,8 +689,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 				                		int cnt = 0;
 				                		List<Statement> extras = null;
 				                		while (sitr2.hasNext()) {
+			                				Statement badStmt = sitr2.nextStatement();
 				                			if (cnt > 0) {
-				                				Statement badStmt = sitr2.nextStatement();
 				                				Resource badSubject = badStmt.getSubject();
 				                				if (extras == null) {
 				                					extras = new ArrayList<Statement>();
@@ -772,6 +773,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		//TODO why does this get a POST_CHANGE and not a PRE_CLOSE? Is this the best listener to use?
     	if(event.getType() == IResourceChangeEvent.PRE_CLOSE ||
     			event.getType() == IResourceChangeEvent.POST_CHANGE){
+    		//event.getResource() instanceof IProject
     		if (isConfigChanged()) {
     			saveConfiguration();
     		}
@@ -804,7 +806,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	public void setDefaultsAltUrlMapping() throws IOException, URISyntaxException, ConfigurationException {
 		if (getModelFolderPath() != null) {
 			String defaultsActual = getModelFolderPath().getAbsolutePath() + File.separator + ACUITY_DEFAULTS_OWL_FN;
-			addMapping(sadlUtils.fileNameToFileUrl(defaultsActual), ACUITY_DEFAULTS_URI, DEFAULTS_PREFIX, SADL);
+			addMapping(getSadlUtils().fileNameToFileUrl(defaultsActual), ACUITY_DEFAULTS_URI, DEFAULTS_PREFIX, false, SADL);
 			File defact = new File(defaultsActual);
 			if (!defact.exists()) {
 				if (!ResourceManager.copyDefaultsFileToOwlModelsDirectory(defaultsActual)) {
@@ -826,7 +828,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	public void setServicesConfigurationAltUrlMapping() throws IOException, URISyntaxException, ConfigurationException {
 		if (getModelFolderPath() != null) {
 			String servicesConfigurationActual = getModelFolderPath().getAbsolutePath() + File.separator + ServicesConfigurationConcepts_FN;
-			addMapping(sadlUtils.fileNameToFileUrl(servicesConfigurationActual), ServicesConfigurationURI, null, SADL);
+			addMapping(getSadlUtils().fileNameToFileUrl(servicesConfigurationActual), ServicesConfigurationURI, ServicesConfigurationPrefix, false, SADL);
 			File defact = new File(servicesConfigurationActual);
 			if (!defact.exists()) {
 				if (!ResourceManager.copyServicesConfigurationFileToOwlModelsDirectory(servicesConfigurationActual)) {
@@ -871,7 +873,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	}
 
 	@Override
-	protected Object getClassInstance(String reasonerClassName)
+	public Object getClassInstance(String reasonerClassName)
 			throws InstantiationException, IllegalAccessException,
 			ClassNotFoundException {
 		return Platform.getBundle("com.ge.research.sadl").loadClass(reasonerClassName).newInstance();
@@ -896,11 +898,21 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	 */
 	public static List<IReasoner> getAvailableReasoners() {
 		List<IReasoner> reasoners = new ArrayList<IReasoner>();
-		ServiceLoader<IReasoner> serviceLoader = getReasonersFromServiceLoader(IReasoner.class);
-		if( serviceLoader != null ){
-			for( Iterator<IReasoner> itr = serviceLoader.iterator(); itr.hasNext() ; ){
-				reasoners.add(itr.next());
+		try {
+			ServiceLoader<IReasoner> serviceLoader = getReasonersFromServiceLoader(IReasoner.class);
+			if( serviceLoader != null ){
+				for( Iterator<IReasoner> itr = serviceLoader.iterator(); itr.hasNext() ; ){
+					try {
+						reasoners.add(itr.next());
+					}
+					catch (Throwable t) {
+						System.err.println("Error getting available reasoners: " + t.getMessage());
+					}
+				}
 			}
+		}
+		catch (Throwable t) {
+			System.err.println("Error getting available reasoners: " + t.getMessage());
 		}
 		return reasoners;
 	}
@@ -911,11 +923,21 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	 */
 	public static List<ITranslator> getAvailableTranslators() {
 		List<ITranslator> translators = new ArrayList<ITranslator>();
-		ServiceLoader<ITranslator> serviceLoader = getTranslatorsFromServiceLoader(ITranslator.class);
-		if( serviceLoader != null ){
-			for( Iterator<ITranslator> itr = serviceLoader.iterator(); itr.hasNext() ; ){
-				translators.add(itr.next());
+		try {
+			ServiceLoader<ITranslator> serviceLoader = getTranslatorsFromServiceLoader(ITranslator.class);
+			if( serviceLoader != null ){
+				for( Iterator<ITranslator> itr = serviceLoader.iterator(); itr.hasNext() ; ){
+					try {
+						translators.add(itr.next());
+					}
+					catch (Throwable t) {
+						System.err.println("Error getting available translators: " + t.getMessage());
+					}
+				}
 			}
+		}
+		catch (Throwable t) {
+			System.err.println("Error getting available translators: " + t.getMessage());
 		}
 		return translators;
 	}
@@ -942,17 +964,34 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		
 	}
 
+	public SadlUtils getSadlUtils() {
+		if (sadlUtils   == null) {
+			sadlUtils = new SadlUtils();
+		}
+		return sadlUtils;
+	}
+
 	@Override
 	public boolean isSadlDerived(String publicUri) throws ConfigurationException, MalformedURLException {
+		if (publicUri.endsWith("rdf-syntax-ns#") || 
+				publicUri.endsWith("rdf-schema#")) {
+			return false;
+		}
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (altUrl !=  null && !altUrl.equals(publicUri)) {
-			String altFN = sadlUtils.fileUrlToFileName(altUrl);
+			String altFN = getSadlUtils().fileUrlToFileName(altUrl);
 			return isOwlFileCreatedBySadl(new File(altFN));
+		}
+		else {
+			String auri = getPublicUriFromActualUrl(publicUri);
+			if (auri != null) {
+				return isSadlDerived(auri);
+			}
 		}
 		return false;
 	}
 
-	@Override
+
 	public Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException {
 		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
@@ -990,7 +1029,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		return null;
 	}
 
-	protected OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException {
+
+	public OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException {
 		OntModel theModel = null;
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (repoType == null) {

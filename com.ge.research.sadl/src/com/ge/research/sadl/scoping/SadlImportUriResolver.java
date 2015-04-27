@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.google.inject.Inject;
 
 /**
@@ -45,7 +46,7 @@ public class SadlImportUriResolver extends ImportUriResolver {
     private static final Logger logger = LoggerFactory.getLogger(ImportUriResolver.class);
 
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
 	
     /**
      * When we resolve an import URI, transform the URI to the absolute
@@ -96,6 +97,7 @@ public class SadlImportUriResolver extends ImportUriResolver {
             else {
                 // Look up the public URI in the policy file and get the OWL URI.
             	try {
+            		SadlModelManager visitor = sadlModelManagerProvider.get(resourceURI);
 					owlUri = visitor.getAltUrl(importUri, resourceURI);
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block

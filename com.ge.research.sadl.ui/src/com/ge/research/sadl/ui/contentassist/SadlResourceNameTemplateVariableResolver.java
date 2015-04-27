@@ -39,6 +39,7 @@ import org.eclipse.xtext.ui.editor.templates.AbstractTemplateVariableResolver;
 import org.eclipse.xtext.ui.editor.templates.XtextTemplateContext;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.builder.ModelManager.ImportListType;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
@@ -57,7 +58,7 @@ public class SadlResourceNameTemplateVariableResolver extends
         AbstractTemplateVariableResolver {
 
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
     
     @Inject
     private SadlProposalProvider proposalProvider;
@@ -81,7 +82,8 @@ public class SadlResourceNameTemplateVariableResolver extends
     @Override
     public List<String> resolveValues(TemplateVariable variable,
             XtextTemplateContext xtextTemplateContext) {
-
+    	
+		SadlModelManager visitor = sadlModelManagerProvider.get(null);
 		String conceptualType = (String) variable.getVariableType()
 				.getParams().iterator().next();
 		if (conceptualType.equals("VERSION")) {

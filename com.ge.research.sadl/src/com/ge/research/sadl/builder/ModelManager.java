@@ -48,7 +48,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,6 +112,7 @@ import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.ge.research.sadl.utils.UtilsForJena;
 import com.ge.research.sadl.visualize.GraphGenerator;
 import com.ge.research.sadl.visualize.GraphGenerator.Orientation;
+import com.google.inject.Inject;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -199,7 +199,6 @@ public class ModelManager {
 	private static final String XSD_NS = "http://www.w3.org/2001/XMLSchema#";
 
 	private org.eclipse.emf.ecore.resource.Resource resource = null;
-	private SadlModelManager sadlModelMgr = null;
 
 	private String owlModelsFolderPath = null;
 
@@ -221,6 +220,9 @@ public class ModelManager {
 	private SadlUtils sadlUtils = new SadlUtils();
 //    private final Lock lock = new ReentrantLock();
 	
+	@Inject
+	private SadlModelManagerProvider sadlModelManagerProvider;
+
 	public class ValidationStatement {
 		private Object modelEObject;
 		private OntResource subject;
@@ -339,8 +341,8 @@ public class ModelManager {
 	 * 
 	 * @param resourceURI -- the Eclipse Resource URI--an actual URL, not a public URI
 	 */
-	public void init(IConfigurationManagerForIDE configMgr, SadlModelManager sadlModelMgr, org.eclipse.emf.ecore.resource.Resource resource) {
-		this.sadlModelMgr  = sadlModelMgr;
+	public void init(IConfigurationManagerForIDE configMgr, SadlModelManagerProvider _sadlModelManagerProvider, org.eclipse.emf.ecore.resource.Resource resource) {
+		sadlModelManagerProvider = _sadlModelManagerProvider;
 		this.resource = resource;
 		URI resourceURI = resource.getURI();
 		try {
@@ -753,7 +755,7 @@ public class ModelManager {
 							String gp = "SadlServicesConfigurationConcepts";
 							getConfigurationMgr().addMapping(actualUrl,
 									ResourceManager.ServicesConfigurationURI,
-									gp, IConfigurationManager.SADL);
+									gp, false, IConfigurationManager.SADL);
 							getConfigurationMgr().addJenaMapping(
 									ResourceManager.ServicesConfigurationURI,
 									actualUrl);
@@ -823,42 +825,49 @@ public class ModelManager {
 			
 			List<ImportMapping> impMappings = null;
 			try {
-				impMappings = getConfigurationMgr().loadImportedModel(getJenaModel().getOntology(modelName), getJenaModel(),
+				IConfigurationManagerForIDE confMgr = getConfigurationMgr();
+				if (!confMgr.containsMappingForURI(publicUri)) {
+					confMgr = ResourceManager.findConfigurationManagerInOtherProject(sadlModelManagerProvider, 
+							getModelActualUrl(), publicUri);
+					actualUrl = confMgr.getAltUrlFromPublicUri(publicUri);
+				}
+				impMappings = confMgr.loadImportedModel(getJenaModel().getOntology(modelName), getJenaModel(),
 					publicUri, actualUrl);
 			}
 			catch (Exception e) {
 				// This load failed--perhaps the import is of a model defined in another Eclipse project on which this depends;
 				// 	the SadlGlobalScopeProvider knows about those inter-project dependencies
-				if (e.getMessage() != null && (e.getMessage().contains("org.apache.http.conn.HttpHostConnectException") ||
-						e.getMessage().contains("org.apache.http.client.ClientProtocolException"))) {
-					IProject prj = ResourceManager.getProject(resource.getURI());
-					try {
-						IProject[] referencedProjects = prj.getReferencedProjects();
-						for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
-							IProject refedPrg = referencedProjects[i];
-							IFile modelFolder = refedPrg.getFile(ResourceManager.OWLDIR);
-							IConfigurationManagerForIDE otherProjectConfigMgr = sadlModelMgr.getConfigurationMgr(modelFolder.getLocation().toOSString());
-							actualUrl = otherProjectConfigMgr.getAltUrlFromPublicUri(publicUri);
-							impMappings = otherProjectConfigMgr.loadImportedModel(getJenaModel().getOntology(modelName), getJenaModel(),
-										publicUri, actualUrl);
-							if (impMappings != null && !impMappings.isEmpty()) {
-								break;
-							}
-						}
-					} catch (CoreException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (URISyntaxException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+//				if (e.getMessage() != null && (e.getMessage().contains("org.apache.http.conn.HttpHostConnectException") ||
+//						e.getMessage().contains("org.apache.http.client.ClientProtocolException"))) {
+//					IProject prj = ResourceManager.getProject(resource.getURI());
+//					try {
+//						IProject[] referencedProjects = prj.getReferencedProjects();
+//						for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
+//							IProject refedPrg = referencedProjects[i];
+//							IFile modelFolder = refedPrg.getFile(ResourceManager.OWLDIR);
+//							SadlModelManager sadlModelMgr = sadlModelManagerProvider.get(URI.createURI(modelFolder.getLocationURI().toString()));
+//							IConfigurationManagerForIDE otherProjectConfigMgr = sadlModelMgr.getConfigurationMgr(modelFolder.getLocation().toOSString());
+//							actualUrl = otherProjectConfigMgr.getAltUrlFromPublicUri(publicUri);
+//							impMappings = otherProjectConfigMgr.loadImportedModel(getJenaModel().getOntology(modelName), getJenaModel(),
+//										publicUri, actualUrl);
+//							if (impMappings != null && !impMappings.isEmpty()) {
+//								break;
+//							}
+//						}
+//					} catch (CoreException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					} catch (URISyntaxException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					} catch (IOException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
 					if (impMappings == null || impMappings.isEmpty()) {
 						addError(0, "Failed to find imported model (" + actualUrl + "); is it in another project? (" + e.getMessage() + ")");	
 					}
-				}
+//				}
 			}
 			logger.debug("Adding import '" + publicUri + "' to model: found " + (impMappings == null ? 0 : impMappings.size()) + " imports to add to mappings.");
 			for (int i = 0; impMappings != null && i < impMappings.size(); i++) {
@@ -4547,7 +4556,7 @@ public class ModelManager {
 				getConfigurationMgr()
 						.addMapping(
 								sadlUtils.fileNameToFileUrl(fullyQualifiedOwlFilename),
-								modelName, globalPrefix, IConfigurationManager.SADL);
+								modelName, globalPrefix, false, IConfigurationManager.SADL);
 			} catch (Exception e) {
 				return addError(errors, new ModelError(
 						"Failed to save mapping for model file '" + owlFile

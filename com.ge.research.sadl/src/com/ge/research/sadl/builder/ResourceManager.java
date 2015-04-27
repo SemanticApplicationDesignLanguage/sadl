@@ -96,7 +96,8 @@ public class ResourceManager {
 	public static final String ServicesConf_FN = "ServicesConfig.owl";
 	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
 
-
+	public static final String PLATFORM_RESOURCE_MODELS_RDF_SCHEMA_RDF = "platform:/resource/TestSadlIde/OwlModels/rdf-schema.rdf";
+	public static final String PLATFORM_RESOURCE_MODELS_RDF_SYNTAX_NS_RDF = "platform:/resource/TestSadlIde/OwlModels/rdf-syntax-ns.rdf";
 
     /**
      * Returns the OWL model file for a given SADL file.
@@ -886,12 +887,17 @@ public class ResourceManager {
         if (target.exists() && !bOverwriteOK) {
             throw new IOException("File '" + targetFN + "' already exists and overwrite not authorized.");
         }
-        File source = getAbsoluteBundlePath("Models", target.getName());
+        File source = getBundleModelFile(target.getName());
         if (source != null) {
             copyFile(source, target);
             return true;
         }
         throw new IOException("Unable to find model file '" + target.getName() + "' in bundle.");
+    }
+    
+    public static File getBundleModelFile(String bundleFileName) throws IOException, URISyntaxException {
+        File source = getAbsoluteBundlePath("Models", bundleFileName);
+        return source;
     }
 
     /**
@@ -1247,5 +1253,42 @@ public class ResourceManager {
 			}
 		}
 		return tmpdir;
+    }
+    
+    /**
+     * Method to find a ConfigurationManager with a mapping for a URI in another project (upon which this project depends)
+     * @param sadlModelManagerProvider
+     * @param thisProjectURI
+     * @param otherProjectURI
+     * @return
+     */
+    public static IConfigurationManagerForIDE findConfigurationManagerInOtherProject(SadlModelManagerProvider sadlModelManagerProvider, 
+    		URI thisProjectURI, String otherProjectURI) {
+		IProject prj = ResourceManager.getProject(thisProjectURI);
+		try {
+			IProject[] referencedProjects = prj.getReferencedProjects();
+			for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
+				IProject refedPrg = referencedProjects[i];
+				IFile modelFolder = refedPrg.getFile(ResourceManager.OWLDIR);
+				SadlModelManager sadlModelMgr = sadlModelManagerProvider.get(URI.createURI(modelFolder.getLocationURI().toString()));
+				IConfigurationManagerForIDE otherProjectConfigMgr = sadlModelMgr.getConfigurationMgr(modelFolder.getLocation().toOSString());
+				if (otherProjectConfigMgr.containsMappingForURI(otherProjectURI)) {
+					return otherProjectConfigMgr;
+				}
+			}
+		} catch (CoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
     }
 }

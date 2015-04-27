@@ -20,6 +20,7 @@ package com.ge.research.sadl.jena;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +31,11 @@ import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.sadl.ClassDeclaration;
@@ -50,7 +54,7 @@ public class JenaResource extends ResourceImpl {
 	private static final Logger logger = LoggerFactory.getLogger(JenaResource.class);
 
 	@Inject
-	private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
 
 	/**
 	 * Loads SADL resources using Xtext but OWL and RDF resources using
@@ -65,9 +69,38 @@ public class JenaResource extends ResourceImpl {
 		// it isn't an OWL file generated from a SADL file (which should already have
 		// its names exported).
 		try {
+			SadlModelManager visitor;
 			URI thisUri = getURI();
-			visitor.init(this);
 			Resource context = this.getResourceSet().getResource(thisUri, false);
+			if (thisUri.toString().endsWith("configuration.rdf") || thisUri.toString().endsWith("ont-policy.rdf")) {
+				return;
+			}
+			else if (thisUri.toString().equals("platform:/resource/TestSadlIde/OwlModels/rdf-syntax-ns.rdf") ||
+					thisUri.toString().equals("platform:/resource/TestSadlIde/OwlModels/rdf-schema.rdf")) {
+				thisUri = ResourceManager.convertPlatformUriToAbsoluteUri(thisUri);
+				visitor = sadlModelManagerProvider.getAny();
+				if (visitor == null) {
+					visitor = sadlModelManagerProvider.get(thisUri);
+				}
+				if (thisUri.toString().endsWith("rdf-syntax-ns.rdf")) {
+					String bundleUrl = ResourceManager.getBundleModelFile("rdf-syntax-ns.rdf").getAbsolutePath();
+					thisUri = URI.createURI(bundleUrl);
+				}
+				else {
+					String bundleUrl = ResourceManager.getBundleModelFile("rdf-schema.rdf").getAbsolutePath();
+					thisUri = URI.createURI(bundleUrl);
+				}
+			}
+			else {
+				visitor = sadlModelManagerProvider.get(thisUri);
+				// TODO if sadl-derived, return without creating names.
+				String owlModelsFolder = ResourceManager.getOwlModelsFolder(thisUri);
+				URI absUri = ResourceManager.convertPlatformUriToAbsoluteUri(context.getURI());
+				if (visitor.getConfigurationMgr(owlModelsFolder).isSadlDerived(absUri.toString())) {	
+					return;
+				}				
+			}
+			visitor.init(this);	
 			List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri, Scope.LOCALONLY);
 			if (names == null || names.isEmpty()) {
 				return;
@@ -76,6 +109,18 @@ public class JenaResource extends ResourceImpl {
 			// add ModelName to the Model, set alias=prefix
 			Model model = SadlFactory.eINSTANCE.createModel();
 			ModelName modelName = SadlFactory.eINSTANCE.createModelName();
+			String prefix = names.get(0).getPrefix();
+			if (prefix == null) {
+				try {
+					prefix = visitor.getConfigurationMgr(thisUri).getGlobalPrefix(names.get(0).getNamespace());
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			modelName.setAlias(names.get(0).getPrefix());
 			modelName.setBaseUri(URI.createURI(names.get(0).getUri()).trimFragment().toString());
 			model.setModelName(modelName);
@@ -138,6 +183,12 @@ public class JenaResource extends ResourceImpl {
 		catch (InvalidNameException e) {
 			logger.error("Invalid name", e);
 			throw new IOException("Unable to resolve name: " + e.getMessage(), e);
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 

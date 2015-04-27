@@ -1981,14 +1981,14 @@ public class CsvImporter {
 		try {
 			IConfigurationManager cmgr = getConfigMgr();
 			if (cmgr instanceof ConfigurationManagerForEditing) {
-				((ConfigurationManagerForEditing)cmgr).addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, CSV_IMPORTER);
+				((ConfigurationManagerForEditing)cmgr).addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, true, CSV_IMPORTER);
 				((ConfigurationManagerForEditing)cmgr).saveOntPolicyFile();
 			}
 			else {
 				String currentMapping = getConfigMgr().getAltUrlFromPublicUri(importModelNS);
 				if ( currentMapping == null || !currentMapping.equals(actualUrl)) {
 					ConfigurationManagerForEditing cfmfe = new ConfigurationManagerForEditing(modelFolderName, IConfigurationManager.JENA_TDB);
-					cfmfe.addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, CSV_IMPORTER);
+					cfmfe.addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, true, CSV_IMPORTER);
 					cfmfe.saveOntPolicyFile();
 				}
 			}

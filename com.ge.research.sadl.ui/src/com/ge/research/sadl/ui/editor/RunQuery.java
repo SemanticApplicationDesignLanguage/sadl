@@ -66,6 +66,7 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.util.StringInputStream;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -92,7 +93,9 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
     private SadlGrammarAccess grammar;
    
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
+    
+    private SadlModelManager visitor = null;
     
     /**
      * Class to capture the user's input in the dialog
@@ -144,6 +147,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 		}
 		
 		XtextResourceSet resourceSet = new XtextResourceSet();
+		visitor = sadlModelManagerProvider.get(resourceSet.getResources().get(0).getURI());
 		prepareModel(visitor, testFilePath, resourceSet);
 		final String modelName = visitor.getModelName();
 		

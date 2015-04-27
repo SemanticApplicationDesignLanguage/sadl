@@ -18,6 +18,8 @@
 
 package com.ge.research.sadl.builder;
 
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+
 /**
  * Class to capture errors encountered in translating Queries/Rules/Tests
  * to intermediate representation.
@@ -28,6 +30,7 @@ package com.ge.research.sadl.builder;
 public class IFTranslationError extends Exception {
 	private static final long serialVersionUID = 1L;
 	private Object errorLocation;
+	private ErrorType errorType = ErrorType.ERROR;	// the default
 	
 	public IFTranslationError(String msg) {
 		super(msg);
@@ -37,6 +40,13 @@ public class IFTranslationError extends Exception {
 		super(msg);
 		setErrorLocation(location);
 	}
+	
+	public IFTranslationError(String msg, Object location, ErrorType errType) {
+		super(msg);
+		setErrorLocation(location);
+		setErrorType(errType);
+	}
+	
 
 	private void setErrorLocation(Object errorLocation) {
 		this.errorLocation = errorLocation;
@@ -44,5 +54,13 @@ public class IFTranslationError extends Exception {
 
 	public Object getErrorLocation() {
 		return errorLocation;
+	}
+
+	public ErrorType getErrorType() {
+		return errorType;
+	}
+
+	private void setErrorType(ErrorType errorType) {
+		this.errorType = errorType;
 	}
 }

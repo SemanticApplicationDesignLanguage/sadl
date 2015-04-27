@@ -39,7 +39,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.builder.IXtextBuilderParticipant;
-import org.eclipse.xtext.builder.IXtextBuilderParticipant.IBuildContext;
 import org.eclipse.xtext.resource.IResourceDescription.Delta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,7 @@ import com.google.inject.Inject;
 public class SadlBuilder implements IXtextBuilderParticipant {
 	private static final Logger logger = LoggerFactory.getLogger(SadlBuilder.class);
 
-    private final SadlModelManager visitor;
+    private SadlModelManager visitor;
     
     private int totalErrors = 0;
     private int totalWarnings = 0;
@@ -59,10 +58,17 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     
     private boolean showTimingInformation = false;
 
-    @Inject
-    public SadlBuilder(SadlModelManager visitor) {
-        this.visitor = visitor;
-    }
+	@Inject
+	private SadlModelManagerProvider sadlModelManagerProvider;
+
+//    @Inject
+//    public SadlBuilder(SadlModelManager visitor) {
+//        this.visitor = visitor;
+//    }
+    
+   public SadlBuilder() {
+	   
+   }
 
     /**
      * Allows us to perform additional steps in the build process such as 
@@ -99,7 +105,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     	IConfigurationManagerForIDE configMgr = null;
 		String modelFolder = ResourceManager.convertProjectRelativePathToAbsolutePath(folder.getFullPath().toPortableString());
        	try {
-       		configMgr = visitor.getConfigurationMgr(modelFolder);
+       		configMgr = getVisitor(URI.createURI(modelFolder)).getConfigurationMgr(modelFolder);
     	}
     	catch (Exception e) {
     		logger.error("Exception while getting a ConfigurationManagerForIDE: " + e.getMessage());
@@ -119,7 +125,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     	            URI sadlFile = resource.getURI();
     	            String fext = sadlFile.fileExtension();
     	            if (ResourceManager.SADLEXT.equals(fext)) {
-    	            	visitor.deleteMarkers(resource, true);
+    	            	getVisitor(resource.getURI()).deleteMarkers(resource, true);
     	            }
     	        }
         	}
@@ -179,7 +185,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 		    				String impUri = ((Import) eObject).getImportURI();
 		    				if (impUri.startsWith("http:")){
 		    					try {
-									impUri = visitor.getAltUrl(impUri, resource.getURI());
+									impUri = getVisitor(resource.getURI()).getAltUrl(impUri, resource.getURI());
 								} catch (MalformedURLException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
@@ -286,19 +292,19 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        URI sadlFile = resource.getURI();
 	        String fext = sadlFile.fileExtension();
 	        if (ResourceManager.SADLEXT.equals(fext)) {
-	        	synchronized(visitor) {
+	        	synchronized(getVisitor(resource.getURI())) {
 		        	try {
 		        		logger.debug("Ready to build '" + resource.getURI().toString() + "': calling SMM.processModel with save true.");
 		        		long t1 = System.currentTimeMillis();
-		        		visitor.processModel(resource, true, false, progress);
-		        		thisModErrCnt = visitor.errors(true);
-		        		thisModErrCnt += visitor.countErrorMarkers(resource);
-		        		thisModErrCnt += visitor.getNumTranslationErrors();
+		        		getVisitor(resource.getURI()).processModel(resource, true, false, progress);
+		        		thisModErrCnt = getVisitor(resource.getURI()).errors(true);
+		        		thisModErrCnt += getVisitor(resource.getURI()).countErrorMarkers(resource);
+		        		thisModErrCnt += getVisitor(resource.getURI()).getNumTranslationErrors();
 		        		if (thisModErrCnt > 0) {
 		        			modsWithErrors++;
 		        		}
 		        		totalErrors += thisModErrCnt;
-		        		thisModWarnCnt = visitor.warnings();
+		        		thisModWarnCnt = getVisitor(resource.getURI()).warnings();
 		        		totalWarnings += thisModWarnCnt;
 		        		if (showTimingInformation) {
 		        			long t2 = System.currentTimeMillis();
@@ -318,7 +324,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 			    				System.out.println(msg);
 			    			}
 		        		}
-		        		visitor.removeResourceModel(resource);
+		        		getVisitor(resource.getURI()).removeResourceModel(resource);
 		        	}
 		        	catch (Throwable t) {
 		        		String msg = "Failed to build model for '" + sadlFile.lastSegment() + "': " + t.getLocalizedMessage();
@@ -351,6 +357,17 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 			}
 		}
 		return null;
+	}
+
+	private SadlModelManager getVisitor(URI uri) {
+		if (visitor == null) {
+			setVisitor(sadlModelManagerProvider.get(uri));
+		}
+		return visitor;
+	}
+
+	private void setVisitor(SadlModelManager visitor) {
+		this.visitor = visitor;
 	}
     
 }

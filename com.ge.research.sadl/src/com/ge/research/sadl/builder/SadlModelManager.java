@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,15 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -222,18 +218,21 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 //    static ThreadLocal<ModelInfo> mData = new ThreadLocal<ModelInfo>();
     private Resource currentResource = null;
     
+    private SadlModelManagerProvider sadlModelManagerProvider = null;	// every SadlModelManager know how to find others for projects on which this depends
+    
     private Hashtable<URI, ModelInfo> modelMgrs = new Hashtable<URI, ModelInfo>();
 
 	private int translationErrors = 0;
     
-	@Inject
-	private ConfigurationManagerForIDE.Provider configurationManagerProvider;
-	
     /**
      * Constructs the Ecore model visitor.
      */
-    public SadlModelManager() {
-//    	OntDocumentManager.getInstance().setCacheModels(false);
+	public SadlModelManager() {
+		
+	}
+	
+    public SadlModelManager(SadlModelManagerProvider sMMP) {
+    	setSadlModelManagerProvider(sMMP);
     }
     
     public synchronized boolean processModel(Resource resource, boolean persistModel, boolean editorOpen, SubMonitor progress) throws CoreException {
@@ -359,7 +358,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 
             IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
         	// Get a ModelManager instance associated with this thread and pass it the model Resource
-            getModel().init(configurationMgr, this, resource);
+            getModel().init(configurationMgr, getSadlModelManagerProvider(), resource);
             getModel().setDeepValidationOff(deepValidationOff);
             
 		} catch (ConfigurationException e) {
@@ -506,12 +505,21 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	   			IPath testpath = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(uri.toPlatformString(false))).getLocation();
 	   			uri = URI.createFileURI(testpath.toOSString());
 	   		}
-	   		IConfigurationManagerForIDE cmgr = getConfigurationMgr(uri);
-			if (cmgr != null) {
-				publicUri = cmgr.getPublicUriFromActualUrl(uri.toString());
+	   		IConfigurationManagerForIDE cmgr = null;
+			if (uri.toString().endsWith("rdf-syntax-ns.rdf")) {
+				publicUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+				cmgr = lastConfigMgr;
+			}
+			else if (uri.toString().endsWith("rdf-schema.rdf")) {
+				publicUri = "http://www.w3.org/2000/01/rdf-schema#";
+				cmgr = lastConfigMgr;
 			}
 			else {
-				throw new InvalidNameException("Unable to find a model with URL '" + uri + "'");
+				cmgr = getConfigurationMgr(uri);
+				publicUri = cmgr.getPublicUriFromActualUrl(uri.toString());
+			}
+			if (cmgr == null) {
+				throw new InvalidNameException("Unable to find a ConfigurationManager for model with URL '" + uri + "'");
 			}
 			if (cmgr.isSadlDerived(publicUri)) {
 				return getModel().getNamedConceptsInNamedModel(publicUri, null, scope);
@@ -3153,10 +3161,9 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
         IConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
         // See if we already have a ConfigurationManager for this project and if so use it.
         String owlModelsFolder = ResourceManager.getOwlModelsFolder(mfuri);
-        configurationManagerProvider.setModelFolder(owlModelsFolder);
 		if (configurationMgr == null) {
 			ResourceManager.validateOwlModelsFolder(owlModelsFolder);
-			configurationMgr = configurationManagerProvider.get();
+			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
 			configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
 			configurationMgrMap.put(projectUri, configurationMgr);
 	    	IPreferencesService service = Platform.getPreferencesService();
@@ -3165,7 +3172,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	    	configurationMgr.setModelGetter(modelGetter);
 		}
 		else if (configurationMgr.isConfigurationStale()) {
-			configurationMgr = configurationManagerProvider.get();
+			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
 			configurationMgrMap.put(projectUri, configurationMgr);
 	    	IPreferencesService service = Platform.getPreferencesService();
 	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
@@ -3176,7 +3183,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			if (configurationMgr.isConfigChanged()) {
 				configurationMgr.saveConfiguration();
 			}
-			configurationMgr = configurationManagerProvider.get();
+			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
 			configurationMgrMap.put(projectUri, configurationMgr);
 			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
 		}
@@ -3612,6 +3619,14 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	public void partInputChanged(IWorkbenchPartReference partRef) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public SadlModelManagerProvider getSadlModelManagerProvider() {
+		return sadlModelManagerProvider;
+	}
+
+	public void setSadlModelManagerProvider(SadlModelManagerProvider sadlModelManagerProvider) {
+		this.sadlModelManagerProvider = sadlModelManagerProvider;
 	}
 
 }

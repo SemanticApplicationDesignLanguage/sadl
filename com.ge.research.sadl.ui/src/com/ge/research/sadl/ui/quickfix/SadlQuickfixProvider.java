@@ -21,6 +21,7 @@ import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.parser.antlr.SadlParser;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -43,7 +44,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
     private final SadlProposalProvider proposalProvider;
 
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
     
     @Inject
     private SadlParser parser;
@@ -208,7 +209,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 		    			}
 		    			uri = uri.substring(idx);
     				}
-    				
+    				SadlModelManager visitor = sadlModelManagerProvider.get(element.eResource().getURI());
 					URI projectUri = ResourceManager.getProjectUri(visitor.getModelResource().getURI());
 					SadlUtils su = new SadlUtils();
 					URI sadlUri = URI.createURI(su.fileNameToFileUrl(ResourceManager.findSadlFileInProject(projectUri.toFileString(), uri)));
@@ -316,6 +317,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 			}
 		}
 		if (issue.getCode().equals(SadlJavaValidator.INSTANCE_NOT_DEFINED)) {
+			SadlModelManager visitor = sadlModelManagerProvider.get(conceptEobject.eResource().getURI());
 			if (visitor != null) {
 				ConceptName rcn = null;
 				try {

@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.15 $ Last modified on   $Date: 2014/12/19 22:20:46 $
+ * $Revision: 1.16 $ Last modified on   $Date: 2015/03/30 13:43:54 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -390,7 +390,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public boolean addMapping(String altUrl, String publicUri,
-			String globalPrefix, String source) throws ConfigurationException,
+			String globalPrefix, boolean bKeepPrefix, String source) throws ConfigurationException,
 			IOException, URISyntaxException {
 		SadlUtils su = new SadlUtils();
 		su.validateHTTP_URI(publicUri);
@@ -400,7 +400,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		if (globalPrefix != null) {
 			pref = getMappingModel().createTypedLiteral(globalPrefix);
 		}
-		return addMapping(altv, pubv, pref, source);
+		return addMapping(altv, pubv, pref, bKeepPrefix, source);
 	}
 
 	/*
@@ -411,7 +411,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (com.hp.hpl.jena.rdf.model.Resource, com.hp.hpl.jena.rdf.model.Resource,
 	 * com.hp.hpl.jena.rdf.model.Literal)
 	 */
-	public boolean addMapping(Resource altv, Resource pubv, Literal prefix,
+	public boolean addMapping(Resource altv, Resource pubv, Literal prefix, boolean bKeepPrefix,
 			String source) throws ConfigurationException, IOException,
 			URISyntaxException {
 		boolean bChanged = false;
@@ -452,15 +452,22 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 					}
 					Statement s3 = subj.getProperty(prefixProp);
 					if (s3 != null) {
-						if (!s3.getObject().equals(prefix)) {
-							if (pendingDeletions == null) {
-								pendingDeletions = new ArrayList<Statement>();
+						// there is already a prefix in the model
+						if (prefix != null) {
+							// we have another which is not null
+							if (!s3.getObject().equals(prefix)) {
+								if (!bKeepPrefix) {
+									// only make the change if not keeping old prefix (when the new prefix is null)
+									if (pendingDeletions == null) {
+										pendingDeletions = new ArrayList<Statement>();
+									}
+									pendingDeletions.add(s3);
+								}
+								if (prefix != null) {
+									subj.addProperty(prefixProp, prefix);
+								}
+								bChanged = true;
 							}
-							pendingDeletions.add(s3);
-							if (prefix != null) {
-								subj.addProperty(prefixProp, prefix);
-							}
-							bChanged = true;
 						}
 					} else if (prefix != null) {
 						subj.addProperty(prefixProp, prefix);
@@ -509,15 +516,22 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 
 						Statement s3 = subj.getProperty(prefixProp);
 						if (s3 != null) {
-							if (!s3.getObject().equals(prefix)) {
-								if (pendingDeletions == null) {
-									pendingDeletions = new ArrayList<Statement>();
+							// there is already a prefix in the model
+							if (prefix != null) {
+								// we have another which is not null
+								if (!s3.getObject().equals(prefix)) {
+									if (!bKeepPrefix) {
+										// only make the change if not keeping old prefix (when the new prefix is null)
+										if (pendingDeletions == null) {
+											pendingDeletions = new ArrayList<Statement>();
+										}
+										pendingDeletions.add(s3);
+									}
+									if (prefix != null) {
+										subj.addProperty(prefixProp, prefix);
+									}
+									bChanged = true;
 								}
-								pendingDeletions.add(s3);
-								if (prefix != null) {
-									subj.addProperty(prefixProp, prefix);
-								}
-								bChanged = true;
 							}
 						} else if (prefix != null) {
 							subj.addProperty(prefixProp, prefix);

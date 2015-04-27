@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
@@ -28,6 +29,7 @@ import org.eclipse.xtext.ui.editor.XtextSourceViewerConfiguration;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.ui.SadlActivatorExt;
 
@@ -70,7 +72,7 @@ public class SadlSourceViewerConfiguration extends
 	@Inject
 	private IHyperlinkDetector detector;
 	@Inject
-	private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
 
 	@Override
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
@@ -118,6 +120,7 @@ public class SadlSourceViewerConfiguration extends
 				try {
 					// get the configuration manager for the edited resource
 					IResource editedResource = (IResource) getEditor().getEditorInput().getAdapter(IResource.class);
+					SadlModelManager visitor = sadlModelManagerProvider.get(URI.createURI(editedResource.getLocation().toString()));
 					cmgr = visitor.getConfigurationMgr(editedResource.getLocation().toString());
 					
 					// map the public URL to the mapped URL

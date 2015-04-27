@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.18 $ Last modified on   $Date: 2015/02/02 22:30:10 $
+ * $Revision: 1.19 $ Last modified on   $Date: 2015/03/30 13:43:54 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -103,6 +103,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	protected static final String pTRANSLATOR_CLASSNAME = CONFIG_NAMESPACE + "translatorClassName";
 	// Note: the ReasonerCategory value, e.g., "Jena", is obtained from the IReasoner (plugin) by calling getConfigurationCategory()
 	
+	private String projectPath = null;
 	protected File modelFolderPath = null;
 	protected URL modelFolderUrl = null;
 	private Model configModel = null;
@@ -308,6 +309,7 @@ public class ConfigurationManager implements IConfigurationManager {
 				throw new ConfigurationException("'" + modelFolderPathname + "' is not a directory.");
 			}		
 			setModelFolderPath(mfpnf);
+			setProjectPath(mfpnf.getParentFile().getAbsolutePath());
 		}
 	}
 
@@ -588,7 +590,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws ClassNotFoundException
 	 * 
 	 */
-	protected Object getClassInstance(String className)
+	public Object getClassInstance(String className)
 			throws InstantiationException, IllegalAccessException,
 			ClassNotFoundException {
 		return this.getClass().getClassLoader().loadClass(className).newInstance();
@@ -703,6 +705,10 @@ public class ConfigurationManager implements IConfigurationManager {
     	}
 //    	this.getJenaDocumentMgr().setCacheModels(true);
    		this.getJenaDocumentMgr().setProcessImports(true);
+   		ReadFailureHandler rfh = this.getJenaDocumentMgr().getReadFailureHandler();
+   		if (rfh instanceof SadlReadFailureHandler) {
+   			((SadlReadFailureHandler)rfh).setSadlConfigMgr(this);
+   		}
    		getModelGetter().configureToModel(importingModel);
 		importingModel.loadImports();
 		if (readError != null) {
@@ -812,6 +818,7 @@ public class ConfigurationManager implements IConfigurationManager {
             com.hp.hpl.jena.rdf.model.Resource subj = s.getSubject();	
             Statement salt = subj.getProperty(altUrlProp);
             Statement spub = subj.getProperty(publicUrlProp);
+            Statement sprefix = subj.getProperty(prefixProp);
             if (salt != null && spub != null) {
 	            altv = salt.getObject();
             	String strAltv = rdfNodeToString(altv);
@@ -896,7 +903,6 @@ public class ConfigurationManager implements IConfigurationManager {
 	            String publicUri = rdfNodeToString(pubv);
 	            logger.debug("Found mapping from public URI '" + publicUri + "' to alternative URL '" + actualFilePath + "'");
 	            importUrlMappings.put(publicUri, actualFilePath);
-	            Statement sprefix = subj.getProperty(prefixProp);
 	            if (sprefix != null) {
 	            	RDFNode prefixNode = sprefix.getObject();
 	            	if (prefixNode instanceof Literal) {
@@ -1426,6 +1432,23 @@ public class ConfigurationManager implements IConfigurationManager {
 		
 		throw new ConfigurationException("PublicURI '" + publicUri + "' not found in mappings.");
 	}
+	
+	/**
+	 * Method to determine if a URI (could be public URI or alt URL) is mapped in this ConfigurationManager (project)
+	 * @param uri
+	 * @return
+	 */
+	public boolean containsMappingForURI(String uri) {
+		if (mappings != null) {
+			if (mappings.containsKey(uri)) {
+				return true;
+			}
+			if (mappings.containsValue(uri)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
     protected String rdfNodeToString(RDFNode node) {
     	if (node != null) {
@@ -1548,4 +1571,15 @@ public class ConfigurationManager implements IConfigurationManager {
 		return cloneReasonerInstance;
 	}
 	
+	public String getProjectPath() {
+		return projectPath;
+	}
+	
+	public void setProjectPath(String projectPath) {
+		this.projectPath = projectPath;
+	}
+	
+	public String toString() {
+		return "ConfigurationManager for project '" + getProjectPath() + "'";
+	}
 }

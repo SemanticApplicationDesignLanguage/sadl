@@ -270,4 +270,11 @@ public interface IConfigurationManager {
 	 */
 	public abstract ITranslator getTranslatorForReasoner(String reasonerClassName) throws ConfigurationException;
 
+	/**
+	 * Method to determine if a URI (could be public URI or alt URL) is mapped in this ConfigurationManager (project)
+	 * @param uri
+	 * @return
+	 */
+	public abstract boolean containsMappingForURI(String uri);
+
 }

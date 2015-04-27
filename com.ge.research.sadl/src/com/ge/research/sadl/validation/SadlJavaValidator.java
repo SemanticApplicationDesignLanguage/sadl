@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.model.PendingModelError;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -60,7 +61,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
     private static final Logger logger = LoggerFactory.getLogger(SadlJavaValidator.class);
     
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
 	
 	@Check
 	public void checkModelName(ModelName uri) {
@@ -85,6 +86,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 	            URI modelUrl = uri.eResource().getURI();
                 String owlUrl = ResourceManager.validateAndReturnOwlUrlOfSadlUri(modelUrl).toString();
 		        String publicUri = baseUri;
+		        SadlModelManager visitor = sadlModelManagerProvider.get(modelUrl);
 		        String altUri = visitor.getAltUrl(publicUri, modelUrl);
 		        // If those urls differ, that indicates another model has already used the public uri
 		        if (altUri != null && !publicUri.equals(altUri) && !owlUrl.equals(altUri)) {
@@ -115,8 +117,13 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 		}
 		// do we have a global alias?
 		try {
-    		IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr((String)null);
-    		
+			SadlModelManager visitor = sadlModelManagerProvider.get(imp.eResource().getURI());
+			String modelFolder = ResourceManager.getProjectUri(imp.eResource().getURI()).appendSegment(ResourceManager.OWLDIR).toString();
+    		IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr(modelFolder);
+    		if (!configMgr.containsMappingForURI(uri)) {
+    			configMgr = ResourceManager.findConfigurationManagerInOtherProject(sadlModelManagerProvider, 
+    					ResourceManager.getProjectUri(imp.eResource().getURI()).appendSegment(ResourceManager.OWLDIR), uri);
+    		}
     		if (configMgr != null) {
     			if (uri.endsWith(ResourceManager.SADLEXTWITHPREFIX)) {
     				if (uri.startsWith(ResourceManager.FILE_URL_PREFIX)) {
@@ -176,6 +183,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 //				}
 				Resource resource = rsrcId.eResource();
 				PendingModelError pendingErr = null;
+				SadlModelManager visitor = sadlModelManagerProvider.get(resource.getURI());
 				if (visitor.hasModelManager(resource)) { 
 					pendingErr = visitor.getPendingError(resource, nm);
 				}

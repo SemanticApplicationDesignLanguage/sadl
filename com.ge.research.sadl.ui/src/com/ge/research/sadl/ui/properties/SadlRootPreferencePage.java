@@ -32,6 +32,9 @@ import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
 import org.pojava.datetime.DateTimeConfig;
@@ -40,6 +43,7 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
@@ -54,7 +58,7 @@ import com.google.inject.Inject;
 public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 	
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
 
     @Override
     protected void createFieldEditors() {
@@ -85,6 +89,9 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 	@Override
 	public boolean performOk() {
 		boolean retVal = super.performOk();
+
+		SadlModelManager visitor = null;
+		
 		if (retVal && isPropertyPage()) {
 			// the changes apply only to the current project
 			IPreferencesService service = Platform.getPreferencesService();

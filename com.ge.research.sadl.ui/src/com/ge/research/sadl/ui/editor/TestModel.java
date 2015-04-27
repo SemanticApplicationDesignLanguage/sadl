@@ -37,6 +37,7 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -54,7 +55,9 @@ public class TestModel extends SadlActionDelegate implements IObjectActionDelega
     private XtextResourceSet resourceSet;
     
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
+    
+    private SadlModelManager visitor = null;
 
 	public TestModel () {
 		Injector injector = SadlActivator.getInstance().getInjector("com.ge.research.sadl.Sadl");//new SadlStandaloneSetup().createInjectorAndDoEMFRegistration();
@@ -79,6 +82,7 @@ public class TestModel extends SadlActionDelegate implements IObjectActionDelega
 	    if (showReasonerTimingInformation) {
 	    	t1 = System.currentTimeMillis();
 	    }
+	    visitor = sadlModelManagerProvider.get(resourceSet.getResources().get(0).getURI());
 	    prepareModel(visitor, testFilePath, resourceSet);
 		final String modelName = visitor.getModelName();
 	    

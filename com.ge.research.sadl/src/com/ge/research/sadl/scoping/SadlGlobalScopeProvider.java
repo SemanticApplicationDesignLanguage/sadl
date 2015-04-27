@@ -38,6 +38,7 @@ import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.xbase.lib.Pair;
 
+import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.resource.SadlEObjectDescription;
 import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.sadl.SadlPackage;
@@ -48,6 +49,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
+
 	private static final Splitter SPLITTER = Splitter.on(',');
 
 	@Inject
@@ -58,7 +60,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	private IResourceScopeCache cache;
 
 	/**
-	 * For each imported owl resource, import also the accoring sadl resource to
+	 * For each imported owl resource, import also the according sadl resource to
 	 * have the elements on the global scope
 	 */
 	@Override
@@ -76,13 +78,18 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 					
 					LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
 					collectImportedURIs(resource, URI.createURI(publicUri), uriSet, visibleResourceDescriptions);
-
+					addImplicitUris(uriSet);
 					return uriSet;
 				} catch (Exception e) {
 					return SadlGlobalScopeProvider.super.getImportedUris(resource);
 				}
 			}
 		});
+	}
+
+	private void addImplicitUris(LinkedHashSet<URI> uriSet) {
+		uriSet.add(URI.createURI(ResourceManager.PLATFORM_RESOURCE_MODELS_RDF_SYNTAX_NS_RDF));
+		uriSet.add(URI.createURI(ResourceManager.PLATFORM_RESOURCE_MODELS_RDF_SCHEMA_RDF));
 	}
 
 	private Iterable<IResourceDescription> getVisibleResourceDescriptions (Resource resource) {

@@ -20,8 +20,10 @@ package com.ge.research.sadl.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.xtext.linking.lazy.LazyLinkingResource;
 import org.eclipse.xtext.util.CancelIndicator;
@@ -37,8 +39,32 @@ public class SadlResource extends LazyLinkingResource {
 	 * A queue of ResourceNames which are created during proxy resolution.
 	 */
 	private List<ResourceName> derivedResourceNames = new ArrayList<>();
+	private Set<ResourceName> toRemoveResourceNames = new HashSet<>();
 	public void addDerivedResourceName (ResourceName rn) {
-		derivedResourceNames.add(rn);
+//		if (!resourceNameInList(derivedResourceNames, rn)) {
+			derivedResourceNames.add(rn);
+//		}
+	}
+	public Set<ResourceName> getToRemoveResourceNames() {
+		return toRemoveResourceNames;
+	}
+	public void removeResourceName (ResourceName rn) {
+//		if (!resourceNameInList(derivedResourceNames, rn)) {
+			toRemoveResourceNames.add(rn);
+//		}
+	}
+
+	private boolean resourceNameInList(List<ResourceName> resourceNameList, ResourceName rn) {
+		if (resourceNameList != null && rn != null) {
+			String rnn = rn.getName();
+			for (int i = 0; i < resourceNameList.size(); i++) {
+				String rnnl = resourceNameList.get(i).getName();
+				if (rnnl != null && rnnl.equals(rnn)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	class SadlInputStream extends InputStream {
@@ -80,6 +106,8 @@ public class SadlResource extends LazyLinkingResource {
 		// to the resource contents now. This cannot happen before since this would
 		// cause a ConcurrentModificationException while iterating over the resource
 		// contents for proxy resolving.
+		getContents().removeAll(toRemoveResourceNames);
+		toRemoveResourceNames.clear();
 		getContents().addAll(derivedResourceNames);
 		derivedResourceNames.clear();
 	}

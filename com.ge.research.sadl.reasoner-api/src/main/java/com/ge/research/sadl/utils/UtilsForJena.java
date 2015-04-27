@@ -29,10 +29,16 @@ import org.pojava.datetime.DateTime;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.ontology.CardinalityRestriction;
+import com.hp.hpl.jena.ontology.MaxCardinalityRestriction;
+import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class UtilsForJena {
@@ -327,5 +333,56 @@ public class UtilsForJena {
 		return uri;
 	}
 
+	public static boolean isSingleValued(OntClass cls, OntProperty prop, String rngString) {
+		if (prop.isFunctionalProperty()) {
+			return true;
+		}
+		if (cls != null) {
+			ExtendedIterator<OntClass> eitr = cls.listSuperClasses(false);
+			while (eitr.hasNext()) {
+				OntClass supercls = eitr.next();
+				if (supercls.isRestriction()) {
+					Restriction rstrct = supercls.asRestriction();
+					if (rstrct.isMaxCardinalityRestriction()) {
+						MaxCardinalityRestriction mxcr = rstrct.asMaxCardinalityRestriction();
+						if (mxcr.getOnProperty().equals(prop) && mxcr.getMaxCardinality() == 1) {
+							return true;
+						}
+					}
+					else if (rstrct.isCardinalityRestriction()) {
+						if (rstrct.isCardinalityRestriction()) {
+							CardinalityRestriction cr = rstrct.asCardinalityRestriction();
+							if (cr.getOnProperty().equals(prop) && cr.getCardinality() == 1) {
+								return true;
+							}
+						}
+					}
+					else {
+						if (rstrct.hasProperty(OWL2.maxQualifiedCardinality)) {
+							if (rstrct.getOnProperty().equals(prop) && rstrct.getProperty(OWL2.maxQualifiedCardinality).getInt() == 1) {
+								// check class
+								if (rstrct.getProperty(OWL2.onClass).getResource().toString().equals(rngString)) {
+									return true;
+								}
+							}
+						}
+						else if (rstrct.hasProperty(OWL2.qualifiedCardinality)) {
+							if (rstrct.getOnProperty().equals(prop) && rstrct.getProperty(OWL2.qualifiedCardinality).getInt() == 1) {
+								// check class
+								if (rstrct.getProperty(OWL2.onClass).getResource().toString().equals(rngString)) {
+									return true;
+								}
+							}							
+						}
+//						StmtIterator siter = rstrct.listProperties();
+//						while (siter.hasNext()) {
+//							System.out.println(siter.nextStatement().toString());
+//						}
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 }
