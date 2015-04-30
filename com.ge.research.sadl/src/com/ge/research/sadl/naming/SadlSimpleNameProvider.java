@@ -24,16 +24,13 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.SimpleAttributeResolver;
 
-import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.Model;
+import com.ge.research.sadl.sadl.Query;
 import com.ge.research.sadl.sadl.ResourceName;
+import com.ge.research.sadl.sadl.Test;
 import com.google.inject.Inject;
 
 public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl {
-	public final static String MATCH_TOKEN1 = "import_";
-	public final static String MATCH_TOKEN2 = "__alias";
-	public final static String DOT_REPLACE_TOKEN = ";;;dot;;;";
-
 	@Inject
 	private IQualifiedNameConverter qualifiedNameConverter;
 
@@ -46,13 +43,7 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 				return QualifiedName.create(m.getModelName().getBaseUri());
 			}
 		}
-		else if (obj instanceof Import) {
-			Import imp = (Import) obj;
-			name = MATCH_TOKEN1 + replace(imp.getImportURI());
-			if (imp.getAlias()!=null) {
-				name += MATCH_TOKEN2 + replace(imp.getAlias());
-			}
-		} else if (obj instanceof ResourceName) {
+		else if (obj instanceof ResourceName) {
 			Model m = EcoreUtil2.getContainerOfType(obj, Model.class);
 			// ResourceNames derived by SadlLinkingService for variables do not have a Model container, but are directly in the root
 			// of the resource
@@ -60,10 +51,13 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 				return null;
 			}
 			if (m.getModelName()!=null && m.getModelName().getAlias()!=null) {
+
 				return QualifiedName.create(m.getModelName().getAlias(), ((ResourceName)obj).getName());
 			} else {
 				return QualifiedName.create(((ResourceName)obj).getName());
 			}
+		} else if (obj instanceof Test || obj instanceof Query) {
+			return QualifiedName.create(obj.eClass().getName()+getIndexInContainer(obj));
 		} else {
 			name = SimpleAttributeResolver.NAME_RESOLVER.apply(obj);
 		}
@@ -72,11 +66,16 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 		return qualifiedNameConverter.toQualifiedName(name);
 	}
 
-	private String replace(String string) {
-		if (string != null) {
-			string = string.replace(".", DOT_REPLACE_TOKEN);
+	private int getIndexInContainer (EObject ctx) {
+		int index = -1;
+		for (EObject obj: ctx.eContainer().eContents()) {
+			if (obj.getClass().equals(ctx.getClass())) {
+				index ++;
+				if (obj == ctx) break;
+			}
 		}
-		return string;
+		return index;
 	}
+	
 
 }

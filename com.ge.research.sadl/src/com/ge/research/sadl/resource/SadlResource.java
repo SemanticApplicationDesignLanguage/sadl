@@ -19,54 +19,15 @@ package com.ge.research.sadl.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.xtext.linking.lazy.LazyLinkingResource;
-import org.eclipse.xtext.util.CancelIndicator;
-
-import com.ge.research.sadl.sadl.ResourceName;
+import org.eclipse.xtext.resource.DerivedStateAwareResource;
 
 /**
  * Appends an artificial whitespace when reading a file to work around the problem that
  * a dot at EOF is not detected as End Of Statement.
  */
-public class SadlResource extends LazyLinkingResource {
-	/**
-	 * A queue of ResourceNames which are created during proxy resolution.
-	 */
-	private List<ResourceName> derivedResourceNames = new ArrayList<>();
-	private Set<ResourceName> toRemoveResourceNames = new HashSet<>();
-	public void addDerivedResourceName (ResourceName rn) {
-//		if (!resourceNameInList(derivedResourceNames, rn)) {
-			derivedResourceNames.add(rn);
-//		}
-	}
-	public Set<ResourceName> getToRemoveResourceNames() {
-		return toRemoveResourceNames;
-	}
-	public void removeResourceName (ResourceName rn) {
-//		if (!resourceNameInList(derivedResourceNames, rn)) {
-			toRemoveResourceNames.add(rn);
-//		}
-	}
-
-	private boolean resourceNameInList(List<ResourceName> resourceNameList, ResourceName rn) {
-		if (resourceNameList != null && rn != null) {
-			String rnn = rn.getName();
-			for (int i = 0; i < resourceNameList.size(); i++) {
-				String rnnl = resourceNameList.get(i).getName();
-				if (rnnl != null && rnnl.equals(rnn)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
+public class SadlResource extends DerivedStateAwareResource {
 	class SadlInputStream extends InputStream {
 		private InputStream delegate;
 		private boolean eof;
@@ -97,18 +58,5 @@ public class SadlResource extends LazyLinkingResource {
 			throws IOException {
 		SadlInputStream is = new SadlInputStream(inputStream);
 		super.doLoad(is, options);
-	}
-
-	@Override
-	public void resolveLazyCrossReferences(CancelIndicator mon) {
-		super.resolveLazyCrossReferences(mon);
-		// the super call might have added virtual ResourceNames, which must be added
-		// to the resource contents now. This cannot happen before since this would
-		// cause a ConcurrentModificationException while iterating over the resource
-		// contents for proxy resolving.
-		getContents().removeAll(toRemoveResourceNames);
-		toRemoveResourceNames.clear();
-		getContents().addAll(derivedResourceNames);
-		derivedResourceNames.clear();
 	}
 }
