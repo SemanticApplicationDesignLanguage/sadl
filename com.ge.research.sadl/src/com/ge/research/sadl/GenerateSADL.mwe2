@@ -25,6 +25,7 @@ Workflow {
   component = Generator {
     pathRtProject = runtimeProject
     pathUiProject = "${runtimeProject}.ui"
+//    pathTestProject = "${runtimeProject}.tests"
     projectNameRt = projectName
     projectNameUi = "${projectName}.ui"
 
@@ -36,9 +37,7 @@ Workflow {
       fragment = grammarAccess.GrammarAccessFragment {}
 
       // generates Java API for the generated EPackages
-      fragment = ecore.EMFGeneratorFragment auto-inject {
-//      	referencedGenModels = "uri to genmodel, uri to next genmodel"
-      }
+      fragment = ecore.EMFGeneratorFragment auto-inject {}
 
       // the serialization component
       // fragment = parseTreeConstructor.ParseTreeConstructorFragment {}
@@ -56,23 +55,13 @@ Workflow {
         options = { backtrack = true memoize = true classSplitting=true}
       }
 
-      // Check based validation 
-      //fragment = validation.CheckFragment {}
-
       // java-based API for validation
       fragment = validation.JavaValidatorFragment {
-                composedCheck = "org.eclipse.xtext.validation.ImportUriValidator"
-                // composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
-                // registerForImportedPackages = true
-            }
+        composedCheck = "org.eclipse.xtext.validation.ImportUriValidator"
+      }
 
       // scoping and exporting API (Xtext 0.7)
       fragment = scoping.ImportURIScopingFragment {}
-      // fragment = exporting.SimpleNamesFragment {}
-
-      // scoping and exporting API (Xtext 1.0, but we like the 0.7 better)
-      // fragment = scoping.ImportNamespacesScopingFragment {}
-      // fragment = exporting.QualifiedNamesFragment {}
 
       // formatter API
       fragment = formatting.FormatterFragment {}
@@ -80,9 +69,6 @@ Workflow {
       // labeling API
       fragment = labeling.LabelProviderFragment {}
 
-      // outline API
-      //fragment = outline.TransformerFragment {}
-      //fragment = outline.OutlineNodeAdapterFactoryFragment {}
       fragment = outline.QuickOutlineFragment {}
 
       // java-based API for content assistance
@@ -95,14 +81,10 @@ Workflow {
 
       fragment = builder.BuilderIntegrationFragment {}
 
-      // project wizard (optional)
-      // fragment = projectWizard.SimpleProjectWizardFragment {
-      //   generatorProjectName = "${projectName}.generator"
-      //   modelFileExtension = file.extensions
-      // }
-
       // quickfix API
       fragment = quickfix.QuickfixProviderFragment {}
+      
+//      fragment = junit.Junit4Fragment {}
     }
   }
 }

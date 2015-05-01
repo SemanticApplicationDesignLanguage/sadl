@@ -10,7 +10,13 @@ import java.net.URISyntaxException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.naming.IQualifiedNameProvider;
+import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.scoping.IGlobalScopeProvider;
+import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.validation.Check;
+import org.eclipse.xtext.validation.CheckType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +43,6 @@ import com.google.inject.Inject;
  * see http://www.eclipse.org/Xtext/documentation.html#validation
  */
 public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractSadlJavaValidator {
-
-//	@Check
-//	public void checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.getName().charAt(0))) {
-//			warning("Name should start with a capital", MyDslPackage.Literals.GREETING__NAME);
-//		}
-//	}
 	public static final String MISSING_MODEL_NAME = "com.ge.research.SADL.MissingModelName";
 	public static final String MISSING_HTTP_PREFIX = "com.ge.research.SADL.MissingHttpPrefix";
 	public static final String DUPLICATE_MODEL_NAME = "com.ge.research.SADL.DuplicateModelName";
@@ -62,6 +61,32 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
     
     @Inject
 	private SadlModelManagerProvider sadlModelManagerProvider;
+    
+    @Inject
+    private IGlobalScopeProvider globalScopeProvider;
+    @Inject
+    private IQualifiedNameProvider qnProvider;
+    
+    /**
+     * Through (transitive) imports the short name ResourceName referred by a ResourceNyName might
+     * be multiple times on the scope, but only the first one is linked. There should be a warning that
+     * this is ambiguous.
+     * @param rn
+     */
+    @Check(CheckType.NORMAL)
+    public void checkNoAmbiguousQualifiedNameOnScope (ResourceByName rn) {
+    	if (rn.eResource()==null || rn.getName().eIsProxy()) return;
+    	// the qualified name of the actually linked ResourceName
+    	QualifiedName qn = qnProvider.getFullyQualifiedName(rn.getName());
+    	// search the global scope for any other name
+    	IScope scope = globalScopeProvider.getScope(rn.eResource(), SadlPackage.Literals.RESOURCE_BY_NAME__NAME, null);
+    	for (IEObjectDescription description : scope.getAllElements()) {
+			if (qn.getLastSegment().equals(description.getQualifiedName()) && !qn.equals(description.getQualifiedName())) {
+				warning("The name "+qn.getLastSegment()+" is ambiguous. Please qualify the name", rn, SadlPackage.Literals.RESOURCE_BY_NAME__NAME);
+				return;
+			}
+		}
+    }
 	
 	@Check
 	public void checkModelName(ModelName uri) {
