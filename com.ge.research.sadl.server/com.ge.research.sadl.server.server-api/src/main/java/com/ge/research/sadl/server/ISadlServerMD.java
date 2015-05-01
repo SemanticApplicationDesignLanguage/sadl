@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright (c) 2007-2014 - General Electric Company, All Rights Reserved
+ * Copyright (c) 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL Knowledge Server
  *
@@ -39,7 +39,17 @@ import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
 
-public interface ISadlServerMD extends ISadlServerPE {
+/**
+ * This Interface class defines additional methods beyond those in 
+ * the super classes SadlServer and SadlServerPE. These methods are 
+ * primarily convenience functions to support model-driven application,
+ * e.g., model-driven user-interface.
+ * MD--model-driven
+ * => SadlServerMD
+ *  
+ * @author Andy Crapo
+ *
+ */public interface ISadlServerMD extends ISadlServerPE {
 
 	/**
 	 * This method sets the output format of OWL files returned by certain queries.
@@ -288,4 +298,29 @@ public interface ISadlServerMD extends ISadlServerPE {
 	 */
 	public abstract Object getDefaultValueOfPropertyOnClass(String cls, String prop) throws InvalidNameException, ReasonerNotFoundException, 
 		ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+	
+	/**
+	 * This method returns the rdfs:label values (aka aliases, aka longnames) for a given concept identified by URI
+	 * @param conceptUri -- the URI of the concept
+	 * @return -- a String array of labels if any else null
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws QueryParseException 
+	 */
+	public abstract String[] getConceptRdfsLabels(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException;
+	
+	/**
+	 * This method returns the rdfs:comment values (aka notes, aka descriptions) for a given concept identified by URI
+	 * @param conceptUri -- the URI of the concept
+	 * @return -- a String array of comments if any else null
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws QueryParseException 
+	 */
+	public abstract String[] getConceptRdfsComments(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException;
+	
 }

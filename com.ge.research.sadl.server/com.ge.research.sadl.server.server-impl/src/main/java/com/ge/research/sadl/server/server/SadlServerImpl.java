@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright (c) 2007-2014 - General Electric Company, All Rights Reserved
+ * Copyright (c) 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL Knowledge Server
  *
@@ -28,6 +28,7 @@
 package com.ge.research.sadl.server.server;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,10 +42,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.ge.research.sadl.server.ISadlServer;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
@@ -54,10 +57,14 @@ import com.ge.research.sadl.utils.StringDataSource;
 import com.ge.research.sadl.utils.UtilsForJena;
 
 import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.activation.URLDataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.importer.CsvImporter;
+import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
@@ -72,6 +79,7 @@ import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -186,6 +194,32 @@ public class SadlServerImpl implements ISadlServer {
 		throw new ReasonerNotFoundException("No reasoner found.");
     }
 
+	public boolean loadCsvData(String serverCsvDataLocator, boolean includesHeader, String csvTemplate) throws ConfigurationException, IOException, InvalidNameException, TemplateException {
+		String uri = scanTemplateForUri(csvTemplate);
+		if (defaultInstanceDataNS == null) {
+			if (uri != null) {
+				setInstanceDataNamespace(uri);
+			}
+			else {
+				throw new ConfigurationException("Instance data namespace must be set before CSV data can be imported.");
+			}
+		}
+		CsvImporter importer = new CsvImporter(getConfigurationMgr());
+		importer.setCsvFilename(serverCsvDataLocator, includesHeader);
+		importer.setModelFolder(getKBaseIdentifier());
+		importer.setImportModelNamespace(defaultInstanceDataNS);
+		importer.setImports(getModelName());
+		importer.setTemplates(csvTemplate);
+		OntModel om;
+		try {
+			om = importer.getOwlModel();
+			reasoner.loadInstanceData(om);
+		} catch (ReasonerNotFoundException e) {
+			throw new ConfigurationException(e.getMessage(), e);
+		}
+		return true;
+	}
+
     public String selectServiceModel(String serviceName) throws ConfigurationException, ReasonerNotFoundException {
         logger.info("Calling selectServiceModel with serviceName (\"{}\")", serviceName);
         if (kbaseRoot == null) {
@@ -275,7 +309,7 @@ public class SadlServerImpl implements ISadlServer {
 			throws ConfigurationException {
 		if (getConfigurationMgr().getModelGetter() == null) {
         	try {
-				getConfigurationMgr().setModelGetter(new SadlJenaModelGetter(getConfigurationMgr().getModelFolder() + "/TDB"));
+				getConfigurationMgr().setModelGetter(new SadlJenaModelGetter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
 			} catch (IOException e) {
 				logger.error("Exception setting ModelGetter: " + e.getMessage());
 				e.printStackTrace();
@@ -327,6 +361,85 @@ public class SadlServerImpl implements ISadlServer {
         }
 		throw new ReasonerNotFoundException("No reasoner found.");
     }
+
+	public boolean sendCsvData(DataSource csvDataSrc, boolean includesHeader, String csvTemplate)
+			throws ConfigurationException, IOException, InvalidNameException, TemplateException {
+		String csvTemplateString;
+		if (csvTemplate.startsWith("http://")) {
+    		DataSource dataSrc = new URLDataSource(new URL(csvTemplate));
+			csvTemplateString = convertDataSourceToString(dataSrc);
+		} else if (csvTemplate.startsWith("file:/")) {
+			// sometimes the URL will, at least on Windows, be "file:/D:/...." 
+			// however, the relative URL for a template on the server, identified in ServicesConfig.owl, is being passed as "file:///template.tmpl"
+			// the implementation below may be incorrect as it would not allow for absolute paths on Unix servers.
+			String s = csvTemplate.substring(6);
+			if (s.startsWith("//")) {
+				// this handles "file:///..." which is how relative template files are passed by QueryServer
+				//	and allows for a Unix absolute path to be given as "file:////..." (which probably isn't compliant with standard)
+				s = s.substring(2);
+			}
+			else if (s.startsWith("/")) {
+				// this handles "file://..." as a relative path
+				s = s.substring(1);
+			}
+			if (s.contains("/") || s.contains("\\")) {
+	    		DataSource dataSrc = new FileDataSource(s);
+				csvTemplateString = convertDataSourceToString(dataSrc);
+			} else {
+				String path = getConfigurationMgr().getModelFolderPath().getAbsolutePath() +
+						File.separator + s;
+	    		DataSource dataSrc = new FileDataSource(path);
+				csvTemplateString = convertDataSourceToString(dataSrc);
+			}
+		} else {
+			csvTemplateString = csvTemplate;
+		}
+		String uri = scanTemplateForUri(csvTemplateString);
+		if (defaultInstanceDataNS == null) {
+			if (uri != null) {
+				setInstanceDataNamespace(uri);
+			}
+			else {
+				throw new ConfigurationException("Instance data namespace must be set before CSV data can be imported.");
+			}
+		}
+		CsvImporter importer = new CsvImporter(getConfigurationMgr());
+		importer.setCsvDataSource(csvDataSrc, includesHeader);
+		importer.setModelFolder(getKBaseIdentifier());
+		importer.setImportModelNamespace(defaultInstanceDataNS);
+		
+		Object[] o = scanTemplateForImports(csvTemplateString);
+		int numImports = 0;
+		if (o != null && o.length > 0) {
+			if (o[1] != null && o[1] instanceof List<?> && ((List<?>)o[1]).size() > 0) {
+				List<String> templateImports = (List<String>) o[1];
+				importer.setImports(templateImports);
+				numImports = templateImports.size();
+			}
+			else {
+				importer.setImports(getModelName());
+				numImports = 1;
+			}
+			String processedTemplate = (String) o[0];
+			importer.setTemplates(processedTemplate);
+			logger.info("Scanned template statistics: Original size = "+csvTemplateString.length()+
+					"  Processed size = "+processedTemplate.length()+
+					"  Number of imports = "+numImports);
+		}
+		OntModel om;
+		try {
+			om = importer.getOwlModel();
+			if (logger.isDebugEnabled()) {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				om.write(baos, "N3");
+				logger.debug(baos.toString());
+			}
+			reasoner.loadInstanceData(om);
+		} catch (ReasonerNotFoundException e) {
+			throw new ConfigurationException(e.getMessage(), e);
+		}
+		return true;
+	}
 
 	public boolean addTriple(String subjName, String predName,
 			Object objValue) throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException {
@@ -667,6 +780,34 @@ public class SadlServerImpl implements ISadlServer {
 		return results;
 	}
 
+	public ResultSet[] atomicQueryCsvData(String serviceName,
+			DataSource csvDataSrc, boolean includesHeader, String csvTemplate,
+			String[] sparql) throws IOException, ConfigurationException,
+			NamedServiceNotFoundException, QueryParseException,
+			ReasonerNotFoundException, SessionNotFoundException,
+			InvalidNameException, TemplateException, QueryCancelledException {
+		ResultSet[] results = null;
+		if (serviceName == null || serviceName.length() == 0) {
+			throw new NamedServiceNotFoundException("Service name is null");
+		}
+		if (sparql != null && sparql.length > 0) {
+			if (selectServiceModel(serviceName) == null) {
+				throw new NamedServiceNotFoundException("Service '" + serviceName + "' did not return a valid session.");
+			}
+			
+			if (csvDataSrc != null) {
+				boolean loadStatus = sendCsvData(csvDataSrc, includesHeader, csvTemplate);
+				if (loadStatus) {
+					results = new ResultSet[sparql.length];
+					for (int i = 0; i < sparql.length; i++) {
+						results[i] = query(prepareQuery(sparql[i]));
+					}
+				}
+			}
+		}
+		return results;
+	}
+
 	public String setInstanceDataNamespace(String namespace) throws InvalidNameException {
 		if (!namespace.endsWith("#")) {
 			throw new InvalidNameException("A namespace should end with '#' ('" + namespace + "' does not)");
@@ -781,4 +922,80 @@ public class SadlServerImpl implements ISadlServer {
 		return false;
 	}
 
+    private Object[] scanTemplateForImports(String rawTemplate) throws TemplateException {
+    	Object[] returnObject = new Object[2];
+    	StringBuffer templateSb = new StringBuffer();
+    	boolean usesCR = false;
+    	List<String> templateImports = new ArrayList<String>();
+		try {
+			Scanner s = new Scanner(rawTemplate).useDelimiter("\\n");
+			while (s.hasNext()) {
+				String templateLine = s.next();
+				if (templateLine.endsWith("\r")) {
+					templateLine = templateLine.substring(0,templateLine.length()-1);
+					usesCR = true;
+				}
+				if (templateLine.matches("\\s*import\\s+\\S*")) {
+					String imp = templateLine.replaceFirst("\\s*import\\s+","");
+					if (imp.startsWith("\"") && imp.endsWith("\"")) {
+						imp = imp.substring(1, imp.length() - 1);
+					}
+					templateImports.add(imp);
+				} else if (!(templateLine.indexOf("uri ") >= 0) && templateLine.length() > 0) {
+					templateSb.append(templateLine);
+					if (usesCR) {
+						templateSb.append("\r\n");
+					} else {
+						templateSb.append("\n");
+					}
+				}
+			}
+			s.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new TemplateException(e.getMessage());
+		}
+		String template = templateSb.toString();
+		returnObject[0] = template;
+		returnObject[1] =  templateImports;
+		return returnObject;
+    }
+
+	private String scanTemplateForUri(String rawTemplate) throws TemplateException {
+    	StringBuffer templateSb = new StringBuffer();
+    	boolean usesCR = false;
+		try {
+			Scanner s = new Scanner(rawTemplate).useDelimiter("\\n");
+			while (s.hasNext()) {
+				String templateLine = s.next();
+				if (templateLine.endsWith("\r")) {
+					templateLine = templateLine.substring(0,templateLine.length()-1);
+					usesCR = true;
+				}
+				if (templateLine.matches("\\s*uri\\s+\\S*")) {
+					String uri = templateLine.replaceFirst("\\s*uri\\s+","");
+					if (uri.startsWith("\"") && uri.endsWith("\"")) {
+						uri = uri.substring(1, uri.length() - 1);
+					}
+					if (!uri.endsWith("#")) {
+						uri = uri + "#";
+					}
+					return uri;
+				} else {
+					templateSb.append(templateLine);
+					if (usesCR) {
+						templateSb.append("\r\n");
+					} else {
+						templateSb.append("\n");
+					}
+				}
+			}
+			s.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new TemplateException(e.getMessage());
+		}
+		return null;
+	}
+	
 }

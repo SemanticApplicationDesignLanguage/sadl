@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright (c) 2007-2014 - General Electric Company, All Rights Reserved
+ * Copyright (c) 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL Knowledge Server
  *
@@ -28,6 +28,7 @@
 package com.ge.research.sadl.server;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -39,8 +40,12 @@ import com.ge.research.sadl.server.ISadlServer;
 import com.ge.research.sadl.server.SessionNotFoundException;
 
 /**
- * This Interface class defines the additional methods provided by SadlServerPlus 
- *  beyond those implemented by its super class, SadlServer.
+ * This Interface class defines additional methods beyond those in 
+ * the superclass SadlServer. These methods support editing of models
+ * and the persistence of changes/additions to models.
+ * P--persistence
+ * E--editing
+ * => SadlServerPE
  *  
  * @author Andy Crapo
  *
@@ -51,13 +56,14 @@ public interface ISadlServerPE extends ISadlServer {
 	 * Call this method to persist the instance data which has been added
 	 * during this session as model on the server.
 	 * 
-	 * @param owlInstanceFileName File name containing instance in OWL format
+	 * @param owlInstanceFileName File name containing instance in OWL format. For absolute paths use "file:///"
 	 * @param globalPrefix Global prefix
 	 * @return True if successful else false
 	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws IOException 
 	 */
-	abstract public boolean persistInstanceModel(String owlInstanceFileName, String globalPrefix) throws ConfigurationException, SessionNotFoundException;
+	abstract public boolean persistInstanceModel(String owlInstanceFileName, String globalPrefix) throws ConfigurationException, SessionNotFoundException, IOException;
 	
 	/**
 	 * Call this method to persist the instance data which has been added
@@ -69,8 +75,9 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @return True if successful else false
 	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws IOException 
 	 */
-	abstract public boolean persistInstanceModel(String modelName, String owlInstanceFileName, String globalPrefix) throws ConfigurationException, SessionNotFoundException;
+	abstract public boolean persistInstanceModel(String modelName, String owlInstanceFileName, String globalPrefix) throws ConfigurationException, SessionNotFoundException, IOException;
 
 	/**
 	 * Call this method to persist any changes that have been made to the
@@ -286,6 +293,36 @@ public interface ISadlServerPE extends ISadlServer {
 	boolean createServiceModel(String kbid, String serviceName, String modelName,
 			String owlFileName) throws SessionNotFoundException;
 
+	/**
+	 * Call this method to create a new mapping to the specified existing model.
+	 * This will allow the model to be queried, imported, and used in the kbase
+	 * but will not copy the model from its given location. 
+	 * Note that all imported models not in the kbase must also be explicitly 
+	 * added for they cannot be found.
+	 * 
+	 * @param modelPublicUri
+	 * @param modelAltUrl
+	 * @param modelPrefix
+	 * @return -- true if successful else false 
+	 * @throws InvalidNameException 
+	 * @throws ConfigurationException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
+	 */
+	boolean addExistingModel(String modelPublicUri, String modelAltUrl, String modelPrefix) throws InvalidNameException, ConfigurationException, IOException, URISyntaxException;
+	
+	/**
+	 * Call this model to add an import to the named model.
+	 * @param modelName
+	 * @param importedModelUri
+	 * @return
+	 * @throws ConfigurationException 
+	 * @throws URISyntaxException 
+	 * @throws InvalidNameException 
+	 * @throws IOException 
+	 */
+	boolean addImport(String modelName, String importedModelUri) throws ConfigurationException, IOException, InvalidNameException, URISyntaxException;
+	
 	/**
 	 * Call this method to add a class to the domain of a property in the named model.
 	 * 

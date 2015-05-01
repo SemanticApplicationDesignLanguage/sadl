@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright 2007-2014 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL Knowledge Server
  *
@@ -33,6 +33,7 @@ import java.util.Map;
 
 import javax.activation.DataSource;
 
+import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
@@ -125,6 +126,26 @@ public interface ISadlServer {
                               
 
     /**
+     * Method to provide CSV instance data and then execute a set of SPARQL queries in an atomic (stateless) manner, returning a ResultSet for each query.
+     * 
+     * @param serviceName -- the name of the service, which is used to lookup the knowledgeBaseIdentifier and modelName
+     * @param csvDataSrc -- the CSV DataSource to supply instance data to the model
+     * @param includesHeader -- true if the CSV file contains header information in the first row
+     * @param csvTemplate -- template mapping data stream
+     * @param sparql -- a array of SPARQL queries to be executed
+     * @return -- an array of ResultSet instances containing the results of each query
+     * @throws IOException
+     * @throws ConfigurationException
+     * @throws NamedServiceNotFoundException
+     * @throws QueryCancelledException 
+     * @throws QueryParseException
+     * @throws ReasonerNotFoundException
+     * @throws SessionNotFoundException
+     * @throws InvalidNameException 
+     * @throws TemplateException 
+     */
+    abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] sparql) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException;
+    /**
      * This method retrieves the results of an RDF triple matching request as a list of matching statements. Zero or more of the
      * subjName, propName, and objValue may be null.
      *
@@ -167,6 +188,21 @@ public interface ISadlServer {
 	 * @throws ConfigurationException
      */
     abstract public boolean loadData(String serverDataLocator) throws IOException, ReasonerNotFoundException, SessionNotFoundException, ConfigurationException;
+
+    /**
+     * This method is called to cause abox data to be loaded by mapping from a CSV data file to semantic data using the mapping template specified
+     * @param serverCsvDataLocator -- server-side location of CSV data 
+     * @param includesHeader -- true if the CSV file contains header information in the first row
+     * @param serverCsvTemplateLocator -- server-side location of template mapping file
+     * @return -- true if successful else false
+     * @throws ConfigurationException 
+     * @throws IOException 
+     * @throws InvalidNameException 
+     * @throws SessionNotFoundException 
+     * @throws TemplateException 
+     */
+    abstract public boolean loadCsvData(String serverCsvDataLocator, boolean includesHeader, String serverCsvTemplateLocator) 
+    		throws TemplateException, ConfigurationException, IOException, InvalidNameException, SessionNotFoundException, TemplateException;
 
     /**
      * This method is called to identify the model (tbox) to use by service name.
@@ -243,6 +279,21 @@ public interface ISadlServer {
      * @throws ConfigurationException
      */
     abstract public boolean sendData(DataSource dataSrc, String inputFormat) throws IOException, ReasonerNotFoundException, SessionNotFoundException, ConfigurationException;
+
+    /**
+     * This method is called to send abox data in CSV format to be converted to semantic data using the supplied mapping template serialized as a string
+     * 
+     * @param csvDataSrc -- CSV data stream
+     * @param includesHeader -- true if the CSV file contains header information in the first row
+     * @param csvTemplate -- template mapping data stream
+     * @return -- true if successful else false
+     * @throws ConfigurationException
+     * @throws IOException
+     * @throws InvalidNameException
+     * @throws SessionNotFoundException 
+     */
+    abstract public boolean sendCsvData(DataSource csvDataSrc, boolean includesHeader, String csvTemplate) 
+    		throws TemplateException, ConfigurationException, IOException, InvalidNameException, SessionNotFoundException;
 
     /**
      * This method sets the default instance data namespace. Instance data nodes without a specified namespace will use this namespace.

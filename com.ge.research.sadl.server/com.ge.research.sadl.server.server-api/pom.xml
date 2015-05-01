@@ -1,6 +1,6 @@
 <!-- 
 /************************************************************************
- * Copyright 2007-2014 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL Knowledge Server
  *
@@ -69,8 +69,7 @@
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-api</artifactId>
-  		<version>${project.version}</version>
-  	</dependency>
+  		</dependency>
   </dependencies>
   
 	<!-- Define where to deploy this project's artifacts -->

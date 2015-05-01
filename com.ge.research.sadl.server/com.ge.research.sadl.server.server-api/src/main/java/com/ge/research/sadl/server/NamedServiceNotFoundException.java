@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright (c) 2007-2014 - General Electric Company, All Rights Reserved
+ * Copyright (c) 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL Knowledge Server
  *
