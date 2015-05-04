@@ -48,11 +48,11 @@ import com.google.inject.name.Names;
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeModule {
-    // Registers our SADL model manager.
-    @SingletonBinding
-    public Class<? extends SadlModelManager> bindSadlModelManager() {
-        return SadlModelManager.class;
-    }
+//    // Registers our SADL model manager.
+//    @SingletonBinding
+//    public Class<? extends SadlModelManager> bindSadlModelManager() {
+//        return SadlModelManager.class;
+//    }
 
     // Registers our own URI resolver to handle file:// and http://.
     public Class<? extends ImportUriResolver> bindImportUriResolver() {
