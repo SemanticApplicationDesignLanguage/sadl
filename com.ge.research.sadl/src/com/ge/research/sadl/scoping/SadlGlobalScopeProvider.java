@@ -117,8 +117,13 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 		
 		URI uri = importMapping.getKey();
 		if (resource.getURI().equals(uri) || uriSet.add(uri)) {
-			for (String importedURI: importMapping.getValue()) {
-				collectImportedURIs(resource, URI.createURI(importedURI), uriSet, resourceDescriptions);
+			for (String imp: importMapping.getValue()) {
+				URI importedURI = URI.createURI(imp);
+				// If scheme is missing, the URI must be resolved relative to the given resource URI
+				if (importedURI.scheme()==null) {
+					importedURI = importedURI.resolve(resource.getURI());
+				}
+				collectImportedURIs(resource, importedURI, uriSet, resourceDescriptions);
 			}
 		}
 	}
@@ -133,7 +138,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 		for (IResourceDescription resourceDescription: resourceDescriptions) {
 			// TODO: Inject file extension for SADL
 			for (IEObjectDescription objDesc: resourceDescription.getExportedObjectsByType(SadlPackage.Literals.MODEL)) {
-				if (objDesc.getQualifiedName().toString().equals(publicURI.toString())) {
+				if (resourceDescription.getURI().equals(publicURI) || objDesc.getQualifiedName().toString().equals(publicURI.toString())) {
 					String importsAsString = objDesc.getUserData(SadlEObjectDescription.IMPORT_KEY);
 					String[] imports = !importsAsString.isEmpty() ? Iterables.toArray(SPLITTER.split(importsAsString), String.class) : new String[0];
 					result = new Pair<URI, String[]>(resourceDescription.getURI(), imports);
