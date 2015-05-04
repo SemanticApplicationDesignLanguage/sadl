@@ -217,6 +217,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			setMappingModel(ModelFactory.createDefaultModel()) ;
 			getMappingModel().read(getModelFolderUrl() + "/" + ONT_POLICY_RDF);
 		}
+		setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
 	}
 	
 	private void loadConfigurationFile() throws ConfigurationException {
@@ -1425,7 +1426,7 @@ public class ConfigurationManager implements IConfigurationManager {
 				return mappings.get(publicUri);
 			}
 		}
-		String alt = OntDocumentManager.getInstance().doAltURLMapping(publicUri);
+		String alt = getJenaDocumentMgr().doAltURLMapping(publicUri);
 		if (alt != null) {
 			return alt;
 		}
@@ -1491,19 +1492,28 @@ public class ConfigurationManager implements IConfigurationManager {
 		}
 		return null;
 	}
-	private OntDocumentManager getJenaDocumentMgr() {
+	
+	public OntDocumentManager getJenaDocumentMgr() {
 		if (jenaDocumentMgr == null) {
-			this.setJenaDocumentMgr(OntDocumentManager.getInstance());
+			if (getMappingModel() != null) {
+				setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
+			}
+			else {
+				setJenaDocumentMgr(OntDocumentManager.getInstance());
+			}
 		}
 		return jenaDocumentMgr;
 	}
+	
 	private void setJenaDocumentMgr(OntDocumentManager jenaDocumentMgr) {
 		this.jenaDocumentMgr = jenaDocumentMgr;
 	}
+	
 	public boolean setTranslatorClassName(String translatorClassName)
 			throws ConfigurationException {
 		return true;
 	}
+	
 	public boolean setReasonerClassName(String reasonerClassName) {
 		return true;
 	}

@@ -49,8 +49,8 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
      * This constructor should be called when the repository format is not known
      * @param _tdbFolder
      */
-    public SadlJenaModelGetterPutter(String _tdbFolder) {
-    	super(_tdbFolder);
+    public SadlJenaModelGetterPutter(IConfigurationManager configMgr, String _tdbFolder) {
+    	super(configMgr, _tdbFolder);
     	setAddMissingModelToTDB(false);
     }
     
@@ -59,8 +59,8 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
      * @param _tdbFolder
      * @param format
      */
-    public SadlJenaModelGetterPutter(String _tdbFolder, String format) {
-    	super(_tdbFolder, format);
+    public SadlJenaModelGetterPutter(IConfigurationManager configMgr, String _tdbFolder, String format) {
+    	super(configMgr, _tdbFolder, format);
     	setAddMissingModelToTDB(true);
     }
     	

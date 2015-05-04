@@ -209,7 +209,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 		    			}
 		    			uri = uri.substring(idx);
     				}
-    				SadlModelManager visitor = sadlModelManagerProvider.get(element.eResource().getURI());
+    				SadlModelManager visitor = sadlModelManagerProvider.get(element.eResource());
 					URI projectUri = ResourceManager.getProjectUri(visitor.getModelResource().getURI());
 					SadlUtils su = new SadlUtils();
 					URI sadlUri = URI.createURI(su.fileNameToFileUrl(ResourceManager.findSadlFileInProject(projectUri.toFileString(), uri)));
@@ -317,7 +317,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 			}
 		}
 		if (issue.getCode().equals(SadlJavaValidator.INSTANCE_NOT_DEFINED)) {
-			SadlModelManager visitor = sadlModelManagerProvider.get(conceptEobject.eResource().getURI());
+			SadlModelManager visitor = sadlModelManagerProvider.get(conceptEobject.eResource());
 			if (visitor != null) {
 				ConceptName rcn = null;
 				try {

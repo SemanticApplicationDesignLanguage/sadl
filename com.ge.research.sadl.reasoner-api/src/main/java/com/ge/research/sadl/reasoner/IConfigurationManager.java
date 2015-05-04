@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ge.research.sadl.model.ImportMapping;
+import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -276,5 +277,11 @@ public interface IConfigurationManager {
 	 * @return
 	 */
 	public abstract boolean containsMappingForURI(String uri);
+	
+	/**
+	 * Method to get the Jena OntDocumentManager that knows about the mappings for this kbase.
+	 * @return
+	 */
+	public abstract OntDocumentManager getJenaDocumentMgr();
 
 }

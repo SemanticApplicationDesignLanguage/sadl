@@ -157,7 +157,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * 
 	 * @return
 	 */
-	protected boolean saveConfigurationModel() {
+	protected synchronized boolean saveConfigurationModel() {
 		FileOutputStream fps = null;
 		try {
 			String configFilename = getModelFolderPath().getCanonicalPath()
@@ -355,8 +355,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#resetJena()
 	 */
 	public boolean resetJena() {
-		OntDocumentManager.getInstance().clearCache();
-		OntDocumentManager.getInstance().getFileManager().resetCache();
+		getJenaDocumentMgr().clearCache();
+		getJenaDocumentMgr().getFileManager().resetCache();
 		return true;
 	}
 
@@ -389,7 +389,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#addMapping
 	 * (java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public boolean addMapping(String altUrl, String publicUri,
+	public synchronized boolean addMapping(String altUrl, String publicUri,
 			String globalPrefix, boolean bKeepPrefix, String source) throws ConfigurationException,
 			IOException, URISyntaxException {
 		SadlUtils su = new SadlUtils();
@@ -411,7 +411,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (com.hp.hpl.jena.rdf.model.Resource, com.hp.hpl.jena.rdf.model.Resource,
 	 * com.hp.hpl.jena.rdf.model.Literal)
 	 */
-	public boolean addMapping(Resource altv, Resource pubv, Literal prefix, boolean bKeepPrefix,
+	public synchronized boolean addMapping(Resource altv, Resource pubv, Literal prefix, boolean bKeepPrefix,
 			String source) throws ConfigurationException, IOException,
 			URISyntaxException {
 		boolean bChanged = false;
@@ -616,7 +616,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		return bChanged;
 	}
 
-	public Model getMappingModel() {
+	public synchronized Model getMappingModel() {
 		if (mappingModel == null) {
 			setMappingModel(ModelFactory.createDefaultModel());
 			mappingChanged = true;
@@ -631,7 +631,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#addJenaMapping
 	 * (java.lang.String, java.lang.String)
 	 */
-	public boolean addJenaMapping(String publicUri, String altUrl)
+	public synchronized boolean addJenaMapping(String publicUri, String altUrl)
 			throws IOException, URISyntaxException, ConfigurationException {
 		if (publicUri == null) {
 			throw new ConfigurationException(
@@ -641,11 +641,11 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			throw new ConfigurationException("Mapping of publicURI '"
 					+ publicUri + "' can't be to null.");
 		}
-		OntDocumentManager.getInstance().addAltEntry(publicUri, altUrl);
+		getJenaDocumentMgr().addAltEntry(publicUri, altUrl);
 		return true;
 	}
 
-	protected boolean deleteMapping(String publicUri, String altUrl)
+	protected synchronized boolean deleteMapping(String publicUri, String altUrl)
 			throws IOException, URISyntaxException, ConfigurationException {
 		if (publicUri == null) {
 			throw new ConfigurationException(
@@ -662,8 +662,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		}
 		mappings.remove(publicUri);
 		globalPrefixes.remove(publicUri);
-		OntDocumentManager.getInstance().forget(publicUri);
-		OntDocumentManager.getInstance().getFileManager()
+		getJenaDocumentMgr().forget(publicUri);
+		getJenaDocumentMgr().getFileManager()
 				.removeCacheModel(publicUri);
 		return true;
 	}
@@ -1121,7 +1121,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#
 	 * saveConfiguration()
 	 */
-	public boolean saveConfiguration() {
+	public synchronized boolean saveConfiguration() {
 		if (getConfigModel() == null || !isConfigChanged()) {
 			return false;
 		}
@@ -1159,7 +1159,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#
 	 * saveOntPolicyFile()
 	 */
-	public boolean saveOntPolicyFile() {
+	public synchronized boolean saveOntPolicyFile() {
 		if (getMappingModel() == null || !isMappingChanged()) {
 			return false;
 		}
@@ -1282,7 +1282,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#addGlobalPrefix
 	 * (java.lang.String, java.lang.String)
 	 */
-	public void addGlobalPrefix(String modelName, String globalPrefix) {
+	public synchronized void addGlobalPrefix(String modelName, String globalPrefix) {
 		String policyFilePrefix = getMappingPrefix(modelName);
 		if (globalPrefix != null) {
 			if (globalPrefixes == null) {
@@ -1331,7 +1331,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		}
 	}
 
-	private String getMappingPrefix(String modelName) {
+	private synchronized String getMappingPrefix(String modelName) {
 		Resource publicUri = getMappingModel().createResource(modelName);
 		StmtIterator sitr = getMappingModel().listStatements(null,
 				publicUrlProp, publicUri);
@@ -1527,6 +1527,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * getJenaDocumentMgr()
 	 */
 	public OntDocumentManager getJenaDocumentMgr() {
+		// Note: for an editing configuration manager, 
+		//	the OntDocumentManager must be set explicitly
 		return jenaDocumentMgr;
 	}
 

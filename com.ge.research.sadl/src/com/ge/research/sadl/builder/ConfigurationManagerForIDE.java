@@ -136,7 +136,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
      * @throws CoreException 
      * @throws IOException 
      */
-    private boolean setMappingsFromProjectFiles(List<File> sadlFiles) throws CoreException, IOException {
+    private synchronized boolean setMappingsFromProjectFiles(List<File> sadlFiles) throws CoreException, IOException {
     	boolean bChange = false;
         for (int i = 0; sadlFiles != null && i < sadlFiles.size(); i++) {
         	File sadlfile = sadlFiles.get(i);
@@ -166,7 +166,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	 * @return - true if a change was made else false if everything was as needed
 	 * @throws ConfigurationException 
 	 */
-	public boolean addMapping(Resource altv, Resource pubv, Literal prefix, String source) throws ConfigurationException, IOException, URISyntaxException {
+	public synchronized boolean addMapping(Resource altv, Resource pubv, Literal prefix, String source) throws ConfigurationException, IOException, URISyntaxException {
 		boolean bChanged = false;
 		boolean mappingFound = false;
 		List<Statement> pendingDeletions = null;
@@ -638,7 +638,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
      * @param configFilename
      * @param sadlFiles 
      */
-	public void cleanAndPopulatePolicyFile(String configFilename, List<File> sadlFiles) {
+	public synchronized void cleanAndPopulatePolicyFile(String configFilename, List<File> sadlFiles) {
         String uri = null ;
         InputStream in = null;
         try {
@@ -992,7 +992,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	}
 
 
-	public Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException {
+	public synchronized Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException {
 		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			Ontology onto = theModel.getOntology(publicUri);
@@ -1035,7 +1035,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (repoType == null) {
 	    	repoType = ConfigurationManagerForIDE.getOWLFormat();	
-		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(getTdbFolder(), repoType);
+		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), repoType);
 		    setModelGetter(modelGetter);
 		}
 		if (repoType != null && repoType.equals(IConfigurationManager.JENA_TDB)) {

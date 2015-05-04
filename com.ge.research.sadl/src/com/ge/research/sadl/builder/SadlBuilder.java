@@ -240,16 +240,16 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 		        someOutput = true;
 	        }
 	        if (totalErrors > 0) {
-	        	System.err.println("   A total of " + totalErrors + " errors occurred in " + modsWithErrors + " models.");
+	        	System.err.println("   A total of " + totalErrors + " errors occurred in " + modsWithErrors + " models in project '" + project.getName() + "'.");
 	        	someOutput = true;
 	        }
 	        if (totalWarnings > 0) {
 	        	if (totalWarnings > 1) {
-	        		System.out.println("   There were " + totalWarnings + " warnings.");
+	        		System.out.println("   There were " + totalWarnings + " warnings in project '" + project.getName() + "'.");
 	        		someOutput = true;
 	        	}
 	        	else {
-	        		System.out.println("   There was 1 warning.");
+	        		System.out.println("   There was 1 warning in project '" + project.getName() + "'.");
 	        		someOutput = true;
 	        	}
 	        }

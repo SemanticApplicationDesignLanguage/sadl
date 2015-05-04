@@ -47,13 +47,14 @@ public class SadlSemanticHighlightingCalculator implements
 		ISemanticHighlightingCalculator, IPartListener2,
 		IResourceChangeListener, IXtextEditorCallback {
 	private final SadlGrammarAccess grammarAccess;
-	private final SadlModelManager visitor;
+//	private final SadlModelManager visitor;
 
 	@Inject
 	public SadlSemanticHighlightingCalculator(SadlGrammarAccess grammarAccess,
-			SadlModelManager visitor, SadlProposalProvider proposalProvider) {
+//			SadlModelManager visitor, 
+			SadlProposalProvider proposalProvider) {
 		this.grammarAccess = grammarAccess;
-		this.visitor = visitor;
+//		this.visitor = visitor;
 	}
 
 	@Override
@@ -127,160 +128,160 @@ public class SadlSemanticHighlightingCalculator implements
 	// =====================================================================================
 	
 	
-	public void provideHighlightingFor2(XtextResource resource,
-			IHighlightedPositionAcceptor acceptor) {
-
-		if (resource == null)
-			return;
-
-		synchronized (visitor) {
-			// We have to convert the Ecore model to a Jena OntModel on the fly
-			// in order to look up which concept type an identifier has.
-			try {
-				// assume that the editor is open--why else would we be in the
-				// semantic highlighting code??
-				boolean editorOpen = true;
-				String resourceName = resource.getURI().lastSegment();
-				IWorkbenchWindow wndw = PlatformUI.getWorkbench()
-						.getActiveWorkbenchWindow();
-				ResourcesPlugin.getWorkspace().addResourceChangeListener(this,
-						IResourceChangeEvent.PRE_CLOSE);
-				// ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-				if (wndw != null) {
-					if (wndw.getActivePage() != null) {
-						// can't set the listener for close unless we have a
-						// window...
-						IEditorReference[] editors = wndw.getActivePage()
-								.getEditorReferences();
-						for (int i = 0; editors != null && i < editors.length; i++) {
-							IEditorReference editor = editors[i];
-							if (resourceName.equals(editor.getPartName())) {
-								// editorOpen = true;
-								editor.getPage().addPartListener(this);
-							}
-						}
-					}
-				}
-				visitor.processModel(resource, false, editorOpen, null);
-			} catch (CoreException e) {
-				// SadlConsole.writeToConsole(MessageType.ERROR,
-				// "Error processing model for syntax highlighting: " +
-				// e.getLocalizedMessage());
-				e.printStackTrace();
-			}
-			SadlConsole.displayMessages(visitor);
-
-			// Now we can highlight each node according to its type.
-			Iterable<INode> allNodes = resource.getParseResult().getRootNode()
-					.getAsTreeIterable();
-			for (INode abstractNode : allNodes) {
-				EObject grammarElement = abstractNode.getGrammarElement();
-				if (grammarElement == grammarAccess.getModelNameAccess()
-						.getBaseUriSTRINGTerminalRuleCall_1_0()) {
-					highlightNode(abstractNode,
-							SadlHighlightingConfiguration.URI_ID, acceptor);
-				} else if (grammarElement == grammarAccess.getImportAccess()
-						.getImportURISTRINGTerminalRuleCall_1_0()) {
-					highlightNode(abstractNode,
-							SadlHighlightingConfiguration.URI_ID, acceptor);
-				} else if (grammarElement == grammarAccess
-						.getResourceNameAccess()
-						.getNameNAMEParserRuleCall_0_0()) {
-					lookupAndHighlightName(abstractNode, acceptor);
-				} else if (grammarElement == grammarAccess
-						.getResourceNameAccess()
-						.getNameNAMEParserRuleCall_0_0()) {
-					lookupAndHighlightName(abstractNode, acceptor);
-				} else if (grammarElement == grammarAccess
-						.getResourceByNameAccess()
-						.getNameResourceNameCrossReference_0()) {
-					lookupAndHighlightName(abstractNode, acceptor);
-				} else if (grammarElement == grammarAccess.getNUMBERAccess()
-						.getUNSIGNED_NUMBERTerminalRuleCall_1()
-						|| grammarElement == grammarAccess.getNUMBERAccess()
-								.getHyphenMinusKeyword_0()) {
-					highlightNode(abstractNode,
-							SadlHighlightingConfiguration.NUMBER_ID, acceptor);
-				}
-			}
-		}
-	}
-
-	private void highlightNode(INode abstractNode, String id,
-			IHighlightedPositionAcceptor acceptor) {
-		if (abstractNode == null)
-			return;
-
-		if (abstractNode instanceof ILeafNode) {
-			acceptor.addPosition(abstractNode.getOffset(),
-					abstractNode.getLength(), id);
-		} else {
-			for (ILeafNode leaf : abstractNode.getLeafNodes()) {
-				if (!leaf.isHidden()) {
-					acceptor.addPosition(leaf.getOffset(), leaf.getLength(), id);
-				}
-			}
-		}
-	}
-
-	private void lookupAndHighlightName(INode abstractNode,
-			IHighlightedPositionAcceptor acceptor) {
-		if (abstractNode == null)
-			return;
-
-		if (abstractNode instanceof ILeafNode) {
-			String id = getHighlightingId(((ILeafNode) abstractNode).getText());
-			acceptor.addPosition(abstractNode.getOffset(),
-					abstractNode.getLength(), id);
-		} else {
-			// We have to concatenate a composite name from its tokens.
-			StringBuilder sb = new StringBuilder();
-			for (ILeafNode leaf : abstractNode.getLeafNodes()) {
-				if (!leaf.isHidden()) {
-					sb.append(leaf.getText());
-				}
-			}
-			// Look up the name's type and highlight it accordingly.
-			String id = getHighlightingId(sb.toString());
-			acceptor.addPosition(abstractNode.getOffset(),
-					abstractNode.getLength(), id);
-		}
-	}
-
-	private String getHighlightingId(String name) {
-		boolean isEscaped = false;
-		if (name.indexOf('^') >= 0) {
-			name = SadlModelManager.removeEscapeCharacters(name);
-		}
-		int idx = name.indexOf(":");
-		if (idx > 0) {
-			if (name.charAt(idx + 1) == '^') {
-				name = name.substring(0, idx + 1) + name.substring(idx + 2);
-				isEscaped = true;
-			}
-		}
-		ConceptType type = visitor.getConceptType(name);
-		switch (type) {
-		case ANNOTATIONPROPERTY:
-			return SadlHighlightingConfiguration.ANNOTATION_PROPERTY_ID;
-		case CONCEPT_NOT_FOUND_IN_MODEL:
-			// return SadlHighlightingConfiguration.DEFAULT_ID;
-			return SadlHighlightingConfiguration.VARIABLE_ID;
-		case DATATYPEPROPERTY:
-			return SadlHighlightingConfiguration.DATA_PROPERTY_ID;
-		case INDIVIDUAL:
-			return SadlHighlightingConfiguration.INSTANCE_ID;
-		case OBJECTPROPERTY:
-			return SadlHighlightingConfiguration.OBJECT_PROPERTY_ID;
-		case ONTCLASS:
-			return SadlHighlightingConfiguration.CLASS_ID;
-		case RDFDATATYPE:
-			return SadlHighlightingConfiguration.RDFDATATYPE_ID;
-		default:
-			return SadlHighlightingConfiguration.DEFAULT_ID;
-		}
-	}
-
+//	public void provideHighlightingFor2(XtextResource resource,
+//			IHighlightedPositionAcceptor acceptor) {
+//
+//		if (resource == null)
+//			return;
+//
+//		synchronized (visitor) {
+//			// We have to convert the Ecore model to a Jena OntModel on the fly
+//			// in order to look up which concept type an identifier has.
+//			try {
+//				// assume that the editor is open--why else would we be in the
+//				// semantic highlighting code??
+//				boolean editorOpen = true;
+//				String resourceName = resource.getURI().lastSegment();
+//				IWorkbenchWindow wndw = PlatformUI.getWorkbench()
+//						.getActiveWorkbenchWindow();
+//				ResourcesPlugin.getWorkspace().addResourceChangeListener(this,
+//						IResourceChangeEvent.PRE_CLOSE);
+//				// ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+//				if (wndw != null) {
+//					if (wndw.getActivePage() != null) {
+//						// can't set the listener for close unless we have a
+//						// window...
+//						IEditorReference[] editors = wndw.getActivePage()
+//								.getEditorReferences();
+//						for (int i = 0; editors != null && i < editors.length; i++) {
+//							IEditorReference editor = editors[i];
+//							if (resourceName.equals(editor.getPartName())) {
+//								// editorOpen = true;
+//								editor.getPage().addPartListener(this);
+//							}
+//						}
+//					}
+//				}
+//				visitor.processModel(resource, false, editorOpen, null);
+//			} catch (CoreException e) {
+//				// SadlConsole.writeToConsole(MessageType.ERROR,
+//				// "Error processing model for syntax highlighting: " +
+//				// e.getLocalizedMessage());
+//				e.printStackTrace();
+//			}
+//			SadlConsole.displayMessages(visitor);
+//
+//			// Now we can highlight each node according to its type.
+//			Iterable<INode> allNodes = resource.getParseResult().getRootNode()
+//					.getAsTreeIterable();
+//			for (INode abstractNode : allNodes) {
+//				EObject grammarElement = abstractNode.getGrammarElement();
+//				if (grammarElement == grammarAccess.getModelNameAccess()
+//						.getBaseUriSTRINGTerminalRuleCall_1_0()) {
+//					highlightNode(abstractNode,
+//							SadlHighlightingConfiguration.URI_ID, acceptor);
+//				} else if (grammarElement == grammarAccess.getImportAccess()
+//						.getImportURISTRINGTerminalRuleCall_1_0()) {
+//					highlightNode(abstractNode,
+//							SadlHighlightingConfiguration.URI_ID, acceptor);
+//				} else if (grammarElement == grammarAccess
+//						.getResourceNameAccess()
+//						.getNameNAMEParserRuleCall_0_0()) {
+//					lookupAndHighlightName(abstractNode, acceptor);
+//				} else if (grammarElement == grammarAccess
+//						.getResourceNameAccess()
+//						.getNameNAMEParserRuleCall_0_0()) {
+//					lookupAndHighlightName(abstractNode, acceptor);
+//				} else if (grammarElement == grammarAccess
+//						.getResourceByNameAccess()
+//						.getNameResourceNameCrossReference_0()) {
+//					lookupAndHighlightName(abstractNode, acceptor);
+//				} else if (grammarElement == grammarAccess.getNUMBERAccess()
+//						.getUNSIGNED_NUMBERTerminalRuleCall_1()
+//						|| grammarElement == grammarAccess.getNUMBERAccess()
+//								.getHyphenMinusKeyword_0()) {
+//					highlightNode(abstractNode,
+//							SadlHighlightingConfiguration.NUMBER_ID, acceptor);
+//				}
+//			}
+//		}
+//	}
+//
+//	private void highlightNode(INode abstractNode, String id,
+//			IHighlightedPositionAcceptor acceptor) {
+//		if (abstractNode == null)
+//			return;
+//
+//		if (abstractNode instanceof ILeafNode) {
+//			acceptor.addPosition(abstractNode.getOffset(),
+//					abstractNode.getLength(), id);
+//		} else {
+//			for (ILeafNode leaf : abstractNode.getLeafNodes()) {
+//				if (!leaf.isHidden()) {
+//					acceptor.addPosition(leaf.getOffset(), leaf.getLength(), id);
+//				}
+//			}
+//		}
+//	}
+//
+//	private void lookupAndHighlightName(INode abstractNode,
+//			IHighlightedPositionAcceptor acceptor) {
+//		if (abstractNode == null)
+//			return;
+//
+//		if (abstractNode instanceof ILeafNode) {
+//			String id = getHighlightingId(((ILeafNode) abstractNode).getText());
+//			acceptor.addPosition(abstractNode.getOffset(),
+//					abstractNode.getLength(), id);
+//		} else {
+//			// We have to concatenate a composite name from its tokens.
+//			StringBuilder sb = new StringBuilder();
+//			for (ILeafNode leaf : abstractNode.getLeafNodes()) {
+//				if (!leaf.isHidden()) {
+//					sb.append(leaf.getText());
+//				}
+//			}
+//			// Look up the name's type and highlight it accordingly.
+//			String id = getHighlightingId(sb.toString());
+//			acceptor.addPosition(abstractNode.getOffset(),
+//					abstractNode.getLength(), id);
+//		}
+//	}
+//
+//	private String getHighlightingId(String name) {
+//		boolean isEscaped = false;
+//		if (name.indexOf('^') >= 0) {
+//			name = SadlModelManager.removeEscapeCharacters(name);
+//		}
+//		int idx = name.indexOf(":");
+//		if (idx > 0) {
+//			if (name.charAt(idx + 1) == '^') {
+//				name = name.substring(0, idx + 1) + name.substring(idx + 2);
+//				isEscaped = true;
+//			}
+//		}
+//		ConceptType type = visitor.getConceptType(name);
+//		switch (type) {
+//		case ANNOTATIONPROPERTY:
+//			return SadlHighlightingConfiguration.ANNOTATION_PROPERTY_ID;
+//		case CONCEPT_NOT_FOUND_IN_MODEL:
+//			// return SadlHighlightingConfiguration.DEFAULT_ID;
+//			return SadlHighlightingConfiguration.VARIABLE_ID;
+//		case DATATYPEPROPERTY:
+//			return SadlHighlightingConfiguration.DATA_PROPERTY_ID;
+//		case INDIVIDUAL:
+//			return SadlHighlightingConfiguration.INSTANCE_ID;
+//		case OBJECTPROPERTY:
+//			return SadlHighlightingConfiguration.OBJECT_PROPERTY_ID;
+//		case ONTCLASS:
+//			return SadlHighlightingConfiguration.CLASS_ID;
+//		case RDFDATATYPE:
+//			return SadlHighlightingConfiguration.RDFDATATYPE_ID;
+//		default:
+//			return SadlHighlightingConfiguration.DEFAULT_ID;
+//		}
+//	}
+//
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
 		int i = 0;
@@ -293,7 +294,7 @@ public class SadlSemanticHighlightingCalculator implements
 
 	@Override
 	public void partClosed(IWorkbenchPartReference partRef) {
-		visitor.editorClosed(partRef.getPartName());
+//		visitor.editorClosed(partRef.getPartName());
 	}
 
 	@Override
@@ -318,7 +319,7 @@ public class SadlSemanticHighlightingCalculator implements
 
 	@Override
 	public void partInputChanged(IWorkbenchPartReference partRef) {
-		visitor.removeResourceModel(visitor.getModelResource());
+//		visitor.removeResourceModel(visitor.getModelResource());
 	}
 
 	@Override
@@ -326,8 +327,8 @@ public class SadlSemanticHighlightingCalculator implements
 		// System.out.println("resourceChanged event " + event.getType());
 		if (event.getType() == IResourceChangeEvent.PRE_CLOSE
 				&& event.getResource() instanceof IProject) {
-			visitor.removeAllProjectResourceModels(event.getResource()
-					.getName());
+//			visitor.removeAllProjectResourceModels(event.getResource()
+//					.getName());
 		}
 	}
 
@@ -370,14 +371,14 @@ public class SadlSemanticHighlightingCalculator implements
 		}
 	}
 
-	// private void explore(String location, XtextEditor editor) {
-	// System.out.println("Explore: " + location);
-	// System.out.println("  Project location: " +
-	// editor.getResource().getProject().getLocation());
-	// System.out.println("  Resource location: " +
-	// editor.getResource().getFullPath());
-	// System.out.println("  Editor input: " + editor.getEditorInput());
-	// }
+//	// private void explore(String location, XtextEditor editor) {
+//	// System.out.println("Explore: " + location);
+//	// System.out.println("  Project location: " +
+//	// editor.getResource().getProject().getLocation());
+//	// System.out.println("  Resource location: " +
+//	// editor.getResource().getFullPath());
+//	// System.out.println("  Editor input: " + editor.getEditorInput());
+//	// }
 	//
 	@Override
 	public void beforeDispose(XtextEditor editor) {

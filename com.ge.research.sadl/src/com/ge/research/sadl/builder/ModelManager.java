@@ -2128,6 +2128,7 @@ public class ModelManager {
 			OntProperty p1 = getOrCreateObjectProperty(0, 0, cl1);
 			OntProperty p2 = getOrCreateObjectProperty(1, 0, cl2);
 			if (p1 != null && p2 != null) {
+				// TODO check for same range?
 				p1.addEquivalentProperty(p2);
 			}
 		} else if (ct1.equals(ConceptType.DATATYPEPROPERTY)) {

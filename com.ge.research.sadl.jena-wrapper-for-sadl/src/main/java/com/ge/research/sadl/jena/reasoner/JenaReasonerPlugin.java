@@ -475,10 +475,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		tboxLoadTime = System.currentTimeMillis();
 
 		if (configurationMgr == null) {
-		//	Get the correct Mappings from the policy file
-			OntDocumentManager mgr = OntDocumentManager.getInstance();
-			mgr.reset();
-//			mgr.setProcessImports(true);
 			configurationMgr = ConfigurationManagerFactory.getConfigurationManager(folderName, repoType);
 		}
 
@@ -493,7 +489,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			String tdbFolder = configurationMgr.getTdbFolder();
 			if (configurationMgr.getModelGetter() == null) {
-				configurationMgr.setModelGetter(new SadlJenaModelGetter(tdbFolder));
+				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
 			}
 			format = configurationMgr.getModelGetter().getFormat();
 			if (!format.equals(IConfigurationManager.JENA_TDB)) {

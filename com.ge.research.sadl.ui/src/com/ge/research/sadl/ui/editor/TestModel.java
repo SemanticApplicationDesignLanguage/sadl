@@ -82,7 +82,7 @@ public class TestModel extends SadlActionDelegate implements IObjectActionDelega
 	    if (showReasonerTimingInformation) {
 	    	t1 = System.currentTimeMillis();
 	    }
-	    visitor = sadlModelManagerProvider.get(resourceSet.getResources().get(0).getURI());
+	    visitor = sadlModelManagerProvider.get(resourceSet.getResources().get(0));
 	    prepareModel(visitor, testFilePath, resourceSet);
 		final String modelName = visitor.getModelName();
 	    

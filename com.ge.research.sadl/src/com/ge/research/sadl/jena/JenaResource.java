@@ -183,12 +183,12 @@ public class JenaResource extends ResourceImpl {
 		catch (InvalidNameException e) {
 			logger.error("Invalid name", e);
 			throw new IOException("Unable to resolve name: " + e.getMessage(), e);
-		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (ConfigurationException e) {
+			logger.error("Invalid name", e);
+			throw new IOException("Configuration error, unable to resolve name: " + e.getMessage(), e);
+		} catch (URISyntaxException e) {
+			logger.error("Invalid name", e);
+			throw new IOException("Syntax error, unable to resolve name: " + e.getMessage(), e);
 		}
 	}
 

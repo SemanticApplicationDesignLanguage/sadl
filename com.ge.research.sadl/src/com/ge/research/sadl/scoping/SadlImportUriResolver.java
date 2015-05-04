@@ -23,18 +23,26 @@
 
 package com.ge.research.sadl.scoping;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.scoping.impl.ImportUriResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.builder.SadlModelManagerProvider;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.sadl.Import;
+import com.ge.research.sadl.sadl.Model;
+import com.ge.research.sadl.sadl.ModelName;
 import com.google.inject.Inject;
 
 /**
@@ -58,11 +66,55 @@ public class SadlImportUriResolver extends ImportUriResolver {
      * @return Import URI resolved to file URI of OWL file.
      */
     public String resolve(EObject object) {
+    	if (object instanceof Model || object instanceof ModelName) {
+    		return null;
+    	}
         String importUri = super.resolve(object);
-        String owlUri = importUri;
+    	Resource resource = object.eResource();
+        if (importUri == null) {
+        	SadlModelManager smMgr = sadlModelManagerProvider.get(resource);
+        	try {
+				IConfigurationManagerForIDE configMgr = smMgr.getConfigurationMgr(resource.getURI());
+				String uri = null;
+				if (object instanceof Model) {
+					uri = ((Model)object).getModelName().getBaseUri();
+				}
+				else if (object instanceof ModelName) {
+					uri = ((ModelName)object).getBaseUri();
+				}
+				else if (object instanceof Import) {
+					uri = ((Import)object).getImportURI();
+				}
+				else {
+					int i = 0;
+				}
+				
+				if (uri != null) {
+					if (uri.startsWith(ResourceManager.HTTP_URL_PREFIX) && uri.endsWith(ResourceManager.OWLFILEEXT)) {
+						return uri;
+					}
+					if (configMgr.containsMappingForURI(uri)) {
+						importUri = configMgr.getAltUrlFromPublicUri(uri);
+					}
+					else {
+						int i = 0;
+					}
+				}
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+        String httpUri = importUri;
 
         if (importUri != null) {
-            URI resourceURI = object.eResource().getURI();
+            URI resourceURI = resource.getURI();
             URI uri = URI.createURI(importUri);
 
             // check for a V1 compatibility issue
@@ -82,31 +134,46 @@ public class SadlImportUriResolver extends ImportUriResolver {
                 // Convert the platform URI to an absolute URI.
                 uri = ResourceManager.convertPlatformUriToAbsoluteUri(uri);
                 // Convert any SADL URI to an OWL URI.
-        	    if (ResourceManager.SADLEXT.equalsIgnoreCase(uri.fileExtension())) {
-        	        try {
-                        uri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(uri);
-                    }
-        	        catch (CoreException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-        	    }
+    	        try {
+            	    if (ResourceManager.SADLEXT.equalsIgnoreCase(uri.fileExtension())) {
+            	    	uri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(uri);
+            	    }
+            	    if (ResourceManager.OWLFILEEXT.equals(uri.fileExtension())) {
+	                	SadlModelManager smMgr = sadlModelManagerProvider.get(resource);
+	    				IConfigurationManagerForIDE configMgr = smMgr.getConfigurationMgr(resource.getURI());
+	    				httpUri = configMgr.getPublicUriFromActualUrl(uri.toString());
+            	    }
+                }
+    	        catch (CoreException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ConfigurationException e) {
+                	SadlModelManager smMgr = sadlModelManagerProvider.get(resource);
+                	smMgr.getMessageManager().error(e.getMessage());
+				} catch (URISyntaxException e) {
+                	SadlModelManager smMgr = sadlModelManagerProvider.get(resource);
+                	smMgr.getMessageManager().error(e.getMessage());
+				} catch (IOException e) {
+                	SadlModelManager smMgr = sadlModelManagerProvider.get(resource);
+                	smMgr.getMessageManager().error(e.getMessage());
+				}
+        	    
                 // Convert the OWL URI back to a string.
-                owlUri = uri.toString();
+//                httpUri = uri.toString();
             }
             else {
                 // Look up the public URI in the policy file and get the OWL URI.
             	try {
-            		SadlModelManager visitor = sadlModelManagerProvider.get(resourceURI);
-					owlUri = visitor.getAltUrl(importUri, resourceURI);
+            		SadlModelManager visitor = sadlModelManagerProvider.get(resource);
+					httpUri = visitor.getAltUrl(importUri, resourceURI);
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             }
-            logger.debug("Resolved import '{}' to '{}'", importUri, owlUri);
+            logger.debug("Resolved import '{}' to '{}'", importUri, httpUri);
         }
 
-        return owlUri;
+        return httpUri;
     }
 }

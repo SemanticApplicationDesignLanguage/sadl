@@ -66,11 +66,14 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     private String format = null;
     private boolean addMissingModelToTDB = false;
     
+    private IConfigurationManager configurationManager = null;
+    
     /**
      * This constructor should be called when the repository format is not known
      * @param _tdbFolder
      */
-    public SadlJenaModelGetter(String _tdbFolder) {
+    public SadlJenaModelGetter(IConfigurationManager configMgr, String _tdbFolder) {
+    	configurationManager = configMgr;
     	File tdbFile = new File(_tdbFolder);
     	if (tdbFile.exists()) {
     		setFormat(IConfigurationManager.JENA_TDB);	// if the caller doesn't tell us the format
@@ -91,7 +94,8 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
      * @param _tdbFolder
      * @param format
      */
-    public SadlJenaModelGetter(String _tdbFolder, String _format) {
+    public SadlJenaModelGetter(IConfigurationManager configMgr, String _tdbFolder, String _format) {
+    	configurationManager = configMgr;
     	setFormat(_format);
     	setTdbFolder(_tdbFolder);
 
@@ -192,7 +196,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     		m = getModel(uri);
     	}
     	if (m == null && loadIfAbsent != null) {
-            String altUrl = OntDocumentManager.getInstance().doAltURLMapping(uri);
+            String altUrl = configurationManager.getJenaDocumentMgr().doAltURLMapping(uri);
             if (altUrl != null && altUrl.endsWith(".TDB/")) {
             	try {
             		SadlUtils su = new SadlUtils();
@@ -207,7 +211,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
             }
             else {
                 m = ModelFactory.createDefaultModel();
-	            loadIfAbsent.readModel( m, uri );
+	            loadIfAbsent.readModel( m, altUrl != null ? altUrl : uri );
 	            if (addToTDB && ds != null && getFormat().equals(IConfigurationManager.JENA_TDB)) {
 	            	ds.begin(ReadWrite.WRITE);
 	            	ds.addNamedModel( uri, m );
@@ -229,7 +233,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     	Model m = getModel(publicUri, new ModelReader() {
             @Override
             public Model readModel( Model toRead, String URL ) {
-               OntDocumentManager.getInstance().getFileManager().readModel( toRead, URL );
+               configurationManager.getJenaDocumentMgr().getFileManager().readModel( toRead, URL );
                return toRead;
             }
          });

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright ? 2007-2010 - General Electric Company, All Rights Reserved
+ * Copyright (c) 2007-2010 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *

@@ -57,7 +57,8 @@ Workflow {
 
       // java-based API for validation
       fragment = validation.JavaValidatorFragment {
-        composedCheck = "org.eclipse.xtext.validation.ImportUriValidator"
+        //composedCheck = "org.eclipse.xtext.validation.ImportUriValidator"
+		composedCheck = "com.ge.research.sadl.validation.SadlImportUriValidator"
       }
 
       // scoping and exporting API (Xtext 0.7)
