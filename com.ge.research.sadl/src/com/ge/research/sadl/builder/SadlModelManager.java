@@ -3168,7 +3168,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			configurationMgrMap.put(projectUri, configurationMgr);
 	    	IPreferencesService service = Platform.getPreferencesService();
 	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
-	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr.getTdbFolder(), format);
+	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
 	    	configurationMgr.setModelGetter(modelGetter);
 		}
 		else if (configurationMgr.isConfigurationStale()) {
@@ -3176,7 +3176,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			configurationMgrMap.put(projectUri, configurationMgr);
 	    	IPreferencesService service = Platform.getPreferencesService();
 	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
-	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr.getTdbFolder(), format);
+	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
 	    	configurationMgr.setModelGetter(modelGetter);
 			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
 		} else if (!configurationMgr.getModelFolderPath().equals(new File(owlModelsFolder))) {
@@ -3216,11 +3216,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	}
 
 	public ModelManager getModel() {
-		Resource currentResource = getResource();
-		if (currentResource==null) {
-			throw new IllegalStateException("Current resource was not set on SadlModelManager");
-		}
-		ModelInfo minfo = getModelInfo(currentResource);
+		ModelInfo minfo = getModelInfo(getResource());
 		if (minfo != null) {
 			return minfo.getModel();
 		}

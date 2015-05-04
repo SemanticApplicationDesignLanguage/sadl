@@ -81,7 +81,7 @@ public class ResourceManager {
     public static final String HTTP_URL_PREFIX = "http://";
     public static final String OWLDIR = "OwlModels";
     public static final String TEMPDIR = "Temp";
-//    public static final String OWLFILEEXT = "owl";
+    public static final String OWLFILEEXT = "owl";
 //    public static final String OWLFILEEXTWITHPREFIX = ".owl";
     public static final String SADLEXT = "sadl";
     public static final String SADLEXTWITHPREFIX = ".sadl";
