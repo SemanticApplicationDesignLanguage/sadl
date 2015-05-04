@@ -21,6 +21,7 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeI
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration;
 import org.eclipse.xtext.ui.editor.syntaxcoloring.ISemanticHighlightingCalculator;
 import org.eclipse.xtext.ui.editor.templates.XtextTemplateContextType;
+import org.eclipse.xtext.ui.editor.validation.ValidatingEditorCallback;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.ui.contentassist.SadlTemplateContextType;
@@ -33,6 +34,7 @@ import com.ge.research.sadl.ui.quickfix.TemplateQuickAssistProcessor;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper;
+import com.google.inject.Binder;
 import com.google.inject.name.Names;
 
 /**
@@ -106,6 +108,10 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
 		binder.bind(IXtextEditorCallback.class)
 				.annotatedWith(Names.named("editor.tracker"))
 				.to(SadlSemanticHighlightingCalculator.class);
+	}
+	
+	public void configureValidatingEditorCallback (Binder binder) {
+		binder.bind(IXtextEditorCallback.class).annotatedWith(Names.named("editor.validator")).to(ValidatingEditorCallback.class);
 	}
 
 	// Customize URL Hyperlink Detection

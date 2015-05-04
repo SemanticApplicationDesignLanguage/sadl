@@ -10,8 +10,10 @@ import java.net.URISyntaxException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.naming.IQualifiedNameConverter;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IGlobalScopeProvider;
 import org.eclipse.xtext.scoping.IScope;
@@ -66,6 +68,8 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
     private IGlobalScopeProvider globalScopeProvider;
     @Inject
     private IQualifiedNameProvider qnProvider;
+    @Inject
+    private IQualifiedNameConverter qnConverter;
     
     /**
      * Through (transitive) imports the short name ResourceName referred by a ResourceNyName might
@@ -77,12 +81,16 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
     public void checkNoAmbiguousQualifiedNameOnScope (ResourceByName rn) {
     	if (rn.eResource()==null || rn.getName().eIsProxy()) return;
     	// the qualified name of the actually linked ResourceName
+    	String crossRefString = NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(rn));
+    	if (qnConverter.toQualifiedName(crossRefString).getSegmentCount()>1) return; // only interested in unqualified names
+    	
+    	// now get the qn of the actual linked ResourceName
     	QualifiedName qn = qnProvider.getFullyQualifiedName(rn.getName());
     	// search the global scope for any other name
     	IScope scope = globalScopeProvider.getScope(rn.eResource(), SadlPackage.Literals.RESOURCE_BY_NAME__NAME, null);
     	for (IEObjectDescription description : scope.getAllElements()) {
-			if (qn.getLastSegment().equals(description.getQualifiedName()) && !qn.equals(description.getQualifiedName())) {
-				warning("The name "+qn.getLastSegment()+" is ambiguous. Please qualify the name", rn, SadlPackage.Literals.RESOURCE_BY_NAME__NAME);
+			if (qn.getLastSegment().equals(description.getQualifiedName().getLastSegment()) && !qn.equals(description.getQualifiedName())) {
+				warning("The name "+qn.getLastSegment()+" is ambiguous ("+qn.toString()+","+description.getQualifiedName()+"). Please qualify the name.", rn, SadlPackage.Literals.RESOURCE_BY_NAME__NAME);
 				return;
 			}
 		}
