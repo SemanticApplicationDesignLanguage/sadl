@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 
 /**
  * Provides SadlModelManagaers, one per Eclipse project. SadlModelManagers are stored n a Map (smmMap) by key project URI. 
@@ -52,6 +53,16 @@ public class SadlModelManagerProvider implements Provider<SadlModelManager>, IRe
 	private Map<URI, SadlModelManager> smmMap = new HashMap<URI, SadlModelManager>();
 	
 	
+	public SadlModelManager get(Resource resource) {
+		setUri(ResourceManager.getProjectUri(resource.getURI()));
+		SadlModelManager modelManager = get();
+		modelManager.setCurrentResource(resource);
+		return modelManager;
+	}
+
+	/**
+	 * @deprecated Use {@link #get(Resource)} instead
+	 */
 	public SadlModelManager get(URI uri) {
 		uri = ResourceManager.getProjectUri(uri);
 		setUri(uri);

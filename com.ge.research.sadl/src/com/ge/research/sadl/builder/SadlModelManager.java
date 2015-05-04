@@ -3216,7 +3216,11 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	}
 
 	public ModelManager getModel() {
-		ModelInfo minfo = getModelInfo(getResource());
+		Resource currentResource = getResource();
+		if (currentResource==null) {
+			throw new IllegalStateException("Current resource was not set on SadlModelManager");
+		}
+		ModelInfo minfo = getModelInfo(currentResource);
 		if (minfo != null) {
 			return minfo.getModel();
 		}

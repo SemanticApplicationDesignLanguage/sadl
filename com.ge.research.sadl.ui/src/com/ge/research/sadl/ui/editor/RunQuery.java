@@ -147,6 +147,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 		}
 		
 		XtextResourceSet resourceSet = new XtextResourceSet();
+		// TODO: [KTH] How should this work? There is no resource in the ResourceSet yet
 		visitor = sadlModelManagerProvider.get(resourceSet.getResources().get(0).getURI());
 		prepareModel(visitor, testFilePath, resourceSet);
 		final String modelName = visitor.getModelName();

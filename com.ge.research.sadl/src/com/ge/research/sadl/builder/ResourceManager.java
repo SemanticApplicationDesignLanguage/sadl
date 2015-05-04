@@ -746,6 +746,9 @@ public class ResourceManager {
      * for other file URIs or just to get the name of the project itself.
      */
     public static URI getProjectUri(URI someFileInProject) {
+    	if (someFileInProject == null) {
+    		throw new NullPointerException("Method called with null value for argument 'someFileInProject'");
+    	}
    		// Get absolute location of workspace.
     	try {
     		IProject prj = getProject(someFileInProject);

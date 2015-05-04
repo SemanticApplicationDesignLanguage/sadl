@@ -151,7 +151,7 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 				if ("importURI".equals(feature)) {
 			        List<ConceptName> names;
 					try {
-						SadlModelManager visitor = sadlModelManagerProvider.get(model.eResource().getURI());
+						SadlModelManager visitor = sadlModelManagerProvider.get(model.eResource());
 						names = visitor.getNamedConceptsOfType(ConceptType.MODELNAME, Scope.INCLUDEIMPORTS);
 				        if (names != null) {
 				        	Collection<ImportMapping> impmappings = visitor.getModelImportMappings();

@@ -31,7 +31,9 @@ import java.util.List;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
@@ -83,7 +85,8 @@ public class SadlResourceNameTemplateVariableResolver extends
     public List<String> resolveValues(TemplateVariable variable,
             XtextTemplateContext xtextTemplateContext) {
     	
-		SadlModelManager visitor = sadlModelManagerProvider.get(null);
+		Resource currentResource = xtextTemplateContext.getContentAssistContext().getCurrentModel().eResource();
+		SadlModelManager visitor = sadlModelManagerProvider.get(currentResource);
 		String conceptualType = (String) variable.getVariableType()
 				.getParams().iterator().next();
 		if (conceptualType.equals("VERSION")) {
