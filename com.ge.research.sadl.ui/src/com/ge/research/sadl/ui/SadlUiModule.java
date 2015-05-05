@@ -21,7 +21,6 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeI
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration;
 import org.eclipse.xtext.ui.editor.syntaxcoloring.ISemanticHighlightingCalculator;
 import org.eclipse.xtext.ui.editor.templates.XtextTemplateContextType;
-import org.eclipse.xtext.ui.editor.validation.ValidatingEditorCallback;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.ui.contentassist.SadlTemplateContextType;
@@ -34,8 +33,6 @@ import com.ge.research.sadl.ui.quickfix.TemplateQuickAssistProcessor;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper;
-import com.google.inject.Binder;
-import com.google.inject.name.Names;
 
 /**
  * Use this class to register components to be used within the IDE.
@@ -103,25 +100,14 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
 		return TemplateIssueResolutionAcceptor.class;
 	}
 
-	public void configureXtextEditorErrorTickUpdater(
-			com.google.inject.Binder binder) {
-		binder.bind(IXtextEditorCallback.class)
-				.annotatedWith(Names.named("editor.tracker"))
-				.to(SadlSemanticHighlightingCalculator.class);
+	@Override
+	public Class<? extends IXtextEditorCallback> bindIXtextEditorCallback() {
+		return SadlSemanticHighlightingCalculator.class;
 	}
 	
-	public void configureValidatingEditorCallback (Binder binder) {
-		binder.bind(IXtextEditorCallback.class).annotatedWith(Names.named("editor.validator")).to(ValidatingEditorCallback.class);
-	}
-
 	// Customize URL Hyperlink Detection
 	public Class<? extends XtextSourceViewerConfiguration> bindXtextSourceViewerConfiguration() {
 		return SadlSourceViewerConfiguration.class;
-	}
-
-	@Override
-	public com.google.inject.Provider<org.eclipse.xtext.resource.containers.IAllContainersState> provideIAllContainersState() {
-		return org.eclipse.xtext.ui.shared.Access.getWorkspaceProjectsState();
 	}
 
 }
