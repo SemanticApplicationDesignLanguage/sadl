@@ -3737,7 +3737,11 @@ public class ModelManager {
 				}
 			}
 			else {
-				logger.error("MM failed to retrieve an OntModel for the current Resource: " + getModelActualUrl().toString());
+				if (getModelActualUrl()!=null) {
+					logger.error("MM failed to retrieve an OntModel for the current Resource: " + getModelActualUrl().toString());
+				} else {
+					logger.error("MM failed to retrieve an OntModel - no current Resource set");
+				}
 			}
 
 			// must look in imported models
