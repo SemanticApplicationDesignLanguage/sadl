@@ -1,28 +1,17 @@
 package com.ge.research.sadl.ui.syntaxcoloring;
 
-import java.io.File;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.XtextResource;
-import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
-import org.eclipse.xtext.ui.editor.XtextEditor;
 //import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
 //import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightedPositionAcceptor;
 import org.eclipse.xtext.ui.editor.syntaxcoloring.ISemanticHighlightingCalculator;
-import org.eclipse.xtext.ui.editor.validation.ValidatingEditorCallback;
 
-import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.sadl.ClassDeclaration;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
 import com.ge.research.sadl.sadl.Import;
@@ -31,12 +20,7 @@ import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceName;
 import com.ge.research.sadl.sadl.SadlPackage;
 
-// TODO: Revisit after Xtext Upgrade
-// see https://www.eclipse.org/forums/index.php/t/827695/
-// do not derive from ValidatingEditorCallback after upgrade
-public class SadlSemanticHighlightingCalculator extends ValidatingEditorCallback implements
-		ISemanticHighlightingCalculator, IPartListener2,
-		IResourceChangeListener, IXtextEditorCallback {
+public class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 
 	@Override
 	public void provideHighlightingFor(XtextResource resource,
@@ -103,133 +87,4 @@ public class SadlSemanticHighlightingCalculator extends ValidatingEditorCallback
 		return SadlHighlightingConfiguration.DEFAULT_ID;
 	}
 
-
-	@Override
-	public void partActivated(IWorkbenchPartReference partRef) {
-		int i = 0;
-	}
-
-	@Override
-	public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		int i = 0;
-	}
-
-	@Override
-	public void partClosed(IWorkbenchPartReference partRef) {
-//		visitor.editorClosed(partRef.getPartName());
-	}
-
-	@Override
-	public void partDeactivated(IWorkbenchPartReference partRef) {
-
-	}
-
-	@Override
-	public void partOpened(IWorkbenchPartReference partRef) {
-		int i = 0;
-	}
-
-	@Override
-	public void partHidden(IWorkbenchPartReference partRef) {
-
-	}
-
-	@Override
-	public void partVisible(IWorkbenchPartReference partRef) {
-		int i = 0;
-	}
-
-	@Override
-	public void partInputChanged(IWorkbenchPartReference partRef) {
-//		visitor.removeResourceModel(visitor.getModelResource());
-	}
-
-	@Override
-	public void resourceChanged(IResourceChangeEvent event) {
-		// System.out.println("resourceChanged event " + event.getType());
-		if (event.getType() == IResourceChangeEvent.PRE_CLOSE
-				&& event.getResource() instanceof IProject) {
-//			visitor.removeAllProjectResourceModels(event.getResource()
-//					.getName());
-		}
-	}
-
-	@Override
-	public void afterSetInput(XtextEditor xtextEditor) {
-		super.afterSetInput(xtextEditor);
-		try {
-			createEditorOpenIndicatorFile(xtextEditor);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void afterCreatePartControl(XtextEditor editor) {
-		super.afterCreatePartControl(editor);
-		try {
-			createEditorOpenIndicatorFile(editor);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void beforeDispose(XtextEditor editor) {
-		super.beforeDispose(editor);
-		try {
-			deleteEditorOpenIndicatorFile(editor);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public synchronized boolean createEditorOpenIndicatorFile(XtextEditor editor)
-			throws Exception {
-		boolean status = false;
-		File indicatorFile = getIndicatorFile(editor);
-		if (indicatorFile != null && !indicatorFile.exists()) {
-			status = indicatorFile.createNewFile();
-		}
-		// else {
-		// System.out.println("Not creating file '" +
-		// indicatorFile.getCanonicalPath() + "' as it already exists.");
-		// }
-		return status;
-	}
-
-	public synchronized boolean deleteEditorOpenIndicatorFile(XtextEditor editor)
-			throws Exception {
-		boolean status = false;
-		File indicatorFile = getIndicatorFile(editor);
-		if (indicatorFile != null && indicatorFile.exists()) {
-			status = indicatorFile.delete();
-		}
-		// else {
-		// System.out.println("Not deleting file '" +
-		// indicatorFile.getCanonicalPath() + "' as it does not exist.");
-		// }
-		return status;
-	}
-
-	private File getIndicatorFile(XtextEditor editor) throws Exception {
-		IPath prjLoc = null;
-		if (editor.getResource() != null) {
-			prjLoc = editor.getResource().getProject().getLocation();
-		} else {
-			System.out
-					.println("getIndicatorFile called with an editor with a null resource. Please report.");
-		}
-		if (prjLoc != null) {
-			IPath tempDir = prjLoc.append(ResourceManager.TEMPDIR);
-			File tmpDir = ResourceManager.createFolderIfNotExists(tempDir
-					.toOSString());
-			File isopenDir = ResourceManager.createFolderIfNotExists(tmpDir
-					.getCanonicalPath() + "/isOpen");
-			File indFile = new File(isopenDir + "/"
-					+ editor.getEditorInput().getName() + ".isOpen");
-			return indFile;
-		}
-		return null;
-	}
 }

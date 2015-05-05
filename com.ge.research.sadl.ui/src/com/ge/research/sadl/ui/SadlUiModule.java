@@ -25,6 +25,7 @@ import org.eclipse.xtext.ui.editor.templates.XtextTemplateContextType;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.ui.contentassist.SadlTemplateContextType;
 import com.ge.research.sadl.ui.editor.SadlDirtyStateEditorSupport;
+import com.ge.research.sadl.ui.editor.SadlEditorCallback;
 import com.ge.research.sadl.ui.editor.SadlHyperlinkHelper;
 import com.ge.research.sadl.ui.editor.SadlSourceViewerConfiguration;
 import com.ge.research.sadl.ui.properties.SadlRootPreferencePage;
@@ -102,7 +103,7 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
 
 	@Override
 	public Class<? extends IXtextEditorCallback> bindIXtextEditorCallback() {
-		return SadlSemanticHighlightingCalculator.class;
+		return SadlEditorCallback.class;
 	}
 	
 	// Customize URL Hyperlink Detection
