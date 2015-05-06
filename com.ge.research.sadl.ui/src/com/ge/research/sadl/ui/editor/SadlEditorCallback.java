@@ -20,13 +20,16 @@ package com.ge.research.sadl.ui.editor;
 import java.io.File;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.xtext.builder.nature.NatureAddingEditorCallback;
-import org.eclipse.xtext.ui.editor.AbstractDirtyStateAwareEditorCallback;
+import org.eclipse.xtext.builder.nature.Messages;
+import org.eclipse.xtext.builder.nature.ToggleXtextNatureAction;
 import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.validation.ValidatingEditorCallback;
@@ -37,13 +40,11 @@ import com.google.inject.Inject;
 //TODO: Revisit after Xtext Upgrade
 //see https://www.eclipse.org/forums/index.php/t/827695/
 //delegation to other callbacks might become obsolete
-public class SadlEditorCallback extends AbstractDirtyStateAwareEditorCallback
+public class SadlEditorCallback extends ValidatingEditorCallback
 		implements IPartListener2, IResourceChangeListener, IXtextEditorCallback {
 
 	@Inject
-	private NatureAddingEditorCallback toggleNatureCallback;
-	@Inject
-	private ValidatingEditorCallback validatingEditorCallback;
+	private ToggleXtextNatureAction toggleNature;
 
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
@@ -97,14 +98,11 @@ public class SadlEditorCallback extends AbstractDirtyStateAwareEditorCallback
 	@Override
 	public void afterSave(XtextEditor editor) {
 		super.afterSave(editor);
-		validatingEditorCallback.afterSave(editor);
 	}
 	
 	@Override
 	public void afterSetInput(XtextEditor editor) {
 		super.afterSetInput(editor);
-		validatingEditorCallback.afterSetInput(editor);
-		toggleNatureCallback.afterSetInput(editor);
 		try {
 			createEditorOpenIndicatorFile(editor);
 		} catch (Exception e) {
@@ -115,12 +113,28 @@ public class SadlEditorCallback extends AbstractDirtyStateAwareEditorCallback
 	@Override
 	public void afterCreatePartControl(XtextEditor editor) {
 		super.afterCreatePartControl(editor);
-		validatingEditorCallback.afterCreatePartControl(editor);
-		toggleNatureCallback.afterCreatePartControl(editor);
+		handleNatureAdding(editor);
 		try {
 			createEditorOpenIndicatorFile(editor);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	/*
+	 * Copied from NatureAddingEditorCallback
+	 */
+	private void handleNatureAdding(XtextEditor editor) {
+		IResource resource = editor.getResource();
+		if (resource!=null && !toggleNature.hasNature(resource.getProject()) && resource.getProject().isAccessible() && !resource.getProject().isHidden()) {
+			String title = Messages.NatureAddingEditorCallback_MessageDialog_Title;
+			String message = Messages.NatureAddingEditorCallback_MessageDialog_Msg0 + resource.getProject().getName() + Messages.NatureAddingEditorCallback_MessageDialog_Msg1;
+			MessageDialog dialog = new MessageDialog(editor.getEditorSite().getShell(), title, null, message, MessageDialog.QUESTION, 
+					new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
+			int open = dialog.open();
+			if (open==0) {
+				toggleNature.toggleNature(resource.getProject());
+			}
 		}
 	}
 
