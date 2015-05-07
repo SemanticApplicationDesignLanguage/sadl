@@ -299,4 +299,11 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract void setServicesConfigurationAltUrlMapping()
 			throws IOException, URISyntaxException, ConfigurationException;
 	
+	/**
+	 * Call this method to get a list of the actual URLs (as class URI) of all RDF and OWL
+	 * models that should be available to the project but are not actually in the project
+	 * or projects upon which this project depends.
+	 * @return
+	 */
+	public abstract List<URI> getExternalModelURIs();
 }

@@ -58,6 +58,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 	public static final String INSTANCE_NOT_DEFINED = "com.ge.research.SADL.InstanceNotDefined";
 	public static final String MISSING_ALIAS = "com.ge.research.SADL.MissingAlias";
 	public static final String DOUBLE_ALIAS = "com.ge.research.SADL.DoubleAlias";
+	public static final String AMBIGUOUS_NAME = "com.ge.researech.SADL.AmbiguousName";
     
     private static final Logger logger = LoggerFactory.getLogger(SadlJavaValidator.class);
     
@@ -77,7 +78,8 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
      * this is ambiguous.
      * @param rn
      */
-    @Check(CheckType.NORMAL)
+//    @Check(CheckType.NORMAL)
+    @Check
     public void checkNoAmbiguousQualifiedNameOnScope (ResourceByName rn) {
     	if (rn.eResource()==null || rn.getName().eIsProxy()) return;
     	// the qualified name of the actually linked ResourceName
@@ -90,7 +92,10 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
     	IScope scope = globalScopeProvider.getScope(rn.eResource(), SadlPackage.Literals.RESOURCE_BY_NAME__NAME, null);
     	for (IEObjectDescription description : scope.getAllElements()) {
 			if (qn.getLastSegment().equals(description.getQualifiedName().getLastSegment()) && !qn.equals(description.getQualifiedName())) {
-				warning("The name "+qn.getLastSegment()+" is ambiguous ("+qn.toString()+","+description.getQualifiedName()+"). Please qualify the name.", rn, SadlPackage.Literals.RESOURCE_BY_NAME__NAME);
+//				error("The name "+qn.getLastSegment()+" is ambiguous ("+qn.toString()+","+description.getQualifiedName()+"). Please qualify the name.", 
+//						rn, SadlPackage.Literals.RESOURCE_BY_NAME__NAME);
+				error("The name "+qn.getLastSegment()+" is ambiguous. Please qualify the name.", rn, SadlPackage.Literals.RESOURCE_BY_NAME__NAME,
+						AMBIGUOUS_NAME);
 				return;
 			}
 		}
@@ -119,7 +124,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 	            URI modelUrl = uri.eResource().getURI();
                 String owlUrl = ResourceManager.validateAndReturnOwlUrlOfSadlUri(modelUrl).toString();
 		        String publicUri = baseUri;
-		        SadlModelManager visitor = sadlModelManagerProvider.get(modelUrl);
+		        SadlModelManager visitor = sadlModelManagerProvider.get(uri.eResource());
 		        String altUri = visitor.getAltUrl(publicUri, modelUrl);
 		        // If those urls differ, that indicates another model has already used the public uri
 		        if (altUri != null && !publicUri.equals(altUri) && !owlUrl.equals(altUri)) {
@@ -216,7 +221,7 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 //				}
 				Resource resource = rsrcId.eResource();
 				PendingModelError pendingErr = null;
-				SadlModelManager visitor = sadlModelManagerProvider.get(resource.getURI());
+				SadlModelManager visitor = sadlModelManagerProvider.get(resource);
 				if (visitor.hasModelManager(resource)) { 
 					pendingErr = visitor.getPendingError(resource, nm);
 				}

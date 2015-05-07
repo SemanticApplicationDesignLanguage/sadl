@@ -734,6 +734,9 @@ public class ResourceManager {
    		} else {
    			String s = someFileInProject.toString();
    			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
+   			if (file == null) {
+   				return null;
+   			}
 	   		String prjName = file.getFullPath().segment(0);
 	   		IProject prj = workspace.getRoot().getProject(prjName);
 	   		return prj;

@@ -1087,5 +1087,54 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		
 	}
 
+	@Override
+	public List<URI> getExternalModelURIs() {
+		List<URI> externals = null;
+		HashMap<String, String> map = getMappings();
+		if (map != null) {
+			Iterator<String> itr = map.keySet().iterator();
+			while (itr.hasNext()) {
+				String key = itr.next();
+				String val = map.get(key);
+				try {
+					if (!isInProject(val)) {
+						if (externals == null) {
+							externals = new ArrayList<URI>();
+						}
+						URI proposed = URI.createURI(val);
+						if (!externals.contains(proposed)) {
+//							System.out.println("Mapping to external resource: " + key + ", " + val );
+							externals.add(proposed);
+						}
+					}
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return externals;
+	}
+
+	/**
+	 * Method to determine if a resourcePath is in the current Project. This does not check the existence of the resource.
+	 * @param resourcePath
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	private boolean isInProject(String resourcePath) throws MalformedURLException, IOException {
+		URI prjUri = ResourceManager.getProjectUri(URI.createURI(getModelFolder()));
+		String rsrcFN = getSadlUtils().fileUrlToFileName(resourcePath);
+		String prjFP = getSadlUtils().fileUrlToFileName(prjUri.toString());
+		if (rsrcFN.startsWith(prjFP)) {
+			return true;
+		}
+		return false;
+	}
+
 
 }

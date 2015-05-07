@@ -1,5 +1,7 @@
 package com.ge.research.sadl.ui.quickfix;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.io.StringReader;
 
@@ -9,7 +11,13 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.xtext.naming.IQualifiedNameConverter;
+import org.eclipse.xtext.naming.IQualifiedNameProvider;
+import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.parser.IParseResult;
+import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.scoping.IGlobalScopeProvider;
+import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.editor.model.XtextDocument;
 import org.eclipse.xtext.ui.editor.model.edit.IModification;
@@ -28,6 +36,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.sadl.PropValPartialTriple;
 import com.ge.research.sadl.sadl.ResourceByName;
+import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.ui.contentassist.SadlProposalProvider;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.builder.ResourceManager;
@@ -48,6 +57,13 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
     
     @Inject
     private SadlParser parser;
+
+    @Inject
+    private IGlobalScopeProvider globalScopeProvider;
+    @Inject
+    private IQualifiedNameProvider qnProvider;
+    @Inject
+    private IQualifiedNameConverter qnConverter;
 
     @Inject
     public SadlQuickfixProvider(SadlProposalProvider proposalProvider) {
@@ -302,7 +318,64 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 
 		});
 	}
-
+	
+	@Fix(SadlJavaValidator.AMBIGUOUS_NAME)
+	public void addNSQualifier(final Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, "Add Qualifier", "Add a namespace prefix to disambiguate name", null, new ISemanticModification() {
+			
+			@Override
+			public void apply(EObject element, IModificationContext context)
+					throws Exception {
+				if (element instanceof ResourceByName) {
+					ResourceByName rn = (ResourceByName) element;
+			    	QualifiedName qn = qnProvider.getFullyQualifiedName(rn.getName());
+			    	// search the global scope for any other name
+			    	IScope scope = globalScopeProvider.getScope(rn.eResource(), SadlPackage.Literals.RESOURCE_BY_NAME__NAME, null);
+			    	List<String> options = new ArrayList<String>();
+			    	for (IEObjectDescription description : scope.getAllElements()) {
+						if (qn.getLastSegment().equals(description.getQualifiedName().getLastSegment()) && !qn.equals(description.getQualifiedName())) {
+							if (!options.contains(qn.getLastSegment())) {
+								options.add(qn.getLastSegment());
+							}
+							options.add(description.getQualifiedName().getLastSegment());
+						}
+					}	
+				}
+			}
+		});
+	}
+	
+//	@Fix(EcoreValidator.DIAGNOSTIC_SOURCE + '.' + EcoreValidator.CONSISTENT_TYPE_CLASS_NOT_PERMITTED) 
+//	public void convertToReference(final Issue issue,final IssueResolutionAcceptor acceptor){
+//		  IModificationContext modificationContext=getModificationContextFactory().createModificationContext(issue);
+//		  final IXtextDocument xtextDocument=modificationContext.getXtextDocument();
+//		  xtextDocument.readOnly(new IUnitOfWork.Void<XtextResource>(){
+//		    @Override public void process(    XtextResource xtextResource) throws Exception {
+//		      EObject cause=xtextResource.getResourceSet().getEObject(issue.getUriToProblem(),false);
+//		      if (cause instanceof XGenericType) {
+//		        XGenericType xGenericType=(XGenericType)cause;
+//		        if (xGenericType.eContainer() instanceof XAttribute && xGenericType.getType() instanceof GenClass) {
+//		          ICompositeNode node=NodeModelUtils.getNode(xGenericType.eContainer());
+//		          String range=node == null ? xtextDocument.get(issue.getOffset(),issue.getLength()) : xtextDocument.get(node.getOffset(),node.getLength());
+//		          quickFix(issue,"Convert to cross reference","refers ",acceptor,range);
+//		          quickFix(issue,"Convert to containment reference","contains ",acceptor,range);
+//		          quickFix(issue,"Convert to container reference","container ",acceptor,range);
+//		        }
+//		      }
+//		    }
+//		    private void quickFix(    final Issue issue,    String description,    final String replacement,    final IssueResolutionAcceptor acceptor,    String range){
+//		      acceptor.accept(issue,description,replacement + range,"full/obj16/correction_change.gif",new IModification(){
+//		        public void apply(        IModificationContext context) throws BadLocationException {
+//		          IXtextDocument xtextDocument=context.getXtextDocument();
+//		          xtextDocument.replace(issue.getOffset(),0,replacement);
+//		        }
+//		      }
+//		);
+//		    }
+//		  }
+//		);
+//		}
+//
 	private Object[] prepareMissingConceptFix(IXtextDocument xtextDocument, EObject conceptEobject, Issue issue) throws BadLocationException {
 		String nameAt0 = null;
 		String propName = null;

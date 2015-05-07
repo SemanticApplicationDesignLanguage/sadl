@@ -509,10 +509,12 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			if (uri.toString().endsWith("rdf-syntax-ns.rdf")) {
 				publicUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 				cmgr = lastConfigMgr;
+				return getRdfExposedNames(publicUri);
 			}
 			else if (uri.toString().endsWith("rdf-schema.rdf")) {
 				publicUri = "http://www.w3.org/2000/01/rdf-schema#";
 				cmgr = lastConfigMgr;
+				return getRdfsExposedNames(publicUri);
 			}
 			else {
 				cmgr = getConfigurationMgr(uri);
@@ -537,7 +539,29 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 		return null;
     }
 
-    /**
+    private List<ConceptName> getRdfsExposedNames(String ns) {
+		List<ConceptName> names = new ArrayList<ConceptName>();
+		ConceptName cn = new ConceptName(ns + "comment");
+		cn.setPrefix("rdfs");
+		cn.setType(ConceptType.ANNOTATIONPROPERTY);
+		names.add(cn);
+		cn = new ConceptName(ns + "label");
+		cn.setPrefix("rdfs");
+		cn.setType(ConceptType.ANNOTATIONPROPERTY );
+		names.add(cn);
+		return names;
+	}
+
+	private List<ConceptName> getRdfExposedNames(String ns) {
+		List<ConceptName> names = new ArrayList<ConceptName>();
+		ConceptName cn = new ConceptName(ns + "type");
+		cn.setType(ConceptType.OBJECTPROPERTY);
+		cn.setPrefix("rdf");
+		names.add(cn);
+		return names;
+	}
+
+	/**
      * Call this method to get a List of ExistingNames which match the 
      * conditions specified by the arguments.
      * 
@@ -3170,6 +3194,12 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
 	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
 	    	configurationMgr.setModelGetter(modelGetter);
+	    	
+			// Temp testing call **********************************		
+			List<URI> externalImports = getConfigurationMgr(owlModelsFolder).getExternalModelURIs();
+			// End temp testing call ********************************
+
+
 		}
 		else if (configurationMgr.isConfigurationStale()) {
 			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
