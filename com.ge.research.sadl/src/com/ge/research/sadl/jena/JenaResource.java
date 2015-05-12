@@ -92,13 +92,20 @@ public class JenaResource extends ResourceImpl {
 				}
 			}
 			else {
-				visitor = sadlModelManagerProvider.get(thisUri);
-				// TODO if sadl-derived, return without creating names.
-				String owlModelsFolder = ResourceManager.getOwlModelsFolder(thisUri);
-				URI absUri = ResourceManager.convertPlatformUriToAbsoluteUri(context.getURI());
-				if (visitor.getConfigurationMgr(owlModelsFolder).isSadlDerived(absUri.toString())) {	
-					return;
-				}				
+				try {
+					visitor = sadlModelManagerProvider.get(thisUri);
+					// TODO if sadl-derived, return without creating names.
+					String owlModelsFolder = ResourceManager.getOwlModelsFolder(thisUri);
+					URI absUri = ResourceManager.convertPlatformUriToAbsoluteUri(context.getURI());
+					if (visitor.getConfigurationMgr(owlModelsFolder).isSadlDerived(absUri.toString())) {	
+						return;
+					}
+				} catch (ConfigurationException e) {
+					throw e;
+				} catch (Exception e) {
+//					sadlModelManagerProvider.setUri(thisUri);
+					visitor = sadlModelManagerProvider.get();
+				}
 			}
 			visitor.init(this);	
 			List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri, Scope.LOCALONLY);

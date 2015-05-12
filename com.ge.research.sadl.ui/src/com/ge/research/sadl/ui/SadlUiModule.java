@@ -9,6 +9,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.xtext.builder.impl.ToBeBuiltComputer;
+import org.eclipse.xtext.builder.impl.javasupport.JdtToBeBuiltComputer;
+import org.eclipse.xtext.resource.containers.IAllContainersState;
 import org.eclipse.xtext.ui.editor.DirtyStateEditorSupport;
 import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
 import org.eclipse.xtext.ui.editor.XtextSourceViewerConfiguration;
@@ -21,6 +24,7 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.AbstractAntlrTokenToAttributeI
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration;
 import org.eclipse.xtext.ui.editor.syntaxcoloring.ISemanticHighlightingCalculator;
 import org.eclipse.xtext.ui.editor.templates.XtextTemplateContextType;
+import org.eclipse.xtext.ui.shared.Access;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.ui.contentassist.SadlTemplateContextType;
@@ -31,9 +35,12 @@ import com.ge.research.sadl.ui.editor.SadlSourceViewerConfiguration;
 import com.ge.research.sadl.ui.properties.SadlRootPreferencePage;
 import com.ge.research.sadl.ui.quickfix.TemplateIssueResolutionAcceptor;
 import com.ge.research.sadl.ui.quickfix.TemplateQuickAssistProcessor;
+import com.ge.research.sadl.ui.scoping.SadlWorkspaceProjectsState;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper;
+import com.google.inject.Binder;
+import com.google.inject.Provider;
 
 /**
  * Use this class to register components to be used within the IDE.
@@ -111,4 +118,11 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
 		return SadlSourceViewerConfiguration.class;
 	}
 
+	public Provider<IAllContainersState> provideIAllContainersState() {
+		return Access.<IAllContainersState>provider(SadlWorkspaceProjectsState.class);
+	}
+	
+	public void configureToBeBuildComputer (Binder binder) {
+		binder.bind(ToBeBuiltComputer.class).to(SadlToBeBuiltComputer.class);
+	}
 }

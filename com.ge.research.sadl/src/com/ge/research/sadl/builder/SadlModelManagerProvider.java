@@ -49,7 +49,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 @Singleton
 public class SadlModelManagerProvider implements Provider<SadlModelManager>, IResourceChangeListener {
 	private URI uri;
-	
 	private Map<URI, SadlModelManager> smmMap = new HashMap<URI, SadlModelManager>();
 	
 	
