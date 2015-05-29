@@ -81,19 +81,30 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
 		if (editorPart != null && editorPart.isDirty()) {
 		    SadlConsole.writeToConsole(MessageType.ERROR, "Model has unsaved changes. Please save before running tests.\n");
 		}
-		
 		errorCnt = 0;
     	IPreferencesService service = Platform.getPreferencesService();
 		final boolean validateBeforeTesting = service.getBoolean("com.ge.research.sadl.Sadl", "validateBeforeTest", false, null);
 		final boolean showReasonerTimingInformation = service.getBoolean("com.ge.research.sadl.Sadl", "showTimingInformation", false, null);
-
-		visitor = sadlModelManagerProvider.get(URI.createURI(testFilePath.makeAbsolute().toString()));
+	    IPath absolutePath = testFilePath.makeAbsolute();
+		URI uri = URI.createPlatformResourceURI(absolutePath.toString(), true);
+	    URI absoluteUri = ResourceManager.convertPlatformUriToAbsoluteUri(uri);
+		String prjdir = ResourceManager.getProjectUri(uri).toFileString();
+		String prjuri = null;
+		try {
+			prjuri = new SadlUtils().fileNameToFileUrl(prjdir);
+			if (prjuri.trim().endsWith("/")) {
+				prjuri = prjuri.substring(0, prjuri.length() - 1);
+			}
+		} catch (URISyntaxException e1) {
+			SadlConsole.writeToConsole(MessageType.ERROR, "Unexpected error running test suite '" + testFilePath.lastSegment() + ": " + e1.getMessage() + ".\n");
+		}
+		sadlModelManagerProvider.setUri(URI.createURI(prjuri));
+		visitor = sadlModelManagerProvider.get();
 		if (visitor == null) {
 			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to run test suite until a SADL model file has been opened to initialize system.\n");
 			return;
 		}
 
-	    IPath absolutePath = testFilePath.makeAbsolute();
 		final List<String> testFiles = getSadlTestFiles(absolutePath);
   		Job runTestJob = new Job("Run Tests") {
   			

@@ -35,7 +35,6 @@ import com.ge.research.sadl.ui.editor.SadlSourceViewerConfiguration;
 import com.ge.research.sadl.ui.properties.SadlRootPreferencePage;
 import com.ge.research.sadl.ui.quickfix.TemplateIssueResolutionAcceptor;
 import com.ge.research.sadl.ui.quickfix.TemplateQuickAssistProcessor;
-import com.ge.research.sadl.ui.scoping.SadlWorkspaceProjectsState;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator;
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper;
@@ -116,13 +115,5 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
 	// Customize URL Hyperlink Detection
 	public Class<? extends XtextSourceViewerConfiguration> bindXtextSourceViewerConfiguration() {
 		return SadlSourceViewerConfiguration.class;
-	}
-
-	public Provider<IAllContainersState> provideIAllContainersState() {
-		return Access.<IAllContainersState>provider(SadlWorkspaceProjectsState.class);
-	}
-	
-	public void configureToBeBuildComputer (Binder binder) {
-		binder.bind(ToBeBuiltComputer.class).to(SadlToBeBuiltComputer.class);
-	}
+	}	
 }

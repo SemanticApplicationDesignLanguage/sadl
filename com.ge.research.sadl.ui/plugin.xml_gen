@@ -9,7 +9,7 @@
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
             contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
             default="true"
-            extensions="sadl,sadl2"
+            extensions="sadl"
             id="com.ge.research.sadl.Sadl"
             name="Sadl Editor">
         </editor>
@@ -220,20 +220,6 @@
         <resourceServiceProvider
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
             uriExtension="sadl">
-        </resourceServiceProvider>
-    </extension>
-
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="sadl2">
-		</parser>
-	</extension>
-	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
-        <resourceServiceProvider
-            class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-            uriExtension="sadl2">
         </resourceServiceProvider>
     </extension>
 

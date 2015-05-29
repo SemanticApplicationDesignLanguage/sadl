@@ -46,7 +46,7 @@ public class ValidateModel extends SadlActionDelegate implements IObjectActionDe
 
 	@Override
 	protected void run(IPath testFilePath) {
-		SadlModelManager visitor = sadlModelManagerProvider.get(URI.createURI(testFilePath.toString()));
+		SadlModelManager visitor = sadlModelManagerProvider.get();
 		prepareModel(visitor, testFilePath, resourceSet);
 		String modelName = visitor.getModelName();
 

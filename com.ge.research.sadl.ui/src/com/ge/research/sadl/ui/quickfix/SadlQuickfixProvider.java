@@ -1,7 +1,6 @@
 package com.ge.research.sadl.ui.quickfix;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.io.StringReader;
 
@@ -11,13 +10,9 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
-import org.eclipse.xtext.naming.IQualifiedNameConverter;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.parser.IParseResult;
-import org.eclipse.xtext.resource.IEObjectDescription;
-import org.eclipse.xtext.scoping.IGlobalScopeProvider;
-import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.editor.model.XtextDocument;
 import org.eclipse.xtext.ui.editor.model.edit.IModification;
@@ -25,6 +20,7 @@ import org.eclipse.xtext.ui.editor.model.edit.IModificationContext;
 import org.eclipse.xtext.ui.editor.model.edit.ISemanticModification;
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider;
 import org.eclipse.xtext.ui.editor.quickfix.Fix;
+import org.eclipse.xtext.ui.editor.quickfix.IssueResolution;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
@@ -36,11 +32,11 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.sadl.PropValPartialTriple;
 import com.ge.research.sadl.sadl.ResourceByName;
-import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.ui.contentassist.SadlProposalProvider;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.validation.SadlJavaValidator;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -59,11 +55,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
     private SadlParser parser;
 
     @Inject
-    private IGlobalScopeProvider globalScopeProvider;
-    @Inject
     private IQualifiedNameProvider qnProvider;
-    @Inject
-    private IQualifiedNameConverter qnConverter;
 
     @Inject
     public SadlQuickfixProvider(SadlProposalProvider proposalProvider) {
@@ -320,29 +312,25 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 	}
 	
 	@Fix(SadlJavaValidator.AMBIGUOUS_NAME)
-	public void addNSQualifier(final Issue issue, IssueResolutionAcceptor acceptor) {
-		acceptor.accept(issue, "Add Qualifier", "Add a namespace prefix to disambiguate name", null, new ISemanticModification() {
-			
-			@Override
-			public void apply(EObject element, IModificationContext context)
-					throws Exception {
-				if (element instanceof ResourceByName) {
-					ResourceByName rn = (ResourceByName) element;
-			    	QualifiedName qn = qnProvider.getFullyQualifiedName(rn.getName());
-			    	// search the global scope for any other name
-			    	IScope scope = globalScopeProvider.getScope(rn.eResource(), SadlPackage.Literals.RESOURCE_BY_NAME__NAME, null);
-			    	List<String> options = new ArrayList<String>();
-			    	for (IEObjectDescription description : scope.getAllElements()) {
-						if (qn.getLastSegment().equals(description.getQualifiedName().getLastSegment()) && !qn.equals(description.getQualifiedName())) {
-							if (!options.contains(qn.getLastSegment())) {
-								options.add(qn.getLastSegment());
-							}
-							options.add(description.getQualifiedName().getLastSegment());
-						}
-					}	
+	public void addNSQualifier(final Issue issue, final IssueResolutionAcceptor acceptor) {
+		String[] fixes = issue.getData();
+		Iterator<String> itr = Splitter.on(",").split(fixes[0]).iterator();
+		while (itr.hasNext()) {
+			// loop over prefixes
+			final String prefix = itr.next();	
+			acceptor.accept(issue, prefix, "Add the namespace prefix '" + prefix + "' to disambiguate name", null, new ISemanticModification() {
+				public void apply(EObject element, IModificationContext context)
+						throws Exception {
+					if (element instanceof ResourceByName) {
+				    	IXtextDocument xtextDocument = context.getXtextDocument();
+				    	if (xtextDocument instanceof XtextDocument) {
+				    		int insertAt = issue.getOffset();
+				    		xtextDocument.replace(insertAt, issue.getLength(), prefix);
+				    	}
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 //	@Fix(EcoreValidator.DIAGNOSTIC_SOURCE + '.' + EcoreValidator.CONSISTENT_TYPE_CLASS_NOT_PERMITTED) 

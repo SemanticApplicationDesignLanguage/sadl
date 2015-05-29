@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ui
 Bundle-Vendor: GE Research
-Bundle-Version: 2.2.0.qualifier
+Bundle-Version: 2.4.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.ge.research.sadl;bundle-version="2.2.0";visibility:=reexport,
+Require-Bundle: com.ge.research.sadl;bundle-version="2.4.0";visibility:=reexport,
  org.eclipse.jface,
  org.eclipse.xtext.ui;bundle-version="2.4.3",
  org.eclipse.xtext.ui.ecore;bundle-version="2.4.3",

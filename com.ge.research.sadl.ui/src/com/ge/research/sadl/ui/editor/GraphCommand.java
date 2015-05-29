@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ISelection;
 
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.google.inject.Inject;
@@ -40,7 +41,9 @@ public class GraphCommand extends AbstractHandler implements IHandler {
     private Provider<EclipseResourceFileSystemAccess2> fileAccessProvider;
      
     @Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
+    
+    private SadlModelManager visitor = null;
 
     //    @Inject
 //    IResourceDescriptions resourceDescriptions;
@@ -61,6 +64,7 @@ public class GraphCommand extends AbstractHandler implements IHandler {
 		        	String seltxt = ((XtextEditor)activeEditor).getDocument().get(offset, length);
 		        	if (seltxt != null && seltxt.length() > 0) {
 		        		ConceptName cname = visitor.validateConceptName(visitor.getCurrentResource(), new ConceptName(seltxt));
+		        		visitor = sadlModelManagerProvider.get();
 		        		visitor.graphNeighborhood(cname);
 		        	}
 				}

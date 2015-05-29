@@ -823,11 +823,12 @@
            file-extensions="owl,n3,nt,rdf">
      </file-association>
   </extension>
+  <!--
   <extension
         point="org.eclipse.xtext.ui.shared.overridingGuiceModule">
      <module
            class="com.ge.research.sadl.ui.SadlSharedModule">
      </module>
   </extension>
-
+-->
 </plugin>
