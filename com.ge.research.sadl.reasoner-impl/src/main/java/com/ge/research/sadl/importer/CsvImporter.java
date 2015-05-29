@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright � 2007-2011 - General Electric Company, All Rights Reserved
+ * Copyright � 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -75,6 +75,7 @@ import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.ge.research.sadl.utils.StringDataSource;
@@ -589,10 +590,11 @@ public class CsvImporter {
 						//    		    		CSVParser.DEFAULT_ESCAPE_CHARACTER, 0, 			// back slash
 						'\'', 0,
 						false, 											// strict quotes
-						true);											// ignore leading whitespace
+						false);											// ignore leading whitespace
 				String [] tokens = reader.readNext();
 				int numReplacements = (tokens != null ? tokens.length : 0);
 				if (numReplacements > 0) {
+					boolean parserUnbalancedQuotes = false;
 					for (int i = 0; i < numReplacements; i++) {
 						String repl = tokens[i];
 						String[] parts = repl.split(":");
@@ -600,7 +602,14 @@ public class CsvImporter {
 							if (replacements == null) {
 								replacements = new HashMap<String, String>();
 							}
-							replacements.put(getSadlUtils().stripQuotes(parts[0]), getSadlUtils().stripQuotes(parts[1]));
+							if (i == 0 && replacementText.startsWith("\"") && !parts[0].startsWith("\"") && parts[0].endsWith("\"")) {
+								parserUnbalancedQuotes = true;
+							}
+							if (parserUnbalancedQuotes) {
+								parts[0] = "\"" + parts[0];
+								parts[1] = "\"" + parts[1];
+							}
+							replacements.put(getSadlUtils().stripQuotes(parts[0].trim()).trim(), getSadlUtils().stripQuotes(parts[1].trim()).trim());
 						}
 						else if (repl.endsWith(":")) {
 							if (replacements == null) {
@@ -625,7 +634,7 @@ public class CsvImporter {
 		}
 
 		@Override
-					public String transform(String input, int modelArrayPosition) {
+		public String transform(String input, int modelArrayPosition) {
 			if (transformedValues != null && transformedValues.containsKey(getInputIdentifier())) {
 				return transformedValues.get(getInputIdentifier());
 			}
@@ -1710,7 +1719,12 @@ public class CsvImporter {
 				return processNode(token, modelArrayPosition);
 			}
 		}
-		return null;
+		else if (pred instanceof Variable) {
+			return processNode(token, modelArrayPosition);
+		}
+		else {
+			throw new TranslationException("Triple predicate of unhandled type: " + pred.toString());
+		}
 	}
 
 	private Object processNode(String token, int modelArrayPosition) throws ConfigurationException {
@@ -3125,7 +3139,7 @@ public class CsvImporter {
 						repoType = IConfigurationManager.RDF_XML_ABBREV_FORMAT;
 					}
 					configMgr = new ConfigurationManager(modelFolderName, repoType);
-					SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configMgr.getTdbFolder(), repoType);
+					SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configMgr, configMgr.getTdbFolder(), repoType);
 					configMgr.setModelGetter(modelGetter);
 				} catch (MalformedURLException e) {
 					e.printStackTrace();

@@ -60,7 +60,7 @@ public class Literal extends Node {
 		if (value instanceof String) {
 			return "\"" + ((String)value).replace("\"", "\\\"") + "\"";
 		}
-		return value.toString();
+		return value != null ? value.toString() : "null";
 	}
 
 	@Override

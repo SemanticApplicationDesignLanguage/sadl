@@ -25,22 +25,29 @@ public class NamedNode extends Node {
 	private String namespace = null;
 	private NodeType nodeType = null;
 	
-	public static enum NodeType {ClassNode, InstanceNode, PropertyNode, VariableNode}
+	public static enum NodeType {ClassNode, InstanceNode, PropertyNode, DataTypeProperty, ObjectProperty, VariableNode}
 	
 	public NamedNode() {
 		super();
 	}
 	
 	public NamedNode(String name) {
-	    int colon = name.indexOf(':');
-	    if (colon > 0 && colon < name.length() - 1) {
-	        setPrefix(name.substring(0, colon));
-	        setName(name.substring(colon + 1));
-	    }
-	    else {
-	        setPrefix(null);
-	        setName(name);
-	    }
+		int hash = name.indexOf('#');
+		if (hash > 0 && hash < name.length() - 1) {
+			setNamespace(name.substring(0, hash + 1));
+			setName(name.substring(hash + 1));
+		}
+		else {
+		    int colon = name.indexOf(':');
+		    if (colon > 0 && colon < name.length() - 1) {
+		        setPrefix(name.substring(0, colon));
+		        setName(name.substring(colon + 1));
+		    }
+		    else {
+		        setPrefix(null);
+		        setName(name);
+		    }
+		}
 	}
 	
 	public NamedNode(String name, NodeType type) {

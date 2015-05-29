@@ -645,7 +645,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		return true;
 	}
 
-	protected synchronized boolean deleteMapping(String publicUri, String altUrl)
+	public synchronized boolean deleteMapping(String publicUri, String altUrl)
 			throws IOException, URISyntaxException, ConfigurationException {
 		if (publicUri == null) {
 			throw new ConfigurationException(

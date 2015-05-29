@@ -77,6 +77,18 @@ public interface IConfigurationManagerForEditing extends IConfigurationManager {
 	public abstract boolean addMapping(Resource altv, Resource pubv,
 			Literal prefix, boolean bKeepPrefix, String source) throws ConfigurationException, IOException,
 			URISyntaxException;
+	
+	/**
+	 * Call this method to delete a mapping
+	 * 
+	 * @param altUrl
+	 * @param publicUri
+	 * @return
+	 * @throws ConfigurationException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
+	 */
+	public abstract boolean deleteMapping(String altUrl, String publicUri) throws IOException, URISyntaxException, ConfigurationException;
 
 	/**
 	 * Method to add a altUrl<->publicUri mapping to the ont-policy.rdf file.
