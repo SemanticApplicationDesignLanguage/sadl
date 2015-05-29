@@ -16,6 +16,7 @@ import com.ge.research.sadl.sadl.Condition;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
 import com.ge.research.sadl.sadl.DataType;
+import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
@@ -25,12 +26,14 @@ import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
 import com.ge.research.sadl.sadl.EquivalentConcepts;
+import com.ge.research.sadl.sadl.ExistentialNegation;
 import com.ge.research.sadl.sadl.ExistingInstanceAttribution;
 import com.ge.research.sadl.sadl.ExistingResourceList;
 import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
+import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.GraphPattern;
 import com.ge.research.sadl.sadl.HasValue;
@@ -92,6 +95,7 @@ import com.ge.research.sadl.sadl.TypeDeclaration;
 import com.ge.research.sadl.sadl.TypedBNode;
 import com.ge.research.sadl.sadl.UnaryOpExpression;
 import com.ge.research.sadl.sadl.UnionResource;
+import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.ValueRow;
 import com.ge.research.sadl.sadl.ValueTable;
 import com.ge.research.sadl.sadl.VariableList;
@@ -260,6 +264,27 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * @generated
    */
   private EClass rangeTypeEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass userDefinedDataTypeEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass dataTypeRestrictionEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass facetsEClass = null;
 
   /**
    * <!-- begin-user-doc -->
@@ -714,6 +739,13 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  private EClass existentialNegationEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   private EClass intervalValueEClass = null;
 
   /**
@@ -920,9 +952,19 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  public EAttribute getModelName_AnnType()
+  {
+    return (EAttribute)modelNameEClass.getEStructuralFeatures().get(3);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public EReference getModelName_AnnContent()
   {
-    return (EReference)modelNameEClass.getEStructuralFeatures().get(3);
+    return (EReference)modelNameEClass.getEStructuralFeatures().get(4);
   }
 
   /**
@@ -1150,9 +1192,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getResourceBySetOp_AnnContent()
+  public EReference getResourceBySetOp_AnnContent()
   {
-    return (EAttribute)resourceBySetOpEClass.getEStructuralFeatures().get(1);
+    return (EReference)resourceBySetOpEClass.getEStructuralFeatures().get(1);
   }
 
   /**
@@ -1200,9 +1242,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getResourceByRestriction_AnnContent()
+  public EReference getResourceByRestriction_AnnContent()
   {
-    return (EAttribute)resourceByRestrictionEClass.getEStructuralFeatures().get(1);
+    return (EReference)resourceByRestrictionEClass.getEStructuralFeatures().get(1);
   }
 
   /**
@@ -1400,9 +1442,29 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  public EAttribute getRange_List()
+  {
+    return (EAttribute)rangeEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getRange_Lists()
+  {
+    return (EAttribute)rangeEClass.getEStructuralFeatures().get(2);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public EReference getRange_Type()
   {
-    return (EReference)rangeEClass.getEStructuralFeatures().get(1);
+    return (EReference)rangeEClass.getEStructuralFeatures().get(3);
   }
 
   /**
@@ -1433,6 +1495,176 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
   public EAttribute getRangeType_DataType()
   {
     return (EAttribute)rangeTypeEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getUserDefinedDataType()
+  {
+    return userDefinedDataTypeEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getUserDefinedDataType_UserDefinedDataType()
+  {
+    return (EReference)userDefinedDataTypeEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getUserDefinedDataType_Restriction()
+  {
+    return (EReference)userDefinedDataTypeEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getDataTypeRestriction()
+  {
+    return dataTypeRestrictionEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getDataTypeRestriction_Basetype()
+  {
+    return (EAttribute)dataTypeRestrictionEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getDataTypeRestriction_Facets()
+  {
+    return (EReference)dataTypeRestrictionEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getDataTypeRestriction_Basetypes()
+  {
+    return (EAttribute)dataTypeRestrictionEClass.getEStructuralFeatures().get(2);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getFacets()
+  {
+    return facetsEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Minexin()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Min()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Max()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(2);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Maxexin()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(3);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Regex()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(4);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Len()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(5);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Minlen()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(6);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Maxlen()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(7);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getFacets_Values()
+  {
+    return (EAttribute)facetsEClass.getEStructuralFeatures().get(8);
   }
 
   /**
@@ -3570,6 +3802,36 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  public EClass getExistentialNegation()
+  {
+    return existentialNegationEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getExistentialNegation_VarList()
+  {
+    return (EReference)existentialNegationEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getExistentialNegation_Quantified()
+  {
+    return (EReference)existentialNegationEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public EClass getIntervalValue()
   {
     return intervalValueEClass;
@@ -3630,9 +3892,29 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getExplicitValue_Term()
+  public EAttribute getExplicitValue_ValueList()
   {
     return (EAttribute)explicitValueEClass.getEStructuralFeatures().get(2);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getExplicitValue_Row()
+  {
+    return (EReference)explicitValueEClass.getEStructuralFeatures().get(3);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getExplicitValue_Term()
+  {
+    return (EAttribute)explicitValueEClass.getEStructuralFeatures().get(4);
   }
 
   /**
@@ -3650,19 +3932,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getValueTable_Row()
-  {
-    return (EReference)valueTableEClass.getEStructuralFeatures().get(0);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
   public EReference getValueTable_Rows()
   {
-    return (EReference)valueTableEClass.getEStructuralFeatures().get(1);
+    return (EReference)valueTableEClass.getEStructuralFeatures().get(0);
   }
 
   /**
@@ -3874,6 +4146,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     createEAttribute(modelNameEClass, MODEL_NAME__BASE_URI);
     createEAttribute(modelNameEClass, MODEL_NAME__ALIAS);
     createEAttribute(modelNameEClass, MODEL_NAME__VERSION);
+    createEAttribute(modelNameEClass, MODEL_NAME__ANN_TYPE);
     createEReference(modelNameEClass, MODEL_NAME__ANN_CONTENT);
 
     importEClass = createEClass(IMPORT);
@@ -3908,13 +4181,13 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
 
     resourceBySetOpEClass = createEClass(RESOURCE_BY_SET_OP);
     createEAttribute(resourceBySetOpEClass, RESOURCE_BY_SET_OP__ANN_TYPE);
-    createEAttribute(resourceBySetOpEClass, RESOURCE_BY_SET_OP__ANN_CONTENT);
+    createEReference(resourceBySetOpEClass, RESOURCE_BY_SET_OP__ANN_CONTENT);
     createEReference(resourceBySetOpEClass, RESOURCE_BY_SET_OP__NAMES);
     createEAttribute(resourceBySetOpEClass, RESOURCE_BY_SET_OP__OP);
 
     resourceByRestrictionEClass = createEClass(RESOURCE_BY_RESTRICTION);
     createEAttribute(resourceByRestrictionEClass, RESOURCE_BY_RESTRICTION__ANN_TYPE);
-    createEAttribute(resourceByRestrictionEClass, RESOURCE_BY_RESTRICTION__ANN_CONTENT);
+    createEReference(resourceByRestrictionEClass, RESOURCE_BY_RESTRICTION__ANN_CONTENT);
     createEReference(resourceByRestrictionEClass, RESOURCE_BY_RESTRICTION__PROP_NAME);
     createEReference(resourceByRestrictionEClass, RESOURCE_BY_RESTRICTION__COND);
 
@@ -3940,11 +4213,33 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
 
     rangeEClass = createEClass(RANGE);
     createEAttribute(rangeEClass, RANGE__SINGLE);
+    createEAttribute(rangeEClass, RANGE__LIST);
+    createEAttribute(rangeEClass, RANGE__LISTS);
     createEReference(rangeEClass, RANGE__TYPE);
 
     rangeTypeEClass = createEClass(RANGE_TYPE);
     createEReference(rangeTypeEClass, RANGE_TYPE__CLASS_IDENTIFIER);
     createEAttribute(rangeTypeEClass, RANGE_TYPE__DATA_TYPE);
+
+    userDefinedDataTypeEClass = createEClass(USER_DEFINED_DATA_TYPE);
+    createEReference(userDefinedDataTypeEClass, USER_DEFINED_DATA_TYPE__USER_DEFINED_DATA_TYPE);
+    createEReference(userDefinedDataTypeEClass, USER_DEFINED_DATA_TYPE__RESTRICTION);
+
+    dataTypeRestrictionEClass = createEClass(DATA_TYPE_RESTRICTION);
+    createEAttribute(dataTypeRestrictionEClass, DATA_TYPE_RESTRICTION__BASETYPE);
+    createEReference(dataTypeRestrictionEClass, DATA_TYPE_RESTRICTION__FACETS);
+    createEAttribute(dataTypeRestrictionEClass, DATA_TYPE_RESTRICTION__BASETYPES);
+
+    facetsEClass = createEClass(FACETS);
+    createEAttribute(facetsEClass, FACETS__MINEXIN);
+    createEAttribute(facetsEClass, FACETS__MIN);
+    createEAttribute(facetsEClass, FACETS__MAX);
+    createEAttribute(facetsEClass, FACETS__MAXEXIN);
+    createEAttribute(facetsEClass, FACETS__REGEX);
+    createEAttribute(facetsEClass, FACETS__LEN);
+    createEAttribute(facetsEClass, FACETS__MINLEN);
+    createEAttribute(facetsEClass, FACETS__MAXLEN);
+    createEAttribute(facetsEClass, FACETS__VALUES);
 
     equivalentConceptsEClass = createEClass(EQUIVALENT_CONCEPTS);
     createEReference(equivalentConceptsEClass, EQUIVALENT_CONCEPTS__CLASS1);
@@ -4223,6 +4518,10 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     createEReference(subTypeOfEClass, SUB_TYPE_OF__SUBCLASS);
     createEReference(subTypeOfEClass, SUB_TYPE_OF__SUPERCLASS);
 
+    existentialNegationEClass = createEClass(EXISTENTIAL_NEGATION);
+    createEReference(existentialNegationEClass, EXISTENTIAL_NEGATION__VAR_LIST);
+    createEReference(existentialNegationEClass, EXISTENTIAL_NEGATION__QUANTIFIED);
+
     intervalValueEClass = createEClass(INTERVAL_VALUE);
     createEAttribute(intervalValueEClass, INTERVAL_VALUE__OP);
     createEReference(intervalValueEClass, INTERVAL_VALUE__EXPR);
@@ -4230,10 +4529,11 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     explicitValueEClass = createEClass(EXPLICIT_VALUE);
     createEReference(explicitValueEClass, EXPLICIT_VALUE__INST_NAME);
     createEReference(explicitValueEClass, EXPLICIT_VALUE__LIT_VALUE);
+    createEAttribute(explicitValueEClass, EXPLICIT_VALUE__VALUE_LIST);
+    createEReference(explicitValueEClass, EXPLICIT_VALUE__ROW);
     createEAttribute(explicitValueEClass, EXPLICIT_VALUE__TERM);
 
     valueTableEClass = createEClass(VALUE_TABLE);
-    createEReference(valueTableEClass, VALUE_TABLE__ROW);
     createEReference(valueTableEClass, VALUE_TABLE__ROWS);
 
     literalValueEClass = createEClass(LITERAL_VALUE);
@@ -4297,6 +4597,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     unionResourceEClass.getESuperTypes().add(this.getResourceBySetOp());
     intersectionResourceEClass.getESuperTypes().add(this.getResourceBySetOp());
     classDeclarationEClass.getESuperTypes().add(this.getStatement());
+    userDefinedDataTypeEClass.getESuperTypes().add(this.getStatement());
     equivalentConceptsEClass.getESuperTypes().add(this.getStatement());
     disjointClassesEClass.getESuperTypes().add(this.getStatement());
     complementOfClassEClass.getESuperTypes().add(this.getStatement());
@@ -4343,6 +4644,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     instAttrSPVEClass.getESuperTypes().add(this.getGraphPattern());
     instAttrPSVEClass.getESuperTypes().add(this.getGraphPattern());
     subTypeOfEClass.getESuperTypes().add(this.getGraphPattern());
+    existentialNegationEClass.getESuperTypes().add(this.getGraphPattern());
     junctionExpressionEClass.getESuperTypes().add(this.getExpression());
     binaryOpExpressionEClass.getESuperTypes().add(this.getExpression());
     unaryOpExpressionEClass.getESuperTypes().add(this.getExpression());
@@ -4357,6 +4659,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEAttribute(getModelName_BaseUri(), ecorePackage.getEString(), "baseUri", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getModelName_Alias(), ecorePackage.getEString(), "alias", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getModelName_Version(), ecorePackage.getEString(), "version", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getModelName_AnnType(), ecorePackage.getEString(), "annType", null, 0, -1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getModelName_AnnContent(), this.getContentList(), null, "annContent", null, 0, -1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(importEClass, Import.class, "Import", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -4390,14 +4693,14 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEClass(resourceIdentifierEClass, ResourceIdentifier.class, "ResourceIdentifier", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 
     initEClass(resourceBySetOpEClass, ResourceBySetOp.class, "ResourceBySetOp", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getResourceBySetOp_AnnType(), ecorePackage.getEString(), "annType", null, 0, 1, ResourceBySetOp.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getResourceBySetOp_AnnContent(), ecorePackage.getEString(), "annContent", null, 0, 1, ResourceBySetOp.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getResourceBySetOp_AnnType(), ecorePackage.getEString(), "annType", null, 0, -1, ResourceBySetOp.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getResourceBySetOp_AnnContent(), this.getContentList(), null, "annContent", null, 0, -1, ResourceBySetOp.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getResourceBySetOp_Names(), this.getResourceIdentifier(), null, "names", null, 0, -1, ResourceBySetOp.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getResourceBySetOp_Op(), ecorePackage.getEString(), "op", null, 0, -1, ResourceBySetOp.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(resourceByRestrictionEClass, ResourceByRestriction.class, "ResourceByRestriction", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getResourceByRestriction_AnnType(), ecorePackage.getEString(), "annType", null, 0, 1, ResourceByRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getResourceByRestriction_AnnContent(), ecorePackage.getEString(), "annContent", null, 0, 1, ResourceByRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getResourceByRestriction_AnnType(), ecorePackage.getEString(), "annType", null, 0, -1, ResourceByRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getResourceByRestriction_AnnContent(), this.getContentList(), null, "annContent", null, 0, -1, ResourceByRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getResourceByRestriction_PropName(), this.getResourceByName(), null, "propName", null, 0, 1, ResourceByRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getResourceByRestriction_Cond(), this.getCondition(), null, "cond", null, 0, 1, ResourceByRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
@@ -4423,11 +4726,33 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
 
     initEClass(rangeEClass, Range.class, "Range", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getRange_Single(), ecorePackage.getEString(), "single", null, 0, 1, Range.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getRange_List(), ecorePackage.getEString(), "list", null, 0, 1, Range.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getRange_Lists(), ecorePackage.getEString(), "lists", null, 0, 1, Range.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getRange_Type(), this.getRangeType(), null, "type", null, 0, 1, Range.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(rangeTypeEClass, RangeType.class, "RangeType", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getRangeType_ClassIdentifier(), this.getResourceIdentifier(), null, "classIdentifier", null, 0, 1, RangeType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getRangeType_DataType(), this.getDataType(), "dataType", null, 0, 1, RangeType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(userDefinedDataTypeEClass, UserDefinedDataType.class, "UserDefinedDataType", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getUserDefinedDataType_UserDefinedDataType(), this.getResourceName(), null, "userDefinedDataType", null, 0, 1, UserDefinedDataType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getUserDefinedDataType_Restriction(), this.getDataTypeRestriction(), null, "restriction", null, 0, 1, UserDefinedDataType.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(dataTypeRestrictionEClass, DataTypeRestriction.class, "DataTypeRestriction", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getDataTypeRestriction_Basetype(), this.getDataType(), "basetype", null, 0, 1, DataTypeRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getDataTypeRestriction_Facets(), this.getFacets(), null, "facets", null, 0, 1, DataTypeRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getDataTypeRestriction_Basetypes(), this.getDataType(), "basetypes", null, 0, -1, DataTypeRestriction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(facetsEClass, Facets.class, "Facets", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getFacets_Minexin(), ecorePackage.getEString(), "minexin", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Min(), ecorePackage.getEString(), "min", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Max(), ecorePackage.getEString(), "max", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Maxexin(), ecorePackage.getEString(), "maxexin", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Regex(), ecorePackage.getEString(), "regex", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Len(), ecorePackage.getEString(), "len", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Minlen(), ecorePackage.getEString(), "minlen", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Maxlen(), ecorePackage.getEString(), "maxlen", null, 0, 1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getFacets_Values(), ecorePackage.getEString(), "values", null, 0, -1, Facets.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(equivalentConceptsEClass, EquivalentConcepts.class, "EquivalentConcepts", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getEquivalentConcepts_Class1(), this.getResourceByName(), null, "class1", null, 0, 1, EquivalentConcepts.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -4706,6 +5031,10 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEReference(getSubTypeOf_Subclass(), this.getResourceByName(), null, "subclass", null, 0, 1, SubTypeOf.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getSubTypeOf_Superclass(), this.getResourceByName(), null, "superclass", null, 0, 1, SubTypeOf.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
+    initEClass(existentialNegationEClass, ExistentialNegation.class, "ExistentialNegation", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getExistentialNegation_VarList(), this.getVariableList(), null, "varList", null, 0, 1, ExistentialNegation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getExistentialNegation_Quantified(), this.getExpression(), null, "quantified", null, 0, 1, ExistentialNegation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
     initEClass(intervalValueEClass, IntervalValue.class, "IntervalValue", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getIntervalValue_Op(), ecorePackage.getEString(), "op", null, 0, 1, IntervalValue.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getIntervalValue_Expr(), this.getExpression(), null, "expr", null, 0, 1, IntervalValue.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -4713,10 +5042,11 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEClass(explicitValueEClass, ExplicitValue.class, "ExplicitValue", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getExplicitValue_InstName(), this.getResourceByName(), null, "instName", null, 0, 1, ExplicitValue.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getExplicitValue_LitValue(), this.getLiteralValue(), null, "litValue", null, 0, 1, ExplicitValue.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getExplicitValue_ValueList(), ecorePackage.getEString(), "valueList", null, 0, 1, ExplicitValue.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getExplicitValue_Row(), this.getValueRow(), null, "row", null, 0, 1, ExplicitValue.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getExplicitValue_Term(), ecorePackage.getEString(), "term", null, 0, 1, ExplicitValue.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(valueTableEClass, ValueTable.class, "ValueTable", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEReference(getValueTable_Row(), this.getValueRow(), null, "row", null, 0, 1, ValueTable.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getValueTable_Rows(), this.getValueRow(), null, "rows", null, 0, -1, ValueTable.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(literalValueEClass, LiteralValue.class, "LiteralValue", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);

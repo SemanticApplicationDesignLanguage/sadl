@@ -13,6 +13,8 @@ import org.eclipse.emf.ecore.EObject;
  * The following features are supported:
  * <ul>
  *   <li>{@link com.ge.research.sadl.sadl.Range#getSingle <em>Single</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.Range#getList <em>List</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.Range#getLists <em>Lists</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.Range#getType <em>Type</em>}</li>
  * </ul>
  * </p>
@@ -48,6 +50,58 @@ public interface Range extends EObject
    * @generated
    */
   void setSingle(String value);
+
+  /**
+   * Returns the value of the '<em><b>List</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>List</em>' attribute isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>List</em>' attribute.
+   * @see #setList(String)
+   * @see com.ge.research.sadl.sadl.SadlPackage#getRange_List()
+   * @model
+   * @generated
+   */
+  String getList();
+
+  /**
+   * Sets the value of the '{@link com.ge.research.sadl.sadl.Range#getList <em>List</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @param value the new value of the '<em>List</em>' attribute.
+   * @see #getList()
+   * @generated
+   */
+  void setList(String value);
+
+  /**
+   * Returns the value of the '<em><b>Lists</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>Lists</em>' attribute isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>Lists</em>' attribute.
+   * @see #setLists(String)
+   * @see com.ge.research.sadl.sadl.SadlPackage#getRange_Lists()
+   * @model
+   * @generated
+   */
+  String getLists();
+
+  /**
+   * Sets the value of the '{@link com.ge.research.sadl.sadl.Range#getLists <em>Lists</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @param value the new value of the '<em>Lists</em>' attribute.
+   * @see #getLists()
+   * @generated
+   */
+  void setLists(String value);
 
   /**
    * Returns the value of the '<em><b>Type</b></em>' containment reference.

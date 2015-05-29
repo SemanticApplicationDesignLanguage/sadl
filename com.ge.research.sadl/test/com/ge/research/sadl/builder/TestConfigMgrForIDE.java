@@ -44,8 +44,8 @@ public class TestConfigMgrForIDE {
 		String publicUri2 = "http://research.ge.com/Acuity/aulo.owl";
 		IConfigurationManagerForIDE confMgr = new ConfigurationManagerForIDE(testModelsFolder, null);
 		assertNotNull(confMgr);
-		assertTrue(confMgr.isSadlDerived(publicUri1));
-		assertFalse(confMgr.isSadlDerived(publicUri2));
+		assertTrue(confMgr.isSadlDerivedPublicUri(publicUri1));
+		assertFalse(confMgr.isSadlDerivedPublicUri(publicUri2));
 	}
 	
 	@Test

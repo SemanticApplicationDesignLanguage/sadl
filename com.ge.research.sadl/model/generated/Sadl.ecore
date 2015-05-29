@@ -13,6 +13,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="baseUri" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="alias" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annType" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="annContent" upperBound="-1"
         eType="#//ContentList" containment="true"/>
   </eClassifiers>
@@ -50,16 +52,20 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceIdentifier"/>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceBySetOp" eSuperTypes="#//ResourceIdentifier">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annContent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annType" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="annContent" upperBound="-1"
+        eType="#//ContentList" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="names" upperBound="-1"
         eType="#//ResourceIdentifier" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="op" unique="false" upperBound="-1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceByRestriction" eSuperTypes="#//ResourceIdentifier">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annContent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annType" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="annContent" upperBound="-1"
+        eType="#//ContentList" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="propName" eType="#//ResourceByName"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="cond" eType="#//Condition"
@@ -95,6 +101,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Range">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="single" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="list" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lists" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RangeType"
         containment="true"/>
   </eClassifiers>
@@ -102,6 +110,31 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="classIdentifier" eType="#//ResourceIdentifier"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dataType" eType="#//DataType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UserDefinedDataType" eSuperTypes="#//Statement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="userDefinedDataType" eType="#//ResourceName"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="restriction" eType="#//DataTypeRestriction"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataTypeRestriction">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="basetype" eType="#//DataType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="facets" eType="#//Facets"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="basetypes" unique="false"
+        upperBound="-1" eType="#//DataType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Facets">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minexin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="min" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxexin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="regex" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="len" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minlen" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxlen" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="values" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="DataType">
     <eLiterals name="string" literal="string"/>
@@ -524,6 +557,12 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="superclass" eType="#//ResourceByName"
         containment="true"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExistentialNegation" eSuperTypes="#//GraphPattern">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="varList" eType="#//VariableList"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="quantified" eType="#//Expression"
+        containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="IntervalValue">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="op" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="expr" eType="#//Expression"
@@ -534,11 +573,12 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="litValue" eType="#//LiteralValue"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="row" eType="#//ValueRow"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="term" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ValueTable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="row" eType="#//ValueRow"
-        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rows" upperBound="-1" eType="#//ValueRow"
         containment="true"/>
   </eClassifiers>

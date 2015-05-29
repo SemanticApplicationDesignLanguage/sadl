@@ -2,6 +2,7 @@
  */
 package com.ge.research.sadl.sadl;
 
+import org.eclipse.emf.common.util.EList;
 
 /**
  * <!-- begin-user-doc -->
@@ -25,56 +26,36 @@ package com.ge.research.sadl.sadl;
 public interface ResourceByRestriction extends ResourceIdentifier
 {
   /**
-   * Returns the value of the '<em><b>Ann Type</b></em>' attribute.
+   * Returns the value of the '<em><b>Ann Type</b></em>' attribute list.
+   * The list contents are of type {@link java.lang.String}.
    * <!-- begin-user-doc -->
    * <p>
-   * If the meaning of the '<em>Ann Type</em>' attribute isn't clear,
+   * If the meaning of the '<em>Ann Type</em>' attribute list isn't clear,
    * there really should be more of a description here...
    * </p>
    * <!-- end-user-doc -->
-   * @return the value of the '<em>Ann Type</em>' attribute.
-   * @see #setAnnType(String)
+   * @return the value of the '<em>Ann Type</em>' attribute list.
    * @see com.ge.research.sadl.sadl.SadlPackage#getResourceByRestriction_AnnType()
-   * @model
+   * @model unique="false"
    * @generated
    */
-  String getAnnType();
+  EList<String> getAnnType();
 
   /**
-   * Sets the value of the '{@link com.ge.research.sadl.sadl.ResourceByRestriction#getAnnType <em>Ann Type</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @param value the new value of the '<em>Ann Type</em>' attribute.
-   * @see #getAnnType()
-   * @generated
-   */
-  void setAnnType(String value);
-
-  /**
-   * Returns the value of the '<em><b>Ann Content</b></em>' attribute.
+   * Returns the value of the '<em><b>Ann Content</b></em>' containment reference list.
+   * The list contents are of type {@link com.ge.research.sadl.sadl.ContentList}.
    * <!-- begin-user-doc -->
    * <p>
-   * If the meaning of the '<em>Ann Content</em>' attribute isn't clear,
+   * If the meaning of the '<em>Ann Content</em>' containment reference list isn't clear,
    * there really should be more of a description here...
    * </p>
    * <!-- end-user-doc -->
-   * @return the value of the '<em>Ann Content</em>' attribute.
-   * @see #setAnnContent(String)
+   * @return the value of the '<em>Ann Content</em>' containment reference list.
    * @see com.ge.research.sadl.sadl.SadlPackage#getResourceByRestriction_AnnContent()
-   * @model
+   * @model containment="true"
    * @generated
    */
-  String getAnnContent();
-
-  /**
-   * Sets the value of the '{@link com.ge.research.sadl.sadl.ResourceByRestriction#getAnnContent <em>Ann Content</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @param value the new value of the '<em>Ann Content</em>' attribute.
-   * @see #getAnnContent()
-   * @generated
-   */
-  void setAnnContent(String value);
+  EList<ContentList> getAnnContent();
 
   /**
    * Returns the value of the '<em><b>Prop Name</b></em>' containment reference.

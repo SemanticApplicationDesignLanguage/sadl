@@ -12,6 +12,7 @@ import com.ge.research.sadl.sadl.ClassDeclaration;
 import com.ge.research.sadl.sadl.ComplementOfClass;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
+import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
@@ -20,12 +21,14 @@ import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
 import com.ge.research.sadl.sadl.EquivalentConcepts;
+import com.ge.research.sadl.sadl.ExistentialNegation;
 import com.ge.research.sadl.sadl.ExistingInstanceAttribution;
 import com.ge.research.sadl.sadl.ExistingResourceList;
 import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
+import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.HasValue;
 import com.ge.research.sadl.sadl.HasValueCondition;
@@ -80,6 +83,7 @@ import com.ge.research.sadl.sadl.TypeDeclaration;
 import com.ge.research.sadl.sadl.TypedBNode;
 import com.ge.research.sadl.sadl.UnaryOpExpression;
 import com.ge.research.sadl.sadl.UnionResource;
+import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.ValueRow;
 import com.ge.research.sadl.sadl.ValueTable;
 import com.ge.research.sadl.sadl.VariableList;
@@ -228,6 +232,12 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 					return; 
 				}
 				else break;
+			case SadlPackage.DATA_TYPE_RESTRICTION:
+				if(context == grammarAccess.getDataTypeRestrictionRule()) {
+					sequence_DataTypeRestriction(context, (DataTypeRestriction) semanticObject); 
+					return; 
+				}
+				else break;
 			case SadlPackage.DEFAULT_VALUE:
 				if(context == grammarAccess.getDefaultValueRule() ||
 				   context == grammarAccess.getModelElementRule() ||
@@ -284,6 +294,13 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 				   context == grammarAccess.getModelElementRule() ||
 				   context == grammarAccess.getStatementRule()) {
 					sequence_EquivalentConcepts(context, (EquivalentConcepts) semanticObject); 
+					return; 
+				}
+				else break;
+			case SadlPackage.EXISTENTIAL_NEGATION:
+				if(context == grammarAccess.getExistentialNegationRule() ||
+				   context == grammarAccess.getGraphPatternRule()) {
+					sequence_ExistentialNegation(context, (ExistentialNegation) semanticObject); 
 					return; 
 				}
 				else break;
@@ -352,6 +369,12 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 				   context == grammarAccess.getRelationalExpressionAccess().getBinaryOpExpressionLeftAction_1_0() ||
 				   context == grammarAccess.getUnaryOrPrimaryExpressionRule()) {
 					sequence_PrimaryExpression(context, (Expression) semanticObject); 
+					return; 
+				}
+				else break;
+			case SadlPackage.FACETS:
+				if(context == grammarAccess.getFacetsRule()) {
+					sequence_Facets(context, (Facets) semanticObject); 
 					return; 
 				}
 				else break;
@@ -782,6 +805,14 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 					return; 
 				}
 				else break;
+			case SadlPackage.USER_DEFINED_DATA_TYPE:
+				if(context == grammarAccess.getModelElementRule() ||
+				   context == grammarAccess.getStatementRule() ||
+				   context == grammarAccess.getUserDefinedDataTypeRule()) {
+					sequence_UserDefinedDataType(context, (UserDefinedDataType) semanticObject); 
+					return; 
+				}
+				else break;
 			case SadlPackage.VALUE_ROW:
 				if(context == grammarAccess.getValueRowRule()) {
 					sequence_ValueRow(context, (ValueRow) semanticObject); 
@@ -1007,6 +1038,15 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
+	 *     ((basetype=DataType facets=Facets) | (basetypes+=DataType basetypes+=DataType+))
+	 */
+	protected void sequence_DataTypeRestriction(EObject context, DataTypeRestriction semanticObject) {
+		genericSequencer.createSequence(context, semanticObject);
+	}
+	
+	
+	/**
+	 * Constraint:
 	 *     (defValueClass=PropertyOfClass level=NUMBER? defValue=ExplicitValue)
 	 */
 	protected void sequence_DefaultValue(EObject context, DefaultValue semanticObject) {
@@ -1096,6 +1136,25 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
+	 *     (varList=VariableList quantified=PrimaryExpression)
+	 */
+	protected void sequence_ExistentialNegation(EObject context, ExistentialNegation semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, SadlPackage.Literals.EXISTENTIAL_NEGATION__VAR_LIST) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, SadlPackage.Literals.EXISTENTIAL_NEGATION__VAR_LIST));
+			if(transientValues.isValueTransient(semanticObject, SadlPackage.Literals.EXISTENTIAL_NEGATION__QUANTIFIED) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, SadlPackage.Literals.EXISTENTIAL_NEGATION__QUANTIFIED));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getExistentialNegationAccess().getVarListVariableListParserRuleCall_3_0(), semanticObject.getVarList());
+		feeder.accept(grammarAccess.getExistentialNegationAccess().getQuantifiedPrimaryExpressionParserRuleCall_6_0(), semanticObject.getQuantified());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
 	 *     (
 	 *         (subj=ResourceByName addlInfoItems+=PropValPartialTriple+) | 
 	 *         (pOfS=OfPatternReturningValues obj=Object) | 
@@ -1127,7 +1186,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (instName=ResourceByName | litValue=LiteralValue | term='PI' | term='known')
+	 *     (instName=ResourceByName | litValue=LiteralValue | (valueList='[' row=ValueRow) | term='PI' | term='known')
 	 */
 	protected void sequence_ExplicitValue(EObject context, ExplicitValue semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1147,6 +1206,21 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
 		feeder.accept(grammarAccess.getExprAccess().getExprExpressionParserRuleCall_1_0(), semanticObject.getExpr());
 		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (
+	 *         ((minexin='(' | minexin='[') min=NUMBER? max=NUMBER? (maxexin=']' | maxexin=')')) | 
+	 *         regex=STRING | 
+	 *         len=NUMBER | 
+	 *         (minlen=NUMBER maxlen=NUMBER) | 
+	 *         ((values+=STRING | values+=NUMBER) (values+=STRING | values+=NUMBER)*)
+	 *     )
+	 */
+	protected void sequence_Facets(EObject context, Facets semanticObject) {
+		genericSequencer.createSequence(context, semanticObject);
 	}
 	
 	
@@ -1286,7 +1360,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (names+=ResourceIdentifier (op+='and' names+=ResourceIdentifier)+ ((annType='alias' | annType='note') annContent=STRING)?)
+	 *     (names+=ResourceIdentifier (op+='and' names+=ResourceIdentifier)+ ((annType+='alias' | annType+='note') annContent+=ContentList)*)
 	 */
 	protected void sequence_IntersectionResource_ResourceIdentifier(EObject context, IntersectionResource semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1504,7 +1578,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (baseUri=STRING alias=NAME? version=STRING? annContent+=ContentList*)
+	 *     (baseUri=STRING alias=NAME? version=STRING? ((annType+='alias' | annType+='note') annContent+=ContentList)*)
 	 */
 	protected void sequence_ModelName(EObject context, ModelName semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1683,7 +1757,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (single='single'? type=RangeType)
+	 *     ((single='single' | list='List' | lists='Lists')? type=RangeType)
 	 */
 	protected void sequence_Range(EObject context, Range semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1717,7 +1791,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (propName=ResourceByName cond=Condition ((annType='alias' | annType='note') annContent=STRING)?)
+	 *     (propName=ResourceByName cond=Condition ((annType+='alias' | annType+='note') annContent+=ContentList)*)
 	 */
 	protected void sequence_ResourceByRestriction_ResourceIdentifier(EObject context, ResourceByRestriction semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1726,7 +1800,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (names+=ResourceIdentifier ((op+=',' | op+='or') names+=ResourceIdentifier)+ ((annType='alias' | annType='note') annContent=STRING)?)
+	 *     (names+=ResourceIdentifier ((op+=',' | op+='or') names+=ResourceIdentifier)+ ((annType+='alias' | annType+='note') annContent+=ContentList)*)
 	 */
 	protected void sequence_ResourceIdentifier_UnionResource(EObject context, UnionResource semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1911,6 +1985,25 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
+	 *     (userDefinedDataType=ResourceName restriction=DataTypeRestriction)
+	 */
+	protected void sequence_UserDefinedDataType(EObject context, UserDefinedDataType semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, SadlPackage.Literals.USER_DEFINED_DATA_TYPE__USER_DEFINED_DATA_TYPE) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, SadlPackage.Literals.USER_DEFINED_DATA_TYPE__USER_DEFINED_DATA_TYPE));
+			if(transientValues.isValueTransient(semanticObject, SadlPackage.Literals.USER_DEFINED_DATA_TYPE__RESTRICTION) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, SadlPackage.Literals.USER_DEFINED_DATA_TYPE__RESTRICTION));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getUserDefinedDataTypeAccess().getUserDefinedDataTypeResourceNameParserRuleCall_2_0(), semanticObject.getUserDefinedDataType());
+		feeder.accept(grammarAccess.getUserDefinedDataTypeAccess().getRestrictionDataTypeRestrictionParserRuleCall_4_0(), semanticObject.getRestriction());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
 	 *     (explicitValues+=ExplicitValue explicitValues+=ExplicitValue*)
 	 */
 	protected void sequence_ValueRow(EObject context, ValueRow semanticObject) {
@@ -1920,7 +2013,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (row=ValueRow | (rows+=ValueRow rows+=ValueRow*))
+	 *     (rows+=ValueRow rows+=ValueRow*)
 	 */
 	protected void sequence_ValueTable(EObject context, ValueTable semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);

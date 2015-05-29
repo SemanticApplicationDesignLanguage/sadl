@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link com.ge.research.sadl.sadl.ModelName#getBaseUri <em>Base Uri</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.ModelName#getAlias <em>Alias</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.ModelName#getVersion <em>Version</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.ModelName#getAnnType <em>Ann Type</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.ModelName#getAnnContent <em>Ann Content</em>}</li>
  * </ul>
  * </p>
@@ -104,6 +105,22 @@ public interface ModelName extends EObject
    * @generated
    */
   void setVersion(String value);
+
+  /**
+   * Returns the value of the '<em><b>Ann Type</b></em>' attribute list.
+   * The list contents are of type {@link java.lang.String}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>Ann Type</em>' attribute list isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>Ann Type</em>' attribute list.
+   * @see com.ge.research.sadl.sadl.SadlPackage#getModelName_AnnType()
+   * @model unique="false"
+   * @generated
+   */
+  EList<String> getAnnType();
 
   /**
    * Returns the value of the '<em><b>Ann Content</b></em>' containment reference list.

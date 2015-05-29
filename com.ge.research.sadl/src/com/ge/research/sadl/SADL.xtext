@@ -31,10 +31,11 @@ Model :
 ModelName :
     'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
     	('(' annType+=('alias'|'note') annContent+=ContentList ')')* EOS;
-//		('(' 'note' annContent+=ContentList ')')* EOS;
 
-// Every import is by actual relative URL (other SADL models) or by URI
-// (OWL files); every import has a unique alias (which becomes the "prefix" in compound names).
+// Every import is by either by actual relative URL (other SADL models only) 
+//	or by URI (SADL models and external OWL files); 
+//	an import may have a unique alias (which becomes the "prefix" in compound names)
+//	but this is discouraged in favor of global aliases given with ModelName.
 Import :
     'import' importURI=STRING ('as' alias=NAME)? EOS;
 
@@ -75,7 +76,7 @@ Statement :
     |   ExistingInstanceAttribution
     |   InstanceDifferentFrom
     |   InstancesAllDifferent
-//    |	UserDefinedDataType
+    |	UserDefinedDataType
     ;
 
 // SADL identifiers may name classes, instances, and properties.
@@ -107,8 +108,8 @@ ExistingResourceList :
 // In some places, we must allow class names to be referenced and created by set operations.
 ResourceIdentifier :
     	ResourceByName 
-    | 	ResourceBySetOp ('(' annType=('alias'|'note') annContent=STRING ')')? 
-    | 	ResourceByRestriction ('(' annType=('alias'|'note') annContent=STRING ')')?
+    | 	ResourceBySetOp ('(' annType+=('alias'|'note') annContent+=ContentList ')')* 
+    | 	ResourceByRestriction ('(' annType+=('alias'|'note') annContent+=ContentList ')')*
     ;
 
 ResourceBySetOp :
@@ -148,8 +149,13 @@ AddlClassInfo :
     	','? 'described' 'by' (propertyByName=ResourceByName | propertyName=ResourceName range=Range)
     | 	','? 'described' 'by' propertyByName=ResourceByName restriction=Condition;
 
+// ... a single value ...
+// ... a List of values ...
+// ... Lists of values ...
+// ... values ...
 Range :
-    ('has'|'with') ('a' single='single' 'value'|'values') 'of' 'type' type=RangeType;
+//    ('has'|'with') ('a' single='single' 'value'|'values') 'of' 'type' type=RangeType;
+    ('has'|'with') ('a' single='single' 'value'|('a' list='List'|lists='Lists') 'of''values'|'values') 'of' 'type' type=RangeType;
 
 RangeType :
         classIdentifier=ResourceIdentifier
@@ -157,21 +163,21 @@ RangeType :
 //	  | dataType=ResourceName
     ;
 
-//UserDefinedDataType :
-//		udt=NAME 'is' 'a' 'data' 'type' 'based' 'on' restriction=DataTypeRestriction EOS
-//;   
-//
-//DataTypeRestriction :
-//		basetype=NAME 'restricted' 'to' facets=Facets
-//	|	'{' basetypes += NAME ((','|'or') basetypes+=NAME)+ '}'
-//	;
-//	
-//Facets :	
-//		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
-//	|	regex=STRING
-//	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
-//	|	'{' values+=(STRING|NUMBER) ((',')? values+=(STRING|NUMBER))* '}'
-//;
+UserDefinedDataType :
+	'data' 'type' userDefinedDataType=ResourceName 'is' restriction=DataTypeRestriction EOS
+;
+
+DataTypeRestriction :
+		('a'|'an')? basetype=DataType facets=Facets
+	|	'{' basetypes += DataType ((','|'or') basetypes+=DataType)+ '}'
+	;
+	
+Facets :	
+		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
+	|	regex=STRING
+	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
+	|	'{' values+=(STRING|NUMBER) ((',')? values+=(STRING|NUMBER))* '}'
+;
  
 enum DataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
@@ -585,6 +591,7 @@ GraphPattern :
 	|	InstAttrPSV
 	|	MergedTriples
 	|   SubTypeOf
+	|   ExistentialNegation
 	;
 
 PropOfSubj :
@@ -603,21 +610,27 @@ InstAttrPSV :
 SubTypeOf :
 	subclass=ResourceByName 'is' 'a' 'type' 'of' superclass=ResourceByName;
 	
+ExistentialNegation :
+	'there' 'is' 'no' varList=VariableList 'such' 'that' quantified=PrimaryExpression
+;	
+	
 IntervalValue :
 	op=('==' | '<' | '<=' | '>' | '>=') expr=AdditiveExpression;
 
 ExplicitValue :
 		instName=ResourceByName		// e.g., George
 	|	litValue=LiteralValue		// e.g., 38.186111
+	|	valueList='[' row=ValueRow ']'
 	|	term='PI'					// PI
 	|	term='known'				// known
     ;
     
 ValueTable :
 //	 	row=ValueRow
-		'[' row=ValueRow ']'
+//		'[' row=ValueRow ']'
 // e.g., [George, 23, "Purple", 38.186111]
-	|	'{' '[' rows+=ValueRow ']' (','? '[' rows+=ValueRow ']')* '}'
+//	|	
+		'{' '[' rows+=ValueRow ']' (','? '[' rows+=ValueRow ']')* '}'
 // e.g., {[George, 23, "Purple", 38.186111], [Martha, 24, "Pink", 45.203]}
 	;
 

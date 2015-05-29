@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl
 Bundle-Vendor: GE Research
-Bundle-Version: 2.2.0.qualifier
+Bundle-Version: 2.4.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext;bundle-version="2.4.3";visibility:=reexport,
@@ -278,5 +278,5 @@ Bundle-ClassPath: lib/opencsv-2.3.jar,
  lib/xml-apis-1.4.01.jar,
  lib/slf4j-api-1.6.4.jar,
  lib/slf4j-log4j12-1.6.4.jar,
- lib/reasoner-api-2.3.0.jar,
- lib/reasoner-impl-2.3.0.jar
+ lib/reasoner-api-2.4.0.jar,
+ lib/reasoner-impl-2.4.0.jar

@@ -9,7 +9,7 @@ import java.util.List;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.validation.ComposedChecks;
 
-@ComposedChecks(validators= {org.eclipse.xtext.validation.ImportUriValidator.class})
+@ComposedChecks(validators= {com.ge.research.sadl.validation.SadlImportUriValidator.class})
 public class AbstractSadlJavaValidator extends org.eclipse.xtext.validation.AbstractDeclarativeValidator {
 
 	@Override

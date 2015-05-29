@@ -212,6 +212,33 @@ public interface SadlFactory extends EFactory
   RangeType createRangeType();
 
   /**
+   * Returns a new object of class '<em>User Defined Data Type</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>User Defined Data Type</em>'.
+   * @generated
+   */
+  UserDefinedDataType createUserDefinedDataType();
+
+  /**
+   * Returns a new object of class '<em>Data Type Restriction</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Data Type Restriction</em>'.
+   * @generated
+   */
+  DataTypeRestriction createDataTypeRestriction();
+
+  /**
+   * Returns a new object of class '<em>Facets</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Facets</em>'.
+   * @generated
+   */
+  Facets createFacets();
+
+  /**
    * Returns a new object of class '<em>Equivalent Concepts</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -786,6 +813,15 @@ public interface SadlFactory extends EFactory
    * @generated
    */
   SubTypeOf createSubTypeOf();
+
+  /**
+   * Returns a new object of class '<em>Existential Negation</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Existential Negation</em>'.
+   * @generated
+   */
+  ExistentialNegation createExistentialNegation();
 
   /**
    * Returns a new object of class '<em>Interval Value</em>'.

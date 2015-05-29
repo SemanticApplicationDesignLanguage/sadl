@@ -141,13 +141,22 @@ public interface SadlPackage extends EPackage
   int MODEL_NAME__VERSION = 2;
 
   /**
+   * The feature id for the '<em><b>Ann Type</b></em>' attribute list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MODEL_NAME__ANN_TYPE = 3;
+
+  /**
    * The feature id for the '<em><b>Ann Content</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int MODEL_NAME__ANN_CONTENT = 3;
+  int MODEL_NAME__ANN_CONTENT = 4;
 
   /**
    * The number of structural features of the '<em>Model Name</em>' class.
@@ -156,7 +165,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int MODEL_NAME_FEATURE_COUNT = 4;
+  int MODEL_NAME_FEATURE_COUNT = 5;
 
   /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.ImportImpl <em>Import</em>}' class.
@@ -449,7 +458,7 @@ public interface SadlPackage extends EPackage
   int RESOURCE_BY_SET_OP = 12;
 
   /**
-   * The feature id for the '<em><b>Ann Type</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Type</b></em>' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -458,7 +467,7 @@ public interface SadlPackage extends EPackage
   int RESOURCE_BY_SET_OP__ANN_TYPE = RESOURCE_IDENTIFIER_FEATURE_COUNT + 0;
 
   /**
-   * The feature id for the '<em><b>Ann Content</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Content</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -504,7 +513,7 @@ public interface SadlPackage extends EPackage
   int RESOURCE_BY_RESTRICTION = 13;
 
   /**
-   * The feature id for the '<em><b>Ann Type</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Type</b></em>' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -513,7 +522,7 @@ public interface SadlPackage extends EPackage
   int RESOURCE_BY_RESTRICTION__ANN_TYPE = RESOURCE_IDENTIFIER_FEATURE_COUNT + 0;
 
   /**
-   * The feature id for the '<em><b>Ann Content</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Content</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -559,7 +568,7 @@ public interface SadlPackage extends EPackage
   int UNION_RESOURCE = 14;
 
   /**
-   * The feature id for the '<em><b>Ann Type</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Type</b></em>' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -568,7 +577,7 @@ public interface SadlPackage extends EPackage
   int UNION_RESOURCE__ANN_TYPE = RESOURCE_BY_SET_OP__ANN_TYPE;
 
   /**
-   * The feature id for the '<em><b>Ann Content</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Content</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -614,7 +623,7 @@ public interface SadlPackage extends EPackage
   int INTERSECTION_RESOURCE = 15;
 
   /**
-   * The feature id for the '<em><b>Ann Type</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Type</b></em>' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -623,7 +632,7 @@ public interface SadlPackage extends EPackage
   int INTERSECTION_RESOURCE__ANN_TYPE = RESOURCE_BY_SET_OP__ANN_TYPE;
 
   /**
-   * The feature id for the '<em><b>Ann Content</b></em>' attribute.
+   * The feature id for the '<em><b>Ann Content</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -825,13 +834,31 @@ public interface SadlPackage extends EPackage
   int RANGE__SINGLE = 0;
 
   /**
+   * The feature id for the '<em><b>List</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int RANGE__LIST = 1;
+
+  /**
+   * The feature id for the '<em><b>Lists</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int RANGE__LISTS = 2;
+
+  /**
    * The feature id for the '<em><b>Type</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int RANGE__TYPE = 1;
+  int RANGE__TYPE = 3;
 
   /**
    * The number of structural features of the '<em>Range</em>' class.
@@ -840,7 +867,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int RANGE_FEATURE_COUNT = 2;
+  int RANGE_FEATURE_COUNT = 4;
 
   /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.RangeTypeImpl <em>Range Type</em>}' class.
@@ -880,6 +907,189 @@ public interface SadlPackage extends EPackage
   int RANGE_TYPE_FEATURE_COUNT = 2;
 
   /**
+   * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.UserDefinedDataTypeImpl <em>User Defined Data Type</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see com.ge.research.sadl.sadl.impl.UserDefinedDataTypeImpl
+   * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getUserDefinedDataType()
+   * @generated
+   */
+  int USER_DEFINED_DATA_TYPE = 21;
+
+  /**
+   * The feature id for the '<em><b>User Defined Data Type</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int USER_DEFINED_DATA_TYPE__USER_DEFINED_DATA_TYPE = STATEMENT_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Restriction</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int USER_DEFINED_DATA_TYPE__RESTRICTION = STATEMENT_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>User Defined Data Type</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int USER_DEFINED_DATA_TYPE_FEATURE_COUNT = STATEMENT_FEATURE_COUNT + 2;
+
+  /**
+   * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.DataTypeRestrictionImpl <em>Data Type Restriction</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see com.ge.research.sadl.sadl.impl.DataTypeRestrictionImpl
+   * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getDataTypeRestriction()
+   * @generated
+   */
+  int DATA_TYPE_RESTRICTION = 22;
+
+  /**
+   * The feature id for the '<em><b>Basetype</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int DATA_TYPE_RESTRICTION__BASETYPE = 0;
+
+  /**
+   * The feature id for the '<em><b>Facets</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int DATA_TYPE_RESTRICTION__FACETS = 1;
+
+  /**
+   * The feature id for the '<em><b>Basetypes</b></em>' attribute list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int DATA_TYPE_RESTRICTION__BASETYPES = 2;
+
+  /**
+   * The number of structural features of the '<em>Data Type Restriction</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int DATA_TYPE_RESTRICTION_FEATURE_COUNT = 3;
+
+  /**
+   * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.FacetsImpl <em>Facets</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see com.ge.research.sadl.sadl.impl.FacetsImpl
+   * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getFacets()
+   * @generated
+   */
+  int FACETS = 23;
+
+  /**
+   * The feature id for the '<em><b>Minexin</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__MINEXIN = 0;
+
+  /**
+   * The feature id for the '<em><b>Min</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__MIN = 1;
+
+  /**
+   * The feature id for the '<em><b>Max</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__MAX = 2;
+
+  /**
+   * The feature id for the '<em><b>Maxexin</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__MAXEXIN = 3;
+
+  /**
+   * The feature id for the '<em><b>Regex</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__REGEX = 4;
+
+  /**
+   * The feature id for the '<em><b>Len</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__LEN = 5;
+
+  /**
+   * The feature id for the '<em><b>Minlen</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__MINLEN = 6;
+
+  /**
+   * The feature id for the '<em><b>Maxlen</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__MAXLEN = 7;
+
+  /**
+   * The feature id for the '<em><b>Values</b></em>' attribute list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS__VALUES = 8;
+
+  /**
+   * The number of structural features of the '<em>Facets</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int FACETS_FEATURE_COUNT = 9;
+
+  /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.EquivalentConceptsImpl <em>Equivalent Concepts</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -887,7 +1097,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getEquivalentConcepts()
    * @generated
    */
-  int EQUIVALENT_CONCEPTS = 21;
+  int EQUIVALENT_CONCEPTS = 24;
 
   /**
    * The feature id for the '<em><b>Class1</b></em>' containment reference.
@@ -924,7 +1134,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getDisjointClasses()
    * @generated
    */
-  int DISJOINT_CLASSES = 22;
+  int DISJOINT_CLASSES = 25;
 
   /**
    * The feature id for the '<em><b>Class1</b></em>' containment reference.
@@ -970,7 +1180,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getComplementOfClass()
    * @generated
    */
-  int COMPLEMENT_OF_CLASS = 23;
+  int COMPLEMENT_OF_CLASS = 26;
 
   /**
    * The feature id for the '<em><b>Class1</b></em>' containment reference.
@@ -1007,7 +1217,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getAllValuesFrom()
    * @generated
    */
-  int ALL_VALUES_FROM = 24;
+  int ALL_VALUES_FROM = 27;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1062,7 +1272,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSomeValuesFrom()
    * @generated
    */
-  int SOME_VALUES_FROM = 25;
+  int SOME_VALUES_FROM = 28;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1117,7 +1327,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getHasValue()
    * @generated
    */
-  int HAS_VALUE = 26;
+  int HAS_VALUE = 29;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1172,7 +1382,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getCardinality()
    * @generated
    */
-  int CARDINALITY = 27;
+  int CARDINALITY = 30;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1227,7 +1437,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getMinCardinality()
    * @generated
    */
-  int MIN_CARDINALITY = 28;
+  int MIN_CARDINALITY = 31;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1282,7 +1492,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getMaxCardinality()
    * @generated
    */
-  int MAX_CARDINALITY = 29;
+  int MAX_CARDINALITY = 32;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1337,7 +1547,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getPropertyOfClass()
    * @generated
    */
-  int PROPERTY_OF_CLASS = 30;
+  int PROPERTY_OF_CLASS = 33;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -1374,7 +1584,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getCondition()
    * @generated
    */
-  int CONDITION = 41;
+  int CONDITION = 44;
 
   /**
    * The number of structural features of the '<em>Condition</em>' class.
@@ -1393,7 +1603,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getAllValuesCondition()
    * @generated
    */
-  int ALL_VALUES_CONDITION = 31;
+  int ALL_VALUES_CONDITION = 34;
 
   /**
    * The feature id for the '<em><b>Restriction</b></em>' containment reference.
@@ -1421,7 +1631,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getEnumeratedAllValuesFrom()
    * @generated
    */
-  int ENUMERATED_ALL_VALUES_FROM = 32;
+  int ENUMERATED_ALL_VALUES_FROM = 35;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1458,7 +1668,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getEnumeratedAllAndSomeValuesFrom()
    * @generated
    */
-  int ENUMERATED_ALL_AND_SOME_VALUES_FROM = 33;
+  int ENUMERATED_ALL_AND_SOME_VALUES_FROM = 36;
 
   /**
    * The feature id for the '<em><b>Restricted</b></em>' containment reference.
@@ -1495,7 +1705,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getDefaultValue()
    * @generated
    */
-  int DEFAULT_VALUE = 34;
+  int DEFAULT_VALUE = 37;
 
   /**
    * The feature id for the '<em><b>Def Value Class</b></em>' containment reference.
@@ -1541,7 +1751,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSomeValuesCondition()
    * @generated
    */
-  int SOME_VALUES_CONDITION = 35;
+  int SOME_VALUES_CONDITION = 38;
 
   /**
    * The feature id for the '<em><b>Restriction</b></em>' containment reference.
@@ -1569,7 +1779,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getHasValueCondition()
    * @generated
    */
-  int HAS_VALUE_CONDITION = 36;
+  int HAS_VALUE_CONDITION = 39;
 
   /**
    * The feature id for the '<em><b>Restriction</b></em>' containment reference.
@@ -1597,7 +1807,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getMinCardCondition()
    * @generated
    */
-  int MIN_CARD_CONDITION = 37;
+  int MIN_CARD_CONDITION = 40;
 
   /**
    * The feature id for the '<em><b>Card</b></em>' attribute.
@@ -1634,7 +1844,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getMaxCardCondition()
    * @generated
    */
-  int MAX_CARD_CONDITION = 38;
+  int MAX_CARD_CONDITION = 41;
 
   /**
    * The feature id for the '<em><b>Card</b></em>' attribute.
@@ -1671,7 +1881,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getCardCondition()
    * @generated
    */
-  int CARD_CONDITION = 39;
+  int CARD_CONDITION = 42;
 
   /**
    * The feature id for the '<em><b>Card</b></em>' attribute.
@@ -1708,7 +1918,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getNecessaryAndSufficient()
    * @generated
    */
-  int NECESSARY_AND_SUFFICIENT = 40;
+  int NECESSARY_AND_SUFFICIENT = 43;
 
   /**
    * The feature id for the '<em><b>Super Class</b></em>' containment reference.
@@ -1772,7 +1982,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getPropertyDeclaration()
    * @generated
    */
-  int PROPERTY_DECLARATION = 42;
+  int PROPERTY_DECLARATION = 45;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -1854,7 +2064,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getAdditionalPropertyInfo()
    * @generated
    */
-  int ADDITIONAL_PROPERTY_INFO = 43;
+  int ADDITIONAL_PROPERTY_INFO = 46;
 
   /**
    * The feature id for the '<em><b>Domain</b></em>' containment reference.
@@ -1945,7 +2155,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getFunctionalProperty()
    * @generated
    */
-  int FUNCTIONAL_PROPERTY = 44;
+  int FUNCTIONAL_PROPERTY = 47;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -1973,7 +2183,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInverseFunctionalProperty()
    * @generated
    */
-  int INVERSE_FUNCTIONAL_PROPERTY = 45;
+  int INVERSE_FUNCTIONAL_PROPERTY = 48;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -2001,7 +2211,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSymmetricalProperty()
    * @generated
    */
-  int SYMMETRICAL_PROPERTY = 46;
+  int SYMMETRICAL_PROPERTY = 49;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -2029,7 +2239,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getTransitiveProperty()
    * @generated
    */
-  int TRANSITIVE_PROPERTY = 47;
+  int TRANSITIVE_PROPERTY = 50;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -2057,7 +2267,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInverseProperty()
    * @generated
    */
-  int INVERSE_PROPERTY = 48;
+  int INVERSE_PROPERTY = 51;
 
   /**
    * The feature id for the '<em><b>Property Name1</b></em>' containment reference.
@@ -2094,7 +2304,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getIsInverseOf()
    * @generated
    */
-  int IS_INVERSE_OF = 49;
+  int IS_INVERSE_OF = 52;
 
   /**
    * The feature id for the '<em><b>Property Name2</b></em>' containment reference.
@@ -2122,7 +2332,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getTypedBNode()
    * @generated
    */
-  int TYPED_BNODE = 50;
+  int TYPED_BNODE = 53;
 
   /**
    * The feature id for the '<em><b>Article</b></em>' attribute.
@@ -2159,7 +2369,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstanceDeclarationStatement()
    * @generated
    */
-  int INSTANCE_DECLARATION_STATEMENT = 51;
+  int INSTANCE_DECLARATION_STATEMENT = 54;
 
   /**
    * The number of structural features of the '<em>Instance Declaration Statement</em>' class.
@@ -2178,7 +2388,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstanceDeclaration()
    * @generated
    */
-  int INSTANCE_DECLARATION = 52;
+  int INSTANCE_DECLARATION = 55;
 
   /**
    * The feature id for the '<em><b>Type Decl</b></em>' containment reference.
@@ -2242,7 +2452,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getTypeDeclaration()
    * @generated
    */
-  int TYPE_DECLARATION = 53;
+  int TYPE_DECLARATION = 56;
 
   /**
    * The feature id for the '<em><b>Inst Name</b></em>' containment reference.
@@ -2279,7 +2489,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstanceDifferentFrom()
    * @generated
    */
-  int INSTANCE_DIFFERENT_FROM = 54;
+  int INSTANCE_DIFFERENT_FROM = 57;
 
   /**
    * The feature id for the '<em><b>Inst Name1</b></em>' containment reference.
@@ -2316,7 +2526,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstancesAllDifferent()
    * @generated
    */
-  int INSTANCES_ALL_DIFFERENT = 55;
+  int INSTANCES_ALL_DIFFERENT = 58;
 
   /**
    * The feature id for the '<em><b>Instances</b></em>' containment reference.
@@ -2344,7 +2554,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExistingInstanceAttribution()
    * @generated
    */
-  int EXISTING_INSTANCE_ATTRIBUTION = 56;
+  int EXISTING_INSTANCE_ATTRIBUTION = 59;
 
   /**
    * The feature id for the '<em><b>Subj</b></em>' containment reference.
@@ -2399,7 +2609,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getObject()
    * @generated
    */
-  int OBJECT = 57;
+  int OBJECT = 60;
 
   /**
    * The feature id for the '<em><b>Val</b></em>' containment reference.
@@ -2427,7 +2637,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getPropValPartialTriple()
    * @generated
    */
-  int PROP_VAL_PARTIAL_TRIPLE = 58;
+  int PROP_VAL_PARTIAL_TRIPLE = 61;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -2473,7 +2683,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getOfPatternReturningValues()
    * @generated
    */
-  int OF_PATTERN_RETURNING_VALUES = 59;
+  int OF_PATTERN_RETURNING_VALUES = 62;
 
   /**
    * The feature id for the '<em><b>Ofphrs</b></em>' containment reference list.
@@ -2519,7 +2729,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getWithChain()
    * @generated
    */
-  int WITH_CHAIN = 60;
+  int WITH_CHAIN = 63;
 
   /**
    * The feature id for the '<em><b>Wps</b></em>' containment reference list.
@@ -2547,7 +2757,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getWithPhrase()
    * @generated
    */
-  int WITH_PHRASE = 61;
+  int WITH_PHRASE = 64;
 
   /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
@@ -2584,7 +2794,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getEmbeddedInstanceDeclaration()
    * @generated
    */
-  int EMBEDDED_INSTANCE_DECLARATION = 62;
+  int EMBEDDED_INSTANCE_DECLARATION = 65;
 
   /**
    * The number of structural features of the '<em>Embedded Instance Declaration</em>' class.
@@ -2603,7 +2813,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getGraphPattern()
    * @generated
    */
-  int GRAPH_PATTERN = 79;
+  int GRAPH_PATTERN = 82;
 
   /**
    * The number of structural features of the '<em>Graph Pattern</em>' class.
@@ -2622,7 +2832,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getMergedTriples()
    * @generated
    */
-  int MERGED_TRIPLES = 63;
+  int MERGED_TRIPLES = 66;
 
   /**
    * The feature id for the '<em><b>Ops</b></em>' containment reference list.
@@ -2668,7 +2878,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getOfPhrase()
    * @generated
    */
-  int OF_PHRASE = 64;
+  int OF_PHRASE = 67;
 
   /**
    * The feature id for the '<em><b>Article</b></em>' attribute.
@@ -2705,7 +2915,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getVariableList()
    * @generated
    */
-  int VARIABLE_LIST = 65;
+  int VARIABLE_LIST = 68;
 
   /**
    * The feature id for the '<em><b>Names</b></em>' containment reference list.
@@ -2733,7 +2943,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getRule()
    * @generated
    */
-  int RULE = 66;
+  int RULE = 69;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -2788,7 +2998,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getQuery()
    * @generated
    */
-  int QUERY = 67;
+  int QUERY = 70;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -2816,7 +3026,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getTest()
    * @generated
    */
-  int TEST = 68;
+  int TEST = 71;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -2844,7 +3054,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExpr()
    * @generated
    */
-  int EXPR = 69;
+  int EXPR = 72;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -2872,7 +3082,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getDisplay()
    * @generated
    */
-  int DISPLAY = 70;
+  int DISPLAY = 73;
 
   /**
    * The feature id for the '<em><b>Display String</b></em>' attribute.
@@ -2909,7 +3119,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExplanation()
    * @generated
    */
-  int EXPLANATION = 71;
+  int EXPLANATION = 74;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -2946,7 +3156,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getElementSet()
    * @generated
    */
-  int ELEMENT_SET = 72;
+  int ELEMENT_SET = 75;
 
   /**
    * The feature id for the '<em><b>Elements</b></em>' containment reference list.
@@ -2974,7 +3184,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExpression()
    * @generated
    */
-  int EXPRESSION = 78;
+  int EXPRESSION = 81;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3056,7 +3266,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSelectExpression()
    * @generated
    */
-  int SELECT_EXPRESSION = 73;
+  int SELECT_EXPRESSION = 76;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3183,7 +3393,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getConstructExpression()
    * @generated
    */
-  int CONSTRUCT_EXPRESSION = 74;
+  int CONSTRUCT_EXPRESSION = 77;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3292,7 +3502,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getAskQueryExpression()
    * @generated
    */
-  int ASK_QUERY_EXPRESSION = 75;
+  int ASK_QUERY_EXPRESSION = 78;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3374,7 +3584,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getOrderList()
    * @generated
    */
-  int ORDER_LIST = 76;
+  int ORDER_LIST = 79;
 
   /**
    * The feature id for the '<em><b>Order List</b></em>' containment reference list.
@@ -3402,7 +3612,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getOrderElement()
    * @generated
    */
-  int ORDER_ELEMENT = 77;
+  int ORDER_ELEMENT = 80;
 
   /**
    * The feature id for the '<em><b>Order</b></em>' attribute.
@@ -3439,7 +3649,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getPropOfSubj()
    * @generated
    */
-  int PROP_OF_SUBJ = 80;
+  int PROP_OF_SUBJ = 83;
 
   /**
    * The feature id for the '<em><b>Of Phr</b></em>' containment reference list.
@@ -3476,7 +3686,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSubjProp()
    * @generated
    */
-  int SUBJ_PROP = 81;
+  int SUBJ_PROP = 84;
 
   /**
    * The feature id for the '<em><b>Subj</b></em>' containment reference.
@@ -3513,7 +3723,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstAttrSPV()
    * @generated
    */
-  int INST_ATTR_SPV = 82;
+  int INST_ATTR_SPV = 85;
 
   /**
    * The feature id for the '<em><b>Subj</b></em>' containment reference.
@@ -3559,7 +3769,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstAttrPSV()
    * @generated
    */
-  int INST_ATTR_PSV = 83;
+  int INST_ATTR_PSV = 86;
 
   /**
    * The feature id for the '<em><b>Prop</b></em>' containment reference.
@@ -3596,7 +3806,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSubTypeOf()
    * @generated
    */
-  int SUB_TYPE_OF = 84;
+  int SUB_TYPE_OF = 87;
 
   /**
    * The feature id for the '<em><b>Subclass</b></em>' containment reference.
@@ -3626,6 +3836,43 @@ public interface SadlPackage extends EPackage
   int SUB_TYPE_OF_FEATURE_COUNT = GRAPH_PATTERN_FEATURE_COUNT + 2;
 
   /**
+   * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.ExistentialNegationImpl <em>Existential Negation</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see com.ge.research.sadl.sadl.impl.ExistentialNegationImpl
+   * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExistentialNegation()
+   * @generated
+   */
+  int EXISTENTIAL_NEGATION = 88;
+
+  /**
+   * The feature id for the '<em><b>Var List</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int EXISTENTIAL_NEGATION__VAR_LIST = GRAPH_PATTERN_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Quantified</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int EXISTENTIAL_NEGATION__QUANTIFIED = GRAPH_PATTERN_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Existential Negation</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int EXISTENTIAL_NEGATION_FEATURE_COUNT = GRAPH_PATTERN_FEATURE_COUNT + 2;
+
+  /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.IntervalValueImpl <em>Interval Value</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -3633,7 +3880,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getIntervalValue()
    * @generated
    */
-  int INTERVAL_VALUE = 85;
+  int INTERVAL_VALUE = 89;
 
   /**
    * The feature id for the '<em><b>Op</b></em>' attribute.
@@ -3670,7 +3917,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExplicitValue()
    * @generated
    */
-  int EXPLICIT_VALUE = 86;
+  int EXPLICIT_VALUE = 90;
 
   /**
    * The feature id for the '<em><b>Inst Name</b></em>' containment reference.
@@ -3691,13 +3938,31 @@ public interface SadlPackage extends EPackage
   int EXPLICIT_VALUE__LIT_VALUE = 1;
 
   /**
+   * The feature id for the '<em><b>Value List</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int EXPLICIT_VALUE__VALUE_LIST = 2;
+
+  /**
+   * The feature id for the '<em><b>Row</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int EXPLICIT_VALUE__ROW = 3;
+
+  /**
    * The feature id for the '<em><b>Term</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int EXPLICIT_VALUE__TERM = 2;
+  int EXPLICIT_VALUE__TERM = 4;
 
   /**
    * The number of structural features of the '<em>Explicit Value</em>' class.
@@ -3706,7 +3971,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int EXPLICIT_VALUE_FEATURE_COUNT = 3;
+  int EXPLICIT_VALUE_FEATURE_COUNT = 5;
 
   /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.ValueTableImpl <em>Value Table</em>}' class.
@@ -3716,16 +3981,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getValueTable()
    * @generated
    */
-  int VALUE_TABLE = 87;
-
-  /**
-   * The feature id for the '<em><b>Row</b></em>' containment reference.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int VALUE_TABLE__ROW = 0;
+  int VALUE_TABLE = 91;
 
   /**
    * The feature id for the '<em><b>Rows</b></em>' containment reference list.
@@ -3734,7 +3990,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int VALUE_TABLE__ROWS = 1;
+  int VALUE_TABLE__ROWS = 0;
 
   /**
    * The number of structural features of the '<em>Value Table</em>' class.
@@ -3743,7 +3999,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int VALUE_TABLE_FEATURE_COUNT = 2;
+  int VALUE_TABLE_FEATURE_COUNT = 1;
 
   /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.LiteralValueImpl <em>Literal Value</em>}' class.
@@ -3753,7 +4009,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getLiteralValue()
    * @generated
    */
-  int LITERAL_VALUE = 88;
+  int LITERAL_VALUE = 92;
 
   /**
    * The feature id for the '<em><b>Literal Number</b></em>' attribute.
@@ -3799,7 +4055,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getValueRow()
    * @generated
    */
-  int VALUE_ROW = 89;
+  int VALUE_ROW = 93;
 
   /**
    * The feature id for the '<em><b>Explicit Values</b></em>' containment reference list.
@@ -3827,7 +4083,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getJunctionExpression()
    * @generated
    */
-  int JUNCTION_EXPRESSION = 90;
+  int JUNCTION_EXPRESSION = 94;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3936,7 +4192,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getBinaryOpExpression()
    * @generated
    */
-  int BINARY_OP_EXPRESSION = 91;
+  int BINARY_OP_EXPRESSION = 95;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -4045,7 +4301,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getUnaryOpExpression()
    * @generated
    */
-  int UNARY_OP_EXPRESSION = 92;
+  int UNARY_OP_EXPRESSION = 96;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -4136,7 +4392,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getDataType()
    * @generated
    */
-  int DATA_TYPE = 93;
+  int DATA_TYPE = 97;
 
 
   /**
@@ -4224,6 +4480,17 @@ public interface SadlPackage extends EPackage
    * @generated
    */
   EAttribute getModelName_Version();
+
+  /**
+   * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.ModelName#getAnnType <em>Ann Type</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute list '<em>Ann Type</em>'.
+   * @see com.ge.research.sadl.sadl.ModelName#getAnnType()
+   * @see #getModelName()
+   * @generated
+   */
+  EAttribute getModelName_AnnType();
 
   /**
    * Returns the meta object for the containment reference list '{@link com.ge.research.sadl.sadl.ModelName#getAnnContent <em>Ann Content</em>}'.
@@ -4457,10 +4724,10 @@ public interface SadlPackage extends EPackage
   EClass getResourceBySetOp();
 
   /**
-   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ResourceBySetOp#getAnnType <em>Ann Type</em>}'.
+   * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.ResourceBySetOp#getAnnType <em>Ann Type</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Ann Type</em>'.
+   * @return the meta object for the attribute list '<em>Ann Type</em>'.
    * @see com.ge.research.sadl.sadl.ResourceBySetOp#getAnnType()
    * @see #getResourceBySetOp()
    * @generated
@@ -4468,15 +4735,15 @@ public interface SadlPackage extends EPackage
   EAttribute getResourceBySetOp_AnnType();
 
   /**
-   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ResourceBySetOp#getAnnContent <em>Ann Content</em>}'.
+   * Returns the meta object for the containment reference list '{@link com.ge.research.sadl.sadl.ResourceBySetOp#getAnnContent <em>Ann Content</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Ann Content</em>'.
+   * @return the meta object for the containment reference list '<em>Ann Content</em>'.
    * @see com.ge.research.sadl.sadl.ResourceBySetOp#getAnnContent()
    * @see #getResourceBySetOp()
    * @generated
    */
-  EAttribute getResourceBySetOp_AnnContent();
+  EReference getResourceBySetOp_AnnContent();
 
   /**
    * Returns the meta object for the containment reference list '{@link com.ge.research.sadl.sadl.ResourceBySetOp#getNames <em>Names</em>}'.
@@ -4511,10 +4778,10 @@ public interface SadlPackage extends EPackage
   EClass getResourceByRestriction();
 
   /**
-   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ResourceByRestriction#getAnnType <em>Ann Type</em>}'.
+   * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.ResourceByRestriction#getAnnType <em>Ann Type</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Ann Type</em>'.
+   * @return the meta object for the attribute list '<em>Ann Type</em>'.
    * @see com.ge.research.sadl.sadl.ResourceByRestriction#getAnnType()
    * @see #getResourceByRestriction()
    * @generated
@@ -4522,15 +4789,15 @@ public interface SadlPackage extends EPackage
   EAttribute getResourceByRestriction_AnnType();
 
   /**
-   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ResourceByRestriction#getAnnContent <em>Ann Content</em>}'.
+   * Returns the meta object for the containment reference list '{@link com.ge.research.sadl.sadl.ResourceByRestriction#getAnnContent <em>Ann Content</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Ann Content</em>'.
+   * @return the meta object for the containment reference list '<em>Ann Content</em>'.
    * @see com.ge.research.sadl.sadl.ResourceByRestriction#getAnnContent()
    * @see #getResourceByRestriction()
    * @generated
    */
-  EAttribute getResourceByRestriction_AnnContent();
+  EReference getResourceByRestriction_AnnContent();
 
   /**
    * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.ResourceByRestriction#getPropName <em>Prop Name</em>}'.
@@ -4736,6 +5003,28 @@ public interface SadlPackage extends EPackage
   EAttribute getRange_Single();
 
   /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Range#getList <em>List</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>List</em>'.
+   * @see com.ge.research.sadl.sadl.Range#getList()
+   * @see #getRange()
+   * @generated
+   */
+  EAttribute getRange_List();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Range#getLists <em>Lists</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Lists</em>'.
+   * @see com.ge.research.sadl.sadl.Range#getLists()
+   * @see #getRange()
+   * @generated
+   */
+  EAttribute getRange_Lists();
+
+  /**
    * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.Range#getType <em>Type</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -4777,6 +5066,190 @@ public interface SadlPackage extends EPackage
    * @generated
    */
   EAttribute getRangeType_DataType();
+
+  /**
+   * Returns the meta object for class '{@link com.ge.research.sadl.sadl.UserDefinedDataType <em>User Defined Data Type</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>User Defined Data Type</em>'.
+   * @see com.ge.research.sadl.sadl.UserDefinedDataType
+   * @generated
+   */
+  EClass getUserDefinedDataType();
+
+  /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.UserDefinedDataType#getUserDefinedDataType <em>User Defined Data Type</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>User Defined Data Type</em>'.
+   * @see com.ge.research.sadl.sadl.UserDefinedDataType#getUserDefinedDataType()
+   * @see #getUserDefinedDataType()
+   * @generated
+   */
+  EReference getUserDefinedDataType_UserDefinedDataType();
+
+  /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.UserDefinedDataType#getRestriction <em>Restriction</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Restriction</em>'.
+   * @see com.ge.research.sadl.sadl.UserDefinedDataType#getRestriction()
+   * @see #getUserDefinedDataType()
+   * @generated
+   */
+  EReference getUserDefinedDataType_Restriction();
+
+  /**
+   * Returns the meta object for class '{@link com.ge.research.sadl.sadl.DataTypeRestriction <em>Data Type Restriction</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Data Type Restriction</em>'.
+   * @see com.ge.research.sadl.sadl.DataTypeRestriction
+   * @generated
+   */
+  EClass getDataTypeRestriction();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.DataTypeRestriction#getBasetype <em>Basetype</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Basetype</em>'.
+   * @see com.ge.research.sadl.sadl.DataTypeRestriction#getBasetype()
+   * @see #getDataTypeRestriction()
+   * @generated
+   */
+  EAttribute getDataTypeRestriction_Basetype();
+
+  /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.DataTypeRestriction#getFacets <em>Facets</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Facets</em>'.
+   * @see com.ge.research.sadl.sadl.DataTypeRestriction#getFacets()
+   * @see #getDataTypeRestriction()
+   * @generated
+   */
+  EReference getDataTypeRestriction_Facets();
+
+  /**
+   * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.DataTypeRestriction#getBasetypes <em>Basetypes</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute list '<em>Basetypes</em>'.
+   * @see com.ge.research.sadl.sadl.DataTypeRestriction#getBasetypes()
+   * @see #getDataTypeRestriction()
+   * @generated
+   */
+  EAttribute getDataTypeRestriction_Basetypes();
+
+  /**
+   * Returns the meta object for class '{@link com.ge.research.sadl.sadl.Facets <em>Facets</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Facets</em>'.
+   * @see com.ge.research.sadl.sadl.Facets
+   * @generated
+   */
+  EClass getFacets();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getMinexin <em>Minexin</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Minexin</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getMinexin()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Minexin();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getMin <em>Min</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Min</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getMin()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Min();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getMax <em>Max</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Max</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getMax()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Max();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getMaxexin <em>Maxexin</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Maxexin</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getMaxexin()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Maxexin();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getRegex <em>Regex</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Regex</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getRegex()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Regex();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getLen <em>Len</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Len</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getLen()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Len();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getMinlen <em>Minlen</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Minlen</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getMinlen()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Minlen();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Facets#getMaxlen <em>Maxlen</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Maxlen</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getMaxlen()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Maxlen();
+
+  /**
+   * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.Facets#getValues <em>Values</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute list '<em>Values</em>'.
+   * @see com.ge.research.sadl.sadl.Facets#getValues()
+   * @see #getFacets()
+   * @generated
+   */
+  EAttribute getFacets_Values();
 
   /**
    * Returns the meta object for class '{@link com.ge.research.sadl.sadl.EquivalentConcepts <em>Equivalent Concepts</em>}'.
@@ -7058,6 +7531,38 @@ public interface SadlPackage extends EPackage
   EReference getSubTypeOf_Superclass();
 
   /**
+   * Returns the meta object for class '{@link com.ge.research.sadl.sadl.ExistentialNegation <em>Existential Negation</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Existential Negation</em>'.
+   * @see com.ge.research.sadl.sadl.ExistentialNegation
+   * @generated
+   */
+  EClass getExistentialNegation();
+
+  /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.ExistentialNegation#getVarList <em>Var List</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Var List</em>'.
+   * @see com.ge.research.sadl.sadl.ExistentialNegation#getVarList()
+   * @see #getExistentialNegation()
+   * @generated
+   */
+  EReference getExistentialNegation_VarList();
+
+  /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.ExistentialNegation#getQuantified <em>Quantified</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Quantified</em>'.
+   * @see com.ge.research.sadl.sadl.ExistentialNegation#getQuantified()
+   * @see #getExistentialNegation()
+   * @generated
+   */
+  EReference getExistentialNegation_Quantified();
+
+  /**
    * Returns the meta object for class '{@link com.ge.research.sadl.sadl.IntervalValue <em>Interval Value</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -7122,6 +7627,28 @@ public interface SadlPackage extends EPackage
   EReference getExplicitValue_LitValue();
 
   /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ExplicitValue#getValueList <em>Value List</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Value List</em>'.
+   * @see com.ge.research.sadl.sadl.ExplicitValue#getValueList()
+   * @see #getExplicitValue()
+   * @generated
+   */
+  EAttribute getExplicitValue_ValueList();
+
+  /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.ExplicitValue#getRow <em>Row</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Row</em>'.
+   * @see com.ge.research.sadl.sadl.ExplicitValue#getRow()
+   * @see #getExplicitValue()
+   * @generated
+   */
+  EReference getExplicitValue_Row();
+
+  /**
    * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ExplicitValue#getTerm <em>Term</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -7141,17 +7668,6 @@ public interface SadlPackage extends EPackage
    * @generated
    */
   EClass getValueTable();
-
-  /**
-   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.ValueTable#getRow <em>Row</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the containment reference '<em>Row</em>'.
-   * @see com.ge.research.sadl.sadl.ValueTable#getRow()
-   * @see #getValueTable()
-   * @generated
-   */
-  EReference getValueTable_Row();
 
   /**
    * Returns the meta object for the containment reference list '{@link com.ge.research.sadl.sadl.ValueTable#getRows <em>Rows</em>}'.
@@ -7437,6 +7953,14 @@ public interface SadlPackage extends EPackage
     EAttribute MODEL_NAME__VERSION = eINSTANCE.getModelName_Version();
 
     /**
+     * The meta object literal for the '<em><b>Ann Type</b></em>' attribute list feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute MODEL_NAME__ANN_TYPE = eINSTANCE.getModelName_AnnType();
+
+    /**
      * The meta object literal for the '<em><b>Ann Content</b></em>' containment reference list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -7635,7 +8159,7 @@ public interface SadlPackage extends EPackage
     EClass RESOURCE_BY_SET_OP = eINSTANCE.getResourceBySetOp();
 
     /**
-     * The meta object literal for the '<em><b>Ann Type</b></em>' attribute feature.
+     * The meta object literal for the '<em><b>Ann Type</b></em>' attribute list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
@@ -7643,12 +8167,12 @@ public interface SadlPackage extends EPackage
     EAttribute RESOURCE_BY_SET_OP__ANN_TYPE = eINSTANCE.getResourceBySetOp_AnnType();
 
     /**
-     * The meta object literal for the '<em><b>Ann Content</b></em>' attribute feature.
+     * The meta object literal for the '<em><b>Ann Content</b></em>' containment reference list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute RESOURCE_BY_SET_OP__ANN_CONTENT = eINSTANCE.getResourceBySetOp_AnnContent();
+    EReference RESOURCE_BY_SET_OP__ANN_CONTENT = eINSTANCE.getResourceBySetOp_AnnContent();
 
     /**
      * The meta object literal for the '<em><b>Names</b></em>' containment reference list feature.
@@ -7677,7 +8201,7 @@ public interface SadlPackage extends EPackage
     EClass RESOURCE_BY_RESTRICTION = eINSTANCE.getResourceByRestriction();
 
     /**
-     * The meta object literal for the '<em><b>Ann Type</b></em>' attribute feature.
+     * The meta object literal for the '<em><b>Ann Type</b></em>' attribute list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
@@ -7685,12 +8209,12 @@ public interface SadlPackage extends EPackage
     EAttribute RESOURCE_BY_RESTRICTION__ANN_TYPE = eINSTANCE.getResourceByRestriction_AnnType();
 
     /**
-     * The meta object literal for the '<em><b>Ann Content</b></em>' attribute feature.
+     * The meta object literal for the '<em><b>Ann Content</b></em>' containment reference list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute RESOURCE_BY_RESTRICTION__ANN_CONTENT = eINSTANCE.getResourceByRestriction_AnnContent();
+    EReference RESOURCE_BY_RESTRICTION__ANN_CONTENT = eINSTANCE.getResourceByRestriction_AnnContent();
 
     /**
      * The meta object literal for the '<em><b>Prop Name</b></em>' containment reference feature.
@@ -7857,6 +8381,22 @@ public interface SadlPackage extends EPackage
     EAttribute RANGE__SINGLE = eINSTANCE.getRange_Single();
 
     /**
+     * The meta object literal for the '<em><b>List</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute RANGE__LIST = eINSTANCE.getRange_List();
+
+    /**
+     * The meta object literal for the '<em><b>Lists</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute RANGE__LISTS = eINSTANCE.getRange_Lists();
+
+    /**
      * The meta object literal for the '<em><b>Type</b></em>' containment reference feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -7889,6 +8429,148 @@ public interface SadlPackage extends EPackage
      * @generated
      */
     EAttribute RANGE_TYPE__DATA_TYPE = eINSTANCE.getRangeType_DataType();
+
+    /**
+     * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.UserDefinedDataTypeImpl <em>User Defined Data Type</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see com.ge.research.sadl.sadl.impl.UserDefinedDataTypeImpl
+     * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getUserDefinedDataType()
+     * @generated
+     */
+    EClass USER_DEFINED_DATA_TYPE = eINSTANCE.getUserDefinedDataType();
+
+    /**
+     * The meta object literal for the '<em><b>User Defined Data Type</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference USER_DEFINED_DATA_TYPE__USER_DEFINED_DATA_TYPE = eINSTANCE.getUserDefinedDataType_UserDefinedDataType();
+
+    /**
+     * The meta object literal for the '<em><b>Restriction</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference USER_DEFINED_DATA_TYPE__RESTRICTION = eINSTANCE.getUserDefinedDataType_Restriction();
+
+    /**
+     * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.DataTypeRestrictionImpl <em>Data Type Restriction</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see com.ge.research.sadl.sadl.impl.DataTypeRestrictionImpl
+     * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getDataTypeRestriction()
+     * @generated
+     */
+    EClass DATA_TYPE_RESTRICTION = eINSTANCE.getDataTypeRestriction();
+
+    /**
+     * The meta object literal for the '<em><b>Basetype</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute DATA_TYPE_RESTRICTION__BASETYPE = eINSTANCE.getDataTypeRestriction_Basetype();
+
+    /**
+     * The meta object literal for the '<em><b>Facets</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference DATA_TYPE_RESTRICTION__FACETS = eINSTANCE.getDataTypeRestriction_Facets();
+
+    /**
+     * The meta object literal for the '<em><b>Basetypes</b></em>' attribute list feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute DATA_TYPE_RESTRICTION__BASETYPES = eINSTANCE.getDataTypeRestriction_Basetypes();
+
+    /**
+     * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.FacetsImpl <em>Facets</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see com.ge.research.sadl.sadl.impl.FacetsImpl
+     * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getFacets()
+     * @generated
+     */
+    EClass FACETS = eINSTANCE.getFacets();
+
+    /**
+     * The meta object literal for the '<em><b>Minexin</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__MINEXIN = eINSTANCE.getFacets_Minexin();
+
+    /**
+     * The meta object literal for the '<em><b>Min</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__MIN = eINSTANCE.getFacets_Min();
+
+    /**
+     * The meta object literal for the '<em><b>Max</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__MAX = eINSTANCE.getFacets_Max();
+
+    /**
+     * The meta object literal for the '<em><b>Maxexin</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__MAXEXIN = eINSTANCE.getFacets_Maxexin();
+
+    /**
+     * The meta object literal for the '<em><b>Regex</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__REGEX = eINSTANCE.getFacets_Regex();
+
+    /**
+     * The meta object literal for the '<em><b>Len</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__LEN = eINSTANCE.getFacets_Len();
+
+    /**
+     * The meta object literal for the '<em><b>Minlen</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__MINLEN = eINSTANCE.getFacets_Minlen();
+
+    /**
+     * The meta object literal for the '<em><b>Maxlen</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__MAXLEN = eINSTANCE.getFacets_Maxlen();
+
+    /**
+     * The meta object literal for the '<em><b>Values</b></em>' attribute list feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute FACETS__VALUES = eINSTANCE.getFacets_Values();
 
     /**
      * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.EquivalentConceptsImpl <em>Equivalent Concepts</em>}' class.
@@ -9723,6 +10405,32 @@ public interface SadlPackage extends EPackage
     EReference SUB_TYPE_OF__SUPERCLASS = eINSTANCE.getSubTypeOf_Superclass();
 
     /**
+     * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.ExistentialNegationImpl <em>Existential Negation</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see com.ge.research.sadl.sadl.impl.ExistentialNegationImpl
+     * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExistentialNegation()
+     * @generated
+     */
+    EClass EXISTENTIAL_NEGATION = eINSTANCE.getExistentialNegation();
+
+    /**
+     * The meta object literal for the '<em><b>Var List</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference EXISTENTIAL_NEGATION__VAR_LIST = eINSTANCE.getExistentialNegation_VarList();
+
+    /**
+     * The meta object literal for the '<em><b>Quantified</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference EXISTENTIAL_NEGATION__QUANTIFIED = eINSTANCE.getExistentialNegation_Quantified();
+
+    /**
      * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.IntervalValueImpl <em>Interval Value</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -9775,6 +10483,22 @@ public interface SadlPackage extends EPackage
     EReference EXPLICIT_VALUE__LIT_VALUE = eINSTANCE.getExplicitValue_LitValue();
 
     /**
+     * The meta object literal for the '<em><b>Value List</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute EXPLICIT_VALUE__VALUE_LIST = eINSTANCE.getExplicitValue_ValueList();
+
+    /**
+     * The meta object literal for the '<em><b>Row</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference EXPLICIT_VALUE__ROW = eINSTANCE.getExplicitValue_Row();
+
+    /**
      * The meta object literal for the '<em><b>Term</b></em>' attribute feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -9791,14 +10515,6 @@ public interface SadlPackage extends EPackage
      * @generated
      */
     EClass VALUE_TABLE = eINSTANCE.getValueTable();
-
-    /**
-     * The meta object literal for the '<em><b>Row</b></em>' containment reference feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EReference VALUE_TABLE__ROW = eINSTANCE.getValueTable_Row();
 
     /**
      * The meta object literal for the '<em><b>Rows</b></em>' containment reference list feature.

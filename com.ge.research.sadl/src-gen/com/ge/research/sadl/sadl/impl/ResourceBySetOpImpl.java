@@ -2,21 +2,19 @@
  */
 package com.ge.research.sadl.sadl.impl;
 
+import com.ge.research.sadl.sadl.ContentList;
 import com.ge.research.sadl.sadl.ResourceBySetOp;
 import com.ge.research.sadl.sadl.ResourceIdentifier;
 import com.ge.research.sadl.sadl.SadlPackage;
 
 import java.util.Collection;
 
-import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
 
 import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
-import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.emf.ecore.util.EDataTypeEList;
 import org.eclipse.emf.ecore.util.EObjectContainmentEList;
@@ -41,44 +39,24 @@ import org.eclipse.emf.ecore.util.InternalEList;
 public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements ResourceBySetOp
 {
   /**
-   * The default value of the '{@link #getAnnType() <em>Ann Type</em>}' attribute.
+   * The cached value of the '{@link #getAnnType() <em>Ann Type</em>}' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @see #getAnnType()
    * @generated
    * @ordered
    */
-  protected static final String ANN_TYPE_EDEFAULT = null;
+  protected EList<String> annType;
 
   /**
-   * The cached value of the '{@link #getAnnType() <em>Ann Type</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getAnnType()
-   * @generated
-   * @ordered
-   */
-  protected String annType = ANN_TYPE_EDEFAULT;
-
-  /**
-   * The default value of the '{@link #getAnnContent() <em>Ann Content</em>}' attribute.
+   * The cached value of the '{@link #getAnnContent() <em>Ann Content</em>}' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @see #getAnnContent()
    * @generated
    * @ordered
    */
-  protected static final String ANN_CONTENT_EDEFAULT = null;
-
-  /**
-   * The cached value of the '{@link #getAnnContent() <em>Ann Content</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getAnnContent()
-   * @generated
-   * @ordered
-   */
-  protected String annContent = ANN_CONTENT_EDEFAULT;
+  protected EList<ContentList> annContent;
 
   /**
    * The cached value of the '{@link #getNames() <em>Names</em>}' containment reference list.
@@ -126,8 +104,12 @@ public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements Resou
    * <!-- end-user-doc -->
    * @generated
    */
-  public String getAnnType()
+  public EList<String> getAnnType()
   {
+    if (annType == null)
+    {
+      annType = new EDataTypeEList<String>(String.class, this, SadlPackage.RESOURCE_BY_SET_OP__ANN_TYPE);
+    }
     return annType;
   }
 
@@ -136,35 +118,13 @@ public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements Resou
    * <!-- end-user-doc -->
    * @generated
    */
-  public void setAnnType(String newAnnType)
+  public EList<ContentList> getAnnContent()
   {
-    String oldAnnType = annType;
-    annType = newAnnType;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.RESOURCE_BY_SET_OP__ANN_TYPE, oldAnnType, annType));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public String getAnnContent()
-  {
+    if (annContent == null)
+    {
+      annContent = new EObjectContainmentEList<ContentList>(ContentList.class, this, SadlPackage.RESOURCE_BY_SET_OP__ANN_CONTENT);
+    }
     return annContent;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public void setAnnContent(String newAnnContent)
-  {
-    String oldAnnContent = annContent;
-    annContent = newAnnContent;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.RESOURCE_BY_SET_OP__ANN_CONTENT, oldAnnContent, annContent));
   }
 
   /**
@@ -205,6 +165,8 @@ public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements Resou
   {
     switch (featureID)
     {
+      case SadlPackage.RESOURCE_BY_SET_OP__ANN_CONTENT:
+        return ((InternalEList<?>)getAnnContent()).basicRemove(otherEnd, msgs);
       case SadlPackage.RESOURCE_BY_SET_OP__NAMES:
         return ((InternalEList<?>)getNames()).basicRemove(otherEnd, msgs);
     }
@@ -245,10 +207,12 @@ public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements Resou
     switch (featureID)
     {
       case SadlPackage.RESOURCE_BY_SET_OP__ANN_TYPE:
-        setAnnType((String)newValue);
+        getAnnType().clear();
+        getAnnType().addAll((Collection<? extends String>)newValue);
         return;
       case SadlPackage.RESOURCE_BY_SET_OP__ANN_CONTENT:
-        setAnnContent((String)newValue);
+        getAnnContent().clear();
+        getAnnContent().addAll((Collection<? extends ContentList>)newValue);
         return;
       case SadlPackage.RESOURCE_BY_SET_OP__NAMES:
         getNames().clear();
@@ -273,10 +237,10 @@ public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements Resou
     switch (featureID)
     {
       case SadlPackage.RESOURCE_BY_SET_OP__ANN_TYPE:
-        setAnnType(ANN_TYPE_EDEFAULT);
+        getAnnType().clear();
         return;
       case SadlPackage.RESOURCE_BY_SET_OP__ANN_CONTENT:
-        setAnnContent(ANN_CONTENT_EDEFAULT);
+        getAnnContent().clear();
         return;
       case SadlPackage.RESOURCE_BY_SET_OP__NAMES:
         getNames().clear();
@@ -299,9 +263,9 @@ public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements Resou
     switch (featureID)
     {
       case SadlPackage.RESOURCE_BY_SET_OP__ANN_TYPE:
-        return ANN_TYPE_EDEFAULT == null ? annType != null : !ANN_TYPE_EDEFAULT.equals(annType);
+        return annType != null && !annType.isEmpty();
       case SadlPackage.RESOURCE_BY_SET_OP__ANN_CONTENT:
-        return ANN_CONTENT_EDEFAULT == null ? annContent != null : !ANN_CONTENT_EDEFAULT.equals(annContent);
+        return annContent != null && !annContent.isEmpty();
       case SadlPackage.RESOURCE_BY_SET_OP__NAMES:
         return names != null && !names.isEmpty();
       case SadlPackage.RESOURCE_BY_SET_OP__OP:
@@ -323,8 +287,6 @@ public class ResourceBySetOpImpl extends ResourceIdentifierImpl implements Resou
     StringBuffer result = new StringBuffer(super.toString());
     result.append(" (annType: ");
     result.append(annType);
-    result.append(", annContent: ");
-    result.append(annContent);
     result.append(", op: ");
     result.append(op);
     result.append(')');
