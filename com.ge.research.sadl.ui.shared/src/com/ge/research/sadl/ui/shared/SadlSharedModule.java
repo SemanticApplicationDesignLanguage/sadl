@@ -1,7 +1,6 @@
-package com.ge.research.sadl.ui;
+package com.ge.research.sadl.ui.shared;
 
 import org.eclipse.xtext.builder.impl.ToBeBuiltComputer;
-import org.eclipse.xtext.builder.impl.XtextBuilder;
 import org.eclipse.xtext.builder.impl.javasupport.JavaChangeQueueFiller;
 import org.eclipse.xtext.builder.impl.javasupport.ProjectClasspathChangeListener;
 import org.eclipse.xtext.builder.trace.JarEntryAwareTrace;
@@ -14,6 +13,8 @@ import org.eclipse.xtext.ui.resource.IStorage2UriMapperJdtExtensions;
 import org.eclipse.xtext.ui.resource.Storage2UriMapperJavaImpl;
 import org.eclipse.xtext.ui.resource.XtextResourceSetProvider;
 import org.eclipse.xtext.ui.shared.internal.SharedModuleWithJdt;
+
+import com.google.inject.Binder;
 
 public class SadlSharedModule extends SharedModuleWithJdt {
 	@Override
@@ -29,6 +30,9 @@ public class SadlSharedModule extends SharedModuleWithJdt {
 		bind(DefaultTraceURIConverter.class).to(DefaultUITraceURIConverter.class);
 	}
 	
-	
+	public void configureToBeBuildComputer (Binder binder) {
+		binder.bind(ToBeBuiltComputer.class).to(SadlToBeBuiltComputer.class);
+	}
+
 
 }
