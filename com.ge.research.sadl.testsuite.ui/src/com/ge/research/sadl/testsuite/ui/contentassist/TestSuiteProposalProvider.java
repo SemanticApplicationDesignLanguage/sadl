@@ -22,8 +22,10 @@ import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.testsuite.testSuite.Model;
@@ -34,8 +36,9 @@ import com.google.inject.Inject;
  * see http://www.eclipse.org/Xtext/documentation/latest/xtext.html#contentAssist on how to customize content assistant
  */
 public class TestSuiteProposalProvider extends AbstractTestSuiteProposalProvider {
+    
 	@Inject
-    private SadlModelManager visitor;
+	private SadlModelManagerProvider sadlModelManagerProvider;
 
 	//	public void complete_Model(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 	//	System.out.println("call to complete_Model");
@@ -102,13 +105,14 @@ public class TestSuiteProposalProvider extends AbstractTestSuiteProposalProvider
 				List<String> alreadyAdded = new ArrayList<String>();
 				// add this one to those to exclude
 				alreadyAdded.add(model.eResource().getURI().lastSegment());
-				ConfigurationManager cmgr = null;
+				IConfigurationManagerForIDE cmgr = null;
 				try {
-					if (visitor != null) {
+					if (sadlModelManagerProvider != null) {
+						SadlModelManager visitor = sadlModelManagerProvider.get(model.eResource());
 						cmgr = visitor.getConfigurationMgr(ResourceManager.getOwlModelsFolder(model.eResource().getURI()));
 					}
 					else {
-						cmgr = new ConfigurationManager(ResourceManager.getOwlModelsFolder(model.eResource().getURI()), ConfigurationManagerForIDE.getOWLFormat());
+						cmgr = new ConfigurationManagerForIDE(ResourceManager.getOwlModelsFolder(model.eResource().getURI()), ConfigurationManagerForIDE.getOWLFormat());
 					}
 				} catch (ConfigurationException e) {
 					// TODO Auto-generated catch block

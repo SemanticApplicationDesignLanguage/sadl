@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ge.research.sadl</groupId>
   <artifactId>jena-wrapper-for-sadl</artifactId>
-  <version>2.3.0</version>
+  <version>2.4.0</version>
 	<name>Jena Reasoner/Translator Plugin for SADL</name>
 
 	<properties>
@@ -42,12 +42,12 @@
 	  <dependency>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>reasoner-api</artifactId>
-		<version>2.3.0</version>
+		<version>2.4.0</version>
 	</dependency>
 	  <dependency>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>reasoner-impl</artifactId>
-		<version>2.3.0</version>
+		<version>2.4.0</version>
 	</dependency>
 	<dependency>
 		<groupId>org.slf4j</groupId>
