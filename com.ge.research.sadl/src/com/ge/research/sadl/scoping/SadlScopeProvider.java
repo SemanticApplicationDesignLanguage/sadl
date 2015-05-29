@@ -34,7 +34,7 @@ public class SadlScopeProvider extends org.eclipse.xtext.scoping.impl.AbstractDe
 
 	@Override
 	public IScope getScope(EObject context, EReference reference) {
-		if (reference == SadlPackage.Literals.RESOURCE_BY_NAME__NAME) {
+		if (context instanceof ResourceByName && reference == SadlPackage.Literals.RESOURCE_BY_NAME__NAME) {
 			return getResourceNameScope(context,reference);
 		}
 		return super.getScope(context, reference);

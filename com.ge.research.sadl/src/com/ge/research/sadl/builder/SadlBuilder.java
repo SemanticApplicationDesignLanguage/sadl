@@ -18,7 +18,10 @@
 
 package com.ge.research.sadl.builder;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -83,29 +86,55 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     @Override
     public void build(IBuildContext context, IProgressMonitor monitor)
             throws CoreException {
+    	logger.debug("SadlBuilder.build called with type " + context.getBuildType().toString());
+    	// Lists of Resources that have changed and need action: new, updated, and deleted
+    	//	New: create mapping?
+    	//	Updated: ??
+    	// 	Deleted: if .sadl file remove mapping, delete corresponding OWL file
+    	List<Resource> newResources = new ArrayList<Resource>();
+    	List<Resource> updatedResources = new ArrayList<Resource>();
+    	List<URI> deletedResources = null;
 
-        // Create and save each resource's Jena model.
-//        List<Resource> resources = context.getResourceSet().getResources();
     	for (Delta delta: context.getDeltas()) {
-    		// Use file extension from injected language name
-    		if ((delta.getNew()!=null || context.getBuildType() == BuildType.CLEAN) && delta.getUri().lastSegment().endsWith(".sadl")) {
-    			context.getResourceSet().getResource(delta.getUri(), true);
+    		if (delta.getNew() != null) {
+    			if (isSadlFile(delta.getUri())) {
+    				// we're only going to build/rebuild SADL files
+	    			if (delta.getOld() != null) {
+	    				updatedResources.add(context.getResourceSet().getResource(delta.getUri(), true));
+	    			}
+	    			else {
+	    				newResources.add(context.getResourceSet().getResource(delta.getUri(), true));
+	    			}
+    			}
     		}
+    		else if (delta.getOld() != null) {
+    			if (deletedResources == null) {
+    				deletedResources = new ArrayList<URI>();
+    			}
+				deletedResources.add(delta.getUri());
+    		}
+    		
+//    		// Use file extension from injected language name
+//    		if ((delta.getNew()!=null || context.getBuildType() == BuildType.CLEAN) && delta.getUri().lastSegment().endsWith(".sadl")) {
+//    			context.getResourceSet().getResource(delta.getUri(), true);
+//    		}
     	}
-        List<Resource> resources = context.getResourceSet().getResources();
-
+    	
         // Ensure that the OWL models folder exists.
         IProject project = context.getBuiltProject();
         IFolder folder = project.getFolder(ResourceManager.OWLDIR);
+        String prjPath = folder.getParent().getFullPath().toString();
         if (!folder.exists()) {
             folder.create(IResource.NONE, true, monitor);
             logger.debug("OwlModels folder created: " + folder.toString());
         }
 
+        // Get a ConfigurationManager for the build
     	IConfigurationManagerForIDE configMgr = null;
 		String modelFolder = ResourceManager.convertProjectRelativePathToAbsolutePath(folder.getFullPath().toPortableString());
+        URI prjUri = ResourceManager.getProjectUri(URI.createURI(modelFolder));
        	try {
-       		configMgr = getVisitor(URI.createURI(modelFolder)).getConfigurationMgr(modelFolder);
+       		configMgr = getVisitor(prjUri).getConfigurationMgr(modelFolder);
     	}
     	catch (Exception e) {
     		logger.error("Exception while getting a ConfigurationManagerForIDE: " + e.getMessage());
@@ -117,10 +146,78 @@ public class SadlBuilder implements IXtextBuilderParticipant {
    			throw new CoreException(new Status(0, this.getClass().getPackage().toString(), 0, 
 				"Unable to get a ConfigurationManager: ", null));
    		}
+   
+   		if (logger.isDebugEnabled()) {
+	    	StringBuilder sb = new StringBuilder();
+	    	for (int i = 0; i < newResources.size(); i++) {
+	    		if (i > 0) {
+	    			sb.append(", ");
+	    		}
+	    		sb.append(newResources.get(i).getURI());
+	    	}
+	    	logger.debug("New (" + newResources.size() + "): " + sb.toString());
+	    	
+	    	sb = new StringBuilder();
+	    	if (updatedResources != null) {
+	        	for (int i = 0; i < updatedResources.size(); i++) {
+	        		if (i > 0) {
+	        			sb.append(", ");
+	        		}
+	        		sb.append(updatedResources.get(i).getURI());
+	        	}
+	    	}
+	    	logger.debug("Updated (" + updatedResources.size() + "): " + sb.toString());
+	
+	        sb = new StringBuilder();
+	    	int numDeleted = 0;
+	    	if (deletedResources != null) {
+	        	for (int i = 0; i < deletedResources.size(); i++) {
+	        		if (i > 0) {
+	        			sb.append(", ");
+	        		}
+	        		sb.append(deletedResources.get(i));
+	        	}
+	        	numDeleted = deletedResources.size();
+	    	}
+	    	logger.debug("Deleted (" + numDeleted + "): " + sb.toString());
+   		}
+        	
+   		// For deleted SADL resources, remove the mapping and delete the generated OWL file
+   		for (int i = 0; deletedResources != null && i < deletedResources.size(); i++) {
+        	URI deletedUri = deletedResources.get(i);
+        	if (isSadlFile(deletedUri)) {
+    			try {
+            		File owlFile = ResourceManager.getOwlFileForSadlUri(deletedUri);
+            		if (owlFile.exists()) {
+						configMgr.removeMappingByActualUrl(owlFile.getCanonicalPath());
+            			boolean bStat = owlFile.delete();
+            			if (!bStat) {
+            				logger.debug("Unable to delete OWL file '" + deletedUri.toString() + "' corresponding to deleted SADL file.");
+            			}
+            		}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
+    	}
+    	
+//   		List<Resource> resources = context.getResourceSet().getResources();
+   		List<Resource> resources = new ArrayList<Resource>();
+   		if (updatedResources != null) {
+   			resources.addAll(updatedResources);
+   		}
+   		if (newResources != null) {
+   			resources.addAll(newResources);
+   		}
+
         if (context.getBuildType() == BuildType.CLEAN) {
         	// Clean up the ont-policy.rdf file if doing a clean.
         	try {
-         		configMgr.cleanProject(project, folder);
+//         		configMgr.cleanProject(project, folder);
     	        for (Resource resource : resources) {
     	            URI sadlFile = resource.getURI();
     	            String fext = sadlFile.fileExtension();
@@ -258,6 +355,13 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        }
 	    }
     }
+
+	private boolean isSadlFile(URI uri) {
+		if (uri.lastSegment().endsWith(ResourceManager.SADLEXTWITHPREFIX)) {
+			return true;
+		}
+		return false;
+	}
 
 	private int buildResource(
 			HashMap<Resource, List<Resource>> sadlDependencyList,

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,6 +50,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -111,7 +113,8 @@ import com.ge.research.sadl.sadl.ComplementOfClass;
 import com.ge.research.sadl.sadl.Condition;
 import com.ge.research.sadl.sadl.ConstructExpression;
 import com.ge.research.sadl.sadl.ContentList;
-//import com.ge.research.sadl.sadl.DataTypeRestriction;
+import com.ge.research.sadl.sadl.DataType;
+import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
@@ -124,7 +127,7 @@ import com.ge.research.sadl.sadl.Explanation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expr;
 import com.ge.research.sadl.sadl.Expression;
-//import com.ge.research.sadl.sadl.Facets;
+import com.ge.research.sadl.sadl.Facets;
 import com.ge.research.sadl.sadl.FunctionalProperty;
 import com.ge.research.sadl.sadl.GraphPattern;
 import com.ge.research.sadl.sadl.HasValue;
@@ -160,12 +163,16 @@ import com.ge.research.sadl.sadl.SomeValuesFrom;
 import com.ge.research.sadl.sadl.SymmetricalProperty;
 import com.ge.research.sadl.sadl.TransitiveProperty;
 import com.ge.research.sadl.sadl.UnionResource;
-//import com.ge.research.sadl.sadl.UserDefinedDataType;
+import com.ge.research.sadl.sadl.UserDefinedDataType;
 import com.ge.research.sadl.sadl.VariableList;
 import com.ge.research.sadl.sadl.util.SadlSwitch;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 
 /**
@@ -285,48 +292,49 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     	if (persistModel) {
 	        // Save the Jena model.  The file won't exist the first time 
 	        // so we have to create it before we can save the model.
-	        File file = ResourceManager.getOwlFileForSadlResource(resource);
-	        if (!file.exists()) {
 //	            byte[] bytes = new byte[0];
 //	            InputStream source = new ByteArrayInputStream(bytes);
-	            try {
+            try {
 //					file.create(source, IResource.NONE, null);
-	            	file.createNewFile();
-		        }
-	            catch (Throwable t) {
-	        		String msg = "Unexpected error: file '" + file.getAbsolutePath() + "' doesn't exist but can't be created: " + t.getLocalizedMessage();
-	        		logger.error(msg);
-	        		System.err.println(msg);
-	            }
+    	        File file = ResourceManager.getOwlFileForSadlResource(resource);
+    	        if (!file.exists()) {
+    	        	file.createNewFile();
+    	        }
+    	        String path = file.getAbsolutePath();
+    	        List<ModelError> errors = save(path);
+    	        if (errors != null) {
+    	        	for (int i = 0; i < errors.size(); i++) {
+    	        		ModelError error = errors.get(i);
+    	        		if (error.getErrorType().equals(ErrorType.ERROR)) {
+    	        			System.err.println(error.toString());
+    	        		}
+    	        		else {
+    	        			logger.error(error.toString());
+    	        			System.err.println(error.toString());
+    	        		}
+    	        	}
+    	        }
+    	        else {
+    	        	// Save was successful--update each ModelManager with the modified model so that any models using 
+    	        	//	this one will be updated.
+    	        	ModelManager savingMM = getModel();
+    	        	Iterator<URI> mmitr = modelMgrs.keySet().iterator();
+    	        	while (mmitr.hasNext()) {
+    	        		URI key = mmitr.next();
+    	        		ModelInfo minfo = modelMgrs.get(key);
+    	        		if (minfo.getModel().updateImport(savingMM)) {
+    	        			logger.debug("Updated model '" + savingMM.getModelName() + "' in imports of model '" + 
+    	        					minfo.getModel().getModelName() + "' after successful save.");
+    	        		}
+    	        	}
+    	        }
 	        }
-	        String path = file.getAbsolutePath();
-	        List<ModelError> errors = save(path);
-	        if (errors != null) {
-	        	for (int i = 0; i < errors.size(); i++) {
-	        		ModelError error = errors.get(i);
-	        		if (error.getErrorType().equals(ErrorType.ERROR)) {
-	        			System.err.println(error.toString());
-	        		}
-	        		else {
-	        			logger.error(error.toString());
-	        			System.err.println(error.toString());
-	        		}
-	        	}
-	        }
-	        else {
-	        	// Save was successful--update each ModelManager with the modified model so that any models using 
-	        	//	this one will be updated.
-	        	ModelManager savingMM = getModel();
-	        	Iterator<URI> mmitr = modelMgrs.keySet().iterator();
-	        	while (mmitr.hasNext()) {
-	        		URI key = mmitr.next();
-	        		ModelInfo minfo = modelMgrs.get(key);
-	        		if (minfo.getModel().updateImport(savingMM)) {
-	        			logger.debug("Updated model '" + savingMM.getModelName() + "' in imports of model '" + 
-	        					minfo.getModel().getModelName() + "' after successful save.");
-	        		}
-	        	}
-	        }
+            catch (Throwable t) {
+        		String msg = "Unexpected error: OWL file for '" + resource.toString() + "' doesn't exist but can't be created: " + t.getLocalizedMessage();
+        		logger.error(msg);
+        		System.err.println(msg);
+            }
+
         }
         return true;
     }
@@ -346,36 +354,66 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     	// remember the Resource of the SADL model
     	this.setResource(resource);
     	
-    	IPreferencesService service = Platform.getPreferencesService();
-    	if (service != null) {
-    		deepValidationOff = service.getBoolean("com.ge.research.sadl.Sadl", "deepValidationOff", false, null);
+    	if (!resource.getURI().isPlatformPlugin()) {
+	    	IPreferencesService service = Platform.getPreferencesService();
+	    	if (service != null) {
+	    		deepValidationOff = service.getBoolean("com.ge.research.sadl.Sadl", "deepValidationOff", false, null);
+	    	}
+	    	
+	    	try {
+	            // What project is this? There should be one ConfigurationManager per project.
+	    		URI projectUri = sadlModelManagerProvider.getProject(this);
+	//            URI projectUri = ResourceManager.getProjectUri(resource.getURI());
+	    		if (projectUri != null) {
+	    			logger.info("SMM called for project " + projectUri.toFileString());
+	    		}
+	    		else {
+	    			projectUri = getProjectFromResourceSet(resource.getResourceSet());
+	    		}
+	
+	            IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
+	        	// Get a ModelManager instance associated with this thread and pass it the model Resource
+	            getModel().init(configurationMgr, getSadlModelManagerProvider(), resource);
+	            getModel().setDeepValidationOff(deepValidationOff);
+	            
+			} catch (ConfigurationException e) {
+				e.printStackTrace();
+			}
+	    	catch (Throwable t) {
+	    		t.printStackTrace();
+	    	}
+	    	
+	        // delete all markers for this Resource (they will be regenerated
+	        //	if the causation still exists)
+    		deleteMarkers(resource, false);
     	}
-    	
-    	try {
-            // What project is this? There should be one ConfigurationManager per project.
-            URI projectUri = ResourceManager.getProjectUri(resource.getURI());
-            logger.info("SMM called for project " + projectUri.toFileString());
-
-            IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
-        	// Get a ModelManager instance associated with this thread and pass it the model Resource
-            getModel().init(configurationMgr, getSadlModelManagerProvider(), resource);
-            getModel().setDeepValidationOff(deepValidationOff);
-            
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-		}
-    	catch (Throwable t) {
-    		t.printStackTrace();
-    	}
-    	
-        // delete all markers for this Resource (they will be regenerated
-        //	if the causation still exists)
-        deleteMarkers(resource, false);
         setTranslationErrors(0);
         
     }
     
     /**
+     * This method looks at a ResourceSet and determines the project having this set. This is necessary when the current
+     * Resource is an external Resource so that it isn't found in the project. However, there must be at least one internal
+     * project Resource in the set in order to make the current one external (by import), so it is used to determine the project.
+     * @param resourceSet
+     * @return
+     */
+    public static URI getProjectFromResourceSet(ResourceSet resourceSet) {
+		for (Resource rsrc: resourceSet.getResources()) {
+			try {
+				URI prjUri = ResourceManager.getProjectUri(rsrc.getURI());
+				if (prjUri != null) {
+					return prjUri;
+				}
+			}
+			catch (Exception e) {
+				
+			}
+		}
+		return null;
+	}
+
+	/**
      * Call this method to begin a new translation to Intermediate Form.
      * 
      * @param target - the Rule, Test, Query, or null if none of these
@@ -501,7 +539,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     public List<ConceptName> getNamedConceptsInNamedModel(URI uri, Scope scope) throws InvalidNameException, IOException {
     	String publicUri = null;
 		try {
-	   		if (uri.isPlatform()) {
+	   		if (uri.isPlatformResource()) {
 	   			IPath testpath = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(uri.toPlatformString(false))).getLocation();
 	   			uri = URI.createFileURI(testpath.toOSString());
 	   		}
@@ -523,7 +561,7 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			if (cmgr == null) {
 				throw new InvalidNameException("Unable to find a ConfigurationManager for model with URL '" + uri + "'");
 			}
-			if (cmgr.isSadlDerived(publicUri)) {
+			if (cmgr.isSadlDerivedAltUrl(uri)) {
 				return getModel().getNamedConceptsInNamedModel(publicUri, null, scope);
 			}
 			else {
@@ -541,20 +579,40 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 
     private List<ConceptName> getRdfsExposedNames(String ns) {
 		List<ConceptName> names = new ArrayList<ConceptName>();
-		ConceptName cn = new ConceptName(ns + "comment");
+		ConceptName cn = new ConceptName(RDFS.comment.getURI());
 		cn.setPrefix("rdfs");
 		cn.setType(ConceptType.ANNOTATIONPROPERTY);
 		names.add(cn);
-		cn = new ConceptName(ns + "label");
+		cn = new ConceptName(RDFS.label.getURI());
 		cn.setPrefix("rdfs");
 		cn.setType(ConceptType.ANNOTATIONPROPERTY );
+		names.add(cn);
+		cn = new ConceptName(RDFS.seeAlso.getURI());
+		cn.setPrefix("rdfs");
+		cn.setType(ConceptType.ANNOTATIONPROPERTY);
+		names.add(cn);
+		cn = new ConceptName(RDFS.domain.getURI());
+		cn.setPrefix("rdfs");
+		cn.setType(ConceptType.OBJECTPROPERTY);
+		names.add(cn);
+		cn = new ConceptName(RDFS.range.getURI());
+		cn.setPrefix("rdfs");
+		cn.setType(ConceptType.OBJECTPROPERTY);
+		names.add(cn);
+		cn = new ConceptName(RDFS.subClassOf.getURI());
+		cn.setPrefix("rdfs");
+		cn.setType(ConceptType.OBJECTPROPERTY);
+		names.add(cn);
+		cn = new ConceptName(RDFS.subPropertyOf.getURI());
+		cn.setPrefix("rdfs");
+		cn.setType(ConceptType.OBJECTPROPERTY);
 		names.add(cn);
 		return names;
 	}
 
 	private List<ConceptName> getRdfExposedNames(String ns) {
 		List<ConceptName> names = new ArrayList<ConceptName>();
-		ConceptName cn = new ConceptName(ns + "type");
+		ConceptName cn = new ConceptName(RDF.type.getURI());
 		cn.setType(ConceptType.OBJECTPROPERTY);
 		cn.setPrefix("rdf");
 		names.add(cn);
@@ -663,21 +721,31 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     @Override
     public EObject caseModelName(ModelName object) {
     	String alias = object.getAlias();
-    	EList<ContentList> cmtlist = object.getAnnContent();
+    	EList<String> annTypes = object.getAnnType();
+    	EList<ContentList> annlist = object.getAnnContent();
+    	List<String> labels = null;
     	List<String> comments = null;
-    	if (cmtlist.size() > 0) {
-    		comments = new ArrayList();
-    		Iterator<ContentList> cliter = cmtlist.iterator();
-    		while (cliter.hasNext()) {
-    			ContentList cl = cliter.next();
+    	if (annlist.size() > 0) {
+    		Iterator<String> typitr = annTypes.iterator();
+    		Iterator<ContentList> annitr = annlist.iterator();
+    		labels = new ArrayList<String>();
+    		comments = new ArrayList<String>();
+    		while (annitr.hasNext()) {
+    			String type = typitr.next();
+    			ContentList cl = annitr.next();
     			EList<String> cl2 = cl.getAnnContent();
     			Iterator<String> inneritr = cl2.iterator();
     			while (inneritr.hasNext()) {
-    				comments.add(inneritr.next().toString());
+    				if (type.equals("note")) {
+    					comments.add(inneritr.next().toString());
+    				}
+    				else {
+    					labels.add(inneritr.next().toString());
+    				}
     			}
     		}
     	}
-        annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, comments));   
+        annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, labels, comments));   
         if (!addedAsListener) {
         	IWorkbenchWindow wndw = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         	if (wndw != null) {
@@ -697,11 +765,12 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
      * @param _modelName
      * @param version
      * @param alias
+     * @param labels 
      * @param comments 
      * @return
      */
-    public List<ModelError> addModelName(String _modelName, String version, String alias, List<String> comments) {
-    	return getModel().setModelName(_modelName, version, alias, comments);
+    public List<ModelError> addModelName(String _modelName, String version, String alias, List<String> labels, List<String> comments) {
+    	return getModel().setModelName(_modelName, version, alias, labels, comments);
     }
 
     /**
@@ -930,23 +999,23 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 
 	private void addProperty(ClassDeclaration object, List<String> newClassNames, 
 			String propName, boolean singleValuedOnClass , Object range) {
-//		boolean isRDFDataType = getModel().isRDFDataType(range);
-//		if (isRDFDataType) {
-//			range = range.toString();
-//		}
-//	    if (!isRDFDataType && range instanceof ResourceIdentifier) {
-//	    	range = createConceptIdentifier((ResourceIdentifier)range);
-//	    }
-//	    if (!isRDFDataType && range instanceof ConceptIdentifier) {
-//	        // An object property was declared.
-//	        for (String newClassName : newClassNames) {
-//	            ConceptName superPropName = null;
-//	            annotateErrors(object, getModel().addObjectProperty(propName, superPropName, (ConceptIdentifier) range, false));
-//	            ConceptName pName = new ConceptName(propName);
-//	            ConceptName newClsName = new ConceptName(newClassName);
-//	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, range));
-//	        }
-//	    }
+		boolean isRDFDataType = getModel().isRDFDataType(range);
+		if (isRDFDataType) {
+			range = range.toString();
+		}
+	    if (!isRDFDataType && range instanceof ResourceIdentifier) {
+	    	range = createConceptIdentifier((ResourceIdentifier)range);
+	    }
+	    if (!isRDFDataType && range instanceof ConceptIdentifier) {
+	        // An object property was declared.
+	        for (String newClassName : newClassNames) {
+	            ConceptName superPropName = null;
+	            annotateErrors(object, getModel().addObjectProperty(propName, superPropName, (ConceptIdentifier) range, false));
+	            ConceptName pName = new ConceptName(propName);
+	            ConceptName newClsName = new ConceptName(newClassName);
+	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, range));
+	        }
+	    }
 	    if (range instanceof ResourceIdentifier) {
 	    	range = createConceptIdentifier((ResourceIdentifier)range);
 	    }
@@ -2046,6 +2115,34 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 		else if (value.getLitValue() != null) {
 			return literalValueToObject(value.getLitValue());
 		}
+		else if (value.getValueList() != null) {
+			EList<ExplicitValue> row = value.getRow().getExplicitValues();
+			if (row != null && row.size() > 0) {
+				ExplicitValue eval = row.get(0);
+				Object oval = resolveExplicitValue(eval);
+				if (oval instanceof ConceptName) {
+					List<ConceptName> retval = new ArrayList<ConceptName>();
+					retval.add((ConceptName) oval);
+					for (int i = 1; i < row.size(); i++) {
+						eval = row.get(i);
+						oval = resolveExplicitValue(eval);
+						retval.add((ConceptName)oval);
+					}
+					return retval;
+				}
+				else {
+					List<Object> retval = new ArrayList<Object>();
+					retval.add(oval);
+					for (int i = 1; row != null && i < row.size(); i++) {
+						eval = row.get(i);
+						oval = resolveExplicitValue(eval);
+						retval.add(oval);
+					}
+					return retval;
+				}
+			}
+			return null;
+		}
 		else {
 			return value.getTerm();
 		}
@@ -2480,9 +2577,11 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 		Object pattern = translate(expr); 
 		if (pattern != null) {
 			logger.info("Expr translation: {}", pattern);
+			getModel().getMessageManager().info("Expr '" + expr.toString() + "' translates to '" + pattern.toString() + "'");
 		}
 		else {
 			logger.error("Expr translation failed: " + expr.toString());
+			getModel().getMessageManager().error("Expr translation failed: " + expr.toString());
 		}
 
 		return expr;
@@ -3181,7 +3280,18 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	}
 
 	public IConfigurationManagerForIDE getConfigurationMgr(URI mfuri) throws ConfigurationException, URISyntaxException, IOException {
-        URI projectUri = ResourceManager.getProjectUri(mfuri);
+        URI projectUri;
+        try {
+        	projectUri = ResourceManager.getProjectUri(mfuri);
+        }
+        catch (IllegalSelectorException e) {
+        	if (lastConfigMgr != null) {
+        		return lastConfigMgr;
+        	}
+        	else {
+        		throw new URISyntaxException(mfuri.toString(), "could not find ConfigurationManager for resource URI '" + mfuri + "'");
+        	}
+        }
         IConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
         // See if we already have a ConfigurationManager for this project and if so use it.
         String owlModelsFolder = ResourceManager.getOwlModelsFolder(mfuri);
@@ -3499,16 +3609,16 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	
 	public boolean removeResourceModel(Resource resource) {
 		ModelInfo mi = modelMgrs.get(resource.getURI());
-		if (mi != null && mi.getModel() != null) {
-			try {
+		try {
+			if (mi != null && mi.getModel() != null && mi.getModel().getConfigurationMgr() != null) {
 				mi.getModel().getConfigurationMgr().resetJena();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
     	return (modelMgrs.remove(resource.getURI()) == null);
 	}
@@ -3658,5 +3768,39 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 	public void setSadlModelManagerProvider(SadlModelManagerProvider sadlModelManagerProvider) {
 		this.sadlModelManagerProvider = sadlModelManagerProvider;
 	}
-
+	@Override
+	public EObject caseUserDefinedDataType(UserDefinedDataType object) {
+    	if (object.getUserDefinedDataType() != null) {
+    		ResourceName name = object.getUserDefinedDataType();
+    		DataTypeRestriction dtr = object.getRestriction();
+    		if (dtr != null) {
+    			DataType baseType = dtr.getBasetype();
+    			EList<DataType> unionOfTypes = dtr.getBasetypes();
+    			Facets fcts = dtr.getFacets();
+    			String minexin = null;
+    			String min = null;
+    			String maxexin = null;
+    			String max = null;
+    			String regex = null;
+    			String len = null;
+    			String maxlen = null;
+    			String minlen = null;
+    			EList<String> values = null;
+    			if (fcts != null) {
+    				minexin = fcts.getMinexin();
+    				min = fcts.getMin();
+    				maxexin = fcts.getMaxexin();
+    				max = fcts.getMax();
+    				regex = fcts.getRegex();
+    				values = fcts.getValues();
+    				len = fcts.getLen();
+    				maxlen = fcts.getMaxlen();
+    				minlen = fcts.getMinlen();
+    			}
+    			annotateErrors(object, getModel().addUserDefinedDataType(name.getName(), unionOfTypes, baseType.getName(), minexin, min, maxexin, max, regex, len, minlen, maxlen, values));
+    		}
+    	}
+    	
+		return super.caseUserDefinedDataType(object);
+	}
 }

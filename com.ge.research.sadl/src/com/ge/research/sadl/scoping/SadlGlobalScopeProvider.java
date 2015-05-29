@@ -23,6 +23,9 @@
 
 package com.ge.research.sadl.scoping;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -38,7 +41,11 @@ import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.xbase.lib.Pair;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
+import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.resource.SadlEObjectDescription;
 import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.sadl.SadlPackage;
@@ -51,6 +58,8 @@ import com.google.inject.Provider;
 public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 
 	private static final Splitter SPLITTER = Splitter.on(',');
+	
+	private List<URI> externalURIs = null;
 
 	@Inject
 	IResourceDescription.Manager resourceDescriptionManager;
@@ -58,6 +67,8 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	private IContainer.Manager containerManager;
 	@Inject
 	private IResourceScopeCache cache;
+	@Inject
+	private SadlModelManagerProvider sadlModelManagerProvider;
 
 	/**
 	 * For each imported owl resource, import also the according sadl resource to
@@ -78,18 +89,44 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 					
 					LinkedHashSet<URI> uriSet = Sets.newLinkedHashSet();
 					collectImportedURIs(resource, URI.createURI(publicUri), uriSet, visibleResourceDescriptions);
-					addImplicitUris(uriSet);
+					addImplicitUris(resource, uriSet);
+					addExternalUris(resource, uriSet);
 					return uriSet;
 				} catch (Exception e) {
 					return SadlGlobalScopeProvider.super.getImportedUris(resource);
 				}
 			}
+
+			private void addExternalUris(Resource importingResource, LinkedHashSet<URI> uriSet) {
+				// add a resource for this external import and add any indirect resource imports as well
+				URI prjUri = SadlModelManager.getProjectFromResourceSet(importingResource.getResourceSet());
+				if (prjUri != null) {
+					SadlModelManager smm = sadlModelManagerProvider.get(prjUri);
+					try {
+						IConfigurationManagerForIDE cmgr = smm.getConfigurationMgr(prjUri.appendSegment(ResourceManager.OWLDIR));
+						List<URI> externalUris = cmgr.getExternalModelURIs();
+						if (externalUris != null) {
+							uriSet.addAll(externalUris);
+						}
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
 		});
 	}
 
-	private void addImplicitUris(LinkedHashSet<URI> uriSet) {
+	private void addImplicitUris(Resource resource, LinkedHashSet<URI> uriSet) {
 		uriSet.add(URI.createURI(ResourceManager.PLATFORM_RESOURCE_MODELS_RDF_SYNTAX_NS_RDF));
 		uriSet.add(URI.createURI(ResourceManager.PLATFORM_RESOURCE_MODELS_RDF_SCHEMA_RDF));
+//		uriSet.add(URI.createURI("http://sadl.sourceforge.net/owl/aulo.owl"));
 	}
 
 	private Iterable<IResourceDescription> getVisibleResourceDescriptions (Resource resource) {
@@ -112,6 +149,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 	 * @param resourceDescriptions The set of resource descriptions that are scanned for Models
 	 */
 	private void collectImportedURIs (Resource resource, URI publicURI, LinkedHashSet<URI> uriSet, Iterable<IResourceDescription> resourceDescriptions)  {
+		// Here's where the imports are collected
 		Pair<URI,String[]> importMapping = getImportMapping(publicURI, resourceDescriptions);
 		if (importMapping==null) return;
 		
@@ -122,6 +160,10 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 				// If scheme is missing, the URI must be resolved relative to the given resource URI
 				if (importedURI.scheme()==null) {
 					importedURI = importedURI.resolve(resource.getURI());
+				}
+				if (importedURI.equals(resource.getURI())) {
+					// this is a self-import
+					return;
 				}
 				collectImportedURIs(resource, importedURI, uriSet, resourceDescriptions);
 			}
@@ -142,10 +184,18 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 					String importsAsString = objDesc.getUserData(SadlEObjectDescription.IMPORT_KEY);
 					String[] imports = !importsAsString.isEmpty() ? Iterables.toArray(SPLITTER.split(importsAsString), String.class) : new String[0];
 					result = new Pair<URI, String[]>(resourceDescription.getURI(), imports);
-					if ("sadl".equals(resourceDescription.getURI().fileExtension())) {
+//					if ("sadl".equals(resourceDescription.getURI().fileExtension())) {
 						return result;
-					}
+//					}
 				}
+			}
+			
+			// TODO add external URI imports, recurse
+			if (externalURIs == null) {
+				externalURIs = new ArrayList<URI>();
+			}
+			if (!externalURIs.contains(publicURI)) {
+				externalURIs.add(publicURI);
 			}
 		}
 		return result;

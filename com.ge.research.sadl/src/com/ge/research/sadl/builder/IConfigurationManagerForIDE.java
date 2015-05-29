@@ -22,6 +22,8 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -237,7 +239,7 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract OntDocumentManager getJenaDocumentMgr();
 
 	/**
-	 * Method to determine if a particular model, identified by URI, is derived
+	 * Method to determine if a particular model, identified by public URI, is derived
 	 * from translating a SADL model file.
 	 * 
 	 * @param publicUri
@@ -245,7 +247,18 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @throws ConfigurationException 
 	 * @throws MalformedURLException 
 	 */
-	public abstract boolean isSadlDerived(String publicUri) throws ConfigurationException, MalformedURLException;
+	public abstract boolean isSadlDerivedPublicUri(String publicUri) throws ConfigurationException, MalformedURLException;
+
+	/**
+	 * Method to determine if a particular model, identified by actual URL, is derived
+	 * from translating a SADL model file.
+	 * 
+	 * @param altUrl
+	 * @return
+	 * @throws ConfigurationException 
+	 * @throws MalformedURLException 
+	 */
+	public abstract boolean isSadlDerivedAltUrl(URI altUrl) throws ConfigurationException, MalformedURLException;
 
 	/**
 	 * Method to find the imports, with prefixes, for a given model identified by uri
@@ -280,6 +293,12 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract URI getSadlUriFromPublicUri (ResourceSet resourceSet, URI publicUri) throws ConfigurationException, IOException;
 	
 	/**
+	 * Get a SadlUtils instance.
+	 * @return
+	 */
+	public abstract SadlUtils getSadlUtils();
+	
+	/**
 	 * Call this method to validate that an OWL model being imported actually exists (is valid)
 	 * @param publicUri
 	 * @param altUrl
@@ -289,7 +308,7 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract boolean validateImport(String publicUri, String altUrl) throws MalformedURLException;
 
 	/**
-	 * Call this method to set the mapping for the "defaults.owl" model. This should be called if a default is added
+	 * Call this method to set the mapping for the "SadlServicesConfigurationConcepts.owl" model. This should be called if a default is added
 	 * to a model to make sure that the definition of default value concepts is available as an import model.
 	 * 
 	 * @throws IOException
@@ -306,4 +325,12 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @return
 	 */
 	public abstract List<URI> getExternalModelURIs();
+
+	/**
+	 * Call this method to remove a mapping of a deleted Resource
+	 * @param canonicalPath -- absolute path to OWL file of deleted resource
+	 * @return -- true if something was removed from mapping else false
+	 * @throws URISyntaxException 
+	 */
+	public abstract boolean removeMappingByActualUrl(String canonicalPath) throws URISyntaxException;
 }

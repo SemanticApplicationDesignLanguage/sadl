@@ -17,7 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.builder;
 
+import java.nio.channels.IllegalSelectorException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.inject.Provider;
@@ -63,7 +65,22 @@ public class SadlModelManagerProvider implements Provider<SadlModelManager>, IRe
 	 * @deprecated Use {@link #get(Resource)} instead
 	 */
 	public SadlModelManager get(URI uri) {
-		uri = ResourceManager.getProjectUri(uri);
+		if (smmMap != null && smmMap.containsKey(uri)) {
+			return smmMap.get(uri);
+		}
+//		try {
+//			uri = ResourceManager.getProjectUri(uri);
+//		}
+//		catch (IllegalSelectorException e) {
+//			SadlModelManager mm = get();
+//			if (mm != null) {
+//				return mm;
+//			}
+//			else {
+//				throw e;
+//			}
+//		}
+		
 		setUri(uri);
 		return get();
 	}
@@ -104,6 +121,19 @@ public class SadlModelManagerProvider implements Provider<SadlModelManager>, IRe
 				System.err.println("Resource '" + event.getResource().getLocationURI() + "' not in SadlModelManagerProvider map");
 			}
 		}
+	}
+
+	public URI getProject(SadlModelManager sadlModelManager) {
+		if (smmMap != null) {
+			Iterator<URI> itr = smmMap.keySet().iterator();
+			while (itr.hasNext()) {
+				URI key = itr.next();
+				if (smmMap.get(key).equals(sadlModelManager)) {
+					return key;
+				}
+			}
+		}
+		return null;
 	}
 
 }

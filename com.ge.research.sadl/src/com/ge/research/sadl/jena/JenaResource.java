@@ -21,6 +21,7 @@ package com.ge.research.sadl.jena;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +51,11 @@ import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.google.inject.Inject;
 
 public class JenaResource extends ResourceImpl {
-
 	private static final Logger logger = LoggerFactory.getLogger(JenaResource.class);
+	
+	private enum SadlDerived{Yes, No, Unknown}
+	
+	private SadlDerived isSadlDerived = SadlDerived.Unknown;
 
 	@Inject
 	private SadlModelManagerProvider sadlModelManagerProvider;
@@ -69,45 +73,35 @@ public class JenaResource extends ResourceImpl {
 		// it isn't an OWL file generated from a SADL file (which should already have
 		// its names exported).
 		try {
-			SadlModelManager visitor;
+			boolean isImplicitLibrary = false;
+			SadlModelManager visitor = null;
 			URI thisUri = getURI();
 			Resource context = this.getResourceSet().getResource(thisUri, false);
 			if (thisUri.toString().endsWith("configuration.rdf") || thisUri.toString().endsWith("ont-policy.rdf")) {
 				return;
 			}
-			else if (thisUri.toString().equals("platform:/resource/TestSadlIde/OwlModels/rdf-syntax-ns.rdf") ||
-					thisUri.toString().equals("platform:/resource/TestSadlIde/OwlModels/rdf-schema.rdf")) {
-				thisUri = ResourceManager.convertPlatformUriToAbsoluteUri(thisUri);
-				visitor = sadlModelManagerProvider.getAny();
-				if (visitor == null) {
-					visitor = sadlModelManagerProvider.get(thisUri);
-				}
-				if (thisUri.toString().endsWith("rdf-syntax-ns.rdf")) {
-					String bundleUrl = ResourceManager.getBundleModelFile("rdf-syntax-ns.rdf").getAbsolutePath();
-					thisUri = URI.createURI(bundleUrl);
-				}
-				else {
-					String bundleUrl = ResourceManager.getBundleModelFile("rdf-schema.rdf").getAbsolutePath();
-					thisUri = URI.createURI(bundleUrl);
-				}
+			else if (thisUri.isPlatformPlugin()) {
+				isImplicitLibrary = true;
+				URI prjUri = SadlModelManager.getProjectFromResourceSet(context.getResourceSet());
+				visitor = sadlModelManagerProvider.get(prjUri);
 			}
 			else {
 				try {
-					visitor = sadlModelManagerProvider.get(thisUri);
-					// TODO if sadl-derived, return without creating names.
-					String owlModelsFolder = ResourceManager.getOwlModelsFolder(thisUri);
+					URI prjUri = SadlModelManager.getProjectFromResourceSet(context.getResourceSet());
+					visitor = sadlModelManagerProvider.get(prjUri);
+					String owlModelsFolder = prjUri.appendSegment(ResourceManager.OWLDIR).toString();
 					URI absUri = ResourceManager.convertPlatformUriToAbsoluteUri(context.getURI());
-					if (visitor.getConfigurationMgr(owlModelsFolder).isSadlDerived(absUri.toString())) {	
+					if (visitor.getConfigurationMgr(owlModelsFolder).isSadlDerivedAltUrl(absUri)) {	
 						return;
 					}
 				} catch (ConfigurationException e) {
 					throw e;
 				} catch (Exception e) {
-//					sadlModelManagerProvider.setUri(thisUri);
 					visitor = sadlModelManagerProvider.get();
 				}
 			}
 			visitor.init(this);	
+			// TODO here's where the Resource's named concepts are loaded
 			List<ConceptName> names = visitor.getNamedConceptsInNamedModel(thisUri, Scope.LOCALONLY);
 			if (names == null || names.isEmpty()) {
 				return;
@@ -132,16 +126,18 @@ public class JenaResource extends ResourceImpl {
 			modelName.setBaseUri(URI.createURI(names.get(0).getUri()).trimFragment().toString());
 			model.setModelName(modelName);
 
-			// pass in OWL model folder to get CfgMgr
-			try {
-				Map<String,String> modelImportMappings = visitor.getConfigurationMgr(thisUri.trimSegments(1)).getImports(modelName.getBaseUri(), Scope.LOCALONLY);
-				for (String importedURI: modelImportMappings.keySet()) {
-					Import imp = SadlFactory.eINSTANCE.createImport();
-					imp.setImportURI(importedURI);
-					model.getImports().add(imp);
+			if (!isImplicitLibrary) {
+				// pass in OWL model folder to get CfgMgr
+				try {
+					Map<String,String> modelImportMappings = visitor.getConfigurationMgr(thisUri.trimSegments(1)).getImports(modelName.getBaseUri(), Scope.LOCALONLY);
+					for (String importedURI: modelImportMappings.keySet()) {
+						Import imp = SadlFactory.eINSTANCE.createImport();
+						imp.setImportURI(importedURI);
+						model.getImports().add(imp);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 
 			getContents().add(model);
@@ -152,6 +148,11 @@ public class JenaResource extends ResourceImpl {
 				ConceptType concept = name.getType();
 				switch (concept) {
 				case ANNOTATIONPROPERTY:
+					ResourceName rnAnn= SadlFactory.eINSTANCE.createResourceName();
+					rnAnn.setName(name.getName());
+					PropertyDeclaration pdAnn = SadlFactory.eINSTANCE.createPropertyDeclaration();
+					pdAnn.setPropertyName(rnAnn);
+					model.getElements().add(pdAnn);
 					break;
 				case DATATYPEPROPERTY:
 					ResourceName rnData= SadlFactory.eINSTANCE.createResourceName();
@@ -193,9 +194,6 @@ public class JenaResource extends ResourceImpl {
 		} catch (ConfigurationException e) {
 			logger.error("Invalid name", e);
 			throw new IOException("Configuration error, unable to resolve name: " + e.getMessage(), e);
-		} catch (URISyntaxException e) {
-			logger.error("Invalid name", e);
-			throw new IOException("Syntax error, unable to resolve name: " + e.getMessage(), e);
 		}
 	}
 
@@ -255,4 +253,5 @@ public class JenaResource extends ResourceImpl {
 
 		return null;
 	}
+
 }

@@ -96,8 +96,8 @@ public class ResourceManager {
 	public static final String ServicesConf_FN = "ServicesConfig.owl";
 	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
 
-	public static final String PLATFORM_RESOURCE_MODELS_RDF_SCHEMA_RDF = "platform:/resource/TestSadlIde/OwlModels/rdf-schema.rdf";
-	public static final String PLATFORM_RESOURCE_MODELS_RDF_SYNTAX_NS_RDF = "platform:/resource/TestSadlIde/OwlModels/rdf-syntax-ns.rdf";
+	public static final String PLATFORM_RESOURCE_MODELS_RDF_SCHEMA_RDF = "platform:/plugin/com.ge.research.sadl.ui/Models/rdf-schema.rdf";
+	public static final String PLATFORM_RESOURCE_MODELS_RDF_SYNTAX_NS_RDF = "platform:/plugin/com.ge.research.sadl.ui/Models/rdf-syntax-ns.rdf";
 
     /**
      * Returns the OWL model file for a given SADL file.
@@ -105,15 +105,28 @@ public class ResourceManager {
      * @param resource A Resource containing the SADL file.
      * @return The OWL model file's path.
      * @throws CoreException If the OWL models directory doesn't exist.
+     * @throws MalformedURLException 
      */
-    public static File getOwlFileForSadlResource(Resource resource) throws CoreException {
-
+    public static File getOwlFileForSadlResource(Resource resource) throws CoreException, MalformedURLException {
         // Get the SADL file's corresponding OWL file.
-        URI owlFile = validateAndReturnOwlUrlOfResource(resource);
-        String s1 = owlFile.toFileString();
-        File retFile = new File(s1);
-        return retFile;
+        URI sadlFile = resource.getURI();
+//
+//        URI owlFile = validateAndReturnOwlUrlOfResource(resource);
+        return getOwlFileForSadlUri(sadlFile);
     }
+
+    /**
+     * Returns the OWL model file for a given SADL file URI
+     * @param owlFile
+     * @return
+     * @throws CoreException 
+     * @throws MalformedURLException 
+     */
+	public static File getOwlFileForSadlUri(URI sadlFile) throws CoreException, MalformedURLException {
+		URI uri = validateAndReturnOwlUrlOfSadlUri(sadlFile);
+        File retFile = new File(new SadlUtils().fileUrlToFileName(uri.toString()));
+        return retFile;
+	}
 
     /**
      * Given a project Resource [corresponding to a SADL file in this project], find and
@@ -124,7 +137,6 @@ public class ResourceManager {
      * @throws CoreException
      */
     public static URI validateAndReturnOwlUrlOfResource(Resource resource) throws CoreException {
-
         URI sadlFile = resource.getURI();
         return validateAndReturnOwlUrlOfSadlUri(sadlFile);
     }
@@ -294,13 +306,14 @@ public class ResourceManager {
      * Method to convert an altUrl to an OWL file into the corresponding name of a SADL file (without path)
      *
      * @param owlAltUrl
+     * @param errorIfNotExists TODO
      * @return
      * @throws MalformedURLException
      */
-    public static String sadlFileNameOfOwlAltUrl(String owlAltUrl) throws IOException {
+    public static String sadlFileNameOfOwlAltUrl(String owlAltUrl, boolean errorIfNotExists) throws IOException {
     	SadlUtils su = new SadlUtils();
     	File owlfile = new File(su.fileUrlToFileName(owlAltUrl));
-    	if (!owlfile.exists()) {
+    	if (errorIfNotExists && !owlfile.exists()) {
     		throw new FileNotFoundException(owlfile.getPath());
     	}
     	// TODO: Check that the URI is actually SADL derived
@@ -728,6 +741,13 @@ public class ResourceManager {
    		} else if (someFileInProject.isFile()) {
    			String s = someFileInProject.toFileString();
    			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
+   			if (file == null) {
+   		   		String prjName = someFileInProject.segment(someFileInProject.segmentCount() - 2);
+   		   		IProject prj = workspace.getRoot().getProject(prjName);
+   		   		if (prj != null) {
+   		   			return prj;
+   		   		}
+   			}
 	   		String prjName = file.getFullPath().segment(0);
 	   		IProject prj = workspace.getRoot().getProject(prjName);
 	   		return prj;

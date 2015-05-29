@@ -40,6 +40,7 @@ import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.NegatedExistentialQuantifier;
 import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Query.Order;
@@ -60,6 +61,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.sadl.BinaryOpExpression;
+import com.ge.research.sadl.sadl.ExistentialNegation;
 import com.ge.research.sadl.sadl.ExplicitValue;
 import com.ge.research.sadl.sadl.Expression;
 import com.ge.research.sadl.sadl.GraphPattern;
@@ -833,6 +835,9 @@ public class IntermediateFormTranslator {
 		else if (gp instanceof SubTypeOf) {
 			pattern = translate((SubTypeOf)gp);
 		}
+		else if (gp instanceof ExistentialNegation) {
+			pattern = translate((ExistentialNegation)gp);
+		}
 
 		return pattern;
 	}
@@ -1202,6 +1207,28 @@ public class IntermediateFormTranslator {
 		pattern.setSourceType(TripleSourceType.SCofC);
 		return pattern;
 	}
+	
+	public GraphPatternElement translate(ExistentialNegation gp) throws TranslationException, InvalidNameException, InvalidTypeException {
+		VariableList varList = gp.getVarList();
+		if (varList != null) {
+			EList<ResourceName> rnames = varList.getNames();
+			List<String> names = new ArrayList<String>();
+			for (int i = 0; i < rnames.size(); i++) {
+				names.add(rnames.get(i).getName());
+			}
+			Expression quantified = gp.getQuantified();
+			Object nqgpe = translate(quantified);
+			if (nqgpe instanceof GraphPatternElement) {
+				return new NegatedExistentialQuantifier(names, (GraphPatternElement)nqgpe);
+			}
+			else {
+				throw new TranslationException("Existentially quantified element is not a GraphPatternElement: " + nqgpe);
+			}
+		}
+		else {
+			throw new TranslationException("Negated existential quantification (there is no ...) must have at least one variable specified.");
+		}
+	}
 
 	/**
 	 * Translate InstAttrSPV pattern
@@ -1330,6 +1357,16 @@ public class IntermediateFormTranslator {
 			litValue.setValue(SadlModelManager.literalValueToObject(value.getLitValue()));
 			return litValue;
 		}
+		else if (value.getValueList() != null) {
+			ValueRow singleRow = value.getRow();
+			List<List<Node>> rows = new ArrayList<List<Node>>(1);
+			List<Node> row = translate(singleRow);
+			rows.add(row);
+			rows.add(row);
+			ValueTableNode valueTableNode = new ValueTableNode();
+			valueTableNode.setRows(rows);
+			return valueTableNode;
+		}
 		else {
 			String term = value.getTerm();
 			if (term.equals("PI")) {
@@ -1392,14 +1429,14 @@ public class IntermediateFormTranslator {
 	}
 
 	public ValueTableNode translate(ValueTable valueTable) throws InvalidNameException {
-		ValueRow singleRow = valueTable.getRow();
+//		ValueRow singleRow = valueTable.getRow();
 		EList<ValueRow> valueRows = valueTable.getRows();
 		
 		List<List<Node>> rows = new ArrayList<List<Node>>(valueRows != null ? valueRows.size() : 1);
-		if (singleRow != null) {
-			List<Node> row = translate(singleRow);
-			rows.add(row);
-		}
+//		if (singleRow != null) {
+//			List<Node> row = translate(singleRow);
+//			rows.add(row);
+//		}
 		if (valueRows != null) {
 			for (ValueRow valueRow : valueRows) {
 				List<Node> row = translate(valueRow);
@@ -1429,7 +1466,12 @@ public class IntermediateFormTranslator {
 				return  validateNode(node);
 			}
 			else {
-				throw new InvalidNameException("conceptIdentifierToNode called with a ResourceByName with null name.");
+				if (modelManager != null) {
+					throw new InvalidNameException("conceptIdentifierToNode called with a ResourceByName with null name in model '" + modelManager.getModelActualUrl() + "'.");
+				}
+				else {
+					throw new InvalidNameException("conceptIdentifierToNode called with a ResourceByName with null name.");
+				}
 			}
 		}
 		else if (classId != null) {	// ok if it's null when editing

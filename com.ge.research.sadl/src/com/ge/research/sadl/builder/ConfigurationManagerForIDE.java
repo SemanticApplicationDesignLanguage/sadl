@@ -285,7 +285,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
     		for (int i = 0; i < pendingDeletions.size(); i++) {
     			Statement s = pendingDeletions.get(i);
     			if (s.getPredicate().getLocalName().equals("altURL")) {
-    				String sadlFileName = ResourceManager.sadlFileNameOfOwlAltUrl(s.getObject().toString());
+    				String sadlFileName = ResourceManager.sadlFileNameOfOwlAltUrl(s.getObject().toString(), true);
     				File owlfile = new File(getSadlUtils().fileUrlToFileName(s.getObject().toString()));
     				String sadlfile = ResourceManager.findSadlFileInProject(owlfile.getParentFile().getParent(), sadlFileName);
     				if (sadlfile != null) {
@@ -402,6 +402,9 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
      *  1) Identify all SADL files currently in the project with their relative paths
      *  2) Remove all OWL files in the OwlModels folder which are not associated with a Project SADL file but are marked as created by SADL
      *  3) Remove all SADL-generated entries in the Jena OwlModels/ont-policy.rdf file of mappings that do not correspond to a project SADL file
+     *  
+     *  Modifications for Version 2.3.0:
+     *  1) No longer necessary to 1, 2, or 3 as the deltas in the SadlBuilder will identify deleted files and they are cleaned up there.
      *
      * @param folder
 	 * @throws ConfigurationException 
@@ -588,7 +591,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 
     private boolean isOwlFileCreatedBySadl(File file) {
 		try {
-			String val = sadlUtils.fileNameToFileUrl(file.getCanonicalPath());
+			String val = getSadlUtils().fileNameToFileUrl(file.getCanonicalPath());
 			String key = null;
 			if (getMappings().containsValue(val)) {
 				Iterator<String> kitr = getMappings().keySet().iterator();
@@ -817,7 +820,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	}
 
 	/**
-	 * Call this method to set the mapping for the "defaults.owl" model. This should be called if a default is added
+	 * Call this method to set the mapping for the "SadServicesConfigurationConcepts.owl" model. This should be called if a default is added
 	 * to a model to make sure that the definition of default value concepts is available as an import model.
 	 * 
 	 * @throws IOException
@@ -972,7 +975,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	}
 
 	@Override
-	public boolean isSadlDerived(String publicUri) throws ConfigurationException, MalformedURLException {
+	public boolean isSadlDerivedPublicUri(String publicUri) throws ConfigurationException, MalformedURLException {
 		if (publicUri.endsWith("rdf-syntax-ns#") || 
 				publicUri.endsWith("rdf-schema#")) {
 			return false;
@@ -982,12 +985,46 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 			String altFN = getSadlUtils().fileUrlToFileName(altUrl);
 			return isOwlFileCreatedBySadl(new File(altFN));
 		}
-		else {
-			String auri = getPublicUriFromActualUrl(publicUri);
-			if (auri != null) {
-				return isSadlDerived(auri);
+//		else {
+//			String auri = getPublicUriFromActualUrl(publicUri);
+//			if (auri != null) {
+//				return isSadlDerived(auri);
+//			}
+//		}
+		return false;
+	}
+
+
+	@Override
+	public boolean isSadlDerivedAltUrl(URI altUrl) throws ConfigurationException, MalformedURLException {
+		if (altUrl.isPlatformPlugin()) {
+			return false;
+		}
+		else if (altUrl.scheme().equals("http")) {
+			return false;
+		}
+		if (altUrl.fileExtension().equals(ResourceManager.OWLFILEEXT)) {
+			String sadlFN = altUrl.trimFileExtension().appendFileExtension(ResourceManager.SADLEXT).lastSegment();
+			List<File> sadlFiles = ResourceManager.findSadlFilesInDir(getModelFolderPath().getParentFile());
+			if (sadlFiles != null) {
+				for (int i = 0; i < sadlFiles.size(); i++) {
+					if (sadlFiles.get(i).getName().equals(sadlFN)) {
+						return true;
+					}
+				}
 			}
 		}
+//		String altUrl = getAltUrlFromPublicUri(altUrl);
+//		if (altUrl !=  null && !altUrl.equals(altUrl)) {
+//			String altFN = getSadlUtils().fileUrlToFileName(altUrl);
+//			return isOwlFileCreatedBySadl(new File(altFN));
+//		}
+//		else {
+//			String auri = getPublicUriFromActualUrl(altUrl);
+//			if (auri != null) {
+//				return isSadlDerived(auri);
+//			}
+//		}
 		return false;
 	}
 
@@ -1072,7 +1109,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	@Override
 	public URI getSadlUriFromPublicUri(ResourceSet resourceSet, URI publicUri)
 			throws ConfigurationException, IOException {
-		if (isSadlDerived(publicUri.toString())) {
+		if (isSadlDerivedPublicUri(publicUri.toString())) {
 			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
 			IResourceDescriptions descriptions = resourceDescriptionsProvider.getResourceDescriptions(resourceSet);
 			Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SadlPackage.Literals.MODEL, QualifiedName.create(publicUri.toString()), false);
@@ -1134,6 +1171,35 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean removeMappingByActualUrl(String canonicalPath) throws URISyntaxException {
+		boolean bChanged = false;
+		String altUrl = getSadlUtils().fileNameToFileUrl(canonicalPath);
+		StmtIterator sitr2 = getMappingModel().listStatements(null, altUrlProp, getMappingModel().getResource(altUrl));
+		List<Statement> extras = null;
+		while (sitr2.hasNext()) {
+			Statement badStmt = sitr2.nextStatement();
+			Resource badSubject = badStmt.getSubject();
+			if (extras == null) {
+				extras = new ArrayList<Statement>();
+			}
+			StmtIterator sitr3 = getMappingModel().listStatements(badSubject, (Property)null, (RDFNode)null);
+			while (sitr3.hasNext()) {
+				extras.add(sitr3.nextStatement());
+			}
+		}
+		if (extras != null) {
+			for (int j = 0; j < extras.size(); j++) {
+				getMappingModel().remove(extras.get(j));
+				bChanged = true;
+			}
+		}
+		if (bChanged) {
+			setMappingChanged(true);
+		}
+		return bChanged;
 	}
 
 
