@@ -1,0 +1,22 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:genbase="http://sadl.org/SadlLinking1/GenealogyBase#"
+  xml:base="http://sadl.org/SadlLinking2/AdamsFamily">
+  <owl:Ontology rdf:about="http://sadl.org/SadlLinking2/AdamsFamily">
+    <owl:imports rdf:resource="http://sadl.org/SadlLinking1/Extended"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'AdamsFamily.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <genbase:Man rdf:ID="JohnQuincyAdams">
+    <genbase:mother>
+      <genbase:Woman rdf:ID="Abigail"/>
+    </genbase:mother>
+    <genbase:father>
+      <genbase:Man rdf:ID="JohnAdams">
+        <genbase:wife rdf:resource="http://sadl.org/SadlLinking2/AdamsFamily#Abigail"/>
+      </genbase:Man>
+    </genbase:father>
+  </genbase:Man>
+</rdf:RDF>

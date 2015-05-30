@@ -1,0 +1,17 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:genbase="http://sadl.org/SadlLinking1/GenealogyBase#"
+  xml:base="http://sadl.org/SadlLinking1/RuleBasedRelations">
+  <owl:Ontology rdf:about="http://sadl.org/SadlLinking1/RuleBasedRelations">
+    <owl:imports rdf:resource="http://sadl.org/SadlLinking1/Extended"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleBasedRelations.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <genbase:Man rdf:ID="George">
+    <genbase:parent>
+      <genbase:Person rdf:ID="Pete"/>
+    </genbase:parent>
+  </genbase:Man>
+</rdf:RDF>

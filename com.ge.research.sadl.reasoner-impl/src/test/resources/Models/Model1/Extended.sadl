@@ -1,0 +1,10 @@
+uri "http://sadl.org/SadlLinking1/Extended" alias extended version "$Revision:$ Last modified on   $Date:$". 
+
+import "http://sadl.org/SadlLinking1/GenealogyBase". 
+
+sibling describes Person with values of type Person.
+cousin describes Person with values of type Person.
+aunt describes Person with values of type Woman.
+uncle describes Person with values of type Man.
+niece describes Person with values of type Woman.
+nephew describes Person with values of type Man.

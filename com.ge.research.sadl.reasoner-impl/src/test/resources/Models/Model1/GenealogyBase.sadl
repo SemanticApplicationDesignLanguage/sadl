@@ -1,0 +1,27 @@
+uri "http://sadl.org/SadlLinking1/GenealogyBase" alias genbase version "$Revision:$ Last modified on   $Date:$". 
+
+Gender is a class, must be one of {Male, Female}.
+
+Person is a class, described by dateOfBirth with a single value of type dateTime,
+	described by gender with a single value of type Gender,
+	described by father with values of type {Person and (gender always has value Male)},
+	described by mother with values of type {Person and (gender always has value Female)},
+	described by spouse with a single value of type Person.
+	
+child describes Person with values of type Person.	
+parent describes Person with values of type Person.
+child is the inverse of parent.
+	
+A Person is a Woman only if gender always has value Female.
+A Person is a Man only if gender always has value Male.	
+
+father is a type of parent.
+mother is a type of parent.
+	
+biologicalFather is a type of father.
+biologicalMother is a type of mother.
+	
+wife is a type of spouse with values of type {Person and (gender always has value Female)}.
+husband is a type of spouse with values of type {Person and (gender always has value Male)}.
+
+	

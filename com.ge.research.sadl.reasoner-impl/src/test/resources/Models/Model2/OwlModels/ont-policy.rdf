@@ -1,0 +1,40 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <OntologySpec>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <publicURI rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >owl</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <altURL rdf:resource="http://protege.stanford.edu/plugins/owl/dc/protege-dc.owl"/>
+    <publicURI rdf:resource="http://purl.org/dc/elements/1.1/"/>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >dc</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <publicURI rdf:resource="http://sadl.org/SadlLinking2/OtherProjectImport"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/workspace/SadlLinking2/OwlModels/OtherProjectImport.owl"/>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <createdBy>SADL</createdBy>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >opi</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <publicURI rdf:resource="http://sadl.org/SadlLinking2/AdamsFamily"/>
+    <altURL rdf:resource="file:/C:/Users/200005201/workspace/SadlLinking2/OwlModels/AdamsFamily.owl"/>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <createdBy>SADL</createdBy>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >adams</prefix>
+  </OntologySpec>
+  <DocumentManagerPolicy>
+    <cacheModels rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</cacheModels>
+    <processImports rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</processImports>
+  </DocumentManagerPolicy>
+</rdf:RDF>
