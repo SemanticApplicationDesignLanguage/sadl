@@ -1296,7 +1296,8 @@ public class ResourceManager {
 			for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
 				IProject refedPrg = referencedProjects[i];
 				IFile modelFolder = refedPrg.getFile(ResourceManager.OWLDIR);
-				SadlModelManager sadlModelMgr = sadlModelManagerProvider.get(URI.createURI(modelFolder.getLocationURI().toString()));
+				URI prjUri = ResourceManager.getProjectUri(URI.createURI(modelFolder.getLocationURI().toString()));
+				SadlModelManager sadlModelMgr = sadlModelManagerProvider.get(prjUri);
 				IConfigurationManagerForIDE otherProjectConfigMgr = sadlModelMgr.getConfigurationMgr(modelFolder.getLocation().toOSString());
 				if (otherProjectConfigMgr.containsMappingForURI(otherProjectURI)) {
 					return otherProjectConfigMgr;

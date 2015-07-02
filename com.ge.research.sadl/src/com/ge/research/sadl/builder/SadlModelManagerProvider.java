@@ -28,6 +28,7 @@ import javax.inject.Singleton;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 
@@ -110,8 +111,9 @@ public class SadlModelManagerProvider implements Provider<SadlModelManager>, IRe
 	public void resourceChanged(IResourceChangeEvent event) {
 		// TODO Auto-generated method stub
 		if (event.getResource() instanceof IProject) {
-			String prjPath = event.getResource().getProject().getRawLocationURI().toString(); //FullPath().append(ResourceManager.OWLDIR).toString();
-			URI projectUri = URI.createURI(prjPath);
+			IProject prj = event.getResource().getProject();
+			java.net.URI uri = prj.getLocationURI();
+			URI projectUri = URI.createURI(uri.getPath());
 			
 			// remove model manager for this project from map
 			if (smmMap.containsKey(projectUri)) {

@@ -353,6 +353,11 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        if (someOutput) {
 	        	System.out.println("\n");
 	        }
+	        if (configMgr != null) {
+	        	// if building then the editor close event will not trigger saving changes to configuration/mapping
+				configMgr.saveConfiguration();
+				configMgr.saveOntPolicyFile();
+	        }
 	    }
     }
 

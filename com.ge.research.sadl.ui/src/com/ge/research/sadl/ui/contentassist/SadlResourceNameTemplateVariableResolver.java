@@ -26,6 +26,7 @@ package com.ge.research.sadl.ui.contentassist;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
@@ -35,12 +36,15 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
+import org.eclipse.xtext.ui.editor.model.XtextDocument;
 import org.eclipse.xtext.ui.editor.templates.AbstractTemplateVariableResolver;
 import org.eclipse.xtext.ui.editor.templates.XtextTemplateContext;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.builder.ModelManager.ImportListType;
 import com.ge.research.sadl.builder.SadlModelManager;
@@ -49,6 +53,7 @@ import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.google.inject.Inject;
 
@@ -86,7 +91,27 @@ public class SadlResourceNameTemplateVariableResolver extends
             XtextTemplateContext xtextTemplateContext) {
     	
 		Resource currentResource = xtextTemplateContext.getContentAssistContext().getCurrentModel().eResource();
-		SadlModelManager visitor = sadlModelManagerProvider.get(currentResource);
+		SadlModelManager visitor = null;
+		if (currentResource == null) {
+			Iterator<EObject> itr = xtextTemplateContext.getContentAssistContext().getCurrentModel().eContents().iterator();
+			while (itr.hasNext()) {
+				EObject obj = itr.next();
+				if (obj instanceof ModelName) {
+					String modelUri = ((ModelName)obj).getBaseUri();
+					visitor = sadlModelManagerProvider.get();
+					break;
+				}
+			}
+			IDocument doc = xtextTemplateContext.getDocument();
+			if (doc instanceof XtextDocument) {
+				URI resourceUri = ((XtextDocument)doc).getResourceURI();
+				URI prjUri = ResourceManager.getProjectUri(resourceUri);
+				visitor = sadlModelManagerProvider.get(prjUri);
+			}
+		}
+		else {
+			visitor = sadlModelManagerProvider.get(currentResource);
+		}
 		String conceptualType = (String) variable.getVariableType()
 				.getParams().iterator().next();
 		if (conceptualType.equals("VERSION")) {

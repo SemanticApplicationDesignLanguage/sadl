@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IPartListener2;
@@ -34,7 +35,11 @@ import org.eclipse.xtext.ui.editor.IXtextEditorCallback;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.validation.ValidatingEditorCallback;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
+import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlModelManagerProvider;
+import com.ge.research.sadl.utils.SadlUtils;
 import com.google.inject.Inject;
 
 //TODO: Revisit after Xtext Upgrade
@@ -42,6 +47,9 @@ import com.google.inject.Inject;
 //delegation to other callbacks might become obsolete
 public class SadlEditorCallback extends ValidatingEditorCallback
 		implements IPartListener2, IResourceChangeListener, IXtextEditorCallback {
+	
+	@Inject
+	private SadlModelManagerProvider visitor;
 
 	@Inject
 	private ToggleXtextNatureAction toggleNature;
@@ -59,6 +67,7 @@ public class SadlEditorCallback extends ValidatingEditorCallback
 	@Override
 	public void partClosed(IWorkbenchPartReference partRef) {
 		// visitor.editorClosed(partRef.getPartName());
+		int i = 0;
 	}
 
 	@Override
@@ -143,6 +152,19 @@ public class SadlEditorCallback extends ValidatingEditorCallback
 		super.beforeDispose(editor);
 		try {
 			deleteEditorOpenIndicatorFile(editor);
+			if (visitor != null) {
+				SadlModelManager smm = null;
+				URI uri = null;
+				IPath prjLoc = getEditorProject(editor);
+				uri = URI.createURI(new SadlUtils().fileNameToFileUrl(prjLoc.toOSString()));
+				URI prjUri = ResourceManager.getProjectUri(uri);
+				smm = visitor.get(prjUri);
+				if (smm != null) {
+					IConfigurationManagerForIDE configMgr = smm.getConfigurationMgr(ResourceManager.getOwlModelsFolder(uri));
+					configMgr.saveConfiguration();
+					configMgr.saveOntPolicyFile();
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -175,12 +197,7 @@ public class SadlEditorCallback extends ValidatingEditorCallback
 	}
 
 	private File getIndicatorFile(XtextEditor editor) throws Exception {
-		IPath prjLoc = null;
-		if (editor.getResource() != null) {
-			prjLoc = editor.getResource().getProject().getLocation();
-		} else {
-			System.out.println("getIndicatorFile called with an editor with a null resource. Please report.");
-		}
+		IPath prjLoc = getEditorProject(editor);
 		if (prjLoc != null) {
 			IPath tempDir = prjLoc.append(ResourceManager.TEMPDIR);
 			File tmpDir = ResourceManager.createFolderIfNotExists(tempDir.toOSString());
@@ -189,6 +206,16 @@ public class SadlEditorCallback extends ValidatingEditorCallback
 			return indFile;
 		}
 		return null;
+	}
+
+	private IPath getEditorProject(XtextEditor editor) {
+		IPath prjLoc = null;
+		if (editor.getResource() != null) {
+			prjLoc = editor.getResource().getProject().getLocation();
+		} else {
+			System.out.println("getIndicatorFile called with an editor with a null resource. Please report.");
+		}
+		return prjLoc;
 	}
 	
 }
