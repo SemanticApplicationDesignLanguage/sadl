@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -74,10 +75,19 @@ public class SadlToBeBuiltComputer extends JdtToBeBuiltComputer {
 		ToBeBuilt toBeBuilt = super.updateProject(project, monitor);
 
 		if (externals != null && externals.size() > 0) {
-			toBeBuilt.getToBeUpdated().addAll(externals);
+			
+			// check to see if the URI is already there before adding
+			Iterator<URI> extItr = externals.iterator();
+			while (extItr.hasNext()) {
+				URI extUri = extItr.next();
+				if (index.getResourceDescription(extUri) == null) {
+					toBeBuilt.getToBeUpdated().add(extUri);
+				}
+			}
 		}
 		
 		// TODO: Which URIs can be deleted from the index? project.getToBeDeleted() or project.getAndRemoveToBeDeleted()
+		// May already be done? If not, may need user action to clear.
 		
 		return toBeBuilt;
 	}

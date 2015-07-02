@@ -42,6 +42,7 @@ Export-Package: com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.
    com.ge.research.sadl.sadl,
    org.eclipse.xtext.builder,
    com.ge.research.sadl.model.gp",
+ com.ge.research.sadl.conversion,
  com.ge.research.sadl.formatting;uses:="org.eclipse.xtext.formatting.impl",
  com.ge.research.sadl.jena;
   uses:="org.eclipse.emf.ecore.resource,
