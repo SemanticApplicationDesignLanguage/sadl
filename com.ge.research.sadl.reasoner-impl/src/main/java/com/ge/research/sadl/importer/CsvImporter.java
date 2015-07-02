@@ -15,7 +15,6 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
  ***********************************************************************/
-
 package com.ge.research.sadl.importer;
 
 import java.io.BufferedReader;
@@ -1914,7 +1913,7 @@ public class CsvImporter {
 			throw new IOException("Import failed: " + e1.getMessage(), e1);
 		}
 		if (status) {
-			// after the model is built, save as OWL or SADL
+			// after the model is built, save as OWL
 			String fullyQualifiedOwlFilename = getSaveAsFileName();
 			String format = "RDF/XML-ABBREV";
 			File outFile = new File(fullyQualifiedOwlFilename);
@@ -1995,14 +1994,14 @@ public class CsvImporter {
 		try {
 			IConfigurationManager cmgr = getConfigMgr();
 			if (cmgr instanceof ConfigurationManagerForEditing) {
-				((ConfigurationManagerForEditing)cmgr).addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, true, CSV_IMPORTER);
+				((ConfigurationManagerForEditing)cmgr).addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, false, CSV_IMPORTER);
 				((ConfigurationManagerForEditing)cmgr).saveOntPolicyFile();
 			}
 			else {
 				String currentMapping = getConfigMgr().getAltUrlFromPublicUri(importModelNS);
 				if ( currentMapping == null || !currentMapping.equals(actualUrl)) {
 					ConfigurationManagerForEditing cfmfe = new ConfigurationManagerForEditing(modelFolderName, IConfigurationManager.JENA_TDB);
-					cfmfe.addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, true, CSV_IMPORTER);
+					cfmfe.addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, false, CSV_IMPORTER);
 					cfmfe.saveOntPolicyFile();
 				}
 			}
@@ -2984,6 +2983,8 @@ public class CsvImporter {
 						transValue = ((String[])results)[idx - 1];
 					}
 					else {
+						// check for skip validations
+						validate(varName, null, modelArrayPosition);
 						String values = "";
 						for (int i = 0; i < ((String[])results).length; i++) {
 							if (i > 0) {
@@ -2996,20 +2997,30 @@ public class CsvImporter {
 				}
 				else {
 					// so it must be a looping group index
-					if (activeGroup != null && activeGroup.getIndices() != null && activeGroup.getIndices().containsKey(indexStr)) {
-						GroupIndex gidx = activeGroup.getIndices().get(indexStr);
-						if (gidx.getMaxVal() < 0) {
-							gidx.setCurVal(0);
-							gidx.setMaxVal(((String[])results).length - 1);
+					if (activeGroup != null) {
+						if (activeGroup.getIndices() == null) {
+							// it must be an implied index--use it and then remove it
+							activeGroup.addIndex(indexStr);
 						}
-						else if (gidx.getMaxVal() != ((String[])results).length - 1) {
-							throw new AbortDataRowException("Transform of '" + tfrm.getOutputIdentifier() + "' to '" + varName + "' in row " + rowNum + " did not produce the expected number of values for group indexing (produced " + 
-									((String[])results).length + " but was expecting " + (gidx.getMaxVal() + 1) + ")");
+					
+						if (activeGroup.getIndices() != null && activeGroup.getIndices().containsKey(indexStr)) {
+							GroupIndex gidx = activeGroup.getIndices().get(indexStr);
+							if (gidx.getMaxVal() < 0) {
+								gidx.setCurVal(0);
+								gidx.setMaxVal(((String[])results).length - 1);
+							}
+							else if (gidx.getMaxVal() != ((String[])results).length - 1) {
+								throw new AbortDataRowException("Transform of '" + tfrm.getOutputIdentifier() + "' to '" + varName + "' in row " + rowNum + " did not produce the expected number of values for group indexing (produced " + 
+										((String[])results).length + " but was expecting " + (gidx.getMaxVal() + 1) + ")");
+							}
+							return ((String[])results)[gidx.getCurVal()];
 						}
-						return ((String[])results)[gidx.getCurVal()];
+						else {
+							throw new InvalidNameException("Encountered variable '" + varName + " in row " + rowNum + "' which appears to be indexed but there is not a matching index on the active group.");
+						}
 					}
 					else {
-						throw new InvalidNameException("Encountered variable '" + varName + " in row " + rowNum + "' which appears to be indexed but there is not a matching index on the active group.");
+						throw new InvalidNameException("Encountered variable '" + varName + " in row " + rowNum + "' which appears to be indexed but there is not an active group.");
 					}
 				}
 			}
@@ -3229,8 +3240,14 @@ public class CsvImporter {
 					templateLine = templateLine.substring(0,templateLine.length()-1);
 					usesCR = true;
 				}
-				if (templateLine.matches("\\s*uri\\s+\\S*\\s*")) {
+//				if (templateLine.matches("\\s*uri\\s+\\S*\\s*")) {
+				if (templateLine.matches("\\s*uri\\s+\\S*.*")) {
 					String uri = templateLine.replaceFirst("\\s*uri\\s+","").trim();
+					StringTokenizer st = new StringTokenizer(uri);
+					uri = st.nextToken();
+					if (st.hasMoreTokens()) {
+						String alias = st.nextToken();
+					}
 					if (uri.startsWith("\"") && uri.endsWith("\"")) {
 						uri = uri.substring(1, uri.length() - 1);
 					}
