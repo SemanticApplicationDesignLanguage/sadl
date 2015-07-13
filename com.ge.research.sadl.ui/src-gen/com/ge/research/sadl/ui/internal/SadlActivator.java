@@ -67,7 +67,6 @@ public class SadlActivator extends AbstractUIPlugin {
 			return Guice.createInjector(mergedModule);
 		} catch (Exception e) {
 			logger.error("Failed to create injector for " + language);
-			e.printStackTrace();
 			logger.error(e.getMessage(), e);
 			throw new RuntimeException("Failed to create injector for " + language, e);
 		}

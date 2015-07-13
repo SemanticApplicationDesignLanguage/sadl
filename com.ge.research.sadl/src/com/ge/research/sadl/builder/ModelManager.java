@@ -839,9 +839,12 @@ public class ModelManager {
 			try {
 				IConfigurationManagerForIDE confMgr = getConfigurationMgr();
 				if (!confMgr.containsMappingForURI(publicUri)) {
-					confMgr = ResourceManager.findConfigurationManagerInOtherProject(sadlModelManagerProvider, 
+					IConfigurationManagerForIDE otherConfMgr = ResourceManager.findConfigurationManagerInOtherProject(sadlModelManagerProvider, 
 							getModelActualUrl(), publicUri);
-					actualUrl = confMgr.getAltUrlFromPublicUri(publicUri);
+					if (otherConfMgr != null) {
+						confMgr = otherConfMgr;
+						actualUrl = confMgr.getAltUrlFromPublicUri(publicUri);
+					}
 				}
 				impMappings = confMgr.loadImportedModel(getJenaModel().getOntology(modelName), getJenaModel(),
 					publicUri, actualUrl);

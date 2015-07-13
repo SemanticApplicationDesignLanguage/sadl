@@ -228,17 +228,19 @@ public class SadlResourceNameTemplateVariableResolver extends
 
 		List<String> values = new ArrayList<String>();
 		try {
-			if (visitor.getModelBaseUri() == null) {
-				// set the model baseUri (from preferences) if it hasn't been set so that we can generate
-				//	a default model name if needed
-				visitor.setModelBaseUri(proposalProvider.generateBaseUri(visitor.getModelResource().getURI()));
-			}
 	        for (TreeIterator<EObject> iter = EcoreUtil.getAllContents(visitor.getModelResource(), true); visitor.getModelName() == null && iter.hasNext();) { 
 	            EObject eObject = iter.next();
 	            if (visitor.doSwitch(eObject) != null) {
 	                iter.prune();
 	            }
 	        }
+	        
+	        if (visitor.getModelBaseUri() == null) {
+				// set the model baseUri (from preferences) if it hasn't been set so that we can generate
+				//	a default model name if needed
+				visitor.setModelBaseUri(proposalProvider.generateBaseUri(visitor.getModelResource().getURI()));
+			}
+
 	        List<ConceptName> names = null;
 	        if (constraint != null) {
 	        	names = visitor.getNamedConceptsOfType(cType, Scope.INCLUDEIMPORTS, new ConceptName(constraint));

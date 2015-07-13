@@ -48,6 +48,10 @@ public class SadlSimpleNameProvider extends IQualifiedNameProvider.AbstractImpl 
 			// ResourceNames derived by SadlLinkingService for variables do not have a Model container, but are directly in the root
 			// of the resource
 			if (m == null) {
+				String nm = ((ResourceName)obj).getName();
+				if (nm.contains(":")) {
+					// remove context_ here? or should the name not ever have gotten created?
+				}
 				return null;
 			}
 			if (m.getModelName()!=null && m.getModelName().getAlias()!=null) {

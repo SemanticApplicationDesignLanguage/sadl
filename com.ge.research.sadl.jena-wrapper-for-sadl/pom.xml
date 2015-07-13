@@ -39,6 +39,11 @@
 		<artifactId>jena-larq</artifactId>
 		<version>1.0.0-incubating</version>
 	</dependency>
+	<dependency>
+		<groupId>org.apache.jena</groupId>
+		<artifactId>jena-core</artifactId>
+		<version>2.11.2</version>
+	</dependency>
 	  <dependency>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>reasoner-api</artifactId>

@@ -58,7 +58,9 @@ public class SadlModelManagerProvider implements Provider<SadlModelManager>, IRe
 	public SadlModelManager get(Resource resource) {
 		setUri(ResourceManager.getProjectUri(resource.getURI()));
 		SadlModelManager modelManager = get();
-		modelManager.setCurrentResource(resource);
+		if (modelManager.getCurrentResource() == null) {
+			modelManager.init(resource);
+		}
 		return modelManager;
 	}
 
