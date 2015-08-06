@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/10/28 14:42:30 $
+ * $Revision: 1.4 $ Last modified on   $Date: 2015/03/04 21:10:31 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model.gp;
@@ -98,13 +98,13 @@ public class Junction extends GraphPatternElement {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(getJunctionName());
 		sb.append("(");
 		if (getLhs() != null) {
 			sb.append(getLhs().toString());
-			sb.append(") ");
+//			sb.append(") ");
 		}
-		sb.append(getJunctionName());
-		sb.append(" (");
+		sb.append(", ");
 		if (getRhs() != null) {
 			sb.append(getRhs().toString());
 		}
@@ -120,6 +120,7 @@ public class Junction extends GraphPatternElement {
 	@Override
 	public String toFullyQualifiedString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(getJunctionName());
 		sb.append("(");
 		if (getLhs() != null) {
 			Object lhs = getLhs();
@@ -132,10 +133,9 @@ public class Junction extends GraphPatternElement {
 			else {
 				sb.append(lhs.toString());
 			}
-			sb.append(") ");
+//			sb.append(") ");
 		}
-		sb.append(getJunctionName());
-		sb.append(" (");
+		sb.append(",");
 		if (getRhs() != null) {
 			Object rhs = getRhs();
 			if (rhs instanceof GraphPatternElement) {
@@ -150,10 +150,10 @@ public class Junction extends GraphPatternElement {
 		}
 		
 		sb.append(")");
-		if (getNext() != null) {
-			sb.append(" . ");
-			sb.append(getNext().toFullyQualifiedString());
-		}
+//		if (getNext() != null) {
+//			sb.append(" . ");
+//			sb.append(getNext().toFullyQualifiedString());
+//		}
 		return sb.toString();
 	}
 }

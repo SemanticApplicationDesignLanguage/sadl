@@ -18,8 +18,37 @@
 
 package com.ge.research.sadl.model.gp;
 
-public abstract class Node {
-	
-	public abstract String toFullyQualifiedString();
+import java.util.ArrayList;
+import java.util.List;
 
+public abstract class Node {
+	// The value types of a variable node will be determined by its use as subject or object
+	//	of a predicate in RDF triples and come from the domain or range. As such, the value
+	//	types could be a union of classes (for an ObjectProperty)--hence the list.
+	// For a NamedNode, the value type is the class to which the node belongs if an instance.
+	private List<Node> nodeValueTypes;
+	public abstract String toFullyQualifiedString();
+	
+	public List<Node> getNodeValueTypes() {
+		return nodeValueTypes;
+	}
+	public void setNodeValueTypes(List<Node> nodeValueTypes) {
+		this.nodeValueTypes = nodeValueTypes;
+	}
+	
+	public void addNodeValueType(Node nodeValueType) {
+		if (nodeValueTypes == null) {
+			nodeValueTypes = new ArrayList<Node>();
+		}
+		if (!nodeValueTypes.contains(nodeValueType)) {
+			nodeValueTypes.add(nodeValueType);
+		}
+	}
+	
+	public boolean hasCompatibleValueType(Node type) {
+		if (nodeValueTypes != null && nodeValueTypes.contains(type)) {
+			return true;
+		}
+		return false;
+	}
 }

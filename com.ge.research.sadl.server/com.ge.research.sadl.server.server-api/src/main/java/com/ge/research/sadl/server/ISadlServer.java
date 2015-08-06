@@ -312,6 +312,13 @@ public interface ISadlServer {
     abstract public String getInstanceDataNamespace();
     
     /**
+     * This method retrieves the instance model associated with the default instance data namespace.
+     * (The model namespace is the model name with a "#" added at the end.)
+     * @return
+     */
+    abstract public String getInstanceModelName();
+    
+    /**
      * This method is called to add a triple to the instance data. The object value will be interpreted based on type 
      * and on the type of the property if it is an OntProperty.
      * 

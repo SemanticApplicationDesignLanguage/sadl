@@ -69,6 +69,7 @@
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-api</artifactId>
+ 		<version>${project.version}</version>
   		</dependency>
   </dependencies>
   

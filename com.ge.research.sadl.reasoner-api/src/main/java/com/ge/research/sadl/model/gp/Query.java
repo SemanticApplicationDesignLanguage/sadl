@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/05/05 13:27:27 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2015/07/25 16:25:16 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model.gp;
@@ -111,6 +111,10 @@ public class Query extends SadlCommand {
 		if (sparqlQueryString != null) {
 			return sparqlQueryString;
 		}
+		return toString(false);
+	}
+
+	private String toString(boolean fullyQualified) {
 		StringBuilder sb = new StringBuilder();
 		if (variables != null) {
 			sb.append(getKeyword());
@@ -128,7 +132,12 @@ public class Query extends SadlCommand {
 				if (i > 0) {
 					sb.append(" . ");
 				}
-				sb.append(patterns.get(i).toString());
+				if (fullyQualified) {
+					sb.append(patterns.get(i).toFullyQualifiedString());
+				}
+				else {
+					sb.append(patterns.get(i).toString());
+				}
 			}
 		}
 		if (getOrderBy() != null) {
@@ -151,6 +160,13 @@ public class Query extends SadlCommand {
 			}
 		}
 		return sb.toString();
+	}
+	
+	public String toFullyQualifiedString() {
+		if (sparqlQueryString != null) {
+			return sparqlQueryString;
+		}
+		return toString(true);
 	}
 
 	public void setSparqlQueryString(String sparqlQueryString) {

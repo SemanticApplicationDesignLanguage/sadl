@@ -19,13 +19,16 @@
 package com.ge.research.sadl.model.gp;
 
 public abstract class GraphPatternElement {
+	enum PatternFunction {BindsVariable, UsesBoundVariables}
+	private PatternFunction patternFunction;
+	private Object locationType;
 	private int lineNo;
 	private int length;
 	private int offset;
 	
 	private GraphPatternElement next = null;
 	
-	private boolean isEmbedded = false;
+	private boolean isEmbedded = false;	// this will be replaced with use of PatternFunction 
 
 	public GraphPatternElement() {
 	}
@@ -71,5 +74,21 @@ public abstract class GraphPatternElement {
 	}
 
 	public abstract String toFullyQualifiedString();
+
+	public PatternFunction getPatternFunction() {
+		return patternFunction;
+	}
+
+	public void setPatternFunction(PatternFunction patternFunction) {
+		this.patternFunction = patternFunction;
+	}
+
+	public Object getLocationType() {
+		return locationType;
+	}
+
+	public void setLocationType(Object locationType) {
+		this.locationType = locationType;
+	}
 	
 }

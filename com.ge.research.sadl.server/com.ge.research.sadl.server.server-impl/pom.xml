@@ -116,6 +116,11 @@
   		<artifactId>jena-wrapper-for-sadl</artifactId>
   		<version>${project.version}</version>
   	</dependency>
+  	<dependency>
+  		<groupId>com.ge.research.sadl</groupId>
+  		<artifactId>prolog-for-sadl</artifactId>
+  		<version>2.4.0</version>
+  	</dependency>
   </dependencies>
   
 	<!-- Define where to deploy this project's artifacts -->

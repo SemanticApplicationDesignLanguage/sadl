@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.3 $ Last modified on   $Date: 2014/09/05 15:45:53 $
+ * $Revision: 1.4 $ Last modified on   $Date: 2015/07/25 16:26:47 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model;
@@ -167,6 +167,7 @@ public class ConceptName extends ConceptIdentifier {
     				if (!uri.endsWith("#")) {
     					uri += "#";
     				}
+    				setNamespace(uri);
     				return uri + getName();
     			}
     		}

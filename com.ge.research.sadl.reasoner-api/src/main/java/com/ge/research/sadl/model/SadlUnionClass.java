@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:07 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2015/07/25 16:27:14 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model;
@@ -47,4 +47,15 @@ public class SadlUnionClass extends ConceptIdentifier {
         return classes;
     }
     
+    public String toString() {
+    	StringBuilder sb = new StringBuilder('{');
+    	for (int i = 0; i < classes.size(); i++) {
+    		if (i > 0) {
+    			sb.append(" or ");
+    		}
+    		sb.append(classes.get(i).toString());
+    	}
+    	sb.append("}");
+    	return sb.toString();
+    }
 }

@@ -80,7 +80,7 @@ public class BuiltinElement extends GraphPatternElement {
 			return UserAdded;
 		}
 		static {
-			Equal.setBooleanBuiltin(true).setTokens("=", "==", "is");
+			Equal.setBooleanBuiltin(true).setTokens("=", "==", "is", "to");
 			NotEqual.setBooleanBuiltin(true).setTokens("!=");
 			LT.setBooleanBuiltin(true).setTokens("<");
 			LTE.setBooleanBuiltin(true).setTokens("<=");

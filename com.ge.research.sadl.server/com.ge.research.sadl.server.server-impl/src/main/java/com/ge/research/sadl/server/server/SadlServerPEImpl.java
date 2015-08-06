@@ -51,8 +51,10 @@ import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServerPE;
 import com.ge.research.sadl.server.SessionNotFoundException;
@@ -76,6 +78,7 @@ import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.ModelGetter;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -131,6 +134,23 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			instanceDataModels.clear();
 		}
 		return super.reset();
+	}
+	
+	@Override
+    public String selectServiceModel(String knowledgeBaseIdentifier, String modelName) throws ConfigurationException, ReasonerNotFoundException {
+		return selectServiceModel(knowledgeBaseIdentifier, modelName, null);
+    }
+
+	protected void setConfigurationManagerModelGetter()
+			throws ConfigurationException, MalformedURLException {
+		if (getConfigurationMgr().getModelGetter() == null) {
+        	try {
+				getConfigurationMgr().setModelGetter(new SadlJenaModelGetterPutter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
+			} catch (IOException e) {
+				logger.error("Exception setting ModelGetter: " + e.getMessage());
+				e.printStackTrace();
+			}
+        }
 	}
 	
 	@Override
@@ -197,6 +217,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				try {
 					fullyQualifiedOwlFilename = getConfigurationMgr().getAltUrlFromPublicUri(modelName);
 				} catch (ConfigurationException e) {
+			    	return addError(new ModelError("Failed to save model to file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
+				} catch (MalformedURLException e) {
 			    	return addError(new ModelError("Failed to save model to file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
 				}
 				// add a comment to the ontology
@@ -445,6 +467,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		if (altUrl != null) {
 			OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 			altUrl = ConfigurationManager.fileNameToFileUrl(altUrl);
+			ontModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
 			ontModel.read(altUrl);
 			ontModel.getDocumentManager().setProcessImports(true);
 			ontModel.loadImports();
@@ -464,13 +487,24 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		if (instanceDataModels != null && instanceDataModels.containsKey(thisModelName)) {
 			return instanceDataModels.get(thisModelName);
 		}
+		if (editedTboxModels != null && editedTboxModels.containsKey(thisModelName)) {
+			return editedTboxModels.get(thisModelName);
+		}
 		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		model.getDocumentManager().setFileManager(getConfigurationMgr().getJenaDocumentMgr().getFileManager());
 		Resource importOnt = model.getResource(getModelName());
 		Ontology ont = model.createOntology(thisModelName);
 		ont.addImport(importOnt);
 		ont.addComment("This ontology model was created by SadlServerPE.", "en");
 		model.getDocumentManager().setProcessImports(true);
 		model.loadImports();
+//		if (logger.isDebugEnabled()) {
+			Iterator<String> importItr = model.listImportedOntologyURIs().iterator();
+			while (importItr.hasNext()) {
+//				logger.debug("Model '" + thisModelName + "' imports '" + importItr.next() + "'");
+				System.out.println("Model '" + thisModelName + "' imports '" + importItr.next() + "'");
+		}
+//		}
 		model.getDocumentManager().setProcessImports(false);
 		if (instanceDataModels == null) {
 			instanceDataModels = new HashMap<String, OntModel>(); 
@@ -612,18 +646,24 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	
 	@Override
 	public boolean addInstance(String modelName, String instName, String className) throws ConfigurationException, InvalidNameException {
-		String error = UtilsForJena.validateRdfUri(instName);
-		if (error != null) {
-			throw new InvalidNameException("Invalid URI (" + instName + ") for new instance: " + error + ".");
-		}
 		OntModel ontModel = null;
 		try {
+			if (instName.indexOf('#') < 0) {
+				instName = getUri(modelName, instName);
+			}
+			String error = UtilsForJena.validateRdfUri(instName);
+			if (error != null) {
+				throw new InvalidNameException("Invalid URI (" + instName + ") for new instance: " + error + ".");
+			}
 			ontModel = getOntModelForEditing(modelName);
 		} catch (ConfigurationException e) {
 	    	return addError(new ModelError("Failed to find model '" + modelName + "' for editing: " + e.getLocalizedMessage(), ErrorType.ERROR));
 		} catch (IOException e) {
 	    	return addError(new ModelError("Failed to find model '" + modelName + "' for editing: " + e.getLocalizedMessage(), ErrorType.ERROR));
 		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PrefixNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -647,19 +687,14 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
 			}
 			try {
-				ontModel.createIndividual(getUri(modelName, instName), cls);
+				ontModel.createIndividual(instName, cls);
 				super.createInstance(instName, className);
-			} catch (PrefixNotFoundException e) {
-		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (ConfigurationException e) {
 		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (IOException e) {
 		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (InvalidNameException e) {
 		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 		return noErrors();
@@ -1430,27 +1465,16 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		this.configurationMgr = configurationMgr;
 	}
 
-	protected ConfigurationManagerForEditing getConfigurationMgr() throws ConfigurationException {
+	protected ConfigurationManagerForEditing getConfigurationMgr() throws ConfigurationException, MalformedURLException {
 		if (configurationMgr == null) {
-			if (super.configurationMgr != null) {
-				String modelFolder;
-				try {
-					modelFolder = super.configurationMgr.getModelFolder();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					throw new ConfigurationException("Cannot get model folder.");
-				}
-				File mff = new File(modelFolder);
-				if (mff.exists()) {
-					configurationMgr = new ConfigurationManagerForEditing(modelFolder, modelFolder);
-				}
-				else {
-					throw new ConfigurationException("Cannot create configuration manager. Model folder '" + modelFolder + "' does not exist.");
-				}
+			String modelFolder = getModelFolder();
+			File mff = new File(modelFolder);
+			if (mff.exists()) {
+				String repoType = getRepoType(modelFolder + "/TDB");
+				configurationMgr = new ConfigurationManagerForEditing(modelFolder, repoType);
 			}
 			else {
-				throw new ConfigurationException("Cannot create configuration manager due to absence of super's configuration manager.");
+				throw new ConfigurationException("Cannot create configuration manager. Model folder '" + modelFolder + "' does not exist.");
 			}
 		}
 		return configurationMgr;
@@ -1482,6 +1506,17 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	public String createInstance(String name, String className) 
 				throws ConfigurationException, InvalidNameException, IOException {
 		String instanceModelName = getInstanceDataName();
+		if (instanceModelName == null) {
+			if (name.indexOf("#") > 0) {
+				// we have a namespace explicit in the new instance name
+				String nameNs = name.substring(0, name.indexOf("#") + 1);
+				setInstanceDataNamespace(nameNs);
+				instanceModelName = nameNs.substring(0, nameNs.length() - 1);
+			}
+			else {
+				throw new ConfigurationException("Instance data namespace must be set before SadlServerPE can support this operation.");
+			}
+		}
 		return createInstance(instanceModelName, name, className);
 	}
 	
@@ -1490,7 +1525,9 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			throws ConfigurationException, InvalidNameException, IOException {
 		String instname = null;
 		try {
-			name = getUri(modelName, name);
+			if (!(name.indexOf('#') > 0)) {
+				name = getUri(modelName, name);
+			}
 			instname = super.createInstance(name, className);
 		} catch (InvalidNameException e) {
 			// this is ok--it just means that the name doesn't exist yet--
@@ -1552,7 +1589,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return defaultInstanceDataNS.substring(0, defaultInstanceDataNS.length() - 1);
 			}
 		}
-		throw new ConfigurationException("Instance data namespace must be set before SadlServerPE can support this operation.");
+		return null;
 	}
 
 	@Override

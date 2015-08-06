@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.server.ISadlServerMD;
 import com.ge.research.sadl.server.SessionNotFoundException;
+import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
@@ -122,7 +123,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	@Override
 	public String[] getAllSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?et where {?et <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + root + "> }";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		if (results != null) {
 			int size = results.length;
@@ -147,7 +150,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 		 */
 	public String[] getLeafClassesOfTaxonomy(String root) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?et where {?et <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + root + "> . OPTIONAL {?et2 <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?et . FILTER ((?et2 != <http://www.w3.org/2002/07/owl#Nothing> && ?et2 != ?et)) } FILTER (!bound(?et2)) }";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		if (results != null) {
 			int size = results.length;
@@ -172,7 +177,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public String[] getInstancesOfClass(String cls) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?i where { ?i <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + cls + "> }";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		if (results != null) {
 			int size = results.length;
@@ -197,7 +204,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public boolean isObjectProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?t where {<" + property + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?t . FILTER(?t = <http://www.w3.org/2002/07/owl#ObjectProperty>)}";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		// these results will be 
 		if (results != null) {
@@ -211,7 +220,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public boolean isDatatypeProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?t where {<" + property + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?t . FILTER(?t = <http://www.w3.org/2002/07/owl#DatatypeProperty>)}";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		// these results will be 
 		if (results != null) {
@@ -225,7 +236,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public String[] getPropertyDomain(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?d where { <" + property + "> <http://www.w3.org/2000/01/rdf-schema#domain> ?d }";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		// these results will be 
 		if (results != null) {
@@ -251,7 +264,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public String[] getPropertyRange(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?r where { <" + property + "> <http://www.w3.org/2000/01/rdf-schema#range> ?r }";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		// these results will be 
 		if (results != null) {
@@ -277,42 +292,36 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public String[] getRequiredRangeClassesOfPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		int numResults = 0;
-		String query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#someValuesFrom> ?v . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + ">}";
-//		query = prepareQuery(query);
+		// qualified cardinality restriction
+		String query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ";
+		query += "?r <http://www.w3.org/2002/07/owl#onProperty> <http://www.mobius.illinois.edu/advise/ont/core/System#function>  . ";
+		query += "?r <owl:minQualifiedCardinality> ?mc . ?r <http://www.w3.org/2002/07/owl#onClass> ?v . filter(?mc > 0)}";
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		if (results != null) {
 			numResults =+ results.length - 1;
 		}
-		query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#cardinality> ?v . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + ">}";
-//		query = prepareQuery(query);
+		query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ";
+		query += "?r <http://www.w3.org/2002/07/owl#onProperty> <http://www.mobius.illinois.edu/advise/ont/core/System#function>  . ";
+		query += "?r <owl:qualifiedCardinality> ?qc . ?r <http://www.w3.org/2002/07/owl#onClass> ?v . filter(?qc > 0)}";
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results2 = getDataAsStringArray(query);
+		if (results2 != null) {
+			numResults += results2.length - 1;
+		}
 
-		query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#minCardinality> ?v . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + ">}";
-//		query = prepareQuery(query);
+		query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ";
+		query += "?r <http://www.w3.org/2002/07/owl#someValuesFrom> ?v}";
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results3 = getDataAsStringArray(query);
-		
-		String[] rngclses = null;
-		
-		if (results2 != null || results3 != null) {
-			boolean apply = false;
-			if (results2 != null) {
-				int card = Integer.parseInt(results2[1][0]);
-				if (card > 0) {
-					apply = true;
-				}
-			}
-			if (results3 != null) {
-				int minCard = Integer.parseInt(results3[1][0]);
-				if (minCard > 0) {
-					apply = true;
-				}
-			}
-			if (apply) {
-				rngclses = this.getPropertyRange(property);
-				if (rngclses != null) {
-					numResults =+ rngclses.length;
-				}
-			}
+		if (results3 != null) {
+			numResults += results3.length - 1;
 		}
 		
 		String[] retVal = null;
@@ -332,9 +341,30 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 					}
 				}
 			}
-			if (rngclses != null) {
-				for (int i = 0; i < rngclses.length; i++) {
-					retVal[retValIdx++] = rngclses[i];
+			if (results2 != null) {
+				int size = results2.length;
+				for (int i = 0; i < size; i++) {
+					String[] ri = results2[i];
+					for (int j = 0; j < ri.length; j++) {
+						String rj = ri[j];
+		//				if (logger.isDebugEnabled()) logger.debug("i="+ i + ", j=" + j + ", value=" + rj);
+						if (i > 0) {
+							retVal[retValIdx++] = rj;
+						}
+					}
+				}
+			}
+			if (results3 != null) {
+				int size = results3.length;
+				for (int i = 0; i < size; i++) {
+					String[] ri = results3[i];
+					for (int j = 0; j < ri.length; j++) {
+						String rj = ri[j];
+		//				if (logger.isDebugEnabled()) logger.debug("i="+ i + ", j=" + j + ", value=" + rj);
+						if (i > 0) {
+							retVal[retValIdx++] = rj;
+						}
+					}
 				}
 			}
 		}
@@ -346,7 +376,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public String[] getAllowedRangeClassesOfPropertyOfClass(String cls, String property) throws NameNotFoundException, InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#allValuesFrom> ?v . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + ">}";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		// these results will be 
 		if (results != null) {
@@ -367,7 +399,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 		else {
 			// just return the range?
 			query = "select ?rng where {<" + property + "> <http://www.w3.org/2000/01/rdf-schema#range> ?rng}";
-//			query = prepareQuery(query);
+			if (SadlUtils.queryContainsQName(query)) {
+				query = prepareQuery(query);
+			}
 			results = getDataAsStringArray(query);
 			// these results will be 
 			if (results != null) {
@@ -393,8 +427,11 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 * @see com.ge.research.sadl.service.extended.ISadlExtendedService2#getAllowedValuesOfObjectPropertyOfClass(java.lang.String, java.lang.String)
 	 */
 	public String[] getAllowedValuesOfObjectPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
-		String query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + "> . ?r <http://www.w3.org/2002/07/owl#allValuesFrom> ?o . ?o <http://www.w3.org/2002/07/owl#oneOf> ?l . ?l <http://jena.hpl.hp.com/ARQ/list#member> ?v}";
-//		query = prepareQuery(query);
+//		String query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + "> . ?r <http://www.w3.org/2002/07/owl#allValuesFrom> ?o . ?o <http://www.w3.org/2002/07/owl#oneOf> ?l . ?l <http://jena.hpl.hp.com/ARQ/list#member> ?v}";
+		String query = "select ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + "> . ?r <http://www.w3.org/2002/07/owl#allValuesFrom> ?v}";
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		String[][] results = getDataAsStringArray(query);
 		if (results != null) { 
 			int size = results.length;
@@ -413,7 +450,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 		}
 		else {
 			query = "select ?v where { <" + property + "> <http://www.w3.org/2000/01/rdf-schema#range> ?c . ?v <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?c}";
-//			query = prepareQuery(query);
+			if (SadlUtils.queryContainsQName(query)) {
+				query = prepareQuery(query);
+			}
 			results = getDataAsStringArray(query);
 			if (results != null) { 
 				int size = results.length;
@@ -439,7 +478,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 */
 	public Object[] getAllowedValuesOfDataPropertyOfClass(String cls, String property) throws QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select distinct ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + "> . ?r <http://www.w3.org/2002/07/owl#hasValue> ?v}";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		ResultSet results = query(query);
 		if (results != null) {
 			int size = results.getRowCount();
@@ -452,7 +493,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 		}
 		else {		
 			query = "select distinct ?v where { <" + cls + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r . ?r <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> . ?r <http://www.w3.org/2002/07/owl#onProperty> <" + property + "> . ?r <http://www.w3.org/2002/07/owl#allValuesFrom> ?dr . ?dr <http://www.w3.org/2002/07/owl#oneOf> ?l . ?l <http://jena.hpl.hp.com/ARQ/list#member> ?v}";
-//			query = prepareQuery(query);
+			if (SadlUtils.queryContainsQName(query)) {
+				query = prepareQuery(query);
+			}
 			results = query(query);
 			if (results != null) {
 				if (results != null) {
@@ -472,7 +515,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	@Override
 	public String[] getPropertiesWithGivenClassInDomain(String cls) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException {
 		String query = "select distinct ?p where { ?p <http://www.w3.org/2000/01/rdf-schema#domain> <" + cls + ">}";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		ResultSet results = query(query);
 		if (results != null) {
 			int size = results.getRowCount();
@@ -489,7 +534,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	@Override
 	public Object getDefaultValueOfPropertyOnClass(String cls, String prop) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?dv where {<" + cls + "> <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?sa . ?sa <http://research.ge.com/Acuity/defaults.owl#appliesToProperty> <" + prop + "> . ?sa <http://research.ge.com/Acuity/defaults.owl#hasDataDefault> ?dv }";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		ResultSet results = query(query);
 		if (results != null) {
 			int colCnt = results.getColumnCount();
@@ -501,7 +548,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 		}
 		// maybe it wasn't a Datatype property...
 		query = "select ?dv where {<" + cls + "> <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?sa . ?sa <http://research.ge.com/Acuity/defaults.owl#appliesToProperty> <" + prop + "> . ?sa <http://research.ge.com/Acuity/defaults.owl#hasObjectDefault> ?dv }";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		results = query(query);
 		if (results != null) {
 			int colCnt = results.getColumnCount();
@@ -517,7 +566,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	@Override
 	public String[] getConceptRdfsLabels(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException {
 		String query = "select distinct ?l where { <" + conceptUri + "> <http://www.w3.org/2000/01/rdf-schema#label> ?l}";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		ResultSet results = query(query);
 		if (results != null) {
 			int size = results.getRowCount();
@@ -534,7 +585,9 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	@Override
 	public String[] getConceptRdfsComments(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException {
 		String query = "select distinct ?c where { <" + conceptUri + "> <http://www.w3.org/2000/01/rdf-schema#comment> ?c}";
-//		query = prepareQuery(query);
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
 		ResultSet results = query(query);
 		if (results != null) {
 			int size = results.getRowCount();

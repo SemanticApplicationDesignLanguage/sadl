@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.9 $ Last modified on   $Date: 2014/09/30 21:06:10 $
+ * $Revision: 1.10 $ Last modified on   $Date: 2015/07/25 16:24:16 $
  ***********************************************************************/
 
 package com.ge.research.sadl.reasoner;
@@ -355,4 +355,13 @@ public interface IReasoner {
 	 * @throws InvalidNameException 
 	 */
 	public boolean clearCache() throws InvalidNameException;
+	
+	/** 
+	 * Method to get any errors that occurred since the last time the method 
+	 * was called. The call removes all errors occurring before the call not
+	 * previously removed.
+	 * @return
+	 */
+	public List<ModelError> getErrors();
+
 }

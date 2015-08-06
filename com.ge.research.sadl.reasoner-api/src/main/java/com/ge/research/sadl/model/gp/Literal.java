@@ -21,6 +21,8 @@ package com.ge.research.sadl.model.gp;
 
 public class Literal extends Node {
 	private Object value = null;
+	
+	private String originalText = null;
 
 	public void setValue(Object value) {
 		this.value = value;
@@ -66,5 +68,13 @@ public class Literal extends Node {
 	@Override
 	public String toFullyQualifiedString() {
 		return toString();
+	}
+
+	public String getOriginalText() {
+		return originalText;
+	}
+
+	public void setOriginalText(String originalText) {
+		this.originalText = originalText;
 	}
 }

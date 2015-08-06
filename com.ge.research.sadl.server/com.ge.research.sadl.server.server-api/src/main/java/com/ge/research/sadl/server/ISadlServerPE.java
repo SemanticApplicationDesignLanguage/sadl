@@ -298,7 +298,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * This will allow the model to be queried, imported, and used in the kbase
 	 * but will not copy the model from its given location. 
 	 * Note that all imported models not in the kbase must also be explicitly 
-	 * added for they cannot be found.
+	 * added or they cannot be found.
 	 * 
 	 * @param modelPublicUri
 	 * @param modelAltUrl

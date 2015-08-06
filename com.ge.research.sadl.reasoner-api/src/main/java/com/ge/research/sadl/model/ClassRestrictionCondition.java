@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.2 $ Last modified on   $Date: 2014/05/05 13:27:25 $
+ * $Revision: 1.3 $ Last modified on   $Date: 2015/07/25 16:27:14 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model;
@@ -37,7 +37,7 @@ public class ClassRestrictionCondition {
 	private ConceptIdentifier restrictedToConcept;
 	
 	private Object restrictedToObject;
-	private int restrictedToCardinality;
+	private int restrictedToCardinality = -1;
 	
 	public ClassRestrictionCondition(RestrictionType rType, Object rObject) {
 		restrictionType = rType;
@@ -75,5 +75,23 @@ public class ClassRestrictionCondition {
 	
 	public int getRestrictedToCardinality() {
 		return restrictedToCardinality;
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getRestrictionType().toString());
+		if (restrictedToCardinality >= 0) {
+			sb.append(" ");
+			sb.append(restrictedToCardinality);
+		}
+		if (restrictedToObject != null) {
+			sb.append(" ");
+			sb.append(restrictedToObject.toString());
+		}
+		else if (restrictedToConcept != null) {
+			sb.append(" ");
+			sb.append(restrictedToConcept.toString());
+		}
+		return sb.toString();
 	}
 }

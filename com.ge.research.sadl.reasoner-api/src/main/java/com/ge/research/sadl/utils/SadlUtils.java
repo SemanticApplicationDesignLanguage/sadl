@@ -451,4 +451,39 @@ public class SadlUtils {
 		return stat;
 	}
 
+	/**
+	 * Method to determine if a query contains any QNames that need expansion.
+	 * @param q
+	 * @return
+	 */
+	public static boolean queryContainsQName(String q) {
+		int start = 0;
+		int openBracket = q.indexOf('<');
+		while (openBracket > start) {
+			int closeBracket = q.indexOf('>', openBracket);
+			if (closeBracket <= openBracket) {
+				// this could be a comparison in a FILTER...
+				start = openBracket + 1;
+				continue;
+			}
+			String url = q.substring(openBracket, closeBracket);
+			start = closeBracket + 1;
+			openBracket = q.indexOf('<', start);
+			if (url.indexOf('#') > 0) {
+				// a full URI
+				continue;
+			}
+			else if (url.indexOf(':') > 0) {
+				// a QName
+				return true;
+			}
+			else {
+				// a local fragment only
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 }

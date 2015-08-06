@@ -18,11 +18,12 @@
 
 /***********************************************************************
  * $Author: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2014/01/31 15:41:06 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2015/07/25 16:19:21 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.reasoner.rulesys.BindingEnvironment;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
@@ -67,7 +68,7 @@ public class Min extends BaseBuiltin {
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
-        Number minVal = null;
+        Object minVal = null;
         Node min = null;
         boolean allLongs = true;
         if (length >= 3) {
@@ -83,17 +84,31 @@ public class Min extends BaseBuiltin {
 	        			else {
 			                if (v1 instanceof Float || v1 instanceof Double) {
 			                	double pwd = nv1.doubleValue();
-			                	if (pwd < minVal.doubleValue()) {
+			                	if (pwd < ((Number) minVal).doubleValue()) {
 			                		minVal = nv1;
 			                	}
 			                	allLongs = false;
 			                }
 			                else if (v1 instanceof Integer || v1 instanceof Long) {
 			                	long pwd = nv1.longValue();
-			                	if (pwd < minVal.doubleValue()) {
+			                	if (pwd < ((Number) minVal).doubleValue()) {
 			                		minVal = nv1;
 			                	}
 			                }
+	        			}
+	        		}
+	        		else if (v1 instanceof XSDDateTime) {
+	        			if (minVal == null) {
+	        				minVal = v1;
+	        			}
+	        			else if (minVal instanceof XSDDateTime) {
+		            		if (((XSDDateTime) minVal).compareTo((XSDDateTime)v1) > 0) {
+		            			minVal = v1;
+		            		}
+	        			}
+	        			else {
+	        				throw new BuiltinException(this, context, "Can't compare datetime (" + v1.toString() + 
+	        						") with non-datetime value (" + minVal.toString() + ")");
 	        			}
 	        		}
 	        		else {
@@ -114,23 +129,27 @@ public class Min extends BaseBuiltin {
         	return false;
         }
     	if (minVal instanceof Float) {
-    		min = Utils.makeFloatNode(minVal.floatValue());
+    		min = Utils.makeFloatNode(((Number) minVal).floatValue());
     	}
     	else if ( minVal instanceof Double) {
-    		min = Util.makeDoubleNode(minVal.doubleValue());
+    		min = Util.makeDoubleNode(((Number) minVal).doubleValue());
+    	}
+    	else if (minVal instanceof XSDDateTime) {
+    		min = Utils.makeXSDDateTimeNode((XSDDateTime)minVal);
     	}
     	else if ( minVal instanceof Integer) {
-    		min = Util.makeIntNode(minVal.intValue());
+    		min = Util.makeIntNode(((Number) minVal).intValue());
     	}
     	else {
-    		min = Util.makeLongNode(minVal.longValue());
+    		min = Util.makeLongNode(((Number) minVal).longValue());
     	}
         return env.bind(args[length - 1], min);
     }
 
-    private Number minOfList(Node lst, RuleContext context) {
+    private Object minOfList(Node lst, RuleContext context) {
     	java.util.List<Node> l = Util.convertList(lst, context);
     	Number min = null;
+    	XSDDateTime minDate = null;
     	for (int i = 0; l != null && i < l.size(); i++) {
     		Node elt = (Node) l.get(i);
             if (elt != null && elt.isLiteral()) {
@@ -140,6 +159,11 @@ public class Min extends BaseBuiltin {
             			min = (Number) v1;
             		}
              	}
+            	else if (v1 instanceof XSDDateTime) {
+            		if (minDate == null || minDate.compareTo((XSDDateTime)v1) > 0) {
+            			minDate = (XSDDateTime) v1;
+            		}
+            	}
             	else {
             		throw new BuiltinException(this, context, "Element of list input to min not a number: " + v1.toString());
             	}
@@ -147,6 +171,9 @@ public class Min extends BaseBuiltin {
             else {
            		throw new BuiltinException(this, context, "Element of list input to min not a Literal: " + elt.toString());
             }
+    	}
+    	if (minDate != null) {
+    		return minDate;
     	}
         return min;
     }

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright � 2007-2015 - General Electric Company, All Rights Reserved
+ * Copyright � 2007-2011 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -1034,7 +1034,12 @@ public class CsvImporter {
 						String alturl = cmgr.getAltUrlFromPublicUri(importModelNS);
 						if (alturl != null) {
 							getModel(arraypos).getDocumentManager().setProcessImports(true);
-							getModel(arraypos).read(alturl);
+							try {
+								getModel(arraypos).read(alturl);
+							}
+							catch (Throwable t) {
+								// this is ok if there is no previous import
+							}
 						}
 					}
 				}

@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2014/05/05 13:27:25 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2015/07/25 16:27:14 $
  ***********************************************************************/
 package com.ge.research.sadl.model;
 
@@ -51,5 +51,13 @@ public class SadlResourceByRestriction extends ConceptIdentifier {
 	
 	public void setRestrictCondition(ClassRestrictionCondition restrictCondition) {
 		this.restrictCondition = restrictCondition;
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(onProperty.toString());
+		sb.append(" ");
+		sb.append(restrictCondition.toString());
+		return sb.toString();
 	}
 }

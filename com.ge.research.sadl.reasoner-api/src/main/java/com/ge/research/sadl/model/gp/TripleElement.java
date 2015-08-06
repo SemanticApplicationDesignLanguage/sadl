@@ -78,7 +78,8 @@ public class TripleElement extends GraphPatternElement {
 	}
 
 	public String toString() {
-		StringBuilder sb = new StringBuilder(subject != null ? subject.toString() : "null");
+		StringBuilder sb = new StringBuilder("rdf(");
+		sb.append(subject != null ? subject.toString() : "null");
 		sb.append(", ");
 		sb.append(predicate != null ? predicate.toString() : "null");
 		sb.append(", ");
@@ -92,11 +93,13 @@ public class TripleElement extends GraphPatternElement {
 			sb.insert(0, getModifierType().toString());
 			sb.append(")");
 		}
+		sb.append(")");
 		return sb.toString();
 	}
 	
 	public String toFullyQualifiedString() {
-		StringBuilder sb = new StringBuilder(subject != null ? subject.toFullyQualifiedString() : "null");
+		StringBuilder sb = new StringBuilder("rdf(");
+		sb.append(subject != null ? subject.toFullyQualifiedString() : "null");
 		sb.append(", ");
 		sb.append(predicate != null ? predicate.toFullyQualifiedString() : "null");
 		sb.append(", ");
@@ -110,6 +113,7 @@ public class TripleElement extends GraphPatternElement {
 			sb.insert(0, getModifierType().toString());
 			sb.append(")");
 		}
+		sb.append(")");
 		return sb.toString();
 	}
 	

@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.7 $ Last modified on   $Date: 2014/11/03 19:33:17 $
+ * $Revision: 1.9 $ Last modified on   $Date: 2015/07/25 16:20:29 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.translator;
@@ -47,7 +47,9 @@ import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.model.gp.NegatedExistentialQuantifier;
 import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Query.Order;
 import com.ge.research.sadl.model.gp.Query.OrderingPair;
@@ -112,11 +114,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 														// for this model so that the imported rule files will be loaded
 	
 
-	public void setConfigurationManager(IConfigurationManagerForEditing configMgr) {
-		configurationMgr = configMgr;
-	}
-
-
 	public List<ModelError> translateAndSaveModel(OntModel model, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException {
 		
@@ -179,6 +176,30 @@ public class JenaTranslatorPlugin implements ITranslator {
 		setRuleInTranslation(rule);
 		boolean translateToBackwardRule = false;
 		StringBuilder sb = new StringBuilder();
+		
+		// put annotations (if any) in the rule
+		if (rule.getAnnotations() != null) {
+			Iterator<String[]> annItr = rule.getAnnotations().iterator();
+			sb.append("#/**\n");
+			while (annItr.hasNext()) {
+				String[] annNVP = annItr.next();
+				sb.append("# * @");
+				sb.append(annNVP[0]);
+				sb.append("\t");
+				String val = annNVP[1];
+				String linesep =System.lineSeparator();
+				String[] valLines = val.split(linesep);
+				for (int i = 0; i < valLines.length; i++) {
+					if (i > 0) {
+						sb.append("# * ");
+					}
+					sb.append(valLines[i]);
+					sb.append("\n");
+				}
+			}
+			sb.append("# */\n");
+		}
+		
 		if (translateToBackwardRule) {
 			sb.append("[");
 			sb.append(rule.getRuleName());
@@ -739,8 +760,20 @@ public class JenaTranslatorPlugin implements ITranslator {
 			sb.append(builtinTypeToString((BuiltinElement)gpe));
 			sb.append("(");
 			for (int i = 0; args != null && i < args.size(); i++) {
+				Node arg = args.get(i);
 				if (i > 0) sb.append(", ");
-				sb.append(nodeToString(args.get(i), TranslationTarget.RULE_BUILTIN));
+				if (arg instanceof ProxyNode) {
+					Object pfor = ((ProxyNode)arg).getProxyFor();
+					if (pfor instanceof GraphPatternElement) {
+						sb.append(graphPatternElementToJenaRuleString((GraphPatternElement) pfor, rulePart));
+					}
+					else {
+						throw new TranslationException("Non-graph element proxy-for in ProxyNode '" + arg.toFullyQualifiedString() + "'");
+					}
+				}
+				else {
+					sb.append(nodeToString(arg, TranslationTarget.RULE_BUILTIN));
+				}
 			}
 			sb.append(")");
 		}
@@ -775,6 +808,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 				System.err.println("Encountered unhandled OR in rule '" + ruleInTranslation.getRuleName() + "'");
 //				throw new TranslationException("Jena rules do not currently support disjunction (OR).");
 			}
+		}
+		else if (gpe instanceof NegatedExistentialQuantifier) {
+			throw new TranslationException("Existential quantification with negation is not supported by the Jena reasoner.");
 		}
 		else {
 			throw new TranslationException("GraphPatternElement '" + gpe.toString() + "' cannot be translated to Jena rule.");
@@ -1506,9 +1542,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 
 	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException {
-		if ((configMgr instanceof IConfigurationManagerForEditing)) {
-			((IConfigurationManagerForEditing) configMgr).setTranslatorClassName(this.getClass().getCanonicalName());
-		}
+//		if ((configMgr instanceof IConfigurationManagerForEditing)) {
+//			((IConfigurationManagerForEditing) configMgr).setTranslatorClassName(this.getClass().getCanonicalName());
+//		}
 		configurationMgr = configMgr;
 	}
 

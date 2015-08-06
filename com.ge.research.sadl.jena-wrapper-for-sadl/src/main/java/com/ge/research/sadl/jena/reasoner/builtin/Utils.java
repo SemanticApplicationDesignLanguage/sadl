@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Author: crapo $ 
- * $Revision: 1.3 $ Last modified on   $Date: 2014/11/03 19:32:40 $
+ * $Revision: 1.4 $ Last modified on   $Date: 2015/07/25 16:19:21 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.reasoner.builtin;
@@ -31,6 +31,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_URI;
@@ -500,5 +501,9 @@ public class Utils {
     
     public static Node makeBooleanNode(boolean value) {
     	return NodeFactory.createLiteral(LiteralLabelFactory.create(new Boolean(value)));
+    }
+    
+    public static Node makeXSDDateTimeNode(XSDDateTime value) {
+    	return NodeFactory.createLiteral(LiteralLabelFactory.create(value));
     }
 }

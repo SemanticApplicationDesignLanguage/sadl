@@ -45,6 +45,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -112,6 +113,7 @@ public class SadlServerImpl implements ISadlServer {
 	protected String kbaseRoot = null;
 	protected String defaultInstanceDataNS = null;
 	protected Map<String, String[]> serviceNameMap = null;
+	private String modelFolder = null;
 
     public SadlServerImpl() {
     }
@@ -227,12 +229,16 @@ public class SadlServerImpl implements ISadlServer {
         }
     	String kbid = getKbIdentifierByServiceName(serviceName);
     	String modnm = getModelNameByServiceName(serviceName);
+    	if (kbid == null || modnm == null) {
+    		throw new ConfigurationException("Named service '" + serviceName + "' is not defined or is invalid; kbase and or model name not found. (Call getServiceNameMap to see available named services.)");
+    	}
     	return selectServiceModel(kbid, modnm);
     }
     
 	public String selectServiceModel(String serviceName,
 			List<ConfigurationItem> preferences) throws ConfigurationException,
 			ReasonerNotFoundException, NamedServiceNotFoundException {
+		serviceName = serviceName.trim();
     	String kbid = getKbIdentifierByServiceName(serviceName);
     	String modnm = getModelNameByServiceName(serviceName);
     	if (kbid == null || modnm == null) {
@@ -261,19 +267,19 @@ public class SadlServerImpl implements ISadlServer {
     	}
     	String repoType;
 		try {
+	    	setModelFolder(knowledgeBaseIdentifier);
 			repoType = getRepoType(knowledgeBaseIdentifier + "/TDB");
-		} catch (MalformedURLException e1) {
+	        if (this.getConfigurationMgr() == null) {
+	        	logger.info("Failed to get configuration manager");
+	        } else {
+	        	logger.info("Got configuration manager");
+	        }
+	        setConfigurationManagerModelGetter();
+	        reasoner = getConfigurationMgr().getReasoner();
+	 	} catch (MalformedURLException e1) {
 			throw new ConfigurationException("Error setting repository type: " + e1.getMessage());
 		}
-        setConfigurationMgr(ConfigurationManagerFactory.getConfigurationManager(knowledgeBaseIdentifier, repoType));
-        if (this.getConfigurationMgr() == null) {
-        	logger.info("Failed to get configuration manager");
-        } else {
-        	logger.info("Got configuration manager");
-        }
-        setConfigurationManagerModelGetter();
-
-       reasoner = getConfigurationMgr().getReasoner();
+        
         if (this.reasoner == null) {
         	logger.info("Failed to get reasoner");
         } else {
@@ -292,7 +298,7 @@ public class SadlServerImpl implements ISadlServer {
     			transPrefs.add(transCi);
     		}
 		}
-        int iStatus = reasoner.initializeReasoner(knowledgeBaseIdentifier, modelName, transPrefs, repoType);
+        int iStatus = reasoner.initializeReasoner(getModelFolder(), modelName, transPrefs, repoType);
         this.modelName = modelName;
         if (this.reasoner == null) {
         	logger.info("Failed to get reasoner");
@@ -305,8 +311,17 @@ public class SadlServerImpl implements ISadlServer {
         return "SadlServer" + System.currentTimeMillis();
 	}
 
+	protected void setModelFolder(String knowledgeBaseIdentifier) throws MalformedURLException {
+		modelFolder = new SadlUtils().fileUrlToFileName(knowledgeBaseIdentifier);
+//		modelFolder = knowledgeBaseIdentifier;
+	}
+	
+	protected String getModelFolder() {
+		return modelFolder;
+	}
+
 	protected void setConfigurationManagerModelGetter()
-			throws ConfigurationException {
+			throws ConfigurationException, MalformedURLException {
 		if (getConfigurationMgr().getModelGetter() == null) {
         	try {
 				getConfigurationMgr().setModelGetter(new SadlJenaModelGetter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
@@ -498,6 +513,18 @@ public class SadlServerImpl implements ISadlServer {
 		if (this.serviceNameMap != null && this.serviceNameMap.containsKey(serviceName)) {
 			return this.serviceNameMap.get(serviceName)[0];
 		}
+		if (serviceNameMap != null && logger.isDebugEnabled()) {
+			Iterator<String> itr = serviceNameMap.keySet().iterator();
+			while (itr.hasNext()) {
+				String key = itr.next();
+				if (key.equals(serviceName)) {
+					logger.debug(key + " == " + serviceName);
+				}
+				else {
+					logger.debug(key + " != " + serviceName);
+				}
+			}
+		}
 		return null;
 	}
 
@@ -509,12 +536,12 @@ public class SadlServerImpl implements ISadlServer {
 	}
 
 	public String getKBaseIdentifier() throws ConfigurationException {
-		if (getConfigurationMgr() != null) {
-			try {
+		try {
+			if (getConfigurationMgr() != null) {
 				return getConfigurationMgr().getModelFolder();
-			} catch (IOException e) {
-				throw new ConfigurationException("Model folder not found", e);
 			}
+		} catch (IOException e) {
+			throw new ConfigurationException("Model folder not found", e);
 		}
 		return null;
 	}
@@ -524,14 +551,20 @@ public class SadlServerImpl implements ISadlServer {
 	}
 
 	public String getReasonerVersion() throws ConfigurationException {
-		IReasoner irsnr = getReasoner();
-		if (irsnr != null) {
-			return irsnr.getClass().getCanonicalName() + ": " + irsnr.getReasonerVersion();
+		IReasoner irsnr;
+		try {
+			irsnr = getReasoner();
+			if (irsnr != null) {
+				return irsnr.getClass().getCanonicalName() + ": " + irsnr.getReasonerVersion();
+			}
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return null;
 	}
 
-	protected IReasoner getReasoner() throws ConfigurationException {
+	protected IReasoner getReasoner() throws ConfigurationException, MalformedURLException {
 		if (getConfigurationMgr() != null) {
 			return getConfigurationMgr().getReasoner();
 		}
@@ -817,6 +850,9 @@ public class SadlServerImpl implements ISadlServer {
 		if (reasoner != null) {
 			reasoner.setInstanceDataNamespace(namespace);
 		}
+		if (defaultInstanceDataNS.endsWith("#")) {
+			modelName = defaultInstanceDataNS.substring(0, defaultInstanceDataNS.length() - 1);
+		}
 		return oldNS;
 	}
 	
@@ -825,6 +861,11 @@ public class SadlServerImpl implements ISadlServer {
 			return reasoner.getInstanceDataNamespace();
 		}
 		return defaultInstanceDataNS;
+	}
+	
+	@Override
+	public String getInstanceModelName() {
+		return modelName;
 	}
 	
 	public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException {
@@ -899,7 +940,11 @@ public class SadlServerImpl implements ISadlServer {
 		
 	}
 
-	protected IConfigurationManager getConfigurationMgr() throws ConfigurationException {
+	protected IConfigurationManager getConfigurationMgr() throws ConfigurationException, MalformedURLException {
+		if (configurationMgr == null) {
+			// this may have already been set by subclass
+			setConfigurationMgr(ConfigurationManagerFactory.getConfigurationManager(getModelFolder(), getRepoType(getModelFolder()  + "/TDB")));
+		}
 		return configurationMgr;
 	}
 
@@ -997,5 +1042,5 @@ public class SadlServerImpl implements ISadlServer {
 		}
 		return null;
 	}
-	
+
 }

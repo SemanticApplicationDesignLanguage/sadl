@@ -68,7 +68,7 @@ public interface IConfigurationManager {
 	public static final String JENA_TDB = "Jena TDB";
 //	public static final String OWL_Func_SWRL = "OWL Functional with SWRL";
 	
-	public static final boolean inferenceCanceled = false;
+	public final boolean inferenceCanceled = false;
 	
 	public abstract boolean setInferenceCanceled(boolean canceled);
 	

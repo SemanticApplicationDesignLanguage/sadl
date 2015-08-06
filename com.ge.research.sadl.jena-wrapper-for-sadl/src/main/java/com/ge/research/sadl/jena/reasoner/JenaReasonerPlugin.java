@@ -95,6 +95,7 @@ import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.StringDataSource;
 import com.ge.research.sadl.utils.UtilsForJena;
+import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.datatypes.xsd.XSDDuration;
 import com.hp.hpl.jena.graph.Graph;
@@ -167,12 +168,12 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * 4. The configuration manager is responsible for setting up mappings, etc.
  * 
  * $Author: crapo $ 
- * $Revision: 1.11 $ Last modified on   $Date: 2014/11/03 19:33:55 $
+ * $Revision: 1.17 $ Last modified on   $Date: 2015/07/31 11:47:46 $
  */
 public class JenaReasonerPlugin extends Reasoner{
     protected static final Logger logger = LoggerFactory.getLogger(JenaReasonerPlugin.class);
 	public static String ReasonerFamily="Jena-Based";
-	public static final String version = "$Revision: 1.11 $";
+	public static final String version = "$Revision: 1.17 $";
 	private static String ReasonerCategory = "Jena";
 	public static final String pModelSpec = "pModelSpec";
 	public static final String pTimeOut = "pTimeOut";
@@ -254,6 +255,8 @@ public class JenaReasonerPlugin extends Reasoner{
 	private String repoType = null;
 	protected List<ConfigurationItem> preferences = null;
 	private OntModel tboxModelWithSpec;
+	private List<ModelError> newErrors = null;
+;
 	
 	public JenaReasonerPlugin() {
 		// these will have been loaded by the translator and added to the configuration if they are needed
@@ -301,9 +304,9 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * @throws ConfigurationException 
 	 */
 	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException {
-		if ((configMgr instanceof IConfigurationManagerForEditing)) {
-			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
-		}
+//		if ((configMgr instanceof IConfigurationManagerForEditing)) {
+//			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
+//		}
 		configurationMgr = configMgr;
 	}
 	
@@ -322,7 +325,12 @@ public class JenaReasonerPlugin extends Reasoner{
 		
 		try {
 			if (!configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
-				throw new ConfigurationException("The model with actual URL '" + tbox + "' and name '" + getModelName() + "' does not appear to exist.");
+				if (tbox.equals(getModelName())) {
+					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
+				}
+				else {
+					throw new ConfigurationException("The model with actual URL '" + tbox + "' and name '" + getModelName() + "' does not appear to exist.");
+				}
 			}
 		} catch (MalformedURLException e) {
 			throw new ConfigurationException("The actual file URL '" + tbox + "' for model '" + getModelName() + "' is not well-formed.");
@@ -441,7 +449,9 @@ public class JenaReasonerPlugin extends Reasoner{
 			queryTimeout = Long.parseLong(strTimeOut.trim());
 		}
 		catch (NumberFormatException e) {
-			logger.error("Invalid timeout value '" + strTimeOut + "'");
+			String msg = "Invalid timeout value '" + strTimeOut + "'";
+			logger.error(msg); addError(new ModelError(msg, ErrorType.ERROR));
+
 		}
 		return reasoner;
 	}
@@ -475,6 +485,10 @@ public class JenaReasonerPlugin extends Reasoner{
 		tboxLoadTime = System.currentTimeMillis();
 
 		if (configurationMgr == null) {
+		//	Get the correct Mappings from the policy file
+			OntDocumentManager mgr = OntDocumentManager.getInstance();
+			mgr.reset();
+//			mgr.setProcessImports(true);
 			configurationMgr = ConfigurationManagerFactory.getConfigurationManager(folderName, repoType);
 		}
 
@@ -577,7 +591,9 @@ public class JenaReasonerPlugin extends Reasoner{
 							return true;
 						}
 				    } catch (ParserException e) {
-				    	logger.error("Error reading rule file '" + ruleFileName + "': " + e.getMessage());
+				    	String msg = "Error reading rule file '" + ruleFileName + "': " + e.getMessage();
+				    	logger.error(msg);
+				    	addError(new ModelError(msg, ErrorType.ERROR));
 				    }
 				    finally {
 				    	in.close();
@@ -660,6 +676,12 @@ public class JenaReasonerPlugin extends Reasoner{
 		
 
 	public boolean deleteRule(String ruleName) throws RuleNotFoundException {
+		try {
+			getReasonerOnlyWhenNeeded();
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		for (int i=0; i<ruleList.size();i++){			
 			Rule r  = ruleList.get(i);
 			String rName = new String(r.getName());
@@ -921,6 +943,12 @@ public class JenaReasonerPlugin extends Reasoner{
 						results = new ArrayList<ModelError>(1);
 						results.add(new ModelError("Failed to complete validity check.", ErrorType.ERROR));
 					}
+				}
+				catch (DatatypeFormatException e) {
+					if (results == null) {
+						results = new ArrayList<ModelError>();
+					}
+					results.add(new ModelError("Exception while validating model: " + e.getLocalizedMessage(), ErrorType.ERROR));
 				}
 				catch (Throwable t) {
 					t.printStackTrace();
@@ -1680,7 +1708,10 @@ public class JenaReasonerPlugin extends Reasoner{
 				prop = RDF.type;
 			}
 			else if (pn instanceof NamedNode) {
-				if(((NamedNode)pn).getNodeType() != null && ((NamedNode)pn).getNodeType().equals(NodeType.PropertyNode)) {	
+				if(((NamedNode)pn).getNodeType() != null && 
+						(((NamedNode)pn).getNodeType().equals(NodeType.PropertyNode) ||
+								((NamedNode)pn).getNodeType().equals(NodeType.ObjectProperty) ||
+								((NamedNode)pn).getNodeType().equals(NodeType.DataTypeProperty))) {	
 					prop = schemaModel.getOntProperty(((NamedNode)pn).toFullyQualifiedString());
 					if (prop == null) {
 						prop = infModel.getProperty(((NamedNode)pn).toFullyQualifiedString());
@@ -2064,7 +2095,8 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
+			addError(new ModelError(e.getMessage(), ErrorType.ERROR));
 		}
 	}
 	
@@ -2567,7 +2599,8 @@ public class JenaReasonerPlugin extends Reasoner{
 				if (pred == null) {
 					nonOntPred = schemaModel.getProperty(predicate);
 					if (nonOntPred != null) {
-						logger.debug("Found predicate but it isn't an OntProperty");
+						String msg = "Found predicate but it isn't an OntProperty";
+						logger.debug(msg); addError(new ModelError(msg, ErrorType.ERROR));
 					}
 				}
 			}
@@ -2619,7 +2652,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				t1 = System.currentTimeMillis();
 			}
 			if (configurationMgr != null) {
-				ITranslator translator = configurationMgr.getTranslator();
+				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
 				if (translator != null) {
 					query = translator.prepareQuery(model, query);
 					if (collectTimingInfo) {
@@ -3051,6 +3084,20 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	public boolean clearCache() throws InvalidNameException {
 		return true;
+	}
+
+	@Override
+	public List<ModelError> getErrors() {
+		List<ModelError> returning = newErrors;
+		newErrors = null;
+		return returning;
+	}
+
+	private void addError(ModelError newError) {
+		if (newErrors == null) {
+			newErrors = new ArrayList<ModelError>();
+		}
+		newErrors.add(newError);
 	}
 
 

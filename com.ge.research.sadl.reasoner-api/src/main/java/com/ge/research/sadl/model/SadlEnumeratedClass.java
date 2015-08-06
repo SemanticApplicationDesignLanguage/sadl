@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:07 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2015/07/25 16:27:14 $
  ***********************************************************************/
 
 package com.ge.research.sadl.model;
@@ -39,5 +39,16 @@ public class SadlEnumeratedClass extends ConceptIdentifier {
     public List<ConceptName> getInstances() {
         return instances;
     }
-    
+ 
+    public String toString() {
+    	StringBuilder sb = new StringBuilder("{");
+    	for (int i = 0; i < instances.size(); i++) {
+    		if (i > 0) {
+    			sb.append(",");
+    		}
+    		sb.append(instances.get(i).toString());
+    	}
+    	sb.append("}");
+    	return sb.toString();
+    }
 }

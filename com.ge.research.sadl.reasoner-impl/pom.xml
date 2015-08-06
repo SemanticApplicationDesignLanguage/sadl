@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>com.ge.research.sadl</groupId>
   <artifactId>reasoner-impl</artifactId>
   <name>SADL Reasoner</name>
   <description>Implementation of com.ge.research.sadl.reasoner-api</description>
@@ -9,7 +10,7 @@
   		<dependency>
   			<groupId>com.ge.research.sadl</groupId>
   			<artifactId>reasoner-api</artifactId>
-  			<version>2.4.0</version>
+  			<version>2.3.0</version>
   		</dependency>
   	</dependencies>
   </dependencyManagement>
@@ -28,10 +29,11 @@
   
   	<!-- Define where to deploy this project's artifacts -->
 	<distributionManagement>
-	  <repository>
-	    <id>grc-deploy</id>
-	    <url>http://cdscilweb.crd.ge.com:8081/nexus/content/repositories/releases</url>
-	  </repository>
+		<repository>
+			<id>swcoealppcr01</id>
+			<name>swcoealppcr01-releases</name>
+			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
+		</repository>
 	</distributionManagement>
   
 	<build>
@@ -81,10 +83,5 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-<!--   <parent> -->
-  	<groupId>com.ge.research.sadl</groupId>
-<!--   	<artifactId>server</artifactId> -->
-  	<version>2.4.0</version>
-<!--   	<relativePath>../com.ge.research.sadl.server</relativePath> -->
-<!--   </parent> -->
+  <version>2.4.0</version>
 </project>
