@@ -57,7 +57,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * during this session as model on the server.
 	 * 
 	 * @param owlInstanceFileName File name containing instance in OWL format. For absolute paths use "file:///"
-	 * @param globalPrefix Global prefix
+	 * @param globalPrefix Global prefix (must be unique in the knowledge base)
 	 * @return True if successful else false
 	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
@@ -67,7 +67,8 @@ public interface ISadlServerPE extends ISadlServer {
 	
 	/**
 	 * Call this method to persist the instance data which has been added
-	 * during this session as model on the server.
+	 * during this session as model on the server with the specified model URI. (This is like a "save as".)
+	 * Issue: are the URI's of all instances in the default instance namespace changed to this namespace??
 	 * 
 	 * @param modelName Model name
 	 * @param owlInstanceFileName File name containing instance in OWL format
@@ -89,7 +90,8 @@ public interface ISadlServerPE extends ISadlServer {
 	abstract public boolean persistChangesToServiceModels()	throws SessionNotFoundException;
 	
 	/**
-	 * Call this method to retrieve the errors that have been accumulated 
+	 * Call this method to retrieve the errors that have been accumulated. Note that calling this method 
+	 * clears the errors--a second immediate call will return no errors.
 	 * 
 	 * @return List of errors since last call or null if none
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
@@ -113,7 +115,7 @@ public interface ISadlServerPE extends ISadlServer {
 			throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException, SessionNotFoundException;
 	
     /**
-     * This method creates a new Individual of the class identified.
+     * This method creates a new Individual of the class identified in the specified named model.
      * 
 	 * @param modelName Model name
      * @param name -- the name of the new instance to be created or null to create a blank node
@@ -143,7 +145,7 @@ public interface ISadlServerPE extends ISadlServer {
 			throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException, SessionNotFoundException;
 
 	/**
-	 * Call this method to create a new class in the named model
+	 * Call this method to create a new class in the specified named model
 	 * 
 	 * @param modelName Model name
 	 * @param className Class name or null if none
@@ -281,17 +283,18 @@ public interface ISadlServerPE extends ISadlServer {
 
 	/**
 	 * Call this method to create a new named service with the specified new model name 
-	 * to be saved to the specified OWL file in the specified kbase.
+	 * and global prefix to be saved to the specified OWL file in the specified kbase.
 	 * 
 	 * @param kbid Knowledge base identifier
 	 * @param serviceName Service name
 	 * @param modelName Model name
 	 * @param owlFileName OWL file name
+	 * @param prefix global prefix name
 	 * @return True if successful else false
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
 	 */
 	boolean createServiceModel(String kbid, String serviceName, String modelName,
-			String owlFileName) throws SessionNotFoundException;
+			String owlFileName, String prefix) throws SessionNotFoundException;
 
 	/**
 	 * Call this method to create a new mapping to the specified existing model.

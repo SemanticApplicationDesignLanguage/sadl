@@ -127,7 +127,7 @@ public class SadlServerImpl implements ISadlServer {
 	}
     
 	public String getServiceVersion() throws SessionNotFoundException {
-		return this.getClass().getSimpleName() + " version " + serviceVersion;
+		return this.getClass().getCanonicalName() + " version " + serviceVersion;
 	}
 
     public ResultSet query(String sparql)

@@ -117,7 +117,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	}
 
 	@Override
-	public boolean createServiceModel(String kbid, String serviceName, String modelName, String owlFileName) {
+	public boolean createServiceModel(String kbid, String serviceName, String modelName, String prefix, String owlFileName) {
 		
 		return noErrors();
 	}

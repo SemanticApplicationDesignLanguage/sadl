@@ -64,14 +64,20 @@ import com.ge.research.sadl.reasoner.TripleNotFoundException;
 public interface ISadlServer {
 	
 	/**
-	 * This method sets the service name map.
+	 * This method sets the service name map. It is not normally necessary to call this from the client 
+	 * as the service name map is normally set by scanning the kbaseroot and its subfolders when the call
+	 * is made to setKbaseRoot. However, in theory this could be set from the client without setting a
+	 * kbaseroot.
 	 * 
 	 * @param serviceNameMap -- service name map
 	 */
 	public void setServiceNameMap(Map<String, String[]> serviceNameMap);
 	
 	/**
-	 * This method returns the service name map.
+	 * This method returns the service name map whose keys are the names of the services and whose values are 
+	 * String arrays of size 2 with the 1st element being the actual URL of the knowledge base folder (the folder
+	 * containing the OWL models, rule files, etc.; the knowledgeBaseIdentifier) and the 2nd element being the 
+	 * public URI of the model which is the entry point into the kbase for the named service.
 	 * 
 	 * @return -- service name map
 	 */
@@ -86,32 +92,34 @@ public interface ISadlServer {
 	abstract public String getClassName() throws SessionNotFoundException;
 	
 	/**
-	 * This method returns the CVS Version of the class implementing the ISadlService interface
+	 * This method returns the Source Code Control System (SCC) Version of the class implementing the ISadlService interface
 	 * @return the CVS version number of the ISadlServer implementation
 	 * @throws SessionNotFoundException 
 	 */
 	abstract public String getServiceVersion() throws SessionNotFoundException;
 
     /**
-     * This method retrieves the results of a SPARQL query as a List array, 1st element being a List of
-     * the column headings and second being a List of rows, each of which is a List of values
+     * This method retrieves the results of a kbase query as a List array, 1st element being a List of
+     * the column headings and second being a List of rows, each of which is a List of values. The query
+     * string will depend upon the knowledge representation and reasoner; it might be SPARQL, Prolog, etc.
      *
-     * @param sparql a SPARQL query string
+     * @param query a query string
      * @return List[] with first element being the column titles (names of query variables) and second element a list of lists of values
      * @throws QueryCancelledException 
      * @throws QueryParseException 
      * @throws ReasonerNotFoundException 
      * @throws SessionNotFoundException 
      */
-    abstract public ResultSet query(String sparql) throws QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException;
+    abstract public ResultSet query(String query) throws QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException;
 
     /**
-     * Method to provide instance data and then execute a set of SPARQL queries in an atomic (stateless) manner, returning a ResultSet for each query.
+     * Method to provide instance data and then execute a set of queries in an atomic (stateless) manner, returning a ResultSet for each query. The query
+     * strings will depend upon the knowledge representation and reasoner; it might be SPARQL, Prolog, etc.
      * 
      * @param serviceName -- the name of the service, which is used to lookup the knowledgeBaseIdentifier and modelName
      * @param dataSrc -- the DataSource to supply instance data to the model
      * @param inputFormat -- "N-TRIPLE", "N3", or "RDF/XML"
-     * @param sparql -- a array of SPARQL queries to be executed
+     * @param query -- a array of queries to be executed
      * @return -- an array of ResultSet instances containing the results of each query
      * @throws IOException
      * @throws ConfigurationException
@@ -122,17 +130,18 @@ public interface ISadlServer {
      * @throws SessionNotFoundException
      * @throws InvalidNameException 
      */
-    abstract public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat, String[] sparql) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException;
+    abstract public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException;
                               
 
     /**
-     * Method to provide CSV instance data and then execute a set of SPARQL queries in an atomic (stateless) manner, returning a ResultSet for each query.
+     * Method to provide CSV instance data and then execute a set of queries in an atomic (stateless) manner, returning a ResultSet for each query. The query
+     * strings will depend upon the knowledge representation and reasoner; it might be SPARQL, Prolog, etc.
      * 
      * @param serviceName -- the name of the service, which is used to lookup the knowledgeBaseIdentifier and modelName
      * @param csvDataSrc -- the CSV DataSource to supply instance data to the model
      * @param includesHeader -- true if the CSV file contains header information in the first row
      * @param csvTemplate -- template mapping data stream
-     * @param sparql -- a array of SPARQL queries to be executed
+     * @param query -- a array of queries to be executed
      * @return -- an array of ResultSet instances containing the results of each query
      * @throws IOException
      * @throws ConfigurationException
@@ -144,7 +153,7 @@ public interface ISadlServer {
      * @throws InvalidNameException 
      * @throws TemplateException 
      */
-    abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] sparql) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException;
+    abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException;
     /**
      * This method retrieves the results of an RDF triple matching request as a list of matching statements. Zero or more of the
      * subjName, propName, and objValue may be null.
@@ -218,7 +227,7 @@ public interface ISadlServer {
     abstract String selectServiceModel(String serviceName) throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException;
     
     /**
-     * This method is called to identify the model (tbox) to use in this knowledge service session.
+     * This method is called to identify the model (tbox) to use in this knowledge service session and to simultaneously override certain default configuration settings.
      *
      * @param serviceName -- the name of the service, which is used to lookup the knowledgeBaseIdentifier and modelName
      * @param preferences -- preferences override the configuration from the development environment (configuration.rdf)
@@ -232,7 +241,7 @@ public interface ISadlServer {
     abstract String selectServiceModel(String serviceName, List<ConfigurationItem> preferences) throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException;
 
     /**
-     * This method is called to identify the model (tbox) to use in this knowledge service session.
+     * This method is called to identify the knowledgeBaseIdentifier and model (tbox) to use in this knowledge service session.
      *
      * @param knowledgeBaseIdentifier -- the identity of the knowledge base, e.g., the folder containing the OWL/Rule files OR the name of the service of a service that does not have a model name specified, in which case the model name is specified by the next parameter
      * @param modelName -- the entry point (specific model) within the knowledge base, e.g., the URI corresponding with the base namespace of the OWL model
@@ -245,7 +254,7 @@ public interface ISadlServer {
     abstract String selectServiceModel(String knowledgeBaseIdentifier, String modelName) throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException;
 
     /**
-     * This method is called to identify the model (tbox) to use in this knowledge service session.
+     * This method is called to identify the knowledgeBaseIdentifier and model (tbox) to use in this knowledge service session.
      *
      * @param knowledgeBaseIdentifier -- the identity of the knowledge base, e.g., the folder containing the OWL/Rule files OR the name of the service of a service that does not have a model name specified, in which case the model name is specified by the next parameter
      * @param modelName -- the entry point (specific model) within the knowledge base, e.g., the URI corresponding with the base namespace of the OWL model
@@ -258,7 +267,7 @@ public interface ISadlServer {
     abstract String selectServiceModel(String knowledgeBaseIdentifier, String modelName, List<ConfigurationItem> preferences) throws ConfigurationException, ReasonerNotFoundException;
 
     /**
-     * This method passes input data as a semantic model as DataSource
+     * This method passes input data as a semantic model as a DataSource
      * @param dataSrc
      * @return true if successful else false
      * @throws IOException 
@@ -269,7 +278,7 @@ public interface ISadlServer {
     abstract public boolean sendData(DataSource dataSrc) throws IOException, ReasonerNotFoundException, SessionNotFoundException, ConfigurationException;
 
     /**
-     * This method passes input data as a semantic model as DataSource
+     * This method passes input data as a semantic model as a DataSource with a specified format
      * @param dataSrc
      * @param inputFormat -- "N-TRIPLE", "N3", or "RDF/XML"
      * @return true if successful else false
@@ -281,18 +290,18 @@ public interface ISadlServer {
     abstract public boolean sendData(DataSource dataSrc, String inputFormat) throws IOException, ReasonerNotFoundException, SessionNotFoundException, ConfigurationException;
 
     /**
-     * This method is called to send abox data in CSV format to be converted to semantic data using the supplied mapping template serialized as a string
+     * This method is called to send abox data in CSV format to be converted to semantic data using the identified mapping template. The template identifier can be a serialized string or it can be a URL to a template.
      * 
      * @param csvDataSrc -- CSV data stream
      * @param includesHeader -- true if the CSV file contains header information in the first row
-     * @param csvTemplate -- template mapping data stream
+     * @param csvTemplateIdentifier -- template mapping identifier
      * @return -- true if successful else false
      * @throws ConfigurationException
      * @throws IOException
      * @throws InvalidNameException
      * @throws SessionNotFoundException 
      */
-    abstract public boolean sendCsvData(DataSource csvDataSrc, boolean includesHeader, String csvTemplate) 
+    abstract public boolean sendCsvData(DataSource csvDataSrc, boolean includesHeader, String csvTemplateIdentifier) 
     		throws TemplateException, ConfigurationException, IOException, InvalidNameException, SessionNotFoundException;
 
     /**
@@ -319,8 +328,8 @@ public interface ISadlServer {
     abstract public String getInstanceModelName();
     
     /**
-     * This method is called to add a triple to the instance data. The object value will be interpreted based on type 
-     * and on the type of the property if it is an OntProperty.
+     * This method is called to add a triple to the instance data. The object value will be interpreted based on type of the Object
+     * and on the range of the property if it is an OntProperty.
      * 
      * @param subjName the URI of the subject
      * @param predName the URI of the property
@@ -339,9 +348,9 @@ public interface ISadlServer {
     /**
      * This method creates a new Individual of the class identified.
      * 
-     * @param name -- the name of the new instance to be created
+     * @param name -- the name of the new instance to be created. If only a local fragment is given (no namespace), the instance will be created in the default namespace.
      * @param className -- the name of the OntClass to which the new Individual will belong
-     * @return -- the identity of the new Individual; the fully qualified name for a named resource
+     * @return -- the identity of the new Individual; the fully qualified name (URI) for a named resource
      * @throws ConfigurationException
      * @throws InvalidNameException
      * @throws IOException
@@ -350,8 +359,8 @@ public interface ISadlServer {
     abstract public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException;
     
     /**
-     * This method is called to delete a triple from the instance data. The subject, predicate, and/or object can be null to delete
-     * patterns.
+     * This method is called to delete a triple from the instance data. The subject, predicate, and/or object can be null to delete everything 
+     * matching the pattern.
      * 
      * @param subjName
      * @param predName
@@ -378,7 +387,7 @@ public interface ISadlServer {
     abstract public boolean reset() throws ReasonerNotFoundException, SessionNotFoundException;
 
     /**
-     * Sets the Owl file output format.
+     * Sets the Owl file output format to be used for output, e.g., when responding to a SPARQL construct query.
      * 
      * @param outputFormat -- "N-TRIPLE", "N3", or "RDF/XML"
      * @throws SessionNotFoundException
@@ -386,7 +395,7 @@ public interface ISadlServer {
 	public abstract void setOwlFileOutputFormat(String outputFormat) throws SessionNotFoundException;
 
     /**
-     * Gets the knowledge base identifier.
+     * Gets the knowledge base identifier for the current session.
      * 
      * @return knowledge base identifier
      * @throws ConfigurationException 
@@ -394,7 +403,7 @@ public interface ISadlServer {
 	public abstract String getKBaseIdentifier() throws ConfigurationException;
 
     /**
-     * Gets the model name.
+     * Gets the model name for the current session.
      * 
      * @return model name
      * @throws IOException 
@@ -411,7 +420,7 @@ public interface ISadlServer {
 	public abstract String getReasonerVersion() throws ConfigurationException, SessionNotFoundException;
 
     /**
-     * Gets derivations
+     * Gets derivations of all inferred statements (if the reasoner supports derivations)
      * 
      * @return Derivations datasource
      * @throws ConfigurationException
@@ -421,14 +430,14 @@ public interface ISadlServer {
 	public abstract DataSource getDerivations() throws ConfigurationException, InvalidDerivationException, SessionNotFoundException;
 
     /**
-     * Executes construct
+     * Executes a construct query, which will return a subgraph of the knowledge base and instance data.
      * 
      * @return Construct datasource
      * @throws QueryCancelledException
      * @throws QueryParseException
      * @throws SessionNotFoundException
      */
-	public abstract DataSource construct(String sparql) throws QueryCancelledException, QueryParseException, SessionNotFoundException;
+	public abstract DataSource construct(String query) throws QueryCancelledException, QueryParseException, SessionNotFoundException;
 
     /**
      * Turn on/off collection of timing information
@@ -439,7 +448,8 @@ public interface ISadlServer {
 	public abstract void collectTimingInformation(boolean bCollect) throws SessionNotFoundException;
 	
     /**
-     * Gets timing information
+     * Gets timing information for a given session, if the reasoner supports this capability. Normally a call to collectTimingInformation(true) 
+     * must be made before the inference session begins for timing to be collected.
      * 
      * @return timing information
      * @throws SessionNotFoundException
@@ -465,7 +475,7 @@ public interface ISadlServer {
 
 	/**
 	 * Method to set the timeout for queries.
-	 * Default is no timeout
+	 * Default is no timeout, which is equivalent to calling this method with a value of -1.
 	 * 
 	 * @param timeout (in milliseconds)
      * @throws ReasonerNotFoundException 
@@ -474,7 +484,7 @@ public interface ISadlServer {
 	public abstract void setQueryTimeout(long timeout) throws ReasonerNotFoundException, SessionNotFoundException;
 
 	/**
-	 * Method to clear the cache for the current kbase model.
+	 * Method to clear the cache for the current kbase model. Inferred models can be cached, depending on the configuration settings, to provide faster performance when the inputs have not changed.
 	 * @return true if successful else false
 	 * @throws InvalidNameException 
 	 */
