@@ -45,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ImportMapping;
-import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -53,7 +52,6 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.OntDocumentManager.ReadFailureHandler;
-import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.rdf.model.Bag;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -113,8 +111,8 @@ public class ConfigurationManager implements IConfigurationManager {
 	private ITranslator translator = null;
 	private IReasoner reasoner = null;
 	protected OntDocumentManager jenaDocumentMgr;
-	
 	private ISadlJenaModelGetter modelGetter = null;
+	private OntModelSpec ontModelSpec = null;
 	
 	protected String repoType = null;
 
@@ -189,7 +187,7 @@ public class ConfigurationManager implements IConfigurationManager {
 		getJenaDocumentMgr().setReadFailureHandler(rfHandler);
 	}
 	
-	protected void loadMappingFile() throws ConfigurationException {
+	protected synchronized void loadMappingFile() throws ConfigurationException {
 		if (getModelFolderPath() != null) {
 			String modelFolderPathname = getModelFolderPath().getAbsolutePath();
 			String mappingFilename = modelFolderPathname + File.separator + ONT_POLICY_RDF;
@@ -486,7 +484,6 @@ public class ConfigurationManager implements IConfigurationManager {
 
 	private ITranslator getTranslatorInstance() throws ConfigurationException {
 		String translatorClassName = null;
-		ITranslator translatorClass = null;
 		if (getConfigModel() != null) {
 			IReasoner reasonerInst = getReasonerInstance();
 			Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
@@ -753,29 +750,29 @@ public class ConfigurationManager implements IConfigurationManager {
     	return map;
     }
     
-	private List<ImportMapping> addImports(List<ImportMapping> mappings, String modname, OntModel m) {
-		StmtIterator sitr = m.listStatements((Resource)null, OWL.imports, (RDFNode)null);
-		if (sitr.hasNext()) {
-			List<String> importNames = new ArrayList<String>();
-			while (sitr.hasNext()) {
-				Statement s = sitr.nextStatement();
-				RDFNode obj = s.getObject();
-				if (obj.isResource()) {
-					String submodelname = ((Resource)obj).getURI();
-					importNames.add(submodelname);
-				}
-			}
-			for (int i = 0; i < importNames.size(); i++) {
-				String submodelname = importNames.get(i);
-				OntModel om = getModelGetter().getOntModel(submodelname, null, null);
-				ImportMapping im = new ImportMapping(submodelname, null, null);
-				mappings.add(im);
-				mappings = addImports(mappings, submodelname, om);
-			}
-		}
-		return mappings;
-	}
-	
+//	private List<ImportMapping> addImports(List<ImportMapping> mappings, String modname, OntModel m) {
+//		StmtIterator sitr = m.listStatements((Resource)null, OWL.imports, (RDFNode)null);
+//		if (sitr.hasNext()) {
+//			List<String> importNames = new ArrayList<String>();
+//			while (sitr.hasNext()) {
+//				Statement s = sitr.nextStatement();
+//				RDFNode obj = s.getObject();
+//				if (obj.isResource()) {
+//					String submodelname = ((Resource)obj).getURI();
+//					importNames.add(submodelname);
+//				}
+//			}
+//			for (int i = 0; i < importNames.size(); i++) {
+//				String submodelname = importNames.get(i);
+//				OntModel om = getModelGetter().getOntModel(submodelname, null, null);
+//				ImportMapping im = new ImportMapping(submodelname, null, null);
+//				mappings.add(im);
+//				mappings = addImports(mappings, submodelname, om);
+//			}
+//		}
+//		return mappings;
+//	}
+//	
 	protected boolean useRepoDatasetForImport(String importedUri) {
 		try {
 			if (getTdbFolder() == null || importedUri.equals(IConfigurationManager.ServicesConfigurationURI)) {
@@ -981,7 +978,7 @@ public class ConfigurationManager implements IConfigurationManager {
      * @param fileName
      * @return
      */
-    public static String fileNameToFileUrl(String fileName) {
+    public String fileNameToFileUrl(String fileName) {
     	URI fileUri = null;
         if (fileName.startsWith("http:") || fileName.startsWith("file:")) {
             fileUri = URI.create(fileName);
@@ -1008,7 +1005,7 @@ public class ConfigurationManager implements IConfigurationManager {
      * @return
      * @throws MalformedURLException 
      */
-    public static String fileUrlToFileName(String urlstr) throws MalformedURLException {
+    public String fileUrlToFileName(String urlstr) throws MalformedURLException {
         URI fileUri = URI.create(urlstr);
         if (fileUri != null) {
         	return fileUri.toURL().getPath();
@@ -1024,7 +1021,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @param inputNamespace
 	 * @return
 	 */
-	public static String addHashToNonTerminatedNamespace(String inputNamespace) {
+	public static synchronized String addHashToNonTerminatedNamespace(String inputNamespace) {
         if (inputNamespace.length() > 0 && XMLChar.isNCName( inputNamespace.charAt(inputNamespace.length() -1) )) {
         	// this is for backward compatibility--in V1 a valid ending character was not required--
         	//  and for convenience (so the user doesn't have to provide an ending character from a
@@ -1163,7 +1160,7 @@ public class ConfigurationManager implements IConfigurationManager {
 									}
 									configItems.add(newItem);
 								}
-								newItem.addNameValuePair(new NameValuePair(name.getLocalName(), valObj));
+								newItem.addNameValuePair(newItem.new NameValuePair(name.getLocalName(), valObj));
 							}
 							else if (value instanceof Resource) {
 							// this value isn't part of a name value pair--is it a Bag or Sequence?
@@ -1193,7 +1190,7 @@ public class ConfigurationManager implements IConfigurationManager {
 											}
 											configItems.add(newItem);
 										}
-										newItem.addNameValuePair(new NameValuePair(name.getLocalName(), valObj));
+										newItem.addNameValuePair(newItem.new NameValuePair(name.getLocalName(), valObj));
 									}
 								}
 							}
@@ -1497,6 +1494,9 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (jenaDocumentMgr == null) {
 			if (getMappingModel() != null) {
 				setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
+				if (ontModelSpec != null) {
+					ontModelSpec.setDocumentManager(getJenaDocumentMgr());
+				}
 			}
 			else {
 				setJenaDocumentMgr(OntDocumentManager.getInstance());
@@ -1591,5 +1591,17 @@ public class ConfigurationManager implements IConfigurationManager {
 	
 	public String toString() {
 		return "ConfigurationManager for project '" + getProjectPath() + "'";
+	}
+	public OntModelSpec getOntModelSpec(OntModelSpec toCopySpec) {
+		if (ontModelSpec == null) {
+			ontModelSpec = new OntModelSpec(toCopySpec != null ? toCopySpec : OntModelSpec.OWL_MEM);
+			if (jenaDocumentMgr != null) {
+				ontModelSpec.setDocumentManager(jenaDocumentMgr);
+			}
+		}
+		return ontModelSpec;
+	}
+	public void setOntModelSpec(OntModelSpec ontModelSpec) {
+		this.ontModelSpec = ontModelSpec;
 	}
 }

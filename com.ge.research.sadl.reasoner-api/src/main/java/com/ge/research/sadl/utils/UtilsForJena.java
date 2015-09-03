@@ -52,7 +52,7 @@ public class UtilsForJena {
      * @return
      * @throws Exception
      */
-    public static Literal getLiteralMatchingDataPropertyRange(OntModel m, OntProperty prop, Object v) throws Exception {
+    public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, OntProperty prop, Object v) throws Exception {
         Literal val = null;
         String errMsg = null;
         if (prop.isAnnotationProperty()) {
@@ -88,7 +88,7 @@ public class UtilsForJena {
         return val;
     }
     
-    public static Literal getLiteralMatchingDataPropertyRange(OntModel m, String rnguri, Object v) throws Exception {
+    public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, String rnguri, Object v) throws Exception {
         Literal val = null;
         String errMsg = null;
         RDFDatatype rdftype = TypeMapper.getInstance().getSafeTypeByName(rnguri);
@@ -272,7 +272,7 @@ public class UtilsForJena {
      * @param uri -- URI (as String) to validate
      * @return -- null if valid else an error description if not valid
      */
-	public static String validateRdfUri(String uri) {
+	public static synchronized String validateRdfUri(String uri) {
 		int lbsign = uri.indexOf('#');
 		if (lbsign >= 0) {
 			String ns = uri.substring(0, uri.indexOf('#'));
@@ -303,7 +303,7 @@ public class UtilsForJena {
 	 * @param baseUri -- the base URI to which the counter is to be added and incremented until unique
 	 * @return -- the unique URI string
 	 */
-	public static String getUniqueOntUri(OntModel ontModel, String baseUri) {
+	public static synchronized String getUniqueOntUri(OntModel ontModel, String baseUri) {
 		long cntr = 0;
 		int numDigitsAtEnd = 0;
 		String cntrStr = "";
@@ -333,7 +333,7 @@ public class UtilsForJena {
 		return uri;
 	}
 
-	public static boolean isSingleValued(OntClass cls, OntProperty prop, String rngString) {
+	public static synchronized boolean isSingleValued(OntClass cls, OntProperty prop, String rngString) {
 		if (prop.isFunctionalProperty()) {
 			return true;
 		}

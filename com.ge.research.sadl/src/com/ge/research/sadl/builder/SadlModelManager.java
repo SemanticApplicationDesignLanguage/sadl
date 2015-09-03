@@ -3728,7 +3728,8 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 
 	@Override
 	public void partClosed(IWorkbenchPartReference partRef) {
-		// TODO
+		int i = 0;
+		System.out.println(i);
 	}
 
 	@Override

@@ -25,7 +25,7 @@ Workflow {
   component = Generator {
     pathRtProject = runtimeProject
     pathUiProject = "${runtimeProject}.ui"
-//    pathTestProject = "${runtimeProject}.tests"
+    pathTestProject = "${runtimeProject}.tests"
     projectNameRt = projectName
     projectNameUi = "${projectName}.ui"
 
@@ -85,7 +85,7 @@ Workflow {
       // quickfix API
       fragment = quickfix.QuickfixProviderFragment {}
       
-//      fragment = junit.Junit4Fragment {}
+      fragment = junit.Junit4Fragment {}
     }
   }
 }

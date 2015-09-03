@@ -366,7 +366,7 @@ public class JenaReasonerPlugin extends Reasoner{
 					return null;
 				}
 				else {
-					schemaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+					schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
@@ -579,7 +579,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	public boolean loadRules(String ruleFileName) throws IOException {
 		if (ruleFileName != null) {
 			try {
-				InputStream in = FileManager.get().open(ruleFileName);
+				InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
 				if (in != null) {
 				    try {
 				    	InputStreamReader isr = new InputStreamReader(in);
@@ -759,7 +759,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			BufferedReader in = new BufferedReader(new InputStreamReader(is));
 			String base = null;
 			initializeDataModel();
-			OntModel newModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+			OntModel newModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
 			if (format != null) {
 				RDFReader reader = newModel.getReader(format);
 				reader.read(newModel, is, base);
@@ -833,7 +833,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (schemaModel == null) {
 				getReasonerOnlyWhenNeeded();
 			}
-			dataModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+			dataModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
 			String instNS = getInstanceDataNS();
 			if (instNS != null) {
 				Resource importOnt = dataModel.getResource(getModelName());
@@ -1027,119 +1027,121 @@ public class JenaReasonerPlugin extends Reasoner{
 	public ResultSet ask(String askQuery) throws QueryParseException, QueryCancelledException {
 		boolean cancelled = false;
 		ResultSet rs = null;
-		try {
-			startTrace();
-			QueryExecution qexec = null;		
-			com.hp.hpl.jena.query.ResultSet results = null;		
-			long t1 = System.currentTimeMillis();
-			prepareInfModel();
+		synchronized(ReasonerFamily) {
 			try {
-	//			IndexLARQ index = null;
-	//			if (askQuery.contains("http://jena.hpl.hp.com/ARQ/property#textMatch")) {
-	//				// this query uses Lucene
-	//				if (luceneIndexerClass != null) {
-	//					ILuceneModelIndexer indexer = (ILuceneModelIndexer) Class.forName(luceneIndexerClass).newInstance();
-	////					OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, infModel);
-	//					indexer.setModel(dataModel != null ? dataModel : schemaModel); //indexer.setModel(om);
-	//					IndexBuilderString larqBuilder = indexer.buildModelIndex();
-	//					index = larqBuilder.getIndex();
-	//
-	//				}
-	//				else {
-	//					FieldOption fo = IndexReader.FieldOption.ALL;
-	//					IndexBuilderString larqBuilder = new IndexBuilderString();
-	//					larqBuilder.indexStatements(this.infModel.listStatements());
-	//	//				larqBuilder.indexStatement(s);
-	//					larqBuilder.closeWriter();
-	//					index = larqBuilder.getIndex();
-	//				}
-	//			}
-				if (infDataset != null) {
-					qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ),infDataset);
-				}
-				else {
-					qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ), this.infModel);
-				}
-	//			if (index != null) {
-	//				LARQ.setDefaultIndex(qexec.getContext(), index);
-	//			}
-				qexec.setTimeout(queryTimeout);
-				if (askQuery.trim().substring(0, 3).equals("ask")) {	
-					boolean askResult = qexec.execAsk();
-					String[] columnName = new String[1];
-					columnName[0] = "ask";
-					Object array[][] = new Object[1][1];
-					array[0][0] = askResult;
-					rs = new ResultSet(columnName, array);
-				}
-				else if (askQuery.trim().substring(0, 9).equals("construct")) {
-					Model constructModel = qexec.execConstruct();
-					if (constructModel != null) {
-						StmtIterator sitr = constructModel.listStatements();
-						if (sitr.hasNext()) {
-							String[] columnName = new String[3];
-							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
-							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
-							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
-							List<Object[]> dataList = new ArrayList<Object[]>();
-							while (sitr.hasNext()) {
-								Statement stmt = sitr.nextStatement();
-								Object[] row = new Object[3];
-								row[0] = stmt.getSubject().toString();
-								row[1] = stmt.getPredicate().toString();
-								RDFNode val = stmt.getObject();
-								if (val instanceof Resource) {
-									row[2] = ((Resource)val).toString();
+				startTrace();
+				QueryExecution qexec = null;		
+				com.hp.hpl.jena.query.ResultSet results = null;		
+				long t1 = System.currentTimeMillis();
+				prepareInfModel();
+				try {
+		//			IndexLARQ index = null;
+		//			if (askQuery.contains("http://jena.hpl.hp.com/ARQ/property#textMatch")) {
+		//				// this query uses Lucene
+		//				if (luceneIndexerClass != null) {
+		//					ILuceneModelIndexer indexer = (ILuceneModelIndexer) Class.forName(luceneIndexerClass).newInstance();
+		////					OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, infModel);
+		//					indexer.setModel(dataModel != null ? dataModel : schemaModel); //indexer.setModel(om);
+		//					IndexBuilderString larqBuilder = indexer.buildModelIndex();
+		//					index = larqBuilder.getIndex();
+		//
+		//				}
+		//				else {
+		//					FieldOption fo = IndexReader.FieldOption.ALL;
+		//					IndexBuilderString larqBuilder = new IndexBuilderString();
+		//					larqBuilder.indexStatements(this.infModel.listStatements());
+		//	//				larqBuilder.indexStatement(s);
+		//					larqBuilder.closeWriter();
+		//					index = larqBuilder.getIndex();
+		//				}
+		//			}
+					if (infDataset != null) {
+						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ),infDataset);
+					}
+					else {
+						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ), this.infModel);
+					}
+		//			if (index != null) {
+		//				LARQ.setDefaultIndex(qexec.getContext(), index);
+		//			}
+					qexec.setTimeout(queryTimeout);
+					if (askQuery.trim().substring(0, 3).equals("ask")) {	
+						boolean askResult = qexec.execAsk();
+						String[] columnName = new String[1];
+						columnName[0] = "ask";
+						Object array[][] = new Object[1][1];
+						array[0][0] = askResult;
+						rs = new ResultSet(columnName, array);
+					}
+					else if (askQuery.trim().substring(0, 9).equals("construct")) {
+						Model constructModel = qexec.execConstruct();
+						if (constructModel != null) {
+							StmtIterator sitr = constructModel.listStatements();
+							if (sitr.hasNext()) {
+								String[] columnName = new String[3];
+								columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
+								columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
+								columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+								List<Object[]> dataList = new ArrayList<Object[]>();
+								while (sitr.hasNext()) {
+									Statement stmt = sitr.nextStatement();
+									Object[] row = new Object[3];
+									row[0] = stmt.getSubject().toString();
+									row[1] = stmt.getPredicate().toString();
+									RDFNode val = stmt.getObject();
+									if (val instanceof Resource) {
+										row[2] = ((Resource)val).toString();
+									}
+									else if (val instanceof Literal) {
+										row[2] = ((Literal)val).getValue();
+									}
+									else {
+										row[2] = val.toString();
+									}
+									dataList.add(row);
 								}
-								else if (val instanceof Literal) {
-									row[2] = ((Literal)val).getValue();
+								Object[][] data = new Object[dataList.size()][3];
+								for (int r = 0; r < dataList.size(); r++) {
+									for (int c = 0; c < 3; c++) {
+										data[r][c] = ((Object[]) dataList.get(r))[c];
+									}
 								}
-								else {
-									row[2] = val.toString();
-								}
-								dataList.add(row);
+								rs = new ResultSet(columnName, data);
 							}
-							Object[][] data = new Object[dataList.size()][3];
-							for (int r = 0; r < dataList.size(); r++) {
-								for (int c = 0; c < 3; c++) {
-									data[r][c] = ((Object[]) dataList.get(r))[c];
-								}
-							}
-							rs = new ResultSet(columnName, data);
 						}
 					}
+					else {
+						results = qexec.execSelect();
+						rs = convertFromJenaResultSetToReasonerResultSet(results);
+					}
+					if (collectTimingInfo) {
+						long t2 = System.currentTimeMillis();
+						timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, "execute query (" + askQuery + ")", t2 - t1));
+					}
 				}
-				else {
-					results = qexec.execSelect();
-					rs = convertFromJenaResultSetToReasonerResultSet(results);
+				catch (com.hp.hpl.jena.query.QueryCancelledException e) {
+					rs = null;
+					cancelled = true;
+					throw new QueryCancelledException("Query timed out (" + queryTimeout + " seconds): '" + askQuery + "'\n");
 				}
-				if (collectTimingInfo) {
-					long t2 = System.currentTimeMillis();
-					timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, "execute query (" + askQuery + ")", t2 - t1));
+				catch (InferenceCanceledException e) {
+					rs = null;
+					throw e;
 				}
+				catch (Exception e) {
+					rs = null;
+					e.printStackTrace();
+					logger.error("query failed with Exception: " + e.getMessage());
+					throw new QueryParseException("Query '" + askQuery + "' failed: " + e.getLocalizedMessage(), e);
+				}
+				finally { if (!cancelled && qexec != null) qexec.close();	}
+				endTrace();
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			catch (com.hp.hpl.jena.query.QueryCancelledException e) {
-				rs = null;
-				cancelled = true;
-				throw new QueryCancelledException("Query timed out (" + queryTimeout + " seconds): '" + askQuery + "'\n");
+			finally {
 			}
-			catch (InferenceCanceledException e) {
-				rs = null;
-				throw e;
-			}
-			catch (Exception e) {
-				rs = null;
-				e.printStackTrace();
-				logger.error("query failed with Exception: " + e.getMessage());
-				throw new QueryParseException("Query '" + askQuery + "' failed: " + e.getLocalizedMessage());
-			}
-			finally { if (!cancelled && qexec != null) qexec.close();	}
-			endTrace();
-		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		finally {
 		}
 		return rs;
 	}
@@ -2100,7 +2102,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 	}
 	
-	protected boolean addBuiltin(String name, String fullyQualifiedClassName) {
+	protected static synchronized boolean addBuiltin(String name, String fullyQualifiedClassName, IConfigurationManager configMgr) {
 		name = name.trim();
 		fullyQualifiedClassName = fullyQualifiedClassName.trim();
 		if (fullyQualifiedClassName.substring(0, fullyQualifiedClassName.lastIndexOf('.')).equals(Product.class.getPackage().toString())) {
@@ -2116,7 +2118,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (javaInstance instanceof Builtin) {
 				BuiltinRegistry.theRegistry.register((Builtin) javaInstance);
 				if (javaInstance instanceof CancellableBuiltin) {
-					((CancellableBuiltin)javaInstance).setConfigMgr(configurationMgr);
+					((CancellableBuiltin)javaInstance).setConfigMgr(configMgr);
 				}
 			}
 		} catch (ClassNotFoundException e) {
@@ -2166,7 +2168,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				Object clssObj = configItem.getNamedValue("class");
 				if (clssObj != null) {
 					String clss = clssObj.toString();
-					return addBuiltin(name, clss);
+					return addBuiltin(name, clss, configurationMgr);
 				}
 			}
 			return false;
@@ -2395,9 +2397,13 @@ public class JenaReasonerPlugin extends Reasoner{
 			modelSpecID = configuration.get(pModelSpec);
 		}
 		if (modelSpecID != null) {
-			return getModelSpec(modelSpecID.toString());
+			OntModelSpec ms = new OntModelSpec(getModelSpec(modelSpecID.toString()));
+			ms.setDocumentManager(configurationMgr.getJenaDocumentMgr());
+			return ms;
 		}
-		return OntModelSpec.OWL_MEM;
+		OntModelSpec ms = new OntModelSpec(OntModelSpec.OWL_MEM);
+		ms.setDocumentManager(configurationMgr.getJenaDocumentMgr());
+		return ms;
 	}
 
 	protected OntModelSpec getModelSpec(String modelSpecID) {
@@ -2519,10 +2525,10 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (infModel != null) {
 			OntModel m;
 			if (deductionsOnly && infModel instanceof InfModel) {
-				m = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, ((InfModel) infModel).getDeductionsModel());
+				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());
 			}
 			else {
-				m = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, infModel);
+				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
 			}
 			String format = "RDF/XML-ABBREV";	
 		    FileOutputStream fps = new FileOutputStream(filename);
@@ -2654,6 +2660,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (configurationMgr != null) {
 				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
 				if (translator != null) {
+					translator.setConfigurationManager(configurationMgr);
 					query = translator.prepareQuery(model, query);
 					if (collectTimingInfo) {
 						long t2 = System.currentTimeMillis();

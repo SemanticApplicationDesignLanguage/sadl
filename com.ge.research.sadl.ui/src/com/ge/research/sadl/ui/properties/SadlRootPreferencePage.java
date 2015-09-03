@@ -116,8 +116,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 						// put date format in configuration
 						String[] itemContent = new String[1];
 						itemContent[0] = IConfigurationManager.DateFormat;
-						NameValuePair nvp = new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 						ConfigurationItem ci = new ConfigurationItem(itemContent);
+						NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 						ci.addNameValuePair(nvp);
 						((ConfigurationManagerForEditing)cmgr).addConfiguration(ci);
 						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
@@ -141,8 +141,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 			String dmyOrder = service.getString("com.ge.research.sadl.Sadl", "dmyOrder", "mdy", null);
 			String[] itemContent = new String[1];
 			itemContent[0] = IConfigurationManager.DateFormat;
-			NameValuePair nvp = new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 			ConfigurationItem ci = new ConfigurationItem(itemContent);
+			NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 			ci.addNameValuePair(nvp);
 			Enumeration<IConfigurationManagerForIDE> cmgrs = visitor.getConfigurationManagers();
 			while (cmgrs.hasMoreElements()) {

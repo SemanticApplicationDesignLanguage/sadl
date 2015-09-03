@@ -327,7 +327,7 @@ public class ReasonerConfigurationDialog extends Dialog {
 		    	logger.debug("Error saving configuration option, "+optionName+", of type "+optionValue.getClass().getName());
 		    }
 		    logger.debug("Setting "+optionName+" to "+optionValue.toString());
-		    ConfigurationItem.NameValuePair nv = new ConfigurationItem.NameValuePair(optionName, optionValue);
+		    ConfigurationItem.NameValuePair nv = configItem.new NameValuePair(optionName, optionValue);
 		    nv.setConfigType(ConfigurationItem.ConfigurationType.SingleValue);
 		    configItem.addNameValuePair(nv);
 		}

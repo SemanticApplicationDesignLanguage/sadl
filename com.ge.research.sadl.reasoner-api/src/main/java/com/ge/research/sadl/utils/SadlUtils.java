@@ -456,7 +456,7 @@ public class SadlUtils {
 	 * @param q
 	 * @return
 	 */
-	public static boolean queryContainsQName(String q) {
+	public static synchronized boolean queryContainsQName(String q) {
 		int start = 0;
 		int openBracket = q.indexOf('<');
 		while (openBracket > start) {

@@ -2076,7 +2076,7 @@ public class CsvImporter {
 		}
 		if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
 			Model m = getModelFromTdbDS();
-			return ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, m);			
+			return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);			
 		}
 		else {
 			return getModel(0);
@@ -2264,7 +2264,7 @@ public class CsvImporter {
 		modelsInUse--;
 	}	
 
-	public static int convertCharSeqToColumnNumber(String ref) throws ConfigurationException {
+	public static synchronized int convertCharSeqToColumnNumber(String ref) throws ConfigurationException {
 		int pos = 0;
 		int retval=0;
 		for (int k = ref.length()-1; k >= 0; k--) {
@@ -3077,7 +3077,7 @@ public class CsvImporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Calendar parseTimestamp(String timestamp) throws Exception {
+	public static synchronized Calendar parseTimestamp(String timestamp) throws Exception {
 		/*
 		 ** we specify Locale.US since months are in english
 		 */
@@ -3092,7 +3092,7 @@ public class CsvImporter {
 		// this method has been moved from getting the model singleton to getting the array specified.
 		// hopefully, this will allow me to use multiple threads which each have their own associated model.
 		if (models[arraypos] == null) {
-			models[arraypos] = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+			models[arraypos] = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null));
 			if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
 				if (getTdbDS(false) == null) {
 					tdbFolder = getSaveAsFileName();
@@ -3456,12 +3456,12 @@ public class CsvImporter {
 
 	private OntModel getImportModel() throws ConfigurationException {
 		if (importModel == null) {
-			importModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+			importModel = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null));
 			importModel.setNsPrefix("rdf", RDF.getURI());
 			importModel.setNsPrefix("rdfs", RDFS.getURI());
 			importModel.setNsPrefix("owl", OWL.getURI());
 			for (int i = 0; imports != null && i < imports.length; i++) {
-				OntModel schemaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+				OntModel schemaModel = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null));
 				schemaModel.getDocumentManager().setProcessImports(true);
 				schemaModel.read(getConfigMgr().getAltUrlFromPublicUri(imports[i]));
 				Set<String> indirectImports = schemaModel.listImportedOntologyURIs(true);

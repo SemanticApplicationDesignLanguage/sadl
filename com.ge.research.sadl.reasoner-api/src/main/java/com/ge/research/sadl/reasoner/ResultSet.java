@@ -217,7 +217,7 @@ public class ResultSet {
 	 * @param rhval
 	 * @return
 	 */
-	public static boolean valuesMatch(Object lhval, Object rhval) {
+	public static synchronized boolean valuesMatch(Object lhval, Object rhval) {
 		if (lhval instanceof KnownNode && rhval != null) {
 			return true;
 		}
@@ -320,7 +320,7 @@ public class ResultSet {
 	 * @param rhval
 	 * @return
 	 */
-	public static boolean valuesMatchExactly(Object lhval, Object rhval) {
+	public boolean valuesMatchExactly(Object lhval, Object rhval) {
 		if (lhval instanceof KnownNode && rhval != null) {
 			return true;
 		}
@@ -347,7 +347,7 @@ public class ResultSet {
 		return false;
 	}
 
-	public static boolean areDoublesEqual(double testVal, double actVal) {
+	public static synchronized boolean areDoublesEqual(double testVal, double actVal) {
 		String tv = new Double(testVal).toString();
 		while (tv.length() > 0 && !Character.isDigit(tv.charAt(0))) {
 			tv = tv.substring(1);

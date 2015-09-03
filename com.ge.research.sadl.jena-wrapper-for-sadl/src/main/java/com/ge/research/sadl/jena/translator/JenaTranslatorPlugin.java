@@ -713,7 +713,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return contents.toString();
 	}
 	
-	public static String modelNsToRuleNs(String modelNs) {
+	public String modelNsToRuleNs(String modelNs) {
 		return modelNs + ".rules";
 	}
 
@@ -1130,8 +1130,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 						if (1 > 0) {
 							if (configurationMgr instanceof IConfigurationManagerForEditing) {
 								ConfigurationItem newItem = new ConfigurationItem(categories);
-								newItem.addNameValuePair(new NameValuePair("name", builtinName, ConfigurationType.Bag));
-								newItem.addNameValuePair(new NameValuePair("class", clsname, ConfigurationType.Bag));
+								newItem.addNameValuePair(newItem.new NameValuePair("name", builtinName, ConfigurationType.Bag));
+								newItem.addNameValuePair(newItem.new NameValuePair("class", clsname, ConfigurationType.Bag));
 								((IConfigurationManagerForEditing) configurationMgr).addConfiguration(newItem);
 								((IConfigurationManagerForEditing) configurationMgr).saveConfiguration();
 								logger.info("Built-in '" + builtinName + "' found in service registry and added to configuration.");
@@ -1227,7 +1227,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 	}
 
-	public static String literalValueToString(Object litObj, TranslationTarget target) {
+	public static synchronized String literalValueToString(Object litObj, TranslationTarget target) {
 		if (litObj instanceof String) {
 			litObj = "\"" + litObj + "\"";
 		}
@@ -1343,7 +1343,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return q;
 	}
 
-	protected static boolean isValidLocalName(String name) {
+	protected boolean isValidLocalName(String name) {
 		if (name == null || name.indexOf(" ") >= 0 || name.indexOf("?") >= 0) {
 			return false;
 		}
@@ -1360,7 +1360,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * 
 	 * @throws InvalidNameException -- the concept was not found
 	 */
-	public static String findNameNs(OntModel model, String name) throws InvalidNameException {
+	public static synchronized String findNameNs(OntModel model, String name) throws InvalidNameException {
 		String uri = findConceptInSomeModel(model, name);
 		if (uri != null) {
 			return uri;
@@ -1373,6 +1373,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			}
 			impuri = getUriInModel(model, impuri, name);
 			if (impuri != null) {
+				logger.debug("found concept with URI '" + impuri + "'");
 				return impuri;
 			}
 		}
@@ -1389,12 +1390,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 					}
 					String muri = getUriInModel(model, or.getURI(), name);
 					if (muri != null) {
+						logger.debug("found concept with URI '" + muri + "'");
 						return muri;
 					}
 				}
 				// try this ontology--maybe it wasn't in the map used by findConceptInSomeModel
 				String muri = getUriInModel(model, onto.getURI() + "#", name);
 				if (muri != null) {
+					logger.debug("found concept with URI '" + muri + "'");
 					return muri;
 				}
 			}
@@ -1409,20 +1412,22 @@ public class JenaTranslatorPlugin implements ITranslator {
 		throw new InvalidNameException("'" + name + "' not found in any model.");
 	}
 
-	private static String findConceptInSomeModel(OntModel model, String name) {
+	private static synchronized String findConceptInSomeModel(OntModel model, String name) {
 		Map<String, String> map = model.getNsPrefixMap();
 		Iterator<String> uriitr = map.values().iterator();
 		while (uriitr.hasNext()) {
 			String ns = uriitr.next();
 			String uri = getUriInModel(model, ns, name);
 			if (uri != null) {
+				logger.debug("found concept with URI '" + uri + "'");
 				return uri;
 			}
 		}
+		logger.debug("did not find concept with name '" + name + "'");
 		return null;
 	}
 	
-	private static String getUriInModel(OntModel model, String ns, String name) {
+	private static synchronized String getUriInModel(OntModel model, String ns, String name) {
 		Resource r = model.getAnnotationProperty(ns + name);
         if (r != null) {
             return r.getURI();
@@ -1449,7 +1454,7 @@ public class JenaTranslatorPlugin implements ITranslator {
         return null;
 	}
 
-	protected static String expandPrefixedUrl(OntModel model, String name) {
+	protected String expandPrefixedUrl(OntModel model, String name) {
 		String prefix = name.substring(0, name.indexOf(':'));
 		String lname = name.substring(name.indexOf(':') + 1);
 		String ns = model.getNsPrefixURI(prefix);
@@ -1708,7 +1713,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * @param v - the variable Node being checked
 	 * @return - true if the variable is bound else false
 	 */
-	public static boolean variableIsBoundInOtherElement(List<GraphPatternElement> gpes, int startingIndex, GraphPatternElement gp, 
+	public boolean variableIsBoundInOtherElement(List<GraphPatternElement> gpes, int startingIndex, GraphPatternElement gp, 
 			boolean boundIfEqual, boolean matchMustBeAfter, Node v) {
 		boolean reachedSame = false;
 		for (int i = startingIndex; gpes != null && i < gpes.size(); i++) {
@@ -1734,7 +1739,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return false;
 	}
 	
-	private static boolean variableIsBound(GraphPatternElement gpe, Node v) {
+	private boolean variableIsBound(GraphPatternElement gpe, Node v) {
 		if (gpe instanceof TripleElement) {
 			if ((((TripleElement)gpe).getSubject() != null &&((TripleElement)gpe).getSubject().equals(v)) || 
 					(((TripleElement)gpe).getObject() != null && ((TripleElement)gpe).getObject().equals(v))) {

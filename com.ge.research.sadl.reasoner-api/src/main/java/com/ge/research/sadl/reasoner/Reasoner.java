@@ -42,7 +42,7 @@ public abstract class Reasoner implements IReasoner {
 	private static final String XSD_TYPE_ID_DELIMITED = "<" + XSDDatatype.XSD + ">";
 	protected HashMap<String, Object> configuration;
 
-	public static Object xsdStringToObject(String objValue) {
+	public static synchronized Object xsdStringToObject(String objValue) {
 		if ((objValue.indexOf(XSDDatatype.XSD)) > 0) {
 			String[] valueAndType = xsdStringToTypeAndValue(objValue);
 			if (valueAndType != null) {
@@ -78,7 +78,7 @@ public abstract class Reasoner implements IReasoner {
 		return objValue;
 	}
 
-	public static String objectToXsdString(Object objValue) throws TranslationException {
+	public static synchronized String objectToXsdString(Object objValue) throws TranslationException {
 		if (objValue == null) {
 			return null;
 		}
@@ -151,7 +151,7 @@ public abstract class Reasoner implements IReasoner {
 		return val;
 	}
 
-	public static String now() {
+	public static synchronized String now() {
 		String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
 
 	    Calendar cal = Calendar.getInstance();

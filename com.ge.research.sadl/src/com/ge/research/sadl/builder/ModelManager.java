@@ -7440,14 +7440,14 @@ public class ModelManager {
 				}
 			}
 			if (type.equals(ComparisonType.IsOnly)) {
-				if (ResultSet.valuesMatchExactly(lhval, rhval)) {
-					return new TestResult(true);
-				}
+//				if (ResultSet.valuesMatchExactly(lhval, rhval)) {
+//					return new TestResult(true);
+//				}
 			}
 			if (type.equals(ComparisonType.IsNotOnly)) {
-				if (!ResultSet.valuesMatchExactly(lhval, rhval)) {
-					return new TestResult(true);
-				}
+//				if (!ResultSet.valuesMatchExactly(lhval, rhval)) {
+//					return new TestResult(true);
+//				}
 			}
 		}
 		if ((type.equals(ComparisonType.IsNot) || type

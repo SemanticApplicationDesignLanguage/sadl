@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogMessageArea;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -47,9 +50,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -380,7 +380,7 @@ public class TranslatorConfigurationDialog extends Dialog {
 		    	logger.debug("Error saving configuration option, "+optionName+", of type "+optionValue.getClass().getName());
 		    }
 		    logger.debug("Setting "+optionName+" to "+optionValue.toString());
-		    ConfigurationItem.NameValuePair nv = new ConfigurationItem.NameValuePair(optionName, optionValue);
+		    ConfigurationItem.NameValuePair nv = configItem.new NameValuePair(optionName, optionValue);
 		    nv.setConfigType(ConfigurationItem.ConfigurationType.SingleValue);
 		    configItem.addNameValuePair(nv);
 		}

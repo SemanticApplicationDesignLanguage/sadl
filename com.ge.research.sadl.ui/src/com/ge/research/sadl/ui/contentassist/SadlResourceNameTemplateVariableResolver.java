@@ -23,7 +23,9 @@
 
 package com.ge.research.sadl.ui.contentassist;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -228,11 +230,24 @@ public class SadlResourceNameTemplateVariableResolver extends
 
 		List<String> values = new ArrayList<String>();
 		try {
+			boolean modelEmpty = true;
 	        for (TreeIterator<EObject> iter = EcoreUtil.getAllContents(visitor.getModelResource(), true); visitor.getModelName() == null && iter.hasNext();) { 
 	            EObject eObject = iter.next();
 	            if (visitor.doSwitch(eObject) != null) {
 	                iter.prune();
 	            }
+	            modelEmpty = false;
+	        }
+	        if (modelEmpty) {
+	        	try {
+					visitor.getModel().init(visitor.getConfigurationMgr((String)null), sadlModelManagerProvider, currentResource);
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	        }
 	        
 	        if (visitor.getModelBaseUri() == null) {

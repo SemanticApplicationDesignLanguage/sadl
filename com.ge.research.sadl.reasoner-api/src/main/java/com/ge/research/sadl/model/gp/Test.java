@@ -62,7 +62,7 @@ public class Test extends SadlCommand {
 		}
 		return false;
 	}
-	public static ComparisonType getType(String token) {
+	public static synchronized ComparisonType getType(String token) {
 		for (ComparisonType type : values()) {
 			if (type.matches(token)) {
 				return type;

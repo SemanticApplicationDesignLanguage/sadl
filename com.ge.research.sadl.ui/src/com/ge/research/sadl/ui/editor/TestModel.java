@@ -87,7 +87,7 @@ public class TestModel extends SadlActionDelegate implements IObjectActionDelega
 		final String modelName = visitor.getModelName();
 	    
 		ConfigurationItem ci = new ConfigurationItem(CONSOLE);
-		NameValuePair nvp = new NameValuePair(pSHOWNAMESPACES, showNS);
+		NameValuePair nvp = ci.new NameValuePair(pSHOWNAMESPACES, showNS);
 		nvp.setConfigType(ConfigurationType.SingleValue);
 		ci.addNameValuePair(nvp);
 		try {

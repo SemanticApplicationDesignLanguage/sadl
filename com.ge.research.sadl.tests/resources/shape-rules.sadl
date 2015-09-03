@@ -1,0 +1,19 @@
+uri "http://sadl.imp/shape_rules" alias rules version "$Revision: 1.3 $ Last modified on $Date: 2015/06/30 21:25:53 $".
+
+import "http://sadl.imp/shapes_specific".
+
+Rule AreaOfCircle
+	given
+		x is any Circle
+	if
+		
+	then
+		area of x = radius of x^2 * 3.14159 .
+		
+Rule AreaOfRectangle
+	given
+		x is any Rectangle
+	if
+		
+	then
+		area of x = height of x * width of x .

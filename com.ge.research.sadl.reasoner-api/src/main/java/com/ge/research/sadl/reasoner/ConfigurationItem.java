@@ -44,7 +44,7 @@ public class ConfigurationItem {
 	 * @author 200005201
 	 *
 	 */
-	public static class NameValuePair {
+	public class NameValuePair {
 		private String name;
 		private Object[] values;
 		private ConfigurationType configType = ConfigurationType.SingleValue; // default

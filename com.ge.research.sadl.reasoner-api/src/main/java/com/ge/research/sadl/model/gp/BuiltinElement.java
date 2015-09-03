@@ -71,7 +71,7 @@ public class BuiltinElement extends GraphPatternElement {
 			}
 			return false;
 		}
-		public static BuiltinType getType(String token) {
+		public static synchronized BuiltinType getType(String token) {
 			for (BuiltinType type : values()) {
 				if (type.matches(token)) {
 					return type;

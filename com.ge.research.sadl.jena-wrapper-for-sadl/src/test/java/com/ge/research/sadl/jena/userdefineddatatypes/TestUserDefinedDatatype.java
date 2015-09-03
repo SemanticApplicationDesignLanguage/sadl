@@ -19,7 +19,7 @@ import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.datatypes.xsd.impl.XSDGenericType;
+//import com.hp.hpl.jena.datatypes.xsd.XSDDatatype.XSDGenericType;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -33,7 +33,7 @@ public class TestUserDefinedDatatype {
 	
 
 	@Test
-//	@Ignore
+	@Ignore
 	public void test() throws DatatypeFormatException, FileNotFoundException {
 		URL dataModelsFolder = ClassLoader.getSystemResource("testing");
         String uri = "http://www.daml.org/2001/03/daml+oil-ex-dt";
@@ -73,7 +73,7 @@ public class TestUserDefinedDatatype {
         XSSimpleType st = new XSSimpleTypeDecl();
 //        ((XSSimpleTypeDecl)st).setNamespaceItem(new XSNamespaceItem());
         
-        XSDGenericType newDT = new XSDGenericType(st, "http://com.ge.research/ns");
+//        XSDGenericType newDT = new XSDDataType.XSDGenericType(st, "http://com.ge.research/ns");
 
         doTestDatatypeRangeValidation(over12Type, OntModelSpec.OWL_MEM_MICRO_RULE_INF);
         doTestDatatypeRangeValidation(over12Type, OntModelSpec.OWL_MEM_MINI_RULE_INF);

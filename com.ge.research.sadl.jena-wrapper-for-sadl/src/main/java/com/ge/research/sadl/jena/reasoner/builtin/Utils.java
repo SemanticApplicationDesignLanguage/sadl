@@ -65,7 +65,7 @@ public class Utils {
      * @return - true if success
      * @throws Exception - throws an Exception if an unsupported Object is passed as obj
      */
-    public static boolean deleteReplaceCreateValue(RuleContext context, Node s, Node p, Object obj) throws Exception {
+    public static synchronized boolean deleteReplaceCreateValue(RuleContext context, Node s, Node p, Object obj) throws Exception {
     	boolean triplesRemoved = false;
 		ClosableIterator<Triple> citr = context.find(s, p, null);
 		if (citr.hasNext()) {
@@ -129,7 +129,7 @@ public class Utils {
      * @return - true if success
      * @throws Exception - throws an Exception if an unsupported Object is passed as obj
      */
-	public static boolean deleteReplaceCreateValue(RuleContext context, Node s, Node p, Node obj) {
+	public static synchronized boolean deleteReplaceCreateValue(RuleContext context, Node s, Node p, Node obj) {
 		boolean tripleExisted = false;
     	ClosableIterator<Triple> citr = context.find(s, p, null);
 		if (citr.hasNext()) {
@@ -172,7 +172,7 @@ public class Utils {
 	 * @param p - the property
 	 * @param obj - the object value
 	 */
-    public static void addValue(RuleContext context, Node s, Node p, Node obj) {
+    public static synchronized void addValue(RuleContext context, Node s, Node p, Node obj) {
 		if (s != null && p != null && obj != null) {
 			Triple t = new Triple(s, p, obj);
 			doAddTriple(t, context, true);
@@ -185,7 +185,7 @@ public class Utils {
      * @return - the double value of the literal
      * @throws InvalidObjectException 
      */
-    public static double getDoubleFromLiteral(Node n) throws InvalidObjectException {
+    public static synchronized double getDoubleFromLiteral(Node n) throws InvalidObjectException {
     	if (n != null && n.isLiteral()) {
     		Object ov = n.getLiteralValue();
     		if (ov instanceof Double) {
@@ -207,7 +207,7 @@ public class Utils {
      * @return - the float value of the literal
      * @throws InvalidObjectException 
      */
-    public static float getFloatFromLiteral(Node n) throws InvalidObjectException {
+    public static synchronized float getFloatFromLiteral(Node n) throws InvalidObjectException {
     	if (n != null && n.isLiteral()) {
     		Object ov = n.getLiteralValue();
     		if (ov instanceof Double) {
@@ -229,7 +229,7 @@ public class Utils {
      * @return - the boolean value
      * @throws InvalidObjectException 
      */
-    public static boolean getBooleanFromLiteral(Node n) throws InvalidObjectException {
+    public static synchronized boolean getBooleanFromLiteral(Node n) throws InvalidObjectException {
     	if (n != null && n.isLiteral()) {
     		Object ov = n.getLiteralValue();
     		if (ov instanceof Boolean) {
@@ -245,7 +245,7 @@ public class Utils {
      * @param newName - the localname to be used in the new URI
      * @return
      */
-    public static String transferNsToLocalName(Node n2, String newName) {
+    public static synchronized String transferNsToLocalName(Node n2, String newName) {
 		if (n2.isURI()) {
 			return n2.getNameSpace() + newName;
 		}
@@ -257,7 +257,7 @@ public class Utils {
      * @param guess - the basename to which a time value is to be appended to create the name
      * @return - the time-based name
      */
-	public static String createUniqueNewLocalName(String guess) {
+	public static synchronized String createUniqueNewLocalName(String guess) {
 		String trial = (guess == null ? "n" : guess) + System.currentTimeMillis();
 		return trial;
 	}
@@ -269,7 +269,7 @@ public class Utils {
 	 * @param existingClass - the URI of the existing class
 	 * @return - a new Node with the specified URI and of the specified type
 	 */
-	public static Node_URI createInstanceOfClass(RuleContext context, String newInstUri, String existingClass) {
+	public static synchronized Node_URI createInstanceOfClass(RuleContext context, String newInstUri, String existingClass) {
 		Node_URI theClass = (Node_URI) NodeFactory.createURI(existingClass);
 		return createInstanceOfClass(context, newInstUri, theClass);
 	}
@@ -281,7 +281,7 @@ public class Utils {
 	 * @param theClass - the class node of which the new instance is to be a type
 	 * @return - a new Node with the specified URI and of the specified type
 	 */
-	public static Node_URI createInstanceOfClass(RuleContext context, String newInstUri, Node_URI theClass) {
+	public static synchronized Node_URI createInstanceOfClass(RuleContext context, String newInstUri, Node_URI theClass) {
 		Node_URI newInst = (Node_URI) NodeFactory.createURI(newInstUri);
 		Utils.deleteReplaceCreateValue(context, newInst, RDF.Nodes.type, theClass);
 		return newInst;
@@ -294,7 +294,7 @@ public class Utils {
 	 * @param predUri - the property URI
 	 * @param object - the object value node
 	 */
-	public static void addObjectProperty(RuleContext context, Node_URI subject, String predUri, Node_URI object) {
+	public static synchronized void addObjectProperty(RuleContext context, Node_URI subject, String predUri, Node_URI object) {
 		if (subject == null) {
 			_logger.error("addObjectProperty called with null subject");
 			return;
@@ -323,7 +323,7 @@ public class Utils {
 	 * @param predUri - the URI of the predicate to be matched
 	 * @return - the Node which is the object of a matching triple
 	 */
-	public static Node getPropertyValue(RuleContext context, Node subject, String predUri) {
+	public static synchronized Node getPropertyValue(RuleContext context, Node subject, String predUri) {
 		Node_URI  prop = (Node_URI) NodeFactory.createURI(predUri);
 		return Util.getPropValue(subject, prop, context);
 	}
@@ -334,7 +334,7 @@ public class Utils {
 	 * @param p - the Node to be tested to see if it is an ObjectProperty
 	 * @return - true if an owl:ObjectProperty else false
 	 */
-	public static boolean isObjectProperty(RuleContext context, Node p) {
+	public static synchronized boolean isObjectProperty(RuleContext context, Node p) {
 		if (p.isURI()) {
 			if (find(p, RDF.type.asNode(), OWL.ObjectProperty.asNode(), context) != null) {
 				return true;
@@ -343,7 +343,7 @@ public class Utils {
 		return false;
 	}
 	
-	public static boolean isOntClass(RuleContext context, Node cls) {
+	public static synchronized boolean isOntClass(RuleContext context, Node cls) {
 		if (cls.isURI()) {
 			Node typ = find(cls, RDF.type.asNode(), null, null, context);
 			if (typ != null && (typ.equals(RDFS.Class.asNode()) ||
@@ -360,7 +360,7 @@ public class Utils {
 	 * @param p - the Node to be tested to see if it is an DatatypeProperty
 	 * @return - true if an owl:DatatypeProperty else false
 	 */
-	public static boolean isDatatypeProperty(RuleContext context, Node p) {
+	public static synchronized boolean isDatatypeProperty(RuleContext context, Node p) {
 		if (p.isURI()) {
 			if (find(p, RDF.type.asNode(), OWL.DatatypeProperty.asNode(), context) != null) {
 				return true;
@@ -375,7 +375,7 @@ public class Utils {
 	 * @param p -- the Node to be tested
 	 * @return -- true if an OntProperty else false
 	 */
-	public static boolean isOntProperty(RuleContext context, Node p) {
+	public static synchronized boolean isOntProperty(RuleContext context, Node p) {
 		if (isObjectProperty(context, p) || isDatatypeProperty(context, p)) {
 			return true;
 		}
@@ -392,7 +392,7 @@ public class Utils {
 	 * @param context
 	 * @return
 	 */
-	public static Triple find(Node subj, Node prop, Node obj, RuleContext context) {
+	public static synchronized Triple find(Node subj, Node prop, Node obj, RuleContext context) {
     	ClosableIterator<Triple> itr = context.find(subj, prop, obj);
     	if (itr.hasNext()) {
     		Triple t = itr.next();
@@ -412,7 +412,7 @@ public class Utils {
 	 * @param context
 	 * @return
 	 */
-	public static Node find(Node subj, Node prop, Node obj, Node cls, RuleContext context) {
+	public static synchronized Node find(Node subj, Node prop, Node obj, Node cls, RuleContext context) {
     	ClosableIterator<Triple> itr = context.find(subj, prop, obj);
     	if (itr.hasNext()) {
     		Triple t = itr.next();
@@ -445,7 +445,7 @@ public class Utils {
 	 * @param context - the RuleContext from the calling built-in
 	 * @param addToDeductions - if true also add the triple to the FBRuleInfGraph's deductions
 	 */
-	public static void doAddTriple(Triple t, RuleContext context, boolean addToDeductions) {
+	public static synchronized void doAddTriple(Triple t, RuleContext context, boolean addToDeductions) {
 		context.add( t );
 		boolean deductionsNotified = false;
 		if (addToDeductions && context.getGraph() instanceof FBRuleInfGraph) {
@@ -463,7 +463,7 @@ public class Utils {
 	 * @param context - the RuleContext from the calling built-in
 	 * @param addToDeductions - if true also remove the triple from the FBRuleInfGraph's deductions
 	 */
-    public static void doRemoveTriple(Triple t, RuleContext context, boolean removeFromDeductions) {
+    public static synchronized void doRemoveTriple(Triple t, RuleContext context, boolean removeFromDeductions) {
 		context.remove(t);	
 		boolean deductionsNotified = false;
 		if (removeFromDeductions && context.getGraph() instanceof FBRuleInfGraph) {
@@ -475,7 +475,7 @@ public class Utils {
 		}
 	}
 
-	public static boolean verifyNodeType(Node matching, Node cls, RuleContext context) {
+	public static synchronized boolean verifyNodeType(Node matching, Node cls, RuleContext context) {
     	ClosableIterator<Triple> itr = context.find(matching, RDF.Nodes.type, cls);
     	if (itr.hasNext()) {
     		itr.close();
@@ -494,16 +494,16 @@ public class Utils {
 	/**
      * Construct a new float valued node
      */
-    public static Node makeFloatNode(double value) {
+    public static synchronized Node makeFloatNode(double value) {
     	return NodeFactory.createLiteral(LiteralLabelFactory.create(new Float(value)));
 //        return Node.createLiteral(new LiteralLabel(new Float(value)));
     }
     
-    public static Node makeBooleanNode(boolean value) {
+    public static synchronized Node makeBooleanNode(boolean value) {
     	return NodeFactory.createLiteral(LiteralLabelFactory.create(new Boolean(value)));
     }
     
-    public static Node makeXSDDateTimeNode(XSDDateTime value) {
+    public static synchronized Node makeXSDDateTimeNode(XSDDateTime value) {
     	return NodeFactory.createLiteral(LiteralLabelFactory.create(value));
     }
 }

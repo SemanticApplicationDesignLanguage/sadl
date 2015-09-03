@@ -238,15 +238,15 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
             }
          });
     	if (m == null) {
-			m = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+			m = ModelFactory.createOntologyModel(configurationManager.getOntModelSpec(null));
 			m.read(altUrl, format);			
     	}
     	if (m instanceof OntModel) {
     		return (OntModel)m;
     	}
     	else {
-    		OntModelSpec.OWL_MEM.setImportModelGetter(this);
-    		return ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, m);
+    		configurationManager.getOntModelSpec(null).setImportModelGetter(this);
+    		return ModelFactory.createOntologyModel(configurationManager.getOntModelSpec(null), m);
     	}
     }
 

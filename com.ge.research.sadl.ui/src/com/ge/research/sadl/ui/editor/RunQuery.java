@@ -303,7 +303,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 	        	showNS = service.getBoolean("com.ge.research.sadl.Sadl", "vnamespacesInQueryResults", true, null);
 			}
 			ConfigurationItem ci = new ConfigurationItem(CONSOLE);
-			NameValuePair nvp = new NameValuePair(pSHOWNAMESPACES, showNS);
+			NameValuePair nvp = ci.new NameValuePair(pSHOWNAMESPACES, showNS);
 			nvp.setConfigType(ConfigurationType.SingleValue);
 			ci.addNameValuePair(nvp);
 			try {
@@ -383,7 +383,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 								(finalPreviousQueries == null || finalPreviousQueries.size() == 0 || !finalPreviousQueries.contains(finalQuery))) {
 							try {
 								ConfigurationItem ci = new ConfigurationItem(ADHOCQUERY);
-								NameValuePair nvp = new NameValuePair(pQUERY, finalQuery);
+								NameValuePair nvp = ci.new NameValuePair(pQUERY, finalQuery);
 								nvp.setConfigType(ConfigurationType.Sequence);
 								ci.addNameValuePair(nvp);
 								visitor.addConfiguration(ci);

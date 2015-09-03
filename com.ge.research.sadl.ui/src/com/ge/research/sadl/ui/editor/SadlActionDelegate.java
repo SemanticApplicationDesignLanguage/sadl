@@ -38,6 +38,7 @@ import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.sadl.Model;
 import com.ge.research.sadl.ui.internal.SadlActivator;
+import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
@@ -113,7 +114,7 @@ public abstract class SadlActionDelegate extends AbstractHandler {
 			URI kbaseUri = ResourceManager.getProjectUri(editorFileUri).appendSegment(ResourceManager.OWLDIR);
 			String kbaseFolder;
 			try {
-				kbaseFolder = ConfigurationManager.fileUrlToFileName(kbaseUri.toString());
+				kbaseFolder = new SadlUtils().fileUrlToFileName(kbaseUri.toString());
 //				logger.debug(kbaseFolder + ", " + editorFile);
 				int segcnt = editorFile.segmentCount();
 				if (segcnt > 2) {

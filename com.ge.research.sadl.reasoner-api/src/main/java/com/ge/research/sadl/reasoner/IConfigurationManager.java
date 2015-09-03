@@ -9,6 +9,7 @@ import java.util.Map;
 import com.ge.research.sadl.model.ImportMapping;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.Model;
 
@@ -283,5 +284,14 @@ public interface IConfigurationManager {
 	 * @return
 	 */
 	public abstract OntDocumentManager getJenaDocumentMgr();
+	
+	/**
+	 * Method to get the OntModelSpec for this ConfigurationManager. When a model's
+	 * getDocumentManager is called, it uses the OntModelSpec, so to be thread safe
+	 * each Configuration manager needs it's own.
+	 * @param toCopySpec--if not null copy the provided spec else copy OntModelSpec.OWL_MEM
+	 * @return
+	 */
+	public abstract OntModelSpec getOntModelSpec(OntModelSpec toCopySpec);
 
 }

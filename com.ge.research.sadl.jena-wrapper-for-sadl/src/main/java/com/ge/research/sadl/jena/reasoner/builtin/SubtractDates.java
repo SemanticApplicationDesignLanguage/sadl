@@ -218,7 +218,7 @@ public class SubtractDates extends BaseBuiltin {
 	private static final int DaysInLeapYear = 366;
 	private static final int DaysInNormalYear = 365;
 
-	public static double getYears(Calendar c0,Calendar c1) {
+	public static synchronized double getYears(Calendar c0,Calendar c1) {
 		int doy0 = c0.get(Calendar.DAY_OF_YEAR);
 		int days0 = (isLeap(c0)?DaysInLeapYear:DaysInNormalYear) - doy0 + 1;
 		int doy1 = c1.get(Calendar.DAY_OF_YEAR);
@@ -230,7 +230,7 @@ public class SubtractDates extends BaseBuiltin {
 		return years;
 	}
 
-	public static double getMonths(Calendar c0, Calendar c1) {
+	public static synchronized double getMonths(Calendar c0, Calendar c1) {
 		boolean swapped = false;
 	    if (c0.after(c1)) {  // swap dates so that d1 is start and d2 is end
 	        Calendar swap = c0;
@@ -264,7 +264,7 @@ public class SubtractDates extends BaseBuiltin {
 //		return months;
 //	}
     
-	public static double getDays (Calendar c0, Calendar c1) {
+	public static synchronized double getDays (Calendar c0, Calendar c1) {
 		boolean swapped = false;
 	    if (c0.after(c1)) {  // swap dates so that d1 is start and d2 is end
 	        Calendar swap = c0;
@@ -288,20 +288,20 @@ public class SubtractDates extends BaseBuiltin {
 	    return days;
 	}
 	
-	public static long getMilliSeconds(Calendar c0, Calendar c1) {
+	public static synchronized long getMilliSeconds(Calendar c0, Calendar c1) {
 		return c0.getTimeInMillis() - c1.getTimeInMillis();
 	}
 	
-	public static double getSeconds(Calendar c0, Calendar c1) {
+	public static synchronized double getSeconds(Calendar c0, Calendar c1) {
 		long diffMS = getMilliSeconds(c0, c1);
 		return diffMS / 1000.0;
 	}
 	
-	public static double getMinutes(Calendar c0, Calendar c1) {
+	public static synchronized double getMinutes(Calendar c0, Calendar c1) {
 		return getSeconds(c0, c1) / 60.0;
 	}
 	
-	public static double getHours(Calendar c0, Calendar c1) { 
+	public static synchronized double getHours(Calendar c0, Calendar c1) { 
 		return getSeconds(c0, c1) / 3600.0;
 	}
 	
