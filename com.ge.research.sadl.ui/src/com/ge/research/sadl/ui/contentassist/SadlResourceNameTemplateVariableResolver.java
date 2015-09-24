@@ -107,12 +107,23 @@ public class SadlResourceNameTemplateVariableResolver extends
 			IDocument doc = xtextTemplateContext.getDocument();
 			if (doc instanceof XtextDocument) {
 				URI resourceUri = ((XtextDocument)doc).getResourceURI();
-				URI prjUri = ResourceManager.getProjectUri(resourceUri);
-				visitor = sadlModelManagerProvider.get(prjUri);
+				URI prjUri;
+				try {
+					prjUri = ResourceManager.getProjectUri(resourceUri);
+					visitor = sadlModelManagerProvider.get(prjUri);
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		else {
-			visitor = sadlModelManagerProvider.get(currentResource);
+			try {
+				visitor = sadlModelManagerProvider.get(currentResource);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		String conceptualType = (String) variable.getVariableType()
 				.getParams().iterator().next();

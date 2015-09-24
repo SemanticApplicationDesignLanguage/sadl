@@ -27,6 +27,8 @@ import org.eclipse.xtext.ui.editor.templates.XtextTemplateContextType;
 import org.eclipse.xtext.ui.shared.Access;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
+import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.ui.builder.SadlUiModelManager;
 import com.ge.research.sadl.ui.contentassist.SadlTemplateContextType;
 import com.ge.research.sadl.ui.editor.SadlDirtyStateEditorSupport;
 import com.ge.research.sadl.ui.editor.SadlEditorCallback;
@@ -116,4 +118,10 @@ public class SadlUiModule extends com.ge.research.sadl.ui.AbstractSadlUiModule {
 	public Class<? extends XtextSourceViewerConfiguration> bindXtextSourceViewerConfiguration() {
 		return SadlSourceViewerConfiguration.class;
 	}	
+	
+	// Provides listener capability for SadlModelManagaer.
+	public Class<? extends SadlModelManager> bindSadlModelManager() {
+		return SadlUiModelManager.class;
+	}
+
 }

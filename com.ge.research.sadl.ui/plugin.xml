@@ -445,7 +445,7 @@
         </page>
         <page
               category="com.ge.research.sadl.Sadl"
-              class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.properties.SadlReasonerPrefrencePage"
+              class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.properties.SadlReasonerPreferencePage"
               id="com.ge.research.sadl.Sadl.reasoner"
               name="Reasoner Preferences">
            <enabledWhen>

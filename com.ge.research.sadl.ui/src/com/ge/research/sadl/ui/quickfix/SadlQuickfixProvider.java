@@ -3,6 +3,7 @@ package com.ge.research.sadl.ui.quickfix;
 import java.util.Iterator;
 import java.util.Map;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -378,7 +379,13 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 			}
 		}
 		if (issue.getCode().equals(SadlJavaValidator.INSTANCE_NOT_DEFINED)) {
-			SadlModelManager visitor = sadlModelManagerProvider.get(conceptEobject.eResource());
+			SadlModelManager visitor = null;
+			try {
+				visitor = sadlModelManagerProvider.get(conceptEobject.eResource());
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			if (visitor != null) {
 				ConceptName rcn = null;
 				try {

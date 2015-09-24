@@ -193,17 +193,23 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 	        ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 
 	    URI modelURI = model.eResource().getURI();
-	    String baseUri = generateBaseUri(modelURI);
-	    String proposalText = getValueConverter().toString(baseUri, "STRING");
-	    String displayText = proposalText + " - Uri of Model";
-		Image image = getImage(model);
-		// no space after 'uri' keyword would be syntactically incorrect, so insert one
-		// check: last node was 'uri' keyword and content assist is invoked directly after the keyword
-		if (context.getLastCompleteNode().getText().equals(g.getModelNameAccess().getUriKeyword_0().getValue()) && context.getLastCompleteNode().getTotalEndOffset()==context.getOffset()) {
-			proposalText = " " + proposalText;
+	    String baseUri;
+		try {
+			baseUri = generateBaseUri(modelURI);
+		    String proposalText = getValueConverter().toString(baseUri, "STRING");
+		    String displayText = proposalText + " - Uri of Model";
+			Image image = getImage(model);
+			// no space after 'uri' keyword would be syntactically incorrect, so insert one
+			// check: last node was 'uri' keyword and content assist is invoked directly after the keyword
+			if (context.getLastCompleteNode().getText().equals(g.getModelNameAccess().getUriKeyword_0().getValue()) && context.getLastCompleteNode().getTotalEndOffset()==context.getOffset()) {
+				proposalText = " " + proposalText;
+			}
+			ICompletionProposal proposal = createCompletionProposal(proposalText, displayText, image, context);
+			acceptor.accept(proposal);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		ICompletionProposal proposal = createCompletionProposal(proposalText, displayText, image, context);
-		acceptor.accept(proposal);
 	}
 
 	
@@ -272,7 +278,7 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 //
 	// Generates a plausible baseUri for a model name using the model file's URI, 
 	// the project's name, and the preferences or project-specific properties.
-	public String generateBaseUri(URI modelURI) {
+	public String generateBaseUri(URI modelURI) throws MalformedURLException {
 	    String prefix = "http://sadl.org/" + ResourceManager.getProjectUri(modelURI).lastSegment() + "/";
 
     	IPreferencesService service = Platform.getPreferencesService();

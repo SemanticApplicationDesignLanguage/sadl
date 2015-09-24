@@ -111,9 +111,9 @@ public abstract class SadlActionDelegate extends AbstractHandler {
 		if (iei instanceof FileEditorInput) {
 			IPath editorFile = ((FileEditorInput)iei).getPath();
 			URI editorFileUri = URI.createFileURI(editorFile.toPortableString());
-			URI kbaseUri = ResourceManager.getProjectUri(editorFileUri).appendSegment(ResourceManager.OWLDIR);
-			String kbaseFolder;
 			try {
+				URI kbaseUri = ResourceManager.getProjectUri(editorFileUri).appendSegment(ResourceManager.OWLDIR);
+				String kbaseFolder;
 				kbaseFolder = new SadlUtils().fileUrlToFileName(kbaseUri.toString());
 //				logger.debug(kbaseFolder + ", " + editorFile);
 				int segcnt = editorFile.segmentCount();
