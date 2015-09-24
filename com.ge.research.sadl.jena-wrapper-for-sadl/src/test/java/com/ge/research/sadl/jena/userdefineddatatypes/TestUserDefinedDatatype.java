@@ -74,6 +74,7 @@ public class TestUserDefinedDatatype {
 //        ((XSSimpleTypeDecl)st).setNamespaceItem(new XSNamespaceItem());
         
 //        XSDGenericType newDT = new XSDDataType.XSDGenericType(st, "http://com.ge.research/ns");
+//        XSDGenericType newDT = new XSDGenericType(st, "http://com.ge.research/ns");
 
         doTestDatatypeRangeValidation(over12Type, OntModelSpec.OWL_MEM_MICRO_RULE_INF);
         doTestDatatypeRangeValidation(over12Type, OntModelSpec.OWL_MEM_MINI_RULE_INF);

@@ -320,7 +320,7 @@ public class ResultSet {
 	 * @param rhval
 	 * @return
 	 */
-	public boolean valuesMatchExactly(Object lhval, Object rhval) {
+	public static synchronized boolean valuesMatchExactly(Object lhval, Object rhval) {
 		if (lhval instanceof KnownNode && rhval != null) {
 			return true;
 		}

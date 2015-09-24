@@ -2,6 +2,7 @@ package com.ge.research.sadl.reasoner;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -294,4 +295,17 @@ public interface IConfigurationManager {
 	 */
 	public abstract OntModelSpec getOntModelSpec(OntModelSpec toCopySpec);
 
+	/**
+	 * Method to convert a URL string to a File-compatible string
+	 * url
+	 * @throws MalformedURLException 
+	 */
+	public abstract String fileUrlToFileName(String url) throws MalformedURLException;
+	
+	/**
+	 * Metod to convert a File-compatible tring to a file URL string
+	 * @param fn
+	 * @return
+	 */
+	public abstract String fileNameToFileUrl(String fn);
 }

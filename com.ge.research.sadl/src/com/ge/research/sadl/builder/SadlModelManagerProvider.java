@@ -17,6 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.builder;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.nio.channels.IllegalSelectorException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +34,9 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
+
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 
 /**
  * Provides SadlModelManagaers, one per Eclipse project. SadlModelManagers are stored n a Map (smmMap) by key project URI. 
@@ -55,7 +61,7 @@ public class SadlModelManagerProvider implements Provider<SadlModelManager>, IRe
 	private Map<URI, SadlModelManager> smmMap = new HashMap<URI, SadlModelManager>();
 	
 	
-	public SadlModelManager get(Resource resource) {
+	public SadlModelManager get(Resource resource) throws MalformedURLException {
 		setUri(ResourceManager.getProjectUri(resource.getURI()));
 		SadlModelManager modelManager = get();
 		if (modelManager.getCurrentResource() == null) {
@@ -105,6 +111,18 @@ public class SadlModelManagerProvider implements Provider<SadlModelManager>, IRe
 			return smmMap.get(uri);
 		}
 		SadlModelManager smm = new SadlModelManager(this);
+		try {
+			IConfigurationManagerForIDE configurationMgr = smm.getConfigurationMgr(uri.appendSegment(IConfigurationManager.OWLDIR));
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		smmMap.put(uri, smm);
 		return smm;
 	}

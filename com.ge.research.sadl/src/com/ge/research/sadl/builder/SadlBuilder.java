@@ -132,8 +132,8 @@ public class SadlBuilder implements IXtextBuilderParticipant {
         // Get a ConfigurationManager for the build
     	IConfigurationManagerForIDE configMgr = null;
 		String modelFolder = ResourceManager.convertProjectRelativePathToAbsolutePath(folder.getFullPath().toPortableString());
-        URI prjUri = ResourceManager.getProjectUri(URI.createURI(modelFolder));
        	try {
+            URI prjUri = ResourceManager.getProjectUri(URI.createURI(modelFolder));
        		configMgr = getVisitor(prjUri).getConfigurationMgr(modelFolder);
     	}
     	catch (Exception e) {

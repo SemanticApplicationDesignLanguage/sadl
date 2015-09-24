@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Author: crapo $ 
- * $Revision: 1.4 $ Last modified on   $Date: 2015/07/25 16:19:21 $
+ * $Revision: 1.5 $ Last modified on   $Date: 2015/09/22 15:00:52 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.reasoner.builtin;

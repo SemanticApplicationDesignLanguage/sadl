@@ -52,10 +52,10 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
+//import org.eclipse.ui.IPartListener2;	//*
+//import org.eclipse.ui.IWorkbenchPartReference;
+//import org.eclipse.ui.IWorkbenchWindow;
+//import org.eclipse.ui.PlatformUI;			//*
 import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.slf4j.Logger;
@@ -95,6 +95,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -182,7 +183,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * $Author: crapo $ 
  * $Revision: 1.4 $ Last modified on   $Date: 2014/11/03 19:20:22 $
  */
-public class SadlModelManager extends SadlSwitch<EObject> implements IPartListener2{
+public class SadlModelManager extends SadlSwitch<EObject> {
 
     private static final Logger logger = LoggerFactory.getLogger(SadlModelManager.class);
     
@@ -746,17 +747,17 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     		}
     	}
         annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, labels, comments));   
-        if (!addedAsListener) {
-        	IWorkbenchWindow wndw = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        	if (wndw != null) {
-        		wndw.getPartService().addPartListener(this);
-        		addedAsListener = true;
-//        		System.out.println("Added part listener");
-        	}
-//        	else {
-//        		System.out.println("Failed to add part listener");
+//        if (!addedAsListener) {
+//        	IWorkbenchWindow wndw = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+//        	if (wndw != null) {
+//        		wndw.getPartService().addPartListener(this);
+//        		addedAsListener = true;
+////        		System.out.println("Added part listener");
 //        	}
-        }
+////        	else {
+////        		System.out.println("Failed to add part listener");
+////        	}
+//        }
         return object;
     }
     
@@ -2199,8 +2200,9 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
      * This method will return a relative URI for a corresponding SADL model if one exists in the project
      * @param u
      * @return
+     * @throws MalformedURLException 
      */
-	public URI equivalentSadlModelInProject(URI u) {
+	public URI equivalentSadlModelInProject(URI u) throws MalformedURLException {
 		return getModel().equivalentSadlModelInProject(u);
 	}
 
@@ -3273,62 +3275,78 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 			SadlUtils su = new SadlUtils();
 			URI mfuri = URI.createURI(su.fileNameToFileUrl(modelFolderName));
             IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(mfuri);
-    		lastConfigMgr = configurationMgr;	// this is for when Xtext springs a call on us without a project identifier
+//    		lastConfigMgr = configurationMgr;	// this is for when Xtext springs a call on us without a project identifier
     		return configurationMgr;
 		}
 		return lastConfigMgr;
 	}
 
-	public IConfigurationManagerForIDE getConfigurationMgr(URI mfuri) throws ConfigurationException, URISyntaxException, IOException {
-        URI projectUri;
-        try {
-        	projectUri = ResourceManager.getProjectUri(mfuri);
-        }
-        catch (IllegalSelectorException e) {
-        	if (lastConfigMgr != null) {
-        		return lastConfigMgr;
-        	}
-        	else {
-        		throw new URISyntaxException(mfuri.toString(), "could not find ConfigurationManager for resource URI '" + mfuri + "'");
-        	}
-        }
-        IConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
-        // See if we already have a ConfigurationManager for this project and if so use it.
-        String owlModelsFolder = ResourceManager.getOwlModelsFolder(mfuri);
-		if (configurationMgr == null) {
-			ResourceManager.validateOwlModelsFolder(owlModelsFolder);
-			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-			configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
-			configurationMgrMap.put(projectUri, configurationMgr);
-	    	IPreferencesService service = Platform.getPreferencesService();
-	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
-	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
-	    	configurationMgr.setModelGetter(modelGetter);
-	    	
-			// Temp testing call **********************************		
-			List<URI> externalImports = getConfigurationMgr(owlModelsFolder).getExternalModelURIs();
-			// End temp testing call ********************************
-
-
+	public IConfigurationManagerForIDE getConfigurationMgr(URI modelFolderUri) throws ConfigurationException, URISyntaxException, IOException {
+		if (lastConfigMgr != null) {
+			return lastConfigMgr;
 		}
-		else if (configurationMgr.isConfigurationStale()) {
-			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-			configurationMgrMap.put(projectUri, configurationMgr);
-	    	IPreferencesService service = Platform.getPreferencesService();
-	    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
-	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
-	    	configurationMgr.setModelGetter(modelGetter);
-			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
-		} else if (!configurationMgr.getModelFolderPath().equals(new File(owlModelsFolder))) {
-			if (configurationMgr.isConfigChanged()) {
-				configurationMgr.saveConfiguration();
+		
+//        URI projectUri;
+//        try {
+//        	projectUri = ResourceManager.getProjectUri(modelFolderUri);
+//        }
+//        catch (IllegalSelectorException e) {
+//        	if (lastConfigMgr != null) {
+//        		return lastConfigMgr;
+//        	}
+//        	else {
+//        		throw new URISyntaxException(modelFolderUri.toString(), "could not find ConfigurationManager for resource URI '" + modelFolderUri + "'");
+//        	}
+//        }
+//        IConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
+//        // See if we already have a ConfigurationManager for this project and if so use it.
+//        String owlModelsFolder = ResourceManager.getOwlModelsFolder(modelFolderUri);
+//		if (configurationMgr == null) {
+//			configurationMgr = getConfigurationMgrFromOwlModelsFolder(owlModelsFolder);
+//		}
+//		else if (configurationMgr.isConfigurationStale()) {
+		String owlModelsFolder = modelFolderUri.toString();
+		owlModelsFolder = new SadlUtils().fileUrlToFileName(owlModelsFolder.toString());
+			IConfigurationManagerForIDE configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+//			configurationMgrMap.put(projectUri, configurationMgr);
+			String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			if (Platform.isRunning()) {
+		    	IPreferencesService service = Platform.getPreferencesService();
+		    	format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
 			}
-			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-			configurationMgrMap.put(projectUri, configurationMgr);
+	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
+	    	configurationMgr.setModelGetter(modelGetter);
 			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
-		}
+//		} else if (!configurationMgr.getModelFolderPath().equals(new File(owlModelsFolder))) {
+//			if (configurationMgr.isConfigChanged()) {
+//				configurationMgr.saveConfiguration();
+//			}
+//			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+//			configurationMgrMap.put(projectUri, configurationMgr);
+//			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
+//		}
+			lastConfigMgr = configurationMgr;
 		return configurationMgr;
 	}
+
+//	public IConfigurationManagerForIDE getConfigurationMgrFromOwlModelsFolder(String owlModelsFolder) throws IOException,
+//			URISyntaxException, ConfigurationException {
+//		URI projectUri = URI.createURI(owlModelsFolder).trimSegments(1);
+//		IConfigurationManagerForIDE configurationMgr;
+//		owlModelsFolder = ResourceManager.validateOwlModelsFolder(owlModelsFolder);
+//		configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+//		configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
+//		configurationMgrMap.put(projectUri, configurationMgr);
+//		IPreferencesService service = Platform.getPreferencesService();
+//		String format = Platform.isRunning() ? service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null) : "owl";	
+//		SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
+//		configurationMgr.setModelGetter(modelGetter);
+//		
+//		// Temp testing call **********************************		
+//		List<URI> externalImports = configurationMgr.getExternalModelURIs();
+//		// End temp testing call ********************************
+//		return configurationMgr;
+//	}
 	
 	private ModelManager getModel(Resource resource) {
 		ModelInfo minfo = getModelInfo(resource);
@@ -3714,53 +3732,6 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 //		return null;
 //	}
 
-	@Override
-	public void partActivated(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partClosed(IWorkbenchPartReference partRef) {
-		int i = 0;
-		System.out.println(i);
-	}
-
-	@Override
-	public void partDeactivated(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partOpened(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partHidden(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partVisible(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partInputChanged(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	public SadlModelManagerProvider getSadlModelManagerProvider() {
 		return sadlModelManagerProvider;

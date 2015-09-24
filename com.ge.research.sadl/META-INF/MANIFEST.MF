@@ -119,6 +119,7 @@ Export-Package: com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.
    com.hp.hpl.jena.rdf.model,
    com.ge.research.sadl.model",
  com.ge.research.sadl.validation;uses:="org.eclipse.xtext.validation",
+ com.hp.hpl.jena.datatypes,
  com.hp.hpl.jena.datatypes.xsd;
   uses:="com.hp.hpl.jena.graph.impl,
    com.hp.hpl.jena.datatypes,

@@ -103,7 +103,7 @@ public class SadlGlobalScopeProvider extends ImportUriGlobalScopeProvider {
 				if (prjUri != null) {
 					SadlModelManager smm = sadlModelManagerProvider.get(prjUri);
 					try {
-						IConfigurationManagerForIDE cmgr = smm.getConfigurationMgr(prjUri.appendSegment(ResourceManager.OWLDIR));
+						IConfigurationManagerForIDE cmgr = smm.getConfigurationMgr(prjUri.appendSegment(ResourceManager.OWLDIR).toString());
 						List<URI> externalUris = cmgr.getExternalModelURIs();
 						if (externalUris != null) {
 							uriSet.addAll(externalUris);

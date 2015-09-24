@@ -101,17 +101,16 @@ public class SadlImportUriResolver extends ImportUriResolver {
     		catch (CoreException e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
-    		} catch (ConfigurationException e) {
-    			SadlModelManager smMgr = sadlModelManagerProvider.get(importingResource);
-    			smMgr.getMessageManager().error(e.getMessage());
-    		} catch (URISyntaxException e) {
-    			SadlModelManager smMgr = sadlModelManagerProvider.get(importingResource);
-    			smMgr.getMessageManager().error(e.getMessage());
-    		} catch (IOException e) {
-    			SadlModelManager smMgr = sadlModelManagerProvider.get(importingResource);
-    			smMgr.getMessageManager().error(e.getMessage());
-    		}
-
+    		} catch (Exception e) {
+    			SadlModelManager smMgr;
+				try {
+					smMgr = sadlModelManagerProvider.get(importingResource);
+	    			smMgr.getMessageManager().error(e.getMessage());
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    		} 
     	}
     	else {
     		// Look up the public URI in the policy file and get the OWL URI.

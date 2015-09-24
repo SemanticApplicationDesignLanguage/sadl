@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -153,9 +154,9 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 					}
 				}
 				else {
-			        SadlModelManager visitor = sadlModelManagerProvider.get(resource);
-			        URI modelFolder = SadlModelManager.getProjectFromResourceSet(resource.getResourceSet()).appendSegment(ResourceManager.OWLDIR);
 			        try {
+				        SadlModelManager visitor = sadlModelManagerProvider.get(resource);
+				        URI modelFolder = SadlModelManager.getProjectFromResourceSet(resource.getResourceSet()).appendSegment(ResourceManager.OWLDIR);
 						IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr(modelFolder.toString());
 						if (!impUri.startsWith(ResourceManager.HTTP_URL_PREFIX)) {
 							String owlUrl = null;
@@ -231,11 +232,11 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 		        SadlModelManager visitor = sadlModelManagerProvider.get(uri.eResource());
 		        String altUri = visitor.getAltUrl(publicUri, modelUrl);
 		        // If those urls differ, that indicates another model has already used the public uri
-		        if (altUri != null && !publicUri.equals(altUri) && !owlUrl.equals(altUri)) {
+		        if (altUri != null && !publicUri.equals(altUri) && owlUrl != null && !owlUrl.equals(altUri)) {
 		            error("Model name must be unique", SadlPackage.Literals.MODEL_NAME__BASE_URI, DUPLICATE_MODEL_NAME, baseUri);
 		        }
 		        String alias = uri.getAlias();
-		        String otherUri = visitor.getConfigurationMgr(modelUrl).getUriFromGlobalPrefix(alias);
+		        String otherUri = visitor.getConfigurationMgr(modelUrl.toString()).getUriFromGlobalPrefix(alias);
 		        if (otherUri != null && !otherUri.equals(publicUri)) {
 		        	error("Global prefix must be unique but '" + alias + "' is already used for namespace '" + otherUri + "'", 
 		        			SadlPackage.Literals.MODEL_NAME__ALIAS, DUPLICATE_ALIAS, alias);
@@ -274,9 +275,8 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 		}
 		// do we have a global alias?
 		try {
-			SadlModelManager visitor = sadlModelManagerProvider.get(imp.eResource().getURI());
-			String modelFolder = ResourceManager.getProjectUri(imp.eResource().getURI()).appendSegment(ResourceManager.OWLDIR).toString();
-    		IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr(modelFolder);
+			SadlModelManager visitor = sadlModelManagerProvider.get(imp.eResource());
+    		IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr((String)null);
     		if (uri.endsWith(ResourceManager.SADLEXTWITHPREFIX)) {
     	    	URI importedURI = URI.createURI(uri);
     	    	if (importedURI.scheme()==null) {
@@ -404,23 +404,29 @@ public class SadlJavaValidator extends com.ge.research.sadl.validation.AbstractS
 //				}
 				Resource resource = rsrcId.eResource();
 				PendingModelError pendingErr = null;
-				SadlModelManager visitor = sadlModelManagerProvider.get(resource);
-				if (visitor.hasModelManager(resource)) { 
-					pendingErr = visitor.getPendingError(resource, nm);
-				}
-				if (pendingErr != null) {
-					if (pendingErr.getConceptType().equals(ConceptType.ONTCLASS)) {
-						error("Class not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, ONTCLASS_NOT_DEFINED);
+				SadlModelManager visitor;
+				try {
+					visitor = sadlModelManagerProvider.get(resource);
+					if (visitor.hasModelManager(resource)) { 
+						pendingErr = visitor.getPendingError(resource, nm);
 					}
-					else if (pendingErr.getConceptType().equals(ConceptType.OBJECTPROPERTY)) {
-						error("Object property not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, OBJECTPROPERTY_NOT_DEFINED);
+					if (pendingErr != null) {
+						if (pendingErr.getConceptType().equals(ConceptType.ONTCLASS)) {
+							error("Class not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, ONTCLASS_NOT_DEFINED);
+						}
+						else if (pendingErr.getConceptType().equals(ConceptType.OBJECTPROPERTY)) {
+							error("Object property not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, OBJECTPROPERTY_NOT_DEFINED);
+						}
+						else if (pendingErr.getConceptType().equals(ConceptType.DATATYPEPROPERTY)) {
+							error("Data property not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, DATATYPEPROPERTY_NOT_DEFINED);	
+						}
+						else if (pendingErr.getConceptType().equals(ConceptType.INDIVIDUAL)) {
+							error("Instance not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, INSTANCE_NOT_DEFINED);	
+						}
 					}
-					else if (pendingErr.getConceptType().equals(ConceptType.DATATYPEPROPERTY)) {
-						error("Data property not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, DATATYPEPROPERTY_NOT_DEFINED);	
-					}
-					else if (pendingErr.getConceptType().equals(ConceptType.INDIVIDUAL)) {
-						error("Instance not found", rsrcId, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, INSTANCE_NOT_DEFINED);	
-					}
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}

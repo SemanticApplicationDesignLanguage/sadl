@@ -88,7 +88,7 @@ public class JenaResource extends ResourceImpl {
 			else {
 				try {
 					URI prjUri = SadlModelManager.getProjectFromResourceSet(context.getResourceSet());
-					visitor = sadlModelManagerProvider.get(prjUri);
+					visitor = sadlModelManagerProvider.get(this);
 					String owlModelsFolder = prjUri.appendSegment(ResourceManager.OWLDIR).toString();
 					URI absUri = ResourceManager.convertPlatformUriToAbsoluteUri(context.getURI());
 					if (visitor.getConfigurationMgr(owlModelsFolder).isSadlDerivedAltUrl(absUri)) {	
@@ -129,7 +129,7 @@ public class JenaResource extends ResourceImpl {
 			if (!isImplicitLibrary) {
 				// pass in OWL model folder to get CfgMgr
 				try {
-					Map<String,String> modelImportMappings = visitor.getConfigurationMgr(thisUri.trimSegments(1)).getImports(modelName.getBaseUri(), Scope.LOCALONLY);
+					Map<String,String> modelImportMappings = visitor.getConfigurationMgr(thisUri.trimSegments(1).toString()).getImports(modelName.getBaseUri(), Scope.LOCALONLY);
 					for (String importedURI: modelImportMappings.keySet()) {
 						Import imp = SadlFactory.eINSTANCE.createImport();
 						imp.setImportURI(importedURI);

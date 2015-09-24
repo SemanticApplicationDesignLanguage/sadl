@@ -168,12 +168,12 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * 4. The configuration manager is responsible for setting up mappings, etc.
  * 
  * $Author: crapo $ 
- * $Revision: 1.17 $ Last modified on   $Date: 2015/07/31 11:47:46 $
+ * $Revision: 1.18 $ Last modified on   $Date: 2015/09/22 15:00:54 $
  */
 public class JenaReasonerPlugin extends Reasoner{
     protected static final Logger logger = LoggerFactory.getLogger(JenaReasonerPlugin.class);
 	public static String ReasonerFamily="Jena-Based";
-	public static final String version = "$Revision: 1.17 $";
+	public static final String version = "$Revision: 1.18 $";
 	private static String ReasonerCategory = "Jena";
 	public static final String pModelSpec = "pModelSpec";
 	public static final String pTimeOut = "pTimeOut";
@@ -1027,122 +1027,122 @@ public class JenaReasonerPlugin extends Reasoner{
 	public ResultSet ask(String askQuery) throws QueryParseException, QueryCancelledException {
 		boolean cancelled = false;
 		ResultSet rs = null;
-		synchronized(ReasonerFamily) {
+//		synchronized(ReasonerFamily) {
+		try {
+			startTrace();
+			QueryExecution qexec = null;		
+			com.hp.hpl.jena.query.ResultSet results = null;		
+			long t1 = System.currentTimeMillis();
+			prepareInfModel();
 			try {
-				startTrace();
-				QueryExecution qexec = null;		
-				com.hp.hpl.jena.query.ResultSet results = null;		
-				long t1 = System.currentTimeMillis();
-				prepareInfModel();
-				try {
-		//			IndexLARQ index = null;
-		//			if (askQuery.contains("http://jena.hpl.hp.com/ARQ/property#textMatch")) {
-		//				// this query uses Lucene
-		//				if (luceneIndexerClass != null) {
-		//					ILuceneModelIndexer indexer = (ILuceneModelIndexer) Class.forName(luceneIndexerClass).newInstance();
-		////					OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, infModel);
-		//					indexer.setModel(dataModel != null ? dataModel : schemaModel); //indexer.setModel(om);
-		//					IndexBuilderString larqBuilder = indexer.buildModelIndex();
-		//					index = larqBuilder.getIndex();
-		//
-		//				}
-		//				else {
-		//					FieldOption fo = IndexReader.FieldOption.ALL;
-		//					IndexBuilderString larqBuilder = new IndexBuilderString();
-		//					larqBuilder.indexStatements(this.infModel.listStatements());
-		//	//				larqBuilder.indexStatement(s);
-		//					larqBuilder.closeWriter();
-		//					index = larqBuilder.getIndex();
-		//				}
-		//			}
-					if (infDataset != null) {
-						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ),infDataset);
-					}
-					else {
-						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ), this.infModel);
-					}
-		//			if (index != null) {
-		//				LARQ.setDefaultIndex(qexec.getContext(), index);
-		//			}
-					qexec.setTimeout(queryTimeout);
-					if (askQuery.trim().substring(0, 3).equals("ask")) {	
-						boolean askResult = qexec.execAsk();
-						String[] columnName = new String[1];
-						columnName[0] = "ask";
-						Object array[][] = new Object[1][1];
-						array[0][0] = askResult;
-						rs = new ResultSet(columnName, array);
-					}
-					else if (askQuery.trim().substring(0, 9).equals("construct")) {
-						Model constructModel = qexec.execConstruct();
-						if (constructModel != null) {
-							StmtIterator sitr = constructModel.listStatements();
-							if (sitr.hasNext()) {
-								String[] columnName = new String[3];
-								columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
-								columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
-								columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
-								List<Object[]> dataList = new ArrayList<Object[]>();
-								while (sitr.hasNext()) {
-									Statement stmt = sitr.nextStatement();
-									Object[] row = new Object[3];
-									row[0] = stmt.getSubject().toString();
-									row[1] = stmt.getPredicate().toString();
-									RDFNode val = stmt.getObject();
-									if (val instanceof Resource) {
-										row[2] = ((Resource)val).toString();
-									}
-									else if (val instanceof Literal) {
-										row[2] = ((Literal)val).getValue();
-									}
-									else {
-										row[2] = val.toString();
-									}
-									dataList.add(row);
+	//			IndexLARQ index = null;
+	//			if (askQuery.contains("http://jena.hpl.hp.com/ARQ/property#textMatch")) {
+	//				// this query uses Lucene
+	//				if (luceneIndexerClass != null) {
+	//					ILuceneModelIndexer indexer = (ILuceneModelIndexer) Class.forName(luceneIndexerClass).newInstance();
+	////					OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, infModel);
+	//					indexer.setModel(dataModel != null ? dataModel : schemaModel); //indexer.setModel(om);
+	//					IndexBuilderString larqBuilder = indexer.buildModelIndex();
+	//					index = larqBuilder.getIndex();
+	//
+	//				}
+	//				else {
+	//					FieldOption fo = IndexReader.FieldOption.ALL;
+	//					IndexBuilderString larqBuilder = new IndexBuilderString();
+	//					larqBuilder.indexStatements(this.infModel.listStatements());
+	//	//				larqBuilder.indexStatement(s);
+	//					larqBuilder.closeWriter();
+	//					index = larqBuilder.getIndex();
+	//				}
+	//			}
+				if (infDataset != null) {
+					qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ),infDataset);
+				}
+				else {
+					qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ), this.infModel);
+				}
+	//			if (index != null) {
+	//				LARQ.setDefaultIndex(qexec.getContext(), index);
+	//			}
+				qexec.setTimeout(queryTimeout);
+				if (askQuery.trim().substring(0, 3).equals("ask")) {	
+					boolean askResult = qexec.execAsk();
+					String[] columnName = new String[1];
+					columnName[0] = "ask";
+					Object array[][] = new Object[1][1];
+					array[0][0] = askResult;
+					rs = new ResultSet(columnName, array);
+				}
+				else if (askQuery.trim().substring(0, 9).equals("construct")) {
+					Model constructModel = qexec.execConstruct();
+					if (constructModel != null) {
+						StmtIterator sitr = constructModel.listStatements();
+						if (sitr.hasNext()) {
+							String[] columnName = new String[3];
+							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
+							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
+							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+							List<Object[]> dataList = new ArrayList<Object[]>();
+							while (sitr.hasNext()) {
+								Statement stmt = sitr.nextStatement();
+								Object[] row = new Object[3];
+								row[0] = stmt.getSubject().toString();
+								row[1] = stmt.getPredicate().toString();
+								RDFNode val = stmt.getObject();
+								if (val instanceof Resource) {
+									row[2] = ((Resource)val).toString();
 								}
-								Object[][] data = new Object[dataList.size()][3];
-								for (int r = 0; r < dataList.size(); r++) {
-									for (int c = 0; c < 3; c++) {
-										data[r][c] = ((Object[]) dataList.get(r))[c];
-									}
+								else if (val instanceof Literal) {
+									row[2] = ((Literal)val).getValue();
 								}
-								rs = new ResultSet(columnName, data);
+								else {
+									row[2] = val.toString();
+								}
+								dataList.add(row);
 							}
+							Object[][] data = new Object[dataList.size()][3];
+							for (int r = 0; r < dataList.size(); r++) {
+								for (int c = 0; c < 3; c++) {
+									data[r][c] = ((Object[]) dataList.get(r))[c];
+								}
+							}
+							rs = new ResultSet(columnName, data);
 						}
 					}
-					else {
-						results = qexec.execSelect();
-						rs = convertFromJenaResultSetToReasonerResultSet(results);
-					}
-					if (collectTimingInfo) {
-						long t2 = System.currentTimeMillis();
-						timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, "execute query (" + askQuery + ")", t2 - t1));
-					}
 				}
-				catch (com.hp.hpl.jena.query.QueryCancelledException e) {
-					rs = null;
-					cancelled = true;
-					throw new QueryCancelledException("Query timed out (" + queryTimeout + " seconds): '" + askQuery + "'\n");
+				else {
+					results = qexec.execSelect();
+					rs = convertFromJenaResultSetToReasonerResultSet(results);
 				}
-				catch (InferenceCanceledException e) {
-					rs = null;
-					throw e;
+				if (collectTimingInfo) {
+					long t2 = System.currentTimeMillis();
+					timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, "execute query (" + askQuery + ")", t2 - t1));
 				}
-				catch (Exception e) {
-					rs = null;
-					e.printStackTrace();
-					logger.error("query failed with Exception: " + e.getMessage());
-					throw new QueryParseException("Query '" + askQuery + "' failed: " + e.getLocalizedMessage(), e);
-				}
-				finally { if (!cancelled && qexec != null) qexec.close();	}
-				endTrace();
-			} catch (ConfigurationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
-			finally {
+			catch (com.hp.hpl.jena.query.QueryCancelledException e) {
+				rs = null;
+				cancelled = true;
+				throw new QueryCancelledException("Query timed out (" + queryTimeout + " seconds): '" + askQuery + "'\n");
 			}
+			catch (InferenceCanceledException e) {
+				rs = null;
+				throw e;
+			}
+			catch (Exception e) {
+				rs = null;
+				e.printStackTrace();
+				logger.error("query failed with Exception: " + e.getMessage());
+				throw new QueryParseException("Query '" + askQuery + "' failed: " + e.getLocalizedMessage(), e);
+			}
+			finally { if (!cancelled && qexec != null) qexec.close();	}
+			endTrace();
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		finally {
+		}
+//		}
 		return rs;
 	}
 
@@ -2014,23 +2014,28 @@ public class JenaReasonerPlugin extends Reasoner{
 				infModel = schemaModel;
 			}
 			else {
+				synchronized(ReasonerFamily) {
 				long t1 = System.currentTimeMillis();
 				generateTboxModelWithSpec();
 				logger.debug("In prepareInfModel, modelSpec: "+modelSpec.toString());
 				logger.debug("In prepareInfModel, reasoner rule count: "+getReasonerOnlyWhenNeeded().getRules().size());
 				infModel = ModelFactory.createInfModel(reasoner, tboxModelWithSpec);
 				if (collectTimingInfo) {
-	//				infModel.size();	// this forces instantiation of the inference model
+					infModel.size();	// this forces instantiation of the inference model
 					long t2 = System.currentTimeMillis();
 					timingInfo.add(new ReasonerTiming(TIMING_PREPARE_INFMODEL, "prepare inference model", t2 - t1));
+				}
 				}
 			}
 		}
 		else if(newInputFlag == true) {
 			logger.debug("In prepareInfModel, reusing infModel with newInputFlag is true");
 			if (infModel instanceof InfModel) {
+				synchronized(ReasonerFamily) {
 				logger.debug("In prepareInfModel, reusing infModel, rebinding existing infModel");
 				((InfModel) infModel).rebind();
+				infModel.size();	// force re-instantiation?
+				}
 			}
 		} else {
 			logger.debug("In prepareInfModel, reusing infModel without any changes, newInputFlag is false");

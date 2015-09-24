@@ -717,12 +717,14 @@ public class ModelManager {
 				if (ResourceManager.SADLEXT.equalsIgnoreCase(uri
 						.fileExtension())) {
 					try {
-						uri = ResourceManager
-								.validateAndReturnOwlUrlOfSadlUri(uri);
+						uri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(uri);
 					} catch (CoreException e) {
 						e.printStackTrace();
 						addError(0, "Error resolvling import name ("
 								+ importUri + "): " + e.getLocalizedMessage());
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 				// Validate that the import URI exists.
@@ -4490,7 +4492,7 @@ public class ModelManager {
 									.getAltUrlFromPublicUri(mname);
 							if (altUrl != null) {
 								File owlFile = new File(
-										getConfigurationMgr().getSadlUtils().fileUrlToFileName(altUrl));
+										getConfigurationMgr().fileUrlToFileName(altUrl));
 								if (owlFile.exists()) {
 									mname = owlFile.getName();
 									if (mname
@@ -5607,8 +5609,9 @@ public class ModelManager {
 	 * 
 	 * @param u
 	 * @return
+	 * @throws MalformedURLException 
 	 */
-	public URI equivalentSadlModelInProject(URI u) {
+	public URI equivalentSadlModelInProject(URI u) throws MalformedURLException {
 		return ResourceManager.validateAndReturnSadlFileEquivalentOfOwlUrl(u);
 	}
 	
@@ -6287,12 +6290,12 @@ public class ModelManager {
 				if (actualUrl.startsWith(ResourceManager.FILE_SHORT_PREFIX)) {
 					// check to make sure that the OWL file has been built
 					if (!configMgr.getModelGetter().getFormat().equals(IConfigurationManager.JENA_TDB)) {
-						File mf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(actualUrl));
+						File mf = new File(getConfigurationMgr().fileUrlToFileName(actualUrl));
 						if (mf.exists()) {
 							long owlTS = mf.lastModified();
 							String sadlFN = ResourceManager.sadlFileNameOfOwlAltUrl(actualUrl, true);
-							sadlFN = ResourceManager.findSadlFileInProject(getConfigurationMgr().getSadlUtils().fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString()), sadlFN);
-							File sf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(sadlFN));
+							sadlFN = ResourceManager.findSadlFileInProject(getConfigurationMgr().fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString()), sadlFN);
+							File sf = new File(getConfigurationMgr().fileUrlToFileName(sadlFN));
 							if (sf.exists()) {
 								long sadlTS = sf.lastModified();
 								if (sadlTS > owlTS) {

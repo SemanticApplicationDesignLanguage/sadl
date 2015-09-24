@@ -286,15 +286,15 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
     			Statement s = pendingDeletions.get(i);
     			if (s.getPredicate().getLocalName().equals("altURL")) {
     				String sadlFileName = ResourceManager.sadlFileNameOfOwlAltUrl(s.getObject().toString(), true);
-    				File owlfile = new File(getSadlUtils().fileUrlToFileName(s.getObject().toString()));
+    				File owlfile = new File(fileUrlToFileName(s.getObject().toString()));
     				String sadlfile = ResourceManager.findSadlFileInProject(owlfile.getParentFile().getParent(), sadlFileName);
     				if (sadlfile != null) {
     					String stmtFileName = owlfile.getName();
-    					String altvFileName = new File(getSadlUtils().fileUrlToFileName(altv.toString())).getName();
+    					String altvFileName = new File(fileUrlToFileName(altv.toString())).getName();
     					if (stmtFileName != null && altvFileName != null && !stmtFileName.equals(altvFileName)) {
 	    					// duplicate model uri
 	    					throw new ConfigurationException("Model name '" + pubv.toString() + "' is used by more than one SADL model: " 
-	    							+ owlfile.getName() + " and " + new File(getSadlUtils().fileUrlToFileName(altv.toString())).getName());
+	    							+ owlfile.getName() + " and " + new File(fileUrlToFileName(altv.toString())).getName());
     					}
     				}
     			}
@@ -579,7 +579,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	 * @return
 	 */
 	public static String getOWLFormat() {
-		IPreferencesService service = Platform.getPreferencesService();
+		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
 		if (service != null) {
 			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
 			return format;
@@ -859,7 +859,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		} else {
 			actualPath = URI.createFileURI(actualUri.toString()).toFileString();
 		}
-		List<File> sadlFiles = ResourceManager.findSadlFilesInDir(new File(sadlUtils.fileUrlToFileName(getProjectFolderPath())));
+		List<File> sadlFiles = ResourceManager.findSadlFilesInDir(new File(fileUrlToFileName(getProjectFolderPath())));
 		for (int i = 0; i < sadlFiles.size(); i++) {
 			File aFile = sadlFiles.get(i);
 			try {
@@ -879,8 +879,16 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	public Object getClassInstance(String reasonerClassName)
 			throws InstantiationException, IllegalAccessException,
 			ClassNotFoundException {
-		return Platform.getBundle("com.ge.research.sadl").loadClass(reasonerClassName).newInstance();
-
+		if (Platform.isRunning()) {
+			return Platform.getBundle("com.ge.research.sadl").loadClass(reasonerClassName).newInstance();
+		}
+		try {
+		   Class c = Class.forName(reasonerClassName);
+		   return c.newInstance();
+		} catch (Exception e) {
+		   e.printStackTrace();
+		}
+		return null;
 	}
 
 	protected static ServiceLoader<ITranslator> getTranslatorsFromServiceLoader(Class<ITranslator> cls) {
@@ -982,7 +990,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		}
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (altUrl !=  null && !altUrl.equals(publicUri)) {
-			String altFN = getSadlUtils().fileUrlToFileName(altUrl);
+			String altFN = fileUrlToFileName(altUrl);
 			return isOwlFileCreatedBySadl(new File(altFN));
 		}
 //		else {
@@ -1000,7 +1008,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 		if (altUrl.isPlatformPlugin()) {
 			return false;
 		}
-		else if (altUrl.scheme().equals("http")) {
+		else if ("http".equals(altUrl.scheme())) {
 			return false;
 		}
 		if (altUrl.fileExtension().equals(ResourceManager.OWLFILEEXT)) {
@@ -1164,9 +1172,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	 * @throws IOException
 	 */
 	private boolean isInProject(String resourcePath) throws MalformedURLException, IOException {
-		URI prjUri = ResourceManager.getProjectUri(URI.createURI(getModelFolder()));
-		String rsrcFN = getSadlUtils().fileUrlToFileName(resourcePath);
-		String prjFP = getSadlUtils().fileUrlToFileName(prjUri.toString());
+//		URI prjUri = ResourceManager.getProjectUri(URI.createURI(getModelFolder()));
+		URI prjUri = URI.createFileURI(getModelFolder()).trimSegments(1);
+		String rsrcFN = fileUrlToFileName(resourcePath);
+		String prjFP = fileUrlToFileName(prjUri.toString());
 		if (rsrcFN.startsWith(prjFP)) {
 			return true;
 		}
