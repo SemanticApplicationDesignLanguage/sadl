@@ -465,8 +465,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 		String altUrl = canModifyModel(thisModelName);
 		if (altUrl != null) {
-			OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-			altUrl = ConfigurationManager.fileNameToFileUrl(altUrl);
+			OntModel ontModel = ModelFactory.createOntologyModel(getConfigurationMgr().getOntModelSpec(null));
+			altUrl = getConfigurationMgr().fileNameToFileUrl(altUrl);
 			ontModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
 			ontModel.read(altUrl);
 			ontModel.getDocumentManager().setProcessImports(true);
@@ -490,7 +490,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		if (editedTboxModels != null && editedTboxModels.containsKey(thisModelName)) {
 			return editedTboxModels.get(thisModelName);
 		}
-		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		OntModel model = ModelFactory.createOntologyModel(getConfigurationMgr().getOntModelSpec(null));
 		model.getDocumentManager().setFileManager(getConfigurationMgr().getJenaDocumentMgr().getFileManager());
 		Resource importOnt = model.getResource(getModelName());
 		Ontology ont = model.createOntology(thisModelName);

@@ -251,7 +251,7 @@ public class SadlServerMain {
 				String[] catHier = new String[1];
 				catHier[0] = "Jena";		// or "JenaForGE"
 				ConfigurationItem ci = new ConfigurationItem(catHier);
-				ci.addNameValuePair(new NameValuePair("pDerivationLogging", (derivationLevel == 1 ? "Shallow" : "Deep")));
+				ci.addNameValuePair(ci.new NameValuePair("pDerivationLogging", (derivationLevel == 1 ? "Shallow" : "Deep")));
 			}
 			if (!verboseFlag.equals("NONE")) {
 				sadlSvc.collectTimingInformation(true);
