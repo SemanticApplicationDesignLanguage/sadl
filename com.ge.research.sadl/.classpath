@@ -3,10 +3,10 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="src-gen"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12-1.7.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/reasoner-api-2.4.0.jar" sourcepath="lib/reasoner-api-2.4.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl-2.4.0.jar" sourcepath="/com.ge.research.sadl.reasoner-impl"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12-1.6.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activation-1.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/com.springsource.org.apache.commons.logging-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.6.jar"/>
