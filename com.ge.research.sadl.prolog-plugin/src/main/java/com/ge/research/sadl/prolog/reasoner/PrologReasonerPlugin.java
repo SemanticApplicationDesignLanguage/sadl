@@ -300,6 +300,9 @@ public class PrologReasonerPlugin extends Reasoner {
 		
 		int whereIndex = askQuery.indexOf(" where ");
 		String plQuery = whereIndex >= 0 ? askQuery.substring(whereIndex + 7) : askQuery;
+		if (!plQuery.endsWith(".")) {
+			plQuery = plQuery + ".";
+		}
 		long t1 = System.currentTimeMillis();
 		if (collectTimingInfo) {
 			timingInfo.add(new ReasonerTiming(TIMING_QUERYPREP, "prepare query", t1 - t0));
@@ -308,7 +311,7 @@ public class PrologReasonerPlugin extends Reasoner {
 		List<String> solution_list = new ArrayList<String>();
 		try {
 			System.out.println("Query: " + plQuery);
-			SolveInfo solution = getPlengine().solve(plQuery + ".");
+			SolveInfo solution = getPlengine().solve(plQuery);
 			while (solution.isSuccess()) {
 				solution_count += 1;
 				for (String var: vars){
