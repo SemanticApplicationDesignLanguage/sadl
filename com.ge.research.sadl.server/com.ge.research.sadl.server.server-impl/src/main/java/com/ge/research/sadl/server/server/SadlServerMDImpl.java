@@ -145,6 +145,38 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.service.extended.ISadlExtendedService2#getDirectSubclassesOfTaxonomy(java.lang.String)
+	 */
+	public String[] getDirectSubclassesOfTaxonomy(String root) 
+			throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException,
+					QueryParseException, SessionNotFoundException, QueryCancelledException {
+			
+		String query = "select distinct ?et where {?et <urn:x-hp-direct-predicate:http_//www.w3.org/2000/01/rdf-schema#subClassOf> <"+ root + "> }";
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
+		String[][] results = getDataAsStringArray(query);
+		if (results == null) {
+			return null;
+		}
+		
+		int size = results.length;
+		String[] retVal = new String[size - 1];
+		for (int i = 0; i < size; ++i) {
+			String[] ri = results[i];
+			for (int j = 0; j < ri.length; ++j) {
+				String rj = ri[j];
+//				if (logger.isDebugEnabled()) logger.debug("i="+ i + ", j=" + j + ", value=" + rj);
+				if (i > 0) {
+					retVal[i-1] = rj;
+				}
+			}
+		}
+ 		return retVal;
+	}
+
+
 		/* (non-Javadoc)
 		 * @see com.ge.research.sadl.service.extended.ISadlExtendedService2#getLeafClassesOfTaxonomy(java.lang.String)
 		 */
