@@ -130,7 +130,7 @@
   </Category>
   <Category rdf:about="http://com.ge.research.sadl.configuration#ReasonerSpec">
     <reasonerClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >com.ge.research.sadl.geonly.jena.JenaGEReasonerPlugin</reasonerClassName>
+    >com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin</reasonerClassName>
   </Category>
   <Category rdf:about="http://com.ge.research.sadl.configuration#Builtin"/>
 </rdf:RDF>
