@@ -32,7 +32,7 @@
   <parent>
     <groupId>com.ge.research.sadl</groupId>
     <artifactId>server</artifactId>
-    <version>2.4.0</version>
+    <version>2.4.1</version>
   </parent>
 
   <artifactId>sadlserver-impl</artifactId>
@@ -58,9 +58,14 @@
 	  		<version>${project.version}</version>
 	  	</dependency>
 	  	<dependency>
-	  		<groupId>com.ge.research.sadl.geonly</groupId>
-	  		<artifactId>jena-wrapper-extensions</artifactId>
-	  		<version>${project.version}</version> 
+	  		<groupId>com.ge.research.sadl</groupId>
+	  		<artifactId>jena-wrapper-for-sadl</artifactId>
+	  		<version>${project.version}</version>
+	  	</dependency>
+	  	<dependency>
+	  		<groupId>com.ge.research.sadl</groupId>
+	  		<artifactId>prolog-for-sadl</artifactId>
+	  		<version>${project.version}</version>
 	  	</dependency>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
@@ -114,12 +119,10 @@
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>jena-wrapper-for-sadl</artifactId>
-  		<version>${project.version}</version>
   	</dependency>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>prolog-for-sadl</artifactId>
-  		<version>2.4.0</version>
   	</dependency>
   </dependencies>
   

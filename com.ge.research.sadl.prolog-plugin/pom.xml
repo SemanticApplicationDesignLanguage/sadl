@@ -3,13 +3,28 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ge.research.sadl</groupId>
 	<artifactId>prolog-for-sadl</artifactId>
-	<version>2.4.0</version>
+	<version>2.4.1</version>
 	<name>Prolog Reasoner/Translator Plugin for SADL</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ver.lucene>3.5.0</ver.lucene>
 	</properties>
+	
+  <dependencyManagement>
+  	<dependencies>
+	  	<dependency>
+	  		<groupId>com.ge.research.sadl</groupId>
+	  		<artifactId>reasoner-api</artifactId>
+	  		<version>${project.version}</version>
+	  	</dependency>
+	  	<dependency>
+	  		<groupId>com.ge.research.sadl</groupId>
+	  		<artifactId>reasoner-impl</artifactId>
+	  		<version>${project.version}</version>
+	  	</dependency>
+  	</dependencies>
+  </dependencyManagement>
 
 	<dependencies>
 	  	<dependency>
@@ -42,12 +57,10 @@
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-api</artifactId>
-			<version>2.4.0</version>
 		</dependency>
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-impl</artifactId>
-			<version>2.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
