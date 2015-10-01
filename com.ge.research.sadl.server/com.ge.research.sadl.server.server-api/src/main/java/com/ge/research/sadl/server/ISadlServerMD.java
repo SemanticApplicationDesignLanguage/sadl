@@ -29,7 +29,6 @@ package com.ge.research.sadl.server;
 
 import java.io.IOException;
 
-import javax.activation.DataSource;
 import javax.naming.NameNotFoundException;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -66,7 +65,7 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	public abstract String getSessionKey();
 	
 	/**
-	 * This method returs all of the subclasses of the classification hierarch starting at root
+	 * This method returns all of the subclasses of the classification hierarchy starting at root
 	 * @param root
 	 * @return
 	 * @throws ConfigurationException 
@@ -78,6 +77,21 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws NameNotFoundException 
 	 */
 	public abstract String[] getAllSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+
+	/**
+	 * This method returns all of the direct subclasses (one level down) of root in a class hierarchy.
+	 * 
+	 * @param root, the starting class type name 
+	 * @return class names of all of the direct descendants, or null if none were found
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws SessionNotFoundException 
+	 * @throws QueryParseException 
+	 * @throws NameNotFoundException 
+	 */
+	public abstract String[] getDirectSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
 
 	/**
 	 * This method returns all the leaf classes of the classification hierarchy starting at root
