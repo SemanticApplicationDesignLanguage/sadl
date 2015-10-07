@@ -148,6 +148,7 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	/* (non-Javadoc)
 	 * @see com.ge.research.sadl.service.extended.ISadlExtendedService2#getDirectSubclassesOfTaxonomy(java.lang.String)
 	 */
+	@Override
 	public String[] getDirectSubclassesOfTaxonomy(String root) 
 			throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException,
 					QueryParseException, SessionNotFoundException, QueryCancelledException {
@@ -631,6 +632,24 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 		return retVal;
 		}
 		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.service.extended.ISadlExtendedService2#getAnnotation(java.lang.String)
+	 */
+	@Override
+	public String getAnnotation(String className, String annotationName) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException {
+		String query = "select ?d where { <" + className + "> <"+annotationName+"> ?d }";
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
+		ResultSet results = query(query);
+
+		if ((results == null) || (results.getRowCount() == 0) || (results.getRowCount() > 1)) {
+			return null;
+		}
+		
+		return (String) results.first()[0];
 	}
 
 //	/**

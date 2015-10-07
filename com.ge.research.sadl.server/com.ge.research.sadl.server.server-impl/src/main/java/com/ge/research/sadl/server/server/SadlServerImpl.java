@@ -973,7 +973,8 @@ public class SadlServerImpl implements ISadlServer {
     	boolean usesCR = false;
     	List<String> templateImports = new ArrayList<String>();
 		try {
-			Scanner s = new Scanner(rawTemplate).useDelimiter("\\n");
+			Scanner s = new Scanner(rawTemplate);
+			s.useDelimiter("\\n");
 			while (s.hasNext()) {
 				String templateLine = s.next();
 				if (templateLine.endsWith("\r")) {
@@ -1002,7 +1003,7 @@ public class SadlServerImpl implements ISadlServer {
 		}
 		String template = templateSb.toString();
 		returnObject[0] = template;
-		returnObject[1] =  templateImports;
+		returnObject[1] = templateImports;
 		return returnObject;
     }
 
@@ -1010,7 +1011,8 @@ public class SadlServerImpl implements ISadlServer {
     	StringBuffer templateSb = new StringBuffer();
     	boolean usesCR = false;
 		try {
-			Scanner s = new Scanner(rawTemplate).useDelimiter("\\n");
+			Scanner s = new Scanner(rawTemplate);
+			s.useDelimiter("\\n");
 			while (s.hasNext()) {
 				String templateLine = s.next();
 				if (templateLine.endsWith("\r")) {
@@ -1025,6 +1027,7 @@ public class SadlServerImpl implements ISadlServer {
 					if (!uri.endsWith("#")) {
 						uri = uri + "#";
 					}
+					s.close();
 					return uri;
 				} else {
 					templateSb.append(templateLine);

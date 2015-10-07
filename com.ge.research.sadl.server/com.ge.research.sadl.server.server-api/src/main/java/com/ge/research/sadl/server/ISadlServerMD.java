@@ -336,5 +336,18 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws QueryParseException 
 	 */
 	public abstract String[] getConceptRdfsComments(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException;
-	
+
+	/**
+	 * This method returns the annotation on the given class
+	 * @param className
+	 * @param annotationName
+	 * @return -- the annotation String if any else null
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws QueryParseException 
+	 */
+	public abstract String getAnnotation(String className, String annotationName) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException ;
+
 }
