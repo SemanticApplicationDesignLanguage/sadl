@@ -23,9 +23,8 @@
 
 package com.ge.research.sadl.prolog.reasoner.builtin;
 
-import com.hp.hpl.jena.reasoner.rulesys.*;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.graph.*;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 
 /**
 
