@@ -3,9 +3,27 @@
  */
 package com.ge.research.sadl
 
+import com.ge.research.sadl.scoping.QualifiedNameProvider
+import com.ge.research.sadl.validation.SoftDeclarationReference
+import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
+import org.eclipse.xtext.naming.IQualifiedNameConverter
+import com.ge.research.sadl.scoping.QualifiedNameConverter
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class SADLRuntimeModule extends AbstractSADLRuntimeModule {
+	
+	override bindIQualifiedNameProvider() {
+		QualifiedNameProvider
+	}
+	
+	def Class<? extends IQualifiedNameConverter> bindIQualifiedNameCoverter() {
+		QualifiedNameConverter
+	}
+	
+	def Class<? extends LinkingDiagnosticMessageProvider> bindILinkingDiagnosticMessageProvider() {
+		SoftDeclarationReference.SoftLinkingMessageProvider
+	}
+	
 }

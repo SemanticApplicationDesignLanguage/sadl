@@ -199,7 +199,7 @@ DefiniteArticle :
 //  -- equivalent properties for properties
 //  -- the same individual for individuals
 EquivalentConcepts :
-	class1=ResourceByName 'is' 'the' 'same' 'as' class2=ResourceIdentifier EOS;
+	class1=ResourceByName 'is' 'the' 'same' 'as'  class2=ResourceIdentifier EOS;
 
 // Two classes are known to be disjoint sets.
 DisjointClasses :
@@ -303,7 +303,7 @@ PropertyDeclaration :
 	;
 
 AdditionalPropertyInfo :
-		','? 'describes' domain=ResourceIdentifier
+		','? ('describes'|'of') domain=ResourceIdentifier
 	|	','? cond=Condition
 	|	','? range=Range
 	|	','? isfunc=IsFunctional
@@ -646,7 +646,8 @@ ValueRow :
 // from the namespace by a colon character).  We also need to accept legal URI
 // fragments as local names.  In particular, we need names like X.509 to work.
 NAME hidden() :
-   ID (':' ID)? ( ('-'|'.'|'~') NAME_FRAGMENT? |'%'? NAME_FRAGMENT )*;
+   ID (':' ID)? ( ('-'|'.'|'~') ->NAME_FRAGMENT? |'%'? ->NAME_FRAGMENT )*;
+
 
 NAME_FRAGMENT hidden():
 	ID_OR_KEYWORD | UNSIGNED_NUMBER ID_OR_KEYWORD?

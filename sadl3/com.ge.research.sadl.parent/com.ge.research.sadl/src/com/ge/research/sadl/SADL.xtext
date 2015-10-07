@@ -40,8 +40,36 @@ ModelElement :
     ;
 
 // These are the things that translate directly to OWL.
-Statement :
-        ClassDeclaration
+Statement returns Declaration:
+        DeclarationPart 
+        	({ClassDeclaration.nameDeclarations+=current} 'is' 'a' ('top-level'? 'class' | 'type' 'of' superType=TypeReference facet=DataTypeFacet?)
+				(','? 'must' 'be' 'one' 'of' '{' instanceDeclarations+=InstanceDeclaration (',' instanceDeclarations+=InstanceDeclaration)* '}')?
+				describedBy+=PropertyDeclarationInClass*
+			|{Property.nameDeclarations+=current} (','? restrictions+=PropertyRestriction)+
+			|{EquivalentConcepts.nameDeclarations=current} 'is' 'the' 'same' 'as' (complement?='not')? class2=TypeReference
+			|{Instance.nameDeclarations+=current} 'is' article=AnArticle type=TypeReference
+			)  EOS
+		| '{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 
+			('are' ('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
+			|{DisjointClasses.types=current} 'are' 'disjoint') EOS
+        | {Property} article=AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
+        | {Instance} article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart EOS
+        | DataTypeDeclaration
+;
+
+DeclarationPart returns Declaration:
+	name=[Declaration|NAME] Annotation*
+;
+
+DataTypeDeclaration returns TypeDefinition:
+	'data' 'type' nameDeclarations+=DeclarationPart 'is' ('a'|'an')? superType=TypeReference facet=DataTypeFacet? EOS
+;
+
+DataTypeFacet :	
+		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
+	|	regex=STRING
+	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
+	|	'{' values+=(STRING|NUMBER) (','? values+=(STRING|NUMBER))* '}'
 ;
 
 // TypeReferences
@@ -58,15 +86,11 @@ IntersectionType returns TypeReference:
 ;
 
 PrimaryTypeReference returns TypeReference:
-	{SimpleTypeReference} type=[ClassDeclaration|NAME]
-	| RestrictedTypeReference
+	{SimpleTypeReference} type=[Declaration|NAME]
 	| PrimitiveDataType
 	| '{' TypeReference '}'
 ;
 
-RestrictedTypeReference :
-	'(' type=TypeReference cond=Condition ')'
-;
 
 PrimitiveDataType returns TypeReference :
 	primitiveType=DataType
@@ -76,34 +100,14 @@ enum DataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
     gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
 
-// Classes may be declared in many ways.
-ClassDeclaration:
-	(name=NAME Annotation* 'is' 'a' ('top-level'? 'class'
-									| 'type' 'of' superType=TypeReference)
-								(','? 'must' 'be' 'one' 'of' '{' instanceDeclarations+=InstanceDeclaration (',' instanceDeclarations+=InstanceDeclaration)* '}')?
-	| '{' multiDeclarations+=MultiClassDeclarationPart (','  multiDeclarations+=MultiClassDeclarationPart)*'}' 
-						   'are' ('top-level'? 'classes'
-									| 'types' 'of' superType=TypeReference))
-	describedBy+=AddlClassInfo* EOS;
-
-MultiClassDeclarationPart returns ClassDeclaration:
-	name=NAME Annotation*
-;
-
 InstanceDeclaration :
 	name=NAME
 ;
 
 // Class declarations may also describe the class's properties.
-AddlClassInfo returns Property:
-    	','? 'described' 'by' name=NAME (type=TypeInformation|restriction=Condition);
+PropertyDeclarationInClass returns Property:
+    	','? 'described' 'by' nameDeclarations+=DeclarationPart restrictions+=PropertyRestriction;
 
-// ... a single value ...
-// ... a List of values ...
-// ... Lists of values ...
-// ... values ...
-TypeInformation :
-    ('has'|'with') ('a' singleValued?='single' 'value'|('a' 'List'|'Lists') 'of' 'values'|'values') 'of' 'type' type=TypeReference;
 
 // These articles can appear before the property name and are indicative of the functionality of the property or
 //	the cardinality of the property on the class
@@ -116,11 +120,22 @@ IndefiniteArticle :
 DefiniteArticle :
 	'The'|'the';
 
-Condition :
+PropertyRestriction :
     	AllValuesCondition
+    |   {TypeAssociation} ('describes'|'of') type=TypeReference
+    |   TypeRestriction
     |   HasValueCondition
     |   CardinalityCondition
-    ;
+    |   {IsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[Declaration|NAME]
+    |   {IsTransitive} 'is' 'transitive'
+    |   {IsSymmetrical} 'is' 'symmetrical'
+    |   {IsAnnotation} 'is' 'a' 'type' 'of' 'annotation'
+//TODO    |   {SubProperty} 'is' 'a' 'type' 'of' superProperty=[Property|NAME]
+    |   {IsFunctional} 'has' 'a' 'single' (inverse?='subject' | 'value')?
+;
+
+TypeRestriction :
+    ('has'|'with') ('a' singleValued?='single' 'value'|('a' 'List'|'Lists') 'of' 'values'|'values') 'of' 'type' type=TypeReference;
 
 AllValuesCondition :
 	'only' ('has'|'with') 'values' 'of' 'type' type=TypeReference;
@@ -133,7 +148,6 @@ CardinalityCondition :
 	('at' operator=('least'|'most') |'exactly') 
 	cardinality=(NUMBER|'one') ('value'|'values') 
 	('of' 'type' type=TypeReference | 'each' 'of' 'types' type=TypeReference)?;
-
 
 ExplicitValue :
 //TODO		instName=ResourceByName		// e.g., George
@@ -159,7 +173,7 @@ NAME hidden() :
    ID (':' ID)? (('-'|'.'|'~'|'%') NAME_FRAGMENT)*;
 
 NAME_FRAGMENT hidden():
-	ID | UNSIGNED_NUMBER ID?
+	ID | UNSIGNED_NUMBER ->ID?
 ;
 
 // NUMBER matches both integral and floating point numbers.

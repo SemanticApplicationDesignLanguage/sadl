@@ -14,6 +14,7 @@ import org.eclipse.xtext.resource.FileExtensionProvider
 import org.eclipse.xtext.validation.Issue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -23,7 +24,7 @@ class GenerateTestCases {
 	@Inject ValidationTestHelper validationHelper
 	@Inject FileExtensionProvider extensionProvider 
 	
-	@Test def void generateTestCasesFromExamples() {
+	@Ignore @Test def void generateTestCasesFromExamples() {
 		val root = new File("../../../..")
 		println(root.canonicalFile.absolutePath)
 		testParseRecursive(root)

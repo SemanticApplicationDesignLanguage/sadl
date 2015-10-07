@@ -30,5 +30,10 @@ abstract class SADLParsingTest{
 		}
 		Assert.assertEquals(text.toString, annotatedText)
 	}
+	
+	protected def String model() {
+		val name = Thread.currentThread.stackTrace.get(2).methodName
+		return '''uri "http://sadl.org/TestRequrements/«name»" alias «name».'''
+	}
 
 }
