@@ -32,6 +32,11 @@
         eType="#//Property" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//Declaration"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PropertyInitializer">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="property" eType="#//Declaration"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//ExplicitValue"
+        containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TypeDefinition" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//DataTypeFacet"
         containment="true"/>
@@ -106,14 +111,13 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ExplicitValue">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="litValue" eType="#//LiteralValue"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="instName" eType="#//Declaration"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="row" eType="#//ValueRow"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="term" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="LiteralValue">
+  <eClassifiers xsi:type="ecore:EClass" name="LiteralValue" eSuperTypes="#//ExplicitValue">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="literalNumber" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="literalString" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="literalBoolean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -137,6 +141,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//TypeReference"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="propertyInitializers" upperBound="-1"
+        eType="#//PropertyInitializer" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DisjointClasses" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" eType="#//Declaration"

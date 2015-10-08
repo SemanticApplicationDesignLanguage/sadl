@@ -47,14 +47,18 @@ Statement returns Declaration:
 				describedBy+=PropertyDeclarationInClass*
 			|{Property.nameDeclarations+=current} (','? restrictions+=PropertyRestriction)+
 			|{EquivalentConcepts.nameDeclarations=current} 'is' 'the' 'same' 'as' (complement?='not')? class2=TypeReference
-			|{Instance.nameDeclarations+=current} 'is' article=AnArticle type=TypeReference
+			|{Instance.nameDeclarations+=current} 'is' article=AnArticle type=TypeReference propertyInitializers+=PropertyInitializer*
 			)  EOS
 		| '{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 
 			('are' ('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
 			|{DisjointClasses.types=current} 'are' 'disjoint') EOS
         | {Property} article=AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
-        | {Instance} article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart EOS
+        | {Instance} article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer* EOS
         | DataTypeDeclaration
+;
+
+PropertyInitializer:
+	','? ('with'|'has') property=[Declaration|NAME] value=ExplicitValue
 ;
 
 DeclarationPart returns Declaration:
@@ -150,8 +154,8 @@ CardinalityCondition :
 	('of' 'type' type=TypeReference | 'each' 'of' 'types' type=TypeReference)?;
 
 ExplicitValue :
-//TODO		instName=ResourceByName		// e.g., George
-		litValue=LiteralValue		// e.g., 38.186111
+		instName=[Declaration|NAME]		// e.g., George
+	|	LiteralValue		// e.g., 38.186111
 	|	valueList='[' row=ValueRow ']'
 	|	term='PI'					// PI
 	|	term='known'				// known
@@ -170,7 +174,7 @@ ValueRow :
 // from the namespace by a colon character).  We also need to accept legal URI
 // fragments as local names.  In particular, we need names like X.509 to work.
 NAME hidden() :
-   ID (':' ID)? (('-'|'.'|'~'|'%') NAME_FRAGMENT)*;
+   ID ->(':' ID)? ->(('-'|'.'|'~'|'%') NAME_FRAGMENT)*;
 
 NAME_FRAGMENT hidden():
 	ID | UNSIGNED_NUMBER ->ID?

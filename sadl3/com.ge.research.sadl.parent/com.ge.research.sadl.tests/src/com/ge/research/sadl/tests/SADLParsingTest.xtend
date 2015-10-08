@@ -19,7 +19,8 @@ abstract class SADLParsingTest{
 	@Inject ParseHelper<Model> parseHelper
 	@Inject ValidationTestHelper validationTestHelper
 	
-	protected def void assertNoErrors(CharSequence text) {
+	protected def void assertNoErrors(CharSequence original) {
+		val text = original.preProcess
 		val model = parseHelper.parse(text)
 		val issues = validationTestHelper.validate(model)
 		if (issues.isEmpty)
@@ -31,8 +32,20 @@ abstract class SADLParsingTest{
 		Assert.assertEquals(text.toString, annotatedText)
 	}
 	
+	def String preProcess(CharSequence sequence) {
+		val text = sequence.toString
+		if (text.trim.startsWith("uri")) {
+			return text;
+		} else {
+			return '''
+				«model»
+				«text»
+			'''
+		}
+	}
+	
 	protected def String model() {
-		val name = Thread.currentThread.stackTrace.get(2).methodName
+		val name = Thread.currentThread.stackTrace.findFirst[className!=SADLParsingTest.simpleName].methodName
 		return '''uri "http://sadl.org/TestRequrements/«name»" alias «name».'''
 	}
 

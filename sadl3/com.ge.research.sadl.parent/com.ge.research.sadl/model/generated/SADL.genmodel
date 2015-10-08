@@ -52,6 +52,10 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/describedBy"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/name"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//PropertyInitializer">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//PropertyInitializer/property"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropertyInitializer/value"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//TypeDefinition">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TypeDefinition/facet"/>
     </genClasses>
@@ -95,7 +99,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CardinalityCondition/type"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//ExplicitValue">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExplicitValue/litValue"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//ExplicitValue/instName"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExplicitValue/valueList"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExplicitValue/row"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExplicitValue/term"/>
@@ -119,6 +123,7 @@
     <genClasses ecoreClass="SADL.ecore#//Instance">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Instance/article"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Instance/type"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Instance/propertyInitializers"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//DisjointClasses">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//DisjointClasses/types"/>
