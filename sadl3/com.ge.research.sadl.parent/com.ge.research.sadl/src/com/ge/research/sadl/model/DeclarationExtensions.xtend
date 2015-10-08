@@ -1,13 +1,12 @@
-package com.ge.research.sadl.validation
+package com.ge.research.sadl.model
 
 import com.ge.research.sadl.sADL.Declaration
 import com.ge.research.sadl.sADL.SADLPackage
-import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import com.google.inject.Inject
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.util.OnChangeEvictingCache
 
-class SoftDeclarationReference {
+class DeclarationExtensions {
 	
 	@Inject OnChangeEvictingCache cache
 	
@@ -17,19 +16,10 @@ class SoftDeclarationReference {
 			val name = nodes.join('')[NodeModelUtils.getTokenText(it)].trim
 			if (name.isNullOrEmpty)
 				return null
+			if (name.startsWith('^'))
+				return name.substring(1)
 			return name
 		]
 	}
 	
-	static class SoftLinkingMessageProvider extends LinkingDiagnosticMessageProvider {
-	
-		override getUnresolvedProxyMessage(ILinkingDiagnosticContext context) {
-			if (context.reference === SADLPackage.Literals.DECLARATION__NAME) {
-				// treated as declaration. 
-				return null
-			}
-			super.getUnresolvedProxyMessage(context)
-		}
-		
-	}
 }

@@ -52,6 +52,10 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/describedBy"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/name"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//PropertyCondition">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//PropertyCondition/property"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropertyCondition/cond"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//PropertyInitializer">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//PropertyInitializer/property"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropertyInitializer/value"/>
@@ -80,11 +84,11 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Property">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Property/restrictions"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Property/article"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Property/from"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Property/to"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//PropertyRestriction"/>
+    <genClasses ecoreClass="SADL.ecore#//Condition"/>
     <genClasses ecoreClass="SADL.ecore#//TypeRestriction">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//TypeRestriction/singleValued"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TypeRestriction/type"/>
@@ -125,6 +129,11 @@
     <genClasses ecoreClass="SADL.ecore#//DisjointClasses">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//DisjointClasses/types"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//TypeConstraint">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TypeConstraint/subject"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TypeConstraint/object"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TypeConstraint/propConditions"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//UnionType">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnionType/left"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnionType/right"/>
@@ -135,6 +144,10 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SimpleTypeReference">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//SimpleTypeReference/type"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Restriction">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//Restriction/property"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Restriction/condition"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//TypeAssociation">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TypeAssociation/type"/>
@@ -147,6 +160,12 @@
     <genClasses ecoreClass="SADL.ecore#//IsAnnotation"/>
     <genClasses ecoreClass="SADL.ecore#//IsFunctional">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//IsFunctional/inverse"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//MustBeOneOf">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//MustBeOneOf/values"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//CanOnlyBeOneOf">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CanOnlyBeOneOf/values"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

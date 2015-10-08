@@ -52,9 +52,15 @@ Statement returns Declaration:
 		| '{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 
 			('are' ('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
 			|{DisjointClasses.types=current} 'are' 'disjoint') EOS
-        | {Property} article=AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
-        | {Instance} article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer* EOS
+        | {Property} AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
+        | AnArticle TypeReference (
+        		{Instance.type=current} nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer*
+        		|{TypeConstraint.subject=current}'is' AnArticle object=DeclarationPart 'only' 'if' propConditions+=PropertyCondition ('and' propConditions+=PropertyCondition)*) EOS
         | DataTypeDeclaration
+;
+
+PropertyCondition :
+	property=[Declaration|NAME] cond+=Condition
 ;
 
 PropertyInitializer:
@@ -97,6 +103,7 @@ IntersectionType returns TypeReference:
 PrimaryTypeReference returns TypeReference:
 	{SimpleTypeReference} type=[Declaration|NAME]
 	| PrimitiveDataType
+	| {Restriction}'(' property=[Declaration|NAME] condition=Condition ')'
 	| '{' TypeReference '}'
 ;
 
@@ -126,24 +133,30 @@ DefiniteArticle :
 	'The'|'the';
 
 PropertyRestriction :
-    	AllValuesCondition
+    	Condition
     |   {TypeAssociation} ('describes'|'of') type=TypeReference
     |   TypeRestriction
-    |   HasValueCondition
-    |   CardinalityCondition
     |   {IsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[Declaration|NAME]
     |   {IsTransitive} 'is' 'transitive'
     |   {IsSymmetrical} 'is' 'symmetrical'
     |   {IsAnnotation} 'is' 'a' 'type' 'of' 'annotation'
 //TODO    |   {SubProperty} 'is' 'a' 'type' 'of' superProperty=[Property|NAME]
     |   {IsFunctional} 'has' 'a' 'single' (inverse?='subject' | 'value')?
+    |   {MustBeOneOf} 'must' 'be' 'one' 'of' '{' values+=LiteralValue (',' values+=LiteralValue)* '}'
+    |   {CanOnlyBeOneOf} 'can' 'only' 'be' 'one' 'of' '{' values+=LiteralValue (',' values+=LiteralValue)* '}'
+;
+
+Condition :
+	AllValuesCondition
+	|   HasValueCondition
+    |   CardinalityCondition
 ;
 
 TypeRestriction :
-    ('has'|'with') ('a' singleValued?='single' 'value'|('a' 'List'|'Lists') 'of' 'values'|'values') 'of' 'type' type=TypeReference;
+    ('has'|'with') ('a' singleValued?='single' 'value'|('a' 'List'|'Lists') 'of' 'values'|'values') 'of' 'type' type=PrimaryTypeReference;
 
 AllValuesCondition :
-	'only' ('has'|'with') 'values' 'of' 'type' type=TypeReference;
+	'only' ('has'|'with') 'values' 'of' 'type' type=PrimaryTypeReference;
 
 HasValueCondition :
 	'always' ('has'|'with') 'value' restriction=ExplicitValue;
@@ -152,7 +165,7 @@ CardinalityCondition :
 	('has'|'with') 
 	('at' operator=('least'|'most') |'exactly') 
 	cardinality=(NUMBER|'one') ('value'|'values') 
-	('of' 'type' type=TypeReference | 'each' 'of' 'types' type=TypeReference)?;
+	('of' 'type' type=PrimaryTypeReference | 'each' 'of' 'types' type=PrimaryTypeReference)?;
 
 ExplicitValue :
 		instName=[Declaration|NAME]		// e.g., George

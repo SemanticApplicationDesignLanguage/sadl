@@ -25,7 +25,7 @@ abstract class SADLParsingTest{
 		if (issues.isEmpty)
 			return;
 		var String annotatedText = text.toString
-		for (issue : issues.sortBy[-offset]) {
+		for (issue : issues.filter[isSyntaxError].sortBy[-offset]) {
 			annotatedText = annotatedText.substring(0, issue.offset) + '''[«issue.message»]''' + annotatedText.substring(issue.offset)
 		}
 		Assert.assertEquals(text.toString, annotatedText)
