@@ -8,7 +8,7 @@ import org.eclipse.xtext.ui.generator.*
 var projectName = "com.ge.research.sadl"
 var projectPath = "../${projectName}"
 
-var fileExtensions = "mydsl"
+var fileExtensions = "sadl"
 var grammarURI = "platform:/resource/${projectName}/src/com/ge/research/sadl/SADL.xtext"
 
 var encoding = "UTF-8"
@@ -84,6 +84,9 @@ Workflow {
 			}
 
 			// The antlr parser generator fragment.
+			fragment = adapter.FragmentAdapter {
+				fragment = parser.antlr.DebugAntlrGeneratorFragment auto-inject {}
+			}
 			fragment = adapter.FragmentAdapter {
 				fragment = parser.antlr.XtextAntlrGeneratorFragment auto-inject {}
 			}
