@@ -29,7 +29,7 @@
 					<arguments>
 						<argument>/${project.basedir}/src/com/ge/research/sadl/GenerateSADL.mwe2</argument>
 						<argument>-p</argument>
-						<argument>rootPath=/${project.basedir}/..</argument>
+						<argument>projectPath=/${project.basedir}</argument>
 					</arguments>
 					<includePluginDependencies>true</includePluginDependencies>
 				</configuration>
@@ -59,25 +59,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.5</version>
 				<configuration>
 					<filesets combine.children="append">
 						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl/src-gen/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.tests/src-gen/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.ide/src-gen/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.ui/src-gen/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.ui.tests/src-gen/</directory>
+							<directory>${basedir}/src-gen/</directory>
 						</fileset>
 						<fileset>
 							<directory>${basedir}/model/generated/</directory>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/../${project.artifactId}.ide/src-gen/</directory>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/../${project.artifactId}.ui/src-gen/</directory>
 						</fileset>
 					</filesets>
 				</configuration>
