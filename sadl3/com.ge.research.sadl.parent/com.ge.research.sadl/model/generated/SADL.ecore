@@ -34,8 +34,15 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PropertyInitializer">
     <eStructuralFeatures xsi:type="ecore:EReference" name="property" eType="#//Declaration"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//ExplicitValue"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
         containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Instance" eSuperTypes="#//Declaration">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//TypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="propertyInitializers" upperBound="-1"
+        eType="#//PropertyInitializer" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TypeDefinition" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//DataTypeFacet"
@@ -136,13 +143,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="complement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="class2" eType="#//TypeReference"
         containment="true"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Instance" eSuperTypes="#//Declaration">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//TypeReference"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="propertyInitializers" upperBound="-1"
-        eType="#//PropertyInitializer" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DisjointClasses" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" eType="#//Declaration"

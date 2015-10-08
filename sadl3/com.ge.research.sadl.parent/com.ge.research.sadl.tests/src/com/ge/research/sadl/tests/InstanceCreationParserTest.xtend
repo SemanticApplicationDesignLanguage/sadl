@@ -24,4 +24,15 @@ class InstanceCreationParserTest extends SADLParsingTest {
 			An AirCraft F16, with name 'F16'.
 		'''.assertNoErrors
 	}
+	
+	@Test def void testInstanceCreation_WithNestedInstance_01(){
+		'''
+			Person is a top-level class, 
+				described by bestFriend with a single value of type Person,
+				described by name with a single value of type string.
+			Fred is a Person,
+				has name 'Fred',
+				has bestFriend (Barny is a Person with name 'Barny').
+		'''.assertNoErrors
+	}
 }

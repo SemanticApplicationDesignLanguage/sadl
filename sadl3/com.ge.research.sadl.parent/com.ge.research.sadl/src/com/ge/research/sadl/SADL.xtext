@@ -58,7 +58,12 @@ Statement returns Declaration:
 ;
 
 PropertyInitializer:
-	','? ('with'|'has') property=[Declaration|NAME] value=ExplicitValue
+	','? ('with'|'has') property=[Declaration|NAME] (value=ExplicitValue | '(' value=NestedInstance')')
+;
+
+NestedInstance returns Instance:
+	nameDeclarations+=DeclarationPart 'is' article=AnArticle type=TypeReference propertyInitializers+=PropertyInitializer*
+	| article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer*
 ;
 
 DeclarationPart returns Declaration:
