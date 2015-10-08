@@ -91,8 +91,8 @@ class InstanceCreationParserTest extends SADLParsingTest {
 			biologicalFather is a type of father.
 			biologicalMother is a type of mother.
 
-«««TODO			wife is a type of spouse with values of type {Person and (gender always has value Female)}.
-«««			husband is a type of spouse with values of type {Person and (gender always has value Male)}.
+			wife is a type of spouse with values of type {Person and (gender always has value Female)}.
+			husband is a type of spouse with values of type {Person and (gender always has value Male)}.
 		'''.assertNoErrors
 	}
 }

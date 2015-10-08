@@ -136,10 +136,13 @@
         eType="#//ExplicitValue" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ClassDeclaration" eSuperTypes="#//Declaration">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="superElement" eType="#//Declaration"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//DataTypeFacet"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="instanceDeclarations" upperBound="-1"
         eType="#//Declaration" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="propertRestrictions" upperBound="-1"
+        eType="#//PropertyRestriction" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EquivalentConcepts" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="complement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
