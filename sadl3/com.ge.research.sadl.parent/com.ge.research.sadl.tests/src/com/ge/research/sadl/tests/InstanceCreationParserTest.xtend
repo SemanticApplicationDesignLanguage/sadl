@@ -11,6 +11,13 @@ class InstanceCreationParserTest extends SADLParsingTest {
 		'''.prependUri.assertNoErrors
 	}
 	
+	@Test def void testInstanceCreation_03(){
+		'''
+			^AirCraft is a top-level class.
+			F16 is an AirCraft.
+		'''.prependUri.assertNoErrors
+	}
+	
 	@Test def void testInstanceCreation_02(){
 		'''
 			AirCraft is a top-level class.

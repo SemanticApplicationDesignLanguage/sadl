@@ -43,11 +43,11 @@ ModelElement :
 Statement returns Declaration:
         DeclarationPart 
         	({ClassDeclaration.nameDeclarations+=current} 'is' 'a' ('top-level'? 'class' | 'type' 'of' superType=TypeReference facet=DataTypeFacet?)
-				(','? 'must' 'be' 'one' 'of' '{' instanceDeclarations+=InstanceDeclaration (',' instanceDeclarations+=InstanceDeclaration)* '}')?
+				(','? 'must' 'be' 'one' 'of' '{' instanceDeclarations+=DeclarationPart (',' instanceDeclarations+=DeclarationPart)* '}')?
 				describedBy+=PropertyDeclarationInClass*
 			|{Property.nameDeclarations+=current} (','? restrictions+=PropertyRestriction)+
-			|{EquivalentConcepts.nameDeclarations=current} 'is' 'the' 'same' 'as' (complement?='not')? class2=TypeReference
-			|{Instance.nameDeclarations+=current} 'is' article=AnArticle type=TypeReference propertyInitializers+=PropertyInitializer*
+			|{EquivalentConcepts.nameDeclarations+=current} 'is' 'the' 'same' 'as' (complement?='not')? class2=TypeReference
+			|{Instance.nameDeclarations+=current} ('is' article=AnArticle type=TypeReference)? propertyInitializers+=PropertyInitializer*
 			)  EOS
 		| '{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 
 			('are' ('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
@@ -108,10 +108,6 @@ PrimitiveDataType returns TypeReference :
 enum DataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
     gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
-
-InstanceDeclaration :
-	name=NAME
-;
 
 // Class declarations may also describe the class's properties.
 PropertyDeclarationInClass returns Property:

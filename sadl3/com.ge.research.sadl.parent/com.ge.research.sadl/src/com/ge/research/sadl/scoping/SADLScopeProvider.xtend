@@ -3,9 +3,9 @@
  */
 package com.ge.research.sadl.scoping
 
+import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.Declaration
 import com.ge.research.sadl.sADL.Import
-import com.ge.research.sadl.validation.SoftDeclarationReference
 import com.google.inject.Inject
 import java.util.Map
 import org.eclipse.emf.ecore.EObject
@@ -26,7 +26,7 @@ import org.eclipse.xtext.scoping.impl.MapBasedScope
  */
 class SADLScopeProvider extends AbstractScopeProvider {
 	
-	@Inject extension SoftDeclarationReference 
+	@Inject extension DeclarationExtensions
 	@Inject IQualifiedNameProvider qnProvider 
 	
 	override getScope(EObject context, EReference reference) {

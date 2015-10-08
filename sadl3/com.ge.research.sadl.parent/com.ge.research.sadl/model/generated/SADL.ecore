@@ -85,9 +85,6 @@
     <eLiterals name="anyURI" value="18" literal="anyURI"/>
     <eLiterals name="data" value="19" literal="data"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="InstanceDeclaration">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Property" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="restrictions" upperBound="-1"
         eType="#//PropertyRestriction" containment="true"/>
@@ -137,7 +134,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//DataTypeFacet"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="instanceDeclarations" upperBound="-1"
-        eType="#//InstanceDeclaration" containment="true"/>
+        eType="#//Declaration" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EquivalentConcepts" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="complement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
