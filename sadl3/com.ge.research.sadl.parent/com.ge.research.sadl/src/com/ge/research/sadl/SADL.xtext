@@ -42,8 +42,9 @@ ModelElement :
 // These are the things that translate directly to OWL.
 Statement returns Declaration:
         DeclarationPart 
-        	({ClassDeclaration.nameDeclarations+=current} 'is' 'a' ('top-level'? 'class' | 'type' 'of' superElement=[Declaration|NAME] 
-        			facet=DataTypeFacet?)
+        	({ClassDeclaration.nameDeclarations+=current} 'is' 'a' 
+        		('top-level'? 'class' 
+        		| 'type' 'of' superElement=PrimaryTypeReference facet=DataTypeFacet?)
 				(','? 'must' 'be' 'one' 'of' '{' instanceDeclarations+=DeclarationPart (',' instanceDeclarations+=DeclarationPart)* '}')?
 				(describedBy+=PropertyDeclarationInClass+ | propertRestrictions+=PropertyRestriction+)?
 			|{Property.nameDeclarations+=current} (','? restrictions+=PropertyRestriction)+
