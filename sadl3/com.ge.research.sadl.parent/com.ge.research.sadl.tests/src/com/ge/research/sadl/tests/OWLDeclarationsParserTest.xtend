@@ -5,6 +5,58 @@ import org.junit.Ignore
 
 class OWLDeclarationsParserTest extends SADLParsingTest {
 	
+	@Test def void testModelName_01() {
+		'''
+		uri "http://sadl.org/Tests/ModelName" alias ^class.
+		'''.assertNoErrors
+	}
+	
+	@Test def void testModelName_02() {
+		'''
+		uri "http://sadl.org/Tests/ModelName" alias mn version "1".		
+		'''.assertNoErrors
+	}
+	
+	@Test def void testModelName_03() {
+		// this is fairly new and is probably inconsistent with annotations for classes, properties, and instances in that
+		// the annotation is not right after the name but is after the prefix and version.
+		'''
+		uri "http://sadl.org/Tests/ModelName" alias mn version "1" (note "This is an rdfs:label") (alias "Model Name").		
+		'''.assertNoErrors
+	}
+	
+	@Test def void testModelName_04() {
+		'''
+		uri "http://sadl.org/Tests/ModelName" alias mn version "1" 
+			(note "This is an rdfs:label", "this is another label")
+			(alias "Model Name", "2nd alias").				
+		'''.assertNoErrors
+	}
+	
+	@Test def void testModelName_05() {
+		'''
+		uri "http://sadl.org/Tests/ModelName" alias mn version "1" 
+			(note "This is an rdfs:label", "this is another label") (note "this is a 3rd label")
+			(alias "Model Name", "2nd alias"), (alias "3rd alias").				
+		'''.assertNoErrors
+	}
+	
+	@Test def void testImport_01() {
+		'''
+		uri "http://sadl.org/Tests/Import" alias imp. 
+		import "http://sadl.org.Tests/ModelName".		
+		'''.assertNoErrors
+	}
+	
+	@Test def void testImport_02() {
+		'''
+		uri "http://sadl.org/Tests/Import" alias imp. 
+		import "http://sadl.org.Tests/ModelName" as mn2.		
+		'''.assertNoErrors
+	}
+
+	
+	
 	@Test def void testDatatype() {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
@@ -66,6 +118,34 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Test def void testClassDefinitions_01a() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			
+			SomeClass is a top-level class.
+			SomeClass2 is a type of SomeClass.
+			SomeClass3 is a type of {SomeClass, SomeClass2}.		// It would probably be a good idea to remove comma-separated and 
+																	//  require explict 'and' or 'or' in intersection or union unnamed
+																	//  classes. The old grammar allowed ',' to be used for 'or'
+																	//  This is a different case from a list, such as a list of
+																	//  instances in the 'must be one of {int1, inst2, ...}'
+			{^A,B,C} are top-level classes.
+			{A1,B1,C1} are types of {SomeClass, ^A}.
+		'''.assertNoErrors
+	}
+	
+	@Test def void testClassDefinitions_02() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			
+			SomeClass is a class.
+			SomeClass2 is a type of SomeClass.
+			SomeClass3 is a type of {SomeClass and SomeClass2}.
+			{^A,B,C} are classes.
+			{A1,B1,C1} are types of {SomeClass or ^A}.
+		'''.assertNoErrors
+	}
+	
 	@Test def void testClassDefinitions_withProperty_01() {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
@@ -83,8 +163,22 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
 			
-			SomeClass is a top-level class,
-				described by p1 only with values of type string,
+			SomeClass is a class.
+			SomeOtherClass is a top-level class,
+				described by p1 with a single value of type SomeClass,
+				described by p2 has a List of values of type string,
+				described by p3 with Lists of values of type int,
+				described by p4 with values of type dateTime.
+				
+		'''.assertNoErrors
+	}
+	@Test def void testClassDefinitions_withPropertyAndConstraint_01() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			
+			SomeClass is a class.
+			SomeOtherClass is a top-level class,
+				described by p1 only with values of type SomeClass,
 				described by p2 always has value 42,
 				described by p3 with at least 42 values of type string,
 				described by p4 with at most 42 values each of types {string, int},
@@ -98,18 +192,19 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
 			
 			SomeClass is a top-level class.
-			AnotherClass is a top-level class.
+			AnotherClass is a top-level class.		
 			SomeClass is the same as AnotherClass.
 		'''.assertNoErrors
 	}
 	
 	@Test def void testEquivalenceAndComplemence_01() {
 		'''
-			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			uri "http://sadl.org/TestSadlIde/Compliments" alias compliments version "$Revision:$ Last modified on   $Date:$". 
 			
-			SomeClass is a top-level class.
-			AnotherClass is a top-level class.
-			SomeClass is the same as not AnotherClass.
+			Mineral is a class.
+			Vegetable is the same as not Mineral.  	// The LHS of the declaration does not need to be pre-defined
+			
+			NonOrganic is the same as Mineral.		// The LHS of the declaration does not need to be pre-defined
 		'''.assertNoErrors
 	}
 	
@@ -118,8 +213,20 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
 			
 			SomeClass is a top-level class.
-			AnotherClass is a top-level class.
-			SomeClass is the same as not AnotherClass.
+			AnotherClass is a class.
+			SomeClass and AnotherClass are disjoint.	// this is not an intersection class because it isn't in curley brackets
+		'''.assertNoErrors
+	}
+	
+	@Test def void testDisjointClasses_02() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			
+			SomeClass is a top-level class.
+			AnotherClass is a class.
+			SomeClass and AnotherClass are disjoint.
+			YetAnotherClass is a class.
+			{SomeClass, AnotherClass, YetAnotherClass} are disjoint.		// this is just a list of classes, not union or intersection
 		'''.assertNoErrors
 	}
 	
@@ -129,7 +236,19 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 			
 			SomeClass is a top-level class.
 			AnotherClass is a top-level class.
-			foo of SomeClass has a single value of type AnotherClass.
+			fooProperty describes SomeClass with a single value of type AnotherClass.
+			relationship of SomeClass to AnotherClass is fooProperty.
+		'''.assertNoErrors
+	}
+
+	@Test def void testPropertyDeclarations_02() {
+		'''
+			uri "http://com.ge.research.propdecls".
+			
+			Person is a class.
+			Professor is a type of Person.
+			Student is a type of Person.
+			relationship of Professor to Student is teaches.
 		'''.assertNoErrors
 	}
 
