@@ -146,6 +146,14 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Test def void testClassDefinitions_02b() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			
+			Gender is a class, must be one of {Male, Female}.	// This creates a class equivalent to Gender, owl:oneOf Male, Female 
+		'''.assertNoErrors
+	}
+	
 	@Test def void testClassDefinitions_withProperty_01() {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
@@ -187,6 +195,65 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Test def void testClassRestrictions_01() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			Person is a top-level class.		
+			Gender is a class, must be one of {Male, Female, Unknown}.		
+			gender describes Person has values of type Gender.		
+			gender of Person can only be one of {Male, Female}.		// this creates an owl:AllValuesFrom restriction
+				
+		'''.assertNoErrors
+	}
+	
+	@Test def void testClassRestrictions_02() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
+			Person is a top-level class.		
+			Gender is a class, must be one of {Male, Female, Unknown}.		
+			gender describes Person has values of type Gender.		
+			gender of Person must be one of {Male, Female}.		// this creates both owl:AllValuesFrom and owl:SomeValuesFrom restrictions
+				
+		'''.assertNoErrors
+	}
+	
+	@Test def void testClassRestrictions_03() {
+		'''
+		uri "http://sadl.org/TestSadlIde/AnonRestrictions" alias anonrest 
+			version "$Revision: 1.3 $ Last modified on   $Date: 2015/06/30 21:27:33 $". 
+		Person is a class described by owns with values of type Artifact.
+		Artifact is a class.
+		Manufacturer is a class.
+		Apple is a Manufacturer.
+		Dell is a Manufacturer.
+		Computer is a type of Artifact described by manufacturer with values of type Manufacturer.
+		Professor is a class described by teaches with values of type Student.
+		Student is a type of Person.
+		A Professor is an AppleProfessor only if teaches has at least one value of type
+			{Student and (owns has at least one value of type {Computer and (manufacturer always has value Apple)})}.
+		AppleLovingStudent is a type of Student, 
+			described by owns with values of type {Computer and (manufacturer always has value Apple)}.
+		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
+		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only
+		'''.assertNoErrors
+	}
+	
+	@Test def void testClassRestrictions_04() {
+		'''
+		uri "http://sadl.imp/TestThreeLevelDefaults".
+		
+		Thingy is a top-level class.
+		Color is a top-level class, must be one of {Black, White, Green}.
+		dp describes Thingy has values of type float.
+		op describes Thingy has values of type Color. 
+		ready describes Thingy has a single value of type boolean.
+		
+		dp of Thingy has level 0 default 2.3  . 
+		ready of Thingy has level 1 default true.   
+		op of Thingy has level 2 default White.
+		'''.assertNoErrors
+	}
+
 	@Test def void testEquivalenceAndComplemence() {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
@@ -205,6 +272,19 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 			Vegetable is the same as not Mineral.  	// The LHS of the declaration does not need to be pre-defined
 			
 			NonOrganic is the same as Mineral.		// The LHS of the declaration does not need to be pre-defined
+		'''.assertNoErrors
+	}
+	
+	@Test def void testAllDifferentInstances_01() {
+		'''
+			uri "http://sadl.org/TestSadlIde/DifferentInstances" alias diffinstances version "$Revision:$ Last modified on   $Date:$". 
+			
+			Person is a class.
+			William is a Person.
+			Bill is a Person.
+			William is not the same as Bill.
+			George is a Person.
+			{William, Bill, George} are not the same.		
 		'''.assertNoErrors
 	}
 	
@@ -252,4 +332,62 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 
+	@Test def void testPropertyDeclarations_03() {
+		'''
+			uri "http://sadl.org/TestSadlIde/PropertyTypes" alias proptypes version "$Revision:$ Last modified on   $Date:$". 
+
+			p1 is a property with values of type data.
+			p1 has a single value.
+			
+			p2 is a property.
+			p2 has a single subject.
+			
+			p3 is a property.
+			p3 is symmetrical.
+			
+			p4 is a property.
+			p4 is transitive.
+			
+			p3 is the inverse of p4.
+		'''.assertNoErrors
+	}	
+
+	@Test def void testAnnotationPropertyDeclarations_01() {
+		'''
+			uri "http://sadl.imp/annotation" version "$Revision: 1.6 $ $Name:  $ $Date: 2015/06/30 21:27:33 $".
+			
+			// In this example, the museum has samples of Rock a class in the model,
+			// but also has specimens assigned to various Holdings. An annotation
+			// property is used to keep track of to which Holding a specific Rock belongs.
+			// In addition, various properties of rocks are of interest to different
+			// categories of museum Patrons, and the properties are annotated to reflect this.
+			
+			Rock is a top-level class, 
+				described by color with values of type string,
+				described by hardness with values of type Hardness.
+			
+			Hardness is a top-level class, must be one of {Hard, Soft}. 
+			
+			
+			Holding is a top-level class, must be one of {SouthwestCollection, NortheastCollection}.
+			Holding has label "this is a label".
+			Holding has seeAlso "http://sadl.org/documentation". 
+			
+			PatronType is a top-level class, must be one of {Expert, Novice, Everyone}. 
+			
+			holding is a type of annotation.	// Note that an annotation cannot have a specified domain and range.
+			ofInterestTo is a type of annotation.
+			
+			color has ofInterestTo Everyone .
+			hardness has ofInterestTo Expert.
+			
+			age (alias "AGE") describes Rock has a single value of type int. 
+			
+			age has holding "European".
+			Holding has holding "European".		
+
+			ChipOfMammyGametBolder is a Rock, has holding NortheastCollection.
+		'''.assertNoErrors
+	}
+	
 }
