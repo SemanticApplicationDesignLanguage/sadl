@@ -151,8 +151,8 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DisjointClasses" eSuperTypes="#//Declaration">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="types" eType="#//Declaration"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="#//Declaration" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TypeConstraint" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="subject" eType="#//TypeReference"

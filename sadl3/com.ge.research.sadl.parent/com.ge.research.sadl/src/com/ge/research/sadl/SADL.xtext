@@ -28,7 +28,7 @@ Model :
     elements+=ModelElement*;
     
 fragment Annotation :
-	'(' annType+=('alias'|'note') annContent+=STRING (',' annContent+=STRING)* ')'
+	','? '(' annType+=('alias'|'note') annContent+=STRING (',' annContent+=STRING)* ')'
 ;
 
 Import :
@@ -50,10 +50,11 @@ Statement returns Declaration:
 			|{Property.nameDeclarations+=current} (','? restrictions+=PropertyRestriction)+
 			|{EquivalentConcepts.nameDeclarations+=current} 'is' 'the' 'same' 'as' (complement?='not')? class2=TypeReference
 			|{Instance.nameDeclarations+=current} ('is' article=AnArticle type=TypeReference)? propertyInitializers+=PropertyInitializer*
+			|{DisjointClasses.types+=current} ('and' types+=DeclarationPart)+ 'are' 'disjoint'
 			)  EOS
 		| '{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 
 			('are' ('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
-			|{DisjointClasses.types=current} 'are' 'disjoint') EOS
+			|{DisjointClasses.types+=current} 'are' 'disjoint') EOS
         | {Property} AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
         | AnArticle TypeReference (
         		{Instance.type=current} nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer*
