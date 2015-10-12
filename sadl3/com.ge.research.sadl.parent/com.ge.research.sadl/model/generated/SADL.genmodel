@@ -118,15 +118,19 @@
     <genClasses ecoreClass="SADL.ecore#//ValueRow">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueRow/explicitValues"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//ClassDeclaration">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassDeclaration/superElement"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassDeclaration/facet"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassDeclaration/instanceDeclarations"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassDeclaration/propertRestrictions"/>
+    <genClasses ecoreClass="SADL.ecore#//ClassOrPropertyDeclaration">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassOrPropertyDeclaration/superElement"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassOrPropertyDeclaration/facet"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassOrPropertyDeclaration/restrictions"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//EquivalentConcepts">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//EquivalentConcepts/complement"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//EquivalentConcepts/class2"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//DifferentForm">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//DifferentForm/class2"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//DifferentForm/types"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//DifferentForm/complement"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//DisjointClasses">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//DisjointClasses/types"/>
@@ -160,6 +164,10 @@
     <genClasses ecoreClass="SADL.ecore#//IsTransitive"/>
     <genClasses ecoreClass="SADL.ecore#//IsSymmetrical"/>
     <genClasses ecoreClass="SADL.ecore#//IsAnnotation"/>
+    <genClasses ecoreClass="SADL.ecore#//DefaultValue">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//DefaultValue/level"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//DefaultValue/defValue"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//IsFunctional">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//IsFunctional/inverse"/>
     </genClasses>

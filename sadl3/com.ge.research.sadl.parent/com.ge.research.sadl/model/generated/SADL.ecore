@@ -135,20 +135,25 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="explicitValues" upperBound="-1"
         eType="#//ExplicitValue" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ClassDeclaration" eSuperTypes="#//Declaration">
+  <eClassifiers xsi:type="ecore:EClass" name="ClassOrPropertyDeclaration" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="superElement" eType="#//TypeReference"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//DataTypeFacet"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="instanceDeclarations" upperBound="-1"
-        eType="#//Declaration" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="propertRestrictions" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="restrictions" upperBound="-1"
         eType="#//PropertyRestriction" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EquivalentConcepts" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="complement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="class2" eType="#//TypeReference"
         containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DifferentForm" eSuperTypes="#//Declaration">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="class2" eType="#//TypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="#//Declaration" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="complement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DisjointClasses" eSuperTypes="#//Declaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
@@ -192,15 +197,20 @@
   <eClassifiers xsi:type="ecore:EClass" name="IsTransitive" eSuperTypes="#//PropertyRestriction"/>
   <eClassifiers xsi:type="ecore:EClass" name="IsSymmetrical" eSuperTypes="#//PropertyRestriction"/>
   <eClassifiers xsi:type="ecore:EClass" name="IsAnnotation" eSuperTypes="#//PropertyRestriction"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DefaultValue" eSuperTypes="#//PropertyRestriction">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="defValue" eType="#//ExplicitValue"
+        containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="IsFunctional" eSuperTypes="#//PropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="inverse" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MustBeOneOf" eSuperTypes="#//PropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EReference" name="values" upperBound="-1"
-        eType="#//LiteralValue" containment="true"/>
+        eType="#//ExplicitValue" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CanOnlyBeOneOf" eSuperTypes="#//PropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EReference" name="values" upperBound="-1"
-        eType="#//LiteralValue" containment="true"/>
+        eType="#//ExplicitValue" containment="true"/>
   </eClassifiers>
 </ecore:EPackage>
