@@ -31,6 +31,12 @@ abstract class SADLParsingTest{
 		Assert.assertEquals(text.toString, annotatedText)
 	}
 	
+	def void assertAST(CharSequence text, (Model)=>void assertion) {
+		val model = parseHelper.parse(text)
+		validationTestHelper.assertNoErrors(model)
+		assertion.apply(model)
+	}
+	
 	def String prependUri(CharSequence sequence) {
 		return '''
 			«model»

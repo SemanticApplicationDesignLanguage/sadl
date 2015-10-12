@@ -26,4 +26,8 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 		SoftLinkingMessageProvider
 	}
 	
+	override bindIValueConverterService() {
+		ValueConverterService
+	}
+	
 }

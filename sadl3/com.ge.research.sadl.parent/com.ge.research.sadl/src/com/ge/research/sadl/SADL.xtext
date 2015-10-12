@@ -23,12 +23,12 @@ generate sADL "http://www.ge.com/research/sadl/SADL"
 
 Model :
     'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
-    	Annotation* EOS 
+    	annotations+=Annotation* EOS 
     imports+=Import*
     elements+=ModelElement*;
     
-fragment Annotation :
-	','? '(' annType+=('alias'|'note') annContent+=STRING (',' annContent+=STRING)* ')'
+Annotation :
+	','? '(' type=('alias'|'note') contents+=STRING (',' contents+=STRING)* ')'
 ;
 
 Import :
@@ -36,15 +36,15 @@ Import :
 
 // The various kinds of elements that make up the body of a model.
 ModelElement :
-    	Statement
-    ;
+    Statement
+;
 
 // These are the things that translate directly to OWL.
 Statement returns Declaration:
-        DeclarationPart 
-        	({ClassOrPropertyDeclaration.nameDeclarations+=current} 'is' 'a' 
-        		('top-level'? 'class' 
-        		| 'type' 'of' superElement=PrimaryTypeReference facet=DataTypeFacet?)
+	    DeclarationPart 
+	    	({ClassOrPropertyDeclaration.nameDeclarations+=current} 'is' 'a' 
+	    		('top-level'? 'class' 
+	    		| 'type' 'of' superElement=PrimaryTypeReference facet=DataTypeFacet?)
 				(describedBy+=PropertyDeclarationInClass+ | (','? restrictions+=PropertyRestriction)+)?
 			|{Property.nameDeclarations+=current} 'is' 'a' 'property' (','? restrictions+=PropertyRestriction)*
 			|{Property.nameDeclarations+=current} (','? restrictions+=PropertyRestriction)+
@@ -53,15 +53,15 @@ Statement returns Declaration:
 			|{Instance.nameDeclarations+=current} ('is' article=AnArticle type=TypeReference)? propertyInitializers+=PropertyInitializer*
 			|{DisjointClasses.types+=current} ('and' types+=DeclarationPart)+ 'are' 'disjoint'
 			)  EOS
-		| '{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 'are' 
-			(('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
-			|{DisjointClasses.types+=current} 'disjoint'
-			|{DifferentForm.types+=current} (complement?='not')? 'the' 'same') EOS
-        | {Property} AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
-        | AnArticle TypeReference (
-        		{Instance.type=current} nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer*
-        		|{TypeConstraint.subject=current}'is' AnArticle object=DeclarationPart 'only' 'if' propConditions+=PropertyCondition ('and' propConditions+=PropertyCondition)*) EOS
-        | DataTypeDeclaration
+	| 	'{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 'are' 
+				(('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
+			|	{DisjointClasses.types+=current} 'disjoint'
+			|	{DifferentForm.types+=current} (complement?='not')? 'the' 'same') EOS
+    | 	{Property} AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
+    | 	AnArticle TypeReference (
+    		{Instance.type=current} nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer*
+    	|	{TypeConstraint.subject=current}'is' AnArticle object=DeclarationPart 'only' 'if' propConditions+=PropertyCondition ('and' propConditions+=PropertyCondition)*) EOS
+    | 	DataTypeDeclaration
 ;
 
 PropertyCondition :
@@ -73,12 +73,12 @@ PropertyInitializer:
 ;
 
 NestedInstance returns Instance:
-	nameDeclarations+=DeclarationPart 'is' article=AnArticle type=TypeReference propertyInitializers+=PropertyInitializer*
-	| article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart? propertyInitializers+=PropertyInitializer*
+		nameDeclarations+=DeclarationPart 'is' article=AnArticle type=TypeReference propertyInitializers+=PropertyInitializer*
+	|	article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart? propertyInitializers+=PropertyInitializer*
 ;
 
 DeclarationPart returns Declaration:
-	name=[Declaration|NAME] Annotation*
+	name=[Declaration|NAME] annotations+=Annotation*
 ;
 
 DataTypeDeclaration returns TypeDefinition:
@@ -106,15 +106,10 @@ IntersectionType returns TypeReference:
 ;
 
 PrimaryTypeReference returns TypeReference:
-	{SimpleTypeReference} type=[Declaration|NAME]
-	| PrimitiveDataType
-	| {Restriction}'(' property=[Declaration|NAME] condition=Condition ')'
-	| '{' TypeReference '}'
-;
-
-
-PrimitiveDataType returns TypeReference :
-	primitiveType=DataType
+		{SimpleTypeReference} type=[Declaration|NAME]
+	|	{PrimitiveDataType} primitiveType=DataType
+	|	{Restriction}'(' property=[Declaration|NAME] condition=Condition ')'
+	|	'{' TypeReference '}'
 ;
 
 enum DataType :
@@ -124,18 +119,6 @@ enum DataType :
 // Class declarations may also describe the class's properties.
 PropertyDeclarationInClass returns Property:
     	','? 'described' 'by' nameDeclarations+=DeclarationPart restrictions+=PropertyRestriction;
-
-
-// These articles can appear before the property name and are indicative of the functionality of the property or
-//	the cardinality of the property on the class
-AnArticle :
-	IndefiniteArticle | DefiniteArticle;
-
-IndefiniteArticle :
-	'A'|'a'|'An'|'an';
-
-DefiniteArticle :
-	'The'|'the';
 
 PropertyRestriction :
     	Condition
@@ -152,7 +135,7 @@ PropertyRestriction :
 ;
 
 Condition :
-	AllValuesCondition
+		AllValuesCondition
 	|   HasValueCondition
     |   CardinalityCondition
 ;
@@ -172,22 +155,25 @@ CardinalityCondition :
 	cardinality=(NUMBER|'one') ('value'|'values') 
 	('of' 'type' type=PrimaryTypeReference | 'each' 'of' 'types' type=PrimaryTypeReference)?;
 
-ExplicitValue :
-		instName=[Declaration|NAME]		// e.g., George
-	|	LiteralValue		// e.g., 38.186111
-	|	valueList='[' row=ValueRow ']'
-	|	term='PI'					// PI
-	|	term='known'				// known
-    ;
-    
-LiteralValue :
-        literalNumber=NUMBER
-    |   literalString=STRING
-    |   literalBoolean=('true'|'false');
+ExplicitValue returns Value:
+		DeclarationPart		// e.g., George
+	|	{NumberLiteral} literalNumber=NUMBER
+    |   {StringLiteral} literalString=STRING
+    |   {BooleanLiteral} (truethy?='true'|'false')
+    |   {ValueList} '[' (explicitValues+=ExplicitValue (',' explicitValues+=ExplicitValue)*)? ']'
+	|	{ConstantLiteral} term=('PI'|'known')
+;
 
-ValueRow :
-	explicitValues+=ExplicitValue (',' explicitValues+=ExplicitValue)*;	// e.g., George, 23, "Purple", 38.186111
+// These articles can appear before the property name and are indicative of the functionality of the property or
+//	the cardinality of the property on the class
+AnArticle :
+	IndefiniteArticle | DefiniteArticle;
 
+IndefiniteArticle :
+	'A'|'a'|'An'|'an';
+
+DefiniteArticle :
+	'The'|'the';
 
 // NAME should match an optional namespace followed by a local name (separated
 // from the namespace by a colon character).  We also need to accept legal URI

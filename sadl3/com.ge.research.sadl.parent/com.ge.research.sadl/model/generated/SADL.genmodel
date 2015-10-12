@@ -33,12 +33,13 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Model/baseUri"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Model/alias"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Model/version"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Model/annotations"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Model/imports"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Model/elements"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Annotation">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Annotation/annType"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Annotation/annContent"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Annotation/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Annotation/contents"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Import">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Import/importURI"/>
@@ -51,6 +52,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/superType"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/describedBy"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/annotations"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//PropertyCondition">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//PropertyCondition/property"/>
@@ -79,9 +81,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//DataTypeFacet/maxlen"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//DataTypeFacet/values"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//TypeReference">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//TypeReference/primitiveType"/>
-    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//TypeReference"/>
     <genClasses ecoreClass="SADL.ecore#//Property">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Property/restrictions"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Property/from"/>
@@ -104,20 +104,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//CardinalityCondition/cardinality"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CardinalityCondition/type"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//ExplicitValue">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//ExplicitValue/instName"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExplicitValue/valueList"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExplicitValue/row"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExplicitValue/term"/>
-    </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//LiteralValue">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//LiteralValue/literalNumber"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//LiteralValue/literalString"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//LiteralValue/literalBoolean"/>
-    </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//ValueRow">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueRow/explicitValues"/>
-    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Value"/>
     <genClasses ecoreClass="SADL.ecore#//ClassOrPropertyDeclaration">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassOrPropertyDeclaration/superElement"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ClassOrPropertyDeclaration/facet"/>
@@ -151,6 +138,9 @@
     <genClasses ecoreClass="SADL.ecore#//SimpleTypeReference">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//SimpleTypeReference/type"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//PrimitiveDataType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//PrimitiveDataType/primitiveType"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Restriction">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//Restriction/property"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Restriction/condition"/>
@@ -176,6 +166,21 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//CanOnlyBeOneOf">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CanOnlyBeOneOf/values"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//NumberLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//NumberLiteral/literalNumber"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//StringLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//StringLiteral/literalString"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//BooleanLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BooleanLiteral/truethy"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//ValueList">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueList/explicitValues"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//ConstantLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ConstantLiteral/term"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
