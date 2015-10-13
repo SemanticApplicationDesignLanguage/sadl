@@ -3,7 +3,7 @@
  */
 package com.ge.research.sadl.tests
 
-import com.ge.research.sadl.sADL.Model
+import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Inject
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 @InjectWith(SADLInjectorProvider)
 abstract class SADLParsingTest{
 
-	@Inject ParseHelper<Model> parseHelper
+	@Inject ParseHelper<SadlModel> parseHelper
 	@Inject ValidationTestHelper validationTestHelper
 	
 	protected def void assertNoErrors(CharSequence text) {
@@ -31,7 +31,7 @@ abstract class SADLParsingTest{
 		Assert.assertEquals(text.toString, annotatedText)
 	}
 	
-	def void assertAST(CharSequence text, (Model)=>void assertion) {
+	def void assertAST(CharSequence text, (SadlModel)=>void assertion) {
 		val model = parseHelper.parse(text)
 		validationTestHelper.assertNoErrors(model)
 		assertion.apply(model)

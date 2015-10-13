@@ -1,6 +1,6 @@
 package com.ge.research.sadl.tests
 
-import com.ge.research.sadl.sADL.Model
+import com.ge.research.sadl.sADL.SadlModel
 import com.google.common.base.Charsets
 import com.google.inject.Inject
 import java.io.File
@@ -12,15 +12,15 @@ import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.FileExtensionProvider
 import org.eclipse.xtext.validation.Issue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 class GenerateTestCases {
 	
-	@Inject ParseHelper<Model> parseHelper
+	@Inject ParseHelper<SadlModel> parseHelper
 	@Inject ValidationTestHelper validationHelper
 	@Inject FileExtensionProvider extensionProvider 
 	
@@ -54,7 +54,7 @@ class GenerateTestCases {
 		}
 	}
 	
-	def generateTest(File file, Model model, Iterable<Issue> issues, String contents) {
+	def generateTest(File file, SadlModel model, Iterable<Issue> issues, String contents) {
 		val typename = (file.parentFile.name.toFirstUpper+"_"+file.name.substring(0, file.name.length-6).toFirstUpper+"Test").replace('-','_')
 		val packagePath = 'com/ge/research/sadl/tests/generated'
 		val toBeGenerated = new File('./src/'+packagePath+'/'+typename+".xtend")

@@ -7,7 +7,7 @@ import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
 class SoftLinkingMessageProvider extends LinkingDiagnosticMessageProvider {
 
 	override getUnresolvedProxyMessage(ILinkingDiagnosticContext context) {
-		if (context.reference === SADLPackage.Literals.DECLARATION__NAME) {
+		if (context.reference === SADLPackage.Literals.SADL_RESOURCE__NAME) {
 			// treated as declaration. 
 			return null
 		}

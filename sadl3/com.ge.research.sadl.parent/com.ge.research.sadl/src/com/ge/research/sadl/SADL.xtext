@@ -21,71 +21,71 @@ grammar com.ge.research.sadl.SADL hidden(WS, ML_COMMENT, SL_COMMENT)
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 generate sADL "http://www.ge.com/research/sadl/SADL"
 
-Model :
+SadlModel :
     'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
-    	annotations+=Annotation* EOS 
-    imports+=Import*
-    elements+=ModelElement*;
+    	annotations+=SadlAnnotation* EOS 
+    imports+=SadlImport*
+    elements+=SadlModelElement*;
     
-Annotation :
+SadlAnnotation :
 	','? '(' type=('alias'|'note') contents+=STRING (',' contents+=STRING)* ')'
 ;
 
-Import :
+SadlImport :
     'import' importURI=STRING ('as' alias=NAME)? EOS;
 
 // The various kinds of elements that make up the body of a model.
-ModelElement :
-    Statement
+SadlModelElement :
+    SadlStatement
 ;
 
 // These are the things that translate directly to OWL.
-Statement returns Declaration:
-	    DeclarationPart 
-	    	({ClassOrPropertyDeclaration.nameDeclarations+=current} 'is' 'a' 
+SadlStatement returns SadlStatement:
+	    SadlResource 
+	    	({SadlClassOrPropertyDeclaration.classOrProperty+=current} 'is' 'a' 
 	    		('top-level'? 'class' 
-	    		| 'type' 'of' superElement=PrimaryTypeReference facet=DataTypeFacet?)
-				(describedBy+=PropertyDeclarationInClass+ | (','? restrictions+=PropertyRestriction)+)?
-			|{Property.nameDeclarations+=current} 'is' 'a' 'property' (','? restrictions+=PropertyRestriction)*
-			|{Property.nameDeclarations+=current} (','? restrictions+=PropertyRestriction)+
-			|{EquivalentConcepts.nameDeclarations+=current} 'is' 'the' 'same' 'as' (complement?='not')? class2=TypeReference
-			|{DifferentForm.nameDeclarations+=current} 'is' 'not' 'the' 'same' 'as' class2=TypeReference
-			|{Instance.nameDeclarations+=current} ('is' article=AnArticle type=TypeReference)? propertyInitializers+=PropertyInitializer*
-			|{DisjointClasses.types+=current} ('and' types+=DeclarationPart)+ 'are' 'disjoint'
+	    		| 'type' 'of' superElement=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
+				(describedBy+=SadlPropertyDeclarationInClass+ | (','? restrictions+=SadlPropertyRestriction)+)?
+			|{SadlProperty.nameOrRef=current} 'is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
+			|{SadlProperty.nameOrRef=current} (','? restrictions+=SadlPropertyRestriction)+
+			|{SadlEquivalentConcepts.nameOrRef=current} 'is' 'the' 'same' 'as' (complement?='not')? sameAs=SadlTypeReference
+			|{SadlDifferentForm.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
+			|{SadlInstance.nameOrRef=current} ('is' AnArticle type=SadlTypeReference)? propertyInitializers+=SadlPropertyInitializer*
+			|{SadlDisjointClasses.classes+=current} ('and' classes+=SadlResource)+ 'are' 'disjoint'
 			)  EOS
-	| 	'{' nameDeclarations+=DeclarationPart (','  nameDeclaration+=DeclarationPart)* '}' 'are' 
-				(('top-level'? 'classes' | 'types' 'of' superType=TypeReference) describedBy+=PropertyDeclarationInClass* 
-			|	{DisjointClasses.types+=current} 'disjoint'
-			|	{DifferentForm.types+=current} (complement?='not')? 'the' 'same') EOS
-    | 	{Property} AnArticle? 'relationship' 'of' from=TypeReference 'to' to=TypeReference 'is' nameDeclaration+=DeclarationPart EOS
-    | 	AnArticle TypeReference (
-    		{Instance.type=current} nameDeclarations+=DeclarationPart propertyInitializers+=PropertyInitializer*
-    	|	{TypeConstraint.subject=current}'is' AnArticle object=DeclarationPart 'only' 'if' propConditions+=PropertyCondition ('and' propConditions+=PropertyCondition)*) EOS
-    | 	DataTypeDeclaration
+	| 	'{' resources+=SadlResource (','  resources+=SadlResource)* '}' 'are' 
+				(('top-level'? 'classes' | 'types' 'of' superType=SadlTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
+			|	{SadlDisjointClasses.types+=current} 'disjoint'
+			|	{SadlDifferentForm.types+=current} (complement?='not')? 'the' 'same') EOS
+    | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource EOS
+    | 	AnArticle SadlTypeReference (
+    		{SadlInstance.type=current} instance+=SadlResource propertyInitializers+=SadlPropertyInitializer*
+    	|	{SadlTypeConstraint.subject=current}'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*) EOS
+    | 	SadlDataTypeDeclaration
 ;
 
-PropertyCondition :
-	property=[Declaration|NAME] cond+=Condition
+SadlPropertyCondition :
+	property=[SadlResource|NAME] cond+=SadlCondition
 ;
 
-PropertyInitializer:
-	','? ('with'|'has') property=[Declaration|NAME] (value=ExplicitValue | '(' value=NestedInstance')')
+SadlPropertyInitializer:
+	','? ('with'|'has') property=[SadlResource|NAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
 
-NestedInstance returns Instance:
-		nameDeclarations+=DeclarationPart 'is' article=AnArticle type=TypeReference propertyInitializers+=PropertyInitializer*
-	|	article=AnArticle type=TypeReference nameDeclarations+=DeclarationPart? propertyInitializers+=PropertyInitializer*
+SadlNestedInstance returns SadlInstance:
+		nameDeclarations+=SadlResource 'is' article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*
+	|	article=AnArticle type=SadlTypeReference nameDeclarations+=SadlResource? propertyInitializers+=SadlPropertyInitializer*
 ;
 
-DeclarationPart returns Declaration:
-	name=[Declaration|NAME] annotations+=Annotation*
+SadlResource:
+	name=[SadlResource|NAME] annotations+=SadlAnnotation*
 ;
 
-DataTypeDeclaration returns TypeDefinition:
-	'data' 'type' nameDeclarations+=DeclarationPart 'is' ('a'|'an')? superType=TypeReference facet=DataTypeFacet? EOS
+SadlDataTypeDeclaration:
+	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlTypeReference facet=SadlDataTypeFacet? EOS
 ;
 
-DataTypeFacet :	
+SadlDataTypeFacet :	
 		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
 	|	regex=STRING
 	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
@@ -93,75 +93,76 @@ DataTypeFacet :
 ;
 
 // TypeReferences
-TypeReference returns TypeReference:
-    UnionType
+SadlTypeReference returns SadlTypeReference:
+    SadlUnionType
 ;
 
-UnionType returns TypeReference:
-	IntersectionType ({UnionType.left=current} (','|'or') right=IntersectionType)*
+SadlUnionType returns SadlTypeReference:
+	SadlIntersectionType ({SadlUnionType.left=current} (','|'or') right=SadlIntersectionType)*
 ;
 
-IntersectionType returns TypeReference:
-	PrimaryTypeReference ({IntersectionType.left=current} ('and') right=PrimaryTypeReference)*
+SadlIntersectionType returns SadlTypeReference:
+	SadlPrimaryTypeReference ({SadlIntersectionType.left=current} ('and') right=SadlPrimaryTypeReference)*
 ;
 
-PrimaryTypeReference returns TypeReference:
-		{SimpleTypeReference} type=[Declaration|NAME]
-	|	{PrimitiveDataType} primitiveType=DataType
-	|	{Restriction}'(' property=[Declaration|NAME] condition=Condition ')'
-	|	'{' TypeReference '}'
+SadlPrimaryTypeReference returns SadlTypeReference:
+		{SadlSimpleTypeReference} type=[SadlResource|NAME]
+	|	{SadlPrimitiveDataType} primitiveType=SadlDataType
+	|	{SadlRestriction}'(' property=[SadlResource|NAME] condition=SadlCondition ')'
+	|	'{' SadlTypeReference '}'
 ;
 
-enum DataType :
+enum SadlDataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
     gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
 
 // Class declarations may also describe the class's properties.
-PropertyDeclarationInClass returns Property:
-    	','? 'described' 'by' nameDeclarations+=DeclarationPart restrictions+=PropertyRestriction;
+SadlPropertyDeclarationInClass returns SadlProperty:
+    	','? 'described' 'by' nameDeclarations+=SadlResource restrictions+=SadlPropertyRestriction;
 
-PropertyRestriction :
-    	Condition
-    |   {TypeAssociation} ('describes'|'of') type=TypeReference
-    |   TypeRestriction
-    |   {IsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[Declaration|NAME]
-    |   {IsTransitive} 'is' 'transitive'
-    |   {IsSymmetrical} 'is' 'symmetrical'
-    |   {IsAnnotation} 'is' 'a' 'type' 'of' 'annotation'
-    |   {DefaultValue} 'has' ('level' level=NUMBER)? 'default' defValue=ExplicitValue
-    |   {IsFunctional} 'has' 'a' 'single' (inverse?='subject' | 'value')?
-    |   {MustBeOneOf} 'must' 'be' 'one' 'of' '{' values+=ExplicitValue (',' values+=ExplicitValue)* '}'
-    |   {CanOnlyBeOneOf} 'can' 'only' 'be' 'one' 'of' '{' values+=ExplicitValue (',' values+=ExplicitValue)* '}'
+SadlPropertyRestriction :
+    	SadlCondition
+    |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
+    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' 'List'|'Lists') 'of' 'values'|'values') 'of' 'type' range=SadlPrimaryTypeReference
+    |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|NAME]
+    |   {SadlIsTransitive} 'is' 'transitive'
+    |   {SadlIsSymmetrical} 'is' 'symmetrical'
+    |   {SadlIsAnnotation} 'is' 'a' 'type' 'of' 'annotation'
+    |   {SadlDefaultValue} 'has' ('level' level=NUMBER)? 'default' defValue=SadlExplicitValue
+    |   {SadlIsFunctional} 'has' 'a' 'single' (inverse?='subject' | 'value')?
+    |   {SadlMustBeOneOf} 'must' 'be' 'one' 'of' '{' values+=SadlExplicitValue (',' values+=SadlExplicitValue)* '}'
+    |   {SadlCanOnlyBeOneOf} 'can' 'only' 'be' 'one' 'of' '{' values+=SadlExplicitValue (',' values+=SadlExplicitValue)* '}'
 ;
 
-Condition :
-		AllValuesCondition
-	|   HasValueCondition
-    |   CardinalityCondition
+SadlCondition :
+		SadlAllValuesCondition
+	|   SadlHasValueCondition
+    |   SadlCardinalityCondition
 ;
 
-TypeRestriction :
-    ('has'|'with') ('a' singleValued?='single' 'value'|('a' 'List'|'Lists') 'of' 'values'|'values') 'of' 'type' type=PrimaryTypeReference;
+SadlAllValuesCondition :
+	'only' ('has'|'with') 'values' 'of' 'type' type=SadlPrimaryTypeReference;
 
-AllValuesCondition :
-	'only' ('has'|'with') 'values' 'of' 'type' type=PrimaryTypeReference;
+SadlHasValueCondition :
+	'always' ('has'|'with') 'value' restriction=SadlExplicitValue;
 
-HasValueCondition :
-	'always' ('has'|'with') 'value' restriction=ExplicitValue;
-
-CardinalityCondition :
+SadlCardinalityCondition :
 	('has'|'with') 
 	('at' operator=('least'|'most') |'exactly') 
 	cardinality=(NUMBER|'one') ('value'|'values') 
-	('of' 'type' type=PrimaryTypeReference | 'each' 'of' 'types' type=PrimaryTypeReference)?;
+	('of' 'type' type=SadlPrimaryTypeReference | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
 
-ExplicitValue returns Value:
-		DeclarationPart		// e.g., George
-	|	{NumberLiteral} literalNumber=NUMBER
-    |   {StringLiteral} literalString=STRING
-    |   {BooleanLiteral} (truethy?='true'|'false')
-    |   {ValueList} '[' (explicitValues+=ExplicitValue (',' explicitValues+=ExplicitValue)*)? ']'
-	|	{ConstantLiteral} term=('PI'|'known')
+SadlExplicitValue:
+		SadlResource		// e.g., George
+	|	{SadlNumberLiteral} literalNumber=NUMBER
+    |   {SadlStringLiteral} literalString=STRING
+    |   {SadlBooleanLiteral} (truethy?='true'|'false')
+//    |   {SadlBag} '{' (explicitValues+=SadlExplicitValue (
+//    				(',' explicitValues+=SadlExplicitValue)+
+//    			|	(operator='and' explicitValues+=SadlExplicitValue)+
+//    			|	(operator='or' explicitValues+=SadlExplicitValue)+)?)? '}'
+    |   {SadlValueList} '[' (explicitValues+=SadlExplicitValue (',' explicitValues+=SadlExplicitValue)*)? ']'
+	|	{SadlConstantLiteral} term=('PI'|'known')
 ;
 
 // These articles can appear before the property name and are indicative of the functionality of the property or

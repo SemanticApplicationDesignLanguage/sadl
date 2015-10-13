@@ -4,8 +4,8 @@
 package com.ge.research.sadl.scoping
 
 import com.ge.research.sadl.model.DeclarationExtensions
-import com.ge.research.sadl.sADL.Declaration
-import com.ge.research.sadl.sADL.Import
+import com.ge.research.sadl.sADL.SadlImport
+import com.ge.research.sadl.sADL.SadlResource
 import com.google.inject.Inject
 import java.util.Map
 import org.eclipse.emf.ecore.EObject
@@ -34,13 +34,13 @@ class SADLScopeProvider extends AbstractScopeProvider {
 		val iter = context.eResource.allContents
 		while (iter.hasNext) {
 			switch it : iter.next {
-				Declaration case concreteName!==null : {
+				SadlResource case concreteName!==null : {
 					val simpleName =  QualifiedName.create(concreteName)
 					result.addElement(simpleName, it)
 					val qn = qnProvider.getFullyQualifiedName(it)
 					result.addElement(qn, it)
 				}
-				Import : {
+				SadlImport : {
 					//TODO
 				}
 			} 
