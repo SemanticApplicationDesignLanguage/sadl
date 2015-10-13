@@ -53,8 +53,8 @@ SadlStatement returns SadlStatement:
 			|{SadlInstance.nameOrRef=current} ('is' AnArticle type=SadlTypeReference)? propertyInitializers+=SadlPropertyInitializer*
 			|{SadlDisjointClasses.classes+=current} ('and' classes+=SadlResource)+ 'are' 'disjoint'
 			)  EOS
-	| 	'{' resources+=SadlResource (','  resources+=SadlResource)* '}' 'are' 
-				(('top-level'? 'classes' | 'types' 'of' superType=SadlTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
+	| 	{SadlClassOrPropertyDeclaration}  '{' classOrProperty+=SadlResource (','  classOrProperty+=SadlResource)* '}' 'are' 
+				(('top-level'? 'classes' | 'types' 'of' superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
 			|	{SadlDisjointClasses.types+=current} 'disjoint'
 			|	{SadlDifferentForm.types+=current} (complement?='not')? 'the' 'same') EOS
     | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource EOS
@@ -108,7 +108,7 @@ SadlIntersectionType returns SadlTypeReference:
 SadlPrimaryTypeReference returns SadlTypeReference:
 		{SadlSimpleTypeReference} type=[SadlResource|NAME]
 	|	{SadlPrimitiveDataType} primitiveType=SadlDataType
-	|	{SadlRestriction}'(' property=[SadlResource|NAME] condition=SadlCondition ')'
+	|	'(' SadlPropertyCondition ')'
 	|	'{' SadlTypeReference '}'
 ;
 

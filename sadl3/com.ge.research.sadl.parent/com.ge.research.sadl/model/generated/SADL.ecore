@@ -22,15 +22,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="alias" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlModelElement"/>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlStatement" eSuperTypes="#//SadlModelElement">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="resources" upperBound="-1"
-        eType="#//SadlResource" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//SadlTypeReference"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="describedBy" upperBound="-1"
-        eType="#//SadlProperty" containment="true"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlPropertyCondition">
+  <eClassifiers xsi:type="ecore:EClass" name="SadlStatement" eSuperTypes="#//SadlModelElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="SadlPropertyCondition" eSuperTypes="#//SadlTypeReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="property" eType="#//SadlResource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="cond" upperBound="-1" eType="#//SadlCondition"
         containment="true"/>
@@ -61,6 +54,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="SadlDataTypeDeclaration" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameDeclarations" upperBound="-1"
         eType="#//SadlResource" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//SadlTypeReference"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//SadlDataTypeFacet"
         containment="true"/>
   </eClassifiers>
@@ -137,6 +132,8 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//SadlDataTypeFacet"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="describedBy" upperBound="-1"
+        eType="#//SadlProperty" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="restrictions" upperBound="-1"
         eType="#//SadlPropertyRestriction" containment="true"/>
   </eClassifiers>
@@ -153,14 +150,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="notTheSameAs" eType="#//SadlTypeReference"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
-        eType="#//SadlStatement" containment="true"/>
+        eType="#//SadlClassOrPropertyDeclaration" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="complement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlDisjointClasses" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="classes" upperBound="-1"
         eType="#//SadlResource" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
-        eType="#//SadlStatement" containment="true"/>
+        eType="#//SadlClassOrPropertyDeclaration" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlTypeConstraint" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="subject" eType="#//SadlTypeReference"
@@ -187,11 +184,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlPrimitiveDataType" eSuperTypes="#//SadlTypeReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="primitiveType" eType="#//SadlDataType"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlRestriction" eSuperTypes="#//SadlTypeReference">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="property" eType="#//SadlResource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="condition" eType="#//SadlCondition"
-        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlTypeAssociation" eSuperTypes="#//SadlPropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EReference" name="domain" eType="#//SadlTypeReference"

@@ -46,11 +46,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlImport/alias"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlModelElement"/>
-    <genClasses ecoreClass="SADL.ecore#//SadlStatement">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlStatement/resources"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlStatement/superType"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlStatement/describedBy"/>
-    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//SadlStatement"/>
     <genClasses ecoreClass="SADL.ecore#//SadlPropertyCondition">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlPropertyCondition/property"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlPropertyCondition/cond"/>
@@ -73,6 +69,7 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlDataTypeDeclaration">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDataTypeDeclaration/nameDeclarations"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDataTypeDeclaration/superType"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDataTypeDeclaration/facet"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlDataTypeFacet">
@@ -113,6 +110,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/classOrProperty"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/superElement"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/facet"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/describedBy"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/restrictions"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlEquivalentConcepts">
@@ -148,10 +146,6 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlPrimitiveDataType">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlPrimitiveDataType/primitiveType"/>
-    </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//SadlRestriction">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlRestriction/property"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlRestriction/condition"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlTypeAssociation">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlTypeAssociation/domain"/>
