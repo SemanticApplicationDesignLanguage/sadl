@@ -254,6 +254,30 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 
+	@Test def void testClassRestrictions_05() {		// AWC, 10/13/15: when placed in the editor, without any white space after the
+													//  last period, an error is created which is hard to understand--any way EOF could
+													//  act like newline or white space for end of file?
+		'''
+		uri "http://sadl.org/TestSadlIde/SadlTypedLists" alias typedLists version "$Revision:$ Last modified on   $Date:$". 
+		
+		Person is a class.
+		Mother is a class, described by children with a List of values of type Person.
+		
+		Flight is a class, described by leg with a List of values of type FlightLeg.
+		
+			FlightLeg is a class, 
+			described by departureTime with a single value of type dateTime,
+			described by departureAirport with a single value of type Airport,
+			described by arrivalTime with a single value of type dateTime,
+			described by arrrivalAirport with a single value of type Airport.
+		
+			Airport is a class.
+		
+		FlightSchedule is a class,
+			described by flight with Lists of values of type Flight.
+		'''.assertNoErrors
+	}
+
 	@Test def void testEquivalenceAndComplemence() {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
@@ -390,4 +414,38 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-}
+	@Test def void testInstanceDeclaration_01() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMartha".
+			
+			A Birth has child George, has mother Mary, 
+				has location (a Location has latitude 38.186111, has longitude -76.930556, 
+					has description "Pope's Creek Estate near present-day Colonial Beach, Virginia, USA"),
+				has ^when "1732-02-22",
+				has weight 9.45.
+		'''.assertNoErrors
+	}
+	
+		@Test def void testInstanceDeclaration_02() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Thingy is a class described by connectedTo with values of type Thingy.
+			
+			T1 is a Thingy.
+			T2 is a Thingy.
+			T3 is a Thingy, connectedTo T1, connectedTo T2.
+		'''.assertNoErrors
+	}
+	
+		@Test def void testInstanceDeclaration_03() {			// AWC, 10/13/15: this should be an error. However, the 
+																//	error message isn't very easy to understand....
+		'''
+			uri "http://sadl.imp/baduris".
+			
+			// Building this file (to create OWL model) should produce errors
+			//  because localnames of concepts cannot start with a digit.
+			
+			SmallNumbers is a top-level class, must be one of {1N, 2N, 3N}.
+		'''.assertNoErrors
+	}}
