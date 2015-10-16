@@ -15,17 +15,19 @@ Require-Bundle: org.eclipse.xtext,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
  org.eclipse.xtext.util,
  org.eclipse.xtend.lib,
- org.eclipse.emf.common
+ org.eclipse.emf.common,
+ com.ge.research.sadl.jena;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: com.ge.research.sadl.sADL,
- com.ge.research.sadl.parser.antlr.internal,
- com.ge.research.sadl.sADL.impl,
- com.ge.research.sadl.services,
+Export-Package: com.ge.research.sadl,
+ com.ge.research.sadl.generator,
+ com.ge.research.sadl.model,
  com.ge.research.sadl.parser.antlr,
+ com.ge.research.sadl.parser.antlr.internal,
+ com.ge.research.sadl.sADL,
+ com.ge.research.sadl.sADL.impl,
  com.ge.research.sadl.sADL.util,
- com.ge.research.sadl,
  com.ge.research.sadl.scoping,
  com.ge.research.sadl.serializer,
- com.ge.research.sadl.validation,
- com.ge.research.sadl.generator
+ com.ge.research.sadl.services,
+ com.ge.research.sadl.validation
 Import-Package: org.apache.log4j
