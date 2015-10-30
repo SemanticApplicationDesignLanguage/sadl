@@ -32,6 +32,20 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void importTestCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			import "http://sadl.org/model2".
+			Foo is a class.
+		'''.assertTranslatesTo [ modelManager |
+			// expectations go here
+			assertEquals("http://sadl.org/model1", modelManager.getModelBaseURI())
+			assertEquals("m1", modelManager.getModelAlias());
+			assertTrue(modelManager.getOrderedImports().size() == 1);
+			assertEquals("http://sadl.org/model2", modelManager.getOrderedImports.get(0).getUri());
+		]
+	}
+	
 	protected def void assertTranslatesTo(CharSequence code, (ModelManager)=>void assertions) {
 		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)
