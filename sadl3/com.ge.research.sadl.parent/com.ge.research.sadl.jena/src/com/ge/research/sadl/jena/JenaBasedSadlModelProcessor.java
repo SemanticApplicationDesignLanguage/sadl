@@ -103,6 +103,12 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		    	com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
 		    	modelOntology.addImport(importedOntology);
 	    	}
+	    	
+// TODO	Should the imported model actually be loaded by Jena? The OWL model, whether from SADL or external, will potenatially 
+//	    	contain information that is necessary for validation. The only information that will be potentially needed for
+//	    	processing the rest of the parse tree is the type of the imported concepts. For imports of SADL models, this type
+//	    	information is known in the ResourceSet. Likewise for external OWL imports? 
+	    	
 //	    	this.getJenaDocumentMgr().setCacheModels(true);
 //	   		this.getJenaDocumentMgr().setProcessImports(true);
 //	   		ReadFailureHandler rfh = this.getJenaDocumentMgr().getReadFailureHandler();
