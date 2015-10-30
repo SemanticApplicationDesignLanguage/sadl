@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Jena
-Bundle-SymbolicName: com.ge.research.sadl.jena
+Bundle-SymbolicName: com.ge.research.sadl.jena;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: GE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/activation-1.0.2.jar,
  lib/com.springsource.org.apache.commons.logging-1.1.1.jar,
  lib/commons-codec-1.6.jar,
@@ -36,4 +36,10 @@ Bundle-ClassPath: lib/activation-1.0.2.jar,
  lib/xml-apis-1.4.01.jar,
  lib/xercesImpl-2.11.0.jar,
  .
-Export-Package: com.ge.research.sadl.jena
+Export-Package: com.ge.research.sadl.jena,
+ com.hp.hpl.jena.ontology
+Require-Bundle: com.ge.research.sadl;bundle-version="1.0.0",
+ org.eclipse.emf.ecore;bundle-version="2.11.1",
+ org.eclipse.emf;bundle-version="2.6.0",
+ org.eclipse.xtext;bundle-version="2.9.0",
+ org.eclipse.equinox.common;bundle-version="3.7.0"

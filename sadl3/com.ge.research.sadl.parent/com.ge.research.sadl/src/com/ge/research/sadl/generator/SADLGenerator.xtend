@@ -3,23 +3,26 @@
  */
 package com.ge.research.sadl.generator
 
+import com.ge.research.sadl.processing.SadlModelProcessorProvider
+import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.IFileSystemAccess
-import org.eclipse.xtext.generator.IGenerator
+import org.eclipse.xtext.generator.GeneratorDelegate
+import org.eclipse.xtext.generator.IFileSystemAccess2
+import org.eclipse.xtext.util.CancelIndicator
 
 /**
  * Generates code from your model files on save.
  * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#code-generation
  */
-class SADLGenerator implements IGenerator {
+class SADLGenerator extends GeneratorDelegate {
 
-	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(typeof(Greeting))
-//				.map[name]
-//				.join(', '))
+	@Inject SadlModelProcessorProvider processorProvider 
+	
+	override doGenerate(Resource resource, IFileSystemAccess2 fsa) {
+		super.doGenerate(resource, fsa)
+		val processor = processorProvider.getProcessor(resource.resourceSet)
+		processor.onGenerate(resource, fsa, CancelIndicator.NullImpl)
 	}
-
+	
 }

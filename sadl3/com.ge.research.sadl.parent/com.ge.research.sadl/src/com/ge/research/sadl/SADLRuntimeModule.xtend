@@ -8,6 +8,8 @@ import com.ge.research.sadl.scoping.QualifiedNameProvider
 import com.ge.research.sadl.validation.SoftLinkingMessageProvider
 import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
 import org.eclipse.xtext.naming.IQualifiedNameConverter
+import org.eclipse.xtext.validation.ResourceValidatorImpl
+import com.ge.research.sadl.validation.ResourceValidator
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -28,6 +30,10 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	
 	override bindIValueConverterService() {
 		ValueConverterService
+	}
+	
+	def Class<? extends ResourceValidatorImpl> bindResourceValidatorImpl() {
+		return ResourceValidator
 	}
 	
 }

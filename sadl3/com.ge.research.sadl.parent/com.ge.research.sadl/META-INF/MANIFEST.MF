@@ -15,14 +15,14 @@ Require-Bundle: org.eclipse.xtext,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
  org.eclipse.xtext.util,
  org.eclipse.xtend.lib,
- org.eclipse.emf.common,
- com.ge.research.sadl.jena;bundle-version="1.0.0"
+ org.eclipse.emf.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.generator,
  com.ge.research.sadl.model,
  com.ge.research.sadl.parser.antlr,
  com.ge.research.sadl.parser.antlr.internal,
+ com.ge.research.sadl.processing,
  com.ge.research.sadl.sADL,
  com.ge.research.sadl.sADL.impl,
  com.ge.research.sadl.sADL.util,

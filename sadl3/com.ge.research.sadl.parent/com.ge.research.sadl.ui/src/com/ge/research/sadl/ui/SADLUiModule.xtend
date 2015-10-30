@@ -3,10 +3,16 @@
  */
 package com.ge.research.sadl.ui
 
+import com.ge.research.sadl.processing.SadlModelProcessorProvider
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorProvider
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
  */
 @FinalFieldsConstructor class SADLUiModule extends AbstractSADLUiModule {
+	
+	def Class<? extends SadlModelProcessorProvider> bindSadlModelProcessorProvider() {
+		return ExtensionPointBasedSadlModelProcessorProvider
+	}
 }
