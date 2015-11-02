@@ -152,7 +152,7 @@
 			</visibleWhen>
 		</command>  
 		</menuContribution>
-		!-- copy qualified name -->
+		<!-- copy qualified name -->
 		<menuContribution locationURI="popup:#TextEditorContext?after=copy">
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName" 
 				style="push" tooltip="Copy Qualified Name">
@@ -204,23 +204,20 @@
 			</activeWhen>
 		</handler>
 	</extension>
-	
 	<!-- adding resource factories -->
-	
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="sadl">
-		</parser>
-	</extension>
-	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
-	    <resourceServiceProvider
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-	        uriExtension="sadl">
-	    </resourceServiceProvider>
-	</extension>
-	
+		<extension
+			point="org.eclipse.emf.ecore.extension_parser">
+			<parser
+				class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+				type="sadl">
+			</parser>
+		</extension>
+		<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
+		    <resourceServiceProvider
+		        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+		        uriExtension="sadl">
+		    </resourceServiceProvider>
+		</extension>
 	<!-- marker definitions for com.ge.research.sadl.SADL -->
 	<extension
 			id="sadl.check.fast"
@@ -246,8 +243,7 @@
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
 			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
-			fileExtensions="sadl">
-		</participant>
+			fileExtensions="sadl"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
@@ -292,7 +288,6 @@
 			</activeWhen>
 		</handler>
 	</extension>
-	
 	<!-- Quick Outline -->
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -326,7 +321,6 @@
 			</command>
 		</menuContribution>
 	</extension>
-	
 	<!-- quickfix marker resolution generator for com.ge.research.sadl.SADL -->
 	<extension
 	        point="org.eclipse.ui.ide.markerResolution">
@@ -355,7 +349,6 @@
 	        </attribute>
 	    </markerResolutionGenerator>
 	</extension>
-	
 	<!-- Rename Refactoring -->
 	<extension point="org.eclipse.ui.handlers">
 		<handler 
@@ -369,52 +362,49 @@
 		</handler>
 	</extension>
 	<extension point="org.eclipse.ui.menus">
-	     <menuContribution
-	        locationURI="popup:#TextEditorContext?after=group.edit">
-	     <command commandId="org.eclipse.xtext.ui.refactoring.RenameElement"
-	           style="push">
-	        <visibleWhen checkEnabled="false">
-	           <reference
-	                 definitionId="com.ge.research.sadl.SADL.Editor.opened">
-	           </reference>
-	        </visibleWhen>
-	     </command>
-	  </menuContribution>
+		<menuContribution
+			locationURI="popup:#TextEditorContext?after=group.edit">
+			<command commandId="org.eclipse.xtext.ui.refactoring.RenameElement"
+				style="push">
+				<visibleWhen checkEnabled="false">
+					<reference
+						definitionId="com.ge.research.sadl.SADL.Editor.opened">
+					</reference>
+				</visibleWhen>
+			</command>
+		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
-	    <page
-	        category="com.ge.research.sadl.SADL"
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
-	        id="com.ge.research.sadl.SADL.refactoring"
-	        name="Refactoring">
-	        <keywordReference id="com.ge.research.sadl.ui.keyword_SADL"/>
-	    </page>
+		<page
+			category="com.ge.research.sadl.SADL"
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
+			id="com.ge.research.sadl.SADL.refactoring"
+			name="Refactoring">
+			<keywordReference id="com.ge.research.sadl.ui.keyword_SADL"/>
+		</page>
 	</extension>
-	
 	<extension point="org.eclipse.compare.contentViewers">
-	<viewer id="com.ge.research.sadl.SADL.compare.contentViewers"
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-	        extensions="sadl">
-	</viewer>
+		<viewer id="com.ge.research.sadl.SADL.compare.contentViewers"
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+			extensions="sadl">
+		</viewer>
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
-	<viewer id="com.ge.research.sadl.SADL.compare.contentMergeViewers"
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-	        extensions="sadl" label="SADL Compare">
-	 </viewer>
+		<viewer id="com.ge.research.sadl.SADL.compare.contentMergeViewers"
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+			extensions="sadl" label="SADL Compare">
+		</viewer>
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
-	<provider id="com.ge.research.sadl.SADL.editors.documentProviders"
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
-	        extensions="sadl">
-	</provider>
+		<provider id="com.ge.research.sadl.SADL.editors.documentProviders"
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
+			extensions="sadl">
+		</provider>
 	</extension>
 	<extension point="org.eclipse.team.core.fileTypes">
-	
-	<fileTypes
-	        extension="sadl"
-	        type="text">
-	</fileTypes>
-	
+		<fileTypes
+			extension="sadl"
+			type="text">
+		</fileTypes>
 	</extension>
 </plugin>

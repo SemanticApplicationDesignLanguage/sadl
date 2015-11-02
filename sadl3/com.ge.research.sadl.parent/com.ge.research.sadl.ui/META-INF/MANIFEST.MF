@@ -16,7 +16,7 @@ Require-Bundle: com.ge.research.sadl,
  org.eclipse.xtext.ui.codetemplates.ui,
  org.eclipse.xtext.xbase.lib,
  org.eclipse.xtext.common.types.ui,
- org.eclipse.xtend.lib,
+ org.eclipse.xtend.lib;resolution:=optional,
  org.eclipse.xtext.ui.shared
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.ge.research.sadl.ui.contentassist,

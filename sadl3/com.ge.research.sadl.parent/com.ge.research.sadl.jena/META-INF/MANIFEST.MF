@@ -39,7 +39,7 @@ Bundle-ClassPath: lib/activation-1.0.2.jar,
 Export-Package: com.ge.research.sadl.jena,
  com.hp.hpl.jena.ontology
 Require-Bundle: com.ge.research.sadl;bundle-version="1.0.0",
- org.eclipse.emf.ecore;bundle-version="2.11.1",
- org.eclipse.emf;bundle-version="2.6.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.emf,
  org.eclipse.xtext;bundle-version="2.9.0",
- org.eclipse.equinox.common;bundle-version="3.7.0"
+ org.eclipse.equinox.common
