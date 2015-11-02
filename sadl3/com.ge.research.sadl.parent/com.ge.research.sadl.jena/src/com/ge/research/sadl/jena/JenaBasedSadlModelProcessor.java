@@ -6,13 +6,12 @@ import java.util.List;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.mwe.core.issues.IssuesImpl;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IAcceptor;
 import org.eclipse.xtext.validation.Issue;
-import org.eclipse.xtext.validation.Issue.IssueImpl;
 
+import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.sADL.SadlAnnotation;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
@@ -21,6 +20,7 @@ import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlTypeReference;
+import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.Ontology;
@@ -31,6 +31,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	private OntModel theJenaModel;
 	
 	enum AnnType {ALIAS, NOTE}
+	
+	@Inject DeclarationExtensions declarationExtensions;
 	
 	/**
 	 * For TESTING
@@ -134,8 +136,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 						Iterator<SadlResource> citer = clses.iterator();
 						while (citer.hasNext()) {
 							SadlResource sr = citer.next();
-// TODO How do I get the actual name? getName() on SadlResource returns a SadlResource, etc.							
-							String nm = sr.getName().getName().toString();
+// TODO How do I get the actual name? getName() on SadlResource returns a SadlResource, etc.
+							String nm = declarationExtensions.getConcreteName(sr);
 							getTheJenaModel().createClass(getUri(modelNamespace, nm));
 						}
 					}
