@@ -446,6 +446,6 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 			// Building this file (to create OWL model) should produce errors
 			//  because localnames of concepts cannot start with a digit.
 			
-			SmallNumbers is a top-level class, must be one of {1N, 2N, 3N}.
+			SmallNumbers is a top-level class, must be one of {N1, N2, N3}.
 		'''.assertNoErrors
 	}}
