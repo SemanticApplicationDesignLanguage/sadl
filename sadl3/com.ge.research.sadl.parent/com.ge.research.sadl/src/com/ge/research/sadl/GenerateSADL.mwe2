@@ -10,7 +10,7 @@ var rootPath = ".."
 Workflow {
 	
 	component = XtextGenerator {
-		configuration = SadlGeneratorModule {
+		configuration = {
 			project = StandardProjectConfig {
 				baseName = "com.ge.research.sadl"
 				rootPath = rootPath
@@ -63,7 +63,6 @@ Workflow {
 			validator = {
 				// composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
 			}
-			contentAssist = ContentAssistFragment42 {}
 		}
 	}
 }
