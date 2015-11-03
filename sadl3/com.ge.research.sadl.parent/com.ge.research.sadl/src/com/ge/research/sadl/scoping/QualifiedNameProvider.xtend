@@ -15,11 +15,7 @@ class QualifiedNameProvider implements IQualifiedNameProvider {
 
 	override getFullyQualifiedName(EObject obj) {
 		if (obj instanceof SadlModel) {
-			if (obj.alias !== null) {
-				return QualifiedName.create(obj.alias)
-			} else {
-				return QualifiedName.create(obj.baseUri)
-			}
+			return QualifiedName.create(obj.baseUri)
 		}
 		if (obj instanceof SadlResource) {
 			val model = EcoreUtil2.getContainerOfType(obj, SadlModel)

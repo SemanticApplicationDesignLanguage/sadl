@@ -40,7 +40,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlAnnotation/contents"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlImport">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlImport/importURI"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlImport/importedResource"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlImport/alias"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlModelElement"/>

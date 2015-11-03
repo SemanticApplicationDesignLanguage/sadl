@@ -32,7 +32,7 @@ SadlAnnotation :
 ;
 
 SadlImport :
-    'import' importURI=STRING ('as' alias=NAME)? EOS;
+    'import' importedResource=[SadlModel|STRING] ('as' alias=NAME)? EOS;
 
 // The various kinds of elements that make up the body of a model.
 SadlModelElement :
