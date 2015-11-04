@@ -107,7 +107,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		Iterator<SadlImport> impitr = implist.iterator();
 		while (impitr.hasNext()) {
 			SadlImport simport = impitr.next();
-			String importUri = simport.getImportURI();
+			SadlModel importedResource = simport.getImportedResource();
+			String importUri = importedResource.getBaseUri();
 			String importPrefix = simport.getAlias();
 //			theJenaModel.addImport(simport.getImportURI(), simport.getAlias());
 	    	if (importUri.equals(modelName)) {
