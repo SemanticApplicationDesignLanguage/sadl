@@ -121,12 +121,12 @@
   <stream name="master"
       label="master">
     <setupTask
+        xsi:type="pde:TargetPlatformTask"
+        name="com.ge.research.sadl.target"/>
+    <setupTask
         xsi:type="launching:LaunchTask"
         excludedTriggers="STARTUP"
         launcher="/com.ge.research.sadl.parent/com.ge.research.sadl.launch"/>
-    <setupTask
-        xsi:type="pde:TargetPlatformTask"
-        name="com.ge.research.sadl.target"/>
   </stream>
   <logicalProjectContainer
       xsi:type="setup:ProjectCatalog"
