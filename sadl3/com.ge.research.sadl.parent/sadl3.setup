@@ -50,14 +50,26 @@
         versionRange="[1.0.0,1.7.0)"/>
     <requirement
         name="org.jboss.tools.m2e.jdt.feature.feature.group"/>
+    <requirement
+        name="org.sonatype.tycho.m2e.feature.feature.group"/>
     <repository
         url="${xtext.nightly.composite}"/>
     <repository
         url="http://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-jdt-compiler/"/>
+    <repository
+        url="http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.8.0/N/0.8.0.201409231215/"/>
   </setupTask>
   <setupTask
       xsi:type="setup:CompoundTask"
       name="Preferences">
+    <setupTask
+        xsi:type="setup:CompoundTask"
+        name="org.eclipse.oomph.setup.ui">
+      <setupTask
+          xsi:type="setup:PreferenceTask"
+          key="/instance/org.eclipse.oomph.setup.ui/skip.startup.tasks"
+          value="true"/>
+    </setupTask>
     <setupTask
         xsi:type="setup:CompoundTask"
         name="org.eclipse.ui.ide">
@@ -125,7 +137,6 @@
         name="com.ge.research.sadl.target"/>
     <setupTask
         xsi:type="launching:LaunchTask"
-        excludedTriggers="STARTUP"
         launcher="/com.ge.research.sadl.parent/com.ge.research.sadl.launch"/>
   </stream>
   <logicalProjectContainer
