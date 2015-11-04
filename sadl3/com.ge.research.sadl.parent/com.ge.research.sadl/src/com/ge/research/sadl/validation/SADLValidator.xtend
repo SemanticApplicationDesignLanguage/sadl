@@ -6,6 +6,7 @@ package com.ge.research.sadl.validation
 import com.ge.research.sadl.sADL.SadlModel
 
 import org.eclipse.xtext.validation.Check
+import com.ge.research.sadl.sADL.SADLPackage
 
 /**
  * This class contains custom validation rules. 
@@ -25,14 +26,14 @@ class SADLValidator extends AbstractSADLValidator {
 //		}
 //	}
 
+	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI";
+	
 	@Check
 	def checkSadlModelNameValidUri(SadlModel model) {
-// TODO how is this done in xtend?
-
-//		String errMsg = SadlUtils.isValidUri(model.baseUri);
-//		if (errMsg != null) {
-//			error('Model name must be a valie URI.', )
-//		}
+		val errMsg = SadlUtils.validateUri(model.baseUri);
+		if (errMsg != null) {
+			error(errMsg, SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
+		}
 	}
 	
 }

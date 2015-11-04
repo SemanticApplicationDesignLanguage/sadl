@@ -32,25 +32,32 @@ import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlProperty;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
 import com.ge.research.sadl.sADL.SadlPropertyRestriction;
+import com.ge.research.sadl.sADL.SadlRangeRestriction;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.google.inject.Inject;
+import com.hp.hpl.jena.ontology.AnnotationProperty;
+import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
+import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFList;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 
 	private OntModel theJenaModel;
 	
 	enum AnnType {ALIAS, NOTE}
-	enum TypeType {CLASS, PROPERTY, DATATYPE, ANNOTATION}
+	enum OntConceptType {CLASS, INDIVIDUAL, OBJECTPROPERTY, DATATYPEPROPERTY, DATATYPE, ANNOTATION}
 	
 	@Inject DeclarationExtensions declarationExtensions;
 	private String modelNamespace;
@@ -61,6 +68,12 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	 */
 	public OntModel getTheJenaModel() {
 		return theJenaModel;
+	}
+	
+	@Override
+	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, CancelIndicator cancelIndicator) {
+		// save the model
+		int i = 0;
 	}
 	
 	@Override
@@ -154,168 +167,248 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					throw new OperationCanceledException();
 				}
 				SadlModelElement element = elitr.next();
-				if (element instanceof SadlClassOrPropertyDeclaration) {
-					// Get the names of the declared concepts and store in a list
-					List<String> newNames = new ArrayList<String>();
-					EList<SadlResource> clses = ((SadlClassOrPropertyDeclaration)element).getClassOrProperty();
-					if (clses != null) {
-						Iterator<SadlResource> citer = clses.iterator();
-						while (citer.hasNext()) {
-							SadlResource sr = citer.next();
-							String nm = declarationExtensions.getConcreteName(sr);
-							newNames.add(nm);
-						}
+				try {
+					if (element instanceof SadlClassOrPropertyDeclaration) {
+						processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) element, issueAcceptor, cancelIndicator);	
 					}
-					
-					// The declared concept(s) will be of type class, property, or datatype. 
-					//	Determining which will depend on the structure, including the superElement....
-					// 	Get the superElement
-					SadlTypeReference superElement = ((SadlClassOrPropertyDeclaration)element).getSuperElement();
-					//		1) if superElement is null then it is a top-level class declaration
-					if (superElement == null) {
-						createOntClass(getModelNamespace(), newNames.get(0), (OntClass)null);
+					else if (element instanceof SadlProperty) {
+						processSadlProperty((SadlProperty) element, issueAcceptor, cancelIndicator);
 					}
-					//  	2) if superElement is not null then the type of the new concept is the same as the type of the superElement
-					// 			the superElement can be:
-					// 				a) a SadlSimpleTypeReference
-					else if (superElement instanceof SadlSimpleTypeReference) {
-						//TODO need to get the type (class or property or datatype declaration) from the ResourceSet--how?
-						SadlResource superSR = ((SadlSimpleTypeReference)superElement).getType();
-// TODO Is this just the local name or is it the URI?
-						String superSRUri = declarationExtensions.getConcreteName(superSR);	
-// TODO how do I get the URI and the type from the ResourceSet?	
-						TypeType superElementType = null;
-						try {
-							superElementType = getSadlTypeReferenceType(superElement);
-						} catch (JenaProcessorException e) {
-							// TODO Auto-generated catch block
-// TODO need to create an issue via issueAcceptor							
-							e.printStackTrace();
-							continue;	// go to next element
-						}  
-						if (superElementType.equals(TypeType.CLASS)) {
-							for (int i = 0; i < newNames.size(); i++) {
-								createOntClass(getModelNamespace(), newNames.get(i), superSRUri);
-							}
-						}
-						else if (superElementType.equals(TypeType.PROPERTY)){
-							for (int i = 0; i < newNames.size(); i++) {
-								createOntProperty(getModelNamespace(), newNames.get(i), superSRUri);
-							}
-						}
-						else if (superElementType.equals(TypeType.ANNOTATION)) {
-							for (int i = 0; i < newNames.size(); i++) {
-								createAnnotationProperty(getModelNamespace(), newNames.get(i));
-							}
-						}
-					}
-					//				b) a SadlPrimitiveDataType
-					else if (superElement instanceof SadlPrimitiveDataType) {
-						SadlDataTypeFacet dtf = ((SadlClassOrPropertyDeclaration)element).getFacet();
-						SadlDataType sdt = ((SadlPrimitiveDataType)superElement).getPrimitiveType();
-						// pull out facets, create rdfs:Datatype
-					}
-					//				c) a SadlPropertyCondition
-					else if (superElement instanceof SadlPropertyCondition) {
-						SadlResource sr = ((SadlPropertyCondition)superElement).getProperty();
-						Iterator<SadlCondition> conditer = ((SadlPropertyCondition)superElement).getCond().iterator();
-						while (conditer.hasNext()) {
-							SadlCondition cond = conditer.next();
-							if (cond instanceof SadlAllValuesCondition) {
-								
-							}
-							else if (cond instanceof SadlHasValueCondition) {
-								
-							}
-							else if (cond instanceof SadlCardinalityCondition) {
-								// Note: SomeValuesFrom is embedded in cardinality in the SADL grammar--an "at least" cardinality with "one" instead of # 
-								String cardinality = ((SadlCardinalityCondition)cond).getCardinality();
-								if (cardinality.equals("one")) {
-									
-								}
-								else {
-									int cardNum = Integer.parseInt(cardinality);
-									
-								}
-							}
-						}		
-					}
-					//				d) a SadlTypeReference
-					else if (superElement instanceof SadlTypeReference) {
-						// this can only be a class; can't create a property as a SadlTypeReference
-						try {
-							OntClass superCls = sadlTypeReferenceToOntClass(superElement);
-						} catch (JenaProcessorException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}	
-				}
-				else if (element instanceof SadlProperty) {
-					// this has two forms:
-					//	1) <name> is a property...
-					//	2) relationship of <Domain> to <Range> is <name>
-					SadlResource sr = ((SadlProperty)element).getNameOrRef();
-					if (sr == null) {
-						sr = ((SadlProperty)element).getProperty();
-					}
-					String propName = declarationExtensions.getConcreteName(sr);
-					Iterator<SadlPropertyRestriction> itr = ((SadlProperty)element).getRestrictions().iterator();
-					if (itr.hasNext()) {
-						while (itr.hasNext()) {
-							SadlPropertyRestriction rest = itr.next();
-							if (rest instanceof SadlIsAnnotation) {
-								createAnnotationProperty(getModelNamespace(), propName);
-							}
-						}
+					else if (element instanceof SadlInstance) {
+						processSadlInstance((SadlInstance) element, issueAcceptor, cancelIndicator);
 					}
 					else {
-						OntProperty ontProp = createOntProperty(getModelNamespace(), propName, null);
-						Iterator<SadlPropertyRestriction> restiter = ((SadlProperty)element).getRestrictions().iterator();
-						while (restiter.hasNext()) {
-							int i = 0;
-						}
+						System.out.println("onValidate for element of type '" + element.getClass().getCanonicalName() + "' not implemented");
 					}
 				}
-				else if (element instanceof SadlInstance) {
-					// this has two forms:
-					//	1) <name> is a <type> ...
-					//	2) a <type> <name> ....
-					SadlTypeReference type = ((SadlInstance)element).getType();
-					SadlResource sr = ((SadlInstance)element).getNameOrRef();
-					if (sr == null) {
-						Iterator<SadlResource> instItr = ((SadlInstance)element).getInstance().iterator();
-						if (instItr.hasNext()) {
-							sr = instItr.next();
-						}
-					}
-					if (sr != null) {
-						String instName = declarationExtensions.getConcreteName(sr);
-						OntClass cls;
-						try {
-							cls = sadlTypeReferenceToOntClass(type);
-						} catch (JenaProcessorException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-//							issueAcceptor.accept(new Issue());
-// TODO should this use the issueAccpetor?							
-							return;	// fatal
-						}
-						createIndividual(getModelNamespace(), instName, cls);
-					}
-				}
-				else {
-					System.out.println("onValidate for element of type '" + element.getClass().getCanonicalName() + "' not implemented");
+				catch (JenaProcessorException e) {
+					// convert to issue
 				}
 			}
 		}
 	}
 
-	@Override
-	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, CancelIndicator cancelIndicator) {
+	private void processSadlClassOrPropertyDeclaration(SadlClassOrPropertyDeclaration element, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+		// Get the names of the declared concepts and store in a list
+		List<String> newNames = new ArrayList<String>();
+		EList<SadlResource> clses = element.getClassOrProperty();
+		if (clses != null) {
+			Iterator<SadlResource> citer = clses.iterator();
+			while (citer.hasNext()) {
+				SadlResource sr = citer.next();
+				String nm = declarationExtensions.getConcreteName(sr);
+				newNames.add(nm);
+			}
+		}
 		
+		// The declared concept(s) will be of type class, property, or datatype. 
+		//	Determining which will depend on the structure, including the superElement....
+		// 	Get the superElement
+		SadlTypeReference superElement = element.getSuperElement();
+		//		1) if superElement is null then it is a top-level class declaration
+		if (superElement == null) {
+			OntClass cls = createOntClass(getModelNamespace(), newNames.get(0), (OntClass)null);
+			Iterator<SadlProperty> dbiter = element.getDescribedBy().iterator();
+			while (dbiter.hasNext()) {
+				SadlProperty sp = dbiter.next();
+				OntProperty prop = processSadlProperty(sp, issueAcceptor, cancelIndicator);
+				addPropertyDomain(prop, cls);
+			}
+		}
+		//  	2) if superElement is not null then the type of the new concept is the same as the type of the superElement
+		// 			the superElement can be:
+		// 				a) a SadlSimpleTypeReference
+		else if (superElement instanceof SadlSimpleTypeReference) {
+			//TODO need to get the type (class or property or datatype declaration) from the ResourceSet--how?
+			SadlResource superSR = ((SadlSimpleTypeReference)superElement).getType();
+// TODO Is this just the local name or is it the URI?
+			String superSRUri = declarationExtensions.getConcreteName(superSR);	
+// TODO how do I get the URI and the type from the ResourceSet?	
+//						OntConceptType onttype =declarationExtensions.getOntConceptType(superSR);
+			OntConceptType superElementType = null;
+			try {
+				superElementType = getSadlTypeReferenceType(superElement);
+			} catch (JenaProcessorException e) {
+				// TODO Auto-generated catch block
+// TODO need to create an issue via issueAcceptor							
+				e.printStackTrace();
+				return;
+			}  
+			if (superElementType.equals(OntConceptType.CLASS)) {
+				for (int i = 0; i < newNames.size(); i++) {
+					createOntClass(getModelNamespace(), newNames.get(i), superSRUri);
+				}
+			}
+			else if (superElementType.equals(OntConceptType.OBJECTPROPERTY)) {
+				for (int i = 0; i < newNames.size(); i++) {
+					createObjectProperty(getModelNamespace(), newNames.get(i), superSRUri);
+				}
+			}
+			else if (superElementType.equals(OntConceptType.DATATYPEPROPERTY)) {
+				for (int i = 0; i < newNames.size(); i++) {
+					createDatatypeProperty(getModelNamespace(), newNames.get(i), superSRUri);
+				}
+			}
+			else if (superElementType.equals(OntConceptType.ANNOTATION)) {
+				for (int i = 0; i < newNames.size(); i++) {
+					createAnnotationProperty(getModelNamespace(), newNames.get(i));
+				}
+			}
+		}
+		//				b) a SadlPrimitiveDataType
+		else if (superElement instanceof SadlPrimitiveDataType) {
+			SadlDataTypeFacet dtf = ((SadlClassOrPropertyDeclaration)element).getFacet();
+			SadlDataType sdt = ((SadlPrimitiveDataType)superElement).getPrimitiveType();
+			// pull out facets, create rdfs:Datatype
+		}
+		//				c) a SadlPropertyCondition
+		else if (superElement instanceof SadlPropertyCondition) {
+			SadlResource sr = ((SadlPropertyCondition)superElement).getProperty();
+			Iterator<SadlCondition> conditer = ((SadlPropertyCondition)superElement).getCond().iterator();
+			while (conditer.hasNext()) {
+				SadlCondition cond = conditer.next();
+				if (cond instanceof SadlAllValuesCondition) {
+					
+				}
+				else if (cond instanceof SadlHasValueCondition) {
+					
+				}
+				else if (cond instanceof SadlCardinalityCondition) {
+					// Note: SomeValuesFrom is embedded in cardinality in the SADL grammar--an "at least" cardinality with "one" instead of # 
+					String cardinality = ((SadlCardinalityCondition)cond).getCardinality();
+					if (cardinality.equals("one")) {
+						
+					}
+					else {
+						int cardNum = Integer.parseInt(cardinality);
+						
+					}
+				}
+			}		
+		}
+		//				d) a SadlTypeReference
+		else if (superElement instanceof SadlTypeReference) {
+			// this can only be a class; can't create a property as a SadlTypeReference
+			try {
+				OntClass superCls = sadlTypeReferenceToOntClass(superElement);
+				if (superCls != null) {
+					createOntClass(modelNamespace, newNames.get(0), superCls);
+				}
+			} catch (JenaProcessorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
+	private Individual processSadlInstance(SadlInstance element, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) {
+		// this has two forms:
+		//	1) <name> is a <type> ...
+		//	2) a <type> <name> ....
+		SadlTypeReference type = element.getType();
+		SadlResource sr = element.getNameOrRef();
+		if (sr == null) {
+			Iterator<SadlResource> instItr = element.getInstance().iterator();
+			if (instItr.hasNext()) {
+				sr = instItr.next();
+			}
+		}
+		if (sr != null) {
+			String instName = declarationExtensions.getConcreteName(sr);
+			OntClass cls;
+			try {
+				cls = sadlTypeReferenceToOntClass(type);
+				return createIndividual(getModelNamespace(), instName, cls);
+			} catch (JenaProcessorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+//							issueAcceptor.accept(new Issue());
+// TODO should this use the issueAccpetor?							
+				return null;	// fatal
+			}
+		}
+		return null;
+	}
+
+	private OntProperty processSadlProperty(SadlProperty element, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+		// this has two forms:
+		//	1) <name> is a property...
+		//	2) relationship of <Domain> to <Range> is <name>
+		SadlResource sr = element.getNameOrRef();
+		if (sr == null) {
+			sr = element.getProperty();
+		}
+		if (sr == null) {
+			sr = element.getNameDeclarations().iterator().next();
+		}
+		
+		String propName = declarationExtensions.getConcreteName(sr);
+		
+		
+		Iterator<SadlPropertyRestriction> spitr = element.getRestrictions().iterator();
+		while (spitr.hasNext()) {
+			SadlPropertyRestriction spr = spitr.next();
+			if (spr instanceof SadlRangeRestriction) {
+				SadlTypeReference rng = ((SadlRangeRestriction)spr).getRange();
+				if (rng instanceof SadlPrimitiveDataType) {
+					String rngName = ((SadlPrimitiveDataType)rng).getPrimitiveType().getName();
+					RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
+					DatatypeProperty prop = null;
+					if (!checkForExistingCompatibleDatatypeProperty(validateUri(propName), rngNode)) {
+						prop = createDatatypeProperty(modelNamespace, propName, null);
+						prop.addRange(rngNode.asResource());
+					}
+					else {
+						prop = getTheJenaModel().getDatatypeProperty(validateUri(propName));
+					}
+					return prop;
+				}
+				else {				
+					int i = 0;
+				}
+			}
+		}
+
+		Iterator<SadlPropertyRestriction> itr = element.getRestrictions().iterator();
+		if (itr.hasNext()) {
+			while (itr.hasNext()) {
+				SadlPropertyRestriction rest = itr.next();
+				if (rest instanceof SadlIsAnnotation) {
+					return createAnnotationProperty(getModelNamespace(), propName);
+				}
+			}
+		}
+		else {
+			OntProperty ontProp = createObjectProperty(getModelNamespace(), propName, null);
+			Iterator<SadlPropertyRestriction> restiter = element.getRestrictions().iterator();
+			while (restiter.hasNext()) {
+				int i = 0;
+			}
+			return ontProp;
+		}
+		return null;
+	}
+
+	private boolean checkForExistingCompatibleDatatypeProperty(
+			String propUri, RDFNode rngNode) {
+		DatatypeProperty prop = getTheJenaModel().getDatatypeProperty(propUri);
+		if (prop != null) {
+			OntResource rng = prop.getRange();
+			if (rng.equals(rngNode)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void addPropertyDomain(OntProperty prop, OntClass cls) {
+		prop.addDomain(cls);
+	}
+
+	private RDFNode primitiveDatatypeToRDFNode(String name) {
+		return getTheJenaModel().getResource(XSD.getURI() + name);
+	}
+
 	/**
 	 * Call this method before doing semantic validity checks that require imports to be loaded as Jena OntModels.
 	 */
@@ -325,7 +418,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	
 	private OntClass createOntClass(String modelNamespace, String newName, String superSRUri) {
 		if (superSRUri != null) {
-			OntClass superCls = getTheJenaModel().getOntClass(superSRUri);
+			OntClass superCls = getTheJenaModel().getOntClass(validateUri(superSRUri));
 			return createOntClass(modelNamespace, newName, superCls);
 		}
 		return createOntClass(modelNamespace, newName, (OntClass)null);
@@ -339,8 +432,20 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		return newCls;
 	}
 	
-	private OntProperty createOntProperty(String modelNamespace, String newName, String superSRUri) {
-		OntProperty newProp = getTheJenaModel().createOntProperty(getUri(modelNamespace, newName));
+	private OntProperty createObjectProperty(String modelNamespace, String newName, String superSRUri) throws JenaProcessorException {
+		OntProperty newProp = getTheJenaModel().createObjectProperty(getUri(modelNamespace, newName));
+		if (superSRUri != null) {
+			OntProperty superProp = getTheJenaModel().getOntProperty(validateUri(superSRUri));
+			if (superProp == null) {
+				throw new JenaProcessorException("Unable to find super property '" + superSRUri + "'");
+			}
+			newProp.addSuperProperty(superProp);
+		}
+		return newProp;
+	}
+	
+	private DatatypeProperty createDatatypeProperty(String modelNamespace, String newName, String superSRUri) {
+		DatatypeProperty newProp = getTheJenaModel().createDatatypeProperty(getUri(modelNamespace, newName));
 		if (superSRUri != null) {
 			OntProperty superProp = getTheJenaModel().getOntProperty(superSRUri);
 			newProp.addSuperProperty(superProp);
@@ -358,8 +463,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		return inst;
 	}
 	
-	private void createAnnotationProperty(String modelNamespace, String newName) {
-		getTheJenaModel().createAnnotationProperty(getUri(modelNamespace, newName));
+	private AnnotationProperty createAnnotationProperty(String modelNamespace, String newName) {
+		return getTheJenaModel().createAnnotationProperty(getUri(modelNamespace, newName));
 		
 	}
 
@@ -370,6 +475,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			SadlResource strSR = ((SadlSimpleTypeReference)sadlTypeRef).getType();
 //TODO Is this just the local name or is it the URI?
 			String strSRUri = declarationExtensions.getConcreteName(strSR);	
+//			strSRUri = declarationExtensions.getUri(strSR);
 //TODO how do I get the URI and the type from the ResourceSet?	
 			return getTheJenaModel().getOntClass(validateUri(strSRUri));
 		}
@@ -402,38 +508,80 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			}		
 		}
 		else if (sadlTypeRef instanceof SadlUnionType) {
-			
+			SadlTypeReference lft = ((SadlUnionType)sadlTypeRef).getLeft();
+			OntClass lftcls = sadlTypeReferenceToOntClass(lft);
+			SadlTypeReference rht = ((SadlUnionType)sadlTypeRef).getRight();
+			OntClass rhtcls = sadlTypeReferenceToOntClass(rht);
+			OntClass unionCls = createUnionClass(lftcls, rhtcls);
+			return unionCls;
 		}
 		else if (sadlTypeRef instanceof SadlIntersectionType) {
-			
+			SadlTypeReference lft = ((SadlIntersectionType)sadlTypeRef).getLeft();
+			OntClass lftcls = sadlTypeReferenceToOntClass(lft);
+			SadlTypeReference rht = ((SadlIntersectionType)sadlTypeRef).getRight();
+			OntClass rhtcls = sadlTypeReferenceToOntClass(rht);
+			OntClass intersectCls = createIntersectionClass(lftcls, rhtcls);
+			return intersectCls;
 		}
 		return cls;
 	}
 
-	private TypeType getSadlTypeReferenceType(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
+	private OntClass createIntersectionClass(OntClass... clses) throws JenaProcessorException {
+		RDFList classes = getTheJenaModel().createList(clses);
+		if (!classes.isEmpty()) {
+			return getTheJenaModel().createIntersectionClass(null, classes);
+		}
+		throw new JenaProcessorException("createIntersectionClass called with empty list of classes");
+	}
+
+	private OntClass createUnionClass(OntClass... clses) throws JenaProcessorException {
+		RDFList classes = getTheJenaModel().createList(clses);
+		if (!classes.isEmpty()) {
+			return getTheJenaModel().createUnionClass(null, classes);
+		}
+		throw new JenaProcessorException("createUnionClass called with empty list of classes");
+	}
+
+	private OntConceptType getSadlTypeReferenceType(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
 			SadlResource sr = ((SadlSimpleTypeReference)sadlTypeRef).getType();
 			String name = declarationExtensions.getConcreteName(sr);
 // TODO  here we have to get the type, class or property, from the Xtext ResourceSet--how do we do that?
 			// default for now to class
-			return TypeType.CLASS;
+			OntResource or = getTheJenaModel().getOntResource(validateUri(name));
+			if (or.isDatatypeProperty()) {
+				return OntConceptType.DATATYPEPROPERTY;
+			}
+			else if (or.isObjectProperty()) {
+				return OntConceptType.OBJECTPROPERTY;
+			}
+			else if (or.isIndividual()) {
+				return OntConceptType.INDIVIDUAL;
+			}
+			else if (or.isAnnotationProperty()) {
+				return OntConceptType.ANNOTATION;
+			}
+			else if (or.isClass()) {
+				return OntConceptType.CLASS;
+			}
+			return OntConceptType.DATATYPE;
 		}
 		else if (sadlTypeRef instanceof SadlPrimitiveDataType) {
-			return TypeType.DATATYPE;
+			return OntConceptType.DATATYPE;
 		}
 		else if (sadlTypeRef instanceof SadlPropertyCondition) {
 			// property conditions => OntClass
-			return TypeType.CLASS;
+			return OntConceptType.CLASS;
 		}
 		else if (sadlTypeRef instanceof SadlUnionType) {
 			SadlTypeReference lft = ((SadlUnionType)sadlTypeRef).getLeft();
-			TypeType lfttype = getSadlTypeReferenceType(lft);
+			OntConceptType lfttype = getSadlTypeReferenceType(lft);
 			return lfttype;
 //			SadlTypeReference rght = ((SadlUnionType)sadlTypeRef).getRight();
 		}
 		else if (sadlTypeRef instanceof SadlIntersectionType) {
 			SadlTypeReference lft = ((SadlIntersectionType)sadlTypeRef).getLeft();
-			TypeType lfttype = getSadlTypeReferenceType(lft);
+			OntConceptType lfttype = getSadlTypeReferenceType(lft);
 			return lfttype;
 //			SadlTypeReference rght = ((SadlIntersectionType)sadlTypeRef).getRight();
 		}
