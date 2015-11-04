@@ -8,7 +8,7 @@
 
 	<properties>
 		<tycho-version>0.23.1</tycho-version>
-		<xtextVersion>2.9.0.beta5</xtextVersion>
+		<xtextVersion>2.9.0.beta6</xtextVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
@@ -20,6 +20,7 @@
 		<module>com.ge.research.sadl.target</module>
 		<module>com.ge.research.sadl.tests</module>
 		<module>com.ge.research.sadl.ui.tests</module>
+		<module>com.ge.research.sadl.jena</module>
 	</modules>
 	<build>
 		<plugins>
