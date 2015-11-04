@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="External Model URL List Editor"
+            extensions="url"
+            icon="icons/sample.gif"
+            contributorClass="com.ge.research.sadl.externalmodels.editors.UrlListEditorContributor"
+            class="com.ge.research.sadl.externalmodels.editors.UrlListEditor"
+            id="com.ge.research.sadl.externalmodels.editors.UrlListEditor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="External Model URL List Wizards"
+            id="com.ge.research.sadl.externalmodels">
+      </category>
+      <wizard
+            name="External Model URL List file"
+            icon="icons/sample.gif"
+            category="com.ge.research.sadl.externalmodels"
+            class="com.ge.research.sadl.externalmodels.wizards.UrlListWizard"
+            id="com.ge.research.sadl.externalmodels.wizards.UrlListWizard">
+      </wizard>
+   </extension>
+
+</plugin>
