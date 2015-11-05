@@ -48,19 +48,19 @@ SadlStatement returns SadlStatement:
 				(describedBy+=SadlPropertyDeclarationInClass+ | (','? restrictions+=SadlPropertyRestriction)+)?
 			|{SadlProperty.nameOrRef=current} 'is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
 			|{SadlProperty.nameOrRef=current} (','? restrictions+=SadlPropertyRestriction)+
-			|{SadlEquivalentConcepts.nameOrRef=current} 'is' 'the' 'same' 'as' (complement?='not')? sameAs=SadlTypeReference
-			|{SadlDifferentForm.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
+			|{SadlSameAs.nameOrRef=current} 'is' 'the' 'same' 'as' (complement?='not')? sameAs=SadlTypeReference
+			|{SadlDifferentFrom.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
 			|{SadlInstance.nameOrRef=current} ('is' AnArticle type=SadlTypeReference)? propertyInitializers+=SadlPropertyInitializer*
 			|{SadlDisjointClasses.classes+=current} ('and' classes+=SadlResource)+ 'are' 'disjoint'
 			)  EOS
 	| 	{SadlClassOrPropertyDeclaration}  '{' classOrProperty+=SadlResource (','  classOrProperty+=SadlResource)* '}' 'are' 
 				(('top-level'? 'classes' | 'types' 'of' superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
 			|	{SadlDisjointClasses.types+=current} 'disjoint'
-			|	{SadlDifferentForm.types+=current} (complement?='not')? 'the' 'same') EOS
+			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same') EOS
     | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource EOS
     | 	AnArticle SadlTypeReference (
     		{SadlInstance.type=current} instance+=SadlResource propertyInitializers+=SadlPropertyInitializer*
-    	|	{SadlTypeConstraint.subject=current}'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*) EOS
+    	|	{SadlNecessaryAndSufficient.subject=current}'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*) EOS
     | 	SadlDataTypeDeclaration
 ;
 
