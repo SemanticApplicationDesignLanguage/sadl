@@ -82,7 +82,7 @@ SadlResource:
 ;
 
 SadlDataTypeDeclaration:
-	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlTypeReference facet=SadlDataTypeFacet? EOS
+	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlPrimaryTypeReference facet=SadlDataTypeFacet? EOS
 ;
 
 SadlDataTypeFacet :	
