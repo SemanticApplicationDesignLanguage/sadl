@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -201,7 +202,9 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 		while (tokenizer.hasMoreTokens()) {
 			urls.add(tokenizer.nextToken());
 		}
-		IPath outputPath = ((FileEditorInput) editor.getEditorInput()).getFile().getParent().getLocation();
+		IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
+		IPath outputPath = (editorFile.getParent().getLocation())
+				.append(editorFile.getName().substring(0, editorFile.getName().lastIndexOf(".")));
 		for (int i = 0; i < urls.size(); i++) {
 			downloadURL((String) urls.get(i), outputPath);
 		}
@@ -223,7 +226,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	        ReadableByteChannel rbc = Channels.newChannel(is);
 	        String urlPath = url.getHost() + url.getPath();
 	        if (!url.getPath().contains("."))
-	        	urlPath = urlPath + "/noname.owl";
+	        	urlPath = urlPath + "/" + urlPath.substring(urlPath.lastIndexOf("/")+1) + ".owl";
 	        String outputPath = iPath.append(urlPath).toString();
 	        File file1 =  new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
 	        file1.mkdirs();	        
