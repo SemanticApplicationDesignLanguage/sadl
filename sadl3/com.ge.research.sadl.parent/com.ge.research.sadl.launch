@@ -5,7 +5,11 @@
 <booleanAttribute key="M2_NON_RECURSIVE" value="false"/>
 <booleanAttribute key="M2_OFFLINE" value="false"/>
 <stringAttribute key="M2_PROFILES" value=""/>
-<listAttribute key="M2_PROPERTIES"/>
+<listAttribute key="M2_PROPERTIES">
+<listEntry value="maven.wagon.http.ssl.insecure=true"/>
+<listEntry value="maven.wagon.http.ssl.allowall=true"/>
+<listEntry value="maven.wagon.http.ssl.ignore.validity.dates=true"/>
+</listAttribute>
 <stringAttribute key="M2_RUNTIME" value="EMBEDDED"/>
 <booleanAttribute key="M2_SKIP_TESTS" value="false"/>
 <intAttribute key="M2_THREADS" value="1"/>
