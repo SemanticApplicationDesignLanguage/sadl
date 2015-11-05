@@ -41,6 +41,7 @@ import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
@@ -364,7 +365,10 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					return prop;
 				}
 				else {				
-					int i = 0;
+					OntClass rngCls = sadlTypeReferenceToOntClass(rng);
+					ObjectProperty prop = getOrCreateObjectProperty(propName);
+					prop.addRange(rngCls);
+					return prop;
 				}
 			}
 		}
@@ -387,6 +391,14 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			return ontProp;
 		}
 		return null;
+	}
+
+	private ObjectProperty getOrCreateObjectProperty(String propName) {
+		ObjectProperty prop = getTheJenaModel().getObjectProperty(validateUri(propName));
+		if (prop == null) {
+			prop = getTheJenaModel().createObjectProperty(validateUri(propName));
+		}
+		return prop;
 	}
 
 	private boolean checkForExistingCompatibleDatatypeProperty(
@@ -485,6 +497,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		}
 		else if (sadlTypeRef instanceof SadlPropertyCondition) {
 			SadlResource sr = ((SadlPropertyCondition)sadlTypeRef).getProperty();
+			String propName = declarationExtensions.getConcreteName(sr);
+			OntProperty prop = getTheJenaModel().getOntProperty(validateUri(propName));
 			Iterator<SadlCondition> conditer = ((SadlPropertyCondition)sadlTypeRef).getCond().iterator();
 			while (conditer.hasNext()) {
 				SadlCondition cond = conditer.next();
@@ -498,11 +512,22 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					// Note: SomeValuesFrom is embedded in cardinality in the SADL grammar--an "at least" cardinality with "one" instead of # 
 					String cardinality = ((SadlCardinalityCondition)cond).getCardinality();
 					if (cardinality.equals("one")) {
-						
+						// this is interpreted as a someValuesFrom restriction
 					}
 					else {
-						int cardNum = Integer.parseInt(cardinality);
 						
+						// cardinality restrictioin
+						int cardNum = Integer.parseInt(cardinality);
+						String op = ((SadlCardinalityCondition)cond).getOperator();
+						if (op == null) {
+							return getTheJenaModel().createCardinalityRestriction(null, prop, cardNum);							
+						}
+						else if (op.equals("least")) {
+							return getTheJenaModel().createMinCardinalityRestriction(null, prop, cardNum);							
+						}
+						else if (op.equals("most")) {
+							return getTheJenaModel().createMaxCardinalityRestriction(null, prop, cardNum);							
+						}
 					}
 				}
 			}		

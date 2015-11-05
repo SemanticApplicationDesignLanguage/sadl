@@ -171,6 +171,45 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void myUnionSuperClassWithRestrictionClassDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			Person is a class described by child with values of type Person.
+			Parent is a type of {Person and (child has at least 1 value)}.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var itr = jenaModel.listClasses().toIterable().iterator
+			var found = false
+			while (itr.hasNext()) {
+				val nxt = itr.next;
+				if (nxt != null && nxt.isURIResource) {
+					if (nxt.localName.equals("Parent")) {
+						found = true;
+						var sciter = nxt.listSuperClasses(true);
+						while (sciter.hasNext()) {
+							var sc = sciter.next();
+							var uc = sc.asIntersectionClass();
+							var operands = uc.listOperands();
+							var cnt = 0
+							while (operands.hasNext) {
+								var opcls = operands.next();
+								assertTrue((opcls.URIResource && opcls.localName.equals("Person")) || opcls.isRestriction());
+								cnt++	
+							}
+							assertTrue(cnt == 2)
+						}
+					}
+				}
+			}	
+			if (!found) {
+				jenaModel.write(System.out, "N3");
+			}
+			assertTrue(found);
+		]
+	}
+	
 	@Test def void myIntersectionSuperClassClassDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
