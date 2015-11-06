@@ -20,6 +20,7 @@ import static org.junit.Assert.*
 import com.hp.hpl.jena.ontology.UnionClass
 import com.hp.hpl.jena.rdf.model.RDFNode
 import java.util.ArrayList
+import com.hp.hpl.jena.query.QueryExecutionFactory
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -499,14 +500,115 @@ class SadlModelManagerProviderTest {
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
-			var error = true
-			if (error) {
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p ?v where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:hasValue ?v}"
+    		assertTrue(queryResultContains(jenaModel, q1, "http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer http://sadl.org/TestSadlIde/AnonRestrictions#Apple"))
+			var q2 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:someValuesFrom ?v}"
+    		assertTrue(queryResultContains(jenaModel, q2, "http://sadl.org/TestSadlIde/AnonRestrictions#teaches"))
+    		assertTrue(queryResultContains(jenaModel, q2, "http://sadl.org/TestSadlIde/AnonRestrictions#owns"))
+			var q3 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p ?v where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:allValuesFrom ?v}"
+    		assertFalse(queryResultContains(jenaModel, q3, "http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer http://sadl.org/TestSadlIde/AnonRestrictions#Apple"))
+
+			var showModel = true
+			if (showModel) {
 				jenaModel.write(System.out, "N3")				
 			}
-			assertFalse(error)
 		]
 	}
-		@Test def void mySimpleInstanceDeclarationCase() {
+		
+	@Test def void myNecesaryAndSufficientCase3() {
+		'''
+		uri "http://sadl.org/TestSadlIde/AnonRestrictions" alias anonrest 
+			version "$Revision: 1.3 $ Last modified on   $Date: 2015/06/30 21:27:33 $". 
+		Person is a class described by owns with values of type Artifact.
+		Artifact is a class.
+		Manufacturer is a class.
+		Apple is a Manufacturer.
+		Dell is a Manufacturer.
+		Computer is a type of Artifact described by manufacturer with values of type Manufacturer.
+		Professor is a class described by teaches with values of type Student.
+		Student is a type of Person.
+		A Professor is an AppleProfessor only if teaches has at least one value of type
+			{Student and (owns has at least one value of type {Computer and (manufacturer always has value Apple)})}.
+		AppleLovingStudent is a type of Student, 
+			described by owns only has values of type {Computer and (manufacturer always has value Apple)}.
+		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
+		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p ?v where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:hasValue ?v}"
+    		assertTrue(queryResultContains(jenaModel, q1, "http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer http://sadl.org/TestSadlIde/AnonRestrictions#Apple"))
+			var q2 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:someValuesFrom ?v}"
+    		assertTrue(queryResultContains(jenaModel, q2, "http://sadl.org/TestSadlIde/AnonRestrictions#teaches"))
+    		assertTrue(queryResultContains(jenaModel, q2, "http://sadl.org/TestSadlIde/AnonRestrictions#owns"))
+			var q3 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p ?v where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:allValuesFrom ?v}"
+    		assertFalse(queryResultContains(jenaModel, q3, "http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer http://sadl.org/TestSadlIde/AnonRestrictions#Apple"))
+
+			var showModel = true
+			if (showModel) {
+				jenaModel.write(System.out, "N3")				
+			}
+		]
+	}
+	
+		@Test def void myNecesaryAndSufficientCase4() {
+		'''
+		uri "http://sadl.org/TestSadlIde/AnonRestrictions" alias anonrest 
+			version "$Revision: 1.3 $ Last modified on   $Date: 2015/06/30 21:27:33 $". 
+		Artifact is a class.
+		Manufacturer is a class.
+		Apple is a Manufacturer.
+		Computer is a type of Artifact described by manufacturer with values of type Manufacturer.
+		AppleComputer is a type of Computer.
+		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p ?v where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:hasValue ?v}"
+    		assertTrue(queryResultContains(jenaModel, q1, "http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer http://sadl.org/TestSadlIde/AnonRestrictions#Apple"))
+			var q2 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:someValuesFrom ?v}"
+    		assertFalse(queryResultContains(jenaModel, q2, "http://sadl.org/TestSadlIde/AnonRestrictions#teaches"))
+    		assertFalse(queryResultContains(jenaModel, q2, "http://sadl.org/TestSadlIde/AnonRestrictions#owns"))
+			var q3 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select distinct ?p ?v where {?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:allValuesFrom ?v}"
+    		assertFalse(queryResultContains(jenaModel, q3, "http://sadl.org/TestSadlIde/AnonRestrictions#manufacturer http://sadl.org/TestSadlIde/AnonRestrictions#Apple"))
+
+			var showModel = true
+			if (showModel) {
+				jenaModel.write(System.out, "N3")				
+			}
+		]
+	}
+	
+	@Test def void mySimpleInstanceDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Foo is a class.
@@ -543,6 +645,9 @@ class SadlModelManagerProviderTest {
 					found = true;
 				}
 			}	
+			if (!found) {
+				jenaModel.write(System.out, "N3")				
+			}
 			assertTrue(found);
 		]
 	}
@@ -560,6 +665,39 @@ class SadlModelManagerProviderTest {
 			assertTrue(imports.next.URI.equals("http://sadl.org/model2"))
 			assertFalse(imports.hasNext())
 		]
+	}
+	
+	protected def boolean queryResultContains(OntModel m, String q, String r) {
+		var qe = QueryExecutionFactory.create(q, m)
+		var results =  qe.execSelect()
+		var vars = results.resultVars
+    	var resultsList = new ArrayList<String>()
+    	while (results.hasNext()) {
+    		var result = results.next()
+    		var sb = new StringBuffer();
+    		var cntr = 0
+    		for (var c = 0; c < vars.size(); c++) {
+    			if (cntr++ > 0) {
+    				sb.append(" ")
+    			}
+    			sb.append(result.get(vars.get(c)))
+    		}
+    		resultsList.add(sb.toString())
+    	}
+    	if (resultsList.contains(r)) {
+    		return true
+    	}
+    	System.out.println("Query result does not contain '" + r + "':")
+    	var itr = resultsList.iterator()
+    	if (itr.hasNext()) {
+    		while (itr.hasNext()) {
+    			System.out.println("   " + itr.next().toString())
+    		}
+    	}
+    	else {
+    		System.out.println("    Query returned no results");
+    	}
+    	return false
 	}
 	
 	protected def void assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {

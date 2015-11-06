@@ -123,7 +123,7 @@ SadlPropertyDeclarationInClass returns SadlProperty:
 SadlPropertyRestriction :
     	SadlCondition
     |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
-    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' 'List'|'Lists') 'of' 'values'|'values') 'of' 'type' range=SadlPrimaryTypeReference
+    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' list?='List'|lists?='Lists') 'of' 'values'|'values') 'of' 'type' range=SadlPrimaryTypeReference
     |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|NAME]
     |   {SadlIsTransitive} 'is' 'transitive'
     |   {SadlIsSymmetrical} 'is' 'symmetrical'
