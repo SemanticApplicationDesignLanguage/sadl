@@ -15,11 +15,14 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -197,6 +200,12 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 		for (int i = 0; i < urls.size(); i++) {
 			downloadURL((String) urls.get(i), outputPath);
 		}
+		try {
+			((FileEditorInput) editor.getEditorInput()).getFile().getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	void downloadURL(String urlString, IPath iPath) {
@@ -214,14 +223,19 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	        is = url.openStream();  // throws an IOException
 	        ReadableByteChannel rbc = Channels.newChannel(is);
 	        String urlPath = url.getHost() + url.getPath();
-	        if (!url.getPath().contains("."))
+	        
+	        if (url.getPath() == null || url.getPath().isEmpty())
+	        	urlPath = urlPath + "/" + url.getHost() + ".owl";
+	        else if (!url.getPath().contains("."))
 	        	urlPath = urlPath + "/" + urlPath.substring(urlPath.lastIndexOf("/")+1) + ".owl";
+	        
 	        String outputPath = iPath.append(urlPath).toString();
 	        File file1 =  new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
 	        file1.mkdirs();	        
 	        FileOutputStream fos = new FileOutputStream(outputPath);
 	        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 	        fos.close();
+	        
 	    } catch (MalformedURLException mue) {
 	         mue.printStackTrace();
 	    } catch (IOException ioe) {
