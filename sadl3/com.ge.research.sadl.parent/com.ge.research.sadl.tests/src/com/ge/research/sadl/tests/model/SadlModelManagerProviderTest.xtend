@@ -1,11 +1,14 @@
 package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.hp.hpl.jena.ontology.OntModel
+import com.hp.hpl.jena.query.QueryExecutionFactory
+import java.util.ArrayList
 import java.util.List
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
@@ -17,10 +20,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.hp.hpl.jena.ontology.UnionClass
-import com.hp.hpl.jena.rdf.model.RDFNode
-import java.util.ArrayList
-import com.hp.hpl.jena.query.QueryExecutionFactory
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -705,7 +704,7 @@ class SadlModelManagerProviderTest {
 		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
-		processor.onValidate(model.eResource, [issues += it], CancelIndicator.NullImpl)
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
 		assertions.apply(processor.theJenaModel, issues)
 	}
 
@@ -714,7 +713,7 @@ class SadlModelManagerProviderTest {
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = processorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
-		processor.onValidate(model.eResource, [issues += it], CancelIndicator.NullImpl)
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
 		assertions.apply(processor.theJenaModel, issues)
 	}
 }

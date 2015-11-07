@@ -13,7 +13,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import java.util.Map
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)

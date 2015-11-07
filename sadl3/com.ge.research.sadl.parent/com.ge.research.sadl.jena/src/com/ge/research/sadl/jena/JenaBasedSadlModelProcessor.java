@@ -9,14 +9,13 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.IAcceptor;
-import org.eclipse.xtext.validation.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.processing.ISadlModelProcessor;
+import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.sADL.SadlAllValuesCondition;
 import com.ge.research.sadl.sADL.SadlAnnotation;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
@@ -113,7 +112,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 	
 	@Override
-	public void onValidate(Resource resource, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) {
+	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) {
 		SadlModel model = (SadlModel) resource.getContents().get(0);
 		String modelActualUrl =resource.getURI().toFileString();
 		// directly create the Jena Model here!
@@ -232,16 +231,14 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					}
 				}
 				catch (JenaProcessorException e) {
-					// convert to issue
-					e.printStackTrace();
-					int i = 0;
+					issueAcceptor.addError(e.getMessage(), element);
 				}
 			}
 		}
 	}
 
 	private void processSadlSameAs(SadlSameAs element,
-			IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+			ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
 		SadlResource sr = element.getNameOrRef();
 		String nm = declarationExtensions.getConcreteName(sr);
 		OntResource rsrc = getTheJenaModel().getOntResource(validateUri(nm));
@@ -282,7 +279,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		}
 	}
 
-	private List<OntResource> processSadlClassOrPropertyDeclaration(SadlClassOrPropertyDeclaration element, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+	private List<OntResource> processSadlClassOrPropertyDeclaration(SadlClassOrPropertyDeclaration element, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
 		// Get the names of the declared concepts and store in a list
 		List<String> newNames = new ArrayList<String>();
 		EList<SadlResource> clses = element.getClassOrProperty();
@@ -376,7 +373,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		return rsrcList;
 	}
 
-	private OntProperty processSadlProperty(SadlProperty element, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+	private OntProperty processSadlProperty(SadlProperty element, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
 		// this has two forms:
 		//	1) <name> is a property...
 		//	2) relationship of <Domain> to <Range> is <name>
@@ -680,7 +677,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 
 	private void processSadlNecessaryAndSufficient(SadlNecessaryAndSufficient element,
-			IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+			ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
 		OntClass supercls = sadlTypeReferenceToOntResource(element.getSubject()).asClass();
 		OntClass rolecls = getOrCreateOntClass(modelNamespace, declarationExtensions.getConcreteName(element.getObject()));
 		Iterator<SadlPropertyCondition> itr = element.getPropConditions().iterator();
@@ -719,7 +716,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 
 	private void processSadlDifferentFrom(SadlDifferentFrom element,
-			IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+			ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
 		List<Individual> differentFrom = new ArrayList<Individual>();
 		Iterator<SadlClassOrPropertyDeclaration> dcitr = element.getTypes().iterator();
 		while(dcitr.hasNext()) {
@@ -752,7 +749,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		logger.debug("New all different from created");
 	}
 
-	private Individual processSadlInstance(SadlInstance element, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) {
+	private Individual processSadlInstance(SadlInstance element, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) {
 		// this has two forms:
 		//	1) <name> is a <type> ...
 		//	2) a <type> <name> ....
@@ -787,7 +784,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 
 	private void processSadlDisjointClasses(SadlDisjointClasses element,
-			IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
+			ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) throws JenaProcessorException {
 		List<OntClass> disjointClses = new ArrayList<OntClass>();
 		if (element.getClasses() != null) {
 			Iterator<SadlResource> dcitr = element.getClasses().iterator();

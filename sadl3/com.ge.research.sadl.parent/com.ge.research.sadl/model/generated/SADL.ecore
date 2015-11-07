@@ -137,14 +137,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="restrictions" upperBound="-1"
         eType="#//SadlPropertyRestriction" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlEquivalentConcepts" eSuperTypes="#//SadlStatement">
+  <eClassifiers xsi:type="ecore:EClass" name="SadlSameAs" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameOrRef" eType="#//SadlResource"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="complement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sameAs" eType="#//SadlTypeReference"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlDifferentForm" eSuperTypes="#//SadlStatement">
+  <eClassifiers xsi:type="ecore:EClass" name="SadlDifferentFrom" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameOrRef" eType="#//SadlResource"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="notTheSameAs" eType="#//SadlTypeReference"
@@ -159,7 +159,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
         eType="#//SadlClassOrPropertyDeclaration" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlTypeConstraint" eSuperTypes="#//SadlStatement">
+  <eClassifiers xsi:type="ecore:EClass" name="SadlNecessaryAndSufficient" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="subject" eType="#//SadlTypeReference"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="object" eType="#//SadlResource"
@@ -191,6 +191,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlRangeRestriction" eSuperTypes="#//SadlPropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="singleValued" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="list" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lists" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="range" eType="#//SadlTypeReference"
         containment="true"/>
   </eClassifiers>

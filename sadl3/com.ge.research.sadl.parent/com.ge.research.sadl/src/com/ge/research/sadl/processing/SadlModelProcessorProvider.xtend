@@ -7,9 +7,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.util.IAcceptor
 import org.eclipse.xtext.util.internal.EmfAdaptable
-import org.eclipse.xtext.validation.Issue
 
 class SadlModelProcessorProvider {
 	
@@ -32,7 +30,7 @@ class SadlModelProcessorProvider {
 	protected def doCreateProcessor(ResourceSet set) {
 		val processors = getAllProviders.map[get];
 		return new ISadlModelProcessor() {
-			override onValidate(Resource resource, IAcceptor<Issue> issueAcceptor, CancelIndicator cancelIndicator) {
+			override onValidate(Resource resource, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) {
 				processors.forEach[onValidate(resource, issueAcceptor, cancelIndicator)]
 			}
 			override onGenerate(Resource resource, IFileSystemAccess2 fsa, CancelIndicator cancelIndicator) {

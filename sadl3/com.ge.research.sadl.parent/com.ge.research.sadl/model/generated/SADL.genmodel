@@ -111,25 +111,25 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/describedBy"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/restrictions"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//SadlEquivalentConcepts">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlEquivalentConcepts/nameOrRef"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlEquivalentConcepts/complement"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlEquivalentConcepts/sameAs"/>
+    <genClasses ecoreClass="SADL.ecore#//SadlSameAs">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlSameAs/nameOrRef"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlSameAs/complement"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlSameAs/sameAs"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//SadlDifferentForm">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDifferentForm/nameOrRef"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDifferentForm/notTheSameAs"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDifferentForm/types"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlDifferentForm/complement"/>
+    <genClasses ecoreClass="SADL.ecore#//SadlDifferentFrom">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDifferentFrom/nameOrRef"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDifferentFrom/notTheSameAs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDifferentFrom/types"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlDifferentFrom/complement"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlDisjointClasses">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDisjointClasses/classes"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDisjointClasses/types"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//SadlTypeConstraint">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlTypeConstraint/subject"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlTypeConstraint/object"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlTypeConstraint/propConditions"/>
+    <genClasses ecoreClass="SADL.ecore#//SadlNecessaryAndSufficient">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlNecessaryAndSufficient/subject"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlNecessaryAndSufficient/object"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlNecessaryAndSufficient/propConditions"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlUnionType">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlUnionType/left"/>
@@ -150,6 +150,8 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlRangeRestriction">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/singleValued"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/list"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/lists"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlRangeRestriction/range"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlIsInverseOf">

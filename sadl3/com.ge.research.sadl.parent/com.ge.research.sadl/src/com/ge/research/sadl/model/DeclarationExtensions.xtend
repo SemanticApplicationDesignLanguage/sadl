@@ -18,7 +18,7 @@ import com.ge.research.sadl.sADL.SadlValueList
 import com.google.inject.Inject
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.ge.research.sadl.sADL.SadlTypeConstraint
+import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
 
 class DeclarationExtensions {
 	
@@ -53,7 +53,7 @@ class DeclarationExtensions {
 					(e.superElement instanceof SadlPrimitiveDataType || e.superElement.eAllContents.exists[it instanceof SadlPrimitiveDataType]) : 
 				OntConceptType.DATATYPE
 				
-			SadlTypeConstraint,
+			SadlNecessaryAndSufficient,
 			SadlClassOrPropertyDeclaration : 
 				OntConceptType.CLASS
 				
