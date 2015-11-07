@@ -775,10 +775,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	private SadlResource sadlResourceFromSadlInstance(SadlInstance element) {
 		SadlResource sr = element.getNameOrRef();
 		if (sr == null) {
-			Iterator<SadlResource> instItr = element.getInstance().iterator();
-			if (instItr.hasNext()) {
-				sr = instItr.next();
-			}
+			return element.getInstance();
 		}
 		return sr;
 	}

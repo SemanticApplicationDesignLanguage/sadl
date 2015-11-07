@@ -59,7 +59,7 @@ SadlStatement returns SadlStatement:
 			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same') EOS
     | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource EOS
     | 	AnArticle SadlTypeReference (
-    		{SadlInstance.type=current} instance+=SadlResource propertyInitializers+=SadlPropertyInitializer*
+    		{SadlInstance.type=current} instance=SadlResource propertyInitializers+=SadlPropertyInitializer*
     	|	{SadlNecessaryAndSufficient.subject=current}'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*) EOS
     | 	SadlDataTypeDeclaration
 ;
@@ -73,8 +73,8 @@ SadlPropertyInitializer:
 ;
 
 SadlNestedInstance returns SadlInstance:
-		nameDeclarations+=SadlResource 'is' article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*
-	|	article=AnArticle type=SadlTypeReference nameDeclarations+=SadlResource? propertyInitializers+=SadlPropertyInitializer*
+		instance=SadlResource 'is' article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*
+	|	article=AnArticle type=SadlTypeReference instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*
 ;
 
 SadlResource:

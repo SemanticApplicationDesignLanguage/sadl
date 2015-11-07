@@ -40,10 +40,8 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="propertyInitializers" upperBound="-1"
         eType="#//SadlPropertyInitializer" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="instance" upperBound="-1"
-        eType="#//SadlResource" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="nameDeclarations" upperBound="-1"
-        eType="#//SadlResource" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="instance" eType="#//SadlResource"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlResource" eSuperTypes="#//SadlStatement #//SadlExplicitValue">

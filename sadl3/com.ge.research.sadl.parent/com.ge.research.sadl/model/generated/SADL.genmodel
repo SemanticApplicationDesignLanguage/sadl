@@ -58,7 +58,6 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlInstance/type"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlInstance/propertyInitializers"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlInstance/instance"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlInstance/nameDeclarations"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlInstance/article"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlResource">
