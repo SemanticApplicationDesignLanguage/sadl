@@ -19,6 +19,8 @@ import com.google.inject.Inject
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.util.OnChangeEvictingCache
 import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
+import org.eclipse.xtext.EcoreUtil2
+import com.ge.research.sadl.sADL.SadlModel
 
 class DeclarationExtensions {
 	
@@ -34,6 +36,11 @@ class DeclarationExtensions {
 				return name.substring(1)
 			return name
 		]
+	}
+	
+	def String getConceptUri(SadlResource it) {
+		val declaration = declaration
+		return EcoreUtil2.getContainerOfType(declaration, SadlModel).baseUri+"#"+declaration.concreteName
 	}
 	
 	def SadlResource getDeclaration(SadlResource resource) {
