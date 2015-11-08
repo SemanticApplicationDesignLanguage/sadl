@@ -414,6 +414,7 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Ignore("https://github.com/crapo/sadlos2/issues/14")
 	@Test def void testInstanceDeclaration_01() {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMartha".
@@ -426,7 +427,8 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-		@Test def void testInstanceDeclaration_02() {
+	@Ignore("https://github.com/crapo/sadlos2/issues/14")
+	@Test def void testInstanceDeclaration_02() {
 		'''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
 			

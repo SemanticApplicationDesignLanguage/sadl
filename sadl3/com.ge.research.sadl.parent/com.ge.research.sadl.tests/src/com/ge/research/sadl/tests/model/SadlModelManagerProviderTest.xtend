@@ -473,7 +473,7 @@ class SadlModelManagerProviderTest {
 			if (error) {
 				jenaModel.write(System.out, "N3")				
 			}
-			assertFalse(error)
+			assertFalse(!error)
 		]
 	}
 	
@@ -648,21 +648,6 @@ class SadlModelManagerProviderTest {
 				jenaModel.write(System.out, "N3")				
 			}
 			assertTrue(found);
-		]
-	}
-	
-	@Test def void importTestCase() {
-		'''
-			uri "http://sadl.org/model1" alias m1.
-			import "http://sadl.org/model2".
-		'''.assertValidatesTo [ jenaModel, issues |
-			// expectations go here
-			assertNotNull(jenaModel)
-			assertTrue(issues.size == 0)
-			assertTrue(jenaModel.listOntologies().hasNext())
-			var imports = jenaModel.listOntologies().next().listImports
-			assertTrue(imports.next.URI.equals("http://sadl.org/model2"))
-			assertFalse(imports.hasNext())
 		]
 	}
 	
