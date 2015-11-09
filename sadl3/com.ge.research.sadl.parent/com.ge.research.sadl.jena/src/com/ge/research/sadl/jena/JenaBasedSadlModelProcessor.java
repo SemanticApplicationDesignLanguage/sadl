@@ -797,15 +797,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	private SadlResource sadlResourceFromSadlInstance(SadlInstance element) throws JenaProcessorException {
 		SadlResource sr = element.getNameOrRef();
 		if (sr == null) {
-			EList<SadlResource> instances = element.getInstance();
-			if (instances != null && instances.size() > 0) {
-				if (instances.size() == 1) {
-					return instances.get(0);
-				}
-				else {
-					throw new JenaProcessorException("SadlInstance element has multiple SadlResources; not yet handled");
-				}
-			}
+			return element.getInstance();
 		}
 		return sr;
 	}
