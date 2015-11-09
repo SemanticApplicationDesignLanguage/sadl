@@ -268,6 +268,44 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void myPropertyWithListDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			Thingy is a class.
+			multiValuedListProperty1 describes Thingy with a List of values of type Thingy.
+			multiValuedListProperty2 describes Thingy with a List of values of type float.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
+			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			assertTrue(ann.toString().equals("LIST"))
+			var dtprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty2")
+			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			assertTrue(ann2.toString().equals("LIST"))
+		]
+	}
+	
+	@Test def void myPropertyWithListsDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			Thingy is a class.
+			multiValuedListProperty1 describes Thingy with Lists of values of type Thingy.
+			multiValuedListProperty2 describes Thingy with Lists of values of type float.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
+			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			assertTrue(ann.toString().equals("LISTS"))
+			var dtprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty2")
+			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			assertTrue(ann2.toString().equals("LISTS"))
+		]
+	}
+	
 	@Test def void mySubPropertyDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
