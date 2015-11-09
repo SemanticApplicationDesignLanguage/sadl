@@ -5,7 +5,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="External Model URL List Editor"
+            name="SADL Model URL List Editor"
             extensions="url"
             icon="icons/sample.gif"
             contributorClass="com.ge.research.sadl.externalmodels.editors.UrlListEditorContributor"
@@ -16,11 +16,11 @@
    <extension
          point="org.eclipse.ui.newWizards">
       <category
-            name="External Model URL List Wizards"
+            name="SADL Model URL List Wizards"
             id="com.ge.research.sadl.externalmodels">
       </category>
       <wizard
-            name="External Model URL List file"
+            name="SADL Model URL List file"
             icon="icons/sample.gif"
             category="com.ge.research.sadl.externalmodels"
             class="com.ge.research.sadl.externalmodels.wizards.UrlListWizard"

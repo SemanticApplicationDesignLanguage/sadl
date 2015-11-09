@@ -55,10 +55,10 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 public class UrlListEditor extends MultiPageEditorPart implements IResourceChangeListener{
 
 	/** The text editor used in page 0. */
-	private TextEditor editor;
+	private UrlListTextEditor editor;
 
 	/**
-	 * Creates a multi-page editor example.
+	 * Creates a multi-page editor.
 	 */
 	public UrlListEditor() {
 		super();
@@ -70,7 +70,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	 */
 	void createPage0() {
 		try {
-			editor = new TextEditor();
+			editor = new UrlListTextEditor();
 			int index = addPage(editor, getEditorInput());
 			setPageText(index, editor.getTitle());
 		} catch (PartInitException e) {
@@ -212,40 +212,43 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 		URL url;
 	    InputStream is = null;
 
-	    try {
-	    	Properties p = System.getProperties();
-	    	p.put("http.proxyHost", "http-proxy.ae.ge.com");
-	    	p.put("http.proxyPort", "80");
-	    	p.put("https.proxyHost", "http-proxy.ae.ge.com");
-	    	p.put("https.proxyPort", "80");
-	    	System.setProperties(p);
-	        url = new URL(urlString);
-	        is = url.openStream();  // throws an IOException
-	        ReadableByteChannel rbc = Channels.newChannel(is);
-	        String urlPath = url.getHost() + url.getPath();
-	        
-	        if (url.getPath() == null || url.getPath().isEmpty())
-	        	urlPath = urlPath + "/" + url.getHost() + ".owl";
-	        else if (!url.getPath().contains("."))
-	        	urlPath = urlPath + "/" + urlPath.substring(urlPath.lastIndexOf("/")+1) + ".owl";
-	        
-	        String outputPath = iPath.append(urlPath).toString();
-	        File file1 =  new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
-	        file1.mkdirs();	        
-	        FileOutputStream fos = new FileOutputStream(outputPath);
-	        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-	        fos.close();
-	        
-	    } catch (MalformedURLException mue) {
-	         mue.printStackTrace();
-	    } catch (IOException ioe) {
-	         ioe.printStackTrace();
-	    } finally {
-	        try {
-	            if (is != null) is.close();
-	        } catch (IOException ioe) {
-	            // nothing to see here
-	        }
-	    }
+	    if (urlString != null && !urlString.isEmpty() && !urlString.startsWith("--")) {
+			try {
+				Properties p = System.getProperties();
+				p.put("http.proxyHost", "http-proxy.ae.ge.com");
+				p.put("http.proxyPort", "80");
+				p.put("https.proxyHost", "http-proxy.ae.ge.com");
+				p.put("https.proxyPort", "80");
+				System.setProperties(p);
+				url = new URL(urlString);
+				is = url.openStream(); // throws an IOException
+				ReadableByteChannel rbc = Channels.newChannel(is);
+				String urlPath = url.getHost() + url.getPath();
+
+				if (url.getPath() == null || url.getPath().isEmpty())
+					urlPath = urlPath + "/" + url.getHost() + ".owl";
+				else if (!url.getPath().contains("."))
+					urlPath = urlPath + "/" + urlPath.substring(urlPath.lastIndexOf("/") + 1) + ".owl";
+
+				String outputPath = iPath.append(urlPath).toString();
+				File file1 = new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
+				file1.mkdirs();
+				FileOutputStream fos = new FileOutputStream(outputPath);
+				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+				fos.close();
+
+			} catch (MalformedURLException mue) {
+				mue.printStackTrace();
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			} finally {
+				try {
+					if (is != null)
+						is.close();
+				} catch (IOException ioe) {
+					// nothing to see here
+				}
+			} 
+		}
 	}
 }

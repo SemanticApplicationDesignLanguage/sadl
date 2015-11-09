@@ -129,7 +129,7 @@ public class UrlListWizard extends Wizard implements INewWizard {
 
 	private InputStream openContentStream() {
 		String contents =
-			"This is the initial file contents for *.url file that should be word-sorted in the Preview page of the multi-page editor";
+			"--This is a list of URLs of OWL model files to add to the external models directory for this project.\n--TO DO:  Add your list of URLs";
 		return new ByteArrayInputStream(contents.getBytes());
 	}
 
