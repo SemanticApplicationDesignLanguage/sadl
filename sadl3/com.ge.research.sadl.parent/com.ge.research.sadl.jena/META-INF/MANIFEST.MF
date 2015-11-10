@@ -33,8 +33,6 @@ Bundle-ClassPath: lib/activation-1.0.2.jar,
  lib/slf4j-log4j12-1.7.12.jar,
  lib/stax-api-1.0.1.jar,
  lib/wstx-asl-3.2.9.jar,
- lib/xml-apis-1.4.01.jar,
- lib/xercesImpl-2.11.0.jar,
  .
 Export-Package: com.ge.research.sadl.jena,
  com.hp.hpl.jena.ontology
@@ -42,4 +40,5 @@ Require-Bundle: com.ge.research.sadl;bundle-version="1.0.0",
  org.eclipse.emf.ecore,
  org.eclipse.emf,
  org.eclipse.xtext;bundle-version="2.9.0",
- org.eclipse.equinox.common
+ org.eclipse.equinox.common,
+ org.apache.xerces;bundle-version="2.9.0"

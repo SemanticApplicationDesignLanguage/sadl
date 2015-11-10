@@ -30,8 +30,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12-1.7.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax-api-1.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wstx-asl-3.2.9.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xml-apis-1.4.01.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xercesImpl-2.11.0.jar"/>
-	<classpathentry kind="src" path="src/"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
