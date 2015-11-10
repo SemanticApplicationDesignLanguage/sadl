@@ -13,28 +13,86 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlResource
+import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 class SadlLinkingTests {
 	
-	@Inject ParseHelper<SadlModel> parseHelper
+	@Inject extension ParseHelper<SadlModel>
+	@Inject extension ValidationTestHelper
 	
 	@Inject extension DeclarationExtensions 
 	
 	@Test def void testImportsLink() {
-		val first = parseHelper.parse('''
+		val first = '''
 			uri "http://sadl.org.Tests/ModelName" alias foo.
-		''')
-		val second = parseHelper.parse('''
+		'''.parse
+		val second = parse('''
 			uri "http://sadl.org/Tests/Import" alias imp.
 			import "http://sadl.org.Tests/ModelName".
 		''', first.eResource.resourceSet)
+		first.assertNoErrors
+		second.assertNoErrors
 		assertSame(first, second.imports.head.importedResource)
 	}
 	
+	@Test def void testCrossResourceSadlResourceLinks() {
+		val first = parse('''
+			uri "http://sadl.org.Tests/ModelName" alias foo.
+			Foo is a class.
+		''')
+		val second = parse('''
+			uri "http://sadl.org/Tests/Import" alias imp.
+			import "http://sadl.org.Tests/ModelName".
+			
+			Bar is a type of Foo.
+		''', first.eResource.resourceSet)
+		first.assertNoErrors
+		second.assertNoErrors
+		assertSame(first, second.imports.head.importedResource)
+		assertSame(first.elements.filter(SadlClassOrPropertyDeclaration).head.classOrProperty.head, 
+			second.elements.filter(SadlClassOrPropertyDeclaration).head.superElement.referencedSadlResources.head)
+	}
+	
+	@Test def void testCrossResourceSadlResourceLinks_01() {
+		val first = parse('''
+			uri "http://sadl.org.Tests/ModelName" alias foo.
+			Foo is a class.
+		''')
+		val second = parse('''
+			uri "http://sadl.org/Tests/Import" alias imp.
+			import "http://sadl.org.Tests/ModelName".
+			
+			Bar is a type of foo:Foo.
+		''', first.eResource.resourceSet)
+		first.assertNoErrors
+		second.assertNoErrors
+		assertSame(first, second.imports.head.importedResource)
+		assertSame(first.elements.filter(SadlClassOrPropertyDeclaration).head.classOrProperty.head, 
+			second.elements.filter(SadlClassOrPropertyDeclaration).head.superElement.referencedSadlResources.head)
+	}
+	
+	@Test def void testCrossResourceSadlResourceLinks_02() {
+		val first = parse('''
+			uri "http://sadl.org.Tests/ModelName".
+			Foo is a class.
+		''')
+		val second = parse('''
+			uri "http://sadl.org/Tests/Import" alias imp.
+			import "http://sadl.org.Tests/ModelName" as foo.
+			
+			Bar is a type of foo:Foo.
+		''', first.eResource.resourceSet)
+		first.assertNoErrors
+		second.assertNoErrors
+		assertSame(first, second.imports.head.importedResource)
+		assertSame(first.elements.filter(SadlClassOrPropertyDeclaration).head.classOrProperty.head, 
+			second.elements.filter(SadlClassOrPropertyDeclaration).head.superElement.referencedSadlResources.head)
+	}
+	
 	@Test def void testClassesLink() {
-		val first = parseHelper.parse('''
+		val first = parse('''
 			uri "http://sadl.org.Tests/ModelName" alias foo.
 			
 			Foo is a class
@@ -48,7 +106,7 @@ class SadlLinkingTests {
 	}
 	
 	@Test def void testResourceLinking_02() {
-		val first = parseHelper.parse('''
+		val first = parse('''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".
 			
 			SomeClass is a class.
@@ -73,7 +131,7 @@ class SadlLinkingTests {
 	}
 	
 	@Test def void testInstanceAndPropertyLinking_01() {
-		val first = parseHelper.parse('''
+		val first = parse('''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
 			
 			Thingy is a class described by connectedTo with values of type Thingy.
