@@ -146,6 +146,14 @@ class DeclarationExtensionsTest {
 		resources.get('AppleComputer').assertIs(OntConceptType.CLASS)
 	}
 	
+	@Test def void testGetOntConceptType_05() {
+		val model = '''
+			uri "http://sadl.org/model1" alias m1.
+			annprop is a type of annotation.
+		'''.parse
+		model.eAllContents.filter(SadlResource).head.assertIs(OntConceptType.ANNOTATION_PROPERTY)
+	}
+	
 	protected def void assertIs(SadlResource it, OntConceptType type) {
 		assertNotNull(it)
 		assertEquals(concreteName, type, ontConceptType)

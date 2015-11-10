@@ -333,7 +333,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					rsrcList.add(createDatatypeProperty(newNames.get(i), superSRUri));
 				}
 			}
-			else if (superElementType.equals(OntConceptType.ANNOTATION)) {
+			else if (superElementType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
 				for (int i = 0; i < newNames.size(); i++) {
 					rsrcList.add(createAnnotationProperty(newNames.get(i)));
 				}

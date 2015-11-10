@@ -21,6 +21,7 @@ import org.eclipse.xtext.util.OnChangeEvictingCache
 import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
 import org.eclipse.xtext.EcoreUtil2
 import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.sADL.SadlIsAnnotation
 
 class DeclarationExtensions {
 	
@@ -53,6 +54,10 @@ class DeclarationExtensions {
 	def OntConceptType getOntConceptType(SadlResource resource) {
 		switch e: resource.declaration.eContainer {
 			
+			SadlClassOrPropertyDeclaration case e.restrictions.exists[it instanceof SadlIsAnnotation],
+			SadlProperty case e.restrictions.exists[it instanceof SadlIsAnnotation] :
+				OntConceptType.ANNOTATION_PROPERTY
+				
 			SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY] :
 				OntConceptType.CLASS_PROPERTY
 				 
