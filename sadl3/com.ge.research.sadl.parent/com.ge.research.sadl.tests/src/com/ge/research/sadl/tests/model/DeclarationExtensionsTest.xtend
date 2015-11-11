@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -152,6 +153,18 @@ class DeclarationExtensionsTest {
 			annprop is a type of annotation.
 		'''.parse
 		model.eAllContents.filter(SadlResource).head.assertIs(OntConceptType.ANNOTATION_PROPERTY)
+	}
+	
+	@Test def void testGetOntConceptType_06() {
+		val model = '''
+			uri "http://sadl.org/model1" alias m1.
+			
+			Airport_Ident is a type of string length 1-4 .
+			Airport is a class, 
+				described by ident with values of type Airport_Ident.
+		'''.parse
+		val airport = model.elements.get(1) as SadlClassOrPropertyDeclaration
+		airport.describedBy.head.eContents.filter(SadlResource).head.assertIs(OntConceptType.DATATYPE_PROPERTY)
 	}
 	
 	protected def void assertIs(SadlResource it, OntConceptType type) {

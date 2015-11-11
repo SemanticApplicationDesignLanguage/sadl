@@ -61,8 +61,7 @@ class DeclarationExtensions {
 			SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY] :
 				OntConceptType.CLASS_PROPERTY
 				 
-			SadlClassOrPropertyDeclaration case e.superElement!==null && 
-					(e.superElement instanceof SadlPrimitiveDataType || e.superElement.eAllContents.exists[it instanceof SadlPrimitiveDataType]) : 
+			SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype : 
 				OntConceptType.DATATYPE
 				
 			SadlNecessaryAndSufficient,
@@ -72,7 +71,7 @@ class DeclarationExtensions {
 			SadlDataTypeDeclaration :
 				OntConceptType.DATATYPE
 				
-			SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[range instanceof SadlPrimitiveDataType]: 
+			SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[range.isDatatype]: 
 				OntConceptType.DATATYPE_PROPERTY
 				
 			SadlProperty : 
@@ -100,8 +99,10 @@ class DeclarationExtensions {
 		}
 	}
 	
-	protected def isPrimitive(SadlTypeReference typeRef) {
-		typeRef instanceof SadlPrimitiveDataType || typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType]
+	protected def isDatatype(SadlTypeReference typeRef) {
+		typeRef instanceof SadlPrimitiveDataType 
+		|| typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType]
+		|| typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE]
 	}
 	
 }
