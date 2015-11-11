@@ -23,4 +23,4 @@ Export-Package: com.ge.research.sadl.ui.contentassist,
  com.ge.research.sadl.ui.quickfix,
  com.ge.research.sadl.ui.internal
 Import-Package: org.apache.log4j
-Bundle-Activator: com.ge.research.sadl.ui.internal.SADLActivator
+Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator

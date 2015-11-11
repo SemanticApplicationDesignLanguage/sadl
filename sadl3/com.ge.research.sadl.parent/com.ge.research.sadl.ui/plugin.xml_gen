@@ -205,19 +205,19 @@
 		</handler>
 	</extension>
 	<!-- adding resource factories -->
-		<extension
-			point="org.eclipse.emf.ecore.extension_parser">
-			<parser
-				class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-				type="sadl">
-			</parser>
-		</extension>
-		<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
-		    <resourceServiceProvider
-		        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-		        uriExtension="sadl">
-		    </resourceServiceProvider>
-		</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="sadl">
+		</parser>
+	</extension>
+	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
+	    <resourceServiceProvider
+	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+	        uriExtension="sadl">
+	    </resourceServiceProvider>
+	</extension>
 	<!-- marker definitions for com.ge.research.sadl.SADL -->
 	<extension
 			id="sadl.check.fast"
