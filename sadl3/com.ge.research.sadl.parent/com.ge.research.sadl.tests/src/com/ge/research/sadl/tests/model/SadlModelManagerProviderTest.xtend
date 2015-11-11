@@ -242,9 +242,45 @@ class SadlModelManagerProviderTest {
 				}
 			}	
 			if (!found) {
-				jenaModel.write(System.out, "N3");
+				jenaModel.write(System.out, "N3")
 			}
 			assertTrue(found);
+		]
+	}
+	
+	@Test def void myUserDefinedDatatypeDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			
+			shortident is a type of string length 1-4 .
+			over12 is a type of int [12,].				// an int >= 12
+			clothingsize is a type of {int or string}.	// either an int or a string
+			enumeratedheight is a type of string {"short", "medium", "tall"}.	// enumeration of 3 possible string values
+			SSN is a type of string "[0-9]{3}-[0-9]{2}-[0-9]{4}".
+			year is a type of int length 4 .
+			
+			SomeClass is a class, described by ident with values of type shortident.
+			Adolescent is a class described by age with a single value of type over12.
+			Clothing is a class described by size with values of type clothingsize.
+			Person is a class described by ssn with values of type SSN.
+			Artifact is a class described by cira with values of type year.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var prop = jenaModel.getDatatypeProperty("http://sadl.org/model1#ident")
+			if (prop != null) {
+				var rng = prop.range;
+				System.out.println("Range: " + rng.toString())
+			}
+			else {
+				var prop2 = jenaModel.getObjectProperty("http://sadl.org/model1#ident")
+				if (prop2 != null) {
+					var rng = prop2.range;
+					System.out.println("Range: " + rng.toString())
+				}	
+			}
+			jenaModel.write(System.out, "N3")
 		]
 	}
 	

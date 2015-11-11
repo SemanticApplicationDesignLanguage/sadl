@@ -84,6 +84,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
+import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
@@ -341,10 +342,16 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		}
 		//				b) a SadlPrimitiveDataType
 		else if (superElement instanceof SadlPrimitiveDataType) {
-			SadlDataTypeFacet dtf = ((SadlClassOrPropertyDeclaration)element).getFacet();
-			SadlDataType sdt = ((SadlPrimitiveDataType)superElement).getPrimitiveType();
-			// pull out facets, create rdfs:Datatype
-			throw new JenaProcessorException("User-defined datatypes not yet supported");
+			com.hp.hpl.jena.rdf.model.Resource spdt = processSadlPrimitiveDataType(element, (SadlPrimitiveDataType) superElement, newNames.get(0));
+			if (spdt instanceof OntClass) {
+				rsrcList.add((OntClass)spdt);
+			}
+			else if (spdt.canAs(OntResource.class)){
+				rsrcList.add(spdt.as(OntResource.class));
+			}
+			else {
+				throw new JenaProcessorException("Expected OntResource to be returned");  // .add(spdt);
+			}
 		}
 		//				c) a SadlPropertyCondition
 		else if (superElement instanceof SadlPropertyCondition) {
@@ -945,8 +952,21 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		logger.debug("New annotation property '" + annProp.getURI() + "' created");
 		return annProp;
 	}
-
+	
 	private OntResource sadlTypeReferenceToOntResource(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
+		Object obj = sadlTypeReferenceToObject(sadlTypeRef);
+		if (obj instanceof OntResource) {
+			return (OntResource)obj;
+		}
+		else if (obj instanceof RDFNode) {
+			if (((RDFNode)obj).canAs(OntResource.class)) {
+				return ((RDFNode)obj).as(OntResource.class);
+			}
+		}
+		throw new JenaProcessorException("Unable to convert SadlTypeReference to OntResource");
+	}
+
+	private Object sadlTypeReferenceToObject(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
 		OntResource rsrc = null;
 		// TODO How do we tell if this is a union versus an intersection?						
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
@@ -969,31 +989,171 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					return createIndividual(strSRUri, (OntClass)null);
 				}
 			}
+			else if (ctype.equals(OntConceptType.DATATYPE)) {				
+				OntResource dt = getTheJenaModel().getOntResource(strSRUri);
+				if (dt == null) {
+					throw new JenaProcessorException("SadlSimpleTypeReference '" + strSRUri + "' not found; it should exist as there isn't enough information to create it.");
+				}
+				return dt;
+			}
 		}
 		else if (sadlTypeRef instanceof SadlPrimitiveDataType) {
-			SadlDataType pt = ((SadlPrimitiveDataType)sadlTypeRef).getPrimitiveType();
-			throw new JenaProcessorException("Cannot convert primitive data type (" + pt.toString() + ") to OntResource");
+			return processSadlPrimitiveDataType(null, (SadlPrimitiveDataType) sadlTypeRef, null);
 		}
 		else if (sadlTypeRef instanceof SadlPropertyCondition) {
 			return processSadlPropertyCondition((SadlPropertyCondition) sadlTypeRef);		
 		}
 		else if (sadlTypeRef instanceof SadlUnionType) {
+			RDFNode lftNode = null; RDFNode rhtNode = null;
 			SadlTypeReference lft = ((SadlUnionType)sadlTypeRef).getLeft();
-			OntClass lftcls = sadlTypeReferenceToOntResource(lft).asClass();
+			Object lftObj = sadlTypeReferenceToObject(lft);
+			if (lftObj instanceof OntResource) {
+				lftNode = ((OntResource)lftObj).asClass();
+			}
+			else {
+				if (lftObj instanceof RDFNode) {
+					lftNode = (RDFNode) lftObj;
+				}
+				else {
+					throw new JenaProcessorException("Union member of unsupported type: " + lftObj.getClass().getCanonicalName());
+				}
+			}
 			SadlTypeReference rht = ((SadlUnionType)sadlTypeRef).getRight();
-			OntClass rhtcls = sadlTypeReferenceToOntResource(rht).asClass();
-			OntClass unionCls = createUnionClass(lftcls, rhtcls);
+			Object rhtObj = sadlTypeReferenceToObject(rht);
+			if (rhtObj instanceof OntResource) {
+				rhtNode = ((OntResource)rhtObj).asClass();
+			}
+			else {
+				if (rhtObj instanceof RDFNode) {
+					rhtNode = (RDFNode) rhtObj;
+				}
+				else {
+					throw new JenaProcessorException("Union member of unsupported type: " + rhtObj.getClass().getCanonicalName());
+				}
+			}
+			OntClass unionCls = createUnionClass(lftNode, rhtNode);
 			return unionCls;
 		}
 		else if (sadlTypeRef instanceof SadlIntersectionType) {
+			RDFNode lftNode = null; RDFNode rhtNode = null;
 			SadlTypeReference lft = ((SadlIntersectionType)sadlTypeRef).getLeft();
-			OntClass lftcls = sadlTypeReferenceToOntResource(lft).asClass();
+			Object lftObj = sadlTypeReferenceToObject(lft);
+			if (lftObj instanceof OntResource) {
+				lftNode = ((OntResource)lftObj).asClass();
+			}
+			else {
+				if (lftObj instanceof RDFNode) {
+					lftNode = (RDFNode) lftObj;
+				}
+				else {
+					throw new JenaProcessorException("Intersection member of unsupported type: " + lftObj.getClass().getCanonicalName());
+				}
+			}
 			SadlTypeReference rht = ((SadlIntersectionType)sadlTypeRef).getRight();
-			OntClass rhtcls = sadlTypeReferenceToOntResource(rht).asClass();
-			OntClass intersectCls = createIntersectionClass(lftcls, rhtcls);
+			Object rhtObj = sadlTypeReferenceToObject(rht);
+			if (rhtObj instanceof OntResource) {
+				rhtNode = ((OntResource)rhtObj).asClass();
+			}
+			else {
+				if (rhtObj instanceof RDFNode) {
+					rhtNode = (RDFNode) rhtObj;
+				}
+				else {
+					throw new JenaProcessorException("Intersection member of unsupported type: " + rhtObj.getClass().getCanonicalName());
+				}
+			}
+			OntClass intersectCls = createIntersectionClass(lftNode, rhtNode);
 			return intersectCls;
 		}
 		return rsrc;
+	}
+
+	private com.hp.hpl.jena.rdf.model.Resource processSadlPrimitiveDataType(SadlClassOrPropertyDeclaration element, SadlPrimitiveDataType sadlTypeRef, String newDatatypeUri) throws JenaProcessorException {
+		SadlDataType pt = sadlTypeRef.getPrimitiveType();
+		String typeStr = pt.getLiteral();
+		com.hp.hpl.jena.rdf.model.Resource onDatatype;
+		if (typeStr.equals(XSD.xstring.getLocalName())) onDatatype = XSD.xstring;
+		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
+		else if (typeStr.equals(XSD.base64Binary.getLocalName())) onDatatype = XSD.base64Binary;
+		else if (typeStr.equals(XSD.date.getLocalName())) onDatatype = XSD.date;
+		else if (typeStr.equals(XSD.dateTime.getLocalName())) onDatatype = XSD.dateTime;
+		else if (typeStr.equals(XSD.decimal.getLocalName())) onDatatype = XSD.decimal;
+		else if (typeStr.equals(XSD.duration.getLocalName())) onDatatype = XSD.duration;
+		else if (typeStr.equals(XSD.gDay.getLocalName())) onDatatype = XSD.gDay;
+		else if (typeStr.equals(XSD.gMonth.getLocalName())) onDatatype = XSD.gMonth;
+		else if (typeStr.equals(XSD.gMonthDay.getLocalName())) onDatatype = XSD.gMonthDay;
+		else if (typeStr.equals(XSD.gYear.getLocalName())) onDatatype = XSD.gYear;
+		else if (typeStr.equals(XSD.gYearMonth.getLocalName())) onDatatype = XSD.gYearMonth;
+		else if (typeStr.equals(XSD.hexBinary.getLocalName())) onDatatype = XSD.hexBinary;
+		else if (typeStr.equals(XSD.integer.getLocalName())) onDatatype = XSD.integer;
+		else if (typeStr.equals(XSD.time.getLocalName())) onDatatype = XSD.time;
+		else if (typeStr.equals(XSD.xboolean.getLocalName())) onDatatype = XSD.xboolean;
+		else if (typeStr.equals(XSD.xdouble.getLocalName())) onDatatype = XSD.xdouble;
+		else if (typeStr.equals(XSD.xfloat.getLocalName())) onDatatype = XSD.xfloat;
+		else if (typeStr.equals(XSD.xint.getLocalName())) onDatatype = XSD.xint;
+		else if (typeStr.equals(XSD.xlong.getLocalName())) onDatatype = XSD.xlong;
+		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
+		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
+		else if (typeStr.equals("data")) onDatatype = null;
+		else {
+			throw new JenaProcessorException("Unexpected primitive data type: " + typeStr);
+		}
+		if (newDatatypeUri == null) {
+			return onDatatype;
+		}
+		OntClass datatype = getTheJenaModel().createOntResource(OntClass.class, RDFS.Datatype, newDatatypeUri);
+		OntClass equivClass = getTheJenaModel().createOntResource(OntClass.class, RDFS.Datatype, null);
+		equivClass.addProperty(OWL2.onDatatype, onDatatype);
+		if (element.getFacet() != null) {
+			com.hp.hpl.jena.rdf.model.Resource restrictions = facetsToRestrictionNode(newDatatypeUri, element.getFacet());
+			equivClass.addProperty(OWL2.withRestrictions, restrictions);
+		}
+		datatype.addEquivalentClass(equivClass);
+		return datatype;
+	}
+
+	private com.hp.hpl.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet) {
+		com.hp.hpl.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
+		boolean minInclusive = (facet.getMinexin() != null && facet.getMinexin().equals("["));
+		boolean maxInclusive = (facet.getMaxexin() != null && facet.getMaxexin().equals("]"));
+		if (facet.getMin() != null) {
+			if (minInclusive) {
+				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "minInclusive"), facet.getMin());
+			}
+			else {
+				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "minExclusive"), facet.getMin());
+			}
+		}
+		if (facet.getMax() != null) {
+			if (maxInclusive) {
+				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "maxInclusive"), facet.getMax());
+			}
+			else {
+				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "maxExclusive"), facet.getMax());
+			}
+		}
+		if (facet.getLen() != null) {
+			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "length"), facet.getLen());
+		}
+		if (facet.getMinlen() != null) {
+			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "minLength"), facet.getMinlen());
+		}
+		if (facet.getMaxlen() != null) {
+			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "maxLength"), facet.getMaxlen());
+		}
+		if (facet.getLen() != null) {
+			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "length"), facet.getLen());
+		}
+		if (facet.getRegex() != null) {
+			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "pattern"), facet.getRegex());
+		}
+		if (facet.getValues() != null) {
+			Iterator<String> iter = facet.getValues().iterator();
+			while (iter.hasNext()) {
+				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "enumeration"), iter.next());
+			}
+		}
+		return anon;
 	}
 
 	private OntClass processSadlPropertyCondition(SadlPropertyCondition sadlPropCond) throws JenaProcessorException {

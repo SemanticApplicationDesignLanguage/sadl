@@ -113,8 +113,8 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 
 	def TextStyle userDefinedDatatypeTextStyle() {
 		var TextStyle textStyle = defaultTextStyle().copy()
-		textStyle.setColor(new RGB(128, 0, 128))
-		textStyle.setStyle(SWT.BOLD)
+		textStyle.setColor(new RGB(0, 0, 128))
+//		textStyle.setStyle(SWT.BOLD)
 		return textStyle
 	}
 }

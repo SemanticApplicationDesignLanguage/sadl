@@ -7,7 +7,8 @@ Download the Eclipse installer from (https://eclipse.org/downloads/)
 Choose Eclipse Platform and make sure a JDK 7 is selected.
 ![Choose Eclipse Platform, JDK 7](setup-step3.png)
 
-Press the green cross top right and add the following github project
+Click on Next
+On the subsequent window, press the green cross top right and add the following github project
 (https://raw.githubusercontent.com/crapo/sadlos2/master/sadl3/com.ge.research.sadl.parent/sadl3.setup)
 ![Add project](setup-step6.png)
 
