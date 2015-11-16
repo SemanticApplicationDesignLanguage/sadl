@@ -1,0 +1,223 @@
+/************************************************************************
+ * Copyright 2007-2015 - General Electric Company, All Rights Reserved
+ *
+ * Project: SADL
+ *
+ * Description: The Semantic Application Design Language (SADL) is a
+ * language for building semantic models and expressing rules that
+ * capture additional domain knowledge. The SADL-IDE (integrated
+ * development environment) is a set of Eclipse plug-ins that
+ * support the editing and testing of semantic models using the
+ * SADL language.
+ *
+ * This software is distributed "AS-IS" without ANY WARRANTIES
+ * and licensed under the Eclipse Public License - v 1.0
+ * which is available at http://www.eclipse.org/org/documents/epl-v10.php
+ *
+ ***********************************************************************/
+
+grammar com.ge.research.sadl.SADL hidden(WS, ML_COMMENT, SL_COMMENT)
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+generate sADL "http://www.ge.com/research/sadl/SADL"
+
+SadlModel :
+    'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
+    	annotations+=SadlAnnotation* EOS 
+    imports+=SadlImport*
+    elements+=SadlModelElement*;
+    
+SadlAnnotation :
+	','? '(' type=('alias'|'note') contents+=STRING (',' contents+=STRING)* ')'
+;
+
+SadlImport :
+    'import' importedResource=[SadlModel|STRING] ('as' alias=NAME)? EOS;
+
+// The various kinds of elements that make up the body of a model.
+SadlModelElement :
+    SadlStatement
+;
+
+// These are the things that translate directly to OWL.
+SadlStatement returns SadlStatement:
+	    SadlResource 
+	    	({SadlClassOrPropertyDeclaration.classOrProperty+=current} 'is' 'a' 
+	    		('top-level'? 'class' 
+	    		| 'type' 'of' superElement=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
+				(describedBy+=SadlPropertyDeclarationInClass+ | (','? restrictions+=SadlPropertyRestriction)+)?
+			|{SadlProperty.nameOrRef=current} 'is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
+			|{SadlProperty.nameOrRef=current} (','? restrictions+=SadlPropertyRestriction)+
+			|{SadlSameAs.nameOrRef=current} 'is' 'the' 'same' 'as' (complement?='not')? sameAs=SadlTypeReference
+			|{SadlDifferentFrom.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
+			|{SadlInstance.nameOrRef=current} ('is' AnArticle type=SadlTypeReference)? propertyInitializers+=SadlPropertyInitializer*
+			|{SadlDisjointClasses.classes+=current} ('and' classes+=SadlResource)+ 'are' 'disjoint'
+			)  EOS
+	| 	{SadlClassOrPropertyDeclaration}  '{' classOrProperty+=SadlResource (','  classOrProperty+=SadlResource)* '}' 'are' 
+				(('top-level'? 'classes' | 'types' 'of' superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
+			|	{SadlDisjointClasses.types+=current} 'disjoint'
+			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same') EOS
+    | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource EOS
+    | 	AnArticle SadlTypeReference (
+    		{SadlInstance.type=current} instance=SadlResource propertyInitializers+=SadlPropertyInitializer*
+    	|	{SadlNecessaryAndSufficient.subject=current}'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*) EOS
+    | 	SadlDataTypeDeclaration
+;
+
+SadlPropertyCondition :
+	property=[SadlResource|NAME] cond+=SadlCondition
+;
+
+SadlPropertyInitializer:
+	','? ('with'|'has') property=[SadlResource|NAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+;
+
+SadlNestedInstance returns SadlInstance:
+		instance=SadlResource 'is' article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*
+	|	article=AnArticle type=SadlTypeReference instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*
+;
+
+SadlResource:
+	name=[SadlResource|NAME] annotations+=SadlAnnotation*
+;
+
+SadlDataTypeDeclaration:
+	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlPrimaryTypeReference facet=SadlDataTypeFacet? EOS
+;
+
+SadlDataTypeFacet :	
+		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
+	|	regex=STRING
+	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
+	|	'{' values+=(STRING|NUMBER) (','? values+=(STRING|NUMBER))* '}'
+;
+
+// TypeReferences
+SadlTypeReference returns SadlTypeReference:
+    SadlUnionType
+;
+
+SadlUnionType returns SadlTypeReference:
+	SadlIntersectionType ({SadlUnionType.left=current} (','|'or') right=SadlIntersectionType)*
+;
+
+SadlIntersectionType returns SadlTypeReference:
+	SadlPrimaryTypeReference ({SadlIntersectionType.left=current} ('and') right=SadlPrimaryTypeReference)*
+;
+
+SadlPrimaryTypeReference returns SadlTypeReference:
+		{SadlSimpleTypeReference} type=[SadlResource|NAME]
+	|	{SadlPrimitiveDataType} primitiveType=SadlDataType
+	|	'(' SadlPropertyCondition ')'
+	|	'{' SadlTypeReference '}'
+;
+
+enum SadlDataType :
+    string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
+    gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
+
+// Class declarations may also describe the class's properties.
+SadlPropertyDeclarationInClass returns SadlProperty:
+    	','? 'described' 'by' nameDeclarations+=SadlResource restrictions+=SadlPropertyRestriction;
+
+SadlPropertyRestriction :
+    	SadlCondition
+    |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
+    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' list?='List'|lists?='Lists') 'of' 'values'|'values') 'of' 'type' range=SadlPrimaryTypeReference
+    |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|NAME]
+    |   {SadlIsTransitive} 'is' 'transitive'
+    |   {SadlIsSymmetrical} 'is' 'symmetrical'
+    |   {SadlIsAnnotation} 'is' 'a' 'type' 'of' 'annotation'
+    |   {SadlDefaultValue} 'has' ('level' level=NUMBER)? 'default' defValue=SadlExplicitValue
+    |   {SadlIsFunctional} 'has' 'a' 'single' (inverse?='subject' | 'value')?
+    |   {SadlMustBeOneOf} 'must' 'be' 'one' 'of' '{' values+=SadlExplicitValue (',' values+=SadlExplicitValue)* '}'
+    |   {SadlCanOnlyBeOneOf} 'can' 'only' 'be' 'one' 'of' '{' values+=SadlExplicitValue (',' values+=SadlExplicitValue)* '}'
+;
+
+SadlCondition :
+		SadlAllValuesCondition
+	|   SadlHasValueCondition
+    |   SadlCardinalityCondition
+;
+
+SadlAllValuesCondition :
+	'only' ('has'|'with') 'values' 'of' 'type' type=SadlPrimaryTypeReference;
+
+SadlHasValueCondition :
+	'always' ('has'|'with') 'value' restriction=SadlExplicitValue;
+
+SadlCardinalityCondition :
+	('has'|'with') 
+	('at' operator=('least'|'most') |'exactly') 
+	cardinality=(NUMBER|'one') ('value'|'values') 
+	('of' 'type' type=SadlPrimaryTypeReference | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
+
+SadlExplicitValue:
+		SadlResource		// e.g., George
+	|	{SadlNumberLiteral} literalNumber=NUMBER
+    |   {SadlStringLiteral} literalString=STRING
+    |   {SadlBooleanLiteral} (truethy?='true'|'false')
+//    |   {SadlBag} '{' (explicitValues+=SadlExplicitValue (
+//    				(',' explicitValues+=SadlExplicitValue)+
+//    			|	(operator='and' explicitValues+=SadlExplicitValue)+
+//    			|	(operator='or' explicitValues+=SadlExplicitValue)+)?)? '}'
+    |   {SadlValueList} '[' (explicitValues+=SadlExplicitValue (',' explicitValues+=SadlExplicitValue)*)? ']'
+	|	{SadlConstantLiteral} term=('PI'|'known')
+;
+
+// These articles can appear before the property name and are indicative of the functionality of the property or
+//	the cardinality of the property on the class
+AnArticle :
+	IndefiniteArticle | DefiniteArticle;
+
+IndefiniteArticle :
+	'A'|'a'|'An'|'an';
+
+DefiniteArticle :
+	'The'|'the';
+
+// NAME should match an optional namespace followed by a local name (separated
+// from the namespace by a colon character).  We also need to accept legal URI
+// fragments as local names.  In particular, we need names like X.509 to work.
+NAME hidden() :
+   ID ->(':' ID)? ->(('-'|'.'|'~'|'%') NAME_FRAGMENT)*;
+
+NAME_FRAGMENT hidden():
+	ID | UNSIGNED_NUMBER ->ID?
+;
+
+// NUMBER matches both integral and floating point numbers.
+NUMBER hidden() :
+  '-'? UNSIGNED_NUMBER
+;
+
+terminal UNSIGNED_NUMBER:
+     ('0'..'9')+
+   | ('0'..'9')+ '.' ('0'..'9')* (('e'|'E') ('+'|'-')? ('0'..'9')+)?
+   |             '.' ('0'..'9')+ (('e'|'E') ('+'|'-')? ('0'..'9')+)?
+   | ('0'..'9')+                  ('e'|'E') ('+'|'-')? ('0'..'9')+
+;
+
+// EOS matches one whitespace character or EOF after the period in order to
+// disambiguate the end of sentence period from periods in names.
+terminal EOS :
+    '.' (' '|'\t'|'\r'|'\n'|EOF);
+
+terminal ID:
+	'^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
+	
+terminal STRING:
+	'"' ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | '"'))* '"' |
+	"'" ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | "'"))* "'";
+	
+terminal ML_COMMENT:
+	'/*'->'*/';
+	
+terminal SL_COMMENT:
+	'//' !('\n' | '\r')* ('\r'? '\n')?;
+	
+terminal WS:
+	(' ' | '\t' | '\r' | '\n')+;
+terminal ANY_OTHER:
+	.;
+	

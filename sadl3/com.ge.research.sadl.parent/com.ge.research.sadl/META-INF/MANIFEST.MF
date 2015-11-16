@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.ge.research.sadl
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: com.ge.research.sadl; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.common.types,
+ org.antlr.runtime,
+ org.eclipse.xtext.xbase.lib,
+ org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
+ org.eclipse.xtext.util,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.common
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: com.ge.research.sadl,
+ com.ge.research.sadl.generator,
+ com.ge.research.sadl.model,
+ com.ge.research.sadl.parser.antlr,
+ com.ge.research.sadl.parser.antlr.internal,
+ com.ge.research.sadl.processing,
+ com.ge.research.sadl.sADL,
+ com.ge.research.sadl.sADL.impl,
+ com.ge.research.sadl.sADL.util,
+ com.ge.research.sadl.scoping,
+ com.ge.research.sadl.serializer,
+ com.ge.research.sadl.services,
+ com.ge.research.sadl.validation
+Import-Package: org.apache.log4j

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension
+	      point="com.ge.research.sadl.ui.sadl_model_processor">
+	    <sadlProcessor
+	          class="com.ge.research.sadl.jena.JenaBasedSadlModelProcessor"/>
+	</extension>
+</plugin>

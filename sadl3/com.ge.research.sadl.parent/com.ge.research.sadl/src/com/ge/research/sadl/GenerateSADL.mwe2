@@ -1,0 +1,69 @@
+module com.ge.research.sadl.GenerateSADL
+
+import removeMeSoon.*
+import org.eclipse.emf.mwe.utils.*
+import org.eclipse.xtext.xtext.generator.*
+import org.eclipse.xtext.xtext.generator.model.project.*
+
+var projectPath = "./"
+var rootPath = "${projectPath}/.."
+
+Workflow {
+	
+	component = XtextGenerator {
+		configuration = {
+			project = StandardProjectConfig {
+				baseName = "com.ge.research.sadl"
+				rootPath = rootPath
+				runtimeTest = {
+					enabled = true
+				}
+				eclipsePlugin = {
+					enabled = true
+				}
+				eclipsePluginTest = {
+					enabled = true
+				}
+				createEclipseMetaData = true
+			}
+			code = {
+				encoding = "UTF-8"
+				fileHeader = '
+/************************************************************************
+ * Copyright 2007-2015 - General Electric Company, All Rights Reserved
+ *
+ * Project: SADL
+ *
+ * Description: The Semantic Application Design Language (SADL) is a
+ * language for building semantic models and expressing rules that
+ * capture additional domain knowledge. The SADL-IDE (integrated
+ * development environment) is a set of Eclipse plug-ins that
+ * support the editing and testing of semantic models using the
+ * SADL language.
+ *
+ * This software is distributed "AS-IS" without ANY WARRANTIES
+ * and licensed under the Eclipse Public License - v 1.0
+ * which is available at http://www.eclipse.org/org/documents/epl-v10.php
+ *
+ ***********************************************************************/
+'
+			}
+		}
+		//TODO fix for bug in beta. Remove me after 2.9
+		language = StandardLanguage {
+			name = "com.ge.research.sadl.SADL"
+			fileExtensions = "sadl"
+
+			parserGenerator = {
+				debugGrammar = true
+				
+			}
+			serializer = {
+				generateStub = false
+			}
+			validator = {
+				// composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
+			}
+		}
+	}
+}
