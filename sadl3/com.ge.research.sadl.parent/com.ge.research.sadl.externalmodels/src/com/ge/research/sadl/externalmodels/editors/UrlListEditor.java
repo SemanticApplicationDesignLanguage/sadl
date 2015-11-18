@@ -14,6 +14,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -195,8 +196,12 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			urls.add(tokenizer.nextToken());
 		}
 		IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
+		String sFolder = editorFile.getName().substring(0, editorFile.getName().lastIndexOf("."));
 		IPath outputPath = (editorFile.getParent().getLocation())
-				.append(editorFile.getName().substring(0, editorFile.getName().lastIndexOf(".")));
+				.append(sFolder);
+		
+		DeleteRecursive(outputPath.toFile());
+		
 		for (int i = 0; i < urls.size(); i++) {
 			downloadURL((String) urls.get(i), outputPath);
 		}
@@ -206,6 +211,14 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	void DeleteRecursive(File fileOrDirectory) {
+	    if (fileOrDirectory.isDirectory())
+	        for (File child : fileOrDirectory.listFiles())
+	            DeleteRecursive(child);
+
+	    fileOrDirectory.delete();
 	}
 	
 	void downloadURL(String urlString, IPath iPath) {
