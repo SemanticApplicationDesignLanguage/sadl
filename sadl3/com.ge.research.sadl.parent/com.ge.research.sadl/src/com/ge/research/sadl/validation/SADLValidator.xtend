@@ -9,6 +9,7 @@ import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.google.inject.Inject
+import org.eclipse.emf.ecore.EStructuralFeature
 
 /**
  * This class contains custom validation rules. 
@@ -32,6 +33,7 @@ class SADLValidator extends AbstractSADLValidator {
 	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI"
 	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
 	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
+	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
 	
 	@Check
 	def checkSadlModelNameValidUri(SadlModel model) {
@@ -42,6 +44,7 @@ class SADLValidator extends AbstractSADLValidator {
 		}
 		var thisRsrc = model.eResource
 		var thisURL = thisRsrc.URI;
+		var thisFN = thisURL.lastSegment
 		var rsrcItr = thisRsrc.resourceSet.resources.iterator
 		while (rsrcItr.hasNext()) {
 			var otherRsrc = rsrcItr.next
@@ -49,13 +52,18 @@ class SADLValidator extends AbstractSADLValidator {
 				// this isn't the same resource
 				var otherModel = otherRsrc.contents.get(0) as SadlModel
 				var otherRsrcUri = otherModel.baseUri
+				var otherURL = otherRsrc.URI
+				var otherFN = otherURL.lastSegment
+				if (thisFN.equals(otherFN)) {
+					error("The filename (" + thisFN + ") is already used by model '" + otherURL + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
+				}
 				if (thisUri != null && thisUri.equals(otherRsrcUri)) {
-					error("This URI is already used by model '" + thisURL.lastSegment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
+					error("This URI is already used by model '" + otherFN + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 				}
 				var thisAlias = model.alias
 				var otherAlias = otherModel.alias
 				if (otherAlias != null && thisAlias != null && otherAlias.equals(thisAlias)) {
-					error("This alias is already used by model '" + thisURL.lastSegment + "'; must be unique", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+					error("This alias is already used by model '" + otherFN + "'; must be unique", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
 				}
 			}
 		}
