@@ -36,7 +36,12 @@ SadlImport :
 
 // The various kinds of elements that make up the body of a model.
 SadlModelElement :
-    SadlStatement
+    	SadlStatement
+//    |	RuleStatement
+//    |	QueryStatement
+//    |	TestStatement
+//    |	ExprStatement
+//    |	ExplainStatement
 ;
 
 // These are the things that translate directly to OWL.
@@ -61,7 +66,7 @@ SadlStatement returns SadlStatement:
     | 	AnArticle SadlTypeReference (
     		{SadlInstance.type=current} instance=SadlResource propertyInitializers+=SadlPropertyInitializer*
     	|	{SadlNecessaryAndSufficient.subject=current}'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*) EOS
-    | 	SadlDataTypeDeclaration
+//    | 	SadlDataTypeDeclaration
 ;
 
 SadlPropertyCondition :
@@ -81,9 +86,9 @@ SadlResource:
 	name=[SadlResource|NAME] annotations+=SadlAnnotation*
 ;
 
-SadlDataTypeDeclaration:
-	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlPrimaryTypeReference facet=SadlDataTypeFacet? EOS
-;
+//SadlDataTypeDeclaration:
+//	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlPrimaryTypeReference facet=SadlDataTypeFacet? EOS
+//;
 
 SadlDataTypeFacet :	
 		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')

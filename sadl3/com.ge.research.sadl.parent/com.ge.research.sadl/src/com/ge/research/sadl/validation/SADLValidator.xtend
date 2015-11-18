@@ -7,6 +7,8 @@ import com.ge.research.sadl.sADL.SadlModel
 
 import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.sADL.SADLPackage
+import com.ge.research.sadl.model.DeclarationExtensions
+import com.google.inject.Inject
 
 /**
  * This class contains custom validation rules. 
@@ -25,15 +27,53 @@ class SADLValidator extends AbstractSADLValidator {
 //					INVALID_NAME)
 //		}
 //	}
+	@Inject DeclarationExtensions declarationExtensions;
 
-	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI";
+	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI"
+	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
+	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
 	
 	@Check
 	def checkSadlModelNameValidUri(SadlModel model) {
-		val errMsg = SadlUtils.validateUri(model.baseUri);
+		var thisUri = model.baseUri
+		var errMsg = SadlUtils.validateUri(thisUri);
 		if (errMsg != null) {
 			error(errMsg, SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
 		}
+		var thisRsrc = model.eResource
+		var thisURL = thisRsrc.URI;
+		var rsrcItr = thisRsrc.resourceSet.resources.iterator
+		while (rsrcItr.hasNext()) {
+			var otherRsrc = rsrcItr.next
+			if (!otherRsrc.equals(thisRsrc)) {
+				// this isn't the same resource
+				var otherModel = otherRsrc.contents.get(0) as SadlModel
+				var otherRsrcUri = otherModel.baseUri
+				if (thisUri != null && thisUri.equals(otherRsrcUri)) {
+					error("This URI is already used by model '" + thisURL.lastSegment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
+				}
+				var thisAlias = model.alias
+				var otherAlias = otherModel.alias
+				if (otherAlias != null && thisAlias != null && otherAlias.equals(thisAlias)) {
+					error("This alias is already used by model '" + thisURL.lastSegment + "'; must be unique", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+				}
+			}
+		}
+		var imports = model.imports
+		// does an import need any validation?
+		if (imports != null) {
+			var itr = imports.iterator
+			while (itr.hasNext) {
+				var imp = itr.next;
+				var sm = imp.importedResource
+				var impuri = sm.baseUri
+				errMsg = SadlUtils.validateUri(impuri);
+				if (errMsg != null) {
+//					error(errMsg, imp, imp.importedReSsource. INVALID_IMPORT_URI);
+					System.err.println(errMsg);
+				}
+		}
+			}
 	}
 	
 }

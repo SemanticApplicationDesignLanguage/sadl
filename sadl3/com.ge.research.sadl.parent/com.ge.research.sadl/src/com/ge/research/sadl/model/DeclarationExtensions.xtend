@@ -3,7 +3,7 @@ package com.ge.research.sadl.model
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
-import com.ge.research.sadl.sADL.SadlDataTypeDeclaration
+//import com.ge.research.sadl.sADL.SadlDataTypeDeclaration
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlIntersectionType
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
@@ -68,8 +68,8 @@ class DeclarationExtensions {
 			SadlClassOrPropertyDeclaration : 
 				OntConceptType.CLASS
 				
-			SadlDataTypeDeclaration :
-				OntConceptType.DATATYPE
+//			SadlDataTypeDeclaration :
+//				OntConceptType.DATATYPE
 				
 			SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[range.isDatatype]: 
 				OntConceptType.DATATYPE_PROPERTY

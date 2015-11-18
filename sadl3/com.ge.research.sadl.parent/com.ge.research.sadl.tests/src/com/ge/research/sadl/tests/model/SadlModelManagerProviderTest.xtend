@@ -20,6 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.ontology.Ontology
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -43,6 +44,22 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void testDuplicateUris() {
+		'''
+			uri "http://sadl.org.Tests/ModelName" alias foo.
+		'''.assertValidatesTo [ jenaModel, issues |
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+		]
+		'''
+			uri "http://sadl.org.Tests/ModelName" alias foo2.
+		'''.assertValidatesTo [ jenaModel2, issues2 |
+			assertNotNull(jenaModel2)
+			assertTrue(issues2.size == 1)
+			assertTrue(issues2.toString(), issues2.get(0).toString().contains(""))
+		]
+		
+	}
 	@Test def void modelNameCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
@@ -52,6 +69,29 @@ class SadlModelManagerProviderTest {
 			assertTrue(issues.size == 0)
 			assertTrue(jenaModel.listOntologies().hasNext())
 			assertTrue(jenaModel.listOntologies().next().URI.toString().equals("http://sadl.org/model1"))
+		]
+	}
+	
+	@Test def void modelNameCase2() {
+		'''
+			uri "http://sadl.org/Tests/ModelName" alias mn version "1" (alias "This is an rdfs:label") (note "Note about the Model").		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			assertTrue(jenaModel.listOntologies().hasNext())
+			var Ontology ont = jenaModel.listOntologies().next()
+			var itr = ont.listComments("en").toIterable().iterator
+			var found = false
+			while (itr.hasNext()) {
+				var cmmnt = itr.next();
+				if (cmmnt.toString().equals("Note about the Model@en")) {
+					found = true;
+				}
+			}
+			assertTrue(found)
+			assertTrue(ont.getLabel("en").toString().equals("This is an rdfs:label"))
+			assertTrue(ont.listVersionInfo().next().toString().equals("1"))
 		]
 	}
 	
@@ -107,6 +147,95 @@ class SadlModelManagerProviderTest {
 			if (!found) {
 				jenaModel.write(System.out, "N3")
 			}
+		]
+	}
+	
+	@Test def void myClassWith50PropertiesCase() {
+		'''
+			uri "http://sadl.org/model50p" alias p50.
+			MyClass is a class 
+				described by p0 with values of type duration,
+				described by p1 with values of type int,
+				described by p2 with values of type float,
+				described by p3 with values of type MyClass,
+				described by p4 with values of type string,
+				described by p5 with values of type date,
+				described by p6 with values of type dateTime,
+				described by p7 with values of type double,
+				described by p8 with values of type long,
+				described by p9 with values of type boolean,
+				described by p0 with values of type duration,
+				described by p1 with values of type int,
+				described by p2 with values of type float,
+				described by p3 with values of type MyClass,
+				described by p4 with values of type string,
+				described by p5 with values of type date,
+				described by p6 with values of type dateTime,
+				described by p7 with values of type double,
+				described by p8 with values of type long,
+				described by p9 with values of type boolean,
+				described by p10 with values of type duration,
+				described by p11 with values of type int,
+				described by p12 with values of type float,
+				described by p13 with values of type MyClass,
+				described by p14 with values of type string,
+				described by p15 with values of type date,
+				described by p16 with values of type dateTime,
+				described by p17 with values of type double,
+				described by p18 with values of type long,
+				described by p19 with values of type boolean,
+				described by p20 with values of type duration,
+				described by p21 with values of type int,
+				described by p22 with values of type float,
+				described by p23 with values of type MyClass,
+				described by p24 with values of type string,
+				described by p25 with values of type date,
+				described by p26 with values of type dateTime,
+				described by p27 with values of type double,
+				described by p28 with values of type long,
+				described by p29 with values of type boolean,
+				described by p30 with values of type duration,
+				described by p31 with values of type int,
+				described by p32 with values of type float,
+				described by p33 with values of type MyClass,
+				described by p34 with values of type string,
+				described by p35 with values of type date,
+				described by p36 with values of type dateTime,
+				described by p37 with values of type double,
+				described by p38 with values of type long,
+				described by p39 with values of type boolean,
+				described by p40 with values of type duration,
+				described by p41 with values of type int,
+				described by p42 with values of type float,
+				described by p43 with values of type MyClass,
+				described by p44 with values of type string,
+				described by p45 with values of type date,
+				described by p46 with values of type dateTime,
+				described by p47 with values of type double,
+				described by p48 with values of type long,
+				described by p49 with values of type boolean.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var prop = jenaModel.getOntProperty("http://sadl.org/model50p#p0")
+			var itr = prop.listDomain().toIterable().iterator
+			var found = false
+			while (itr.hasNext()) {
+				val nxt = itr.next;
+				if (nxt.localName.equals("MyClass")) {
+					found = true;
+				}
+			}	
+			if (!found) {
+				jenaModel.write(System.out, "N3")
+			}
+			assertTrue(found);
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select (count(distinct ?p) as ?cnt) where {?p rdfs:domain <http://sadl.org/model50p#MyClass>}"
+    		assertTrue(queryResultContains(jenaModel, q1, "50^^http://www.w3.org/2001/XMLSchema#integer"))
 		]
 	}
 	

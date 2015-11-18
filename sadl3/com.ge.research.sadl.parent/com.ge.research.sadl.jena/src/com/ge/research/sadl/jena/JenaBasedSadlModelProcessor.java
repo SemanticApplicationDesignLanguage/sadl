@@ -1,11 +1,14 @@
 package com.ge.research.sadl.jena;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
@@ -51,7 +54,6 @@ import com.ge.research.sadl.sADL.SadlTypeAssociation;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.SadlValueList;
-import com.google.common.collect.Sets.SetView;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -79,6 +81,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
@@ -96,6 +99,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
 	
 	@Inject DeclarationExtensions declarationExtensions;
+	private String modelName;
 	private String modelNamespace;
 	private OntDocumentManager jenaDocumentMgr;
 	private static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
@@ -114,18 +118,37 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, CancelIndicator cancelIndicator) {
 		// save the model
-		int i = 0;
+		if (getTheJenaModel() == null) {
+			// it always is?
+			onValidate(resource, null, cancelIndicator);
+		}
+		if (fsa !=null) {
+			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
+			String owlFN = lastSeg.trimFileExtension().appendFileExtension("owl").lastSegment().toString();
+			String format = "RDF/XML-ABBREV";
+			RDFWriter w = getTheJenaModel().getWriter(format);
+			w.setProperty("xmlbase",getModelName());
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			w.write(getTheJenaModel(), out, getModelName());
+			Charset charset = Charset.forName("UTF-8"); 
+			CharSequence seq = new String(out.toByteArray(), charset);
+			fsa.generateFile(owlFN, seq);
+		}
 	}
 	
 	@Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) {
 		setIssueAcceptor(issueAcceptor);
 		setCancelIndicator(cancelIndicator);
+		if (resource.getContents().size() < 1) {
+			return;
+		}
 		SadlModel model = (SadlModel) resource.getContents().get(0);
-		String modelActualUrl =resource.getURI().toFileString();
+		String modelActualUrl =resource.getURI().lastSegment();
 		// directly create the Jena Model here!
 		theJenaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		String modelName = model.getBaseUri();
+		setModelName(modelName);
 		setModelNamespace(assureNamespaceEndsWithHash(modelName));
 		String modelAlias = model.getAlias();
 		if (modelAlias == null) {
@@ -151,10 +174,10 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			Iterator<String> anniter = annContents.iterator();
 			while (anniter.hasNext()) {
 				String annContent = anniter.next();
-				if (anntype.equals(AnnType.ALIAS)) {
+				if (anntype.equalsIgnoreCase(AnnType.ALIAS.toString())) {
 					modelOntology.addLabel(annContent, "en");
 				}
-				else if (anntype.equals(AnnType.NOTE)) {
+				else if (anntype.equalsIgnoreCase(AnnType.NOTE.toString())) {
 					modelOntology.addComment(annContent, "en");
 				}
 			}
@@ -239,7 +262,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					}
 				}
 				catch (JenaProcessorException e) {
-					issueAcceptor.addError(e.getMessage(), element);
+					addError(e.getMessage(), element);
 				}
 			}
 		}
@@ -361,14 +384,9 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		//				d) a SadlTypeReference
 		else if (superElement instanceof SadlTypeReference) {
 			// this can only be a class; can't create a property as a SadlTypeReference
-			try {
-				OntClass superCls = sadlTypeReferenceToOntResource(superElement).asClass();
-				if (superCls != null) {
-					rsrcList.add(createOntClass(newNames.get(0), superCls));
-				}
-			} catch (JenaProcessorException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			OntClass superCls = sadlTypeReferenceToOntResource(superElement).asClass();
+			if (superCls != null) {
+				rsrcList.add(createOntClass(newNames.get(0), superCls));
 			}
 		}
 		for (int i = 0; i < rsrcList.size(); i++) {
@@ -645,7 +663,9 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 
 	private void addError(String msg, EObject context) {
-		getIssueAcceptor().addError(msg, context);
+		if (getIssueAcceptor() != null) {
+			getIssueAcceptor().addError(msg, context);
+		}
 		System.err.println(msg);
 	}
 
@@ -655,7 +675,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 
 	private OntResource addClassToUnionClass(OntResource existingCls,
-			OntResource cls) {
+			OntResource cls) throws JenaProcessorException {
 		if (existingCls != null && !existingCls.equals(cls)) {
 			if (existingCls.canAs(OntClass.class) && classIsSubclassOf(existingCls.as(OntClass.class), cls, true)) {
 				return cls;
@@ -786,17 +806,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			if (!declarationExtensions.getConceptUri(sr).equals(instUri)) {
 				throw new JenaProcessorException("Oops!!");
 			}
-			OntClass cls;
-			try {
-				cls = sadlTypeReferenceToOntResource(type).asClass();
-				return createIndividual(instUri, cls);
-			} catch (JenaProcessorException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-//							issueAcceptor.accept(new Issue());
-// TODO should this use the issueAccpetor?							
-				return null;	// fatal
-			}
+			OntClass cls = sadlTypeReferenceToOntResource(type).asClass();
+			return createIndividual(instUri, cls);
 		}
 		return null;
 	}
@@ -1326,7 +1337,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		}
 	}
 
-	private boolean valueInObjectTypePropertyRange(OntProperty prop, Individual valInst) {
+	private boolean valueInObjectTypePropertyRange(OntProperty prop, Individual valInst) throws JenaProcessorException {
 		ExtendedIterator<? extends OntResource> itr = prop.listRange();
 		while (itr.hasNext()) {
 			OntResource nxt = itr.next();
@@ -1441,8 +1452,9 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	 * @param inst
 	 * @param cls
 	 * @return
+	 * @throws JenaProcessorException 
 	 */
-	private boolean instanceBelongsToClass(OntModel m, OntResource inst, OntResource cls) {
+	private boolean instanceBelongsToClass(OntModel m, OntResource inst, OntResource cls) throws JenaProcessorException {
 		// The following cases must be considered:
 		// 1) The class is a union of other classes. Check to see if the instance is a member of any of
 		//		the union classes and if so return true.
@@ -1511,13 +1523,13 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 				}
 			}
 			else if (rest.isCardinalityRestriction()) {
-				
+				throw new JenaProcessorException("Unhandled cardinality restriction");
 			}
 			else if (rest.isMaxCardinalityRestriction()) {
-				
+				throw new JenaProcessorException("Unhandled max cardinality restriction");
 			}
 			else if (rest.isMinCardinalityRestriction()) {
-				
+				throw new JenaProcessorException("Unhandled min cardinality restriction");
 			}
 		}
 		else {
@@ -1551,8 +1563,9 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	 * @param subcls
 	 * @param cls
 	 * @return
+	 * @throws JenaProcessorException 
 	 */
-	private boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) {
+	private boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) throws JenaProcessorException {
 		if (subcls == null || cls == null) {
 			return false;
 		}
@@ -1635,6 +1648,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 
 		} catch (Throwable t) {
 			t.printStackTrace();
+			logger.debug("Error in classIsSubclassOf: " + t.getMessage());
+			throw new JenaProcessorException(t.getMessage(), t);
 		}
 		return false;
 	}
@@ -1710,6 +1725,14 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 
 	private void setCancelIndicator(CancelIndicator cancelIndicator) {
 		this.cancelIndicator = cancelIndicator;
+	}
+
+	protected String getModelName() {
+		return modelName;
+	}
+
+	protected void setModelName(String modelName) {
+		this.modelName = modelName;
 	}
 
 }
