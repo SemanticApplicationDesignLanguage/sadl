@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.swing.JOptionPane;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
@@ -33,6 +35,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -186,30 +189,37 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	 * Downloads the files to the local folder.
 	 */
 	void downloadModels() {
-		String editorText =
-			editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
-
-		StringTokenizer tokenizer =
-			new StringTokenizer(editorText, "\n\r");
-		ArrayList<String> urls = new ArrayList<String>();
-		while (tokenizer.hasMoreTokens()) {
-			urls.add(tokenizer.nextToken());
+		if (editor.isDirty())
+		{
+			JOptionPane.showMessageDialog( null, "Please save the .url file.","Please save",JOptionPane.OK_OPTION);
 		}
-		IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
-		String sFolder = editorFile.getName().substring(0, editorFile.getName().lastIndexOf("."));
-		IPath outputPath = (editorFile.getParent().getLocation())
-				.append(sFolder);
-		
-		DeleteRecursive(outputPath.toFile());
-		
-		for (int i = 0; i < urls.size(); i++) {
-			downloadURL((String) urls.get(i), outputPath);
-		}
-		try {
-			((FileEditorInput) editor.getEditorInput()).getFile().getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		else
+		{
+			String editorText =
+				editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+	
+			StringTokenizer tokenizer =
+				new StringTokenizer(editorText, "\n\r");
+			ArrayList<String> urls = new ArrayList<String>();
+			while (tokenizer.hasMoreTokens()) {
+				urls.add(tokenizer.nextToken());
+			}
+			IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
+			String sFolder = editorFile.getName().substring(0, editorFile.getName().lastIndexOf("."));
+			IPath outputPath = (editorFile.getParent().getLocation())
+					.append(sFolder);
+			
+			DeleteRecursive(outputPath.toFile());
+			
+			for (int i = 0; i < urls.size(); i++) {
+				downloadURL((String) urls.get(i), outputPath);
+			}
+			try {
+				((FileEditorInput) editor.getEditorInput()).getFile().getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
