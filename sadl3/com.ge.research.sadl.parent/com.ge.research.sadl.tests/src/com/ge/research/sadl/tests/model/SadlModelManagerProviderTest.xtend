@@ -21,6 +21,8 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import com.hp.hpl.jena.ontology.Ontology
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.ResourceSet
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -35,7 +37,7 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "my/uri" alias m1.
 			Foo is a class.
-		'''.assertInValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 //			assertEquals("my/uri", modelManager.theJenaModel.getModelBaseURI())
 			assertNotNull(jenaModel)
@@ -45,15 +47,15 @@ class SadlModelManagerProviderTest {
 	}
 	
 	@Test def void testDuplicateUris() {
-		'''
+		val model = '''
 			uri "http://sadl.org.Tests/ModelName" alias foo.
 		'''.assertValidatesTo [ jenaModel, issues |
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 		]
-		'''
+		assertValidatesTo(model.resourceSet, '''
 			uri "http://sadl.org.Tests/ModelName" alias foo2.
-		'''.assertValidatesTo [ jenaModel2, issues2 |
+		''') [ jenaModel2, issues2 |
 			assertNotNull(jenaModel2)
 			assertTrue(issues2.size == 1)
 			assertTrue(issues2.toString(), issues2.get(0).toString().contains(""))
@@ -887,21 +889,23 @@ class SadlModelManagerProviderTest {
     	return false
 	}
 	
-	protected def void assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
+	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
 		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
 		assertions.apply(processor.theJenaModel, issues)
+		return model.eResource
 	}
 
-	protected def void assertInValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		val model = parser.parse(code);
+	protected def Resource assertValidatesTo(ResourceSet resourceSet, CharSequence code, (OntModel, List<Issue>)=>void assertions) {
+		val model = parser.parse(code, resourceSet);
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = processorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
 		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
 		assertions.apply(processor.theJenaModel, issues)
+		return model.eResource
 	}
 }
