@@ -30,6 +30,11 @@
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
+	        <plugin>
+	          <groupId>org.eclipse.tycho</groupId>
+	          <artifactId>tycho-surefire-plugin</artifactId>
+	          <version>${tycho-version}</version>
+	        </plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
@@ -97,31 +102,44 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<dependencies>
+	</dependencies>
 	<repositories>
 		<repository>
-			<id>sonatype-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>codehaus-snapshots</id>
+			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
+			<url>http://nexus.codehaus.org/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
 			<snapshots>
-				<enabled>true</enabled>
+				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>sonatype-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
-			<id>sonatype-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>codehaus-snapshots</id>
+			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
+			<url>http://nexus.codehaus.org/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
 			<snapshots>
-				<enabled>true</enabled>
+				<enabled>false</enabled>
 			</snapshots>
 		</pluginRepository>
+		<pluginRepository>
+			<id>sonatype-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
+		</pluginRepository>
 	</pluginRepositories>
-
-	<dependencies>
-	</dependencies>
 </project>

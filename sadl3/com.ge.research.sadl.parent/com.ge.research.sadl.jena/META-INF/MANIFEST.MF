@@ -31,7 +31,8 @@ Bundle-ClassPath: lib/activation-1.0.2.jar,
  lib/wstx-asl-3.2.9.jar,
  .
 Export-Package: com.ge.research.sadl.jena,
- com.hp.hpl.jena.ontology
+ com.hp.hpl.jena.ontology,
+ com.hp.hpl.jena.rdf.model
 Require-Bundle: com.ge.research.sadl;bundle-version="1.0.0",
  org.eclipse.emf.ecore,
  org.eclipse.emf,
