@@ -1,6 +1,8 @@
 package com.ge.research.sadl.jena;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -1733,6 +1735,21 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 
 	protected void setModelName(String modelName) {
 		this.modelName = modelName;
+	}
+
+	@Override
+	public void processExternalModels(String mappingFileFolder, List<String> fileNames) throws IOException {
+		File mff = new File(mappingFileFolder);
+		if (!mff.exists()) {
+			mff.mkdirs();
+		}
+		if (!mff.isDirectory()) {
+			throw new IOException("Mapping file location '" + mappingFileFolder + "' exists but is not a directory.");
+		}
+		System.out.println("Ready to save mappings in folder: " + mff.getCanonicalPath());
+		for (int i = 0; i < fileNames.size(); i++) {
+			System.out.println("   URL: " + fileNames.get(i));
+		}
 	}
 
 }

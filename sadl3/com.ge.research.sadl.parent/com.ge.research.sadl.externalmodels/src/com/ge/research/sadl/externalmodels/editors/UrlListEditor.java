@@ -10,17 +10,19 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.inject.Inject;
 import javax.swing.JOptionPane;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -35,17 +37,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+
+import com.ge.research.sadl.processing.ISadlModelProcessor;
+import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -57,6 +60,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
  * </ul>
  */
 public class UrlListEditor extends MultiPageEditorPart implements IResourceChangeListener{
+	@Inject SadlModelProcessorProvider processorProvider;
 
 	/** The text editor used in page 0. */
 	private UrlListTextEditor editor;
@@ -210,17 +214,53 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 					.append(sFolder);
 			
 			DeleteRecursive(outputPath.toFile());
-			
+			List<String> uploadedFiles = new ArrayList<String>();
 			for (int i = 0; i < urls.size(); i++) {
-				downloadURL((String) urls.get(i), outputPath);
+				String filename = downloadURL((String) urls.get(i), outputPath);
+				if (filename != null) {
+					uploadedFiles.add(filename);
+				}
 			}
 			try {
 				((FileEditorInput) editor.getEditorInput()).getFile().getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+				// add downloaded models to ont-policy.rdf file
+				createMappingsFromDownloads(outputPath.toOSString(), uploadedFiles);
 			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void createMappingsFromDownloads(String sFolder, List<String> uploadedFiles) throws IOException {
+		// need to know project location
+		File prjPath = getProjectPath(sFolder);
+		if (prjPath != null) {
+			String owlModelsFolder = prjPath.getAbsolutePath() + "/OwlModels";
+			if (processorProvider != null) {
+				ISadlModelProcessor processor = processorProvider.getProcessor(null);
+				processor.processExternalModels(owlModelsFolder, uploadedFiles);
+			}
+		}
+	}
+	
+	private File getProjectPath(String sFolder) {
+		//get object which represents the workspace  
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();  
+
+		//get location of workspace (java.io.File)  
+		File workspaceDirectory = workspace.getRoot().getLocation().toFile();
+		String ws = workspaceDirectory.getAbsolutePath();
+		File fldr = new File(sFolder);
+		File prjFolder = fldr;
+		while (!fldr.equals(workspaceDirectory)) {
+			prjFolder = fldr;
+			fldr = fldr.getParentFile();
+		}
+		return prjFolder;
 	}
 	
 	void DeleteRecursive(File fileOrDirectory) {
@@ -231,7 +271,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	    fileOrDirectory.delete();
 	}
 	
-	void downloadURL(String urlString, IPath iPath) {
+	String downloadURL(String urlString, IPath iPath) {
 		URL url;
 	    InputStream is = null;
 
@@ -259,6 +299,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 				FileOutputStream fos = new FileOutputStream(outputPath);
 				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				fos.close();
+				return outputPath;
 
 			} catch (MalformedURLException mue) {
 				mue.printStackTrace();
@@ -273,5 +314,6 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 				}
 			} 
 		}
+		return null;
 	}
 }

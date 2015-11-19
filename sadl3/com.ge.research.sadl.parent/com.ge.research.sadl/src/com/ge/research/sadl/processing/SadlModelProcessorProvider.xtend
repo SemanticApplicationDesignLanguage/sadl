@@ -8,6 +8,7 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.internal.EmfAdaptable
+import java.util.List
 
 class SadlModelProcessorProvider {
 	
@@ -36,6 +37,11 @@ class SadlModelProcessorProvider {
 			override onGenerate(Resource resource, IFileSystemAccess2 fsa, CancelIndicator cancelIndicator) {
 				processors.forEach[onGenerate(resource, fsa, cancelIndicator)]
 			}
+			
+			override processExternalModels(String mappingFileFolder, List<String> fileNames) {
+				processors.forEach[processExternalModels(mappingFileFolder, fileNames)]
+			}
+			
 		}
 	}
 	
