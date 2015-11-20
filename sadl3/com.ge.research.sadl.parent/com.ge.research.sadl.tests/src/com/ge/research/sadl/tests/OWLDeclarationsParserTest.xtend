@@ -5,6 +5,27 @@ import org.junit.Ignore
 
 class OWLDeclarationsParserTest extends SADLParsingTest {
 	
+/* These tests check for errors that should be found and reported */	
+	@Test def void testModelName_Err() {
+		var errs = newArrayList("not a valid URL")
+		assertErrors('''
+		uri "my/uri" alias m1.
+		''', errs)
+	}
+		
+	@Test def void testDRemovedDatatype() {
+		var errs = newArrayList("missing EOF at 'data'")
+		assertErrors('''
+			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
+			
+			data type Airport_Ident is string length 1-4 .
+			Airport_Ident is a type of string length 1-4 .
+			
+			Airport is a class, described by ident with values of type Airport_Ident.
+		''', errs)
+	}
+	
+/* These test check that no errors occur in valid constructs */	
 	@Test def void testModelName_01() {
 		'''
 		uri "http://sadl.org/Tests/ModelName" alias ^class.
@@ -54,14 +75,11 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		import "http://sadl.org.Tests/ModelName" as mn2.		
 		'''.assertNoErrors
 	}
-
-	
 	
 	@Test def void testDatatype() {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
 			
-			data type Airport_Ident is string length 1-4 .
 			Airport_Ident is a type of string length 1-4 .
 			
 			Airport is a class, described by ident with values of type Airport_Ident.

@@ -31,6 +31,22 @@ abstract class SADLParsingTest{
 		Assert.assertEquals(text.toString, annotatedText)
 	}
 	
+	protected def void assertErrors(CharSequence text, String[] errPartials) {
+		val model = parseHelper.parse(text)
+		val issues = validationTestHelper.validate(model)
+		Assert.assertFalse(issues.isEmpty)
+		Assert.assertEquals(issues.size, 1)
+		for (err : errPartials) {
+			var found = false
+			for (issue : issues) {
+				if (issue.message.contains(err)) {
+					found = true
+				}
+			}
+			Assert.assertTrue(found)
+		}
+	}
+	
 	def void assertAST(CharSequence text, (SadlModel)=>void assertion) {
 		val model = parseHelper.parse(text)
 		validationTestHelper.assertNoErrors(model)

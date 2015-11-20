@@ -25,7 +25,6 @@ class DeclarationExtensionsTest {
 		val model = '''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen. 
 			
-			data type datatype1 is string length 1-4 .
 			datatype2 is a type of string length 1-4 .
 			
 			SomeClass is a class, described by ident with values of type datatype1.
@@ -33,7 +32,6 @@ class DeclarationExtensionsTest {
 		
 		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
 		
-		assertEquals("http://sadl.org/TestRequrements/StringLength#datatype1", name2resource.get('datatype1').conceptUri)
 		assertEquals("http://sadl.org/TestRequrements/StringLength#datatype2", name2resource.get('datatype2').conceptUri)
 		assertEquals("http://sadl.org/TestRequrements/StringLength#SomeClass", name2resource.get('SomeClass').conceptUri)
 		
@@ -43,7 +41,6 @@ class DeclarationExtensionsTest {
 		val model = '''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen. 
 			
-			data type datatype1 is string length 1-4 .
 			datatype2 is a type of string length 1-4 .
 			
 			SomeClass is a class, described by ident with values of type datatype1.
@@ -51,7 +48,6 @@ class DeclarationExtensionsTest {
 		
 		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
 		
-		assertEquals(OntConceptType.DATATYPE, name2resource.get('datatype1').ontConceptType)
 		assertEquals(OntConceptType.DATATYPE, name2resource.get('datatype2').ontConceptType)
 		assertEquals(OntConceptType.CLASS, name2resource.get('SomeClass').ontConceptType)
 		

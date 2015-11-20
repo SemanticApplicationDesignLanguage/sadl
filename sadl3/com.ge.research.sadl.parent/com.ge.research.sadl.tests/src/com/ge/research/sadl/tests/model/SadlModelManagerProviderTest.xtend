@@ -32,20 +32,7 @@ class SadlModelManagerProviderTest {
 	@Inject ValidationTestHelper validationTestHelper
 	@Inject Provider<JenaBasedSadlModelProcessor> processorProvider
 	
-// TODO Is this the right place/method to check that errors are generated?	
-	@Test def void invalidUriTestCase() {
-		'''
-			uri "my/uri" alias m1.
-			Foo is a class.
-		'''.assertValidatesTo [ jenaModel, issues |
-			// expectations go here
-//			assertEquals("my/uri", modelManager.theJenaModel.getModelBaseURI())
-			assertNotNull(jenaModel)
-			assertEquals(1, issues.size())
-			assertTrue(issues.toString(), issues.get(0).toString().contains("'my/uri' is not a valid URL"))
-		]
-	}
-	
+/* Tests that should generate validation errors */	
 	@Test def void testDuplicateUris() {
 		val model = '''
 			uri "http://sadl.org.Tests/ModelName" alias foo.
@@ -58,10 +45,29 @@ class SadlModelManagerProviderTest {
 		''') [ jenaModel2, issues2 |
 			assertNotNull(jenaModel2)
 			assertTrue(issues2.size == 1)
-			assertTrue(issues2.toString(), issues2.get(0).toString().contains(""))
+			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This URI is already used by model"))
 		]
 		
 	}
+	
+	@Test def void testDuplicateAliases() {
+		val model = '''
+			uri "http://sadl.org.Tests/ModelName1" alias foo.
+		'''.assertValidatesTo [ jenaModel, issues |
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+		]
+		assertValidatesTo(model.resourceSet, '''
+			uri "http://sadl.org.Tests/ModelName2" alias foo.
+		''') [ jenaModel2, issues2 |
+			assertNotNull(jenaModel2)
+			assertTrue(issues2.size == 1)
+			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This alias is already used by model"))
+		]
+		
+	}
+	
+/* Test that should not generate any validation errors */	
 	@Test def void modelNameCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
