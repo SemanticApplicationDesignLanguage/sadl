@@ -49,14 +49,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="annotations" upperBound="-1"
         eType="#//SadlAnnotation" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlDataTypeDeclaration" eSuperTypes="#//SadlStatement">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="nameDeclarations" upperBound="-1"
-        eType="#//SadlResource" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//SadlTypeReference"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//SadlDataTypeFacet"
-        containment="true"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlDataTypeFacet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="minexin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="min" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

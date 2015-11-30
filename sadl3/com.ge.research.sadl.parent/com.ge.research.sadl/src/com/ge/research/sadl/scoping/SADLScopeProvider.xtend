@@ -58,7 +58,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			var newParent = createImportScope(resource, parent, importedResources)
 			if (shouldWrap)
 				newParent = wrap(newParent)
-			val aliasToUse = alias ?: (resource.contents.head as SadlModel).alias
+			val aliasToUse = alias ?: resource.getAlias
 			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
 			val map = <QualifiedName, IEObjectDescription>newHashMap
 			val iter = resource.allContents
@@ -76,12 +76,17 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		]
 	}
 	
+	protected def String getAlias(Resource resource) {
+		(resource.contents.head as SadlModel).alias
+	}
+	
 	protected def IScope createImportScope(Resource resource, IScope parent, Set<Resource> importedResources) {
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
 		var newParent = parent
 		for (imp : imports) {
 			val externalResource = imp.importedResource
-			newParent = createResourceScope(externalResource.eResource, imp.alias, newParent, importedResources)
+			if (!externalResource.eIsProxy)
+				newParent = createResourceScope(externalResource.eResource, imp.alias, newParent, importedResources)
 		}
 		return newParent
 	}

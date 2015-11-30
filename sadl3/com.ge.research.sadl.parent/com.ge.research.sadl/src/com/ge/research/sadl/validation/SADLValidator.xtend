@@ -3,13 +3,11 @@
  */
 package com.ge.research.sadl.validation
 
-import com.ge.research.sadl.sADL.SadlModel
-
-import org.eclipse.xtext.validation.Check
-import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.SADLPackage
+import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Inject
-import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.xtext.validation.Check
 
 /**
  * This class contains custom validation rules. 
