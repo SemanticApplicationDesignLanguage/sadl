@@ -73,7 +73,12 @@ class SADLValidator extends AbstractSADLValidator {
 				var imp = itr.next;
 				var sm = imp.importedResource
 				var impuri = sm.baseUri
-				errMsg = SadlUtils.validateUri(impuri);
+				if (impuri == null) {
+					errMsg = "Model '" + thisUri + "' has an import which appears to be null";
+				}
+				else {
+					errMsg = SadlUtils.validateUri(impuri);
+				}
 				if (errMsg != null) {
 //					error(errMsg, imp, imp.importedReSsource. INVALID_IMPORT_URI);
 					System.err.println(errMsg);

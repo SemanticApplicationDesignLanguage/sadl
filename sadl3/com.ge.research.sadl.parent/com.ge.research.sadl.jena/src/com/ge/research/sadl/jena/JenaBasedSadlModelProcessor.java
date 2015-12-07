@@ -453,10 +453,15 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					ObjectProperty prop = getOrCreateObjectProperty(propUri);
 					OntClass condCls = processSadlCondition((SadlCondition) spr, prop, propType);
 					addPropertyRange(prop, condCls, RangeValueType.CLASS_OR_DT, spr);		// use default?
+					//TODO don't we need to add this class as superclass??
 					return prop;
 				}
 				else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-					throw new JenaProcessorException("SadlCondition on data type property not handled");
+					ObjectProperty prop = getOrCreateObjectProperty(propUri);
+					OntClass condCls = processSadlCondition((SadlCondition) spr, prop, propType);
+					//TODO don't we need to add this class as superclass??
+					return prop;
+//					throw new JenaProcessorException("SadlCondition on data type property not handled");
 				}
 				else {
 					throw new JenaProcessorException("Invalid property type: " + propType.toString());
@@ -976,7 +981,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 				return ((RDFNode)obj).as(OntResource.class);
 			}
 		}
-		throw new JenaProcessorException("Unable to convert SadlTypeReference to OntResource");
+		throw new JenaProcessorException("Unable to convert SadlTypeReference '" + sadlTypeRef + "' to OntResource");
 	}
 
 	private Object sadlTypeReferenceToObject(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
