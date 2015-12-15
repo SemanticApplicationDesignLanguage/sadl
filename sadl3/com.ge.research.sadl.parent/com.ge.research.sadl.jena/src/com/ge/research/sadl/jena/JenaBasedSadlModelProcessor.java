@@ -46,6 +46,7 @@ import com.ge.research.sadl.sADL.SadlNumberLiteral;
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlProperty;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
+import com.ge.research.sadl.sADL.SadlPropertyInitializer;
 import com.ge.research.sadl.sADL.SadlPropertyRestriction;
 import com.ge.research.sadl.sADL.SadlRangeRestriction;
 import com.ge.research.sadl.sADL.SadlResource;
@@ -109,6 +110,9 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	private ValidationAcceptor issueAcceptor = null;
 	private CancelIndicator cancelIndicator = null;
 	
+	public JenaBasedSadlModelProcessor() {
+		logger.debug("New " + this.getClass().getCanonicalName() + "' created");
+	}
 	/**
 	 * For TESTING
 	 * @return
@@ -440,12 +444,22 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 				else {				
 					OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
 					if (rngRsrc == null) {
-						throw new JenaProcessorException("Range failed to resolve to a class");
+						throw new JenaProcessorException("Range failed to resolve to a class or datatype");
 					}
-					OntClass rngCls = rngRsrc.asClass();
-					ObjectProperty prop = getOrCreateObjectProperty(propUri);
-					addPropertyRange(prop, rngCls, rngValueType, rng);
-					return prop;
+					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+						OntClass rngCls = rngRsrc.asClass();
+						ObjectProperty prop = getOrCreateObjectProperty(propUri);
+						addPropertyRange(prop, rngCls, rngValueType, rng);
+						return prop;
+					}
+					else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+						DatatypeProperty prop = getOrCreateDatatypeProperty(propUri);
+						addPropertyRange(prop, rngRsrc, rngValueType, rng);
+						return prop;
+					}
+					else {
+						throw new JenaProcessorException("Processing of non-Ontology properpty not yet handled.");
+					}
 				}
 			}
 			else if (spr instanceof SadlCondition) {
@@ -540,7 +554,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 				}
 			}
 			else {
-				// TODO issue warning--datatype property range mismatch		
+				// TODO issue warning--datatype property range mismatch	
+				addError("Property '" + prop.getURI() + "' has range '" + existingRange.getURI() + "' so can't assign range '" + rngNode.toString(), context);
 			}
 		}
 		else {
@@ -808,15 +823,69 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		//	2) a <type> <name> ....
 		SadlTypeReference type = element.getType();
 		SadlResource sr = sadlResourceFromSadlInstance(element);
+		String instUri = null;
 		if (sr != null) {
-			String instUri = declarationExtensions.getConceptUri(sr);
+			instUri = declarationExtensions.getConceptUri(sr);
 			if (!declarationExtensions.getConceptUri(sr).equals(instUri)) {
 				throw new JenaProcessorException("Oops!!");
 			}
-			OntClass cls = sadlTypeReferenceToOntResource(type).asClass();
-			return createIndividual(instUri, cls);
 		}
-		return null;
+		OntClass cls = sadlTypeReferenceToOntResource(type).asClass();
+		Individual inst;
+		if (sr != null) {
+			inst = createIndividual(instUri, cls);
+		}
+		else {
+			inst = createIndividual(null, cls);
+		}
+		Iterator<SadlPropertyInitializer> itr = element.getPropertyInitializers().iterator();
+		while (itr.hasNext()) {
+			SadlPropertyInitializer propinit = itr.next();
+			SadlResource prop = propinit.getProperty();
+			EObject val = propinit.getValue();
+			assignInstancePropertyValue(inst, prop, val);
+		}
+		return inst;
+	}
+
+	private void assignInstancePropertyValue(Individual inst, SadlResource prop, EObject val) throws JenaProcessorException {
+		OntConceptType type = declarationExtensions.getOntConceptType(prop);
+		String propuri = declarationExtensions.getConceptUri(prop);
+		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
+			ObjectProperty oprop = getTheJenaModel().getObjectProperty(propuri);
+			if (oprop == null) {
+				addError("Property '" + propuri + "' does not exist", prop);
+			}
+			else {
+				if (val instanceof SadlInstance) {
+					Individual instval = processSadlInstance((SadlInstance) val);
+					inst.addProperty(oprop, instval);
+					logger.debug("added value '" + instval.toString() + "' to property '" + propuri + "' for instance '" + inst.toString() + "'");
+				}
+				else {
+					throw new JenaProcessorException("unhandled value type for object property");
+				}
+			}
+		}
+		else if (type.equals(OntConceptType.DATATYPE_PROPERTY)) {
+			DatatypeProperty dprop = getTheJenaModel().getDatatypeProperty(propuri);
+			if (dprop == null) {
+				addError("Property '" + propuri + "' does not exist", prop);
+			}
+			else {
+				if (val instanceof SadlExplicitValue) {
+					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, dprop);
+					inst.addProperty(dprop, lval);
+					logger.debug("added value '" + lval.toString() + "' to property '" + propuri + "' for instance '" + inst.toString() + "'");
+				}
+				else {
+					throw new JenaProcessorException("unhandled value type for data property");
+				}
+			}
+		}
+		else {
+			throw new JenaProcessorException("unhandled property type");
+		}
 	}
 
 	private SadlResource sadlResourceFromSadlInstance(SadlInstance element) throws JenaProcessorException {
@@ -868,6 +937,14 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		if (prop == null) {
 			prop = getTheJenaModel().createObjectProperty(propName);
 			logger.debug("New object property '" + prop.getURI() + "' created");
+		}
+		return prop;
+	}
+
+	private DatatypeProperty getOrCreateDatatypeProperty(String propUri) throws JenaProcessorException {
+		DatatypeProperty prop = getTheJenaModel().getDatatypeProperty(propUri);
+		if (prop == null) {
+			prop = createDatatypeProperty(propUri, null);
 		}
 		return prop;
 	}
@@ -961,7 +1038,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	
 	private Individual createIndividual(String newName, OntClass supercls) {
 		Individual inst = getTheJenaModel().createIndividual(newName, supercls);
-		logger.debug("New instance '" + inst.getURI() + "' created");
+		logger.debug("New instance '" + (newName != null ? newName : "(bnode)") + "' created");
 		return inst;
 	}
 	

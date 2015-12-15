@@ -21,8 +21,11 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import com.hp.hpl.jena.ontology.Ontology
+import com.hp.hpl.jena.vocabulary.RDF;
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
+import org.junit.Ignore
+import com.hp.hpl.jena.rdf.model.RDFNode
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -421,6 +424,28 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Ignore
+	@Test def void myUserDefinedDatatypeUse1Case() {
+		'''
+			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
+			Airport_Ident is a type of string length 1-4 .
+			Airport is a class, described by ident with values of type Airport_Ident.
+			ALB is an Airport with ident "toolong".
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			// look for something specific to the model; if found set found true
+// TODO use datatype facets to check validity?			
+
+			if (!found) {
+				jenaModel.write(System.out, "N3")				
+			}
+			assertTrue(found);
+		]
+	}
+
 	@Test def void mySimplePropertyDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
@@ -861,6 +886,78 @@ class SadlModelManagerProviderTest {
 			assertTrue(found);
 		]
 	}
+
+	@Test def void myBoxesInstanceCase() {
+		'''
+			uri "http://sadl.org/TestRequrements/Boxes" alias boxes version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/13 22:30:26 $". 
+			
+			Box is a class, 
+				described by upper-right with a single value of type Point,
+				described by lower-left with a single value of type Point.
+				
+			Point is a class, 
+				described by x with values of type int,
+				described by y with values of type int,
+				described by inside (note "meaning inside both boxes") with values of type boolean.
+			
+			Box1 is a Box, 
+				with lower-left (a Point with x 2, with y 12),
+				with upper-right (a Point with x 8, with y 18).
+			
+			Box2 is a Box,
+				with lower-left (a Point with x 0, with y 10),
+				with upper-right (a Point with x 5, with y 12).
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			// look for something specific to the model; if found set found true
+			var boxitr = jenaModel.listStatements(null, RDF.type, jenaModel.getOntClass("http://sadl.org/TestRequrements/Boxes#Box"))
+			var cntr = 0;
+			while (boxitr.hasNext()) {
+				var box = boxitr.nextStatement().subject;
+				var ur = box.getPropertyResourceValue(jenaModel.getObjectProperty("http://sadl.org/TestRequrements/Boxes#upper-right"))
+				var xitr = jenaModel.listStatements(ur, jenaModel.getDatatypeProperty("http://sadl.org/TestRequrements/Boxes#x"), null as RDFNode)
+				var x = xitr.nextStatement().object.asLiteral.int
+				if (box.URI.endsWith("#Box1")) {
+					assertTrue(x == 8)
+				}
+				else if (box.URI.endsWith("#Box2")) {
+					assertTrue(x == 5)
+				}
+				else {
+					fail
+				}
+				cntr++
+			}
+			if (cntr == 2) {
+				found = true
+			}
+			if (!found) {
+				jenaModel.write(System.out, "N3")				
+			}
+			assertTrue(found);
+		]
+	}
+	
+
+//	@Test def void my<younameit>Case() {
+//		'''
+//			// model goes here
+//		'''.assertValidatesTo [ jenaModel, issues |
+//			// expectations go here
+//			assertNotNull(jenaModel)
+//			assertTrue(issues.size == 0)
+//			var found = false
+//			// look for something specific to the model; if found set found true
+//
+//			if (!found) {
+//				jenaModel.write(System.out, "N3")				
+//			}
+//			assertTrue(found);
+//		]
+//	}
 	
 	protected def boolean queryResultContains(OntModel m, String q, String r) {
 		var qe = QueryExecutionFactory.create(q, m)

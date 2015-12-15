@@ -213,6 +213,15 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Test def void testConceptNamesWithDots() {
+		'''
+			uri "http://com.ge.research.sadl/morenames" alias morenames.
+			Aircraft is a class.
+			Aircraft2.1 is a type of Aircraft
+			MyAircraft.4 is a type of Aircraft2.1.
+		'''.assertNoErrors
+	}
+	
 	@Test def void testClassRestrictions_01() {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".

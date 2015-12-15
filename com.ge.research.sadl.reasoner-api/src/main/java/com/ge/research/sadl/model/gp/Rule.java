@@ -24,6 +24,11 @@ import java.util.List;
 
 public class Rule {
 	private String ruleName = null;
+	private String ruleNamespace = null;
+	private int editorLine;
+	private int editorLength;
+	private int editorOffset;
+
 	private List<String[]> annotations = null;
 	private List<GraphPatternElement> givens = null;
 	private List<GraphPatternElement> ifs = null;
@@ -152,5 +157,37 @@ public class Rule {
 
 	public void setAnnotations(List<String[]> annotations) {
 		this.annotations = annotations;
+	}
+
+	public String getRuleNamespace() {
+		return ruleNamespace;
+	}
+
+	public void setRuleNamespace(String ruleNamespace) {
+		this.ruleNamespace = ruleNamespace;
+	}
+
+	public int getEditorLine() {
+		return editorLine;
+	}
+
+	public void setEditorLine(int editorLine) {
+		this.editorLine = editorLine;
+	}
+
+	public int getEditorLength() {
+		return editorLength;
+	}
+
+	public void setEditorLength(int editorLength) {
+		this.editorLength = editorLength;
+	}
+
+	public int getEditorOffset() {
+		return editorOffset;
+	}
+
+	public void setEditorOffset(int editorOffset) {
+		this.editorOffset = editorOffset;
 	}
 }

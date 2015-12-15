@@ -49,6 +49,11 @@
 						<artifactId>org.eclipse.xtext.xbase</artifactId>
 						<version>${xtextVersion}</version>
 					</dependency>
+					<dependency>
+						<groupId>com.ibm.icu</groupId>
+						<artifactId>icu4j</artifactId>
+						<version>56.1</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
