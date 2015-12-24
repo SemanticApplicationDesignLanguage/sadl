@@ -68,7 +68,6 @@ SadlStatement returns SadlStatement:
     | 	AnArticle SadlTypeReference (
     		{SadlInstance.type=current} instance=SadlResource propertyInitializers+=SadlPropertyInitializer*
     	|	{SadlNecessaryAndSufficient.subject=current} 'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*)
-//    | 	SadlDataTypeDeclaration
 ;
 
 SadlPropertyCondition :
@@ -87,10 +86,6 @@ SadlNestedInstance returns SadlInstance:
 SadlResource:
 	name=[SadlResource|NAME] annotations+=SadlAnnotation*
 ;
-
-//SadlDataTypeDeclaration:
-//	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlPrimaryTypeReference facet=SadlDataTypeFacet? EOS
-//;
 
 SadlDataTypeFacet :	
 		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
@@ -119,13 +114,16 @@ SadlPrimaryTypeReference returns SadlTypeReference:
 	|	'{' SadlTypeReference '}'
 ;
 
+// Built-in primitive data types
 enum SadlDataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
-    gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
+    gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | 
+    integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger |  
+    unsignedByte | unsignedInt | anySimpleType | data;
 
 // Class declarations may also describe the class's properties.
 SadlPropertyDeclarationInClass returns SadlProperty:
-    	','? 'described' 'by' nameDeclarations+=SadlResource restrictions+=SadlPropertyRestriction;
+    	','? 'described' 'by' nameDeclarations+=SadlResource restrictions+=SadlPropertyRestriction*;
 
 SadlPropertyRestriction :
     	SadlCondition
@@ -183,7 +181,7 @@ IndefiniteArticle :
 DefiniteArticle :
 	'The'|'the';
 
-// NAME should match an optional namespace followed by a local name (separated
+// NAME should match an optional namespace prefix followed by a local name (separated
 // from the namespace by a colon character).  We also need to accept legal URI
 // fragments as local names.  In particular, we need names like X.509 to work.
 NAME hidden() :

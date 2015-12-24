@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
+import com.ge.research.sadl.owl2sadl.OwlToSadl;
+//import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.sADL.SadlAllValuesCondition;
@@ -39,6 +41,7 @@ import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
+import com.ge.research.sadl.sADL.SadlIsTransitive;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
 import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient;
@@ -82,9 +85,11 @@ import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
@@ -95,6 +100,11 @@ import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelProcessor.class);
+
+    public final static String XSDNS = XSD.getURI();
+
+    public final static Property xsdProperty( String local )
+        { return ResourceFactory.createProperty( XSDNS + local ); }
 
 	private OntModel theJenaModel;
 	
@@ -194,27 +204,31 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		while (impitr.hasNext()) {
 			SadlImport simport = impitr.next();
 			SadlModel importedResource = simport.getImportedResource();
-			String importUri = importedResource.getBaseUri();
-			String importPrefix = simport.getAlias();
-//			theJenaModel.addImport(simport.getImportURI(), simport.getAlias());
-	    	if (importUri.equals(modelName)) {
-	    		// don't import to self
-//	    		generate error marker--can't import self
-	    	}
-	    	else {
-		    	// Now add import model (with setCachedModels false so that the actual imports are not loaded. If then need to be loaded 
-	    		//	at some point to do semantic validation, they will be loaded then.
-	    		if (importPrefix == null) {
-// TODO	    		// need to get the prefix from the global prefix in the imported model, if SADL, else from the ont-policy.rdf file if external
-//	    			OntologyModel importedModel;//  = simport.getImportedNamespace().getURI();	// this will not work until the grammar treats the import as a reference.
-	    		}
-	    		if (importPrefix != null) {
-	    			getTheJenaModel().setNsPrefix(importPrefix, assureNamespaceEndsWithHash(importUri));
-	    		}
-		    	com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
-		    	logger.debug("Imported ontology resource '" + importUri + "' created.");
-		    	modelOntology.addImport(importedOntology);
-	    	}
+			if (importedResource != null) {
+				String importUri = importedResource.getBaseUri();
+				String importPrefix = simport.getAlias();
+	//			theJenaModel.addImport(simport.getImportURI(), simport.getAlias());
+		    	if (importUri != null) {
+		    		if (importUri.equals(modelName)) {
+			    		// don't import to self
+		//	    		generate error marker--can't import self
+			    	}
+			    	else {
+				    	// Now add import model (with setCachedModels false so that the actual imports are not loaded. If then need to be loaded 
+			    		//	at some point to do semantic validation, they will be loaded then.
+			    		if (importPrefix == null) {
+		// TODO	    		// need to get the prefix from the global prefix in the imported model, if SADL, else from the ont-policy.rdf file if external
+		//	    			OntologyModel importedModel;//  = simport.getImportedNamespace().getURI();	// this will not work until the grammar treats the import as a reference.
+			    		}
+			    		if (importPrefix != null) {
+			    			getTheJenaModel().setNsPrefix(importPrefix, assureNamespaceEndsWithHash(importUri));
+			    		}
+				    	com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
+				    	logger.debug("Imported ontology resource '" + importUri + "' created.");
+				    	modelOntology.addImport(importedOntology);
+			    	}
+		    	}
+			}
 	    	
 // TODO	Should the imported model actually be loaded by Jena? The OWL model, whether from SADL or external, will potenatially 
 //	    	contain information that is necessary for validation. The only information that will be potentially needed for
@@ -499,6 +513,11 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			}
 			else if (spr instanceof SadlIsAnnotation) {
 				return getTheJenaModel().createAnnotationProperty(propUri);
+			}
+			else if (spr instanceof SadlIsTransitive) {
+				OntProperty pr = getOrCreateObjectProperty(propUri);
+				pr.convertToTransitiveProperty();
+				return getTheJenaModel().createTransitiveProperty(pr.getURI());
 			}
 			else {
 				throw new JenaProcessorException("Unhandled SadlPropertyRestriction type: " + spr.getClass().getCanonicalName());
@@ -790,8 +809,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			while (djitr.hasNext()) {
 				SadlResource sr = djitr.next();
 				String declUri = declarationExtensions.getConceptUri(sr);
-				if (!declarationExtensions.getConceptUri(sr).equals(declUri)) {
-					throw new JenaProcessorException("Oops!!");
+				if (declUri == null) {
+					throw new JenaProcessorException("Failed to get concept URI for SadlResource in processSadlDifferentFrom");
 				}
 				Individual inst = getTheJenaModel().getIndividual(declUri);
 				differentFrom.add(inst);
@@ -826,18 +845,30 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		String instUri = null;
 		if (sr != null) {
 			instUri = declarationExtensions.getConceptUri(sr);
-			if (!declarationExtensions.getConceptUri(sr).equals(instUri)) {
-				throw new JenaProcessorException("Oops!!");
+			if (instUri == null) {
+				throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlInstance");
 			}
 		}
-		OntClass cls = sadlTypeReferenceToOntResource(type).asClass();
+		OntClass cls = null;
+		if (type != null) {
+			cls = sadlTypeReferenceToOntResource(type).asClass();
+		} 
 		Individual inst;
-		if (sr != null) {
-			inst = createIndividual(instUri, cls);
+		if (cls != null) {
+			if (sr != null) {
+				inst = createIndividual(instUri, cls);
+			}
+			else {
+				inst = createIndividual(null, cls);
+			}
+		}
+		else if (instUri != null) {
+			inst = createIndividual(instUri, (OntClass)null);
 		}
 		else {
-			inst = createIndividual(null, cls);
+			throw new JenaProcessorException("Can't create an unnamed instance with no class given");
 		}
+		
 		Iterator<SadlPropertyInitializer> itr = element.getPropertyInitializers().iterator();
 		while (itr.hasNext()) {
 			SadlPropertyInitializer propinit = itr.next();
@@ -861,6 +892,16 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					Individual instval = processSadlInstance((SadlInstance) val);
 					inst.addProperty(oprop, instval);
 					logger.debug("added value '" + instval.toString() + "' to property '" + propuri + "' for instance '" + inst.toString() + "'");
+				}
+				else if (val instanceof SadlResource) {
+					String uri = declarationExtensions.getConceptUri((SadlResource) val);
+					com.hp.hpl.jena.rdf.model.Resource rsrc = getTheJenaModel().getResource(uri);
+					if (rsrc.canAs(Individual.class)){
+						inst.addProperty(oprop, rsrc.as(Individual.class));
+					}
+					else {
+						throw new JenaProcessorException("unhandled value type SadlResource that isn't an instance (URI is '" + uri + "')");
+					}
 				}
 				else {
 					throw new JenaProcessorException("unhandled value type for object property");
@@ -903,8 +944,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			while (dcitr.hasNext()) {
 				SadlResource sr = dcitr.next();
 				String declUri = declarationExtensions.getConceptUri(sr);
-				if (!declarationExtensions.getConceptUri(sr).equals(declUri)) {
-					throw new JenaProcessorException("Oops!!");
+				if (declUri == null) {
+					throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlDisjointClasses");
 				}
 				OntClass cls = getTheJenaModel().getOntClass(declUri);
 				disjointClses.add(cls.asClass());
@@ -917,8 +958,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			while (djitr.hasNext()) {
 				SadlResource sr = djitr.next();
 				String declUri = declarationExtensions.getConceptUri(sr);
-				if (!declarationExtensions.getConceptUri(sr).equals(declUri)) {
-					throw new JenaProcessorException("Oops!!");
+				if (declUri == null) {
+					throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlDisjointClasses");
 				}
 				OntClass cls = getTheJenaModel().getOntClass(declUri);
 				disjointClses.add(cls.asClass());
@@ -1068,8 +1109,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			SadlResource strSR = ((SadlSimpleTypeReference)sadlTypeRef).getType();
 			OntConceptType ctype = declarationExtensions.getOntConceptType(strSR);
 			String strSRUri = declarationExtensions.getConceptUri(strSR);	
-			if (!declarationExtensions.getConceptUri(strSR).equals(strSRUri)) {
-				throw new JenaProcessorException("Oops!!");
+			if (strSRUri == null) {
+				throw new JenaProcessorException("Failed to get concept URI of SadlResource in sadlTypeReferenceToObject");
 			}
 			if (ctype.equals(OntConceptType.CLASS)) {
 				rsrc = getTheJenaModel().getOntClass(strSRUri);
@@ -1201,7 +1242,9 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		equivClass.addProperty(OWL2.onDatatype, onDatatype);
 		if (element.getFacet() != null) {
 			com.hp.hpl.jena.rdf.model.Resource restrictions = facetsToRestrictionNode(newDatatypeUri, element.getFacet());
-			equivClass.addProperty(OWL2.withRestrictions, restrictions);
+			// Create a list containing the restrictions
+			RDFList list = getTheJenaModel().createList(new RDFNode[] {restrictions});
+			equivClass.addProperty(OWL2.withRestrictions, list);
 		}
 		datatype.addEquivalentClass(equivClass);
 		return datatype;
@@ -1213,39 +1256,36 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		boolean maxInclusive = (facet.getMaxexin() != null && facet.getMaxexin().equals("]"));
 		if (facet.getMin() != null) {
 			if (minInclusive) {
-				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "minInclusive"), facet.getMin());
+				anon.addProperty(xsdProperty("minInclusive"), facet.getMin());
 			}
 			else {
-				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "minExclusive"), facet.getMin());
+				anon.addProperty(xsdProperty("minExclusive"), facet.getMin());
 			}
 		}
 		if (facet.getMax() != null) {
 			if (maxInclusive) {
-				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "maxInclusive"), facet.getMax());
+				anon.addProperty(xsdProperty("maxInclusive"), facet.getMax());
 			}
 			else {
-				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "maxExclusive"), facet.getMax());
+				anon.addProperty(xsdProperty("maxExclusive"), facet.getMax());
 			}
 		}
 		if (facet.getLen() != null) {
-			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "length"), facet.getLen());
+			anon.addProperty(xsdProperty("length"), facet.getLen());
 		}
 		if (facet.getMinlen() != null) {
-			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "minLength"), facet.getMinlen());
+			anon.addProperty(xsdProperty("minLength"), facet.getMinlen());
 		}
 		if (facet.getMaxlen() != null) {
-			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "maxLength"), facet.getMaxlen());
-		}
-		if (facet.getLen() != null) {
-			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "length"), facet.getLen());
+			anon.addProperty(xsdProperty("maxLength"), facet.getMaxlen());
 		}
 		if (facet.getRegex() != null) {
-			anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "pattern"), facet.getRegex());
+			anon.addProperty(xsdProperty("pattern"), facet.getRegex());
 		}
 		if (facet.getValues() != null) {
 			Iterator<String> iter = facet.getValues().iterator();
 			while (iter.hasNext()) {
-				anon.addProperty(getTheJenaModel().getProperty(XSD.getURI(), "enumeration"), iter.next());
+				anon.addProperty(xsdProperty("enumeration"), iter.next());
 			}
 		}
 		return anon;
@@ -1255,8 +1295,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		OntClass retval = null;
 		SadlResource sr = ((SadlPropertyCondition)sadlPropCond).getProperty();
 		String propUri = declarationExtensions.getConceptUri(sr);
-		if (!declarationExtensions.getConceptUri(sr).equals(propUri)) {
-			throw new JenaProcessorException("Oops!!");
+		if (propUri == null) {
+			throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlPropertyCondition");
 		}
 		OntConceptType propType = declarationExtensions.getOntConceptType(sr);
 		OntProperty prop = getTheJenaModel().getOntProperty(propUri);
@@ -1833,5 +1873,5 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			System.out.println("   URL: " + fileNames.get(i));
 		}
 	}
-
+	
 }

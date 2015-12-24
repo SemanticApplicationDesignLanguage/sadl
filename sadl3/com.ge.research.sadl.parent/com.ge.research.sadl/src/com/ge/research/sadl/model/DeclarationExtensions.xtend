@@ -41,7 +41,16 @@ class DeclarationExtensions {
 	
 	def String getConceptUri(SadlResource it) {
 		val declaration = declaration
-		return EcoreUtil2.getContainerOfType(declaration, SadlModel).baseUri+"#"+declaration.concreteName
+		if (declaration != null) {	
+			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
+			if (part1 != null) {
+				val part2 = part1.baseUri
+				if (part2 != null) {
+					return part2 +"#"+declaration.concreteName
+				}
+			}
+		}
+		return null
 	}
 	
 	def SadlResource getDeclaration(SadlResource resource) {
@@ -52,6 +61,8 @@ class DeclarationExtensions {
 	}
 	
 	def OntConceptType getOntConceptType(SadlResource resource) {
+		var cnm = getConcreteName(resource)
+		if(cnm == null) System.out.println("Resource could not provide a concrete name");
 		switch e: resource.declaration.eContainer {
 			
 			SadlClassOrPropertyDeclaration case e.restrictions.exists[it instanceof SadlIsAnnotation],
@@ -60,6 +71,12 @@ class DeclarationExtensions {
 				
 			SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY] :
 				OntConceptType.CLASS_PROPERTY
+				 
+			SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE_PROPERTY] :
+				OntConceptType.DATATYPE_PROPERTY
+				 
+			SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY] :
+				OntConceptType.ANNOTATION_PROPERTY
 				 
 			SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype : 
 				OntConceptType.DATATYPE
@@ -83,7 +100,7 @@ class DeclarationExtensions {
 			SadlMustBeOneOf :
 				OntConceptType.INSTANCE
 			
-			default: throw new IllegalStateException("Couldn't determine the ontology type of "+resource.concreteName) 
+			default: OntConceptType.VARIABLE // throw new IllegalStateException("Couldn't determine the ontology type of "+ cnm) 
 		}
 	}
 	

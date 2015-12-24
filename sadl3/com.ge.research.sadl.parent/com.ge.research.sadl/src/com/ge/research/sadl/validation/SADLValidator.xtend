@@ -34,7 +34,7 @@ class SADLValidator extends AbstractSADLValidator {
 	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
 	
 	@Check
-	def checkSadlModelNameValidUri(SadlModel model) {
+	def checkSadlModel(SadlModel model) {
 		var thisUri = model.baseUri
 		var errMsg = SadlUtils.validateUri(thisUri);
 		if (errMsg != null) {
@@ -72,19 +72,23 @@ class SADLValidator extends AbstractSADLValidator {
 			while (itr.hasNext) {
 				var imp = itr.next;
 				var sm = imp.importedResource
-				var impuri = sm.baseUri
-				if (impuri == null) {
-					errMsg = "Model '" + thisUri + "' has an import which appears to be null";
+				if (sm != null) {
+					var impuri = sm.baseUri
+					if (impuri == null) {
+						errMsg = "Model '" + thisUri + "' has an import which appears to be null";
+					}
+					else if (impuri.equals(thisUri)) {
+						error("A model cannot import itself", SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE)
+					}
+					else {
+						errMsg = SadlUtils.validateUri(impuri);
+						if (errMsg != null) {
+							error(errMsg, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
+						}
+					}
 				}
-				else {
-					errMsg = SadlUtils.validateUri(impuri);
-				}
-				if (errMsg != null) {
-//					error(errMsg, imp, imp.importedReSsource. INVALID_IMPORT_URI);
-					System.err.println(errMsg);
-				}
-		}
 			}
+		}
 	}
 	
 }

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl
-Bundle-Vendor: My Company
+Bundle-Vendor: GE Global Research
 Bundle-Version: 3.0.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl; singleton:=true
 Bundle-ActivationPolicy: lazy

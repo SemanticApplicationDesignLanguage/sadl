@@ -2,6 +2,7 @@
 <?eclipse version="3.0"?>
 <plugin>
    <extension-point id="sadl_model_processor" name="SADL Model Processor" schema="schema/sadl_model_processor.exsd"/>
+   <extension-point id="sadl_import_processor" name="SADL Import Processor" schema="schema/sadl_import_processor.exsd"/>
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
@@ -418,4 +419,34 @@
 	</fileTypes>
 	
 	</extension>
+  <extension point="org.eclipse.ui.importWizards"> 
+		<category id="com.ge.research.sadl" name="SADL"/>
+<!--		<wizard 
+			id="com.ge.research.sadl.geonly.ImportCSVToSadl" 
+			name="CSV Files" 
+			class="com.ge.research.sadl.geonly.ui.imports.SadlCSVImportWizard"
+			icon="icons/import_folder.gif" 
+			category="com.ge.research.sadl">
+			<description>Import CSV files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.csv"/> 
+		</wizard> -->
+<!--		<wizard 
+			id="com.ge.research.sadl.geonly.ImportXLSToSadl" 
+			name="Excel Files" 
+			class="com.ge.research.sadl.geonly.ui.imports.SadlXLSImportWizard" 
+			icon="icons/import_folder.gif" 
+			category="com.ge.research.sadl">
+			<description>Import Excel files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.xls"/> 
+		</wizard> -->
+		<wizard 
+			id="com.ge.research.sadl.geonly.ImportOwlToSadl" 
+			name="Owl Files" 
+			class="com.ge.research.sadl.ui.imports.OwlFileImportWizard" 
+			icon="icons/import_folder.gif" 
+			category="com.ge.research.sadl">
+			<description>Import Owl files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
+		</wizard> 
+   </extension> 
 </plugin>

@@ -106,6 +106,18 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+// TODO How should this self-import be tested? This doesn't work because the SADLValidator doesn't get the URI for the import	
+	@Ignore	
+	@Test def void testImportSelfError() {
+		'''
+			uri "http://sadl.org/Tests/Import" alias imp.
+			import "http://sadl.org.Tests/ModelName".
+		'''.assertValidatesTo[jenaModel, issues |
+			assertTrue(issues.size == 1)
+			assertTrue(issues.get(0).toString().contains("cannot import self"))
+		]
+	}
+	
 	@Test def void mySimpleClassDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
@@ -119,6 +131,32 @@ class SadlModelManagerProviderTest {
 			while (itr.hasNext()) {
 				val nxt = itr.next;
 				if (nxt.localName.equals("Foo")) {
+					found = true;
+				}
+			}	
+			assertTrue(found);
+		]
+	}
+	
+	@Ignore
+	@Test def void mySimpleClassAsQnDeclarationCase() {
+		'''
+			uri "http://sadl.org/allqnames.sadl" alias aqn.
+			 
+			aqn:Shape is a class.
+			aqn:area describes aqn:Shape with values of type float.
+			
+			aqn:MyShape is a aqn:Shape with aqn:area 23 . 
+			
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var itr = jenaModel.listClasses().toIterable().iterator
+			var found = false
+			while (itr.hasNext()) {
+				val nxt = itr.next;
+				if (nxt.localName.equals("Shape")) {
 					found = true;
 				}
 			}	
@@ -424,7 +462,7 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
-	@Ignore
+//	@Ignore
 	@Test def void myUserDefinedDatatypeUse1Case() {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 

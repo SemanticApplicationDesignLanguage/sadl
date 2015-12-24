@@ -10,7 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/icu4j-3.4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-arq-2.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-core-2.11.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jena-core-2.11.2.jar" sourcepath="C:/Users/200005201/.m2/repository/org/apache/jena/jena-core/2.11.2/jena-core-2.11.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-iri-1.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-tdb-1.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-4.8.1.jar"/>

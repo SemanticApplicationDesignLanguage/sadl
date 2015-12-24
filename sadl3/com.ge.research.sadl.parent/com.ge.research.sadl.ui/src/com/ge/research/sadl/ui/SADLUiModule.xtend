@@ -12,6 +12,8 @@ import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+import com.ge.research.sadl.processing.SadlImportProcessorProvider
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -20,6 +22,10 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 
 	def Class<? extends SadlModelProcessorProvider> bindSadlModelProcessorProvider() {
 		return ExtensionPointBasedSadlModelProcessorProvider
+	}
+
+	def Class<? extends SadlImportProcessorProvider> bindSadlImportProcessorProvider() {
+		return ExtensionPointBasedSadlImportProcessorProvider
 	}
 
 	// Registers our own syntax coloring styles.

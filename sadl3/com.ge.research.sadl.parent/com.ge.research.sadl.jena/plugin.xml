@@ -6,4 +6,9 @@
 	    <sadlProcessor
 	          class="com.ge.research.sadl.jena.JenaBasedSadlModelProcessor"/>
 	</extension>
+	<extension
+	      point="com.ge.research.sadl.ui.sadl_import_processor">
+	    <sadlImportProcessor
+	          class="com.ge.research.sadl.jena.JenaBasedSadlImportProcessor"/>
+	</extension>
 </plugin>
