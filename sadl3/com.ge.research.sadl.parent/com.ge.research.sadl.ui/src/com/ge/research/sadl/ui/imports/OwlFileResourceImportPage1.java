@@ -989,7 +989,7 @@ public class OwlFileResourceImportPage1 extends WizardResourceImportPage
             settings.put(STORE_CREATE_CONTAINER_STRUCTURE_ID,
                     createTopLevelFolderCheckbox.getSelection());
             if (getContainerFullPath() != null) {
-            	settings.put(STORE_PATH_VARIABLE_SELECTED_ID, getContainerFullPath().lastSegment());
+            	settings.put(STORE_PATH_VARIABLE_SELECTED_ID, getContainerFullPath().toPortableString());
             }
 
             /*

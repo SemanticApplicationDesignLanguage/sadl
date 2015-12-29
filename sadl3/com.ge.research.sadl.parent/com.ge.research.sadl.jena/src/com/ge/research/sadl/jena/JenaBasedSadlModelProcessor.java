@@ -3,6 +3,7 @@ package com.ge.research.sadl.jena;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -92,6 +93,7 @@ import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.sparql.util.Utils;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
@@ -113,6 +115,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	
 	@Inject DeclarationExtensions declarationExtensions;
 	private String modelName;
+	private String modelAlias;
 	private String modelNamespace;
 	private OntDocumentManager jenaDocumentMgr;
 	private static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
@@ -149,6 +152,39 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			Charset charset = Charset.forName("UTF-8"); 
 			CharSequence seq = new String(out.toByteArray(), charset);
 			fsa.generateFile(owlFN, seq);
+			
+			// now update the mapping
+			if (!fsa.isFile(UtilsForJena.ONT_POLICY_FILENAME)) {
+				// copy policy file template to folder
+				try {
+					fsa.generateFile(UtilsForJena.ONT_POLICY_FILENAME, new UtilsForJena().getMinimalPolicyFileContent());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			String pfileContent = fsa.readTextFile(UtilsForJena.ONT_POLICY_FILENAME).toString();
+			URI actUrl = fsa.getURI(owlFN);
+			//TODO this has to be converted to actual url? (or just save relative?)
+			List<String> segs = actUrl.segmentsList();
+			String altUrl = "";
+			for (int i = 2; i < segs.size(); i++) {
+				if (i > 2) {
+					altUrl += "/";
+				}
+				altUrl += segs.get(i);
+			}
+			String revisedContent;
+			try {
+				revisedContent = new UtilsForJena().addMappingToPolicyFile(pfileContent, getModelNamespace(), altUrl, getModelAlias(), "SADL");
+				fsa.generateFile(UtilsForJena.ONT_POLICY_FILENAME, revisedContent);
+			} catch (JenaProcessorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -166,11 +202,11 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		String modelName = model.getBaseUri();
 		setModelName(modelName);
 		setModelNamespace(assureNamespaceEndsWithHash(modelName));
-		String modelAlias = model.getAlias();
-		if (modelAlias == null) {
-			modelAlias = "";
+		setModelAlias(model.getAlias());
+		if (getModelAlias() == null) {
+			setModelAlias("");
 		}
-		getTheJenaModel().setNsPrefix(modelAlias, getModelNamespace());
+		getTheJenaModel().setNsPrefix(getModelAlias(), getModelNamespace());
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
 		logger.debug("Ontology '" + modelName + "' created");
 		modelOntology.addComment("This ontology was created from a SADL file '"
@@ -1872,6 +1908,12 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		for (int i = 0; i < fileNames.size(); i++) {
 			System.out.println("   URL: " + fileNames.get(i));
 		}
+	}
+	private String getModelAlias() {
+		return modelAlias;
+	}
+	private void setModelAlias(String modelAlias) {
+		this.modelAlias = modelAlias;
 	}
 	
 }

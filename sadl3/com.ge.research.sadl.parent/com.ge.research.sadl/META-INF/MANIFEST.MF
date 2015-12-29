@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.xtext,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
  org.eclipse.xtext.util,
  org.eclipse.xtend.lib,
- org.eclipse.emf.common
+ org.eclipse.emf.common,
+ org.eclipse.core.runtime;bundle-version="3.9.100"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.generator,
@@ -29,5 +30,6 @@ Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.scoping,
  com.ge.research.sadl.serializer,
  com.ge.research.sadl.services,
+ com.ge.research.sadl.utils,
  com.ge.research.sadl.validation
 Import-Package: org.apache.log4j

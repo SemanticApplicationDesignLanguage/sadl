@@ -23,10 +23,23 @@
 
 package com.ge.research.sadl.jena;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.pojava.datetime.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.utils.ResourceManager;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -37,12 +50,43 @@ import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.RDFWriter;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class UtilsForJena {
-    /**
+	protected static final Logger logger = LoggerFactory.getLogger(UtilsForJena.class);
+
+	public static final String OWL_MODELS_FOLDER_NAME = "OwlModels";
+    public static final String ONT_POLICY_FILENAME = "ont-policy.rdf";
+    
+	// Constants used to manage mappings between model namespace (publicURI) and model file (altURL) in ont-policy.rdf file
+    public static final String SADL = "SADL";
+	protected static final String OWL_ONT_MANAGER_PUBLIC_URINS = "http://www.w3.org/2002/07/owl";
+	protected static final String ONT_MANAGER_LANGUAGE = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#language";
+	protected static final String ONT_MANAGER_CREATED_BY = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#createdBy";
+	protected static final String ONT_MANAGER_ALT_URL = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#altURL";
+	protected static final String ONT_MANAGER_PUBLIC_URI = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#publicURI";
+	protected static final String ONT_MANAGER_PREFIX = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#prefix";
+	protected static final String ONT_MANAGER_ONTOLOGY_SPEC = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#OntologySpec";
+
+
+	protected RDFNode sadlNode = null;
+	protected Property createdBy;
+	protected Property altUrlProp;
+	protected Property publicUrlProp;
+	protected Property prefixProp;
+	protected RDFNode createdBySadlLiteral;
+
+	/**
      * Call this method to convert a value (v) as a Java object to a typed 
      * Literal matching the range of the property.
      *
@@ -384,5 +428,270 @@ public class UtilsForJena {
 		}
 		return false;
 	}
+	
+	public String addMappingToPolicyFile(String content, String publicUri, String altUrl, String globalAlias, String source) throws JenaProcessorException {
+		// read content into a Model
+        Model m = ModelFactory.createDefaultModel();
+        m.read(new ByteArrayInputStream(content.getBytes()), null);
+        
+        // add/update the model with the specified mapping
+        initializePolicyConcepts(m);
+		Resource pubv = m.createResource(publicUri);
+		Resource altv = m.createResource(altUrl);
+		Literal pref = null;
+		if (globalAlias != null) {
+			pref = m.createTypedLiteral(globalAlias);
+		}
+		addMapping(m, altv, pubv, pref, false, source);
+        
+        // prepare the new content and return it
+		String pfBase = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager";
+		String format = "RDF/XML-ABBREV";
+		RDFWriter w = m.getWriter(format);
+		w.setProperty("xmlbase", pfBase);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		w.write(m, out, pfBase);
+		Charset charset = Charset.forName("UTF-8"); 
+		CharSequence seq = new String(out.toByteArray(), charset);
+		return seq.toString();
+	}
 
+	public boolean removeMappingFromPolicyFile(String modelFolder, String publicUri) {
+		
+		return true;
+	}
+	
+	public String getMinimalPolicyFileContent() throws IOException, URISyntaxException {
+        File source = ResourceManager.getAbsoluteBundlePath("Models", ONT_POLICY_FILENAME);
+        return fileToString(source);
+	}
+	
+	/**
+	 * Method to convert the file identified by a fully qualified name to a string representing its contents.
+	 *
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public String fileToString(File file) throws IOException {
+		String result = null;
+		DataInputStream in = null;
+
+		try {
+			byte[] buffer = new byte[(int) file.length()];
+			in = new DataInputStream(new FileInputStream(file));
+			in.readFully(buffer);
+			result = new String(buffer);
+		} finally {
+			try {
+				in.close();
+			} catch (IOException e) { /* ignore it */
+			}
+		}
+		return result;
+	}
+
+	private boolean initializePolicyConcepts(Model m) {
+    	if (sadlNode == null) {
+    		sadlNode = m.createTypedLiteral(SADL);
+    		createdBy = m.createProperty(ONT_MANAGER_CREATED_BY);
+    		altUrlProp = m.createProperty(ONT_MANAGER_ALT_URL);
+    		publicUrlProp = m.createProperty(ONT_MANAGER_PUBLIC_URI);
+    		prefixProp = m.createProperty(ONT_MANAGER_PREFIX);
+    		return true;
+    	}
+    	return false;
+	}
+
+	public synchronized boolean addMapping(Model m, Resource altv, Resource pubv, Literal prefix, boolean bKeepPrefix, String source) {
+		boolean bChanged = false;
+		boolean mappingFound = false;
+		List<Statement> pendingDeletions = null;
+		// Get all the statements that have this public URI
+		StmtIterator pubitr = m.listStatements(null,
+				publicUrlProp, pubv);
+		if (pubitr.hasNext()) {
+			mappingFound = true;
+			int cntr = 0;
+			while (pubitr.hasNext()) {
+				Statement s = pubitr.nextStatement();
+				if (cntr > 0) {
+					// there are multiple entries for this public URI
+					if (pendingDeletions == null) {
+						pendingDeletions = new ArrayList<Statement>();
+					}
+					pendingDeletions.add(s);
+				} else {
+					Resource subj = s.getSubject();
+					// find the corresponding altURL
+					Statement s2 = subj.getProperty(altUrlProp);
+					if (s2 != null) {
+						// Is the old and the new actual URL the same? If not
+						// then change the statement for the actual URL
+						if (!s2.getObject().equals(altv)) {
+							if (pendingDeletions == null) {
+								pendingDeletions = new ArrayList<Statement>();
+							}
+							pendingDeletions.add(s2);
+							subj.addProperty(altUrlProp, altv);
+							bChanged = true;
+						}
+					} else {
+						subj.addProperty(altUrlProp, altv);
+						bChanged = true;
+					}
+					Statement s3 = subj.getProperty(prefixProp);
+					if (s3 != null) {
+						// there is already a prefix in the model
+						if (prefix != null) {
+							// we have another which is not null
+							if (!s3.getObject().equals(prefix)) {
+								if (!bKeepPrefix) {
+									// only make the change if not keeping old prefix (when the new prefix is null)
+									if (pendingDeletions == null) {
+										pendingDeletions = new ArrayList<Statement>();
+									}
+									pendingDeletions.add(s3);
+								}
+								if (prefix != null) {
+									subj.addProperty(prefixProp, prefix);
+								}
+								bChanged = true;
+							}
+						}
+					} else if (prefix != null) {
+						subj.addProperty(prefixProp, prefix);
+						bChanged = true;
+					}
+				}
+				cntr++;
+			}
+		}
+		StmtIterator altitr = m.listStatements(null,
+				altUrlProp, altv);
+		if (altitr.hasNext()) {
+			mappingFound = true;
+			int cntr = 0;
+			while (altitr.hasNext()) {
+				Statement s = altitr.nextStatement();
+				if (cntr > 0) {
+					// there are mulitiple statements for this alt URL
+					if (pendingDeletions == null) {
+						pendingDeletions = new ArrayList<Statement>();
+					}
+					pendingDeletions.add(s);
+				} else {
+					if (!bChanged) {
+						// if bChanged is true then we must have already fixed
+						// the one mapping in the section above--no need to do
+						// it again
+						Resource subj = s.getSubject();
+						// find the corresponding publicUri
+						Statement s2 = subj.getProperty(publicUrlProp);
+						if (s2 != null) {
+							// is the old and the new public URI the same? If
+							// not then change the statement for the new public
+							// URI
+							if (!s2.getObject().equals(pubv)) {
+								if (pendingDeletions == null) {
+									pendingDeletions = new ArrayList<Statement>();
+								}
+								pendingDeletions.add(s2);
+								subj.addProperty(publicUrlProp, pubv);
+								bChanged = true;
+							}
+						}
+						subj.addProperty(publicUrlProp, pubv);
+						bChanged = true;
+
+						Statement s3 = subj.getProperty(prefixProp);
+						if (s3 != null) {
+							// there is already a prefix in the model
+							if (prefix != null) {
+								// we have another which is not null
+								if (!s3.getObject().equals(prefix)) {
+									if (!bKeepPrefix) {
+										// only make the change if not keeping old prefix (when the new prefix is null)
+										if (pendingDeletions == null) {
+											pendingDeletions = new ArrayList<Statement>();
+										}
+										pendingDeletions.add(s3);
+									}
+									if (prefix != null) {
+										subj.addProperty(prefixProp, prefix);
+									}
+									bChanged = true;
+								}
+							}
+						} else if (prefix != null) {
+							subj.addProperty(prefixProp, prefix);
+							bChanged = true;
+						}
+					}
+				}
+				cntr++;
+			}
+		}
+
+		// remove extra and obsolete entries
+		if (pendingDeletions != null && pendingDeletions.size() > 0) {
+			for (int i = 0; i < pendingDeletions.size(); i++) {
+				Statement s = pendingDeletions.get(i);
+				m.remove(s);
+				bChanged = true;
+			}
+		}
+
+		if (!mappingFound) {
+			com.hp.hpl.jena.rdf.model.Resource type = m
+					.createResource(ONT_MANAGER_ONTOLOGY_SPEC);
+			com.hp.hpl.jena.rdf.model.Resource newOntSpec = m
+					.createResource(type);
+			Property langp = m
+					.getProperty(ONT_MANAGER_LANGUAGE);
+			RDFNode langv = m.createResource(
+					OWL_ONT_MANAGER_PUBLIC_URINS);
+			m.add(newOntSpec, publicUrlProp, pubv);
+			m.add(newOntSpec, altUrlProp, altv);
+			m.add(newOntSpec, langp, langv);
+			if (source != null && !source.equalsIgnoreCase(SADL)) {
+				m.add(newOntSpec, createdBy, source);
+			} else {
+				m.add(newOntSpec, createdBy, SADL);
+			}
+			if (prefix != null) {
+				m.add(newOntSpec, prefixProp, prefix);
+			}
+			logger.debug("Created new mapping for '" + pubv.toString() + "', '"
+					+ altv.toString() + "'");
+			bChanged = true;
+		}
+//		try {
+//			// add mapping to Jena OntDocumentManager
+//			if (addJenaMapping(pubv.getURI().toString(), altv.getURI()
+//					.toString())) {
+//				bChanged = true;
+//			}
+//		} catch (URISyntaxException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ConfigurationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		if (bChanged) {
+//			setMappingChanged(true);
+//			logger.debug("Modified mapping for '" + pubv.toString() + "', '"
+//					+ altv.toString() + "'");
+//		}
+//		if (this.mappings == null) {
+//			mappings = new HashMap<String, String>();
+//		}
+//		mappings.put(rdfNodeToString(pubv), rdfNodeToString(altv));
+		return bChanged;
+	}
+	
 }
