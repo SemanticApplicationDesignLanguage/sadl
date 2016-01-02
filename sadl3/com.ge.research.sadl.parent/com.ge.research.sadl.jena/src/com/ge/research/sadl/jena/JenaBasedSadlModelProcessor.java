@@ -19,6 +19,7 @@ import org.eclipse.xtext.util.CancelIndicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
@@ -61,6 +62,7 @@ import com.ge.research.sadl.sADL.SadlTypeAssociation;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.SadlValueList;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -153,19 +155,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			CharSequence seq = new String(out.toByteArray(), charset);
 			fsa.generateFile(owlFN, seq);
 			
-			// now update the mapping
-			if (!fsa.isFile(UtilsForJena.ONT_POLICY_FILENAME)) {
-				// copy policy file template to folder
-				try {
-					fsa.generateFile(UtilsForJena.ONT_POLICY_FILENAME, new UtilsForJena().getMinimalPolicyFileContent());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			// the mapping will have been updated already via onValidate
 			String pfileContent = fsa.readTextFile(UtilsForJena.ONT_POLICY_FILENAME).toString();
 			URI actUrl = fsa.getURI(owlFN);
 			//TODO this has to be converted to actual url? (or just save relative?)
@@ -179,7 +169,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			}
 			String revisedContent;
 			try {
-				revisedContent = new UtilsForJena().addMappingToPolicyFile(pfileContent, getModelNamespace(), altUrl, getModelAlias(), "SADL");
+				revisedContent = new UtilsForJena().addMappingToPolicyFile(pfileContent, getModelName(), altUrl, getModelAlias(), "SADL");
 				fsa.generateFile(UtilsForJena.ONT_POLICY_FILENAME, revisedContent);
 			} catch (JenaProcessorException e) {
 				// TODO Auto-generated catch block
@@ -198,13 +188,36 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		SadlModel model = (SadlModel) resource.getContents().get(0);
 		String modelActualUrl =resource.getURI().lastSegment();
 		// directly create the Jena Model here!
-		theJenaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+//		theJenaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		String modelName = model.getBaseUri();
 		setModelName(modelName);
 		setModelNamespace(assureNamespaceEndsWithHash(modelName));
 		setModelAlias(model.getAlias());
 		if (getModelAlias() == null) {
 			setModelAlias("");
+		}
+		
+		try {
+			UtilsForJena ufj = new UtilsForJena();
+			String policyFilename = ufj.fileUrlToFileName(ufj.getPolicyFilename(resource));
+			theJenaModel = ufj.createAndInitializeJenaModel(policyFilename, OntModelSpec.OWL_MEM, true);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			addError(e1.getMessage(), model);
+			return; // this is a fatal error
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			addError(e1.getMessage(), model);
+			return; // this is a fatal error
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			addError(e.getMessage(), model);
+			return; // this is a fatal error
+		} catch (JenaProcessorException e) {	// this isn't fatal??
+			e.printStackTrace();
+			addError(e.getMessage(), model);
 		}
 		getTheJenaModel().setNsPrefix(getModelAlias(), getModelNamespace());
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
@@ -279,6 +292,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 //	   		}
 //	    	Conclusion: if checking is needed that requires Jena imported models, then it happens here. 
 //	    		Otherwise it happens in the validator.
+	    	theJenaModel.loadImports();
 		}
 		
 		// process rest of parse tree
@@ -1047,13 +1061,6 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		return getTheJenaModel().getResource(XSD.getURI() + name);
 	}
 
-	/**
-	 * Call this method before doing semantic validity checks that require imports to be loaded as Jena OntModels.
-	 */
-	private void loadImportsInJena() {
-		
-	}
-	
 	private OntClass getOrCreateOntClass(String name) {
 		OntClass cls = getTheJenaModel().getOntClass(name);
 		if (cls == null) {

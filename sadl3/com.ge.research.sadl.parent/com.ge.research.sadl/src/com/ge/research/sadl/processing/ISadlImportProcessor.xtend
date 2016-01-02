@@ -14,7 +14,7 @@ interface ISadlImportProcessor {
 	 * 1st element is a list of error Strings (if any)
 	 * Note: all results are returned on call to onImport because separate calls go to different instances of the processor
 	 */	
-	def Object[] onImport(Resource resource, String targetProjectOwlModelsFolder);
+	def Object[] onImport(Resource resource, String targetProjectPath);
 	
 	/**
 	 * Same outputs as above but single OWL model content as a String input

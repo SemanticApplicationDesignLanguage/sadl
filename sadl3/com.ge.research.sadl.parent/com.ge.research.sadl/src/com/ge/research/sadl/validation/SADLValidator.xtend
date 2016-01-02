@@ -8,6 +8,7 @@ import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Inject
 import org.eclipse.xtext.validation.Check
+import com.ge.research.sadl.utils.SadlUtils
 
 /**
  * This class contains custom validation rules. 

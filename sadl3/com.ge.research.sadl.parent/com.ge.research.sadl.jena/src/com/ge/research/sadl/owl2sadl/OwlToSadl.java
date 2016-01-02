@@ -39,9 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
-import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.sadl.utils.SadlUtils;
+import com.ge.research.sadl.jena.UtilsForJena;
+import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.utils.StringDataSource;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -50,6 +49,7 @@ import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.ComplementClass;
+import com.hp.hpl.jena.ontology.ConversionException;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.EnumeratedClass;
 import com.hp.hpl.jena.ontology.HasValueRestriction;
@@ -106,8 +106,6 @@ public class OwlToSadl {
 	private List<String> imports = null;
 	private Map<String,String> qNamePrefixes = new HashMap<String,String>();
 	
-	private IConfigurationManager configMgr = null;
-
 	private StringBuilder sadlModel = null;
 	
 	private List<String> allTokens = null;
@@ -124,19 +122,22 @@ public class OwlToSadl {
 	private String baseUri;
 
 	private String sourceFile = null;
+
+	private OntModelSpec spec;
 	
 	public class ModelConcepts {
 		private List<Ontology> ontologies = new ArrayList<Ontology>();
 		private List<OntClass> classes = new ArrayList<OntClass>();
 		private List<ObjectProperty> objProperties = new ArrayList<ObjectProperty>();
 		private List<DatatypeProperty> dtProperties = new ArrayList<DatatypeProperty>();
+		private List<Property> rdfProperties = new ArrayList<Property>();
 		private List<Resource> pseudoObjProperties = new ArrayList<Resource>();
 		private List<Resource> pseudoDtProperties = new ArrayList<Resource>();
 		private List<AnnotationProperty> annProperties = new ArrayList<AnnotationProperty>();
 		private List<Individual> instances = new ArrayList<Individual>();
 		private List<Statement> statements = new ArrayList<Statement>();
 		private List<Restriction> unMappedRestrictions = new ArrayList<Restriction>();
-		private Map<OntClass, Restriction> mappedRestrictions = new HashMap<OntClass, Restriction>();
+		private Map<OntClass, List<Restriction>> mappedRestrictions = new HashMap<OntClass, List<Restriction>>();
 		private List<Resource> completed = new ArrayList<Resource>();
 		private List<OntResource> datatypes = new ArrayList<OntResource>();
 		private List<String> errorMessages = new ArrayList<String>();
@@ -264,13 +265,22 @@ public class OwlToSadl {
 			}
 		}
 
-		public Map<OntClass, Restriction> getMappedRestrictions() {
+		public Map<OntClass, List<Restriction>> getMappedRestrictions() {
 			return mappedRestrictions;
 		}
 
 		public void addMappedRestriction(OntClass cls, Restriction restriction) {
-			if (!mappedRestrictions.containsKey(cls)) {
-				this.mappedRestrictions.put(cls, restriction);
+			
+			if (mappedRestrictions.containsKey(cls)) {
+				List<Restriction> restList = mappedRestrictions.get(cls);
+				if (!restList.contains(restriction)) {
+					restList.add(restriction);
+				}
+			}
+			else {
+				List<Restriction> restList = new ArrayList<Restriction>();
+				restList.add(restriction);
+				this.mappedRestrictions.put(cls, restList);
 			}
 		}
 
@@ -313,6 +323,16 @@ public class OwlToSadl {
 				pseudoDtProperties.add(pseudoDtProperty);
 			}
 		}
+		
+		public List<Property> getRdfProperties() {
+			return rdfProperties;
+		}
+		
+		public void addRdfProperty(Property rdfProperty) {
+			if (!rdfProperties.contains(rdfProperty)) {
+				rdfProperties.add(rdfProperty);
+			}
+		}
 
 		public List<String> getErrorMessages() {
 			return errorMessages;
@@ -336,32 +356,38 @@ public class OwlToSadl {
 		process();
 	}
 	
-	/**
-	 * Constructor taking Jena OntModel and a ConfigurationManager to use to manage prefixes, etc.
-	 * @param model
-	 * @param configMgr2
-	 * @throws Exception
-	 */
-	public OwlToSadl(OntModel model, IConfigurationManager configMgr2) throws Exception {
-		theModel = model;
-		configMgr = configMgr2;
-		process();
-	}
+//	/**
+//	 * Constructor taking Jena OntModel and a ConfigurationManager to use to manage prefixes, etc.
+//	 * @param model
+//	 * @param configMgr2
+//	 * @throws Exception
+//	 */
+//	public OwlToSadl(OntModel model, IConfigurationManager configMgr2) throws Exception {
+//		theModel = model;
+//		configMgr = configMgr2;
+//		process();
+//	}
 
 	/**
 	 * Constructor taking the URL of an OWL file and the URL of the policy file to be used to
 	 * resolve imports.
 	 * 
-	 * @param modelUrl
-	 * @param policyFilename
+	 * @param modelUrl--OWL file to translate to SADL
+	 * @param policyFilename--location of mapping file to resolve imports
 	 * @throws Exception
 	 */
 	public OwlToSadl(String modelUrl, String policyFilename) throws Exception {
-		// not sure what the model spec should be... awc 7/12/2010
-		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
-		OntDocumentManager owlDocMgr = theModel.getDocumentManager();
-		prepare(modelUrl, policyFilename, owlDocMgr);
-		owlDocMgr.setProcessImports(true);
+		File owlInputFile = validateOntologyName(modelUrl);
+		if (policyFilename == null) {
+			throw new Exception("Policy file name cannot be null");
+		}
+		theModel = new UtilsForJena().createAndInitializeJenaModel(policyFilename, OntModelSpec.OWL_MEM, true);
+		String modelFolder = new File(policyFilename).getParent();
+		OntDocumentManager owlDocMgr = theModel.getDocumentManager(); //prepare(modelUrl, policyFilename);
+		setSpec(theModel.getSpecification());
+//		getSpec().setImportModelGetter(new SadlJenaModelGetterPutter(getSpec(), modelFolder));
+//		getSpec().setDocumentManager(owlDocMgr);
+//		owlDocMgr.setProcessImports(true);
 		theModel.read(modelUrl);
 		owlDocMgr.setProcessImports(false);
 		process();
@@ -382,16 +408,16 @@ public class OwlToSadl {
 	 * 
 	 * @throws Exception
 	 */
-	public OwlToSadl(String modelUrl, ConfigurationManagerForEditing _cmgr) throws Exception {
-		// not sure what the model spec should be... awc 7/12/2010
-		configMgr = _cmgr;
-		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
-		theModel.getDocumentManager().setProcessImports(true);
-		theModel.read(modelUrl);
-		theModel.getDocumentManager().setProcessImports(false);
-		process();
-	}
-	
+//	public OwlToSadl(String modelUrl, ConfigurationManagerForEditing _cmgr) throws Exception {
+//		// not sure what the model spec should be... awc 7/12/2010
+//		configMgr = _cmgr;
+//		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
+//		theModel.getDocumentManager().setProcessImports(true);
+//		theModel.read(modelUrl);
+//		theModel.getDocumentManager().setProcessImports(false);
+//		process();
+//	}
+//	
 
 	/**
 	 * Save the SADL model to the specified file
@@ -446,11 +472,9 @@ public class OwlToSadl {
 	 * 
 	 * @return
 	 */
-	public DataSource getSadlModel() {
+	public String getSadlModel() {
 		if (sadlModel != null) {
-			StringDataSource dataSrc = new StringDataSource(sadlModel.toString(), null);
-			dataSrc.setName("SADL");
-			return dataSrc;
+			return sadlModel.toString();
 		}
 		return null;
 	}
@@ -470,16 +494,16 @@ public class OwlToSadl {
 				qNamePrefixes.put(uri, prefix);
 			}
 		}
-		theModel.getBaseModel().write(System.out);
-		theBaseModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, theModel);
-//		theBaseModel.write(System.out);
+		if (logger.isDebugEnabled()) {
+			theModel.getBaseModel().write(System.out);
+		}
+		theBaseModel = ModelFactory.createOntologyModel(getSpec(), theModel);
 		
 		if (allTokens == null) {
 			allTokens = new ArrayList<String>();
 			String[] tokens = tokenNames;
-			SadlUtils su = new SadlUtils();
 			for (int i = 0; i < tokens.length; i++) {
-				String strippedToken = su.stripQuotes(tokens[i]);
+				String strippedToken = stripQuotes(tokens[i]);
 				String[] words = strippedToken.trim().split(" ");
 				if (words != null) {
 					for (int j = 0; j < words.length; j++) {
@@ -516,28 +540,6 @@ public class OwlToSadl {
 		sadlModel.append("\"");
 		
 		String alias = null;
-		if (configMgr != null) {
-			alias = configMgr.getGlobalPrefix(baseUri);
-			if (alias == null) {
-				int lastSeg = baseUri.lastIndexOf('/');
-				String baseAlias = baseUri.substring((lastSeg > 0 ? lastSeg + 1 : 0));
-				int cntr = 0;
-				alias = baseAlias;
-				do {
-					if (cntr++ > 0) {
-						alias = baseAlias + cntr;
-					}
-					alias = sadlizePrefix(alias);
-				} while (configMgr.getUriFromGlobalPrefix(alias) != null);
-			}
-			else {
-				alias = sadlizePrefix(alias);
-			}
-			if (configMgr instanceof ConfigurationManagerForEditing) {
-				((ConfigurationManagerForEditing) configMgr).addGlobalPrefix( baseUri, alias);
-			}
-			qNamePrefixes.put(baseUri + "#", alias);
-		}
 		if (alias == null) {
 			if (qNamePrefixes.containsKey(baseUri + "#")) {
 				alias = qNamePrefixes.get(baseUri + "#");
@@ -631,24 +633,15 @@ public class OwlToSadl {
 				if (prefix == null) {
 					prefix = theModel.getNsURIPrefix(impUri+"#");
 				}
-				if (prefix == null && configMgr != null) {
-					prefix = configMgr.getGlobalPrefix(impUri);
-				}
 				prefix = sadlizePrefix(prefix);
 				sadlModel.append("import \"");
 				sadlModel.append(impUri);
-				if (configMgr == null || configMgr.getGlobalPrefix(impUri) == null) {
-					sadlModel.append("\" as ");
-					if (prefix == null) {
-						prefix = "pre_" + prefixCntr++;
-					}
-					sadlModel.append(prefix);
-					theModel.setNsPrefix(prefix, impUri + "#");
+				sadlModel.append("\" as ");
+				if (prefix == null) {
+					prefix = "pre_" + prefixCntr++;
 				}
-				else {
-					sadlModel.append("\"");
-					theModel.setNsPrefix(prefix, impUri + "#");
-				}
+				sadlModel.append(prefix);
+				theModel.setNsPrefix(prefix, impUri + "#");
 				sadlModel.append(".\n");
 				if (imports == null) {
 					imports = new ArrayList<String>();
@@ -719,6 +712,7 @@ public class OwlToSadl {
 		while (siter.hasNext()) {
 			Statement s = siter.nextStatement();
 			statements.add(s);
+			System.out.println("Processing model statement: " + s.toString());
 			Resource subj = s.getSubject();
 			OntResource ontSubj = theModel.getOntResource(subj);
 			if (shouldResourceBeOutput(ontSubj, false, false, true)) {
@@ -768,7 +762,7 @@ public class OwlToSadl {
 			Ontology onti = onts.get(i);
 			sadlModel.append("//    ");
 			sadlModel.append(onti.toString());
-			sadlModel.append("\n ");
+			sadlModel.append("\n");
 		}
 		sadlModel.append("\n\n// Datatype Declarations:\n");
 		List<OntResource> datatypes = concepts.getDatatypes();
@@ -784,26 +778,34 @@ public class OwlToSadl {
 				concepts.addCompleted(ann);
 			}
 		}
-		sadlModel.append("\n\n// Properties without specified range (ObjectProperty assumed):\n");
+		sadlModel.append("\n\n// RDF Properties:\n");
+		List<Property> rdfProperties = concepts.getRdfProperties();
+		for (int i = 0; i < rdfProperties.size(); i++) {
+			Property prop = rdfProperties.get(i);
+			addRdfProperty(concepts, sadlModel, prop);
+			concepts.addCompleted(prop);
+		}
+		sadlModel.append("\n\n// Object properties without specified range:\n");
 		List<ObjectProperty> objProperties = concepts.getObjProperties();
 		for (int i = 0; i < objProperties.size(); i++) {
 			OntResource prop = objProperties.get(i);
 			addSuperPropertiesWithoutRange(concepts, sadlModel, prop);
 			concepts.addCompleted(prop);
 		}
+		sadlModel.append("\n\n// Datatype properties without specified range:\n");
 		List<DatatypeProperty> dtProperties = concepts.getDtProperties();
 		for (int i = 0; i < dtProperties.size(); i++) {
 			OntResource prop = dtProperties.get(i);
 			addSuperPropertiesWithoutRange(concepts, sadlModel, prop);
 		}
 		
-		sadlModel.append("\n\n// Classes:\n");
+		sadlModel.append("\n\n// Classes and their restrictions:\n");
 		List<OntClass> classes = concepts.getClasses();
 		for (int i = 0; i < classes.size(); i++) {
 			OntClass cls = classes.get(i);
 			sadlModel.append(classToSadl(concepts, cls));
 		}
-		sadlModel.append("\n\n// Object Properties:\n");
+		sadlModel.append("\n\n// Other object Properties:\n");
 		objProperties = concepts.getObjProperties();
 		for (int i = 0; i < objProperties.size(); i++) {
 			OntResource prop = objProperties.get(i);
@@ -811,7 +813,7 @@ public class OwlToSadl {
 				sadlModel.append(objPropertyToSadl(concepts, prop));
 			}
 		}
-		sadlModel.append("\n\n// Datatype Properties:\n");
+		sadlModel.append("\n\n// Other datatype Properties:\n");
 		dtProperties = concepts.getDtProperties();
 		for (int i = 0; i < dtProperties.size(); i++) {
 			OntResource prop = dtProperties.get(i);
@@ -825,7 +827,7 @@ public class OwlToSadl {
 			Individual inst = instances.get(i);
 			sadlModel.append(individualToSadl(concepts, inst));
 		}
-		sadlModel.append("\n\n// Other Restrictions:\n");
+		sadlModel.append("\n\n// Other restrictions:\n");
 		List<Restriction> ress = concepts.getUnMappedRestrictions();
 		for (int i = 0; i < ress.size(); i++) {
 			Restriction res = ress.get(i);
@@ -861,6 +863,11 @@ public class OwlToSadl {
 		for (int i = 0; i < numLineFeeds; i++) {
 			sb.append("\n");
 		}
+	}
+
+	private void addRdfProperty(ModelConcepts concepts, StringBuilder sb, Property prop) {
+		sb.append(rdfPropertyToSadl(concepts, prop));
+		
 	}
 
 	private void addSuperPropertiesWithoutRange(ModelConcepts concepts,
@@ -1280,6 +1287,13 @@ public class OwlToSadl {
 		return sb.toString();
 	}
 
+	private String rdfPropertyToSadl(ModelConcepts concepts, Property prop) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(uriToSadlString(concepts, prop));
+		sb.append(" is a property.\n");
+		return sb.toString();
+	}
+	
 	private String dtPropertyToSadl(ModelConcepts concepts, OntResource prop) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, prop));
@@ -1385,19 +1399,27 @@ public class OwlToSadl {
 		}
 		addEndOfStatement(sb, 1);
 		if (concepts.getMappedRestrictions().containsKey(cls)) {
-			Restriction res = concepts.getMappedRestrictions().get(cls);
-			OntProperty op = res.getOnProperty();
-			if (!concepts.getCompleted().contains(op)) {
-				if (op.isObjectProperty()) {
-					sb.append(objPropertyToSadl(concepts, op));
+			List<Restriction> restList = concepts.getMappedRestrictions().get(cls);
+			for (int i = 0; restList != null && i < restList.size(); i++) {
+				Restriction res = restList.get(i);
+				try {
+					OntProperty op = res.getOnProperty();
+					if (!concepts.getCompleted().contains(op)) {
+						if (op.isObjectProperty()) {
+							sb.append(objPropertyToSadl(concepts, op));
+						}
+						else {
+							sb.append(dtPropertyToSadl(concepts, op));
+						}
+						concepts.addCompleted(op);
+					}
 				}
-				else {
-					sb.append(dtPropertyToSadl(concepts, op));
+				catch (Throwable t) {
+					concepts.addErrorMessage(t.getMessage());
 				}
-				concepts.addCompleted(op);
+				sb.append(restrictionToString(concepts, cls, res));
+				addEndOfStatement(sb, 1);
 			}
-			sb.append(restrictionToString(concepts, cls, res));
-			addEndOfStatement(sb, 1);
 		}
 		return sb.toString();
 	}
@@ -1438,7 +1460,17 @@ public class OwlToSadl {
 			return uriToSadlString(concepts, res);
 		}
 		StringBuilder sb = new StringBuilder();
-		OntProperty onprop = res.getOnProperty();
+		OntProperty onprop = null;
+		try {
+			onprop = res.getOnProperty();
+		}
+		catch (ConversionException e) {
+			onprop = getOnPropertyFromConversionException(e);
+			if (onprop == null) {
+				sb.append("// Error: " + e.getMessage());
+				return sb.toString();
+			}
+		}
 		sb.append(uriToSadlString(concepts,onprop));
 		if (restrictedClass == null) {
 			OntClass supcls = res.getSuperClass();
@@ -1513,6 +1545,18 @@ public class OwlToSadl {
 		return sb.toString();
 	}
 
+	private OntProperty getOnPropertyFromConversionException(ConversionException e) {
+		String msg = e.getMessage();
+		int start = msg.indexOf("Cannot convert node ") + 20;
+		int end = start;
+		if (start > 0 && end > start) {
+			while (!Character.isWhitespace(msg.charAt(++end))) {}
+			String uri = msg.substring(start, end);
+			return theModel.createOntProperty(uri);
+		}
+		return null;
+	}
+
 	private void propertyToSadl(StringBuilder sb, ModelConcepts concepts,
 			OntResource prop) {
 		OntProperty ontprop = prop.asProperty();
@@ -1534,12 +1578,12 @@ public class OwlToSadl {
 			int domainctr = 0;
 			while (deitr.hasNext()) {
 				OntResource dr = deitr.next();
-				if (deitr.hasNext()) {
+				if (deitr.hasNext() && domainctr == 0) {
 					unionDomain = true;
 					sb.append("{");
 				}
 				if (domainctr++ > 0) {
-					sb.append(" and ");
+					sb.append(" or ");
 				}
 				sb.append(uriToSadlString(concepts, dr));
 			}
@@ -1551,11 +1595,28 @@ public class OwlToSadl {
 			sb.append(" is a property");				
 		}
 		ExtendedIterator<? extends OntResource> reitr = ontprop.listRange();
+		List<OntResource> rngList = new ArrayList<OntResource>();
 		while (reitr.hasNext()) {
 			OntResource rr = reitr.next();
 			if (!rr.equals(RDFS.Resource)) {
-				sb.append(" with values of type ");
-				sb.append(uriToSadlString(concepts, rr));
+				rngList.add(rr);
+			}
+		}
+		int rngcnt = rngList.size();
+		if (rngcnt > 0) {
+			sb.append(" with values of type ");
+			if (rngcnt == 1) {
+				sb.append(uriToSadlString(concepts, rngList.get(0)));
+			}
+			else {
+				sb.append("{");
+				for (int i = 0; i < rngcnt; i++) {
+					if (i > 0) {
+						sb.append(" or ");
+					}
+					sb.append(uriToSadlString(concepts, rngList.get(i)));
+				}
+				sb.append("}");
 			}
 		}
 	}
@@ -1638,19 +1699,19 @@ public class OwlToSadl {
 		}
 		else if (type.equals(RDF.Property)) {
 			// does anything a subproperty of this property?
-			Resource superPropType = getSuperPropertyType(ontRsrc);
-			if (superPropType != null) {
-				if (superPropType.equals(OWL.DatatypeProperty)) {
-					concepts.addPseudoDtProperty(ontRsrc);
-					return true;
-				}
-				else {
-					concepts.addPseudoObjProperty(ontRsrc);
-					return true;
-				}
-			}
-			System.out.println("Ignoring rdf:Property for now: " + ontRsrc.toString());
-			return false;
+//			Resource superPropType = getSuperPropertyType(ontRsrc);
+//			if (superPropType != null) {
+//				if (superPropType.equals(OWL.DatatypeProperty)) {
+//					concepts.addPseudoDtProperty(ontRsrc);
+//					return true;
+//				}
+//				else {
+//					concepts.addPseudoObjProperty(ontRsrc);
+//					return true;
+//				}
+//			}
+			concepts.addRdfProperty(ontRsrc.asProperty());
+			return true;
 		}
 		else if (type.equals(OWL.AnnotationProperty)) {
 			concepts.addAnnProperty(ontRsrc.asAnnotationProperty());
@@ -2591,13 +2652,6 @@ public class OwlToSadl {
 			ln = rsrc.getLocalName();
 		}
 		String prefix = null;
-		if (configMgr != null) {
-			String key = ns;
-			if (key.endsWith("#")) {
-				key = key.substring(0, key.length() - 1);
-			}
-			prefix = configMgr.getGlobalPrefix(key);
-		}
 		if (prefix == null) {
 			prefix = theModel.getNsURIPrefix(ns);
 		}
@@ -2763,25 +2817,21 @@ public class OwlToSadl {
 		return false;
 	}
 
-	protected void prepare(String modelUrl, String policyFilename, OntDocumentManager mgr) throws IOException {
-		File of = validateOntologyName(modelUrl);
-		File pf;
-		if (policyFilename != null && policyFilename.length() > 0) {
-			pf = new File(new URL(policyFilename).getFile());
-		}
-		else {
-			pf = getSiblingFile(of, "ont-policy.rdf");
-			if (pf == null) {
-				
-			}
-		}
-		mgr.setFileManager(com.hp.hpl.jena.util.FileManager.get());
-		if (pf != null) {
-			System.out.println("  Adding Jena metadata search path '" + pf.getCanonicalPath() + "'");
-			mgr.setMetadataSearchPath(pf.getCanonicalPath(), false);
-		}
-	}
-
+//	protected OntDocumentManager prepare(String modelUrl, String policyFilename) throws IOException {
+//		File of = validateOntologyName(modelUrl);
+//		File pf;
+//		if (policyFilename != null && policyFilename.length() > 0) {
+//			pf = new File(policyFilename);
+//		}
+//		else {
+//			throw new IOException("Policy file name is invalid");
+//		}
+//		return new UtilsForJena().loadMappings(pf);
+//		
+//		OntModel m = new UtilsForJena().createAndInitializeJenaModel(policyFilename);
+//		m.getSpecification();
+//	}
+//
 	protected File validateOntologyName(String ontology) throws IOException {
 		URL url = new URL(ontology);
 		String filename = URLDecoder.decode(url.getFile(), "UTF-8");
@@ -2860,5 +2910,46 @@ public class OwlToSadl {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Call this method to remove double quotes from the beginning and end of a
+	 * string so quoted.
+	 * 
+	 * @param quotedString
+	 *            -- the string from which quotes are to be removed
+	 */
+	public String stripQuotes(String quotedString) {
+		if (quotedString != null && !quotedString.isEmpty()) {
+			if (quotedString.charAt(0) == '\"') {
+				while (quotedString.charAt(0) == '\"') {
+					quotedString = quotedString.substring(1);
+				}
+				while (quotedString.length() > 0
+						&& quotedString.charAt(quotedString.length() - 1) == '\"') {
+					quotedString = quotedString.substring(0,
+							quotedString.length() - 1);
+				}
+			}
+			else if (quotedString.charAt(0) == '\'') {
+				while (quotedString.charAt(0) == '\'') {
+					quotedString = quotedString.substring(1);
+				}
+				while (quotedString.length() > 0
+						&& quotedString.charAt(quotedString.length() - 1) == '\'') {
+					quotedString = quotedString.substring(0,
+							quotedString.length() - 1);
+				}
+			}
+		}
+		return quotedString;
+	}
+
+	private OntModelSpec getSpec() {
+		return spec;
+	}
+
+	private void setSpec(OntModelSpec spec) {
+		this.spec = spec;
 	}
 }

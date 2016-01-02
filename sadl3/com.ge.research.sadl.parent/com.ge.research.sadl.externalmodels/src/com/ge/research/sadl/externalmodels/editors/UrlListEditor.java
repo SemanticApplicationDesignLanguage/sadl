@@ -49,6 +49,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 
 import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
+import com.ge.research.sadl.utils.SadlUtils;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -199,83 +200,37 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 		}
 		else
 		{
+			SadlUtils su = new SadlUtils();
 			String editorText =
 				editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
-	
-			StringTokenizer tokenizer =
-				new StringTokenizer(editorText, "\n\r");
-			ArrayList<String> urls = new ArrayList<String>();
-			while (tokenizer.hasMoreTokens()) {
-				urls.add(tokenizer.nextToken());
-			}
+			List<String>[] urlsAndPrefixes = su.getUrlsAndPrefixesFromExternalUrlContent(editorText);
+			List<String> urls = urlsAndPrefixes[0];
 			IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
-			String sFolder = editorFile.getName().substring(0, editorFile.getName().lastIndexOf("."));
+			String sFolder = su.getExternalModelRootFromUrlFilename(editorFile.getFullPath().toFile());
 			IPath outputPath = (editorFile.getParent().getLocation())
 					.append(sFolder);
-			
-			DeleteRecursive(outputPath.toFile());
+			su.recursiveDelete(outputPath.toFile());
 			List<String> uploadedFiles = new ArrayList<String>();
 			for (int i = 0; i < urls.size(); i++) {
-				String filename = downloadURL((String) urls.get(i), outputPath);
-				if (filename != null) {
-					uploadedFiles.add(filename);
+				try {
+					String urlPath = su.externalUrlToRelativePath((String)urls.get(i));
+					String filename = downloadURL((String) urls.get(i), outputPath, urlPath);
+					if (filename != null) {
+						uploadedFiles.add(filename);
+					}
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
-			try {
-				((FileEditorInput) editor.getEditorInput()).getFile().getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-				// add downloaded models to ont-policy.rdf file
-				createMappingsFromDownloads(outputPath.toOSString(), uploadedFiles);
-			} catch (CoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 	}
 	
-	private void createMappingsFromDownloads(String sFolder, List<String> uploadedFiles) throws IOException {
-		// need to know project location
-		File prjPath = getProjectPath(sFolder);
-		if (prjPath != null) {
-			String owlModelsFolder = prjPath.getAbsolutePath() + "/OwlModels";
-			if (processorProvider != null) {
-				ISadlModelProcessor processor = processorProvider.getProcessor(null);
-				processor.processExternalModels(owlModelsFolder, uploadedFiles);
-			}
-		}
-	}
-	
-	private File getProjectPath(String sFolder) {
-		//get object which represents the workspace  
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();  
-
-		//get location of workspace (java.io.File)  
-		File workspaceDirectory = workspace.getRoot().getLocation().toFile();
-		String ws = workspaceDirectory.getAbsolutePath();
-		File fldr = new File(sFolder);
-		File prjFolder = fldr;
-		while (!fldr.equals(workspaceDirectory)) {
-			prjFolder = fldr;
-			fldr = fldr.getParentFile();
-		}
-		return prjFolder;
-	}
-	
-	void DeleteRecursive(File fileOrDirectory) {
-	    if (fileOrDirectory.isDirectory())
-	        for (File child : fileOrDirectory.listFiles())
-	            DeleteRecursive(child);
-
-	    fileOrDirectory.delete();
-	}
-	
-	String downloadURL(String urlString, IPath iPath) {
+	String downloadURL(String downloadUrl, IPath downloadsRootFolder, String destinationRelativePath) {
 		URL url;
 	    InputStream is = null;
 
-	    if (urlString != null && !urlString.isEmpty() && !urlString.startsWith("--")) {
+	    if (downloadUrl != null && !downloadUrl.isEmpty() && !downloadUrl.startsWith("--")) {
 			try {
 				Properties p = System.getProperties();
 				p.put("http.proxyHost", "http-proxy.ae.ge.com");
@@ -283,17 +238,11 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 				p.put("https.proxyHost", "http-proxy.ae.ge.com");
 				p.put("https.proxyPort", "80");
 				System.setProperties(p);
-				url = new URL(urlString);
+				url = new URL(downloadUrl);
 				is = url.openStream(); // throws an IOException
 				ReadableByteChannel rbc = Channels.newChannel(is);
-				String urlPath = url.getHost() + url.getPath();
 
-				if (url.getPath() == null || url.getPath().isEmpty())
-					urlPath = urlPath + "/" + url.getHost() + ".owl";
-				else if (!url.getPath().contains("."))
-					urlPath = urlPath + "/" + urlPath.substring(urlPath.lastIndexOf("/") + 1) + ".owl";
-
-				String outputPath = iPath.append(urlPath).toString();
+				String outputPath = downloadsRootFolder.append(destinationRelativePath).toString();
 				File file1 = new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
 				file1.mkdirs();
 				FileOutputStream fos = new FileOutputStream(outputPath);

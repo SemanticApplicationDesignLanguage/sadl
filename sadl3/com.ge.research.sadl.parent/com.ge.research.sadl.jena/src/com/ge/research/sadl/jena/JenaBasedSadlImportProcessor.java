@@ -29,7 +29,7 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	
     private List<String> errors = new ArrayList<String>();
 
-	private DataSource resultingDataSource;
+	private String resultingDataSource;
 
 	
 	public JenaBasedSadlImportProcessor() {
@@ -44,16 +44,15 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	}
 	
 	@Override
-	public Object[] onImport(Resource resource, String policyFileName) {
-		String owlFilePath = resource.getURI().toFileString();
-    	File ffop = new File(owlFilePath);
-    	String sfop = ffop.toURI().toString();
-        setResultingDataSource(null);
-
+	public Object[] onImport(Resource resource, String projectPath) {
 		try {
+			String policyFileName = UtilsForJena.getPolicyFilePathForProject(projectPath);
+			String owlFilePath = resource.getURI().toFileString();
+	    	File ffop = new File(owlFilePath);
+	    	String sfop = ffop.toURI().toString();
+	        setResultingDataSource(null);
 			OwlToSadl owlToSadl = new OwlToSadl(sfop,policyFileName);
 			setResultingDataSource(owlToSadl.getSadlModel());
-
 		} catch (Exception e1) {
 	        if (getResultingDataSource() == null) {
 	            getErrors().add(e1.toString());
@@ -61,9 +60,9 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 		}
 		Object[] retval = new Object[2];
 		try {
-			retval[0] = getResultingDataSource() != null ? getResultingDataSource().getInputStream() : null;
-		} catch (IOException e) {
-			getErrors().add(e.getMessage());
+			retval[0] = getResultingDataSource();
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
 		retval[1] = getErrors();
 		return retval;	
@@ -81,11 +80,7 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	        }
 		}
 		Object[] retval = new Object[2];
-		try {
-			retval[0] = getResultingDataSource() != null ? getResultingDataSource().getInputStream() : null;
-		} catch (IOException e) {
-			getErrors().add(e.getMessage());
-		}
+		retval[0] = getResultingDataSource();
 		retval[1] = getErrors();
 		return retval;
 	}
@@ -95,11 +90,11 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	}
 	
 	
-	private void setResultingDataSource(DataSource resultingDataSource) {
+	private void setResultingDataSource(String resultingDataSource) {
 		this.resultingDataSource = resultingDataSource;
 	}
 	
-	private DataSource getResultingDataSource() {
+	private String getResultingDataSource() {
 		return resultingDataSource;
 	}
 }

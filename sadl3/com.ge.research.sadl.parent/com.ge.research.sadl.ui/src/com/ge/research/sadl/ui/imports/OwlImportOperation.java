@@ -12,9 +12,11 @@
  *******************************************************************************/
 package com.ge.research.sadl.ui.imports;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -63,6 +65,7 @@ import com.ge.research.sadl.processing.ISadlImportProcessor;
 import com.ge.research.sadl.processing.SadlImportProcessorProvider;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -576,14 +579,14 @@ public class OwlImportOperation extends WorkspaceModifyOperation {
             return;
         }
 
-        InputStream contentStream = null;
+        String newContent = null;
         try {
         	// get file path as a string
         	File ffop = new File(fileObjectPath);
         	String sfop = ffop.toURI().toString();
         	// get ont-policy file as a string
-        	URI projectUri = URI.createFileURI(targetResource.getLocationURI().getPath());
-        	String policyFileName = ""; //(ResourceManager.getPolicyFileUrlForProject(projectUri)).toString();
+        	URI someInProjectUri = URI.createFileURI(targetResource.getLocationURI().getPath());
+        	String projectPath = ResourceManager.getProjectUri(someInProjectUri).toString();
         	// Convert OWL file to SADL
         	if (processorProvider == null) {
         		Injector injector = SadlActivator.getInstance().getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
@@ -597,10 +600,13 @@ public class OwlImportOperation extends WorkspaceModifyOperation {
         	ResourceSet resSet = new ResourceSetImpl();
         	Resource res = resSet.createResource(URI.createFileURI(ffop.getCanonicalPath()));
         	ISadlImportProcessor processor = processorProvider.getProcessor(resSet);
-        	Object[] retvals = processor.onImport(res, policyFileName);
+        	Object[] retvals = processor.onImport(res, projectPath);
         	if (retvals[0] != null) {
-        		if (retvals[0] instanceof InputStream) {
-        			contentStream = (InputStream) retvals[0];
+        		if (retvals[0] instanceof String) {
+        			newContent = (String) retvals[0];
+        			if (newContent.length() <= 20) {
+            			errorTable.add(new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID, 0, "Returned content from import appears to be basically empty (" + newContent + ")", null));        				
+        			}
         		}
         		else {
         			errorTable.add(new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID, 0, "Unexpected return type (" + retvals[0].getClass().getCanonicalName() + ") from import", null));
@@ -611,16 +617,17 @@ public class OwlImportOperation extends WorkspaceModifyOperation {
         		errorTable.add(new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID, 0, errors.get(i), null));
         	}
 		} catch (Exception e1) {
-	        if (contentStream == null) {
+	        if (newContent == null) {
 	            errorTable.add(new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID, 0, e1.toString(), null));
 	            return;
 	        }
 		}
 
-        if (contentStream != null) {
+        if (newContent != null) {
 	        try {
+	        	InputStream is = new ByteArrayInputStream(newContent.getBytes(StandardCharsets.UTF_8));
 	            if (targetResource.exists()) {
-					targetResource.setContents(contentStream,
+					targetResource.setContents(is,
 	                        IResource.KEEP_HISTORY, null);
 	            } else {
 	                if (createVirtualFolder || createLinks || createLinkFilesOnly)
@@ -628,7 +635,7 @@ public class OwlImportOperation extends WorkspaceModifyOperation {
 	                            new Path(provider
 	                                    .getFullPath(fileObject)), targetResource), 0, null);
 	                else
-	                    targetResource.create(contentStream, false, null);
+	                    targetResource.create(is, false, null);
 	            }
 	            setResourceAttributes(targetResource, fileObject);
 	
@@ -641,12 +648,6 @@ public class OwlImportOperation extends WorkspaceModifyOperation {
 	            }
 	        } catch (CoreException e) {
 	            errorTable.add(e.getStatus());
-	        } finally {
-	            try {
-	                contentStream.close();
-	            } catch (IOException e) {
-	                errorTable.add(new Status( IStatus.ERROR, PlatformUI.PLUGIN_ID, 0, NLS.bind(DataTransferMessages.ImportOperation_closeStreamError, fileObjectPath), e));
-	            }
 	        }
         }
     }
