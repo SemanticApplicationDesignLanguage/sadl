@@ -111,6 +111,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
         { return ResourceFactory.createProperty( XSDNS + local ); }
 
 	private OntModel theJenaModel;
+	private OntModelSpec spec;
 	
 	enum AnnType {ALIAS, NOTE}
 	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
@@ -201,6 +202,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			UtilsForJena ufj = new UtilsForJena();
 			String policyFilename = ufj.fileUrlToFileName(ufj.getPolicyFilename(resource));
 			theJenaModel = ufj.createAndInitializeJenaModel(policyFilename, OntModelSpec.OWL_MEM, true);
+			OntDocumentManager owlDocMgr = getTheJenaModel().getDocumentManager();
+			setSpec(getTheJenaModel().getSpecification());
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -1921,6 +1924,12 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 	private void setModelAlias(String modelAlias) {
 		this.modelAlias = modelAlias;
+	}
+	private OntModelSpec getSpec() {
+		return spec;
+	}
+	private void setSpec(OntModelSpec spec) {
+		this.spec = spec;
 	}
 	
 }
