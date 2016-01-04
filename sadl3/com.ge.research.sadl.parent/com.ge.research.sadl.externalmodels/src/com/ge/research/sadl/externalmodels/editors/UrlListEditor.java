@@ -246,8 +246,11 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 				File file1 = new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
 				file1.mkdirs();
 				FileOutputStream fos = new FileOutputStream(outputPath);
-				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+				long bytesTransferred = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				fos.close();
+				if (bytesTransferred < 1) {
+					System.err.println("Failed to get any content from external source '" + downloadUrl + "'");
+				}
 				return outputPath;
 
 			} catch (MalformedURLException mue) {
