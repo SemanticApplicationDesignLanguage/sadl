@@ -1,0 +1,175 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/rule/patterns">
+  <owl:Ontology rdf:about="http://sadl.org/rule/patterns">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RulePatterns.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Rule">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="editorOffset"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="editorLength"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="editorLine"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Argument">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onClass rdf:resource="http://sadl.org/rule/patterns#Argument"/>
+        <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxQualifiedCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="next"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onClass>
+          <owl:Class rdf:ID="Node"/>
+        </owl:onClass>
+        <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxQualifiedCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="argument"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Resource">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/rule/patterns#Node"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Triple">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onClass rdf:resource="http://sadl.org/rule/patterns#Node"/>
+        <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxQualifiedCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="object"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onClass rdf:resource="http://sadl.org/rule/patterns#Node"/>
+        <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxQualifiedCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="predicate"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onClass rdf:resource="http://sadl.org/rule/patterns#Node"/>
+        <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxQualifiedCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="subject"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Pattern"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Literal">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="value"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://sadl.org/rule/patterns#Node"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Builtin">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onClass rdf:resource="http://sadl.org/rule/patterns#Argument"/>
+        <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxQualifiedCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="argumentList"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://sadl.org/rule/patterns#Pattern"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Variable">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/rule/patterns#Node"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="http://sadl.org/rule/patterns#argumentList">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Builtin"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/rule/patterns#next">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Argument"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="conclusion">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Rule"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Pattern"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="condition">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Rule"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Pattern"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/rule/patterns#predicate">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Triple"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Node"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/rule/patterns#subject">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Triple"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Node"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/rule/patterns#argument">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Argument"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Node"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/rule/patterns#object">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Triple"/>
+    <rdfs:range rdf:resource="http://sadl.org/rule/patterns#Node"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/rule/patterns#editorLine">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Rule"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/rule/patterns#editorOffset">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Rule"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/rule/patterns#editorLength">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Rule"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/rule/patterns#value">
+    <rdfs:domain rdf:resource="http://sadl.org/rule/patterns#Literal"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>

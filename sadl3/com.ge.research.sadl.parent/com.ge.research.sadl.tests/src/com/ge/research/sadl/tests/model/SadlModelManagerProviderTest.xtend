@@ -20,6 +20,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.ontology.Ontology
+import com.hp.hpl.jena.vocabulary.RDF;
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.ResourceSet
+import org.junit.Ignore
+import com.hp.hpl.jena.rdf.model.RDFNode
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -29,20 +35,42 @@ class SadlModelManagerProviderTest {
 	@Inject ValidationTestHelper validationTestHelper
 	@Inject Provider<JenaBasedSadlModelProcessor> processorProvider
 	
-// TODO Is this the right place/method to check that errors are generated?	
-	@Test def void invalidUriTestCase() {
-		'''
-			uri "my/uri" alias m1.
-			Foo is a class.
-		'''.assertInValidatesTo [ jenaModel, issues |
-			// expectations go here
-//			assertEquals("my/uri", modelManager.theJenaModel.getModelBaseURI())
+/* Tests that should generate validation errors */	
+	@Test def void testDuplicateUris() {
+		val model = '''
+			uri "http://sadl.org.Tests/ModelName" alias foo.
+		'''.assertValidatesTo [ jenaModel, issues |
 			assertNotNull(jenaModel)
-			assertEquals(1, issues.size())
-			assertTrue(issues.toString(), issues.get(0).toString().contains("'my/uri' is not a valid URL"))
+			assertTrue(issues.size == 0)
 		]
+		assertValidatesTo(model.resourceSet, '''
+			uri "http://sadl.org.Tests/ModelName" alias foo2.
+		''') [ jenaModel2, issues2 |
+			assertNotNull(jenaModel2)
+			assertTrue(issues2.size == 1)
+			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This URI is already used by model"))
+		]
+		
 	}
 	
+	@Test def void testDuplicateAliases() {
+		val model = '''
+			uri "http://sadl.org.Tests/ModelName1" alias foo.
+		'''.assertValidatesTo [ jenaModel, issues |
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+		]
+		assertValidatesTo(model.resourceSet, '''
+			uri "http://sadl.org.Tests/ModelName2" alias foo.
+		''') [ jenaModel2, issues2 |
+			assertNotNull(jenaModel2)
+			assertTrue(issues2.size == 1)
+			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This alias is already used by model"))
+		]
+		
+	}
+	
+/* Test that should not generate any validation errors */	
 	@Test def void modelNameCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
@@ -52,6 +80,41 @@ class SadlModelManagerProviderTest {
 			assertTrue(issues.size == 0)
 			assertTrue(jenaModel.listOntologies().hasNext())
 			assertTrue(jenaModel.listOntologies().next().URI.toString().equals("http://sadl.org/model1"))
+		]
+	}
+	
+	@Test def void modelNameCase2() {
+		'''
+			uri "http://sadl.org/Tests/ModelName" alias mn version "1" (alias "This is an rdfs:label") (note "Note about the Model").		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			assertTrue(jenaModel.listOntologies().hasNext())
+			var Ontology ont = jenaModel.listOntologies().next()
+			var itr = ont.listComments("en").toIterable().iterator
+			var found = false
+			while (itr.hasNext()) {
+				var cmmnt = itr.next();
+				if (cmmnt.toString().equals("Note about the Model@en")) {
+					found = true;
+				}
+			}
+			assertTrue(found)
+			assertTrue(ont.getLabel("en").toString().equals("This is an rdfs:label"))
+			assertTrue(ont.listVersionInfo().next().toString().equals("1"))
+		]
+	}
+	
+// TODO How should this self-import be tested? This doesn't work because the SADLValidator doesn't get the URI for the import	
+	@Ignore	
+	@Test def void testImportSelfError() {
+		'''
+			uri "http://sadl.org/Tests/Import" alias imp.
+			import "http://sadl.org.Tests/ModelName".
+		'''.assertValidatesTo[jenaModel, issues |
+			assertTrue(issues.size == 1)
+			assertTrue(issues.get(0).toString().contains("cannot import self"))
 		]
 	}
 	
@@ -68,6 +131,32 @@ class SadlModelManagerProviderTest {
 			while (itr.hasNext()) {
 				val nxt = itr.next;
 				if (nxt.localName.equals("Foo")) {
+					found = true;
+				}
+			}	
+			assertTrue(found);
+		]
+	}
+	
+	@Ignore
+	@Test def void mySimpleClassAsQnDeclarationCase() {
+		'''
+			uri "http://sadl.org/allqnames.sadl" alias aqn.
+			 
+			aqn:Shape is a class.
+			aqn:area describes aqn:Shape with values of type float.
+			
+			aqn:MyShape is a aqn:Shape with aqn:area 23 . 
+			
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var itr = jenaModel.listClasses().toIterable().iterator
+			var found = false
+			while (itr.hasNext()) {
+				val nxt = itr.next;
+				if (nxt.localName.equals("Shape")) {
 					found = true;
 				}
 			}	
@@ -107,6 +196,95 @@ class SadlModelManagerProviderTest {
 			if (!found) {
 				jenaModel.write(System.out, "N3")
 			}
+		]
+	}
+	
+	@Test def void myClassWith50PropertiesCase() {
+		'''
+			uri "http://sadl.org/model50p" alias p50.
+			MyClass is a class 
+				described by p0 with values of type duration,
+				described by p1 with values of type int,
+				described by p2 with values of type float,
+				described by p3 with values of type MyClass,
+				described by p4 with values of type string,
+				described by p5 with values of type date,
+				described by p6 with values of type dateTime,
+				described by p7 with values of type double,
+				described by p8 with values of type long,
+				described by p9 with values of type boolean,
+				described by p0 with values of type duration,
+				described by p1 with values of type int,
+				described by p2 with values of type float,
+				described by p3 with values of type MyClass,
+				described by p4 with values of type string,
+				described by p5 with values of type date,
+				described by p6 with values of type dateTime,
+				described by p7 with values of type double,
+				described by p8 with values of type long,
+				described by p9 with values of type boolean,
+				described by p10 with values of type duration,
+				described by p11 with values of type int,
+				described by p12 with values of type float,
+				described by p13 with values of type MyClass,
+				described by p14 with values of type string,
+				described by p15 with values of type date,
+				described by p16 with values of type dateTime,
+				described by p17 with values of type double,
+				described by p18 with values of type long,
+				described by p19 with values of type boolean,
+				described by p20 with values of type duration,
+				described by p21 with values of type int,
+				described by p22 with values of type float,
+				described by p23 with values of type MyClass,
+				described by p24 with values of type string,
+				described by p25 with values of type date,
+				described by p26 with values of type dateTime,
+				described by p27 with values of type double,
+				described by p28 with values of type long,
+				described by p29 with values of type boolean,
+				described by p30 with values of type duration,
+				described by p31 with values of type int,
+				described by p32 with values of type float,
+				described by p33 with values of type MyClass,
+				described by p34 with values of type string,
+				described by p35 with values of type date,
+				described by p36 with values of type dateTime,
+				described by p37 with values of type double,
+				described by p38 with values of type long,
+				described by p39 with values of type boolean,
+				described by p40 with values of type duration,
+				described by p41 with values of type int,
+				described by p42 with values of type float,
+				described by p43 with values of type MyClass,
+				described by p44 with values of type string,
+				described by p45 with values of type date,
+				described by p46 with values of type dateTime,
+				described by p47 with values of type double,
+				described by p48 with values of type long,
+				described by p49 with values of type boolean.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var prop = jenaModel.getOntProperty("http://sadl.org/model50p#p0")
+			var itr = prop.listDomain().toIterable().iterator
+			var found = false
+			while (itr.hasNext()) {
+				val nxt = itr.next;
+				if (nxt.localName.equals("MyClass")) {
+					found = true;
+				}
+			}	
+			if (!found) {
+				jenaModel.write(System.out, "N3")
+			}
+			assertTrue(found);
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+				"prefix ar: <http://sadl.org/TestSadlIde/AnonRestrictions#> " +
+				"select (count(distinct ?p) as ?cnt) where {?p rdfs:domain <http://sadl.org/model50p#MyClass>}"
+    		assertTrue(queryResultContains(jenaModel, q1, "50^^http://www.w3.org/2001/XMLSchema#integer"))
 		]
 	}
 	
@@ -284,6 +462,28 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+//	@Ignore
+	@Test def void myUserDefinedDatatypeUse1Case() {
+		'''
+			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
+			Airport_Ident is a type of string length 1-4 .
+			Airport is a class, described by ident with values of type Airport_Ident.
+			ALB is an Airport with ident "toolong".
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			// look for something specific to the model; if found set found true
+// TODO use datatype facets to check validity?			
+
+			if (!found) {
+				jenaModel.write(System.out, "N3")				
+			}
+			assertTrue(found);
+		]
+	}
+
 	@Test def void mySimplePropertyDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
@@ -724,6 +924,78 @@ class SadlModelManagerProviderTest {
 			assertTrue(found);
 		]
 	}
+
+	@Test def void myBoxesInstanceCase() {
+		'''
+			uri "http://sadl.org/TestRequrements/Boxes" alias boxes version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/13 22:30:26 $". 
+			
+			Box is a class, 
+				described by upper-right with a single value of type Point,
+				described by lower-left with a single value of type Point.
+				
+			Point is a class, 
+				described by x with values of type int,
+				described by y with values of type int,
+				described by inside (note "meaning inside both boxes") with values of type boolean.
+			
+			Box1 is a Box, 
+				with lower-left (a Point with x 2, with y 12),
+				with upper-right (a Point with x 8, with y 18).
+			
+			Box2 is a Box,
+				with lower-left (a Point with x 0, with y 10),
+				with upper-right (a Point with x 5, with y 12).
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			// look for something specific to the model; if found set found true
+			var boxitr = jenaModel.listStatements(null, RDF.type, jenaModel.getOntClass("http://sadl.org/TestRequrements/Boxes#Box"))
+			var cntr = 0;
+			while (boxitr.hasNext()) {
+				var box = boxitr.nextStatement().subject;
+				var ur = box.getPropertyResourceValue(jenaModel.getObjectProperty("http://sadl.org/TestRequrements/Boxes#upper-right"))
+				var xitr = jenaModel.listStatements(ur, jenaModel.getDatatypeProperty("http://sadl.org/TestRequrements/Boxes#x"), null as RDFNode)
+				var x = xitr.nextStatement().object.asLiteral.int
+				if (box.URI.endsWith("#Box1")) {
+					assertTrue(x == 8)
+				}
+				else if (box.URI.endsWith("#Box2")) {
+					assertTrue(x == 5)
+				}
+				else {
+					fail
+				}
+				cntr++
+			}
+			if (cntr == 2) {
+				found = true
+			}
+			if (!found) {
+				jenaModel.write(System.out, "N3")				
+			}
+			assertTrue(found);
+		]
+	}
+	
+
+//	@Test def void my<younameit>Case() {
+//		'''
+//			// model goes here
+//		'''.assertValidatesTo [ jenaModel, issues |
+//			// expectations go here
+//			assertNotNull(jenaModel)
+//			assertTrue(issues.size == 0)
+//			var found = false
+//			// look for something specific to the model; if found set found true
+//
+//			if (!found) {
+//				jenaModel.write(System.out, "N3")				
+//			}
+//			assertTrue(found);
+//		]
+//	}
 	
 	protected def boolean queryResultContains(OntModel m, String q, String r) {
 		var qe = QueryExecutionFactory.create(q, m)
@@ -758,21 +1030,23 @@ class SadlModelManagerProviderTest {
     	return false
 	}
 	
-	protected def void assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
+	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
 		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
 		assertions.apply(processor.theJenaModel, issues)
+		return model.eResource
 	}
 
-	protected def void assertInValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		val model = parser.parse(code);
+	protected def Resource assertValidatesTo(ResourceSet resourceSet, CharSequence code, (OntModel, List<Issue>)=>void assertions) {
+		val model = parser.parse(code, resourceSet);
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = processorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
 		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
 		assertions.apply(processor.theJenaModel, issues)
+		return model.eResource
 	}
 }

@@ -41,7 +41,7 @@ public class NewUrlListWizardPage extends WizardPage {
 	public NewUrlListWizardPage(ISelection selection) {
 		super("wizardPage");
 		setTitle("SADL External Model URL File");
-		setDescription("This wizard creates a new file with *.url extension that can be opened by by the External Model URL List Editor.");
+		setDescription("This wizard creates a new file with *.url extension that can be opened by the External Model URL List Editor.");
 		this.selection = selection;
 	}
 

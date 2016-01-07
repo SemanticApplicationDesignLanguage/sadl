@@ -49,14 +49,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="annotations" upperBound="-1"
         eType="#//SadlAnnotation" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlDataTypeDeclaration" eSuperTypes="#//SadlStatement">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="nameDeclarations" upperBound="-1"
-        eType="#//SadlResource" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//SadlTypeReference"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="facet" eType="#//SadlDataTypeFacet"
-        containment="true"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlDataTypeFacet">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="minexin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="min" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -90,7 +82,15 @@
     <eLiterals name="hexBinary" value="16" literal="hexBinary"/>
     <eLiterals name="base64Binary" value="17" literal="base64Binary"/>
     <eLiterals name="anyURI" value="18" literal="anyURI"/>
-    <eLiterals name="data" value="19" literal="data"/>
+    <eLiterals name="integer" value="19" literal="integer"/>
+    <eLiterals name="negativeInteger" value="20" literal="negativeInteger"/>
+    <eLiterals name="nonNegativeInteger" value="21" literal="nonNegativeInteger"/>
+    <eLiterals name="positiveInteger" value="22" literal="positiveInteger"/>
+    <eLiterals name="nonPositiveInteger" value="23" literal="nonPositiveInteger"/>
+    <eLiterals name="unsignedByte" value="24" literal="unsignedByte"/>
+    <eLiterals name="unsignedInt" value="25" literal="unsignedInt"/>
+    <eLiterals name="anySimpleType" value="26" literal="anySimpleType"/>
+    <eLiterals name="data" value="27" literal="data"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlProperty" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameOrRef" eType="#//SadlResource"

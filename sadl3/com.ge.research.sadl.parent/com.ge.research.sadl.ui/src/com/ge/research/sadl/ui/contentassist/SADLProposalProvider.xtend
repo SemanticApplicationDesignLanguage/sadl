@@ -3,11 +3,92 @@
  */
 package com.ge.research.sadl.ui.contentassist
 
-import com.ge.research.sadl.ui.contentassist.AbstractSADLProposalProvider
+import com.ge.research.sadl.model.DeclarationExtensions
+import com.google.inject.Inject
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.Assignment
+import org.eclipse.xtext.Keyword
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import org.eclipse.xtext.RuleCall
+import org.eclipse.swt.graphics.Image
+import org.eclipse.jface.text.contentassist.ICompletionProposal
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
  */
 class SADLProposalProvider extends AbstractSADLProposalProvider {
+	@Inject package DeclarationExtensions declarationExtensions
+	
+	override void completeSadlModel_BaseUri(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		var rsrcNm = context.resource.URI.lastSegment
+		var proposal = "\"http://sadl.org/" + rsrcNm + "\""
+		acceptor.accept(createCompletionProposal(proposal, context))
+	}
+	
+	override void completeSadlModel_Alias(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		var rsrcNm = context.resource.URI.trimFileExtension.lastSegment
+		var proposal = rsrcNm
+		acceptor.accept(createCompletionProposal(proposal, context))
+		
+	}
+	
+	// Creates a proposal for an EOS terminal.  Xtext can't guess (at
+    // the moment) what the valid values for a terminal rule are, so
+    // that's why there is no automatic content assist for EOS.
+	override void complete_EOS(EObject model, RuleCall ruleCall, 
+	        ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		var proposalText = ".\n";
+		var displayText = ". - End of Sentence";
+		var image = getImage(model);
+		var proposal = createCompletionProposal(proposalText, displayText, image, context);
+		acceptor.accept(proposal);
+	}
+
+	override void completeKeyword(Keyword keyword, ContentAssistContext context,
+			ICompletionProposalAcceptor acceptor) {
+		var proposalText = keyword.getValue();
+		if (isInvokedDirectlyAfterKeyword(context) && requireSpaceBefore(keyword, context) && !hasSpaceBefore(context)) {
+			proposalText = " " + proposalText;
+		}
+		if (requireSpaceAfter(keyword, context) && !hasSpaceAfter(context)) {
+			proposalText = proposalText + " ";
+		}
+	
+		var proposal = createCompletionProposal(proposalText, getKeywordDisplayString(keyword),
+				getImage(keyword), context);
+		getPriorityHelper().adjustKeywordPriority(proposal, context.getPrefix());
+		acceptor.accept(proposal);
+	}
+
+	def isInvokedDirectlyAfterKeyword (ContentAssistContext context) {
+		return context.getLastCompleteNode().getTotalEndOffset()==context.getOffset();
+	}
+	
+	def requireSpaceBefore (Keyword keyword, ContentAssistContext context) {
+//		if (!keywordsWithSpaceBefore.contains(keyword)) {
+//			return false;
+//		}
+		return true;
+	}
+	
+	def hasSpaceBefore (ContentAssistContext context) {
+		//TODO: Detect space before invocation offset
+		return false;
+	}
+	
+	def requireSpaceAfter (Keyword keyword, ContentAssistContext context) {
+//		if (!keywordsWithSpaceAfter.contains(keyword)) {
+//			return false;
+//		}
+		return true;
+	}
+	
+	def boolean hasSpaceAfter (ContentAssistContext context) {
+		if (!context.getCurrentNode().hasNextSibling()) return false; // EOF
+		//TODO: Detect space after invocation offset
+		return false;
+	}
+	
 }

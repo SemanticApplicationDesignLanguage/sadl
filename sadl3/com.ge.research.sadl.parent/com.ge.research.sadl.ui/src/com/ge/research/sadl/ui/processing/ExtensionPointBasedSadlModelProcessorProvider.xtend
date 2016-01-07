@@ -10,7 +10,6 @@ import com.google.inject.Injector
 class ExtensionPointBasedSadlModelProcessorProvider extends SadlModelProcessorProvider {
 	
 	static val EXTENSION_ID = 'com.ge.research.sadl.ui.sadl_model_processor'
-//	static val ELEMENT_ID = 'sadlProcessor'
 
 	@Inject Injector injector;
 	

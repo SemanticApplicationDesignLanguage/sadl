@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#" xml:base="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#">
+	<OntologySpec>
+		<language rdf:resource="http://www.w3.org/2002/07/owl"/>
+		<publicURI rdf:resource="http://www.w3.org/2002/07/owl"/>
+		<prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string">owl</prefix>
+	</OntologySpec>
+	<OntologySpec>
+		<altURL rdf:resource="http://protege.stanford.edu/plugins/owl/dc/protege-dc.owl"/>
+		<publicURI rdf:resource="http://purl.org/dc/elements/1.1/"/>
+		<language rdf:resource="http://www.w3.org/2002/07/owl"/>
+		<prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string">dc</prefix>
+	</OntologySpec>
+	<DocumentManagerPolicy>
+		<cacheModels rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</cacheModels>
+		<processImports rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</processImports>
+	</DocumentManagerPolicy>
+</rdf:RDF>

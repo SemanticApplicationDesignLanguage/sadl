@@ -27,8 +27,8 @@
       vm="true"/>
   <setupTask
       xsi:type="setup:VariableTask"
-      name="xtext.nightly.composite"
-      value="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/milestones/"/>
+      name="xtext.releases.composite"
+      value="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/"/>
   <setupTask
       xsi:type="setup:VariableTask"
       name="eclipse.target.platform"
@@ -53,7 +53,7 @@
     <requirement
         name="org.sonatype.tycho.m2e.feature.feature.group"/>
     <repository
-        url="${xtext.nightly.composite}"/>
+        url="${xtext.releases.composite}"/>
     <repository
         url="http://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-jdt-compiler/"/>
     <repository

@@ -21,6 +21,8 @@ grammar com.ge.research.sadl.SADL hidden(WS, ML_COMMENT, SL_COMMENT)
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 generate sADL "http://www.ge.com/research/sadl/SADL"
 
+
+
 SadlModel :
     'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
     	annotations+=SadlAnnotation* EOS 
@@ -36,7 +38,12 @@ SadlImport :
 
 // The various kinds of elements that make up the body of a model.
 SadlModelElement :
-    SadlStatement
+    	SadlStatement EOS
+//    |	RuleStatement
+//    |	QueryStatement
+//    |	TestStatement
+//    |	ExprStatement
+//    |	ExplainStatement
 ;
 
 // These are the things that translate directly to OWL.
@@ -52,16 +59,15 @@ SadlStatement returns SadlStatement:
 			|{SadlDifferentFrom.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
 			|{SadlInstance.nameOrRef=current} ('is' AnArticle type=SadlTypeReference)? propertyInitializers+=SadlPropertyInitializer*
 			|{SadlDisjointClasses.classes+=current} ('and' classes+=SadlResource)+ 'are' 'disjoint'
-			)  EOS
+			)
 	| 	{SadlClassOrPropertyDeclaration}  '{' classOrProperty+=SadlResource (','  classOrProperty+=SadlResource)* '}' 'are' 
 				(('top-level'? 'classes' | 'types' 'of' superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
 			|	{SadlDisjointClasses.types+=current} 'disjoint'
-			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same') EOS
-    | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource EOS
+			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same')
+    | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource 
     | 	AnArticle SadlTypeReference (
     		{SadlInstance.type=current} instance=SadlResource propertyInitializers+=SadlPropertyInitializer*
-    	|	{SadlNecessaryAndSufficient.subject=current}'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*) EOS
-    | 	SadlDataTypeDeclaration
+    	|	{SadlNecessaryAndSufficient.subject=current} 'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*)
 ;
 
 SadlPropertyCondition :
@@ -79,10 +85,6 @@ SadlNestedInstance returns SadlInstance:
 
 SadlResource:
 	name=[SadlResource|NAME] annotations+=SadlAnnotation*
-;
-
-SadlDataTypeDeclaration:
-	'data' 'type' nameDeclarations+=SadlResource 'is' ('a'|'an')? superType=SadlPrimaryTypeReference facet=SadlDataTypeFacet? EOS
 ;
 
 SadlDataTypeFacet :	
@@ -112,13 +114,16 @@ SadlPrimaryTypeReference returns SadlTypeReference:
 	|	'{' SadlTypeReference '}'
 ;
 
+// Built-in primitive data types
 enum SadlDataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
-    gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
+    gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | 
+    integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger |  
+    unsignedByte | unsignedInt | anySimpleType | data;
 
 // Class declarations may also describe the class's properties.
 SadlPropertyDeclarationInClass returns SadlProperty:
-    	','? 'described' 'by' nameDeclarations+=SadlResource restrictions+=SadlPropertyRestriction;
+    	','? 'described' 'by' nameDeclarations+=SadlResource restrictions+=SadlPropertyRestriction*;
 
 SadlPropertyRestriction :
     	SadlCondition
@@ -176,11 +181,19 @@ IndefiniteArticle :
 DefiniteArticle :
 	'The'|'the';
 
-// NAME should match an optional namespace followed by a local name (separated
+// NAME should match an optional namespace prefix followed by a local name (separated
 // from the namespace by a colon character).  We also need to accept legal URI
 // fragments as local names.  In particular, we need names like X.509 to work.
 NAME hidden() :
    ID ->(':' ID)? ->(('-'|'.'|'~'|'%') NAME_FRAGMENT)*;
+
+//HACK this is needed to tell the parser, that a WS is a possible follow up of NAME
+CALL_TO_NAME_WITH_WS :
+	NAME_WITH_WS
+;
+NAME_WITH_WS hidden() :
+	NAME WS?
+;
 
 NAME_FRAGMENT hidden():
 	ID | UNSIGNED_NUMBER ->ID?

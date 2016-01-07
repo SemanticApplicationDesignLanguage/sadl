@@ -10,14 +10,19 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
+import javax.inject.Inject;
+import javax.swing.JOptionPane;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -38,10 +43,13 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+
+import com.ge.research.sadl.processing.ISadlModelProcessor;
+import com.ge.research.sadl.processing.SadlModelProcessorProvider;
+import com.ge.research.sadl.utils.SadlUtils;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -53,6 +61,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
  * </ul>
  */
 public class UrlListEditor extends MultiPageEditorPart implements IResourceChangeListener{
+	@Inject SadlModelProcessorProvider processorProvider;
 
 	/** The text editor used in page 0. */
 	private UrlListTextEditor editor;
@@ -185,34 +194,43 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	 * Downloads the files to the local folder.
 	 */
 	void downloadModels() {
-		String editorText =
-			editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
-
-		StringTokenizer tokenizer =
-			new StringTokenizer(editorText, "\n\r");
-		ArrayList<String> urls = new ArrayList<String>();
-		while (tokenizer.hasMoreTokens()) {
-			urls.add(tokenizer.nextToken());
+		if (editor.isDirty())
+		{
+			JOptionPane.showMessageDialog( null, "Please save the .url file.","Please save",JOptionPane.OK_OPTION);
 		}
-		IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
-		IPath outputPath = (editorFile.getParent().getLocation())
-				.append(editorFile.getName().substring(0, editorFile.getName().lastIndexOf(".")));
-		for (int i = 0; i < urls.size(); i++) {
-			downloadURL((String) urls.get(i), outputPath);
-		}
-		try {
-			((FileEditorInput) editor.getEditorInput()).getFile().getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		else
+		{
+			SadlUtils su = new SadlUtils();
+			String editorText =
+				editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+			List<String>[] urlsAndPrefixes = su.getUrlsAndPrefixesFromExternalUrlContent(editorText);
+			List<String> urls = urlsAndPrefixes[0];
+			IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
+			String sFolder = su.getExternalModelRootFromUrlFilename(editorFile.getFullPath().toFile());
+			IPath outputPath = (editorFile.getParent().getLocation())
+					.append(sFolder);
+			su.recursiveDelete(outputPath.toFile());
+			List<String> uploadedFiles = new ArrayList<String>();
+			for (int i = 0; i < urls.size(); i++) {
+				try {
+					String urlPath = su.externalUrlToRelativePath((String)urls.get(i));
+					String filename = downloadURL((String) urls.get(i), outputPath, urlPath);
+					if (filename != null) {
+						uploadedFiles.add(filename);
+					}
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	
-	void downloadURL(String urlString, IPath iPath) {
+	String downloadURL(String downloadUrl, IPath downloadsRootFolder, String destinationRelativePath) {
 		URL url;
 	    InputStream is = null;
 
-	    if (urlString != null && !urlString.isEmpty() && !urlString.startsWith("--")) {
+	    if (downloadUrl != null && !downloadUrl.isEmpty() && !downloadUrl.startsWith("--")) {
 			try {
 				Properties p = System.getProperties();
 				p.put("http.proxyHost", "http-proxy.ae.ge.com");
@@ -220,22 +238,20 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 				p.put("https.proxyHost", "http-proxy.ae.ge.com");
 				p.put("https.proxyPort", "80");
 				System.setProperties(p);
-				url = new URL(urlString);
+				url = new URL(downloadUrl);
 				is = url.openStream(); // throws an IOException
 				ReadableByteChannel rbc = Channels.newChannel(is);
-				String urlPath = url.getHost() + url.getPath();
 
-				if (url.getPath() == null || url.getPath().isEmpty())
-					urlPath = urlPath + "/" + url.getHost() + ".owl";
-				else if (!url.getPath().contains("."))
-					urlPath = urlPath + "/" + urlPath.substring(urlPath.lastIndexOf("/") + 1) + ".owl";
-
-				String outputPath = iPath.append(urlPath).toString();
+				String outputPath = downloadsRootFolder.append(destinationRelativePath).toString();
 				File file1 = new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
 				file1.mkdirs();
 				FileOutputStream fos = new FileOutputStream(outputPath);
-				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+				long bytesTransferred = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				fos.close();
+				if (bytesTransferred < 1) {
+					System.err.println("Failed to get any content from external source '" + downloadUrl + "'");
+				}
+				return outputPath;
 
 			} catch (MalformedURLException mue) {
 				mue.printStackTrace();
@@ -250,5 +266,6 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 				}
 			} 
 		}
+		return null;
 	}
 }

@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ge.research.sadl</groupId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<artifactId>com.ge.research.sadl.parent</artifactId>
 	<packaging>pom</packaging>
 
 	<properties>
 		<tycho-version>0.23.1</tycho-version>
-		<xtextVersion>2.9.0.rc1</xtextVersion>
+		<xtextVersion>2.9.0</xtextVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
@@ -21,6 +21,8 @@
 		<module>com.ge.research.sadl.tests</module>
 		<module>com.ge.research.sadl.ui.tests</module>
 		<module>com.ge.research.sadl.jena</module>
+		<module>com.ge.research.sadl.feature</module>
+		<module>com.ge.research.sadl.update</module>
 	</modules>
 	<build>
 		<plugins>
@@ -30,6 +32,11 @@
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
+	        <plugin>
+	          <groupId>org.eclipse.tycho</groupId>
+	          <artifactId>tycho-surefire-plugin</artifactId>
+	          <version>${tycho-version}</version>
+	        </plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
@@ -97,31 +104,44 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<dependencies>
+	</dependencies>
 	<repositories>
 		<repository>
-			<id>sonatype-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>codehaus-snapshots</id>
+			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
+			<url>http://nexus.codehaus.org/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
 			<snapshots>
-				<enabled>true</enabled>
+				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>sonatype-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
-			<id>sonatype-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>codehaus-snapshots</id>
+			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
+			<url>http://nexus.codehaus.org/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
 			<snapshots>
-				<enabled>true</enabled>
+				<enabled>false</enabled>
 			</snapshots>
 		</pluginRepository>
+		<pluginRepository>
+			<id>sonatype-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
+		</pluginRepository>
 	</pluginRepositories>
-
-	<dependencies>
-	</dependencies>
 </project>

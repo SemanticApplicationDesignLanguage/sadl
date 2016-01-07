@@ -3,10 +3,12 @@
  */
 package com.ge.research.sadl.validation
 
-import com.ge.research.sadl.sADL.SadlModel
-
-import org.eclipse.xtext.validation.Check
+import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.SADLPackage
+import com.ge.research.sadl.sADL.SadlModel
+import com.google.inject.Inject
+import org.eclipse.xtext.validation.Check
+import com.ge.research.sadl.utils.SadlUtils
 
 /**
  * This class contains custom validation rules. 
@@ -25,14 +27,68 @@ class SADLValidator extends AbstractSADLValidator {
 //					INVALID_NAME)
 //		}
 //	}
+	@Inject DeclarationExtensions declarationExtensions;
 
-	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI";
+	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI"
+	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
+	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
+	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
 	
 	@Check
-	def checkSadlModelNameValidUri(SadlModel model) {
-		val errMsg = SadlUtils.validateUri(model.baseUri);
+	def checkSadlModel(SadlModel model) {
+		var thisUri = model.baseUri
+		var errMsg = SadlUtils.validateUri(thisUri);
 		if (errMsg != null) {
 			error(errMsg, SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
+		}
+		var thisRsrc = model.eResource
+		var thisURL = thisRsrc.URI;
+		var thisFN = thisURL.lastSegment
+		var rsrcItr = thisRsrc.resourceSet.resources.iterator
+		while (rsrcItr.hasNext()) {
+			var otherRsrc = rsrcItr.next
+			if (!otherRsrc.equals(thisRsrc)) {
+				// this isn't the same resource
+				var otherModel = otherRsrc.contents.get(0) as SadlModel
+				var otherRsrcUri = otherModel.baseUri
+				var otherURL = otherRsrc.URI
+				var otherFN = otherURL.lastSegment
+				if (thisFN.equals(otherFN)) {
+					error("The filename (" + thisFN + ") is already used by model '" + otherURL + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
+				}
+				if (thisUri != null && thisUri.equals(otherRsrcUri)) {
+					error("This URI is already used by model '" + otherFN + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
+				}
+				var thisAlias = model.alias
+				var otherAlias = otherModel.alias
+				if (otherAlias != null && thisAlias != null && otherAlias.equals(thisAlias)) {
+					error("This alias is already used by model '" + otherFN + "'; must be unique", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+				}
+			}
+		}
+		var imports = model.imports
+		// does an import need any validation?
+		if (imports != null) {
+			var itr = imports.iterator
+			while (itr.hasNext) {
+				var imp = itr.next;
+				var sm = imp.importedResource
+				if (sm != null) {
+					var impuri = sm.baseUri
+					if (impuri == null) {
+						errMsg = "Model '" + thisUri + "' has an import which appears to be null";
+					}
+					else if (impuri.equals(thisUri)) {
+						error("A model cannot import itself", SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE)
+					}
+					else {
+						errMsg = SadlUtils.validateUri(impuri);
+						if (errMsg != null) {
+							error(errMsg, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
+						}
+					}
+				}
+			}
 		}
 	}
 	

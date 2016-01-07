@@ -48,10 +48,13 @@ import com.hp.hpl.jena.vocabulary.XSD;
  */
 public class ConceptName extends ConceptIdentifier {
 
+	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
+
     private String name;
     private String prefix = null;
     private String namespace = null;;
     private ConceptType type = null;
+    private RangeValueType rangeValueType = RangeValueType.CLASS_OR_DT;
     
     /**
      * This constructor takes a single String input. However, this String may
@@ -225,5 +228,13 @@ public class ConceptName extends ConceptIdentifier {
 			return equals((ConceptName)o);
 		}
 		return false;
+	}
+
+	public RangeValueType getRangeValueType() {
+		return rangeValueType;
+	}
+
+	public void setRangeValueType(RangeValueType rangeValueType) {
+		this.rangeValueType = rangeValueType;
 	}
 }
