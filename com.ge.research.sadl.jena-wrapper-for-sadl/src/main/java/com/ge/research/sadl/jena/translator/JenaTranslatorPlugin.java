@@ -1355,7 +1355,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * 
 	 * @param model -- the OntModel at the root of the search
 	 * @param name -- the concept name
-	 * @return -- the fuly-qualified name of the concept as found in some model
+	 * @return -- the fully-qualified name of the concept as found in some model
 	 * 
 	 * @throws InvalidNameException -- the concept was not found
 	 */
