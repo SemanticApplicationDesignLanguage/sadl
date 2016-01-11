@@ -94,6 +94,38 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	public abstract String[] getDirectSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
 
 	/**
+	 * This method returns all of the ancestor classes given a starting class,
+	 *  "className", in a class hierarchy.
+	 * 
+	 * @param root, the starting class type name 
+	 * @return class names of all of the ancestors, or null if none were found
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws SessionNotFoundException 
+	 * @throws QueryParseException 
+	 * @throws NameNotFoundException 
+	 */
+	public abstract String[] getAncestorClassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+
+	/**
+	 * This method returns all of the direct super classes (one level up) given
+	 * a starting class, "className", in a class hierarchy.
+	 * 
+	 * @param root, the starting class type name 
+	 * @return class names of all of the direct ancestors, or null if none were found
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws SessionNotFoundException 
+	 * @throws QueryParseException 
+	 * @throws NameNotFoundException 
+	 */
+	public abstract String[] getDirectSuperclassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+
+	/**
 	 * This method returns all the leaf classes of the classification hierarchy starting at root
 	 * @param root -- the localname, prefix:localname, or complete URI of the root class
 	 * @return - a String array containing the local names of the leaf classes

@@ -154,33 +154,52 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 					QueryParseException, SessionNotFoundException, QueryCancelledException {
 			
 		String query = "select distinct ?et where {?et <urn:x-hp-direct-predicate:http_//www.w3.org/2000/01/rdf-schema#subClassOf> <"+ root + "> }";
-		if (SadlUtils.queryContainsQName(query)) {
-			query = prepareQuery(query);
-		}
-		String[][] results = getDataAsStringArray(query);
-		if (results == null) {
-			return null;
-		}
 		
-		int size = results.length;
-		String[] retVal = new String[size - 1];
-		for (int i = 0; i < size; ++i) {
-			String[] ri = results[i];
-			for (int j = 0; j < ri.length; ++j) {
-				String rj = ri[j];
-//				if (logger.isDebugEnabled()) logger.debug("i="+ i + ", j=" + j + ", value=" + rj);
-				if (i > 0) {
-					retVal[i-1] = rj;
-				}
-			}
-		}
- 		return retVal;
+		return doQueryAndReturnStrings(query);
+	}
+
+	/**
+	 * Return all of the ancestor class names given a starting class in a hierarchy
+	 * 
+	 * @param className, the starting class type name 
+	 * @return an array of ancestor class type names or null if className is already a root
+	 * @throws InvalidClassDomainException, InvalidConfigurationException
+	 */
+	public String[] getAncestorClassesOfTaxonomy(String className)
+			 throws InvalidNameException, ReasonerNotFoundException, ConfigurationException,
+			 		NameNotFoundException, QueryParseException, SessionNotFoundException, 
+			 		QueryCancelledException {
+
+		String query = "select distinct ?ancestors where ";
+		query += "{<"+ className + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?mid .";
+		query += " ?mid <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?ancestors . }";
+		query += " group by ?ancestors order by count(?mid)";
+		
+		return doQueryAndReturnStrings(query);
+	}
+
+	/**
+	 * Returns an array of class type names of all of the direct (one level up)
+	 * ancestors in a class hierarchy.
+	 * 
+	 * @param className, the starting class type name 
+	 * @return class names of all of the direct ancestors, or null if none were found
+	 * @throws InvalidClassDomainException, InvalidConfigurationException
+	 */
+	public String[] getDirectSuperclassesOfTaxonomy(String className)
+			 throws InvalidNameException, ReasonerNotFoundException, ConfigurationException,
+		 		NameNotFoundException, QueryParseException, SessionNotFoundException, 
+		 		QueryCancelledException {
+		
+		String query = "select distinct ?et where {<"+ className + "> <urn:x-hp-direct-predicate:http_//www.w3.org/2000/01/rdf-schema#subClassOf> ?et }";
+
+		return doQueryAndReturnStrings(query);
 	}
 
 
-		/* (non-Javadoc)
-		 * @see com.ge.research.sadl.service.extended.ISadlExtendedService2#getLeafClassesOfTaxonomy(java.lang.String)
-		 */
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.service.extended.ISadlExtendedService2#getLeafClassesOfTaxonomy(java.lang.String)
+	 */
 	public String[] getLeafClassesOfTaxonomy(String root) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
 		String query = "select ?et where {?et <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + root + "> . OPTIONAL {?et2 <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?et . FILTER ((?et2 != <http://www.w3.org/2002/07/owl#Nothing> && ?et2 != ?et)) } FILTER (!bound(?et2)) }";
 		if (SadlUtils.queryContainsQName(query)) {
@@ -650,6 +669,32 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 		}
 		
 		return (String) results.first()[0];
+	}
+
+	private String[] doQueryAndReturnStrings(String query) 
+			throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException,
+					QueryParseException, SessionNotFoundException, QueryCancelledException {
+			
+		if (SadlUtils.queryContainsQName(query)) {
+			query = prepareQuery(query);
+		}
+		String[][] results = getDataAsStringArray(query);
+		if (results != null) {
+			int size = results.length;
+			String[] retVal = new String[size - 1];
+			for (int i = 0; i < size; ++i) {
+				String[] ri = results[i];
+				for (int j = 0; j < ri.length; ++j) {
+					String rj = ri[j];
+//					if (logger.isDebugEnabled()) logger.debug("i="+ i + ", j=" + j + ", value=" + rj);
+					if (i > 0) {
+						retVal[i-1] = rj;
+					}
+				}
+			}
+			return retVal;
+		}
+ 		return null;
 	}
 
 //	/**
