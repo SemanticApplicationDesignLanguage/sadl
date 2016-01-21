@@ -853,6 +853,11 @@ public class PrologTranslatorPlugin implements ITranslator {
 		return null;
 	}
 	
+	/**
+	 * Converts a built-in element to a string representation.
+	 * @param bin
+	 * @return String
+	 */
 	private String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
 		String builtinName = null;
