@@ -926,21 +926,30 @@ public class PrologTranslatorPlugin implements ITranslator {
 //			return "assign";
 			builtinName = "is";
 		}
-		else if (ftype.equals(BuiltinType.UserAdded) && bin.getFuncName().equals("holds")) {
-			// this is good
-			builtinName = "holds";
-		}
-		else if (ftype.equals(BuiltinType.UserAdded) && bin.getFuncName().equals("rdf")) {
-			builtinName = "rdf";
-		}
-		else if (ftype.equals(BuiltinType.UserAdded) && bin.getFuncName().equals("equal")){
-			builtinName = "equal";
-		}
 		else {
-			logger.warn("Something went wrong finding/loading Builtin '" + bin.getFuncName() + "' of type '" + ftype + "'");
-			addError("Found reference to unknown built-in '" + bin.getFuncName() + "' of type '" + ftype + "'", ErrorType.WARNING);
-//			throw new TranslationException("Unable to resolve built-in of type '" + ftype + "'");
-			return bin.getFuncName();
+            boolean found = false;
+            if (ftype.equals(BuiltinType.UserAdded)) {
+                if (bin.getFuncName().equals("holds")) {
+                    // this is good
+                    builtinName = "holds";
+                    found = true;
+                }
+                else if (bin.getFuncName().equals("rdf")) {
+                    builtinName = "rdf";
+                    found = true;
+                }
+                else if (bin.getFuncName().equals("equal")) {
+                    builtinName = "equal";
+                    found = true;
+                }
+            }
+            
+            if (!found) {
+                logger.warn("Something went wrong finding/loading Builtin '" + bin.getFuncName() + "' of type '" + ftype + "'");
+                addError("Found reference to unknown built-in '" + bin.getFuncName() + "' of type '" + ftype + "'", ErrorType.WARNING);
+//              throw new TranslationException("Unable to resolve built-in of type '" + ftype + "'");
+                return bin.getFuncName();
+            }
 		}
 
 		return builtinName;
