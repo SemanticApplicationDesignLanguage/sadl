@@ -11,7 +11,7 @@ class SadlTokenToAttributeIdMapper extends DefaultAntlrTokenToAttributeIdMapper 
 		// we want to ensure a compilation error if someone renames 
 		// the NUMBER terminal without updating this place.
 		var String ruleNumber = {
-			val _rdIndx_tmpNode = InternalSADLParser.RULE_UNSIGNED_NUMBER
+			val _rdIndx_tmpNode = InternalSADLParser.RULE_NUMBER; // RULE_UNSIGNED_NUMBER
 			InternalSADLParser.tokenNames.get(_rdIndx_tmpNode)
 		}
 		if (ruleNumber.equals(tokenName)) {

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright 2007-2015 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2016 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -16,7 +16,7 @@
  *
  ***********************************************************************/
 
-grammar com.ge.research.sadl.SADL hidden(WS, ML_COMMENT, SL_COMMENT)
+grammar com.ge.research.sadl.SADL hidden(WS, ML_COMMENT, SL_COMMENT) //with with org.eclipse.xtext.common.Terminals
 
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 generate sADL "http://www.ge.com/research/sadl/SADL"
@@ -24,7 +24,7 @@ generate sADL "http://www.ge.com/research/sadl/SADL"
 
 
 SadlModel :
-    'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
+    'uri' baseUri=STRING ('alias' alias=ID)? ('version' version=STRING)? 
     	annotations+=SadlAnnotation* EOS 
     imports+=SadlImport*
     elements+=SadlModelElement*;
@@ -34,16 +34,13 @@ SadlAnnotation :
 ;
 
 SadlImport :
-    'import' importedResource=[SadlModel|STRING] ('as' alias=NAME)? EOS;
+    'import' importedResource=[SadlModel|STRING] ('as' alias=ID)? EOS;
 
 // The various kinds of elements that make up the body of a model.
 SadlModelElement :
-    	SadlStatement EOS
-//    |	RuleStatement
-//    |	QueryStatement
-//    |	TestStatement
-//    |	ExprStatement
-//    |	ExplainStatement
+		SadlStatement EOS
+//	|	ExpressionStatement => EOS
+	|	RuleStatement => EOS
 ;
 
 // These are the things that translate directly to OWL.
@@ -71,11 +68,11 @@ SadlStatement returns SadlStatement:
 ;
 
 SadlPropertyCondition :
-	property=[SadlResource|NAME] cond+=SadlCondition
+	property=[SadlResource|DNAME] cond+=SadlCondition
 ;
 
 SadlPropertyInitializer:
-	','? ('with'|'has') property=[SadlResource|NAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	','? ('with'|'has') property=[SadlResource|DNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
 
 SadlNestedInstance returns SadlInstance:
@@ -84,14 +81,18 @@ SadlNestedInstance returns SadlInstance:
 ;
 
 SadlResource:
-	name=[SadlResource|NAME] annotations+=SadlAnnotation*
+	name=[SadlResource|DNAME] annotations+=SadlAnnotation*
 ;
 
 SadlDataTypeFacet :	
 		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
 	|	regex=STRING
 	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
-	|	'{' values+=(STRING|NUMBER) (','? values+=(STRING|NUMBER))* '}'
+	|	'{' values+=FacetValue (','? values+=FacetValue)* '}'
+;
+
+FacetValue :
+	STRING | NUMBER
 ;
 
 // TypeReferences
@@ -108,7 +109,7 @@ SadlIntersectionType returns SadlTypeReference:
 ;
 
 SadlPrimaryTypeReference returns SadlTypeReference:
-		{SadlSimpleTypeReference} type=[SadlResource|NAME]
+		{SadlSimpleTypeReference} type=[SadlResource|DNAME]
 	|	{SadlPrimitiveDataType} primitiveType=SadlDataType
 	|	'(' SadlPropertyCondition ')'
 	|	'{' SadlTypeReference '}'
@@ -129,7 +130,7 @@ SadlPropertyRestriction :
     	SadlCondition
     |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
     |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' list?='List'|lists?='Lists') 'of' 'values'|'values') 'of' 'type' range=SadlPrimaryTypeReference
-    |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|NAME]
+    |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|DNAME]
     |   {SadlIsTransitive} 'is' 'transitive'
     |   {SadlIsSymmetrical} 'is' 'symmetrical'
     |   {SadlIsAnnotation} 'is' 'a' 'type' 'of' 'annotation'
@@ -154,8 +155,12 @@ SadlHasValueCondition :
 SadlCardinalityCondition :
 	('has'|'with') 
 	('at' operator=('least'|'most') |'exactly') 
-	cardinality=(NUMBER|'one') ('value'|'values') 
+	cardinality=CardinalityValue ('value'|'values') 
 	('of' 'type' type=SadlPrimaryTypeReference | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
+
+CardinalityValue :
+	NUMBER | 'one'
+;
 
 SadlExplicitValue:
 		SadlResource		// e.g., George
@@ -181,56 +186,167 @@ IndefiniteArticle :
 DefiniteArticle :
 	'The'|'the';
 
-// NAME should match an optional namespace prefix followed by a local name (separated
-// from the namespace by a colon character).  We also need to accept legal URI
-// fragments as local names.  In particular, we need names like X.509 to work.
-NAME hidden() :
-   ID ->(':' ID)? ->(('-'|'.'|'~'|'%') NAME_FRAGMENT)*;
+// This is primarily for debugging purposes. Any expression can be given after "Expr:" to see if it is valid. 
+// Such an expression has no meaning in translation.
+//ExpressionStatement:
+//	'Expr:' expr=ThenExpression ('=>' evaluatesTo=STRING)?;
 
-//HACK this is needed to tell the parser, that a WS is a possible follow up of NAME
-CALL_TO_NAME_WITH_WS :
-	NAME_WITH_WS
+RuleStatement :
+	'Rule' name=QNAME ':'? 'if' ifs+=Expression<false> // (','? ifs+=Expression<false>)*
+						   'then' thens +=Expression<true> // (','? thens+=Expression<false>)*
 ;
-NAME_WITH_WS hidden() :
-	NAME WS?
+	
+//ThenExpression returns Expression:
+//	Expression<true>
+//;
+
+//RuleStatement :
+//	'Rule' name=QNAME ':'? ('if' (ifs = ElementSet<false>)) 'then' thens=ElementSet<true>
+//;
+//
+//ElementSet<THEN> :
+//	elements+=Expression<THEN> (','? elements+=Expression<THEN>)*
+//;
+
+// Real expressions start here
+Expression<THEN> returns Expression: // (1)
+	OrExpression<THEN>;
+
+OrExpression<THEN> returns Expression:
+	AndExpression<THEN> ({BinaryOperation.left=current} op=OpOr right=AndExpression<THEN>)*;
+
+OpOr:
+	'or' | '||';
+
+AndExpression<THEN> returns Expression:
+	EqualityExpression<THEN> ({BinaryOperation.left=current} op=OpAnd right=EqualityExpression<THEN>)*;
+
+OpAnd:
+	'and' | '&&';
+
+EqualityExpression<THEN> returns Expression:
+	RelationalExpression<THEN> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<THEN>)*;
+
+InfixOperator :
+	'==' 
+	| '!=' 
+	| '=' 
+	| 'is' ('not'? 'unique' 'in')? 
 ;
 
-NAME_FRAGMENT hidden():
-	ID | UNSIGNED_NUMBER ->ID?
+RelationalExpression<THEN> returns Expression:
+	Addition<THEN> ({BinaryOperation.left=current} op=OpCompare right=Addition<THEN>)*;
+
+OpCompare:
+	'>=' | '<=' | '>' | '<';
+
+Addition<THEN> returns Expression:
+	Multiplication<THEN> (({Plus.left=current} '+' | {Minus.left=current} '-') right=Multiplication<THEN>)*;
+
+Multiplication<THEN> returns Expression:
+	Power<THEN> (({Multi.left=current} '*' | {Div.left=current} '/' | {Mod.left=current} '%') right=Power<THEN>)*;
+
+Power<THEN> returns Expression:
+	PrefixOperation<THEN> (({Exp.left=current} '^') right=PrefixOperation<THEN>)*;
+
+PrefixOperation<THEN> returns Expression :
+	  {UnaryExpression} 'not' negated=PrefixOperation<THEN>
+	| {UnitaryOperation} op=('!' | 'only' | '-') expr=PrefixOperation<THEN> // this can be applied to other unitary operations
+	| SubjHasProp<THEN>
 ;
 
-// NUMBER matches both integral and floating point numbers.
-NUMBER hidden() :
-  '-'? UNSIGNED_NUMBER
+// SubjHasProp has left associativity: Subj with prop1 with prop2 is equivalent to ((Subj with prop1) with prop2)
+SubjHasProp<THEN> returns Expression: // (18)
+	PropOfSubject<THEN> (=>({SubjHasProp.left=current} ('has'|'with') prop=SadlResource)  right=SubjHasProp<THEN>?)*
+//	PropOfSubject<THEN> (<!THEN>(
+//			','? 'has' ( {SubjHasProp.left=current} prop=DNAME right=PropOfSubject<THEN>?
+//			  | {PPP.left=current} negated?='not'? 'been' right=PropOfSubject<THEN>)
+//		| {SubjHasProp.left=current} 'with' prop=DNAME right=PropOfSubject<THEN>?)*)
+	//	PropOfSubject ({SubjHasProp.left=current} ('has'|'with') prop = ID /*[sadl::ResourceName]*/  right=PrimaryExpression)*
 ;
 
-terminal UNSIGNED_NUMBER:
-     ('0'..'9')+
-   | ('0'..'9')+ '.' ('0'..'9')* (('e'|'E') ('+'|'-')? ('0'..'9')+)?
-   |             '.' ('0'..'9')+ (('e'|'E') ('+'|'-')? ('0'..'9')+)?
-   | ('0'..'9')+                  ('e'|'E') ('+'|'-')? ('0'..'9')+
+// PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
+PropOfSubject<THEN> returns Expression: // (17)
+	PrefixOperation2<THEN> (
+		{PropOfSubject.left=current} 'of' right=PropOfSubject<THEN>
+	)?;
+	
+PrefixOperation2<THEN> returns Expression :
+	  {Declaration} article=AnArticle type=SadlResource ->(newName=DNAME)?
+	| PrimaryExpression<THEN>
 ;
 
-// EOS matches one whitespace character or EOF after the period in order to
+// primary expressions are the atom units of expression in the grammar	
+PrimaryExpression<THEN> returns Expression: // (20)
+	'(' Expression<THEN> ')' 
+	| {StringLiteral} value=STRING 
+	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=(STRING | ID))?
+	| {BooleanLiteral} value=BooleanValue 
+	| {Constant} constant=Constants
+	| {Name} nm=QNAME ({Function.name=current} '(' arglist+=Expression<THEN>? (',' arglist+=Expression<THEN>)* ')')?|
+	{ValueTable} valueTable=ValueTable;
+
+	// the truth table
+ValueTable:
+	'[' row=ValueRow ']'
+	// e.g., [George, 23, "Purple", 38.186111]
+	| '{' '[' rows+=ValueRow ']' (','? '[' rows+=ValueRow ']')* '}'
+	// e.g., {[George, 23, "Purple", 38.186111], [Martha, 24, "Pink", 45.203]}
+;
+
+BooleanValue:
+	'true' | 'false';
+	
+
+Constants:
+	'PI' | '--' | 'None' | 'type' | 'index';
+
+ValueRow:
+	explicitValues+=Expression<false> (',' explicitValues+=Expression<false>)*; // e.g., George, 23, "Purple", 38.186111
+
+QNAME:
+	(prefix=ID ':')? frag=DNAME;
+
+DNAME hidden():
+	ID => DNAME_FRAGMENT*;
+
+DNAME_FRAGMENT hidden():
+	'.' (ID | NUMBER);
+
+AnyNumber returns ecore::EBigDecimal hidden() :
+	DecimalNumber EXPONENT?;
+
+DecimalNumber returns ecore::EBigDecimal hidden() :
+	NUMBER => ('.' NUMBER)?;
+
+	// making this a terminal prevents the "-" from getting picked up as unary operator
+terminal EXPONENT returns ecore::EBigDecimal:
+	('e' | 'E') ('-' | '+')? NUMBER;
+
+terminal NUMBER returns ecore::EInt:
+	('0'..'9')+;
+
+	// EOS matches one whitespace character or EOF after the period in order to
 // disambiguate the end of sentence period from periods in names.
-terminal EOS :
-    '.' (' '|'\t'|'\r'|'\n'|EOF);
+terminal EOS:
+//    '.' (WS|EOF);
+	'.' (' ' | '\t' | '\r' | '\n' | EOF);
+
+terminal WS:
+	('\u00A0' | ' ' | '\t' | '\r' | '\n')+;
 
 terminal ID:
-	'^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
-	
+	'^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '-' | '%' | '~')*;
+
 terminal STRING:
-	'"' ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | '"'))* '"' |
-	"'" ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | "'"))* "'";
-	
+	'"' ('\\' ('b' | 't' | 'n' | 'f' | 'r' | 'u' | '"' | "'" | '\\') | !('\\' | '"'))* '"' |
+	"'" ('\\' ('b' | 't' | 'n' | 'f' | 'r' | 'u' | '"' | "'" | '\\') | !('\\' | "'"))* "'";
+
 terminal ML_COMMENT:
 	'/*'->'*/';
-	
+
 terminal SL_COMMENT:
 	'//' !('\n' | '\r')* ('\r'? '\n')?;
-	
-terminal WS:
-	(' ' | '\t' | '\r' | '\n')+;
+
 terminal ANY_OTHER:
 	.;
-	

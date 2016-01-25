@@ -14,6 +14,7 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -161,6 +162,27 @@ class DeclarationExtensionsTest {
 		'''.parse
 		val airport = model.elements.get(1) as SadlClassOrPropertyDeclaration
 		airport.describedBy.head.eContents.filter(SadlResource).head.assertIs(OntConceptType.DATATYPE_PROPERTY)
+	}
+	
+	@Ignore
+	@Test def void testLocalVariable_01() {
+		val model = '''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Thingy is a class described by connectedTo with values of type Thingy, described by color with values of type string.
+			
+			T1 is a Thingy.
+			T2 is a Thingy.
+			T3 is a Thingy.
+			
+			Rule AllThingysConnect: if x is a Thingy and y is a Thingy and x != y then x has connectedTo y .
+			Rule AllThingysAreBlue: if x is a Thingy then color of x is "blue".
+		'''.parse
+		
+		val resources = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		// TODO how do we check that the two rules have separate local variables?
+		resources.get('x').assertIs(OntConceptType.VARIABLE)
+		resources.get('y').assertIs(OntConceptType.VARIABLE)
 	}
 	
 	protected def void assertIs(SadlResource it, OntConceptType type) {

@@ -106,6 +106,24 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlCardinalityCondition/type"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlExplicitValue"/>
+    <genClasses ecoreClass="SADL.ecore#//RuleStatement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/ifs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/thens"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Expression"/>
+    <genClasses ecoreClass="SADL.ecore#//ValueTable">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueTable/valueTable"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueTable/row"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueTable/rows"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//ValueRow">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueRow/explicitValues"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//QNAME">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//QNAME/prefix"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//QNAME/frag"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlClassOrPropertyDeclaration">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/classOrProperty"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/superElement"/>
@@ -189,6 +207,79 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlConstantLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlConstantLiteral/term"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//BinaryOperation">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//BinaryOperation/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BinaryOperation/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//BinaryOperation/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Plus">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Plus/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Plus/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Minus">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Minus/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Minus/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Multi">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Multi/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Multi/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Div">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Div/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Div/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Mod">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Mod/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Mod/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Exp">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Exp/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Exp/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//UnaryExpression">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnaryExpression/negated"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//UnitaryOperation">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//UnitaryOperation/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnitaryOperation/expr"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//SubjHasProp">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/prop"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//PropOfSubject">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Declaration">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Declaration/article"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Declaration/newName"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//StringLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//StringLiteral/value"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//NumberLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//NumberLiteral/value"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Unit">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Unit/value"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Unit/unit"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//BooleanLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BooleanLiteral/value"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Constant">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Constant/constant"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Name">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Name/nm"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Function">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Function/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Function/arglist"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

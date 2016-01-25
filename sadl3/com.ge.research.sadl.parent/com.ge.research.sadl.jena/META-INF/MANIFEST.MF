@@ -32,7 +32,7 @@ Export-Package: com.ge.research.sadl.jena,
  com.hp.hpl.jena.ontology,
  com.hp.hpl.jena.rdf.model,
  com.hp.hpl.jena.util
-Require-Bundle: com.ge.research.sadl;bundle-version="1.0.0",
+Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
  org.eclipse.emf.ecore,
  org.eclipse.emf,
  org.eclipse.xtext;bundle-version="2.9.0",

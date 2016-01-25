@@ -16,6 +16,8 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.CancelIndicator
+import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.QNAME
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -60,6 +62,15 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					var highlightingId = getHighlightingId(element.otherProperty)
 					acceptor.highlight(element, SADLPackage.Literals.SADL_IS_INVERSE_OF__OTHER_PROPERTY, highlightingId)
 				}
+				QNAME : {
+					var node = NodeModelUtils.getNode(element)
+					acceptor.addPosition(node.offset, node.length, SadlHighlightingConfiguration.URI_ID)
+				}
+				Name : {
+					var highlightingId = getHighlightingId(element.nm)
+					var node = NodeModelUtils.getNode(element.nm)
+					acceptor.addPosition(node.offset, node.length, highlightingId)
+				}
 			}
 		}
 	}
@@ -68,6 +79,10 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 		for (node : NodeModelUtils.findNodesForFeature(object, feature)) {
 			acceptor.addPosition(node.offset, node.length, id)
 		}
+	}
+	
+	def private String getHighlightingId(QNAME nm) {
+		return SadlHighlightingConfiguration.VARIABLE_ID;
 	}
 
 	def private String getHighlightingId(SadlResource rn) {
