@@ -4,7 +4,7 @@ Bundle-Name: Jena
 Bundle-SymbolicName: com.ge.research.sadl.jena;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-Vendor: GE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/activation-1.0.2.jar,
  lib/com.springsource.org.apache.commons.logging-1.1.1.jar,
  lib/commons-codec-1.6.jar,
