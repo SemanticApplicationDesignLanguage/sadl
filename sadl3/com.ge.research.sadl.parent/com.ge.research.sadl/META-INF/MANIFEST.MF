@@ -17,7 +17,7 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtend.lib,
  org.eclipse.emf.common,
  org.eclipse.core.runtime;bundle-version="3.9.100"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.generator,
  com.ge.research.sadl.model,

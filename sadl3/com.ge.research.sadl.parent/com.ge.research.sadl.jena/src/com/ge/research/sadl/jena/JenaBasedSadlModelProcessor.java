@@ -26,6 +26,7 @@ import com.ge.research.sadl.owl2sadl.OwlToSadl;
 //import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SadlAllValuesCondition;
 import com.ge.research.sadl.sADL.SadlAnnotation;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
@@ -329,6 +330,9 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 					}
 					else if (element instanceof SadlSameAs) {
 						processSadlSameAs((SadlSameAs)element);
+					}
+					else if (element instanceof RuleStatement) {
+						
 					}
 					else {
 						throw new JenaProcessorException("onValidate for element of type '" + element.getClass().getCanonicalName() + "' not implemented");
@@ -1300,34 +1304,22 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		com.hp.hpl.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
 		boolean minInclusive = (facet.getMinexin() != null && facet.getMinexin().equals("["));
 		boolean maxInclusive = (facet.getMaxexin() != null && facet.getMaxexin().equals("]"));
-		if (facet.getMin() != null) {
-			if (minInclusive) {
-				anon.addProperty(xsdProperty("minInclusive"), facet.getMin());
-			}
-			else {
-				anon.addProperty(xsdProperty("minExclusive"), facet.getMin());
-			}
+		if (minInclusive) {
+			anon.addProperty(xsdProperty("minInclusive"), "" + facet.getMin());
 		}
-		if (facet.getMax() != null) {
-			if (maxInclusive) {
-				anon.addProperty(xsdProperty("maxInclusive"), facet.getMax());
-			}
-			else {
-				anon.addProperty(xsdProperty("maxExclusive"), facet.getMax());
-			}
+		else {
+			anon.addProperty(xsdProperty("minExclusive"), "" + facet.getMin());
 		}
-		if (facet.getLen() != null) {
-			anon.addProperty(xsdProperty("length"), facet.getLen());
+		if (maxInclusive) {
+			anon.addProperty(xsdProperty("maxInclusive"), "" + facet.getMax());
 		}
-		if (facet.getMinlen() != null) {
-			anon.addProperty(xsdProperty("minLength"), facet.getMinlen());
+		else {
+			anon.addProperty(xsdProperty("maxExclusive"), "" + facet.getMax());
 		}
-		if (facet.getMaxlen() != null) {
-			anon.addProperty(xsdProperty("maxLength"), facet.getMaxlen());
-		}
-		if (facet.getRegex() != null) {
-			anon.addProperty(xsdProperty("pattern"), facet.getRegex());
-		}
+		anon.addProperty(xsdProperty("length"), "" + facet.getLen());
+		anon.addProperty(xsdProperty("minLength"), "" + facet.getMinlen());
+		anon.addProperty(xsdProperty("maxLength"), "" + facet.getMaxlen());
+		anon.addProperty(xsdProperty("pattern"), "" + facet.getRegex());
 		if (facet.getValues() != null) {
 			Iterator<String> iter = facet.getValues().iterator();
 			while (iter.hasNext()) {
@@ -1484,7 +1476,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 
 	private Literal sadlExplicitValueToLiteral(SadlExplicitValue value, OntProperty prop) throws JenaProcessorException {
 		if (value instanceof SadlNumberLiteral) {
-			String val = ((SadlNumberLiteral)value).getLiteralNumber();
+			int val = ((SadlNumberLiteral)value).getLiteralNumber();
 			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val);
 		}
 		else if (value instanceof SadlStringLiteral) {
