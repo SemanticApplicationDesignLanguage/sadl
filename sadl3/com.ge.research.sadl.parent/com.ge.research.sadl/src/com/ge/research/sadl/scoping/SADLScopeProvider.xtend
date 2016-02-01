@@ -21,6 +21,9 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import org.eclipse.xtext.EcoreUtil2
+import com.ge.research.sadl.sADL.RuleStatement
+import com.ge.research.sadl.sADL.Expression
 
 /**
  * This class contains custom scoping description.
@@ -46,7 +49,27 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
-		return createResourceScope(context.eResource, null, IScope.NULLSCOPE, newHashSet)
+		val parent = createResourceScope(context.eResource, null, IScope.NULLSCOPE, newHashSet)
+		val rule = EcoreUtil2.getContainerOfType(context, RuleStatement)
+		if (rule !== null) {
+			return getLocalVariableScope(rule.ifs + rule.thens, parent)
+		}
+		return parent
+	}
+	
+	protected def IScope getLocalVariableScope(Iterable<Expression> expressions, IScope parent) {
+		val map = newHashMap
+		for (expression : expressions) {
+			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource)
+			while (iter.hasNext) {
+				val name = iter.next
+				val qn = QualifiedName.create(name.concreteName)
+				if (!map.containsKey(qn) && parent.getSingleElement(qn) === null) {
+					map.put(qn, new EObjectDescription(qn, name, emptyMap))
+				}
+			}
+		}
+		return MapBasedScope.createScope(parent, map.values)
 	}
 	
 	protected def IScope createResourceScope(Resource resource, String alias, IScope parent, Set<Resource> importedResources) {
@@ -70,10 +93,18 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						if (namespace !== null)
 							map.addElement(namespace.append(simpleName), it)
 					}
+					default :
+						if (pruneScope(it)) {
+							iter.prune
+						}
 				}
 			}
 			return MapBasedScope.createScope(newParent, map.values)
 		]
+	}
+	
+	protected def pruneScope(EObject object) {
+		return object instanceof RuleStatement
 	}
 	
 	protected def String getAlias(Resource resource) {

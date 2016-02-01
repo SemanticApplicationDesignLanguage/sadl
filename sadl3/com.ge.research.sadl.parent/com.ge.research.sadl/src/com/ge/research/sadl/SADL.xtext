@@ -283,8 +283,12 @@ PrimaryExpression returns Expression: // (20)
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=(STRING | ID))?
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-	| {Name} nm=QNAME ({Function.name=current} '(' arglist+=Expression? (',' arglist+=Expression)* ')')?|
-	{ValueTable} valueTable=ValueTable;
+	| FeatureCall 
+	| {ValueTable} valueTable=ValueTable;
+	
+FeatureCall returns SadlResource:
+	{Name} name=[SadlResource|DNAME] ({Function.targetName=current} '(' arglist+=Expression? (',' arglist+=Expression)* ')')?
+;
 
 	// the truth table
 ValueTable:

@@ -1,6 +1,8 @@
 package com.ge.research.sadl.ui.syntaxcoloring
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.QNAME
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlIsInverseOf
 import com.ge.research.sadl.sADL.SadlModel
@@ -16,8 +18,6 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.CancelIndicator
-import com.ge.research.sadl.sADL.Name
-import com.ge.research.sadl.sADL.QNAME
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -41,6 +41,11 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 		}
 		for (element : model.eAllContents.toList) {
 			switch element {
+				Name : {
+					var highlightingId = SadlHighlightingConfiguration.VARIABLE_ID
+					var node = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME).head
+					acceptor.addPosition(node.offset, node.length, highlightingId)
+				}
 				SadlResource : {
 					var node = NodeModelUtils.findActualNodeFor(element)
 					var highlightingId = getHighlightingId(element)
@@ -66,11 +71,6 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					var node = NodeModelUtils.getNode(element)
 					acceptor.addPosition(node.offset, node.length, SadlHighlightingConfiguration.URI_ID)
 				}
-				Name : {
-					var highlightingId = getHighlightingId(element.nm)
-					var node = NodeModelUtils.getNode(element.nm)
-					acceptor.addPosition(node.offset, node.length, highlightingId)
-				}
 			}
 		}
 	}
@@ -81,10 +81,6 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 		}
 	}
 	
-	def private String getHighlightingId(QNAME nm) {
-		return SadlHighlightingConfiguration.VARIABLE_ID;
-	}
-
 	def private String getHighlightingId(SadlResource rn) {
 		switch (declarationExtensions.getOntConceptType(rn)) {
 			case CLASS_PROPERTY: {
