@@ -476,7 +476,10 @@ class SadlModelManagerProviderTest {
 			var found = false
 			// look for something specific to the model; if found set found true
 // TODO use datatype facets to check validity?			
-
+			var stmtitr = jenaModel.listStatements(null, jenaModel.getProperty("http://www.w3.org/2001/XMLSchema#maxLength"), null as RDFNode).toIterable().iterator
+			if (stmtitr != null && stmtitr.hasNext) {
+				found = true;
+			}
 			if (!found) {
 				jenaModel.write(System.out, "N3")				
 			}

@@ -42,6 +42,7 @@ class SadlImportManagerProviderTest {
 	@Inject Provider<JenaBasedSadlImportProcessor> impProcessorProvider
 	
 /* Tests that should generate validation errors */	
+	@Ignore
 	@Test def void testDatatypeImports1() {
 		val model = '''
 			<rdf:RDF
