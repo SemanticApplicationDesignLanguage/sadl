@@ -26,6 +26,7 @@ import com.ge.research.sadl.owl2sadl.OwlToSadl;
 //import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SadlAllValuesCondition;
 import com.ge.research.sadl.sADL.SadlAnnotation;
@@ -332,7 +333,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 						processSadlSameAs((SadlSameAs)element);
 					}
 					else if (element instanceof RuleStatement) {
-						
+						processRuleStatement((RuleStatement)element);
 					}
 					else {
 						throw new JenaProcessorException("onValidate for element of type '" + element.getClass().getCanonicalName() + "' not implemented");
@@ -345,6 +346,14 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		}
 	}
 
+	private void processRuleStatement(RuleStatement element) {
+		String rulePrefix = element.getName().getPrefix();
+		String ruleName = element.getName().getFrag();
+		EList<Expression> ifs = element.getIfs();
+		EList<Expression> thens = element.getThens();
+		int i = 0;
+	}
+	
 	private void processSadlSameAs(SadlSameAs element) throws JenaProcessorException {
 		SadlResource sr = element.getNameOrRef();
 		String uri = declarationExtensions.getConceptUri(sr);

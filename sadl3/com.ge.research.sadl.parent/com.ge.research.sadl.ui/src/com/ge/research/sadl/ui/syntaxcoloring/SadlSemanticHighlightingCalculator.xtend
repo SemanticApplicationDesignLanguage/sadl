@@ -40,31 +40,36 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 			}
 		}
 		for (element : model.eAllContents.toList) {
-			switch element {
+			var v = element
+			if (element instanceof Name) {
+				v = element.name
+			}
+			switch v {
 				Name : {
+					// check what getName returns. If it returns itself or something of type Name
 					var highlightingId = SadlHighlightingConfiguration.VARIABLE_ID
 					var node = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME).head
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}
 				SadlResource : {
 					var node = NodeModelUtils.findActualNodeFor(element)
-					var highlightingId = getHighlightingId(element)
+					var highlightingId = getHighlightingId(v)
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}
 				SadlPropertyCondition : {
-					var highlightingId = getHighlightingId(element.property)
+					var highlightingId = getHighlightingId(v.property)
 					acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_CONDITION__PROPERTY, highlightingId)
 				}
 				SadlPropertyInitializer : {
-					var highlightingId = getHighlightingId(element.property)
+					var highlightingId = getHighlightingId(v.property)
 					acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_INITIALIZER__PROPERTY, highlightingId)
 				}
 				SadlSimpleTypeReference : {
-					var highlightingId = getHighlightingId(element.type)
+					var highlightingId = getHighlightingId(v.type)
 					acceptor.highlight(element, SADLPackage.Literals.SADL_SIMPLE_TYPE_REFERENCE__TYPE, highlightingId)
 				}
 				SadlIsInverseOf : {
-					var highlightingId = getHighlightingId(element.otherProperty)
+					var highlightingId = getHighlightingId(v.otherProperty)
 					acceptor.highlight(element, SADLPackage.Literals.SADL_IS_INVERSE_OF__OTHER_PROPERTY, highlightingId)
 				}
 				QNAME : {

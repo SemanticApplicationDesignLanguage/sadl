@@ -9,6 +9,11 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Inject
 import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.utils.SadlUtils
+import com.ge.research.sadl.sADL.RuleStatement
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.EcoreUtil2
+import com.ge.research.sadl.sADL.Name
+import java.util.ArrayList
 
 /**
  * This class contains custom validation rules. 
@@ -33,6 +38,7 @@ class SADLValidator extends AbstractSADLValidator {
 	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
 	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
 	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
+	public static String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
 	
 	@Check
 	def checkSadlModel(SadlModel model) {
@@ -92,4 +98,16 @@ class SADLValidator extends AbstractSADLValidator {
 		}
 	}
 	
+	@Check
+	def checkRuleStatement(RuleStatement rule) {
+		// make sure all variables used in the head are bound in the bod
+		val itr = EcoreUtil2.getAllContents(rule.thens).filter(Name).toList.iterator
+		while (itr.hasNext) {
+			var name = itr.next
+			if (name.name.equals(name)) {
+				var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + " which is not bound in the rule premises."
+				error(errMsg, SADLPackage.Literals.RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+			}
+		}
+	}
 }
