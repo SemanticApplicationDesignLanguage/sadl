@@ -268,7 +268,7 @@ SubjHasProp returns Expression: // (18)
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject returns Expression: // (17)
 	PrefixOperation2 (
-		{PropOfSubject.left=current} 'of' right=PropOfSubject
+		{PropOfSubject.left=current} ('of'|'for') right=PropOfSubject
 	)?;
 	
 PrefixOperation2 returns Expression :
@@ -283,11 +283,12 @@ PrimaryExpression returns Expression: // (20)
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=(STRING | ID))?
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-	| FeatureCall 
+	| {Function} =>(called=DNAME '(') arglist+=Expression? (',' arglist+=Expression)* ')'
+	| FeatureCall
 	| {ValueTable} valueTable=ValueTable;
 	
 FeatureCall returns SadlResource:
-	{Name} name=[SadlResource|DNAME] ({Function.targetName=current} '(' arglist+=Expression? (',' arglist+=Expression)* ')')?
+	{Name} name=[SadlResource|DNAME]
 ;
 
 	// the truth table
