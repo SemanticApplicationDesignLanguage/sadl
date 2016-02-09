@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.activation.DataSource;
 
 import org.slf4j.Logger;
@@ -62,7 +63,9 @@ public class PrologReasonerPlugin extends Reasoner {
 	private OntologyInterface ontointerface = new OntologyInterface();
 	
 	private String runInitPred = "";
+	@SuppressWarnings("unused")
 	private String plImport = "";
+	@SuppressWarnings("unused")
 	private String plArgs = "";
 
 	protected boolean collectTimingInfo = false;
@@ -294,8 +297,12 @@ public class PrologReasonerPlugin extends Reasoner {
 				continue;
 			}
 			
-			if (varStart)
-				vars.add(querySplit[index]);
+			if (varStart) {
+				String[] varSplit = querySplit[index].split(",+");
+				for (int i=0; i<varSplit.length; ++i){
+					vars.add(varSplit[i]);
+				}
+			}
 		}
 		
 		int whereIndex = askQuery.indexOf(" where ");
@@ -325,7 +332,6 @@ public class PrologReasonerPlugin extends Reasoner {
 					break;
 			}
 		} catch (MalformedGoalException | NoSolutionException | NoMoreSolutionException e) {
-			// TODO Auto-generated catch block
 			System.err.println("Error: " + (e.getMessage() != null ? e.getMessage() : "") + " executing query '" + plQuery + "'");
 			e.printStackTrace();
 		}
@@ -371,7 +377,7 @@ public class PrologReasonerPlugin extends Reasoner {
 			}
 			return pQuery;
 		}
-		return null;
+		return query;
 	}
 
 	@Override
