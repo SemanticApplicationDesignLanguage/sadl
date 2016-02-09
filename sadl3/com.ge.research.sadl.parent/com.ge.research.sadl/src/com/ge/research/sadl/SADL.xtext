@@ -192,40 +192,40 @@ DefiniteArticle :
 //	'Expr:' expr=ThenExpression ('=>' evaluatesTo=STRING)?;
 
 RuleStatement :
-	'Rule' name=QNAME ':'? 'if' ifs+=Expression<false> // (','? ifs+=Expression<false>)*
-						   'then' thens +=Expression<true> // (','? thens+=Expression<false>)*
+	'Rule' name=QNAME ':'? 'if' ifs+=Expression // (','? ifs+=Expression)*
+						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
 	
 //ThenExpression returns Expression:
-//	Expression<true>
+//	Expression
 //;
 
 //RuleStatement :
-//	'Rule' name=QNAME ':'? ('if' (ifs = ElementSet<false>)) 'then' thens=ElementSet<true>
+//	'Rule' name=QNAME ':'? ('if' (ifs = ElementSet)) 'then' thens=ElementSet
 //;
 //
-//ElementSet<THEN> :
-//	elements+=Expression<THEN> (','? elements+=Expression<THEN>)*
+//ElementSet :
+//	elements+=Expression (','? elements+=Expression)*
 //;
 
 // Real expressions start here
-Expression<THEN> returns Expression: // (1)
-	OrExpression<THEN>;
+Expression returns Expression: // (1)
+	OrExpression;
 
-OrExpression<THEN> returns Expression:
-	AndExpression<THEN> ({BinaryOperation.left=current} op=OpOr right=AndExpression<THEN>)*;
+OrExpression returns Expression:
+	AndExpression ({BinaryOperation.left=current} op=OpOr right=AndExpression)*;
 
 OpOr:
 	'or' | '||';
 
-AndExpression<THEN> returns Expression:
-	EqualityExpression<THEN> ({BinaryOperation.left=current} op=OpAnd right=EqualityExpression<THEN>)*;
+AndExpression returns Expression:
+	EqualityExpression ({BinaryOperation.left=current} op=OpAnd right=EqualityExpression)*;
 
 OpAnd:
 	'and' | '&&';
 
-EqualityExpression<THEN> returns Expression:
-	RelationalExpression<THEN> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<THEN>)*;
+EqualityExpression returns Expression:
+	RelationalExpression ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression)*;
 
 InfixOperator :
 	'==' 
@@ -234,57 +234,62 @@ InfixOperator :
 	| 'is' ('not'? 'unique' 'in')? 
 ;
 
-RelationalExpression<THEN> returns Expression:
-	Addition<THEN> ({BinaryOperation.left=current} op=OpCompare right=Addition<THEN>)*;
+RelationalExpression returns Expression:
+	Addition ({BinaryOperation.left=current} op=OpCompare right=Addition)*;
 
 OpCompare:
 	'>=' | '<=' | '>' | '<';
 
-Addition<THEN> returns Expression:
-	Multiplication<THEN> (({Plus.left=current} '+' | {Minus.left=current} '-') right=Multiplication<THEN>)*;
+Addition returns Expression:
+	Multiplication (({Plus.left=current} '+' | {Minus.left=current} '-') right=Multiplication)*;
 
-Multiplication<THEN> returns Expression:
-	Power<THEN> (({Multi.left=current} '*' | {Div.left=current} '/' | {Mod.left=current} '%') right=Power<THEN>)*;
+Multiplication returns Expression:
+	Power (({Multi.left=current} '*' | {Div.left=current} '/' | {Mod.left=current} '%') right=Power)*;
 
-Power<THEN> returns Expression:
-	PrefixOperation<THEN> (({Exp.left=current} '^') right=PrefixOperation<THEN>)*;
+Power returns Expression:
+	PrefixOperation (({Exp.left=current} '^') right=PrefixOperation)*;
 
-PrefixOperation<THEN> returns Expression :
-	  {UnaryExpression} 'not' negated=PrefixOperation<THEN>
-	| {UnitaryOperation} op=('!' | 'only' | '-') expr=PrefixOperation<THEN> // this can be applied to other unitary operations
-	| SubjHasProp<THEN>
+PrefixOperation returns Expression :
+	  {UnaryExpression} 'not' negated=PrefixOperation
+	| {UnitaryOperation} op=('!' | 'only' | '-') expr=PrefixOperation // this can be applied to other unitary operations
+	| SubjHasProp
 ;
 
 // SubjHasProp has left associativity: Subj with prop1 with prop2 is equivalent to ((Subj with prop1) with prop2)
-SubjHasProp<THEN> returns Expression: // (18)
-	PropOfSubject<THEN> (=>({SubjHasProp.left=current} ('has'|'with') prop=SadlResource)  right=SubjHasProp<THEN>?)*
-//	PropOfSubject<THEN> (<!THEN>(
-//			','? 'has' ( {SubjHasProp.left=current} prop=DNAME right=PropOfSubject<THEN>?
-//			  | {PPP.left=current} negated?='not'? 'been' right=PropOfSubject<THEN>)
-//		| {SubjHasProp.left=current} 'with' prop=DNAME right=PropOfSubject<THEN>?)*)
+SubjHasProp returns Expression: // (18)
+	PropOfSubject (=>({SubjHasProp.left=current} ('has'|'with') prop=SadlResource)  right=SubjHasProp?)*
+//	PropOfSubject (<!THEN>(
+//			','? 'has' ( {SubjHasProp.left=current} prop=DNAME right=PropOfSubject?
+//			  | {PPP.left=current} negated?='not'? 'been' right=PropOfSubject)
+//		| {SubjHasProp.left=current} 'with' prop=DNAME right=PropOfSubject?)*)
 	//	PropOfSubject ({SubjHasProp.left=current} ('has'|'with') prop = ID /*[sadl::ResourceName]*/  right=PrimaryExpression)*
 ;
 
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
-PropOfSubject<THEN> returns Expression: // (17)
-	PrefixOperation2<THEN> (
-		{PropOfSubject.left=current} 'of' right=PropOfSubject<THEN>
+PropOfSubject returns Expression: // (17)
+	PrefixOperation2 (
+		{PropOfSubject.left=current} ('of'|'for') right=PropOfSubject
 	)?;
 	
-PrefixOperation2<THEN> returns Expression :
+PrefixOperation2 returns Expression :
 	  {Declaration} article=AnArticle type=SadlResource ->(newName=DNAME)?
-	| PrimaryExpression<THEN>
+	| PrimaryExpression
 ;
 
 // primary expressions are the atom units of expression in the grammar	
-PrimaryExpression<THEN> returns Expression: // (20)
-	'(' Expression<THEN> ')' 
+PrimaryExpression returns Expression: // (20)
+	'(' Expression ')' 
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=(STRING | ID))?
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-	| {Name} nm=QNAME ({Function.name=current} '(' arglist+=Expression<THEN>? (',' arglist+=Expression<THEN>)* ')')?|
-	{ValueTable} valueTable=ValueTable;
+	| {Function} =>(called=DNAME '(') arglist+=Expression? (',' arglist+=Expression)* ')'
+	| FeatureCall
+	| {ValueTable} valueTable=ValueTable;
+	
+FeatureCall returns SadlResource:
+	{Name} name=[SadlResource|DNAME]
+;
 
 	// the truth table
 ValueTable:
@@ -302,7 +307,7 @@ Constants:
 	'PI' | '--' | 'None' | 'type' | 'index';
 
 ValueRow:
-	explicitValues+=Expression<false> (',' explicitValues+=Expression<false>)*; // e.g., George, 23, "Purple", 38.186111
+	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111
 
 QNAME:
 	(prefix=ID ':')? frag=DNAME;

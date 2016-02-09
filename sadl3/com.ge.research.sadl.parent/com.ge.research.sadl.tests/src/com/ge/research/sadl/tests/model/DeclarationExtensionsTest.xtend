@@ -164,7 +164,6 @@ class DeclarationExtensionsTest {
 		airport.describedBy.head.eContents.filter(SadlResource).head.assertIs(OntConceptType.DATATYPE_PROPERTY)
 	}
 	
-	@Ignore
 	@Test def void testLocalVariable_01() {
 		val model = '''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 

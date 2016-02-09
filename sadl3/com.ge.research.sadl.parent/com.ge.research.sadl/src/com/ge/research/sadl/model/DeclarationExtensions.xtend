@@ -22,6 +22,7 @@ import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
 import org.eclipse.xtext.EcoreUtil2
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlIsAnnotation
+import com.ge.research.sadl.sADL.Name
 
 class DeclarationExtensions {
 	
@@ -63,6 +64,11 @@ class DeclarationExtensions {
 	def OntConceptType getOntConceptType(SadlResource resource) {
 		var cnm = getConcreteName(resource)
 		if(cnm == null) System.out.println("Resource could not provide a concrete name");
+		
+		if (resource instanceof Name) {
+			return OntConceptType.VARIABLE
+		}
+		
 		switch e: resource.declaration.eContainer {
 			
 			SadlClassOrPropertyDeclaration case e.restrictions.exists[it instanceof SadlIsAnnotation],
@@ -99,8 +105,8 @@ class DeclarationExtensions {
 			SadlValueList,
 			SadlMustBeOneOf :
 				OntConceptType.INSTANCE
-			
-			default: OntConceptType.VARIABLE // throw new IllegalStateException("Couldn't determine the ontology type of "+ cnm) 
+				
+			default: OntConceptType.INSTANCE // linking errors and the like
 		}
 	}
 	

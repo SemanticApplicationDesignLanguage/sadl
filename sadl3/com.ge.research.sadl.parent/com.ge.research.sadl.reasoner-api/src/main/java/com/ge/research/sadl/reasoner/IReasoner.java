@@ -51,6 +51,12 @@ public interface IReasoner {
 	public int initializeReasoner(URI KBIdentifier, String modelName, String repoType) throws ReasonerNotFoundException, ConfigurationException;
 		
 	/**
+	 * Method to find out if an instance of IReasoner has been initialized
+	 * @return-- true if the reasoner has been initialized
+	 */
+	public boolean isInitialized();
+	
+	/**
 	 * Method to set the ConfigurationManager. If not set, a new one will be created.
 	 * 
 	 * @param configMgr
@@ -114,7 +120,7 @@ public interface IReasoner {
 	public boolean loadInstanceData(String instanceDatafile) throws IOException, ConfigurationException;
 	public boolean loadInstanceData(URI instanceDatafile) throws IOException, ConfigurationException;
 	public boolean loadInstanceData(InputStream is, String format) throws IOException, ConfigurationException;
-		public boolean addRules(List<String> rules);
+	public boolean addRules(List<String> rules);
 
 	/**
 	 * Method to add instance data

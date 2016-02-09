@@ -42,6 +42,7 @@ class SadlImportManagerProviderTest {
 	@Inject Provider<JenaBasedSadlImportProcessor> impProcessorProvider
 	
 /* Tests that should generate validation errors */	
+	@Ignore
 	@Test def void testDatatypeImports1() {
 		val model = '''
 			<rdf:RDF
@@ -155,8 +156,9 @@ class SadlImportManagerProviderTest {
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val impprocessor = impProcessorProvider.get
 		val Object[] results = impprocessor.onImport(code.toString);
-		val InputStream is = results.get(0) as InputStream
-		val String sadl = streamToString(is)
+//		val InputStream is = results.get(0) as InputStream
+//		val String sadl = streamToString(is)
+		val String sadl = results.get(0) as String
 		System.out.println(sadl)
 		val model = parser.parse(sadl)
 		validationTestHelper.assertNoErrors(model)

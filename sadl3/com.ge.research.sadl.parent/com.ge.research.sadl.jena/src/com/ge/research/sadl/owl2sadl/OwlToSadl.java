@@ -2946,6 +2946,9 @@ public class OwlToSadl {
 	}
 
 	private OntModelSpec getSpec() {
+		if (spec == null) {
+			spec = OntModelSpec.OWL_MEM;
+		}
 		return spec;
 	}
 

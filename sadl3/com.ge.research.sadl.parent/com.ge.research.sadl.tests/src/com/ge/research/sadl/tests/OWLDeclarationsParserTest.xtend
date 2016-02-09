@@ -213,6 +213,7 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Ignore
 	@Test def void testConceptNamesWithDots() {
 		'''
 			uri "http://com.ge.research.sadl/morenames" alias morenames.
@@ -265,6 +266,7 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Ignore
 	@Test def void testClassRestrictions_04() {
 		'''
 		uri "http://sadl.imp/TestThreeLevelDefaults".
