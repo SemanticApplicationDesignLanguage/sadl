@@ -58,6 +58,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def IScope getLocalVariableScope(Iterable<Expression> expressions, IScope parent) {
+		if (expressions.empty)
+			return parent;
 		val map = newHashMap
 		for (expression : expressions) {
 			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource)
@@ -77,7 +79,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		if (!importedResources.add(resource)) {
 			return parent
 		}
-		return cache.get('resource_scope'+alias, resource) [
+		{//cache.get('resource_scope'+alias, resource) [
 			var newParent = createImportScope(resource, parent, importedResources)
 			if (shouldWrap)
 				newParent = wrap(newParent)
@@ -100,7 +102,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				}
 			}
 			return MapBasedScope.createScope(newParent, map.values)
-		]
+		}
 	}
 	
 	protected def pruneScope(EObject object) {

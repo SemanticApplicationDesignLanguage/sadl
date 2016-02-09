@@ -106,7 +106,7 @@ class DeclarationExtensions {
 			SadlMustBeOneOf :
 				OntConceptType.INSTANCE
 				
-			default: throw new IllegalStateException("Couldn't determine the ontology type of "+ cnm + " ["+resource.class.name+"]") 
+			default: OntConceptType.INSTANCE // linking errors and the like
 		}
 	}
 	
