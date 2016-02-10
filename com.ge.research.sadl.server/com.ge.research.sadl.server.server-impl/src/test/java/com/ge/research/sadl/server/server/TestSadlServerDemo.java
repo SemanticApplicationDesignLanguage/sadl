@@ -27,22 +27,19 @@
 
 package com.ge.research.sadl.server.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.activation.DataSource;
-import javax.naming.NameNotFoundException;
-
 import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -53,11 +50,9 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServer;
-import com.ge.research.sadl.server.ISadlServerMD;
 import com.ge.research.sadl.server.ISadlServerPE;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
-import com.ge.research.sadl.server.server.SadlServerMDImpl;
 
 public class TestSadlServerDemo extends TestCase {
 
@@ -81,7 +76,8 @@ public class TestSadlServerDemo extends TestCase {
 	
 	private String serverSideScenario = "Test1Scenario";
 	private String clientScenarioService = "ClientScenario";
-	private String initialNamedService = "SSShapes";
+//	private String initialNamedService = "SSShapes";
+	private String initialNamedService = "Shapes";
 	private String toBeCreatedNamedService = "SSShapesExtended";
 	
 	@Before
@@ -89,7 +85,8 @@ public class TestSadlServerDemo extends TestCase {
 		super.setUp();
 		kbaseRoot = ClassLoader.getSystemResource("DataModels").getFile();
 //		modelFolder = ClassLoader.getSystemResource("DataModels/Advise2").getFile();
-		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesSadlServerTest/OwlModels").getFile();
+//		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesSadlServerTest/OwlModels").getFile();
+		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesDemo/OwlModels").getFile();
 		List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
 		loggers.add(LogManager.getRootLogger());
 		for ( Logger logger : loggers ) {
@@ -109,7 +106,7 @@ public class TestSadlServerDemo extends TestCase {
 	
 	@Test
 	public void testServerVersionInfo() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, QueryParseException, IOException {
-		// get an instance of the servrer
+		// get an instance of the server
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
 		// get server version
@@ -117,24 +114,24 @@ public class TestSadlServerDemo extends TestCase {
 		assertNotNull(sv);
 		System.out.println("Server version: " + sv);
 		
-		// select a service model--this is necessary to enable creation of a reasoner--and then get the reasoner version
-		assertNotNull(srvr.selectServiceModel(serverSideScenario));
-		String rv = srvr.getReasonerVersion();
-		assertNotNull(rv);
-		System.out.println("Reasoner version: " + rv);
-		
-		// get the version of the ontology (model) specified in the named service
-		String modelName = srvr.getModelName();
-		String vqry = srvr.prepareQuery("select ?ver where {<" + modelName + "> <owl:versionInfo> + ?ver}");
-		ResultSet rs = srvr.query(vqry);
-		assertNotNull(rs);
-		System.out.println("Server-side scenario ontology (" + modelName + ") version: " + rs.getResultAt(0, 0));
-		
-		// get the names of all imported models and their versions
-		String ivqry = srvr.prepareQuery("select ?impont ?impver where {<" + modelName + "> <owl:imports>+ ?impont . ?impont <owl:versionInfo> ?impver}");
-		rs = srvr.query(ivqry);
-		assertNotNull(rs);
-		System.out.println("Imported ontologies and versions: " + rs.toStringWithIndent(5));
+//		// select a service model--this is necessary to enable creation of a reasoner--and then get the reasoner version
+//		assertNotNull(srvr.selectServiceModel(serverSideScenario));
+//		String rv = srvr.getReasonerVersion();
+//		assertNotNull(rv);
+//		System.out.println("Reasoner version: " + rv);
+//		
+//		// get the version of the ontology (model) specified in the named service
+//		String modelName = srvr.getModelName();
+//		String vqry = srvr.prepareQuery("select ?ver where {<" + modelName + "> <owl:versionInfo> + ?ver}");
+//		ResultSet rs = srvr.query(vqry);
+//		assertNotNull(rs);
+//		System.out.println("Server-side scenario ontology (" + modelName + ") version: " + rs.getResultAt(0, 0));
+//		
+//		// get the names of all imported models and their versions
+//		String ivqry = srvr.prepareQuery("select ?impont ?impver where {<" + modelName + "> <owl:imports>+ ?impont . ?impont <owl:versionInfo> ?impver}");
+//		rs = srvr.query(ivqry);
+//		assertNotNull(rs);
+//		System.out.println("Imported ontologies and versions: " + rs.toStringWithIndent(5));
 	}
 
 	@Test
@@ -142,33 +139,35 @@ public class TestSadlServerDemo extends TestCase {
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
 		
-		assertNotNull(srvr.selectServiceModel(serverSideScenario));
-		assertTrue(test1MN.equals(srvr.getModelName()));
-		
-		String qry = srvr.prepareQuery("select ?shape ?area where {?shape <area> ?area}");
-		ResultSet rs = srvr.query(qry);
-		assertNotNull(rs);
-		assertTrue(rs.getRowCount() > 0);
-		String[] cols = rs.getColumnNames();
-		assertTrue(cols[0].equals("shape"));
-		assertTrue(cols[1].equals("area"));
-		assertTrue(rs.getResultAt(0, 0).equals(test1NS+"MyRect"));
-		assertTrue(rs.getResultAt(0, 1).equals(13.75));
+//		assertNotNull(srvr.selectServiceModel(serverSideScenario));
+//		assertTrue(test1MN.equals(srvr.getModelName()));
+//		
+//		String qry = srvr.prepareQuery("select ?shape ?area where {?shape <area> ?area}");
+//		ResultSet rs = srvr.query(qry);
+//		assertNotNull(rs);
+//		assertTrue(rs.getRowCount() > 0);
+//		String[] cols = rs.getColumnNames();
+//		assertTrue(cols[0].equals("shape"));
+//		assertTrue(cols[1].equals("area"));
+//		assertTrue(rs.getResultAt(0, 0).equals(test1NS+"MyRect"));
+//		assertTrue(rs.getResultAt(0, 1).equals(13.75));
 	}
 
 	@Test
 	public void testSadlServerClienSideScenario() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
-		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
-		assertNotNull(srvr);
-		assertNotNull(srvr.selectServiceModel(initialNamedService));
-		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
-		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
-		assertTrue(instUri.equals(newRectUri));
-		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
-		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
-		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
-		assertNotNull(rs);
-		assertEquals(rs.getResultAt(0, 0),120.0);
+//		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
+//		assertNotNull(srvr);
+//		Map<String, String[]> map = srvr.getServiceNameMap();
+//		int x = map.size();
+//		assertNotNull(srvr.selectServiceModel(initialNamedService));
+//		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
+//		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
+//		assertTrue(instUri.equals(newRectUri));
+//		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
+//		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
+//		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
+//		assertNotNull(rs);
+//		assertEquals(rs.getResultAt(0, 0),120.0);
 	}
 
 	@Test
@@ -176,21 +175,21 @@ public class TestSadlServerDemo extends TestCase {
 		ISadlServerPE srvr = new SadlServerPEImpl(kbaseRoot);
 		assertNotNull(srvr);
 		assertNotNull(srvr.selectServiceModel(initialNamedService));
-		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
-		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
-		assertTrue(instUri.equals(newRectUri));
-		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
-		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
-		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
-		assertNotNull(rs);
-		assertEquals(rs.getResultAt(0, 0),120.0);
-		assertTrue(srvr.persistInstanceModel(clientScenearioFileName, clientScenarioGlobalPrefix));
-		
-		ISadlServer srvr2 = new SadlServerImpl(kbaseRoot);
-		assertNotNull(srvr2.selectServiceModel(modelFolder, clientScenarioMN));
-		ResultSet rs2 = srvr.ask(instUri, shapesNS + "area", null);
-		assertNotNull(rs2);
-		assertEquals(rs2.getResultAt(0, 0),120.0);
+//		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
+//		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
+//		assertTrue(instUri.equals(newRectUri));
+//		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
+//		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
+//		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
+//		assertNotNull(rs);
+//		assertEquals(rs.getResultAt(0, 0),120.0);
+//		assertTrue(srvr.persistInstanceModel(clientScenearioFileName, clientScenarioGlobalPrefix));
+//		
+//		ISadlServer srvr2 = new SadlServerImpl(kbaseRoot);
+//		assertNotNull(srvr2.selectServiceModel(modelFolder, clientScenarioMN));
+//		ResultSet rs2 = srvr.ask(instUri, shapesNS + "area", null);
+//		assertNotNull(rs2);
+//		assertEquals(rs2.getResultAt(0, 0),120.0);
 	}
 
 //	@Test
@@ -227,7 +226,8 @@ public class TestSadlServerDemo extends TestCase {
 		InputStream is = null;
 		try {
 			is = out.getInputStream();
-			java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+			java.util.Scanner s = new java.util.Scanner(is);
+			s.useDelimiter("\\A");
 		    return s.hasNext() ? s.next() : "";
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -82,7 +82,6 @@ import com.ge.research.sadl.utils.UtilsForJena;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
@@ -618,11 +617,14 @@ public class CsvImporter {
 
 						}
 						else {
+							reader.close();
 							throw new IOException("Failed to parse '" + replacementText + "' into a set of colon-separated pairs of replace-replacewith tokens in row " + rowNum + ".");
 						}
 					}
 				}
 				else if (urlEncode) {
+					reader.close();
+					
 					// can't have an Encode with no urlEncoding (a "replace") and no replacement
 					throw new IOException("Can't have a 'replace' with no replacement text");
 				}
@@ -2099,17 +2101,20 @@ public class CsvImporter {
 	}
 
 	private boolean doImport(InputStreamReader isReader) throws ConfigurationException, IOException, InvalidNameException, AbortDataRowException, QueryCancelledException, ReasonerNotFoundException {
+		
+		CSVReader reader = null;
+		
 		try {
 			if (varMap == null) {
 				throw new ConfigurationException("There are no variables found in the template; can't do import.");
 			}
 			// do the import
 			//	open the CSV file with a CSV parser
-			CSVReader reader = new CSVReader(isReader);
+			reader = new CSVReader(isReader);
 
 			//	assume that the first row is the variable names (column headers)
 			//	(if the variables used in the templates don't resolve and all
-			//	 variable names are convertable to column designations by letter,
+			//	 variable names are convertible to column designations by letter,
 			// 	 reverse this assumption)
 
 			int currentModel = 0;
@@ -2214,6 +2219,7 @@ public class CsvImporter {
 				logger.debug("Ready to process final chunk with model " + currentModel + " for rows " + (rowNum - chunkSize) + " to " + rowNum);
 				processChunk(currentModel);
 			}
+			
 		}
 		catch (Throwable t) {
 			System.out.println("Throwable in doImport: " + t.getMessage());
@@ -2235,6 +2241,9 @@ public class CsvImporter {
 			}
 			if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
 				closeTdbDS();
+			}
+			if (reader!=null) {
+				reader.close();
 			}
 		}
 		return true;
@@ -3238,7 +3247,8 @@ public class CsvImporter {
 		boolean usesCR = false;
 		List<String> templateImports = new ArrayList<String>();
 		try {
-			Scanner s = new Scanner(rawTemplate).useDelimiter("\\n");
+			Scanner s = new Scanner(rawTemplate);
+			s.useDelimiter("\\n");
 			while (s.hasNext()) {
 				String templateLine = s.next();
 				if (templateLine.endsWith("\r")) {

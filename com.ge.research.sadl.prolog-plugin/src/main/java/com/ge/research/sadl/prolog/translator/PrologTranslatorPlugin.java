@@ -60,8 +60,12 @@ public class PrologTranslatorPlugin implements ITranslator {
     private boolean saveRuleFileAfterModelSave = true;
     private List<String> importOrder;
 	protected IConfigurationManager configurationMgr;
-    private List<String> builtinList = Arrays.asList("printhead","print","derive","holds","rdf","length","sub_string","sub_atom","equal");
-	private Rule ruleInTranslation = null;
+    private List<String> builtinList = Arrays.asList("printhead","print","derive",
+    		"holds","rdf","length","sub_string","sub_atom","equal","relevantAttackSteps",
+    		"subProperty","mostSpecificSubClass","minSkillProficiency","outcome",
+    		"preconditions","effect","goalOfInterest","goalTarget","potentialGoalCondition",
+    		"occurs","adversary_goal","detect","subtract","lesseq");
+ 	private Rule ruleInTranslation = null;
 	private Query queryInTranslation = null;
 	private int nextQueryVarNum = 1;
 
@@ -90,7 +94,7 @@ public class PrologTranslatorPlugin implements ITranslator {
 	public List<ModelError> translateAndSaveModel(OntModel model,
 			String translationFolder, String modelName, List<String> orderedImports, String saveFilename)
 			throws TranslationException, IOException, URISyntaxException {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -152,8 +156,8 @@ public class PrologTranslatorPlugin implements ITranslator {
 			OntModel model, Object otherStructure, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
 			IOException, URISyntaxException {
-		// TODO Auto-generated method stub
-		return null;
+	
+		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
 	}
 
 	@Override
@@ -239,7 +243,6 @@ public class PrologTranslatorPlugin implements ITranslator {
 			throws TranslationException, InvalidNameException {
 		setTheModel(model);
 		setModelName(modelName);
-		// TODO Auto-generated method stub
 		//System.out.println(query.toString());
 		
 		return query.toFullyQualifiedString().replace("and", ",").replace("!=", "\\==");
@@ -252,27 +255,27 @@ public class PrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public Map<String, ConfigurationOption> getTranslatorConfigurationOptions() {
-		// TODO Auto-generated method stub
+		// This translator doesn't have any configuration items
 		return null;
 	}
 
 	@Override
 	public boolean configure(ConfigurationItem configItem) {
-		// TODO Auto-generated method stub
+		// This translator doesn't have any configuration items
 		return false;
 	}
 
 	@Override
 	public boolean configure(List<ConfigurationItem> configItems) {
-		// TODO Auto-generated method stub
+		// This translator doesn't have any configuration items
 		return false;
 	}
 
 	@Override
 	public String prepareQuery(OntModel model, String queryStr)
 			throws InvalidNameException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		throw new InvalidNameException("Invalid configuration detected.  Please change the configuration.rdf file to use the prolog reasoner!");
 	}
 
 	@Override
@@ -281,8 +284,7 @@ public class PrologTranslatorPlugin implements ITranslator {
 			IConfigurationManager configMgr, List<Query> queries)
 			throws FunctionNotSupportedException, ConfigurationException,
 			TranslationException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new FunctionNotSupportedException(this.getClass().getCanonicalName() + " does not support discovery of optimal configuration.");
 	}
 
 	@Override
@@ -290,7 +292,8 @@ public class PrologTranslatorPlugin implements ITranslator {
 			String modelName) throws TranslationException {
 		setTheModel(model);
 		setModelName(modelName);
-		// TODO Auto-generated method stub
+		
+		// Prolog does not generate a rules file at this time.
 		return null;
 	}
 
@@ -853,6 +856,11 @@ public class PrologTranslatorPlugin implements ITranslator {
 		return null;
 	}
 	
+	/**
+	 * Converts a built-in element to a string representation.
+	 * @param bin
+	 * @return String
+	 */
 	private String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
 		String builtinName = null;
@@ -927,20 +935,21 @@ public class PrologTranslatorPlugin implements ITranslator {
 			builtinName = "is";
 		}
 		else if (ftype.equals(BuiltinType.UserAdded) && bin.getFuncName().equals("holds")) {
-			// this is good
-			builtinName = "holds";
-		}
-		else if (ftype.equals(BuiltinType.UserAdded) && bin.getFuncName().equals("rdf")) {
-			builtinName = "rdf";
-		}
-		else if (ftype.equals(BuiltinType.UserAdded) && bin.getFuncName().equals("equal")){
-			builtinName = "equal";
-		}
+// 			this is good
+            builtinName = "holds";
+        }
+        else if (ftype.equals(BuiltinType.UserAdded) &&bin.getFuncName().equals("rdf")) {
+            builtinName = "rdf";
+        }
+        else if (ftype.equals(BuiltinType.UserAdded) &&bin.getFuncName().equals("equal")) {
+            builtinName = "equal";
+        }
 		else {
+            
 			logger.warn("Something went wrong finding/loading Builtin '" + bin.getFuncName() + "' of type '" + ftype + "'");
-			addError("Found reference to unknown built-in '" + bin.getFuncName() + "' of type '" + ftype + "'", ErrorType.WARNING);
-//			throw new TranslationException("Unable to resolve built-in of type '" + ftype + "'");
-			return bin.getFuncName();
+            addError("Found reference to unknown built-in '" + bin.getFuncName() + "' of type '" + ftype + "'", ErrorType.WARNING);
+//          throw new TranslationException("Unable to resolve built-in of type '" + ftype + "'");
+            return bin.getFuncName();
 		}
 
 		return builtinName;

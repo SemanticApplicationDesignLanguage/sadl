@@ -29,7 +29,6 @@ package com.ge.research.sadl.server;
 
 import java.io.IOException;
 
-import javax.activation.DataSource;
 import javax.naming.NameNotFoundException;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -66,7 +65,7 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	public abstract String getSessionKey();
 	
 	/**
-	 * This method returs all of the subclasses of the classification hierarch starting at root
+	 * This method returns all of the subclasses of the classification hierarchy starting at root
 	 * @param root
 	 * @return
 	 * @throws ConfigurationException 
@@ -78,6 +77,53 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws NameNotFoundException 
 	 */
 	public abstract String[] getAllSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+
+	/**
+	 * This method returns all of the direct subclasses (one level down) of root in a class hierarchy.
+	 * 
+	 * @param root, the starting class type name 
+	 * @return class names of all of the direct descendants, or null if none were found
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws SessionNotFoundException 
+	 * @throws QueryParseException 
+	 * @throws NameNotFoundException 
+	 */
+	public abstract String[] getDirectSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+
+	/**
+	 * This method returns all of the ancestor classes given a starting class,
+	 *  "className", in a class hierarchy.
+	 * 
+	 * @param root, the starting class type name 
+	 * @return class names of all of the ancestors, or null if none were found
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws SessionNotFoundException 
+	 * @throws QueryParseException 
+	 * @throws NameNotFoundException 
+	 */
+	public abstract String[] getAncestorClassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+
+	/**
+	 * This method returns all of the direct super classes (one level up) given
+	 * a starting class, "className", in a class hierarchy.
+	 * 
+	 * @param root, the starting class type name 
+	 * @return class names of all of the direct ancestors, or null if none were found
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws SessionNotFoundException 
+	 * @throws QueryParseException 
+	 * @throws NameNotFoundException 
+	 */
+	public abstract String[] getDirectSuperclassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
 
 	/**
 	 * This method returns all the leaf classes of the classification hierarchy starting at root
@@ -322,5 +368,18 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws QueryParseException 
 	 */
 	public abstract String[] getConceptRdfsComments(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException;
-	
+
+	/**
+	 * This method returns the annotation on the given class
+	 * @param className
+	 * @param annotationName
+	 * @return -- the annotation String if any else null
+	 * @throws ConfigurationException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws InvalidNameException 
+	 * @throws QueryCancelledException 
+	 * @throws QueryParseException 
+	 */
+	public abstract String getAnnotation(String className, String annotationName) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException ;
+
 }

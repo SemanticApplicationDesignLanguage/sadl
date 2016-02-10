@@ -61,7 +61,6 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
-import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.FunctionNotSupportedException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -1356,7 +1355,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * 
 	 * @param model -- the OntModel at the root of the search
 	 * @param name -- the concept name
-	 * @return -- the fuly-qualified name of the concept as found in some model
+	 * @return -- the fully-qualified name of the concept as found in some model
 	 * 
 	 * @throws InvalidNameException -- the concept was not found
 	 */
