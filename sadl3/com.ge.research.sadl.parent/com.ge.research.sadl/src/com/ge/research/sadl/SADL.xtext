@@ -257,7 +257,7 @@ PrefixOperation returns Expression :
 
 // SubjHasProp has left associativity: Subj with prop1 with prop2 is equivalent to ((Subj with prop1) with prop2)
 SubjHasProp returns Expression: // (18)
-	PropOfSubject (=>({SubjHasProp.left=current} ('has'|'with') prop=SadlResource)  right=SubjHasProp?)*
+	PropOfSubject ->(({SubjHasProp.left=current} ('with'|'has') prop=SadlResource)+ right=PropOfSubject)?
 //	PropOfSubject (<!THEN>(
 //			','? 'has' ( {SubjHasProp.left=current} prop=DNAME right=PropOfSubject?
 //			  | {PPP.left=current} negated?='not'? 'been' right=PropOfSubject)
@@ -280,7 +280,7 @@ PrefixOperation2 returns Expression :
 PrimaryExpression returns Expression: // (20)
 	'(' Expression ')' 
 	| {StringLiteral} value=STRING 
-	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=(STRING | ID))?
+	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
 	| {Function} =>(called=DNAME '(') arglist+=Expression? (',' arglist+=Expression)* ')'
@@ -289,6 +289,10 @@ PrimaryExpression returns Expression: // (20)
 	
 FeatureCall returns SadlResource:
 	{Name} name=[SadlResource|DNAME]
+;
+
+UNIT :
+	ID | STRING
 ;
 
 	// the truth table
