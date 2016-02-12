@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.ge.research.sadl.prolog_plugin.sdk_2.4.0.201601191733.jar" id="com.ge.research.sadl.prolog_plugin.sdk" version="2.4.0.201601191733">
+      <category name="sadl-with-prolog-plugin"/>
+   </feature>
+   <feature url="features/com.ge.research.sadl.feature_2.2.0.201601191733.jar" id="com.ge.research.sadl.feature" version="2.2.0.201601191733">
+      <category name="sadl-with-prolog-plugin"/>
+   </feature>
+   <feature url="features/com.ge.research.sadl.testsuite.sdk_2.2.0.201601191733.jar" id="com.ge.research.sadl.testsuite.sdk" version="2.2.0.201601191733">
+      <category name="sadl-with-prolog-plugin"/>
+   </feature>
+   <category-def name="sadl-with-prolog-plugin" label="SADL-IDE with tuProlog Plug-in"/>
+</site>

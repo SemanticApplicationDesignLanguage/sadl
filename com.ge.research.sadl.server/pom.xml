@@ -27,4 +27,28 @@
   		com.ge.research.sadl.server.server-impl
   	</module>
   </modules>
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>reasoner-api</artifactId>
+  			<version>2.4.2</version>
+  		</dependency>
+  		<dependency>
+  			<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>reasoner-impl</artifactId>
+  			<version>2.4.2</version>
+  		</dependency>
+  		<dependency>
+  			<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>jena-wrapper-for-sadl</artifactId>
+  			<version>2.4.2</version>
+  		</dependency>
+  		<dependency>
+  			<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>prolog-for-sadl</artifactId>
+  			<version>2.4.2</version>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
 </project>

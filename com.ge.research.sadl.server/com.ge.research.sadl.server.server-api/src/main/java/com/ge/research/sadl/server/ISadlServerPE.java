@@ -28,13 +28,17 @@
 package com.ge.research.sadl.server;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServer;
 import com.ge.research.sadl.server.SessionNotFoundException;
@@ -169,6 +173,36 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @throws com.ge.research.sadl.sadlserver.server.InvalidNameException 
 	 */
 	String getUniqueInstanceUri(String namespace, String baseLocalName) throws InvalidNameException, SessionNotFoundException;
+
+	/**
+	 * Call this method to obtain a unique unused URI based on the namespace and baseLocalName provided. If the baseLocalName
+	 * ends in a series of digits (a number), then this number becomes the starting counter value. If not, the counter starts
+	 * at 1 and is appended to the name provided. The counter is incremented by 1 until a URI is generated that is not used
+	 * for a ontology resource in the named model. This URI is then returned as a string.
+	 * 
+	 * @param modelName Model name
+	 * @param namespace -- namespace of the new URI
+	 * @param baseLocalName -- local fragment base of the URI
+	 * @return -- a unique URI with the namespace and base fragment augmented to make it unique
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws com.ge.research.sadl.sadlserver.server.InvalidNameException 
+	 */
+	String getUniqueInstanceUri(String modelName, String namespace, String baseLocalName) throws InvalidNameException, SessionNotFoundException;
+
+	/**
+	 * Call this method to obtain a unique unused namespace URI based on the base namespace provided. If the base namespace
+	 * ends in a series of digits (a number), then this number becomes the starting counter value. If not, the counter starts
+	 * at 1 and is appended to the name provided. The counter is incremented by 1 until a URI is generated that is not used
+	 * for an ontology in the knowledge base. This URI is then returned as a string.
+	 * 
+	 * @param baseNamespace -- base namespace of the new URI
+	 * @return -- a unique namespace URI with base namespace augmented to make it unique
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws com.ge.research.sadl.sadlserver.server.InvalidNameException 
+	 * @throws ConfigurationException 
+	 * @throws MalformedURLException 
+	 */
+	String getUniqueNamespaceUri(String baseNamespace) throws InvalidNameException, SessionNotFoundException, MalformedURLException, ConfigurationException;
 
 	/**
 	 * Call this method to create a new instance of the specified class in the named model.
@@ -389,4 +423,72 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
 	 */
 	boolean deleteModel(String modelName) throws ConfigurationException, IOException, SessionNotFoundException;
+	
+	/**
+	 * Method to add or update the rdfs:label for the ontology Resource identified by uri and of the specified language
+	 * @param uri -- uri identifying Resource for which the label is to be added or updated
+	 * @param label -- the new label
+	 * @param language -- the language to be updated; if null update any label
+	 * @return -- return true if a label is updated else false if there was no prior matching label
+	 * @throws ConfigurationException 
+	 * @throws URISyntaxException 
+	 * @throws InvalidNameException 
+	 * @throws IOException 
+	 */
+	boolean updateRdfsLabel(String uri, String label, String language) throws ConfigurationException, IOException, InvalidNameException, URISyntaxException;
+
+	/**
+	 * Method to add or update the rdfs:label for the ontology Resource identified by uri and of the specified language
+	 * @param modelName -- the public URI identifying the model to be edited
+	 * @param uri -- uri identifying Resource for which the label is to be added or updated
+	 * @param label -- the new label
+	 * @param language -- the language to be updated; if null update any label
+	 * @return -- return true if a label is updated else false if there was no prior matching label
+	 * @throws URISyntaxException 
+	 * @throws InvalidNameException 
+	 * @throws IOException 
+	 * @throws ConfigurationException 
+	 */
+	boolean updateRdfsLabel(String modelName, String uri, String label, String language) throws ConfigurationException, IOException, InvalidNameException, URISyntaxException;
+
+    /**
+     * This method retrieves the results of an RDF triple matching request as a list of matching statements. Zero or more of the
+     * subjName, propName, and objValue may be null.
+     *
+	 * @param modelName -- the public URI identifying the model to be edited
+     * @param subjName
+     * @param propName
+     * @param objValue
+     * @return List of matching statements, each element is Object[3]: subject, predicate, object
+     * @throws QueryCancelledException 
+     * @throws TripleNotFoundException 
+     * @throws ReasonerNotFoundException 
+     * @throws SessionNotFoundException 
+     * @throws URISyntaxException 
+     * @throws InvalidNameException 
+     * @throws ConfigurationException 
+     * @throws IOException 
+     */
+    abstract public ResultSet ask(String modelName, String subjName, String propName, Object objValue) throws TripleNotFoundException, ReasonerNotFoundException, QueryCancelledException, SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException;
+
+    /**
+     * This method retrieves the results of a kbase query as a List array, 1st element being a List of
+     * the column headings and second being a List of rows, each of which is a List of values. The query
+     * string will depend upon the knowledge representation and reasoner; it might be SPARQL, Prolog, etc.
+     *
+	 * @param modelName -- the public URI identifying the model to be edited
+     * @param query a query string
+     * @return List[] with first element being the column titles (names of query variables) and second element a list of lists of values
+     * @throws QueryCancelledException 
+     * @throws QueryParseException 
+     * @throws ReasonerNotFoundException 
+     * @throws SessionNotFoundException 
+     * @throws URISyntaxException 
+     * @throws InvalidNameException 
+     * @throws ConfigurationException 
+     * @throws IOException 
+     */
+    abstract public ResultSet query(String modelName, String query) throws QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException;
+
+
 }

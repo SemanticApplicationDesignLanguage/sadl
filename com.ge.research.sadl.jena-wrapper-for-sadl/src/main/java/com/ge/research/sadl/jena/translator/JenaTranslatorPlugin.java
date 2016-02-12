@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.10 $ Last modified on   $Date: 2015/09/22 15:00:57 $
+ * $Revision: 1.11 $ Last modified on   $Date: 2015/11/16 16:36:57 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.translator;
@@ -61,6 +61,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.FunctionNotSupportedException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -1228,10 +1229,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	public static synchronized String literalValueToString(Object litObj, TranslationTarget target) {
 		if (litObj instanceof String) {
-			litObj = "\"" + litObj + "\"";
-		}
-		if (litObj instanceof String) {
-			return (String)litObj;
+			if (target.equals(TranslationTarget.RULE_BUILTIN)) {
+				return "'" + litObj.toString().trim() + "'^^http://www.w3.org/2001/XMLSchema#string";
+			}
+			else {
+				litObj = "\"" + litObj + "\"";
+				return (String)litObj;
+			}
 		}
 		else if (litObj instanceof Boolean) {
 			if (target.equals(TranslationTarget.QUERY_TRIPLE) || target.equals(TranslationTarget.QUERY_FILTER)) {
@@ -1355,7 +1359,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * 
 	 * @param model -- the OntModel at the root of the search
 	 * @param name -- the concept name
-	 * @return -- the fully-qualified name of the concept as found in some model
+	 * @return -- the fuly-qualified name of the concept as found in some model
 	 * 
 	 * @throws InvalidNameException -- the concept was not found
 	 */

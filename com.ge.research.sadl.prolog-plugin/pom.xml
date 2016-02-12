@@ -73,11 +73,7 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>jpl</groupId>
-			<artifactId>jpl</artifactId>
-			<version>3.1.4-alpha</version>
-		</dependency>
+
 		<dependency>
 			<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
 			<artifactId>serviceloader-maven-plugin</artifactId>
@@ -87,13 +83,15 @@
 			<groupId>it.unibo.alice.tuprolog</groupId>
 			<artifactId>tuprolog</artifactId>
 			<version>2.9.1</version>
+			<scope>system</scope>
+			<systemPath>C:/eclipse64Xtext243/eclipse/plugins/tuPrologPlugin_2.9.1/lib/tuprolog.jar</systemPath>
 		</dependency>
-		<dependency>
-			<groupId>it.unibo.alice.tuprolog</groupId>
-			<artifactId>2p</artifactId>
-			<version>2.9.1</version>
-			<scope>provided</scope>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>it.unibo.alice.tuprolog</groupId> -->
+<!-- 			<artifactId>2p</artifactId> -->
+<!-- 			<version>2.9.1</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
 	</dependencies>
 
 	<!-- Define where to deploy this project's artifacts -->

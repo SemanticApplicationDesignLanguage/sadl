@@ -41,6 +41,8 @@ public abstract class Reasoner implements IReasoner {
 
 	private static final String XSD_TYPE_ID_DELIMITED = "<" + XSDDatatype.XSD + ">";
 	protected HashMap<String, Object> configuration;
+	
+	private boolean initialized = false;
 
 	public static synchronized Object xsdStringToObject(String objValue) {
 		if ((objValue.indexOf(XSDDatatype.XSD)) > 0) {
@@ -212,6 +214,19 @@ public abstract class Reasoner implements IReasoner {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public boolean isInitialized() {
+		return initialized;
+	}
+
+	/**
+	 * Method to set the flag indicating that this instance of Reasoner has been initialized
+	 * @param initialized
+	 */
+	public void setInitialized(boolean initialized) {
+		this.initialized = initialized;
 	}
 
 }

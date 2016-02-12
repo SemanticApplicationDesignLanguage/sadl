@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Swi-Prolog-Plugin
+Bundle-SymbolicName: com.ge.research.sadl.swi-prolog-plugin;singleton:=true
+Bundle-Version: 2.4.2.qualifier
+Bundle-Activator: com.ge.research.sadl.swi_prolog.plugin.Activator
+Bundle-Vendor: GE Global Research
+Require-Bundle: org.eclipse.core.runtime,
+ org.apache.log4j
+Eclipse-RegisterBuddy: com.ge.research.sadl
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
+ com.ge.research.sadl.swi_prolog.plinterface,
+ com.ge.research.sadl.swi_prolog.plugin,
+ com.ge.research.sadl.swi_prolog.reasoner;version="2.4.0",
+ com.ge.research.sadl.swi_prolog.translator;version="2.4.0"
+Bundle-ClassPath: .,
+ target/classes/com/ge/research/sadl/prolog/plinterface/

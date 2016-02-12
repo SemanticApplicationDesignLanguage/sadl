@@ -154,6 +154,7 @@ public interface ISadlServer {
      * @throws TemplateException 
      */
     abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException;
+
     /**
      * This method retrieves the results of an RDF triple matching request as a list of matching statements. Zero or more of the
      * subjName, propName, and objValue may be null.

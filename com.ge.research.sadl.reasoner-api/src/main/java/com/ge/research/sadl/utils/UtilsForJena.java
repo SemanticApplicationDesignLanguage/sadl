@@ -94,7 +94,8 @@ public class UtilsForJena {
         RDFDatatype rdftype = TypeMapper.getInstance().getSafeTypeByName(rnguri);
         if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
         		!rdftype.getURI().equals(XSD.date.getURI()) && 
-        		!rdftype.getURI().equals(XSD.dateTime.getURI())) {
+        		!rdftype.getURI().equals(XSD.dateTime.getURI()) &&
+        		!rdftype.getURI().equals(XSD.time.getURI())) {
         	val = m.createTypedLiteral(v, rdftype);
         	if (val != null) {
         		return val;
@@ -220,7 +221,7 @@ public class UtilsForJena {
 	        else if (rnguri.endsWith("time")) {
 	            if (v instanceof String) {
 	                v = stripQuotes((String)v);
-	                val = m.createTypedLiteral(v, rnguri);
+	                val = m.createTypedLiteral("\"" + v + "\"", rnguri);
 	            }
 	            else {
 	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
@@ -304,12 +305,27 @@ public class UtilsForJena {
 	 * @return -- the unique URI string
 	 */
 	public static synchronized String getUniqueOntUri(OntModel ontModel, String baseUri) {
+		Object[] split = splitUriIntoBaseAndCounter(baseUri);
+		baseUri = (String) split[0];
+		long cntr = (long) split[1];
+		String uri = baseUri + cntr;
+		while (ontModel.getOntResource(uri) != null) {
+			uri = baseUri + ++cntr;
+		}
+		return uri;
+	}
+	
+	/**
+	 * Method to take a URI that may end in an integer and split it into the base (before the integer) and the counter (the integer)
+	 * @param uri
+	 * @return-- Object array containing 0) base URI, 1) counter
+	 */
+	public static Object[] splitUriIntoBaseAndCounter(String uri) {
 		long cntr = 0;
 		int numDigitsAtEnd = 0;
-		String cntrStr = "";
-		for (int i = baseUri.length() - 1; i >= 0; i--) {
-			int exp = baseUri.length() - (i + 1);
-			char c = baseUri.charAt(i);
+		for (int i = uri.length() - 1; i >= 0; i--) {
+			int exp = uri.length() - (i + 1);
+			char c = uri.charAt(i);
 			if (Character.isDigit(c)) {
 				int cint = c - 48;
 				long mplier = (long) Math.pow(10, exp);
@@ -321,16 +337,15 @@ public class UtilsForJena {
 			}
 		}
 		if (numDigitsAtEnd > 0) {
-			baseUri = baseUri.substring(0, baseUri.length() - numDigitsAtEnd);
+			uri = uri.substring(0, uri.length() - numDigitsAtEnd);
 		}
 		else {
 			cntr = 1;
 		}
-		String uri = baseUri + cntr;
-		while (ontModel.getOntResource(uri) != null) {
-			uri = baseUri + ++cntr;
-		}
-		return uri;
+		Object[] retval = new Object[2];
+		retval[0] = uri;
+		retval[1] = cntr;
+		return retval;
 	}
 
 	public static synchronized boolean isSingleValued(OntClass cls, OntProperty prop, String rngString) {

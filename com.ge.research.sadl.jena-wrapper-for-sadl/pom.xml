@@ -61,10 +61,12 @@
 	  <dependency>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>reasoner-api</artifactId>
+		<version>2.4.2</version>
 	</dependency>
 	  <dependency>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>reasoner-impl</artifactId>
+		<version>2.4.2</version>
 	</dependency>
 	<dependency>
 		<groupId>org.slf4j</groupId>

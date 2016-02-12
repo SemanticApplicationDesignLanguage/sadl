@@ -53,6 +53,12 @@ public interface IReasoner {
 	public int initializeReasoner(URI KBIdentifier, String modelName, String repoType) throws ReasonerNotFoundException, ConfigurationException;
 		
 	/**
+	 * Method to find out if an instance of IReasoner has been initialized
+	 * @return-- true if the reasoner has been initialized
+	 */
+	public boolean isInitialized();
+	
+	/**
 	 * Method to set the ConfigurationManager. If not set, a new one will be created.
 	 * 
 	 * @param configMgr

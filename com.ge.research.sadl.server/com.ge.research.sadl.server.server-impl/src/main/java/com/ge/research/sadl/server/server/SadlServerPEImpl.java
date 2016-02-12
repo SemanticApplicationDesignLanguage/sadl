@@ -51,6 +51,9 @@ import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
@@ -105,6 +108,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	private Map<String, OntModel> editedTboxModels = null;
 	private Map<String, List<Rule>> editedRules = null;
 	private List<ModelError> errors = null;
+	private List<String> newUnsavedNamespaces = null;
 	private String serviceVersion = "$Revision: 1.16 $";
 	
 	private String lastChanceDefaultInstanceUri = "http://org.sadl/default_inst_data";
@@ -604,8 +608,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	}
 	
 	@Override
-	public String getUniqueInstanceUri(String namespace, String baseLocalName) throws InvalidNameException {
-		OntModel ontModel;
+	public String getUniqueInstanceUri(String namespace, String baseLocalName) throws InvalidNameException, SessionNotFoundException {
 		String modelName;
 		if (namespace.endsWith("#")) {
 			modelName = namespace.substring(0, namespace.length() - 1);
@@ -614,6 +617,14 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			modelName = namespace;
 			namespace += "#";
 		}
+		return getUniqueInstanceUri(modelName, namespace, baseLocalName);
+	}
+	
+	@Override
+	public String getUniqueInstanceUri(String modelName, String namespace,
+			String baseLocalName) throws InvalidNameException,
+			SessionNotFoundException {
+		OntModel ontModel;
 		try {
 			String baseUri = namespace + baseLocalName;
 			String error = UtilsForJena.validateRdfUri(baseUri);
@@ -643,7 +654,32 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
     	addError(new ModelError("Failed to create a unique URI for namespace '" + namespace + "' and base local name '" + baseLocalName + "' for unknown reasons. ", ErrorType.ERROR));
 		return null;
 	}
-	
+
+	@Override
+	public String getUniqueNamespaceUri(String baseUri)
+			throws InvalidNameException, SessionNotFoundException, MalformedURLException, ConfigurationException {
+		Object[] split = UtilsForJena.splitUriIntoBaseAndCounter(baseUri);
+		baseUri = (String) split[0];
+		long cntr = (long) split[1];
+		String newNSUri = null;
+		do {
+			String uri = baseUri + cntr++;
+			String actualUrl = getConfigurationMgr().getMappings().get(uri);
+			if (actualUrl != null) {
+				continue;
+			}
+			if (newUnsavedNamespaces != null && newUnsavedNamespaces.contains(uri)) {
+				continue;
+			}
+			newNSUri = uri;
+			if (newUnsavedNamespaces == null) {
+				newUnsavedNamespaces = new ArrayList<String>();
+			}
+			newUnsavedNamespaces.add(newNSUri);
+		} while (newNSUri == null);
+		return newNSUri;
+	}
+
 	@Override
 	public boolean addInstance(String modelName, String instName, String className) throws ConfigurationException, InvalidNameException {
 		OntModel ontModel = null;
@@ -1805,6 +1841,59 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		} catch (ConfigurationException e) {
 			throw new ConfigurationException("Model cannot be imported as its location is unknown.", e);
 		}
+	}
+	
+	@Override
+	public boolean updateRdfsLabel(String uri, String label, String language) throws ConfigurationException, IOException, InvalidNameException, URISyntaxException {
+		return updateRdfsLabel(getInstanceDataName(),  uri, label, language);
+	}
+
+	@Override
+	public boolean updateRdfsLabel(String modelName, String uri, String label, String language) throws IOException, ConfigurationException, InvalidNameException, URISyntaxException {
+		OntModel ontModel = getOntModelForEditing(modelName);
+		boolean retval = false;
+		if (ontModel != null) {
+			OntResource rsrc = ontModel.getOntResource(uri);
+			if (rsrc == null) {
+				throw new InvalidNameException("'" + uri + "' was not found in model '" + modelName + "'");
+			}
+			String lbl = rsrc.getLabel(language);
+			if (lbl != null) {
+				if (!lbl.equals(label)) {
+					rsrc.removeLabel(lbl, language);
+					retval = true;
+				}
+			}
+			rsrc.addLabel(label, language);
+		}
+		return retval;
+	}
+
+	@Override
+	public ResultSet ask(String modelName, String subjName, String propName,
+			Object objValue) throws TripleNotFoundException,
+			ReasonerNotFoundException, QueryCancelledException,
+			SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
+		if (reasoner == null) {
+			throw new ReasonerNotFoundException("No Reasoner found; can't do query");
+		}
+		reasoner.reset();
+		OntModel ontModel = getOntModelForEditing(modelName);
+		reasoner.loadInstanceData(ontModel);
+		return reasoner.ask(subjName, propName, objValue != null ? objValue.toString() : null);
+	}
+
+	@Override
+	public ResultSet query(String modelName, String query)
+			throws QueryCancelledException, QueryParseException,
+			ReasonerNotFoundException, SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
+		if (reasoner == null) {
+			throw new ReasonerNotFoundException("No Reasoner found; can't do query");
+		}
+		reasoner.reset();
+		OntModel ontModel = getOntModelForEditing(modelName);
+		reasoner.loadInstanceData(ontModel);
+		return reasoner.ask(query);
 	}
 
 }

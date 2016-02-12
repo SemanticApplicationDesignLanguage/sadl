@@ -2,6 +2,9 @@ package com.ge.research.sadl.server.server;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +22,7 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServerMD;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
@@ -71,6 +75,42 @@ public class TestSadlServerPEOnShapes extends TestCase {
 		ResultSet rs = srvr.query(qry);
 		assertNotNull(rs);
 		assertTrue(rs.toString().contains("Rectangle"));
+	}
+	
+	@Test
+	public void testGetUniqueNS() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, MalformedURLException, InvalidNameException {
+		ISadlServerMD srvr = new SadlServerMDImpl();
+		srvr.setKbaseRoot(modelFolder);
+		String session = srvr.selectServiceModel(baseOntologyNamedService);
+		assertNotNull(session);
+		String baseNS = "http://research.ge.com/cds/eal/otherExamples";
+		assertTrue(srvr.getUniqueNamespaceUri(baseNS).endsWith("1"));
+		assertTrue(srvr.getUniqueNamespaceUri(baseNS).endsWith("2"));
+		assertTrue(srvr.getUniqueNamespaceUri(baseNS).endsWith("3"));
+	}
+	
+	@Test
+	public void testUpdateLabel() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, IOException, InvalidNameException, URISyntaxException, TripleNotFoundException, QueryCancelledException {
+		ISadlServerMD srvr = new SadlServerMDImpl();
+		srvr.setKbaseRoot(modelFolder);
+		String session = srvr.selectServiceModel(baseOntologyNamedService);
+		assertNotNull(session);
+		String mn = "http://sadl.imp/shapes_specific";	
+		String instMn = "http://sadl.org/test/add/shapes";
+		String instNs = instMn + "#";
+		srvr.setInstanceDataNamespace(instNs);
+		String newUri = srvr.getUniqueInstanceUri(instNs, "Rectangle");
+		String newInst = srvr.createInstance(newUri, mn + "#Rectangle");
+		assert(newUri.equals(newInst));
+		assertFalse(srvr.updateRdfsLabel(instMn, newUri, "My Rectangle", null));
+		assertTrue(srvr.updateRdfsLabel(instMn, newUri, "Not Your Rectangle", null));
+		ResultSet rs = srvr.ask(instMn, newUri, "http://www.w3.org/2000/01/rdf-schema#label", null);
+		assertNotNull(rs);
+		assertTrue(rs.getResultAt(0, 0).equals("Not Your Rectangle"));
+		
+		srvr.updateRdfsLabel(mn, mn, "This is the ontology", null);
+		rs = srvr.ask(mn, mn, "http://www.w3.org/2000/01/rdf-schema#label", null);
+		assertTrue(rs.getResultAt(0, 0).equals("This is the ontology"));
 	}
 
 }
