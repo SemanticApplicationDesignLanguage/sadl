@@ -65,9 +65,12 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource)
 			while (iter.hasNext) {
 				val name = iter.next
-				val qn = QualifiedName.create(name.concreteName)
-				if (!map.containsKey(qn) && parent.getSingleElement(qn) === null) {
-					map.put(qn, new EObjectDescription(qn, name, emptyMap))
+				val concreteName = name.concreteName
+				if (concreteName !== null) {
+					val qn = QualifiedName.create(concreteName)
+					if (!map.containsKey(qn) && parent.getSingleElement(qn) === null) {
+						map.put(qn, new EObjectDescription(qn, name, emptyMap))
+					}
 				}
 			}
 		}
