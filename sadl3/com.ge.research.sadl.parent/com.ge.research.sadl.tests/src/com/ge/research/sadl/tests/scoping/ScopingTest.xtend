@@ -23,7 +23,27 @@ class ScopingTest {
 	@Inject extension DeclarationExtensions
 	@Inject ValidationTestHelper validationTestHelper
 
-	
+	@Test def void testLocalVariable_02() {
+		val model = '''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Thingy is a class described by connectedTo with values of type Thingy, described by color with values of type string.
+			
+			T1 is a Thingy.
+			T2 is a Thingy.
+			T3 is a Thingy.
+			
+			Rule AllThingysConnect: 
+				if x != y and x is a Thingy and y is a Thingy 
+				   then x has connectedTo y .
+		'''.parse
+		model.elements.get(4) as RuleStatement => [
+			val names = EcoreUtil2.getAllContents(ifs).filter(Name).filter[concreteName == 'x'].toList
+			val reference = names.get(0)
+			val declaration = names.get(1)
+			assertSame(declaration, reference.name)
+		]
+	}
 	
 	@Test def void testLocalVariable_01() {
 		val model = '''

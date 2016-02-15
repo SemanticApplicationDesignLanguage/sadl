@@ -4,6 +4,9 @@
 package com.ge.research.sadl.scoping
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.Expression
+import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlImport
 import com.ge.research.sadl.sADL.SadlModel
@@ -14,6 +17,7 @@ import java.util.Set
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.resource.EObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
@@ -21,9 +25,6 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import org.eclipse.xtext.EcoreUtil2
-import com.ge.research.sadl.sADL.RuleStatement
-import com.ge.research.sadl.sADL.Expression
 
 /**
  * This class contains custom scoping description.
@@ -62,7 +63,12 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return parent;
 		val map = newHashMap
 		for (expression : expressions) {
-			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource)
+			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter[
+				switch container : eContainer {
+					BinaryOperation case container.op == 'is' || container.op == '==' : true
+					default : false
+				}
+			]
 			while (iter.hasNext) {
 				val name = iter.next
 				val concreteName = name.concreteName
