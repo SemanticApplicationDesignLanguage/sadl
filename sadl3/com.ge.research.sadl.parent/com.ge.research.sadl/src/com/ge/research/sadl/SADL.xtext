@@ -39,7 +39,7 @@ SadlImport :
 // The various kinds of elements that make up the body of a model.
 SadlModelElement :
 		SadlStatement EOS
-//	|	ExpressionStatement => EOS
+	|	ExpressionStatement => EOS
 	|	RuleStatement => EOS
 ;
 
@@ -188,25 +188,13 @@ DefiniteArticle :
 
 // This is primarily for debugging purposes. Any expression can be given after "Expr:" to see if it is valid. 
 // Such an expression has no meaning in translation.
-//ExpressionStatement:
-//	'Expr:' expr=ThenExpression ('=>' evaluatesTo=STRING)?;
+ExpressionStatement:
+	'Expr:' expr=Expression ('=>' evaluatesTo=STRING)?;
 
 RuleStatement :
 	'Rule' name=QNAME ':'? 'if' ifs+=Expression // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
-	
-//ThenExpression returns Expression:
-//	Expression
-//;
-
-//RuleStatement :
-//	'Rule' name=QNAME ':'? ('if' (ifs = ElementSet)) 'then' thens=ElementSet
-//;
-//
-//ElementSet :
-//	elements+=Expression (','? elements+=Expression)*
-//;
 
 // Real expressions start here
 Expression returns Expression: // (1)
@@ -232,10 +220,12 @@ InfixOperator :
 	| '!=' 
 	| '=' 
 	| 'is' ('not'? 'unique' 'in')? 
+	| 'contains'
+	| 'does' 'not' 'contain'
 ;
 
 RelationalExpression returns Expression:
-	Addition ({BinaryOperation.left=current} op=OpCompare right=Addition)*;
+	Addition ->({BinaryOperation.left=current} =>op=OpCompare right=Addition)*;
 
 OpCompare:
 	'>=' | '<=' | '>' | '<';
@@ -247,38 +237,36 @@ Multiplication returns Expression:
 	Power (({Multi.left=current} '*' | {Div.left=current} '/' | {Mod.left=current} '%') right=Power)*;
 
 Power returns Expression:
-	PrefixOperation (({Exp.left=current} '^') right=PrefixOperation)*;
+	PropOfSubject (({Exp.left=current} '^') right=PropOfSubject)*;
 
-PrefixOperation returns Expression :
-	  {UnaryExpression} 'not' negated=PrefixOperation
-	| {UnitaryOperation} op=('!' | 'only' | '-') expr=PrefixOperation // this can be applied to other unitary operations
-	| SubjHasProp
-;
-
-// SubjHasProp has left associativity: Subj with prop1 with prop2 is equivalent to ((Subj with prop1) with prop2)
-SubjHasProp returns Expression: // (18)
-	PropOfSubject (=>({SubjHasProp.left=current} ('with'|'has') prop=SadlResource) right=SubjHasProp)?
-//	PropOfSubject (<!THEN>(
-//			','? 'has' ( {SubjHasProp.left=current} prop=DNAME right=PropOfSubject?
-//			  | {PPP.left=current} negated?='not'? 'been' right=PropOfSubject)
-//		| {SubjHasProp.left=current} 'with' prop=DNAME right=PropOfSubject?)*)
-	//	PropOfSubject ({SubjHasProp.left=current} ('has'|'with') prop = ID /*[sadl::ResourceName]*/  right=PrimaryExpression)*
-;
+//PrefixOperation returns Expression :
+//	  {UnaryExpression} 'not' negated=PrefixOperation
+//	| {UnitaryOperation} op=('!' | 'only' | '-') expr=PrefixOperation // this can be applied to other unitary operations
+//	| {ElementInList} 'element' (before?='before'|after?='after')? element=PrefixOperation
+//	| SubjHasProp
+//;
+//
+//// SubjHasProp has left associativity: Subj with prop1 with prop2 is equivalent to ((Subj with prop1) with prop2)
+//SubjHasProp returns Expression: // (18)
+//	PropOfSubject (=>({SubjHasProp.left=current} ('with'|'has') prop=SadlResource) right=SubjHasProp)?
+////	PropOfSubject (<!THEN>(
+////			','? 'has' ( {SubjHasProp.left=current} prop=DNAME right=PropOfSubject?
+////			  | {PPP.left=current} negated?='not'? 'been' right=PropOfSubject)
+////		| {SubjHasProp.left=current} 'with' prop=DNAME right=PropOfSubject?)*)
+//	//	PropOfSubject ({SubjHasProp.left=current} ('has'|'with') prop = ID /*[sadl::ResourceName]*/  right=PrimaryExpression)*
+//;
 
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject returns Expression: // (17)
-	PrefixOperation2 (
-		{PropOfSubject.left=current} ('of'|'for') right=PropOfSubject
-	)?;
-	
-PrefixOperation2 returns Expression :
-	  {Declaration} article=AnArticle type=SadlResource ->(newName=DNAME)?
-	| PrimaryExpression
-;
+	PrimaryExpression ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject) |  
+					  (=>({SubjHasProp.left=current} ('with'|'has') prop=SadlResource) right=PrimaryExpression)+)?
+|   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PropOfSubject // this can be applied to other unitary operations
+|   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject;
 
 // primary expressions are the atom units of expression in the grammar	
 PrimaryExpression returns Expression: // (20)
 	'(' Expression ')' 
+	| {Declaration} article=AnArticle type=SadlResource ->(newName=DNAME)?
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 
@@ -308,7 +296,7 @@ BooleanValue:
 	
 
 Constants:
-	'PI' | '--' | 'None' | 'type' | 'index';
+	'PI' | '--' | 'None' | 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element';
 
 ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111

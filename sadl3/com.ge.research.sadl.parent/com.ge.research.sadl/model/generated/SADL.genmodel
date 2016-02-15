@@ -107,6 +107,10 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlCardinalityCondition/type"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlExplicitValue"/>
+    <genClasses ecoreClass="SADL.ecore#//ExpressionStatement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExpressionStatement/expr"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExpressionStatement/evaluatesTo"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//RuleStatement">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/ifs"/>
@@ -238,21 +242,23 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Exp/left"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Exp/right"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//UnaryExpression">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnaryExpression/negated"/>
-    </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//UnitaryOperation">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//UnitaryOperation/op"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnitaryOperation/expr"/>
+    <genClasses ecoreClass="SADL.ecore#//PropOfSubject">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/right"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SubjHasProp">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/left"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/prop"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/right"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//PropOfSubject">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/left"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/right"/>
+    <genClasses ecoreClass="SADL.ecore#//UnaryExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//UnaryExpression/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnaryExpression/expr"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//ElementInList">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/before"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/after"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ElementInList/element"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Declaration">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Declaration/article"/>
