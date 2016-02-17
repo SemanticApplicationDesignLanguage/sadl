@@ -42,5 +42,9 @@ import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessor
 	def Class<? extends AbstractAntlrTokenToAttributeIdMapper> bindTokenToAttributeIdMapper() {
 		return SadlTokenToAttributeIdMapper
 	}
-
+	
+	// registers our own root preference page.
+	def Class<? extends org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage> bindLanguageRootPreferencePage() {
+    	return com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
+	}
 }
