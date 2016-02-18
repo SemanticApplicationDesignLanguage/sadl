@@ -57,7 +57,15 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class SWIPrologTranslatorPlugin implements ITranslator {
-    protected static final Logger logger = LoggerFactory.getLogger(SWIPrologTranslatorPlugin.class);
+    public static final String SWI_RUN_PROLOG_SERVICE_PL = "swi-run-prolog-service.pl";
+
+	public static final String SWI_CUSTOM_PREDICATES_PL = "swi-custom-predicates.pl";
+
+	public static final String SWI_PROLOG_SERVICE_PL = "swi-prolog-service.pl";
+
+	public static final String SWI_STANDARD_DECLARATIONS_PL = "swi-standard-declarations.pl";
+
+	protected static final Logger logger = LoggerFactory.getLogger(SWIPrologTranslatorPlugin.class);
 
     private static final String TranslatorCategory = "SWI-Prolog_Translator";
 
@@ -92,7 +100,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	public enum TranslationTarget {RULE_TRIPLE, RULE_BUILTIN, QUERY_TRIPLE, QUERY_FILTER}
 	
 	public SWIPrologTranslatorPlugin() {
-		logger.debug("Creating new " + this.getClass().getName() + "' translator.");
+		logger.debug("Creating new '" + this.getClass().getName() + "' translator.");
 	}
 	
 	@Override
@@ -188,22 +196,22 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 
 	private void assureRequiredPrologFiles(String translationFolder) {
-		String standardDecls = translationFolder + File.separator + "standard-declarations.pl";
+		String standardDecls = translationFolder + File.separator + SWI_STANDARD_DECLARATIONS_PL;
 		File f = new File(standardDecls);
 		if (!f.exists()){
 			FileInterface.writeFile(standardDecls, getStandardDeclarations(), false);
 		}
-		String prologService = translationFolder + File.separator + "prolog-service.pl";
+		String prologService = translationFolder + File.separator + SWI_PROLOG_SERVICE_PL;
 		f = new File(prologService);
 		if (!f.exists()) {
 			FileInterface.writeFile(prologService, getService(), false);
 		}
-		String custom = translationFolder + File.separator + "custom-predicates.pl";
+		String custom = translationFolder + File.separator + SWI_CUSTOM_PREDICATES_PL;
 		File cpf = new File(custom);
 		if (!cpf.exists()) {
-			FileInterface.writeFile(custom, "% custom predicates should be defined here\n\n", false);
+			FileInterface.writeFile(custom, "% custom predicates and initialization for SWI-Prolog should be defined here\n\n", false);
 		}
-		String runService = translationFolder + File.separator + "run-prolog-service.pl";
+		String runService = translationFolder + File.separator + SWI_RUN_PROLOG_SERVICE_PL;
 		f = new File(runService);
 		if (!f.exists()) {
 			FileInterface.writeFile(runService, getRunService(), false);
@@ -215,8 +223,8 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			OntModel model, Object otherStructure, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
 			IOException, URISyntaxException {
-		// TODO Auto-generated method stub
-		return null;
+	
+		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
 	}
 
 	@Override
@@ -578,7 +586,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	private String getRunService() {
 		StringBuilder sb = new StringBuilder("% start Prolog Service\n");
 		sb.append(":- style_check(-singleton).\n");
-		sb.append(":- consult('standard-declarations.pl').\n\n\n");
+		sb.append(":- consult('swi-standard-declarations.pl').\n\n\n");
 
 		sb.append("load_pl_file(X) :- consult(X).\n");
 		sb.append("unload_pl_file(X) :- unload_file(X).\n\n");
@@ -600,12 +608,12 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		sb.append("    concat(Pred,'(',PredStr),\n");
 		sb.append("    sub_string(E,0,L,A,PredStr), !.\n\n\n");
 		
-		sb.append(":- consult('custom-predicates.pl').\n\n\n");
+		sb.append(":- consult('swi-custom-predicates.pl').\n\n\n");
 
 		sb.append("%%%%%%%%%%%%%%%\n");
 		sb.append("% start service\n");
 		sb.append("%%%%%%%%%%%%%%%\n");
-		sb.append(":- consult('prolog-service.pl').\n");
+		sb.append(":- consult('swi-prolog-service.pl').\n");
 		sb.append(":- query:port_number(X), server(X), !.\n");
 
 		return sb.toString();

@@ -692,7 +692,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			bf.getParentFile().mkdirs();
 		}
 		
-		String runServiceFile = getConfigMgr().getModelFolder() + "/run-prolog-service.pl";
+		String runServiceFile = getConfigMgr().getModelFolder() + "/" + SWIPrologTranslatorPlugin.SWI_RUN_PROLOG_SERVICE_PL;
 		String contents = "start /min swipl-win.exe -s " + runServiceFile + "\nexit\n";
 		SadlUtils su = new SadlUtils();
 		su.stringToFile(bf, contents, false);
