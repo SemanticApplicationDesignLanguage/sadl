@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ge.research.sadl</groupId>
   <artifactId>swi-prolog-plugin</artifactId>
-  <version>2.4.0</version>
+  <version>2.4.2</version>
 	<name>SWI-Prolog Reasoner/Translator Plugin for SADL</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -41,12 +41,12 @@
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-api</artifactId>
-			<version>2.4.0</version>
+			<version>2.4.2</version>
 		</dependency>
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-impl</artifactId>
-			<version>2.4.0</version>
+			<version>2.4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

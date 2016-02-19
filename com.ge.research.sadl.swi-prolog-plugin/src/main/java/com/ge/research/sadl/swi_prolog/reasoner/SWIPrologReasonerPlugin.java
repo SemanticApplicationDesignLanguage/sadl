@@ -72,14 +72,15 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public int initializeReasoner(String KBIdentifier, String modelName,
 			List<ConfigurationItem> preferences, String repoType)
 			throws ReasonerNotFoundException, ConfigurationException {
-		// TODO Auto-generated method stub
-		for (ConfigurationItem config: preferences){
-			for (NameValuePair pair: config.getNameValuePairs()){
-				System.out.println(pair.getName());
-				System.out.println(pair.getValue());
+		if (preferences != null) {
+			for (ConfigurationItem config: preferences){
+				for (NameValuePair pair: config.getNameValuePairs()){
+					System.out.println(pair.getName());
+					System.out.println(pair.getValue());
+				}
 			}
 		}
-		return 0;
+		return initializeReasoner(KBIdentifier, modelName, repoType);
 	}
 
 	@Override
@@ -386,7 +387,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public String prepareQuery(String query) throws InvalidNameException,
 			ConfigurationException {
 		// TODO Auto-generated method stub
-		return null;
+		return query;
 	}
 
 	@Override

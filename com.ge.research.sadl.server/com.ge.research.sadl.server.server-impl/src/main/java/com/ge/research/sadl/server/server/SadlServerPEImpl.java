@@ -460,7 +460,10 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				if (instanceDataModels != null && instanceDataModels.containsKey(thisModelName)) {
 					return instanceDataModels.get(thisModelName);
 				}
-				else if (thisModelName.equals(getInstanceDataName())) {
+				else if (getInstanceDataName() == null || thisModelName.equals(getInstanceDataName())) {
+					if (getInstanceDataName() == null) {
+						setInstanceDataNamespace(thisModelName + "#");
+					}
 					return createInstanceModel(thisModelName);
 				}
 			}

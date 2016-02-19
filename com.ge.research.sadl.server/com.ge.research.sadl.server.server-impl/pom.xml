@@ -67,6 +67,11 @@
 	  		<artifactId>prolog-for-sadl</artifactId>
 	  		<version>${project.version}</version>
 	  	</dependency>
+	  	<dependency>
+	  	  	<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>swi-prolog-plugin</artifactId>
+  			<version>${project.version}</version>
+	  	</dependency>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
@@ -124,7 +129,11 @@
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>prolog-for-sadl</artifactId>
   	</dependency>
-  </dependencies>
+  	<dependency>
+  	  	<groupId>com.ge.research.sadl</groupId>
+ 			<artifactId>swi-prolog-plugin</artifactId>
+  	</dependency>
+ </dependencies>
   
 	<!-- Define where to deploy this project's artifacts -->
 	<distributionManagement>
