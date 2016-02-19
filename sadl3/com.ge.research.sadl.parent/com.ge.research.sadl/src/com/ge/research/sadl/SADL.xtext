@@ -21,8 +21,6 @@ grammar com.ge.research.sadl.SADL hidden(WS, ML_COMMENT, SL_COMMENT) //with with
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 generate sADL "http://www.ge.com/research/sadl/SADL"
 
-
-
 SadlModel :
     'uri' baseUri=STRING ('alias' alias=ID)? ('version' version=STRING)? 
     	annotations+=SadlAnnotation* EOS 
@@ -85,14 +83,18 @@ SadlResource:
 ;
 
 SadlDataTypeFacet :	
-		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
+		minexin=('(' | '[') min=FacetNumber? ',' max=FacetNumber? maxexin=(']' | ')')
 	|	regex=STRING
-	|	'length' (len=NUMBER | minlen=NUMBER '-' maxlen=NUMBER)
+	|	'length' (len=FacetNumber | minlen=FacetNumber '-' maxlen=FacetNumber)
 	|	'{' values+=FacetValue (','? values+=FacetValue)* '}'
 ;
 
+FacetNumber :
+	'-'? NUMBER
+;
+
 FacetValue :
-	STRING | NUMBER
+	STRING | FacetNumber
 ;
 
 // TypeReferences
