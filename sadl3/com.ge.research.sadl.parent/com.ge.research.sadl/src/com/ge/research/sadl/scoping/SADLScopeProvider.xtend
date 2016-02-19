@@ -6,11 +6,13 @@ package com.ge.research.sadl.scoping
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.Expression
+import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlImport
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SubjHasProp
 import com.google.inject.Inject
 import java.util.Map
 import java.util.Set
@@ -64,10 +66,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val map = newHashMap
 		for (expression : expressions) {
 			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter[
-				switch container : eContainer {
-					BinaryOperation case container.op == 'is' || container.op == '==' : true
-					default : false
+				var container = eContainer
+				if (container instanceof PropOfSubject || container instanceof SubjHasProp) {
+					container = container.eContainer
 				}
+				if (container instanceof BinaryOperation) {
+					if (container.op == 'is' || container.op == '==' || container.op == '=') 
+						return true
+				}
+				return false
 			]
 			while (iter.hasNext) {
 				val name = iter.next

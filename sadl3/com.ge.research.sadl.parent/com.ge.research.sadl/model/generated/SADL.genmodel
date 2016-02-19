@@ -107,15 +107,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlCardinalityCondition/type"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlExplicitValue"/>
-    <genClasses ecoreClass="SADL.ecore#//ExpressionStatement">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExpressionStatement/expr"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExpressionStatement/evaluatesTo"/>
-    </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//RuleStatement">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/ifs"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/thens"/>
-    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//ExpressionScope"/>
     <genClasses ecoreClass="SADL.ecore#//Expression"/>
     <genClasses ecoreClass="SADL.ecore#//ValueTable">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueTable/valueTable"/>
@@ -212,6 +204,15 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlConstantLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlConstantLiteral/term"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//ExpressionStatement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExpressionStatement/expr"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExpressionStatement/evaluatesTo"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//RuleStatement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/ifs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/thens"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//BinaryOperation">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//BinaryOperation/left"/>

@@ -190,10 +190,12 @@ DefiniteArticle :
 
 // This is primarily for debugging purposes. Any expression can be given after "Expr:" to see if it is valid. 
 // Such an expression has no meaning in translation.
-ExpressionStatement:
+ExpressionStatement returns ExpressionScope :
+	{ExpressionStatement}
 	'Expr:' expr=Expression ('=>' evaluatesTo=STRING)?;
 
-RuleStatement :
+RuleStatement returns ExpressionScope :
+	{RuleStatement}
 	'Rule' name=QNAME ':'? 'if' ifs+=Expression // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
