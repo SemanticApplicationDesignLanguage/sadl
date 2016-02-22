@@ -31,11 +31,11 @@ class SadlModelProcessorProvider {
 	protected def doCreateProcessor(ResourceSet set) {
 		val processors = getAllProviders.map[get];
 		return new ISadlModelProcessor() {
-			override onValidate(Resource resource, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) {
-				processors.forEach[onValidate(resource, issueAcceptor, cancelIndicator)]
+			override onValidate(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
+				processors.forEach[onValidate(resource, issueAcceptor, context)]
 			}
-			override onGenerate(Resource resource, IFileSystemAccess2 fsa, CancelIndicator cancelIndicator) {
-				processors.forEach[onGenerate(resource, fsa, cancelIndicator)]
+			override onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
+				processors.forEach[onGenerate(resource, fsa, context)]
 			}
 			
 			override processExternalModels(String mappingFileFolder, List<String> fileNames) {

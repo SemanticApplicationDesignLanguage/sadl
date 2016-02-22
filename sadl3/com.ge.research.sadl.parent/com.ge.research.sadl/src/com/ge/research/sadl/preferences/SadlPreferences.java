@@ -5,6 +5,7 @@ import org.eclipse.xtext.preferences.PreferenceKey;
 
 @SuppressWarnings("restriction")
 public class SadlPreferences {
+	
 	public static final PreferenceKey SADL_BASE_URI= new PreferenceKey("baseUri", "");
 	public static final PreferenceKey RDF_XML_FORMAT = new PreferenceKey("RDF/XML", ""); // default
 	public static final PreferenceKey RDF_XML_ABBREV_FORMAT = new PreferenceKey("RDF/XML-ABBREV", "");
@@ -22,26 +23,4 @@ public class SadlPreferences {
 	public static final PreferenceKey DEEP_VALIDATION_OFF = new PreferenceKey("deepValidationOff", "");
 	public static final PreferenceKey GRAPH_VIZ_PATH = new PreferenceKey("graphvizpath", "");
 	
-	private IPreferenceValuesProvider preferenceValuesProvider;
-	private static SadlPreferences instance = null;
-	protected SadlPreferences(){
-		
-	}
-	public static SadlPreferences getInstance()
-	{
-		if (instance == null)
-		{
-			instance = new SadlPreferences();
-		}
-		return instance;
-	}
-	
-	public IPreferenceValuesProvider getPreferenceProvider()
-	{
-		return preferenceValuesProvider;
-	}
-	public void setPreferenceProvider(IPreferenceValuesProvider provider)
-	{
-		this.preferenceValuesProvider = provider;
-	}
 }

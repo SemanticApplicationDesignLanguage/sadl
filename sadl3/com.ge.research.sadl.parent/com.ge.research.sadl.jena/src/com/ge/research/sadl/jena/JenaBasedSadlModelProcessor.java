@@ -15,12 +15,14 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
+import org.eclipse.xtext.preferences.IPreferenceValues;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
+import com.ge.research.sadl.preferences.SadlPreferences;
 //import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
@@ -134,12 +136,13 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		return theJenaModel;
 	}
 	
+	@SuppressWarnings("restriction")
 	@Override
-	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, CancelIndicator cancelIndicator) {
+	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
 		// save the model
 		if (getTheJenaModel() == null) {
 			// it always is?
-			onValidate(resource, null, cancelIndicator);
+			onValidate(resource, null, context);
 		}
 		if (fsa !=null) {
 			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
@@ -152,6 +155,11 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			Charset charset = Charset.forName("UTF-8"); 
 			CharSequence seq = new String(out.toByteArray(), charset);
 			fsa.generateFile(owlFN, seq);
+			
+			IPreferenceValues testPrefs = context.getPreferenceValues();
+			
+			String baseuri = context.getPreferenceValues().getPreference(SadlPreferences.SADL_BASE_URI);
+			logger.debug("Base SADL URI is: " + baseuri); 
 			
 			// the mapping will have been updated already via onValidate
 			String pfileContent = fsa.readTextFile(UtilsForJena.ONT_POLICY_FILENAME).toString();
@@ -177,7 +185,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 	
 	@Override
-	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CancelIndicator cancelIndicator) {
+	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
 		setIssueAcceptor(issueAcceptor);
 		setCancelIndicator(cancelIndicator);
 		if (resource.getContents().size() < 1) {
@@ -301,7 +309,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 			Iterator<SadlModelElement> elitr = elements.iterator();
 			while (elitr.hasNext()) {
 				// check for cancelation from time to time
-				if (cancelIndicator.isCanceled()) {
+				if (context.getCancelIndicator().isCanceled()) {
 					throw new OperationCanceledException();
 				}
 				SadlModelElement element = elitr.next();

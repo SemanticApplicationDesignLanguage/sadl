@@ -9,6 +9,8 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import com.ge.research.sadl.processing.ISadlModelProcessor.ProcessorContext
 
 /**
  * Generates code from your model files on save.
@@ -18,10 +20,11 @@ import org.eclipse.xtext.generator.IGeneratorContext
 class SADLGenerator extends AbstractGenerator {
 
 	@Inject SadlModelProcessorProvider processorProvider 
+	@Inject IPreferenceValuesProvider preferenceProvider
 	
 	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext ctx) {
 		val processor = processorProvider.getProcessor(resource.resourceSet)
-		processor.onGenerate(resource, fsa, ctx.cancelIndicator)
+		processor.onGenerate(resource, fsa, new ProcessorContext(ctx.cancelIndicator,  preferenceProvider.getPreferenceValues(resource)))
 	}
 	
 }

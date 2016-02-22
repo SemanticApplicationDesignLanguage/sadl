@@ -31,6 +31,8 @@ import java.io.InputStream
 import java.io.IOException
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import com.ge.research.sadl.processing.ISadlModelProcessor.ProcessorContext
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -40,6 +42,7 @@ class SadlImportManagerProviderTest {
 	@Inject ValidationTestHelper validationTestHelper
 	@Inject Provider<JenaBasedSadlModelProcessor> smProcessorProvider
 	@Inject Provider<JenaBasedSadlImportProcessor> impProcessorProvider
+	@Inject IPreferenceValuesProvider preferenceProvider
 	
 /* Tests that should generate validation errors */	
 	@Ignore
@@ -164,7 +167,7 @@ class SadlImportManagerProviderTest {
 		validationTestHelper.assertNoErrors(model)
 		val smprocessor = smProcessorProvider.get
 		val List<Issue> issues= newArrayList
-		smprocessor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
+		smprocessor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(smprocessor.theJenaModel, issues)
 		return model.eResource
 	}
@@ -174,7 +177,7 @@ class SadlImportManagerProviderTest {
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = smProcessorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(processor.theJenaModel, issues)
 		return model.eResource
 	}

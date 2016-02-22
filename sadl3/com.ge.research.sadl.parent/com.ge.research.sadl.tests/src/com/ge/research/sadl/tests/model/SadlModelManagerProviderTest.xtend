@@ -26,6 +26,8 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.junit.Ignore
 import com.hp.hpl.jena.rdf.model.RDFNode
+import com.ge.research.sadl.processing.ISadlModelProcessor.ProcessorContext
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -34,6 +36,7 @@ class SadlModelManagerProviderTest {
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper
 	@Inject Provider<JenaBasedSadlModelProcessor> processorProvider
+	@Inject IPreferenceValuesProvider preferenceProvider
 	
 /* Tests that should generate validation errors */	
 	@Test def void testDuplicateUris() {
@@ -1038,7 +1041,7 @@ class SadlModelManagerProviderTest {
 		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(processor.theJenaModel, issues)
 		return model.eResource
 	}
@@ -1048,7 +1051,7 @@ class SadlModelManagerProviderTest {
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = processorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CancelIndicator.NullImpl)
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(processor.theJenaModel, issues)
 		return model.eResource
 	}
