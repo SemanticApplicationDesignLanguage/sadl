@@ -350,8 +350,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	}
 
 	private void processRuleStatement(RuleStatement element) {
-		String rulePrefix = element.getName().getPrefix();
-		String ruleName = element.getName().getFrag();
+		String ruleName = element.getName();
 		EList<Expression> ifs = element.getIfs();
 		EList<Expression> thens = element.getThens();
 		int i = 0;
@@ -1169,6 +1168,7 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		// TODO How do we tell if this is a union versus an intersection?						
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
 			SadlResource strSR = ((SadlSimpleTypeReference)sadlTypeRef).getType();
+			//TODO check for proxy, i.e. unresolved references
 			OntConceptType ctype = declarationExtensions.getOntConceptType(strSR);
 			String strSRUri = declarationExtensions.getConceptUri(strSR);	
 			if (strSRUri == null) {

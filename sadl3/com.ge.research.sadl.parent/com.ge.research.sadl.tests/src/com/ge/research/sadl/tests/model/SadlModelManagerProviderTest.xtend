@@ -141,7 +141,6 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
-	@Ignore
 	@Test def void mySimpleClassAsQnDeclarationCase() {
 		'''
 			uri "http://sadl.org/allqnames.sadl" alias aqn.
@@ -149,12 +148,12 @@ class SadlModelManagerProviderTest {
 			aqn:Shape is a class.
 			aqn:area describes aqn:Shape with values of type float.
 			
-			aqn:MyShape is a aqn:Shape with aqn:area 23 . 
+			aqn:MyShape is a aqn:Shape with aqn:area 23 .
 			
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)
-			assertTrue(issues.size == 0)
+			assertTrue(issues.join(',')[message], issues.size == 0)
 			var itr = jenaModel.listClasses().toIterable().iterator
 			var found = false
 			while (itr.hasNext()) {

@@ -27,6 +27,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import org.eclipse.xtext.naming.IQualifiedNameConverter
 
 /**
  * This class contains custom scoping description.
@@ -38,6 +39,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 
 	@Inject extension DeclarationExtensions
 	@Inject OnChangeEvictingCache cache
+	@Inject IQualifiedNameConverter converter
 
 	override getScope(EObject context, EReference reference) {
 		// resolving imports against external models goes directly to the global scope
@@ -106,10 +108,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			while (iter.hasNext) {
 				switch it : iter.next {
 					SadlResource case concreteName !== null: {
-						val simpleName = QualifiedName.create(concreteName)
-						map.addElement(simpleName, it)
-						if (namespace !== null)
-							map.addElement(namespace.append(simpleName), it)
+						val name = converter.toQualifiedName(concreteName)
+						map.addElement(name, it)
+						if (name.segmentCount > 1) {
+							map.addElement(name.skipFirst(1), it)
+						} else if (namespace !== null) {
+							map.addElement(namespace.append(name), it)
+						}
 					}
 					default :
 						if (pruneScope(it)) {

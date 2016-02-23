@@ -2,7 +2,6 @@ package com.ge.research.sadl.ui.syntaxcoloring
 
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.Name
-import com.ge.research.sadl.sADL.QNAME
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlIsInverseOf
 import com.ge.research.sadl.sADL.SadlModel
@@ -71,10 +70,6 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 				SadlIsInverseOf : {
 					var highlightingId = getHighlightingId(v.otherProperty)
 					acceptor.highlight(element, SADLPackage.Literals.SADL_IS_INVERSE_OF__OTHER_PROPERTY, highlightingId)
-				}
-				QNAME : {
-					var node = NodeModelUtils.getNode(element)
-					acceptor.addPosition(node.offset, node.length, SadlHighlightingConfiguration.URI_ID)
 				}
 			}
 		}

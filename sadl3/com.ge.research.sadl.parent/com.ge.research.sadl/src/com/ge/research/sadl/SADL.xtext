@@ -66,11 +66,11 @@ SadlStatement returns SadlStatement:
 ;
 
 SadlPropertyCondition :
-	property=[SadlResource|DNAME] cond+=SadlCondition
+	property=[SadlResource|QNAME] cond+=SadlCondition
 ;
 
 SadlPropertyInitializer:
-	','? ('with'|'has') property=[SadlResource|DNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	','? ('with'|'has') property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
 
 SadlNestedInstance returns SadlInstance:
@@ -79,7 +79,7 @@ SadlNestedInstance returns SadlInstance:
 ;
 
 SadlResource:
-	name=[SadlResource|DNAME] annotations+=SadlAnnotation*
+	name=[SadlResource|QNAME] annotations+=SadlAnnotation*
 ;
 
 SadlDataTypeFacet :	
@@ -111,7 +111,7 @@ SadlIntersectionType returns SadlTypeReference:
 ;
 
 SadlPrimaryTypeReference returns SadlTypeReference:
-		{SadlSimpleTypeReference} type=[SadlResource|DNAME]
+		{SadlSimpleTypeReference} type=[SadlResource|QNAME]
 	|	{SadlPrimitiveDataType} primitiveType=SadlDataType
 	|	'(' SadlPropertyCondition ')'
 	|	'{' SadlTypeReference '}'
@@ -132,7 +132,7 @@ SadlPropertyRestriction :
     	SadlCondition
     |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
     |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' list?='List'|lists?='Lists') 'of' 'values'|'values') 'of' 'type' range=SadlPrimaryTypeReference
-    |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|DNAME]
+    |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|QNAME]
     |   {SadlIsTransitive} 'is' 'transitive'
     |   {SadlIsSymmetrical} 'is' 'symmetrical'
     |   {SadlIsAnnotation} 'is' 'a' 'type' 'of' 'annotation'
@@ -283,7 +283,7 @@ PrimaryExpression returns Expression: // (20)
 	| {ValueTable} valueTable=ValueTable;
 	
 FeatureCall returns SadlResource:
-	{Name} name=[SadlResource|DNAME]
+	{Name} name=[SadlResource|QNAME]
 ;
 
 UNIT :
@@ -309,7 +309,7 @@ ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111
 
 QNAME:
-	(prefix=ID ':')? frag=DNAME;
+	(ID ':')? DNAME;
 
 DNAME hidden():
 	ID => DNAME_FRAGMENT*;

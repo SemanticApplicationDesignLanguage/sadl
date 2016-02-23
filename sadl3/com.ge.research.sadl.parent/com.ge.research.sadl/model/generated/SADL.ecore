@@ -137,10 +137,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="explicitValues" upperBound="-1"
         eType="#//Expression" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="QNAME">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prefix" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="frag" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlClassOrPropertyDeclaration" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="classOrProperty" upperBound="-1"
         eType="#//SadlResource" containment="true"/>
@@ -256,8 +252,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="evaluatesTo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RuleStatement" eSuperTypes="#//ExpressionScope">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//QNAME"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ifs" upperBound="-1" eType="#//Expression"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="thens" upperBound="-1"

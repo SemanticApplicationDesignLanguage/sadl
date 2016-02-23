@@ -8,10 +8,12 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.naming.IQualifiedNameConverter
 
 class QualifiedNameProvider implements IQualifiedNameProvider {
 
 	@Inject extension DeclarationExtensions
+	@Inject IQualifiedNameConverter nameConverter
 
 	override getFullyQualifiedName(EObject obj) {
 		if (obj instanceof SadlModel) {
@@ -19,7 +21,11 @@ class QualifiedNameProvider implements IQualifiedNameProvider {
 		}
 		if (obj instanceof SadlResource) {
 			val model = EcoreUtil2.getContainerOfType(obj, SadlModel)
-			return model.fullyQualifiedName.append(obj.concreteName)
+			val concreteName = obj.concreteName
+			if (concreteName.indexOf(':') != -1) {
+				return nameConverter.toQualifiedName(concreteName)
+			}
+			return model.fullyQualifiedName.append(concreteName)
 		}
 		return null
 	}
