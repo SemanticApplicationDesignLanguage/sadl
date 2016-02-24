@@ -1521,6 +1521,11 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 
 	@Override
 	public List<ModelError> getErrors() {
+		if (errors != null && errors.size() > 0) {
+			List<ModelError> retErrors = errors;
+			errors = null;
+			return retErrors;
+		}
 		return errors;
 	}
 	

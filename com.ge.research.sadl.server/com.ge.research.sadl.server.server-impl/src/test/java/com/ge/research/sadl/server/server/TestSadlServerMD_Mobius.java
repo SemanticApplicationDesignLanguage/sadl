@@ -2,6 +2,8 @@ package com.ge.research.sadl.server.server;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +21,7 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServerMD;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
@@ -44,7 +47,7 @@ public class TestSadlServerMD_Mobius extends TestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 //		modelFolder = ClassLoader.getSystemResource("DataModels/mobius20160211").getFile();
-		modelFolder = "E:/sadl/workspace-sadl/Mobius2.new/OwlModels";
+		modelFolder = "E:/sadl/workspace-sadl/Mobius2/OwlModels";
 		List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
 		loggers.add(LogManager.getRootLogger());
 		for ( Logger logger : loggers ) {
@@ -73,4 +76,42 @@ public class TestSadlServerMD_Mobius extends TestCase {
 		System.out.println(rs.toStringWithIndent(5));
 	}
 
+	@Test
+	public void test1() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
+		// demonstrate ability to get correct query answer
+		String modelName = "http://www.mobius.illinois.edu/advise/ont/core/RecloserSimple1";
+		ISadlServerMD srvr = new SadlServerMDImpl();
+		srvr.setKbaseRoot(modelFolder);
+		String session = srvr.selectServiceModel(modelFolder, modelName);
+		assertNotNull(session);
+		String qry = srvr.prepareQuery("select Sk P where minSkillProficiency('http://www.mobius.illinois.edu/advise/ont/core/Attack#AdminModifyFWOpen',Sk,P)");
+		ResultSet rs = srvr.query(qry);
+		assertNotNull(rs);
+		System.out.println(rs.toStringWithIndent(5));		
+	}
+	
+	@Test
+	public void testCreateAndDelete() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException {
+		String modelName = "http://www.mobius.illinois.edu/advise/ont/core/InitInstanceModel";
+		ISadlServerMD srvr = new SadlServerMDImpl();
+		assertNotNull(srvr);
+		assertNotNull(srvr.selectServiceModel(modelFolder, modelName));
+		String instMn = "http://www.mobius.illinois.edu/advise/ont/inst1";
+		String instNs = instMn + "#";
+		String newUri = srvr.getUniqueInstanceUri(instMn, instNs, "Device");
+		String newInst = srvr.createInstance(instMn, newUri, "http://www.mobius.illinois.edu/advise/ont/core/System#Device");
+		assertNotNull(newInst);
+		assertEquals(newUri, newInst);
+		assertFalse(srvr.updateRdfsLabel(instMn, newUri, "Ken's Device", null));
+		assertTrue(srvr.addTriple(instMn, newInst, "http://www.mobius.illinois.edu/advise/ont/core/System#loginPolicyImpact", 0.0));
+		System.out.println(srvr.ask(instMn, newUri, null, null));
+		assertTrue(srvr.deleteTriple(instMn, newUri, null, null));
+		assertFalse(srvr.deleteTriple(instMn, null, null, newInst));
+		System.out.println(srvr.ask(instMn, newUri, null, null));
+		System.out.println(srvr.ask(instMn, null, null, newUri));
+		assertNotNull(srvr.getErrors());
+		String owlInstanceFileName = "file:///c:/tmp/inst1.owl";
+		String globalPrefix = "inst1";
+		assertTrue(srvr.persistInstanceModel(instMn, owlInstanceFileName, globalPrefix));
+	}
 }

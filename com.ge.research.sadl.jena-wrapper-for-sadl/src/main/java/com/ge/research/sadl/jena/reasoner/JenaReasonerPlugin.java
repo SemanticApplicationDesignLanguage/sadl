@@ -1266,7 +1266,13 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (obj == null) {
 				RDFNode objval = s.getObject();
 				if (objval != null && objval.isLiteral()) {
-					result.get(i).add(((Literal)objval).getValue());
+					try {
+						result.get(i).add(((Literal)objval).getValue());
+					}
+					catch (Throwable t) {
+						System.err.println("Error (" + t.getMessage() + ") converting literal value to result set");
+						result.get(i).add(((Literal)objval).getLexicalForm());
+					}
 				}
 				else if (objval != null && objval.isResource() && !((Resource)objval).isAnon()){
 					result.get(i).add(((Resource)objval).getURI());
@@ -2269,7 +2275,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (sub != null) {
 			r = getOntResource(sub);
 			if (r == null) {
-				if (dataModel != null && p.equals(RDF.type) && n.canAs(OntClass.class)) {
+				if (dataModel != null && p != null && p.equals(RDF.type) && n.canAs(OntClass.class)) {
 					r = dataModel.createIndividual(sub, n.as(OntClass.class));
 				}
 				else {

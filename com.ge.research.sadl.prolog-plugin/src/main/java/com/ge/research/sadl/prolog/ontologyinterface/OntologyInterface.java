@@ -2,6 +2,9 @@ package com.ge.research.sadl.prolog.ontologyinterface;
 
 import java.io.File;
 
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.Theory;
+
 import com.ge.research.sadl.prolog.fileinterface.FileInterface;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -39,24 +42,29 @@ public class OntologyInterface{
 		configMgr = cm;
 	}
 	
+	public IConfigurationManager getConfigMgr() {
+		return configMgr;
+	}
+	
 	public int preparePrologFiles(String KBIdentifier) throws QueryParseException, QueryCancelledException {
 		// writing triples to prolog
 		System.out.println("Writing triples to prolog");
+		StringBuilder sb = new StringBuilder();
 		ResultSet results = getJenareasoner().ask("select distinct ?x ?y ?z where {?x ?y ?z}");
 		Object[][] resultdata = results.getData();
 		String outFile = KBIdentifier + File.separator + "rdf.pl";
-		FileInterface.writeFile(outFile, "", false);
+		FileInterface.writeFile(outFile, "", false);	// clear file contents
 		for (int row=0; row < resultdata.length; row++){
-			String toWrite = "rdf(";
+			sb.append("rdf(");
 			for (int col=0; col < resultdata[row].length; col++){
-				toWrite += "\'" + formatString(resultdata[row][col].toString()) + "\'";
+				sb.append("\'" + formatString(resultdata[row][col].toString()) + "\'");
 				if (col < resultdata[row].length-1)
-					toWrite += ",";
+					sb.append(",");
 				else
-					toWrite += ").\n";
+					sb.append(").\n");
 			}
-			FileInterface.writeFile(outFile, toWrite, true);
 		}
+		FileInterface.writeFile(outFile, sb.toString(), true);
 		
 		/* write direct instances and subclasses */
 		boolean ignore = false;
@@ -168,6 +176,10 @@ public class OntologyInterface{
 
 	private void setJenareasoner(IReasoner jenareasoner) {
 		this.jenareasoner = jenareasoner;
+	}
+	
+	public Theory createTheoryByConsult(String filename) throws InvalidTheoryException {
+		return new Theory(":- consult('" + filename + "').");
 	}
 	
 //	public static void dummy1()

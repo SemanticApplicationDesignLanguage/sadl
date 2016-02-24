@@ -31,6 +31,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.Reasoner;
@@ -63,6 +64,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	private SWIPrologServiceInterface prologServiceInstance;
 	private String plUrl;
 	private IConfigurationManager configMgr;
+	private List<ModelError> newErrors = null;
 	
 	public SWIPrologReasonerPlugin() {
 		logger.debug("Creating new " + this.getClass().getName() + " reasoner.");
@@ -285,14 +287,14 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public boolean addTriple(String sub, String pred, String obj)
 			throws TripleNotFoundException, ConfigurationException {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean deleteTriple(String sub, String pred, String obj)
 			throws TripleNotFoundException, ConfigurationException {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -336,6 +338,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			try {
 				return prologQueryToResultSet(plQuery, vars);
 			} catch (Exception e) {
+				addError(new ModelError("Error processing query '" + plQuery + "': " + e.getMessage(), ErrorType.ERROR));
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -589,8 +592,9 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 
 	@Override
 	public List<ModelError> getErrors() {
-		// TODO Auto-generated method stub
-		return null;
+		List<ModelError> returning = newErrors;
+		newErrors = null;
+		return returning;
 	}
 
 	public String prepareService(SWIPrologServiceInterface pl, String url, String query) {
@@ -841,4 +845,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		return filename + "." + newext;
 	}
 	
+	private void addError(ModelError newError) {
+		if (newErrors  == null) {
+			newErrors = new ArrayList<ModelError>();
+		}
+		newErrors.add(newError);
+	}
+
 }

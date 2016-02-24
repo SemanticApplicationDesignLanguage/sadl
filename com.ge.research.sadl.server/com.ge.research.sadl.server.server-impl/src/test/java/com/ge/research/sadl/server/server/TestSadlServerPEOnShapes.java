@@ -90,6 +90,33 @@ public class TestSadlServerPEOnShapes extends TestCase {
 	}
 	
 	@Test
+	public void testImplicitModelCreation() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, IOException, InvalidNameException, URISyntaxException, TripleNotFoundException, QueryCancelledException {
+		ISadlServerMD srvr = new SadlServerMDImpl();
+		srvr.setKbaseRoot(modelFolder);
+		String session = srvr.selectServiceModel(baseOntologyNamedService);
+		assertNotNull(session);
+		String mn = "http://sadl.imp/shapes_specific";	
+		String instMn = "http://sadl.org/test/add/shapes";
+		String instNs = instMn + "#";
+		String newUri = srvr.getUniqueInstanceUri(instMn, instNs, "Rectangle");
+		String newInst = srvr.createInstance(instMn, newUri, mn + "#Rectangle");
+		assert(newUri.equals(newInst));
+		assertFalse(srvr.updateRdfsLabel(instMn, newUri, "My Rectangle", null));
+		assertTrue(srvr.updateRdfsLabel(instMn, newUri, "Not Your Rectangle", null));
+		ResultSet rs = srvr.ask(instMn, newUri, "http://www.w3.org/2000/01/rdf-schema#label", null);
+		assertNotNull(rs);
+		assertTrue(rs.getResultAt(0, 0).equals("Not Your Rectangle"));
+		
+		srvr.updateRdfsLabel(mn, mn, "This is the ontology", null);
+		rs = srvr.ask(mn, mn, "http://www.w3.org/2000/01/rdf-schema#label", null);
+		assertTrue(rs.getResultAt(0, 0).equals("This is the ontology"));
+		
+		assertTrue(srvr.deleteTriple(instMn, newInst, null, null));
+		rs = srvr.ask(instMn, newInst,  null, null);
+		System.out.println(rs);
+	}
+
+	@Test
 	public void testUpdateLabel() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, IOException, InvalidNameException, URISyntaxException, TripleNotFoundException, QueryCancelledException {
 		ISadlServerMD srvr = new SadlServerMDImpl();
 		srvr.setKbaseRoot(modelFolder);
@@ -102,8 +129,8 @@ public class TestSadlServerPEOnShapes extends TestCase {
 		String newUri = srvr.getUniqueInstanceUri(instNs, "Rectangle");
 		String newInst = srvr.createInstance(newUri, mn + "#Rectangle");
 		assert(newUri.equals(newInst));
-		assertFalse(srvr.updateRdfsLabel(instMn, newUri, "My Rectangle", null));
-		assertTrue(srvr.updateRdfsLabel(instMn, newUri, "Not Your Rectangle", null));
+		assertFalse(srvr.updateRdfsLabel(newUri, "My Rectangle", null));
+		assertTrue(srvr.updateRdfsLabel(newUri, "Not Your Rectangle", null));
 		ResultSet rs = srvr.ask(instMn, newUri, "http://www.w3.org/2000/01/rdf-schema#label", null);
 		assertNotNull(rs);
 		assertTrue(rs.getResultAt(0, 0).equals("Not Your Rectangle"));

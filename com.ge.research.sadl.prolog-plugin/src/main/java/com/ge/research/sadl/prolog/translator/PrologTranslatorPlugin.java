@@ -42,9 +42,11 @@ import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.FunctionNotSupportedException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
@@ -56,6 +58,9 @@ public class PrologTranslatorPlugin implements ITranslator {
     protected static final Logger logger = LoggerFactory.getLogger(PrologTranslatorPlugin.class);
 
     private static final String TranslatorCategory = "tu-Prolog_Translator";
+    
+	private static final Object DEFAULTS_URI = "http://research.ge.com/Acuity/defaults.owl";
+
     protected List<ModelError> errors = null;
     private boolean saveRuleFileAfterModelSave = true;
     private List<String> importOrder;
@@ -73,10 +78,18 @@ public class PrologTranslatorPlugin implements ITranslator {
 	private OntModel theModel = null;
     private Map<String, String> prefixes = new HashMap<String, String>();
 	
+	private String translationFolder;
+
+	private IReasoner reasoner;
+	
     private enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN}
 	public enum TranslationTarget {RULE_TRIPLE, RULE_BUILTIN, QUERY_TRIPLE, QUERY_FILTER}
 
+	public PrologTranslatorPlugin() {
+		logger.debug("Creating new '" + this.getClass().getName() + "' translator");
+	}
+	
 	@Override
 	public String getConfigurationCategory() {
 		return TranslatorCategory;
@@ -88,6 +101,12 @@ public class PrologTranslatorPlugin implements ITranslator {
 //			((IConfigurationManagerForEditing) configMgr).setTranslatorClassName(this.getClass().getCanonicalName());
 //		}
 		configurationMgr = configMgr;
+		try {
+			assureRequiredPrologFiles(configMgr.getModelFolderPath().getCanonicalPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			throw new ConfigurationException("Failed to create required Prolog files", e);
+		}
 	}
 
 	@Override
@@ -106,6 +125,7 @@ public class PrologTranslatorPlugin implements ITranslator {
 		
 		setTheModel(model);
 		setModelName(modelName);
+		this.setTranslationFolder(translationFolder);
 		if (errors != null) {
 			errors.clear();
 		}
@@ -129,6 +149,26 @@ public class PrologTranslatorPlugin implements ITranslator {
 			//FileInterface.writeFile(fullyQualifiedRulesFilename, getHeaders(), true);
 			
         
+			for (int i = 0; orderedImports != null && i < orderedImports.size(); i++) {
+				String impUri = orderedImports.get(i).toString();
+				if (impUri.equals(DEFAULTS_URI)) {
+					continue;
+				}
+				try {
+					String impUrl = configurationMgr.getAltUrlFromPublicUri(impUri);
+					String impName = impUrl.substring(impUrl.lastIndexOf('/') + 1);
+					String plImpName = createDerivedFilename(impName, "pl");
+					StringBuilder sb = new StringBuilder();
+					sb.append(":- consult('");
+					sb.append(plImpName);
+					sb.append("').\n");
+					FileInterface.writeFile(fullyQualifiedRulesFilename, sb.toString(), true);
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
 			if (ruleList != null){
 				for (Rule rule: ruleList){
 					//System.out.println(rule.toString());
@@ -151,6 +191,25 @@ public class PrologTranslatorPlugin implements ITranslator {
 		return (errors != null && errors.size() > 0) ? errors : null;
 	}
 
+	private void assureRequiredPrologFiles(String translationFolder) {
+		String standardDecls = translationFolder + File.separator + "tuprolog-standard-declarations.pl";
+		File f = new File(standardDecls);
+		if (!f.exists()){
+			FileInterface.writeFile(standardDecls, getStandardDeclarations(), false);
+		}
+		String custom = translationFolder + File.separator + "tuprolog-custom-predicates.pl";
+		File cpf = new File(custom);
+		if (!cpf.exists()) {
+			FileInterface.writeFile(custom, "% custom predicates and initializaiton for tuProlog reasoner should be defined here\n:- consult('tuprolog-standard-declarations.pl').\n\n", false);
+		}
+	}
+
+	protected String getStandardDeclarations(){
+		StringBuilder sb = new StringBuilder("% standard declarations for tuProlog reasoner\n");
+		return sb.toString();
+		    
+	}
+	
 	@Override
 	public List<ModelError> translateAndSaveModelWithOtherStructure(
 			OntModel model, Object otherStructure, String translationFolder,
@@ -1212,6 +1271,26 @@ public class PrologTranslatorPlugin implements ITranslator {
 		if (!prefixes.containsKey(prefix)) {
 			prefixes.put(prefix, namespace);
 		}
+	}
+
+	private String getTranslationFolder() {
+		return translationFolder;
+	}
+
+	private void setTranslationFolder(String translationFolder) {
+		this.translationFolder = translationFolder;
+	}
+
+	private IReasoner getReasoner() throws ConfigurationException, ReasonerNotFoundException {
+		if (reasoner == null) {
+			reasoner = configurationMgr.getReasoner();
+		}
+		if (!reasoner.isInitialized()) {
+			reasoner.setConfigurationManager(configurationMgr);
+			int iStatus = reasoner.initializeReasoner(
+					getTranslationFolder(), modelName, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+		}
+		return reasoner;
 	}
 
 }

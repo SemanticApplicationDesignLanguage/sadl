@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 //import java.net.URL;
 //import java.net.URLClassLoader;
@@ -48,6 +49,7 @@ import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
+import com.ge.research.sadl.utils.SadlUtils;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Model;
 
@@ -71,6 +73,7 @@ public class PrologReasonerPlugin extends Reasoner {
 	protected boolean collectTimingInfo = false;
 	protected List<ReasonerTiming> timingInfo = null;
 	private String kbIdentifier = null;
+	private String modelName = null;
 
 	private List<ModelError> newErrors = null;
 	
@@ -95,7 +98,7 @@ public class PrologReasonerPlugin extends Reasoner {
 	}
 
 	@Override
-	public int initializeReasoner(String KBIdentifier, String modelName,
+	public int initializeReasoner(String KBIdentifier, String _modelName,
 			String repoType) throws ReasonerNotFoundException,
 			ConfigurationException {
 		
@@ -104,6 +107,7 @@ public class PrologReasonerPlugin extends Reasoner {
 		//System.out.println("Repo type: " + repoType);
 		
 		kbIdentifier = KBIdentifier;
+		modelName = _modelName;
 		if (collectTimingInfo) {
 			if (timingInfo == null) {
 				timingInfo = new ArrayList<ReasonerTiming>();
@@ -333,6 +337,12 @@ public class PrologReasonerPlugin extends Reasoner {
 			}
 		} catch (MalformedGoalException | NoSolutionException | NoMoreSolutionException e) {
 			System.err.println("Error: " + (e.getMessage() != null ? e.getMessage() : "") + " executing query '" + plQuery + "'");
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (collectTimingInfo) {
@@ -592,7 +602,7 @@ public class PrologReasonerPlugin extends Reasoner {
 		return false;
 	}
 
-	private Prolog getPlengine() throws QueryParseException, QueryCancelledException {
+	private Prolog getPlengine() throws QueryParseException, QueryCancelledException, ConfigurationException, MalformedURLException {
 		if (plengine == null) {
 			long t1 = System.currentTimeMillis();
 			if (ontointerface.preparePrologFiles(kbIdentifier) == 0) {
@@ -612,16 +622,10 @@ public class PrologReasonerPlugin extends Reasoner {
 
 				try {
 					System.out.println("Loading " + rdfFile);
-					plengine.addTheory(new Theory(new FileInputStream(rdfFile)));
+					plengine.addTheory(ontointerface.createTheoryByConsult(rdfFile));
 					System.out.println("Loading " + initFile);
-					plengine.addTheory(new Theory(new FileInputStream(initFile)));
+					plengine.addTheory(ontointerface.createTheoryByConsult(initFile));
 				} catch (InvalidTheoryException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
@@ -681,26 +685,15 @@ public class PrologReasonerPlugin extends Reasoner {
 				String value = envMap.get(key);
 				System.out.println("[" + key + "] " + value);
 			}*/
-			File[] files = plFilesFolder.listFiles(); 
-			// first load prolog files and then owl/rdf files
-			for (int i = 0; i < files.length; i++){
-				if (files[i].getName().endsWith(".pl")){
-					if (!ignoreFile(files[i].getName())){
-						System.out.println("Loading " + files[i].getAbsolutePath());
-						try {
-							plengine.addTheory(new Theory(new FileInputStream(files[i].getAbsolutePath())));
-						} catch (InvalidTheoryException e) {
-							// TODO Auto-generated catch block
-							System.err.println("Syntax error: " + e.getMessage());
-						} catch (FileNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
+			String modelAltUrl = ontointerface.getConfigMgr().getAltUrlFromPublicUri(modelName);
+			String owlFile = new SadlUtils().fileUrlToFileName(modelAltUrl);
+			String plOwlFile = createDerivedFilename(owlFile, "pl");
+			System.out.println("Loading " + plOwlFile);
+			try {
+				plengine.addTheory(ontointerface.createTheoryByConsult(plOwlFile));
+			} catch (InvalidTheoryException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			
 			// to get configuration options
@@ -709,6 +702,14 @@ public class PrologReasonerPlugin extends Reasoner {
 		return plengine;
 	}
 
+	protected String createDerivedFilename(String filename, String newext) {
+		int lastDot = filename.lastIndexOf('.');
+		if (lastDot > 0) {
+			return filename.substring(0, lastDot + 1) + newext;
+		}
+		return filename + "." + newext;
+	}
+	
 	@Override
 	public List<ModelError> getErrors() {
 		List<ModelError> returning = newErrors;
