@@ -275,7 +275,18 @@ public class SadlServerImpl implements ISadlServer {
 	        	logger.info("Got configuration manager");
 	        }
 	        setConfigurationManagerModelGetter();
-	        reasoner = getConfigurationMgr().getReasoner();
+	        if (preferences != null && preferences.size() > 0) {
+	        	for (int i = 0; i < preferences.size(); i++) {
+	        		ConfigurationItem ci = preferences.get(i);
+	        		if (ci.getLeafCategory().equals("http://com.ge.research.sadl.configuration#ReasonerSpec")) {
+	        			ci.getNamedValue("reasonerClassName");
+	        			reasoner = getConfigurationMgr().getOtherReasoner((String) ci.getNamedValue("reasonerClassName"));
+	        		}
+	        	}
+	        }
+	        if (reasoner == null) {
+	        	reasoner = getConfigurationMgr().getReasoner();
+	        }
 	 	} catch (MalformedURLException e1) {
 			throw new ConfigurationException("Error setting repository type: " + e1.getMessage());
 		}

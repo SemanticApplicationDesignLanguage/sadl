@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,9 +14,12 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationItem;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
@@ -56,29 +60,53 @@ public class TestSadlServerMD_Mobius extends TestCase {
 		modelName = "http://www.mobius.illinois.edu/advise/ont/core/Queries";
 	}
 
-
-
 	@Test
-	public void test0() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
+	public void testWithJenaReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
 		// demonstrate ability to access the base named service
+		modelFolder = "E:/sadl/workspace-sadl/Mobius2.new/OwlModels";
 		ISadlServerMD srvr = new SadlServerMDImpl();
 		srvr.setKbaseRoot(modelFolder);
-		String session = srvr.selectServiceModel(baseOntologyNamedService);
+		List<ConfigurationItem> preferences = new ArrayList<ConfigurationItem>();
+		String[] categoryTree = new String[1];
+		categoryTree[0] = "http://com.ge.research.sadl.configuration#ReasonerSpec";
+		ConfigurationItem ci = new ConfigurationItem(categoryTree);
+		NameValuePair nvp = ci.new NameValuePair("reasonerClassName", "com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin");
+		ci.addNameValuePair(nvp);
+		preferences.add(ci);
+		String session = srvr.selectServiceModel(baseOntologyNamedService, preferences);
 		assertNotNull(session);
 		String qry = srvr.prepareQuery("select ?et where {?et <urn:x-hp-direct-predicate:http_//www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.mobius.illinois.edu/advise/ont/core/System#Performer> }");
 		ResultSet rs = srvr.query(qry);
 		assertNotNull(rs);
 		System.out.println(rs.toStringWithIndent(5));
-		
-		qry = srvr.prepareQuery("select X where rdf(X,'http://www.w3.org/2000/01/rdf-schema#subClassOf','http://www.mobius.illinois.edu/advise/ont/core/System#Performer')");
-		rs = srvr.query(qry);
+	}
+
+	@Test
+	public void testWithSWIPrologReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
+		// demonstrate ability to access the base named service
+		modelFolder = "E:/sadl/workspace-sadl/Mobius2.new/OwlModels";
+		ISadlServerMD srvr = new SadlServerMDImpl();
+		srvr.setKbaseRoot(modelFolder);
+		List<ConfigurationItem> preferences = new ArrayList<ConfigurationItem>();
+		String[] categoryTree = new String[1];
+		categoryTree[0] = "http://com.ge.research.sadl.configuration#ReasonerSpec";
+		ConfigurationItem ci = new ConfigurationItem(categoryTree);
+		NameValuePair nvp = ci.new NameValuePair("reasonerClassName", "com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin");
+		ci.addNameValuePair(nvp);
+		preferences.add(ci);
+		String session = srvr.selectServiceModel(baseOntologyNamedService, preferences);
+		assertNotNull(session);
+		String qry = srvr.prepareQuery("select X where rdf(X,'http://www.w3.org/2000/01/rdf-schema#subClassOf','http://www.mobius.illinois.edu/advise/ont/core/System#Performer')");
+		ResultSet rs = srvr.query(qry);
 		assertNotNull(rs);
 		System.out.println(rs.toStringWithIndent(5));
+		
 	}
 
 	@Test
 	public void test1() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
 		// demonstrate ability to get correct query answer
+		modelFolder = "E:/sadl/workspace-sadl/Mobius2.new/OwlModels";
 		String modelName = "http://www.mobius.illinois.edu/advise/ont/core/RecloserSimple1";
 		ISadlServerMD srvr = new SadlServerMDImpl();
 		srvr.setKbaseRoot(modelFolder);
