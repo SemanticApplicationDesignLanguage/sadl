@@ -5,6 +5,11 @@
   <artifactId>reasoner-impl</artifactId>
   <name>SADL Reasoner</name>
   <description>Implementation of com.ge.research.sadl.reasoner-api</description>
+	<parent>
+		<groupId>com.ge.research.sadl</groupId>
+		<artifactId>com.ge.research.sadl.parent</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+	</parent>
   <dependencyManagement>
   	<dependencies>
   		<dependency>

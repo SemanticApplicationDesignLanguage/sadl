@@ -55,20 +55,22 @@ class SADLValidator extends AbstractSADLValidator {
 			var otherRsrc = rsrcItr.next
 			if (!otherRsrc.equals(thisRsrc)) {
 				// this isn't the same resource
-				var otherModel = otherRsrc.contents.get(0) as SadlModel
-				var otherRsrcUri = otherModel.baseUri
-				var otherURL = otherRsrc.URI
-				var otherFN = otherURL.lastSegment
-				if (thisFN.equals(otherFN)) {
-					error("The filename (" + thisFN + ") is already used by model '" + otherURL + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
-				}
-				if (thisUri != null && thisUri.equals(otherRsrcUri)) {
-					error("This URI is already used by model '" + otherFN + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
-				}
-				var thisAlias = model.alias
-				var otherAlias = otherModel.alias
-				if (otherAlias != null && thisAlias != null && otherAlias.equals(thisAlias)) {
-					error("This alias is already used by model '" + otherFN + "'; must be unique", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+				if (otherRsrc.contents.size > 0) {
+					var otherModel = otherRsrc.contents.get(0) as SadlModel
+					var otherRsrcUri = otherModel.baseUri
+					var otherURL = otherRsrc.URI
+					var otherFN = otherURL.lastSegment
+					if (thisFN.equals(otherFN)) {
+						error("The filename (" + thisFN + ") is already used by model '" + otherURL + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
+					}
+					if (thisUri != null && thisUri.equals(otherRsrcUri)) {
+						error("This URI is already used by model '" + otherFN + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
+					}
+					var thisAlias = model.alias
+					var otherAlias = otherModel.alias
+					if (otherAlias != null && thisAlias != null && otherAlias.equals(thisAlias)) {
+						error("This alias is already used by model '" + otherFN + "'; must be unique", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+					}
 				}
 			}
 		}
