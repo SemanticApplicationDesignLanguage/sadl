@@ -7,8 +7,11 @@ Bundle-SymbolicName: com.ge.research.sadl.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl,
  org.eclipse.xtext.ide,
- org.eclipse.xtext.xbase.ide
+ org.eclipse.xtext.xbase.ide,
+ org.eclipse.xtend.core;bundle-version="2.9.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.ge.research.sadl.ide.contentassist.antlr.internal,
- com.ge.research.sadl.ide.contentassist.antlr
+Export-Package: com.ge.research.sadl.ide.contentassist.antlr,
+ com.ge.research.sadl.ide.contentassist.antlr.internal,
+ com.ge.research.sadl.ide.contentassist.antlr.lexer,
+ com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex
 

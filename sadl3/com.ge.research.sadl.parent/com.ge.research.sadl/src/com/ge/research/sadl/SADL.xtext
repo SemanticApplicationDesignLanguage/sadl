@@ -309,39 +309,32 @@ ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111
 
 QNAME:
-	(ID ':')? DNAME;
+	(DNAME ':')? DNAME;
 
-DNAME hidden():
-	ID => DNAME_FRAGMENT*;
+DNAME:
+	ID;
 
-DNAME_FRAGMENT hidden():
-	'.' (ID | NUMBER);
-
-AnyNumber returns ecore::EBigDecimal hidden() :
+AnyNumber returns ecore::EBigDecimal :
 	DecimalNumber EXPONENT?;
 
-DecimalNumber returns ecore::EBigDecimal hidden() :
-	NUMBER => ('.' NUMBER)?;
+DecimalNumber returns ecore::EBigDecimal :
+	NUMBER ;
 
-	// making this a terminal prevents the "-" from getting picked up as unary operator
-terminal EXPONENT returns ecore::EBigDecimal:
-	('e' | 'E') ('-' | '+')? NUMBER;
+EXPONENT returns ecore::EBigDecimal:
+	('e' | 'E') ('-' | '+')? DecimalNumber;
 
-terminal NUMBER returns ecore::EInt:
-	('0'..'9')+;
-
-	// EOS matches one whitespace character or EOF after the period in order to
-// disambiguate the end of sentence period from periods in names.
-terminal EOS:
-//    '.' (WS|EOF);
-	'.' (' ' | '\t' | '\r' | '\n' | EOF);
+EOS:
+	'.';
+	
+terminal NUMBER returns ecore::EInt :
+	'0'..'9'+;
 
 terminal WS:
 	('\u00A0' | ' ' | '\t' | '\r' | '\n')+;
 
 terminal ID:
-	'^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '-' | '%' | '~')*;
-
+	'^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '-' | '%' | '~')* ;
+	
 terminal STRING:
 	'"' ('\\' ('b' | 't' | 'n' | 'f' | 'r' | 'u' | '"' | "'" | '\\') | !('\\' | '"'))* '"' |
 	"'" ('\\' ('b' | 't' | 'n' | 'f' | 'r' | 'u' | '"' | "'" | '\\') | !('\\' | "'"))* "'";
@@ -354,3 +347,4 @@ terminal SL_COMMENT:
 
 terminal ANY_OTHER:
 	.;
+	

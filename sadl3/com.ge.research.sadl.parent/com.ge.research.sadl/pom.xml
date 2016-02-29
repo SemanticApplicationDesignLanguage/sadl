@@ -50,6 +50,11 @@
 				</configuration>
 				<dependencies>
 					<dependency>
+						<groupId>com.ge.research.sadl</groupId>
+						<artifactId>com.ge.research.sadl.xtextgenerator</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
 						<groupId>org.eclipse.xtext</groupId>
 						<artifactId>org.eclipse.xtext.xtext</artifactId>
 						<version>${xtextVersion}</version>
@@ -62,6 +67,11 @@
 					<dependency>
 						<groupId>org.eclipse.xtext</groupId>
 						<artifactId>org.eclipse.xtext.xbase</artifactId>
+						<version>${xtextVersion}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtend</groupId>
+						<artifactId>org.eclipse.xtend.core</artifactId>
 						<version>${xtextVersion}</version>
 					</dependency>
 					<dependency>

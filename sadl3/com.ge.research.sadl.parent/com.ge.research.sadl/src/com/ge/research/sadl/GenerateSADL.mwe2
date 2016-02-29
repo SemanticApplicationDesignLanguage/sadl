@@ -9,7 +9,6 @@ var projectPath = "./"
 var rootPath = "${projectPath}/.."
 
 Workflow {
-	
 	component = XtextGenerator {
 		configuration = {
 			project = StandardProjectConfig {
@@ -56,7 +55,7 @@ Workflow {
 
 			parserGenerator = {
 				debugGrammar = true
-				
+				combinedGrammar = false
 			}
 			serializer = {
 				generateStub = false
@@ -64,6 +63,8 @@ Workflow {
 			validator = {
 				// composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
 			}
+			
+			fragment = xtextgenerator.JFlexFragment {}
 		}
 	}
 }
