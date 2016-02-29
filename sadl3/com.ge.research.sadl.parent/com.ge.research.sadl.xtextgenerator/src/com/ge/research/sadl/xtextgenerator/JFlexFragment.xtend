@@ -129,7 +129,7 @@ class JFlexFragment extends AbstractXtextGeneratorFragment {
 					field.setAccessible(true);
 					field_n.setAccessible(true);
 					data = (char[]) field.get(input);
-					data_length = (int) field_n.get(input);
+					data_length = (Integer) field_n.get(input);
 					reset();
 				} catch (Exception e) {
 					throw new RuntimeException(e);
