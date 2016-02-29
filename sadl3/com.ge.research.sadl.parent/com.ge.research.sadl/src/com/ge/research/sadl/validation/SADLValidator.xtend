@@ -4,16 +4,18 @@
 package com.ge.research.sadl.validation
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.resource.ResourceDescriptionStrategy
+import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
-import com.google.inject.Inject
-import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.utils.SadlUtils
-import com.ge.research.sadl.sADL.RuleStatement
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import com.google.inject.Inject
 import org.eclipse.xtext.EcoreUtil2
-import com.ge.research.sadl.sADL.Name
-import java.util.ArrayList
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.resource.IResourceDescription
+import org.eclipse.xtext.resource.IResourceDescriptionsProvider
+import org.eclipse.xtext.validation.Check
 
 /**
  * This class contains custom validation rules. 
@@ -22,17 +24,9 @@ import java.util.ArrayList
  */
 class SADLValidator extends AbstractSADLValidator {
 	
-//  public static val INVALID_NAME = 'invalidName'
-//
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					MyDslPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}
-	@Inject DeclarationExtensions declarationExtensions;
+	@Inject DeclarationExtensions declarationExtensions
+	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
+	@Inject IResourceDescription.Manager resourceDescriptionManager
 
 	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI"
 	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
@@ -42,59 +36,41 @@ class SADLValidator extends AbstractSADLValidator {
 	
 	@Check
 	def checkSadlModel(SadlModel model) {
-		var thisUri = model.baseUri
-		var errMsg = SadlUtils.validateUri(thisUri);
+		val thisUri = model.baseUri
+		val errMsg = SadlUtils.validateUri(thisUri);
 		if (errMsg != null) {
 			error(errMsg, SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
 		}
-		var thisRsrc = model.eResource
-		var thisURL = thisRsrc.URI;
-		var thisFN = thisURL.lastSegment
-		var rsrcItr = thisRsrc.resourceSet.resources.iterator
-		while (rsrcItr.hasNext()) {
-			var otherRsrc = rsrcItr.next
-			if (!otherRsrc.equals(thisRsrc)) {
-				// this isn't the same resource
-				if (otherRsrc.contents.size > 0) {
-					var otherModel = otherRsrc.contents.get(0) as SadlModel
-					var otherRsrcUri = otherModel.baseUri
-					var otherURL = otherRsrc.URI
-					var otherFN = otherURL.lastSegment
-					if (thisFN.equals(otherFN)) {
-						error("The filename (" + thisFN + ") is already used by model '" + otherURL + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
-					}
-					if (thisUri != null && thisUri.equals(otherRsrcUri)) {
-						error("This URI is already used by model '" + otherFN + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
-					}
-					var thisAlias = model.alias
-					var otherAlias = otherModel.alias
-					if (otherAlias != null && thisAlias != null && otherAlias.equals(thisAlias)) {
-						error("This alias is already used by model '" + otherFN + "'; must be unique", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
-					}
-				}
+		val thisRsrc = model.eResource
+		val emfURI = thisRsrc.URI;
+		val simpleFileName = emfURI.lastSegment
+		val thisResourceDescription = resourceDescriptionManager.getResourceDescription(model.eResource)
+		val allModels = resourceDescriptionsProvider.getResourceDescriptions(model.eResource.resourceSet).getExportedObjectsByType(SADLPackage.Literals.SADL_MODEL)
+		for (modelDescription : allModels.filter[EObjectURI.trimFragment != thisResourceDescription.URI]) {
+			if (modelDescription.name.toString == thisUri) {
+				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
+			}
+			if (model.alias !== null && modelDescription.getUserData(ResourceDescriptionStrategy.USER_DATA_ALIAS) == model.alias) {
+				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+			}
+			if (modelDescription.EObjectURI.trimFragment.lastSegment == simpleFileName) {
+				error("The simple filename (" + simpleFileName + ") is already used by model '" + modelDescription.EObjectURI.trimFragment + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
 			}
 		}
+		
 		var imports = model.imports
 		// does an import need any validation?
 		if (imports != null) {
 			var itr = imports.iterator
 			while (itr.hasNext) {
 				var imp = itr.next;
-				var sm = imp.importedResource
-				if (sm != null) {
-					var impuri = sm.baseUri
-					if (impuri == null) {
-						errMsg = "Model '" + thisUri + "' has an import which appears to be null";
-					}
-					else if (impuri.equals(thisUri)) {
-						error("A model cannot import itself", SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE)
-					}
-					else {
-						errMsg = SadlUtils.validateUri(impuri);
-						if (errMsg != null) {
-							error(errMsg, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
-						}
-					}
+				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADLPackage.Literals.SADL_MODEL__BASE_URI).map[text].join().trim
+				val errorMsg = SadlUtils.validateUri(importedURI);
+				if (errorMsg != null) {
+					error(errorMsg, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
+				}
+				if (importedURI == thisUri) {
+					error("A model cannot import itself", SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE)
 				}
 			}
 		}

@@ -51,7 +51,7 @@ class SadlModelManagerProviderTest {
 		''') [ jenaModel2, issues2 |
 			assertNotNull(jenaModel2)
 			assertTrue(issues2.size == 1)
-			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This URI is already used by model"))
+			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This URI is already used in"))
 		]
 		
 	}
@@ -68,7 +68,7 @@ class SadlModelManagerProviderTest {
 		''') [ jenaModel2, issues2 |
 			assertNotNull(jenaModel2)
 			assertTrue(issues2.size == 1)
-			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This alias is already used by model"))
+			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:The alias 'foo' is already used in "))
 		]
 		
 	}

@@ -14,6 +14,8 @@ import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
 import com.google.inject.Binder
 import com.google.inject.Singleton
+import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
+import com.ge.research.sadl.resource.ResourceDescriptionStrategy
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -46,4 +48,7 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 		return ResourceValidator
 	}
 	
+	def Class<? extends DefaultResourceDescriptionStrategy> bindResourceDescritpionStrategy() {
+		return ResourceDescriptionStrategy
+	}
 }
