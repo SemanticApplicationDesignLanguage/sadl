@@ -31,13 +31,15 @@ import java.io.OutputStream;
 import javax.activation.DataSource;
 
 public class StringDataSource implements DataSource {
-	String type = null;
+	String type = "application/octet-stream";
 	String data = null;
 	private String name = null;
 	
 	public StringDataSource(String _data, String _type) {
 		data = _data;
-		type = _type;
+		if (_type != null) {
+			type = _type;
+		}
 	}
 	
 	public String getContentType() {
