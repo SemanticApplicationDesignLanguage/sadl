@@ -25,8 +25,16 @@ import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.preferences.SadlPreferences;
 //import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.ISadlModelProcessor;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.sADL.BinaryOperation;
+import com.ge.research.sadl.sADL.BooleanLiteral;
+import com.ge.research.sadl.sADL.Constant;
+import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.Expression;
+import com.ge.research.sadl.sADL.Name;
+import com.ge.research.sadl.sADL.NumberLiteral;
+import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SadlAllValuesCondition;
 import com.ge.research.sadl.sADL.SadlAnnotation;
@@ -64,6 +72,8 @@ import com.ge.research.sadl.sADL.SadlTypeAssociation;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.SadlValueList;
+import com.ge.research.sadl.sADL.StringLiteral;
+import com.ge.research.sadl.sADL.SubjHasProp;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -101,7 +111,7 @@ import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
-public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
+public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelProcessor.class);
 
     public final static String XSDNS = XSD.getURI();
@@ -115,7 +125,8 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 	enum AnnType {ALIAS, NOTE}
 	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
 	
-	@Inject DeclarationExtensions declarationExtensions;
+	@Inject
+	public DeclarationExtensions declarationExtensions;
 	private String modelName;
 	private String modelAlias;
 	private String modelNamespace;
@@ -353,7 +364,55 @@ public class JenaBasedSadlModelProcessor implements ISadlModelProcessor {
 		String ruleName = element.getName();
 		EList<Expression> ifs = element.getIfs();
 		EList<Expression> thens = element.getThens();
+		for (int i = 0; ifs != null && i < ifs.size(); i++) {
+			Expression expr = ifs.get(i);
+			String result = processExpression(expr);
+			System.out.println("If expression: " + result);
+		}
+		for (int i = 0; thens != null && i < thens.size(); i++) {
+			Expression expr = thens.get(i);
+			String result = processExpression(expr);
+			System.out.println("Then expression: " + result);
+		}
 		int i = 0;
+	}
+	
+	
+	public String processExpression(final Expression expr) {
+		if (expr instanceof BinaryOperation) {
+			return processExpression((BinaryOperation)expr);
+		}
+		else if (expr instanceof BooleanLiteral) {
+			return processExpression((BooleanLiteral)expr);
+		}
+		else if (expr instanceof Constant) {
+			return processExpression((Constant)expr);
+		}
+		else if (expr instanceof Declaration) {
+			return processExpression((Declaration)expr);
+		}
+		else if (expr instanceof Name) {
+			return processExpression((Name)expr);
+		}
+		else if (expr instanceof NumberLiteral) {
+			return processExpression((NumberLiteral)expr);
+		}
+		else if (expr instanceof PropOfSubject) {
+			return processExpression((PropOfSubject)expr);
+		}
+		else if (expr instanceof StringLiteral) {
+			return processExpression((StringLiteral)expr);
+		}
+		else if (expr instanceof SubjHasProp) {
+			return processExpression((SubjHasProp)expr);
+		}
+		else if (expr instanceof SadlResource) {
+			return declarationExtensions.getConceptUri((SadlResource)expr);
+		}
+		else {
+			System.err.println("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
+		}
+		return null;
 	}
 	
 	private void processSadlSameAs(SadlSameAs element) throws JenaProcessorException {

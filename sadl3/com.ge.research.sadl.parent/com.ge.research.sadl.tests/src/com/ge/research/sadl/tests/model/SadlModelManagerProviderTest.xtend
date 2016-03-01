@@ -984,6 +984,22 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void RuleTest1() {
+		val model = '''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Thingy is a class described by connectedTo with values of type Thingy, described by color with values of type string.
+			
+			T1 is a Thingy.
+			T2 is a Thingy.
+			T3 is a Thingy.
+			
+			Rule AllThingysConnect: if x is a Thingy and y is a Thingy and x != y then x has connectedTo y .
+			Rule AllThingysAreBlue: if x is a Thingy then color of x is "blue".
+		'''.assertValidatesTo[ jenaModel, issues |
+			
+		]
+	}
 
 //	@Test def void my<younameit>Case() {
 //		'''

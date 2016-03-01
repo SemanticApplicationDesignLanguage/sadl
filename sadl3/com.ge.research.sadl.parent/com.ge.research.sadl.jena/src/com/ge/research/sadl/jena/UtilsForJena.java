@@ -114,7 +114,7 @@ public class UtilsForJena {
      * @param prop
      * @param v
      * @return
-     * @throws JenaProcessorException
+     * @throws JenaProcessorException 
      */
     public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, OntProperty prop, Object v) throws JenaProcessorException {
         Literal val = null;

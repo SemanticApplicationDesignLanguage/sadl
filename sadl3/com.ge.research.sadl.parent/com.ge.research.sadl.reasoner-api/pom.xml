@@ -135,6 +135,4 @@
 <!-- 		<version>2.4.0</version> -->
 <!-- 		<relativePath>../com.ge.research.sadl.server</relativePath> -->
 <!-- 	</parent> -->
-	<groupId>com.ge.research.sadl</groupId>
-	<version>3.0.0</version>
 </project>

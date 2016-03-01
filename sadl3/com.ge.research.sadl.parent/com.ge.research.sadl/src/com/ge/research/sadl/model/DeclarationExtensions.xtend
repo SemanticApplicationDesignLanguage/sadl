@@ -54,6 +54,20 @@ class DeclarationExtensions {
 		return null
 	}
 	
+	def String getConceptQualifiedName(SadlResource it) {
+		val declaration = declaration
+		if (declaration != null) {	
+			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
+			if (part1 != null) {
+				val part2 = part1.alias
+				if (part2 != null) {
+					return part2 +":"+declaration.concreteName
+				}
+			}
+		}
+		return null
+	}
+	
 	def SadlResource getDeclaration(SadlResource resource) {
 		if (resource.name !== null && !resource.name.eIsProxy) {
 			return resource.name

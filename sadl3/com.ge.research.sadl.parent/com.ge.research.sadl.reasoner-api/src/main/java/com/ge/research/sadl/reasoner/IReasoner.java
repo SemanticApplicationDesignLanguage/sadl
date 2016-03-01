@@ -96,6 +96,14 @@ public interface IReasoner {
 	public boolean deleteRule(String ruleName) throws RuleNotFoundException;
 	
 	/**
+	 * Method to set the ConfigurationManager. If not set, a new one will be created.
+	 * 
+	 * @param configMgr
+	 * @throws ConfigurationException 
+	 */
+	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException;
+
+	/**
 	 * Method to set the instance data namespace for this scenario's instance data
 	 * 
 	 * @param ns

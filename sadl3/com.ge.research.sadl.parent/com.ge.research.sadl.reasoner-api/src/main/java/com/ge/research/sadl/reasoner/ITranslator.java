@@ -46,7 +46,7 @@ public interface ITranslator {
 	 * @param configMgr
 	 * @throws ConfigurationException 
 	 */
-//	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException;
+	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException;
 	
 	/**
 	 * Method to translate and save a model when there are no rules

@@ -5,6 +5,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="src-gen"/>
 	<classpathentry kind="src" path="xtend-gen"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-api-3.0.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl-3.0.0-SNAPSHOT.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ge.research.sadl.xtextgenerator"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
