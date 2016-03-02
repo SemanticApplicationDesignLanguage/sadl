@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright \u00a9 2007-2010 - General Electric Company, All Rights Reserved
+ * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -15,7 +15,6 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
  ***********************************************************************/
-
 package com.ge.research.sadl.jena.reasoner;
 
 import java.io.BufferedReader;

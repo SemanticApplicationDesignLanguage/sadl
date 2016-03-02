@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright \u00a9 2007-2010 - General Electric Company, All Rights Reserved
+ * Copyright \u00a9 2007-2016 - General Electric Company, All Rights Reserved
  * 
  * Project: SADL
  * 
@@ -14,11 +14,6 @@
  * and licensed under the Eclipse Public License - v 1.0 
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
- ***********************************************************************/
-
-/***********************************************************************
- * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:10 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena;

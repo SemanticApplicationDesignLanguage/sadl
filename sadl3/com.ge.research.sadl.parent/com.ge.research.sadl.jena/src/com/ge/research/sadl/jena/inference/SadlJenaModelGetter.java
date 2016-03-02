@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright 2007-2013 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2016 - General Electric Company, All Rights Reserved
  * 
  * Project: SADL
  * 
@@ -14,11 +14,6 @@
  * and licensed under the Eclipse Public License - v 1.0 
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
- ***********************************************************************/
-
-/***********************************************************************
- * $Last revised by: crapo $ 
- * $Revision: 1.8 $ Last modified on   $Date: 2015/07/31 11:32:33 $
  ***********************************************************************/
 
 package com.ge.research.sadl.jena.inference;

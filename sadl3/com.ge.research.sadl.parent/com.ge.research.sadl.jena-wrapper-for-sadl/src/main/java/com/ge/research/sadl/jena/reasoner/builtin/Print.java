@@ -1,12 +1,20 @@
-/******************************************************************
- * File:        Print.java
- * Created by:  Dave Reynolds
- * Created on:  11-Apr-2003
- * 
- * (c) Copyright 2003, 2004, 2005, 2006, 2007, 2008 Hewlett-Packard Development Company, LP
- * [See end of file]
- * $Id: Print.java,v 1.1 2014/01/31 15:41:06 crapo Exp $
- *****************************************************************/
+/************************************************************************
+ * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
+ *
+ * Project: SADL
+ *
+ * Description: The Semantic Application Design Language (SADL) is a
+ * language for building semantic models and expressing rules that
+ * capture additional domain knowledge. The SADL-IDE (integrated
+ * development environment) is a set of Eclipse plug-ins that
+ * support the editing and testing of semantic models using the
+ * SADL language.
+ *
+ * This software is distributed "AS-IS" without ANY WARRANTIES
+ * and licensed under the Eclipse Public License - v 1.0
+ * which is available at http://www.eclipse.org/org/documents/epl-v10.php
+ *
+ ***********************************************************************/
 package com.ge.research.sadl.jena.reasoner.builtin;
 
 import com.hp.hpl.jena.reasoner.rulesys.*;
