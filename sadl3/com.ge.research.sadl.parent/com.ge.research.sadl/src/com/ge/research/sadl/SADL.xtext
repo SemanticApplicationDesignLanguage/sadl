@@ -203,29 +203,23 @@ RuleStatement returns ExpressionScope :
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	'Ask:' expr=SelectExpression | ConstructExpression | AskExpression 
+	'Ask:' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
 ;
 
 SelectExpression returns Expression :
-	('select' (distinct='distinct')? (allVars='*' | varList=VariableList) 'where')? expr=Expression (orderby='order by' orderList=OrderList)?
+	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (',' selectFrom+=SadlResource)*) 'where' whereExpression=Expression (orderby='order by' orderList+=OrderElement (',' (orderList+=OrderElement))*)?
 ;
 
-VariableList :
-	names+=SadlResource (',' names+=SadlResource)*;
-
-OrderList :
-	orderList+=OrderElement (',' (orderList+=OrderElement))*;
-
 OrderElement :
-	(order=('asc' | 'desc'))? name=SadlResource;
+	('asc' | desc?='desc')? orderBy=SadlResource;
 
 
 ConstructExpression returns Expression :
-	'construct' subj=SadlResource pred=SadlResource obj=SadlResource 'where' expr=Expression
+	'construct' subj=SadlResource pred=SadlResource obj=SadlResource 'where' whereExpression=Expression
 ;
 
 AskExpression returns Expression :
-	'ask' 'where' expr=Expression
+	'ask' 'where' whereExpression=Expression
 ;
 
 Expression returns Expression: // (1)
@@ -266,13 +260,21 @@ OpCompare:
 	'>=' | '<=' | '>' | '<';
 
 Addition<EnabledWith> returns Expression:
-	Multiplication<EnabledWith> (({Plus.left=current} '+' | {Minus.left=current} '-') right=Multiplication<EnabledWith>)*;
+	Multiplication<EnabledWith> ({BinaryOperation.left=current} op=AddOp right=Multiplication<EnabledWith>)*;
+
+AddOp:
+	'+' | '-'
+;
 
 Multiplication<EnabledWith> returns Expression:
-	Power<EnabledWith> (({Multi.left=current} '*' | {Div.left=current} '/' | {Mod.left=current} '%') right=Power<EnabledWith>)*;
+	Power<EnabledWith> ({BinaryOperation.left=current} op=MultiOp right=Power<EnabledWith>)*;
+	
+MultiOp :
+	'*'|'/'|'%'
+;
 
 Power<EnabledWith> returns Expression:
-	PropOfSubject<EnabledWith> (({Exp.left=current} '^') right=PropOfSubject<EnabledWith>)*;
+	PropOfSubject<EnabledWith> ({BinaryOperation.left=current} op='^' right=PropOfSubject<EnabledWith>)*;
 
 //PrefixOperation returns Expression :
 //	  {UnaryExpression} 'not' negated=PrefixOperation
