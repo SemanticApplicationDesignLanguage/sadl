@@ -39,6 +39,7 @@ SadlModelElement :
 		SadlStatement EOS
 	|	ExpressionStatement => EOS
 	|	RuleStatement => EOS
+	|	QueryStatement => EOS
 ;
 
 // These are the things that translate directly to OWL.
@@ -198,6 +199,33 @@ RuleStatement returns ExpressionScope :
 	{RuleStatement}
 	'Rule' name=QNAME ':'? 'if' ifs+=Expression // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
+;
+
+QueryStatement returns ExpressionScope :
+	{QueryStatement}
+	'Ask:' expr=SelectExpression | ConstructExpression | AskExpression 
+;
+
+SelectExpression returns Expression :
+	('select' (distinct='distinct')? (allVars='*' | varList=VariableList) 'where')? expr=Expression (orderby='order by' orderList=OrderList)?
+;
+
+VariableList :
+	names+=SadlResource (',' names+=SadlResource)*;
+
+OrderList :
+	orderList+=OrderElement (',' (orderList+=OrderElement))*;
+
+OrderElement :
+	(order=('asc' | 'desc'))? name=SadlResource;
+
+
+ConstructExpression returns Expression :
+	'construct' subj=SadlResource pred=SadlResource obj=SadlResource 'where' expr=Expression
+;
+
+AskExpression returns Expression :
+	'ask' 'where' expr=Expression
 ;
 
 Expression returns Expression: // (1)
