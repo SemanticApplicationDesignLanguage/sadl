@@ -394,6 +394,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		int i = 0;
 	}
 	
+	@Override
+	public String translate(Expression expr) {
+		return processExpression(expr);
+	}
 	
 	public String processExpression(final Expression expr) {
 		if (expr instanceof BinaryOperation) {
@@ -430,6 +434,51 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			System.err.println("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
 		}
 		return null;
+	}
+	
+	public String processExpression(BinaryOperation expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getOp());
+		return expr.getOp();
+	}
+	
+	public String processExpression(BooleanLiteral expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
+		return expr.getValue();
+	}
+	
+	public String processExpression(Constant expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getConstant());
+		return expr.getConstant();
+	}
+	
+	public String processExpression(Declaration expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getNewName());
+		return expr.getNewName();
+	}
+	
+	public String processExpression(Name expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getName().toString());
+		return expr.getName().toString();
+	}
+	
+	public String processExpression(NumberLiteral expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
+		return expr.getValue().toString();
+	}
+	
+	public String processExpression(PropOfSubject expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getPred().toString());
+		return expr.getPred().toString();
+	}
+	
+	public String processExpression(StringLiteral expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
+		return expr.getValue();
+	}
+	
+	public String processExpression(SubjHasProp expr) {
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
+		return expr.getProp().toString();
 	}
 	
 	private void processSadlSameAs(SadlSameAs element) throws JenaProcessorException {

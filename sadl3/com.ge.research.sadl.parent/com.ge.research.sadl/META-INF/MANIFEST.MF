@@ -17,7 +17,8 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtend.lib,
  org.eclipse.emf.common,
  org.eclipse.core.runtime;bundle-version="3.9.100",
- org.eclipse.xtend.core;bundle-version="2.9.1"
+ org.eclipse.xtend.core;bundle-version="2.9.1",
+ org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.generator,
