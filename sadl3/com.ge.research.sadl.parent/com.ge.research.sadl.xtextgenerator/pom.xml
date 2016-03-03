@@ -9,13 +9,6 @@
 	<artifactId>com.ge.research.sadl.xtextgenerator</artifactId>
 	<packaging>eclipse-plugin</packaging>
 
-  <dependencies>
-	<dependency>
-		<groupId>org.eclipse.xtext</groupId>
-		<artifactId>org.eclipse.xtext.xtext.generator</artifactId>
-		<version>${xtextVersion}</version>
-	</dependency>
-  </dependencies>
 	<build>
 		<plugins>
 			<plugin>
