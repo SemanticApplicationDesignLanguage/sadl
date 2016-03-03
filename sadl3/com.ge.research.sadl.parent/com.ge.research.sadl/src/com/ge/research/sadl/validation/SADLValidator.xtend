@@ -84,10 +84,10 @@ class SADLValidator extends AbstractSADLValidator {
 				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADLPackage.Literals.SADL_MODEL__BASE_URI).map[text].join().trim
 				val errorMsg = SadlUtils.validateUri(importedURI);
 				if (errorMsg != null) {
-					error(errorMsg, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
+					error(errorMsg, imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
 				}
 				if (importedURI == thisUri) {
-					error("A model cannot import itself", SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE)
+					error("A model cannot import itself", imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE)
 				}
 			}
 		}

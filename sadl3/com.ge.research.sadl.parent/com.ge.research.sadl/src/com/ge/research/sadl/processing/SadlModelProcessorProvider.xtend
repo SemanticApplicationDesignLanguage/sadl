@@ -18,14 +18,13 @@
 package com.ge.research.sadl.processing
 
 import com.google.inject.Provider
+import java.util.List
 import java.util.Set
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.internal.EmfAdaptable
-import java.util.List
 
 class SadlModelProcessorProvider {
 	

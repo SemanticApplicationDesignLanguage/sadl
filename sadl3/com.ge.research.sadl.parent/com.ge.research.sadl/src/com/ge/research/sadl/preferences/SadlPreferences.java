@@ -17,7 +17,6 @@
  ***********************************************************************/
 package com.ge.research.sadl.preferences;
 
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 import org.eclipse.xtext.preferences.PreferenceKey;
 
 @SuppressWarnings("restriction")
