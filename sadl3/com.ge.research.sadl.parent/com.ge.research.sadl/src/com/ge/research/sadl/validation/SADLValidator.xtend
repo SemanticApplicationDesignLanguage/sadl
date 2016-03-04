@@ -81,7 +81,7 @@ class SADLValidator extends AbstractSADLValidator {
 			var itr = imports.iterator
 			while (itr.hasNext) {
 				var imp = itr.next;
-				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADLPackage.Literals.SADL_MODEL__BASE_URI).map[text].join().trim
+				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).map[text].join().trimQuotes
 				val errorMsg = SadlUtils.validateUri(importedURI);
 				if (errorMsg != null) {
 					error(errorMsg, imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
@@ -91,6 +91,10 @@ class SADLValidator extends AbstractSADLValidator {
 				}
 			}
 		}
+	}
+	
+	def trimQuotes(String string) {
+		string.substring(1, string.length-1)
 	}
 	
 	@Check

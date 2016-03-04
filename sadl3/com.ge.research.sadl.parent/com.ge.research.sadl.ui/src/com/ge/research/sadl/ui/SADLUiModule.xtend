@@ -20,17 +20,20 @@
  */
 package com.ge.research.sadl.ui
 
+import com.ge.research.sadl.processing.SadlImportProcessorProvider
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
+import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
 import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorProvider
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
+import com.google.inject.Binder
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
+import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
-import com.ge.research.sadl.processing.SadlImportProcessorProvider
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -61,7 +64,11 @@ import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessor
 	}
 	
 	// registers our own root preference page.
-	def Class<? extends org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage> bindLanguageRootPreferencePage() {
-    	return com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
+	def Class<? extends LanguageRootPreferencePage> bindLanguageRootPreferencePage() {
+    	return SadlRootPreferencePage
+	}
+	
+	override configureContentAssistLexerProvider(Binder binder) {
+		//disabled
 	}
 }
