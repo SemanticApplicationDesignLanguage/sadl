@@ -23,6 +23,7 @@ import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -67,4 +68,29 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[MyShape] is a <Shape> with <area> 23 .
 		'''.assertLinking[sadl]
 	}
+	
+	@Ignore
+	@Test
+	def void testLinking3Files() {
+		'''
+			uri "http://sadl.org/allqnames.sadl" alias aqn.
+			
+			[Shape] is a class.
+			[area] describes <Shape> with values of type float.
+		'''.assertLinking[sadl]
+		'''
+			uri "http://sadl.org/allqnames2.sadl" alias aqn2.
+			import "http://sadl.org/allqnames.sadl"
+			
+			[MyShape] is a <Shape> with <area> 23 .
+			Rectangle is a type of <Shape>, described by height with values of type float, described by width with values of type float.
+		'''.assertLinking[sadl]
+		'''
+			uri "http://sadl.org.allqames3.sadl" alias aqn3.
+			import "http://sadl.org.allqnames2.sadl".
+			
+			[MyRect] is a <Rectangle> with <height> 3, with <width> 4, with <area> 12 .
+		'''.assertLinking[sadl]
+	}
+	
 }
