@@ -74,7 +74,7 @@ abstract class AbstractLinkingTest {
 				Assert.fail("unexpected node "+obj)
 			}
 		}
-		Assert.assertEquals(markerFile.actualContents, markerFile.originalContents)
+		Assert.assertEquals(markerFile.originalContents, markerFile.actualContents)
 	}
 	
 	private def void updateActual(TestFile markerFile, String name, TextRegion region, EObject callSite, EObject reference) {

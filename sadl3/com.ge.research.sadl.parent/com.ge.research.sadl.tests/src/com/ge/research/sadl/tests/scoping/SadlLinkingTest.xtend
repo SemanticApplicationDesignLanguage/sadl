@@ -69,7 +69,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testLinking3Files() {
 		'''
@@ -83,11 +82,11 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			import "http://sadl.org/allqnames.sadl"
 			
 			[MyShape] is a <Shape> with <area> 23 .
-			Rectangle is a type of <Shape>, described by height with values of type float, described by width with values of type float.
+			[Rectangle] is a type of <Shape>, described by [height] with values of type float, described by [width] with values of type float.
 		'''.assertLinking[sadl]
 		'''
 			uri "http://sadl.org.allqames3.sadl" alias aqn3.
-			import "http://sadl.org.allqnames2.sadl".
+			import "http://sadl.org/allqnames2.sadl".
 			
 			[MyRect] is a <Rectangle> with <height> 3, with <width> 4, with <area> 12 .
 		'''.assertLinking[sadl]
