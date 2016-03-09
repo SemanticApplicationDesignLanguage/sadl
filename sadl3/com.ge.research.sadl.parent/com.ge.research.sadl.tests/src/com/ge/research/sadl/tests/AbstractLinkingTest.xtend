@@ -37,23 +37,27 @@ import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
+import org.eclipse.xtext.util.StringInputStream
+import org.eclipse.emf.common.util.URI
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 abstract class AbstractLinkingTest {
 	
-	@Inject ParseHelper<SadlModel> parseHelper
-	
-	XtextResourceSet currentResourceSet
+	@Inject XtextResourceSet currentResourceSet
 	
 	protected def XtextResource sadl(CharSequence contents) {
-		val resource = if (currentResourceSet === null) {
-			parseHelper.parse(contents).eResource as XtextResource
-		} else {
-			parseHelper.parse(contents, currentResourceSet).eResource as XtextResource
-		}
-		currentResourceSet = resource.resourceSet as XtextResourceSet 
-		return resource
+		loadResource(computeURI('sadl'), contents)
+	}
+	
+	protected def XtextResource loadResource(URI uri, CharSequence contents) {
+		val resource = currentResourceSet.createResource(uri)
+		resource.load(new StringInputStream(contents.toString), null)
+		return resource as XtextResource
+	}
+	
+	protected def URI computeURI(String ext) {
+		return URI.createURI("synthetic:/Model"+currentResourceSet.resources.size+"."+ext)
 	}
 	
 	protected def void assertLinking(CharSequence contents, (CharSequence)=>XtextResource parser) {

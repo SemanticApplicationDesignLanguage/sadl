@@ -126,11 +126,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				switch it : iter.next {
 					SadlResource case concreteName !== null: {
 						val name = converter.toQualifiedName(concreteName)
-						map.addElement(name, it)
-						if (name.segmentCount > 1) {
-							map.addElement(name.skipFirst(1), it)
-						} else if (namespace !== null) {
-							map.addElement(namespace.append(name), it)
+						if (newParent.getSingleElement(name) === null) {
+							map.addElement(name, it)
+							if (name.segmentCount > 1) {
+								map.addElement(name.skipFirst(1), it)
+							} else if (namespace !== null) {
+								map.addElement(namespace.append(name), it)
+							}
 						}
 					}
 					default :
