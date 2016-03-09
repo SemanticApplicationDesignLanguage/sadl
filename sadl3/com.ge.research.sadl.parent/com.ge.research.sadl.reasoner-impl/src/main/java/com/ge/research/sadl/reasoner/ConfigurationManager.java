@@ -127,6 +127,8 @@ public class ConfigurationManager implements IConfigurationManager {
 	
 	private boolean inferenceCanceled = false;
 
+	private ISadlJenaModelGetter modelGetter;
+
 	/**
 	 * Required constructor for subclass call
 	 */
@@ -1486,12 +1488,12 @@ public class ConfigurationManager implements IConfigurationManager {
 		return getModelFolder() + "/TDB";
 	}
 
-//	public ISadlJenaModelGetter getModelGetter() {
-//		return modelGetter;
-//	}
-//	public void setModelGetter(ISadlJenaModelGetter modelGetter) {
-//		this.modelGetter = modelGetter;
-//	}
+	public ISadlJenaModelGetter getModelGetter() {
+		return modelGetter;
+	}
+	public void setModelGetter(ISadlJenaModelGetter modelGetter) {
+		this.modelGetter = modelGetter;
+	}
 	@Override
 	public boolean setInferenceCanceled(boolean canceled) {
 		boolean oldVal = inferenceCanceled;
@@ -1563,5 +1565,11 @@ public class ConfigurationManager implements IConfigurationManager {
 	}
 	public void setOntModelSpec(OntModelSpec ontModelSpec) {
 		this.ontModelSpec = ontModelSpec;
+	}
+	@Override
+	public List<ImportMapping> loadImportedModel(Ontology importingOntology, OntModel importingModel,
+			String publicImportUri, String altImportUrl) throws ConfigurationException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

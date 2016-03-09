@@ -28,5 +28,11 @@ Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.processing,
  com.ge.research.sadl.ui.quickfix,
  com.ge.research.sadl.ui.syntaxcoloring
-Import-Package: org.apache.log4j
+Import-Package: org.apache.log4j,
+ org.pojava.datetime
 Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
+Bundle-ClassPath: lib/reasoner-api-3.0.0-SNAPSHOT.jar,
+ lib/reasoner-impl-3.0.0-SNAPSHOT.jar,
+ .,
+ lib/slf4j-api-1.7.12.jar,
+ lib/slf4j-log4j12-1.7.12.jar

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.hp.hpl.jena.ontology.OntResource;
 
 public class PendingModelError extends ModelError {
     
@@ -35,8 +36,8 @@ public class PendingModelError extends ModelError {
     private List<AdditionalCheck> additionalChecks = null;
     
     public class AdditionalCheck {
-//    	private OntResource instance;
-//    	private OntResource requiredClass;
+    	private OntResource instance;
+    	private OntResource requiredClass;
     	private String message;
     	private ErrorType severity;
     	
@@ -59,21 +60,21 @@ public class PendingModelError extends ModelError {
 //    		setSeverity(errType);
 //    	}
 //
-//		private void setInstance(OntResource instance) {
-//			this.instance = instance;
-//		}
-//
-//		public OntResource getInstance() {
-//			return instance;
-//		}
-//
-//		private void setRequiredClass(OntResource requiredClass) {
-//			this.requiredClass = requiredClass;
-//		}
-//
-//		public OntResource getRequiredClass() {
-//			return requiredClass;
-//		}
+		private void setInstance(OntResource instance) {
+			this.instance = instance;
+		}
+
+		public OntResource getInstance() {
+			return instance;
+		}
+
+		private void setRequiredClass(OntResource requiredClass) {
+			this.requiredClass = requiredClass;
+		}
+
+		public OntResource getRequiredClass() {
+			return requiredClass;
+		}
 
 		private void setMessage(String message) {
 			this.message = message;

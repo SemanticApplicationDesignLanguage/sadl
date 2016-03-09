@@ -62,32 +62,34 @@ import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
-import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.reasoner.InferenceCanceledException;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
-import com.ge.research.sadl.reasoner.InferenceCanceledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.Reasoner;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
-import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.StringDataSource;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
@@ -298,9 +300,9 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * @throws ConfigurationException 
 	 */
 	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException {
-//		if ((configMgr instanceof IConfigurationManagerForEditing)) {
-//			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
-//		}
+		if ((configMgr instanceof IConfigurationManagerForEditing)) {
+			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
+		}
 		configurationMgr = configMgr;
 	}
 	
@@ -317,18 +319,18 @@ public class JenaReasonerPlugin extends Reasoner{
 		this.ruleFilesLoaded = new ArrayList<String>();
 		this.ruleList = new ArrayList<Rule>();
 		
-//		try {
-//			if (!configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
-//				if (tbox.equals(getModelName())) {
-//					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
-//				}
-//				else {
-//					throw new ConfigurationException("The model with actual URL '" + tbox + "' and name '" + getModelName() + "' does not appear to exist.");
-//				}
-//			}
-//		} catch (MalformedURLException e) {
-//			throw new ConfigurationException("The actual file URL '" + tbox + "' for model '" + getModelName() + "' is not well-formed.");
-//		}
+		try {
+			if (!configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+				if (tbox.equals(getModelName())) {
+					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
+				}
+				else {
+					throw new ConfigurationException("The model with actual URL '" + tbox + "' and name '" + getModelName() + "' does not appear to exist.");
+				}
+			}
+		} catch (MalformedURLException e) {
+			throw new ConfigurationException("The actual file URL '" + tbox + "' for model '" + getModelName() + "' is not well-formed.");
+		}
 
 		String derval = getStringConfigurationValue(preferences , pDerivationLogging, DERIVATION_NONE);
 		derivationLogging = (derval != null && !derval.equals(DERIVATION_NONE));
@@ -348,14 +350,14 @@ public class JenaReasonerPlugin extends Reasoner{
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
 			if (format.equals(IConfigurationManager.JENA_TDB)) {
-//				schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);	
+				schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);	
 				schemaModel.getDocumentManager().setProcessImports(true);
-//				schemaModel.loadImports();
+				schemaModel.loadImports();
 			}
 			else {
 				if (tbox.endsWith(".TDB/")) {
 					// this is a cached inferred TDB model
-//					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
+					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
 					schemaModelIsCachedInferredModel = true;
 					return null;
 				}
@@ -364,7 +366,7 @@ public class JenaReasonerPlugin extends Reasoner{
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
-//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
+					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
 					schemaModel.read(tbox, format);
 				}
 			}
@@ -482,7 +484,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		//	Get the correct Mappings from the policy file
 			OntDocumentManager mgr = OntDocumentManager.getInstance();
 			mgr.reset();
-//			mgr.setProcessImports(true);
+			mgr.setProcessImports(true);
 			configurationMgr = ConfigurationManagerFactory.getConfigurationManager(folderName, repoType);
 		}
 
@@ -496,10 +498,10 @@ public class JenaReasonerPlugin extends Reasoner{
 		String format = repoType;
 		try {
 			String tdbFolder = configurationMgr.getTdbFolder();
-//			if (configurationMgr.getModelGetter() == null) {
-//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
-//			}
-//			format = configurationMgr.getModelGetter().getFormat();
+			if (configurationMgr.getModelGetter() == null) {
+				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
+			}
+			format = configurationMgr.getModelGetter().getFormat();
 			if (!format.equals(IConfigurationManager.JENA_TDB)) {
 				String ext = tbox.substring(tbox.lastIndexOf('.'));
 				format = "RDF/XML-ABBREV";	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
@@ -509,7 +511,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				else if (ext.equalsIgnoreCase(".ntriple") || ext.equalsIgnoreCase(".nt")) {
 					format = "N-TRIPLE";
 				}
-//				configurationMgr.getModelGetter().setFormat(format);
+				configurationMgr.getModelGetter().setFormat(format);
 			}
 		}
 		catch (IOException e) {

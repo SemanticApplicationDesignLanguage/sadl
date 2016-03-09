@@ -1562,13 +1562,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 
 
-//	@Override
-//	public List<ModelError> translateAndSaveModelWithOtherStructure(
-//			OntModel model, Object otherStructure, String translationFolder,
-//			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
-//			IOException, URISyntaxException {
-//		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
-//	}
+	@Override
+	public List<ModelError> translateAndSaveModelWithOtherStructure(
+			OntModel model, Object otherStructure, String translationFolder,
+			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
+			IOException, URISyntaxException {
+		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+	}
 
 	public List<ModelError> validateRule(com.ge.research.sadl.model.gp.Rule rule) {
 		List<ModelError> errors = null;

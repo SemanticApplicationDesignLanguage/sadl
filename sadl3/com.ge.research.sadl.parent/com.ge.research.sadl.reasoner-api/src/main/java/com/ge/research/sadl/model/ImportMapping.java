@@ -23,6 +23,8 @@
 
 package com.ge.research.sadl.model;
 
+import com.hp.hpl.jena.ontology.OntModel;
+
 /**
  * This class encapsulates all of the information important to an
  * import: the publicURI, the actualURL, the prefix for this
@@ -36,7 +38,7 @@ public class ImportMapping {
 	private String publicURI;
 	private String actualURL;
 	private String prefix;
-//	private OntModel model;
+	private OntModel model;
 	
 	public ImportMapping() {
 		
@@ -72,12 +74,12 @@ public class ImportMapping {
 		return prefix;
 	}
 
-//	public OntModel getModel() {
-//		return model;
-//	}
-//
-//	public void setModel(OntModel model) {
-//		this.model = model;
-//	}
-//
+	public OntModel getModel() {
+		return model;
+	}
+
+	public void setModel(OntModel model) {
+		this.model = model;
+	}
+
 }

@@ -148,7 +148,8 @@ Export-Package: com.ge.research.sadl.jena,
  com.hp.hpl.jena.util.iterator,
  com.hp.hpl.jena.vocabulary,
  com.hp.hpl.jena.xmloutput,
- com.hp.hpl.jena.xmloutput.impl
+ com.hp.hpl.jena.xmloutput.impl,
+ org.pojava.datetime
 Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
  org.eclipse.emf.ecore,
  org.eclipse.emf,

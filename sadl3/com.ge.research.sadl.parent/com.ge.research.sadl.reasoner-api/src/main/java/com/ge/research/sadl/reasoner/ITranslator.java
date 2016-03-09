@@ -25,6 +25,7 @@ package com.ge.research.sadl.reasoner;
 
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.*;
+import com.hp.hpl.jena.ontology.OntModel;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public interface ITranslator {
 	 * @throws IOException 
 	 * @throws URISyntaxException 
 	 */
-//	public List<ModelError> translateAndSaveModel(OntModel model, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
+	public List<ModelError> translateAndSaveModel(OntModel model, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
 	
 	/**
 	 * Method to translate and save a model when there are no rules
@@ -75,7 +76,7 @@ public interface ITranslator {
 	 * @throws IOException 
 	 * @throws URISyntaxException 
 	 */
-//	public List<ModelError> translateAndSaveModel(OntModel model, List<Rule> ruleList, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
+	public List<ModelError> translateAndSaveModel(OntModel model, List<Rule> ruleList, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
 
 	
 	/**
@@ -90,7 +91,7 @@ public interface ITranslator {
 	 * @throws IOException 
 	 * @throws URISyntaxException 
 	 */
-//	public List<ModelError> translateAndSaveModelWithOtherStructure(OntModel model, Object otherStructure, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
+	public List<ModelError> translateAndSaveModelWithOtherStructure(OntModel model, Object otherStructure, String translationFolder, String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException;
 
 	/**
 	 * Method to translate a rule in intermediate form to the target representation
@@ -101,7 +102,7 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 */
 	
-//	public String translateRule(OntModel model, Rule rule)throws TranslationException;	
+	public String translateRule(OntModel model, Rule rule)throws TranslationException;	
 	
 	/**
 	 * Method to translate a query in intermediate form to the target representation
@@ -112,7 +113,7 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 * @throws InvalidNameException 
 	 */
-//	public String translateQuery(OntModel model, Query query) throws TranslationException, InvalidNameException;	
+	public String translateQuery(OntModel model, Query query) throws TranslationException, InvalidNameException;	
 	
 	/**
 	 * Method to identify the family of reasoners to which this translator can be applied, e.g., "Jena-Based".

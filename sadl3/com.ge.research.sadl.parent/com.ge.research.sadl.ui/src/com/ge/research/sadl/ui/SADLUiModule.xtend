@@ -34,6 +34,8 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttribute
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+import com.ge.research.sadl.builder.SadlModelManager
+import com.ge.research.sadl.ui.builder.SadlUiModelManager
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -70,5 +72,10 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 	
 	override configureContentAssistLexerProvider(Binder binder) {
 		//disabled
+	}
+	
+	// Provides listener capability for SadlModelManagaer.
+	def Class<? extends SadlModelManager> bindSadlModelManager() {
+		return SadlUiModelManager
 	}
 }

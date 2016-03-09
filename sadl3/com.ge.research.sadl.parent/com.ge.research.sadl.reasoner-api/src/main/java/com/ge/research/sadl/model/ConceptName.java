@@ -23,7 +23,12 @@
 
 package com.ge.research.sadl.model;
 
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 /**
  * This class encapsulates a named concept in a SADL model. The SADL model
@@ -142,44 +147,44 @@ public class ConceptName extends ConceptIdentifier {
 		return name;
     }
     
-//    public String getUri() throws InvalidNameException {
-//    	return getUri(null);
-//    }
+    public String getUri() throws InvalidNameException {
+    	return getUri(null);
+    }
     
-//    public String getUri(IConfigurationManager confMgr) throws InvalidNameException {
-//    	if (getNamespace() != null) {
-//    		return getNamespace() + getName();
-//    	}
-//    	else if (getPrefix() != null) {
-//    		if (getPrefix().equals("rdf")) {
-//    			setNamespace(RDF.getURI());
-//    			return RDF.getURI() + getName();
-//    		}
-//    		else if (getPrefix().equals("rdfs")) {
-//    			setNamespace(RDFS.getURI());
-//    			return RDFS.getURI() + getName();
-//    		}
-//    		else if (getPrefix().equals("owl")) {
-//    			setNamespace(OWL.getURI());
-//    			return OWL.getURI() + getName();
-//    		}
-//    		else if (getPrefix().equals("xsd")) {
-//    			setNamespace(XSD.getURI());
-//    			return XSD.getURI() + getName();
-//    		}
-//    		else if (confMgr != null) {
-//    			String uri = confMgr.getUriFromGlobalPrefix(getPrefix());
-//    			if (uri != null) {
-//    				if (!uri.endsWith("#")) {
-//    					uri += "#";
-//    				}
-//    				setNamespace(uri);
-//    				return uri + getName();
-//    			}
-//    		}
-//    	}
-//    	throw new InvalidNameException("ConceptName '" + toString() + "' doesn't have a namespace");
-//    }
+    public String getUri(IConfigurationManager confMgr) throws InvalidNameException {
+    	if (getNamespace() != null) {
+    		return getNamespace() + getName();
+    	}
+    	else if (getPrefix() != null) {
+    		if (getPrefix().equals("rdf")) {
+    			setNamespace(RDF.getURI());
+    			return RDF.getURI() + getName();
+    		}
+    		else if (getPrefix().equals("rdfs")) {
+    			setNamespace(RDFS.getURI());
+    			return RDFS.getURI() + getName();
+    		}
+    		else if (getPrefix().equals("owl")) {
+    			setNamespace(OWL.getURI());
+    			return OWL.getURI() + getName();
+    		}
+    		else if (getPrefix().equals("xsd")) {
+    			setNamespace(XSD.getURI());
+    			return XSD.getURI() + getName();
+    		}
+    		else if (confMgr != null) {
+    			String uri = confMgr.getUriFromGlobalPrefix(getPrefix());
+    			if (uri != null) {
+    				if (!uri.endsWith("#")) {
+    					uri += "#";
+    				}
+    				setNamespace(uri);
+    				return uri + getName();
+    			}
+    		}
+    	}
+    	throw new InvalidNameException("ConceptName '" + toString() + "' doesn't have a namespace");
+    }
     
     public boolean hasPrefix() {
         if (prefix != null) {

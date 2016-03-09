@@ -19,5 +19,11 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/httpclient-4.2.3.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/jena-arq-2.11.2.jar"/>
+	<classpathentry kind="lib" path="lib/jena-core-2.11.2.jar"/>
+	<classpathentry kind="lib" path="lib/jena-iri-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jena-tdb-1.0.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

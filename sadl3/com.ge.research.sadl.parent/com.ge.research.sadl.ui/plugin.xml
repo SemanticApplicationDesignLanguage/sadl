@@ -112,6 +112,21 @@
 			</enabledWhen>
 			<filter name="projectNature" value="org.eclipse.xtext.ui.shared.xtextNature"/>
 		</page>
+				<page
+              category="com.ge.research.sadl.SADL"
+              class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.ui.preferences.SadlReasonerPreferencePage"
+              id="com.ge.research.sadl.Sadl.reasoner"
+              name="Reasoner Preferences">
+           <enabledWhen>
+              <instanceof
+                    value="org.eclipse.core.resources.IProject">
+              </instanceof>
+           </enabledWhen>
+           <filter
+                 name="nature"
+                 value="org.eclipse.xtext.ui.shared.xtextNature">
+           </filter>
+        </page>
 	</extension>
 	<extension
 		point="org.eclipse.ui.keywords">

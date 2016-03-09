@@ -35,6 +35,20 @@ public class SadlUtils {
 	    }
 	    return null;
 	}
+	
+	public String validateHTTP_URI(String uri) throws java.net.MalformedURLException { 
+		final URL url; 
+		try { 
+			url = new URL(uri); 
+		}
+		catch (Exception e1) { 
+			throw new java.net.MalformedURLException("'" + uri + "' is not a valid URL: " + e1.getLocalizedMessage());
+		} 
+		if (!"http".equals(url.getProtocol())) {
+			throw new java.net.MalformedURLException("'" + uri + "' is not a valid URL: Model name must use http protocol.");
+		}
+		return uri;
+	}	
 
 
 	/**
