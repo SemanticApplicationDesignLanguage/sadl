@@ -67,9 +67,9 @@ import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SADLPackage;
-import com.ge.research.sadl.utils.SadlUtils;
-//import com.ge.research.sadl.utils.SadlUtils.ConceptType;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -90,7 +90,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
  * @author 200005201
  *
  */
-public class ConfigurationManagerForIDE extends com.ge.research.sadl.reasoner.ConfigurationManagerForEditing 
+public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing 
 	implements IConfigurationManagerForIDE, IResourceChangeListener, IPropertyChangeListener {
 	
 	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {

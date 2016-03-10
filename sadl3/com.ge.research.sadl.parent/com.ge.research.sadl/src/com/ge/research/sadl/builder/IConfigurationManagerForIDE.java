@@ -23,9 +23,8 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
-import com.ge.research.sadl.utils.SadlUtils;
-//import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 

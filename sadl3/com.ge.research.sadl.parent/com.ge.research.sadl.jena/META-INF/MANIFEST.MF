@@ -29,6 +29,7 @@ Bundle-ClassPath: lib/activation-1.0.2.jar,
  lib/wstx-asl-3.2.9.jar,
  .
 Export-Package: com.ge.research.sadl.jena,
+ com.ge.research.sadl.jena.inference,
  com.hp.hpl.jena,
  com.hp.hpl.jena.assembler,
  com.hp.hpl.jena.assembler.assemblers,

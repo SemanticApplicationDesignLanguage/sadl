@@ -26,7 +26,7 @@ package com.ge.research.sadl.ui.preferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.ITranslator;
-
+import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 
 import java.util.ArrayList;
@@ -75,8 +75,6 @@ import org.slf4j.LoggerFactory;
 //import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.MessageManager.MessageType;
-import com.ge.research.sadl.builder.ResourceManager;
 import com.google.inject.Inject;
 
 /**

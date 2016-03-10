@@ -66,7 +66,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 
 import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
-import com.ge.research.sadl.utils.SadlUtils;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 /**
  * An example showing how to create a multi-page editor.

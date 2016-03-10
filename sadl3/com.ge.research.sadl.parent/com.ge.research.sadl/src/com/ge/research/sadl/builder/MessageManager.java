@@ -8,7 +8,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import com.ge.research.sadl.utils.SadlUtils;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public class MessageManager {
 	public static enum MessageType { ERROR, WARN, INFO }

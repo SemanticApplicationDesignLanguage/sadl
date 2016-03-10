@@ -1,4 +1,4 @@
-package com.ge.research.sadl.utils;
+package com.ge.research.sadl.reasoner.utils;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;

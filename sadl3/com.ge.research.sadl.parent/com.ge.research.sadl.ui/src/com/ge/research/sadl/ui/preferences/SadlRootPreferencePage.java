@@ -31,9 +31,6 @@ import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
 import org.pojava.datetime.DateTimeConfig;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.ResourceManager;
-import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -44,9 +41,6 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.google.inject.Inject;
 
 public class SadlRootPreferencePage extends LanguageRootPreferencePage {
-	
-	@Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
 	
 	@SuppressWarnings("restriction")
 	@Override
@@ -78,50 +72,48 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 	@Override
 	public boolean performOk() {
 		boolean retVal = super.performOk();
-
-		SadlModelManager visitor = null;
 		
 		if (retVal && isPropertyPage()) {
 			// the changes apply only to the current project
 			IPreferencesService service = Platform.getPreferencesService();
 			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
-			if (visitor.getCurrentResource() != null) {
-				try {
-					String curResource = ResourceManager.getOwlModelsFolder(visitor.getCurrentResource().getURI());
-					IConfigurationManager cmgr = visitor.getConfigurationMgr(curResource.toString());
-					if (cmgr != null) {
-						cmgr.getModelGetter().setFormat(format);
-					}
-					String dmyOrder = service.getString("com.ge.research.sadl.Sadl", 
-							IConfigurationManager.dmyOrder, IConfigurationManager.dmyOrderMDY, null);
-					if (dmyOrder.equals(IConfigurationManager.dmyOrderDMY)) {
-						DateTimeConfig.getGlobalDefault().setDmyOrder(true);
-					}
-					else {
-						DateTimeConfig.getGlobalDefault().setDmyOrder(false);
-					}
-					if (cmgr != null && cmgr instanceof ConfigurationManagerForEditing) {
-						// TODO
-						// put date format in configuration
-						String[] itemContent = new String[1];
-						itemContent[0] = IConfigurationManager.DateFormat;
-						ConfigurationItem ci = new ConfigurationItem(itemContent);
-						NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
-						ci.addNameValuePair(nvp);
-						((ConfigurationManagerForEditing)cmgr).addConfiguration(ci);
-						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
-					}
-				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+//			if (visitor.getCurrentResource() != null) {
+//				try {
+//					String curResource = ResourceManager.getOwlModelsFolder(visitor.getCurrentResource().getURI());
+//					IConfigurationManager cmgr = visitor.getConfigurationMgr(curResource.toString());
+//					if (cmgr != null) {
+//						cmgr.getModelGetter().setFormat(format);
+//					}
+//					String dmyOrder = service.getString("com.ge.research.sadl.Sadl", 
+//							IConfigurationManager.dmyOrder, IConfigurationManager.dmyOrderMDY, null);
+//					if (dmyOrder.equals(IConfigurationManager.dmyOrderDMY)) {
+//						DateTimeConfig.getGlobalDefault().setDmyOrder(true);
+//					}
+//					else {
+//						DateTimeConfig.getGlobalDefault().setDmyOrder(false);
+//					}
+//					if (cmgr != null && cmgr instanceof ConfigurationManagerForEditing) {
+//						// TODO
+//						// put date format in configuration
+//						String[] itemContent = new String[1];
+//						itemContent[0] = IConfigurationManager.DateFormat;
+//						ConfigurationItem ci = new ConfigurationItem(itemContent);
+//						NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
+//						ci.addNameValuePair(nvp);
+//						((ConfigurationManagerForEditing)cmgr).addConfiguration(ci);
+//						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
+//					}
+//				} catch (ConfigurationException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (URISyntaxException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
 		}
 		else {
 			// the changes apply to all projects
@@ -133,27 +125,27 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			ConfigurationItem ci = new ConfigurationItem(itemContent);
 			NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 			ci.addNameValuePair(nvp);
-			Enumeration<IConfigurationManagerForIDE> cmgrs = visitor.getConfigurationManagers();
-			while (cmgrs.hasMoreElements()) {
-				IConfigurationManagerForIDE cmgr = cmgrs.nextElement();
-				cmgr.getModelGetter().setFormat(format);
-				if (dmyOrder.equals(IConfigurationManager.dmyOrderDMY)) {
-					DateTimeConfig.getGlobalDefault().setDmyOrder(true);
-				}
-				else {
-					DateTimeConfig.getGlobalDefault().setDmyOrder(false);
-				}
-				if (cmgr != null && cmgr instanceof IConfigurationManagerForIDE) {
-					// put date format in configuration
-					try {
-						((IConfigurationManagerForIDE)cmgr).addConfiguration(ci);
-						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
-					} catch (ConfigurationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
+//			Enumeration<IConfigurationManagerForIDE> cmgrs = visitor.getConfigurationManagers();
+//			while (cmgrs.hasMoreElements()) {
+//				IConfigurationManagerForIDE cmgr = cmgrs.nextElement();
+//				cmgr.getModelGetter().setFormat(format);
+//				if (dmyOrder.equals(IConfigurationManager.dmyOrderDMY)) {
+//					DateTimeConfig.getGlobalDefault().setDmyOrder(true);
+//				}
+//				else {
+//					DateTimeConfig.getGlobalDefault().setDmyOrder(false);
+//				}
+//				if (cmgr != null && cmgr instanceof IConfigurationManagerForIDE) {
+//					// put date format in configuration
+//					try {
+//						((IConfigurationManagerForIDE)cmgr).addConfiguration(ci);
+//						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
+//					} catch (ConfigurationException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+//			}
 		}
 		return retVal;
 	}

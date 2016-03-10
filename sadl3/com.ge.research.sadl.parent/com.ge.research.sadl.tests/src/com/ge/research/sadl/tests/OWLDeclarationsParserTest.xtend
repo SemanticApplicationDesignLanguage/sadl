@@ -485,7 +485,7 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-		@Test def void testInstanceDeclaration_03() {			// AWC, 10/13/15: this should be an error. However, the 
+	@Test def void testInstanceDeclaration_03() {			// AWC, 10/13/15: this should be an error. However, the 
 																//	error message isn't very easy to understand....
 		'''
 			uri "http://sadl.imp/baduris".
@@ -495,4 +495,18 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 			
 			SmallNumbers is a top-level class, must be one of {N1, N2, N3}.
 		'''.assertNoErrors
-	}}
+	}
+
+	@Ignore
+	@Test def void testInstanceDeclaration_04() {
+		'''
+			uri "http://sadl.imp/negnumber".
+						
+			Freezer is a class, described by expectedTemperature with values of type float.
+			
+			MyFreezer is a Freezer with expectedTemperature -20 .
+			YourFreezer is a Freezer with expectedTemperature -20.5.
+			SomeFreezer is a Freezer with expectedTemperature -3.2e2 .
+		'''.assertNoErrors
+	}
+}

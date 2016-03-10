@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
-import com.ge.research.sadl.utils.StringDataSource;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;

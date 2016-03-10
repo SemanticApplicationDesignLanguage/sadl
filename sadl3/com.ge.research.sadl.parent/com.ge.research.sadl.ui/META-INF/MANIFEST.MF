@@ -5,7 +5,7 @@ Bundle-Vendor: My Company
 Bundle-Version: 3.0.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.ge.research.sadl,
+Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
  com.ge.research.sadl.ide,
  org.eclipse.xtext.ui,
  org.eclipse.ui.editors;bundle-version="3.5.0",
@@ -20,6 +20,7 @@ Require-Bundle: com.ge.research.sadl,
  org.eclipse.xtext.ui.shared
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.ge.research.sadl.ui,
+ com.ge.research.sadl.ui.builder,
  com.ge.research.sadl.ui.contentassist,
  com.ge.research.sadl.ui.imports,
  com.ge.research.sadl.ui.internal,
@@ -29,10 +30,10 @@ Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.quickfix,
  com.ge.research.sadl.ui.syntaxcoloring
 Import-Package: org.apache.log4j,
- org.pojava.datetime
+ org.pojava.datetime,
+ com.ge.research.sadl.reasoner,
+ com.ge.research.sadl.reasoner.utils
 Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
-Bundle-ClassPath: lib/reasoner-api-3.0.0-SNAPSHOT.jar,
- lib/reasoner-impl-3.0.0-SNAPSHOT.jar,
- .,
+Bundle-ClassPath: .,
  lib/slf4j-api-1.7.12.jar,
  lib/slf4j-log4j12-1.7.12.jar

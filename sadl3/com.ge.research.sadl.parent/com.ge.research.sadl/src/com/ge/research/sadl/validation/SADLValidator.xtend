@@ -26,13 +26,13 @@ import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.utils.SadlUtils
 import com.google.inject.Inject
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 
 /**
  * This class contains custom validation rules. 

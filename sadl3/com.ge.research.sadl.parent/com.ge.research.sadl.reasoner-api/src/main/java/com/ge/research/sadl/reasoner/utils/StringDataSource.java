@@ -21,7 +21,7 @@
  * $Revision: 1.1 $ Last modified on   $Date: 2013/08/26 18:52:13 $
  ***********************************************************************/
 
-package com.ge.research.sadl.utils;
+package com.ge.research.sadl.reasoner.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

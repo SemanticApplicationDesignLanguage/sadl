@@ -25,5 +25,8 @@
 	<classpathentry kind="lib" path="lib/jena-core-2.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/jena-iri-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jena-tdb-1.0.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.ge.research.sadl"/>
+	<classpathentry kind="lib" path="/com.ge.research.sadl/lib/reasoner-api-3.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/com.ge.research.sadl/lib/reasoner-impl-3.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

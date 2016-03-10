@@ -5,13 +5,13 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="src-gen"/>
 	<classpathentry kind="src" path="xtend-gen"/>
-	<classpathentry exported="true" kind="lib" path="/com.ge.research.sadl.reasoner-api/target/reasoner-api-3.0.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="/com.ge.research.sadl.reasoner-impl/target/reasoner-impl-3.0.0-SNAPSHOT.jar" sourcepath="/com.ge.research.sadl.reasoner-impl/target/reasoner-impl-3.0.0-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jena-arq-2.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/jena-core-2.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/jena-iri-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jena-tdb-1.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12-1.7.12.jar"/>
+	<classpathentry kind="lib" path="lib/reasoner-api-3.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/reasoner-impl-3.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

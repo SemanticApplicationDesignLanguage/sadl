@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -37,7 +38,21 @@ public class ResourceManager {
 
     private static final String pluginId = "com.ge.research.sadl.ui";
 
-    /**
+    public static final String OWLDIR = "OwlModels";
+	public static final String ACUITY_DEFAULTS_URI = "http://research.ge.com/Acuity/defaults.owl";
+	public static final String ACUITY_DEFAULTS_NS = ACUITY_DEFAULTS_URI + "#";
+//	public static final String ACUITY_DEFAULTS_PREFIX = "defs";
+	public static final String ACUITY_DEFAULTS_OWL_FN = "defaults.owl";
+	public static final String ServicesConfigurationURI = "http://com.ge.research.sadl/sadlserver/Services";
+	public static final String ServicesConfigurationConcepts_FN = "SadlServicesConfigurationConcepts.owl";
+	public static final String ServicesConf_FN = "ServicesConfig.owl";
+	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
+    public static final String OWLFILEEXT = "owl";
+  public static final String OWLFILEEXTWITHPREFIX = ".owl";
+    public static final String SADLEXT = "sadl";
+    public static final String SADLEXTWITHPREFIX = ".sadl";
+
+	/**
      * Method to return the absolute path to a bundle resource given its local path
      *
      * @param relPath
@@ -134,4 +149,52 @@ public class ResourceManager {
     	}
     }
 
+	public static URI validateAndReturnOwlUrlOfSadlUri(URI createFileURI) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static String getModelNameFromSadlFile(File sadlfile) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static String sadlFileNameOfOwlAltUrl(String string, boolean b) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static String findSadlFileInProject(String parent, String sadlFileName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static List<File> findSadlFilesInDir(File projectDir) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static String getOwlFileExtension() {
+		// TODO Auto-generated method stub
+		return "owl";	// reasonable default?
+	}
+
+    /**
+     * Method to determine, from preferences, the OWL file format to use
+     * @return -- the file extension, preceded by a period, specified by the format selected in preferences
+     */
+    public static String getOwlFileExtensionWithPrefix() {
+    	return "." + getOwlFileExtension();
+    }
+
+	public static boolean copyDefaultsFileToOwlModelsDirectory(String defaultsActual) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public static boolean copyServicesConfigurationFileToOwlModelsDirectory(String servicesConfigurationActual) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+    
 }
