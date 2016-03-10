@@ -90,7 +90,7 @@ SadlDataTypeFacet :
 	|	'{' values+=FacetValue (','? values+=FacetValue)* '}'
 ;
 
-FacetNumber :
+FacetNumber returns ecore::EInt :
 	'-'? NUMBER
 ;
 
@@ -167,7 +167,7 @@ CardinalityValue :
 
 SadlExplicitValue:
 		SadlResource		// e.g., George
-	|	{SadlNumberLiteral} literalNumber=NUMBER
+	|	{SadlNumberLiteral} literalNumber=FacetNumber
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
 //    |   {SadlBag} '{' (explicitValues+=SadlExplicitValue (

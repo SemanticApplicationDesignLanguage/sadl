@@ -51,6 +51,12 @@ class ValueConverterService extends AbstractDeclarativeValueConverterService {
 
 	@Inject INTValueConverter intValueConverter
 	
+	@ValueConverter(rule = "NUMBER") def NUMBER() {
+		intValueConverter
+	}
+	@ValueConverter(rule = "FacetNumber") def FACETNUMBER() {
+		intValueConverter
+	}
 	@ValueConverter(rule = "INT") def INT() {
 		intValueConverter
 	}
