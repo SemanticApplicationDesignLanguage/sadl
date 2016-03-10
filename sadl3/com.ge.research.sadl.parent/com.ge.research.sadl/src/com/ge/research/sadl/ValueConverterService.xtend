@@ -19,12 +19,12 @@ package com.ge.research.sadl
 
 import com.google.inject.Inject
 import org.eclipse.xtext.conversion.ValueConverter
+import org.eclipse.xtext.conversion.ValueConverterException
 import org.eclipse.xtext.conversion.impl.AbstractDeclarativeValueConverterService
 import org.eclipse.xtext.conversion.impl.AbstractIDValueConverter
+import org.eclipse.xtext.conversion.impl.AbstractValueConverter
 import org.eclipse.xtext.conversion.impl.INTValueConverter
 import org.eclipse.xtext.conversion.impl.STRINGValueConverter
-import org.eclipse.xtext.conversion.impl.AbstractValueConverter
-import org.eclipse.xtext.conversion.ValueConverterException
 import org.eclipse.xtext.nodemodel.INode
 
 class ValueConverterService extends AbstractDeclarativeValueConverterService {
@@ -51,12 +51,6 @@ class ValueConverterService extends AbstractDeclarativeValueConverterService {
 
 	@Inject INTValueConverter intValueConverter
 	
-	@ValueConverter(rule = "NUMBER") def NUMBER() {
-		intValueConverter
-	}
-	@ValueConverter(rule = "FacetNumber") def FACETNUMBER() {
-		intValueConverter
-	}
 	@ValueConverter(rule = "INT") def INT() {
 		intValueConverter
 	}
@@ -66,5 +60,5 @@ class ValueConverterService extends AbstractDeclarativeValueConverterService {
 	@ValueConverter(rule = "STRING") def STRING() {
 		stringValueConverter
 	}
-
+	
 }

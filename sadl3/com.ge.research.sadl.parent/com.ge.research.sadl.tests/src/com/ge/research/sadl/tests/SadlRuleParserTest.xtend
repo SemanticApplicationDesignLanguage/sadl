@@ -44,7 +44,24 @@ class SadlRuleParserTest extends SADLParsingTest {
 			
 			 Freezer is a class, described by expectedTemperature with values of type float.
 			
-			 MyFreezer is a Freezer with expectedTemperature -20 .
+			 MyFreezer is a Freezer with expectedTemperature -20.
+			 YourFreezer is a Freezer with expectedTemperature -20.5.
+		'''.assertNoErrors
+	}
+	
+	@Test def void testInstanceDeclaration_05() {
+		'''
+			uri "http://sadl.imp/negnumber".
+			
+			ASSERT_DM-17 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_3,
+			    with functional_max 750,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min -100,
+			    with tolerance 0.5,
+			    with resolution 0.5.
 		'''.assertNoErrors
 	}
 }

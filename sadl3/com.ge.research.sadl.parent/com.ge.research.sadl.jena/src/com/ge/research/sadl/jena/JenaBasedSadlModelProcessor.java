@@ -1613,7 +1613,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private Literal sadlExplicitValueToLiteral(SadlExplicitValue value, OntProperty prop) throws JenaProcessorException {
 		if (value instanceof SadlNumberLiteral) {
-			int val = ((SadlNumberLiteral)value).getLiteralNumber();
+			String val = ((SadlNumberLiteral)value).getLiteralNumber();
 			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val);
 		}
 		else if (value instanceof SadlStringLiteral) {

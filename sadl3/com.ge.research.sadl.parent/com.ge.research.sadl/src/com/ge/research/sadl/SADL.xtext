@@ -90,8 +90,8 @@ SadlDataTypeFacet :
 	|	'{' values+=FacetValue (','? values+=FacetValue)* '}'
 ;
 
-FacetNumber returns ecore::EInt :
-	'-'? NUMBER
+FacetNumber :
+	'-'? AnyNumber
 ;
 
 FacetValue :
