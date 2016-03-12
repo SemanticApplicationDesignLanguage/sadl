@@ -793,8 +793,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
     			closing = true;
     		}
     		if (event.getType() == IResourceChangeEvent.POST_CHANGE && closing) {
-    			this.mappings.clear();
-    			this.globalPrefixes.clear();
+    			if (mappings != null) {
+    				this.mappings.clear();
+    			}
+    			if (globalPrefixes != null) {
+    				this.globalPrefixes.clear();
+    			}
     		}
     	}	
 	}

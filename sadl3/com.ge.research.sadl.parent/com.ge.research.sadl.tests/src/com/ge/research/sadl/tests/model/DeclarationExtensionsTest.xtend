@@ -181,6 +181,22 @@ class DeclarationExtensionsTest {
 		airport.describedBy.head.eContents.filter(SadlResource).head.assertIs(OntConceptType.DATATYPE_PROPERTY)
 	}
 	
+	@Test def void testEscapedName() {
+		val model = '''
+			uri "http://sadl.org/TestRequrements/StringLength" alias strlen. 
+					
+			INPUT_CLASS is a class, must be one of {^A, B, C}.
+		'''.parse
+		
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		
+		assertEquals(OntConceptType.CLASS, name2resource.get('INPUT_CLASS').ontConceptType)
+		assertEquals(OntConceptType.INSTANCE, name2resource.get('C').ontConceptType)
+		assertEquals(OntConceptType.INSTANCE, name2resource.get('B').ontConceptType)
+		assertEquals(OntConceptType.INSTANCE, name2resource.get('A').ontConceptType)
+		
+	}
+	
 	@Test def void testLocalVariable_01() {
 		val model = '''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 

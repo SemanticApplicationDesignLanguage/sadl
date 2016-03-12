@@ -861,9 +861,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else {
 					prop.removeRange(existingRange);
 				}
-				prop.addRange(newRange); 
-				addRangeListAnnotationToProperty(prop, rngValueType);
-				retval = true;
+				if (prop != null) {
+					prop.addRange(newRange); 
+					addRangeListAnnotationToProperty(prop, rngValueType);
+					retval = false;
+				}
+				else {
+					retval = true;
+				}
 			} else {
 				// this is the first range class given
 				if (!prop.getNameSpace().equals(getModelNamespace())) {
@@ -892,8 +897,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private OntProperty createObjectPropertyInCurrentModel(OntProperty prop) throws JenaProcessorException {
-		throw new JenaProcessorException("Creation of copy of object property in current model not yet implemented");
-//		return null;
+//		throw new JenaProcessorException("Creation of copy of object property in current model not yet implemented");
+		return null;
 	}
 
 	private void addError(String msg, EObject context) {
@@ -904,8 +909,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private void addWarning(String msg, EObject context) {
-		getIssueAcceptor().addWarning(msg, context);
-		System.out.println(msg);
+		if (getIssueAcceptor() != null) {
+			getIssueAcceptor().addWarning(msg, context);
+		}
+		else {
+			System.out.println(msg);			
+		}
 	}
 
 	private OntResource addClassToUnionClass(OntResource existingCls,

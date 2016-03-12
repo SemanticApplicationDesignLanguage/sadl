@@ -497,7 +497,6 @@ class OWLDeclarationsParserTest extends SADLParsingTest {
 		'''.assertNoErrors
 	}
 
-	@Ignore
 	@Test def void testInstanceDeclaration_04() {
 		'''
 			uri "http://sadl.imp/negnumber".
