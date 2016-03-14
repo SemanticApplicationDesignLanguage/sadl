@@ -18,6 +18,7 @@
 package com.ge.research.sadl.tests
 
 import org.junit.Test
+import org.junit.Ignore
 
 class SadlRuleParserTest extends SADLParsingTest {
 
@@ -36,6 +37,20 @@ class SadlRuleParserTest extends SADLParsingTest {
 			Rule AllThingsConnect: if x is a Thingy and y is a Thingy and x != y then x has connectedTo y .
 		'''.assertNoErrors
 
+	}
+	
+	@Ignore
+	@Test def void testPolyRule() {
+		'''
+			uri "http://sadl.impl/polyrule".
+			
+			AnyThingWillDo is a class.
+			
+			Rule Poly_Rule
+				if x is a childClass
+					and childClass is a type of superClass
+				then x is a superClass.
+		'''.assertNoErrors
 	}
 
 	@Test def void testInstanceDeclaration_04() {
