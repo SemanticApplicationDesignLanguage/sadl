@@ -79,4 +79,22 @@ class SadlRuleParserTest extends SADLParsingTest {
 			    with resolution 0.5.
 		'''.assertNoErrors
 	}
+	
+	@Ignore
+	@Test def void testInstanceDeclaration_06() {
+		'''
+			uri "http://sadl.imp/negnumber".
+			
+			ASSERT_DM-17 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_3,
+			    with functional_max 750,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min -100,
+			    with tolerance .5,
+			    with resolution .5.
+		'''.assertNoErrors
+	}
+	
 }
