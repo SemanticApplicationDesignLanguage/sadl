@@ -40,6 +40,7 @@ SadlModelElement :
 	|	ExpressionStatement => EOS
 	|	RuleStatement => EOS
 	|	QueryStatement => EOS
+	|	TestStatement => EOS
 ;
 
 // These are the things that translate directly to OWL.
@@ -197,7 +198,7 @@ ExpressionStatement returns ExpressionScope :
 
 RuleStatement returns ExpressionScope :
 	{RuleStatement}
-	'Rule' name=QNAME ':'? 'if' ifs+=Expression // (','? ifs+=Expression)*
+	'Rule' name=QNAME ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
 
@@ -220,6 +221,11 @@ ConstructExpression returns Expression :
 
 AskExpression returns Expression :
 	'ask' 'where' whereExpression=Expression
+;
+
+TestStatement returns ExpressionScope :
+	{TestStatement}
+	'Test' ':' tests+=Expression
 ;
 
 Expression returns Expression: // (1)

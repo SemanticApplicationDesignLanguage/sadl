@@ -1150,6 +1150,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlDisjointClasses");
 				}
 				OntClass cls = getTheJenaModel().getOntClass(declUri);
+				if (cls == null) {
+					throw new JenaProcessorException("Failed to get class '" + declUri + "' from Jena model.");
+				}
 				disjointClses.add(cls.asClass());
 			}
 		}
@@ -1328,6 +1331,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				return dt;
 			}
+			else if (ctype.equals(OntConceptType.CLASS_PROPERTY)) {
+				OntProperty otp = getTheJenaModel().getOntProperty(strSRUri);
+				if (otp == null) {
+					throw new JenaProcessorException("SadlSimpleTypeReference '" + strSRUri + "' not found; should have found an ObjectProperty");
+				}
+				return otp;
+			}
+			else if (ctype.equals(OntConceptType.DATATYPE_PROPERTY)) {
+				OntProperty dtp = getTheJenaModel().getOntProperty(strSRUri);
+				if (dtp == null) {
+					throw new JenaProcessorException("SadlSimpleTypeReference '" + strSRUri + "' not found; should have found an DatatypeProperty");
+				}
+				return dtp;
+			}
+			else {
+				throw new JenaProcessorException("SadlSimpleTypeReference '" + strSRUri + "' was of a type not yet handled: " + ctype.toString());
+			}
 		}
 		else if (sadlTypeRef instanceof SadlPrimitiveDataType) {
 			return processSadlPrimitiveDataType(null, (SadlPrimitiveDataType) sadlTypeRef, null);
@@ -1360,7 +1380,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					rhtNode = (RDFNode) rhtObj;
 				}
 				else {
-					throw new JenaProcessorException("Union member of unsupported type: " + rhtObj.getClass().getCanonicalName());
+					throw new JenaProcessorException("Union member of unsupported type: " + rhtObj != null ? rhtObj.getClass().getCanonicalName() : "null");
 				}
 			}
 			OntClass unionCls = createUnionClass(lftNode, rhtNode);
@@ -1382,6 +1402,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 			SadlTypeReference rht = ((SadlIntersectionType)sadlTypeRef).getRight();
+			if (rht == null) {
+				throw new JenaProcessorException("No right-hand side to intersection");
+			}
 			Object rhtObj = sadlTypeReferenceToObject(rht);
 			if (rhtObj instanceof OntResource) {
 				rhtNode = ((OntResource)rhtObj).asClass();
@@ -1508,10 +1531,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			SadlExplicitValue value = ((SadlHasValueCondition)cond).getRestriction();
 			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
 				if (value instanceof SadlResource) {
-					SadlResource srValue = ((SadlResource)value).getName();
-					OntConceptType srType = declarationExtensions.getOntConceptType(srValue);
+					OntConceptType srType = declarationExtensions.getOntConceptType((SadlResource)value);
+					SadlResource srValue = (SadlResource) value;
+					if (srType == null) {
+						srValue = ((SadlResource)value).getName();
+						srType = declarationExtensions.getOntConceptType(srValue);
+					}
+					if (srType == null) {
+						throw new JenaProcessorException("Unable to resolve SadlResource value");
+					}
 					if (srType.equals(OntConceptType.INSTANCE)) {
-						Individual valInst = getTheJenaModel().getIndividual(declarationExtensions.getConceptUri(srValue));
+						String valUri = declarationExtensions.getConceptUri(srValue);
+						if (valUri == null) {
+							throw new JenaProcessorException("Failed to find SadlResource in Xtext model");
+						}
+						Individual valInst = getTheJenaModel().getIndividual(valUri);
+						if (valInst == null) {
+							throw new JenaProcessorException("Failed to retrieve instance '" + valUri + "' from Jena model");
+						}
 						if (valueInObjectTypePropertyRange(prop, valInst)) {
 							HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, valInst);
 							logger.debug("New has value restriction on '" + prop.getURI() + "' to value '" + valInst.toString() + "'");
