@@ -17,7 +17,8 @@ Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
  org.eclipse.xtext.xbase.lib,
  org.eclipse.xtext.common.types.ui,
  org.eclipse.xtend.lib;resolution:=optional,
- org.eclipse.xtext.ui.shared
+ org.eclipse.xtext.ui.shared,
+ com.ge.research.jena;bundle-version="3.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.builder,
@@ -34,6 +35,3 @@ Import-Package: org.apache.log4j,
  com.ge.research.sadl.reasoner,
  com.ge.research.sadl.reasoner.utils
 Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
-Bundle-ClassPath: .,
- lib/slf4j-api-1.7.12.jar,
- lib/slf4j-log4j12-1.7.12.jar

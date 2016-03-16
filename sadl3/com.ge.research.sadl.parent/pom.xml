@@ -15,6 +15,7 @@
 	</properties>
 	<modules>
 		<module>com.ge.research.sadl.xtextgenerator</module>
+		<module>com.ge.research.jena</module>
 		<module>com.ge.research.sadl</module>
 		<module>com.ge.research.sadl.ide</module>
 		<module>com.ge.research.sadl.ui</module>
