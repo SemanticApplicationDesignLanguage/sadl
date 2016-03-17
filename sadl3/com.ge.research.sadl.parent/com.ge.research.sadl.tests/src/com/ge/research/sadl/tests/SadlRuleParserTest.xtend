@@ -39,7 +39,6 @@ class SadlRuleParserTest extends SADLParsingTest {
 
 	}
 	
-	@Ignore
 	@Test def void testPolyRule() {
 		'''
 			uri "http://sadl.impl/polyrule".
