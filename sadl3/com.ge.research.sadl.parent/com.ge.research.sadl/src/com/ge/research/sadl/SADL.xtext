@@ -41,6 +41,11 @@ SadlModelElement :
 	|	RuleStatement => EOS
 	|	QueryStatement => EOS
 	|	TestStatement => EOS
+	| 	PrintStatement => EOS
+	|	ReadStatement => EOS
+	| 	ExplainStatement => EOS
+	|	StartWriteStatement => EOS
+	|	EndWriteStatement => EOS
 	|   EquationStatement => EOS
 	|   ExternalEquationStatement => EOS
 ;
@@ -245,8 +250,32 @@ AskExpression returns Expression :
 
 TestStatement returns ExpressionScope :
 	{TestStatement}
-	'Test' ':' tests+=Expression
+	'Test:' tests+=Expression
 ;
+
+PrintStatement :
+	'Print:'
+			displayString=STRING 
+		|	model=('Deductions'|'Model');
+
+ExplainStatement :
+	'Explain:'
+			expr=Expression EOS
+		| 	'Rule' rulename=QNAME 
+			;
+			
+StartWriteStatement :
+	write='Write:' (dataOnly='data')? '{' 
+;
+
+EndWriteStatement :
+	'}' 'to' filename=STRING 
+;
+			
+ReadStatement :
+	'Read:' 'data' 'from' filename=STRING ('using' templateFilename=STRING)? 
+;
+
 
 Expression returns Expression: // (1)
 	ExpressionParameterized<true>

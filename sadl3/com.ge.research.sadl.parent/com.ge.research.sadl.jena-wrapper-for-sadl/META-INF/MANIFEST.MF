@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.ge.research.sadl.jena-plugin;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-Activator: com.ge.research.sadl.jena_plugin.Activator
 Bundle-Vendor: GE Global Research
-Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
+Require-Bundle: com.ge.research.jena;bundle-version="3.0.0",
+ com.ge.research.sadl;bundle-version="3.0.0",
  com.ge.research.sadl.jena;bundle-version="3.0.0",
  org.eclipse.core.runtime,
  org.eclipse.osgi,
@@ -37,13 +38,7 @@ Export-Package: com.ge.research.sadl.jena.reasoner;version="3.0.0";
    com.ge.research.sadl.reasoner,
    com.ge.research.sadl.model,
    com.hp.hpl.jena.ontology"
-Bundle-ClassPath: lib/httpclient-4.2.3.jar,
- lib/httpcore-4.2.2.jar,
- lib/jena-arq-2.11.2.jar,
- lib/jena-core-2.11.2.jar,
- lib/jena-iri-1.0.2.jar,
- lib/jena-tdb-1.0.2.jar,
- .
+Bundle-ClassPath: .
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.reasoner

@@ -1,6 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.ge.research.sadl</groupId>
+	<parent>
+		<groupId>com.ge.research.sadl</groupId>
+		<artifactId>com.ge.research.sadl.parent</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+	</parent>
   <artifactId>jena-wrapper-for-sadl</artifactId>
   <version>3.0.0</version>
 	<name>Jena Reasoner/Translator Plugin for SADL</name>
@@ -10,79 +14,6 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ver.lucene>3.5.0</ver.lucene>
 	</properties>
-  <dependencyManagement>
-  	<dependencies>
-	  	<dependency>
-	  		<groupId>com.ge.research.sadl</groupId>
-	  		<artifactId>reasoner-api</artifactId>
-	  		<version>${project.version}</version>
-	  	</dependency>
-	  	<dependency>
-	  		<groupId>com.ge.research.sadl</groupId>
-	  		<artifactId>reasoner-impl</artifactId>
-	  		<version>${project.version}</version>
-	  	</dependency>
-  	</dependencies>
-  </dependencyManagement>
-
-	<dependencies>
-  	<dependency>
-  		<groupId>org.apache.jena</groupId>
-  		<artifactId>apache-jena-libs</artifactId>
-  		<version>2.13.0</version>
-  		<type>pom</type>
-  		<exclusions>
-  			<exclusion>
-  				<groupId>log4j</groupId>
-  				<artifactId>log4j</artifactId>
-  			</exclusion>
-  		</exclusions>
-  	</dependency>
-	<dependency>
-	    <groupId>org.apache.jena</groupId>
-	    <artifactId>jena-arq</artifactId>
-	    <version>2.13.0</version>
-	</dependency>
-	<dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-      <version>${ver.lucene}</version>
-    </dependency>
-	<dependency>
-		<groupId>org.apache.jena</groupId>
-		<artifactId>jena-larq</artifactId>
-		<version>1.0.0-incubating</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.jena</groupId>
-		<artifactId>jena-core</artifactId>
-		<version>2.13.0</version>
-	</dependency>
-	  <dependency>
-		<groupId>com.ge.research.sadl</groupId>
-		<artifactId>reasoner-api</artifactId>
-	</dependency>
-	  <dependency>
-		<groupId>com.ge.research.sadl</groupId>
-		<artifactId>reasoner-impl</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-log4j12</artifactId>
-		<version>1.7.7</version>
-	</dependency>
-	<dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-	<dependency>
-		<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-		<artifactId>serviceloader-maven-plugin</artifactId>
-		<version>1.0.2</version>
-	</dependency>         
-	</dependencies>
 	
 	<!-- Define where to deploy this project's artifacts -->
 	<distributionManagement>

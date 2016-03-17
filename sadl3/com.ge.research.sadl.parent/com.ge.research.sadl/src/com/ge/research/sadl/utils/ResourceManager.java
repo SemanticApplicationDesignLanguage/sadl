@@ -93,6 +93,7 @@ public class ResourceManager {
      * returns the URI of the project's directory to use as a base part
      * for other file URIs or just to get the name of the project itself.
      */
+    //TODO change to pass in Resource
     public static URI getProjectUri(URI someFileInProject) {
    		// Get absolute location of workspace.
     	try {
