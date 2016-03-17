@@ -79,7 +79,6 @@ class SadlRuleParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test def void testInstanceDeclaration_06() {
 		'''
 			uri "http://sadl.imp/negnumber".
@@ -93,6 +92,24 @@ class SadlRuleParserTest extends AbstractSADLParsingTest {
 			    with physical_min -100,
 			    with tolerance .5,
 			    with resolution .5.
+		'''.assertNoErrors
+	}
+	
+	/**
+	 * see https://github.com/crapo/sadlos2/issues/46
+	 */
+	@Test def void testNewlineSparatesAndedPredicates() {
+		'''
+			uri "http://sadl.imp/negnumber".
+			
+			Rule Rule_Name
+			given
+			x is a Thingy
+			
+			then
+			intVal of x is abs(-1) and
+			flVal of x is abs(-1.0) and
+			dblVal of x is abs(-1.0).
 		'''.assertNoErrors
 	}
 	

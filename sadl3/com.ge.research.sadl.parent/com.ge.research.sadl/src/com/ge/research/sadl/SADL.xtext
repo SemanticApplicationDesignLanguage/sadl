@@ -302,23 +302,6 @@ MultiOp :
 Power<EnabledWith> returns Expression:
 	PropOfSubject<EnabledWith> ({BinaryOperation.left=current} op='^' right=PropOfSubject<EnabledWith>)*;
 
-//PrefixOperation returns Expression :
-//	  {UnaryExpression} 'not' negated=PrefixOperation
-//	| {UnitaryOperation} op=('!' | 'only' | '-') expr=PrefixOperation // this can be applied to other unitary operations
-//	| {ElementInList} 'element' (before?='before'|after?='after')? element=PrefixOperation
-//	| SubjHasProp
-//;
-//
-//// SubjHasProp has left associativity: Subj with prop1 with prop2 is equivalent to ((Subj with prop1) with prop2)
-//SubjHasProp returns Expression: // (18)
-//	PropOfSubject (=>({SubjHasProp.left=current} ('with'|'has') prop=SadlResource) right=SubjHasProp)?
-////	PropOfSubject (<!THEN>(
-////			','? 'has' ( {SubjHasProp.left=current} prop=DNAME right=PropOfSubject?
-////			  | {PPP.left=current} negated?='not'? 'been' right=PropOfSubject)
-////		| {SubjHasProp.left=current} 'with' prop=DNAME right=PropOfSubject?)*)
-//	//	PropOfSubject ({SubjHasProp.left=current} ('has'|'with') prop = ID /*[sadl::ResourceName]*/  right=PrimaryExpression)*
-//;
-
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject<EnabledWith> returns Expression: // (17)
 	PrimaryExpression ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  

@@ -9,8 +9,9 @@ COMMENT_ERROR_PATTERN="/*" [^*]* ("*"+ [^/*] [^*]*)* "*"?
 SL_COMMENT="/""/"[^\r\n]*(\r?\n)?
 
 NUMBER = {DIGIT}+ ("." {DIGIT}+)? (("e"|"E") ("+"|"-")? {DIGIT}+)?
+		|("." {DIGIT}+) (("e"|"E") ("+"|"-")? {DIGIT}+)?
 DIGIT = [0-9]
-			 
+
 STRING=("'"([^\\\']|{ESCAPE_SEQUENCE})*"'"?)|(\"([^\\\"]|{ESCAPE_SEQUENCE})*\"?)
 ESCAPE_SEQUENCE=\\{ANY_OTHER}
 
