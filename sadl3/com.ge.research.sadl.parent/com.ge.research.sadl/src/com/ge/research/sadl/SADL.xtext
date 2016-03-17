@@ -41,6 +41,26 @@ SadlModelElement :
 	|	RuleStatement => EOS
 	|	QueryStatement => EOS
 	|	TestStatement => EOS
+	|   EquationStatement => EOS
+	|   ExternalEquationStatement => EOS
+;
+
+EquationStatement:
+	'Equation' EquationSignature
+	body = Expression
+;
+
+ExternalEquationStatement:
+	'External' EquationSignature
+	uri = STRING ('located' 'at' location=STRING)?
+;
+
+fragment EquationSignature returns AbstractSadlEquation:
+	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' returnType=SadlPrimaryTypeReference '->' //TODO decide on separator char
+;
+
+SadlParameterDeclaration:
+	type=SadlPrimaryTypeReference name=SadlResource
 ;
 
 // These are the things that translate directly to OWL.

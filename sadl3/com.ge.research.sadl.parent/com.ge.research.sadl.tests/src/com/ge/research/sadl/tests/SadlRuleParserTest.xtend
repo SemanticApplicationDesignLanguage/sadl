@@ -20,7 +20,7 @@ package com.ge.research.sadl.tests
 import org.junit.Test
 import org.junit.Ignore
 
-class SadlRuleParserTest extends SADLParsingTest {
+class SadlRuleParserTest extends AbstractSADLParsingTest {
 
 	/* These tests check for errors that should be found and reported */
 	/* These test check that no errors occur in valid constructs */

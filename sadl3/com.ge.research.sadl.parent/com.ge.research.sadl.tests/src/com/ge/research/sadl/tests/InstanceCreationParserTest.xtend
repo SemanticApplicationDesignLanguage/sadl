@@ -19,7 +19,7 @@ package com.ge.research.sadl.tests
 
 import org.junit.Test
 
-class InstanceCreationParserTest extends SADLParsingTest {
+class InstanceCreationParserTest extends AbstractSADLParsingTest {
 	
 	@Test def void testInstanceCreation_01(){
 		'''

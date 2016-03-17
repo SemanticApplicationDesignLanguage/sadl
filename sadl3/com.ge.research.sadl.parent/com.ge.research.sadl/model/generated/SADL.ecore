@@ -22,6 +22,28 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="alias" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlModelElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="EquationStatement" eSuperTypes="#//SadlModelElement #//AbstractSadlEquation">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="#//Expression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExternalEquationStatement" eSuperTypes="#//SadlModelElement #//AbstractSadlEquation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="uri" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractSadlEquation">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//SadlResource"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parameter" upperBound="-1"
+        eType="#//SadlParameterDeclaration" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="returnType" eType="#//SadlTypeReference"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SadlParameterDeclaration">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//SadlResource"
+        containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlStatement" eSuperTypes="#//SadlModelElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="SadlPropertyCondition" eSuperTypes="#//SadlTypeReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="property" eType="#//SadlResource"/>

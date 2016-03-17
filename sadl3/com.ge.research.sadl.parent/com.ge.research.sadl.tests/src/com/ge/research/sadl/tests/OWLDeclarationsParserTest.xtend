@@ -20,7 +20,7 @@ package com.ge.research.sadl.tests
 import org.junit.Test
 import org.junit.Ignore
 
-class OWLDeclarationsParserTest extends SADLParsingTest {
+class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 	
 /* These tests check for errors that should be found and reported */	
 	@Test def void testModelName_Err() {

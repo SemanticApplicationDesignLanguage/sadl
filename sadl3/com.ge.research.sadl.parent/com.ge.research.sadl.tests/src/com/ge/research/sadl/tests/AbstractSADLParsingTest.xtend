@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-abstract class SADLParsingTest{
+abstract class AbstractSADLParsingTest{
 
 	@Inject ParseHelper<SadlModel> parseHelper
 	@Inject ValidationTestHelper validationTestHelper
@@ -78,7 +78,7 @@ abstract class SADLParsingTest{
 	}
 	
 	protected def String model() {
-		val name = Thread.currentThread.stackTrace.findFirst[className!=SADLParsingTest.simpleName].methodName
+		val name = Thread.currentThread.stackTrace.findFirst[className!=AbstractSADLParsingTest.simpleName].methodName
 		return '''uri "http://sadl.org/TestRequrements/«name»" alias «name».'''
 	}
 

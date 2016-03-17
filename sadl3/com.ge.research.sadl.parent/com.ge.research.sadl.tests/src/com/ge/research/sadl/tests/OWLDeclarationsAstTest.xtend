@@ -21,7 +21,7 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class OWLDeclarationsAstTest extends SADLParsingTest {
+class OWLDeclarationsAstTest extends AbstractSADLParsingTest {
 	
 	@Test def void testModelName_01() {
 		'''
