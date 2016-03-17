@@ -22,6 +22,7 @@ package com.ge.research.sadl.scoping
 
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.Expression
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.RuleStatement
@@ -37,6 +38,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.resource.EObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
@@ -44,7 +46,6 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import org.eclipse.xtext.naming.IQualifiedNameConverter
 
 /**
  * This class contains custom scoping description.
@@ -75,6 +76,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val rule = EcoreUtil2.getContainerOfType(context, RuleStatement)
 		if (rule !== null) {
 			return getLocalVariableScope(rule.ifs + rule.thens, parent)
+		}
+		val equation = EcoreUtil2.getContainerOfType(context, EquationStatement)
+		if (equation !== null) {
+			return MapBasedScope.createScope(parent, 
+				equation.parameter.map[EObjectDescription.create(name.concreteName, it.name)])
 		}
 		return parent
 	}
@@ -146,7 +152,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def pruneScope(EObject object) {
-		return object instanceof RuleStatement
+		return object instanceof RuleStatement || object instanceof EquationStatement
 	}
 	
 	protected def String getAlias(Resource resource) {
