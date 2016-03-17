@@ -17,12 +17,14 @@
 		<module>com.ge.research.sadl.xtextgenerator</module>
 		<module>com.ge.research.jena</module>
 		<module>com.ge.research.sadl</module>
+		<module>com.ge.research.sadl.externalmodels</module>
 		<module>com.ge.research.sadl.ide</module>
 		<module>com.ge.research.sadl.ui</module>
 		<module>com.ge.research.sadl.target</module>
 		<module>com.ge.research.sadl.tests</module>
 		<module>com.ge.research.sadl.ui.tests</module>
 		<module>com.ge.research.sadl.jena</module>
+		<module>com.ge.research.sadl.jena-wrapper-for-sadl</module>
 		<module>com.ge.research.sadl.feature</module>
 		<module>com.ge.research.sadl.update</module>
 	</modules>
