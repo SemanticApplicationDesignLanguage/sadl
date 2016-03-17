@@ -64,6 +64,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -970,10 +971,13 @@ public class UtilsForJena {
 	}
 	
 	public String getPolicyFilename(org.eclipse.emf.ecore.resource.Resource somerojectResource) {
-		org.eclipse.emf.common.util.URI prjUri = ResourceManager.getProjectUri(somerojectResource.getURI());
-		org.eclipse.emf.common.util.URI uri = prjUri.appendSegment(OWL_MODELS_FOLDER_NAME);
-		uri = uri.appendSegment(ONT_POLICY_FILENAME);
-		return uri.toString();
+		org.eclipse.emf.common.util.URI prjUri = ResourceManager.getProjectUri(somerojectResource);
+		if (prjUri != null) {
+			org.eclipse.emf.common.util.URI uri = prjUri.appendSegment(OWL_MODELS_FOLDER_NAME);
+			uri = uri.appendSegment(ONT_POLICY_FILENAME);
+			return uri.toString();
+		}
+		return null;
 	}
 
 	public String getNewPolicyFileContent(String policyFilename) throws IOException, URISyntaxException, JenaProcessorException {
@@ -984,7 +988,7 @@ public class UtilsForJena {
 	
 	public OntModel createAndInitializeJenaModel(String policyFilename, OntModelSpec omSpec, boolean loadImports) 
 			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-		File pf;
+		File pf = null;
 		if (policyFilename != null && policyFilename.length() > 0) {
 			pf = new File(policyFilename);
 			if (!pf.exists()) {
@@ -995,16 +999,22 @@ public class UtilsForJena {
 			}
 		}
 		else {
-			throw new IOException("Policy file name is invalid");
+			logger.warn("Policy file name is invalid");
 		}
-		String modelFolder = pf.getParent();
-		OntDocumentManager owlDocMgr = loadMappings(pf);
-		OntModelSpec spec = new OntModelSpec(omSpec);
-		spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolder));
-		spec.setDocumentManager(owlDocMgr);
-		owlDocMgr.setProcessImports(loadImports);
-		OntModel theModel = ModelFactory.createOntologyModel(spec);
-		return theModel;
+		if (pf != null) {
+			String modelFolder = pf.getParent();
+			OntDocumentManager owlDocMgr = loadMappings(pf);
+			OntModelSpec spec = new OntModelSpec(omSpec);
+			spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolder));
+			spec.setDocumentManager(owlDocMgr);
+			owlDocMgr.setProcessImports(loadImports);
+			OntModel theModel = ModelFactory.createOntologyModel(spec);
+			return theModel;
+		}
+		else {
+			OntModel theModel = ModelFactory.createOntologyModel(OntModelSpec.getDefaultSpec(OWL.getURI()));
+			return theModel;
+		}
 	}
 
 	private StringBuilder addExternalMappings(StringBuilder sb, String prjDir) throws IOException, JenaProcessorException {

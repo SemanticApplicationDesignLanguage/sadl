@@ -87,6 +87,19 @@ public class ResourceManager {
         }
         return null;
     }
+    
+    public static URI getProjectUri(org.eclipse.emf.ecore.resource.Resource someProjectResource ) {
+		URI rsrcuri = someProjectResource.getURI();
+		URI prjuri = null;
+		if (rsrcuri.isPlatform()) {
+			prjuri = rsrcuri.trimSegments(rsrcuri.segmentCount() - 2);
+			if (prjuri != null) {
+				return prjuri;
+			}
+		}
+//		someProjectResource.getResourceSet().getURIConverter() ???
+		return null;
+    }
 
     /**
      * This method takes any actual file URI in the project as input and

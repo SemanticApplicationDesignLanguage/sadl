@@ -220,11 +220,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return;
 		}
 		SadlModel model = (SadlModel) resource.getContents().get(0);
-		URI rsrcuri = resource.getURI();
-		URI prjuri = null;
-		if (rsrcuri.isPlatform()) {
-			prjuri = rsrcuri.trimSegments(rsrcuri.segmentCount() - 2);
-		}
 		String modelActualUrl =resource.getURI().lastSegment();
 		// directly create the Jena Model here!
 //		theJenaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -238,7 +233,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		
 		try {
 			UtilsForJena ufj = new UtilsForJena();
-			String policyFilename = ufj.fileUrlToFileName(ufj.getPolicyFilename(resource));
+			String policyFileUrl = ufj.getPolicyFilename(resource);
+			String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
 			theJenaModel = ufj.createAndInitializeJenaModel(policyFilename, OntModelSpec.OWL_MEM, true);
 			OntDocumentManager owlDocMgr = getTheJenaModel().getDocumentManager();
 			setSpec(getTheJenaModel().getSpecification());
