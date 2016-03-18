@@ -15,11 +15,11 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.xtext.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/"/>
+<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.9.2/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/modeling/emf/emf/updates/2.10.x"/>
+<repository location="http://download.eclipse.org/modeling/emf/emf/updates/2.10.x/core/S201501230452/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xerces" version="0.0.0"/>

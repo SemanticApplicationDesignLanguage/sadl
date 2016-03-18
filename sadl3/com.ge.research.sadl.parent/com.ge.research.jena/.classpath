@@ -1,35 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-csv.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-lang3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient-cache.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpcore.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-annotations.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-databind.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jena-arq.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jena-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jena-iri.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jena-tdb.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsonld-java.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/libthrift.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/opencsv.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/pojava.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/stax-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wstx-asl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry exported="true" kind="lib" path="lib/activation-1.0.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/com.springsource.org.apache.commons.logging-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.2.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.2.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/icu4j-3.4.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j-1.6.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-arq-2.11.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-arq-2.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-core-2.11.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-core-2.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-iri-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-iri-1.0.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-tdb-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-tdb-1.0.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit-4.8.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.16.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/logback-classic-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/logback-core-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-core-3.5.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/opencsv-2.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/pojava-2.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.12.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12-1.7.12.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/stax-api-1.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/wstx-asl-3.2.9.jar"/>
 	<classpathentry kind="src" path="src/"/>
-	<classpathentry exported="true" kind="lib" path="lib/reasoner-api-3.0.0-SNAPSHOT.jar" sourcepath="lib/reasoner-api-3.0.0-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl-3.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
