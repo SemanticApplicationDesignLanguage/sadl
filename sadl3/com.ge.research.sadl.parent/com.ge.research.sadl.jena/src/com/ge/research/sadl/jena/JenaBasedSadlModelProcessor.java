@@ -250,6 +250,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			fsa.generateFile(owlFN, seq);
 			
 			// Output the ont-policy.rdf mapping file: the mapping will have been updated already via onValidate
+			if (!fsa.isFile(UtilsForJena.ONT_POLICY_FILENAME)) {
+				fsa.generateFile(UtilsForJena.ONT_POLICY_FILENAME, getDefaultPolicyFileContent());
+			}
+		
 			String pfileContent = fsa.readTextFile(UtilsForJena.ONT_POLICY_FILENAME).toString();
 			URI actUrl = fsa.getURI(owlFN);
 			//TODO this has to be converted to actual url? (or just save relative?)
@@ -323,6 +327,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			
 			
 		}
+	}
+	
+	private String getDefaultPolicyFileContent() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<?xml version=\"1.0\"?>\n");
+		sb.append("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\" xmlns=\"http://jena.hpl.hp.com/schemas/2003/03/ont-manager#\" xml:base=\"http://jena.hpl.hp.com/schemas/2003/03/ont-manager#\">\n");
+		sb.append("<OntologySpec>\n");
+		sb.append("<language rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
+		sb.append("<publicURI rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
+		sb.append("<prefix rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">owl</prefix>\n");
+		sb.append("</OntologySpec>\n");
+		sb.append("<OntologySpec>\n");
+		sb.append("<altURL rdf:resource=\"http://protege.stanford.edu/plugins/owl/dc/protege-dc.owl\"/>\n");
+		sb.append("<publicURI rdf:resource=\"http://purl.org/dc/elements/1.1/\"/>\n");
+		sb.append("<language rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
+		sb.append("<prefix rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">dc</prefix>\n");
+		sb.append("</OntologySpec>\n");
+		sb.append("<DocumentManagerPolicy>\n");
+		sb.append("<cacheModels rdf:datatype=\"http://www.w3.org/2001/XMLSchema#boolean\">true</cacheModels>\n");
+		sb.append("<processImports rdf:datatype=\"http://www.w3.org/2001/XMLSchema#boolean\">true</processImports>\n");
+		sb.append("</DocumentManagerPolicy>\n");
+		sb.append("</rdf:RDF>\n");
+		return sb.toString();
 	}
 	
 	private Object getOtherKnowledgeStructure() {
