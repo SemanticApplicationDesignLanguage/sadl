@@ -1,8 +1,11 @@
 WS=[\ \n\r\t]+
 ANY_OTHER=.
 
+QNAME_TERMINAL= {ID} ":" {ID}
+
 ID="^"? [:jletter:] {ID_PART}* ("." {ID_PART}+)*
 ID_PART= [:jletterdigit:] | "-" | "%" | "~"
+
 
 ML_COMMENT="/*" ~"*/"
 COMMENT_ERROR_PATTERN="/*" [^*]* ("*"+ [^/*] [^*]*)* "*"?

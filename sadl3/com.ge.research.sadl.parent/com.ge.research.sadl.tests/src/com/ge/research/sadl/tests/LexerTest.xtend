@@ -81,6 +81,20 @@ class LexerTest {
 				
 	}
 	
+	@Test def void testID_AND_QNAME() {
+		val lexer = lexerProvider.get()
+		lexer.charStream = new ANTLRStringStream('''
+			foo:bar:test
+		''')
+		lexer.nextToken => RULE_QNAME_TERMINAL
+		lexer.nextToken => Colon
+		lexer.nextToken => RULE_ID
+		lexer.nextToken => RULE_WS
+		
+		lexer.nextToken => EOF
+				
+	}
+	
 	def assertTokens(CharSequence txt, int... types) {
 		val lexer = lexerProvider.get()
 		lexer.charStream = new ANTLRStringStream(txt.toString)

@@ -14,4 +14,14 @@ class SadlEquationsParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Test
+	def void testQnameConflict() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Equation myEquation(float x, float y) returns f:b:c.
+			Equation anotherEquation(float x) returns f: b:c.
+		'''.assertNoErrors
+	}
+	
 }

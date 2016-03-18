@@ -61,7 +61,7 @@ ExternalEquationStatement:
 ;
 
 fragment EquationSignature returns AbstractSadlEquation:
-	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' returnType=SadlPrimaryTypeReference '->' //TODO decide on separator char
+	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' returnType=SadlPrimaryTypeReference ':' //TODO decide on separator char
 ;
 
 SadlParameterDeclaration:
@@ -376,9 +376,6 @@ Constants:
 ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111
 
-QNAME:
-	(DNAME ':')? DNAME;
-
 DNAME:
 	ID;
 
@@ -394,6 +391,10 @@ EXPONENT returns ecore::EBigDecimal:
 EOS:
 	'.';
 	
+QNAME :
+	QNAME_TERMINAL | ID
+;
+	
 terminal NUMBER returns ecore::EInt :
 	'0'..'9'+;
 
@@ -402,6 +403,9 @@ terminal WS:
 
 terminal ID:
 	'^'? ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9' | '-' | '%' | '~')* ;
+	
+terminal QNAME_TERMINAL:
+	ID ':' ID;
 	
 terminal STRING:
 	'"' ('\\' ('b' | 't' | 'n' | 'f' | 'r' | 'u' | '"' | "'" | '\\') | !('\\' | '"'))* '"' |
