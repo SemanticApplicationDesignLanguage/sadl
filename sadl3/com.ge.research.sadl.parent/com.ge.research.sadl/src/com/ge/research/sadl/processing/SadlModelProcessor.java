@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.DeclarationExtensions;
+import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -64,14 +65,14 @@ import com.google.inject.Inject;
 
 public abstract class SadlModelProcessor implements ISadlModelProcessor {
     private static final Logger logger = Logger.getLogger(SadlModelProcessor.class);
-    private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
+    protected Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
     private List<IFTranslationError> errors = null;
-    private Object encapsulatingTarget = null;	// when a query is in a test
+    protected Object encapsulatingTarget = null;	// when a query is in a test
 
 	@Inject
 	public DeclarationExtensions declarationExtensions;
 
-	public abstract Object translate(Expression expr) ;
+	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	protected Object translate(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		StringBuilder sb = new StringBuilder();
@@ -295,7 +296,7 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 		return createBinaryBuiltin(expr, op, lobj, robj);
 	}
 
-	protected String translate(SubjHasProp expr) {
+	protected String translate(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(translate(expr.getLeft()));
 		sb.append(" ");
@@ -305,7 +306,7 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 		return sb.toString();
 	}
 
-	protected String translate(PropOfSubject expr) {
+	protected String translate(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(translate(expr.getLeft()));
 		sb.append(" of ");
@@ -318,7 +319,7 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 	
 	}
 
-	protected String translate(Declaration expr) {
+	protected String translate(Declaration expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder sb = new StringBuilder();
 		String article = expr.getArticle();
 		sb.append(article);
@@ -875,5 +876,37 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 		return null;
 	}
 
-
+	public NodeType ontConceptTypeToNodeType(OntConceptType octype) throws TranslationException {
+//		public static enum NodeType {ClassNode, InstanceNode, PropertyNode, DataTypeProperty, ObjectProperty, VariableNode}
+//		enum OntConceptType {
+//			CLASS,
+//			CLASS_PROPERTY,
+//			DATATYPE_PROPERTY,
+//			DATATYPE,
+//			ANNOTATION_PROPERTY,
+//			INSTANCE,
+//			VARIABLE
+		if (octype == null) {
+			throw new TranslationException("ontConceptTypeToNodeType called with null type");
+		}
+		if (octype.equals(OntConceptType.CLASS)){
+			return NodeType.ClassNode;
+		}
+		if (octype.equals(OntConceptType.CLASS_PROPERTY)) {
+			return NodeType.ObjectProperty;
+		}
+		if (octype.equals(OntConceptType.DATATYPE_PROPERTY)) {
+			return NodeType.DataTypeProperty;
+		}
+		if (octype.equals(OntConceptType.INSTANCE)) {
+			return NodeType.InstanceNode;
+		}
+		if (octype.equals(OntConceptType.VARIABLE)) {
+			return NodeType.VariableNode;
+		}
+		if (octype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+			return NodeType.PropertyNode;
+		}
+		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
+	}
 }

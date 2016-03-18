@@ -20,39 +20,83 @@ package com.ge.research.sadl.jena;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.builder.EclipseResourceFileSystemAccess2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
+import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.preferences.IPreferenceValues;
+import org.eclipse.xtext.preferences.PreferenceKey;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.scoping.IScope;
+import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.DeclarationExtensions;
+import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.OntConceptType;
+import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
+import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.Junction;
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.ProxyNode;
+import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.RDFTypeNode;
+import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.model.gp.Test;
+import com.ge.research.sadl.model.gp.TripleElement;
+import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
+import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
+import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
-//import com.ge.research.sadl.owl2sadl.OwlToSadl;
-import com.ge.research.sadl.processing.ISadlModelProcessor;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
+import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.InvalidTypeException;
+import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.Declaration;
+import com.ge.research.sadl.sADL.EndWriteStatement;
+import com.ge.research.sadl.sADL.EquationStatement;
+import com.ge.research.sadl.sADL.ExplainStatement;
 import com.ge.research.sadl.sADL.Expression;
+import com.ge.research.sadl.sADL.Function;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
+import com.ge.research.sadl.sADL.PrintStatement;
 import com.ge.research.sadl.sADL.PropOfSubject;
+import com.ge.research.sadl.sADL.ReadStatement;
 import com.ge.research.sadl.sADL.RuleStatement;
+import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.sADL.SadlAllValuesCondition;
 import com.ge.research.sadl.sADL.SadlAnnotation;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
@@ -75,6 +119,7 @@ import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
 import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient;
 import com.ge.research.sadl.sADL.SadlNumberLiteral;
+import com.ge.research.sadl.sADL.SadlParameterDeclaration;
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlProperty;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
@@ -89,8 +134,10 @@ import com.ge.research.sadl.sADL.SadlTypeAssociation;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.SadlValueList;
+import com.ge.research.sadl.sADL.StartWriteStatement;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -141,6 +188,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	enum AnnType {ALIAS, NOTE}
 	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
+	private int vNum = 0;	// used to create unique variables
+	private List<String> userDefinedVariables = new ArrayList<String>();
 	
 	@Inject
 	public DeclarationExtensions declarationExtensions;
@@ -152,6 +201,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private ValidationAcceptor issueAcceptor = null;
 	private CancelIndicator cancelIndicator = null;
+
+	private List<String> importsInOrderOfAppearance = null;	// an ordered set of import URIs, ordered by appearance in file.
+	private List<Rule> rules = null;
+	private List<Equation> equations = null;
 	
 	public JenaBasedSadlModelProcessor() {
 		logger.debug("New " + this.getClass().getCanonicalName() + "' created");
@@ -173,6 +226,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			onValidate(resource, null, context);
 		}
 		if (fsa !=null) {
+			IPreferenceValues testPrefs = context.getPreferenceValues();
+			String baseuri = context.getPreferenceValues().getPreference(SadlPreferences.SADL_BASE_URI);
+			String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+			String pv = context.getPreferenceValues().getPreference(SadlPreferences.RDF_XML_FORMAT); 
+			pv = context.getPreferenceValues().getPreference(SadlPreferences.RDF_XML_ABBREV_FORMAT);
+			pv = context.getPreferenceValues().getPreference(SadlPreferences.N_TRIPLE_FORMAT);
+			pv = context.getPreferenceValues().getPreference(SadlPreferences.N3_FORMAT);
+			pv = context.getPreferenceValues().getPreference(SadlPreferences.JENA_TDB);
+
+			logger.debug("Base SADL URI is: " + baseuri); 
+
+			// Output the OWL file for the ontology model
 			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
 			String owlFN = lastSeg.trimFileExtension().appendFileExtension("owl").lastSegment().toString();
 			String format = "RDF/XML-ABBREV";
@@ -184,12 +249,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			CharSequence seq = new String(out.toByteArray(), charset);
 			fsa.generateFile(owlFN, seq);
 			
-			IPreferenceValues testPrefs = context.getPreferenceValues();
-			
-			String baseuri = context.getPreferenceValues().getPreference(SadlPreferences.SADL_BASE_URI);
-			logger.debug("Base SADL URI is: " + baseuri); 
-			
-			// the mapping will have been updated already via onValidate
+			// Output the ont-policy.rdf mapping file: the mapping will have been updated already via onValidate
 			String pfileContent = fsa.readTextFile(UtilsForJena.ONT_POLICY_FILENAME).toString();
 			URI actUrl = fsa.getURI(owlFN);
 			//TODO this has to be converted to actual url? (or just save relative?)
@@ -209,9 +269,92 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			// Output the Rules and any other knowledge structures via the specified translator
+			URI prjuri = ResourceManager.getProjectUri(resource);
+			URI mdlfldruri = prjuri.appendSegment(ResourceManager.OWLDIR);
+			try {
+				String modelFolderPathname;
+				if (mdlfldruri.isPlatform()) {
+					if (mdlfldruri.isFile()) {
+						modelFolderPathname = mdlfldruri.toFileString();
+					}
+					else {
+					    String platformString = mdlfldruri.toPlatformString(true);
+					    IPath myFile = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+					    modelFolderPathname = myFile.append(platformString).toOSString();
+					}
+				}
+				else {
+					modelFolderPathname = new SadlUtils().fileUrlToFileName(mdlfldruri.toString());				
+				}
+				IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
+				ITranslator translator = configMgr.getTranslator();
+				List<ModelError> results = translator
+						.translateAndSaveModel(getTheJenaModel(), rules,
+								modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), 
+								owlFN);
+				if (results != null) {
+					modelErrorsToOutput(resource, results);
+				}
+				else if (getOtherKnowledgeStructure() != null) {
+					results = translator.translateAndSaveModelWithOtherStructure(getTheJenaModel(), getOtherKnowledgeStructure(), 
+							modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), owlFN);
+					if (results != null) {
+						modelErrorsToOutput(resource, results);
+					}
+				}
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (com.ge.research.sadl.reasoner.ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
 		}
 	}
 	
+	private Object getOtherKnowledgeStructure() {
+		if (getEquations() != null) {
+			return getEquations();
+		}
+		return null;
+	}
+	private void modelErrorsToOutput(Resource resource, List<ModelError> errors) {
+		for (int i = 0; errors != null && i < errors.size(); i++) {
+			ModelError err = errors.get(i);
+			addError(err.getErrorMsg(), resource.getContents().get(0));
+		}
+	}
+	
+	/**
+	 * Method to retrieve a list of the model's imports ordered according to appearance
+	 * @return
+	 */
+	public List<String> getImportsInOrderOfAppearance() {
+		return importsInOrderOfAppearance;
+	}
+
+	private void addOrderedImport(String importUri) {
+		if (importsInOrderOfAppearance == null) {
+			importsInOrderOfAppearance = new ArrayList<String>();
+		}
+		if (!importsInOrderOfAppearance.contains(importUri)) {
+			importsInOrderOfAppearance.add(importUri);
+		}
+		
+	}
 	@Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
 		setIssueAcceptor(issueAcceptor);
@@ -312,6 +455,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				    	com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
 				    	logger.debug("Imported ontology resource '" + importUri + "' created.");
 				    	modelOntology.addImport(importedOntology);
+				    	addOrderedImport(importUri);
 			    	}
 		    	}
 			}
@@ -365,7 +509,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						processSadlSameAs((SadlSameAs)element);
 					}
 					else if (element instanceof RuleStatement) {
-						processRuleStatement((RuleStatement)element);
+						processStatement((RuleStatement)element);
+					}
+					else if (element instanceof EquationStatement) {
+						processStatement((EquationStatement)element);
+					}
+					else if (element instanceof PrintStatement) {
+						processStatement((PrintStatement)element);
+					}
+					else if (element instanceof ReadStatement) {
+						processStatement((ReadStatement)element);
+					}
+					else if (element instanceof StartWriteStatement) {
+						processStatement((StartWriteStatement)element);
+					}
+					else if (element instanceof EndWriteStatement) {
+						processStatement((EndWriteStatement)element);
+					}
+					else if (element instanceof ExplainStatement) {
+						processStatement((ExplainStatement)element);
 					}
 					else {
 						throw new JenaProcessorException("onValidate for element of type '" + element.getClass().getCanonicalName() + "' not implemented");
@@ -373,34 +535,126 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				catch (JenaProcessorException e) {
 					addError(e.getMessage(), element);
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidTypeException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}
 	}
 
-	private void processRuleStatement(RuleStatement element) {
+	private void processStatement(ExplainStatement element) throws JenaProcessorException {
+		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
+	}
+	
+	private void processStatement(EndWriteStatement element) throws JenaProcessorException {
+		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
+	}
+	
+	private void processStatement(StartWriteStatement element) throws JenaProcessorException {
+		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
+	}
+	
+	private void processStatement(ReadStatement element) throws JenaProcessorException {
+		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
+	}
+	
+	private void processStatement(PrintStatement element) throws JenaProcessorException {
+		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
+	}
+	
+	private void processStatement(EquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+		SadlResource nm = element.getName();
+		EList<SadlParameterDeclaration> params = element.getParameter();
+		SadlTypeReference rtype = element.getReturnType();
+		Expression bdy = element.getBody();
+		Equation eq = new Equation(declarationExtensions.getConcreteName(nm));
+		eq.setNamespace(declarationExtensions.getConceptNamespace(nm));
+		Node rtnode = sadlTypeReferenceToNode(rtype);
+		eq.setReturnType(rtnode);
+		if (params != null && params.size() > 0) {
+			List<Node> args = new ArrayList<Node>();
+			List<Node> argtypes = new ArrayList<Node>();
+			for (int i = 0; i < params.size(); i++) {
+				SadlParameterDeclaration param = params.get(i);
+				SadlResource pr = param.getName();
+				Object pn = processExpression(pr);
+				args.add((Node) pn);
+				SadlTypeReference prtype = param.getType();
+				Node prtnode = sadlTypeReferenceToNode(prtype); 
+				argtypes.add(prtnode);
+			}
+			eq.setArguments(args);
+			eq.setArgumentTypes(argtypes);
+		}
+		Object bdyobj = processExpression(bdy);
+		if (bdyobj instanceof List<?>) {
+			eq.setBody((List<GraphPatternElement>) bdyobj);
+		}
+		else if (bdyobj instanceof GraphPatternElement) {
+			eq.addBodyElement((GraphPatternElement)bdyobj);
+		}
+		logger.debug("Equation: " + eq.toFullyQualifiedString());
+		addEquation(eq);
+	}
+	
+	private NamedNode sadlTypeReferenceToNode(SadlTypeReference rtype) throws JenaProcessorException {
+		Object rtobj = sadlTypeReferenceToObject(rtype);
+		if (rtobj instanceof com.hp.hpl.jena.rdf.model.Resource) {
+			if (((com.hp.hpl.jena.rdf.model.Resource)rtobj).isURIResource()) {
+				NamedNode rtnn = new NamedNode(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getLocalName());
+				rtnn.setNamespace(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getNameSpace());
+				return rtnn;
+			}
+			else {
+				throw new JenaProcessorException("SadlTypeReference is not a URI resource");
+			}
+		}
+		else {
+			throw new JenaProcessorException("SadlTypeReference is a type (" + rtobj.getClass().getCanonicalName() + ") which is not yet handled");		
+		}
+	}
+	
+	private void addEquation(Equation eq) {
+		if (equations == null) {
+			equations = new ArrayList<Equation>();
+		}
+		equations.add(eq);
+	}
+	
+	public List<Equation> getEquations() {
+		return equations;
+	}
+	
+	private void processStatement(RuleStatement element) throws InvalidNameException, InvalidTypeException, TranslationException {
 		String ruleName = element.getName();
 		EList<Expression> ifs = element.getIfs();
 		EList<Expression> thens = element.getThens();
 		for (int i = 0; ifs != null && i < ifs.size(); i++) {
 			Expression expr = ifs.get(i);
-			String result = processExpression(expr);
+			Object result = processExpression(expr);
 			System.out.println("If expression: " + result);
 		}
 		for (int i = 0; thens != null && i < thens.size(); i++) {
 			Expression expr = thens.get(i);
-			String result = processExpression(expr);
+			Object result = processExpression(expr);
 			System.out.println("Then expression: " + result);
 		}
 		int i = 0;
 	}
 	
 	@Override
-	public String translate(Expression expr) {
+	public Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		return processExpression(expr);
 	}
 	
-	public String processExpression(final Expression expr) {
+	public Object processExpression(final Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (expr instanceof BinaryOperation) {
 			return processExpression((BinaryOperation)expr);
 		}
@@ -429,7 +683,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return processExpression((SubjHasProp)expr);
 		}
 		else if (expr instanceof SadlResource) {
-			return declarationExtensions.getConceptUri((SadlResource)expr);
+			return processExpression((SadlResource)expr);
+		}
+		else if (expr instanceof Function) {
+			return processExpression((Function)expr);
 		}
 		else {
 			System.err.println("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
@@ -437,11 +694,521 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return null;
 	}
 	
-	public String processExpression(BinaryOperation expr) {
-		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getOp());
-		return expr.getOp();
+	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		String op = expr.getOp();
+		BuiltinType optype = BuiltinType.getType(op);
+		
+		Expression lexpr = expr.getLeft();
+		Expression rexpr = expr.getRight();
+		Object lobj = translate(lexpr);
+		Object robj = translate(rexpr);
+				
+		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
+			// If we're doing an assignment, we can simplify the pattern.
+			Node assignedNode = null;
+			Object pattern = null;
+			if (rexpr instanceof Declaration) {
+				TripleElement trel = new TripleElement((Node)lobj, new RDFTypeNode(), (Node)robj);
+				return trel;
+			}
+			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
+				TripleElement trel = (TripleElement)robj;
+				while (trel != null) {
+					trel.setSubject((Node) lobj);
+					trel = (TripleElement) trel.getNext();
+				}
+				return robj;
+			}
+			if ((lobj instanceof TripleElement || (lobj instanceof Literal && isSparqlQuery(((Literal)lobj).toString())))
+					&& robj instanceof BuiltinElement) {
+				if (isModifiedTriple(((BuiltinElement)robj).getFuncType())) {
+					assignedNode = ((BuiltinElement)robj).getArguments().get(0);
+					optype = ((BuiltinElement)robj).getFuncType();
+					pattern = lobj;
+				}
+				else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
+					if ( ((BuiltinElement)robj).getArguments().get(0) instanceof Literal) {
+						((TripleElement)lobj).setObject(nodeCheck(robj));
+						return lobj;
+					}
+					else {
+						return createBinaryBuiltin(rexpr, ((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
+					}
+				}
+			}
+			else if (lobj instanceof Node && robj instanceof TripleElement) {
+				assignedNode = validateNode((Node) lobj);
+				pattern = (TripleElement) robj;
+			}
+			else if (robj instanceof Node && lobj instanceof TripleElement) {
+				assignedNode = validateNode((Node) robj);
+				pattern = (TripleElement) lobj;
+			}
+			if (assignedNode != null && pattern != null) {
+				// We're expressing the type of a named thing.
+				if (pattern instanceof TripleElement && ((TripleElement)pattern).getSubject() == null) {
+					if (isModifiedTripleViaBuitin(robj)) {
+						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();	
+						((TripleElement)pattern).setNext(null);
+					}
+					((TripleElement)pattern).setSubject(assignedNode);
+					if (optype != BuiltinType.Equal) {
+						((TripleElement)pattern).setType(getTripleModifierType(optype));
+					}
+				}
+				else if (pattern instanceof TripleElement && ((TripleElement)pattern).getObject() == null && 
+						(((TripleElement)pattern).getSourceType().equals(TripleSourceType.PSnewV) 
+								|| ((TripleElement)pattern).getSourceType().equals(TripleSourceType.PSV))) {
+					if (isModifiedTripleViaBuitin(robj)) {
+						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();	
+						((TripleElement)pattern).setNext(null);
+					}
+					((TripleElement)pattern).setObject(assignedNode);
+					if (optype != BuiltinType.Equal) {
+						((TripleElement)pattern).setType(getTripleModifierType(optype));
+					}
+				}
+				else if (pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.SPV)
+						&& assignedNode instanceof NamedNode && getProxyWithNullSubject(((TripleElement)pattern)) != null) {
+					TripleElement proxyFor = getProxyWithNullSubject(((TripleElement)pattern));
+					assignNullSubjectInProxies(((TripleElement)pattern), proxyFor, assignedNode);
+					if (optype != BuiltinType.Equal) {
+						proxyFor.setType(getTripleModifierType(optype));
+					}
+				}
+				else if (isModifiedTriple(optype) || 
+						(optype.equals(BuiltinType.Equal) && pattern instanceof TripleElement && 
+								(((TripleElement)pattern).getObject() == null || 
+										((TripleElement)pattern).getObject() instanceof NamedNode ||
+										((TripleElement)pattern).getObject() instanceof Literal))){
+					if (pattern instanceof TripleElement && isModifiedTripleViaBuitin(robj)) {
+						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();
+						((TripleElement)pattern).setObject(assignedNode);
+						((TripleElement)pattern).setNext(null);
+						((TripleElement)pattern).setType(getTripleModifierType(optype));
+					}
+					else if (isComparisonViaBuiltin(robj, lobj)) {
+						BuiltinElement be = (BuiltinElement)((TripleElement)robj).getNext();
+						be.addMissingArgument((Node) lobj);
+						return pattern;
+					}
+					else if (pattern instanceof TripleElement){
+						TripleElement lastPattern = (TripleElement)pattern;
+						// this while may need additional conditions to narrow application to nested triples?
+						while (lastPattern.getNext() != null && lastPattern instanceof TripleElement) {
+							lastPattern = (TripleElement) lastPattern.getNext();
+						}
+						if (encapsulatingTarget instanceof Test) {
+							((Test)encapsulatingTarget).setRhs(assignedNode);
+							((Test)encapsulatingTarget).setCompName(optype);
+						}
+						else if (encapsulatingTarget instanceof Query && target instanceof Test) {
+							((Test)target).setRhs(encapsulatingTarget);
+							((Test)target).setLhs(assignedNode);
+							((Test)target).setCompName(optype);
+						}
+						else if (target instanceof Test && assignedNode != null) {
+							((Test)target).setLhs(pattern);
+							((Test)target).setRhs(assignedNode);
+							((Test)target).setCompName(optype);
+							((TripleElement) pattern).setType(TripleModifierType.None);
+							optype = BuiltinType.Equal;
+						}
+						else {
+							lastPattern.setObject(assignedNode);
+						}
+						if (!optype.equals(BuiltinType.Equal)) {
+							((TripleElement)pattern).setType(getTripleModifierType(optype));
+						}
+					}
+					else {
+						if (target instanceof Test) {
+							((Test)target).setLhs(lobj);
+							((Test)target).setRhs(assignedNode);
+							((Test)target).setCompName(optype);
+						}
+					}
+				}
+				else if (encapsulatingTarget instanceof Test) {
+					((Test)encapsulatingTarget).setRhs(assignedNode);
+					((Test)encapsulatingTarget).setCompName(optype);
+				}
+				else if (target instanceof Rule && pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.ITC) && 
+						((TripleElement)pattern).getSubject() instanceof VariableNode && assignedNode instanceof VariableNode) {
+					// in a rule of this type we just want to replace the pivot node variable
+					doVariableSubstitution(((TripleElement)pattern), (VariableNode)((TripleElement)pattern).getSubject(), (VariableNode)assignedNode);
+				}
+				return pattern;
+			}
+			BuiltinElement bin = null;
+			boolean binOnRight = false;
+			Object retObj = null;
+			if (lobj instanceof Node && robj instanceof BuiltinElement) {
+				assignedNode = validateNode((Node)lobj);
+				bin = (BuiltinElement)robj;
+				retObj = robj;
+				binOnRight = true;
+			}
+			else if (robj instanceof Node && lobj instanceof BuiltinElement) {
+				assignedNode = validateNode((Node)robj);
+				bin = (BuiltinElement)lobj;
+				retObj = lobj;
+				binOnRight = false;
+			}
+			if (bin != null && assignedNode != null) {
+				if ((assignedNode instanceof VariableNode ||
+					(assignedNode instanceof NamedNode && ((NamedNode)assignedNode).getNodeType().equals(NodeType.VariableNode)))) {
+					while (bin.getNext() instanceof BuiltinElement) {
+						bin = (BuiltinElement) bin.getNext();
+					}
+					if (bin.isCreatedFromInterval()) {
+						bin.addArgument(0, assignedNode);
+					}
+					else {
+						bin.addArgument(assignedNode);
+					}
+					return retObj;
+				}
+				else if (assignedNode instanceof Node && isComparisonBuiltin(bin.getFuncName())) {
+					// this is a comparison with an extra "is"
+					if (bin.getArguments().size() == 1) {
+						if (bin.isCreatedFromInterval() || binOnRight) {
+							bin.addArgument(0, assignedNode);
+						}
+						else {
+							bin.addArgument(assignedNode);
+						}
+						return bin;
+					}
+				}
+			}
+			// We're describing a thing with a graph pattern.
+			Set<VariableNode> vars = pattern instanceof TripleElement ? getSelectVariables(((TripleElement)pattern)) : null; 
+			if (vars != null && vars.size() == 1) {
+				// Find where the unbound variable occurred in the pattern
+				// and replace each place with the assigned node.
+				VariableNode var = vars.iterator().next();
+				GraphPatternElement gpe = ((TripleElement)pattern);
+				while (gpe instanceof TripleElement) {
+					TripleElement triple = (TripleElement) gpe;
+					if (var.equals(triple.getSubject())) {
+						triple.setSubject(assignedNode);
+					}
+					if (var.equals(triple.getObject())) {
+						triple.setObject(assignedNode);
+					}
+					gpe = gpe.getNext();
+				}
+				return pattern;
+			}
+		}
+		// if we get to here we want to actually create a BuiltinElement for the BinaryOpExpression
+		// However, if the type is equal ("is", "equal") and the left side is a VariableNode and the right side is a literal
+		//	and the VariableNode hasn't already been bound, change from type equal to type assign.
+		if (optype == BuiltinType.Equal && target instanceof Rule && lobj instanceof VariableNode && robj instanceof Literal && 
+				!variableIsBound((Rule)target, null, (VariableNode)lobj)) {
+			return createBinaryBuiltin(expr, "assign", robj, lobj);
+		}
+		return createBinaryBuiltin(expr, op, lobj, robj);
 	}
 	
+	private Object processExpression(Function expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		EList<Expression> arglist = expr.getArglist();
+		String funcname = expr.getCalled();
+		BuiltinElement builtin = new BuiltinElement();
+		builtin.setFuncName(funcname);
+		if (arglist != null && arglist.size() > 0) {
+			List<Object> args = new ArrayList<Object>();
+			for (int i = 0; i < arglist.size(); i++) {
+				args.add(processExpression(arglist.get(i)));
+			}
+			if (args != null) {
+				for (Object arg : args) {
+					builtin.addArgument(nodeCheck(arg));
+					if (arg instanceof GraphPatternElement) {
+						((GraphPatternElement)arg).setEmbedded(true);
+					}
+				}
+			}
+		}
+		return builtin;
+	}
+	
+	private boolean hasCommonVariableSubject(Object robj) {
+		if (robj instanceof TripleElement && 
+				(((TripleElement)robj).getSubject() instanceof VariableNode && 
+						(((TripleElement)robj).getSourceType().equals(TripleSourceType.SPV)) ||
+						((TripleElement)robj).getSourceType().equals(TripleSourceType.ITC))) {
+			VariableNode subjvar = (VariableNode) ((TripleElement)robj).getSubject();
+			Object trel = robj;
+			while (trel != null && trel instanceof TripleElement) {
+				if (!(trel instanceof TripleElement) || 
+						(((TripleElement)trel).getSubject() != null &&!(((TripleElement)trel).getSubject().equals(subjvar)))) {
+					return false;
+				}
+				trel = ((TripleElement)trel).getNext();
+			}
+			if (trel == null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the bottom triple whose subject was replaced.
+	 * @param pattern
+	 * @param proxyFor
+	 * @param assignedNode
+	 * @return
+	 */
+	private TripleElement assignNullSubjectInProxies(TripleElement pattern,
+			TripleElement proxyFor, Node assignedNode) {
+		if (pattern.getSubject() instanceof ProxyNode) {
+			Object proxy = ((ProxyNode)pattern.getSubject()).getProxyFor();
+			if (proxy instanceof TripleElement) {
+//				((ProxyNode)pattern.getSubject()).setReplacementNode(assignedNode);
+				if (((TripleElement)proxy).getSubject() == null) {
+					// this is the bottom of the recursion
+					((TripleElement)proxy).setSubject(assignedNode);
+					return (TripleElement) proxy;
+				}
+				else {
+					// recurse down
+					TripleElement bottom = assignNullSubjectInProxies(((TripleElement)proxy), proxyFor, assignedNode);
+					// make the proxy next and reassign this subject as assignedNode
+					((ProxyNode)((TripleElement)proxy).getSubject()).setReplacementNode(assignedNode);
+					((TripleElement)proxy).setSubject(assignedNode);
+					if (bottom.getNext() == null) {
+						bottom.setNext(pattern);
+					}
+					return bottom;
+				}
+			}
+		}
+		return null;
+	}
+
+	private TripleElement getProxyWithNullSubject(TripleElement pattern) {
+		if (pattern.getSubject() instanceof ProxyNode) {
+			Object proxy = ((ProxyNode)pattern.getSubject()).getProxyFor();
+			if (proxy instanceof TripleElement) {
+				if (((TripleElement)proxy).getSubject() == null) {
+					return (TripleElement)proxy;
+				}
+				else {
+					return getProxyWithNullSubject(((TripleElement)proxy));
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean isComparisonViaBuiltin(Object robj, Object lobj) {
+		if (robj instanceof TripleElement && lobj instanceof Node &&
+				((TripleElement)robj).getNext() instanceof BuiltinElement) {
+			BuiltinElement be = (BuiltinElement) ((TripleElement)robj).getNext();
+			if (isComparisonBuiltin(be.getFuncName()) && be.getArguments().size() == 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isModifiedTripleViaBuitin(Object robj) {
+		if (robj instanceof TripleElement && ((TripleElement)robj).getNext() instanceof BuiltinElement) {
+			BuiltinElement be = (BuiltinElement) ((TripleElement)robj).getNext();
+			if (((TripleElement)robj).getPredicate() instanceof RDFTypeNode) {
+				if (isModifiedTriple(be.getFuncType())) {
+					Node subj = ((TripleElement)robj).getSubject();
+					Node arg = (be.getArguments() != null && be.getArguments().size() > 0) ? be.getArguments().get(0) : null;
+					if (subj == null && arg == null) {
+						return true;
+					}
+					if (subj != null && arg != null && subj.equals(arg)) {
+						return true;
+					}
+				}
+			}
+			else {
+				if (isModifiedTriple(be.getFuncType()) && ((TripleElement)robj).getObject().equals(be.getArguments().get(0))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean doVariableSubstitution(GraphPatternElement gpe, VariableNode v1, VariableNode v2) {
+		boolean retval = false;
+		do {
+			if (gpe instanceof TripleElement) {
+				if (((TripleElement)gpe).getSubject().equals(v1)) {
+					((TripleElement)gpe).setSubject(v2);
+					retval = true;
+				}
+				else if (((TripleElement)gpe).getObject().equals(v1)) {
+					((TripleElement)gpe).setObject(v2);
+					retval = true;
+				}
+			}
+			else if (gpe instanceof BuiltinElement) {
+				List<Node> args = ((BuiltinElement)gpe).getArguments();
+				for (int j = 0; j < args.size(); j++) {
+					if (args.get(j).equals(v1)) {
+						args.set(j, v2);
+						retval = true;
+					}
+				}
+			}
+			else if (gpe instanceof Junction) {
+				logger.error("Not yet handled");
+			}
+			gpe = gpe.getNext();
+		} while (gpe != null);
+		return retval;
+	}
+
+	/**
+	 * This method returns true if the argument node is bound in some other element of the rule
+	 * 
+	 * @param rule
+	 * @param gpe
+	 * @param v
+	 * @return
+	 */
+	public static boolean variableIsBound(Rule rule, GraphPatternElement gpe,
+			Node v) {
+		if (v instanceof NamedNode) {
+			if (((NamedNode)v).getNodeType() != null && !(((NamedNode)v).getNodeType().equals(NodeType.VariableNode))) {
+				return true;
+			}
+		}
+		// Variable is bound if it appears in a triple or as the return argument of a built-in
+		List<GraphPatternElement> givens = rule.getGivens();
+		if (variableIsBoundInOtherElement(givens, 0, gpe, true, false, v)) {
+			return true;
+		}
+		List<GraphPatternElement> ifs = rule.getIfs();
+		if (variableIsBoundInOtherElement(ifs, 0, gpe, true, false, v)) {
+			return true;
+		}
+		List<GraphPatternElement> thens = rule.getThens();
+		if (variableIsBoundInOtherElement(thens, 0, gpe, false, true, v)) {
+			return true;
+		}
+		return false;
+	}
+
+	private GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
+		BuiltinElement builtin = new BuiltinElement();
+		builtin.setFuncName(name);
+		if (lobj != null) {
+			builtin.addArgument(nodeCheck(lobj));
+		}
+		if (robj != null) {
+			builtin.addArgument(nodeCheck(robj));
+		}
+		return builtin;
+	}
+	
+	private Junction createJunction(Expression expr, String name, Object lobj, Object robj) {
+		Junction junction = new Junction();
+		junction.setJunctionName(name);
+		junction.setLhs(lobj);
+		junction.setRhs(robj);
+		return junction;
+	}
+
+	private Object createUnaryBuiltin(Expression sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
+		if (sobj instanceof com.ge.research.sadl.model.gp.Literal && BuiltinType.getType(name).equals(BuiltinType.Minus)) {
+			Object theVal = ((com.ge.research.sadl.model.gp.Literal)sobj).getValue();
+			if (theVal instanceof Integer) {
+				theVal = ((Integer)theVal) * -1;
+			}
+			else if (theVal instanceof Long) {
+				theVal = ((Long)theVal) * -1;
+			}
+			else if (theVal instanceof Float) {
+				theVal = ((Float)theVal) * -1;
+			}
+			else if (theVal instanceof Double) {
+				theVal = ((Double)theVal) * -1;
+			}
+			((com.ge.research.sadl.model.gp.Literal)sobj).setValue(theVal);
+			((com.ge.research.sadl.model.gp.Literal)sobj).setOriginalText("-" + ((com.ge.research.sadl.model.gp.Literal)sobj).getOriginalText());
+			return sobj;
+		}
+		if (sobj instanceof Junction) {
+			// If the junction has two literal values, apply the op to both of them.
+			Junction junc = (Junction) sobj;
+			Object lhs = junc.getLhs();
+			Object rhs = junc.getRhs();
+			if (lhs instanceof com.ge.research.sadl.model.gp.Literal && rhs instanceof com.ge.research.sadl.model.gp.Literal) {
+				lhs = createUnaryBuiltin(sexpr, name, lhs);
+				rhs = createUnaryBuiltin(sexpr, name, rhs);
+				junc.setLhs(lhs);
+				junc.setRhs(rhs);
+			}
+			return junc;
+		}
+		if (BuiltinType.getType(name).equals(BuiltinType.Equal)) {
+			if (sobj instanceof BuiltinElement) {
+				if (isComparisonBuiltin(((BuiltinElement)sobj).getFuncName())) {
+					// this is a "is <comparison>"--translates to <comparsion> (ignore is)
+					return sobj;
+				}
+			}
+			else if (sobj instanceof com.ge.research.sadl.model.gp.Literal || sobj instanceof NamedNode) {
+				// an "=" interval value of a value is just the value
+				return sobj;
+			}
+		}
+		BuiltinElement builtin = new BuiltinElement();
+		builtin.setFuncName(name);
+		if (isModifiedTriple(builtin.getFuncType())) {
+			if (sobj instanceof TripleElement) {
+				((TripleElement)sobj).setType(getTripleModifierType(builtin.getFuncType()));
+				return sobj;
+			}
+		}
+		if (sobj != null) {
+			builtin.addArgument(nodeCheck(sobj));
+		}
+		return builtin;
+	}
+
+	private Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
+		if (nodeObj == null) {
+//			throw new InvalidTypeException("nodeCheck called with null argument; this should not happen.");
+			return null;
+		}
+		if (nodeObj instanceof Node) {
+			return (Node) nodeObj; 
+		}
+		else if (nodeObj instanceof TripleElement) {
+			if (((TripleElement)nodeObj).getPredicate() == null 
+					&& ((TripleElement)nodeObj).getObject() == null
+					&& ((TripleElement)nodeObj).getSubject() != null) {
+				return ((TripleElement)nodeObj).getSubject();
+			}
+		}
+		return new ProxyNode(nodeObj);
+	}
+
+	private TripleModifierType getTripleModifierType(BuiltinType btype) {
+		if (btype.equals(BuiltinType.Not) || btype.equals(BuiltinType.NotEqual)) {
+			return TripleModifierType.Not;
+		}
+		else if (btype.equals(BuiltinType.Only)) {
+			return TripleModifierType.Only;
+		}
+		else if (btype.equals(BuiltinType.NotOnly)) {
+			return TripleModifierType.NotOnly;
+		}
+		return null;
+	}
+
 	public String processExpression(BooleanLiteral expr) {
 		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
 		return expr.getValue();
@@ -452,24 +1219,125 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return expr.getConstant();
 	}
 	
-	public String processExpression(Declaration expr) {
-		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getNewName());
-		return expr.getNewName();
+	public Object processExpression(Declaration expr) throws TranslationException {
+		String nn = expr.getNewName();
+		SadlResource type = expr.getType();
+		Node typenode = processExpression(type);
+		return typenode;
 	}
 	
-	public String processExpression(Name expr) {
-		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getName().toString());
-		return expr.getName().toString();
+	public Object processExpression(Name expr) throws TranslationException {
+		SadlResource qnm =expr.getName();
+		String nm = declarationExtensions.getConcreteName(qnm);
+		if (nm == null) {
+			SadlResource srnm = qnm.getName();
+			if (srnm != null) {
+				return processExpression(srnm);
+			}
+			addError("translate(Name) called with a SadlResource which resolved to null; this needs to be caught in validation", expr);
+			nm = "nullvarname";
+		}
+		return processExpression(qnm);
 	}
 	
+	private String getPrefix(String qn) {
+		if (qn.contains(":")) {
+			return qn.substring(0,qn.indexOf(":"));
+		}
+		return qn;
+	}
 	public String processExpression(NumberLiteral expr) {
 		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
 		return expr.getValue().toString();
 	}
 	
-	public String processExpression(PropOfSubject expr) {
-		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getPred().toString());
-		return expr.getPred().toString();
+	public Object processExpression(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Expression predicate = expr.getLeft();
+		Expression subject = expr.getRight();
+		Node subjNode = null;
+		Node predNode = null;
+		if (predicate instanceof Constant) {
+			// this is a pseudo PropOfSubject; the predicate is a constant
+			String cnstval = ((Constant)predicate).getConstant();
+			if (cnstval.equals("length")) {
+			}
+			else if (cnstval.equals("count")) {
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
+				Object elobj = translate(predicate);
+			}
+			else if (cnstval.equals("index")) {
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
+				Object idxobj = translate(predicate);
+			}
+			else if (cnstval.equals("first element")) {
+			}
+			else if (cnstval.equals("last element")) {
+			}
+			else {
+				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
+			}
+		}
+		else {
+			Object predobj = translate(predicate);
+			if(predobj instanceof Node) {
+				predNode = (Node) predobj;
+			}
+			else {
+				throw new TranslationException("Predicate '" + predobj.toString() + "' did not translate to Node");
+			}
+		}
+		Object sn = translate(subject);
+		if (sn instanceof Node) {
+			subjNode = (Node) sn;
+		}
+		else {
+			throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node");
+		}
+		TripleElement returnTriple = null;
+		if (predNode != null) {
+			returnTriple = new TripleElement(subjNode, predNode, null);
+			returnTriple.setSourceType(TripleSourceType.PSV);
+		}
+		else {
+			predNode = new RDFTypeNode();			
+			Node variable = getVariableNode(expr, null, predNode, subjNode);
+			returnTriple = new TripleElement();
+			returnTriple.setSubject(variable);
+			returnTriple.setPredicate(predNode);
+			returnTriple.setObject(subjNode);
+			if (subjNode instanceof NamedNode && !((NamedNode)subjNode).getNodeType().equals(NodeType.ClassNode)) {
+				addError("'" + subjNode.toString() + "' is not a Class.", subject);
+			}
+			returnTriple.setSourceType(TripleSourceType.ITC);
+		}
+
+		return returnTriple;
+	}
+	
+	public Node processExpression(SadlResource expr) throws TranslationException {
+		String nm =  declarationExtensions.getConcreteName(expr);
+		String ns = declarationExtensions.getConceptNamespace(expr);
+		String prfx = declarationExtensions.getConceptPrefix(expr);
+		OntConceptType type = declarationExtensions.getOntConceptType(expr);
+		if (type.equals(OntConceptType.VARIABLE)) {
+			VariableNode vn = new VariableNode(nm);
+			vn.setNamespace(ns);
+			vn.setPrefix(prfx);
+			vn.setNodeType(ontConceptTypeToNodeType(type));
+			return vn;
+		}
+		else {
+			NamedNode n = new NamedNode(nm, ontConceptTypeToNodeType(type));
+			n.setNamespace(ns);
+			n.setPrefix(prfx);
+			return n;
+		}
 	}
 	
 	public String processExpression(StringLiteral expr) {
@@ -2106,6 +2974,99 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	private void setSpec(OntModelSpec spec) {
 		this.spec = spec;
+	}
+	
+	private boolean isVariable(SadlResource sr) {
+		OntConceptType ct = declarationExtensions.getOntConceptType(sr);
+		if (ct.equals(OntConceptType.VARIABLE)) {
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * This method looks in the clauses of a Rule to see if there is already a triple matching the given pattern. If there is
+	 * a new variable of the same name is created (to make sure the count is right) and returned. If not a rule or no match
+	 * a new variable (new name) is created and returned.
+	 * @param expr 
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @return
+	 */
+	protected VariableNode getVariableNode(Expression expr, Node subject, Node predicate, Node object) {
+		if (target != null) {
+			// Note: when we find a match we still create a new VariableNode with the same name in order to have the right reference counts for the new VariableNode
+			if (target instanceof Rule) {
+				VariableNode var = findVariableInTripleForReuse(((Rule)target).getGivens(), subject, predicate, object);
+				if (var != null) {
+					return new VariableNode(var.getName());
+				}
+				var = findVariableInTripleForReuse(((Rule)target).getIfs(), subject, predicate, object);
+				if (var != null) {
+					return new VariableNode(var.getName());
+				}
+				var = findVariableInTripleForReuse(((Rule)target).getThens(), subject, predicate, object);
+				if (var != null) {
+					return new VariableNode(var.getName());
+				}
+			}
+		}
+		return new VariableNode(getNewVar(expr));
+	}
+	
+	protected String getNewVar(Expression expr) {
+		IScopeProvider scopeProvider = ((XtextResource)expr.eResource()).getResourceServiceProvider().get(IScopeProvider.class);
+		IScope scope = scopeProvider.getScope(expr, SADLPackage.Literals.SADL_RESOURCE__NAME);
+		String proposedName = "v" + vNum;
+		while (userDefinedVariables.contains(proposedName)
+				|| 	scope.getSingleElement(QualifiedName.create(proposedName)) != null) {
+			vNum++;
+			proposedName = "v" + vNum;
+		}
+		vNum++;
+		return proposedName;
+	}
+	
+	/**
+	 * Supporting method for the method above (getVariableNode(Node, Node, Node))
+	 * @param gpes
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @return
+	 */
+	protected VariableNode findVariableInTripleForReuse(List<GraphPatternElement> gpes, Node subject, Node predicate, Node object) {
+		if (gpes != null) {
+			Iterator<GraphPatternElement> itr = gpes.iterator();
+			while (itr.hasNext()) {
+				GraphPatternElement gpe = itr.next();
+				while (gpe != null) {
+					if (gpe instanceof TripleElement) {
+						TripleElement tr = (TripleElement)gpe;
+						Node tsn = tr.getSubject();
+						Node tpn = tr.getPredicate();
+						Node ton = tr.getObject();
+						if (subject == null && tsn instanceof VariableNode) {
+							if (predicate != null && predicate.equals(tpn) && object != null && object.equals(ton)) {
+								return (VariableNode) tsn;
+							}
+						}
+						if (predicate == null && tpn instanceof VariableNode) {
+							if (subject != null && subject.equals(tsn) && object != null && object.equals(ton)) {
+								return (VariableNode) tpn;
+							}
+						}
+						if (object == null && ton instanceof VariableNode) {
+							if (subject != null && subject.equals(tsn) && predicate != null && predicate.equals(tpn)) {
+								return (VariableNode) ton;
+							}
+						}
+					}
+					gpe = gpe.getNext();
+				}
+			}
+		}
+		return null;
 	}
 	
 }

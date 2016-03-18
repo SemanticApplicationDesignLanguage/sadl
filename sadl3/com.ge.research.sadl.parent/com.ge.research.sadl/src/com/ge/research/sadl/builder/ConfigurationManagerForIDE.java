@@ -41,13 +41,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
-//import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
-import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -62,7 +57,6 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -90,8 +84,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
  * @author 200005201
  *
  */
-public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing 
-	implements IConfigurationManagerForIDE, IResourceChangeListener, IPropertyChangeListener {
+public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing implements IConfigurationManagerForIDE {
 	
 	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {
 		private String modelFolder;
@@ -124,9 +117,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	// TODO: Do not use directly
 	public ConfigurationManagerForIDE(String modelFolderPathname, String _repoType) throws ConfigurationException {
 		super(modelFolderPathname, _repoType);
-		if (ResourcesPlugin.getPlugin() != null) {
-			ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-		}
 	}
 	
    /**
@@ -626,14 +616,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	}
 
 	protected void finalize() throws Throwable {
-        try {
-        	if (ResourcesPlugin.getPlugin() != null) {
-        		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
-        	}
-
-        } finally {
-            super.finalize();
-        }
+		
     }
 
     /**
@@ -970,14 +953,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty() != null) {
-			System.out.println(event.getProperty().toString());
-		}
-		
 	}
 
 	public SadlUtils getSadlUtils() {

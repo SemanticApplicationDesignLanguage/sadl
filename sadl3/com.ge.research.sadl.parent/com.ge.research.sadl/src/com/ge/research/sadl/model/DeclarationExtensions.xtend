@@ -92,6 +92,34 @@ class DeclarationExtensions {
 		return resource
 	}
 	
+	def String getConceptNamespace(SadlResource it) {
+		val declaration = declaration
+		if (declaration != null) {	
+			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
+			if (part1 != null) {
+				val part2 = part1.baseUri
+				if (part2 != null) {
+					return part2 + "#"
+				}
+			}
+		}
+		return null
+	}
+	
+	def String getConceptPrefix(SadlResource it) {
+		val declaration = declaration
+		if (declaration != null) {	
+			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
+			if (part1 != null) {
+				val part2 = part1.alias
+				if (part2 != null) {
+					return part2
+				}
+			}
+		}
+		return null
+	}
+	
 	def OntConceptType getOntConceptType(SadlResource resource) {
 		var cnm = getConcreteName(resource)
 		if(cnm == null) System.out.println("Resource could not provide a concrete name");

@@ -9,8 +9,8 @@ class SadlEquationsParsingTest extends AbstractSADLParsingTest {
 		'''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
 			
-			Equation myEquation(float x, float y) returns float -> x * y.
-			Equation anotherEquation(float x) returns float -> myEquation(x, x).
+			Equation myEquation(float x, float y) returns float: x * y.
+			Equation anotherEquation(float x) returns float: myEquation(x, x).
 		'''.assertNoErrors
 	}
 	

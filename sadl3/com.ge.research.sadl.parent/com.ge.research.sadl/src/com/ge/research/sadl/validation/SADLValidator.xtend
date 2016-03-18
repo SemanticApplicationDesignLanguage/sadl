@@ -33,6 +33,7 @@ import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.ge.research.sadl.sADL.SadlResource
 
 /**
  * This class contains custom validation rules. 
@@ -109,4 +110,13 @@ class SADLValidator extends AbstractSADLValidator {
 			}
 		}
 	}
+	
+//	@Check
+//	def checkResourceName(SadlResource name) {
+//		val nm = declarationExtensions.getConcreteName(name)
+//		if (nm.startsWith("__")) {
+//			error("", SADLPackage.Literals.SADL_RESOURCE__NAME, <constant>)
+//		}
+//	}
+
 }

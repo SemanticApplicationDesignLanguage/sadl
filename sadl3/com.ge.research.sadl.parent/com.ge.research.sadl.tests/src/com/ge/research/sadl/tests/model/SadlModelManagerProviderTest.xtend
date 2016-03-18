@@ -1018,6 +1018,20 @@ class SadlModelManagerProviderTest {
 		]
 	}
 
+	@Test def void EquationTest1() {
+		val model = '''
+			uri "http://com.ge.research.sadl/equations". 
+			
+			Thingy is a class 
+				described by dateOfBirth with a single value of type date, 
+				described by age with a single value of type int.
+			
+			Equation dateSubtractYears(dateTime x, dateTime y) returns float: x - y.		
+		'''.assertValidatesTo[ jenaModel, issues |
+			
+		]
+	}
+
 //	@Test def void my<younameit>Case() {
 //		'''
 //			// model goes here
