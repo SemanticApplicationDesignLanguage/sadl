@@ -35,18 +35,12 @@ class ValueConverterService extends AbstractDeclarativeValueConverterService {
 		idValueConverter
 	}
 	
-	@ValueConverter(rule = "NAME") def NAME() {
-		new AbstractValueConverter<String>() {
-			
-			override toString(String value) throws ValueConverterException {
-				idValueConverter.toString(value)
-			}
-			
-			override toValue(String string, INode node) throws ValueConverterException {
-				idValueConverter.toValue(string, node)
-			}
-			
-		}
+	@ValueConverter(rule = "DNAME") def DNAME() {
+		idValueConverter
+	}
+	
+	@ValueConverter(rule = "QNAME") def QNAME() {
+		idValueConverter
 	}
 
 	@Inject INTValueConverter intValueConverter
