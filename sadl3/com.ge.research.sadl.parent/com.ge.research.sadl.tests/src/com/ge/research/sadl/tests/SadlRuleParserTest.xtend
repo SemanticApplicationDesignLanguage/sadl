@@ -124,4 +124,17 @@ class SadlRuleParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	/**
+	 * see https://github.com/crapo/sadlos2/issues/48
+	 */
+	@Test def void testAllowOmittingWithHas() {
+		'''
+			uri "http://sadl.imp/propOfSubject".
+			
+			Jake owns Spot.
+			Jake has owns Spot.
+			Jake with owns Spot.
+		'''.assertNoErrors
+	}
+	
 }
