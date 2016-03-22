@@ -113,4 +113,15 @@ class SadlRuleParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	/**
+	 * see https://github.com/crapo/sadlos2/issues/47
+	 */
+	@Test def void testPropertyOfSubject() {
+		'''
+			uri "http://sadl.imp/propOfSubject".
+			
+			GE is a Company. Andy is a Person. Andy is employee of GE.
+		'''.assertNoErrors
+	}
+	
 }

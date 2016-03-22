@@ -54,6 +54,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="property" eType="#//SadlResource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlResource"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlInstance" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameOrRef" eType="#//SadlResource"

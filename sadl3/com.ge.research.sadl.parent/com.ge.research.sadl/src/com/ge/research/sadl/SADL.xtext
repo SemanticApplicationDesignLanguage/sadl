@@ -97,7 +97,10 @@ SadlPropertyCondition :
 ;
 
 SadlPropertyInitializer:
-	','? ('with'|'has') property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	','? 
+	(('with'|'has') property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	|'is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
+	)
 ;
 
 SadlNestedInstance returns SadlInstance:
