@@ -21,6 +21,7 @@ package com.ge.research.sadl.model.gp;
 
 public class Literal extends Node {
 	private Object value = null;
+	private String units = null;
 	
 	private String originalText = null;
 
@@ -76,5 +77,13 @@ public class Literal extends Node {
 
 	public void setOriginalText(String originalText) {
 		this.originalText = originalText;
+	}
+
+	public String getUnits() {
+		return units;
+	}
+
+	public void setUnits(String units) {
+		this.units = units;
 	}
 }

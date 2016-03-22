@@ -59,6 +59,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
+//import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
@@ -137,6 +138,7 @@ import com.ge.research.sadl.sADL.SadlValueList;
 import com.ge.research.sadl.sADL.StartWriteStatement;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -715,6 +717,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof Function) {
 			return processExpression((Function)expr);
 		}
+		else if (expr instanceof Unit) {
+			return processExpression((Unit)expr);
+		}
 		else {
 			System.err.println("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
 		}
@@ -726,9 +731,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		BuiltinType optype = BuiltinType.getType(op);
 		
 		Expression lexpr = expr.getLeft();
+		Object lobj;
+		if (lexpr != null) {
+			lobj = translate(lexpr);			
+		}
+		else {
+			throw new TranslationException("Left side of '" + op + "' is null (Resource '" + expr.eResource().getURI() + "')");
+		}
 		Expression rexpr = expr.getRight();
-		Object lobj = translate(lexpr);
-		Object robj = translate(rexpr);
+		Object robj;
+		if (rexpr != null) {
+			robj = translate(rexpr);
+		}
+		else {
+			throw new TranslationException("Right side of '" + op + "' is null (Resource '" + expr.eResource().getURI() + "')");
+		}
 				
 		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
 			// If we're doing an assignment, we can simplify the pattern.
@@ -746,7 +763,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				return robj;
 			}
-			if ((lobj instanceof TripleElement || (lobj instanceof Literal && isSparqlQuery(((Literal)lobj).toString())))
+			if ((lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal && isSparqlQuery(((com.ge.research.sadl.model.gp.Literal)lobj).toString())))
 					&& robj instanceof BuiltinElement) {
 				if (isModifiedTriple(((BuiltinElement)robj).getFuncType())) {
 					assignedNode = ((BuiltinElement)robj).getArguments().get(0);
@@ -754,7 +771,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					pattern = lobj;
 				}
 				else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
-					if ( ((BuiltinElement)robj).getArguments().get(0) instanceof Literal) {
+					if ( ((BuiltinElement)robj).getArguments().get(0) instanceof com.ge.research.sadl.model.gp.Literal) {
 						((TripleElement)lobj).setObject(nodeCheck(robj));
 						return lobj;
 					}
@@ -807,7 +824,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						(optype.equals(BuiltinType.Equal) && pattern instanceof TripleElement && 
 								(((TripleElement)pattern).getObject() == null || 
 										((TripleElement)pattern).getObject() instanceof NamedNode ||
-										((TripleElement)pattern).getObject() instanceof Literal))){
+										((TripleElement)pattern).getObject() instanceof com.ge.research.sadl.model.gp.Literal))){
 					if (pattern instanceof TripleElement && isModifiedTripleViaBuitin(robj)) {
 						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();
 						((TripleElement)pattern).setObject(assignedNode);
@@ -932,7 +949,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		// if we get to here we want to actually create a BuiltinElement for the BinaryOpExpression
 		// However, if the type is equal ("is", "equal") and the left side is a VariableNode and the right side is a literal
 		//	and the VariableNode hasn't already been bound, change from type equal to type assign.
-		if (optype == BuiltinType.Equal && target instanceof Rule && lobj instanceof VariableNode && robj instanceof Literal && 
+		if (optype == BuiltinType.Equal && target instanceof Rule && lobj instanceof VariableNode && robj instanceof com.ge.research.sadl.model.gp.Literal && 
 				!variableIsBound((Rule)target, null, (VariableNode)lobj)) {
 			return createBinaryBuiltin(expr, "assign", robj, lobj);
 		}
@@ -1273,9 +1290,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return qn;
 	}
-	public String processExpression(NumberLiteral expr) {
+	public Object 	processExpression(NumberLiteral expr) {
 		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
-		return expr.getValue().toString();
+		com.ge.research.sadl.model.gp.Literal lit = new com.ge.research.sadl.model.gp.Literal();
+		lit.setValue(translate(expr));
+		return lit;
 	}
 	
 	public Object processExpression(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -1319,12 +1338,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				throw new TranslationException("Predicate '" + predobj.toString() + "' did not translate to Node");
 			}
 		}
-		Object sn = translate(subject);
-		if (sn instanceof Node) {
-			subjNode = (Node) sn;
+		if (subject != null) {
+			Object sn = translate(subject);
+			if (sn instanceof Node) {
+				subjNode = (Node) sn;
+			}
+			else {
+				throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node");
+			}
 		}
 		else {
-			throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node");
+			throw new TranslationException("Subject of PropOfSubject is null (Resource '" + expr.eResource().getURI() + "')");
 		}
 		TripleElement returnTriple = null;
 		if (predNode != null) {
@@ -1375,6 +1399,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public String processExpression(SubjHasProp expr) {
 		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
 		return expr.getProp().toString();
+	}
+	
+	public Object processExpression(Unit expr) {
+		String unit = expr.getUnit();
+		NumberLiteral value = expr.getValue();
+		Object valobj = translate(value);
+		if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
+			((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
+		}
+		return valobj;
 	}
 	
 	private void processSadlSameAs(SadlSameAs element) throws JenaProcessorException {

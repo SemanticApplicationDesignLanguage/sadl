@@ -16,7 +16,8 @@ Require-Bundle: com.ge.research.jena;bundle-version="3.0.0",
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.ge.research.sadl.jena.reasoner;version="3.0.0";
+Export-Package: com.ge.research.sadl.jena.multithreaded,
+ com.ge.research.sadl.jena.reasoner;version="3.0.0";
   uses:="com.hp.hpl.jena.reasoner,
    com.ge.research.sadl.model.gp,
    org.slf4j,
@@ -38,8 +39,10 @@ Export-Package: com.ge.research.sadl.jena.reasoner;version="3.0.0";
    org.slf4j,
    com.ge.research.sadl.reasoner,
    com.ge.research.sadl.model,
-   com.hp.hpl.jena.ontology"
+   com.hp.hpl.jena.ontology",
+ com.ge.research.sadl.jena
 Bundle-ClassPath: .
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.reasoner
+ 

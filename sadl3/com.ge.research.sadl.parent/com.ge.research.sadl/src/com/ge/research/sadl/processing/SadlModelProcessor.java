@@ -675,8 +675,9 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 	 * @param namedNode
 	 * @return
 	 * @throws InvalidNameException 
+	 * @throws TranslationException 
 	 */
-	protected Node validateNode(Node node) throws InvalidNameException {
+	protected Node validateNode(Node node) throws InvalidNameException, TranslationException {
 		if (node instanceof NamedNode) {
 			if (!((NamedNode)node).isValidated()) {
 				if (node instanceof VariableNode) {
@@ -700,6 +701,9 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 				        String lname = name.substring(colon + 1);
 				        ((NamedNode)node).setName(lname);
 				        cname = validateConceptName(new ConceptName(pfx, lname));
+				        NodeType nt = ((NamedNode)node).getNodeType();
+				        ConceptType ct = nodeTypeToConceptType(nt);
+				        cname.setType(ct);
 				    }
 				    else {
 				    	cname = validateConceptName(new ConceptName(name));
@@ -746,9 +750,30 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 		return node;
 	}
 
+	private ConceptType nodeTypeToConceptType(NodeType nt) throws TranslationException {
+		if (nt.equals(NodeType.ClassNode)) {
+			return ConceptType.ONTCLASS;
+		}
+		else if (nt.equals(NodeType.InstanceNode)) {
+			return ConceptType.INDIVIDUAL;
+		}
+		else if (nt.equals(NodeType.DataTypeProperty)) {
+			return ConceptType.DATATYPEPROPERTY;
+		}
+		else if (nt.equals(NodeType.ObjectProperty)) {
+			return ConceptType.OBJECTPROPERTY;
+		}
+		else if (nt.equals(NodeType.VariableNode)) {
+			return ConceptType.VARIABLE;
+		}
+		else {
+			throw new TranslationException("NodeType '" + nt.toString() + "' cannot be converted to a ConceptType");
+		}
+	}
+
 	private ConceptName validateConceptName(ConceptName conceptName) {
 		// TODO Auto-generated method stub
-		return null;
+		return conceptName;
 	}
 	
 	private void addError(IFTranslationError error) {
