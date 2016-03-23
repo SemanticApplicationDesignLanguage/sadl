@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -332,16 +333,32 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 		return sb.toString();
 	}
 
-	protected String translate(BooleanLiteral expr) {
-		return expr.getValue();
+	protected Object translate(BooleanLiteral expr) {
+		Literal lit = new Literal();
+		String val = expr.getValue();
+		if (val.equals("true")) {
+			lit.setValue(true);
+		}
+		else {
+			lit.setValue(false);
+		}
+		lit.setOriginalText(val);
+		return lit;
 	}
 
-	protected String translate(NumberLiteral expr) {
-		return expr.getValue().toPlainString();
+	protected Object translate(NumberLiteral expr) {
+		Literal lit = new Literal();
+		BigDecimal val = expr.getValue();
+		lit.setValue(val);
+		lit.setOriginalText(expr.getValue().toPlainString());
+		return lit;
 	}
 
-	protected String translate(StringLiteral expr) {
-		return expr.getValue();
+	protected Object translate(StringLiteral expr) {
+		Literal lit = new Literal();
+		lit.setValue(expr.getValue());
+		lit.setOriginalText(expr.getValue());
+		return lit;
 	}
 
 	protected String translate(Constant expr) {
@@ -688,61 +705,14 @@ public abstract class SadlModelProcessor implements ISadlModelProcessor {
 					((RDFTypeNode) node).setNodeType(NodeType.PropertyNode);
 				}
 				else {
-					ConceptName cname;
-					ConceptType ctype = null;
-					String name = ((NamedNode)node).toString(); //getName();
-					if (name == null) {
-						throw new InvalidNameException("A NamedNode has a null name! Did ResourceByName resolution fail?");
-					}
-				    int colon = name.indexOf(':');
-					if (colon > 0 && colon < name.length() - 1) {
-						String pfx = name.substring(0, colon);
-				        ((NamedNode)node).setPrefix(pfx);
-				        String lname = name.substring(colon + 1);
-				        ((NamedNode)node).setName(lname);
-				        cname = validateConceptName(new ConceptName(pfx, lname));
-				        NodeType nt = ((NamedNode)node).getNodeType();
-				        ConceptType ct = nodeTypeToConceptType(nt);
-				        cname.setType(ct);
-				    }
-				    else {
-				    	cname = validateConceptName(new ConceptName(name));
-				    }
-			        ctype = cname.getType();
-			        ((NamedNode)node).setNamespace(cname.getNamespace());
-			        ((NamedNode)node).setPrefix(cname.getPrefix());
-			    	if (ctype.equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
-//			    		modelManager.addToVariableNamesCache(cname);
-			    		node = new VariableNode(((NamedNode)node).getName());
+					if (!(node instanceof VariableNode) && ((NamedNode)node).getNodeType().equals(NodeType.VariableNode)) {
+						VariableNode vnode = new VariableNode(((NamedNode)node).getName());
+						vnode.setNamespace(((NamedNode) node).getNamespace());
+						vnode.setNodeType(((NamedNode)node).getNodeType());
+						vnode.setPrefix(((NamedNode)node).getPrefix());
+						node = vnode;
 //			    		userDefinedVariables.add(((NamedNode) node).getName());
 			    	}
-			    	else if (ctype.equals(ConceptType.ANNOTATIONPROPERTY)){
-			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.DATATYPEPROPERTY)){
-			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.OBJECTPROPERTY)){
-			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.ONTCLASS)){
-			    		((NamedNode)node).setNodeType(NodeType.ClassNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.INDIVIDUAL)){
-			    		((NamedNode)node).setNodeType(NodeType.InstanceNode);
-			    	}
-			    	else {
-//			    		logger.error("Unexpected ConceptType: " + ctype.toString());
-				    	addError(new IFTranslationError("Unexpected ConceptType: " + ctype.toString()));
-			    	}
-//			    	if (isCollectNamedNodes()) {
-//			    		if (namedNodes == null) {
-//			    			namedNodes = new ArrayList<ConceptName>();
-//			    		}
-//			    		if (!namedNodes.contains(cname)) {
-//			    			namedNodes.add(cname);
-//			    		}
-//			    	}
 				}
 				((NamedNode)node).setValidated(true);
 			}

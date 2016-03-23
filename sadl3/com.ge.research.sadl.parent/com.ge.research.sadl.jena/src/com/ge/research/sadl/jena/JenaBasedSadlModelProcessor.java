@@ -138,6 +138,7 @@ import com.ge.research.sadl.sADL.SadlValueList;
 import com.ge.research.sadl.sADL.StartWriteStatement;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
@@ -720,10 +721,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof Unit) {
 			return processExpression((Unit)expr);
 		}
-		else {
-			System.err.println("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
+		else if (expr instanceof UnaryExpression) {
+			return processExpression((UnaryExpression)expr);
 		}
-		return null;
+		else {
+			throw new TranslationException("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
+		}
 	}
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -753,6 +756,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			Object pattern = null;
 			if (rexpr instanceof Declaration) {
 				TripleElement trel = new TripleElement((Node)lobj, new RDFTypeNode(), (Node)robj);
+				trel.setSourceType(TripleSourceType.ITC);
 				return trel;
 			}
 			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
@@ -1387,6 +1391,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			NamedNode n = new NamedNode(nm, ontConceptTypeToNodeType(type));
 			n.setNamespace(ns);
 			n.setPrefix(prfx);
+			n.setNodeType(ontConceptTypeToNodeType(type));
 			return n;
 		}
 	}
@@ -1399,6 +1404,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public String processExpression(SubjHasProp expr) {
 		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
 		return expr.getProp().toString();
+	}
+	
+	public Object processExpression(UnaryExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Object eobj = translate(expr.getExpr());
+		String op = expr.getOp();
+		if (eobj instanceof com.ge.research.sadl.model.gp.Literal) {
+			Object val = ((com.ge.research.sadl.model.gp.Literal)eobj).getValue();
+			if (val instanceof Number) {
+				val = -1.0 * ((Number)val).doubleValue();
+				((com.ge.research.sadl.model.gp.Literal)eobj).setValue(val);
+				((com.ge.research.sadl.model.gp.Literal)eobj).setOriginalText(op + ((com.ge.research.sadl.model.gp.Literal)eobj).getOriginalText());
+				return eobj;
+			}
+		}
+		BuiltinElement bi = new BuiltinElement();
+		bi.setFuncName(op);
+		bi.addArgument((Node) eobj);
+		return bi;
 	}
 	
 	public Object processExpression(Unit expr) {
