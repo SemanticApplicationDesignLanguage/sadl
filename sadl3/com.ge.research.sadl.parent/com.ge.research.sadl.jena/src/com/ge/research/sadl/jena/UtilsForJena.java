@@ -35,6 +35,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -441,10 +445,6 @@ public class UtilsForJena {
 								}
 							}							
 						}
-//						StmtIterator siter = rstrct.listProperties();
-//						while (siter.hasNext()) {
-//							System.out.println(siter.nextStatement().toString());
-//						}
 					}
 				}
 			}
@@ -922,11 +922,14 @@ public class UtilsForJena {
      * @throws MalformedURLException 
      */
     public String fileUrlToFileName(String urlstr) throws MalformedURLException {
-        URI fileUri = URI.create(urlstr);
-        if (fileUri != null) {
-        	return fileUri.toURL().getPath();
-        }
-        throw new MalformedURLException("Unable to convert '" + urlstr + "' to a file name");
+    	if (urlstr.startsWith(FILE_URL_PREFIX)) {
+	        URI fileUri = URI.create(urlstr);
+	        if (fileUri != null) {
+	        	return fileUri.toURL().getPath();
+	        }
+	        throw new MalformedURLException("Unable to convert '" + urlstr + "' to a file name");
+    	}
+    	return urlstr;
     }
 
 	private String siblingFolderUrl(String modelFolder, String fileName, String lastToken) {
@@ -975,7 +978,13 @@ public class UtilsForJena {
 		if (prjUri != null) {
 			org.eclipse.emf.common.util.URI uri = prjUri.appendSegment(OWL_MODELS_FOLDER_NAME);
 			uri = uri.appendSegment(ONT_POLICY_FILENAME);
-			return uri.toString();
+			if (uri.isPlatform()) {
+				 IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(uri.toPlatformString(true)));
+				 return file.getRawLocation().toPortableString();
+			}
+			else {
+				return uri.toFileString();
+			}
 		}
 		return null;
 	}

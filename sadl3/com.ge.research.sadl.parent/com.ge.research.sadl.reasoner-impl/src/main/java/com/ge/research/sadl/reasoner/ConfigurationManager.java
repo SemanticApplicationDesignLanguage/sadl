@@ -145,6 +145,12 @@ public class ConfigurationManager implements IConfigurationManager {
 		setConfigModel(ModelFactory.createDefaultModel()) ;
 		getConfigModel().setNsPrefix("", CONFIG_NAMESPACE);
 		loadConfigurationFile();
+		loadMappingFile();
+		try {
+			loadMappings();
+		} catch (IOException e) {
+			throw new ConfigurationException("Failed to load ontology mappings: " + e.getMessage(), e);
+		}
 	}
 	
 	protected synchronized void loadMappingFile() throws ConfigurationException {
@@ -176,6 +182,40 @@ public class ConfigurationManager implements IConfigurationManager {
 			getMappingModel().read(getModelFolderUrl() + "/" + ONT_POLICY_RDF);
 		}
 		setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
+	}
+	
+	/**
+	 * Call this method to actually apply the mappings to the Jena Document Mgr
+	 * @throws IOException
+	 */
+	protected void loadMappings() throws IOException {
+		mappings = getMappings();
+		if (mappings != null) {
+			this.getJenaDocumentMgr().reset();
+			this.getJenaDocumentMgr().clearCache();
+			Iterator<String> iterator = mappings.keySet().iterator();
+			boolean needFileLocator = false;
+			while (iterator.hasNext()) {
+				String url = (String)iterator.next();
+				logger.debug("loading mapping url ="+url);
+				String altUrl = mappings.get(url);
+				getJenaDocumentMgr().addAltEntry(url, altUrl);
+				if (altUrl != null && altUrl.startsWith(FILE_SHORT_PREFIX)) {
+					needFileLocator = true;
+				}
+			}
+			if (needFileLocator) {
+				setupJenaFileManager();
+			}
+		}
+	}
+	
+	private void setupJenaFileManager() throws IOException {
+		getJenaDocumentMgr().getFileManager().addLocatorFile(getModelFolder());
+		getJenaDocumentMgr().getFileManager().addLocatorURL();
+		SadlReadFailureHandler rfHandler = new SadlReadFailureHandler(logger );	
+		rfHandler.setSadlConfigMgr(this);
+		getJenaDocumentMgr().setReadFailureHandler(rfHandler);
 	}
 	
 	private void loadConfigurationFile() throws ConfigurationException {

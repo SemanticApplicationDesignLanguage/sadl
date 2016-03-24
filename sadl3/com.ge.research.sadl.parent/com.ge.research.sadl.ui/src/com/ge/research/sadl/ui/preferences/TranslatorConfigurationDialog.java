@@ -159,7 +159,7 @@ public class TranslatorConfigurationDialog extends Dialog {
         		    if (currentValue != null) {
         		    	optionValue = currentValue;
         		    }
-        		    logger.debug(key+" class = "+optionValue.getClass().getName());
+        		    logger.debug(key+" class = "+ (optionValue != null ? optionValue.getClass().getName() : "null"));
         		    Object[] optionPossibleValues = option.getPossibleValues();
         		    if (optionPossibleValues != null && optionPossibleValues.length > 0) {
         		    	// Option has a list of values so create a dropdown box
@@ -174,8 +174,14 @@ public class TranslatorConfigurationDialog extends Dialog {
         		    	addField(editor);
         		    	editor.load();
         		    	editors.add(editor);
-        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
+        		    } else if (optionValue == null) {
         		    	editor = new StringFieldEditor(key, optionDescription, getFieldEditorParent());
+         		    	editor.setPreferenceStore(rcps);
+        		    	addField(editor);
+        		    	editor.load();        		    	
+        		    	editors.add(editor);
+     		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
+         		    	editor = new StringFieldEditor(key, optionDescription, getFieldEditorParent());
         		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
         		    	editor.setPreferenceStore(rcps);
         		    	addField(editor);
@@ -325,11 +331,14 @@ public class TranslatorConfigurationDialog extends Dialog {
 		    			maxOptsL = optionPossibleValues[i].toString().length();
 		    		}
 		    	}
-		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
+		    } else if (optionValue != null && optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
 		    	int size = Math.max(optionValue.toString().length(), 40);
 		    	if (size > maxOptsL) {
 		    		maxOptsL = size;
 		    	}
+		    }
+		    else {
+		    	maxOptsL = 40;
 		    }
 		    // logger.debug("maxDescL = "+maxDescL+"   maxOptsL = "+maxOptsL);
 		}
