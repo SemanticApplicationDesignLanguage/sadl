@@ -281,24 +281,26 @@ ReadStatement :
 Expression returns Expression: // (1)
 	ExpressionParameterized<true>
 ;
+
 // Real expressions start here
 ExpressionParameterized<EnabledWith> returns Expression: // (1)
-	OrExpression<EnabledWith>;
+	OrExpression<EnabledWith>
+;
 
 OrExpression<EnabledWith> returns Expression:
-	AndExpression<EnabledWith> ({BinaryOperation.left=current} op=OpOr right=AndExpression<EnabledWith>)*;
+	AndExpression<EnabledWith> ->({BinaryOperation.left=current} op=OpOr right=AndExpression<EnabledWith>)*;
 
 OpOr:
 	'or' | '||';
 
 AndExpression<EnabledWith> returns Expression:
-	EqualityExpression<EnabledWith> ({BinaryOperation.left=current} op=OpAnd right=EqualityExpression<EnabledWith>)*;
+	EqualityExpression<EnabledWith> ->({BinaryOperation.left=current} op=OpAnd right=EqualityExpression<EnabledWith>)*;
 
 OpAnd:
 	'and' | '&&';
 
 EqualityExpression<EnabledWith> returns Expression:
-	RelationalExpression<EnabledWith> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<EnabledWith>)*;
+	RelationalExpression<EnabledWith> ->({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<EnabledWith>)*;
 
 InfixOperator :
 	'==' 
@@ -316,33 +318,34 @@ OpCompare:
 	'>=' | '<=' | '>' | '<';
 
 Addition<EnabledWith> returns Expression:
-	Multiplication<EnabledWith> ({BinaryOperation.left=current} op=AddOp right=Multiplication<EnabledWith>)*;
+	Multiplication<EnabledWith> ->({BinaryOperation.left=current} op=AddOp right=Multiplication<EnabledWith>)*;
 
 AddOp:
 	'+' | '-'
 ;
 
 Multiplication<EnabledWith> returns Expression:
-	Power<EnabledWith> ({BinaryOperation.left=current} op=MultiOp right=Power<EnabledWith>)*;
+	Power<EnabledWith> ->({BinaryOperation.left=current} op=MultiOp right=Power<EnabledWith>)*;
 	
 MultiOp :
 	'*'|'/'|'%'
 ;
 
 Power<EnabledWith> returns Expression:
-	PropOfSubject<EnabledWith> ({BinaryOperation.left=current} op='^' right=PropOfSubject<EnabledWith>)*;
+	PropOfSubject<EnabledWith> ->({BinaryOperation.left=current} op='^' right=PropOfSubject<EnabledWith>)*;
 
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject<EnabledWith> returns Expression: // (17)
-	PrimaryExpression ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
-					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression)+)?
-|   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PropOfSubject<EnabledWith> // this can be applied to other unitary operations
+	PrimaryExpression<EnabledWith> ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
+					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression<EnabledWith>)+)?
+|   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PropOfSubject<EnabledWith> // this can be applied to other unary operations
 |   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith>;
 
 // primary expressions are the atom units of expression in the grammar	
-PrimaryExpression returns Expression: // (20)
-	'(' Expression ')' 
+PrimaryExpression<EnabledWith> returns Expression: // (20)
+	'(' ExpressionParameterized<EnabledWith> ')' 
 	| {Declaration} article=AnArticle type=SadlResource ->(newName=DNAME)?
+	| {Sublist} AnArticle? 'sublist' 'of' list=ExpressionParameterized<EnabledWith> 'matching' where=ExpressionParameterized<EnabledWith>
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 
@@ -381,13 +384,7 @@ DNAME:
 	ID;
 
 AnyNumber returns ecore::EBigDecimal :
-	DecimalNumber EXPONENT?;
-
-DecimalNumber returns ecore::EBigDecimal :
-	NUMBER ;
-
-EXPONENT returns ecore::EBigDecimal:
-	('e' | 'E') ('-' | '+')? DecimalNumber;
+	NUMBER;
 
 EOS:
 	'.';
@@ -396,6 +393,8 @@ QNAME :
 	QNAME_TERMINAL | ID
 ;
 	
+// terminal rules are just dummy implementations, as we use a jflex based lexer.
+// see SADL.flex
 terminal NUMBER returns ecore::EInt :
 	'0'..'9'+;
 
