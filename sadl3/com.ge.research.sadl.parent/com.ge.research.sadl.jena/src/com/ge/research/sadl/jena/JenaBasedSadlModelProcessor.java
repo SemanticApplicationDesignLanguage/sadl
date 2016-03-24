@@ -20,15 +20,12 @@ package com.ge.research.sadl.jena;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -39,10 +36,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.URIConverter;
-import org.eclipse.emf.ecore.resource.URIHandler;
 import org.eclipse.xtext.builder.EclipseResourceFileSystemAccess2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -246,7 +240,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 			logger.debug("Base SADL URI is: " + baseuri); 
 
-//			// Output the OWL file for the ontology model
+			// Output the OWL file for the ontology model
 			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
 			String owlFN = lastSeg.trimFileExtension().appendFileExtension("owl").lastSegment().toString();
 			String format = "RDF/XML-ABBREV";
@@ -284,63 +278,58 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 
 			// Output the Rules and any other knowledge structures via the specified translator
-			List<ModelError> results = translateAndSaveModel(resource, owlFN, _repoType);
-			if (results != null) {
-				modelErrorsToOutput(resource, results);
+			URI prjuri = ResourceManager.getProjectUri(resource);
+			URI mdlfldruri = prjuri.appendSegment(ResourceManager.OWLDIR);
+			try {
+				String modelFolderPathname;
+				if (mdlfldruri.isPlatform()) {
+					if (mdlfldruri.isFile()) {
+						modelFolderPathname = mdlfldruri.toFileString();
+					}
+					else {
+					    String platformString = mdlfldruri.toPlatformString(true);
+					    IPath myFile = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+					    modelFolderPathname = myFile.append(platformString).toOSString();
+					}
+				}
+				else {
+					modelFolderPathname = new SadlUtils().fileUrlToFileName(mdlfldruri.toString());				
+				}
+				IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
+				ITranslator translator = configMgr.getTranslator();
+				List<ModelError> results = translator
+						.translateAndSaveModel(getTheJenaModel(), rules,
+								modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), 
+								owlFN);
+				if (results != null) {
+					modelErrorsToOutput(resource, results);
+				}
+				else if (getOtherKnowledgeStructure() != null) {
+					results = translator.translateAndSaveModelWithOtherStructure(getTheJenaModel(), getOtherKnowledgeStructure(), 
+							modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), owlFN);
+					if (results != null) {
+						modelErrorsToOutput(resource, results);
+					}
+				}
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (com.ge.research.sadl.reasoner.ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			
+			
 		}
-	}
-	
-	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType) {
-		String modelFolderPathname = getModelFolderPath(resource);
-		try {
-			IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
-			ITranslator translator = configMgr.getTranslator();
-			List<ModelError> results = translator
-					.translateAndSaveModel(getTheJenaModel(), rules,
-							modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), 
-							owlFN);
-			if (results != null) {
-				modelErrorsToOutput(resource, results);
-			}
-			else if (getOtherKnowledgeStructure() != null) {
-				results = translator.translateAndSaveModelWithOtherStructure(getTheJenaModel(), getOtherKnowledgeStructure(), 
-						modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), owlFN);
-				return results;
-			}
-		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (com.ge.research.sadl.reasoner.ConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TranslationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-		return null;
-	}
-	
-	private String getModelFolderPath(Resource resource) {
-		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
-		v = v.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
-		String modelFolderPathname;
-		if (v.isPlatform()) {
-			 IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(v.toPlatformString(true)));
-			 modelFolderPathname = file.getRawLocation().toPortableString();
-		}
-		else {
-			modelFolderPathname = v.toFileString();
-		}
-		return modelFolderPathname;
 	}
 	
 	private String getDefaultPolicyFileContent() {
@@ -372,7 +361,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return null;
 	}
-	
 	private void modelErrorsToOutput(Resource resource, List<ModelError> errors) {
 		for (int i = 0; errors != null && i < errors.size(); i++) {
 			ModelError err = errors.get(i);
@@ -397,7 +385,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		
 	}
-	
 	@Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
 		setIssueAcceptor(issueAcceptor);
@@ -499,7 +486,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				    	logger.debug("Imported ontology resource '" + importUri + "' created.");
 				    	modelOntology.addImport(importedOntology);
 				    	addOrderedImport(importUri);
-				    	getTheJenaModel().loadImports();
 			    	}
 		    	}
 			}
@@ -1309,7 +1295,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return qn;
 	}
 	public Object 	processExpression(NumberLiteral expr) {
-		Object lit = translate(expr);
+		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
+		com.ge.research.sadl.model.gp.Literal lit = new com.ge.research.sadl.model.gp.Literal();
+		lit.setValue(translate(expr));
 		return lit;
 	}
 	
@@ -2052,7 +2040,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
 			ObjectProperty oprop = getTheJenaModel().getObjectProperty(propuri);
 			if (oprop == null) {
-				addError("Property '" + propuri + "' does not exist in the Jena model", prop);
+				addError("Property '" + propuri + "' does not exist", prop);
 			}
 			else {
 				if (val instanceof SadlInstance) {
@@ -2078,8 +2066,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (type.equals(OntConceptType.DATATYPE_PROPERTY)) {
 			DatatypeProperty dprop = getTheJenaModel().getDatatypeProperty(propuri);
 			if (dprop == null) {
-//				dumpModel(getTheJenaModel());
-				addError("Property '" + propuri + "' does not exist in the Jena model", prop);
+				addError("Property '" + propuri + "' does not exist", prop);
 			}
 			else {
 				if (val instanceof SadlExplicitValue) {
@@ -2092,44 +2079,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 		}
-		else if (type.equals(OntConceptType.ANNOTATION_PROPERTY)) {
-			AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(propuri);
-			if (annprop == null) {
-				addError("Annotation property '" + propuri + "' not found in Jena model", prop);
-			}
-			else {
-				RDFNode rsrcval;
-				if (val instanceof SadlResource) {
-					String uri = declarationExtensions.getConceptUri((SadlResource) val);
-					 rsrcval = getTheJenaModel().getResource(uri);
-				}
-				else if (val instanceof SadlInstance) {
-					rsrcval = processSadlInstance((SadlInstance) val);
-				}
-				else if (val instanceof SadlExplicitValue) {
-					rsrcval = sadlExplicitValueToLiteral((SadlExplicitValue)val, null);
-				}
-				else {
-					throw new JenaProcessorException("unable to handle annotation value of type '" + val.getClass().getCanonicalName() + "')");
-				}
-				inst.addProperty(annprop, rsrcval);
-			}
-		}
 		else {
 			throw new JenaProcessorException("unhandled property type");
 		}
 	}
 
-	private void dumpModel(OntModel m) {
-		System.out.println("Dumping OntModel");
-		PrintStream strm = System.out;
-		m.write(strm);
-		ExtendedIterator<OntModel> itr = m.listSubModels();
-		while (itr.hasNext()) {
-			dumpModel(itr.next());
-		}
-	}
-	
 	private SadlResource sadlResourceFromSadlInstance(SadlInstance element) throws JenaProcessorException {
 		SadlResource sr = element.getNameOrRef();
 		if (sr == null) {

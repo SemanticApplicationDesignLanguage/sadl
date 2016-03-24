@@ -134,68 +134,63 @@ public class ReasonerConfigurationDialog extends Dialog {
             		rcps = new PreferenceStore();
             	}
             	FieldEditor editor;
-            	if (config != null) {
-	            	for (Map.Entry<String, ConfigurationOption> entry : config.entrySet()) {
-	        		    String key = entry.getKey();
-	        		    ConfigurationOption option = entry.getValue();
-	        		    if (key.equalsIgnoreCase("builtin")) {
-	        		    	continue;
-	        		    }
-	        		    String optionDescription = option.getDescription();
-	        		    Object currentValue = currentConfig.get(key);
-	        		    Object optionValue = option.getValue();
-	        		    if (currentValue != null) {
-	        		    	optionValue = currentValue;
-	        		    }
-	        		    logger.debug(key+" class = "+optionValue.getClass().getName());
-	        		    Object[] optionPossibleValues = option.getPossibleValues();
-	        		    if (optionPossibleValues != null && optionPossibleValues.length > 0) {
-	        		    	// Option has a list of values so create a dropdown box
-	        		    	String[][] nv = new String[optionPossibleValues.length][2];
-	        		    	for (int i=0; i<optionPossibleValues.length; i++) {
-	        		    		nv[i][0] = optionPossibleValues[i].toString();
-	        		    		nv[i][1] = optionPossibleValues[i].toString();
-	        		    	}
-	        		    	editor = new ComboFieldEditor(key, optionDescription, nv, getFieldEditorParent());
-	        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
-	        		    	editor.setPreferenceStore(rcps);
-	        		    	addField(editor);
-	        		    	editor.load();
-	        		    	editors.add(editor);
-	        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
-	        		    	editor = new StringFieldEditor(key, optionDescription, getFieldEditorParent());
-	        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
-	        		    	editor.setPreferenceStore(rcps);
-	        		    	addField(editor);
-	        		    	editor.load();        		    	
-	        		    	editors.add(editor);
-	        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.Boolean")) {
-	        		    	editor = new BooleanFieldEditor(key, optionDescription, BooleanFieldEditor.SEPARATE_LABEL, getFieldEditorParent());
-	        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
-	        		    	editor.setPreferenceStore(rcps);
-	        		    	addField(editor);
-	        		    	editor.load();        		    	
-	        		    	editors.add(editor);
-	        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.Integer")) {
-	        		    	editor = new IntegerFieldEditor(key, optionDescription, getFieldEditorParent());
-	        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
-	        		    	editor.setPreferenceStore(rcps);
-	        		    	addField(editor);
-	        		    	editor.setPage(page);
-	        		    	editor.load();        		    	
-	        		    	editors.add(editor);
-	        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.Double")) {
-	        		    	editor = new DoubleFieldEditor(key, optionDescription, getFieldEditorParent());
-	        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
-	        		    	editor.setPreferenceStore(rcps);
-	        		    	addField(editor);
-	        		    	editor.load();        		    	
-	        		    	editors.add(editor);
-	        		    }
-	            	}
-            	}
-            	else {
-            		logger.info("No configuration options available");
+            	for (Map.Entry<String, ConfigurationOption> entry : config.entrySet()) {
+        		    String key = entry.getKey();
+        		    ConfigurationOption option = entry.getValue();
+        		    if (key.equalsIgnoreCase("builtin")) {
+        		    	continue;
+        		    }
+        		    String optionDescription = option.getDescription();
+        		    Object currentValue = currentConfig.get(key);
+        		    Object optionValue = option.getValue();
+        		    if (currentValue != null) {
+        		    	optionValue = currentValue;
+        		    }
+        		    logger.debug(key+" class = "+optionValue.getClass().getName());
+        		    Object[] optionPossibleValues = option.getPossibleValues();
+        		    if (optionPossibleValues != null && optionPossibleValues.length > 0) {
+        		    	// Option has a list of values so create a dropdown box
+        		    	String[][] nv = new String[optionPossibleValues.length][2];
+        		    	for (int i=0; i<optionPossibleValues.length; i++) {
+        		    		nv[i][0] = optionPossibleValues[i].toString();
+        		    		nv[i][1] = optionPossibleValues[i].toString();
+        		    	}
+        		    	editor = new ComboFieldEditor(key, optionDescription, nv, getFieldEditorParent());
+        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
+        		    	editor.setPreferenceStore(rcps);
+        		    	addField(editor);
+        		    	editor.load();
+        		    	editors.add(editor);
+        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
+        		    	editor = new StringFieldEditor(key, optionDescription, getFieldEditorParent());
+        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
+        		    	editor.setPreferenceStore(rcps);
+        		    	addField(editor);
+        		    	editor.load();        		    	
+        		    	editors.add(editor);
+        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.Boolean")) {
+        		    	editor = new BooleanFieldEditor(key, optionDescription, BooleanFieldEditor.SEPARATE_LABEL, getFieldEditorParent());
+        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
+        		    	editor.setPreferenceStore(rcps);
+        		    	addField(editor);
+        		    	editor.load();        		    	
+        		    	editors.add(editor);
+        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.Integer")) {
+        		    	editor = new IntegerFieldEditor(key, optionDescription, getFieldEditorParent());
+        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
+        		    	editor.setPreferenceStore(rcps);
+        		    	addField(editor);
+        		    	editor.setPage(page);
+        		    	editor.load();        		    	
+        		    	editors.add(editor);
+        		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.Double")) {
+        		    	editor = new DoubleFieldEditor(key, optionDescription, getFieldEditorParent());
+        		    	rcps.setValue(editor.getPreferenceName(), optionValue.toString());
+        		    	editor.setPreferenceStore(rcps);
+        		    	addField(editor);
+        		    	editor.load();        		    	
+        		    	editors.add(editor);
+        		    }
             	}
             }
             
@@ -256,42 +251,37 @@ public class ReasonerConfigurationDialog extends Dialog {
 		nOptions = 0;
 		int maxDescL = -1;
 		int maxOptsL = 20;
-		if (config != null) {
-			for (Map.Entry<String, ConfigurationOption> entry : config.entrySet()) {
-			    String key = entry.getKey();
-			    ConfigurationOption option = entry.getValue();
-			    if (key.equalsIgnoreCase("builtin")) {
-			    	continue;
-			    }
-			    nOptions++;
-			    // String optionName = option.getName();
-			    String optionDescription = option.getDescription();
-			    if (optionDescription.length() > maxDescL) {
-			    	maxDescL = optionDescription.length();
-			    }
-			    // String[] optionHierarchy = option.getCategoryHierarchy();
-			    Object optionValue = option.getValue();
-			    if (optionValue.toString().length() > maxOptsL) {
-			    	maxOptsL = optionValue.toString().length();
-			    }
-			    Object[] optionPossibleValues = option.getPossibleValues();
-			    if (optionPossibleValues != null && optionPossibleValues.length > 0) {
-			    	for (int i=0; i<optionPossibleValues.length; i++) {
-			    		if (optionPossibleValues[i].toString().length() > maxOptsL) {
-			    			maxOptsL = optionPossibleValues[i].toString().length();
-			    		}
-			    	}
-			    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
-			    	int size = Math.max(optionValue.toString().length(), 40);
-			    	if (size > maxOptsL) {
-			    		maxOptsL = size;
-			    	}
-			    }
-			    // logger.debug("maxDescL = "+maxDescL+"   maxOptsL = "+maxOptsL);
-			}
-		}
-		else {
-			logger.info("No reasoner configurations available.");
+		for (Map.Entry<String, ConfigurationOption> entry : config.entrySet()) {
+		    String key = entry.getKey();
+		    ConfigurationOption option = entry.getValue();
+		    if (key.equalsIgnoreCase("builtin")) {
+		    	continue;
+		    }
+		    nOptions++;
+		    // String optionName = option.getName();
+		    String optionDescription = option.getDescription();
+		    if (optionDescription.length() > maxDescL) {
+		    	maxDescL = optionDescription.length();
+		    }
+		    // String[] optionHierarchy = option.getCategoryHierarchy();
+		    Object optionValue = option.getValue();
+		    if (optionValue.toString().length() > maxOptsL) {
+		    	maxOptsL = optionValue.toString().length();
+		    }
+		    Object[] optionPossibleValues = option.getPossibleValues();
+		    if (optionPossibleValues != null && optionPossibleValues.length > 0) {
+		    	for (int i=0; i<optionPossibleValues.length; i++) {
+		    		if (optionPossibleValues[i].toString().length() > maxOptsL) {
+		    			maxOptsL = optionPossibleValues[i].toString().length();
+		    		}
+		    	}
+		    } else if (optionValue.getClass().getName().equalsIgnoreCase("java.lang.String")) {
+		    	int size = Math.max(optionValue.toString().length(), 40);
+		    	if (size > maxOptsL) {
+		    		maxOptsL = size;
+		    	}
+		    }
+		    // logger.debug("maxDescL = "+maxDescL+"   maxOptsL = "+maxOptsL);
 		}
 	    width = maxDescL + 5 + maxOptsL + 15;
 	    logger.debug("maxDescL = "+maxDescL+"   maxOptsL = "+maxOptsL+"   width = "+width);

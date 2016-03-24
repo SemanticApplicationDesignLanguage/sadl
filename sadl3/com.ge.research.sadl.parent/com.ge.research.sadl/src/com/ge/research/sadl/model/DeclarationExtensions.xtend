@@ -122,7 +122,7 @@ class DeclarationExtensions {
 	
 	def OntConceptType getOntConceptType(SadlResource resource) {
 		var cnm = getConcreteName(resource)
-		if(cnm == null) System.err.println("Resource could not provide a concrete name");
+		if(cnm == null) System.out.println("Resource could not provide a concrete name");
 		
 		if (resource instanceof Name) {
 			return OntConceptType.VARIABLE

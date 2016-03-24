@@ -358,10 +358,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 				Map<String, ConfigurationOption> config = r.getReasonerConfigurationOptions();
 				// addTestingOptions(config);
 				ReasonerConfigurationDialog dialog = new ReasonerConfigurationDialog(
-							getShell(), rc, config, configurationManager);
-				if (config == null) {
-					// display appropriate message?
-				}
+						getShell(), rc, config, configurationManager);
 				int dialogReturnButton = dialog.open();
 			}
 		});
