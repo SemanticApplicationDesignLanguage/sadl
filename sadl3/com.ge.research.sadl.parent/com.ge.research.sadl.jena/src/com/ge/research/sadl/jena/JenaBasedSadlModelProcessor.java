@@ -101,6 +101,7 @@ import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PrintStatement;
 import com.ge.research.sadl.sADL.PropOfSubject;
+import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.sADL.ReadStatement;
 import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SADLPackage;
@@ -144,6 +145,7 @@ import com.ge.research.sadl.sADL.SadlValueList;
 import com.ge.research.sadl.sADL.StartWriteStatement;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -573,6 +575,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else if (element instanceof ExplainStatement) {
 						processStatement((ExplainStatement)element);
 					}
+					else if (element instanceof QueryStatement) {
+						processStatement((QueryStatement)element);
+					}
+					else if (element instanceof SadlResource) {
+						processStatement((SadlResource)element);
+					}
+					else if (element instanceof TestStatement) {
+						processStatement((TestStatement)element);
+					}
 					else {
 						throw new JenaProcessorException("onValidate for element of type '" + element.getClass().getCanonicalName() + "' not implemented");
 					}
@@ -601,7 +612,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
 	}
 	
+	private void processStatement(SadlResource element) throws TranslationException {
+		Object srobj = processExpression(element);
+		int i = 0;
+	}
+	
 	private void processStatement(StartWriteStatement element) throws JenaProcessorException {
+		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
+	}
+	
+	private void processStatement(TestStatement element) {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
 	}
 	
@@ -613,6 +633,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
 	}
 	
+	private void processStatement(QueryStatement element) throws JenaProcessorException {
+		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
+	}
+
 	private void processStatement(EquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
@@ -2506,6 +2530,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		OntConceptType propType = declarationExtensions.getOntConceptType(sr);
 		OntProperty prop = getTheJenaModel().getOntProperty(propUri);
+		if (prop == null) {
+			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+				prop = getTheJenaModel().createObjectProperty(propUri);
+			}
+			else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+				prop = getTheJenaModel().createDatatypeProperty(propUri);
+			}
+			else if (propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+				prop = getTheJenaModel().createAnnotationProperty(propUri);
+			}
+			else {
+				prop = getTheJenaModel().createOntProperty(propUri);
+			}
+		}
 		Iterator<SadlCondition> conditer = ((SadlPropertyCondition)sadlPropCond).getCond().iterator();
 		while (conditer.hasNext()) {
 			SadlCondition cond = conditer.next();

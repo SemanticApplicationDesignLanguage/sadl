@@ -119,7 +119,7 @@ public class UtilsForJena {
     public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, OntProperty prop, Object v) throws JenaProcessorException {
         Literal val = null;
         String errMsg = null;
-        if (prop.isAnnotationProperty()) {
+        if (prop == null || prop.isAnnotationProperty()) {
         	return m.createTypedLiteral(v);
         }
         // SADL only has DoubleLiterals--if this property has range float convert v to Float.
@@ -230,12 +230,17 @@ public class UtilsForJena {
 	        }
 	        else if (rnguri.contains("int")) {
 	        	if (v instanceof String) {
-	       			v = Integer.parseInt(stripQuotes((String)v));
+	        		if (((String)v).trim().contains(".")) {
+	        			errMsg = "Value '" + v.toString() + "' doesn't match range int";
+	        		}
+	        		else {
+	        			v = Integer.parseInt(stripQuotes((String)v));
+	        		}
 	         	}
 	            if (v instanceof Integer) {
 	                val = m.createTypedLiteral(v);
 	            }
-	            else {
+	            else if (errMsg == null) {
 	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range int";
 	            }
 	        }
