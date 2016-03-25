@@ -42,7 +42,9 @@ import org.eclipse.xtext.xtext.generator.parser.antlr.KeywordHelper
 
 import static extension org.eclipse.xtext.GrammarUtil.*
 import static extension org.eclipse.xtext.xtext.generator.model.TypeReference.*
+import org.eclipse.xtext.parser.antlr.LexerProvider
 import org.eclipse.xtext.parser.antlr.Lexer
+import com.google.inject.name.Names
 
 class JFlexFragment extends AbstractXtextGeneratorFragment {
 	
@@ -87,8 +89,8 @@ class JFlexFragment extends AbstractXtextGeneratorFragment {
 		val customIDELexer = fileAccessFactory.createJavaFile(customIdeLexerName, generateCustomLexer(customIdeLexerName, contentAssistNaming.getLexerClass(language.grammar)))
 		customIDELexer.writeTo(projectConfig.genericIde.srcGen)
 		val ideBindings = new GuiceModuleAccess.BindingFactory()
-			.addConfiguredBinding('ideLexer', '''
-			binder.bind(«contentAssistNaming.getLexerClass(language.grammar)».class).to(«customIdeLexerName».class);
+			.addConfiguredBinding('ContentAssistLexerProvider', '''
+			binder.bind(«contentAssistNaming.getLexerClass(language.grammar)».class).toProvider(«LexerProvider.typeRef».create(«customIdeLexerName».class));
 		''')
 		ideBindings.contributeTo(language.eclipsePluginGenModule)
 	}
@@ -120,6 +122,14 @@ class JFlexFragment extends AbstractXtextGeneratorFragment {
 		public class «decl.simpleName» extends «superType» {
 			«flexerClassName» delegate = new «flexerClassName»((«Reader.typeRef»)null);
 			
+			public «decl.simpleName»(«CharStream.typeRef» stream) {
+				super(stream);
+			}			
+			
+			public «decl.simpleName»() {
+				super();
+			}
+						
 			@Override
 			public void mTokens() throws «RecognitionException.typeRef» {
 				throw new UnsupportedOperationException();
@@ -248,7 +258,6 @@ class JFlexFragment extends AbstractXtextGeneratorFragment {
 		
 		«IF rules !== null»
 			«rules»
-			<YYINITIAL> {COMMENT_ERROR_PATTERN} { return 0; /* antlr <invalid> */ }
 		«ENDIF»
 		
 		«FOR tr : language.grammar.allTerminalRules»
