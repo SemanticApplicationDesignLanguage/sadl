@@ -621,7 +621,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
 	}
 	
-	private void processStatement(TestStatement element) {
+	private void processStatement(TestStatement element) throws JenaProcessorException {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implmeneted");		
 	}
 	
