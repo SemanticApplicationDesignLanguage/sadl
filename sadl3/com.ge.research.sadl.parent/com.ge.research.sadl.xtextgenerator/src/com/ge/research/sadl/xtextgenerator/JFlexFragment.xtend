@@ -89,6 +89,8 @@ class JFlexFragment extends AbstractXtextGeneratorFragment {
 		val ideBindings = new GuiceModuleAccess.BindingFactory()
 			.addConfiguredBinding('ideLexer', '''
 			binder.bind(«contentAssistNaming.getLexerClass(language.grammar)».class).to(«customIdeLexerName».class);
+		''').addConfiguredBinding('ContentAssistLexerProvider', '''
+			// disabled contribution from XtextAntlrGeneratorFragment2
 		''')
 		ideBindings.contributeTo(language.eclipsePluginGenModule)
 	}
@@ -248,7 +250,6 @@ class JFlexFragment extends AbstractXtextGeneratorFragment {
 		
 		«IF rules !== null»
 			«rules»
-			<YYINITIAL> {COMMENT_ERROR_PATTERN} { return 0; /* antlr <invalid> */ }
 		«ENDIF»
 		
 		«FOR tr : language.grammar.allTerminalRules»
