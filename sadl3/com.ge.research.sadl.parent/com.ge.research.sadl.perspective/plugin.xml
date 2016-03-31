@@ -51,9 +51,10 @@
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               label="ASSERT"
-               mnemonic="M"
-               id="Test.menus.sadlMenu">
+               icon="icons/releng_gears.gif"
+               id="sadl.menus.sadlMenu"
+               label="SADL"
+               mnemonic="M">
                
              <visibleWhen checkEnabled="false">
   				<with variable="activeWorkbenchWindow.activePerspective">
@@ -61,30 +62,15 @@
     			</with>
 			</visibleWhen>
              <command
-                   commandId="referenceToMenuId4"
-                   icon="icons/RC_Icon_Resize.png"
-                   tooltip="Generate ACL2s Input Files">
+                   commandId="SADL.RunInference"
+                   icon="icons/releng_gears.gif"
+                   tooltip="Run Inference">
              </command>
              <command
-                   commandId="referenceToMenuId5"
-                   icon="icons/RC_Icon_Resize.png"
-                   tooltip="Generate Simulink Input Files">
+                   commandId="SADL.RunQuery"
+                   icon="icons/releng_gears.gif"
+                   tooltip="Run Query">
              </command>
-            <command
-                  commandId="Test.commands.ACL2sAnalysisCommand"
-                  icon="icons/RA_Icon_Resize.png"
-                  tooltip="Start Requirements Analysis">
-            </command>   
-            <command
-                  commandId="Test.commands.AnalysisResultsCommand"
-                  icon="icons/RA_Icon_Magnify_Mock.png"
-                  tooltip="View Requirements Analysis">
-            </command>
-            <command
-                  commandId="Test.commands.RunATG"
-                  icon="icons/ATCG_Icon_Resize.png"
-                  tooltip="Run ATG">
-            </command>
          </menu>
          
       </menuContribution>
@@ -92,10 +78,10 @@
             allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
-               id="toolbar">
+               id="sadl.toolbar">
             <command
                   commandId="referenceToMenuId"
-                  icon="icons/ASSERT_Icon_.ico"
+                  icon="icons/releng_gears.gif"
                   style="pulldown">
             </command>
             <visibleWhen
@@ -110,33 +96,15 @@
             allPopups="false"
             locationURI="menu:referenceToMenuId">
          <command
-               commandId="referenceToMenuId4"
-               icon="icons/RC_Icon_Resize.png"
-               label="Generate ACL2s Input Files"
+               commandId="SADL.RunInference"
+               icon="icons/releng_gears.gif"
+               label="Run Inference"
                style="push">
          </command>
          <command
-               commandId="referenceToMenuId5"
-               icon="icons/RC_Icon_Resize.png"
-               label="Generate Simulink Input Files"
-               style="push">
-         </command>
-         <command
-               commandId="referenceToMenuId"
-               icon="icons/RA_Icon_Resize.png"
-               label="Perform Analysis"
-               style="push">
-         </command>
-         <command
-               commandId="referenceToMenuId2"
-               icon="icons/RA_Icon_Magnify_Mock.png"
-               label="View Analysis Results"
-               style="push">
-         </command>
-         <command
-               commandId="referenceToMenuId3"
-               icon="icons/ATCG_Icon_Resize.png"
-               label="Run ATG"
+               commandId="SADL.RunQuery"
+               icon="icons/releng_gears.gif"
+               label="Run Query"
                style="push">
          </command>
       </menuContribution>
@@ -179,7 +147,7 @@
             category="test.wizards.SADL"
             class="wizards.SADL_Project"
             finalPerspective="test.perspectives.SADL"
-            icon="icons/RC_Icon_Resize.png"
+            icon="icons/06-link.png"
             id="test.wizards.SadlProject"
             name="SADL Project"
             project="true">
@@ -188,7 +156,7 @@
             category="test.wizards.SADL"
             class="wizards.SADL_File"
             finalPerspective="test.perspectives.SADL"
-            icon="icons/RC_Icon_Resize.png"
+            icon="icons/releng_gears.gif"
             id="test.wizards.SADL_File"
             name="SADL Ontology File"
             project="false">
@@ -199,7 +167,7 @@
       <perspective
             class="com.ge.research.sadl.perspective.perspectives.SADL"
             icon="icons/06-link.png"
-            id="test.perspectives.SADL"
+            id="sadl.perspectives.SADL"
             name="SADL">
       </perspective>
    </extension>
