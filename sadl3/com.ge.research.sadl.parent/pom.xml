@@ -28,6 +28,7 @@
 		<module>com.ge.research.sadl.jena</module>
 		<module>com.ge.research.sadl.jena-wrapper-for-sadl</module>
 		<module>com.ge.research.sadl.feature</module>
+		<module>com.ge.research.sadl.perspective</module>
 		<module>com.ge.research.sadl.update</module>
 	</modules>
 	<build>
