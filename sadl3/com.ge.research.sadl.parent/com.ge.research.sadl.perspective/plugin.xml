@@ -58,7 +58,7 @@
                
              <visibleWhen checkEnabled="false">
   				<with variable="activeWorkbenchWindow.activePerspective">
-     	   			<equals value="test.perspectives.SADL"/>
+     	   			<equals value="sadl.perspectives.SADL"/>
     			</with>
 			</visibleWhen>
              <command
@@ -140,24 +140,24 @@
    <extension
          point="org.eclipse.ui.newWizards">
       <category
-            id="test.wizards.SADL"
+            id="sadl.wizards.SADL"
             name="SADL">
       </category>
       <wizard
-            category="test.wizards.SADL"
+            category="sadl.wizards.SADL"
             class="wizards.SADL_Project"
-            finalPerspective="test.perspectives.SADL"
+            finalPerspective="sadl.perspectives.SADL"
             icon="icons/06-link.png"
-            id="test.wizards.SadlProject"
+            id="sadl.wizards.SadlProject"
             name="SADL Project"
             project="true">
       </wizard>
       <wizard
-            category="test.wizards.SADL"
+            category="sadl.wizards.SADL"
             class="wizards.SADL_File"
-            finalPerspective="test.perspectives.SADL"
+            finalPerspective="sadl.perspectives.SADL"
             icon="icons/releng_gears.gif"
-            id="test.wizards.SADL_File"
+            id="sadl.wizards.SADL_File"
             name="SADL Ontology File"
             project="false">
       </wizard>
@@ -174,19 +174,19 @@
    <extension
          point="org.eclipse.ui.activities">
       <activity
-            id="Lean_Test.activity1"
+            id="sadl.activity1"
             name="Welcome">       
       </activity>
       <activityPatternBinding
-            activityId="Lean_Test.activity1"
+            activityId="sadl.activity1"
             pattern="org.eclipse.ui.help.quickStartAction">
       </activityPatternBinding>
       <activity
-            id="Lean_Test.activity2"
+            id="sadl.activity2"
             name="Java">
       </activity>
       <activityPatternBinding
-            activityId="Lean_Test.activity2"
+            activityId="sadl.activity2"
             pattern="org.eclipse.jdt.debug.ui ">
       </activityPatternBinding>
    </extension>
@@ -194,24 +194,24 @@
          point="org.eclipse.ui.navigator.navigatorContent">
       <commonWizard
             type="new"
-            wizardId="test.wizards.SadlProject">
+            wizardId="sadl.wizards.SadlProject">
          <enablement></enablement>
       </commonWizard>
       <commonWizard
             type="new"
-            wizardId="test.wizards.SADL_File">
+            wizardId="sadl.wizards.SADL_File">
          <enablement></enablement>
       </commonWizard>
       <commonWizard
             type="new"
-            wizardId="test.wizards.REQ_File">
+            wizardId="sadl.wizards.REQ_File">
          <enablement></enablement>
       </commonWizard>
    </extension>
    <extension
          point="org.eclipse.core.runtime.products">
       <product
-            application="Lean_Test.product"
+            application="sadl.product"
             name="preferenceDefaults">
          <property
                name="preferenceCustomization"
