@@ -17,16 +17,26 @@
             id="SADL.RunQuery"
             name="Run Query">
       </command>
+      <command
+            defaultHandler="com.ge.research.sadl.perspective.handlers.RunInference"
+            id="referenceToSadlMenuId"
+            name="Run Inference">
+      </command>
+      <command
+            defaultHandler="com.ge.research.sadl.perspective.handlers.RunQuery"
+            id="referenceToSadlMenuId2"
+            name="Run Query">
+      </command>
    </extension>
    
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            commandId="SADL.RunInference"
+            commandId="SADL.commands.RunInference"
             class="com.ge.research.sadl.perspective.handlers.RunInference">
       </handler>
       <handler
-            commandId="SADL.RunQuery"
+            commandId="SADL.commands.RunQuery"
             class="com.ge.research.sadl.perspective.handlers.RunQuery">
       </handler>
    </extension>
@@ -34,13 +44,13 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="SADL.RunInference"            
+            commandId="SADL.commands.RunInference"            
             contextId="org.eclipse.ui.contexts.window"
             sequence="M1+6"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
       </key>
       <key
-            commandId="SADL.RunQuery"            
+            commandId="SADL.commands.RunQuery"            
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+7">
@@ -62,12 +72,12 @@
     			</with>
 			</visibleWhen>
              <command
-                   commandId="SADL.RunInference"
+                   commandId="referenceToSadlMenuId"
                    icon="icons/releng_gears.gif"
                    tooltip="Run Inference">
              </command>
              <command
-                   commandId="SADL.RunQuery"
+                   commandId="referenceToSadlMenuId2"
                    icon="icons/releng_gears.gif"
                    tooltip="Run Query">
              </command>
@@ -80,29 +90,28 @@
          <toolbar
                id="sadl.toolbar">
             <command
-                  commandId="referenceToMenuId"
+                  commandId="referenceToSadlMenuId"
                   icon="icons/releng_gears.gif"
                   style="pulldown">
+              <visibleWhen checkEnabled="false">
+  				<with variable="activeWorkbenchWindow.activePerspective">
+     	   			<equals value="sadl.perspectives.SADL"/>
+    			</with>
+			  </visibleWhen>
             </command>
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-               </with>
-            </visibleWhen>
          </toolbar>
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:referenceToMenuId">
+            locationURI="menu:referenceToSadlMenuId">
          <command
-               commandId="SADL.RunInference"
+               commandId="referenceToSadlMenuId"
                icon="icons/releng_gears.gif"
                label="Run Inference"
                style="push">
          </command>
          <command
-               commandId="SADL.RunQuery"
+               commandId="referenceToSadlMenuId2"
                icon="icons/releng_gears.gif"
                label="Run Query"
                style="push">
