@@ -32,11 +32,11 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            commandId="SADL.commands.RunInference"
+            commandId="SADL.RunInference"
             class="com.ge.research.sadl.perspective.handlers.RunInference">
       </handler>
       <handler
-            commandId="SADL.commands.RunQuery"
+            commandId="SADL.RunQuery"
             class="com.ge.research.sadl.perspective.handlers.RunQuery">
       </handler>
    </extension>
@@ -44,13 +44,13 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="SADL.commands.RunInference"            
+            commandId="SADL.RunInference"            
             contextId="org.eclipse.ui.contexts.window"
             sequence="M1+6"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
       </key>
       <key
-            commandId="SADL.commands.RunQuery"            
+            commandId="SADL.RunQuery"            
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+7">

@@ -3,6 +3,7 @@ package com.ge.research.sadl.perspective.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -17,10 +18,15 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.xtext.preferences.*;
 
 import com.ge.research.sadl.perspective.util.Util;
+import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.ui.internal.SadlActivator;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 public class RunInference extends AbstractHandler {
+
+	@Inject SadlModelProcessorProvider processorProvider;
+	@Inject IPreferenceValuesProvider preferenceProvider;
 
 	public String projectLocation;
 	protected Process Process;
@@ -76,16 +82,28 @@ public class RunInference extends AbstractHandler {
 								.createPlatformResourceURI("/" + project.getName() + "/");
 						resource.setURI(uri);
 					}
+					else if (firstElement instanceof IFile) {
+						IPath loc = ((IFile)firstElement).getLocation();
+						if (loc.getFileExtension() != null) {
+							if (loc.getFileExtension().equals("sadl")) {
+								// run inference on this model
+								System.out.println("Inference of '" + loc.lastSegment() + "' requested.");
+							}
+							else if (loc.getFileExtension().equals("test")) {
+								// run test suite
+								System.out.println("Testing of suite '" + loc.lastSegment() + "' requested.");
+							}
+						}
+						return null;
+					}
 				}
 			}
 			
 			IPreferenceValues preferenceValues = pvp.getPreferenceValues(resource);
 			//TODO: FIX
-			//preferenceValues.getPreference(RequirementsPreference.P_PROLOG_FOLDER_PATH);
 			
 			if (project_loc == null) {
-				// ask the user which SADL project they want to select for
-				// analysis
+				// ask the user which SADL project they want to select 
 				IProject project = Util.selectSADLProject();
 				if (project == null) {
 					// method failed to give us a project, give up.
