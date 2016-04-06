@@ -17,6 +17,30 @@
       [Enter License Description here.]
    </license>
 
+   <includes
+         id="org.eclipse.xtext.redist"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.common"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.ecore"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.edit"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.edit.ui"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.common.ui"
+         version="0.0.0"/>
+
    <plugin
          id="com.ge.research.sadl"
          download-size="0"
@@ -61,6 +85,62 @@
 
    <plugin
          id="com.ge.research.sadl.jena-wrapper-for-sadl"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.ge.research.sadl.perspective"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.xtend.lib.macro"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.guava"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.inject"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.inject"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.xtext.junit4"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.xtext.builder.standalone"
          download-size="0"
          install-size="0"
          version="0.0.0"

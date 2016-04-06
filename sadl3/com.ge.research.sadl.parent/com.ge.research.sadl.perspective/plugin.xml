@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="SADL Category"
+            id="sadl.commands.category">
+      </category>
+      <command
+            name="Run Inference"
+            categoryId="sadl.commands.category"
+            id="SADL.RunInference">
+      </command>
+      <command
+            categoryId="sadl.commands.category"
+            id="SADL.RunQuery"
+            name="Run Query">
+      </command>
+      <command
+            defaultHandler="com.ge.research.sadl.perspective.handlers.RunInference"
+            id="referenceToSadlMenuId"
+            name="Run Inference">
+      </command>
+      <command
+            defaultHandler="com.ge.research.sadl.perspective.handlers.RunQuery"
+            id="referenceToSadlMenuId2"
+            name="Run Query">
+      </command>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="SADL.RunInference"
+            class="com.ge.research.sadl.perspective.handlers.RunInference">
+      </handler>
+      <handler
+            commandId="SADL.RunQuery"
+            class="com.ge.research.sadl.perspective.handlers.RunQuery">
+      </handler>
+   </extension>
+  
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="SADL.RunInference"            
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="SADL.RunQuery"            
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+7">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               icon="icons/releng_gears.gif"
+               id="sadl.menus.sadlMenu"
+               label="SADL"
+               mnemonic="M">
+               
+             <visibleWhen checkEnabled="false">
+  				<with variable="activeWorkbenchWindow.activePerspective">
+     	   			<equals value="sadl.perspectives.SADL"/>
+    			</with>
+			</visibleWhen>
+             <command
+                   commandId="referenceToSadlMenuId"
+                   icon="icons/releng_gears.gif"
+                   tooltip="Run Inference">
+             </command>
+             <command
+                   commandId="referenceToSadlMenuId2"
+                   icon="icons/releng_gears.gif"
+                   tooltip="Run Query">
+             </command>
+         </menu>
+         
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="sadl.toolbar">
+            <command
+                  commandId="referenceToSadlMenuId"
+                  icon="icons/releng_gears.gif"
+                  style="pulldown">
+              <visibleWhen checkEnabled="false">
+  				<with variable="activeWorkbenchWindow.activePerspective">
+     	   			<equals value="sadl.perspectives.SADL"/>
+    			</with>
+			  </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:referenceToSadlMenuId">
+         <command
+               commandId="referenceToSadlMenuId"
+               icon="icons/releng_gears.gif"
+               label="Run Inference"
+               style="push">
+         </command>
+         <command
+               commandId="referenceToSadlMenuId2"
+               icon="icons/releng_gears.gif"
+               label="Run Query"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewerActionBinding
+            viewerId="com.example.test">
+         <includes>
+            <actionExtension
+                  pattern="org.eclipse.ui.navigator.resources.*">
+            </actionExtension>
+         </includes>
+      </viewerActionBinding>
+      <viewerContentBinding
+            viewerId="com.example.test">
+         <includes>
+            <contentExtension
+                  pattern="org.eclipse.ui.navigator.resourceContent">
+            </contentExtension>
+            <contentExtension
+                  pattern="org.eclipse.ui.navigator.resources.filters.*">
+            </contentExtension>
+            <contentExtension
+                  pattern="org.eclipse.ui.navigator.resources.linkHelper">
+            </contentExtension>
+            <contentExtension
+                  pattern="org.eclipse.ui.navigator.resources.workingSets">
+            </contentExtension>
+         </includes>
+      </viewerContentBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="sadl.wizards.SADL"
+            name="SADL">
+      </category>
+      <wizard
+            category="sadl.wizards.SADL"
+            class="wizards.SADL_Project"
+            finalPerspective="sadl.perspectives.SADL"
+            icon="icons/06-link.png"
+            id="sadl.wizards.SadlProject"
+            name="SADL Project"
+            project="true">
+      </wizard>
+      <wizard
+            category="sadl.wizards.SADL"
+            class="wizards.SADL_File"
+            finalPerspective="sadl.perspectives.SADL"
+            icon="icons/releng_gears.gif"
+            id="sadl.wizards.SADL_File"
+            name="SADL Ontology File"
+            project="false">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.ge.research.sadl.perspective.perspectives.SADL"
+            icon="icons/06-link.png"
+            id="sadl.perspectives.SADL"
+            name="SADL">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.activities">
+      <activity
+            id="sadl.activity1"
+            name="Welcome">       
+      </activity>
+      <activityPatternBinding
+            activityId="sadl.activity1"
+            pattern="org.eclipse.ui.help.quickStartAction">
+      </activityPatternBinding>
+      <activity
+            id="sadl.activity2"
+            name="Java">
+      </activity>
+      <activityPatternBinding
+            activityId="sadl.activity2"
+            pattern="org.eclipse.jdt.debug.ui ">
+      </activityPatternBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <commonWizard
+            type="new"
+            wizardId="sadl.wizards.SadlProject">
+         <enablement></enablement>
+      </commonWizard>
+      <commonWizard
+            type="new"
+            wizardId="sadl.wizards.SADL_File">
+         <enablement></enablement>
+      </commonWizard>
+      <commonWizard
+            type="new"
+            wizardId="sadl.wizards.REQ_File">
+         <enablement></enablement>
+      </commonWizard>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="sadl.product"
+            name="preferenceDefaults">
+         <property
+               name="preferenceCustomization"
+               value="plugin_customization.ini">
+         </property>
+      </product>
+   </extension>
+</plugin>

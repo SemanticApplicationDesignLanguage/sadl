@@ -40,6 +40,7 @@ import org.eclipse.xtext.EcoreUtil2
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlIsAnnotation
 import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.SadlParameterDeclaration
 
 class DeclarationExtensions {
 	
@@ -158,6 +159,9 @@ class DeclarationExtensions {
 				
 			SadlProperty : 
 				OntConceptType.CLASS_PROPERTY
+				
+			SadlParameterDeclaration :
+				OntConceptType.VARIABLE				
 				
 			SadlInstance,
 			SadlCanOnlyBeOneOf,

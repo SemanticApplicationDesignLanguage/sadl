@@ -137,7 +137,7 @@
         name="com.ge.research.sadl.target"/>
     <setupTask
         xsi:type="launching:LaunchTask"
-        launcher="/com.ge.research.sadl.parent/com.ge.research.sadl.launch"/>
+        launcher="/com.ge.research.sadl.parent/SADL mvn clean install.launch"/>
   </stream>
   <logicalProjectContainer
       xsi:type="setup:ProjectCatalog"

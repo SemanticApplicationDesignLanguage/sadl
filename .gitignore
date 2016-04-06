@@ -1,7 +1,8 @@
 *._trace
-xtend-gen
-xtext-gen
-src-gen
-bin
-target
-classes
+xtend-gen/
+xtext-gen/
+src-gen/
+bin/
+target/
+classes/
+.DS_Store

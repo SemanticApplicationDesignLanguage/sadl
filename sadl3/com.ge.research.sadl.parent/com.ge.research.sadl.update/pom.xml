@@ -11,7 +11,7 @@
   <artifactId>com.ge.research.sadl.update</artifactId>
   <packaging>eclipse-repository</packaging>
 
-  <name>SADL 3</name>
+  <name>SADL 3 Update Site</name>
 
 	<build>
 		<plugins>

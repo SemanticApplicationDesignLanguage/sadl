@@ -9,7 +9,6 @@ Export-Package: com.ge.research.sadl.jena,
  com.ge.research.sadl.jena.inference
 Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
  org.eclipse.emf.ecore,
- org.eclipse.emf,
  com.ge.research.jena;bundle-version="3.0.0",
  org.eclipse.xtext;bundle-version="2.9.0",
  org.eclipse.equinox.common,
