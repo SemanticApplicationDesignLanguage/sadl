@@ -210,6 +210,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private OntDocumentManager jenaDocumentMgr;
 	private static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
 	
+	private JenaBasedSadlModelValidator modelValidator = null;
 	private ValidationAcceptor issueAcceptor = null;
 	private CancelIndicator cancelIndicator = null;
 
@@ -522,6 +523,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	    	theJenaModel.loadImports();
 		}
 		
+		// create validator for expressions
+		modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions);
+		
 		// process rest of parse tree
 		List<SadlModelElement> elements = model.getElements();
 		if (elements != null) {
@@ -768,6 +772,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		//Validate BinaryOperation expression
+		if(!modelValidator.validate(expr)){
+			issueAcceptor.addError("This expression contains a type conflict", expr);
+		}
+		
+		//Continue on with processing
 		String op = expr.getOp();
 		BuiltinType optype = BuiltinType.getType(op);
 		
