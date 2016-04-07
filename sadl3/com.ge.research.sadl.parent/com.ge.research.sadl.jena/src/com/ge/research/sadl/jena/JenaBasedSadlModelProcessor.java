@@ -125,6 +125,7 @@ import com.ge.research.sadl.sADL.SadlIsAnnotation;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
+import com.ge.research.sadl.sADL.SadlMustBeOneOf;
 import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient;
 import com.ge.research.sadl.sADL.SadlNumberLiteral;
 import com.ge.research.sadl.sADL.SadlParameterDeclaration;
@@ -1511,7 +1512,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
-	private List<OntResource> processSadlClassOrPropertyDeclaration(SadlClassOrPropertyDeclaration element) throws JenaProcessorException {
+	private List<OntResource> processSadlClassOrPropertyDeclaration(SadlClassOrPropertyDeclaration element) throws JenaProcessorException, TranslationException {
 		// Get the names of the declared concepts and store in a list
 		List<String> newNames = new ArrayList<String>();
 		EList<SadlResource> clses = element.getClassOrProperty();
@@ -1589,6 +1590,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			OntClass superCls = sadlTypeReferenceToOntResource(superElement).asClass();
 			if (superCls != null) {
 				rsrcList.add(createOntClass(newNames.get(0), superCls));
+			}
+		}
+		EList<SadlPropertyRestriction> restrictions = element.getRestrictions();
+		if (restrictions != null) {
+			Iterator<SadlPropertyRestriction> ritr = restrictions.iterator();
+			while (ritr.hasNext()) {
+				SadlPropertyRestriction rest = ritr.next();
+				if (rest instanceof SadlMustBeOneOf) {
+					EList<SadlExplicitValue> instances = ((SadlMustBeOneOf)rest).getValues();
+					if (instances != null) {
+						Iterator<SadlExplicitValue> iitr = instances.iterator();
+						while (iitr.hasNext()) {
+							SadlExplicitValue inst = iitr.next();
+							if (inst instanceof SadlResource) {
+								for (int i = 0; i < rsrcList.size(); i++) {
+									createIndividual((SadlResource)inst, rsrcList.get(i).asClass());
+								}
+							}
+							else {
+								throw new JenaProcessorException("Unhandled type of SadlExplicitValue: " + inst.getClass().getCanonicalName());
+							}
+						}
+					}
+				}
 			}
 		}
 		for (int i = 0; i < rsrcList.size(); i++) {
@@ -1712,6 +1737,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				SadlPropertyRestriction rest = itr.next();
 				if (rest instanceof SadlIsAnnotation) {
 					return createAnnotationProperty(propUri);
+				}
+				else {
+					throw new JenaProcessorException("Unhandled SadlPropertyRestriction type: " + rest.getClass().getCanonicalName());
 				}
 			}
 		}
@@ -2050,7 +2078,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				inst = createIndividual(instUri, cls);
 			}
 			else {
-				inst = createIndividual(null, cls);
+				inst = createIndividual((String)null, cls);
 			}
 		}
 		else if (instUri != null) {
@@ -2291,6 +2319,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			logger.debug("    Datatype property '" + newProp.getURI() + "' given super property '" + superSRUri + "'");
 		}
 		return newProp;
+	}
+	
+	private Individual createIndividual(SadlResource srsrc, OntClass type) throws JenaProcessorException, TranslationException {
+		Node n = processExpression(srsrc);
+		if (n == null) {
+			throw new JenaProcessorException("SadlResource failed to convert to Node");
+		}
+		return createIndividual(n.toFullyQualifiedString(), type);
 	}
 	
 	private Individual createIndividual(String newName, String superSRUri) {
