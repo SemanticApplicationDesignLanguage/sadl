@@ -18,18 +18,17 @@
 package com.ge.research.sadl
 
 import com.google.inject.Inject
+import org.eclipse.xtend.lib.annotations.Accessors
+import org.eclipse.xtext.AbstractRule
 import org.eclipse.xtext.conversion.ValueConverter
-import org.eclipse.xtext.conversion.ValueConverterException
 import org.eclipse.xtext.conversion.impl.AbstractDeclarativeValueConverterService
-import org.eclipse.xtext.conversion.impl.AbstractIDValueConverter
-import org.eclipse.xtext.conversion.impl.AbstractValueConverter
+import org.eclipse.xtext.conversion.impl.IDValueConverter
 import org.eclipse.xtext.conversion.impl.INTValueConverter
 import org.eclipse.xtext.conversion.impl.STRINGValueConverter
-import org.eclipse.xtext.nodemodel.INode
 
 class ValueConverterService extends AbstractDeclarativeValueConverterService {
 	
-	@Inject AbstractIDValueConverter idValueConverter
+	@Inject NameConverter idValueConverter
 
 	@ValueConverter(rule = "ID") def ID() {
 		idValueConverter
@@ -54,5 +53,15 @@ class ValueConverterService extends AbstractDeclarativeValueConverterService {
 	@ValueConverter(rule = "STRING") def STRING() {
 		stringValueConverter
 	}
-	
+
+
+	static class NameConverter extends IDValueConverter {
+		
+		@Accessors AbstractRule rule
+		
+		override protected getLexer() {
+			return null
+		}
+		
+	}	
 }
