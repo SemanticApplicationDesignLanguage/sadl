@@ -97,8 +97,18 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''
 			uri "http://sadl.org/equations".
 			
-			Equation foo(int [a], int [b]) returns int : <a> + <b>.
-			Equation bar(int [a], int [b]) returns int: <a> + <b>.
+			Equation [foo](int [a], int [b]) returns int : <a> + <b>.
+			Equation [bar](int [a], int [b]) returns int: <a> + <b>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingEquations_02() {
+		'''
+			uri "http://sadl.org/equations".
+			
+			Equation [foo](int [a], int [b]) returns int : <a> + <b>.
+			Equation [bar](int [a], int [b]) returns int: <foo>(<a>, <b>).
 		'''.assertLinking[sadl]
 	}
 	

@@ -26,9 +26,7 @@ package com.ge.research.sadl.ui.builder;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 
-import com.ge.research.sadl.builder.SadlModelManager;
-
-public class SadlUiModelManager extends SadlModelManager implements IPartListener2 {
+public class SadlUiModelManager implements IPartListener2 {
 	
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
