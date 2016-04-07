@@ -751,11 +751,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof SubjHasProp) {
 			return processExpression((SubjHasProp)expr);
 		}
-		else if (expr instanceof SadlResource) {
-			return processExpression((SadlResource)expr);
-		}
 		else if (expr instanceof Function) {
 			return processExpression((Function)expr);
+		}
+		else if (expr instanceof SadlResource) {
+			return processExpression((SadlResource)expr);
 		}
 		else if (expr instanceof Unit) {
 			return processExpression((Unit)expr);
@@ -1001,7 +1001,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private Object processExpression(Function expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		EList<Expression> arglist = expr.getArglist();
-		String funcname = expr.getCalled();
+		String funcname = processExpression(expr.getName()).toString();
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(funcname);
 		if (arglist != null && arglist.size() > 0) {
