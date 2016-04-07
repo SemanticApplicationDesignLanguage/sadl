@@ -17,7 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.imports
 
+import com.ge.research.sadl.jena.JenaBasedSadlImportProcessor
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
@@ -25,31 +27,27 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import com.hp.hpl.jena.ontology.OntModel
 import com.hp.hpl.jena.query.QueryExecutionFactory
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.util.ArrayList
 import java.util.List
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.Issue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.hp.hpl.jena.ontology.Ontology
-import com.hp.hpl.jena.vocabulary.RDF;
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.junit.Ignore
-import com.hp.hpl.jena.rdf.model.RDFNode
-import com.ge.research.sadl.jena.JenaBasedSadlImportProcessor
-import java.io.InputStream
-import java.io.IOException
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import com.ge.research.sadl.processing.ISadlModelProcessor.ProcessorContext
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import org.eclipse.xtext.validation.CheckMode
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -184,7 +182,7 @@ class SadlImportManagerProviderTest {
 		validationTestHelper.assertNoErrors(model)
 		val smprocessor = smProcessorProvider.get
 		val List<Issue> issues= newArrayList
-		smprocessor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+		smprocessor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(smprocessor.theJenaModel, issues)
 		return model.eResource
 	}
@@ -194,7 +192,7 @@ class SadlImportManagerProviderTest {
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = smProcessorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(processor.theJenaModel, issues)
 		return model.eResource
 	}

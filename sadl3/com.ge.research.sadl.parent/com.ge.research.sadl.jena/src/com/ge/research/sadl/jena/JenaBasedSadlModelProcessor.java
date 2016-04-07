@@ -43,6 +43,7 @@ import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.URIHandler;
+import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl.EObjectOutputStream.Check;
 import org.eclipse.xtext.builder.EclipseResourceFileSystemAccess2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -52,6 +53,8 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.util.CancelIndicator;
+import org.eclipse.xtext.validation.CheckMode;
+import org.eclipse.xtext.validation.CheckType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,7 +238,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		// save the model
 		if (getTheJenaModel() == null) {
 			// it always is?
-			onValidate(resource, null, context);
+			onValidate(resource, null, CheckMode.FAST_ONLY, context);
 		}
 		if (fsa !=null) {
 			IPreferenceValues testPrefs = context.getPreferenceValues();
@@ -402,7 +405,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	@Override
-	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
+	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
+		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
+			// do expensive validation, i.e. those that should only be done when 'validate' action was invoked. 
+		}
 		setIssueAcceptor(issueAcceptor);
 		setCancelIndicator(cancelIndicator);
 		if (resource.getContents().size() < 1) {

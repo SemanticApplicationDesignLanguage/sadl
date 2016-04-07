@@ -64,7 +64,7 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.google.inject.Inject;
 
 
-public abstract class SadlModelProcessor implements ISadlModelProcessor {
+public abstract class SadlModelProcessor implements IModelProcessor {
     private static final Logger logger = Logger.getLogger(SadlModelProcessor.class);
     protected Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
     private List<IFTranslationError> errors = null;

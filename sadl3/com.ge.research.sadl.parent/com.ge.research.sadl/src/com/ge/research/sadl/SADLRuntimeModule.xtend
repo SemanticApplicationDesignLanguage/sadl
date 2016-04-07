@@ -68,4 +68,9 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	def Class<? extends DefaultResourceDescriptionStrategy> bindResourceDescritpionStrategy() {
 		return ResourceDescriptionStrategy
 	}
+	
+	override bindIGenerator2() {
+		super.bindIGenerator2()
+	}
+	
 }
