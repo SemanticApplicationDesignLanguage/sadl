@@ -18,33 +18,34 @@
 package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.hp.hpl.jena.ontology.OntModel
+import com.hp.hpl.jena.ontology.Ontology
 import com.hp.hpl.jena.query.QueryExecutionFactory
+import com.hp.hpl.jena.rdf.model.RDFNode
+import com.hp.hpl.jena.vocabulary.RDF
 import java.util.ArrayList
 import java.util.List
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.hp.hpl.jena.ontology.Ontology
-import com.hp.hpl.jena.vocabulary.RDF;
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.junit.Ignore
-import com.hp.hpl.jena.rdf.model.RDFNode
-import com.ge.research.sadl.processing.ISadlModelProcessor.ProcessorContext
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -155,6 +156,26 @@ class SadlModelManagerProviderTest {
 				}
 			}	
 			assertTrue(found);
+		]
+	}
+	
+	@Test def void mustBeOnOfClassDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			Season is a class, must be one of {Spring, Summer, Fall, Winter}.
+		'''.assertValidatesTo[jenaModel, issues |
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var itr = jenaModel.listIndividuals().toIterable().iterator
+			var found = 0
+			while (itr.hasNext()) {
+				val nxt = itr.next
+				if (nxt.localName.equals("Spring")) found++
+				if (nxt.localName.equals("Summer")) found++
+				if (nxt.localName.equals("Fall")) found++
+				if (nxt.localName.equals("Winter")) found++
+			}
+			assertTrue(found == 4);
 		]
 	}
 	
@@ -1087,7 +1108,7 @@ class SadlModelManagerProviderTest {
 		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(processor.theJenaModel, issues)
 		return model.eResource
 	}
@@ -1097,7 +1118,7 @@ class SadlModelManagerProviderTest {
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = processorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(processor.theJenaModel, issues)
 		return model.eResource
 	}

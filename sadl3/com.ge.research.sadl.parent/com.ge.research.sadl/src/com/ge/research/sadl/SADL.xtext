@@ -61,7 +61,7 @@ ExternalEquationStatement:
 ;
 
 fragment EquationSignature returns AbstractSadlEquation:
-	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' returnType=SadlPrimaryTypeReference ':' //TODO decide on separator char
+	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' returnType=SadlPrimaryTypeReference ':'
 ;
 
 SadlParameterDeclaration:
@@ -88,7 +88,7 @@ SadlStatement returns SadlStatement:
 			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same')
     | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource 
     | 	AnArticle SadlTypeReference (
-    		{SadlInstance.type=current} instance=SadlResource propertyInitializers+=SadlPropertyInitializer*
+    		{SadlInstance.type=current} instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*
     	|	{SadlNecessaryAndSufficient.subject=current} 'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*)
 ;
 
@@ -347,10 +347,14 @@ PrimaryExpression returns Expression: // (20)
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-	| {Function} =>(called=DNAME '(') arglist+=Expression? (',' arglist+=Expression)* ')'
+	| ->Function
 	| FeatureCall
 	| {ValueTable} valueTable=ValueTable;
 	
+Function returns SadlResource:
+	{Function} =>(name=[SadlResource|QNAME] '(') arglist+=Expression? (',' arglist+=Expression)* ')'
+;
+
 FeatureCall returns SadlResource:
 	{Name} name=[SadlResource|QNAME]
 ;

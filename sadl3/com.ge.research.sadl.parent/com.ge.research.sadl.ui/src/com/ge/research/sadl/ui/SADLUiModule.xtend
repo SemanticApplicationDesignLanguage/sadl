@@ -20,10 +20,8 @@
  */
 package com.ge.research.sadl.ui
 
-import com.ge.research.sadl.builder.SadlModelManager
 import com.ge.research.sadl.processing.SadlImportProcessorProvider
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
-import com.ge.research.sadl.ui.builder.SadlUiModelManager
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
 import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorProvider
@@ -69,8 +67,4 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
     	return SadlRootPreferencePage
 	}
 	
-	// Provides listener capability for SadlModelManagaer.
-	def Class<? extends SadlModelManager> bindSadlModelManager() {
-		return SadlUiModelManager
-	}
 }

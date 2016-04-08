@@ -25,16 +25,17 @@ import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.util.internal.EmfAdaptable
+import org.eclipse.xtext.validation.CheckMode
 
-class SadlModelProcessorProvider {
+class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
 	@EmfAdaptable @Data static class InternalAdapter {
-		protected ISadlModelProcessor processor
+		protected IModelProcessor processor
 	}
 	
-	public static val Set<Provider<ISadlModelProcessor>> Registry = newHashSet
+	public static val Set<Provider<IModelProcessor>> Registry = newHashSet
 	
-	def ISadlModelProcessor getProcessor(ResourceSet resourceSet) {
+	override IModelProcessor getProcessor(ResourceSet resourceSet) {
 		val adapter = InternalAdapter.findInEmfObject(resourceSet)
 		if (adapter !== null) {
 			return adapter.processor
@@ -46,9 +47,9 @@ class SadlModelProcessorProvider {
 	
 	protected def doCreateProcessor(ResourceSet set) {
 		val processors = getAllProviders.map[get];
-		return new ISadlModelProcessor() {
-			override onValidate(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
-				processors.forEach[onValidate(resource, issueAcceptor, context)]
+		return new com.ge.research.sadl.processing.IModelProcessor() {
+			override onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
+				processors.forEach[onValidate(resource, issueAcceptor, mode, context)]
 			}
 			override onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
 				processors.forEach[onGenerate(resource, fsa, context)]
@@ -61,7 +62,7 @@ class SadlModelProcessorProvider {
 		}
 	}
 	
-	protected def Iterable<? extends Provider<? extends ISadlModelProcessor>> getAllProviders() {
+	protected def Iterable<? extends Provider<? extends IModelProcessor>> getAllProviders() {
 		Registry
 	}
 	

@@ -282,7 +282,6 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test def void testClassRestrictions_04() {
 		'''
 		uri "http://sadl.imp/TestThreeLevelDefaults".
@@ -459,7 +458,6 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore("https://github.com/crapo/sadlos2/issues/14")
 	@Test def void testInstanceDeclaration_01() {
 		'''
 			uri "http://com.ge.research.sadlGeorgeAndMartha".
@@ -472,7 +470,14 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore("https://github.com/crapo/sadlos2/issues/14")
+	@Test def void testInstanceDeclaration_01_b() {
+		'''
+			uri "http://com.ge.research.sadlGeorgeAndMartha".
+			
+			A Birth has child George.
+		'''.assertNoErrors
+	}
+	
 	@Test def void testInstanceDeclaration_02() {
 		'''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
@@ -481,7 +486,7 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 			
 			T1 is a Thingy.
 			T2 is a Thingy.
-			T3 is a Thingy, connectedTo T1, connectedTo T2.
+			T3 is a Thingy connectedTo T1 connectedTo T2.
 		'''.assertNoErrors
 	}
 	

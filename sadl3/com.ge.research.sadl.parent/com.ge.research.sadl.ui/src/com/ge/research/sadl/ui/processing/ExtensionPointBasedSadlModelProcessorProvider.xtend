@@ -17,12 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.processing
 
-import com.ge.research.sadl.processing.ISadlModelProcessor
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
 import com.google.inject.Provider
 import org.eclipse.core.runtime.RegistryFactory
 import com.google.inject.Inject
 import com.google.inject.Injector
+import com.ge.research.sadl.processing.IModelProcessor
 
 class ExtensionPointBasedSadlModelProcessorProvider extends SadlModelProcessorProvider {
 	
@@ -34,9 +34,9 @@ class ExtensionPointBasedSadlModelProcessorProvider extends SadlModelProcessorPr
 		val registry = RegistryFactory.getRegistry();
 		val configElements = registry.getConfigurationElementsFor(EXTENSION_ID).toList
 		return configElements.map [ configElement |
-			new Provider<ISadlModelProcessor>() {
+			new Provider<IModelProcessor>() {
 				override get() {
-					val result = configElement.createExecutableExtension("class") as ISadlModelProcessor
+					val result = configElement.createExecutableExtension("class") as IModelProcessor
 					injector.injectMembers(result)
 					return result
 				}

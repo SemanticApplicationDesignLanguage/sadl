@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
+ * Copyright ï¿½ 2007-2016 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -64,7 +64,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 
-import com.ge.research.sadl.processing.ISadlModelProcessor;
+import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 

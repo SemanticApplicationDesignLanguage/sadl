@@ -141,6 +141,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 							}
 						}
 					}
+					EquationStatement : {
+						val name = converter.toQualifiedName(it.name.concreteName)
+						map.addElement(name, it.name)
+						if (name.segmentCount > 1) {
+							map.addElement(name.skipFirst(1), it.name)
+						} else if (namespace !== null) {
+							map.addElement(namespace.append(name), it.name)
+						}
+					}
 					default :
 						if (pruneScope(it)) {
 							iter.prune
