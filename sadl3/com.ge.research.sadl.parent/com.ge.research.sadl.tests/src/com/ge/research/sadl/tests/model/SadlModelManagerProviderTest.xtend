@@ -159,6 +159,26 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void mustBeOnOfClassDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			Season is a class, must be one of {Spring, Summer, Fall, Winter}.
+		'''.assertValidatesTo[jenaModel, issues |
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var itr = jenaModel.listIndividuals().toIterable().iterator
+			var found = 0
+			while (itr.hasNext()) {
+				val nxt = itr.next
+				if (nxt.localName.equals("Spring")) found++
+				if (nxt.localName.equals("Summer")) found++
+				if (nxt.localName.equals("Fall")) found++
+				if (nxt.localName.equals("Winter")) found++
+			}
+			assertTrue(found == 4);
+		]
+	}
+	
 	@Test def void mySimpleClassAsQnDeclarationCase() {
 		'''
 			uri "http://sadl.org/allqnames.sadl" alias aqn.
