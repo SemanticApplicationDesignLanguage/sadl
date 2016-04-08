@@ -20,7 +20,6 @@ package com.ge.research.sadl.jena;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -28,27 +27,19 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.URIConverter;
-import org.eclipse.emf.ecore.resource.URIHandler;
-import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl.EObjectOutputStream.Check;
-import org.eclipse.xtext.builder.EclipseResourceFileSystemAccess2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.preferences.IPreferenceValues;
-import org.eclipse.xtext.preferences.PreferenceKey;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
@@ -85,12 +76,10 @@ import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
@@ -152,7 +141,6 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
-import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -784,7 +772,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			issueAcceptor.addError("This expression contains a type conflict", expr);
 		}
 		
-		//Continue on with processing
 		String op = expr.getOp();
 		BuiltinType optype = BuiltinType.getType(op);
 		
@@ -2473,4 +2460,820 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					lftNode = (RDFNode) lftObj;
 				}
 				else {
-					throw new JenaProcessorException("Intersection member of
+					throw new JenaProcessorException("Intersection member of unsupported type: " + lftObj.getClass().getCanonicalName());
+				}
+			}
+			SadlTypeReference rht = ((SadlIntersectionType)sadlTypeRef).getRight();
+			if (rht == null) {
+				throw new JenaProcessorException("No right-hand side to intersection");
+			}
+			Object rhtObj = sadlTypeReferenceToObject(rht);
+			if (rhtObj instanceof OntResource) {
+				rhtNode = ((OntResource)rhtObj).asClass();
+			}
+			else {
+				if (rhtObj instanceof RDFNode) {
+					rhtNode = (RDFNode) rhtObj;
+				}
+				else {
+					throw new JenaProcessorException("Intersection member of unsupported type: " + rhtObj.getClass().getCanonicalName());
+				}
+			}
+			OntClass intersectCls = createIntersectionClass(lftNode, rhtNode);
+			return intersectCls;
+		}
+		return rsrc;
+	}
+
+	private com.hp.hpl.jena.rdf.model.Resource processSadlPrimitiveDataType(SadlClassOrPropertyDeclaration element, SadlPrimitiveDataType sadlTypeRef, String newDatatypeUri) throws JenaProcessorException {
+		SadlDataType pt = sadlTypeRef.getPrimitiveType();
+		String typeStr = pt.getLiteral();
+		com.hp.hpl.jena.rdf.model.Resource onDatatype;
+		if (typeStr.equals(XSD.xstring.getLocalName())) onDatatype = XSD.xstring;
+		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
+		else if (typeStr.equals(XSD.base64Binary.getLocalName())) onDatatype = XSD.base64Binary;
+		else if (typeStr.equals(XSD.date.getLocalName())) onDatatype = XSD.date;
+		else if (typeStr.equals(XSD.dateTime.getLocalName())) onDatatype = XSD.dateTime;
+		else if (typeStr.equals(XSD.decimal.getLocalName())) onDatatype = XSD.decimal;
+		else if (typeStr.equals(XSD.duration.getLocalName())) onDatatype = XSD.duration;
+		else if (typeStr.equals(XSD.gDay.getLocalName())) onDatatype = XSD.gDay;
+		else if (typeStr.equals(XSD.gMonth.getLocalName())) onDatatype = XSD.gMonth;
+		else if (typeStr.equals(XSD.gMonthDay.getLocalName())) onDatatype = XSD.gMonthDay;
+		else if (typeStr.equals(XSD.gYear.getLocalName())) onDatatype = XSD.gYear;
+		else if (typeStr.equals(XSD.gYearMonth.getLocalName())) onDatatype = XSD.gYearMonth;
+		else if (typeStr.equals(XSD.hexBinary.getLocalName())) onDatatype = XSD.hexBinary;
+		else if (typeStr.equals(XSD.integer.getLocalName())) onDatatype = XSD.integer;
+		else if (typeStr.equals(XSD.time.getLocalName())) onDatatype = XSD.time;
+		else if (typeStr.equals(XSD.xboolean.getLocalName())) onDatatype = XSD.xboolean;
+		else if (typeStr.equals(XSD.xdouble.getLocalName())) onDatatype = XSD.xdouble;
+		else if (typeStr.equals(XSD.xfloat.getLocalName())) onDatatype = XSD.xfloat;
+		else if (typeStr.equals(XSD.xint.getLocalName())) onDatatype = XSD.xint;
+		else if (typeStr.equals(XSD.xlong.getLocalName())) onDatatype = XSD.xlong;
+		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
+		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
+		else if (typeStr.equals("data")) onDatatype = null;
+		else {
+			throw new JenaProcessorException("Unexpected primitive data type: " + typeStr);
+		}
+		if (newDatatypeUri == null) {
+			return onDatatype;
+		}
+		OntClass datatype = getTheJenaModel().createOntResource(OntClass.class, RDFS.Datatype, newDatatypeUri);
+		OntClass equivClass = getTheJenaModel().createOntResource(OntClass.class, RDFS.Datatype, null);
+		equivClass.addProperty(OWL2.onDatatype, onDatatype);
+		if (element.getFacet() != null) {
+			com.hp.hpl.jena.rdf.model.Resource restrictions = facetsToRestrictionNode(newDatatypeUri, element.getFacet());
+			// Create a list containing the restrictions
+			RDFList list = getTheJenaModel().createList(new RDFNode[] {restrictions});
+			equivClass.addProperty(OWL2.withRestrictions, list);
+		}
+		datatype.addEquivalentClass(equivClass);
+		return datatype;
+	}
+
+	private com.hp.hpl.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet) {
+		com.hp.hpl.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
+		boolean minInclusive = (facet.getMinexin() != null && facet.getMinexin().equals("["));
+		boolean maxInclusive = (facet.getMaxexin() != null && facet.getMaxexin().equals("]"));
+		if (minInclusive) {
+			anon.addProperty(xsdProperty("minInclusive"), "" + facet.getMin());
+		}
+		else {
+			anon.addProperty(xsdProperty("minExclusive"), "" + facet.getMin());
+		}
+		if (maxInclusive) {
+			anon.addProperty(xsdProperty("maxInclusive"), "" + facet.getMax());
+		}
+		else {
+			anon.addProperty(xsdProperty("maxExclusive"), "" + facet.getMax());
+		}
+		anon.addProperty(xsdProperty("length"), "" + facet.getLen());
+		anon.addProperty(xsdProperty("minLength"), "" + facet.getMinlen());
+		anon.addProperty(xsdProperty("maxLength"), "" + facet.getMaxlen());
+		anon.addProperty(xsdProperty("pattern"), "" + facet.getRegex());
+		if (facet.getValues() != null) {
+			Iterator<String> iter = facet.getValues().iterator();
+			while (iter.hasNext()) {
+				anon.addProperty(xsdProperty("enumeration"), iter.next());
+			}
+		}
+		return anon;
+	}
+
+	private OntClass processSadlPropertyCondition(SadlPropertyCondition sadlPropCond) throws JenaProcessorException {
+		OntClass retval = null;
+		SadlResource sr = ((SadlPropertyCondition)sadlPropCond).getProperty();
+		String propUri = declarationExtensions.getConceptUri(sr);
+		if (propUri == null) {
+			throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlPropertyCondition");
+		}
+		OntConceptType propType = declarationExtensions.getOntConceptType(sr);
+		OntProperty prop = getTheJenaModel().getOntProperty(propUri);
+		if (prop == null) {
+			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+				prop = getTheJenaModel().createObjectProperty(propUri);
+			}
+			else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+				prop = getTheJenaModel().createDatatypeProperty(propUri);
+			}
+			else if (propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+				prop = getTheJenaModel().createAnnotationProperty(propUri);
+			}
+			else {
+				prop = getTheJenaModel().createOntProperty(propUri);
+			}
+		}
+		Iterator<SadlCondition> conditer = ((SadlPropertyCondition)sadlPropCond).getCond().iterator();
+		while (conditer.hasNext()) {
+			SadlCondition cond = conditer.next();
+			retval = processSadlCondition(cond, prop, propType);
+			if (conditer.hasNext()) {
+				throw new JenaProcessorException("Multiple property conditions not currently handled");
+			}
+		}
+		return retval;
+	}
+
+	private OntClass processSadlCondition(SadlCondition cond, OntProperty prop, OntConceptType propType) throws JenaProcessorException {
+		OntClass retval = null;
+		if (cond instanceof SadlAllValuesCondition) {
+			SadlTypeReference type = ((SadlAllValuesCondition)cond).getType();
+			OntResource typersrc = sadlTypeReferenceToOntResource(type);
+			AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
+			logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '" + typersrc.toString() + "'");
+			retval = avf;
+		}
+		else if (cond instanceof SadlHasValueCondition) {
+			SadlExplicitValue value = ((SadlHasValueCondition)cond).getRestriction();
+			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+				if (value instanceof SadlResource) {
+					OntConceptType srType = declarationExtensions.getOntConceptType((SadlResource)value);
+					SadlResource srValue = (SadlResource) value;
+					if (srType == null) {
+						srValue = ((SadlResource)value).getName();
+						srType = declarationExtensions.getOntConceptType(srValue);
+					}
+					if (srType == null) {
+						throw new JenaProcessorException("Unable to resolve SadlResource value");
+					}
+					if (srType.equals(OntConceptType.INSTANCE)) {
+						String valUri = declarationExtensions.getConceptUri(srValue);
+						if (valUri == null) {
+							throw new JenaProcessorException("Failed to find SadlResource in Xtext model");
+						}
+						Individual valInst = getTheJenaModel().getIndividual(valUri);
+						if (valInst == null) {
+							throw new JenaProcessorException("Failed to retrieve instance '" + valUri + "' from Jena model");
+						}
+						if (valueInObjectTypePropertyRange(prop, valInst)) {
+							HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, valInst);
+							logger.debug("New has value restriction on '" + prop.getURI() + "' to value '" + valInst.toString() + "'");
+							retval =  hvr;
+						}
+						else {
+							throw new JenaProcessorException("Value '" + valInst.getURI() + "' not in range of object property '" + prop.getURI() + "'");
+						}
+					}
+					else {
+						throw new JenaProcessorException("A has value restriction on an object property must have an instance as the restricted value");
+					}
+				}
+				else {
+					throw new JenaProcessorException("A has value restriction on an object property has an unexpected restricted value type: " + value.getClass().getCanonicalName());
+				}
+			}
+			else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+				Literal val = sadlExplicitValueToLiteral(value, prop);
+				if (valueInDatatypePropertyRange(prop, val)) {
+					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, val);
+					logger.debug("New has value restriction on '" + prop.getURI() + "' to value '" + val.toString() + "'");
+					retval =  hvr;
+				}	
+				else {
+					throw new JenaProcessorException("Value '" + val.getLexicalForm() + "' not in range of datatype property '" + prop.getURI() + "'");
+				}
+			}
+			else {
+				throw new JenaProcessorException("Has value restriction on unexpected property type: " + propType.toString());
+			}
+		}
+		else if (cond instanceof SadlCardinalityCondition) {
+			// Note: SomeValuesFrom is embedded in cardinality in the SADL grammar--an "at least" cardinality with "one" instead of # 
+			String cardinality = ((SadlCardinalityCondition)cond).getCardinality();
+			SadlTypeReference type = ((SadlCardinalityCondition)cond).getType();
+			OntResource typersrc = null;
+			if (type != null) {
+				typersrc = sadlTypeReferenceToOntResource(type);					
+			}
+			if (cardinality.equals("one")) {
+				// this is interpreted as a someValuesFrom restriction
+				if (type == null) {
+					throw new JenaProcessorException("'one' means some value from class so a type must be given");
+				}
+				SomeValuesFromRestriction svf = getTheJenaModel().createSomeValuesFromRestriction(null, prop, typersrc);
+				logger.debug("New some values from restriction on '" + prop.getURI() + "' to values of type '" + typersrc.toString() + "'");
+				retval =  svf;
+			}
+			else {
+				// cardinality restrictioin
+				int cardNum = Integer.parseInt(cardinality);
+				String op = ((SadlCardinalityCondition)cond).getOperator();
+				if (op == null) {
+					CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, prop, cardNum);	
+					logger.debug("New cardinality restriction " + cardNum + " on '" + prop.getURI() + "' created");
+					if (type != null) {
+						cr.removeAll(OWL.cardinality);
+						cr.addLiteral(OWL2.qualifiedCardinality, cardNum);
+						cr.addProperty(OWL2.onClass, typersrc);
+					}
+					retval =  cr;
+				}
+				else if (op.equals("least")) {
+					MinCardinalityRestriction cr = getTheJenaModel().createMinCardinalityRestriction(null, prop, cardNum);							
+					logger.debug("New min cardinality restriction " + cardNum + " on '" + prop.getURI() + "' created");
+					if (type != null) {
+						cr.removeAll(OWL.minCardinality);
+						cr.addLiteral(OWL2.minQualifiedCardinality, cardNum);
+						cr.addProperty(OWL2.onClass, typersrc);
+					}
+					retval =  cr;
+				}
+				else if (op.equals("most")) {
+					logger.debug("New max cardinality restriction " + cardNum + " on '" + prop.getURI() + "' created");
+					MaxCardinalityRestriction cr = getTheJenaModel().createMaxCardinalityRestriction(null, prop, cardNum);							
+					if (type != null) {
+						cr.removeAll(OWL.maxCardinality);
+						cr.addLiteral(OWL2.maxQualifiedCardinality, cardNum);
+						cr.addProperty(OWL2.onClass, typersrc);
+					}
+					retval =  cr;
+				}
+				if (logger.isDebugEnabled()) {
+					if (type != null) {
+						logger.debug("   cardinality is qualified; values must be of type '" + typersrc + "'");
+					}	
+				}
+			}
+		}
+		else {
+			throw new JenaProcessorException("Unhandled SadlCondition type: " + cond.getClass().getCanonicalName());
+		}
+		return retval;
+	}
+
+	private boolean valueInDatatypePropertyRange(OntProperty prop, Literal val) {
+		String ptype = prop.getRange().getURI();
+		if (ptype == null) {
+			return true;
+		}
+		String dtype = val.getDatatypeURI();
+		if (dtype.equals(ptype)) {
+			return true;
+		}
+		return false;
+	}
+
+	private Literal sadlExplicitValueToLiteral(SadlExplicitValue value, OntProperty prop) throws JenaProcessorException {
+		if (value instanceof SadlNumberLiteral) {
+			String val = ((SadlNumberLiteral)value).getLiteralNumber();
+			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val);
+		}
+		else if (value instanceof SadlStringLiteral) {
+			String val = ((SadlStringLiteral)value).getLiteralString();
+			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val);
+		}
+		else if (value instanceof SadlBooleanLiteral) {
+			SadlBooleanLiteral val = ((SadlBooleanLiteral)value);
+			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val.toString());
+		}
+		else if (value instanceof SadlValueList) {
+			throw new JenaProcessorException("A SADL value list cannot be converted to a Literal");
+		}
+		else if (value instanceof SadlConstantLiteral) {
+			String val = ((SadlConstantLiteral)value).getTerm();
+			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val);
+		}
+		else {
+			throw new JenaProcessorException("Unhandled sadl explicit vaue type: " + value.getClass().getCanonicalName());
+		}
+	}
+
+	private boolean valueInObjectTypePropertyRange(OntProperty prop, Individual valInst) throws JenaProcessorException {
+		ExtendedIterator<? extends OntResource> itr = prop.listRange();
+		while (itr.hasNext()) {
+			OntResource nxt = itr.next();
+			if (nxt.isClass()) {
+				if (instanceBelongsToClass(getTheJenaModel(), valInst, nxt)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private IntersectionClass createIntersectionClass(List<RDFNode> members) throws JenaProcessorException {
+		RDFNode[] array = members.toArray(new RDFNode[members.size()]);
+		return createIntersectionClass(array);
+	}
+
+	private IntersectionClass createIntersectionClass(RDFNode... members) throws JenaProcessorException {
+		RDFList classes = getTheJenaModel().createList(members);
+		if (!classes.isEmpty()) {
+			IntersectionClass intersectCls = getTheJenaModel().createIntersectionClass(null, classes);
+			logger.debug("New intersection class created");
+			return intersectCls;
+		}
+		throw new JenaProcessorException("createIntersectionClass called with empty list of classes");
+	}
+
+	private UnionClass createUnionClass(List<RDFNode> members) throws JenaProcessorException {
+		RDFNode[] array = members.toArray(new RDFNode[members.size()]);
+		return createUnionClass(array);
+	}
+	private UnionClass createUnionClass(RDFNode... members) throws JenaProcessorException {
+		RDFList classes = getTheJenaModel().createList(members);
+		if (!classes.isEmpty()) {
+			UnionClass unionCls = getTheJenaModel().createUnionClass(null, classes);
+			logger.debug("New union class created");
+			return unionCls;
+		}
+		throw new JenaProcessorException("createUnionClass called with empty list of classes");
+	}
+
+	private OntConceptType getSadlTypeReferenceType(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
+		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
+			SadlResource sr = ((SadlSimpleTypeReference)sadlTypeRef).getType();
+			return declarationExtensions.getOntConceptType(sr);
+		}
+		else if (sadlTypeRef instanceof SadlPrimitiveDataType) {
+			return OntConceptType.DATATYPE;
+		}
+		else if (sadlTypeRef instanceof SadlPropertyCondition) {
+			// property conditions => OntClass
+			return OntConceptType.CLASS;
+		}
+		else if (sadlTypeRef instanceof SadlUnionType) {
+			SadlTypeReference lft = ((SadlUnionType)sadlTypeRef).getLeft();
+			OntConceptType lfttype = getSadlTypeReferenceType(lft);
+			return lfttype;
+//			SadlTypeReference rght = ((SadlUnionType)sadlTypeRef).getRight();
+		}
+		else if (sadlTypeRef instanceof SadlIntersectionType) {
+			SadlTypeReference lft = ((SadlIntersectionType)sadlTypeRef).getLeft();
+			OntConceptType lfttype = getSadlTypeReferenceType(lft);
+			return lfttype;
+//			SadlTypeReference rght = ((SadlIntersectionType)sadlTypeRef).getRight();
+		}
+		throw new JenaProcessorException("Unexpected SadlTypeReference subtype: " + sadlTypeRef.getClass().getCanonicalName());
+	}
+
+	private String assureNamespaceEndsWithHash(String name) {
+		name = name.trim();
+		if (!name.endsWith("#")) {
+			return name + "#";
+		}
+		return name;
+	}
+
+	private String getModelNamespace() {
+		return modelNamespace;
+	}
+
+	private void setModelNamespace(String modelNamespace) {
+		this.modelNamespace = modelNamespace;
+	}
+
+	public OntDocumentManager getJenaDocumentMgr(OntModelSpec ontModelSpec) {
+		if (jenaDocumentMgr == null) {
+			if (getMappingModel() != null) {
+				setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
+				if (ontModelSpec != null) {
+					ontModelSpec.setDocumentManager(jenaDocumentMgr);
+				}
+			}
+			else {
+				setJenaDocumentMgr(OntDocumentManager.getInstance());
+			}
+		}
+		return jenaDocumentMgr;
+	}
+
+	private void setJenaDocumentMgr(OntDocumentManager ontDocumentManager) {
+		jenaDocumentMgr = ontDocumentManager;
+	}
+
+	private Model getMappingModel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/**
+	 * return true if the instance belongs to the class else return false
+	 * 
+	 * @param inst
+	 * @param cls
+	 * @return
+	 * @throws JenaProcessorException 
+	 */
+	private boolean instanceBelongsToClass(OntModel m, OntResource inst, OntResource cls) throws JenaProcessorException {
+		// The following cases must be considered:
+		// 1) The class is a union of other classes. Check to see if the instance is a member of any of
+		//		the union classes and if so return true.
+		// 2) The class is an intersection of other classes. Check to see if the instance is 
+		//		a member of each class in the intersection and if so return true.
+		// 3) The class is neither a union nor an intersection. If the instance belongs to the class return true. Otherwise
+		//		check to see if the instance belongs to a subclass of the class else
+		//		return false. (Superclasses do not need to be considered because even if the instance belongs to a super
+		//		class that does not tell us that it belongs to the class.)
+		
+		/*
+		 * e.g., 	Internet is a Network.
+		 * 			Network is a type of Subsystem.
+		 * 			Subsystem is type of System.
+		 */
+		if (cls.isURIResource()) {
+			cls = m.getOntClass(cls.getURI());
+		}
+		if (cls == null) {
+			return false;
+		}
+		if (cls.canAs(UnionClass.class)) {
+			List<OntResource> uclses = getOntResourcesInUnionClass(m, cls.as(UnionClass.class));	
+			for (int i = 0; i < uclses.size(); i++) {
+				OntResource ucls = uclses.get(i);
+				if (instanceBelongsToClass(m, inst, ucls)) {
+					return true;
+				}
+			}
+		}
+		else if (cls.canAs(IntersectionClass.class)) {
+			List<OntResource> uclses = getOntResourcesInIntersectionClass(m, cls.as(IntersectionClass.class));	
+			for (int i = 0; i < uclses.size(); i++) {
+				OntResource ucls = uclses.get(i);
+				if (!instanceBelongsToClass(m, inst, ucls)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		else if (cls.canAs(Restriction.class)) {
+			Restriction rest = cls.as(Restriction.class);
+			OntProperty ontp = rest.getOnProperty();				
+			if (rest.isAllValuesFromRestriction()) {
+				StmtIterator siter = inst.listProperties(ontp);
+				while (siter.hasNext()) {
+					Statement stmt = siter.nextStatement();
+					RDFNode obj = stmt.getObject();
+					if (obj.canAs(Individual.class)) {
+						com.hp.hpl.jena.rdf.model.Resource avfc = rest.asAllValuesFromRestriction().getAllValuesFrom();
+						if (!instanceBelongsToClass(m, (Individual)obj.as(Individual.class), (OntResource)avfc.as(OntResource.class))) {
+							return false;
+						}
+					}
+				}
+			}
+			else if (rest.isSomeValuesFromRestriction()) {
+				if (inst.hasProperty(ontp)) {
+					return true;
+				}
+			}
+			else if (rest.isHasValueRestriction()) {
+				RDFNode hval = rest.as(HasValueRestriction.class).getHasValue();
+				if (inst.hasProperty(ontp, hval)) {
+					return true;
+				}
+			}
+			else if (rest.isCardinalityRestriction()) {
+				throw new JenaProcessorException("Unhandled cardinality restriction");
+			}
+			else if (rest.isMaxCardinalityRestriction()) {
+				throw new JenaProcessorException("Unhandled max cardinality restriction");
+			}
+			else if (rest.isMinCardinalityRestriction()) {
+				throw new JenaProcessorException("Unhandled min cardinality restriction");
+			}
+		}
+		else {
+			if (inst.canAs(Individual.class)) {
+				ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> eitr = inst.asIndividual().listRDFTypes(false);
+				while (eitr.hasNext()) {
+					com.hp.hpl.jena.rdf.model.Resource r = eitr.next();				
+					OntResource or = m.getOntResource(r);
+					if (or.isURIResource()) {
+						OntClass oc = m.getOntClass(or.getURI());
+						if (classIsSubclassOf(oc, cls, true)) {
+							eitr.close();
+							return true;
+						}
+					}
+					else if (or.canAs(OntClass.class)) {
+						if (classIsSubclassOf(or.as(OntClass.class), cls, true)) {
+							eitr.close();
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+	/**
+	 * return true if the first argument class is a subclass of the second
+	 * argument class
+	 * 
+	 * @param subcls
+	 * @param cls
+	 * @return
+	 * @throws JenaProcessorException 
+	 */
+	private boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) throws JenaProcessorException {
+		if (subcls == null || cls == null) {
+			return false;
+		}
+		if (cls.isURIResource() && subcls.isURIResource()
+				&& cls.getURI().equals(subcls.getURI())) {
+			return true;
+		}
+		if (cls.isAnon()) {
+			if (cls.canAs(OntClass.class)) {
+				OntClass ocls = cls.as(OntClass.class);
+				if (ocls.isUnionClass()) {
+					UnionClass ucls = cls.as(UnionClass.class);
+					try {
+						ExtendedIterator<? extends OntClass> eitr = ucls
+								.listOperands();
+						while (eitr.hasNext()) {
+							OntClass uclsmember = eitr.next();
+							if (classIsSubclassOf(subcls, uclsmember, false)) {
+								eitr.close();
+								return true;
+							}
+						}
+					}
+					catch (Exception e) {
+						logger.error("Unexpected error during deep validation: apparent Union Class does not return operands.");
+					}
+				}
+			}
+		}
+		try {
+			if (cls.canAs(OntClass.class)) {
+				ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSubClasses();
+				while (eitr.hasNext()) {
+					OntClass subClsOfCls = eitr.next();
+					if (subClsOfCls.equals(subcls)) {
+						eitr.close();
+						return true;
+					}
+					else {
+						if (classIsSubclassOf(subcls, subClsOfCls, false)) {
+							eitr.close();
+							return true;
+						}
+					}
+				}
+				eitr.close();
+//				if (rootCall && classIsSuperClassOf(cls.as(OntClass.class), subcls)) {
+//					return true;
+//				}
+			}
+			if (subcls.isAnon()) {
+				if (subcls.isIntersectionClass()) {
+					IntersectionClass icls = subcls.asIntersectionClass();
+					try {
+						ExtendedIterator<? extends OntClass> eitr = icls.listOperands();
+						while (eitr.hasNext()) {
+							OntClass iclsmember = eitr.next();
+							if (classIsSubclassOf(cls.as(OntClass.class), iclsmember, false)) {
+								eitr.close();
+								return true;
+							}
+						}
+					}
+					catch (Exception e) {
+						logger.error("Unexpected error during deep validation: apparent Intersection Class does not return operands.");
+					}
+				}
+			}
+// TODO We need to look for equivalent classes that provide a definition for a subclass, 
+//			e.g. Component is equivalent to System is class, (System and connectedTo someValueFrom Network) => Component subclass of System.
+			if (cls.canAs(OntClass.class)) {
+				ExtendedIterator<OntClass> eqitr = cls.as(OntClass.class).listEquivalentClasses();
+				while (eqitr.hasNext()) {
+					OntClass eqcls = eqitr.next();
+					if (classIsSubclassOf(subcls, eqcls, false)) {
+						return true;
+					}
+				}
+			}
+
+		} catch (Throwable t) {
+			t.printStackTrace();
+			logger.debug("Error in classIsSubclassOf: " + t.getMessage());
+			throw new JenaProcessorException(t.getMessage(), t);
+		}
+		return false;
+	}
+
+	private boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
+		ExtendedIterator<OntClass> eitr = subcls.listSuperClasses();
+		try {
+			while (eitr.hasNext()) {
+				OntClass sprcls = eitr.next();
+				if (sprcls.equals(cls)) {
+					return true;
+				}
+				if (classIsSuperClassOf(cls, sprcls)) {
+					return true;
+				}
+			}
+			eitr.close();
+			
+			eitr = cls.listSuperClasses();
+			while (eitr.hasNext()) {
+				OntClass equivCls = eitr.next();
+				if (classIsSubclassOf(subcls, equivCls, false)) {
+					eitr.close();
+					return true;
+				}
+			}
+		}
+		catch (Throwable t) {
+			logger.error("Error checking if class '" + cls.toString() + "' is a superclass of '" + subcls.toString() + 
+					"' : " + t.getMessage());
+		}
+		finally {
+			eitr.close();
+		}
+		return false;
+	}
+
+	private List<OntResource> getOntResourcesInUnionClass(OntModel m, UnionClass ucls) {
+		List<OntResource> results = new ArrayList<OntResource>();
+		List<RDFNode> clses = ucls.getOperands().asJavaList();
+		for (int i = 0; i < clses.size(); i++) {
+			RDFNode mcls = clses.get(i);
+			if (mcls.canAs(OntResource.class)) {
+				results.add(mcls.as(OntResource.class));
+			}
+		}
+		return results;
+	}
+	
+	private List<OntResource> getOntResourcesInIntersectionClass(OntModel m, IntersectionClass icls) {
+		List<OntResource> results = new ArrayList<OntResource>();
+		List<RDFNode> clses = icls.getOperands().asJavaList();
+		for (int i = 0; i < clses.size(); i++) {
+			RDFNode mcls = clses.get(i);
+			if (mcls.canAs(OntResource.class)) {
+				results.add(mcls.as(OntResource.class));
+			}
+		}
+		return results;
+	}
+
+	private ValidationAcceptor getIssueAcceptor() {
+		return issueAcceptor;
+	}
+
+	private void setIssueAcceptor(ValidationAcceptor issueAcceptor) {
+		this.issueAcceptor = issueAcceptor;
+	}
+
+	private CancelIndicator getCancelIndicator() {
+		return cancelIndicator;
+	}
+
+	private void setCancelIndicator(CancelIndicator cancelIndicator) {
+		this.cancelIndicator = cancelIndicator;
+	}
+
+	protected String getModelName() {
+		return modelName;
+	}
+
+	protected void setModelName(String modelName) {
+		this.modelName = modelName;
+	}
+
+	@Override
+	public void processExternalModels(String mappingFileFolder, List<String> fileNames) throws IOException {
+		File mff = new File(mappingFileFolder);
+		if (!mff.exists()) {
+			mff.mkdirs();
+		}
+		if (!mff.isDirectory()) {
+			throw new IOException("Mapping file location '" + mappingFileFolder + "' exists but is not a directory.");
+		}
+		System.out.println("Ready to save mappings in folder: " + mff.getCanonicalPath());
+		for (int i = 0; i < fileNames.size(); i++) {
+			System.out.println("   URL: " + fileNames.get(i));
+		}
+	}
+	private String getModelAlias() {
+		return modelAlias;
+	}
+	private void setModelAlias(String modelAlias) {
+		this.modelAlias = modelAlias;
+	}
+	private OntModelSpec getSpec() {
+		return spec;
+	}
+	private void setSpec(OntModelSpec spec) {
+		this.spec = spec;
+	}
+	
+	private boolean isVariable(SadlResource sr) {
+		OntConceptType ct = declarationExtensions.getOntConceptType(sr);
+		if (ct.equals(OntConceptType.VARIABLE)) {
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * This method looks in the clauses of a Rule to see if there is already a triple matching the given pattern. If there is
+	 * a new variable of the same name is created (to make sure the count is right) and returned. If not a rule or no match
+	 * a new variable (new name) is created and returned.
+	 * @param expr 
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @return
+	 */
+	protected VariableNode getVariableNode(Expression expr, Node subject, Node predicate, Node object) {
+		if (target != null) {
+			// Note: when we find a match we still create a new VariableNode with the same name in order to have the right reference counts for the new VariableNode
+			if (target instanceof Rule) {
+				VariableNode var = findVariableInTripleForReuse(((Rule)target).getGivens(), subject, predicate, object);
+				if (var != null) {
+					return new VariableNode(var.getName());
+				}
+				var = findVariableInTripleForReuse(((Rule)target).getIfs(), subject, predicate, object);
+				if (var != null) {
+					return new VariableNode(var.getName());
+				}
+				var = findVariableInTripleForReuse(((Rule)target).getThens(), subject, predicate, object);
+				if (var != null) {
+					return new VariableNode(var.getName());
+				}
+			}
+		}
+		return new VariableNode(getNewVar(expr));
+	}
+	
+	protected String getNewVar(Expression expr) {
+		IScopeProvider scopeProvider = ((XtextResource)expr.eResource()).getResourceServiceProvider().get(IScopeProvider.class);
+		IScope scope = scopeProvider.getScope(expr, SADLPackage.Literals.SADL_RESOURCE__NAME);
+		String proposedName = "v" + vNum;
+		while (userDefinedVariables.contains(proposedName)
+				|| 	scope.getSingleElement(QualifiedName.create(proposedName)) != null) {
+			vNum++;
+			proposedName = "v" + vNum;
+		}
+		vNum++;
+		return proposedName;
+	}
+	
+	/**
+	 * Supporting method for the method above (getVariableNode(Node, Node, Node))
+	 * @param gpes
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @return
+	 */
+	protected VariableNode findVariableInTripleForReuse(List<GraphPatternElement> gpes, Node subject, Node predicate, Node object) {
+		if (gpes != null) {
+			Iterator<GraphPatternElement> itr = gpes.iterator();
+			while (itr.hasNext()) {
+				GraphPatternElement gpe = itr.next();
+				while (gpe != null) {
+					if (gpe instanceof TripleElement) {
+						TripleElement tr = (TripleElement)gpe;
+						Node tsn = tr.getSubject();
+						Node tpn = tr.getPredicate();
+						Node ton = tr.getObject();
+						if (subject == null && tsn instanceof VariableNode) {
+							if (predicate != null && predicate.equals(tpn) && object != null && object.equals(ton)) {
+								return (VariableNode) tsn;
+							}
+						}
+						if (predicate == null && tpn instanceof VariableNode) {
+							if (subject != null && subject.equals(tsn) && object != null && object.equals(ton)) {
+								return (VariableNode) tpn;
+							}
+						}
+						if (object == null && ton instanceof VariableNode) {
+							if (subject != null && subject.equals(tsn) && predicate != null && predicate.equals(tpn)) {
+								return (VariableNode) ton;
+							}
+						}
+					}
+					gpe = gpe.getNext();
+				}
+			}
+		}
+		return null;
+	}
+	
+}
