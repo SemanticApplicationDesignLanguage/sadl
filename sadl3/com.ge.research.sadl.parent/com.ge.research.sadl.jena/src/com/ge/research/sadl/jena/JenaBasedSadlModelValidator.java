@@ -117,17 +117,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
 		} catch (TranslationException e) {
-			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", expression);
+			issueAcceptor.addError("A translation exception exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
-			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", expression);
+			issueAcceptor.addError("An URI syntax exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
 		} catch (IOException e) {
-			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", expression);
+			issueAcceptor.addError("An IO exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
 		} catch (ConfigurationException e) {
-			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", expression);
+			issueAcceptor.addError("A configuration exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
+		} catch (NullPointerException e){
+			issueAcceptor.addError("A null pointer exception occurred while type-checking this expression.", expression);
 		}
 		return false;
 	}
