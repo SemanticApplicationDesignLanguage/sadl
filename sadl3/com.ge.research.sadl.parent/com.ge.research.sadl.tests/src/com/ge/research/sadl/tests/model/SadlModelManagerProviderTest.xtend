@@ -924,6 +924,60 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void myMaxCardinalityCase1() {
+		'''
+			uri "http://sadl.org/TestSadlIde/model1" alias m1.
+			MyClass1 is a class.
+			MyClass2 is a class.
+			myProp describes MyClass1 with a List of values of type MyClass2.
+			myProp of MyClass1 has at most 10 values. 		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+				"prefix m1: <http://sadl.org/TestSadlIde/model1#> " +
+				"select distinct ?c ?p ?v where {?c rdfs:subClassOf ?r . ?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:maxCardinality ?v}"
+    		assertTrue(queryResultContains(jenaModel, q1, "http://sadl.org/TestSadlIde/model1#MyClass1 http://sadl.org/TestSadlIde/model1#myProp 10^^http://www.w3.org/2001/XMLSchema#int"))
+			var showModel = true
+			if (showModel) {
+				jenaModel.write(System.out, "N3")				
+			}
+		]
+	}
+
+	@Test def void myMaxCardinalityCase2() {
+		'''
+			uri "http://sadl.org/TestSadlIde/model1" alias m1.
+			MyClass1 is a class.
+			MyClass2 is a class described by yourProp.
+			myProp describes MyClass1 with a List of values of type MyClass2.
+			myProp of MyClass1 has at most 10 values. 		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+				"prefix m1: <http://sadl.org/TestSadlIde/model1#> " +
+				"select distinct ?c ?p ?v where {?c rdfs:subClassOf ?r . ?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:maxCardinality ?v}"
+    		assertTrue(queryResultContains(jenaModel, q1, "http://sadl.org/TestSadlIde/model1#MyClass1 http://sadl.org/TestSadlIde/model1#myProp 10^^http://www.w3.org/2001/XMLSchema#int"))
+			var showModel = true
+			if (showModel) {
+				jenaModel.write(System.out, "N3")				
+			}
+		]
+	}
+
 	@Test def void mySimpleInstanceDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.

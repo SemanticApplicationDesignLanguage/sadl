@@ -59,6 +59,11 @@ import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
+import com.ge.research.sadl.sADL.SadlDataType;
+import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
+import com.ge.research.sadl.sADL.SadlResource;
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
+import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
 import com.google.inject.Inject;
@@ -331,6 +336,18 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			sb.append(expr.getNewName());
 		}
 		return sb.toString();
+	}
+
+	private Object translate(SadlTypeReference type) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if (type instanceof SadlSimpleTypeReference) {
+			return translate(((SadlSimpleTypeReference)type).getType());
+		}
+		else if (type instanceof SadlPrimitiveDataType) {
+			SadlDataType pt = ((SadlPrimitiveDataType)type).getPrimitiveType();
+			String typeStr = pt.getLiteral();
+			return typeStr;
+		}
+		throw new TranslationException("Unhandled type of SadlTypeReference");
 	}
 
 	protected Object translate(BooleanLiteral expr) {

@@ -46,14 +46,14 @@
       <key
             commandId="SADL.RunInference"            
             contextId="org.eclipse.ui.contexts.window"
-            sequence="M1+6"
+            sequence="M1+r"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
       </key>
       <key
             commandId="SADL.RunQuery"            
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+7">
+            sequence="M1+q">
       </key>
    </extension>
    <extension
@@ -91,7 +91,7 @@
                id="sadl.toolbar">
             <command
                   commandId="referenceToSadlMenuId"
-                  icon="icons/releng_gears.gif"
+                  icon="icons/06-link.png"
                   style="pulldown">
               <visibleWhen checkEnabled="false">
   				<with variable="activeWorkbenchWindow.activePerspective">
