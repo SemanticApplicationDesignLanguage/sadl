@@ -3,13 +3,17 @@ package com.ge.research.sadl.jena;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.emf.ecore.EObject;
 
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.ConceptName.RangeValueType;
+import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.ValidationAcceptor;
@@ -129,7 +133,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			issueAcceptor.addError("A configuration exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
 		} catch (NullPointerException e){
-			issueAcceptor.addError("A null pointer exception occurred while type-checking this expression.", expression);
+			//issueAcceptor.addError("A null pointer exception occurred while type-checking this expression.", expression);
 		}
 		return false;
 	}
@@ -188,7 +192,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 		}
 		else if(expression instanceof PropOfSubject){
-			return getType(((PropOfSubject)expression).getLeft());
+			return getType((PropOfSubject)expression);
 		}
 		else if(expression instanceof SubjHasProp){
 			return getType(((SubjHasProp)expression).getLeft());
@@ -211,9 +215,52 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
+	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
+		List<String> operations = Collections.<String>emptyList();
+		TypeCheckInfo predicateTypeCheckInfo = null;
+		TypeCheckInfo subjectTypeCheckInfo = null;
+		Expression predicate = expression.getLeft();
+		Expression subject = expression.getRight();
+		
+		if (predicate instanceof Constant) {
+			String cnstval = ((Constant)predicate).getConstant();
+			if (cnstval.equals("length")) {
+			}
+			else if (cnstval.equals("count")) {
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
+			}
+			else if (cnstval.equals("index")) {
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
+			}
+			else if (cnstval.equals("first element")) {
+			}
+			else if (cnstval.equals("last element")) {
+			}
+			else {
+				issueAcceptor.addError("Unhandled constant property", expression);
+			}
+		}
+		
+		predicateTypeCheckInfo = getType(predicate);
+		subjectTypeCheckInfo = getType(subject);
+		return combineTypes(operations, predicate, subject, 
+				predicateTypeCheckInfo, subjectTypeCheckInfo);
+	}
+	
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
 		SadlResource qnm =expression.getName();
+		return getType(qnm);
+	}
+	
+	protected TypeCheckInfo getType(SadlResource qnm){
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
+		EObject expression = qnm.eContainer();
 		if (conceptUri == null) {
 			issueAcceptor.addError("Unidentified expression", expression);
 		}
@@ -249,11 +296,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(conceptName, conceptName);
 		}
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
-			//The scope of the variable depends on what it is in (rule, query, requirement)
-			//Variables are handled by the xtext index now
-			//Will take further thought as to how this is processed for requirements
-			//Will be overridden by RequirementsValidator
-			return getVariableType(ConceptType.VARIABLE, conceptUri, expression);
+			return getVariableType(ConceptType.VARIABLE, conceptUri, (Name) expression);
 
 		}
 		else if(conceptType.equals(OntConceptType.ANNOTATION_PROPERTY)){
@@ -266,7 +309,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 	}
 	
-	private TypeCheckInfo getNameProperty(ConceptType dataTypeProperty, String conceptUri, Name expression) {
+	private TypeCheckInfo getNameProperty(ConceptType dataTypeProperty, String conceptUri, EObject expression) {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
 			issueAcceptor.addError("Unidentified expression", expression);
@@ -285,8 +328,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, Name expression) {
-		// TODO Auto-generated method stub
+	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, Name expression) {
 		//Needs filled in for Requirements extension
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
