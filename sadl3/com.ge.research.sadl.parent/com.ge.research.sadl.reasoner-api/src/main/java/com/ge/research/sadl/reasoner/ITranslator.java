@@ -102,7 +102,16 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 */
 	
-	public String translateRule(OntModel model, Rule rule)throws TranslationException;	
+	public String translateRule(OntModel model, Rule rule) throws TranslationException;	
+	
+	/**
+	 * Method to translate an Equation (internal or external) to a String.
+	 * @param model
+	 * @param equation
+	 * @return
+	 * @throws TranslationException
+	 */
+	public String translateEquation(OntModel model, Equation equation) throws TranslationException;
 	
 	/**
 	 * Method to translate a query in intermediate form to the target representation

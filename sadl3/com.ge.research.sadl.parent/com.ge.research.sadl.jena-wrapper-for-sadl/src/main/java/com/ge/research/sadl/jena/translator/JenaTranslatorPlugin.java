@@ -1784,4 +1784,10 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return false;
 	}
 
+
+	@Override
+	public String translateEquation(OntModel model, Equation equation) throws TranslationException {
+		throw new TranslationException("Equation translation not yet implemented in " + this.getClass().getCanonicalName());
+	}
+
 }

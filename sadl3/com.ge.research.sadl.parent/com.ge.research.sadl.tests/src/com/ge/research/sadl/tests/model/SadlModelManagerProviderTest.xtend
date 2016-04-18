@@ -46,6 +46,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.vocabulary.RDFS
+import com.hp.hpl.jena.vocabulary.OWL
+import com.hp.hpl.jena.rdf.model.RDFList
+import com.hp.hpl.jena.vocabulary.XSD
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -503,7 +507,7 @@ class SadlModelManagerProviderTest {
 	}
 	
 //	@Ignore
-	@Test def void myUserDefinedDatatypeUse1Case() {
+	@Test def void myUserDefinedDatatypeUseCase1() {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
 			Airport_Ident is a type of string length 1-4 .
@@ -522,6 +526,34 @@ class SadlModelManagerProviderTest {
 			}
 			if (!found) {
 				jenaModel.write(System.out, "N3")				
+			}
+			assertTrue(found);
+		]
+	}
+
+	@Test def void myUserDefinedDatatypeUseCase2() {
+		'''
+			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
+			AnyThingGoes is a type of {string or decimal or int or date or time}.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			// look for something specific to the model; if found set found true
+// TODO use datatype facets to check validity?			
+			var stmtitr = jenaModel.listStatements(null, OWL.unionOf, null as RDFNode).toIterable().iterator
+			if (stmtitr != null && stmtitr.hasNext) {
+				var obj = stmtitr.next.object as com.hp.hpl.jena.rdf.model.RDFNode;
+				if (obj.canAs(com.hp.hpl.jena.rdf.model.RDFList)) {
+					var lst = obj.^as(com.hp.hpl.jena.rdf.model.RDFList)
+					var jlst = lst.asJavaList
+					if (jlst.contains(XSD.date))
+					found = true;
+				}
+			}
+			if (!found) {
+				jenaModel.write(System.out)				
 			}
 			assertTrue(found);
 		]
