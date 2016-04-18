@@ -45,7 +45,7 @@ import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected ValidationAcceptor issueAcceptor = null;
-	private OntModel theJenaModel = null;
+	protected OntModel theJenaModel = null;
 	private DeclarationExtensions declarationExtensions = null;
 	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","not","unique","in","contains","does",/*"not",*/"contain");
 	
@@ -309,7 +309,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 	}
 	
-	private TypeCheckInfo getNameProperty(ConceptType dataTypeProperty, String conceptUri, EObject expression) {
+	protected TypeCheckInfo getNameProperty(ConceptType dataTypeProperty, String conceptUri, EObject expression) {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
 			issueAcceptor.addError("Unidentified expression", expression);
