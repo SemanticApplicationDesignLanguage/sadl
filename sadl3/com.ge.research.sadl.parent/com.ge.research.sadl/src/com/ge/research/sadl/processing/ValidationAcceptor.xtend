@@ -38,7 +38,7 @@ import org.eclipse.xtext.validation.Issue
 	}
 	
 	def void addError(String message, EObject context, EStructuralFeature feature) {
-		val diag = new FeatureBasedDiagnostic(Diagnostic.WARNING, message, context, feature, -1, CheckType.NORMAL, 'processor.issue')
+		val diag = new FeatureBasedDiagnostic(Diagnostic.ERROR, message, context, feature, -1, CheckType.NORMAL, 'processor.issue')
 		converter.convertValidatorDiagnostic(diag, acceptor)
 	}
 	

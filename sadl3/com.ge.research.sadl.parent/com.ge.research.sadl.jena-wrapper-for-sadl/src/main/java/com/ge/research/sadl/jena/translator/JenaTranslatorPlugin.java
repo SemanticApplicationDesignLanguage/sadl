@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
+import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
@@ -76,6 +77,7 @@ import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
+import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
 
 public class JenaTranslatorPlugin implements ITranslator {
     protected static final Logger logger = LoggerFactory.getLogger(JenaTranslatorPlugin.class);
@@ -1567,7 +1569,18 @@ public class JenaTranslatorPlugin implements ITranslator {
 			OntModel model, Object otherStructure, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
 			IOException, URISyntaxException {
-		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+		if (otherStructure instanceof List<?>) {
+			OntModel eqModel = null;	// get model
+			// remove all equations in this namespace
+			for (Object os: (List<?>)otherStructure) {
+				if (os instanceof Equation) {
+					// add equations
+					System.out.println("Jena translator ready to save equation '" + os.toString() + "'");
+				}
+			}
+			// save eqModel
+		}
+		return (errors != null && errors.size() > 0) ? errors : null;
 	}
 
 	public List<ModelError> validateRule(com.ge.research.sadl.model.gp.Rule rule) {
@@ -1769,6 +1782,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 			}
 		}
 		return false;
+	}
+
+
+	@Override
+	public String translateEquation(OntModel model, Equation equation) throws TranslationException {
+		throw new TranslationException("Equation translation not yet implemented in " + this.getClass().getCanonicalName());
 	}
 
 }

@@ -39,6 +39,7 @@ public class BuiltinElement extends GraphPatternElement {
 															// an output variable
 		Not, Negative,										// these built-ins are unary--they take a single input argument followed by
 															// an output variable
+		BuiltinFunction,									// some rule languages have built-in functions, e.g., X is min(Y,Z) in Prolog
 		UserAdded;
 
 		public boolean isBooleanBuiltin;
@@ -111,6 +112,12 @@ public class BuiltinElement extends GraphPatternElement {
 
 	public BuiltinType getFuncType() {
 		return funcType;
+	}
+	
+	public BuiltinType setFuncType(BuiltinType ft) {
+		BuiltinType oldft = funcType;
+		funcType = ft;
+		return oldft;
 	}
 	
 	public List<Node> getArguments() {

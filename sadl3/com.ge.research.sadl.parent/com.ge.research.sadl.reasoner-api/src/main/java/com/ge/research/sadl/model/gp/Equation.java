@@ -26,12 +26,15 @@ import java.util.List;
  *
  */
 public class Equation {
+	private boolean isExternal = false;
 	private String name = null;
 	private String namespace = null;
 	private List<Node> arguments = null;
 	private List<Node> argumentTypes = null;
 	private Node returnType = null;
 	private List<GraphPatternElement> body = null;
+	private String uri = null;
+	private String location = null;
 	
 	public Equation( String nm) {
 		setName(nm);
@@ -99,11 +102,23 @@ public class Equation {
 		}
 		sb.append(")");
 		sb.append(": ");
-		List<GraphPatternElement> exprs = getBody();
-		for (int i = 0; exprs != null && i < exprs.size(); i++) {
-			GraphPatternElement expr = exprs.get(i);
-			if (i > 0) sb.append(",");
-			sb.append(expr.toString());
+		if (isExternal()) {
+			 sb.append("uri(\"");
+			 sb.append(getUri());
+			 sb.append("\")");
+			 if (getLocation() != null) {
+				 sb.append(" location(\"");
+				 sb.append(getLocation());
+				 sb.append("\")");
+			 }
+		}
+		else {
+			List<GraphPatternElement> exprs = getBody();
+			for (int i = 0; exprs != null && i < exprs.size(); i++) {
+				GraphPatternElement expr = exprs.get(i);
+				if (i > 0) sb.append(",");
+				sb.append(expr.toString());
+			}
 		}
 		return sb.toString();
 	}
@@ -132,11 +147,23 @@ public class Equation {
 		}
 		sb.append(")");
 		sb.append(": ");
-		List<GraphPatternElement> exprs = getBody();
-		for (int i = 0; exprs != null && i < exprs.size(); i++) {
-			GraphPatternElement expr = exprs.get(i);
-			if (i > 0) sb.append(",");
-			sb.append(expr.toFullyQualifiedString());
+		if (isExternal()) {
+			 sb.append("uri(\"");
+			 sb.append(getUri());
+			 sb.append("\")");
+			 if (getLocation() != null) {
+				 sb.append(" location(\"");
+				 sb.append(getLocation());
+				 sb.append("\")");
+			 }
+		}
+		else {
+			List<GraphPatternElement> exprs = getBody();
+			for (int i = 0; exprs != null && i < exprs.size(); i++) {
+				GraphPatternElement expr = exprs.get(i);
+				if (i > 0) sb.append(",");
+				sb.append(expr.toFullyQualifiedString());
+			}
 		}
 		return sb.toString();		
 	}
@@ -155,5 +182,29 @@ public class Equation {
 
 	public void setArgumentTypes(List<Node> argumentTypes) {
 		this.argumentTypes = argumentTypes;
+	}
+
+	public boolean isExternal() {
+		return isExternal;
+	}
+
+	public void setExternal(boolean isExternal) {
+		this.isExternal = isExternal;
+	}
+
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 }

@@ -123,7 +123,9 @@ class DeclarationExtensions {
 	
 	def OntConceptType getOntConceptType(SadlResource resource) {
 		var cnm = getConcreteName(resource)
-		if(cnm == null) System.err.println("Resource could not provide a concrete name");
+//		if(cnm == null) {
+//			System.err.println("Resource could not provide a concrete name");
+//		}
 		
 		if (resource instanceof Name) {
 			return OntConceptType.VARIABLE
@@ -169,7 +171,7 @@ class DeclarationExtensions {
 			SadlMustBeOneOf :
 				OntConceptType.INSTANCE
 				
-			default: OntConceptType.INSTANCE // linking errors and the like
+			default: OntConceptType.VARIABLE // linking errors and the like
 		}
 	}
 	

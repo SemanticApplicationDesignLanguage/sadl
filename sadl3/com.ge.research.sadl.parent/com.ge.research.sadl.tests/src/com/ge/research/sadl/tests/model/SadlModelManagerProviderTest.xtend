@@ -46,6 +46,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.vocabulary.RDFS
+import com.hp.hpl.jena.vocabulary.OWL
+import com.hp.hpl.jena.rdf.model.RDFList
+import com.hp.hpl.jena.vocabulary.XSD
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -503,7 +507,7 @@ class SadlModelManagerProviderTest {
 	}
 	
 //	@Ignore
-	@Test def void myUserDefinedDatatypeUse1Case() {
+	@Test def void myUserDefinedDatatypeUseCase1() {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
 			Airport_Ident is a type of string length 1-4 .
@@ -522,6 +526,34 @@ class SadlModelManagerProviderTest {
 			}
 			if (!found) {
 				jenaModel.write(System.out, "N3")				
+			}
+			assertTrue(found);
+		]
+	}
+
+	@Test def void myUserDefinedDatatypeUseCase2() {
+		'''
+			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
+			AnyThingGoes is a type of {string or decimal or int or date or time}.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			// look for something specific to the model; if found set found true
+// TODO use datatype facets to check validity?			
+			var stmtitr = jenaModel.listStatements(null, OWL.unionOf, null as RDFNode).toIterable().iterator
+			if (stmtitr != null && stmtitr.hasNext) {
+				var obj = stmtitr.next.object as com.hp.hpl.jena.rdf.model.RDFNode;
+				if (obj.canAs(com.hp.hpl.jena.rdf.model.RDFList)) {
+					var lst = obj.^as(com.hp.hpl.jena.rdf.model.RDFList)
+					var jlst = lst.asJavaList
+					if (jlst.contains(XSD.date))
+					found = true;
+				}
+			}
+			if (!found) {
+				jenaModel.write(System.out)				
 			}
 			assertTrue(found);
 		]
@@ -924,6 +956,60 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void myMaxCardinalityCase1() {
+		'''
+			uri "http://sadl.org/TestSadlIde/model1" alias m1.
+			MyClass1 is a class.
+			MyClass2 is a class.
+			myProp describes MyClass1 with a List of values of type MyClass2.
+			myProp of MyClass1 has at most 10 values. 		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+				"prefix m1: <http://sadl.org/TestSadlIde/model1#> " +
+				"select distinct ?c ?p ?v where {?c rdfs:subClassOf ?r . ?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:maxCardinality ?v}"
+    		assertTrue(queryResultContains(jenaModel, q1, "http://sadl.org/TestSadlIde/model1#MyClass1 http://sadl.org/TestSadlIde/model1#myProp 10^^http://www.w3.org/2001/XMLSchema#int"))
+			var showModel = true
+			if (showModel) {
+				jenaModel.write(System.out, "N3")				
+			}
+		]
+	}
+
+	@Test def void myMaxCardinalityCase2() {
+		'''
+			uri "http://sadl.org/TestSadlIde/model1" alias m1.
+			MyClass1 is a class.
+			MyClass2 is a class described by yourProp.
+			myProp describes MyClass1 with a List of values of type MyClass2.
+			myProp of MyClass1 has at most 10 values. 		
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var found = false
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
+				"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+				"prefix m1: <http://sadl.org/TestSadlIde/model1#> " +
+				"select distinct ?c ?p ?v where {?c rdfs:subClassOf ?r . ?r rdf:type owl:Restriction . ?r owl:onProperty ?p . ?r owl:maxCardinality ?v}"
+    		assertTrue(queryResultContains(jenaModel, q1, "http://sadl.org/TestSadlIde/model1#MyClass1 http://sadl.org/TestSadlIde/model1#myProp 10^^http://www.w3.org/2001/XMLSchema#int"))
+			var showModel = true
+			if (showModel) {
+				jenaModel.write(System.out, "N3")				
+			}
+		]
+	}
+
 	@Test def void mySimpleInstanceDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.

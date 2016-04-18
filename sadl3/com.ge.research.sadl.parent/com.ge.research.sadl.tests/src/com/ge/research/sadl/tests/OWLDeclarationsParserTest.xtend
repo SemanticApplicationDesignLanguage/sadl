@@ -513,4 +513,17 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 			SomeFreezer is a Freezer with expectedTemperature -3.2e2 .
 		'''.assertNoErrors
 	}
+	
+	@Ignore
+	@Test 
+	def void testPropOfSubjAssignment() {
+		'''
+			uri "http://sadl.org/testpropertyofsubjectassignment.sadl" alias tposa.
+			 
+			Person is a class described by age with values of type int.
+			George is a Person.
+			age of George is 23 .
+		'''.assertNoErrors
+	}
+	
 }
