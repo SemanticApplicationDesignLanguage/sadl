@@ -5,16 +5,13 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public class MessageManager {
 	public static enum MessageType { ERROR, WARN, INFO }
 
 	public class HyperlinkInfo {
-		private IFile linkFile;
+		private URI linkFile;
 		private int fileLineNumber;
 		private int fileOffset;
 		private int fileLength;
@@ -30,10 +27,7 @@ public class MessageManager {
 			try {
 				SadlUtils su = new SadlUtils();
 				location = new URI(su.fileNameToFileUrl(fname));
-		        IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(location);
-		        if (files != null && files.length > 0) {
-					linkFile = files[0];
-		        }
+				linkFile = location;
 			} catch (URISyntaxException e) {
 				linkFile = null;
 				e.printStackTrace();
@@ -47,7 +41,7 @@ public class MessageManager {
 			}
 		}
 		
-		public IFile getFile() {
+		public URI getFile() {
 			return linkFile;
 		}
 		

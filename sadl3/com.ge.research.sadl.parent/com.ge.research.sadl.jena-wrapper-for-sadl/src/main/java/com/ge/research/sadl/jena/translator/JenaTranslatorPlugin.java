@@ -77,7 +77,6 @@ import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
-import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
 
 public class JenaTranslatorPlugin implements ITranslator {
     protected static final Logger logger = LoggerFactory.getLogger(JenaTranslatorPlugin.class);

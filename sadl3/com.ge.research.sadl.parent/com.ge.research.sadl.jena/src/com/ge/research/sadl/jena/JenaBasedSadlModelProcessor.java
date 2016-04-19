@@ -521,6 +521,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			    	}
 		    	}
 			}
+//			else {
+//				Resource importedRsrc = simport.eResource();
+//				// this should be an external model
+//			}
 	    	
 // TODO	Should the imported model actually be loaded by Jena? The OWL model, whether from SADL or external, will potenatially 
 //	    	contain information that is necessary for validation. The only information that will be potentially needed for

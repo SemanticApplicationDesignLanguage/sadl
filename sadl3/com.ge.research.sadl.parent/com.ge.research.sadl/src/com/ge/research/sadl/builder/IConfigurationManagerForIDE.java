@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
@@ -115,18 +112,6 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 			throws ConfigurationException, IOException, URISyntaxException;
 
 	/**
-	 * Method to clean a SADL Project as a result of a clean event. Cleaning consists of the following steps:
-	 *  1) Identify all SADL files currently in the project with their relative paths
-	 *  2) Remove all OWL files in the OwlModels folder which are not associated with a Project SADL file
-	 *  3) Remove all SADL-generated entries in the Jena OwlModels/ont-policy.rdf file of mappings that do not correspond to a project SADL file
-	 *
-	 * @param folder
-	 * @throws ConfigurationException 
-	 */
-	public abstract void cleanProject(IProject project, IFolder folder)
-			throws ConfigurationException;
-
-	/**
 	 * Method to get a list of all the available translator plugins for the current reasoner using a {@link ServiceLoader}
 	 * @return A list of all available translator plugins that are compatible (same Reasoner Family) with the current reasoner
 	 * @throws ConfigurationException 
@@ -192,11 +177,6 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract boolean saveOntPolicyFile();
 
 	public abstract boolean isConfigChanged();
-
-	/** Listen for events that indicate that the project may be closing so that any configuration changes
-	 *  can be saved.
-	 */
-	public abstract void resourceChanged(IResourceChangeEvent event);
 
 	/**
 	 * Call this method to set the mapping for the "defaults.owl" model. This should be called if a default is added
