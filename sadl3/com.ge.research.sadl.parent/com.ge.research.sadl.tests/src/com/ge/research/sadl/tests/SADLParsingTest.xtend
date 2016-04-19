@@ -18,30 +18,17 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
-import com.ge.research.sadl.sADL.SadlModel
-import com.google.inject.Inject
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
-import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.Ignore
 
-@RunWith(XtextRunner)
-@InjectWith(SADLInjectorProvider)
-@Ignore
-class SADLParsingTest{
-
-	@Inject
-	ParseHelper<SadlModel> parseHelper;
+class SADLParsingTest extends AbstractSADLParsingTest {
 
 	@Test 
-	def void loadModel() {
-		val result = parseHelper.parse('''
-			Hello Xtext!
-		''')
-		Assert.assertNotNull(result)
+	def void testSublist_01() {
+		'''
+			uri "http://com.ge.research.sadl/sublists". 
+			
+			Test: Items is (the sublist of list_of_items matching var1 is true and var2 is true and var3 is false).
+		'''.assertNoErrors
 	}
 
 }

@@ -366,6 +366,7 @@ class SadlModelManagerProviderTest {
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)
+			assertTrue(issues.toString, issues.empty)
 			assertTrue(issues.size == 0)
 			var itr = jenaModel.listClasses().toIterable().iterator
 			var found = false

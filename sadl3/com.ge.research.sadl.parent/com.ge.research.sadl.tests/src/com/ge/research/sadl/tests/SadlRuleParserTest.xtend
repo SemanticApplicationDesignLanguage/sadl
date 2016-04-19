@@ -36,7 +36,6 @@ class SadlRuleParserTest extends AbstractSADLParsingTest {
 			
 			Rule AllThingsConnect: if x is a Thingy and y is a Thingy and x != y then x has connectedTo y .
 		'''.assertNoErrors
-
 	}
 	
 	@Test def void testPolyRule() {

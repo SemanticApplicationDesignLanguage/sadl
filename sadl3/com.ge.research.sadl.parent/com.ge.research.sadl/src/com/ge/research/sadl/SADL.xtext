@@ -282,7 +282,8 @@ Expression returns Expression: // (1)
 ;
 // Real expressions start here
 ExpressionParameterized<EnabledWith> returns Expression: // (1)
-	OrExpression<EnabledWith>;
+    {Sublist} AnArticle? 'sublist' 'of' list=OrExpression<EnabledWith> 'matching' where=OrExpression<EnabledWith>
+    | OrExpression<EnabledWith>;
 
 OrExpression<EnabledWith> returns Expression:
 	AndExpression<EnabledWith> ({BinaryOperation.left=current} op=OpOr right=AndExpression<EnabledWith>)*;
@@ -333,14 +334,14 @@ Power<EnabledWith> returns Expression:
 
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject<EnabledWith> returns Expression: // (17)
-	PrimaryExpression ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
-					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression)+)?
+	PrimaryExpression<EnabledWith> ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
+					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression<EnabledWith>)+)?
 |   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PropOfSubject<EnabledWith> // this can be applied to other unitary operations
 |   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith>;
 
 // primary expressions are the atom units of expression in the grammar	
-PrimaryExpression returns Expression: // (20)
-	'(' Expression ')' 
+PrimaryExpression<EnabledWith> returns Expression: // (20)
+	'(' ExpressionParameterized<EnabledWith> ')' 
 	| {Declaration} article=AnArticle type=SadlPrimaryTypeReference ->(newName=DNAME)?
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
