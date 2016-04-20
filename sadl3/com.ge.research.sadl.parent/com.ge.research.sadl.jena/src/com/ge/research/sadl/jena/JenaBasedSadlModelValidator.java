@@ -296,7 +296,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(conceptName, conceptName);
 		}
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
-			return getVariableType(ConceptType.VARIABLE, conceptUri, (Name) expression);
+			return getVariableType(ConceptType.VARIABLE, conceptUri, expression);
 
 		}
 		else if(conceptType.equals(OntConceptType.ANNOTATION_PROPERTY)){
@@ -328,7 +328,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, Name expression) {
+	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) {
 		//Needs filled in for Requirements extension
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
