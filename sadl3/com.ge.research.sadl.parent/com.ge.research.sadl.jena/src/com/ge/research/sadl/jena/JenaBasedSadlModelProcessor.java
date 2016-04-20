@@ -20,7 +20,6 @@ package com.ge.research.sadl.jena;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -28,27 +27,19 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.URIConverter;
-import org.eclipse.emf.ecore.resource.URIHandler;
-import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl.EObjectOutputStream.Check;
-import org.eclipse.xtext.builder.EclipseResourceFileSystemAccess2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.preferences.IPreferenceValues;
-import org.eclipse.xtext.preferences.PreferenceKey;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
@@ -85,12 +76,10 @@ import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
@@ -214,6 +203,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private OntDocumentManager jenaDocumentMgr;
 	private static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
 	
+	private JenaBasedSadlModelValidator modelValidator = null;
 	private ValidationAcceptor issueAcceptor = null;
 	private CancelIndicator cancelIndicator = null;
 
@@ -542,6 +532,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	    	theJenaModel.loadImports();
 		}
 		
+		// create validator for expressions
+		modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions);
+		
 		// process rest of parse tree
 		List<SadlModelElement> elements = model.getElements();
 		if (elements != null) {
@@ -836,6 +829,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		//Validate BinaryOperation expression
+		if(!modelValidator.validate(expr)){
+			issueAcceptor.addError("This expression contains a type conflict", expr);
+		}
+		
 		String op = expr.getOp();
 		BuiltinType optype = BuiltinType.getType(op);
 		
