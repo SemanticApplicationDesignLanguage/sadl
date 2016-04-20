@@ -514,7 +514,6 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test 
 	def void testPropOfSubjAssignment() {
 		'''
