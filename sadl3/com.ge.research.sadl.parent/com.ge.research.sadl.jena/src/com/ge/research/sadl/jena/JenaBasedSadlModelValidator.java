@@ -107,7 +107,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		this.declarationExtensions = declarationExtensions;
 	}
 	
-	@Override
 	public boolean validate(BinaryOperation expression) {
 		Expression leftExpression = expression.getLeft();
 		Expression rightExpression = expression.getRight();
@@ -142,7 +141,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private boolean skipOperations(List<String> operations) {
+	protected boolean skipOperations(List<String> operations) {
 		if(operations.contains("and") || operations.contains("or")){
 			return true;
 		}
