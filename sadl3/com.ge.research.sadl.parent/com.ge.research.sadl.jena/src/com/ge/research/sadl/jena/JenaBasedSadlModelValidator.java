@@ -425,6 +425,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if(isDecimal(leftConceptName) && isInteger(rightConceptName)){
 					return true;
 				}
+				else if(isDecimal(leftConceptName) && isDecimal(rightConceptName)){
+					return true;
+				}
 			}
 			else if (leftConceptName.getType().equals(ConceptType.DATATYPEPROPERTY) &&
 					  rightConceptName.getType().equals(ConceptType.DATATYPEPROPERTY)) {
