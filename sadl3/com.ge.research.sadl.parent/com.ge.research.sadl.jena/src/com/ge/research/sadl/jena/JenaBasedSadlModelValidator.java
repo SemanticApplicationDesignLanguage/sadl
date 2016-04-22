@@ -113,6 +113,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		Expression rightExpression = expression.getRight();
 		List<String> operations = Arrays.asList(expression.getOp().split("\\s+"));
 		
+		if(skipOperations(operations)){
+			return true;
+		}
+		
 		try {	
 			TypeCheckInfo leftTypeCheckInfo = getType(leftExpression);
 			TypeCheckInfo rightTypeCheckInfo = getType(rightExpression);
@@ -138,6 +142,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
+	private boolean skipOperations(List<String> operations) {
+		if(operations.contains("and") || operations.contains("or")){
+			return true;
+		}
+		return false;
+	}
+
 	protected TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
 		if(expression instanceof Name){
 			return getType((Name)expression);
@@ -149,17 +160,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof StringLiteral){
 			ConceptName stringLiteralConceptName = new ConceptName(XSD.xstring.getURI());
-			stringLiteralConceptName.setType(ConceptType.DATATYPEPROPERTY);
+			stringLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(stringLiteralConceptName, stringLiteralConceptName);
 		}
 		else if(expression instanceof NumberLiteral){
 			ConceptName numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
-			numberLiteralConceptName.setType(ConceptType.DATATYPEPROPERTY);
+			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(numberLiteralConceptName, numberLiteralConceptName);
 		}
 		else if(expression instanceof BooleanLiteral){
 			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
-			booleanLiteralConceptName.setType(ConceptType.DATATYPEPROPERTY);
+			booleanLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName);
 		}
 		else if(expression instanceof Constant){
@@ -406,12 +417,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (leftConceptName.equals(rightConceptName)) {
 				return true;
 			}
-			else if (leftConceptName.getType().equals(ConceptType.DATATYPEPROPERTY) &&
-					  rightConceptName.getType().equals(ConceptType.DATATYPEPROPERTY)) {
+			else if (leftConceptName.getType().equals(ConceptType.RDFDATATYPE) &&
+					  rightConceptName.getType().equals(ConceptType.RDFDATATYPE)) {
 				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 					return true;
 				}
-				else if(isDecimal(leftConceptIdentifier) && isDecimal(rightConceptIdentifier)){
+				else if(isDecimal(leftConceptName) && isInteger(rightConceptName)){
+					return true;
+				}
+			}
+			else if (leftConceptName.getType().equals(ConceptType.DATATYPEPROPERTY) &&
+					  rightConceptName.getType().equals(ConceptType.DATATYPEPROPERTY)) {
+				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 					return true;
 				}
 			}
@@ -441,6 +458,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
+	private boolean isInteger(ConceptIdentifier type) throws InvalidNameException {
+		if (type instanceof ConceptName) {
+			String uri = ((ConceptName)type).getUri();
+			if (uri.equals(XSD.integer.getURI())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean isDecimal(ConceptIdentifier type) throws InvalidNameException {
 		if (type instanceof ConceptName) {
 			String uri = ((ConceptName)type).getUri();
