@@ -282,6 +282,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Individual individual = theJenaModel.getIndividual(conceptUri);
 			if(individual == null){
 				issueAcceptor.addError("Unidentified expression", expression);
+				return null;
 			}
 			Resource ontResource = individual.getRDFType(true);
 			if(!ontResource.isURIResource()){

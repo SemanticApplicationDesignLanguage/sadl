@@ -67,6 +67,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         						{"DD/MM/YYYY", SadlPreferences.DMY_ORDER_DMY.getId()}}, getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DEEP_VALIDATION_OFF.getId(), "Disable Deep Validation of Model", getFieldEditorParent()));
         addField(new StringFieldEditor(SadlPreferences.GRAPH_VIZ_PATH.getId(), "GraphViz bin folder", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
     }
 	
 	@Override

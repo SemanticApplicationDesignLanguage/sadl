@@ -142,6 +142,7 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -415,8 +416,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (isReservedName(resource)) {
 			addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
 		}
-		// directly create the Jena Model here!
-//		theJenaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		String modelName = model.getBaseUri();
 		setModelName(modelName);
 		setModelNamespace(assureNamespaceEndsWithHash(modelName));
@@ -532,8 +531,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	    	theJenaModel.loadImports();
 		}
 		
+//		List<com.hp.hpl.jena.rdf.model.Resource> importResources = importJenaModelsDirectAndIndirect(model);
+//		if (importResources != null) {
+//			for (com.hp.hpl.jena.rdf.model.Resource ir : importResources) {
+//				modelOntology.addImport(ir);
+//			}
+//		}
+//		getTheJenaModel().loadImports();
+		
+		boolean disableTypeChecking = true;
+		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.DISABLE_TYPE_CHECKING);
+		if (typechecking != null) {
+			disableTypeChecking = Boolean.parseBoolean(typechecking);
+		}
 		// create validator for expressions
-		modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions);
+		if (!disableTypeChecking) {
+			modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions);
+		}
 		
 		// process rest of parse tree
 		List<SadlModelElement> elements = model.getElements();
@@ -618,6 +632,53 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Method to determine the OWL model URI and actual URL for each import and add that, along with the prefix,
+	 * to the Jena OntDocumentManager so that it will be loaded when we do a Jena loadImports
+	 * @param sadlImports -- the list of imports to 
+	 * @return 
+	 */
+	private List<com.hp.hpl.jena.rdf.model.Resource> importJenaModelsDirectAndIndirect(SadlModel model) {
+		EList<SadlImport> implist = model.getImports();
+		Iterator<SadlImport> impitr = implist.iterator();
+		if (impitr.hasNext()) {
+			List<com.hp.hpl.jena.rdf.model.Resource> importedResources = new ArrayList<com.hp.hpl.jena.rdf.model.Resource>();
+			while (impitr.hasNext()) {
+				SadlImport simport = impitr.next();
+				SadlModel importedModel = simport.getImportedResource();
+				String importUri = importedModel.getBaseUri();
+				if (importUri != null) {
+					String importPrefix = simport.getAlias();
+		    		if (importPrefix != null) {
+		    			getTheJenaModel().setNsPrefix(importPrefix, assureNamespaceEndsWithHash(importUri));
+		    		}
+
+			    	// Now add import model 
+			    	com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
+			    	logger.debug("Imported ontology resource '" + importUri + "' created.");
+			    	URI prjUri = ResourceManager.getProjectUri(importedModel.eResource().getURI());
+			    	if (prjUri == null) {
+			    		logger.debug("Unable to get a project URI--is this a JUnit test?");
+			    		
+			    	}
+			    	else {
+			    		String sadlFile = importedModel.eResource().getURI().lastSegment();
+			    		String owlFile = sadlFile.substring(0, sadlFile.length() - 4) + "owl";
+			    		String locationURL = prjUri.toString() + "/" + ResourceManager.OWLDIR + "/" + owlFile;
+			    		getTheJenaModel().getDocumentManager().addAltEntry(importUri, locationURL);
+			    	}
+			    	importedResources.add(importedOntology);
+				}
+				else {
+					addError("Unable to obtain import URI", simport);
+				}
+				importJenaModelsDirectAndIndirect(importedModel);
+			}
+			return importedResources;
+		}
+		return null;
 	}
 
 	private boolean isReservedName(Resource resource) {
@@ -830,7 +891,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		//Validate BinaryOperation expression
-		if(!modelValidator.validate(expr)){
+		if(modelValidator != null && !modelValidator.validate(expr)) {
 			issueAcceptor.addError("This expression contains a type conflict", expr);
 		}
 		
