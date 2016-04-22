@@ -138,7 +138,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
+	protected TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
 		if(expression instanceof Name){
 			return getType((Name)expression);
 		}
@@ -247,10 +247,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
-		predicateTypeCheckInfo = getType(predicate);
-		subjectTypeCheckInfo = getType(subject);
-		return combineTypes(operations, predicate, subject, 
-				predicateTypeCheckInfo, subjectTypeCheckInfo);
+		return predicateTypeCheckInfo = getType(predicate);
+//		subjectTypeCheckInfo = getType(subject);
+//		return combineTypes(operations, predicate, subject, 
+//				predicateTypeCheckInfo, subjectTypeCheckInfo);
 	}
 	
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
@@ -284,6 +284,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				issueAcceptor.addError("Unidentified expression", expression);
 				return null;
 			}
+			ConceptName instConceptName = new ConceptName(conceptUri);
+			instConceptName.setType(ConceptType.INDIVIDUAL);
 			Resource ontResource = individual.getRDFType(true);
 			if(!ontResource.isURIResource()){
 				//Unhandled condition
@@ -293,8 +295,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			String uriOfTypeToBeReturned = ontResource.getURI();
 			ConceptName conceptName = new ConceptName(uriOfTypeToBeReturned);
-			conceptName.setType(ConceptType.INDIVIDUAL);
-			return new TypeCheckInfo(conceptName, conceptName);
+			conceptName.setType(ConceptType.ONTCLASS);
+			return new TypeCheckInfo(instConceptName, conceptName);
 		}
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
 			return getVariableType(ConceptType.VARIABLE, conceptUri, expression);
@@ -310,19 +312,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 	}
 	
-	protected TypeCheckInfo getNameProperty(ConceptType dataTypeProperty, String conceptUri, EObject expression) {
+	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
 			issueAcceptor.addError("Unidentified expression", expression);
 			return null;
 		}
+		ConceptName propConceptName = new ConceptName(conceptUri);
+		propConceptName.setType(propertyType);
 		ExtendedIterator<? extends OntResource> pIterator = property.listRange();
 		if(pIterator.hasNext()){
 			OntResource first = pIterator.next();
 			if(first.getURI() != null){
-				ConceptName conceptName = new ConceptName(first.getURI());
-				conceptName.setType(dataTypeProperty);
-				return new TypeCheckInfo(conceptName, conceptName);
+				ConceptName rangeConceptName = new ConceptName(first.getURI());
+				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+					rangeConceptName.setType(ConceptType.RDFDATATYPE);
+					rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+				}
+				else {
+					rangeConceptName.setType(ConceptType.ONTCLASS);
+				}
+				return new TypeCheckInfo(propConceptName, rangeConceptName);
 			}
 		}
 		
