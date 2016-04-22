@@ -480,65 +480,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		
 		EList<SadlImport> implist = model.getImports();
 		Iterator<SadlImport> impitr = implist.iterator();
-		while (impitr.hasNext()) {
-			SadlImport simport = impitr.next();
-			SadlModel importedResource = simport.getImportedResource();
-			if (importedResource != null) {
-				String importUri = importedResource.getBaseUri();
-				String importPrefix = simport.getAlias();
-	//			theJenaModel.addImport(simport.getImportURI(), simport.getAlias());
-		    	if (importUri != null) {
-		    		if (importUri.equals(modelName)) {
-			    		// don't import to self
-		//	    		generate error marker--can't import self
-			    	}
+		if (impitr.hasNext()) {
+			while (impitr.hasNext()) {
+				SadlImport simport = impitr.next();
+				SadlModel importedResource = simport.getImportedResource();
+				if (importedResource != null) {
+					String importUri = importedResource.getBaseUri();
+					String importPrefix = simport.getAlias();
+					XtextResource xtrsrc = (XtextResource) importedResource.eResource();
+					xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+			        OntModel importedOntModel = OntModelProvider.find(xtrsrc);
+					com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
+					if (importedOntModel != null) {
+						getTheJenaModel().addSubModel(importedOntModel);
+					}
 			    	else {
-				    	// Now add import model (with setCachedModels false so that the actual imports are not loaded. If then need to be loaded 
-			    		//	at some point to do semantic validation, they will be loaded then.
-			    		if (importPrefix == null) {
-		// TODO	    		// need to get the prefix from the global prefix in the imported model, if SADL, else from the ont-policy.rdf file if external
-		//	    			OntologyModel importedModel;//  = simport.getImportedNamespace().getURI();	// this will not work until the grammar treats the import as a reference.
-			    		}
-			    		if (importPrefix != null) {
-			    			getTheJenaModel().setNsPrefix(importPrefix, assureNamespaceEndsWithHash(importUri));
-			    		}
-				    	com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
-				    	logger.debug("Imported ontology resource '" + importUri + "' created.");
-				    	modelOntology.addImport(importedOntology);
-				    	addOrderedImport(importUri);
-				    	getTheJenaModel().loadImports();
+			    		addError("Imported model has null OntModel", simport);
 			    	}
-		    	}
+					modelOntology.addImport(importedOntology);
+					addOrderedImport(importUri);
+				}
+				else {
+					addError("Import failed to provide an imported Resource" , simport);
+				}
 			}
-//			else {
-//				Resource importedRsrc = simport.eResource();
-//				// this should be an external model
-//			}
-	    	
-// TODO	Should the imported model actually be loaded by Jena? The OWL model, whether from SADL or external, will potenatially 
-//	    	contain information that is necessary for validation. The only information that will be potentially needed for
-//	    	processing the rest of the parse tree is the type of the imported concepts. For imports of SADL models, this type
-//	    	information is known in the ResourceSet. Likewise for external OWL imports? 
-	    	
-//	    	this.getJenaDocumentMgr().setCacheModels(true);
-//	   		this.getJenaDocumentMgr().setProcessImports(true);
-//	   		ReadFailureHandler rfh = this.getJenaDocumentMgr().getReadFailureHandler();
-//	   		if (rfh instanceof SadlReadFailureHandler) {
-//	   			((SadlReadFailureHandler)rfh).setSadlConfigMgr(this);
-//	   		}
-//	    	Conclusion: if checking is needed that requires Jena imported models, then it happens here. 
-//	    		Otherwise it happens in the validator.
-	    	theJenaModel.loadImports();
 		}
-		
-//		List<com.hp.hpl.jena.rdf.model.Resource> importResources = importJenaModelsDirectAndIndirect(model);
-//		if (importResources != null) {
-//			for (com.hp.hpl.jena.rdf.model.Resource ir : importResources) {
-//				modelOntology.addImport(ir);
-//			}
-//		}
-//		getTheJenaModel().loadImports();
-		
+
 		boolean disableTypeChecking = true;
 		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.DISABLE_TYPE_CHECKING);
 		if (typechecking != null) {
@@ -632,6 +599,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 		}
+		OntModelProvider.attach(model.eResource(), getTheJenaModel());
 	}
 
 	/**
@@ -640,41 +608,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	 * @param sadlImports -- the list of imports to 
 	 * @return 
 	 */
-	private List<com.hp.hpl.jena.rdf.model.Resource> importJenaModelsDirectAndIndirect(SadlModel model) {
+	private List<Resource> getIndirectImportResources(SadlModel model) {
 		EList<SadlImport> implist = model.getImports();
 		Iterator<SadlImport> impitr = implist.iterator();
 		if (impitr.hasNext()) {
-			List<com.hp.hpl.jena.rdf.model.Resource> importedResources = new ArrayList<com.hp.hpl.jena.rdf.model.Resource>();
+			List<Resource> importedResources = new ArrayList<Resource>();
 			while (impitr.hasNext()) {
 				SadlImport simport = impitr.next();
 				SadlModel importedModel = simport.getImportedResource();
-				String importUri = importedModel.getBaseUri();
-				if (importUri != null) {
+				if (importedModel != null) {
+					String importUri = importedModel.getBaseUri();
 					String importPrefix = simport.getAlias();
 		    		if (importPrefix != null) {
 		    			getTheJenaModel().setNsPrefix(importPrefix, assureNamespaceEndsWithHash(importUri));
 		    		}
-
-			    	// Now add import model 
-			    	com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
-			    	logger.debug("Imported ontology resource '" + importUri + "' created.");
-			    	URI prjUri = ResourceManager.getProjectUri(importedModel.eResource().getURI());
-			    	if (prjUri == null) {
-			    		logger.debug("Unable to get a project URI--is this a JUnit test?");
-			    		
-			    	}
-			    	else {
-			    		String sadlFile = importedModel.eResource().getURI().lastSegment();
-			    		String owlFile = sadlFile.substring(0, sadlFile.length() - 4) + "owl";
-			    		String locationURL = prjUri.toString() + "/" + ResourceManager.OWLDIR + "/" + owlFile;
-			    		getTheJenaModel().getDocumentManager().addAltEntry(importUri, locationURL);
-			    	}
-			    	importedResources.add(importedOntology);
+			    	importedResources.add(importedModel.eResource());
 				}
 				else {
 					addError("Unable to obtain import URI", simport);
 				}
-				importJenaModelsDirectAndIndirect(importedModel);
+				List<Resource> moreImports = getIndirectImportResources(importedModel);
+				if (moreImports != null) {
+					importedResources.addAll(moreImports);
+				}
 			}
 			return importedResources;
 		}
