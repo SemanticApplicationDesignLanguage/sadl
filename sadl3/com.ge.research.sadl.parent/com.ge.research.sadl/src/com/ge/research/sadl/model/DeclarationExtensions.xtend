@@ -41,6 +41,8 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlIsAnnotation
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.SadlParameterDeclaration
+import com.ge.research.sadl.sADL.ExternalEquationStatement
+import com.ge.research.sadl.sADL.EquationStatement
 
 class DeclarationExtensions {
 	
@@ -133,6 +135,10 @@ class DeclarationExtensions {
 		
 		switch e: resource.declaration.eContainer {
 			
+			EquationStatement, 
+			ExternalEquationStatement :
+				OntConceptType.FUNCTION_DEFN
+				
 			SadlClassOrPropertyDeclaration case e.restrictions.exists[it instanceof SadlIsAnnotation],
 			SadlProperty case e.restrictions.exists[it instanceof SadlIsAnnotation] :
 				OntConceptType.ANNOTATION_PROPERTY

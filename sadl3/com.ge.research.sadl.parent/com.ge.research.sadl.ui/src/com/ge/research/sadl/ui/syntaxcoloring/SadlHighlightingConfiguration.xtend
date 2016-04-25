@@ -32,6 +32,7 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 	public static final String OBJECT_PROPERTY_ID = "objectProperty"
 	public static final String ANNOTATION_PROPERTY_ID = "annotationProperty"
 	public static final String RDFDATATYPE_ID = "rdfDataType"
+	public static final String FUNCTION_NAME_ID = "functionName"
 
 	override void configure(IHighlightingConfigurationAcceptor acceptor) {
 		super.configure(acceptor)
@@ -43,6 +44,14 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 		acceptor.acceptDefaultHighlighting(OBJECT_PROPERTY_ID, "Object Property", objectPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(ANNOTATION_PROPERTY_ID, "Annotation Property", annotationPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(RDFDATATYPE_ID, "RDF Data Type", userDefinedDatatypeTextStyle())
+		acceptor.acceptDefaultHighlighting(FUNCTION_NAME_ID, "Function Name", functionNameTextStyle())
+	}
+	
+	def TextStyle functionNameTextStyle() {
+		var TextStyle textStyle = defaultTextStyle().copy()
+		textStyle.setColor(new RGB(128, 20, 128))
+		textStyle.setStyle(SWT.BOLD)
+		return textStyle
 	}
 
 	// SADL V1 used SWT.COLOR_BLACK and SWT.BOLD.

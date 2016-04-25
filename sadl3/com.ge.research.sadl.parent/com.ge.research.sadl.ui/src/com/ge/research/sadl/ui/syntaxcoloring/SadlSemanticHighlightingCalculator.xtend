@@ -118,6 +118,9 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 			case DATATYPE: {
 				return SadlHighlightingConfiguration.RDFDATATYPE_ID
 			}
+			case FUNCTION_DEFN: {
+				return SadlHighlightingConfiguration.FUNCTION_NAME_ID
+			}
 			default: {
 				return SadlHighlightingConfiguration.VARIABLE_ID
 			}
