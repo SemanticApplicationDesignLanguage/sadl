@@ -37,7 +37,7 @@ class ResourceValidator extends ResourceValidatorImpl {
 	
 	override protected validate(Resource resource, CheckMode mode, CancelIndicator monitor, IAcceptor<Issue> acceptor) {
 		super.validate(resource, mode, monitor, acceptor)
-		val processor = processorProvider.getProcessor(resource.resourceSet)
+		val processor = processorProvider.getProcessor(resource)
 		processor.onValidate(resource, new ValidationAcceptor(acceptor), mode, new ProcessorContext(monitor,  preferenceProvider.getPreferenceValues(resource)))
 	}
 	

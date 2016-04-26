@@ -40,7 +40,7 @@ class ProcessorProviderBasedGenerator extends AbstractGenerator {
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
 	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext ctx) {
-		val processor = processorProvider.getProcessor(resource.resourceSet)
+		val processor = processorProvider.getProcessor(resource)
 		processor.onGenerate(resource, fsa, new ProcessorContext(ctx.cancelIndicator,  preferenceProvider.getPreferenceValues(resource)))
 	}
 	

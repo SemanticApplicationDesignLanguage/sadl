@@ -17,8 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
-import org.eclipse.emf.ecore.resource.ResourceSet
 import com.google.inject.ImplementedBy
+import org.eclipse.emf.ecore.resource.Resource
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -26,6 +26,6 @@ import com.google.inject.ImplementedBy
 @ImplementedBy(SadlModelProcessorProvider)
 interface IModelProcessorProvider {
 	
-	def IModelProcessor getProcessor(ResourceSet resourceSet)
+	def IModelProcessor getProcessor(Resource resource)
 	
 }

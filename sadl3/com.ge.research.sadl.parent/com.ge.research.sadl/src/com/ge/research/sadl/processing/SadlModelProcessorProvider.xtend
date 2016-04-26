@@ -17,48 +17,46 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.google.inject.Inject
 import com.google.inject.Provider
 import java.util.List
 import java.util.Set
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.util.internal.EmfAdaptable
+import org.eclipse.xtext.util.OnChangeEvictingCache
 import org.eclipse.xtext.validation.CheckMode
 
 class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
-	@EmfAdaptable @Data static class InternalAdapter {
-		protected IModelProcessor processor
-	}
+	@Inject OnChangeEvictingCache cache
 	
 	public static val Set<Provider<IModelProcessor>> SADL_PROCESSOR_Registry = newHashSet
 	
-	override IModelProcessor getProcessor(ResourceSet resourceSet) {
-		val adapter = InternalAdapter.findInEmfObject(resourceSet)
-		if (adapter !== null) {
-			return adapter.processor
-		}
-		val result = doCreateProcessor(resourceSet)
-		new InternalAdapter(result).attachToEmfObject(resourceSet)
-		return result
+	override IModelProcessor getProcessor(Resource resource) {
+		return cache.get("modelprocessor", resource) [
+			doCreateProcessor(resource)
+		]
 	}
 	
-	protected def doCreateProcessor(ResourceSet set) {
+	protected def IModelProcessor doCreateProcessor(Resource resource) {
 		val processors = getAllProviders.map[get];
-		return new IModelProcessor() {
-			override onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
-				processors.forEach[onValidate(resource, issueAcceptor, mode, context)]
-			}
-			override onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
-				processors.forEach[onGenerate(resource, fsa, context)]
-			}
-			
-			override processExternalModels(String mappingFileFolder, List<String> fileNames) {
-				processors.forEach[processExternalModels(mappingFileFolder, fileNames)]
-			}
-			
+		return new CompositeModelProcessor(processors)
+	}
+	
+	@Data static class CompositeModelProcessor implements IModelProcessor {
+		
+		val Iterable<? extends IModelProcessor> processors
+		
+		override onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
+			processors.forEach[onValidate(resource, issueAcceptor, mode, context)]
+		}
+		override onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
+			processors.forEach[onGenerate(resource, fsa, context)]
+		}
+		
+		override processExternalModels(String mappingFileFolder, List<String> fileNames) {
+			processors.forEach[processExternalModels(mappingFileFolder, fileNames)]
 		}
 	}
 	
