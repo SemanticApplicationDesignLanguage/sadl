@@ -132,6 +132,7 @@ class SadlModelManagerProviderTest {
 	}
 	
 // TODO How should this self-import be tested? This doesn't work because the SADLValidator doesn't get the URI for the import	
+// Also, should this check for import loops that have a larger number of participants?
 	@Ignore	
 	@Test def void testImportSelfError() {
 		'''
