@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IPathVariableManager;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -585,8 +586,8 @@ public class OwlImportOperation extends WorkspaceModifyOperation {
         	File ffop = new File(fileObjectPath);
         	String sfop = ffop.toURI().toString();
         	// get ont-policy file as a string
-        	URI someInProjectUri = URI.createFileURI(targetResource.getLocationURI().getPath());
-        	String projectPath = ResourceManager.getProjectUri(someInProjectUri).toString();
+        	IProject project = targetResource.getProject();
+        	String projectPath = URI.createFileURI(project.getLocation().toString()).toString();
         	// Convert OWL file to SADL
         	if (processorProvider == null) {
         		Injector injector = SadlActivator.getInstance().getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
