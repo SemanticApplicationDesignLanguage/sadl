@@ -112,4 +112,46 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
+	// https://github.com/crapo/sadlos2/issues/67
+	@Test
+	def void testLinkingPrecedence_01() {
+		'''
+			uri "http://sadl.org/equations".
+			
+			[area] describes <Shape> with values of type float.
+			[Shape] is a class.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingPrecedence_02() {
+		'''
+			uri "http://sadl.org/equations".
+			
+			[area] describes <Rectangle> with values of type float.
+			[Rectangle] is a type of <Shape>.
+			[Shape] is a class.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingPrecedence_03() {
+		'''
+			uri "http://sadl.org/equations".
+			
+			[area] describes <Rectangle> with values of type float.
+			A Foo is a [Rectangle] only if area has one value of type float.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingPrecedence_04() {
+		'''
+			uri "http://sadl.org/equations".
+			
+			[area] describes <Rectangle> with values of type float.
+			A Foo is a [Rectangle] only if area has one value of type float.
+		'''.assertLinking[sadl]
+	}
+	
 }
