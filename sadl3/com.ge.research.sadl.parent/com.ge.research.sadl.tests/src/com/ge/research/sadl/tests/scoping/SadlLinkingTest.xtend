@@ -154,4 +154,75 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
+	@Ignore
+	@Test
+	def void testLinkingPrecedence_05() {
+		'''
+			 uri "http://sadl.org/classes.sadl" alias clsses.
+			 
+			 [LivingThing] is a class.
+			 [Mammal] is a type of <LivingThing> described by [friend] with values of type <Mammal>.
+			 {[Earth], [Water], [Air], [Fire], [Aether]} are classes.
+			 
+			 {[Cow], [Horse], [Dog], [Cat], [Human]} are types of <Mammal>.
+			 
+			 A <Dog> is a [Pet] only if <friend> has at least 1 value of type <Human>.
+			 
+			 [NonLivingThing] is the same as not <LivingThing>.
+			 
+			 [Consumable] is a class.
+			 [Liquid] is a class.
+			 [PotableLiquid] is the same as {<Consumable> and <Liquid>}.
+ 		'''.assertLinking[sadl]
+	}
+	
+	@Ignore
+	@Test
+	def void testLinkingPrecedence_06() {
+		'''
+			 uri "http://sadl.org/instances.sadl" alias instances.
+			 
+			 import "http://sadl.org/classes.sadl".
+			 
+			[Gregory] is a Human with friend <Lassie>. 
+			 
+			[Lassie] is a Dog.	// this is the declaration of Lassie
+			// {MrEd, SeaBuiscut, Flicka} are instances of Horse.
+			 
+			[Winter] is a <Season>. 
+			 
+			[Season] is a class, must be one of {<Spring>, [Summer], [Fall], <Winter>}.
+			
+			[Spring] is a Season.	
+			 
+			[Book] is a class.
+			[HarperLeeBook] is a type of <Book>, 
+				can only be one of {[ToKillaMockingbird], <GoSetaWatchman>}.	
+			[GoSetaWatchman] is a <Book>.	
+			
+			[Event] is a class described by [when] with values of type <Season>.
+			[NewYear] is an Event with when <Winter>.
+			[BastilleDay] is an Event with when <Summer>.
+ 		'''.assertLinking[sadl]
+	}
+	
+	@Ignore
+	@Test
+	def void testLinkingPrecedence_07() {
+		'''
+			 uri "http://sadl.org/properties.sadl" alias properties.
+			 
+			 [Shape] is a class described by <area>.
+			 
+			 [area] is a property.	
+			 
+			 [displayColor] is a type of annotation.
+			 [surfaceArea] is a type of <area>.		
+			 
+			 [Circle] is a type of <Shape>.
+			 [radius] describes <Circle> with values of type float.	
+ 		'''.assertLinking[sadl]
+	}
+	
+	
 }
