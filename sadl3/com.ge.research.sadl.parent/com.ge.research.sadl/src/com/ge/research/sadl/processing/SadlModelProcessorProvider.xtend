@@ -33,7 +33,7 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 		protected IModelProcessor processor
 	}
 	
-	public static val Set<Provider<IModelProcessor>> Registry = newHashSet
+	public static val Set<Provider<IModelProcessor>> SADL_PROCESSOR_Registry = newHashSet
 	
 	override IModelProcessor getProcessor(ResourceSet resourceSet) {
 		val adapter = InternalAdapter.findInEmfObject(resourceSet)
@@ -47,7 +47,7 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
 	protected def doCreateProcessor(ResourceSet set) {
 		val processors = getAllProviders.map[get];
-		return new com.ge.research.sadl.processing.IModelProcessor() {
+		return new IModelProcessor() {
 			override onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
 				processors.forEach[onValidate(resource, issueAcceptor, mode, context)]
 			}
@@ -63,7 +63,7 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 	}
 	
 	protected def Iterable<? extends Provider<? extends IModelProcessor>> getAllProviders() {
-		Registry
+		SADL_PROCESSOR_Registry
 	}
 	
 }
