@@ -488,8 +488,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					String importUri = importedResource.getBaseUri();
 					String importPrefix = simport.getAlias();
 					XtextResource xtrsrc = (XtextResource) importedResource.eResource();
-					xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-			        OntModel importedOntModel = OntModelProvider.find(xtrsrc);
+					OntModel importedOntModel = OntModelProvider.find(xtrsrc);
+					if (importedOntModel == null) {
+						xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+				        importedOntModel = OntModelProvider.find(xtrsrc);
+					}
 					com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
 					if (importedOntModel != null) {
 						getTheJenaModel().addSubModel(importedOntModel);
@@ -1699,15 +1702,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = ((UnionClass)superCls).listOperands();
 						while (itr.hasNext()) {
 							com.hp.hpl.jena.rdf.model.Resource cls = itr.next();
-							System.out.println(cls.toString());
+							System.out.println("Union member: " + cls.toString());
 						}
 					}
 					else if (superCls instanceof IntersectionClass) {
-						
+						ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = ((IntersectionClass)superCls).listOperands();
+						while (itr.hasNext()) {
+							com.hp.hpl.jena.rdf.model.Resource cls = itr.next();
+							System.out.println("Intersection member: " + cls.toString());
+						}
 					}
-					else {
-						rsrcList.add(createOntClass(newNames.get(0), superCls.as(OntClass.class)));
-					}
+					rsrcList.add(createOntClass(newNames.get(0), superCls.as(OntClass.class)));
 				}
 			}
 		}
