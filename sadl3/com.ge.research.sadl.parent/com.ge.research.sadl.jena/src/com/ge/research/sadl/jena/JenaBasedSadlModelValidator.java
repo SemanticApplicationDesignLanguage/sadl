@@ -36,9 +36,12 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.IntersectionClass;
+import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.XSD;
@@ -48,6 +51,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected OntModel theJenaModel = null;
 	private DeclarationExtensions declarationExtensions = null;
 	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","not","unique","in","contains","does",/*"not",*/"contain");
+	private EObject defaultContext;
 	
 	public class TypeCheckInfo {
     	private ConceptIdentifier expressionType = null;
@@ -108,6 +112,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	public boolean validate(BinaryOperation expression) {
+		setDefaultContext(expression);
 		Expression leftExpression = expression.getLeft();
 		Expression rightExpression = expression.getRight();
 		List<String> operations = Arrays.asList(expression.getOp().split("\\s+"));
@@ -137,6 +142,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			e.printStackTrace();
 		} catch (NullPointerException e){
 			//issueAcceptor.addError("A null pointer exception occurred while type-checking this expression.", expression);
+		} catch (DontTypeCheckException e) {
+			return true;
 		}
 		return false;
 	}
@@ -148,7 +155,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	protected TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
+	protected TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException{
 		if(expression instanceof Name){
 			return getType((Name)expression);
 		}
@@ -225,7 +232,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
+	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException{
 		List<String> operations = Collections.<String>emptyList();
 		TypeCheckInfo predicateTypeCheckInfo = null;
 		TypeCheckInfo subjectTypeCheckInfo = null;
@@ -446,6 +453,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 					return true;
 				}
+				if (classIsSubclassOf(theJenaModel.getOntClass(leftConceptName.getUri()), theJenaModel.getOntResource(rightConceptName.getUri()), true)) {
+					return true;
+				}
 			}
 			else if ((leftConceptName.getType().equals(ConceptType.INDIVIDUAL) &&
 					rightConceptName.getType().equals(ConceptType.ONTCLASS)) ||
@@ -459,6 +469,118 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		return false;
 	}
+	
+	/**
+	 * return true if the first argument class is a subclass of the second
+	 * argument class
+	 * 
+	 * @param subcls
+	 * @param cls
+	 * @return
+	 */
+	public boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) {
+		if (subcls == null || cls == null) {
+			return false;
+		}
+		if (cls.isURIResource() && subcls.isURIResource()
+				&& cls.getURI().equals(subcls.getURI())) {
+			return true;
+		}
+		if (cls.isAnon()) {
+			if (cls.canAs(OntClass.class)) {
+				OntClass ocls = cls.as(OntClass.class);
+				if (ocls.isUnionClass()) {
+					UnionClass ucls = cls.as(UnionClass.class);
+					try {
+						ExtendedIterator<? extends OntClass> eitr = ucls
+								.listOperands();
+						while (eitr.hasNext()) {
+							OntClass uclsmember = eitr.next();
+							if (classIsSubclassOf(subcls, uclsmember, false)) {
+								eitr.close();
+								return true;
+							}
+						}
+					}
+					catch (Exception e) {
+						issueAcceptor.addError("Unexpected error during deep validation: apparent Union Class does not return operands.", getDefaultContext());
+					}
+				}
+			}
+		}
+		try {
+			if (cls.canAs(OntClass.class)) {
+				ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSubClasses();
+				while (eitr.hasNext()) {
+					OntClass subClsOfCls = eitr.next();
+					if (subClsOfCls.equals(subcls)) {
+						eitr.close();
+						return true;
+					}
+					else {
+						if (classIsSubclassOf(subcls, subClsOfCls, false)) {
+							eitr.close();
+							return true;
+						}
+					}
+				}
+				eitr.close();
+//				if (rootCall && classIsSuperClassOf(cls.as(OntClass.class), subcls)) {
+//					return true;
+//				}
+			}
+			if (subcls.isAnon()) {
+				if (subcls.isIntersectionClass()) {
+					IntersectionClass icls = subcls.asIntersectionClass();
+					try {
+						ExtendedIterator<? extends OntClass> eitr = icls.listOperands();
+						while (eitr.hasNext()) {
+							OntClass iclsmember = eitr.next();
+							if (classIsSubclassOf(cls.as(OntClass.class), iclsmember, false)) {
+								eitr.close();
+								return true;
+							}
+						}
+					}
+					catch (Exception e) {
+						issueAcceptor.addError("Unexpected error during deep validation: apparent Intersection Class does not return operands.", getDefaultContext());
+					}
+				}
+			}
+// TODO We need to look for equivalent classes that provide a definition for a subclass, 
+//			e.g. Component is equivalent to System is class, (System and connectedTo someValueFrom Network) => Component subclass of System.
+			if (cls.canAs(OntClass.class)) {
+//				SELECT ?eqClass 
+//						WHERE {?class owl:equivalentClass ?eqClass}
+				ExtendedIterator<OntClass> eqitr = cls.as(OntClass.class).listEquivalentClasses();
+				while (eqitr.hasNext()) {
+					OntClass eqcls = eqitr.next();
+					if (classIsSubclassOf(subcls, eqcls, false)) {
+						return true;
+					}
+				}
+			}
+//			if (subcls.hasSuperClass(cls, false)) {  // this doesn't work, don't know why awc 6/8/2012
+//				return true;
+//			}
+//			else {
+//				if (subcls.canAs(OntClass.class)) {
+//					ExtendedIterator<OntClass> eitr = subcls.as(OntClass.class).listSuperClasses(false);
+//					while (eitr.hasNext()) {
+//						OntClass sprcls = eitr.next();
+//						if (sprcls.equals(cls)) {
+//							return true;
+//						}
+//					}
+//				}
+//			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return false;
+	}
+
+
 	
 	private boolean isInteger(ConceptIdentifier type) throws InvalidNameException {
 		if (type instanceof ConceptName) {
@@ -478,5 +600,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return false;
+	}
+
+	private EObject getDefaultContext() {
+		return defaultContext;
+	}
+
+	private void setDefaultContext(EObject defaultContext) {
+		this.defaultContext = defaultContext;
 	}
 }
