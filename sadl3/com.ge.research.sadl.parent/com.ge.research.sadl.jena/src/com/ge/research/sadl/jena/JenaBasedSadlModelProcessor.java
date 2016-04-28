@@ -488,20 +488,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					String importUri = importedResource.getBaseUri();
 					String importPrefix = simport.getAlias();
 					XtextResource xtrsrc = (XtextResource) importedResource.eResource();
-					OntModel importedOntModel = OntModelProvider.find(xtrsrc);
-					if (importedOntModel == null) {
-						xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-				        importedOntModel = OntModelProvider.find(xtrsrc);
+					if (xtrsrc != null) {
+						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
+						if (importedOntModel == null) {
+							xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+					        importedOntModel = OntModelProvider.find(xtrsrc);
+						}
+						com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
+						if (importedOntModel != null) {
+							getTheJenaModel().addSubModel(importedOntModel);
+						}
+				    	else {
+				    		addError("Imported model has null OntModel", simport);
+				    	}
+						modelOntology.addImport(importedOntology);
+						addOrderedImport(importUri);
 					}
-					com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
-					if (importedOntModel != null) {
-						getTheJenaModel().addSubModel(importedOntModel);
+					else {
+						addError("Import resolved to a null XtextResource", simport);
 					}
-			    	else {
-			    		addError("Imported model has null OntModel", simport);
-			    	}
-					modelOntology.addImport(importedOntology);
-					addOrderedImport(importUri);
 				}
 				else {
 					addError("Import failed to provide an imported Resource" , simport);
@@ -1593,7 +1598,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			OntClass cls = getTheJenaModel().getOntClass(uri);
 			if (cls == null) {
 				// this is OK--create class
-				cls = createOntClass(declarationExtensions.getConcreteName(sr), (String)null);
+				cls = createOntClass(declarationExtensions.getConcreteName(sr), (String)null, null);
 			}
 			if (element.isComplement()) {
 				ComplementClass cc = getTheJenaModel().createComplementClass(cls.getURI(), smasCls);
@@ -1649,7 +1654,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			OntConceptType superElementType = declarationExtensions.getOntConceptType(superSR);
 			if (superElementType.equals(OntConceptType.CLASS)) {
 				for (int i = 0; i < newNames.size(); i++) {
-					rsrcList.add(createOntClass(newNames.get(i), superSRUri));
+					rsrcList.add(createOntClass(newNames.get(i), superSRUri, superSR));
 				}
 			}
 			else if (superElementType.equals(OntConceptType.CLASS_PROPERTY)) {
@@ -2574,11 +2579,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return cls;
 	}
 	
-	private OntClass createOntClass(String newName, String superSRUri) {
+	private OntClass createOntClass(String newName, String superSRUri, EObject superSR) {
 		if (superSRUri != null) {
 			OntClass superCls = getTheJenaModel().getOntClass(superSRUri);
 			if (superCls == null) {
-				getTheJenaModel().createClass(superSRUri);
+				superCls = getTheJenaModel().createClass(superSRUri);
 			}
 			return createOntClass(newName, superCls);
 		}
