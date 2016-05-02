@@ -30,7 +30,14 @@ import com.ge.research.sadl.sADL.Function;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
+import com.ge.research.sadl.sADL.SadlDataType;
+import com.ge.research.sadl.sADL.SadlIntersectionType;
+import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
+import com.ge.research.sadl.sADL.SadlPropertyCondition;
 import com.ge.research.sadl.sADL.SadlResource;
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
+import com.ge.research.sadl.sADL.SadlTypeReference;
+import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.UnaryExpression;
@@ -160,9 +167,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getType((Name)expression);
 		}
 		else if(expression instanceof Declaration){
+			SadlTypeReference decltype = ((Declaration)expression).getType();
+			return getType(decltype);
 			//Need to return passing case for time being
-			ConceptName declarationConceptName = new ConceptName("TODO");
-			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
+//			ConceptName declarationConceptName = new ConceptName("TODO");
+//			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 		}
 		else if(expression instanceof StringLiteral){
 			ConceptName stringLiteralConceptName = new ConceptName(XSD.xstring.getURI());
@@ -230,6 +239,56 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		issueAcceptor.addError("This expression cannot be decomposed into a known type", expression);
 		return null;
+	}
+
+	private TypeCheckInfo getType(SadlTypeReference expression) {
+		if (expression instanceof SadlIntersectionType) {
+			return getType((SadlIntersectionType)expression);
+		}
+		else if (expression instanceof SadlPrimitiveDataType) {
+			return getType((SadlPrimitiveDataType)expression);			
+		}
+		else if (expression instanceof SadlPropertyCondition) {
+			return getType((SadlPropertyCondition)expression);
+		}
+		else if (expression instanceof SadlSimpleTypeReference) {
+			return getType((SadlSimpleTypeReference)expression);
+		}
+		else if (expression instanceof SadlUnionType) {
+			return getType((SadlUnionType)expression);
+		}
+		issueAcceptor.addError("Unexpected type reference type: " + expression.getClass().getCanonicalName(), expression);
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
+	}
+	
+	private TypeCheckInfo getType(SadlIntersectionType expression) {
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);		
+	}
+
+	private TypeCheckInfo getType(SadlPrimitiveDataType expression) {
+		return getType(expression.getPrimitiveType());
+	}
+
+	private TypeCheckInfo getType(SadlDataType primitiveType) {
+		String nm = primitiveType.getName();
+		ConceptName cn = new ConceptName(XSD.getURI() + nm);
+		return new TypeCheckInfo(cn, cn);
+	}
+
+	private TypeCheckInfo getType(SadlPropertyCondition expression) {
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);		
+	}
+
+	private TypeCheckInfo getType(SadlSimpleTypeReference expression) {
+		return getType(expression.getType());
+	}
+
+	private TypeCheckInfo getType(SadlUnionType expression) {
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);		
 	}
 
 	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException{

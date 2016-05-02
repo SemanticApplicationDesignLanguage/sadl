@@ -76,9 +76,13 @@ import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
@@ -672,7 +676,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
-	private void processStatement(TestStatement element) throws JenaProcessorException {
+	public Test[] processStatement(TestStatement element) throws JenaProcessorException {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
@@ -684,10 +688,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
-	private void processStatement(QueryStatement element) throws JenaProcessorException {
+	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+		Expression qexpr = element.getExpr();
+		Object qobj = processExpression(qexpr);
+		Query query = processQuery(qobj);
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 
+	private Query processQuery(Object qobj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	private void processStatement(EquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
@@ -3548,6 +3559,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			System.out.println("   URL: " + fileNames.get(i));
 		}
 	}
+	
 	private String getModelAlias() {
 		return modelAlias;
 	}
@@ -3653,8 +3665,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return null;
 	}
+	
 	public List<Rule> getRules() {
 		return rules;
+	}
+	@Override
+	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context,
+			String query) {
+		String queryString;
+		String modelFolderPathname = getModelFolderPath(resource);
+		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+		try {
+			IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
+			ITranslator translator = configMgr.getTranslator();
+			queryString = translator.translateQuery(getTheJenaModel(), processQuery(query));
+			ResultSet results =  configMgr.getReasoner().ask(queryString);
+			System.out.println(results.toStringWithIndent(5));
+		} catch (com.ge.research.sadl.reasoner.ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryCancelledException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

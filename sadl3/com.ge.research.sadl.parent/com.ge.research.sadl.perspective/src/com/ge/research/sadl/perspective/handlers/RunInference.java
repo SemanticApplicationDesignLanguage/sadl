@@ -1,29 +1,26 @@
 package com.ge.research.sadl.perspective.handlers;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.xtext.preferences.*;
 
+import com.ge.research.sadl.actions.InferenceAction;
 import com.ge.research.sadl.perspective.util.Util;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
-import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
-public class RunInference extends AbstractHandler {
+public class RunInference extends SadlActionHandler {
 
 	@Inject SadlModelProcessorProvider processorProvider;
 	@Inject IPreferenceValuesProvider preferenceProvider;
@@ -36,95 +33,51 @@ public class RunInference extends AbstractHandler {
 	}
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-
+		MessageConsoleStream output = null;
 		try {
-
-			/**
-			 * Project location code taken from ACL2sAnalysis
-			 */
-			// return the active workbench window
-			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-
-			// access the workspace from the resources plug-in class
-			// (org.eclipse.core.resources)
-			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			// get root location of workspace
-			String workspace_loc = workspace.getRoot().getLocation().toString();
-			// return null if no path can be determined
-			String project_loc = null;
-
-			Injector reqInjector = SadlActivator.getInstance()
-					.getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
-			IPreferenceValuesProvider pvp = reqInjector.getInstance(IPreferenceValuesProvider.class);
-			org.eclipse.emf.ecore.resource.Resource resource = new ResourceImpl();
-			resource.setURI(org.eclipse.emf.common.util.URI.createFileURI("/"));
-
-			// if user has an active window
-			if (window != null) {
-				// returns the selection service which tracks selection within the active window
-				if ((window.getSelectionService().getSelection()) instanceof IStructuredSelection) {
-					// returns the current selection
-					IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
-					// returns the first element in this selection, or null if the selection is empty
-					Object firstElement = selection.getFirstElement();
-
-					// if user has selected a project in package explorer
-					if (firstElement instanceof IProject) {
-						// returns an object that is castable to the given class
-						IProject project = (IProject) ((IAdaptable) firstElement).getAdapter(IProject.class);
-						// returns the path as a string
-						IPath path = project.getFullPath();
-						project_loc = path.toString();
-						// project context is obtained from platform resource
-						// URI pointing to the project in the workspace
-						@SuppressWarnings("deprecation")
-						org.eclipse.emf.common.util.URI uri = org.eclipse.emf.common.util.URI
-								.createPlatformResourceURI("/" + project.getName() + "/");
-						resource.setURI(uri);
-					}
-					else if (firstElement instanceof IFile) {
-						IPath loc = ((IFile)firstElement).getLocation();
-						if (loc.getFileExtension() != null) {
-							if (loc.getFileExtension().equals("sadl")) {
-								// run inference on this model
-								System.out.println("Inference of '" + loc.lastSegment() + "' requested.");
-							}
-							else if (loc.getFileExtension().equals("test")) {
-								// run test suite
-								System.out.println("Testing of suite '" + loc.lastSegment() + "' requested.");
-							}
-						}
-						return null;
-					}
-				}
-			}
-			
-			IPreferenceValues preferenceValues = pvp.getPreferenceValues(resource);
-			//TODO: FIX
-			
-			if (project_loc == null) {
-				// ask the user which SADL project they want to select 
-				IProject project = Util.selectSADLProject();
-				if (project == null) {
-					// method failed to give us a project, give up.
-					return null;
-				}
-				
-				// get the path from the project
-				project_loc = project.getFullPath().toString();
-			}
-
-			// get current file path
-			String filePath = workspace_loc + project_loc;
-			this.projectLocation = filePath;
-
 			MessageConsole sadlInference = Util.findConsole("SADL Inference");
-			MessageConsoleStream output = sadlInference.newMessageStream();
+			output = sadlInference.newMessageStream();
 
 			sadlInference.activate();
+			
+			String[] validTargetTypes = {"sadl","test"};
+			File[] prjAndTarget = getTargetProjectAndFile(validTargetTypes);
+			if (prjAndTarget == null || prjAndTarget.length < 2) {
+				output.println("Unable to obtain target project and file");
+			}
+			File prjFolder = prjAndTarget[0];
+			File trgtFile = prjAndTarget[1];
+
+			Map<String,String> prefMap = getPreferences();
+			if (trgtFile.getName().endsWith("sadl")) {
+				// run inference on this model
+				output.println("Inference of '" + trgtFile.getName() + "' requested.");
+				InferenceAction action;
+				action = new InferenceAction(prjFolder, trgtFile, prefMap);
+				runAction(output, action, event);
+			}
+			else if (trgtFile.getName().endsWith("test")) {
+				// run test suite
+				output.println("Testing of suite '" +  trgtFile.getName() + "' requested.");
+			}
+		}
+		catch (Exception e) {
+			if (output != null) {
+				output.println(e.getMessage());
+			}
+			else {
+				System.err.println(e.getMessage());
+			}
 		}
 		finally {
-			
+			if (output != null) {
+				try {
+					output.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return event;

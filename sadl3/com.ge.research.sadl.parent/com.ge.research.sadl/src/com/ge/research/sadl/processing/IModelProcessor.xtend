@@ -47,6 +47,16 @@ interface IModelProcessor {
 	 */
 	def void processExternalModels(String mappingFileFolder, List<String> fileNames) throws IOException;
 	
+	/**
+	 * Called to process all of the Ask, Test, Explain, etc. commands in a .sadl file
+	 */
+	def void processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context);
+	
+	/**
+	 * Called to process an adhoc query against the model in a .sadl file
+	 */
+	def void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context, String query);
+	
 	@Data class ProcessorContext {
 		CancelIndicator cancelIndicator
 		IPreferenceValues preferenceValues
