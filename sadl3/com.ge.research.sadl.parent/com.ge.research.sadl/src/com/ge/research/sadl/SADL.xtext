@@ -377,7 +377,7 @@ BooleanValue:
 	
 
 Constants:
-	'PI' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element';
+	'PI' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element' | 'value';
 
 ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111

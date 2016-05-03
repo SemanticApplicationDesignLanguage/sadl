@@ -18,7 +18,6 @@
 package com.ge.research.sadl.tests
 
 import org.junit.Test
-import org.junit.Ignore
 
 class SadlRuleParserTest extends AbstractSADLParsingTest {
 
