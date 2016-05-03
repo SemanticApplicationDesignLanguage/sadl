@@ -135,8 +135,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						if (newParent.getSingleElement(name1) === null) {
 							map.addElement(name1, it)
 						}
-						val name2 = if (name1.segments.size==1) namespace.append(name1) else name1.skipFirst(1)
-						if (newParent.getSingleElement(name2) === null) {
+						val name2 = if (name1.segments.size==1) namespace?.append(name1) else name1.skipFirst(1)
+						if (name2 !== null && newParent.getSingleElement(name2) === null) {
 							map.addElement(name2, it)
 						}
 					}

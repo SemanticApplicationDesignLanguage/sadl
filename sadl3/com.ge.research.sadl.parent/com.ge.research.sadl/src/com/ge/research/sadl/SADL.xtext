@@ -78,7 +78,7 @@ SadlStatement returns SadlStatement:
 			|{SadlProperty.nameOrRef=current} (','? restrictions+=SadlPropertyRestriction)+
 			|{SadlSameAs.nameOrRef=current} 'is' 'the' 'same' 'as' (complement?='not')? sameAs=SadlTypeReference
 			|{SadlDifferentFrom.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
-			|{SadlInstance.nameOrRef=current} ('is' AnArticle type=SadlTypeReference)? propertyInitializers+=SadlPropertyInitializer*
+			|{SadlInstance.nameOrRef=current} ('is' AnArticle type=SadlTypeReference)? (listInitializer=SadlValueList | propertyInitializers+=SadlPropertyInitializer+)?
 			|{SadlDisjointClasses.classes+=current} ('and' classes+=SadlResource)+ 'are' 'disjoint'
 			)
 	| 	{SadlClassOrPropertyDeclaration}  '{' classOrProperty+=SadlResource (','  classOrProperty+=SadlResource)* '}' 'are' 
@@ -90,6 +90,8 @@ SadlStatement returns SadlStatement:
     		{SadlInstance.type=current} instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*
     	|	{SadlNecessaryAndSufficient.subject=current} 'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*)
 ;
+
+
 
 SadlPropertyCondition :
 	property=[SadlResource|QNAME] cond+=SadlCondition
@@ -139,8 +141,8 @@ SadlIntersectionType returns SadlTypeReference:
 ;
 
 SadlPrimaryTypeReference returns SadlTypeReference:
-		{SadlSimpleTypeReference} type=[SadlResource|QNAME]
-	|	{SadlPrimitiveDataType} primitiveType=SadlDataType
+		{SadlSimpleTypeReference} type=[SadlResource|QNAME] list?='List'?
+	|	{SadlPrimitiveDataType} primitiveType=SadlDataType list?='List'?
 	|	'(' SadlPropertyCondition ')'
 	|	'{' SadlTypeReference '}'
 ;
@@ -197,12 +199,12 @@ SadlExplicitValue:
 	|	{SadlNumberLiteral} literalNumber=FacetNumber
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
-//    |   {SadlBag} '{' (explicitValues+=SadlExplicitValue (
-//    				(',' explicitValues+=SadlExplicitValue)+
-//    			|	(operator='and' explicitValues+=SadlExplicitValue)+
-//    			|	(operator='or' explicitValues+=SadlExplicitValue)+)?)? '}'
-    |   {SadlValueList} '[' (explicitValues+=SadlExplicitValue (',' explicitValues+=SadlExplicitValue)*)? ']'
+    |   SadlValueList
 	|	{SadlConstantLiteral} term=('PI'|'known')
+;
+
+SadlValueList:
+	{SadlValueList} '[' (explicitValues+=SadlExplicitValue (',' explicitValues+=SadlExplicitValue)*)? ']'
 ;
 
 // These articles can appear before the property name and are indicative of the functionality of the property or

@@ -75,5 +75,32 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			Test: Items is (the sublist of list_of_items matching index >= 42 and type is Person and OtherList does not contain value).
 		'''.assertNoErrors
 	}
+	
+	@Test 
+	def void testListTypes_01() {
+		'''
+			uri "http://com.ge.research.sadl/sublists". 
+			
+			MyPets is a Pet List.
+		'''.assertNoErrors
+	}
+	
+	@Test 
+	def void testListTypes_02() {
+		'''
+			uri "http://com.ge.research.sadl/sublists". 
+			
+			GennysPriorizedPets is the Pet List [Spot, Lassie].
+		'''.assertNoErrors
+	}
+	
+	@Test 
+	def void testListTypes_03() {
+		'''
+			uri "http://com.ge.research.sadl/sublists". 
+			
+			Test: MyPets is a Pet List.
+		'''.assertNoErrors
+	}
 
 }
