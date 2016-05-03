@@ -37,6 +37,7 @@ import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -70,6 +71,8 @@ abstract class AbstractLinkingTest {
 			} else if (obj instanceof SadlSimpleTypeReference) {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.type)
 			} else if (obj instanceof SadlPropertyInitializer) {
+				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
+			} else if (obj instanceof SadlPropertyCondition) {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
 			} else {
 				Assert.fail("unexpected node "+obj)

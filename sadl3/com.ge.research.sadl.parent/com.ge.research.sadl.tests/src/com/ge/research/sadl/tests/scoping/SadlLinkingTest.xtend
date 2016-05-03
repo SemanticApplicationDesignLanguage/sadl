@@ -21,7 +21,6 @@ import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -154,7 +153,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testLinkingPrecedence_05() {
 		'''
@@ -176,7 +174,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
  		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testLinkingPrecedence_06() {
 		'''
@@ -206,7 +203,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
  		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testLinkingPrecedence_07() {
 		'''

@@ -46,6 +46,10 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import com.google.common.base.Predicate
+import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
+import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.sADL.SadlInstance
 
 /**
  * This class contains custom scoping description.
@@ -126,17 +130,40 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				newParent = wrap(newParent)
 			val aliasToUse = alias ?: resource.getAlias
 			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
-			val map = <QualifiedName, IEObjectDescription>newHashMap
-			val iter = resource.allContents
-			while (iter.hasNext) {
-				switch it : iter.next {
+			newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
+			return getSecondaryLocalResourceScope(resource, namespace, newParent)
+		}
+	}
+	
+	protected def getSecondaryLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope) [true]
+	}
+	
+	def getPrimaryLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope) [
+			if (it instanceof SadlResource) {
+				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADLPackage.Literals.SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
+					|| eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
+					|| eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF
+			} 
+			return false
+		]
+	}
+	
+	def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope, Predicate<EObject> isIncluded) {
+		val map = <QualifiedName, IEObjectDescription>newHashMap
+		val iter = resource.allContents
+		while (iter.hasNext) {
+			val it = iter.next
+			if (isIncluded.apply(it)) {
+				switch it {
 					SadlResource case concreteName !== null: {
 						val name1 = converter.toQualifiedName(concreteName)
-						if (newParent.getSingleElement(name1) === null) {
+						if (parentScope.getSingleElement(name1) === null) {
 							map.addElement(name1, it)
 						}
 						val name2 = if (name1.segments.size==1) namespace?.append(name1) else name1.skipFirst(1)
-						if (name2 !== null && newParent.getSingleElement(name2) === null) {
+						if (name2 !== null && parentScope.getSingleElement(name2) === null) {
 							map.addElement(name2, it)
 						}
 					}
@@ -155,8 +182,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						}
 				}
 			}
-			return MapBasedScope.createScope(newParent, map.values)
 		}
+		return MapBasedScope.createScope(parentScope, map.values)
 	}
 	
 	protected def pruneScope(EObject object) {
