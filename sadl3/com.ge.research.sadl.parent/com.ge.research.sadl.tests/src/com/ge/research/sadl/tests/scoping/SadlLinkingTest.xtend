@@ -23,11 +23,12 @@ import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 class SadlLinkingTest extends AbstractLinkingTest {
-	
+
 	@Test
 	def void testLinkingQNames() {
 		'''
@@ -89,37 +90,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			
 			[MyRect] is a <Rectangle> with <height> 3, with <width> 4, with <area> 12 .
 		'''.assertLinking[sadl]
-	}
-	
-	@Ignore
-	@Test
-	def void testLinkingQnamesNeeded() {
-		'''
-			 uri "http://sadl.org/NS1.sadl" alias ns1.
-			 
-			 [Car] is a class described by [position] with values of type <Location>.
-			 [Location] is a class, described by [longitude] with values of type float, described by [latitude] with values of type float.
- 		'''.assertLinking[sadl]
-		'''
-			 uri "http://sadl.org/NS2.sadl" alias ns2.
-			 
-			 [Airplane] is a class described by [position] with values of type <Location>.
-			 
-			 [Location] is a class described by [longitude] with values of type float, 
-			 	described by [latitude] with values of type float,
-			 	described by [altitude] with values of type float.
-		'''.assertLinking[sadl]
-		'''
-			 uri "http://sadl.org/NS3.sadl" alias ns3.
-			 
-			 import "http://sadl.org/NS1.sadl".
-			 import "http://sadl.org/NS2.sadl".
-			 
-			 [MyCar] is an <Car> with <ns1:position> (a <ns1:Location> with <ns1:longitude> -72.025, with <ns1:latitude> 43.654).
-			 [MyPlane] is an <Airplane> with <ns2:position> (a <ns2:Location> with <ns2:longitude> -72.025, with <ns2:latitude> 43.654, with <altitude> 1000).
-
-		'''.assertLinking[sadl]
-		
 	}
 	
 	@Test
@@ -249,6 +219,73 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			 [Circle] is a type of <Shape>.
 			 [radius] describes <Circle> with values of type float.	
  		'''.assertLinking[sadl]
+	}
+	
+	@Ignore
+	@Test 
+	def void testLinkingPrecedence_08() {
+		'''
+			uri "http://sadl.org/TestRequrements/ontology2" alias ont2 version "$Revision:$ Last modified on   $Date:$". 
+			
+			[Vehicle] is a class, 
+				described by [number_of_wheels] with values of type int,
+				described by [number_of_seats] with values of type int,
+				described by [color] with values of type string.
+				
+			[Unicycle] is a type of <Vehicle>.
+			<number_of_wheels> of <Unicycle> always has value 1 .
+			<number_of_seats> of <Unicycle> always has value 1 .
+			
+				
+			[Bicycle] is a type of <Vehicle>.
+			<number_of_wheels> of <Bicycle> always has value 2 .
+			<number_of_seats> of <Bicycle> always has value 1 .
+			
+			[Car] is a type of <Vehicle>.
+			<number_of_wheels> of <Car> always has value 4 .
+			
+			[MyCar] is a <Car> with <color> "blue", with <number_of_seats> 4 .
+		'''.assertLinking[sadl]
+	}
+	
+	@Ignore
+	@Test
+	def void testLinkingPrecedence_09() {
+		'''
+			 uri "http://sadl.org/ListDecls.sadl" alias ListDecls.
+			 
+			Person is a class described by gender with values of type Gender,
+				described by age with values of type int, 
+				described by height with values of type float,
+				described by child with values of type Person,
+				described by orderedChildren with values of type Person List,
+				described by orderedFemaleChildren with values of type Person List.
+				
+			Gender is a class, must be one of {Male, Female}.
+			
+			GeorgesChildren is the Person List [Sue, Wayne, Fred].
+			AllKnownChildren is the Person List [Sue, Wayne, Fred, John, Francis, Boyd].
+			George is a Person with orderedChildren GeorgesChildren.
+			
+			NotGeorgesChildren is a Person List.
+			
+			Rule R1:
+			if  p is a Person
+				p has orderedChildren oc
+			then 
+				p has orderedChildren (the sublist of oc matching gender is Female).
+			
+			Rule R2:
+			then 
+				NotGeorgesChildren is (the sublist of AllKnownChildren matching GeorgesChildren does not contain value).
+				
+			Rule R3:
+			if  [p] is a Person and
+				<p> has orderedChildren [oc] and
+				<oc> contains [c]
+			then
+				<p> has child <c>.
+		'''.assertLinking[sadl]
 	}
 	
     @Test

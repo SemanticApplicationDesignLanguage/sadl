@@ -1952,6 +1952,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 			}
+			else if (spr1 instanceof SadlTypeAssociation) {
+				// this is case 3 but with range not present
+				SadlTypeReference domain = ((SadlTypeAssociation)spr1).getDomain();
+				OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
+				ObjectProperty prop = getOrCreateObjectProperty(propUri);
+				addPropertyDomain(prop, domainrsrc);
+			}
 			else {
 				throw new JenaProcessorException("Unhandled SadlProperty expression");
 			}
