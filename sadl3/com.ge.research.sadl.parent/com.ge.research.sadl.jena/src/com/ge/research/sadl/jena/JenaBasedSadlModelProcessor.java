@@ -2482,6 +2482,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				inst.addProperty(annprop, rsrcval);
 			}
 		}
+		else if (type.equals(OntConceptType.VARIABLE)) {
+			// a variable for a property type is only valid in a rule or query.
+		}
 		else {
 			throw new JenaProcessorException("unhandled property type");
 		}

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -18,28 +19,49 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.xtext.preferences.IPreferenceValues;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.ui.resource.IResourceSetProvider;
+import org.eclipse.xtext.util.CancelIndicator;
+import org.eclipse.xtext.validation.CheckMode;
+import org.eclipse.xtext.validation.IResourceValidator;
 
-import com.ge.research.sadl.actions.SadlAction;
+import com.ge.research.sadl.perspective.util.Util;
 import com.ge.research.sadl.preferences.SadlPreferences;
-import com.ge.research.sadl.reasoner.ModelError;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+import com.ge.research.sadl.processing.IModelProcessor;
+import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.ui.internal.SadlActivator;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 public abstract class SadlActionHandler extends AbstractHandler {
 
 	private boolean isCanceled = false;
+	@Inject
+	protected IResourceSetProvider resourceSetProvider;
+	@Inject
+	protected SadlModelProcessorProvider processorProvider;
+	@Inject
+	protected IPreferenceValuesProvider preferenceProvider;
+	protected MessageConsoleStream output;
+	protected IModelProcessor processor;
+	
+	public SadlActionHandler() {
+		SadlActivator.getInstance().getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL).injectMembers(this);
+	}
 
-	protected File[] getTargetProjectAndFile(String[] validTargetTypes) throws ExecutionException {
+	protected IFile getTargetFile(String[] validTargetTypes) throws ExecutionException {
 			IPath prjFolder = null;
 			IPath trgtFile = null;
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
@@ -61,8 +83,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			    			}
 			    		}
 			    		if (validTarget) {
-			    			trgtFile =  ((org.eclipse.core.resources.IFile)firstElement).getFullPath();	
-			    			prjFolder = ((org.eclipse.core.resources.IFile)firstElement).getProject().getFullPath();
+			    			return  (IFile) firstElement;	
 			    		}
 			    		else {
 			    			throw new ExecutionException("Only files of type .sadl or .test can be targets for this action");
@@ -73,24 +94,22 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			    	}
 			    }
 	//	        System.out.println(path);
-			    IPath owlModelsPath =  prjFolder.append("OwlModels");
-			    String absOwlModelsPath = convertProjectRelativePathToAbsolutePath(owlModelsPath.toString());
-			    File ifPathFile =  new File(absOwlModelsPath);
-			    if (ifPathFile.exists() && !ifPathFile.isDirectory()) {
-			    	throw new ExecutionException("Folder '" + absOwlModelsPath + "' exists but is not a directory");
-			    }
-			    if (!ifPathFile.exists()) {
-			    	ifPathFile.mkdirs();
-			    }
-			    File prjFile = ifPathFile.getParentFile();
-				File[] results = new File[2];
-				results[0] = prjFile;
-				results[1] = new File(convertProjectRelativePathToAbsolutePath(trgtFile.toFile().getAbsolutePath()));
-				return results;
+//			    IPath owlModelsPath =  prjFolder.append("OwlModels");
+//			    String absOwlModelsPath = convertProjectRelativePathToAbsolutePath(owlModelsPath.toString());
+//			    File ifPathFile =  new File(absOwlModelsPath);
+//			    if (ifPathFile.exists() && !ifPathFile.isDirectory()) {
+//			    	throw new ExecutionException("Folder '" + absOwlModelsPath + "' exists but is not a directory");
+//			    }
+//			    if (!ifPathFile.exists()) {
+//			    	ifPathFile.mkdirs();
+//			    }
+//			    File prjFile = ifPathFile.getParentFile();
+//				File[] results = new File[2];
+//				results[0] = prjFile;
+//				results[1] = new File(convertProjectRelativePathToAbsolutePath(trgtFile.toFile().getAbsolutePath()));
+//				return results;
 			}
-			else {
-				throw new ExecutionException("No project window selected");
-			}
+			throw new ExecutionException("No project window selected");
 		}
 
 	protected Map<String,String> getPreferences() {
@@ -129,73 +148,31 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return absolutePath;
 	}
 
-	protected void runAction(final Object visitor, final SadlAction action, final ExecutionEvent event) {
-		Job runTestJob = new Job(action.getClass().getSimpleName()) {
-			
-			@Override
-			protected void canceling() {
-				setCanceled(true);
-				action.setCanceled(true);
-			};
-	
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-					Object result = action.run(monitor);
-					if (result != null) {
-						if (result instanceof List<?>) {
-							for (int i = 0; i < ((List<?>)result).size(); i++) {						
-								Object r = ((List<?>)result).get(i);
-								outputMessage(visitor, r);
-							}
-						}
-						else {
-							outputMessage(visitor, result);
-						}
-					}
-					if (isCanceled()) {
-						return Status.CANCEL_STATUS;
-					}
-					else {
-						return Status.OK_STATUS;
-					}
-				} catch(Exception e) {
-					e.printStackTrace();
-					return Status.CANCEL_STATUS;
-				}
-			}
-
-			private void outputMessage(Object visitor, Object r) {
-				if (visitor != null && visitor instanceof MessageConsoleStream) {
-					((MessageConsoleStream)visitor).println(r.toString());
-				}
-				else {
-					ErrorType errtype = ErrorType.INFO;	// default
-					if (r instanceof ModelError) {
-						errtype = ((ModelError)r).getErrorType();
-					}
-					else if (r instanceof Throwable) {
-						errtype = ErrorType.ERROR;
-					}
-					if (errtype.equals(ErrorType.ERROR)) {
-						System.err.println(r.toString());
-					}
-					else {
-						System.out.println(r.toString());
-					}
-				}
-			}
-		};
-		runTestJob.schedule();
-	}
-
 	protected boolean isCanceled() {
 		return isCanceled;
 	}
 
 	protected void setCanceled(boolean isCanceled) {
 		this.isCanceled = isCanceled;
+	}
+
+	protected Resource prepareActionHandler(IFile trgtFile) throws ExecutionException {
+		MessageConsole sadlInference = Util.findConsole("SADL Inference");
+		output = sadlInference.newMessageStream();
+		sadlInference.activate();
+		
+		ResourceSet resourceSet = resourceSetProvider.get(trgtFile.getProject());
+		if (resourceSet != null) {
+	    	Resource res = resourceSet.getResource(URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true), true);
+	    	if (res != null) {
+	    		IResourceValidator validator = ((XtextResource)res).getResourceServiceProvider().getResourceValidator();
+	    		validator.validate(res, CheckMode.FAST_ONLY, CancelIndicator.NullImpl);
+				processor = processorProvider.getProcessor(res);
+				return res;
+	    	}
+			throw new ExecutionException("Unable to obtain a resource for the target file '" + trgtFile.getName() + "'");
+		}
+		throw new ExecutionException("Unable to obtain a resource set for the target file '" + trgtFile.getName() + "'");
 	}
 	
 
