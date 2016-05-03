@@ -21,9 +21,9 @@ import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -63,7 +63,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 		'''
 			uri "http://sadl.org/allqnames2.sadl" alias aqn2.
-			import "http://sadl.org/allqnames.sadl"
+			import "http://sadl.org/allqnames.sadl".
 			
 			[MyShape] is a <Shape> with <area> 23 .
 		'''.assertLinking[sadl]
@@ -79,7 +79,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 		'''
 			uri "http://sadl.org/allqnames2.sadl" alias aqn2.
-			import "http://sadl.org/allqnames.sadl"
+			import "http://sadl.org/allqnames.sadl".
 			
 			[MyShape] is a <Shape> with <area> 23 .
 			[Rectangle] is a type of <Shape>, described by [height] with values of type float, described by [width] with values of type float.
@@ -97,8 +97,8 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''
 			uri "http://sadl.org/equations".
 			
-			Equation [foo](int [a], int [b]) returns int : <a> + <b>.
-			Equation [bar](int [a], int [b]) returns int: <a> + <b>.
+			Equation [foo](int [b], int [c]) returns int : <b> + <c>.
+			Equation [bar](int [b], int [c]) returns int: <b> + <c>.
 		'''.assertLinking[sadl]
 	}
 	
@@ -107,8 +107,8 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''
 			uri "http://sadl.org/equations".
 			
-			Equation [foo](int [a], int [b]) returns int : <a> + <b>.
-			Equation [bar](int [a], int [b]) returns int: <foo>(<a>, <b>).
+			Equation [foo](int [b], int [c]) returns int : <b> + <c>.
+			Equation [bar](int [b], int [c]) returns int: <foo>(<b>, <c>).
 		'''.assertLinking[sadl]
 	}
 	
@@ -224,5 +224,33 @@ class SadlLinkingTest extends AbstractLinkingTest {
  		'''.assertLinking[sadl]
 	}
 	
-	
+    @Test
+    def void testLinkingQnamesNeeded() {
+        '''
+             uri "http://sadl.org/NS1.sadl" alias ns1.
+             
+             [Car] is a class described by [position] with values of type <Location>.
+             [Location] is a class, described by [longitude] with values of type float, described by [latitude] with values of type float.
+         '''.assertLinking[sadl]
+        '''
+             uri "http://sadl.org/NS2.sadl" alias ns2.
+             
+             [Airplane] is a class described by [position] with values of type <Location>.
+             
+             [Location] is a class described by [longitude] with values of type float, 
+                 described by [latitude] with values of type float,
+                 described by [altitude] with values of type float.
+        '''.assertLinking[sadl]
+        '''
+             uri "http://sadl.org/NS3.sadl" alias ns3.
+             
+             import "http://sadl.org/NS1.sadl".
+             import "http://sadl.org/NS2.sadl".
+             
+             [MyCar] is an <Car> with <ns1:position> (a <ns1:Location> with <ns1:longitude> -72.025, with <ns1:latitude> 43.654).
+             [MyPlane] is an <Airplane> with <ns2:position> (a <ns2:Location> with <ns2:longitude> -72.025, with <ns2:latitude> 43.654, with <altitude> 1000).
+
+        '''.assertLinking[sadl]
+        
+    }
 }

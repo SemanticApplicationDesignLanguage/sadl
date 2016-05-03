@@ -184,7 +184,7 @@ SadlHasValueCondition :
 
 SadlCardinalityCondition :
 	('has'|'with') 
-	('at' operator=('least'|'most') |'exactly') 
+	('at' operator=('least'|'most') |'exactly')? 
 	cardinality=CardinalityValue ('value'|'values') 
 	('of' 'type' type=SadlPrimaryTypeReference | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
 
