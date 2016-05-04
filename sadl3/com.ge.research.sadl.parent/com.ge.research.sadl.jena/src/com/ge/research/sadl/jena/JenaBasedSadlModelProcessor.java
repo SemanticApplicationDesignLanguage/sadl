@@ -75,6 +75,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -143,6 +144,7 @@ import com.ge.research.sadl.sADL.SadlValueList;
 import com.ge.research.sadl.sADL.StartWriteStatement;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
@@ -859,6 +861,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof UnaryExpression) {
 			return processExpression((UnaryExpression)expr);
 		}
+		else if (expr instanceof Sublist) {
+			return processExpression((Sublist)expr);
+		}
 		else {
 			throw new TranslationException("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
 		}
@@ -1556,9 +1561,56 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return expr.getValue();
 	}
 	
-	public String processExpression(SubjHasProp expr) {
+	public Object processExpression(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
-		return expr.getProp().toString();
+		Expression subj = expr.getLeft();
+		Expression pred = expr.getProp();
+		Expression obj = expr.getRight();
+		Object sobj = null;
+		Object pobj = null;
+		Object oobj = null;
+		if (subj != null) {
+			sobj = translate(subj);
+		}
+		if (pred != null) {
+			pobj = translate(pred);
+		}
+		if (obj != null) {
+			oobj = translate(obj);
+		}
+		TripleElement returnTriple = null;
+		if (pobj != null) {
+			returnTriple = new TripleElement(null, nodeCheck(pobj), null);
+			returnTriple.setSourceType(TripleSourceType.SPV);
+		}
+		if (sobj != null) {
+			returnTriple.setSubject(nodeCheck(sobj));
+		}
+		if (oobj != null) {
+			returnTriple.setObject(nodeCheck(oobj));
+		}
+		return returnTriple;
+	}
+	
+	public Object processExpression(Sublist expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Expression list = expr.getList();
+		Expression where = expr.getWhere();
+		Object lobj = translate(list);
+		Object wobj = translate(where);
+		
+		addError("Processing of sublist construct not yet implemented: " + lobj.toString() + ", " + wobj.toString(), expr);
+		
+		BuiltinElement builtin = new BuiltinElement();
+		builtin.setFuncName("sublist");
+		builtin.addArgument(nodeCheck(lobj));
+		if (lobj instanceof GraphPatternElement) {
+			((GraphPatternElement)lobj).setEmbedded(true);
+		}
+		builtin.addArgument(nodeCheck(wobj));
+		if (wobj instanceof GraphPatternElement) {
+			((GraphPatternElement)wobj).setEmbedded(true);
+		}
+		return builtin;
 	}
 	
 	public Object processExpression(UnaryExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
