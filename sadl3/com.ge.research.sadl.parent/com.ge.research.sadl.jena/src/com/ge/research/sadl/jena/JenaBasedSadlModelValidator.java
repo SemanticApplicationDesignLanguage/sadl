@@ -241,7 +241,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private TypeCheckInfo getType(SadlTypeReference expression) {
+	private TypeCheckInfo getType(SadlTypeReference expression) throws DontTypeCheckException {
 		if (expression instanceof SadlIntersectionType) {
 			return getType((SadlIntersectionType)expression);
 		}
@@ -282,7 +282,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);		
 	}
 
-	private TypeCheckInfo getType(SadlSimpleTypeReference expression) {
+	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException {
 		return getType(expression.getType());
 	}
 
@@ -329,12 +329,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //				predicateTypeCheckInfo, subjectTypeCheckInfo);
 	}
 	
-	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
+	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException {
 		SadlResource qnm =expression.getName();
 		return getType(qnm);
 	}
 	
-	protected TypeCheckInfo getType(SadlResource qnm){
+	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException{
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
 		EObject expression = qnm.eContainer();
 		if (conceptUri == null) {
@@ -415,7 +415,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) {
+	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) throws DontTypeCheckException {
 		//Needs filled in for Requirements extension
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
