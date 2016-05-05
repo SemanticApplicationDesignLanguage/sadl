@@ -17,28 +17,27 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
-import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.google.inject.Inject
-import java.util.ArrayList
 import java.util.List
 import java.util.regex.Pattern
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.annotations.Accessors
+import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtend.lib.annotations.ToString
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
+import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
-import org.eclipse.xtext.util.StringInputStream
-import org.eclipse.emf.common.util.URI
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -63,17 +62,18 @@ abstract class AbstractLinkingTest {
 	protected def void assertLinking(CharSequence contents, (CharSequence)=>XtextResource parser) {
 		val markerFile = parseReferenceMarker(contents)
 		val model = parser.apply(markerFile.parseableContents)
-		val allranges = new ArrayList(markerFile.declarations)
-		allranges.addAll(markerFile.references)
-		for (decl : allranges) {
-			val node = NodeModelUtils.findLeafNodeAtOffset(model.parseResult.rootNode, decl.value.offset)
+		Assert.assertTrue(model.errors.map[message].join('\n'), model.errors.isEmpty)
+		for (decl : markerFile.allNames) {
+			val node = NodeModelUtils.findLeafNodeAtOffset(model.parseResult.rootNode, decl.region.offset)
 			val obj = NodeModelUtils.findActualSemanticObjectFor(node)
 			if (obj instanceof SadlResource) {
-				updateActual(markerFile, decl.key, decl.value, obj, obj.name)
+				updateActual(markerFile, decl.value, decl.region, obj, obj.name)
 			} else if (obj instanceof SadlSimpleTypeReference) {
-				updateActual(markerFile, decl.key, decl.value, obj, obj.type)
+				updateActual(markerFile, decl.value, decl.region, obj, obj.type)
 			} else if (obj instanceof SadlPropertyInitializer) {
-				updateActual(markerFile, decl.key, decl.value, obj, obj.property)
+				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
+			} else if (obj instanceof SadlPropertyCondition) {
+				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
 			} else {
 				Assert.fail("unexpected node "+obj)
 			}
@@ -82,61 +82,57 @@ abstract class AbstractLinkingTest {
 	}
 	
 	private def void updateActual(TestFile markerFile, String name, TextRegion region, EObject callSite, EObject reference) {
-		if (callSite === reference) {
-			markerFile.actualDeclarations.add(name -> region)
+		val Boolean isDeclaration = if (callSite === reference) {
+			true
 		} else if (!reference.eIsProxy) {
-			markerFile.actualReferences.add(name -> region)
+			false
 		} else {
-			markerFile.actualUnresolved.add(name -> region)
+			null
 		}
+		markerFile.actualNames.add(new Name(name, isDeclaration, region))
 	}
 	
 	@Accessors @ToString private static class TestFile {
 		String originalContents
 		String parseableContents
-		List<Pair<String, TextRegion>> declarations = newArrayList()
-		List<Pair<String, TextRegion>> references = newArrayList()
-		List<Pair<String, TextRegion>> actualDeclarations = newArrayList()
-		List<Pair<String, TextRegion>> actualReferences = newArrayList()
-		List<Pair<String, TextRegion>> actualUnresolved = newArrayList()
+		List<Name> allNames = newArrayList()
+		List<Name> actualNames = newArrayList()
 		
 		def String getActualContents() {
-			var result = originalContents
-			for (decl : actualDeclarations) {
-				result = result.substring(0,decl.value.offset) + "["+ decl.key + "]" + result.substring(decl.value.offset + decl.value.length)
-			}
-			for (decl : actualReferences) {
-				result = result.substring(0,decl.value.offset) + "<" + decl.key + ">" + result.substring(decl.value.offset + decl.value.length)
-			}
-			for (decl : actualUnresolved) {
-				result = result.substring(0,decl.value.offset) + "?" + decl.key + "?" + result.substring(decl.value.offset + decl.value.length)
+			var result = parseableContents
+			var addedChars = 0
+			for (decl : actualNames.sortBy[region.offset]) {
+				val brackets = if (decl.isDeclaration == null) "?"->"?" else if (decl.isDeclaration) "["->"]" else "<"->">"
+				result = result.substring(0,decl.region.offset + addedChars) + brackets.key+ decl.value + brackets.value + result.substring(decl.region.offset + decl.region.length + addedChars)
+				addedChars += 2
 			}
 			return result
 		}
 	}
 	
+	@Data private static class Name {
+		String value
+		Boolean isDeclaration
+		TextRegion region
+	}
+	
 	private static val NAME = "[a-zA-Z0-9\\.:]+"
-	private static val declarationMarker = Pattern.compile("\\[("+NAME+")\\]")
-	private static val referenceMarker = Pattern.compile("\\<("+NAME+")\\>")
+	private static val markerPattern = Pattern.compile("[\\[\\<]("+NAME+")[\\]|\\>]")
 	
 	private def TestFile parseReferenceMarker(CharSequence txt) {
 		val result = new TestFile() => [
 			originalContents = txt.toString
 		]
-		val declarationMatcher = declarationMarker.matcher(txt)
-		while (declarationMatcher.find) {
-			val region = new TextRegion(declarationMatcher.start, declarationMatcher.end - declarationMatcher.start)
-			val name = declarationMatcher.group(1)
-			result.declarations.add(name -> region)
+		val matcher = markerPattern.matcher(txt)
+		var int charactersRemoved = 0
+		while (matcher.find) {
+			val region = new TextRegion(matcher.start - charactersRemoved, matcher.end - matcher.start - 2)
+			charactersRemoved += 2
+			val name = matcher.group(1)
+			result.allNames.add(new Name(name, matcher.group.startsWith("["), region))
 		}
-		val withoutDeclarations = declarationMatcher.replaceAll("_$1_")
-		val referenceMatcher = referenceMarker.matcher(withoutDeclarations)
-		while (referenceMatcher.find) {
-			val region = new TextRegion(referenceMatcher.start, referenceMatcher.end - referenceMatcher.start)
-			val name = referenceMatcher.group(1)
-			result.references.add(name -> region)
-		}
-		result.parseableContents = referenceMatcher.replaceAll("_$1_")
+		result.parseableContents = matcher.replaceAll("$1")
+		result.allNames.forall[result.parseableContents.substring(region.offset, region.offset + region.length) == value]
 		return result
 	}
 }

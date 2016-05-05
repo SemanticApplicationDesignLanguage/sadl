@@ -18,7 +18,11 @@
 package com.ge.research.sadl.jena.inference;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.hp.hpl.jena.ontology.OntModel;
 
 public interface ISadlJenaModelGetter {
@@ -59,5 +63,14 @@ public interface ISadlJenaModelGetter {
 	public abstract String getFormat();
 
 	public abstract void setFormat(String format);
+
+	/**
+	 * Method to return the import hierarchy of the specified model
+	 * @param modelUrl -- actual URL of the model for which imports are desired
+	 * @return configMgr -- an implementation of IConfigurationManager that will be used to resolve mappings
+	 * @return -- import hierarch as a Map. The import URI is the key and a Map of that models imports else null if it has none is the value.
+	 * @throws ConfigurationException 
+	 */
+	public abstract HashMap<String, Map> getImportHierarchy(IConfigurationManager configMgr, String modelUri) throws ConfigurationException;
 
 }

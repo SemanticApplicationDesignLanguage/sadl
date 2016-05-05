@@ -75,10 +75,15 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
@@ -139,6 +144,7 @@ import com.ge.research.sadl.sADL.SadlValueList;
 import com.ge.research.sadl.sADL.StartWriteStatement;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
@@ -228,6 +234,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	@SuppressWarnings("restriction")
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
+    	logger.debug("onGenerate called for Resource '" + resource.getURI() + "'");
 		// save the model
 		if (getTheJenaModel() == null) {
 			// it always is?
@@ -403,6 +410,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	@Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
+    	logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate' action was invoked. 
 		}
@@ -491,6 +499,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					if (xtrsrc != null) {
 						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
 						if (importedOntModel == null) {
+				        	logger.debug("JenaBasedSadlModelProcessor encountered null OntModel for Resource '" + xtrsrc.getURI() + "' while processing Resource '" + resource.getURI() + "'");
 							xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 					        importedOntModel = OntModelProvider.find(xtrsrc);
 						}
@@ -499,6 +508,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							getTheJenaModel().addSubModel(importedOntModel);
 						}
 				    	else {
+				        	logger.debug("JenaBasedSadlModelProcessor failed to resolve null OntModel for Resource '" + xtrsrc.getURI() + "' while processing Resource '" + resource.getURI() + "'");
 				    		addError("Imported model has null OntModel", simport);
 				    	}
 						modelOntology.addImport(importedOntology);
@@ -607,6 +617,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 		}
+    	logger.debug("JenaBasedSadlModelProcessor saving OntModel for Resource '" + resource.getURI() + "'");
 		OntModelProvider.attach(model.eResource(), getTheJenaModel());
 	}
 
@@ -672,7 +683,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
-	private void processStatement(TestStatement element) throws JenaProcessorException {
+	public Test[] processStatement(TestStatement element) throws JenaProcessorException {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
@@ -684,10 +695,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
-	private void processStatement(QueryStatement element) throws JenaProcessorException {
+	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+		Expression qexpr = element.getExpr();
+		Object qobj = processExpression(qexpr);
+		Query query = processQuery(qobj);
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 
+	private Query processQuery(Object qobj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	private void processStatement(EquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
@@ -847,6 +865,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		else if (expr instanceof UnaryExpression) {
 			return processExpression((UnaryExpression)expr);
+		}
+		else if (expr instanceof Sublist) {
+			return processExpression((Sublist)expr);
 		}
 		else {
 			throw new TranslationException("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
@@ -1545,9 +1566,56 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return expr.getValue();
 	}
 	
-	public String processExpression(SubjHasProp expr) {
+	public Object processExpression(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
-		return expr.getProp().toString();
+		Expression subj = expr.getLeft();
+		Expression pred = expr.getProp();
+		Expression obj = expr.getRight();
+		Object sobj = null;
+		Object pobj = null;
+		Object oobj = null;
+		if (subj != null) {
+			sobj = translate(subj);
+		}
+		if (pred != null) {
+			pobj = translate(pred);
+		}
+		if (obj != null) {
+			oobj = translate(obj);
+		}
+		TripleElement returnTriple = null;
+		if (pobj != null) {
+			returnTriple = new TripleElement(null, nodeCheck(pobj), null);
+			returnTriple.setSourceType(TripleSourceType.SPV);
+		}
+		if (sobj != null) {
+			returnTriple.setSubject(nodeCheck(sobj));
+		}
+		if (oobj != null) {
+			returnTriple.setObject(nodeCheck(oobj));
+		}
+		return returnTriple;
+	}
+	
+	public Object processExpression(Sublist expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Expression list = expr.getList();
+		Expression where = expr.getWhere();
+		Object lobj = translate(list);
+		Object wobj = translate(where);
+		
+		addError("Processing of sublist construct not yet implemented: " + lobj.toString() + ", " + wobj.toString(), expr);
+		
+		BuiltinElement builtin = new BuiltinElement();
+		builtin.setFuncName("sublist");
+		builtin.addArgument(nodeCheck(lobj));
+		if (lobj instanceof GraphPatternElement) {
+			((GraphPatternElement)lobj).setEmbedded(true);
+		}
+		builtin.addArgument(nodeCheck(wobj));
+		if (wobj instanceof GraphPatternElement) {
+			((GraphPatternElement)wobj).setEmbedded(true);
+		}
+		return builtin;
 	}
 	
 	public Object processExpression(UnaryExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -1940,6 +2008,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						throw new JenaProcessorException("Unable to convert concept being restricted (" + domainrsrc.toString() + ") to an OntClass.");
 					}
 				}
+			}
+			else if (spr1 instanceof SadlTypeAssociation) {
+				// this is case 3 but with range not present
+				SadlTypeReference domain = ((SadlTypeAssociation)spr1).getDomain();
+				OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
+				ObjectProperty prop = getOrCreateObjectProperty(propUri);
+				addPropertyDomain(prop, domainrsrc);
 			}
 			else {
 				throw new JenaProcessorException("Unhandled SadlProperty expression");
@@ -2470,6 +2545,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				inst.addProperty(annprop, rsrcval);
 			}
+		}
+		else if (type.equals(OntConceptType.VARIABLE)) {
+			// a variable for a property type is only valid in a rule or query.
 		}
 		else {
 			throw new JenaProcessorException("unhandled property type");
@@ -3548,6 +3626,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			System.out.println("   URL: " + fileNames.get(i));
 		}
 	}
+	
 	private String getModelAlias() {
 		return modelAlias;
 	}
@@ -3653,8 +3732,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return null;
 	}
+	
 	public List<Rule> getRules() {
 		return rules;
+	}
+	@Override
+	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context,
+			String query) {
+		String queryString;
+		String modelFolderPathname = getModelFolderPath(resource);
+		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+		try {
+			IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
+			ITranslator translator = configMgr.getTranslator();
+			queryString = translator.translateQuery(getTheJenaModel(), processQuery(query));
+			ResultSet results =  configMgr.getReasoner().ask(queryString);
+			System.out.println(results.toStringWithIndent(5));
+		} catch (com.ge.research.sadl.reasoner.ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryCancelledException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
