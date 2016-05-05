@@ -234,6 +234,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	@SuppressWarnings("restriction")
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
+    	logger.debug("onGenerate called for Resource '" + resource.getURI() + "'");
 		// save the model
 		if (getTheJenaModel() == null) {
 			// it always is?
@@ -409,6 +410,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	@Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
+    	logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate' action was invoked. 
 		}
@@ -497,6 +499,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					if (xtrsrc != null) {
 						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
 						if (importedOntModel == null) {
+				        	logger.debug("JenaBasedSadlModelProcessor encountered null OntModel for Resource '" + xtrsrc.getURI() + "' while processing Resource '" + resource.getURI() + "'");
 							xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 					        importedOntModel = OntModelProvider.find(xtrsrc);
 						}
@@ -505,6 +508,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							getTheJenaModel().addSubModel(importedOntModel);
 						}
 				    	else {
+				        	logger.debug("JenaBasedSadlModelProcessor failed to resolve null OntModel for Resource '" + xtrsrc.getURI() + "' while processing Resource '" + resource.getURI() + "'");
 				    		addError("Imported model has null OntModel", simport);
 				    	}
 						modelOntology.addImport(importedOntology);
@@ -613,6 +617,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 		}
+    	logger.debug("JenaBasedSadlModelProcessor saving OntModel for Resource '" + resource.getURI() + "'");
 		OntModelProvider.attach(model.eResource(), getTheJenaModel());
 	}
 
