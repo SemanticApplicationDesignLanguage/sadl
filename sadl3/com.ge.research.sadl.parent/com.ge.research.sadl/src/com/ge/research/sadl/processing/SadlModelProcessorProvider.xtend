@@ -61,11 +61,11 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 		}
 		
 		override processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
-//			processors.forEach[processCommands(resource, issueAcceptor, context)]
+			processors.forEach[processCommands(resource, issueAcceptor, context)]
 		}
 		
 		override processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context, String query) {
-//			processors.forEach[processAdhocQuery(resource, issueAcceptor, context, query)]
+			processors.forEach[processAdhocQuery(resource, issueAcceptor, context, query)]
 		}
 		
 	}
