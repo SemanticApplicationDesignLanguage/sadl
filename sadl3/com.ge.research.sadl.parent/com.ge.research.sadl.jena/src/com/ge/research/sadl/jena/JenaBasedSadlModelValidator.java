@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.crypto.URIReference;
+import javax.xml.transform.URIResolver;
+
 import org.eclipse.emf.ecore.EObject;
 
 import com.ge.research.sadl.model.ConceptIdentifier;
@@ -50,15 +53,18 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.UnionClass;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected ValidationAcceptor issueAcceptor = null;
 	protected OntModel theJenaModel = null;
 	private DeclarationExtensions declarationExtensions = null;
-	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","not","unique","in","contains","does",/*"not",*/"contain");
+	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
 	private EObject defaultContext;
 	
 	public class TypeCheckInfo {
@@ -308,20 +314,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		if (predicate instanceof Constant) {
 			String cnstval = ((Constant)predicate).getConstant();
-			if (cnstval.equals("length")) {
+			if (cnstval.equals("length") || cnstval.equals("count") || cnstval.equals("index")) {
+				ConceptName nlcn = new ConceptName(XSD.integer.getURI());
+				nlcn.setType(ConceptType.RDFDATATYPE);
+				return new TypeCheckInfo(nlcn, nlcn);
 			}
-			else if (cnstval.equals("count")) {
-				if (subject instanceof PropOfSubject) {
-					predicate = ((PropOfSubject)subject).getLeft();
-					subject = ((PropOfSubject)subject).getRight();
-				}
-			}
-			else if (cnstval.equals("index")) {
-				if (subject instanceof PropOfSubject) {
-					predicate = ((PropOfSubject)subject).getLeft();
-					subject = ((PropOfSubject)subject).getRight();
-				}
-			}
+//			else if (cnstval.equals("count")) {
+//				if (subject instanceof PropOfSubject) {
+//					predicate = ((PropOfSubject)subject).getLeft();
+//					subject = ((PropOfSubject)subject).getRight();
+//				}
+//			}
+//			else if (cnstval.equals("index")) {
+//				if (subject instanceof PropOfSubject) {
+//					predicate = ((PropOfSubject)subject).getLeft();
+//					subject = ((PropOfSubject)subject).getRight();
+//				}
+//			}
 			else if (cnstval.equals("first element")) {
 			}
 			else if (cnstval.equals("last element")) {
@@ -396,7 +405,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 	}
 	
-	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) {
+	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
 			issueAcceptor.addError("Unidentified expression", expression);
@@ -408,6 +417,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if(pIterator.hasNext()){
 			OntResource first = pIterator.next();
 			if(first.getURI() != null){
+// TODO This is a horrible kluge!!! needs to be fixed. AWC 5/11/2016				
+				if (isRangeKlugyDATASubclass(first)) {
+					throw new DontTypeCheckException();
+				}
 				ConceptName rangeConceptName = new ConceptName(first.getURI());
 				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 					rangeConceptName.setType(ConceptType.RDFDATATYPE);
@@ -416,11 +429,49 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else {
 					rangeConceptName.setType(ConceptType.ONTCLASS);
 				}
+				pIterator.close();
 				return new TypeCheckInfo(propConceptName, rangeConceptName);
 			}
 		}
 		
+//		StmtIterator stmtitr = theJenaModel.listStatements(property, RDFS.range, (RDFNode)null);
+//		while (stmtitr.hasNext()) {
+//			RDFNode obj = stmtitr.nextStatement().getObject();
+//			if(obj.isURIResource() && ((Resource)obj).getURI() != null && ((Resource)obj).canAs(OntResource.class)){
+//// TODO This is a horrible kluge!!! needs to be fixed. AWC 5/11/2016				
+//				if (isRangeKlugyDATASubclass(obj.as(OntResource.class))) {
+//					throw new DontTypeCheckException();
+//				}
+//				ConceptName rangeConceptName = new ConceptName(((Resource)obj).getURI());
+//				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+//					rangeConceptName.setType(ConceptType.RDFDATATYPE);
+//					rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+//				}
+//				else {
+//					rangeConceptName.setType(ConceptType.ONTCLASS);
+//				}
+//				pIterator.close();
+//				return new TypeCheckInfo(propConceptName, rangeConceptName);
+//			}
+//		}
+//		
 		return null;
+	}
+
+	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
+		if (rsrc.getURI().endsWith("#DATA")) {
+			return true;
+		}
+		if (rsrc.canAs(OntClass.class)){
+			ExtendedIterator<OntClass> itr = rsrc.as(OntClass.class).listSuperClasses();
+			while (itr.hasNext()) {
+				OntClass spr = itr.next();
+				if (spr.isURIResource() && spr.getURI().endsWith("#DATA")) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) throws DontTypeCheckException {
@@ -523,7 +574,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 					return true;
 				}
+				// these next two ifs are a little loose, but not clear how to determine which way the comparison should be? May need tightening... AWC 5/11/2016
 				if (classIsSubclassOf(theJenaModel.getOntClass(leftConceptName.getUri()), theJenaModel.getOntResource(rightConceptName.getUri()), true)) {
+					return true;
+				}
+				if (classIsSubclassOf(theJenaModel.getOntClass(rightConceptName.getUri()), theJenaModel.getOntResource(leftConceptName.getUri()), true)) {
 					return true;
 				}
 			}
