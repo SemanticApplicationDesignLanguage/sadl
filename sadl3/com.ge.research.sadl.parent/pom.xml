@@ -30,6 +30,7 @@
 		<module>com.ge.research.sadl.feature</module>
 		<module>com.ge.research.sadl.perspective</module>
 		<module>com.ge.research.sadl.update</module>
+		<module>com.ge.research.sadl.utils</module>
 	</modules>
 	<build>
 		<plugins>

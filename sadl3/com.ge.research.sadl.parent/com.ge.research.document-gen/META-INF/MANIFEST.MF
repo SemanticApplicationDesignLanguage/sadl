@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Document-gen
+Bundle-SymbolicName: com.ge.research.doc-gen;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: GE
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.hp.hpl.jena.util
+Export-Package: com.ge.research.documentation
