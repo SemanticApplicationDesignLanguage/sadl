@@ -882,8 +882,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		//Validate BinaryOperation expression
-		if(modelValidator != null && !modelValidator.validate(expr)) {
-			issueAcceptor.addError("This expression contains a type conflict", expr);
+		StringBuilder errorMessage = new StringBuilder();
+		if(modelValidator != null && !modelValidator.validate(expr, errorMessage)) {
+			issueAcceptor.addError(errorMessage.toString(), expr);
 		}
 		
 		String op = expr.getOp();

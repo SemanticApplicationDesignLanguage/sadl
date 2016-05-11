@@ -24,5 +24,5 @@ import com.ge.research.sadl.sADL.BinaryOperation
  *  
  */
 interface ISadlModelValidator {
-	def boolean validate(BinaryOperation expression)
+	def boolean validate(BinaryOperation expression, StringBuilder errorMessageBuilder)
 }
