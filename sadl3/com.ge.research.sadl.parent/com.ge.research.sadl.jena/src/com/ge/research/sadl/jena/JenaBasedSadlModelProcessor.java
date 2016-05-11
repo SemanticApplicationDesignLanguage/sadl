@@ -296,20 +296,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType) {
 		String modelFolderPathname = getModelFolderPath(resource);
+		List<ModelError> results = null;
 		try {
 			IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
 			ITranslator translator = configMgr.getTranslator();
-			List<ModelError> results = translator
+			results = translator
 					.translateAndSaveModel(getTheJenaModel(), getRules(),
 							modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), 
 							owlFN);
-			if (results != null) {
-				modelErrorsToOutput(resource, results);
-			}
-			else if (getOtherKnowledgeStructure() != null) {
+			if (results == null && getOtherKnowledgeStructure() != null) {
 				results = translator.translateAndSaveModelWithOtherStructure(getTheJenaModel(), getOtherKnowledgeStructure(), 
 						modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), owlFN);
-				return results;
 			}
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
@@ -329,7 +326,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		
 		
-		return null;
+		return results;
 	}
 	
 	private String getModelFolderPath(Resource resource) {
@@ -848,7 +845,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		//Validate BinaryOperation expression
 		if(modelValidator != null && !modelValidator.validate(expr)) {
-			issueAcceptor.addError("This expression contains a type conflict", expr);
+			addError("This expression contains a type conflict", expr);
 		}
 		
 		String op = expr.getOp();
