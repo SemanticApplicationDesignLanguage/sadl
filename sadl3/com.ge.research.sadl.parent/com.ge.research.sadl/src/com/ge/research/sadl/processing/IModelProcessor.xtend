@@ -25,6 +25,7 @@ import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.preferences.IPreferenceValues
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
+import com.ge.research.sadl.reasoner.ResultSet
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources

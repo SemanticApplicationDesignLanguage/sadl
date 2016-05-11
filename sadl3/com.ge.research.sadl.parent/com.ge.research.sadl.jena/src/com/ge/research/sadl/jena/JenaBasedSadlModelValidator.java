@@ -1,6 +1,7 @@
 package com.ge.research.sadl.jena;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -179,7 +180,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(stringLiteralConceptName, stringLiteralConceptName);
 		}
 		else if(expression instanceof NumberLiteral){
-			ConceptName numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+			BigDecimal value = ((NumberLiteral)expression).getValue();
+			ConceptName numberLiteralConceptName = null;
+			if (value.stripTrailingZeros().scale() <= 0 || value.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0) {
+				numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
+			}
+			else {
+				numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+			}
 			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(numberLiteralConceptName, numberLiteralConceptName);
 		}
@@ -487,6 +495,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 					return true;
 				}
+				else if (isInteger(leftConceptName) && isInteger(rightConceptName)) {
+					return true;
+				}
 				else if(isDecimal(leftConceptName) && isInteger(rightConceptName)){
 					return true;
 				}
@@ -645,6 +656,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (type instanceof ConceptName) {
 			String uri = ((ConceptName)type).getUri();
 			if (uri.equals(XSD.integer.getURI())) {
+				return true;
+			}
+			else if (uri.equals(XSD.xint.getURI())) {
 				return true;
 			}
 		}

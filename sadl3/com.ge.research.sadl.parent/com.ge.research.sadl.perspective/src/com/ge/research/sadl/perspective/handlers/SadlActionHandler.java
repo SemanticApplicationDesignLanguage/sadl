@@ -23,6 +23,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -67,6 +68,12 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			if (window != null) {
 			    ISelection selection = (ISelection) window.getSelectionService().getSelection();
+			    if (selection instanceof TextSelection) {
+			    	String selectedText = ((TextSelection)selection).getText();
+			    	// how do we get the file containing the text?
+			    	System.out.println("Selected text for action: " + selectedText);
+			    	
+			    }
 			    if (!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
 			    	throw new ExecutionException("Nothing is selected for action");
 			    }
