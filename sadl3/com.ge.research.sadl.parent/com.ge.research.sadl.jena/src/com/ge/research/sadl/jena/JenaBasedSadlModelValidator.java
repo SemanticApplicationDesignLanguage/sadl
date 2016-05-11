@@ -119,7 +119,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		this.declarationExtensions = declarationExtensions;
 	}
 	
-	public boolean validate(BinaryOperation expression) {
+	public boolean validate(BinaryOperation expression, StringBuilder errorMessageBuilder) {
 		setDefaultContext(expression);
 		Expression leftExpression = expression.getLeft();
 		Expression rightExpression = expression.getRight();
@@ -132,7 +132,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		try {	
 			TypeCheckInfo leftTypeCheckInfo = getType(leftExpression);
 			TypeCheckInfo rightTypeCheckInfo = getType(rightExpression);
-			return compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
+			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo);
+				return false;
+			}
+			return true;
 		} catch (InvalidNameException e) {
 			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
@@ -154,6 +158,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return true;
 		}
 		return false;
+	}
+
+	private void createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
+		String leftName = leftTypeCheckInfo.expressionType != null ? leftTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED";
+		String leftType = leftTypeCheckInfo.typeCheckType != null ? leftTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED";
+		String leftRange = leftTypeCheckInfo.rangeValueType != null ? leftTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED";
+		String rightName = rightTypeCheckInfo.expressionType != null ? rightTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED";
+		String rightType = rightTypeCheckInfo.typeCheckType != null ? rightTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED";
+		String rightRange = rightTypeCheckInfo.rangeValueType != null ? rightTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED";
+		
+		errorMessageBuilder.append("Element '" + leftName + "' of type '" + leftType + "'");
+		if(!leftRange.equals("UNIDENTIFIED")){
+			errorMessageBuilder.append(", with a range of '" + leftRange + "',");
+		}
+		errorMessageBuilder.append(" cannot be compared to element '" + rightName + "' of type " + rightType + "'");
+		if(!rightRange.equals("UNIDENTIFIED")){
+			errorMessageBuilder.append(", with a range of '" + rightRange + "'");
+		}
+		errorMessageBuilder.append(".");
 	}
 
 	protected boolean skipOperations(List<String> operations) {
