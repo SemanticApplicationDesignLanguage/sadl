@@ -116,7 +116,7 @@ abstract class AbstractLinkingTest {
 		TextRegion region
 	}
 	
-	private static val NAME = "[a-zA-Z0-9\\.:]+"
+	private static val NAME = "[a-zA-Z0-9_\\.:]+"
 	private static val markerPattern = Pattern.compile("[\\[\\<]("+NAME+")[\\]|\\>]")
 	
 	private def TestFile parseReferenceMarker(CharSequence txt) {

@@ -74,7 +74,7 @@ SadlStatement returns SadlStatement:
 	    		('top-level'? 'class' 
 	    		| 'type' 'of' superElement=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
 				(describedBy+=SadlPropertyDeclarationInClass+ | (','? restrictions+=SadlPropertyRestriction)+)?
-			|{SadlProperty.nameOrRef=current} 'is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
+			|{SadlProperty.nameOrRef=current} primaryDeclaration?='is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
 			|{SadlProperty.nameOrRef=current} (','? restrictions+=SadlPropertyRestriction)+
 			|{SadlSameAs.nameOrRef=current} 'is' 'the' 'same' 'as' (complement?='not')? sameAs=SadlTypeReference
 			|{SadlDifferentFrom.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
@@ -113,9 +113,9 @@ SadlResource:
 ;
 
 SadlDataTypeFacet :	
-		minexin=('(' | '[') min=FacetNumber? ',' max=FacetNumber? maxexin=(']' | ')')
+		{SadlDataTypeFacet} ('(' | minInclusive?='[') min=FacetNumber? ',' max=FacetNumber? (maxInclusive?=']' | ')')
 	|	regex=STRING
-	|	'length' (len=FacetNumber | minlen=FacetNumber '-' maxlen=FacetNumber)
+	|	'length' (len=FacetNumber | minlen=FacetNumber '-' maxlen=(FacetNumber|'*'))
 	|	'{' values+=FacetValue (','? values+=FacetValue)* '}'
 ;
 
@@ -345,7 +345,10 @@ PropOfSubject<EnabledWith> returns Expression: // (17)
 // primary expressions are the atom units of expression in the grammar	
 PrimaryExpression<EnabledWith> returns Expression: // (20)
 	'(' ExpressionParameterized<EnabledWith> ')' 
-	| {Declaration} article=AnArticle type=SadlPrimaryTypeReference ->(newName=DNAME)?
+	| {Declaration} article=AnArticle type=SadlPrimaryTypeReference 
+	->('[' arglist+=Expression? (',' arglist+=Expression)* ']'|
+		newName=DNAME
+	)?
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 

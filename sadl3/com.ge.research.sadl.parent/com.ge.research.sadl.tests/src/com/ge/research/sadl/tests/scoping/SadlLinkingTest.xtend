@@ -140,7 +140,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			uri "http://sadl.org/equations".
 			
 			[area] describes <Rectangle> with values of type float.
-			A Foo is a [Rectangle] only if area has one value of type float.
+			A Foo is a [Rectangle] only if <area> has one value of type float.
 		'''.assertLinking[sadl]
 	}
 	
@@ -150,7 +150,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			uri "http://sadl.org/equations".
 			
 			[area] describes <Rectangle> with values of type float.
-			A Foo is a [Rectangle] only if area has one value of type float.
+			A Foo is a [Rectangle] only if <area> has one value of type float.
 		'''.assertLinking[sadl]
 	}
 	
@@ -221,7 +221,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
  		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test 
 	def void testLinkingPrecedence_08() {
 		'''
@@ -248,7 +247,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testLinkingPrecedence_09() {
 		'''
@@ -288,7 +286,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testLinkingPrecedence_10() {
 		'''

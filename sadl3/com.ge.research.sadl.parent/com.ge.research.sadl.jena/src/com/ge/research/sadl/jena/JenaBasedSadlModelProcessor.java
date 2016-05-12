@@ -882,8 +882,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		//Validate BinaryOperation expression
-		if(modelValidator != null && !modelValidator.validate(expr)) {
-			issueAcceptor.addError("This expression contains a type conflict", expr);
+		StringBuilder errorMessage = new StringBuilder();
+		if(modelValidator != null && !modelValidator.validate(expr, errorMessage)) {
+			issueAcceptor.addError(errorMessage.toString(), expr);
 		}
 		
 		String op = expr.getOp();
@@ -2987,27 +2988,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private com.hp.hpl.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet) {
 		com.hp.hpl.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
-		boolean minInclusive = (facet.getMinexin() != null && facet.getMinexin().equals("["));
-		boolean maxInclusive = (facet.getMaxexin() != null && facet.getMaxexin().equals("]"));
-		if (minInclusive) {
-			anon.addProperty(xsdProperty("minInclusive"), "" + facet.getMin());
-		}
-		else {
-			anon.addProperty(xsdProperty("minExclusive"), "" + facet.getMin());
-		}
-		if (maxInclusive) {
-			anon.addProperty(xsdProperty("maxInclusive"), "" + facet.getMax());
-		}
-		else {
-			anon.addProperty(xsdProperty("maxExclusive"), "" + facet.getMax());
-		}
+		
+		anon.addProperty(xsdProperty(facet.isMinInclusive()?"minInclusive":"minExclusive"), "" + facet.getMin());
+		anon.addProperty(xsdProperty(facet.isMaxInclusive()?"maxInclusive":"maxExclusive"), "" + facet.getMax());
+		
 		if (facet.getLen() != null) {
 			anon.addProperty(xsdProperty("length"), "" + facet.getLen());
 		}
 		if (facet.getMinlen() != null) {
 			anon.addProperty(xsdProperty("minLength"), "" + facet.getMinlen());
 		}
-		if (facet.getMaxlen() != null) {
+		if (facet.getMaxlen() != null && !facet.getMaxlen().equals("*")) {
 			anon.addProperty(xsdProperty("maxLength"), "" + facet.getMaxlen());
 		}
 		if (facet.getRegex() != null) {
