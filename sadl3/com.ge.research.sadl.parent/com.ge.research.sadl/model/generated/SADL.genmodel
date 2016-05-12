@@ -105,6 +105,7 @@
     <genClasses ecoreClass="SADL.ecore#//SadlTypeReference"/>
     <genClasses ecoreClass="SADL.ecore#//SadlProperty">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlProperty/nameOrRef"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlProperty/primaryDeclaration"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlProperty/restrictions"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlProperty/from"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlProperty/to"/>
