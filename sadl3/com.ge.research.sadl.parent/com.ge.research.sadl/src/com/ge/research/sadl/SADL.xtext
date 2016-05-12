@@ -74,7 +74,7 @@ SadlStatement returns SadlStatement:
 	    		('top-level'? 'class' 
 	    		| 'type' 'of' superElement=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
 				(describedBy+=SadlPropertyDeclarationInClass+ | (','? restrictions+=SadlPropertyRestriction)+)?
-			|{SadlProperty.nameOrRef=current} 'is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
+			|{SadlProperty.nameOrRef=current} primaryDeclaration?='is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
 			|{SadlProperty.nameOrRef=current} (','? restrictions+=SadlPropertyRestriction)+
 			|{SadlSameAs.nameOrRef=current} 'is' 'the' 'same' 'as' (complement?='not')? sameAs=SadlTypeReference
 			|{SadlDifferentFrom.nameOrRef=current} 'is' 'not' 'the' 'same' 'as' notTheSameAs=SadlTypeReference
