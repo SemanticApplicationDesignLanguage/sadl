@@ -345,7 +345,10 @@ PropOfSubject<EnabledWith> returns Expression: // (17)
 // primary expressions are the atom units of expression in the grammar	
 PrimaryExpression<EnabledWith> returns Expression: // (20)
 	'(' ExpressionParameterized<EnabledWith> ')' 
-	| {Declaration} article=AnArticle type=SadlPrimaryTypeReference ->(newName=DNAME)?
+	| {Declaration} article=AnArticle type=SadlPrimaryTypeReference 
+	->('[' arglist+=Expression? (',' arglist+=Expression)* ']'|
+		newName=DNAME
+	)?
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 

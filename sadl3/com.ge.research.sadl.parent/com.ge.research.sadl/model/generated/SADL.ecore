@@ -376,6 +376,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="arglist" upperBound="-1"
+        eType="#//Expression" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="newName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="StringLiteral" eSuperTypes="#//Expression">
