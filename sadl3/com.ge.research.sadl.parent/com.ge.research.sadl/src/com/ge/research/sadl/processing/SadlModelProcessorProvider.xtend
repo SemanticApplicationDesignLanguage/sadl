@@ -32,7 +32,7 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
 	@Inject OnChangeEvictingCache cache
 	
-	public static val Set<Provider<IModelProcessor>> SADL_PROCESSOR_Registry = newHashSet
+	public static val Set<Provider<? extends IModelProcessor>> SADL_PROCESSOR_Registry = newHashSet
 	
 	override IModelProcessor getProcessor(Resource resource) {
 		return cache.get("modelprocessor", resource) [
