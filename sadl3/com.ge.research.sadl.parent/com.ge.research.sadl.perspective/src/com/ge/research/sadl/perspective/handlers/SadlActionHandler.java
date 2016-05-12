@@ -23,8 +23,11 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
@@ -32,6 +35,8 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.xtext.preferences.IPreferenceValues;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.ui.editor.XtextEditor;
+import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.ui.resource.IResourceSetProvider;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
@@ -67,6 +72,13 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			if (window != null) {
 			    ISelection selection = (ISelection) window.getSelectionService().getSelection();
+			    if (selection instanceof TextSelection) {
+			    	XtextEditor editor = EditorUtils.getActiveXtextEditor();
+			    	IEditorInput editorInput = editor.getEditorInput();
+			    	if (editorInput instanceof IFileEditorInput) {
+			    		return ((IFileEditorInput) editorInput).getFile();
+			    	}
+			    }
 			    if (!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
 			    	throw new ExecutionException("Nothing is selected for action");
 			    }

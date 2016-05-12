@@ -78,11 +78,13 @@ import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.sADL.BinaryOperation;
@@ -699,11 +701,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		Expression qexpr = element.getExpr();
 		Object qobj = processExpression(qexpr);
 		Query query = processQuery(qobj);
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+		return query;
 	}
 
 	private Query processQuery(Object qobj) {
-		// TODO Auto-generated method stub
+		if (qobj instanceof String) {
+			Query q = new Query();
+			q.setSparqlQueryString((String) qobj);
+			return q;
+		}
 		return null;
 	}
 	private void processStatement(EquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
@@ -876,8 +882,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		//Validate BinaryOperation expression
-		if(modelValidator != null && !modelValidator.validate(expr)) {
-			issueAcceptor.addError("This expression contains a type conflict", expr);
+		StringBuilder errorMessage = new StringBuilder();
+		if(modelValidator != null && !modelValidator.validate(expr, errorMessage)) {
+			issueAcceptor.addError(errorMessage.toString(), expr);
 		}
 		
 		String op = expr.getOp();
@@ -2981,27 +2988,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private com.hp.hpl.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet) {
 		com.hp.hpl.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
-		boolean minInclusive = (facet.getMinexin() != null && facet.getMinexin().equals("["));
-		boolean maxInclusive = (facet.getMaxexin() != null && facet.getMaxexin().equals("]"));
-		if (minInclusive) {
-			anon.addProperty(xsdProperty("minInclusive"), "" + facet.getMin());
-		}
-		else {
-			anon.addProperty(xsdProperty("minExclusive"), "" + facet.getMin());
-		}
-		if (maxInclusive) {
-			anon.addProperty(xsdProperty("maxInclusive"), "" + facet.getMax());
-		}
-		else {
-			anon.addProperty(xsdProperty("maxExclusive"), "" + facet.getMax());
-		}
+		
+		anon.addProperty(xsdProperty(facet.isMinInclusive()?"minInclusive":"minExclusive"), "" + facet.getMin());
+		anon.addProperty(xsdProperty(facet.isMaxInclusive()?"maxInclusive":"maxExclusive"), "" + facet.getMax());
+		
 		if (facet.getLen() != null) {
 			anon.addProperty(xsdProperty("length"), "" + facet.getLen());
 		}
 		if (facet.getMinlen() != null) {
 			anon.addProperty(xsdProperty("minLength"), "" + facet.getMinlen());
 		}
-		if (facet.getMaxlen() != null) {
+		if (facet.getMaxlen() != null && !facet.getMaxlen().equals("*")) {
 			anon.addProperty(xsdProperty("maxLength"), "" + facet.getMaxlen());
 		}
 		if (facet.getRegex() != null) {
@@ -3736,11 +3733,50 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public List<Rule> getRules() {
 		return rules;
 	}
+	
 	@Override
 	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
-		// TODO Auto-generated method stub
+		setCancelIndicator(cancelIndicator);
+		if (resource.getContents().size() < 1) {
+			return;
+		}
+		SadlModel model = (SadlModel) resource.getContents().get(0);
+		String modelActualUrl =resource.getURI().lastSegment();
+		if (isReservedName(resource)) {
+			addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
+		}
+		modelName = model.getBaseUri();
+		EList<SadlModelElement> elements = model.getElements();
+		if (elements != null) {
+			Iterator<SadlModelElement> elitr = elements.iterator();
+			while (elitr.hasNext()) {
+				SadlModelElement element = elitr.next();
+				if (element instanceof QueryStatement) {
+					try {
+						String query = (String) translate(((QueryStatement)element).getExpr());
+						processAdhocQuery(resource, issueAcceptor, context, query);
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else if (element instanceof TestStatement) {
+					
+				}
+				else if (element instanceof PrintStatement) {
+					
+				}
+			}
+		}
 		
 	}
+	
 	@Override
 	public void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context,
 			String query) {
@@ -3748,8 +3784,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		String modelFolderPathname = getModelFolderPath(resource);
 		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
 		try {
+			if (getTheJenaModel() == null) {
+				// it always is?
+				onValidate(resource, null, CheckMode.FAST_ONLY, context);
+			}
 			IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
 			ITranslator translator = configMgr.getTranslator();
+			IReasoner reasoner = configMgr.getReasoner();
+			if (!reasoner.isInitialized()) {
+				reasoner.setConfigurationManager(configMgr);
+				reasoner.initializeReasoner(modelFolderPathname, modelName, _repoType);
+			}
 			queryString = translator.translateQuery(getTheJenaModel(), processQuery(query));
 			ResultSet results =  configMgr.getReasoner().ask(queryString);
 			System.out.println(results.toStringWithIndent(5));
@@ -3766,6 +3811,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (QueryCancelledException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ReasonerNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

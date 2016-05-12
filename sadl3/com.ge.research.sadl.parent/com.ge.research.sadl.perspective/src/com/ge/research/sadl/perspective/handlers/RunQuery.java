@@ -58,7 +58,7 @@ public class RunQuery extends SadlActionHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
-			String[] validTargetTypes = {"sadl","test"};
+			String[] validTargetTypes = {"sadl","owl"};
 			IFile trgtFile = getTargetFile(validTargetTypes);
 
 			Map<String,String> prefMap = getPreferences();
