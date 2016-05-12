@@ -19,6 +19,7 @@ package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.tests.SADLInjectorProvider
@@ -30,8 +31,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -43,7 +42,8 @@ class DeclarationExtensionsTest {
 		val model = '''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen. 
 			
-			datatype2 is a type of string length 1-4 .
+			datatype2 is a type of string length 1-4.
+			datatype3 is a type of string length 1-*.
 			
 			SomeClass is a class, described by ident with values of type datatype1.
 		'''.parse
@@ -51,8 +51,8 @@ class DeclarationExtensionsTest {
 		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
 		
 		assertEquals("http://sadl.org/TestRequrements/StringLength#datatype2", name2resource.get('datatype2').conceptUri)
+		assertEquals("http://sadl.org/TestRequrements/StringLength#datatype3", name2resource.get('datatype3').conceptUri)
 		assertEquals("http://sadl.org/TestRequrements/StringLength#SomeClass", name2resource.get('SomeClass').conceptUri)
-		
 	}
 	
 	@Test def void testGetOntConceptType_01() {

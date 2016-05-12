@@ -113,9 +113,9 @@ SadlResource:
 ;
 
 SadlDataTypeFacet :	
-		minexin=('(' | '[') min=FacetNumber? ',' max=FacetNumber? maxexin=(']' | ')')
+		{SadlDataTypeFacet} ('(' | minInclusive?='[') min=FacetNumber? ',' max=FacetNumber? (maxInclusive?=']' | ')')
 	|	regex=STRING
-	|	'length' (len=FacetNumber | minlen=FacetNumber '-' maxlen=FacetNumber)
+	|	'length' (len=FacetNumber | minlen=FacetNumber '-' maxlen=(FacetNumber|'*'))
 	|	'{' values+=FacetValue (','? values+=FacetValue)* '}'
 ;
 
