@@ -1,10 +1,14 @@
 package com.ge.research.sadl.jena;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import javax.xml.crypto.URIReference;
+import javax.xml.transform.URIResolver;
 
 import org.eclipse.emf.ecore.EObject;
 
@@ -30,24 +34,38 @@ import com.ge.research.sadl.sADL.Function;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
+import com.ge.research.sadl.sADL.SadlDataType;
+import com.ge.research.sadl.sADL.SadlIntersectionType;
+import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
+import com.ge.research.sadl.sADL.SadlPropertyCondition;
 import com.ge.research.sadl.sADL.SadlResource;
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
+import com.ge.research.sadl.sADL.SadlTypeReference;
+import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.IntersectionClass;
+import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.UnionClass;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected ValidationAcceptor issueAcceptor = null;
 	protected OntModel theJenaModel = null;
 	private DeclarationExtensions declarationExtensions = null;
-	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","not","unique","in","contains","does",/*"not",*/"contain");
+	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
+	private EObject defaultContext;
 	
 	public class TypeCheckInfo {
     	private ConceptIdentifier expressionType = null;
@@ -107,7 +125,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		this.declarationExtensions = declarationExtensions;
 	}
 	
-	public boolean validate(BinaryOperation expression) {
+	public boolean validate(BinaryOperation expression, StringBuilder errorMessageBuilder) {
+		setDefaultContext(expression);
 		Expression leftExpression = expression.getLeft();
 		Expression rightExpression = expression.getRight();
 		List<String> operations = Arrays.asList(expression.getOp().split("\\s+"));
@@ -119,7 +138,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		try {	
 			TypeCheckInfo leftTypeCheckInfo = getType(leftExpression);
 			TypeCheckInfo rightTypeCheckInfo = getType(rightExpression);
-			return compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
+			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo);
+				return false;
+			}
+			return true;
 		} catch (InvalidNameException e) {
 			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", expression);
 			e.printStackTrace();
@@ -137,8 +160,29 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			e.printStackTrace();
 		} catch (NullPointerException e){
 			//issueAcceptor.addError("A null pointer exception occurred while type-checking this expression.", expression);
+		} catch (DontTypeCheckException e) {
+			return true;
 		}
 		return false;
+	}
+
+	private void createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
+		String leftName = leftTypeCheckInfo != null ? leftTypeCheckInfo.expressionType != null ? leftTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		String leftType = leftTypeCheckInfo != null ? leftTypeCheckInfo.typeCheckType != null ? leftTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		String leftRange = leftTypeCheckInfo != null ? leftTypeCheckInfo.rangeValueType != null ? leftTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		String rightName = rightTypeCheckInfo != null ? rightTypeCheckInfo.expressionType != null ? rightTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		String rightType = rightTypeCheckInfo != null ? rightTypeCheckInfo.typeCheckType != null ? rightTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		String rightRange = rightTypeCheckInfo != null ? rightTypeCheckInfo.rangeValueType != null ? rightTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		
+		errorMessageBuilder.append("Element '" + leftName + "' of type '" + leftType + "'");
+		if(!leftRange.equals("UNIDENTIFIED")){
+			errorMessageBuilder.append(", with a range of '" + leftRange + "',");
+		}
+		errorMessageBuilder.append(" cannot be compared to element '" + rightName + "' of type " + rightType + "'");
+		if(!rightRange.equals("UNIDENTIFIED")){
+			errorMessageBuilder.append(", with a range of '" + rightRange + "'");
+		}
+		errorMessageBuilder.append(".");
 	}
 
 	protected boolean skipOperations(List<String> operations) {
@@ -148,14 +192,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	protected TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
+	protected TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException{
 		if(expression instanceof Name){
 			return getType((Name)expression);
 		}
 		else if(expression instanceof Declaration){
+			SadlTypeReference decltype = ((Declaration)expression).getType();
+			return getType(decltype);
 			//Need to return passing case for time being
-			ConceptName declarationConceptName = new ConceptName("TODO");
-			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
+//			ConceptName declarationConceptName = new ConceptName("TODO");
+//			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 		}
 		else if(expression instanceof StringLiteral){
 			ConceptName stringLiteralConceptName = new ConceptName(XSD.xstring.getURI());
@@ -163,7 +209,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(stringLiteralConceptName, stringLiteralConceptName);
 		}
 		else if(expression instanceof NumberLiteral){
-			ConceptName numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+			BigDecimal value = ((NumberLiteral)expression).getValue();
+			ConceptName numberLiteralConceptName = null;
+			if (value.stripTrailingZeros().scale() <= 0 || value.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0) {
+				numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
+			}
+			else {
+				numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+			}
 			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(numberLiteralConceptName, numberLiteralConceptName);
 		}
@@ -225,7 +278,57 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
+	private TypeCheckInfo getType(SadlTypeReference expression) throws DontTypeCheckException {
+		if (expression instanceof SadlIntersectionType) {
+			return getType((SadlIntersectionType)expression);
+		}
+		else if (expression instanceof SadlPrimitiveDataType) {
+			return getType((SadlPrimitiveDataType)expression);			
+		}
+		else if (expression instanceof SadlPropertyCondition) {
+			return getType((SadlPropertyCondition)expression);
+		}
+		else if (expression instanceof SadlSimpleTypeReference) {
+			return getType((SadlSimpleTypeReference)expression);
+		}
+		else if (expression instanceof SadlUnionType) {
+			return getType((SadlUnionType)expression);
+		}
+		issueAcceptor.addError("Unexpected type reference type: " + expression.getClass().getCanonicalName(), expression);
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
+	}
+	
+	private TypeCheckInfo getType(SadlIntersectionType expression) {
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);		
+	}
+
+	private TypeCheckInfo getType(SadlPrimitiveDataType expression) {
+		return getType(expression.getPrimitiveType());
+	}
+
+	private TypeCheckInfo getType(SadlDataType primitiveType) {
+		String nm = primitiveType.getName();
+		ConceptName cn = new ConceptName(XSD.getURI() + nm);
+		return new TypeCheckInfo(cn, cn);
+	}
+
+	private TypeCheckInfo getType(SadlPropertyCondition expression) {
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);		
+	}
+
+	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException {
+		return getType(expression.getType());
+	}
+
+	private TypeCheckInfo getType(SadlUnionType expression) {
+		ConceptName declarationConceptName = new ConceptName("TODO");
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName);		
+	}
+
+	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException{
 		List<String> operations = Collections.<String>emptyList();
 		TypeCheckInfo predicateTypeCheckInfo = null;
 		TypeCheckInfo subjectTypeCheckInfo = null;
@@ -234,20 +337,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		if (predicate instanceof Constant) {
 			String cnstval = ((Constant)predicate).getConstant();
-			if (cnstval.equals("length")) {
+			if (cnstval.equals("length") || cnstval.equals("count") || cnstval.equals("index")) {
+				ConceptName nlcn = new ConceptName(XSD.integer.getURI());
+				nlcn.setType(ConceptType.RDFDATATYPE);
+				return new TypeCheckInfo(nlcn, nlcn);
 			}
-			else if (cnstval.equals("count")) {
-				if (subject instanceof PropOfSubject) {
-					predicate = ((PropOfSubject)subject).getLeft();
-					subject = ((PropOfSubject)subject).getRight();
-				}
-			}
-			else if (cnstval.equals("index")) {
-				if (subject instanceof PropOfSubject) {
-					predicate = ((PropOfSubject)subject).getLeft();
-					subject = ((PropOfSubject)subject).getRight();
-				}
-			}
+//			else if (cnstval.equals("count")) {
+//				if (subject instanceof PropOfSubject) {
+//					predicate = ((PropOfSubject)subject).getLeft();
+//					subject = ((PropOfSubject)subject).getRight();
+//				}
+//			}
+//			else if (cnstval.equals("index")) {
+//				if (subject instanceof PropOfSubject) {
+//					predicate = ((PropOfSubject)subject).getLeft();
+//					subject = ((PropOfSubject)subject).getRight();
+//				}
+//			}
 			else if (cnstval.equals("first element")) {
 			}
 			else if (cnstval.equals("last element")) {
@@ -263,12 +369,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //				predicateTypeCheckInfo, subjectTypeCheckInfo);
 	}
 	
-	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
+	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException {
 		SadlResource qnm =expression.getName();
 		return getType(qnm);
 	}
 	
-	protected TypeCheckInfo getType(SadlResource qnm){
+	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException{
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
 		EObject expression = qnm.eContainer();
 		if (conceptUri == null) {
@@ -322,7 +428,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 	}
 	
-	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) {
+	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
 			issueAcceptor.addError("Unidentified expression", expression);
@@ -334,6 +440,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if(pIterator.hasNext()){
 			OntResource first = pIterator.next();
 			if(first.getURI() != null){
+// TODO This is a horrible kluge!!! needs to be fixed. AWC 5/11/2016				
+				if (isRangeKlugyDATASubclass(first)) {
+					throw new DontTypeCheckException();
+				}
 				ConceptName rangeConceptName = new ConceptName(first.getURI());
 				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 					rangeConceptName.setType(ConceptType.RDFDATATYPE);
@@ -342,14 +452,52 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else {
 					rangeConceptName.setType(ConceptType.ONTCLASS);
 				}
+				pIterator.close();
 				return new TypeCheckInfo(propConceptName, rangeConceptName);
 			}
 		}
 		
+//		StmtIterator stmtitr = theJenaModel.listStatements(property, RDFS.range, (RDFNode)null);
+//		while (stmtitr.hasNext()) {
+//			RDFNode obj = stmtitr.nextStatement().getObject();
+//			if(obj.isURIResource() && ((Resource)obj).getURI() != null && ((Resource)obj).canAs(OntResource.class)){
+//// TODO This is a horrible kluge!!! needs to be fixed. AWC 5/11/2016				
+//				if (isRangeKlugyDATASubclass(obj.as(OntResource.class))) {
+//					throw new DontTypeCheckException();
+//				}
+//				ConceptName rangeConceptName = new ConceptName(((Resource)obj).getURI());
+//				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+//					rangeConceptName.setType(ConceptType.RDFDATATYPE);
+//					rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+//				}
+//				else {
+//					rangeConceptName.setType(ConceptType.ONTCLASS);
+//				}
+//				pIterator.close();
+//				return new TypeCheckInfo(propConceptName, rangeConceptName);
+//			}
+//		}
+//		
 		return null;
 	}
 
-	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) {
+	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
+		if (rsrc.getURI().endsWith("#DATA")) {
+			return true;
+		}
+		if (rsrc.canAs(OntClass.class)){
+			ExtendedIterator<OntClass> itr = rsrc.as(OntClass.class).listSuperClasses();
+			while (itr.hasNext()) {
+				OntClass spr = itr.next();
+				if (spr.isURIResource() && spr.getURI().endsWith("#DATA")) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) throws DontTypeCheckException {
 		//Needs filled in for Requirements extension
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
@@ -421,6 +569,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 					return true;
 				}
+				else if (isInteger(leftConceptName) && isInteger(rightConceptName)) {
+					return true;
+				}
 				else if(isDecimal(leftConceptName) && isInteger(rightConceptName)){
 					return true;
 				}
@@ -446,6 +597,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 					return true;
 				}
+				// these next two ifs are a little loose, but not clear how to determine which way the comparison should be? May need tightening... AWC 5/11/2016
+				if (classIsSubclassOf(theJenaModel.getOntClass(leftConceptName.getUri()), theJenaModel.getOntResource(rightConceptName.getUri()), true)) {
+					return true;
+				}
+				if (classIsSubclassOf(theJenaModel.getOntClass(rightConceptName.getUri()), theJenaModel.getOntResource(leftConceptName.getUri()), true)) {
+					return true;
+				}
 			}
 			else if ((leftConceptName.getType().equals(ConceptType.INDIVIDUAL) &&
 					rightConceptName.getType().equals(ConceptType.ONTCLASS)) ||
@@ -460,10 +618,125 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
+	/**
+	 * return true if the first argument class is a subclass of the second
+	 * argument class
+	 * 
+	 * @param subcls
+	 * @param cls
+	 * @return
+	 */
+	public boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) {
+		if (subcls == null || cls == null) {
+			return false;
+		}
+		if (cls.isURIResource() && subcls.isURIResource()
+				&& cls.getURI().equals(subcls.getURI())) {
+			return true;
+		}
+		if (cls.isAnon()) {
+			if (cls.canAs(OntClass.class)) {
+				OntClass ocls = cls.as(OntClass.class);
+				if (ocls.isUnionClass()) {
+					UnionClass ucls = cls.as(UnionClass.class);
+					try {
+						ExtendedIterator<? extends OntClass> eitr = ucls
+								.listOperands();
+						while (eitr.hasNext()) {
+							OntClass uclsmember = eitr.next();
+							if (classIsSubclassOf(subcls, uclsmember, false)) {
+								eitr.close();
+								return true;
+							}
+						}
+					}
+					catch (Exception e) {
+						issueAcceptor.addError("Unexpected error during deep validation: apparent Union Class does not return operands.", getDefaultContext());
+					}
+				}
+			}
+		}
+		try {
+			if (cls.canAs(OntClass.class)) {
+				ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSubClasses();
+				while (eitr.hasNext()) {
+					OntClass subClsOfCls = eitr.next();
+					if (subClsOfCls.equals(subcls)) {
+						eitr.close();
+						return true;
+					}
+					else {
+						if (classIsSubclassOf(subcls, subClsOfCls, false)) {
+							eitr.close();
+							return true;
+						}
+					}
+				}
+				eitr.close();
+//				if (rootCall && classIsSuperClassOf(cls.as(OntClass.class), subcls)) {
+//					return true;
+//				}
+			}
+			if (subcls.isAnon()) {
+				if (subcls.isIntersectionClass()) {
+					IntersectionClass icls = subcls.asIntersectionClass();
+					try {
+						ExtendedIterator<? extends OntClass> eitr = icls.listOperands();
+						while (eitr.hasNext()) {
+							OntClass iclsmember = eitr.next();
+							if (classIsSubclassOf(cls.as(OntClass.class), iclsmember, false)) {
+								eitr.close();
+								return true;
+							}
+						}
+					}
+					catch (Exception e) {
+						issueAcceptor.addError("Unexpected error during deep validation: apparent Intersection Class does not return operands.", getDefaultContext());
+					}
+				}
+			}
+// TODO We need to look for equivalent classes that provide a definition for a subclass, 
+//			e.g. Component is equivalent to System is class, (System and connectedTo someValueFrom Network) => Component subclass of System.
+			if (cls.canAs(OntClass.class)) {
+//				SELECT ?eqClass 
+//						WHERE {?class owl:equivalentClass ?eqClass}
+				ExtendedIterator<OntClass> eqitr = cls.as(OntClass.class).listEquivalentClasses();
+				while (eqitr.hasNext()) {
+					OntClass eqcls = eqitr.next();
+					if (classIsSubclassOf(subcls, eqcls, false)) {
+						return true;
+					}
+				}
+			}
+//			if (subcls.hasSuperClass(cls, false)) {  // this doesn't work, don't know why awc 6/8/2012
+//				return true;
+//			}
+//			else {
+//				if (subcls.canAs(OntClass.class)) {
+//					ExtendedIterator<OntClass> eitr = subcls.as(OntClass.class).listSuperClasses(false);
+//					while (eitr.hasNext()) {
+//						OntClass sprcls = eitr.next();
+//						if (sprcls.equals(cls)) {
+//							return true;
+//						}
+//					}
+//				}
+//			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return false;
+	}
+
+
+	
 	private boolean isInteger(ConceptIdentifier type) throws InvalidNameException {
 		if (type instanceof ConceptName) {
 			String uri = ((ConceptName)type).getUri();
 			if (uri.equals(XSD.integer.getURI())) {
+				return true;
+			}
+			else if (uri.equals(XSD.xint.getURI())) {
 				return true;
 			}
 		}
@@ -478,5 +751,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return false;
+	}
+
+	private EObject getDefaultContext() {
+		return defaultContext;
+	}
+
+	private void setDefaultContext(EObject defaultContext) {
+		this.defaultContext = defaultContext;
 	}
 }

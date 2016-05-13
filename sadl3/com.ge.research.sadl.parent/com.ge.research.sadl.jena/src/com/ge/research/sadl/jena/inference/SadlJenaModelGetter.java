@@ -26,12 +26,16 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.jena.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -63,7 +67,9 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     private String format = null;
     private boolean addMissingModelToTDB = false;
     
-	/*
+    private IConfigurationManager configurationManager = null;
+
+    /*
 	 * From the Jena OntModel.java file:
 	 * <p>The language in which to write the model is specified by the
 	 * <code>lang</code> argument.  Predefined values are "RDF/XML",
@@ -250,7 +256,8 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     	Model m = getModel(publicUri, new ModelReader() {
             @Override
             public Model readModel( Model toRead, String URL ) {
-//               configurationManager.getJenaDocumentMgr().getFileManager().readModel( toRead, URL );
+//            	toRead.getReader().read(toRead, URL);
+               configurationManager.getJenaDocumentMgr().getFileManager().readModel( toRead, URL );
                return toRead;
             }
          });
@@ -392,6 +399,24 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 
 	private void setModelFolder(String modelFolder) {
 		this.modelFolder = modelFolder;
+	}
+
+	@Override
+	public HashMap<String, Map> getImportHierarchy(IConfigurationManager configMgr, String modelUri) throws ConfigurationException {
+		configurationManager = configMgr;
+		String modelUrl = configMgr.getAltUrlFromPublicUri(modelUri);
+		OntModel model = getOntModel(modelUri, modelUrl, null);
+		Set<String> imports = model.listImportedOntologyURIs();
+		if (imports != null) {
+			HashMap<String, Map> thisMap = new HashMap<String,Map>();
+			Iterator<String> impitr = imports.iterator();
+			while (impitr.hasNext()) {
+				String importUri = impitr.next();
+				thisMap.put(importUri, getImportHierarchy(configMgr, importUri));
+			}
+			return thisMap;
+		}
+		return null;
 	}
 
 

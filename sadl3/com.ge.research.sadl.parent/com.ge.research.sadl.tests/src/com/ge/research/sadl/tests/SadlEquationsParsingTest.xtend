@@ -24,4 +24,13 @@ class SadlEquationsParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Test
+	def void testEquations() {
+		'''
+			uri "http://sadl.org/equations".
+			
+			Equation foo(int ^a, int b) returns int : ^a + b.
+			Equation bar(int ^a, int b) returns int: ^a + b.
+		'''.assertNoErrors
+	}
 }

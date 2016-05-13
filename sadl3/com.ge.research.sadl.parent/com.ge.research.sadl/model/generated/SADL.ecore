@@ -61,6 +61,8 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listInitializer" eType="#//SadlValueList"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="propertyInitializers" upperBound="-1"
         eType="#//SadlPropertyInitializer" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="instance" eType="#//SadlResource"
@@ -73,10 +75,10 @@
         eType="#//SadlAnnotation" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlDataTypeFacet">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minexin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minInclusive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="min" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="max" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxexin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxInclusive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="regex" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="len" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="minlen" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -118,6 +120,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="SadlProperty" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameOrRef" eType="#//SadlResource"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="primaryDeclaration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="restrictions" upperBound="-1"
         eType="#//SadlPropertyRestriction" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="from" eType="#//SadlTypeReference"
@@ -146,6 +149,10 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlExplicitValue"/>
+  <eClassifiers xsi:type="ecore:EClass" name="SadlValueList" eSuperTypes="#//SadlExplicitValue">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="explicitValues" upperBound="-1"
+        eType="#//SadlExplicitValue" containment="true"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ExpressionScope" eSuperTypes="#//SadlModelElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="Expression">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="distinct" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -256,9 +263,11 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlSimpleTypeReference" eSuperTypes="#//SadlTypeReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlResource"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="list" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlPrimitiveDataType" eSuperTypes="#//SadlTypeReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="primitiveType" eType="#//SadlDataType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="list" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlTypeAssociation" eSuperTypes="#//SadlPropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EReference" name="domain" eType="#//SadlTypeReference"
@@ -301,10 +310,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlBooleanLiteral" eSuperTypes="#//SadlExplicitValue">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="truethy" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlValueList" eSuperTypes="#//SadlExplicitValue">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="explicitValues" upperBound="-1"
-        eType="#//SadlExplicitValue" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlConstantLiteral" eSuperTypes="#//SadlExplicitValue">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="term" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -371,6 +376,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="arglist" upperBound="-1"
+        eType="#//Expression" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="newName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="StringLiteral" eSuperTypes="#//Expression">

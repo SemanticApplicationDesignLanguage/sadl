@@ -26,12 +26,13 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.util.OnChangeEvictingCache
 import org.eclipse.xtext.validation.CheckMode
+import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 
 class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
 	@Inject OnChangeEvictingCache cache
 	
-	public static val Set<Provider<IModelProcessor>> SADL_PROCESSOR_Registry = newHashSet
+	public static val Set<Provider<? extends IModelProcessor>> SADL_PROCESSOR_Registry = newHashSet
 	
 	override IModelProcessor getProcessor(Resource resource) {
 		return cache.get("modelprocessor", resource) [
@@ -58,6 +59,15 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 		override processExternalModels(String mappingFileFolder, List<String> fileNames) {
 			processors.forEach[processExternalModels(mappingFileFolder, fileNames)]
 		}
+		
+		override processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
+			processors.forEach[processCommands(resource, issueAcceptor, context)]
+		}
+		
+		override processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context, String query) {
+			processors.forEach[processAdhocQuery(resource, issueAcceptor, context, query)]
+		}
+		
 	}
 	
 	protected def Iterable<? extends Provider<? extends IModelProcessor>> getAllProviders() {

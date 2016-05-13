@@ -25,6 +25,7 @@ import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.preferences.IPreferenceValues
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
+import com.ge.research.sadl.reasoner.ResultSet
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -46,6 +47,16 @@ interface IModelProcessor {
 	 * Called when external models are downloaded
 	 */
 	def void processExternalModels(String mappingFileFolder, List<String> fileNames) throws IOException;
+	
+	/**
+	 * Called to process all of the Ask, Test, Explain, etc. commands in a .sadl file
+	 */
+	def void processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context);
+	
+	/**
+	 * Called to process an adhoc query against the model in a .sadl file
+	 */
+	def void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context, String query);
 	
 	@Data class ProcessorContext {
 		CancelIndicator cancelIndicator

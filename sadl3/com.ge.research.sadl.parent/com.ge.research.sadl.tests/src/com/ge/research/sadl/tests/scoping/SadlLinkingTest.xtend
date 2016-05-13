@@ -28,7 +28,7 @@ import org.junit.Ignore
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 class SadlLinkingTest extends AbstractLinkingTest {
-	
+
 	@Test
 	def void testLinkingQNames() {
 		'''
@@ -63,7 +63,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 		'''
 			uri "http://sadl.org/allqnames2.sadl" alias aqn2.
-			import "http://sadl.org/allqnames.sadl"
+			import "http://sadl.org/allqnames.sadl".
 			
 			[MyShape] is a <Shape> with <area> 23 .
 		'''.assertLinking[sadl]
@@ -79,7 +79,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 		'''
 			uri "http://sadl.org/allqnames2.sadl" alias aqn2.
-			import "http://sadl.org/allqnames.sadl"
+			import "http://sadl.org/allqnames.sadl".
 			
 			[MyShape] is a <Shape> with <area> 23 .
 			[Rectangle] is a type of <Shape>, described by [height] with values of type float, described by [width] with values of type float.
@@ -97,8 +97,8 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''
 			uri "http://sadl.org/equations".
 			
-			Equation [foo](int [a], int [b]) returns int : <a> + <b>.
-			Equation [bar](int [a], int [b]) returns int: <a> + <b>.
+			Equation [foo](int [b], int [c]) returns int : <b> + <c>.
+			Equation [bar](int [b], int [c]) returns int: <b> + <c>.
 		'''.assertLinking[sadl]
 	}
 	
@@ -107,8 +107,8 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''
 			uri "http://sadl.org/equations".
 			
-			Equation [foo](int [a], int [b]) returns int : <a> + <b>.
-			Equation [bar](int [a], int [b]) returns int: <foo>(<a>, <b>).
+			Equation [foo](int [b], int [c]) returns int : <b> + <c>.
+			Equation [bar](int [b], int [c]) returns int: <foo>(<b>, <c>).
 		'''.assertLinking[sadl]
 	}
 	
@@ -140,7 +140,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			uri "http://sadl.org/equations".
 			
 			[area] describes <Rectangle> with values of type float.
-			A Foo is a [Rectangle] only if area has one value of type float.
+			A Foo is a [Rectangle] only if <area> has one value of type float.
 		'''.assertLinking[sadl]
 	}
 	
@@ -150,8 +150,942 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			uri "http://sadl.org/equations".
 			
 			[area] describes <Rectangle> with values of type float.
-			A Foo is a [Rectangle] only if area has one value of type float.
+			A Foo is a [Rectangle] only if <area> has one value of type float.
 		'''.assertLinking[sadl]
 	}
 	
+	@Test
+	def void testLinkingPrecedence_05() {
+		'''
+			 uri "http://sadl.org/classes.sadl" alias clsses.
+			 
+			 [LivingThing] is a class.
+			 [Mammal] is a type of <LivingThing> described by [friend] with values of type <Mammal>.
+			 {[Earth], [Water], [Air], [Fire], [Aether]} are classes.
+			 
+			 {[Cow], [Horse], [Dog], [Cat], [Human]} are types of <Mammal>.
+			 
+			 A <Dog> is a [Pet] only if <friend> has at least 1 value of type <Human>.
+			 
+			 [NonLivingThing] is the same as not <LivingThing>.
+			 
+			 [Consumable] is a class.
+			 [Liquid] is a class.
+			 [PotableLiquid] is the same as {<Consumable> and <Liquid>}.
+ 		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingPrecedence_06() {
+		'''
+			 uri "http://sadl.org/instances.sadl" alias instances.
+			 
+			 import "http://sadl.org/classes.sadl".
+			 
+			[Gregory] is a Human with friend <Lassie>. 
+			 
+			[Lassie] is a Dog.	// this is the declaration of Lassie
+			// {MrEd, SeaBuiscut, Flicka} are instances of Horse.
+			 
+			[Winter] is a <Season>. 
+			 
+			[Season] is a class, must be one of {<Spring>, [Summer], [Fall], <Winter>}.
+			
+			[Spring] is a Season.	
+			 
+			[Book] is a class.
+			[HarperLeeBook] is a type of <Book>, 
+				can only be one of {[ToKillaMockingbird], <GoSetaWatchman>}.	
+			[GoSetaWatchman] is a <Book>.	
+			
+			[Event] is a class described by [when] with values of type <Season>.
+			[NewYear] is an Event with when <Winter>.
+			[BastilleDay] is an Event with when <Summer>.
+ 		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingPrecedence_07() {
+		'''
+			 uri "http://sadl.org/properties.sadl" alias properties.
+			 
+			 [Shape] is a class described by <area>.
+			 
+			 [area] is a property.	
+			 
+			 [displayColor] is a type of annotation.
+			 [surfaceArea] is a type of <area>.		
+			 
+			 [Circle] is a type of <Shape>.
+			 [radius] describes <Circle> with values of type float.	
+ 		'''.assertLinking[sadl]
+	}
+	
+	@Test 
+	def void testLinkingPrecedence_08() {
+		'''
+			uri "http://sadl.org/TestRequrements/ontology2" alias ont2 version "$Revision:$ Last modified on   $Date:$". 
+			
+			[Vehicle] is a class, 
+				described by [number_of_wheels] with values of type int,
+				described by [number_of_seats] with values of type int,
+				described by [color] with values of type string.
+				
+			[Unicycle] is a type of <Vehicle>.
+			<number_of_wheels> of <Unicycle> always has value 1 .
+			<number_of_seats> of <Unicycle> always has value 1 .
+			
+				
+			[Bicycle] is a type of <Vehicle>.
+			<number_of_wheels> of <Bicycle> always has value 2 .
+			<number_of_seats> of <Bicycle> always has value 1 .
+			
+			[Car] is a type of <Vehicle>.
+			<number_of_wheels> of <Car> always has value 4 .
+			
+			[MyCar] is a <Car> with <color> "blue", with <number_of_seats> 4 .
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingPrecedence_09() {
+		'''
+			 uri "http://sadl.org/ListDecls.sadl" alias ListDecls.
+			 
+			Person is a class described by gender with values of type Gender,
+				described by age with values of type int, 
+				described by height with values of type float,
+				described by child with values of type Person,
+				described by orderedChildren with values of type Person List,
+				described by orderedFemaleChildren with values of type Person List.
+				
+			Gender is a class, must be one of {Male, Female}.
+			
+			GeorgesChildren is the Person List [Sue, Wayne, Fred].
+			AllKnownChildren is the Person List [Sue, Wayne, Fred, John, Francis, Boyd].
+			George is a Person with orderedChildren GeorgesChildren.
+			
+			NotGeorgesChildren is a Person List.
+			
+			Rule R1:
+			if  p is a Person
+				p has orderedChildren oc
+			then 
+				p has orderedChildren (the sublist of oc matching gender is Female).
+			
+			Rule R2:
+			then 
+				NotGeorgesChildren is (the sublist of AllKnownChildren matching GeorgesChildren does not contain value).
+				
+			Rule R3:
+			if  [p] is a Person and
+				<p> has orderedChildren [oc] and
+				<oc> contains [c]
+			then
+				<p> has child <c>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingPrecedence_10() {
+		'''
+			uri "http://assert/Properties" alias Properties.
+			reference_class is a type of annotation.
+			reference_property is a type of annotation.
+			reference_range is a type of annotation.
+			reference_instance is a type of annotation.
+			INTERFACE_DEFINITION is a class.
+			  functional_max describes INTERFACE_DEFINITION with values of type decimal.
+			  functional_min describes INTERFACE_DEFINITION with values of type decimal.
+			  physical_max describes INTERFACE_DEFINITION with values of type decimal.
+			  physical_min describes INTERFACE_DEFINITION with values of type decimal.
+			  tolerance describes INTERFACE_DEFINITION with values of type decimal.
+			  resolution describes INTERFACE_DEFINITION with values of type decimal.
+			  physical_mapping describes INTERFACE_DEFINITION with values of type PHYSICAL_MAPPING.
+			  PHYSICAL_MAPPING is a class.
+			    physical_value describes PHYSICAL_MAPPING with values of type decimal.
+			//SectionObjectId=ASSERT_DM-2
+			example_1 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-3
+			example_2 is a property.
+			//SectionObjectId=ASSERT_DM-4
+			example_3 is a property.
+			//SectionObjectId=ASSERT_DM-5
+			example_4 is a property.
+			//SectionObjectId=ASSERT_DM-6
+			example_5 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-7
+			sent is a property.
+			//SectionObjectId=ASSERT_DM-8
+			received is a property.
+			//SectionObjectId=ASSERT_DM-9
+			example_7_1 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-50
+			example_7_2 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-10
+			example_7_6 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-11
+			example_8 is a property.
+			//SectionObjectId=ASSERT_DM-12
+			example_9 is a property.
+			//SectionObjectId=ASSERT_DM-13
+			example_10 is a property with values of type int.
+			//SectionObjectId=ASSERT_DM-14
+			example_11 is a property.
+			//SectionObjectId=ASSERT_DM-51
+			example_12 is a property.
+			//SectionObjectId=ASSERT_DM-52
+			example_13 is a property.
+			//SectionObjectId=ASSERT_DM-53
+			example_14 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-54
+			example_15 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-69
+			example_16 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-70
+			example_17 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-71
+			example_18 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-77
+			example_19 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-81
+			example_20 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-82
+			example_21 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-83
+			example_22 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-84
+			example_23 is a property.
+			//SectionObjectId=ASSERT_DM-15
+			input_1 is a property.
+			//SectionObjectId=ASSERT_DM-16
+			input_2 is a property.
+			//SectionObjectId=ASSERT_DM-17
+			input_3 is a property.
+			//SectionObjectId=ASSERT_DM-18
+			input_4 is a property.
+			//SectionObjectId=ASSERT_DM-19
+			input_5 is a property.
+			//SectionObjectId=ASSERT_DM-20
+			input_6 is a property.
+			//SectionObjectId=ASSERT_DM-21
+			input_7 is a property.
+			//SectionObjectId=ASSERT_DM-22
+			input_8 is a property.
+			//SectionObjectId=ASSERT_DM-23
+			input_9 is a property.
+			//SectionObjectId=ASSERT_DM-24
+			input_10 is a property.
+			//SectionObjectId=ASSERT_DM-25
+			input_11 is a property.
+			//SectionObjectId=ASSERT_DM-27
+			event_data_1 is a property.
+			//SectionObjectId=ASSERT_DM-30
+			event_data_1 is a property.
+			//SectionObjectId=ASSERT_DM-33
+			event_data_2 is a property.
+			//SectionObjectId=ASSERT_DM-34
+			event_data_3 is a property.
+			//SectionObjectId=ASSERT_DM-32
+			event_data_1 is a property.
+			//SectionObjectId=ASSERT_DM-78
+			result is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-73
+			event_data_1 is a property.
+			//SectionObjectId=ASSERT_DM-79
+			result is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-75
+			event_data_1 is a property.
+			//SectionObjectId=ASSERT_DM-76
+			event_data_2 is a property.
+			//SectionObjectId=ASSERT_DM-40
+			property_1 is a property.
+			//SectionObjectId=ASSERT_DM-42
+			property_2 is a property.
+			//SectionObjectId=ASSERT_DM-44
+			property_3 is a property with values of type boolean.
+			//SectionObjectId=ASSERT_DM-46
+			_value is a property.
+			//SectionObjectId=ASSERT_DM-80
+			input is a property.
+		'''.assertLinking[sadl]
+        '''
+			uri "http://ont.sample/SYSTEM" alias SYSTEM.
+			//SectionObjectId=ASSERT_DM-1
+			import "http://assert/Properties".
+			
+			//ObjectId=ASSERT_DM-1
+			SYSTEM is a class, must be one of {SYS_1,SYS_2}.
+			  //ObjectId=ASSERT_DM-2
+			  example_1 describes SYSTEM with values of type boolean.
+			  example_1 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-2 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_1 .
+			
+			  //ObjectId=ASSERT_DM-3
+			  example_2 describes SYSTEM with values of type DATA.
+			  example_2 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-3 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_2,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-4
+			  example_3 describes SYSTEM with values of type ENUMERATION.
+			  example_3 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-4 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_3,
+			    with functional_max 3,
+			    with functional_min 0,
+			    with physical_max 0,
+			    with physical_min 2,
+			    with tolerance 1,
+			    with resolution 1,
+			    with physical_mapping (a PHYSICAL_MAPPING, with reference_instance <Enum_1>, with physical_value 0),
+			    with physical_mapping (a PHYSICAL_MAPPING, with reference_instance Enum_2, with physical_value 1),
+			    with physical_mapping (a PHYSICAL_MAPPING, with reference_instance Enum_3, with physical_value 2) .
+			
+			  //ObjectId=ASSERT_DM-5
+			  example_4 describes SYSTEM with values of type DATA.
+			  example_4 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-5 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_4,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-6
+			  example_5 describes SYSTEM with values of type boolean.
+			  example_5 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-6 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_5 .
+			
+			  //ObjectId=ASSERT_DM-7
+			  sent describes SYSTEM with values of type SYSTEM_EVENT.
+			
+			  ASSERT_DM-7 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property sent .
+			
+			  //ObjectId=ASSERT_DM-8
+			  received describes SYSTEM with values of type SYSTEM_EVENT.
+			
+			  ASSERT_DM-8 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property received .
+			
+			  //ObjectId=ASSERT_DM-9
+			  example_7_1 describes SYSTEM with values of type boolean.
+			  example_7_1 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-9 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_7_1 .
+			
+			  //ObjectId=ASSERT_DM-50
+			  example_7_2 describes SYSTEM with values of type boolean.
+			  example_7_2 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-50 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_7_2 .
+			
+			  //ObjectId=ASSERT_DM-10
+			  example_7_6 describes SYSTEM with values of type boolean.
+			  example_7_6 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-10 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_7_6 .
+			
+			  //ObjectId=ASSERT_DM-11
+			  example_8 describes SYSTEM with a List of values of type DATA.
+			  example_8 of SYSTEM has at most 20 values.
+			  example_8 of SYSTEM has at least 3 values.
+			
+			  ASSERT_DM-11 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_8,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-12
+			  example_9 describes SYSTEM with a List of values of type DATA.
+			
+			  ASSERT_DM-12 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_9,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-13
+			  example_10 describes SYSTEM with values of type int.
+			  example_10 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-13 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_10 .
+			
+			  //ObjectId=ASSERT_DM-14
+			  example_11 describes SYSTEM with a List of values of type DATA.
+			  example_11 of SYSTEM has exactly 3 values.
+			
+			  ASSERT_DM-14 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_11,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-51
+			  example_12 describes SYSTEM with values of type DATA.
+			  example_12 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-51 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_12,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-52
+			  example_13 describes SYSTEM with values of type DATA.
+			  example_13 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-52 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_13,
+			    with functional_max 2.5,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance .1,
+			    with resolution .1 .
+			
+			  //ObjectId=ASSERT_DM-53
+			  example_14 describes SYSTEM with values of type boolean.
+			  example_14 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-53 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_14 .
+			
+			  //ObjectId=ASSERT_DM-54
+			  example_15 describes SYSTEM with values of type boolean.
+			  example_15 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-54 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_15 .
+			
+			  //ObjectId=ASSERT_DM-69
+			  example_16 describes SYSTEM with values of type boolean.
+			  example_16 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-69 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_16 .
+			
+			  //ObjectId=ASSERT_DM-70
+			  example_17 describes SYSTEM with values of type boolean.
+			  example_17 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-70 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_17 .
+			
+			  //ObjectId=ASSERT_DM-71
+			  example_18 describes SYSTEM with values of type boolean.
+			  example_18 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-71 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_18 .
+			
+			  //ObjectId=ASSERT_DM-77
+			  example_19 describes SYSTEM with values of type boolean.
+			  example_19 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-77 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_19 .
+			
+			  //ObjectId=ASSERT_DM-81
+			  example_20 describes SYSTEM with values of type boolean.
+			  example_20 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-81 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_20 .
+			
+			  //ObjectId=ASSERT_DM-82
+			  example_21 describes SYSTEM with values of type boolean.
+			  example_21 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-82 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_21 .
+			
+			  //ObjectId=ASSERT_DM-83
+			  example_22 describes SYSTEM with values of type boolean.
+			  example_22 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-83 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_22 .
+			
+			  //ObjectId=ASSERT_DM-84
+			  example_23 describes SYSTEM with values of type DATA.
+			  example_23 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-84 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property example_23,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-15
+			  input_1 describes SYSTEM with values of type DATA.
+			  input_1 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-15 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_1,
+			    with functional_max 500,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-16
+			  input_2 describes SYSTEM with values of type DATA.
+			  input_2 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-16 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_2,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-17
+			  input_3 describes SYSTEM with values of type DATA.
+			  input_3 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-17 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_3,
+			    with functional_max 750,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min -100,
+			    with tolerance 0.5,
+			    with resolution 0.5 .
+			
+			  //ObjectId=ASSERT_DM-18
+			  input_4 describes SYSTEM with values of type DATA.
+			  input_4 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-18 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_4,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-19
+			  input_5 describes SYSTEM with values of type DATA.
+			  input_5 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-19 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_5,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-20
+			  input_6 describes SYSTEM with values of type COMMON_CLASS.
+			  input_6 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-20 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_6 .
+			
+			  //ObjectId=ASSERT_DM-21
+			  input_7 describes SYSTEM with values of type ENUMERATION.
+			  input_7 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-21 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_7,
+			    with functional_max 3,
+			    with functional_min 1,
+			    with physical_max 0,
+			    with physical_min 3,
+			    with tolerance 1,
+			    with resolution 1,
+			    with physical_mapping (a PHYSICAL_MAPPING, with reference_instance <Enum_1>, with physical_value 1),
+			    with physical_mapping (a PHYSICAL_MAPPING, with reference_instance Enum_2, with physical_value 2),
+			    with physical_mapping (a PHYSICAL_MAPPING, with reference_instance Enum_3, with physical_value 3) .
+			
+			  //ObjectId=ASSERT_DM-22
+			  input_8 describes SYSTEM with values of type DATA.
+			  input_8 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-22 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_8,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-23
+			  input_9 describes SYSTEM with values of type DATA.
+			  input_9 of SYSTEM has exactly 1 values.
+			
+			  ASSERT_DM-23 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_9,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-24
+			  input_10 describes SYSTEM with a List of values of type DATA.
+			  input_10 of SYSTEM has at most 20 values.
+			  input_10 of SYSTEM has at least 1 values.
+			
+			  ASSERT_DM-24 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_10,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-25
+			  input_11 describes SYSTEM with a List of values of type DATA.
+			  input_11 of SYSTEM has at most 20 values.
+			  input_11 of SYSTEM has at least 1 values.
+			
+			  ASSERT_DM-25 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input_11,
+			    with functional_max 1000,
+			    with functional_min 0,
+			    with physical_max 1000,
+			    with physical_min 0,
+			    with tolerance 1,
+			    with resolution 1 .
+			
+			  //ObjectId=ASSERT_DM-26
+			  SYSTEM_EVENT is a type of EVENT.
+			    //ObjectId=ASSERT_DM-28
+			    SYSTEM_EVENT_1 is a type of SYSTEM_EVENT.
+			      //ObjectId=ASSERT_DM-27
+			      event_data_1 describes SYSTEM_EVENT_1 with values of type DATA.
+			      event_data_1 of SYSTEM_EVENT_1 has exactly 1 values.
+			
+			      ASSERT_DM-27 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_1,
+			        with reference_property event_data_1,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			    
+			    //ObjectId=ASSERT_DM-29
+			    SYSTEM_EVENT_2 is a type of SYSTEM_EVENT.
+			      //ObjectId=ASSERT_DM-30
+			      event_data_1 describes SYSTEM_EVENT_2 with values of type DATA.
+			      event_data_1 of SYSTEM_EVENT_2 has exactly 1 values.
+			
+			      ASSERT_DM-30 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_2,
+			        with reference_property event_data_1,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			      //ObjectId=ASSERT_DM-33
+			      event_data_2 describes SYSTEM_EVENT_2 with values of type DATA.
+			      event_data_2 of SYSTEM_EVENT_2 has exactly 1 values.
+			
+			      ASSERT_DM-33 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_2,
+			        with reference_property event_data_2,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			      //ObjectId=ASSERT_DM-34
+			      event_data_3 describes SYSTEM_EVENT_2 with values of type DATA.
+			      event_data_3 of SYSTEM_EVENT_2 has exactly 1 values.
+			
+			      ASSERT_DM-34 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_2,
+			        with reference_property event_data_3,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			    
+			    //ObjectId=ASSERT_DM-31
+			    SYSTEM_EVENT_3 is a type of SYSTEM_EVENT.
+			      //ObjectId=ASSERT_DM-32
+			      event_data_1 describes SYSTEM_EVENT_3 with values of type DATA.
+			      event_data_1 of SYSTEM_EVENT_3 has exactly 1 values.
+			
+			      ASSERT_DM-32 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_3,
+			        with reference_property event_data_1,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			    
+			    //ObjectId=ASSERT_DM-35
+			    SYSTEM_EVENT_4 is a type of SYSTEM_EVENT.
+			    
+			    //ObjectId=ASSERT_DM-36
+			    SYSTEM_EVENT_5 is a type of SYSTEM_EVENT.
+			    
+			    //ObjectId=ASSERT_DM-72
+			    SYSTEM_EVENT_6 is a type of SYSTEM_EVENT.
+			      //ObjectId=ASSERT_DM-78
+			      result describes SYSTEM_EVENT_6 with values of type boolean.
+			      result of SYSTEM_EVENT_6 has exactly 1 values.
+			
+			      ASSERT_DM-78 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_6,
+			        with reference_property result .
+			
+			      //ObjectId=ASSERT_DM-73
+			      event_data_1 describes SYSTEM_EVENT_6 with values of type DATA.
+			      event_data_1 of SYSTEM_EVENT_6 has exactly 1 values.
+			
+			      ASSERT_DM-73 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_6,
+			        with reference_property event_data_1,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			    
+			    //ObjectId=ASSERT_DM-74
+			    SYSTEM_EVENT_7 is a type of SYSTEM_EVENT.
+			      //ObjectId=ASSERT_DM-79
+			      result describes SYSTEM_EVENT_7 with values of type boolean.
+			      result of SYSTEM_EVENT_7 has exactly 1 values.
+			
+			      ASSERT_DM-79 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_7,
+			        with reference_property result .
+			
+			      //ObjectId=ASSERT_DM-75
+			      event_data_1 describes SYSTEM_EVENT_7 with values of type DATA.
+			      event_data_1 of SYSTEM_EVENT_7 has exactly 1 values.
+			
+			      ASSERT_DM-75 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_7,
+			        with reference_property event_data_1,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			      //ObjectId=ASSERT_DM-76
+			      event_data_2 describes SYSTEM_EVENT_7 with values of type DATA.
+			      event_data_2 of SYSTEM_EVENT_7 has exactly 1 values.
+			
+			      ASSERT_DM-76 is a INTERFACE_DEFINITION,
+			        with reference_class SYSTEM_EVENT_7,
+			        with reference_property event_data_2,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			    
+			  
+			  //ObjectId=ASSERT_DM-38
+			  COMMON_CLASS is a class.
+			    //ObjectId=ASSERT_DM-39
+			    CLASS_1 is a type of COMMON_CLASS.
+			      //ObjectId=ASSERT_DM-40
+			      property_1 describes CLASS_1 with values of type DATA.
+			      property_1 of CLASS_1 has exactly 1 values.
+			
+			      ASSERT_DM-40 is a INTERFACE_DEFINITION,
+			        with reference_class CLASS_1,
+			        with reference_property property_1,
+			        with functional_max 1000,
+			        with functional_min 0,
+			        with physical_max 1000,
+			        with physical_min 0,
+			        with tolerance 1,
+			        with resolution 1 .
+			
+			    
+			    //ObjectId=ASSERT_DM-41
+			    CLASS_2 is a type of COMMON_CLASS.
+			      //ObjectId=ASSERT_DM-42
+			      property_2 describes CLASS_2 with values of type ENUMERATION.
+			      property_2 of CLASS_2 has exactly 1 values.
+			
+			      ASSERT_DM-42 is a INTERFACE_DEFINITION,
+			        with reference_class CLASS_2,
+			        with reference_property property_2 .
+			
+			    
+			    //ObjectId=ASSERT_DM-43
+			    CLASS_3 is a type of COMMON_CLASS.
+			      //ObjectId=ASSERT_DM-44
+			      property_3 describes CLASS_3 with values of type boolean.
+			      property_3 of CLASS_3 has exactly 1 values.
+			
+			      ASSERT_DM-44 is a INTERFACE_DEFINITION,
+			        with reference_class CLASS_3,
+			        with reference_property property_3 .
+			
+			  //ObjectId=ASSERT_DM-37
+			  ENUMERATION is a class, must be one of {[Enum_1],Enum_2,Enum_3}.
+			    
+			  
+			  //ObjectId=ASSERT_DM-45
+			  COMPUTATION is a class.
+			    //ObjectId=ASSERT_DM-46
+			    _value describes COMPUTATION with values of type DATA.
+			
+			    ASSERT_DM-46 is a INTERFACE_DEFINITION,
+			      with reference_class COMPUTATION,
+			      with reference_property _value .
+			
+			  
+			  //ObjectId=ASSERT_DM-80
+			  input describes SYSTEM with values of type DATA.
+			
+			  ASSERT_DM-80 is a INTERFACE_DEFINITION,
+			    with reference_class SYSTEM,
+			    with reference_property input .
+			
+			  //ObjectId=ASSERT_DM-47
+			  DATA is a class.
+			  
+			  //ObjectId=ASSERT_DM-48
+			  EVENT is a class.
+			  
+			  //ObjectId=ASSERT_DM-49
+			  description is a type of annotation.
+			  
+			
+			//EndSectionObject
+		'''.assertLinking[sadl]
+	}
+	
+    @Test
+    def void testLinkingQnamesNeeded() {
+        '''
+             uri "http://sadl.org/NS1.sadl" alias ns1.
+             
+             [Car] is a class described by [position] with values of type <Location>.
+             [Location] is a class, described by [longitude] with values of type float, described by [latitude] with values of type float.
+         '''.assertLinking[sadl]
+        '''
+             uri "http://sadl.org/NS2.sadl" alias ns2.
+             
+             [Airplane] is a class described by [position] with values of type <Location>.
+             
+             [Location] is a class described by [longitude] with values of type float, 
+                 described by [latitude] with values of type float,
+                 described by [altitude] with values of type float.
+        '''.assertLinking[sadl]
+        '''
+             uri "http://sadl.org/NS3.sadl" alias ns3.
+             
+             import "http://sadl.org/NS1.sadl".
+             import "http://sadl.org/NS2.sadl".
+             
+             [MyCar] is an <Car> with <ns1:position> (a <ns1:Location> with <ns1:longitude> -72.025, with <ns1:latitude> 43.654).
+             [MyPlane] is an <Airplane> with <ns2:position> (a <ns2:Location> with <ns2:longitude> -72.025, with <ns2:latitude> 43.654, with <altitude> 1000).
+
+        '''.assertLinking[sadl]
+        
+    }
 }
