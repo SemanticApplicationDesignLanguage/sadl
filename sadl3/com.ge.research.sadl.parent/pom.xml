@@ -15,6 +15,7 @@
 	</properties>
 	<modules>
 		<module>com.ge.research.sadl.xtextgenerator</module>
+		<module>com.ge.research.sadl.utils</module>
 		<module>com.ge.research.sadl.reasoner-api</module>
 		<module>com.ge.research.sadl.reasoner-impl</module>
 		<module>com.ge.research.jena</module>
@@ -30,7 +31,6 @@
 		<module>com.ge.research.sadl.feature</module>
 		<module>com.ge.research.sadl.perspective</module>
 		<module>com.ge.research.sadl.update</module>
-		<module>com.ge.research.sadl.utils</module>
 	</modules>
 	<build>
 		<plugins>

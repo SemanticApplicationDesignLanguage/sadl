@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import com.ge.research.messages.ErrorMessage;
+import com.ge.research.sadl.reasoner.utils.SadlErrorMessages;
 import com.hp.hpl.jena.util.FileUtils;
 
 

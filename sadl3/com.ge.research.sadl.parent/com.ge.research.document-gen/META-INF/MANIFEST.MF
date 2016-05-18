@@ -7,3 +7,5 @@ Bundle-Vendor: GE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.hp.hpl.jena.util
 Export-Package: com.ge.research.documentation
+Require-Bundle: com.ge.research.jena;bundle-version="3.0.0",
+ com.ge.research.sadl.requirements;bundle-version="2.0.0"
