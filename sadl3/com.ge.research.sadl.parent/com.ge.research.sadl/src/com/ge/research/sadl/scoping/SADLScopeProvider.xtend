@@ -77,7 +77,9 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
-		val parent = createResourceScope(context.eResource, null, IScope.NULLSCOPE, newHashSet)
+		val parent = cache.get('resource_scope', context.eResource) [
+			createResourceScope(context.eResource, null, IScope.NULLSCOPE, newHashSet)
+		]
 		val rule = EcoreUtil2.getContainerOfType(context, RuleStatement)
 		if (rule !== null) {
 			return getLocalVariableScope(rule.ifs + rule.thens, parent)
@@ -133,16 +135,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		if (!importedResources.add(resource)) {
 			return parent
 		}
-		{//cache.get('resource_scope'+alias, resource) [
-			var newParent = createImportScope(resource, parent, importedResources)
-			if (shouldWrap)
-				newParent = wrap(newParent)
-			val aliasToUse = alias ?: resource.getAlias
-			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
-			newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
-			newParent = getSecondaryLocalResourceScope(resource, namespace, newParent)
-			return getTertiaryLocalResourceScope(resource, namespace, newParent)
-		}
+		
+		var newParent = createImportScope(resource, parent, importedResources)
+		if (shouldWrap)
+			newParent = wrap(newParent)
+		val aliasToUse = alias ?: resource.getAlias
+		val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
+		newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
+		newParent = getSecondaryLocalResourceScope(resource, namespace, newParent)
+		return getTertiaryLocalResourceScope(resource, namespace, newParent)
 	}
 	
 	protected def getTertiaryLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope) {
