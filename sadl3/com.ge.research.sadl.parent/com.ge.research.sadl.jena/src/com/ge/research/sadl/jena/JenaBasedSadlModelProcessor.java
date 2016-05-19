@@ -518,6 +518,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 					else {
 						addError("Import resolved to a null XtextResource", simport);
+						return;
 					}
 				}
 				else {
@@ -1934,7 +1935,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					// this is case 3
 					SadlTypeReference domain = ((SadlTypeAssociation)spr1).getDomain();
 					OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
-					ObjectProperty prop = getOrCreateObjectProperty(propUri);
+					OntProperty prop;
+					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+						prop = getOrCreateObjectProperty(propUri);
+					}
+					else {
+						prop = getOrCreateDatatypeProperty(propUri);
+					}
 					addPropertyDomain(prop, domainrsrc);
 					SadlTypeReference from = element.getFrom();
 					if (from != null) {
@@ -2640,7 +2647,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		DatatypeProperty prop = getTheJenaModel().getDatatypeProperty(propUri);
 		if (prop != null) {
 			OntResource rng = prop.getRange();
-			if (rng.equals(rngNode)) {
+			if (rng != null && rng.equals(rngNode)) {
 				return true;
 			}
 		}
