@@ -1979,21 +1979,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else {				
 						OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
 						if (rngRsrc == null) {
-							throw new JenaProcessorException("Range failed to resolve to a class or datatype");
-						}
-						if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
-							OntClass rngCls = rngRsrc.asClass();
-							ObjectProperty prop2 = getOrCreateObjectProperty(propUri);
-							addPropertyRange(prop2, rngCls, rngValueType, rng);
-							retOntProp = prop2;
-						}
-						else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-							DatatypeProperty prop2 = getOrCreateDatatypeProperty(propUri);
-							addPropertyRange(prop2, rngRsrc, rngValueType, rng);
-							retOntProp = prop2;
+							addError("Range failed to resolve to a class or datatype", rng);
 						}
 						else {
-							throw new JenaProcessorException("Processing of non-Ontology properpty not yet handled.");
+							if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+								OntClass rngCls = rngRsrc.asClass();
+								ObjectProperty prop2 = getOrCreateObjectProperty(propUri);
+								addPropertyRange(prop2, rngCls, rngValueType, rng);
+								retOntProp = prop2;
+							}
+							else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+								DatatypeProperty prop2 = getOrCreateDatatypeProperty(propUri);
+								addPropertyRange(prop2, rngRsrc, rngValueType, rng);
+								retOntProp = prop2;
+							}
+							else {
+								throw new JenaProcessorException("Processing of non-Ontology properpty not yet handled.");
+							}
 						}
 					}
 				}
@@ -2757,6 +2759,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private OntResource sadlTypeReferenceToOntResource(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
 		Object obj = sadlTypeReferenceToObject(sadlTypeRef);
+		if (obj == null) {
+			return null;	// this happens when sadlTypeRef is a variable (even if unintended)
+		}
 		if (obj instanceof OntResource) {
 			return (OntResource)obj;
 		}
@@ -2777,6 +2782,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			OntConceptType ctype = declarationExtensions.getOntConceptType(strSR);
 			String strSRUri = declarationExtensions.getConceptUri(strSR);	
 			if (strSRUri == null) {
+				if (ctype.equals(OntConceptType.VARIABLE)) {
+					addError("Range should not be a variable.", sadlTypeRef);
+					return null;
+				}
 				throw new JenaProcessorException("Failed to get concept URI of SadlResource in sadlTypeReferenceToObject");
 			}
 			if (ctype.equals(OntConceptType.CLASS)) {
@@ -3056,9 +3065,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private OntClass processSadlCondition(SadlCondition cond, OntProperty prop, OntConceptType propType) throws JenaProcessorException {
 		OntClass retval = null;
+		if (prop == null) {
+			addError("Can't create restiction on unresolvable property", cond);
+		}
 		if (cond instanceof SadlAllValuesCondition) {
 			SadlTypeReference type = ((SadlAllValuesCondition)cond).getType();
 			OntResource typersrc = sadlTypeReferenceToOntResource(type);
+			if (typersrc == null) {
+				addError("Can't create all values from restriction on unresolvable property value restriction", type);
+			}
 			AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
 			logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '" + typersrc.toString() + "'");
 			retval = avf;
