@@ -34,6 +34,7 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.CancelIndicator
+import com.ge.research.sadl.model.CircularDefinitionException
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -99,7 +100,12 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 	}
 	
 	def private String getHighlightingId(SadlResource rn) {
-		switch (declarationExtensions.getOntConceptType(rn)) {
+		val type = try {
+			declarationExtensions.getOntConceptType(rn)
+		} catch (CircularDefinitionException e) {
+			e.definitionType
+		}
+		switch (type) {
 			case CLASS_PROPERTY: {
 				return SadlHighlightingConfiguration.OBJECT_PROPERTY_ID
 			}
