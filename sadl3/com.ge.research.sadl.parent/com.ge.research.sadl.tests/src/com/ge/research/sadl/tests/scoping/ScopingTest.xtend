@@ -103,4 +103,19 @@ class ScopingTest {
 			assertSame(x, names.get(2).name)
 		]
 	}
+		
+	@Test def void testScopingSlowdown() {
+		for (i:1 ..< 10) {
+			var modeltext = "uri \"http://com.ge.research.sadl/scopingscaletest\".\n"
+			for (j:0 ..< i*100) {
+				modeltext += "Pr" + j + " is a property.\n"
+			}
+//			print(modeltext)
+			var t1 = System.currentTimeMillis
+			var model = modeltext.parse
+			validationTestHelper.assertNoErrors(model.eResource)
+			var t2 = System.currentTimeMillis;
+			print(i*100 + "," + (t2-t1) + "ms\n")
+		}
+	}
 }

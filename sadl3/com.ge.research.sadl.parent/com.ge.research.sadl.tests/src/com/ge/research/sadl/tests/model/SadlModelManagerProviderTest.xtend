@@ -581,12 +581,13 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Ignore
 	@Test def void myPropertyWithListDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Thingy is a class.
-			multiValuedListProperty1 describes Thingy with a List of values of type Thingy.
-			multiValuedListProperty2 describes Thingy with a List of values of type float.
+			multiValuedListProperty1 describes Thingy with values of type Thingy List.
+			multiValuedListProperty2 describes Thingy with values of type float List.
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)
@@ -600,12 +601,13 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Ignore
 	@Test def void myPropertyWithListsDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Thingy is a class.
-			multiValuedListProperty1 describes Thingy with Lists of values of type Thingy.
-			multiValuedListProperty2 describes Thingy with Lists of values of type float.
+			multiValuedListProperty1 describes Thingy with values of type Thingy List.
+			multiValuedListProperty2 describes Thingy with values of type float List.
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)

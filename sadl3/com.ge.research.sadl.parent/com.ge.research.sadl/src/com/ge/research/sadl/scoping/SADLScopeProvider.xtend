@@ -37,11 +37,13 @@ import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.google.common.base.Predicate
 import com.google.inject.Inject
+import java.util.List
 import java.util.Map
 import java.util.Set
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
@@ -77,7 +79,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
-		val parent = createResourceScope(context.eResource, null, IScope.NULLSCOPE, newHashSet)
+		val parent = createResourceScope(context.eResource, null, newHashSet)
+		
 		val rule = EcoreUtil2.getContainerOfType(context, RuleStatement)
 		if (rule !== null) {
 			return getLocalVariableScope(rule.ifs + rule.thens, parent)
@@ -128,13 +131,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	
-	protected def IScope createResourceScope(Resource resource, String alias, IScope parent, Set<Resource> importedResources) {
-		val shouldWrap = importedResources.empty
-		if (!importedResources.add(resource)) {
-			return parent
-		}
-		{//cache.get('resource_scope'+alias, resource) [
-			var newParent = createImportScope(resource, parent, importedResources)
+	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
+		return cache.get('resource_scope'->alias, resource) [
+			val shouldWrap = importedResources.empty
+			if (!importedResources.add(resource)) {
+				return IScope.NULLSCOPE
+			}
+			
+			var newParent = createImportScope(resource, importedResources)
 			if (shouldWrap)
 				newParent = wrap(newParent)
 			val aliasToUse = alias ?: resource.getAlias
@@ -142,7 +146,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
 			newParent = getSecondaryLocalResourceScope(resource, namespace, newParent)
 			return getTertiaryLocalResourceScope(resource, namespace, newParent)
-		}
+		]
 	}
 	
 	protected def getTertiaryLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope) {
@@ -213,15 +217,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		(resource.contents.head as SadlModel).alias
 	}
 	
-	protected def IScope createImportScope(Resource resource, IScope parent, Set<Resource> importedResources) {
+	protected def IScope createImportScope(Resource resource, Set<Resource> importedResources) {
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
-		var newParent = parent
+		var importScopes = newArrayList
 		for (imp : imports) {
 			val externalResource = imp.importedResource
 			if (!externalResource.eIsProxy)
-				newParent = createResourceScope(externalResource.eResource, imp.alias, newParent, importedResources)
+				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
 		}
-		return newParent
+		return new ListCompositeScope(importScopes)
 	}
 
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
@@ -230,4 +234,53 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 	}
 
+	@Data static class ListCompositeScope implements IScope {
+	
+		List<IScope> delegates
+		
+		override getAllElements() {
+			delegates.map[allElements].reduce[p1, p2| p1 + p2]
+		}
+		
+		override getElements(QualifiedName name) {
+			for (scope : delegates) {
+				val result = scope.getElements(name)
+				if (!result.isEmpty) {
+					return result
+				}
+			}
+			return emptyList
+		}
+		
+		override getElements(EObject object) {
+			for (scope : delegates) {
+				val result = scope.getElements(object)
+				if (!result.isEmpty) {
+					return result
+				}
+			}
+			return emptyList
+		}
+		
+		override getSingleElement(QualifiedName name) {
+			for (scope : delegates) {
+				val element = scope.getSingleElement(name)
+				if (element !== null) {
+					return element
+				}
+			}
+			return null
+		}
+		
+		override getSingleElement(EObject object) {
+			for (scope : delegates) {
+				val element = scope.getSingleElement(object)
+				if (element !== null) {
+					return element
+				}
+			}
+			return null
+		}
+		
+	}
 }
