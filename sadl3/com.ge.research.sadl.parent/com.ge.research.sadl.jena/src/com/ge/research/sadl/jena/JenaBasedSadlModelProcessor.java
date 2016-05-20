@@ -1748,6 +1748,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					rsrcList.add(createAnnotationProperty(newNames.get(i)));
 				}
 			}
+			else if (superElementType.equals(OntConceptType.VARIABLE)) {
+				addError("Invalid type", element);
+			}
 		}
 		//				b) a SadlPrimitiveDataType
 		else if (superElement instanceof SadlPrimitiveDataType) {
@@ -2008,7 +2011,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						OntProperty prop = getTheJenaModel().getOntProperty(propUri);
 						if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
 							OntClass condCls = processSadlCondition((SadlCondition) spr2, prop, propType);
-							cls.addSuperClass(condCls);
+							if (condCls != null) {
+								cls.addSuperClass(condCls);
+							}
+							else {
+								addError("Unable to add restriction; unable to create condition class", domain);
+							}
 							retOntProp = prop;
 						}
 						else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
@@ -3074,9 +3082,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (typersrc == null) {
 				addError("Can't create all values from restriction on unresolvable property value restriction", type);
 			}
-			AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
-			logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '" + typersrc.toString() + "'");
-			retval = avf;
+			else {
+				AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
+				logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '" + typersrc.toString() + "'");
+				retval = avf;
+			}
 		}
 		else if (cond instanceof SadlHasValueCondition) {
 			SadlExplicitValue value = ((SadlHasValueCondition)cond).getRestriction();

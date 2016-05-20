@@ -208,8 +208,8 @@ class DeclarationExtensions {
 	
 	protected def isDatatype(SadlTypeReference typeRef) {
 		typeRef instanceof SadlPrimitiveDataType 
-		|| typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType]
-		|| typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE]
+		|| (typeRef != null) && typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType]
+		|| (typeRef != null) && typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE]
 	}
 	
 }
