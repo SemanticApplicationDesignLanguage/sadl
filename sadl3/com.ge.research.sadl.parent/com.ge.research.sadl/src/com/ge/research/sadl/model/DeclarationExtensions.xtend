@@ -127,13 +127,14 @@ class DeclarationExtensions {
 	
 	private ThreadLocal<Set<SadlResource>> recursionDetection = new ThreadLocal<Set<SadlResource>>();
 	
-	def OntConceptType getOntConceptType(SadlResource resource) {
+	def OntConceptType getOntConceptType(SadlResource resource) throws CircularDefinitionException {
 		if (recursionDetection.get == null) {
 			recursionDetection.set(new HashSet)
 		}
 		if (!recursionDetection.get.add(resource)) {
 			// Recursion detected. Should be an error.
-			return OntConceptType.CLASS
+//			return OntConceptType.CLASS
+			throw new CircularDefinitionException("Concept is not properly defined", OntConceptType.CLASS)
 		}
 		try {
 			if (resource instanceof Name) {
@@ -208,8 +209,8 @@ class DeclarationExtensions {
 	
 	protected def isDatatype(SadlTypeReference typeRef) {
 		typeRef instanceof SadlPrimitiveDataType 
-		|| (typeRef != null) && typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType]
-		|| (typeRef != null) && typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE]
+		|| (typeRef != null && typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType])
+		|| (typeRef != null && typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE])
 	}
 	
 }
