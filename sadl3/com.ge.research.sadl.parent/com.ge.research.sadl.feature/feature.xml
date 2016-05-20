@@ -6,16 +6,44 @@
       provider-name="GE">
 
    <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+      The Semantic Application Design Language (SADL) is a controlled
+English grammar and Eclipse IDE for building, testing, and deploying
+semantic models.
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+      Copyright General Electric, 2007-2016.
    </copyright>
 
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
+   <license url="http://sadl.sourceforge.net">
+      SADL is available under the Eclipse Public License.
+
+SADL is built on Xtext and includes Xtext language elements used under the Eclipse Public License.
+
+SADL includes Apache Jena licensed under Apache License V2.0:
+Apache Jena, Copyright 2011, 2012, 2013 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of this software were originally based on the following:
+  - Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Hewlett-Packard Development Company, LP
+  - Copyright 2010, 2011 Epimorphics Ltd.
+  - Copyright 2010, 2011 Talis Systems Ltd.
+These have been licensed to the Apache Software Foundation under a software grant.
+
+This product includes software developed by
+PluggedIn Software under a BSD license.
+
+This product includes software developed by Mort Bay Consulting Pty. Ltd.
+   Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
+
+SADL also includes POJava licensed under Apache License V2.0.
    </license>
+
+   <url>
+      <discovery label="Semantic Application Design Language" url="http://sadl.sourceforge.net"/>
+   </url>
 
    <includes
          id="org.eclipse.xtext.redist"
