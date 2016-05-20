@@ -31,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.model.CircularDefinitionException
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -235,7 +236,12 @@ class DeclarationExtensionsTest {
 	
 	protected def void assertIs(SadlResource it, OntConceptType type) {
 		assertNotNull(it)
-		assertEquals(concreteName, type, ontConceptType)
+		val typ = try {
+		    ontConceptType
+		  } catch (CircularDefinitionException e) {
+		    e.definitionType
+		  }
+  		assertEquals(concreteName, type, typ)
 	}
 	
 }
