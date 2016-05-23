@@ -1,0 +1,18 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rect="http://sadl.org/Shapes/Rectangle#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/Shapes/Test">
+  <owl:Ontology rdf:about="http://sadl.org/Shapes/Test">
+    <owl:imports rdf:resource="http://sadl.org/Shapes/Rule"/>
+    <owl:versionInfo>$Revision:$ Last modified on   $Date:$</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Test.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <rect:Rectangle rdf:ID="MyRect">
+    <rect:width rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >5.5</rect:width>
+    <rect:height rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >2.5</rect:height>
+  </rect:Rectangle>
+</rdf:RDF>
