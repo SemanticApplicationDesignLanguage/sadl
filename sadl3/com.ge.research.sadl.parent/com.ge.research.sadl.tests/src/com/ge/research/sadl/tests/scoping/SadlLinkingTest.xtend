@@ -1093,6 +1093,26 @@ class SadlLinkingTest extends AbstractLinkingTest {
     }
     
     @Test
+    def void testRecursion() {
+        '''
+             uri "http://sadl.org/NS1.sadl" alias ns1.
+             
+             [Foo2] is a type of <Foo>.
+             [Foo3] is a type of <Foo2>.
+             [Foo] is a type of <Foo2>.
+         '''.assertLinking[sadl]
+    }
+    
+    @Test
+    def void testRecursion_01() {
+        '''
+             uri "http://sadl.org/NS1.sadl" alias ns1.
+             
+             [Foo] is a type of <Foo>.
+         '''.assertLinking[sadl]
+    }
+    
+    @Test
     def void testImportPerformance() {
     	for (i : 99..100) {
     		val started = Stopwatch.createStarted

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.ge.research.sadl.feature_2.2.0.201602181731.jar" id="com.ge.research.sadl.feature" version="2.2.0.201602181731">
+      <category name="SWI-PrologPlugin"/>
+   </feature>
+   <feature url="features/com.ge.research.sadl.testsuite.sdk_2.2.0.201602181731.jar" id="com.ge.research.sadl.testsuite.sdk" version="2.2.0.201602181731">
+      <category name="SWI-PrologPlugin"/>
+   </feature>
+   <feature url="features/com.ge.research.sadl.swi_prolog.feature_2.4.2.201602181731.jar" id="com.ge.research.sadl.swi_prolog.feature" version="2.4.2.201602181731">
+      <category name="SWI-PrologPlugin"/>
+   </feature>
+   <category-def name="SWI-PrologPlugin" label="SWI-Prolog Plug-in for SADL"/>
+</site>

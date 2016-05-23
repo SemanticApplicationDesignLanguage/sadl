@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.OntConceptType;
@@ -518,6 +519,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 					else {
 						addError("Import resolved to a null XtextResource", simport);
+						return;
 					}
 				}
 				else {
@@ -1551,7 +1553,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		String nm =  declarationExtensions.getConcreteName(expr);
 		String ns = declarationExtensions.getConceptNamespace(expr);
 		String prfx = declarationExtensions.getConceptPrefix(expr);
-		OntConceptType type = declarationExtensions.getOntConceptType(expr);
+		OntConceptType type;
+		try {
+			type = declarationExtensions.getOntConceptType(expr);
+		} catch (CircularDefinitionException e) {
+			type = e.getDefinitionType();
+			addError(e.getMessage(), expr);
+		}
 		if (type.equals(OntConceptType.VARIABLE)) {
 			VariableNode vn = new VariableNode(nm);
 			vn.setNamespace(ns);
@@ -1665,7 +1673,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			
 		}
 		else {
-			sameAsType = declarationExtensions.getOntConceptType(sr);
+			try {
+				sameAsType = declarationExtensions.getOntConceptType(sr);
+			} catch (CircularDefinitionException e) {
+				sameAsType = e.getDefinitionType();
+				addError(e.getMessage(), element);
+			}
 		}
 		if (sameAsType.equals(OntConceptType.CLASS)) {
 			OntClass smasCls = sadlTypeReferenceToOntResource(smas).asClass();
@@ -1726,7 +1739,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (superElement instanceof SadlSimpleTypeReference) {
 			SadlResource superSR = ((SadlSimpleTypeReference)superElement).getType();
 			String superSRUri = declarationExtensions.getConceptUri(superSR);	
-			OntConceptType superElementType = declarationExtensions.getOntConceptType(superSR);
+			OntConceptType superElementType;
+			try {
+				superElementType = declarationExtensions.getOntConceptType(superSR);
+			} catch (CircularDefinitionException e) {
+				superElementType = e.getDefinitionType();
+				addError("Part of circular definition", superElement);
+			}
 			if (superElementType.equals(OntConceptType.CLASS)) {
 				for (int i = 0; i < newNames.size(); i++) {
 					rsrcList.add(createOntClass(newNames.get(i), superSRUri, superSR));
@@ -1845,7 +1864,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		//  4) <prop> of <class> <restriction>	(1st spr is a SadlTypeAssociation, the class being restricted; 2nd spr is 
 		SadlResource sr = sadlResourceFromSadlProperty(element);
 		String propUri = declarationExtensions.getConceptUri(sr);
-		OntConceptType propType = declarationExtensions.getOntConceptType(sr);
+		OntConceptType propType;
+		try {
+			propType = declarationExtensions.getOntConceptType(sr);
+		} catch (CircularDefinitionException e) {
+			propType = e.getDefinitionType();
+			addError(e.getMessage(), element);
+		}
 		
 		
 		Iterator<SadlPropertyRestriction> spitr = element.getRestrictions().iterator();
@@ -1934,7 +1959,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					// this is case 3
 					SadlTypeReference domain = ((SadlTypeAssociation)spr1).getDomain();
 					OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
-					ObjectProperty prop = getOrCreateObjectProperty(propUri);
+					OntProperty prop;
+					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+						prop = getOrCreateObjectProperty(propUri);
+					}
+					else {
+						prop = getOrCreateDatatypeProperty(propUri);
+					}
 					addPropertyDomain(prop, domainrsrc);
 					SadlTypeReference from = element.getFrom();
 					if (from != null) {
@@ -1972,21 +2003,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else {				
 						OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
 						if (rngRsrc == null) {
-							throw new JenaProcessorException("Range failed to resolve to a class or datatype");
-						}
-						if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
-							OntClass rngCls = rngRsrc.asClass();
-							ObjectProperty prop2 = getOrCreateObjectProperty(propUri);
-							addPropertyRange(prop2, rngCls, rngValueType, rng);
-							retOntProp = prop2;
-						}
-						else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-							DatatypeProperty prop2 = getOrCreateDatatypeProperty(propUri);
-							addPropertyRange(prop2, rngRsrc, rngValueType, rng);
-							retOntProp = prop2;
+							addError("Range failed to resolve to a class or datatype", rng);
 						}
 						else {
-							throw new JenaProcessorException("Processing of non-Ontology properpty not yet handled.");
+							if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+								OntClass rngCls = rngRsrc.asClass();
+								ObjectProperty prop2 = getOrCreateObjectProperty(propUri);
+								addPropertyRange(prop2, rngCls, rngValueType, rng);
+								retOntProp = prop2;
+							}
+							else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+								DatatypeProperty prop2 = getOrCreateDatatypeProperty(propUri);
+								addPropertyRange(prop2, rngRsrc, rngValueType, rng);
+								retOntProp = prop2;
+							}
+							else {
+								throw new JenaProcessorException("Processing of non-Ontology properpty not yet handled.");
+							}
 						}
 					}
 				}
@@ -1999,7 +2032,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						OntProperty prop = getTheJenaModel().getOntProperty(propUri);
 						if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
 							OntClass condCls = processSadlCondition((SadlCondition) spr2, prop, propType);
-							cls.addSuperClass(condCls);
+							if (condCls != null) {
+								cls.addSuperClass(condCls);
+							}
+							else {
+								addError("Unable to add restriction; unable to create condition class", domain);
+							}
 							retOntProp = prop;
 						}
 						else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
@@ -2295,7 +2333,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (getIssueAcceptor() != null) {
 			getIssueAcceptor().addError(msg, context);
 		}
-		System.err.println(msg);
+		else {
+			System.err.println(msg);
+		}
 	}
 
 	private void addWarning(String msg, EObject context) {
@@ -2477,7 +2517,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private void assignInstancePropertyValue(Individual inst, SadlResource prop, EObject val) throws JenaProcessorException {
-		OntConceptType type = declarationExtensions.getOntConceptType(prop);
+		OntConceptType type;
+		try {
+			type = declarationExtensions.getOntConceptType(prop);
+		} catch (CircularDefinitionException e) {
+			type = e.getDefinitionType();
+			addError(e.getMessage(), prop);
+		}
 		String propuri = declarationExtensions.getConceptUri(prop);
 		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
 			ObjectProperty oprop = getTheJenaModel().getObjectProperty(propuri);
@@ -2640,7 +2686,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		DatatypeProperty prop = getTheJenaModel().getDatatypeProperty(propUri);
 		if (prop != null) {
 			OntResource rng = prop.getRange();
-			if (rng.equals(rngNode)) {
+			if (rng != null && rng.equals(rngNode)) {
 				return true;
 			}
 		}
@@ -2750,6 +2796,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private OntResource sadlTypeReferenceToOntResource(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
 		Object obj = sadlTypeReferenceToObject(sadlTypeRef);
+		if (obj == null) {
+			return null;	// this happens when sadlTypeRef is a variable (even if unintended)
+		}
 		if (obj instanceof OntResource) {
 			return (OntResource)obj;
 		}
@@ -2767,9 +2816,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
 			SadlResource strSR = ((SadlSimpleTypeReference)sadlTypeRef).getType();
 			//TODO check for proxy, i.e. unresolved references
-			OntConceptType ctype = declarationExtensions.getOntConceptType(strSR);
+			OntConceptType ctype;
+			try {
+				ctype = declarationExtensions.getOntConceptType(strSR);
+			} catch (CircularDefinitionException e) {
+				ctype = e.getDefinitionType();
+				addError(e.getMessage(), sadlTypeRef);
+			}
 			String strSRUri = declarationExtensions.getConceptUri(strSR);	
 			if (strSRUri == null) {
+				if (ctype.equals(OntConceptType.VARIABLE)) {
+					addError("Range should not be a variable.", sadlTypeRef);
+					return null;
+				}
 				throw new JenaProcessorException("Failed to get concept URI of SadlResource in sadlTypeReferenceToObject");
 			}
 			if (ctype.equals(OntConceptType.CLASS)) {
@@ -3020,7 +3079,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (propUri == null) {
 			throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlPropertyCondition");
 		}
-		OntConceptType propType = declarationExtensions.getOntConceptType(sr);
+		OntConceptType propType;
+		try {
+			propType = declarationExtensions.getOntConceptType(sr);
+		} catch (CircularDefinitionException e) {
+			propType = e.getDefinitionType();
+			addError(e.getMessage(), sadlPropCond);
+		}
 		OntProperty prop = getTheJenaModel().getOntProperty(propUri);
 		if (prop == null) {
 			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
@@ -3049,22 +3114,41 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private OntClass processSadlCondition(SadlCondition cond, OntProperty prop, OntConceptType propType) throws JenaProcessorException {
 		OntClass retval = null;
-		if (cond instanceof SadlAllValuesCondition) {
+		if (prop == null) {
+			addError("Can't create restiction on unresolvable property", cond);
+		}
+		else if (cond instanceof SadlAllValuesCondition) {
 			SadlTypeReference type = ((SadlAllValuesCondition)cond).getType();
 			OntResource typersrc = sadlTypeReferenceToOntResource(type);
-			AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
-			logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '" + typersrc.toString() + "'");
-			retval = avf;
+			if (typersrc == null) {
+				addError("Can't create all values from restriction on unresolvable property value restriction", type);
+			}
+			else {
+				AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
+				logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '" + typersrc.toString() + "'");
+				retval = avf;
+			}
 		}
 		else if (cond instanceof SadlHasValueCondition) {
 			SadlExplicitValue value = ((SadlHasValueCondition)cond).getRestriction();
 			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
 				if (value instanceof SadlResource) {
-					OntConceptType srType = declarationExtensions.getOntConceptType((SadlResource)value);
+					OntConceptType srType;
+					try {
+						srType = declarationExtensions.getOntConceptType((SadlResource)value);
+					} catch (CircularDefinitionException e) {
+						srType = e.getDefinitionType();
+						addError(e.getMessage(), cond);
+					}
 					SadlResource srValue = (SadlResource) value;
 					if (srType == null) {
 						srValue = ((SadlResource)value).getName();
-						srType = declarationExtensions.getOntConceptType(srValue);
+						try {
+							srType = declarationExtensions.getOntConceptType(srValue);
+						} catch (CircularDefinitionException e) {
+							srType = e.getDefinitionType();
+							addError(e.getMessage(), cond);
+						}
 					}
 					if (srType == null) {
 						throw new JenaProcessorException("Unable to resolve SadlResource value");
@@ -3256,7 +3340,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private OntConceptType getSadlTypeReferenceType(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
 			SadlResource sr = ((SadlSimpleTypeReference)sadlTypeRef).getType();
-			return declarationExtensions.getOntConceptType(sr);
+			try {
+				return declarationExtensions.getOntConceptType(sr);
+			} catch (CircularDefinitionException e) {
+				addError(e.getMessage(), sadlTypeRef);
+				return e.getDefinitionType();
+			}
 		}
 		else if (sadlTypeRef instanceof SadlPrimitiveDataType) {
 			return OntConceptType.DATATYPE;
@@ -3638,7 +3727,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private boolean isVariable(SadlResource sr) {
-		OntConceptType ct = declarationExtensions.getOntConceptType(sr);
+		OntConceptType ct;
+		try {
+			ct = declarationExtensions.getOntConceptType(sr);
+		} catch (CircularDefinitionException e) {
+			ct = e.getDefinitionType();
+			addError(e.getMessage(), sr);
+		}
 		if (ct.equals(OntConceptType.VARIABLE)) {
 			return true;
 		}

@@ -12,6 +12,7 @@ import javax.xml.transform.URIResolver;
 
 import org.eclipse.emf.ecore.EObject;
 
+import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
@@ -381,7 +382,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			issueAcceptor.addError("Unidentified expression", expression);
 		}
 		
-		OntConceptType conceptType = declarationExtensions.getOntConceptType(qnm);
+		OntConceptType conceptType;
+		try {
+			conceptType = declarationExtensions.getOntConceptType(qnm);
+		} catch (CircularDefinitionException e) {
+			conceptType = e.getDefinitionType();
+			issueAcceptor.addError(e.getMessage(), expression);
+		}
 		if(conceptType.equals(OntConceptType.CLASS)){
 			ConceptName conceptName = new ConceptName(conceptUri);
 			conceptName.setType(ConceptType.ONTCLASS);
