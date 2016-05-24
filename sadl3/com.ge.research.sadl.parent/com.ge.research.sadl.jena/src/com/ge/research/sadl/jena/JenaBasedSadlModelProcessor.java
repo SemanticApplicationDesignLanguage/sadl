@@ -122,6 +122,7 @@ import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
+import com.ge.research.sadl.sADL.SadlIsInverseOf;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
@@ -1882,6 +1883,35 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				OntProperty pr = getOrCreateObjectProperty(propUri);
 				pr.convertToTransitiveProperty();
 				retOntProp = getTheJenaModel().createTransitiveProperty(pr.getURI());
+			}
+			else if (spr1 instanceof SadlIsInverseOf) {
+				OntProperty pr;
+				if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+					pr = getOrCreateObjectProperty(propUri);
+				}
+				else {
+					throw new JenaProcessorException("Only object properties can have inverses");
+				}
+				if (pr == null) {
+					throw new JenaProcessorException("Property '" + propUri + "' not found in ontology.");
+				}
+				SadlResource otherProp = ((SadlIsInverseOf)spr1).getOtherProperty();
+				String otherPropUri = declarationExtensions.getConceptUri(otherProp);
+				OntConceptType optype;
+				try {
+					optype = declarationExtensions.getOntConceptType(otherProp);
+				} catch (CircularDefinitionException e) {
+					optype = e.getDefinitionType();
+					addError(e.getMessage(), element);
+				}
+				if (!optype.equals(OntConceptType.CLASS_PROPERTY)) {
+					throw new JenaProcessorException("Only object properties can have inverses");
+				}
+				OntProperty opr = getOrCreateObjectProperty(otherPropUri);
+				if (opr == null) {
+					throw new JenaProcessorException("Property '" + otherPropUri + "' not found in ontology.");
+				}
+				pr.addInverseOf(opr);
 			}
 			else if (spr1 instanceof SadlRangeRestriction) {
 				SadlTypeReference rng = ((SadlRangeRestriction)spr1).getRange();
