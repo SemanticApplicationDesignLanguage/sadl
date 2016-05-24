@@ -581,6 +581,19 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test def void myInversePropertyDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			prop1 is a property.
+			prop2 is a property.
+			prop2 is the inverse of prop1.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+		]
+	}
+	
 	@Ignore
 	@Test def void myPropertyWithListDeclarationCase() {
 		'''
