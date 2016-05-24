@@ -97,7 +97,6 @@ import com.ge.research.sadl.sADL.EquationStatement;
 import com.ge.research.sadl.sADL.ExplainStatement;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.ExternalEquationStatement;
-import com.ge.research.sadl.sADL.Function;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PrintStatement;
@@ -862,9 +861,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof SubjHasProp) {
 			return processExpression((SubjHasProp)expr);
 		}
-		else if (expr instanceof Function) {
-			return processExpression((Function)expr);
-		}
 		else if (expr instanceof SadlResource) {
 			return processExpression((SadlResource)expr);
 		}
@@ -1124,7 +1120,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return createBinaryBuiltin(expr, op, lobj, robj);
 	}
 	
-	private Object processExpression(Function expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+	private Object processFunction(Name expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		EList<Expression> arglist = expr.getArglist();
 		String funcname = processExpression(expr.getName()).toString();
 		BuiltinElement builtin = new BuiltinElement();
@@ -1450,7 +1446,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new TranslationException("Unhandled type of SadlTypeReference");
 	}
 	
-	public Object processExpression(Name expr) throws TranslationException {
+	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if (expr.isFunction()) {
+			return processFunction(expr);
+		}
 		SadlResource qnm =expr.getName();
 		String nm = declarationExtensions.getConcreteName(qnm);
 		if (nm == null) {

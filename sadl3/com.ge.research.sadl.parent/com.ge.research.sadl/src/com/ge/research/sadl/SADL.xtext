@@ -353,16 +353,11 @@ PrimaryExpression<EnabledWith> returns Expression: // (20)
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-	| ->Function
 	| FeatureCall
 	| {ValueTable} valueTable=ValueTable;
-	
-Function returns SadlResource:
-	{Function} =>(name=[SadlResource|QNAME] '(') arglist+=Expression? (',' arglist+=Expression)* ')'
-;
 
 FeatureCall returns SadlResource:
-	{Name} name=[SadlResource|QNAME]
+	{Name} name=[SadlResource|QNAME] ->(function?='(' arglist+=Expression? (',' arglist+=Expression)* ')')?
 ;
 
 UNIT :

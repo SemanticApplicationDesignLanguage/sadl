@@ -64,8 +64,10 @@ class SADLValidator extends AbstractSADLValidator {
 		val simpleFileName = emfURI.lastSegment
 		val thisResourceDescription = resourceDescriptionManager.getResourceDescription(model.eResource)
 		val allModels = resourceDescriptionsProvider.getResourceDescriptions(model.eResource.resourceSet).getExportedObjectsByType(SADLPackage.Literals.SADL_MODEL)
-		for (modelDescription : allModels.filter[EObjectURI.trimFragment != thisResourceDescription.URI 
-				&& EObjectURI.segment(1) == thisResourceDescription.URI.segment(1)]) {
+		for (modelDescription : allModels.filter[EObjectURI.trimFragment != thisResourceDescription.URI
+			    && (!EObjectURI.isPlatformResource &&  !thisResourceDescription.URI.isPlatformResource 
+			    || EObjectURI.segmentCount > 1 && thisResourceDescription.URI.segmentCount > 1
+				&& EObjectURI.segment(1) == thisResourceDescription.URI.segment(1))]) {
 			if (modelDescription.name.toString == thisUri) {
 				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 			}
