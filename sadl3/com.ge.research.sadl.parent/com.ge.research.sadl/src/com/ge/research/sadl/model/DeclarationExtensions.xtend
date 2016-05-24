@@ -163,6 +163,9 @@ class DeclarationExtensions {
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY] :
 					OntConceptType.ANNOTATION_PROPERTY
 					 
+//				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isList : 
+//					OntConceptType.CLASS
+				
 				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype : 
 					OntConceptType.DATATYPE
 					
@@ -172,6 +175,12 @@ class DeclarationExtensions {
 					
 	//			SadlDataTypeDeclaration :
 	//				OntConceptType.DATATYPE
+	
+	//			if it is a SadlProperty and 
+	//				typeonly is class => OntConceptType.CLASS_PROPERTY
+	//				typeonly is "data" => OntConceptType.DATATYPE_PROPERTY
+	//				typeonly is null && range is null => OntConceptType.RDF_PROPERPTY
+	//				conditions below
 					
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[range.isDatatype]: 
 					OntConceptType.DATATYPE_PROPERTY
@@ -206,6 +215,10 @@ class DeclarationExtensions {
 			default : throw new IllegalStateException("typeRef "+typeRef+" not handled.") 
 		}
 	}
+	
+//	protected def boolean isList(SadlTypeReference typeRef) {
+//		typeRef != null && typeRef instanceof SadlPrimitiveDataType && typeRef.list == true
+//	}
 	
 	protected def isDatatype(SadlTypeReference typeRef) {
 		typeRef instanceof SadlPrimitiveDataType 

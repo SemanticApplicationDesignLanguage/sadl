@@ -581,6 +581,49 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
+	@Test 
+	def void testPropertyAllRangeSpecTypes() {
+		'''
+			uri "http://com.ge.research.sadl/proptypeonly". 
+			Person is a class.
+			prop is a property.
+			dtpropwithrng is a property with values of type float.
+			objpropwithrng is a property with values of type Person.		
+			dtprop is a property with values of type data.
+			objprop is a property with values of type class.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var foundop = false
+			var founddp = false;
+			var foundp = false
+			var itr1 = jenaModel.listObjectProperties().toIterable().iterator
+			while (itr1.hasNext()) {
+				val nxt = itr1.next;
+				if (nxt.localName.equals("objprop")) {
+					foundop = true;
+				}
+				if (nxt.localName.equals("prop")) {
+					foundp = true;
+				}
+			}	
+			var itr2 = jenaModel.listDatatypeProperties().toIterable().iterator
+			while (itr2.hasNext()) {
+				val nxt = itr2.next;
+				if (nxt.localName.equals("dtprop")) {
+					foundop = true;
+				}
+				if (nxt.localName.equals("prop")) {
+					foundp = true;
+				}
+			}	
+			assertTrue(foundop);
+			assertTrue(founddp);
+			assertFalse(foundp);
+		]
+	}
+
 	@Test def void myInversePropertyDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.

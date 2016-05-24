@@ -34,7 +34,6 @@
       <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/unsignedByte"/>
       <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/unsignedInt"/>
       <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/anySimpleType"/>
-      <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/data"/>
     </genEnums>
     <genClasses ecoreClass="SADL.ecore#//SadlModel">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlModel/baseUri"/>
@@ -221,6 +220,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/singleValued"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/list"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/lists"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/typeonly"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlRangeRestriction/range"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlIsInverseOf">

@@ -1914,46 +1914,65 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				pr.addInverseOf(opr);
 			}
 			else if (spr1 instanceof SadlRangeRestriction) {
-				SadlTypeReference rng = ((SadlRangeRestriction)spr1).getRange();
-				RangeValueType rngValueType = RangeValueType.CLASS_OR_DT;	// default
-				if (((SadlRangeRestriction)spr1).isList()) {
-					rngValueType = RangeValueType.LIST;
-				}
-				else if (((SadlRangeRestriction)spr1).isLists()) {
-					rngValueType = RangeValueType.LISTS;
-				}
-				if (rng instanceof SadlPrimitiveDataType) {
-					String rngName = ((SadlPrimitiveDataType)rng).getPrimitiveType().getName();
-					RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
-					DatatypeProperty prop = null;
-					if (!checkForExistingCompatibleDatatypeProperty(propUri, rngNode)) {
-						prop = createDatatypeProperty(propUri, null);
-						addPropertyRange(prop, rngNode, rngValueType, rng);
+				String typeonly = ((SadlRangeRestriction)spr1).getTypeonly();
+				if (typeonly != null) {
+					if (typeonly.equals("class")) {
+						// ObjectProperty with no range
+					}
+					else if (typeonly.equals("data")) {
+						// DatatypeProperty with no range
 					}
 					else {
-						prop = getTheJenaModel().getDatatypeProperty(propUri);
-						addPropertyRange(prop, rngNode, rngValueType, rng);
+						throw new JenaProcessorException("Unexpected value of Typeonly: " + typeonly);
 					}
-					retOntProp = prop;
 				}
 				else {
-					OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
-					if (rngRsrc == null) {
-						throw new JenaProcessorException("Range failed to resolve to a class or datatype");
+					SadlTypeReference rng = ((SadlRangeRestriction)spr1).getRange();
+					if (rng == null) {
+						throw new JenaProcessorException("No range, no typeonly: this shouldn't happen!");
 					}
-					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
-						OntClass rngCls = rngRsrc.asClass();
-						ObjectProperty prop = getOrCreateObjectProperty(propUri);
-						addPropertyRange(prop, rngCls, rngValueType, rng);
-						retOntProp = prop;
+					RangeValueType rngValueType = RangeValueType.CLASS_OR_DT;	// default
+					if (((SadlRangeRestriction)spr1).isList()) {
+						rngValueType = RangeValueType.LIST;
 					}
-					else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-						DatatypeProperty prop = getOrCreateDatatypeProperty(propUri);
-						addPropertyRange(prop, rngRsrc, rngValueType, rng);
+					else if (((SadlRangeRestriction)spr1).isLists()) {
+						rngValueType = RangeValueType.LISTS;
+					}
+					if (rng instanceof SadlPrimitiveDataType) {
+						// this is a DatatypeProperty with explicit range
+						String rngName = ((SadlPrimitiveDataType)rng).getPrimitiveType().getName();
+						RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
+						DatatypeProperty prop = null;
+						if (!checkForExistingCompatibleDatatypeProperty(propUri, rngNode)) {
+							prop = createDatatypeProperty(propUri, null);
+							addPropertyRange(prop, rngNode, rngValueType, rng);
+						}
+						else {
+							prop = getTheJenaModel().getDatatypeProperty(propUri);
+							addPropertyRange(prop, rngNode, rngValueType, rng);
+						}
 						retOntProp = prop;
 					}
 					else {
-						throw new JenaProcessorException("Processing of non-Ontology properpty not yet handled.");
+						// this is an ObjectProperty with explicit range
+						OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
+						if (rngRsrc == null) {
+							throw new JenaProcessorException("Range failed to resolve to a class or datatype");
+						}
+						if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+							OntClass rngCls = rngRsrc.asClass();
+							ObjectProperty prop = getOrCreateObjectProperty(propUri);
+							addPropertyRange(prop, rngCls, rngValueType, rng);
+							retOntProp = prop;
+						}
+						else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+							DatatypeProperty prop = getOrCreateDatatypeProperty(propUri);
+							addPropertyRange(prop, rngRsrc, rngValueType, rng);
+							retOntProp = prop;
+						}
+						else {
+							throw new JenaProcessorException("Processing of non-Ontology properpty not yet handled.");
+						}
 					}
 				}
 			}
@@ -2188,6 +2207,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} // end while
 		}
 		else {
+			// No restrictions--this will become an rdf:Property
 			OntProperty ontProp = createObjectProperty(propUri, null);
 			retOntProp = ontProp;
 		}
