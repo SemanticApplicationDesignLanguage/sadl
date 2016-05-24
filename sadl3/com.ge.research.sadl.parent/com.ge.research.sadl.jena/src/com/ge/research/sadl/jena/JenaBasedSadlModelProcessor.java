@@ -77,7 +77,6 @@ import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -87,6 +86,7 @@ import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.utils.SadlErrorMessages;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
@@ -150,7 +150,6 @@ import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
-import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -244,7 +243,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		if (fsa !=null) {
 			if (isReservedName(resource)) {
-				addError("'" + resource.getURI().lastSegment() + "' is a reserved name. Model cannot be saved. Please choose a different name.", resource.getContents().get(0));
+				addError(SadlErrorMessages.RESERVED_NAME.get(resource.getURI().lastSegment()), resource.getContents().get(0));
 				return;
 			}
 			IPreferenceValues testPrefs = context.getPreferenceValues();
@@ -421,7 +420,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		SadlModel model = (SadlModel) resource.getContents().get(0);
 		String modelActualUrl =resource.getURI().lastSegment();
 		if (isReservedName(resource)) {
-			addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
+			addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
 		}
 		String modelName = model.getBaseUri();
 		setModelName(modelName);
@@ -1536,7 +1535,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			returnTriple.setPredicate(predNode);
 			returnTriple.setObject(subjNode);
 			if (subjNode instanceof NamedNode && !((NamedNode)subjNode).getNodeType().equals(NodeType.ClassNode)) {
-				addError("'" + subjNode.toString() + "' is not a Class.", subject);
+				addError(SadlErrorMessages.IS_NOT_A.get(subjNode.toString(), "Class"), subject);
 			}
 			returnTriple.setSourceType(TripleSourceType.ITC);
 		}
@@ -2266,7 +2265,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				retval = true;
 			}
 		} else {
-			addError("Range not found.", context);
+			addError(SadlErrorMessages.NOT_FOUND.get("Range", prop.getURI()), context);
 		}
 		return retval;
 	}
@@ -2479,7 +2478,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
 			ObjectProperty oprop = getTheJenaModel().getObjectProperty(propuri);
 			if (oprop == null) {
-				addError("Property '" + propuri + "' does not exist in the Jena model", prop);
+				addError(SadlErrorMessages.PROP_NOT_EXIST.get(propuri), prop);
 			}
 			else {
 				if (val instanceof SadlInstance) {
@@ -2514,7 +2513,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			DatatypeProperty dprop = getTheJenaModel().getDatatypeProperty(propuri);
 			if (dprop == null) {
 //				dumpModel(getTheJenaModel());
-				addError("Property '" + propuri + "' does not exist in the Jena model", prop);
+				addError(SadlErrorMessages.PROP_NOT_EXIST.get(propuri), prop);
 			}
 			else {
 				if (val instanceof SadlExplicitValue) {
@@ -2530,7 +2529,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (type.equals(OntConceptType.ANNOTATION_PROPERTY)) {
 			AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(propuri);
 			if (annprop == null) {
-				addError("Annotation property '" + propuri + "' not found in Jena model", prop);
+				addError(SadlErrorMessages.PROP_NOT_EXIST.get(propuri), prop);
 			}
 			else {
 				RDFNode rsrcval;
@@ -3740,7 +3739,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		SadlModel model = (SadlModel) resource.getContents().get(0);
 		String modelActualUrl =resource.getURI().lastSegment();
 		if (isReservedName(resource)) {
-			addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
+			addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
 		}
 		modelName = model.getBaseUri();
 		EList<SadlModelElement> elements = model.getElements();
