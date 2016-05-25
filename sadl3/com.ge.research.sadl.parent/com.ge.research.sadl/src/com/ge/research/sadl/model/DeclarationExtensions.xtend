@@ -17,13 +17,19 @@
  ***********************************************************************/
 package com.ge.research.sadl.model
 
+import com.ge.research.sadl.sADL.EquationStatement
+import com.ge.research.sadl.sADL.ExternalEquationStatement
+import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
-//import com.ge.research.sadl.sADL.SadlDataTypeDeclaration
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlIntersectionType
+import com.ge.research.sadl.sADL.SadlIsAnnotation
+import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
+import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
+import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlRangeRestriction
@@ -32,26 +38,17 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
-import com.google.inject.Inject
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils
-import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
-import org.eclipse.xtext.EcoreUtil2
-import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.sADL.SadlIsAnnotation
-import com.ge.research.sadl.sADL.Name
-import com.ge.research.sadl.sADL.SadlParameterDeclaration
-import com.ge.research.sadl.sADL.ExternalEquationStatement
-import com.ge.research.sadl.sADL.EquationStatement
-import java.util.Set
 import java.util.HashSet
+import java.util.Set
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.resource.XtextResource
 
 class DeclarationExtensions {
 	
-	@Inject OnChangeEvictingCache cache
-	
 	def String getConcreteName(SadlResource it) {
-		cache.get(it->'concreteName', eResource) [
+		val resource = it.eResource as XtextResource
+		resource.cache.get(it->'concreteName', eResource) [
 			val nodes = NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME)
 			val name = nodes.join('')[NodeModelUtils.getTokenText(it)].trim
 			if (name.isNullOrEmpty)
