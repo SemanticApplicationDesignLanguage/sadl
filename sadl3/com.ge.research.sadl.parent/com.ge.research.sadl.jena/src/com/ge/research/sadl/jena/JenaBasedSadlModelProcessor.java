@@ -97,7 +97,6 @@ import com.ge.research.sadl.sADL.EquationStatement;
 import com.ge.research.sadl.sADL.ExplainStatement;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.ExternalEquationStatement;
-import com.ge.research.sadl.sADL.Function;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PrintStatement;
@@ -123,6 +122,7 @@ import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
+import com.ge.research.sadl.sADL.SadlIsInverseOf;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
@@ -862,9 +862,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof SubjHasProp) {
 			return processExpression((SubjHasProp)expr);
 		}
-		else if (expr instanceof Function) {
-			return processExpression((Function)expr);
-		}
 		else if (expr instanceof SadlResource) {
 			return processExpression((SadlResource)expr);
 		}
@@ -1124,7 +1121,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return createBinaryBuiltin(expr, op, lobj, robj);
 	}
 	
-	private Object processExpression(Function expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+	private Object processFunction(Name expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		EList<Expression> arglist = expr.getArglist();
 		String funcname = processExpression(expr.getName()).toString();
 		BuiltinElement builtin = new BuiltinElement();
@@ -1450,7 +1447,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new TranslationException("Unhandled type of SadlTypeReference");
 	}
 	
-	public Object processExpression(Name expr) throws TranslationException {
+	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if (expr.isFunction()) {
+			return processFunction(expr);
+		}
 		SadlResource qnm =expr.getName();
 		String nm = declarationExtensions.getConcreteName(qnm);
 		if (nm == null) {
@@ -1883,6 +1883,35 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				OntProperty pr = getOrCreateObjectProperty(propUri);
 				pr.convertToTransitiveProperty();
 				retOntProp = getTheJenaModel().createTransitiveProperty(pr.getURI());
+			}
+			else if (spr1 instanceof SadlIsInverseOf) {
+				OntProperty pr;
+				if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+					pr = getOrCreateObjectProperty(propUri);
+				}
+				else {
+					throw new JenaProcessorException("Only object properties can have inverses");
+				}
+				if (pr == null) {
+					throw new JenaProcessorException("Property '" + propUri + "' not found in ontology.");
+				}
+				SadlResource otherProp = ((SadlIsInverseOf)spr1).getOtherProperty();
+				String otherPropUri = declarationExtensions.getConceptUri(otherProp);
+				OntConceptType optype;
+				try {
+					optype = declarationExtensions.getOntConceptType(otherProp);
+				} catch (CircularDefinitionException e) {
+					optype = e.getDefinitionType();
+					addError(e.getMessage(), element);
+				}
+				if (!optype.equals(OntConceptType.CLASS_PROPERTY)) {
+					throw new JenaProcessorException("Only object properties can have inverses");
+				}
+				OntProperty opr = getOrCreateObjectProperty(otherPropUri);
+				if (opr == null) {
+					throw new JenaProcessorException("Property '" + otherPropUri + "' not found in ontology.");
+				}
+				pr.addInverseOf(opr);
 			}
 			else if (spr1 instanceof SadlRangeRestriction) {
 				SadlTypeReference rng = ((SadlRangeRestriction)spr1).getRange();
