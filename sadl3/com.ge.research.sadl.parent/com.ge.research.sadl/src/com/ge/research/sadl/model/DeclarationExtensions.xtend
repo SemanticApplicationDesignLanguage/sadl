@@ -160,6 +160,10 @@ class DeclarationExtensions {
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY] :
 					OntConceptType.ANNOTATION_PROPERTY
 					 
+				SadlClassOrPropertyDeclaration case e.superElement.isList : 
+					if (e.superElement.isDatatype) OntConceptType.DATATYPE_LIST
+					else OntConceptType.CLASS_LIST
+				
 				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype : 
 					OntConceptType.DATATYPE
 					
@@ -169,12 +173,27 @@ class DeclarationExtensions {
 					
 	//			SadlDataTypeDeclaration :
 	//				OntConceptType.DATATYPE
+	
+	//			if it is a SadlProperty and 
+	//				typeonly is class => OntConceptType.CLASS_PROPERTY
+	//				typeonly is "data" => OntConceptType.DATATYPE_PROPERTY
+	//				typeonly is null && range is null => OntConceptType.RDF_PROPERPTY
+	//				conditions below
+					
+				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[typeonly=="class"]: 
+					OntConceptType.CLASS_PROPERTY
+					
+				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[typeonly=="data"]: 
+					OntConceptType.DATATYPE_PROPERTY
 					
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[range.isDatatype]: 
 					OntConceptType.DATATYPE_PROPERTY
-					
-				SadlProperty : 
+
+				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[!range.isDatatype]: 
 					OntConceptType.CLASS_PROPERTY
+
+				SadlProperty : 
+					OntConceptType.RDF_PROPERTY
 					
 				SadlParameterDeclaration :
 					OntConceptType.VARIABLE				
@@ -204,6 +223,22 @@ class DeclarationExtensions {
 		}
 	}
 	
+	protected dispatch def boolean isList(SadlTypeReference typeRef) {
+		return false
+	}
+	
+	protected dispatch def  boolean isList(SadlPrimitiveDataType typeRef) {
+		typeRef.list
+	}
+
+	protected dispatch def  boolean isList(SadlSimpleTypeReference typeRef) {
+		typeRef.list
+	}
+
+	protected dispatch def  boolean isList(Void typeRef) {
+		return false
+	}
+
 	protected def isDatatype(SadlTypeReference typeRef) {
 		typeRef instanceof SadlPrimitiveDataType 
 		|| (typeRef != null && typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType])
