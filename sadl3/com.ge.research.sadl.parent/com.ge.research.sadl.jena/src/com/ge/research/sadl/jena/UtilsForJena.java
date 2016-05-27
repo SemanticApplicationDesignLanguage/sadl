@@ -173,150 +173,155 @@ public class UtilsForJena {
         	}
         }
     	if (rnguri != null) {
-	        if (rnguri.contains("float")) {
-	        	if (v instanceof String) {
-	       			v = Double.parseDouble(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Double) {
-	                v = new Float(((Double)v).floatValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Float){
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Integer) {
-	                v = new Float(((Integer)v).floatValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range float";
-	            }
-	        }
-	        else if (rnguri.contains("double")) {
-	        	if (v instanceof String) {
-	       			v = Double.parseDouble(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Double) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Float){
-	                v = new Double(((Float)v).doubleValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Integer) {
-	                v = new Double(((Integer)v).doubleValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range double";
-	            }
-	        }
-	        else if (rnguri.contains("decimal")) {
-	        	if (v instanceof String) {
-	       			v = Double.parseDouble(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Double) {
-	                v= new BigDecimal(((Double)v).doubleValue());
-	            }
-	            else if (v instanceof Float){
-	                v= new BigDecimal(((Float)v).doubleValue());
-	            }
-	            else if (v instanceof Integer) {
-	                v= new BigDecimal(((Integer)v).doubleValue());
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range decimal";
-	            }
-	            val = m.createTypedLiteral(v);
-	        }
-	        else if (rnguri.contains("int")) {
-	        	if (v instanceof String) {
-	        		if (((String)v).trim().contains(".")) {
-	        			errMsg = "Value '" + v.toString() + "' doesn't match range int";
-	        		}
-	        		else {
-	        			v = Integer.parseInt(stripQuotes((String)v));
-	        		}
-	         	}
-	            if (v instanceof Integer) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (errMsg == null) {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range int";
-	            }
-	        }
-	        else if (rnguri.contains("long")) {
-	        	if (v instanceof String) {
-	       			v = Long.parseLong(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Long) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Integer) {
-	            	val = m.createTypedLiteral(new Long(((Integer)v).longValue()));
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range long";
-	            }
-	        }
-	        else if (rnguri.contains("string")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range string";
-	            }
-	        }
-	        else if (rnguri.endsWith("date")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-					DateTime dt = new DateTime((String)v);
-					String xsdFormat = "yyyy-MM-dd";
-					String modifiedV = dt.toString(xsdFormat);
-	                val = m.createTypedLiteral(modifiedV, rnguri);
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
-	            }
-	        }
-	        else if (rnguri.endsWith("dateTime")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-	                if (v != null && ((String) v).length() > 0) {
+    		try {
+		        if (rnguri.contains("float")) {
+		        	if (v instanceof String) {
+		       			v = Double.parseDouble(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Double) {
+		                v = new Float(((Double)v).floatValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Float){
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Integer) {
+		                v = new Float(((Integer)v).floatValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range float";
+		            }
+		        }
+		        else if (rnguri.contains("double")) {
+		        	if (v instanceof String) {
+		       			v = Double.parseDouble(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Double) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Float){
+		                v = new Double(((Float)v).doubleValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Integer) {
+		                v = new Double(((Integer)v).doubleValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range double";
+		            }
+		        }
+		        else if (rnguri.contains("decimal")) {
+		        	if (v instanceof String) {
+		       			v = Double.parseDouble(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Double) {
+		                v= new BigDecimal(((Double)v).doubleValue());
+		            }
+		            else if (v instanceof Float){
+		                v= new BigDecimal(((Float)v).doubleValue());
+		            }
+		            else if (v instanceof Integer) {
+		                v= new BigDecimal(((Integer)v).doubleValue());
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range decimal";
+		            }
+		            val = m.createTypedLiteral(v);
+		        }
+		        else if (rnguri.contains("int")) {
+		        	if (v instanceof String) {
+		        		if (((String)v).trim().contains(".")) {
+		        			errMsg = "Value '" + v.toString() + "' doesn't match range int";
+		        		}
+		        		else {
+		        			v = Integer.parseInt(stripQuotes((String)v));
+		        		}
+		         	}
+		            if (v instanceof Integer) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (errMsg == null) {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range int";
+		            }
+		        }
+		        else if (rnguri.contains("long")) {
+		        	if (v instanceof String) {
+		       			v = Long.parseLong(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Long) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Integer) {
+		            	val = m.createTypedLiteral(new Long(((Integer)v).longValue()));
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range long";
+		            }
+		        }
+		        else if (rnguri.contains("string")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range string";
+		            }
+		        }
+		        else if (rnguri.endsWith("date")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
 						DateTime dt = new DateTime((String)v);
-						String xsdFormat = "yyyy-MM-dd'T'HH:mm:ssZZ";
+						String xsdFormat = "yyyy-MM-dd";
 						String modifiedV = dt.toString(xsdFormat);
 		                val = m.createTypedLiteral(modifiedV, rnguri);
-	                }
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
-	            }
-	        }
-	        else if (rnguri.endsWith("time")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-	                val = m.createTypedLiteral(v, rnguri);
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
-	            }
-	        }
-	        else if (rnguri.endsWith("boolean")) {
-	        	if (v instanceof String) {
-	       			v = Boolean.parseBoolean(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Boolean) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range boolean";
-	            }
-	        }
-	        else {
-	            errMsg = "Unhandled range " + rnguri;
-	        }
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
+		            }
+		        }
+		        else if (rnguri.endsWith("dateTime")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                if (v != null && ((String) v).length() > 0) {
+							DateTime dt = new DateTime((String)v);
+							String xsdFormat = "yyyy-MM-dd'T'HH:mm:ssZZ";
+							String modifiedV = dt.toString(xsdFormat);
+			                val = m.createTypedLiteral(modifiedV, rnguri);
+		                }
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
+		            }
+		        }
+		        else if (rnguri.endsWith("time")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                val = m.createTypedLiteral(v, rnguri);
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
+		            }
+		        }
+		        else if (rnguri.endsWith("boolean")) {
+		        	if (v instanceof String) {
+		       			v = Boolean.parseBoolean(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Boolean) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range boolean";
+		            }
+		        }
+		        else {
+		            errMsg = "Unhandled range " + rnguri;
+		        }
+    		}
+    		catch (Throwable t) {
+    			throw new JenaProcessorException("Unable to convert value '" + v + "' to type '" + rnguri + "'", t);
+    		}
     	}
     	else {
     		errMsg = "Range should not be null.";

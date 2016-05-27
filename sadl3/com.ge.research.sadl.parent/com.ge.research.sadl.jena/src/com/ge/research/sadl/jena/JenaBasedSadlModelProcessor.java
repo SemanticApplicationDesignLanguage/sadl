@@ -2629,12 +2629,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 			else {
-				cls = sadlTypeReferenceToOntResource(type).asClass();
-				if (isList) {
-					try {
-						cls = createListSubclass(null, cls.getURI(), type.eResource());
-					} catch (JenaProcessorException e) {
-						addError(e.getMessage(), type);
+				OntResource or = sadlTypeReferenceToOntResource(type);
+				if (or != null) {
+					cls = or.asClass();
+					if (isList) {
+						try {
+							cls = createListSubclass(null, cls.getURI(), type.eResource());
+						} catch (JenaProcessorException e) {
+							addError(e.getMessage(), type);
+						}
 					}
 				}
 			}
@@ -2796,8 +2799,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, dprop.getRange());
-					inst.addProperty(dprop, lval);
-					logger.debug("added value '" + lval.toString() + "' to property '" + propuri + "' for instance '" + inst.toString() + "'");
+					if (lval != null) {
+						inst.addProperty(dprop, lval);
+						logger.debug("added value '" + lval.toString() + "' to property '" + propuri + "' for instance '" + inst.toString() + "'");
+					}
 				}
 				else {
 					throw new JenaProcessorException("unhandled value type for data property");
@@ -3592,28 +3597,34 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private Literal sadlExplicitValueToLiteral(SadlExplicitValue value, com.hp.hpl.jena.rdf.model.Resource rng) throws JenaProcessorException {
-		if (value instanceof SadlNumberLiteral) {
-			String val = ((SadlNumberLiteral)value).getLiteralNumber();
-			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+		try {
+			if (value instanceof SadlNumberLiteral) {
+				String val = ((SadlNumberLiteral)value).getLiteralNumber();
+				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+			}
+			else if (value instanceof SadlStringLiteral) {
+				String val = ((SadlStringLiteral)value).getLiteralString();
+				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+			}
+			else if (value instanceof SadlBooleanLiteral) {
+				SadlBooleanLiteral val = ((SadlBooleanLiteral)value);
+				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.toString());
+			}
+			else if (value instanceof SadlValueList) {
+				throw new JenaProcessorException("A SADL value list cannot be converted to a Literal");
+			}
+			else if (value instanceof SadlConstantLiteral) {
+				String val = ((SadlConstantLiteral)value).getTerm();
+				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+			}
+			else {
+				throw new JenaProcessorException("Unhandled sadl explicit vaue type: " + value.getClass().getCanonicalName());
+			}
 		}
-		else if (value instanceof SadlStringLiteral) {
-			String val = ((SadlStringLiteral)value).getLiteralString();
-			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+		catch (Throwable t) {
+			addError(t.getMessage(), value);
 		}
-		else if (value instanceof SadlBooleanLiteral) {
-			SadlBooleanLiteral val = ((SadlBooleanLiteral)value);
-			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.toString());
-		}
-		else if (value instanceof SadlValueList) {
-			throw new JenaProcessorException("A SADL value list cannot be converted to a Literal");
-		}
-		else if (value instanceof SadlConstantLiteral) {
-			String val = ((SadlConstantLiteral)value).getTerm();
-			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
-		}
-		else {
-			throw new JenaProcessorException("Unhandled sadl explicit vaue type: " + value.getClass().getCanonicalName());
-		}
+		return null;
 	}
 
 	private boolean valueInObjectTypePropertyRange(OntProperty prop, Individual valInst) throws JenaProcessorException {
