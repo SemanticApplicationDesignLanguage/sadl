@@ -274,8 +274,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlRangeRestriction" eSuperTypes="#//SadlPropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="singleValued" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="list" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lists" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeonly" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="range" eType="#//SadlTypeReference"
         containment="true"/>

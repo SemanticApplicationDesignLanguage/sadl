@@ -161,7 +161,7 @@ SadlPropertyDeclarationInClass returns SadlProperty:
 SadlPropertyRestriction :
     	SadlCondition
     |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
-    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' list?='List'|lists?='Lists') 'of' 'values'|'values') 'of' 'type' ((typeonly='class'|'data') | range=SadlPrimaryTypeReference)
+    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|'values') 'of' 'type' ((typeonly=('class'|'data')) | range=SadlPrimaryTypeReference)
     |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|QNAME]
     |   {SadlIsTransitive} 'is' 'transitive'
     |   {SadlIsSymmetrical} 'is' 'symmetrical'
