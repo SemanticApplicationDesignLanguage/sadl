@@ -173,6 +173,7 @@ public class UtilsForJena {
         	}
         }
     	if (rnguri != null) {
+    		Object vorig = v;
     		try {
 		        if (rnguri.contains("float")) {
 		        	if (v instanceof String) {
@@ -320,7 +321,17 @@ public class UtilsForJena {
 		        }
     		}
     		catch (Throwable t) {
-    			throw new JenaProcessorException("Unable to convert value '" + v + "' to type '" + rnguri + "'", t);
+    			StringBuilder sb = new StringBuilder("Unable to convert value '");
+    			sb.append(v);
+    			if (!v.equals(vorig)) {
+    				sb.append(" (");
+    				sb.append(vorig);
+    				sb.append(")");
+    			}
+    			sb.append(" to type '");
+    			sb.append(rnguri);
+    			sb.append("'");
+    			throw new JenaProcessorException(sb.toString(), t);
     		}
     	}
     	else {
