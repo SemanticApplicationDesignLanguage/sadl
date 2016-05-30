@@ -115,6 +115,9 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 			case ANNOTATION_PROPERTY: {
 				return SadlHighlightingConfiguration.ANNOTATION_PROPERTY_ID
 			}
+			case RDF_PROPERTY: {
+				return SadlHighlightingConfiguration.RDF_PROPERTY_ID
+			}
 			case INSTANCE: {
 				return SadlHighlightingConfiguration.INSTANCE_ID
 			}
