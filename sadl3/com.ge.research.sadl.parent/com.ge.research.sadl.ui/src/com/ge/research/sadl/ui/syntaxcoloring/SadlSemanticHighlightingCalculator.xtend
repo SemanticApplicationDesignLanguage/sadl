@@ -69,9 +69,14 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}
 				SadlResource : {
-					var node = NodeModelUtils.findActualNodeFor(element)
-					var highlightingId = getHighlightingId(v)
-					acceptor.addPosition(node.offset, node.length, highlightingId)
+					var nodes = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME)
+					var highlightingId = switch element {
+						Name case element.isFunction : SadlHighlightingConfiguration.FUNCTION_NAME_ID
+						default : getHighlightingId(v)
+					}
+					val start = nodes.head.offset
+					val end =  nodes.last.offset + nodes.last.length - start
+					acceptor.addPosition(start, end, highlightingId)
 				}
 				SadlPropertyCondition : {
 					var highlightingId = getHighlightingId(v.property)
