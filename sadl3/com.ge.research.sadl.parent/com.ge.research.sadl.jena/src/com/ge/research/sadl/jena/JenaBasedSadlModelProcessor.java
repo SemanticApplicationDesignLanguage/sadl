@@ -2680,6 +2680,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (val != null) {
 				assignInstancePropertyValue(inst, prop, val);
 			}
+			else if (val == null) {
+				throw new JenaProcessorException("no value found");
+			}
 			else {
 				throw new JenaProcessorException("unhandled SadlPropertyInitializer, value is null");
 			}
@@ -2849,6 +2852,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				inst.addProperty(annprop, rsrcval);
 			}
+		}
+		else if (type.equals(OntConceptType.RDF_PROPERTY)) {
+			Property rdfprop = getTheJenaModel().getProperty(propuri);
+			if (rdfprop == null) {
+				addError("RDF property '" + propuri + "' not found in Jena Model", prop);
+			}
+			RDFNode rsrcval;
+			if (val instanceof SadlResource) {
+				String uri = declarationExtensions.getConceptUri((SadlResource) val);
+				 rsrcval = getTheJenaModel().getResource(uri);
+			}
+			else if (val instanceof SadlInstance) {
+				rsrcval = processSadlInstance((SadlInstance) val);
+			}
+			else if (val instanceof SadlExplicitValue) {
+				rsrcval = sadlExplicitValueToLiteral((SadlExplicitValue)val, null);
+			}
+			else {
+				throw new JenaProcessorException("unable to handle rdf property value of type '" + val.getClass().getCanonicalName() + "')");
+			}
+			inst.addProperty(rdfprop, rsrcval);
 		}
 		else if (type.equals(OntConceptType.VARIABLE)) {
 			// a variable for a property type is only valid in a rule or query.
@@ -3618,22 +3642,63 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		try {
 			if (value instanceof SadlNumberLiteral) {
 				String val = ((SadlNumberLiteral)value).getLiteralNumber();
-				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+				if (rng != null) {
+					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+				}
+				else {
+					if (val.contains(".")) {
+						return getTheJenaModel().createTypedLiteral(Double.parseDouble(val));
+					}
+					else {
+						return getTheJenaModel().createTypedLiteral(Integer.parseInt(val));
+					}
+				}
 			}
 			else if (value instanceof SadlStringLiteral) {
 				String val = ((SadlStringLiteral)value).getLiteralString();
-				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+				if (rng != null) {
+					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+				}
+				else {
+					return getTheJenaModel().createTypedLiteral(val);
+				}
 			}
 			else if (value instanceof SadlBooleanLiteral) {
 				SadlBooleanLiteral val = ((SadlBooleanLiteral)value);
-				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.toString());
+				if (rng != null) {
+					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.toString());
+				}
+				else {
+					getTheJenaModel().createTypedLiteral(Boolean.parseBoolean(val.toString()));
+				}
 			}
 			else if (value instanceof SadlValueList) {
 				throw new JenaProcessorException("A SADL value list cannot be converted to a Literal");
 			}
 			else if (value instanceof SadlConstantLiteral) {
 				String val = ((SadlConstantLiteral)value).getTerm();
-				return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+				if (rng != null) {
+					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+				}
+				else {
+					try {
+						int ival = Integer.parseInt(val);
+						return getTheJenaModel().createTypedLiteral(ival);
+					}
+					catch (Exception e) {
+						try {
+							double dval = Double.parseDouble(val);
+							return getTheJenaModel().createTypedLiteral(dval);
+						}
+						catch (Exception e2) {
+							return getTheJenaModel().createTypedLiteral(val);
+						}
+					}
+				}
+			}
+			else if (value instanceof SadlResource) {
+				Node nval = processExpression((SadlResource)value);
+				throw new JenaProcessorException("Unable to convert concept '" + nval.toFullyQualifiedString() + "to a literal");
 			}
 			else {
 				throw new JenaProcessorException("Unhandled sadl explicit vaue type: " + value.getClass().getCanonicalName());
