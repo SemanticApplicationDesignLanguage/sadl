@@ -31,6 +31,7 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 	public static final String DATA_PROPERTY_ID = "dataProperty"
 	public static final String OBJECT_PROPERTY_ID = "objectProperty"
 	public static final String ANNOTATION_PROPERTY_ID = "annotationProperty"
+	public static final String RDF_PROPERTY_ID = "rdfProperty"
 	public static final String RDFDATATYPE_ID = "rdfDataType"
 	public static final String FUNCTION_NAME_ID = "functionName"
 
@@ -43,6 +44,7 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 		acceptor.acceptDefaultHighlighting(DATA_PROPERTY_ID, "Data Property", dataPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(OBJECT_PROPERTY_ID, "Object Property", objectPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(ANNOTATION_PROPERTY_ID, "Annotation Property", annotationPropertyTextStyle())
+		acceptor.acceptDefaultHighlighting(RDF_PROPERTY_ID, "RDF Property", rdfPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(RDFDATATYPE_ID, "RDF Data Type", userDefinedDatatypeTextStyle())
 		acceptor.acceptDefaultHighlighting(FUNCTION_NAME_ID, "Function Name", functionNameTextStyle())
 	}
@@ -105,6 +107,14 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 	def TextStyle annotationPropertyTextStyle() {
 		var TextStyle textStyle = defaultTextStyle().copy()
 		textStyle.setColor(new RGB(0, 128, 0))
+		return textStyle
+	}
+
+	// Did not exist in SADL 1 or SADL 2
+	def TextStyle rdfPropertyTextStyle() {
+		var TextStyle textStyle = defaultTextStyle().copy()
+		textStyle.setColor(new RGB(0, 204, 0))
+		textStyle.setStyle(SWT.BOLD)
 		return textStyle
 	}
 

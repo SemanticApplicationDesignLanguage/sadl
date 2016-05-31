@@ -115,7 +115,6 @@
     <eLiterals name="unsignedByte" value="24" literal="unsignedByte"/>
     <eLiterals name="unsignedInt" value="25" literal="unsignedInt"/>
     <eLiterals name="anySimpleType" value="26" literal="anySimpleType"/>
-    <eLiterals name="data" value="27" literal="data"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlProperty" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameOrRef" eType="#//SadlResource"
@@ -275,8 +274,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlRangeRestriction" eSuperTypes="#//SadlPropertyRestriction">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="singleValued" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="list" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lists" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="typeonly" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="range" eType="#//SadlTypeReference"
         containment="true"/>
   </eClassifiers>
