@@ -87,11 +87,12 @@ public class ResourceManager {
 		URI rsrcuri = someProjectResource.getURI();
 		URI prjuri = null;
 		if (rsrcuri.isPlatform()) {
-			prjuri = rsrcuri.trimSegments(rsrcuri.segmentCount() - 2);
+			prjuri = rsrcuri.trimSegments(rsrcuri.segmentCount() - 2);	// project is second segment
 			if (prjuri != null) {
 				return prjuri;
 			}
 		}
+		// walk up the folder structure until a folder containing .project is found
 //		someProjectResource.getResourceSet().getURIConverter() ???
 		return null;
     }

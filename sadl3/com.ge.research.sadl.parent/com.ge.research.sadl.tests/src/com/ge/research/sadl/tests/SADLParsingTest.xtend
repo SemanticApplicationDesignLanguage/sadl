@@ -103,4 +103,14 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 
+	@Test 
+	def void testPropertyTypeOnly() {
+		'''
+			uri "http://com.ge.research.sadl/proptypeonly". 
+			
+			dtprop is a property with values of type data.
+			objprop is a property with values of type class.
+		'''.assertNoErrors
+	}
+
 }

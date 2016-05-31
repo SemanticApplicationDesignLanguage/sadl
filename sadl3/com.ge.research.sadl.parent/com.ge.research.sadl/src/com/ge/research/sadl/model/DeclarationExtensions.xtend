@@ -17,13 +17,19 @@
  ***********************************************************************/
 package com.ge.research.sadl.model
 
+import com.ge.research.sadl.sADL.EquationStatement
+import com.ge.research.sadl.sADL.ExternalEquationStatement
+import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
-//import com.ge.research.sadl.sADL.SadlDataTypeDeclaration
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlIntersectionType
+import com.ge.research.sadl.sADL.SadlIsAnnotation
+import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
+import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
+import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlRangeRestriction
@@ -32,26 +38,17 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
-import com.google.inject.Inject
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils
-import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
-import org.eclipse.xtext.EcoreUtil2
-import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.sADL.SadlIsAnnotation
-import com.ge.research.sadl.sADL.Name
-import com.ge.research.sadl.sADL.SadlParameterDeclaration
-import com.ge.research.sadl.sADL.ExternalEquationStatement
-import com.ge.research.sadl.sADL.EquationStatement
-import java.util.Set
 import java.util.HashSet
+import java.util.Set
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.resource.XtextResource
 
 class DeclarationExtensions {
 	
-	@Inject OnChangeEvictingCache cache
-	
 	def String getConcreteName(SadlResource it) {
-		cache.get(it->'concreteName', eResource) [
+		val resource = it.eResource as XtextResource
+		val ()=>String nameSupplyer = [
 			val nodes = NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME)
 			val name = nodes.join('')[NodeModelUtils.getTokenText(it)].trim
 			if (name.isNullOrEmpty)
@@ -60,6 +57,9 @@ class DeclarationExtensions {
 				return name.substring(1)
 			return name
 		]
+		if (resource === null)
+			return nameSupplyer.apply
+		return resource.cache.get(it->'concreteName', eResource, nameSupplyer)
 	}
 	
 	def String getConceptUri(SadlResource it) {
@@ -163,6 +163,10 @@ class DeclarationExtensions {
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY] :
 					OntConceptType.ANNOTATION_PROPERTY
 					 
+				SadlClassOrPropertyDeclaration case e.superElement.isList : 
+					if (e.superElement.isDatatype) OntConceptType.DATATYPE_LIST
+					else OntConceptType.CLASS_LIST
+				
 				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype : 
 					OntConceptType.DATATYPE
 					
@@ -172,12 +176,27 @@ class DeclarationExtensions {
 					
 	//			SadlDataTypeDeclaration :
 	//				OntConceptType.DATATYPE
+	
+	//			if it is a SadlProperty and 
+	//				typeonly is class => OntConceptType.CLASS_PROPERTY
+	//				typeonly is "data" => OntConceptType.DATATYPE_PROPERTY
+	//				typeonly is null && range is null => OntConceptType.RDF_PROPERPTY
+	//				conditions below
+					
+				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[typeonly=="class"]: 
+					OntConceptType.CLASS_PROPERTY
+					
+				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[typeonly=="data"]: 
+					OntConceptType.DATATYPE_PROPERTY
 					
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[range.isDatatype]: 
 					OntConceptType.DATATYPE_PROPERTY
-					
-				SadlProperty : 
+
+				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[!range.isDatatype]: 
 					OntConceptType.CLASS_PROPERTY
+
+				SadlProperty : 
+					OntConceptType.RDF_PROPERTY
 					
 				SadlParameterDeclaration :
 					OntConceptType.VARIABLE				
@@ -207,6 +226,22 @@ class DeclarationExtensions {
 		}
 	}
 	
+	protected dispatch def boolean isList(SadlTypeReference typeRef) {
+		return false
+	}
+	
+	protected dispatch def  boolean isList(SadlPrimitiveDataType typeRef) {
+		typeRef.list
+	}
+
+	protected dispatch def  boolean isList(SadlSimpleTypeReference typeRef) {
+		typeRef.list
+	}
+
+	protected dispatch def  boolean isList(Void typeRef) {
+		return false
+	}
+
 	protected def isDatatype(SadlTypeReference typeRef) {
 		typeRef instanceof SadlPrimitiveDataType 
 		|| (typeRef != null && typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType])
