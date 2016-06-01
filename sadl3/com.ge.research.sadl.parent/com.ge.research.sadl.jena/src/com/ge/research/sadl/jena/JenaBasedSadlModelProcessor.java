@@ -300,7 +300,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					sb.append(eqs.get(i).toFullyQualifiedString());
 					sb.append("\n");
 				}
-				fsa.generateFile(lastSeg.appendFileExtension("pl").toString(), sb.toString());
+				fsa.generateFile(lastSeg.appendFileExtension("pl").lastSegment().toString(), sb.toString());
 			}
 			
 			if(sadlBaseModel != null) {
@@ -410,10 +410,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			 modelFolderPathname = file.getRawLocation().toPortableString();
 		}
 		else {
-			modelFolderPathname = v.toFileString();
+			modelFolderPathname = findModelFolderPath(resource.getURI());
+			if(modelFolderPathname == null) {
+				modelFolderPathname = v.toFileString();
+			}
 		}
 		return modelFolderPathname;
 	}
+	
+    private static String findModelFolderPath(URI uri){
+    	File file = new File(uri.path());
+    	if(file != null){
+    		if(file.isDirectory()){
+    			if(file.getAbsolutePath().endsWith(UtilsForJena.OWL_MODELS_FOLDER_NAME)){
+    				return file.getAbsolutePath();
+    			}
+    			
+    			for(File child : file.listFiles()){
+    				if(child.getAbsolutePath().endsWith(UtilsForJena.OWL_MODELS_FOLDER_NAME)){
+    					return child.getAbsolutePath();
+    				}
+    			}
+    			//Didn't find a project file in this directory, check parent
+    			if(file.getParentFile() != null){
+    				return findModelFolderPath(uri.trimSegments(1));
+    			}
+    		}
+    		if(file.isFile() && file.getParentFile() != null){
+    			return findModelFolderPath(uri.trimSegments(1));
+    		}
+    	}
+    	
+    	return null;
+    }
 	
 	private Object getOtherKnowledgeStructure() {
 		if (getEquations() != null) {
