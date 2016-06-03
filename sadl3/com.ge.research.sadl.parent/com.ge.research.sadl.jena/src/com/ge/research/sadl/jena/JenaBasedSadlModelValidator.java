@@ -3,8 +3,10 @@ package com.ge.research.sadl.jena;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
@@ -41,20 +43,25 @@ import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.UnaryExpression;
+import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.IntersectionClass;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
@@ -68,6 +75,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     	private ConceptIdentifier expressionType = null;
     	private ConceptIdentifier typeCheckType = null;
     	private RangeValueType rangeValueType = null;
+    	private List<ConceptName> implicitProperties = null;
     	
     	public TypeCheckInfo(ConceptIdentifier eType) {
     		setExpressionType(eType);
@@ -76,6 +84,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     	public TypeCheckInfo(ConceptIdentifier eType, ConceptIdentifier tcType) {
     		setExpressionType(eType);
     		setTypeCheckType(tcType);
+    	}
+    	
+    	public TypeCheckInfo(ConceptIdentifier eType, ConceptIdentifier tcType, List<ConceptName> impliedProps) {
+    		setExpressionType(eType);
+    		setTypeCheckType(tcType);
+    		if (impliedProps != null) {
+    			if (implicitProperties == null) {
+    				implicitProperties = impliedProps;
+    			}
+    			else {
+    				implicitProperties.addAll(impliedProps);
+    			}
+    		}
     	}
 
 		public ConceptIdentifier getExpressionType() {
@@ -113,6 +134,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			sb.append(typeCheckType.toString());
 			sb.append(")");
 			return sb.toString();
+		}
+		
+		public void addImplicitProperty(ConceptName implicitProp) {
+			if (implicitProp != null) {
+				if (implicitProperties == null) {
+					implicitProperties = new ArrayList<ConceptName>();
+				}
+				if (!implicitProperties.contains(implicitProp)) {
+					implicitProperties.add(implicitProp);
+				}
+			}
+		}
+		
+		public List<ConceptName> getImplicitProperties() {
+			return implicitProperties;
 		}
     }
 	
@@ -219,6 +255,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		} catch (InvalidNameException e) {
 			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", rightExpression);
 			e.printStackTrace();
+		} catch (DontTypeCheckException e) {
+			return true;
 		}
 		return true;
 	}
@@ -265,8 +303,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			stringLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(stringLiteralConceptName, stringLiteralConceptName);
 		}
-		else if(expression instanceof NumberLiteral){
-			BigDecimal value = ((NumberLiteral)expression).getValue();
+		else if(expression instanceof NumberLiteral || expression instanceof Unit){
+			BigDecimal value;
+			if (expression instanceof Unit) {
+				value = ((Unit)expression).getValue().getValue();
+			}
+			else {
+				value = ((NumberLiteral)expression).getValue();
+			}
 			ConceptName numberLiteralConceptName = null;
 			if (value.stripTrailingZeros().scale() <= 0 || value.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0) {
 				numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
@@ -505,6 +549,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getNameProperty(ConceptType.OBJECTPROPERTY, conceptUri, expression);
 		}
 		else if (conceptType.equals(OntConceptType.RDF_PROPERTY)) {
+			TypeCheckInfo rdfpropcheckinfo = getNameProperty(ConceptType.RDFDATATYPE, conceptUri, expression);
+			if (rdfpropcheckinfo != null) {
+				return rdfpropcheckinfo;
+			}
 			throw new DontTypeCheckException();
 		}
 		else if(conceptType.equals(OntConceptType.INSTANCE)){
@@ -550,15 +598,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		ConceptName propConceptName = new ConceptName(conceptUri);
 		propConceptName.setType(propertyType);
-		ExtendedIterator<? extends OntResource> pIterator = property.listRange();
-		if(pIterator.hasNext()){
-			OntResource first = pIterator.next();
-			if(first.getURI() != null){
-// TODO This is a horrible kluge!!! needs to be fixed. AWC 5/11/2016				
-				if (isRangeKlugyDATASubclass(first)) {
-					throw new DontTypeCheckException();
-				}
-				ConceptName rangeConceptName = new ConceptName(first.getURI());
+		return getTypeInfoFromRange(propConceptName, property, expression);
+	}
+
+	private TypeCheckInfo getTypeInfoFromRange(ConceptName propConceptName, Property property,
+			EObject expression) throws DontTypeCheckException {
+		ConceptType propertyType = propConceptName.getType();
+		StmtIterator sitr = theJenaModel.listStatements(property, RDFS.range, (RDFNode)null);
+		if (sitr.hasNext()) {
+			RDFNode first = sitr.next().getObject();
+			if(first.isURIResource()){
+				ConceptName rangeConceptName = new ConceptName(first.asResource().getURI());
 				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 					rangeConceptName.setType(ConceptType.RDFDATATYPE);
 					rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
@@ -566,32 +616,38 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else {
 					rangeConceptName.setType(ConceptType.ONTCLASS);
 				}
-				pIterator.close();
-				return new TypeCheckInfo(propConceptName, rangeConceptName);
+				sitr.close();
+				List<ConceptName> impliedProperties = getImpliedProperties(first.asResource());
+				return new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties);
 			}
 		}
-		
-//		StmtIterator stmtitr = theJenaModel.listStatements(property, RDFS.range, (RDFNode)null);
-//		while (stmtitr.hasNext()) {
-//			RDFNode obj = stmtitr.nextStatement().getObject();
-//			if(obj.isURIResource() && ((Resource)obj).getURI() != null && ((Resource)obj).canAs(OntResource.class)){
-//// TODO This is a horrible kluge!!! needs to be fixed. AWC 5/11/2016				
-//				if (isRangeKlugyDATASubclass(obj.as(OntResource.class))) {
-//					throw new DontTypeCheckException();
-//				}
-//				ConceptName rangeConceptName = new ConceptName(((Resource)obj).getURI());
-//				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
-//					rangeConceptName.setType(ConceptType.RDFDATATYPE);
-//					rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
-//				}
-//				else {
-//					rangeConceptName.setType(ConceptType.ONTCLASS);
-//				}
-//				pIterator.close();
-//				return new TypeCheckInfo(propConceptName, rangeConceptName);
-//			}
-//		}
-//		
+		else {
+			StmtIterator sitr2 = theJenaModel.listStatements(property, RDFS.subPropertyOf, (RDFNode)null);
+			while (sitr2.hasNext()) {
+				RDFNode psuper = sitr2.next().getObject();
+				if (psuper.isLiteral()) {
+					TypeCheckInfo superTCInfo = getNameProperty(propertyType, psuper.asResource().getURI(), expression);
+					if (superTCInfo != null) {
+						return superTCInfo;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private List<ConceptName> getImpliedProperties(Resource first) {
+		StmtIterator sitr = theJenaModel.listStatements(first, theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
+		if (sitr.hasNext()) {
+			List<ConceptName> retlst = new ArrayList<ConceptName>();
+			while (sitr.hasNext()) {
+				RDFNode obj = sitr.nextStatement().getObject();
+				if (obj.isURIResource()) {
+					retlst.add(new ConceptName(obj.asResource().getURI()));
+				}
+			}
+			return retlst;
+		}
 		return null;
 	}
 
@@ -618,7 +674,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	private TypeCheckInfo combineTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
-			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException {
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 			return null;
 		}
@@ -633,8 +689,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
+	/**
+	 * Compare two TypeCheckInfo structures
+	 * @param operations
+	 * @param leftExpression
+	 * @param rightExpression
+	 * @param leftTypeCheckInfo
+	 * @param rightTypeCheckInfo
+	 * @return return true if they pass type check comparison else false
+	 * @throws InvalidNameException
+	 * @throws DontTypeCheckException 
+	 */
 	private boolean compareTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
-			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException {
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? leftTypeCheckInfo.getTypeCheckType(): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? rightTypeCheckInfo.getTypeCheckType() : null; 
 		if (leftConceptIdentifier == null) {
@@ -652,9 +719,40 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return true;
 		}
 		else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+			if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
+				return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
+			}
 			return false;
 		}
 		return true;
+	}
+
+	private boolean compareTypesUsingImpliedProperties(List<String> operations, Expression leftExpression,
+			Expression rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
+		if (leftTypeCheckInfo.getImplicitProperties() != null) {
+			Iterator<ConceptName> litr = leftTypeCheckInfo.getImplicitProperties().iterator();
+			while (litr.hasNext()) {
+				ConceptName cn = litr.next();
+				Property prop = theJenaModel.getProperty(cn.getUri());
+				if (prop.canAs(ObjectProperty.class)) {
+					cn.setType(ConceptType.OBJECTPROPERTY);
+				}
+				else if (prop.canAs(DatatypeProperty.class)) {
+					cn.setType(ConceptType.DATATYPEPROPERTY);
+				}
+				else {
+					cn.setType(ConceptType.RDFPROPERTY);
+				}
+				TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, leftExpression);
+				if (compareTypes(operations, leftExpression, rightExpression, newltci, rightTypeCheckInfo)) {
+					return true;
+				}
+			}
+		}
+		else if (rightTypeCheckInfo.getImplicitProperties() != null) {
+			
+		}
+		return false;
 	}
 
 	private boolean compatibleTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
@@ -677,6 +775,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			
 			if (leftConceptName.equals(rightConceptName)) {
 				return true;
+			}
+			else if (leftConceptName.getType() == null || rightConceptName.getType() == null) {
+				if (rightConceptName.getType() == null && leftConceptName.getType() == null) {
+					return true;
+				}
+				else {
+					return false;
+				}
 			}
 			else if (leftConceptName.getType().equals(ConceptType.RDFDATATYPE) &&
 					  rightConceptName.getType().equals(ConceptType.RDFDATATYPE)) {
