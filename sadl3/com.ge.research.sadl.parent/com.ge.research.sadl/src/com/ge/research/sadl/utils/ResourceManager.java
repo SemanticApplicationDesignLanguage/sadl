@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.framework.Bundle;
 
+import com.ge.research.sadl.reasoner.IConfigurationManager;
+
 public class ResourceManager {
 
     private static final String pluginId = "com.ge.research.sadl.ui";
@@ -43,7 +45,7 @@ public class ResourceManager {
 	public static final String ServicesConf_FN = "ServicesConfig.owl";
 	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
     public static final String OWLFILEEXT = "owl";
-  public static final String OWLFILEEXTWITHPREFIX = ".owl";
+    public static final String OWLFILEEXTWITHPREFIX = ".owl";
     public static final String SADLEXT = "sadl";
     public static final String SADLEXTWITHPREFIX = ".sadl";
 
@@ -143,18 +145,28 @@ public class ResourceManager {
 		return null;
 	}
 
-	public static String getOwlFileExtension() {
-		// TODO Auto-generated method stub
-		return "owl";	// reasonable default?
+	public static String getOwlFileExtension(String format) {
+    	if (format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) || format.equals(IConfigurationManager.RDF_XML_FORMAT)) {
+    		return "owl";
+    	}
+    	else if (format.equals(IConfigurationManager.N3_FORMAT))	{
+    		return "n3";
+    	}
+    	else if (format.equals(IConfigurationManager.N_TRIPLE_FORMAT)) {
+    		return "nt";
+    	}
+    	else {
+    		return "owl";	// reasonable default?
+    	}
 	}
 
-    /**
-     * Method to determine, from preferences, the OWL file format to use
-     * @return -- the file extension, preceded by a period, specified by the format selected in preferences
-     */
-    public static String getOwlFileExtensionWithPrefix() {
-    	return "." + getOwlFileExtension();
-    }
+//    /**
+//     * Method to determine, from preferences, the OWL file format to use
+//     * @return -- the file extension, preceded by a period, specified by the format selected in preferences
+//     */
+//    public static String getOwlFileExtensionWithPrefix() {
+//    	return "." + getOwlFileExtension();
+//    }
 
 	public static boolean copyDefaultsFileToOwlModelsDirectory(String defaultsActual) {
 		// TODO Auto-generated method stub

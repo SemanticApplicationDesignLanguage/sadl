@@ -27,6 +27,7 @@ Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.internal,
  com.ge.research.sadl.ui.labeling,
  com.ge.research.sadl.ui.outline,
+ com.ge.research.sadl.ui.preferences,
  com.ge.research.sadl.ui.processing,
  com.ge.research.sadl.ui.quickfix,
  com.ge.research.sadl.ui.syntaxcoloring

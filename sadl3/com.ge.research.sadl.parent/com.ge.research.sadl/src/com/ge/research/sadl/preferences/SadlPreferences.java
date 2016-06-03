@@ -22,7 +22,8 @@ import org.eclipse.xtext.preferences.PreferenceKey;
 @SuppressWarnings("restriction")
 public class SadlPreferences {
 	
-	public static final PreferenceKey SADL_BASE_URI= new PreferenceKey("baseUri", "");
+	public static final PreferenceKey SADL_BASE_URI= new PreferenceKey("baseUri", "http://sadl.org");
+	public static final PreferenceKey OWL_MODEL_FORMAT = new PreferenceKey("OWL_Format", "RDF/XML-ABBREV");
 	public static final PreferenceKey RDF_XML_FORMAT = new PreferenceKey("RDF/XML", ""); // default
 	public static final PreferenceKey RDF_XML_ABBREV_FORMAT = new PreferenceKey("RDF/XML-ABBREV", "");
 	public static final PreferenceKey N_TRIPLE_FORMAT = new PreferenceKey("N-TRIPLE", "");

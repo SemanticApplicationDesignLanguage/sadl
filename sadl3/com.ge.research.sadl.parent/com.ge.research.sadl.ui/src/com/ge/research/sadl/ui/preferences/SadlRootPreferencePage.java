@@ -47,7 +47,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
     protected void createFieldEditors() {
         addField(new LabelFieldEditor("General SADL Settings", getFieldEditorParent()));
         addField(new StringFieldEditor(SadlPreferences.SADL_BASE_URI.getId(), "Base URI", getFieldEditorParent()));
-        addField(new RadioGroupFieldEditor("OWL_Format", "Saved OWL model format :", 5, 
+        addField(new RadioGroupFieldEditor(SadlPreferences.OWL_MODEL_FORMAT.getId(), "Saved OWL model format :", 5, 
         		new String[][] {
         		{SadlPreferences.RDF_XML_ABBREV_FORMAT.getId(), SadlPreferences.RDF_XML_ABBREV_FORMAT.getId()}, 
         		{SadlPreferences.RDF_XML_FORMAT.getId(), SadlPreferences.RDF_XML_FORMAT.getId()}, 

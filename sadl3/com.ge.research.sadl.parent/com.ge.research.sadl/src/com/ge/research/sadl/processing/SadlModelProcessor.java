@@ -910,6 +910,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (octype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 			return NodeType.DataTypeProperty;
 		}
+		if (octype.equals(OntConceptType.RDF_PROPERTY)) {
+			return NodeType.PropertyNode;
+		}
 		if (octype.equals(OntConceptType.INSTANCE)) {
 			return NodeType.InstanceNode;
 		}

@@ -1573,7 +1573,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			for (Object os: (List<?>)otherStructure) {
 				if (os instanceof Equation) {
 					// add equations
-					System.out.println("Jena translator ready to save equation '" + os.toString() + "'");
+//					System.out.println("Jena translator ready to save equation '" + os.toString() + "'");
 				}
 			}
 			// save eqModel
