@@ -564,17 +564,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			ConceptName instConceptName = new ConceptName(conceptUri);
 			instConceptName.setType(ConceptType.INDIVIDUAL);
-			Resource ontResource = individual.getRDFType(true);
-			if(!ontResource.isURIResource()){
-				//Unhandled condition
-				//TODO
-				ConceptName declarationConceptName = new ConceptName("TODO");
-				return new TypeCheckInfo(declarationConceptName, declarationConceptName);
-			}
-			String uriOfTypeToBeReturned = ontResource.getURI();
-			ConceptName conceptName = new ConceptName(uriOfTypeToBeReturned);
-			conceptName.setType(ConceptType.ONTCLASS);
-			return new TypeCheckInfo(instConceptName, conceptName);
+//			Resource ontResource = individual.getRDFType(true);
+//			if(!ontResource.isURIResource()){
+//				//Unhandled condition
+//				//TODO
+//				ConceptName declarationConceptName = new ConceptName("TODO");
+//				return new TypeCheckInfo(declarationConceptName, declarationConceptName);
+//			}
+//			String uriOfTypeToBeReturned = ontResource.getURI();
+//			ConceptName conceptName = new ConceptName(uriOfTypeToBeReturned);
+//			conceptName.setType(ConceptType.ONTCLASS);
+			return new TypeCheckInfo(instConceptName, instConceptName);
 		}
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
 			return getVariableType(ConceptType.VARIABLE, conceptUri, expression);
@@ -825,19 +825,32 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return true;
 				}
 			}
-			else if ((leftConceptName.getType().equals(ConceptType.INDIVIDUAL) &&
-					rightConceptName.getType().equals(ConceptType.ONTCLASS)) ||
-					(leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
-					rightConceptName.getType().equals(ConceptType.INDIVIDUAL))){
-				if(leftConceptName.getUri().equals(rightConceptName.getUri())){
-					return true;
-				}
+			else if ((leftConceptName.getType().equals(ConceptType.INDIVIDUAL) && rightConceptName.getType().equals(ConceptType.ONTCLASS))) {
+				return instanceBelongsToClass(theJenaModel.getIndividual(leftConceptName.getUri()), theJenaModel.getOntClass(rightConceptName.getUri()));
+			}
+			else if ((leftConceptName.getType().equals(ConceptType.ONTCLASS) && rightConceptName.getType().equals(ConceptType.INDIVIDUAL))){
+				return instanceBelongsToClass(theJenaModel.getIndividual(rightConceptName.getUri()), theJenaModel.getOntClass(leftConceptName.getUri()));
 			}
 		}
 		
 		return false;
 	}
 	
+	private boolean instanceBelongsToClass(Individual individual, OntClass ontClass) {
+		ExtendedIterator<Resource> citr = individual.listRDFTypes(false);
+		while (citr.hasNext()) {
+			Resource cls = citr.next();
+			if (cls.isURIResource() && cls.getURI().equals(ontClass.getURI())) {
+				return true;
+			}
+			else {
+				// this may be a union or intersection class; how should this be handled?
+				// TODO
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * return true if the first argument class is a subclass of the second
 	 * argument class
