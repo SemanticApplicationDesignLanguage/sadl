@@ -2454,7 +2454,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// do nothing
 				return;
 			}
-			if (prop.isObjectProperty()) {
+			if (!prop.isDatatypeProperty()) {
 				// is the new range a subclass of the existing range, or vice versa?
 				if (rngNode.isResource() && rngNode.asResource().canAs(OntClass.class)) {
 					OntClass newRngCls = rngNode.asResource().as(OntClass.class);
@@ -2581,8 +2581,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private OntProperty createObjectPropertyInCurrentModel(OntProperty prop) throws JenaProcessorException {
-//		throw new JenaProcessorException("Creation of copy of object property in current model not yet implemented");
-		return null;
+		return getTheJenaModel().getOntProperty(prop.getURI());
 	}
 
 	private void addError(String msg, EObject context) {
