@@ -621,7 +621,6 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
-	@Ignore
 	@Test def void myPropertyWithListDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
@@ -635,13 +634,12 @@ class SadlModelManagerProviderTest {
 			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
 			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
 			assertTrue(ann.toString().equals("LIST"))
-			var dtprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty2")
+			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
 			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
 			assertTrue(ann2.toString().equals("LIST"))
 		]
 	}
 	
-	@Ignore
 	@Test def void myPropertyWithListsDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
@@ -654,10 +652,10 @@ class SadlModelManagerProviderTest {
 			assertTrue(issues.size == 0)
 			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
 			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
-			assertTrue(ann.toString().equals("LISTS"))
-			var dtprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty2")
+			assertTrue(ann.toString().equals("LIST"))
+			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
 			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
-			assertTrue(ann2.toString().equals("LISTS"))
+			assertTrue(ann2.toString().equals("LIST"))
 		]
 	}
 	

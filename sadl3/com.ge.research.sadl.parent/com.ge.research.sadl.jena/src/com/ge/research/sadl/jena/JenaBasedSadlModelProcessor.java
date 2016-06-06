@@ -2097,10 +2097,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					boolean isList = typeRefIsList(rng);
 					RangeValueType rngValueType = RangeValueType.CLASS_OR_DT;	// default
 					if (rng instanceof SadlPrimitiveDataType) {
-						if (isList) {
-							rngValueType = RangeValueType.LIST;
-							setImportSadlListModel(true);
-						}
 						// this is a DatatypeProperty with explicit range
 						String rngName = ((SadlPrimitiveDataType)rng).getPrimitiveType().getName();
 						RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
@@ -2117,12 +2113,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 					else {
 						// this is an ObjectProperty with explicit range
-						if (rng instanceof SadlSimpleTypeReference) {
-							if (isList) {
-								rngValueType = RangeValueType.LIST;
-								setImportSadlListModel(true);
-							}
-						}
 						OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
 						if (rngRsrc == null) {
 							throw new JenaProcessorException("Range failed to resolve to a class or datatype");
@@ -2420,6 +2410,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private void addPropertyRange(OntProperty prop, RDFNode rngNode, RangeValueType rngValueType, EObject context) throws JenaProcessorException {
 		OntResource existingRange = prop.getRange();
+		if (context instanceof SadlSimpleTypeReference && ((SadlSimpleTypeReference)context).isList()) {
+			rngValueType = RangeValueType.LIST;
+			setImportSadlListModel(true);
+		}
+		else if (context instanceof SadlPrimitiveDataType && ((SadlPrimitiveDataType)context).isList()) {
+			rngValueType = RangeValueType.LIST;
+			setImportSadlListModel(true);
+		}
 		if (existingRange != null) {
 			if (rngNode.equals(existingRange)) {
 				// do nothing
@@ -2428,7 +2426,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (!prop.isDatatypeProperty()) {
 				// is the new range a subclass of the existing range, or vice versa?
 				if (rngNode.isResource() && rngNode.asResource().canAs(OntClass.class)) {
-					OntClass newRngCls = rngNode.asResource().as(OntClass.class);
+					OntClass newRngCls;
+					if (rngValueType.equals(RangeValueType.LIST)) {
+						newRngCls = createListSubclass(null, rngNode.toString(), context.eResource());
+					}
+					else {
+						newRngCls = rngNode.asResource().as(OntClass.class);
+						// TODO this should be removed as soon as translators are updated to new List ontology representation
+						String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
+						AnnotationProperty annprop = getTheJenaModel().createAnnotationProperty(LIST_RANGE_ANNOTATION_PROPERTY);
+						prop.addProperty(annprop, RangeValueType.LIST.toString());
+					}
 					updateObjectPropertyRange(prop, newRngCls, rngValueType, context);
 				}
 				else {
@@ -2441,16 +2449,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		else {
-			prop.addRange(rngNode.asResource());
+			if (rngValueType.equals(RangeValueType.LIST)) {
+				prop.addRange(createListSubclass(null, rngNode.toString(), context.eResource()));
+				// TODO this should be removed as soon as translators are updated to new List ontology representation
+				String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
+				AnnotationProperty annprop = getTheJenaModel().createAnnotationProperty(LIST_RANGE_ANNOTATION_PROPERTY);
+				prop.addProperty(annprop, RangeValueType.LIST.toString());
+			}
+			else {
+				prop.addRange(rngNode.asResource());
+			}
 			if (logger.isDebugEnabled()) {
 				StringBuffer sb = new StringBuffer();
-				if (rngValueType.equals(RangeValueType.LIST)) {
-					sb.append("List of values of type ");
-				}
-				else if (rngValueType.equals(RangeValueType.LISTS)) {
-					sb.append("Lists of values of type ");
-				}
 				sb.append(rngNode.toString());
+				if (rngValueType.equals(RangeValueType.LIST)) {
+					sb.append(" List");
+				}
 				logger.debug("Range '" + sb.toString() + "' given to property '" + prop.toString() + "'");
 			}
 		}
