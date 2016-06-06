@@ -831,11 +831,31 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else if ((leftConceptName.getType().equals(ConceptType.ONTCLASS) && rightConceptName.getType().equals(ConceptType.INDIVIDUAL))){
 				return instanceBelongsToClass(theJenaModel.getIndividual(rightConceptName.getUri()), theJenaModel.getOntClass(leftConceptName.getUri()));
 			}
+			else if ((leftConceptName.getType().equals(ConceptType.INDIVIDUAL) && rightConceptName.getType().equals(ConceptType.INDIVIDUAL))){
+				// TODO Is this the right way to compare for two individuals? 
+				return instancesHaveCommonType(theJenaModel.getIndividual(leftConceptName.getUri()), theJenaModel.getIndividual(rightConceptName.getUri()));
+			}
 		}
-		
 		return false;
 	}
 	
+	private boolean instancesHaveCommonType(Individual individualL, Individual individualR) {
+		ExtendedIterator<Resource> lcitr = individualL.listRDFTypes(true);
+		ExtendedIterator<Resource> rcitr = individualR.listRDFTypes(true);
+		while (lcitr.hasNext()) {
+			Resource lr = lcitr.next();
+			while (rcitr.hasNext()) {
+				Resource rr = rcitr.next();
+				if (lr.equals(rr)) {
+					lcitr.close();
+					rcitr.close();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean instanceBelongsToClass(Individual individual, OntClass ontClass) {
 		ExtendedIterator<Resource> citr = individual.listRDFTypes(false);
 		while (citr.hasNext()) {
