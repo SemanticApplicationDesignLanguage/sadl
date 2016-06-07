@@ -12,6 +12,7 @@ import javax.xml.transform.URIResolver;
 
 import org.eclipse.emf.ecore.EObject;
 
+import com.ge.research.documentation.SadlErrorMessages;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
@@ -274,7 +275,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					leftTypeCheckInfo, rightTypeCheckInfo);
 		}
 		
-		issueAcceptor.addError("This expression cannot be decomposed into a known type", expression);
+		issueAcceptor.addError(SadlErrorMessages.UNKNOWN_TYPE.get("expression", expression.getClass().getCanonicalName()), expression);
 		return null;
 	}
 
@@ -294,7 +295,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (expression instanceof SadlUnionType) {
 			return getType((SadlUnionType)expression);
 		}
-		issueAcceptor.addError("Unexpected type reference type: " + expression.getClass().getCanonicalName(), expression);
+		issueAcceptor.addError(SadlErrorMessages.UNKNOWN_TYPE.get("expression", expression.getClass().getCanonicalName()), expression);
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName);
 	}
@@ -359,7 +360,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else if (cnstval.equals("last element")) {
 			}
 			else {
-				issueAcceptor.addError("Unhandled constant property", expression);
+				issueAcceptor.addError(SadlErrorMessages.UNKNOWN_VALUE.get(cnstval, "Constant Property"), expression);
 			}
 		}
 		
@@ -378,7 +379,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
 		EObject expression = qnm.eContainer();
 		if (conceptUri == null) {
-			issueAcceptor.addError("Unidentified expression", expression);
+			issueAcceptor.addError(SadlErrorMessages.UNIDENTIFIED.get(), expression);
 		}
 		
 		OntConceptType conceptType = declarationExtensions.getOntConceptType(qnm);
@@ -397,7 +398,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			//Direct type to which the instance belongs
 			Individual individual = theJenaModel.getIndividual(conceptUri);
 			if(individual == null){
-				issueAcceptor.addError("Unidentified expression", expression);
+				issueAcceptor.addError(SadlErrorMessages.UNIDENTIFIED.get(), expression);
 				return null;
 			}
 			ConceptName instConceptName = new ConceptName(conceptUri);
@@ -431,7 +432,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
-			issueAcceptor.addError("Unidentified expression", expression);
+			issueAcceptor.addError(SadlErrorMessages.UNIDENTIFIED.get(), expression);
 			return null;
 		}
 		ConceptName propConceptName = new ConceptName(conceptUri);
@@ -506,6 +507,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo combineTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException {
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+			StringBuilder errorMsgBuilder = new StringBuilder();
+			createErrorMessage(errorMsgBuilder, leftTypeCheckInfo, rightTypeCheckInfo);
+			issueAcceptor.addError(errorMsgBuilder.toString(), leftExpression);   //TODO:Should probably be on the parent expression
 			return null;
 		}
 		
@@ -524,11 +528,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? leftTypeCheckInfo.getTypeCheckType(): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? rightTypeCheckInfo.getTypeCheckType() : null; 
 		if (leftConceptIdentifier == null) {
-			issueAcceptor.addError("Type comparison not possible", leftExpression);
 			return false;
 		}
 		else if(rightConceptIdentifier == null){
-			issueAcceptor.addError("Type comparison not possible", rightExpression);
 			return false;
 		}
 		else if (leftConceptIdentifier.toString().equals("None") || rightConceptIdentifier.toString().equals("None") ||

@@ -11,16 +11,15 @@ public class ErrorMessage {
 	public final static String SADL_MSG = "sadl";
 	public final static String REQ_MSG = "req";
 	
-	public ErrorMessage(String msg) {
-		ResourceBundle bundle = ResourceBundle.getBundle(SADL_MSG + "Messages");
+	public ErrorMessage(String msg, String sadlOrReq) {
+		ResourceBundle msgBundle = ResourceBundle.getBundle(sadlOrReq + "Messages");
 		
+		this.msg = msgBundle.getString(msg);
 		try {
-			this.msg = bundle.getString(msg);
+			this.description = msgBundle.getString(msg + ".description");
 		} catch(MissingResourceException e) {
-			bundle = ResourceBundle.getBundle(REQ_MSG + "Messages");
-			this.msg = bundle.getString(msg);
-		} finally {
-			getDescriptionFromBundle(bundle, msg);
+			System.out.println("  WARNING: Description missing for message '" + msg + "'");
+			this.description = "<em>No description provided</em>";
 		}
 	}
 	
@@ -29,21 +28,13 @@ public class ErrorMessage {
 		return m.format(args);
 	}
 	
-	private void getDescriptionFromBundle(ResourceBundle bundle, String msg) {
-		try {
-			this.description = bundle.getString(msg + ".description");
-		} catch(MissingResourceException e) {
-			System.out.println("  WARNING: Description missing for message '" + msg + "'");
-			this.description = "<em>No description provided</em>";
-		}
-	}
-	
 	public String getDescription() {
 		MessageFormat m = new MessageFormat(description);
 		return m.format(null);
 	}
 	
 	public String toString() {
-		return msg.replaceAll("\\{.*?\\}", "<>");
+		//return msg.replaceAll("\\{.*?\\}", "<>");
+		return msg;
 	}
 }

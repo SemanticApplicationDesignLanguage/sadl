@@ -21,7 +21,8 @@
 						<Import-Package>
 						</Import-Package>
 						<Export-Package>
-                            com.ge.research.messages
+                            com.ge.research.messages,
+                            com.ge.research.logger
 						</Export-Package>
 					</instructions>
 				</configuration>

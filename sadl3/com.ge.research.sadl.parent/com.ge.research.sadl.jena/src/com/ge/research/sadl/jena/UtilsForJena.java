@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.InvalidModelInputException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -116,8 +117,9 @@ public class UtilsForJena {
      * @param v
      * @return
      * @throws JenaProcessorException 
+	 * @throws InvalidModelInputException 
      */
-    public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, OntProperty prop, Object v) throws JenaProcessorException {
+    public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, OntProperty prop, Object v) throws JenaProcessorException, InvalidModelInputException {
         Literal val = null;
         String errMsg = null;
         if (prop == null || prop.isAnnotationProperty()) {
@@ -148,12 +150,12 @@ public class UtilsForJena {
         }
         if (errMsg != null) {
         	errMsg += " (Property is '" + prop.getLocalName() + "'.)";
-            throw new JenaProcessorException(errMsg);
+            throw new InvalidModelInputException(errMsg);
         }
         return val;
     }
     
-    public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, String rnguri, Object v) throws JenaProcessorException {
+    public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, String rnguri, Object v) throws JenaProcessorException, InvalidModelInputException {
         Literal val = null;
         String errMsg = null;
         RDFDatatype rdftype = TypeMapper.getInstance().getSafeTypeByName(rnguri);
@@ -322,7 +324,7 @@ public class UtilsForJena {
     		errMsg = "Range should not be null.";
     	}
         if (errMsg != null) {
-            throw new JenaProcessorException(errMsg);
+            throw new InvalidModelInputException(errMsg);
         }
         return val;
     }
@@ -458,7 +460,7 @@ public class UtilsForJena {
 		return false;
 	}
 	
-	public String addMappingToPolicyFile(String content, String publicUri, String altUrl, String globalAlias, String source) throws JenaProcessorException {
+	public String addMappingToPolicyFile(String content, String publicUri, String altUrl, String globalAlias, String source) {
 		// read content into a Model
         Model m = ModelFactory.createDefaultModel();
         m.read(new ByteArrayInputStream(content.getBytes()), null);
@@ -1002,7 +1004,7 @@ public class UtilsForJena {
 	}
 	
 	public OntModel createAndInitializeJenaModel(String policyFilename, OntModelSpec omSpec, boolean loadImports) 
-			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException, InvalidModelInputException {
 		File pf = null;
 		if (policyFilename != null && policyFilename.length() > 0) {
 			pf = new File(policyFilename);

@@ -32,6 +32,7 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.documentation.SadlErrorMessages;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -1166,12 +1167,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 				// it appears that at time of parsing of the rule or query the named concept was not defined but
 				//	was subsequently. Warn user of this apparent error: concepts must be defined before they are 
 				//	used in a rule or query.
+				addError(SadlErrorMessages.UNDEFINED.get(((NamedNode)node).getName(),"concept"));
+				
 				String msg = "The concept '" + ((NamedNode)node).getName() + "' ";
 				if (ruleInTranslation != null) {
 					msg += "in rule '" + ruleInTranslation.getRuleName() + "' ";
 				}
 				msg += " in model '" + getModelName() + "' is used before it is defined. Please define the concept before referencing it in a query or rule.";
-				addError(msg);
 				logger.error(msg);
 			}
 			if (node instanceof RDFTypeNode) {
