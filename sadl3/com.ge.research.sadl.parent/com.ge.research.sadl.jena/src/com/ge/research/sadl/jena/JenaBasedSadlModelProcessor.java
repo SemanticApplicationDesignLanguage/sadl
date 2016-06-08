@@ -231,8 +231,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
 	private static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
 	private static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
-	private static final String SADL_LIST_MODEL_LIST_URI = "http://sadl.org/sadllistmodel#List";
-	private static final String SADL_LIST_MODEL_FIRST_URI = "http://sadl.org/sadllistmodel#first";
+	public static final String SADL_LIST_MODEL_LIST_URI = "http://sadl.org/sadllistmodel#List";
+	public static final String SADL_LIST_MODEL_FIRST_URI = "http://sadl.org/sadllistmodel#first";
 	private static final String SADL_LIST_MODEL_REST_URI = "http://sadl.org/sadllistmodel#rest";
 	private static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = "http://sadl.org/sadllistmodel#lengthRestriction";
 	private static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = "http://sadl.org/sadllistmodel#lengthMinRestriction";
@@ -285,6 +285,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
     	logger.debug("onGenerate called for Resource '" + resource.getURI() + "'");
+//    	System.out.println("onGenerate called for Resource '" + resource.getURI() + "'");
 		// save the model
 		if (getTheJenaModel() == null) {
 			// it always is?
@@ -389,6 +390,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				modelErrorsToOutput(resource, results);
 			}
 		}
+	   	logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
 	}
 	
 	private void updateMappingFile(IFileSystemAccess2 fsa, String filename, String modelUri) {
@@ -755,7 +757,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 		}
-    	logger.debug("JenaBasedSadlModelProcessor saving OntModel for Resource '" + resource.getURI() + "'");
+    	logger.debug("onValidate completed for Resource '" + resource.getURI() + "'");
 		OntModelProvider.attach(model.eResource(), getTheJenaModel());
 	}
 	
@@ -2559,7 +2561,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// there's already a range class specified
 				if (!prop.getNameSpace().equals(getModelNamespace())) {
 					// this is changing the range of a property defined in a different model
-					if (classIsSubclassOf((OntClass) rangeCls, existingRange, true)) {
+					if (classIsSubclassOf((OntClass) rangeCls, existingRange, true, null)) {
 						addWarning("The range is a subclass of the range of property '" + prop.getURI() + "' which is defined in an imported model; perhaps you mean an 'only has values of type' restricion?", context);						
 					}
 					else {
@@ -2619,10 +2621,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private OntResource addClassToUnionClass(OntResource existingCls,
 			OntResource cls) throws JenaProcessorException {
 		if (existingCls != null && !existingCls.equals(cls)) {
-			if (existingCls.canAs(OntClass.class) && classIsSubclassOf(existingCls.as(OntClass.class), cls, true)) {
+			if (existingCls.canAs(OntClass.class) && classIsSubclassOf(existingCls.as(OntClass.class), cls, true, null)) {
 				return cls;
 			}
-			else if (cls.canAs(OntClass.class) && classIsSubclassOf(cls.as(OntClass.class), existingCls, true)) {
+			else if (cls.canAs(OntClass.class) && classIsSubclassOf(cls.as(OntClass.class), existingCls, true, null)) {
 				return existingCls;
 			}
 			else {
@@ -4052,13 +4054,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					OntResource or = m.getOntResource(r);
 					if (or.isURIResource()) {
 						OntClass oc = m.getOntClass(or.getURI());
-						if (classIsSubclassOf(oc, cls, true)) {
+						if (classIsSubclassOf(oc, cls, true, null)) {
 							eitr.close();
 							return true;
 						}
 					}
 					else if (or.canAs(OntClass.class)) {
-						if (classIsSubclassOf(or.as(OntClass.class), cls, true)) {
+						if (classIsSubclassOf(or.as(OntClass.class), cls, true, null)) {
 							eitr.close();
 							return true;
 						}
@@ -4077,13 +4079,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	 * @return
 	 * @throws JenaProcessorException 
 	 */
-	private boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) throws JenaProcessorException {
+	protected static boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall, List<OntResource> previousClasses) throws JenaProcessorException {
 		if (subcls == null || cls == null) {
 			return false;
 		}
 		if (cls.isURIResource() && subcls.isURIResource()
 				&& cls.getURI().equals(subcls.getURI())) {
 			return true;
+		}
+		if (previousClasses == null) {
+			previousClasses = new ArrayList<OntResource>();
+			previousClasses.add(cls);
 		}
 		if (cls.isAnon()) {
 			if (cls.canAs(OntClass.class)) {
@@ -4095,7 +4101,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								.listOperands();
 						while (eitr.hasNext()) {
 							OntClass uclsmember = eitr.next();
-							if (classIsSubclassOf(subcls, uclsmember, false)) {
+							previousClasses = checkPreviousClassList(previousClasses, uclsmember);
+							if (classIsSubclassOf(subcls, uclsmember, false, previousClasses)) {
 								eitr.close();
 								return true;
 							}
@@ -4117,7 +4124,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						return true;
 					}
 					else {
-						if (classIsSubclassOf(subcls, subClsOfCls, false)) {
+						previousClasses = checkPreviousClassList(previousClasses, subClsOfCls);
+						if (classIsSubclassOf(subcls, subClsOfCls, false, previousClasses)) {
 							eitr.close();
 							return true;
 						}
@@ -4135,11 +4143,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						ExtendedIterator<? extends OntClass> eitr = icls.listOperands();
 						while (eitr.hasNext()) {
 							OntClass iclsmember = eitr.next();
-							if (classIsSubclassOf(cls.as(OntClass.class), iclsmember, false)) {
+							previousClasses = checkPreviousClassList(previousClasses, iclsmember);
+							if (classIsSubclassOf(cls.as(OntClass.class), iclsmember, false, previousClasses)) {
 								eitr.close();
 								return true;
 							}
 						}
+					}
+					catch (JenaProcessorException e) {
+						throw e;
 					}
 					catch (Exception e) {
 						logger.error("Unexpected error during deep validation: apparent Intersection Class does not return operands.");
@@ -4152,13 +4164,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				ExtendedIterator<OntClass> eqitr = cls.as(OntClass.class).listEquivalentClasses();
 				while (eqitr.hasNext()) {
 					OntClass eqcls = eqitr.next();
-					if (classIsSubclassOf(subcls, eqcls, false)) {
+					previousClasses = checkPreviousClassList(previousClasses, eqcls);
+					if (classIsSubclassOf(subcls, eqcls, false, previousClasses)) {
 						return true;
 					}
 				}
 			}
 
-		} catch (Throwable t) {
+		} 
+		catch (JenaProcessorException e) {
+			throw e;
+		}
+		catch (Throwable t) {
 			t.printStackTrace();
 			logger.debug("Error in classIsSubclassOf: " + t.getMessage());
 			throw new JenaProcessorException(t.getMessage(), t);
@@ -4166,6 +4183,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 
+	private static List<OntResource> checkPreviousClassList(List<OntResource> previousClasses, OntClass cls) throws JenaProcessorException {
+		if (previousClasses.contains(cls)) {
+			StringBuilder msg = new StringBuilder("Cycle encountered while checking subclasses of ");
+			msg.append(previousClasses.get(0).toString());
+			throw new JenaProcessorException(msg.toString());
+		}
+		previousClasses.add(cls);
+		return previousClasses;
+	}
+	
 	private boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
 		ExtendedIterator<OntClass> eitr = subcls.listSuperClasses();
 		try {
@@ -4183,7 +4210,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			eitr = cls.listSuperClasses();
 			while (eitr.hasNext()) {
 				OntClass equivCls = eitr.next();
-				if (classIsSubclassOf(subcls, equivCls, false)) {
+				if (classIsSubclassOf(subcls, equivCls, false, null)) {
 					eitr.close();
 					return true;
 				}
@@ -4496,33 +4523,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		sb.append(" 	described by unit with values of type string.\n");
 		return sb.toString();
 	}
-	
-//	static public String getSadlImplicitModel() {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("<rdf:RDF\n");
-//		sb.append("	    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
-//		sb.append("	    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n");
-//		sb.append("	    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
-//		sb.append("	    xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel#\"\n");
-//		sb.append("	    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
-//		sb.append("	    xml:base=\"http://sadl.org/sadlimplicitmodel\">\n");
-//		sb.append("	  <owl:Ontology rdf:about=\"\">\n");
-//		sb.append("	    <rdfs:comment xml:lang=\"en\">Model of implicit concepts for SADL. These concepts can be used without importing.</rdfs:comment>\n");
-//		sb.append("	  </owl:Ontology>\n");
-//		sb.append("	  <owl:AnnotationProperty rdf:ID=\"impliedProperty\"/>\n");
-//		sb.append("	  <owl:Class rdf:ID=\"Event\"/>\n");
-//		sb.append("	  <owl:Class rdf:ID=\"UnitedQuantity\"/>\n");
-//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"unit\">\n");
-//		sb.append("	  <rdfs:domain rdf:resource=\"#UnitedQuantity\"/>\n");
-//		sb.append("	  <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-//		sb.append("	  </owl:DatatypeProperty>\n");
-//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"value\">\n");
-//		sb.append("	  <rdfs:domain rdf:resource=\"#UnitedQuantity\"/>\n");
-//		sb.append("	  <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#decimal\"/>\n");
-//		sb.append("	  </owl:DatatypeProperty>\n");
-//		sb.append("</rdf:RDF>\n");
-//		return sb.toString();
-//	}
 	
 	static public String getSadlBaseModel() {
 		StringBuilder sb = new StringBuilder();
