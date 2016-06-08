@@ -665,7 +665,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 										Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
 										eitr.close();
 										if (avf.isURIResource()) {
-											List<ConceptName> impliedProperties = getImpliedProperties(first.asResource());
+											List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
 											ConceptName rangeConceptName = new ConceptName(avf.getURI());
 											if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 												rangeConceptName.setType(ConceptType.RDFDATATYPE);

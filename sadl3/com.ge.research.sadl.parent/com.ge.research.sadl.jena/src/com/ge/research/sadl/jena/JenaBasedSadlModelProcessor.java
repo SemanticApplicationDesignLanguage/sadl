@@ -4495,33 +4495,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return sb.toString();
 	}
 	
-//	static public String getSadlImplicitModel() {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("<rdf:RDF\n");
-//		sb.append("	    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
-//		sb.append("	    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n");
-//		sb.append("	    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
-//		sb.append("	    xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel#\"\n");
-//		sb.append("	    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
-//		sb.append("	    xml:base=\"http://sadl.org/sadlimplicitmodel\">\n");
-//		sb.append("	  <owl:Ontology rdf:about=\"\">\n");
-//		sb.append("	    <rdfs:comment xml:lang=\"en\">Model of implicit concepts for SADL. These concepts can be used without importing.</rdfs:comment>\n");
-//		sb.append("	  </owl:Ontology>\n");
-//		sb.append("	  <owl:AnnotationProperty rdf:ID=\"impliedProperty\"/>\n");
-//		sb.append("	  <owl:Class rdf:ID=\"Event\"/>\n");
-//		sb.append("	  <owl:Class rdf:ID=\"UnitedQuantity\"/>\n");
-//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"unit\">\n");
-//		sb.append("	  <rdfs:domain rdf:resource=\"#UnitedQuantity\"/>\n");
-//		sb.append("	  <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-//		sb.append("	  </owl:DatatypeProperty>\n");
-//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"value\">\n");
-//		sb.append("	  <rdfs:domain rdf:resource=\"#UnitedQuantity\"/>\n");
-//		sb.append("	  <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#decimal\"/>\n");
-//		sb.append("	  </owl:DatatypeProperty>\n");
-//		sb.append("</rdf:RDF>\n");
-//		return sb.toString();
-//	}
-	
 	static public String getSadlBaseModel() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<rdf:RDF\n");
