@@ -265,6 +265,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private List<Rule> rules = null;
 	private List<Equation> equations = null;
 	
+	int modelErrorCount = 0;
+	int modelWarningCount = 0;
+	int modelInfoCount = 0;
+
+	
 	public static String[] reservedFileNames = {"SadlBaseModel.sadl", "SadlListModel.sadl", "RulePatterns.sadl", "RulePatternsData.sadl", "SadlServicesConfigurationConcepts.sadl", "ServicesConfig.sadl"};
 	public static String[] reservedModelURIs = {SADL_BASE_MODEL_URI,SADL_LIST_MODEL_URI,
 			SADL_RULE_PATTERN_URI, SADL_RULE_PATTERN_DATA_URI,SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,SADL_SERIVCES_CONFIGURATION_URI};
