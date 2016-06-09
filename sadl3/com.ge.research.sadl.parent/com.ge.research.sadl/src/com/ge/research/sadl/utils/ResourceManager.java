@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -99,7 +100,7 @@ public class ResourceManager {
     }
     
     private static URI findProjectUriByTrimming(URI uri){
-    	File file = new File(uri.path());
+    	File file = new File(uri.toFileString());
     	if(file != null){
     		if(file.isDirectory()){
     			for(String child : file.list()){
