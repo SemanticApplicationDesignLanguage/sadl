@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.xtext,
  com.ge.research.jena;bundle-version="3.0.0"
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.ge.research.sadl,
+Export-Package: com.ge.research.documentation,
+ com.ge.research.sadl,
  com.ge.research.sadl.builder,
  com.ge.research.sadl.generator,
  com.ge.research.sadl.model,

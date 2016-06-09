@@ -1689,7 +1689,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			logger.debug("Instance '" + rsrc.toString() + "' declared same as '" + smas.toString() + "'");
 		}
 		else {
-			throw new InvalidModelInputException("Unexpected concept type for same as statement: " + sameAsType.toString());
+			throw new InvalidModelInputException(SadlErrorMessages.UNKNOWN_TYPE.get("concept type", sameAsType.toString()));
 		}
 	}
 
@@ -1918,17 +1918,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						retOntProp = null;
 					}
 					else {
-						throw new JenaProcessorException("Invalid property type: " + propType.toString());
+						throw new JenaProcessorException(SadlErrorMessages.INVALID_PROP_TYPE.get(propType.toString()));
 					}
 				}
 				else {
-					throw new InvalidModelInputException("Unable to convert concept being restricted (" + subject.toString() + ") to an OntClass.");
+					throw new InvalidModelInputException(SadlErrorMessages.UNKNOWN_VALUE.get(subject.toString(), "OntClass"));
 				}
 			}
 			else if (spitr.hasNext()) {
 				SadlPropertyRestriction spr2 = spitr.next();
 				if (spitr.hasNext()) {
-					throw new InvalidModelInputException("Unexpected SadlProperty has more than 2 restrictions");
+					throw new InvalidModelInputException(SadlErrorMessages.PROPERTY_RESTRICTIONS.get());
 				}
 				if (spr1 instanceof SadlTypeAssociation && spr2 instanceof SadlRangeRestriction) {
 					// this is case 3
@@ -2008,11 +2008,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							retOntProp = prop;
 						}
 						else {
-							throw new JenaProcessorException("Invalid property type: " + propType.toString());
+							throw new JenaProcessorException(SadlErrorMessages.INVALID_PROP_TYPE.get(propType.toString()));
 						}
 					}
 					else {
-						throw new InvalidModelInputException("Unable to convert concept being restricted (" + domainrsrc.toString() + ") to an OntClass.");
+						throw new InvalidModelInputException(SadlErrorMessages.UNKNOWN_VALUE.get(domainrsrc.toString(), "OntClass"));
 					}
 				}
 			}
@@ -2152,7 +2152,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					updateObjectPropertyRange(prop, newRngCls, rngValueType, context);
 				}
 				else {
-					throw new InvalidModelInputException("Unable to convert object property range to a class");
+					throw new JenaProcessorException("Unable to convert object property range to a class");
 				}
 			}
 			else {
@@ -2831,7 +2831,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					// carry on: RDFNode list from nested union
 				}
 				else {
-					throw new InvalidModelInputException("Union member of unsupported type: " + lftObj.getClass().getCanonicalName());
+					throw new InvalidModelInputException(SadlErrorMessages.INVALID_MEMBER_TYPE.get("Union", lftObj.getClass().getCanonicalName()));
 				}
 			}
 			SadlTypeReference rht = ((SadlUnionType)sadlTypeRef).getRight();
@@ -2847,7 +2847,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					// carry on: RDFNode list from nested union
 				}
 				else {
-					throw new InvalidModelInputException("Union member of unsupported type: " + rhtObj != null ? rhtObj.getClass().getCanonicalName() : "null");
+					throw new InvalidModelInputException(SadlErrorMessages.INVALID_MEMBER_TYPE.get("Union", rhtObj != null ? rhtObj.getClass().getCanonicalName() : "null"));
 				}
 			}
 			if (lftNode instanceof OntResource && rhtNode instanceof OntResource) {
@@ -2869,7 +2869,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				return rdfdatatypelist;
 			}
 			else {
-				throw new InvalidModelInputException("Left and right sides of union are of incompatible types: " + lftNode.toString() + " and " + rhtNode.toString());
+				throw new InvalidModelInputException(SadlErrorMessages.INCOMPATIBLE_MEMBER_TYPES.get("Union", lftNode.toString(), rhtNode.toString()));
 			}
 		}
 		else if (sadlTypeRef instanceof SadlIntersectionType) {
@@ -2884,12 +2884,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					lftNode = (RDFNode) lftObj;
 				}
 				else {
-					throw new InvalidModelInputException("Intersection member of unsupported type: " + lftObj.getClass().getCanonicalName());
+					throw new InvalidModelInputException(SadlErrorMessages.INVALID_MEMBER_TYPE.get("Intersection", lftObj.getClass().getCanonicalName()));
 				}
 			}
 			SadlTypeReference rht = ((SadlIntersectionType)sadlTypeRef).getRight();
 			if (rht == null) {
-				throw new InvalidModelInputException("No right-hand side to intersection");
+				throw new InvalidModelInputException(SadlErrorMessages.MISSING.get("Intersection", "right-hand side"));
 			}
 			Object rhtObj = sadlTypeReferenceToObject(rht);
 			if (rhtObj instanceof OntResource) {
@@ -2900,7 +2900,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					rhtNode = (RDFNode) rhtObj;
 				}
 				else {
-					throw new InvalidModelInputException("Intersection member of unsupported type: " + rhtObj.getClass().getCanonicalName());
+					throw new InvalidModelInputException(SadlErrorMessages.INVALID_MEMBER_TYPE.get("Intersection", lftObj.getClass().getCanonicalName()));
 				}
 			}
 			if (lftNode instanceof OntResource && rhtNode instanceof OntResource) {
@@ -2914,7 +2914,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				return rdfdatatypelist;
 			}
 			else {
-				throw new InvalidModelInputException("Left and right sides of union are of incompatible types: " + lftNode.toString() + " and " + rhtNode.toString());
+				throw new InvalidModelInputException(SadlErrorMessages.INCOMPATIBLE_MEMBER_TYPES.get("Intersection", lftNode.toString(), rhtNode.toString()));
 			}
 		}
 		return rsrc;
@@ -2948,7 +2948,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
 		else if (typeStr.equals("data")) onDatatype = null;
 		else {
-			throw new InvalidModelInputException("Unexpected primitive data type: " + typeStr);
+			throw new InvalidModelInputException(SadlErrorMessages.UNKNOWN_TYPE.get("primitive", typeStr));
 		}
 		if (newDatatypeUri == null) {
 			return onDatatype;
@@ -3084,7 +3084,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							retval =  hvr;
 						}
 						else {
-							throw new InvalidModelInputException("Value '" + valInst.getURI() + "' not in range of object property '" + prop.getURI() + "'");
+							throw new InvalidModelInputException(SadlErrorMessages.NOT_IN_RANGE.get(valInst.getURI(), prop.getURI()));
 						}
 					}
 					else {
@@ -3103,7 +3103,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					retval =  hvr;
 				}	
 				else {
-					throw new InvalidModelInputException("Value '" + val.getLexicalForm() + "' not in range of datatype property '" + prop.getURI() + "'");
+					throw new InvalidModelInputException(SadlErrorMessages.NOT_IN_RANGE.get(val.getLexicalForm(), prop.getURI()));
 				}
 			}
 			else {
@@ -3200,7 +3200,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val.toString());
 		}
 		else if (value instanceof SadlValueList) {
-			throw new InvalidModelInputException("A SADL value list cannot be converted to a Literal");
+			throw new InvalidModelInputException(SadlErrorMessages.CANNOT_CONVERT.get("value list", "literal"));
 		}
 		else if (value instanceof SadlConstantLiteral) {
 			String val = ((SadlConstantLiteral)value).getTerm();

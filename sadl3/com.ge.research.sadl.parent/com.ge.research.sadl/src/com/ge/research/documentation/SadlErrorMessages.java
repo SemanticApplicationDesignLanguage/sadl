@@ -24,4 +24,13 @@ public final class SadlErrorMessages {
 	public static final ErrorMessage MISSING = new ErrorMessage("missing", ErrorMessage.SADL_MSG);
 	public static final ErrorMessage CANNOT_ASSIGN_EXISTING = new ErrorMessage("cannot_assign_existing", ErrorMessage.SADL_MSG);
 	public static final ErrorMessage UNIDENTIFIED = new ErrorMessage("unidentified", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage INVALID_PROP_TYPE = new ErrorMessage("invalid_prop_type", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage PROPERTY_RESTRICTIONS = new ErrorMessage("property_restrictions", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage INVALID_MEMBER_TYPE = new ErrorMessage("invalid_member_type", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage INCOMPATIBLE_MEMBER_TYPES = new ErrorMessage("incompatible_member_types", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage NOT_IN_RANGE = new ErrorMessage("not_in_range", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage CANNOT_CONVERT = new ErrorMessage("cannot_convert", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage INCOMPATIBLE_RANGE = new ErrorMessage("incompatible_range", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage UNHANDLED = new ErrorMessage("unhandled", ErrorMessage.SADL_MSG);
+	public static final ErrorMessage INVALID_NULL = new ErrorMessage("invalid_null", ErrorMessage.SADL_MSG);
 }

@@ -43,6 +43,7 @@ import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.documentation.SadlErrorMessages;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidModelInputException;
@@ -129,7 +130,7 @@ public class UtilsForJena {
         OntResource rng = prop.getRange();
         String rnguri = rng != null ? rng.getURI() : null;
         if (rng == null) {
-            errMsg = "Range not given.";
+            errMsg = SadlErrorMessages.INVALID_NULL.get("Range");
         }
         else if (rng.isAnon()) {
             // this is a complex range--needs work. Try to do something with it....
@@ -141,7 +142,7 @@ public class UtilsForJena {
             else {
                 val = m.createTypedLiteral(v);
                 if (val == null) {
-                    errMsg = "Range is an unsupported complex type, failed to create a Literal value for '" + v.toString() + "'.";
+                    errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "Literal");
                 }
             }
         }
@@ -191,7 +192,7 @@ public class UtilsForJena {
 	                val = m.createTypedLiteral(v);
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range float";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "float");
 	            }
 	        }
 	        else if (rnguri.contains("double")) {
@@ -210,7 +211,7 @@ public class UtilsForJena {
 	                val = m.createTypedLiteral(v);
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range double";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "double");
 	            }
 	        }
 	        else if (rnguri.contains("decimal")) {
@@ -227,14 +228,14 @@ public class UtilsForJena {
 	                v= new BigDecimal(((Integer)v).doubleValue());
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range decimal";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "decimal");
 	            }
 	            val = m.createTypedLiteral(v);
 	        }
 	        else if (rnguri.contains("int")) {
 	        	if (v instanceof String) {
 	        		if (((String)v).trim().contains(".")) {
-	        			errMsg = "Value '" + v.toString() + "' doesn't match range int";
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "int");
 	        		}
 	        		else {
 	        			v = Integer.parseInt(stripQuotes((String)v));
@@ -244,7 +245,7 @@ public class UtilsForJena {
 	                val = m.createTypedLiteral(v);
 	            }
 	            else if (errMsg == null) {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range int";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "int");
 	            }
 	        }
 	        else if (rnguri.contains("long")) {
@@ -258,7 +259,7 @@ public class UtilsForJena {
 	            	val = m.createTypedLiteral(new Long(((Integer)v).longValue()));
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range long";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "long");
 	            }
 	        }
 	        else if (rnguri.contains("string")) {
@@ -267,7 +268,7 @@ public class UtilsForJena {
 	                val = m.createTypedLiteral(v);
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range string";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "string");
 	            }
 	        }
 	        else if (rnguri.endsWith("date")) {
@@ -279,7 +280,7 @@ public class UtilsForJena {
 	                val = m.createTypedLiteral(modifiedV, rnguri);
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "date");
 	            }
 	        }
 	        else if (rnguri.endsWith("dateTime")) {
@@ -293,7 +294,7 @@ public class UtilsForJena {
 	                }
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "dateTime");
 	            }
 	        }
 	        else if (rnguri.endsWith("time")) {
@@ -302,7 +303,7 @@ public class UtilsForJena {
 	                val = m.createTypedLiteral(v, rnguri);
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "time");
 	            }
 	        }
 	        else if (rnguri.endsWith("boolean")) {
@@ -313,15 +314,15 @@ public class UtilsForJena {
 	                val = m.createTypedLiteral(v);
 	            }
 	            else {
-	                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range boolean";
+	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "boolean");
 	            }
 	        }
 	        else {
-	            errMsg = "Unhandled range " + rnguri;
+	            errMsg = SadlErrorMessages.UNHANDLED.get("range", rnguri);
 	        }
     	}
     	else {
-    		errMsg = "Range should not be null.";
+    		errMsg = SadlErrorMessages.INVALID_NULL.get("Range");
     	}
         if (errMsg != null) {
             throw new InvalidModelInputException(errMsg);
