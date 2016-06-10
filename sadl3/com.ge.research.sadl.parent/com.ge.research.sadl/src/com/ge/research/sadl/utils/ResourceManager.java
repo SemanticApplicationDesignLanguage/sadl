@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -90,13 +91,34 @@ public class ResourceManager {
 		URI prjuri = null;
 		if (rsrcuri.isPlatform()) {
 			prjuri = rsrcuri.trimSegments(rsrcuri.segmentCount() - 2);	// project is second segment
-			if (prjuri != null) {
-				return prjuri;
-			}
 		}
-		// walk up the folder structure until a folder containing .project is found
-//		someProjectResource.getResourceSet().getURIConverter() ???
-		return null;
+		else{
+			//Added to handle automation, not platform
+			prjuri = findProjectUriByTrimming(rsrcuri);
+		}
+		return prjuri;
+    }
+    
+    private static URI findProjectUriByTrimming(URI uri){
+    	File file = new File(uri.toFileString());
+    	if(file != null){
+    		if(file.isDirectory()){
+    			for(String child : file.list()){
+    				if(child.endsWith(".project")){
+    					return uri;
+    				}
+    			}
+    			//Didn't find a project file in this directory, check parent
+    			if(file.getParentFile() != null){
+    				return findProjectUriByTrimming(uri.trimSegments(1));
+    			}
+    		}
+    		if(file.isFile() && file.getParentFile() != null){
+    			return findProjectUriByTrimming(uri.trimSegments(1));
+    		}
+    	}
+    	
+    	return null;
     }
     
 	public static URI validateAndReturnOwlUrlOfSadlUri(URI createFileURI) {
