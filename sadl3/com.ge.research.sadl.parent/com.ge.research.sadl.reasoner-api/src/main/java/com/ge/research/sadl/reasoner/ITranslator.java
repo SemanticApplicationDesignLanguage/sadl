@@ -176,7 +176,7 @@ public interface ITranslator {
 	 * @return
 	 * @throws InvalidNameException
 	 */
-//	public String prepareQuery(OntModel model, String queryStr) throws InvalidNameException;
+	public String prepareQuery(OntModel model, String queryStr) throws InvalidNameException;
 	
 	/**
 	 * Method to explore translator configuration options to discover those
@@ -192,8 +192,8 @@ public interface ITranslator {
 	 * @throws ConfigurationException 
 	 * @throws TranslationException 
 	 */
-//	public List<ConfigurationItem> discoverOptimalConfiguration(String translationFolder, String modelName, 
-//			IConfigurationManager configMgr, List<Query> queries) throws FunctionNotSupportedException, ConfigurationException, TranslationException;
+	public List<ConfigurationItem> discoverOptimalConfiguration(String translationFolder, String modelName, 
+			IConfigurationManager configMgr, List<Query> queries) throws FunctionNotSupportedException, ConfigurationException, TranslationException;
 	
 	/**
 	 * Method to save a set of rules to a file
@@ -204,7 +204,7 @@ public interface ITranslator {
 	 * @return
 	 * @throws TranslationException
 	 */
-//	public String translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName) throws TranslationException;
+	public String translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName) throws TranslationException;
 	
 	/**
 	 * Method to validate a rule per the requirements of a specific translator

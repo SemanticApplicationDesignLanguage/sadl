@@ -70,6 +70,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
@@ -504,7 +505,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			format = configurationMgr.getModelGetter().getFormat();
 			if (!format.equals(IConfigurationManager.JENA_TDB)) {
 				String ext = tbox.substring(tbox.lastIndexOf('.'));
-				format = "RDF/XML-ABBREV";	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
+				format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
 				if (ext.equalsIgnoreCase(".n3")) {
 					format = "N3";
 				}
@@ -2540,7 +2541,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			else {
 				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
 			}
-			String format = "RDF/XML-ABBREV";	
+			String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;	
 		    FileOutputStream fps = new FileOutputStream(filename);
 	        RDFWriter rdfw = m.getWriter(format);
 	        rdfw.write(m, fps, modelname);
@@ -2671,7 +2672,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
 				if (translator != null) {
 					translator.setConfigurationManager(configurationMgr);
-//					query = translator.prepareQuery(model, query);
+					query = translator.prepareQuery(model, query);
 					if (collectTimingInfo) {
 						long t2 = System.currentTimeMillis();
 						rt.setMilliseconds(t2 - t1);

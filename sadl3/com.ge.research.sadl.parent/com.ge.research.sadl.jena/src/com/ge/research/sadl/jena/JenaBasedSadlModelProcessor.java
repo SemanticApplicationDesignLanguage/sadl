@@ -221,31 +221,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private static final String SADL_BASE_MODEL_FILENAME = "SadlBaseModel";
 	private static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
 	private static final String SADL_BASE_MODEL_PREFIX = "sadlbasemodel";
-	private static final String SADL_BASE_MODEL_EQUATION_URI = "http://sadl.org/sadlbasemodel#Equation";
-	private static final String SADL_BASE_MODEL_EXTERNAL_URI = "http://sadl.org/sadlbasemodel#ExternalEquation";
-	private static final String SADL_BASE_MODEL_EQ_EXPRESSION_URI = "http://sadl.org/sadlbasemodel#expression";
-	private static final String SADL_BASE_MODEL_EXTERNALURI_URI = "http://sadl.org/sadlbasemodel#externalURI";
+	private static final String SADL_BASE_MODEL_EQUATION_URI = SADL_BASE_MODEL_URI + "#Equation";
+	private static final String SADL_BASE_MODEL_EXTERNAL_URI = SADL_BASE_MODEL_URI + "#ExternalEquation";
+	private static final String SADL_BASE_MODEL_EQ_EXPRESSION_URI = SADL_BASE_MODEL_URI + "#expression";
+	private static final String SADL_BASE_MODEL_EXTERNALURI_URI = SADL_BASE_MODEL_URI + "#externalURI";
 
 	private boolean importSadlListModel = false;
 	private OntModel sadlListModel = null;
 	private static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
 	private static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
 	private static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
-	public static final String SADL_LIST_MODEL_LIST_URI = "http://sadl.org/sadllistmodel#List";
-	public static final String SADL_LIST_MODEL_FIRST_URI = "http://sadl.org/sadllistmodel#first";
-	private static final String SADL_LIST_MODEL_REST_URI = "http://sadl.org/sadllistmodel#rest";
-	private static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = "http://sadl.org/sadllistmodel#lengthRestriction";
-	private static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = "http://sadl.org/sadllistmodel#lengthMinRestriction";
-	private static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = "http://sadl.org/sadllistmodel#lengthMaxRestriction";
+	public static final String SADL_LIST_MODEL_LIST_URI = SADL_LIST_MODEL_URI + "#List";
+	public static final String SADL_LIST_MODEL_FIRST_URI = SADL_LIST_MODEL_URI + "#first";
+	private static final String SADL_LIST_MODEL_REST_URI = SADL_LIST_MODEL_URI + "#rest";
+	private static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthRestriction";
+	private static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMinRestriction";
+	private static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
 	
 	private static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
 	private static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
 	private static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
-	private static final String SADL_IMPLICIT_MODEL_EVENT_URI = "http://sadl.org/sadlimplicitmodel#Event";
-	private static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = "http://sadl.org/sadlimplicitmodel#UnittedQuantity";
-	private static final String SADL_IMPLICIT_MODEL_UNIT_URI = "http://sadl.org/sadlimplicitmodel#unit";
-	private static final String SADL_IMPLICIT_MODEL_VALUE_URI = "http://sadl.org/sadlimplicitmodel#value";
-	public static final String SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI = "http://sadl.org/sadlimplicitmodel#impliedProperty";
+	private static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
+	private static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
+	private static final String SADL_IMPLICIT_MODEL_UNIT_URI = SADL_IMPLICIT_MODEL_URI + "#unit";
+	private static final String SADL_IMPLICIT_MODEL_VALUE_URI = SADL_IMPLICIT_MODEL_URI + "#value";
+	public static final String SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#impliedProperty";
+	private static final String SADL_IMPLICIT_MODEL_QUERY_STRING_URI = SADL_IMPLICIT_MODEL_URI + "#queryString";
 	
 	private static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
 	private static final String SADL_RULE_PATTERN_PREFIX = "";
@@ -268,6 +269,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	int modelErrorCount = 0;
 	int modelWarningCount = 0;
 	int modelInfoCount = 0;
+
+	private IntermediateFormTranslator intermediateFormTranslator = null;
 
 	
 	public static String[] reservedFileNames = {"SadlBaseModel.sadl", "SadlListModel.sadl", "RulePatterns.sadl", "RulePatternsData.sadl", "SadlServicesConfigurationConcepts.sadl", "ServicesConfig.sadl"};
@@ -823,6 +826,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		Expression qexpr = element.getExpr();
 		Object qobj = processExpression(qexpr);
 		Query query = processQuery(qobj);
+		if (element.getName() != null) {
+			query.setFqName(getModelNamespace() + element.getName());
+		}
 		return query;
 	}
 
@@ -937,19 +943,41 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private void processStatement(RuleStatement element) throws InvalidNameException, InvalidTypeException, TranslationException {
 		String ruleName = element.getName();
+		Rule rule = new Rule(ruleName);
 		EList<Expression> ifs = element.getIfs();
 		EList<Expression> thens = element.getThens();
 		for (int i = 0; ifs != null && i < ifs.size(); i++) {
 			Expression expr = ifs.get(i);
 			Object result = processExpression(expr);
-			System.out.println("If expression: " + result);
+			if (result instanceof GraphPatternElement) {
+				rule.addIf((GraphPatternElement) result);
+			}
+			else {
+				addError("If expression (" + result + ") is not a GraphPatternElement", expr);
+			}
 		}
 		for (int i = 0; thens != null && i < thens.size(); i++) {
 			Expression expr = thens.get(i);
 			Object result = processExpression(expr);
-			System.out.println("Then expression: " + result);
+			if (result instanceof GraphPatternElement) {
+				rule.addThen((GraphPatternElement) result);
+			}
+			else {
+				addError("Then expression (" + result + ") not a GraphPatternElement", expr);
+			}
 		}
-		int i = 0;
+		rule = getIfTranslator().postProcessRule(rule, element);
+		if (rules == null) {
+			rules = new ArrayList<Rule>();
+		}
+		rules.add(rule);
+	}
+	
+	public IntermediateFormTranslator getIfTranslator() {
+		if (intermediateFormTranslator == null) {
+			intermediateFormTranslator = new IntermediateFormTranslator(getTheJenaModel());
+		}
+		return intermediateFormTranslator;
 	}
 	
 	@Override
@@ -3075,9 +3103,38 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 
-	private void addPropertyDomain(Property prop, OntResource cls) {
+	private OntProperty createOntPropertyInCurrentModel(OntProperty prop) {
+		if (!prop.getNameSpace().equals(getModelNamespace())) {
+			if (prop.isDatatypeProperty()) {
+				prop = getTheJenaModel().createDatatypeProperty(prop.getURI());
+			}
+			else {
+				prop = getTheJenaModel().createObjectProperty(prop.getURI());
+			}
+		}
+		return prop;
+	}
+
+	private void addPropertyDomain(Property prop, OntResource cls) throws JenaProcessorException {
+		StmtIterator sitr = getTheJenaModel().listStatements(prop, RDFS.domain, (RDFNode)null);
+		if (sitr.hasNext()) {
+			Statement s = sitr.nextStatement();
+			RDFNode existingDomain = s.getObject();
+			if (existingDomain.equals(cls)) {
+				return;	// nothing to do
+			}
+			if (existingDomain.canAs(OntResource.class)){ 
+				OntResource domainCls = addClassToUnionClass(existingDomain.as(OntResource.class), cls);
+				if (!prop.getNameSpace().equals(getModelNamespace()) && prop.canAs(OntProperty.class)) {
+					prop = createOntPropertyInCurrentModel(prop.as(OntProperty.class));
+				}
+				else {
+					getTheJenaModel().remove(s);
+				}
+				cls = domainCls;
+			}
+		}
 		getTheJenaModel().add(prop, RDFS.domain, cls);
-//		prop.addDomain(cls);
 		logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
 	}
 
@@ -4433,7 +4490,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		try {
 			if (getTheJenaModel() == null) {
 				// it always is?
-				onValidate(resource, null, CheckMode.FAST_ONLY, context);
+				XtextResource xtrsrc = (XtextResource) resource.getContents().get(0).eResource();
+				if (xtrsrc != null) {
+					URI resourceUri = xtrsrc.getURI();
+					OntModel ontModel = OntModelProvider.find(xtrsrc);
+					if (ontModel != null) {
+						theJenaModel = ontModel;
+					}
+				}
+				if (getTheJenaModel() == null) {
+					onValidate(resource, null, CheckMode.FAST_ONLY, context);
+				}
 			}
 			IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
 			ITranslator translator = configMgr.getTranslator();
@@ -4464,6 +4531,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+//	@Override
+	public ResultSet processNamedQuery(Resource resource, String queryName) throws JenaProcessorException {
+		SadlModel model = (SadlModel) resource.getContents().get(0);
+		if (model != null) {
+			URI resourceUri = resource.getURI();
+			XtextResource xtrsrc = (XtextResource) model.eResource();
+			if (xtrsrc != null) {
+				URI importedResourceUri = xtrsrc.getURI();
+				OntModel m = OntModelProvider.find(xtrsrc);
+				if (m == null) {
+					throw new JenaProcessorException("Unable to retrieve OntModel for resource '" + resourceUri + "'");
+				}
+				OntResource query = m.getOntResource(queryName);
+				Statement s = query.getProperty(m.getProperty(SADL_IMPLICIT_MODEL_QUERY_STRING_URI));
+			}
+		}
+		return null;
 	}
 	
 	private void checkImplicitSadlModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {

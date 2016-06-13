@@ -50,6 +50,7 @@ import com.hp.hpl.jena.vocabulary.RDFS
 import com.hp.hpl.jena.vocabulary.OWL
 import com.hp.hpl.jena.rdf.model.RDFList
 import com.hp.hpl.jena.vocabulary.XSD
+import com.ge.research.sadl.reasoner.ConfigurationManager
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -527,7 +528,7 @@ class SadlModelManagerProviderTest {
 				found = true;
 			}
 //			if (!found) {
-				jenaModel.write(System.out, "RDF/XML-ABBREV")
+				jenaModel.write(System.out, ConfigurationManager.RDF_XML_ABBREV_FORMAT)
 //			}
 			assertTrue(found);
 		]

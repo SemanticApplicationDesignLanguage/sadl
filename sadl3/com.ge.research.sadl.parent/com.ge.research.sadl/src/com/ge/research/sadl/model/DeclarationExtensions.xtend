@@ -43,6 +43,7 @@ import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
+import com.ge.research.sadl.sADL.QueryStatement
 
 class DeclarationExtensions {
 	
@@ -138,6 +139,9 @@ class DeclarationExtensions {
 		}
 		try {
 			if (resource instanceof Name) {
+				if (resource.eContainer instanceof QueryStatement) {
+					return OntConceptType.INSTANCE;
+				}
 				return OntConceptType.VARIABLE
 			}
 			

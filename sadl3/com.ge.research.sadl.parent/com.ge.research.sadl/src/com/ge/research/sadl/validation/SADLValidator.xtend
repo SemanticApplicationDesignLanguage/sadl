@@ -34,6 +34,8 @@ import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.sADL.SadlResource
+import java.util.List
+import java.util.ArrayList
 
 /**
  * This class contains custom validation rules. 
@@ -51,7 +53,14 @@ class SADLValidator extends AbstractSADLValidator {
 	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
 	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
 	public static String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
+	public static String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
+		
+	var List<String> ruleNames = new ArrayList
 	
+	new() {
+		ruleNames.clear
+	}
+
 	@Check
 	def checkSadlModel(SadlModel model) {
 		val thisUri = model.baseUri
@@ -103,6 +112,12 @@ class SADLValidator extends AbstractSADLValidator {
 	
 	@Check
 	def checkRuleStatement(RuleStatement rule) {
+		// make sure rule name is unique
+		if (ruleNames.contains(rule.name)) {
+			var errMsg = "There is already a Rule named '" + rule.name + "' in this namespace."
+			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
+		}
+		ruleNames.add(rule.name)
 		// make sure all variables used in the head are bound in the bod
 		val itr = EcoreUtil2.getAllContents(rule.thens).filter(Name).toList.iterator
 		while (itr.hasNext) {
