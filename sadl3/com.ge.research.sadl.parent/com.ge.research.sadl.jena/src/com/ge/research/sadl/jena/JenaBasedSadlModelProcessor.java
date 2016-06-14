@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ModelError;
@@ -643,8 +644,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					URI importingResourceUri = resource.getURI();
 					String importUri = importedResource.getBaseUri();
 					String importPrefix = simport.getAlias();
-					XtextResource xtrsrc = (XtextResource) importedResource.eResource();
-					if (xtrsrc != null) {
+					Resource eResource = importedResource.eResource();
+					if (eResource instanceof XtextResource) {
+						XtextResource xtrsrc = (XtextResource) eResource;
 						URI importedResourceUri = xtrsrc.getURI();
 						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
 						if (importedOntModel == null) {
@@ -659,6 +661,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						else {
 							addImportToJenaModel(modelName, importUri, importedOntModel);							
 				    	}
+					} else if (eResource instanceof ExternalEmfResource) {
+						ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
+						addImportToJenaModel(modelName, importUri, emfResource.getJenaModel());
 					}
 					else {
 						addError("Import resolved to a null XtextResource", simport);
@@ -771,7 +776,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		OntModelProvider.attach(model.eResource(), getTheJenaModel());
 	}
 	
-	private void addImportToJenaModel(String modelName, String importUri, OntModel importedOntModel) {
+	private void addImportToJenaModel(String modelName, String importUri, Model importedOntModel) {
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
 		com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
 		getTheJenaModel().addSubModel(importedOntModel);

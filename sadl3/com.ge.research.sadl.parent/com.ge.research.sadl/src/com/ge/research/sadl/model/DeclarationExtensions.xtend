@@ -17,6 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.model
 
+import com.ge.research.sadl.external.ExternalEmfResource
+import com.ge.research.sadl.external.ExternalResourceAdapter
 import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.ExternalEquationStatement
 import com.ge.research.sadl.sADL.Name
@@ -48,6 +50,9 @@ import com.ge.research.sadl.sADL.QueryStatement
 class DeclarationExtensions {
 	
 	def String getConcreteName(SadlResource it) {
+		if (isExternal) {
+			return getExternalResourceAdapter.concreteName
+		}
 		val resource = it.eResource as XtextResource
 		val ()=>String nameSupplyer = [
 			val nodes = NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME)
@@ -64,6 +69,9 @@ class DeclarationExtensions {
 	}
 	
 	def String getConceptUri(SadlResource it) {
+		if (isExternal) {
+			return getExternalResourceAdapter.conceptUri
+		}
 		val declaration = declaration
 		if (declaration != null) {	
 			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
@@ -100,7 +108,7 @@ class DeclarationExtensions {
 	
 	def String getConceptNamespace(SadlResource it) {
 		val declaration = declaration
-		if (declaration != null) {	
+		if (declaration != null) {
 			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
 			if (part1 != null) {
 				val part2 = part1.baseUri
@@ -129,6 +137,9 @@ class DeclarationExtensions {
 	private ThreadLocal<Set<SadlResource>> recursionDetection = new ThreadLocal<Set<SadlResource>>();
 	
 	def OntConceptType getOntConceptType(SadlResource resource) throws CircularDefinitionException {
+		if (resource.isExternal) {
+			return resource.getExternalResourceAdapter.type
+		}
 		if (recursionDetection.get == null) {
 			recursionDetection.set(new HashSet)
 		}
@@ -252,4 +263,11 @@ class DeclarationExtensions {
 		|| (typeRef != null && typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE])
 	}
 	
+	public def boolean isExternal(SadlResource resource) {
+		return resource.eResource instanceof ExternalEmfResource
+	}
+	
+	public def ExternalResourceAdapter getExternalResourceAdapter(SadlResource resource) {
+		ExternalResourceAdapter.findInEmfObject(resource)
+	}
 }
