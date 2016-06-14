@@ -100,22 +100,25 @@ public class ResourceManager {
     }
     
     private static URI findProjectUriByTrimming(URI uri){
-    	File file = new File(uri.toFileString());
-    	if(file != null){
-    		if(file.isDirectory()){
-    			for(String child : file.list()){
-    				if(child.endsWith(".project")){
-    					return uri;
-    				}
-    			}
-    			//Didn't find a project file in this directory, check parent
-    			if(file.getParentFile() != null){
-    				return findProjectUriByTrimming(uri.trimSegments(1));
-    			}
-    		}
-    		if(file.isFile() && file.getParentFile() != null){
-    			return findProjectUriByTrimming(uri.trimSegments(1));
-    		}
+    	String fstr = uri.toFileString();
+    	if (fstr != null) {
+	    	File file = new File(uri.toFileString());
+	    	if(file != null){
+	    		if(file.isDirectory()){
+	    			for(String child : file.list()){
+	    				if(child.endsWith(".project")){
+	    					return uri;
+	    				}
+	    			}
+	    			//Didn't find a project file in this directory, check parent
+	    			if(file.getParentFile() != null){
+	    				return findProjectUriByTrimming(uri.trimSegments(1));
+	    			}
+	    		}
+	    		if(file.isFile() && file.getParentFile() != null){
+	    			return findProjectUriByTrimming(uri.trimSegments(1));
+	    		}
+	    	}
     	}
     	
     	return null;

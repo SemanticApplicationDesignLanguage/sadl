@@ -841,7 +841,7 @@ public class IntermediateFormTranslator {
 
 	public Rule postProcessRule(Rule rule, EObject object) {
 		// convert givens linked list to array; expand conjunctions
-		List<GraphPatternElement> givens = rule.getGivens();
+		List<GraphPatternElement> givens = flattenRuleJunctions(rule.getGivens());
 		if (givens != null) {
 			Object results;
 			try {
@@ -865,7 +865,7 @@ public class IntermediateFormTranslator {
 		}
 		
 		// convert ifs linked list to array; expand conjunctions
-		List<GraphPatternElement> ifs = rule.getIfs();
+		List<GraphPatternElement> ifs = flattenRuleJunctions(rule.getIfs());
 		if (ifs != null) {
 			Object results;
 			try {
@@ -886,7 +886,7 @@ public class IntermediateFormTranslator {
 		}
 		
 		// now process conclusions
-		List<GraphPatternElement> thens = rule.getThens();
+		List<GraphPatternElement> thens = flattenRuleJunctions(rule.getThens());
 		if (thens != null) {
 			Object results;
 			try {
@@ -911,6 +911,24 @@ public class IntermediateFormTranslator {
 		}
 		removeDuplicateElements(rule);
 		return rule;
+	}
+
+	private List<GraphPatternElement> flattenRuleJunctions(List<GraphPatternElement> lst) {
+		List<GraphPatternElement> results = lst;
+		if (lst != null) {
+			for (int i = 0; i < lst.size(); i++) {
+				GraphPatternElement element = lst.get(i);
+				if (element instanceof BuiltinElement && ((BuiltinElement)element).getFuncName().equals("and")) {
+					if (results == null) {
+						results = new ArrayList<GraphPatternElement>();
+					}
+					for (int j = 0; j <= 1; j++) {
+						Node nj = ((BuiltinElement)element).getArguments().get(j);
+					}
+				}
+			}
+		}
+		return results;
 	}
 
 	/**
@@ -1474,21 +1492,32 @@ public class IntermediateFormTranslator {
 				else {
 					Object realArg = ((ProxyNode)arg).getProxyFor();
 					Object argNode = expandProxyNodes(patterns, realArg, isRuleThen);
-					if (argNode == null && realArg instanceof BuiltinElement) {
-						if (be.getFuncType().equals(BuiltinType.Not)) {
-							// don't put in an intermediate variable for negation of a builtin--if needed the language-specific translator will need to do that
-							// the call above to expandProxyNodes might have put the argNode into the patterns; if so remove it
+					if (argNode == null) {
+						if (realArg instanceof BuiltinElement) {
+							if (be.getFuncType().equals(BuiltinType.Not)) {
+								// don't put in an intermediate variable for negation of a builtin--if needed the language-specific translator will need to do that
+								// the call above to expandProxyNodes might have put the argNode into the patterns; if so remove it
+								if (patterns.get(patterns.size() - 1).equals(realArg)) {
+									patterns.remove(patterns.size() - 1);
+								}
+							}
+							else {
+								Node newNode = getVariableNode((BuiltinElement)realArg);
+								((BuiltinElement)realArg).addArgument(newNode);
+								argNode = newNode;
+								((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
+								retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
+								args.set(i, nodeCheck(argNode));
+							}
+						}
+						else if (realArg instanceof TripleElement) {
+							// don't do anything--keep proxy and triple
 							if (patterns.get(patterns.size() - 1).equals(realArg)) {
 								patterns.remove(patterns.size() - 1);
 							}
 						}
 						else {
-							Node newNode = getVariableNode((BuiltinElement)realArg);
-							((BuiltinElement)realArg).addArgument(newNode);
-							argNode = newNode;
-							((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
-							retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
-							args.set(i, nodeCheck(argNode));
+							throw new TranslationException("Unexpected real argument");
 						}
 					}
 					else {
