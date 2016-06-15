@@ -152,7 +152,7 @@ enum SadlDataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
     gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | 
     integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger |  
-    unsignedByte | unsignedInt | anySimpleType | data;
+    unsignedByte | unsignedInt | anySimpleType;
 
 // Class declarations may also describe the class's properties.
 SadlPropertyDeclarationInClass returns SadlProperty:
@@ -161,7 +161,7 @@ SadlPropertyDeclarationInClass returns SadlProperty:
 SadlPropertyRestriction :
     	SadlCondition
     |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
-    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|('a' list?='List'|lists?='Lists') 'of' 'values'|'values') 'of' 'type' range=SadlPrimaryTypeReference
+    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|'values') 'of' 'type' ((typeonly=('class'|'data')) | range=SadlPrimaryTypeReference)
     |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|QNAME]
     |   {SadlIsTransitive} 'is' 'transitive'
     |   {SadlIsSymmetrical} 'is' 'symmetrical'
@@ -353,16 +353,11 @@ PrimaryExpression<EnabledWith> returns Expression: // (20)
 	| {NumberLiteral} value=AnyNumber ->({Unit.value=current} unit=UNIT)?
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-	| ->Function
 	| FeatureCall
 	| {ValueTable} valueTable=ValueTable;
-	
-Function returns SadlResource:
-	{Function} =>(name=[SadlResource|QNAME] '(') arglist+=Expression? (',' arglist+=Expression)* ')'
-;
 
 FeatureCall returns SadlResource:
-	{Name} name=[SadlResource|QNAME]
+	{Name} name=[SadlResource|QNAME] ->(function?='(' arglist+=Expression? (',' arglist+=Expression)* ')')?
 ;
 
 UNIT :

@@ -20,6 +20,11 @@
  ***********************************************************************/
 package com.ge.research.sadl
 
+import com.ge.research.sadl.external.ExternalEmfResourceFactory
+import com.ge.research.sadl.external.ExternalEmfResourceServiceProvider
+import com.google.inject.Injector
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.resource.IResourceServiceProvider
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -30,4 +35,15 @@ class SADLStandaloneSetup extends SADLStandaloneSetupGenerated {
 		new SADLStandaloneSetup().createInjectorAndDoEMFRegistration()
 	}
 
+	override register(Injector injector) {
+		super.register(injector)
+		val resourceFactory = injector.getInstance(ExternalEmfResourceFactory);
+		val serviceProvider = injector.getInstance(ExternalEmfResourceServiceProvider);
+		
+		for (ext : ExternalEmfResourceFactory.EXTERNAL_EXTENSIONS) {
+			Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(ext, resourceFactory);
+			IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().put(ext, serviceProvider);
+		}
+	}
+	
 }

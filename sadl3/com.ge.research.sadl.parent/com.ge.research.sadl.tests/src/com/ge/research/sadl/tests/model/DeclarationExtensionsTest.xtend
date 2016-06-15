@@ -31,6 +31,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.model.CircularDefinitionException
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -217,9 +219,42 @@ class DeclarationExtensionsTest {
 		resources.get('y').assertIs(OntConceptType.VARIABLE)
 	}
 	
+	   @Test
+    def void testStackOverflow() {
+       val model = '''
+               uri "http://sadl.org/test.sadl" alias test.
+               
+               Foo is a type of Foo.
+              //Foo is a class.
+              //Foo2 is a type of Foo.
+              //Foo3 is a type of Foo2.
+              //Foo is a type of Foo2.
+       '''.parse
+              val resources = model.eAllContents.filter(SadlResource).toMap[concreteName]
+              // TODO how do we check that the two rules have separate local variables?
+              resources.get('Foo').assertIs(OntConceptType.CLASS)
+    }
+    
+    @Ignore
+	@Test
+    def void testIntList() {
+       val model = '''
+    		uri "http://sadl.org/test.sadl" alias test.
+    		Grades is a type of int List.
+		'''.parse
+              val resources = model.eAllContents.filter(SadlResource).toMap[concreteName]
+              // TODO how do we check that the two rules have separate local variables?
+              resources.get('Grades').assertIs(OntConceptType.CLASS)
+	}
+	
 	protected def void assertIs(SadlResource it, OntConceptType type) {
 		assertNotNull(it)
-		assertEquals(concreteName, type, ontConceptType)
+		val typ = try {
+		    ontConceptType
+		  } catch (CircularDefinitionException e) {
+		    e.definitionType
+		  }
+  		assertEquals(concreteName, type, typ)
 	}
 	
 }

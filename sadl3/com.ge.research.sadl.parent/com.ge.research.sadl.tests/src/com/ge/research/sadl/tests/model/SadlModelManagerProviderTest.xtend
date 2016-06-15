@@ -526,9 +526,9 @@ class SadlModelManagerProviderTest {
 			if (stmtitr != null && stmtitr.hasNext) {
 				found = true;
 			}
-			if (!found) {
-				jenaModel.write(System.out, "N3")				
-			}
+//			if (!found) {
+				jenaModel.write(System.out, "RDF/XML-ABBREV")
+//			}
 			assertTrue(found);
 		]
 	}
@@ -569,15 +569,55 @@ class SadlModelManagerProviderTest {
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
-			var itr = jenaModel.listObjectProperties().toIterable().iterator
-			var found = false
-			while (itr.hasNext()) {
-				val nxt = itr.next;
-				if (nxt.localName.equals("prop")) {
-					found = true;
-				}
-			}	
-			assertTrue(found);
+			var p = jenaModel.getProperty("http://sadl.org/model1#prop");
+			assertTrue(p != null);
+		]
+	}
+	
+	@Test 
+	def void testPropertyAllRangeSpecTypes() {
+		'''
+			uri "http://com.ge.research.sadl/proptypeonly". 
+			Person is a class.
+			prop is a property.
+			dtpropwithrng is a property with values of type float.
+			objpropwithrng is a property with values of type Person.		
+			dtprop is a property with values of type data.
+			objprop is a property with values of type class.
+			dtpropwithlistrng is a property with values of type float List.
+			objpropwithlistrng is a property with values of type Person List.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			var ns = "http://com.ge.research.sadl/proptypeonly#"
+			var p = jenaModel.getProperty(ns+"prop")
+			assertTrue(p != null);
+			var op = jenaModel.getObjectProperty(ns+"objprop")
+			assertNotNull(op)
+			var opwr = jenaModel.getObjectProperty(ns+"objpropwithrng")
+			assertNotNull(opwr)
+			var opwlr = jenaModel.getObjectProperty(ns+"objpropwithlistrng")
+			assertNotNull(opwlr)
+			var dtp = jenaModel.getDatatypeProperty(ns+"dtprop")
+			assertNotNull(dtp)
+			var dtpwr = jenaModel.getDatatypeProperty(ns+"dtpropwithrng")
+			assertNotNull(dtpwr)
+			var dtpwlr = jenaModel.getDatatypeProperty(ns+"dtpropwithlistrng")
+			assertNotNull(dtpwlr)
+		]
+	}
+
+	@Test def void myInversePropertyDeclarationCase() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			prop1 is a property with values of type class.
+			prop2 is a property with values of type class.
+			prop2 is the inverse of prop1.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
 		]
 	}
 	
@@ -585,8 +625,8 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Thingy is a class.
-			multiValuedListProperty1 describes Thingy with a List of values of type Thingy.
-			multiValuedListProperty2 describes Thingy with a List of values of type float.
+			multiValuedListProperty1 describes Thingy with values of type Thingy List.
+			multiValuedListProperty2 describes Thingy with values of type float List.
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)
@@ -594,7 +634,7 @@ class SadlModelManagerProviderTest {
 			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
 			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
 			assertTrue(ann.toString().equals("LIST"))
-			var dtprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty2")
+			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
 			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
 			assertTrue(ann2.toString().equals("LIST"))
 		]
@@ -604,25 +644,25 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Thingy is a class.
-			multiValuedListProperty1 describes Thingy with Lists of values of type Thingy.
-			multiValuedListProperty2 describes Thingy with Lists of values of type float.
+			multiValuedListProperty1 describes Thingy with values of type Thingy List.
+			multiValuedListProperty2 describes Thingy with values of type float List.
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
 			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
-			assertTrue(ann.toString().equals("LISTS"))
-			var dtprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty2")
+			assertTrue(ann.toString().equals("LIST"))
+			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
 			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
-			assertTrue(ann2.toString().equals("LISTS"))
+			assertTrue(ann2.toString().equals("LIST"))
 		]
 	}
 	
 	@Test def void mySubPropertyDeclarationCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
-			prop1 is a property.
+			prop1 is a property with values of type class.
 			prop2 is a type of prop1.
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
@@ -963,7 +1003,7 @@ class SadlModelManagerProviderTest {
 			uri "http://sadl.org/TestSadlIde/model1" alias m1.
 			MyClass1 is a class.
 			MyClass2 is a class.
-			myProp describes MyClass1 with a List of values of type MyClass2.
+			myProp describes MyClass1 with values of type MyClass2 List.
 			myProp of MyClass1 has at most 10 values. 		
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
@@ -990,7 +1030,7 @@ class SadlModelManagerProviderTest {
 			uri "http://sadl.org/TestSadlIde/model1" alias m1.
 			MyClass1 is a class.
 			MyClass2 is a class described by yourProp.
-			myProp describes MyClass1 with a List of values of type MyClass2.
+			myProp describes MyClass1 with values of type MyClass2 List.
 			myProp of MyClass1 has at most 10 values. 		
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
@@ -1138,6 +1178,74 @@ class SadlModelManagerProviderTest {
 			Equation dateSubtractYears(dateTime x, dateTime y) returns float: x - y.		
 		'''.assertValidatesTo[ jenaModel, issues |
 			
+		]
+	}
+
+	@Test
+	def void testListModel() {
+		'''
+			uri "http://sadl.org/sadllistmodel" alias sadllist.
+			 
+			^List is a class 
+				described by ^first,
+				described by rest with values of type ^List,
+				described by lengthRestriction with values of type int,
+				described by minLengthRestriction with values of type int,
+				described by maxLengthRestriction with values of type int. 
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			jenaModel.write(System.out, "TURTLE")
+			assertTrue(issues.size == 0)
+		]
+	}
+	@Test			
+	def void testLists_01() {
+		'''
+			uri "http://sadl.org/SadlList.sadl" alias SadlList.
+			 
+			Person is a class.
+			PersonList is a type of Person List.
+			
+			MyChildren is the PersonList [Peter, Eileen, Janet, Sharon, Spencer, Lana].
+			SpousesChildren is the Person List [Peter, Eileen, Janet, Sharon, Spencer, Lana].
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			jenaModel.write(System.out, "TURTLE")
+			assertTrue(issues.size == 0)
+		]
+	}
+
+	@Test 
+	def void testLists_02() {
+		'''
+			uri "http://sadl.org/SadlList.sadl" alias SadlList.
+			 
+			Grades is a type of int List.
+			
+			MyGrades is the Grades [87, 43, 98, 100].
+			YourGrades is the int List [87, 43, 98, 100].
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			jenaModel.write(System.out, "TURTLE")
+			assertTrue(issues.size == 0)
+		]
+	}
+
+	@Test 
+	def void testLists_03() {
+		'''
+			uri "http://sadl.org/SadlList.sadl" alias SadlList.
+			
+			ITEM is a class.
+			MarkerListType is a type of ITEM List length 0-100.
+		'''.assertValidatesTo [ jenaModel, issues |
+			// expectations go here
+			assertNotNull(jenaModel)
+			jenaModel.write(System.out, "TURTLE")
+			assertTrue(issues.size == 0)
 		]
 	}
 

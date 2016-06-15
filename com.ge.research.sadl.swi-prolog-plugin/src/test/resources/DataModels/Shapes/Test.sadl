@@ -1,0 +1,8 @@
+uri "http://sadl.org/Shapes/Test" alias test version "$Revision:$ Last modified on   $Date:$".
+
+import "http://sadl.org/Shapes/Rule". 
+
+MyRect is a Rectangle with height 2.5, with width 5.5.
+
+Test: area of MyRect is 13.75 .
+ 

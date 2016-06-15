@@ -20,10 +20,8 @@ package com.ge.research.sadl.jena;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -38,7 +36,6 @@ import java.util.StringTokenizer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +115,6 @@ public class UtilsForJena {
      * @param v
      * @return
      * @throws JenaProcessorException 
-	 * @throws InvalidModelInputException 
      */
     public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, OntProperty prop, Object v) throws JenaProcessorException, InvalidModelInputException {
         Literal val = null;
@@ -176,150 +172,166 @@ public class UtilsForJena {
         	}
         }
     	if (rnguri != null) {
-	        if (rnguri.contains("float")) {
-	        	if (v instanceof String) {
-	       			v = Double.parseDouble(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Double) {
-	                v = new Float(((Double)v).floatValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Float){
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Integer) {
-	                v = new Float(((Integer)v).floatValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "float");
-	            }
-	        }
-	        else if (rnguri.contains("double")) {
-	        	if (v instanceof String) {
-	       			v = Double.parseDouble(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Double) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Float){
-	                v = new Double(((Float)v).doubleValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Integer) {
-	                v = new Double(((Integer)v).doubleValue());
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "double");
-	            }
-	        }
-	        else if (rnguri.contains("decimal")) {
-	        	if (v instanceof String) {
-	       			v = Double.parseDouble(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Double) {
-	                v= new BigDecimal(((Double)v).doubleValue());
-	            }
-	            else if (v instanceof Float){
-	                v= new BigDecimal(((Float)v).doubleValue());
-	            }
-	            else if (v instanceof Integer) {
-	                v= new BigDecimal(((Integer)v).doubleValue());
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "decimal");
-	            }
-	            val = m.createTypedLiteral(v);
-	        }
-	        else if (rnguri.contains("int")) {
-	        	if (v instanceof String) {
-	        		if (((String)v).trim().contains(".")) {
+    		Object vorig = v;
+    		try {
+		        if (rnguri.contains("float")) {
+		        	if (v instanceof String) {
+		       			v = Double.parseDouble(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Double) {
+		                v = new Float(((Double)v).floatValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Float){
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Integer) {
+		                v = new Float(((Integer)v).floatValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "float");;
+		            }
+		        }
+		        else if (rnguri.contains("double")) {
+		        	if (v instanceof String) {
+		       			v = Double.parseDouble(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Double) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Float){
+		                v = new Double(((Float)v).doubleValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Integer) {
+		                v = new Double(((Integer)v).doubleValue());
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "double");
+		            }
+		        }
+		        else if (rnguri.contains("decimal")) {
+		        	if (v instanceof String) {
+		       			v = Double.parseDouble(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Double) {
+		                v= new BigDecimal(((Double)v).doubleValue());
+		            }
+		            else if (v instanceof Float){
+		                v= new BigDecimal(((Float)v).doubleValue());
+		            }
+		            else if (v instanceof Integer) {
+		                v= new BigDecimal(((Integer)v).doubleValue());
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "decimal");
+		            }
+		            val = m.createTypedLiteral(v);
+		        }
+		        else if (rnguri.contains("int")) {
+		        	if (v instanceof String) {
+		        		if (((String)v).trim().contains(".")) {
+		        			errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "int");
+		        		}
+		        		else {
+		        			v = Integer.parseInt(stripQuotes((String)v));
+		        		}
+		         	}
+		            if (v instanceof Integer) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (errMsg == null) {
 		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "int");
-	        		}
-	        		else {
-	        			v = Integer.parseInt(stripQuotes((String)v));
-	        		}
-	         	}
-	            if (v instanceof Integer) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (errMsg == null) {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "int");
-	            }
-	        }
-	        else if (rnguri.contains("long")) {
-	        	if (v instanceof String) {
-	       			v = Long.parseLong(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Long) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else if (v instanceof Integer) {
-	            	val = m.createTypedLiteral(new Long(((Integer)v).longValue()));
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "long");
-	            }
-	        }
-	        else if (rnguri.contains("string")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "string");
-	            }
-	        }
-	        else if (rnguri.endsWith("date")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-					DateTime dt = new DateTime((String)v);
-					String xsdFormat = "yyyy-MM-dd";
-					String modifiedV = dt.toString(xsdFormat);
-	                val = m.createTypedLiteral(modifiedV, rnguri);
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "date");
-	            }
-	        }
-	        else if (rnguri.endsWith("dateTime")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-	                if (v != null && ((String) v).length() > 0) {
+		            }
+		        }
+		        else if (rnguri.contains("long")) {
+		        	if (v instanceof String) {
+		       			v = Long.parseLong(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Long) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else if (v instanceof Integer) {
+		            	val = m.createTypedLiteral(new Long(((Integer)v).longValue()));
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "long");
+		            }
+		        }
+		        else if (rnguri.contains("string")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "string");
+		            }
+		        }
+		        else if (rnguri.endsWith("date")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
 						DateTime dt = new DateTime((String)v);
-						String xsdFormat = "yyyy-MM-dd'T'HH:mm:ssZZ";
+						String xsdFormat = "yyyy-MM-dd";
 						String modifiedV = dt.toString(xsdFormat);
 		                val = m.createTypedLiteral(modifiedV, rnguri);
-	                }
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "dateTime");
-	            }
-	        }
-	        else if (rnguri.endsWith("time")) {
-	            if (v instanceof String) {
-	                v = stripQuotes((String)v);
-	                val = m.createTypedLiteral(v, rnguri);
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "time");
-	            }
-	        }
-	        else if (rnguri.endsWith("boolean")) {
-	        	if (v instanceof String) {
-	       			v = Boolean.parseBoolean(stripQuotes((String)v));
-	         	}
-	            if (v instanceof Boolean) {
-	                val = m.createTypedLiteral(v);
-	            }
-	            else {
-	                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "boolean");
-	            }
-	        }
-	        else {
-	            errMsg = SadlErrorMessages.UNHANDLED.get("range", rnguri);
-	        }
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "date");
+		            }
+		        }
+		        else if (rnguri.endsWith("dateTime")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                if (v != null && ((String) v).length() > 0) {
+							DateTime dt = new DateTime((String)v);
+							String xsdFormat = "yyyy-MM-dd'T'HH:mm:ssZZ";
+							String modifiedV = dt.toString(xsdFormat);
+			                val = m.createTypedLiteral(modifiedV, rnguri);
+		                }
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "dateTime");
+		            }
+		        }
+		        else if (rnguri.endsWith("time")) {
+		            if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                val = m.createTypedLiteral(v, rnguri);
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "time");
+		            }
+		        }
+		        else if (rnguri.endsWith("boolean")) {
+		        	if (v instanceof String) {
+		       			v = Boolean.parseBoolean(stripQuotes((String)v));
+		         	}
+		            if (v instanceof Boolean) {
+		                val = m.createTypedLiteral(v);
+		            }
+		            else {
+		                errMsg = SadlErrorMessages.INCOMPATIBLE_RANGE.get(v.toString(), v.getClass().getSimpleName(), "boolean");
+		            }
+		        }
+		        else {
+		            errMsg = SadlErrorMessages.UNHANDLED.get("range", rnguri);
+		        }
+    		}
+    		catch (Throwable t) {
+    			StringBuilder sb = new StringBuilder("Unable to convert value '");
+    			sb.append(v);
+    			if (!v.equals(vorig)) {
+    				sb.append(" (");
+    				sb.append(vorig);
+    				sb.append(")");
+    			}
+    			sb.append(" to type '");
+    			sb.append(rnguri);
+    			sb.append("'");
+    			throw new InvalidModelInputException(sb.toString());
+    		}
     	}
     	else {
     		errMsg = SadlErrorMessages.INVALID_NULL.get("Range");

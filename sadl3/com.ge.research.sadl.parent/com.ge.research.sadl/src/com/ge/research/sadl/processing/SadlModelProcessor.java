@@ -910,6 +910,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (octype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 			return NodeType.DataTypeProperty;
 		}
+		if (octype.equals(OntConceptType.RDF_PROPERTY)) {
+			return NodeType.PropertyNode;
+		}
 		if (octype.equals(OntConceptType.INSTANCE)) {
 			return NodeType.InstanceNode;
 		}
@@ -918,6 +921,10 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		if (octype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
 			return NodeType.PropertyNode;
+		}
+		else if (octype.equals(OntConceptType.FUNCTION_DEFN)) {
+			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
+			return NodeType.InstanceNode;
 		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
 	}

@@ -34,6 +34,7 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.CancelIndicator
+import com.ge.research.sadl.model.CircularDefinitionException
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -68,9 +69,14 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}
 				SadlResource : {
-					var node = NodeModelUtils.findActualNodeFor(element)
-					var highlightingId = getHighlightingId(v)
-					acceptor.addPosition(node.offset, node.length, highlightingId)
+					var nodes = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME)
+					var highlightingId = switch element {
+						Name case element.isFunction : SadlHighlightingConfiguration.FUNCTION_NAME_ID
+						default : getHighlightingId(v)
+					}
+					val start = nodes.head.offset
+					val end =  nodes.last.offset + nodes.last.length - start
+					acceptor.addPosition(start, end, highlightingId)
 				}
 				SadlPropertyCondition : {
 					var highlightingId = getHighlightingId(v.property)
@@ -99,7 +105,12 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 	}
 	
 	def private String getHighlightingId(SadlResource rn) {
-		switch (declarationExtensions.getOntConceptType(rn)) {
+		val type = try {
+			declarationExtensions.getOntConceptType(rn)
+		} catch (CircularDefinitionException e) {
+			e.definitionType
+		}
+		switch (type) {
 			case CLASS_PROPERTY: {
 				return SadlHighlightingConfiguration.OBJECT_PROPERTY_ID
 			}
@@ -109,14 +120,23 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 			case ANNOTATION_PROPERTY: {
 				return SadlHighlightingConfiguration.ANNOTATION_PROPERTY_ID
 			}
+			case RDF_PROPERTY: {
+				return SadlHighlightingConfiguration.RDF_PROPERTY_ID
+			}
 			case INSTANCE: {
 				return SadlHighlightingConfiguration.INSTANCE_ID
 			}
 			case CLASS: {
 				return SadlHighlightingConfiguration.CLASS_ID
 			}
+			case CLASS_LIST: {
+				return SadlHighlightingConfiguration.CLASS_ID
+			}
 			case DATATYPE: {
 				return SadlHighlightingConfiguration.RDFDATATYPE_ID
+			}
+			case DATATYPE_LIST: {
+				return SadlHighlightingConfiguration.CLASS_ID
 			}
 			case FUNCTION_DEFN: {
 				return SadlHighlightingConfiguration.FUNCTION_NAME_ID

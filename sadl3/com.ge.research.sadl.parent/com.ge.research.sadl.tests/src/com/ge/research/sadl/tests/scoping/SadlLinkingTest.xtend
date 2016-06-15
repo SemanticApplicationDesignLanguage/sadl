@@ -24,6 +24,10 @@ import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Ignore
+import org.eclipse.xtext.EcoreUtil2
+import com.google.common.base.Stopwatch
+import java.util.concurrent.TimeUnit
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -1086,6 +1090,45 @@ class SadlLinkingTest extends AbstractLinkingTest {
              [MyPlane] is an <Airplane> with <ns2:position> (a <ns2:Location> with <ns2:longitude> -72.025, with <ns2:latitude> 43.654, with <altitude> 1000).
 
         '''.assertLinking[sadl]
-        
+    }
+    
+    @Test
+    def void testRecursion() {
+        '''
+             uri "http://sadl.org/NS1.sadl" alias ns1.
+             
+             [Foo2] is a type of <Foo>.
+             [Foo3] is a type of <Foo2>.
+             [Foo] is a type of <Foo2>.
+         '''.assertLinking[sadl]
+    }
+    
+    @Test
+    def void testRecursion_01() {
+        '''
+             uri "http://sadl.org/NS1.sadl" alias ns1.
+             
+             [Foo] is a type of <Foo>.
+         '''.assertLinking[sadl]
+    }
+    
+    @Test
+    def void testImportPerformance() {
+    	for (i : 99..100) {
+    		val started = Stopwatch.createStarted
+    		val resource = '''
+	             uri "http://sadl.org/NS1.sadl«i»" alias ns«i».
+	             «FOR j : 1 ..< i»
+	             	import "http://sadl.org/NS1.sadl«j»" as ns«j»foo.
+	             «ENDFOR»
+	             
+	             «FOR k : 1..100»
+	                 Car«k» is a class described by position with values of type Location«k».
+	                 Location«k» is a class, described by longitude with values of type float, described by latitude with values of type float.
+	             «ENDFOR»
+	         '''.sadl
+	         EcoreUtil.resolveAll(resource)
+	         println("Iteration "+i+" Took : "+started.elapsed(TimeUnit.MILLISECONDS))
+    	}
     }
 }

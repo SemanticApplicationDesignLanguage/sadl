@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -28,6 +29,8 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.framework.Bundle;
+
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 
 public class ResourceManager {
 
@@ -43,7 +46,7 @@ public class ResourceManager {
 	public static final String ServicesConf_FN = "ServicesConfig.owl";
 	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
     public static final String OWLFILEEXT = "owl";
-  public static final String OWLFILEEXTWITHPREFIX = ".owl";
+    public static final String OWLFILEEXTWITHPREFIX = ".owl";
     public static final String SADLEXT = "sadl";
     public static final String SADLEXTWITHPREFIX = ".sadl";
 
@@ -87,13 +90,35 @@ public class ResourceManager {
 		URI rsrcuri = someProjectResource.getURI();
 		URI prjuri = null;
 		if (rsrcuri.isPlatform()) {
-			prjuri = rsrcuri.trimSegments(rsrcuri.segmentCount() - 2);
-			if (prjuri != null) {
-				return prjuri;
-			}
+			prjuri = rsrcuri.trimSegments(rsrcuri.segmentCount() - 2);	// project is second segment
 		}
-//		someProjectResource.getResourceSet().getURIConverter() ???
-		return null;
+		else{
+			//Added to handle automation, not platform
+			prjuri = findProjectUriByTrimming(rsrcuri);
+		}
+		return prjuri;
+    }
+    
+    private static URI findProjectUriByTrimming(URI uri){
+    	File file = new File(uri.toFileString());
+    	if(file != null){
+    		if(file.isDirectory()){
+    			for(String child : file.list()){
+    				if(child.endsWith(".project")){
+    					return uri;
+    				}
+    			}
+    			//Didn't find a project file in this directory, check parent
+    			if(file.getParentFile() != null){
+    				return findProjectUriByTrimming(uri.trimSegments(1));
+    			}
+    		}
+    		if(file.isFile() && file.getParentFile() != null){
+    			return findProjectUriByTrimming(uri.trimSegments(1));
+    		}
+    	}
+    	
+    	return null;
     }
     
 	public static URI validateAndReturnOwlUrlOfSadlUri(URI createFileURI) {
@@ -121,18 +146,28 @@ public class ResourceManager {
 		return null;
 	}
 
-	public static String getOwlFileExtension() {
-		// TODO Auto-generated method stub
-		return "owl";	// reasonable default?
+	public static String getOwlFileExtension(String format) {
+    	if (format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) || format.equals(IConfigurationManager.RDF_XML_FORMAT)) {
+    		return "owl";
+    	}
+    	else if (format.equals(IConfigurationManager.N3_FORMAT))	{
+    		return "n3";
+    	}
+    	else if (format.equals(IConfigurationManager.N_TRIPLE_FORMAT)) {
+    		return "nt";
+    	}
+    	else {
+    		return "owl";	// reasonable default?
+    	}
 	}
 
-    /**
-     * Method to determine, from preferences, the OWL file format to use
-     * @return -- the file extension, preceded by a period, specified by the format selected in preferences
-     */
-    public static String getOwlFileExtensionWithPrefix() {
-    	return "." + getOwlFileExtension();
-    }
+//    /**
+//     * Method to determine, from preferences, the OWL file format to use
+//     * @return -- the file extension, preceded by a period, specified by the format selected in preferences
+//     */
+//    public static String getOwlFileExtensionWithPrefix() {
+//    	return "." + getOwlFileExtension();
+//    }
 
 	public static boolean copyDefaultsFileToOwlModelsDirectory(String defaultsActual) {
 		// TODO Auto-generated method stub

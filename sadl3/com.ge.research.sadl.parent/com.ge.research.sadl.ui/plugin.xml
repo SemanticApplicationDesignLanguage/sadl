@@ -237,6 +237,45 @@
 	        uriExtension="sadl">
 	    </resourceServiceProvider>
 	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.external.ExternalEmfResourceFactory"
+			type="owl">
+		</parser>
+	</extension>
+	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
+	    <resourceServiceProvider
+	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.ui.external.ExternalEmfUIResourceServiceProvider"
+	        uriExtension="owl">
+	    </resourceServiceProvider>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.external.ExternalEmfResourceFactory"
+			type="nt">
+		</parser>
+	</extension>
+	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
+	    <resourceServiceProvider
+	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.ui.external.ExternalEmfUIResourceServiceProvider"
+	        uriExtension="nt">
+	    </resourceServiceProvider>
+	</extension>
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.external.ExternalEmfResourceFactory"
+			type="n3">
+		</parser>
+	</extension>
+	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
+	    <resourceServiceProvider
+	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.ui.external.ExternalEmfUIResourceServiceProvider"
+	        uriExtension="n3">
+	    </resourceServiceProvider>
+	</extension>
 	
 	<!-- marker definitions for com.ge.research.sadl.SADL -->
 	<extension

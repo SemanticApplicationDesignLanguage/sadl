@@ -7,18 +7,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.crypto.URIReference;
-import javax.xml.transform.URIResolver;
-
 import org.eclipse.emf.ecore.EObject;
 
 import com.ge.research.documentation.SadlErrorMessages;
+import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
-import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.ConceptName.RangeValueType;
-import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.ValidationAcceptor;
@@ -31,7 +28,6 @@ import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.ElementInList;
 import com.ge.research.sadl.sADL.Expression;
-import com.ge.research.sadl.sADL.Function;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
@@ -54,11 +50,8 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.UnionClass;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
@@ -247,10 +240,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return new TypeCheckInfo(constantConceptName, constantConceptName);
 			}
 		}
-		else if(expression instanceof Function){
-			ConceptName declarationConceptName = new ConceptName("TODO");
-			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
-		}
 		else if(expression instanceof ValueTable){
 			ConceptName declarationConceptName = new ConceptName("TODO");
 			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
@@ -382,7 +371,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			issueAcceptor.addError(SadlErrorMessages.UNIDENTIFIED.get(), expression);
 		}
 		
-		OntConceptType conceptType = declarationExtensions.getOntConceptType(qnm);
+		OntConceptType conceptType;
+		try {
+			conceptType = declarationExtensions.getOntConceptType(qnm);
+		} catch (CircularDefinitionException e) {
+			conceptType = e.getDefinitionType();
+			issueAcceptor.addError(e.getMessage(), expression);
+		}
 		if(conceptType.equals(OntConceptType.CLASS)){
 			ConceptName conceptName = new ConceptName(conceptUri);
 			conceptName.setType(ConceptType.ONTCLASS);

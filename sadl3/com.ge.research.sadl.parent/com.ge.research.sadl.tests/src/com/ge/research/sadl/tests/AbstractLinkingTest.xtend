@@ -38,6 +38,8 @@ import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
 import com.ge.research.sadl.sADL.SadlPropertyCondition
+import com.ge.research.sadl.external.ExternalEmfResource
+import org.eclipse.emf.ecore.resource.Resource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -46,13 +48,25 @@ abstract class AbstractLinkingTest {
 	@Inject XtextResourceSet currentResourceSet
 	
 	protected def XtextResource sadl(CharSequence contents) {
-		loadResource(computeURI('sadl'), contents)
+		loadResource(computeURI('sadl'), contents) as XtextResource
 	}
 	
-	protected def XtextResource loadResource(URI uri, CharSequence contents) {
+	protected def ExternalEmfResource owl(CharSequence contents) {
+		loadResource(computeURI('owl'), contents) as ExternalEmfResource
+	}
+	
+	protected def ExternalEmfResource nt(CharSequence contents) {
+		loadResource(computeURI('nt'), contents) as ExternalEmfResource
+	}
+	
+	protected def ExternalEmfResource n3(CharSequence contents) {
+		loadResource(computeURI('n3'), contents) as ExternalEmfResource
+	}
+	
+	protected def Resource loadResource(URI uri, CharSequence contents) {
 		val resource = currentResourceSet.createResource(uri)
 		resource.load(new StringInputStream(contents.toString), null)
-		return resource as XtextResource
+		return resource
 	}
 	
 	protected def URI computeURI(String ext) {

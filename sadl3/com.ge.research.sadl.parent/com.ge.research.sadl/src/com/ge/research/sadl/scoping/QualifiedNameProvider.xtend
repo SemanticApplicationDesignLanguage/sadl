@@ -26,6 +26,7 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.naming.IQualifiedNameConverter
+import org.eclipse.emf.common.util.URI
 
 class QualifiedNameProvider implements IQualifiedNameProvider {
 
@@ -37,6 +38,14 @@ class QualifiedNameProvider implements IQualifiedNameProvider {
 			return QualifiedName.create(obj.baseUri)
 		}
 		if (obj instanceof SadlResource) {
+			if (obj.isExternal) {
+				val uri = URI.createURI(obj.conceptUri)
+				if (uri.fragment === null) {
+					return null
+				} else {
+					return QualifiedName.create(uri.trimFragment.toString, uri.fragment)
+				}
+			}
 			val model = EcoreUtil2.getContainerOfType(obj, SadlModel)
 			val concreteName = obj.concreteName
 			if (concreteName.indexOf(':') != -1) {

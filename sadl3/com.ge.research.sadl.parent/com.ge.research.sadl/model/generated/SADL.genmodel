@@ -34,7 +34,6 @@
       <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/unsignedByte"/>
       <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/unsignedInt"/>
       <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/anySimpleType"/>
-      <genEnumLiterals ecoreEnumLiteral="SADL.ecore#//SadlDataType/data"/>
     </genEnums>
     <genClasses ecoreClass="SADL.ecore#//SadlModel">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlModel/baseUri"/>
@@ -219,8 +218,7 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlRangeRestriction">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/singleValued"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/list"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/lists"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/typeonly"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlRangeRestriction/range"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlIsInverseOf">
@@ -318,9 +316,9 @@
     <genClasses ecoreClass="SADL.ecore#//Constant">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Constant/constant"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//Function">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Function/arglist"/>
+    <genClasses ecoreClass="SADL.ecore#//Name">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Name/function"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Name/arglist"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//Name"/>
   </genPackages>
 </genmodel:GenModel>
