@@ -902,6 +902,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if(isDecimal(leftConceptName) && isInteger(rightConceptName)){
 					return true;
 				}
+				else if(isInteger(leftConceptName) && isDecimal(rightConceptName)){
+					// TODO does this need to be restricted to certain operators? This should work for numerical comparison...
+					return true;
+				}
 				else if(isDecimal(leftConceptName) && isDecimal(rightConceptName)){
 					return true;
 				}

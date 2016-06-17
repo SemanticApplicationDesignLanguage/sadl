@@ -168,7 +168,8 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * $Revision: 1.19 $ Last modified on   $Date: 2015/09/28 15:19:32 $
  */
 public class JenaReasonerPlugin extends Reasoner{
-    protected static final Logger logger = LoggerFactory.getLogger(JenaReasonerPlugin.class);
+    private static final String DEFAULT_TRANSLATOR_CLASSNAME = "com.ge.research.sadl.jena.translator.JenaTranslatorPlugin";
+	protected static final Logger logger = LoggerFactory.getLogger(JenaReasonerPlugin.class);
 	public static String ReasonerFamily="Jena-Based";
 	public static final String version = "$Revision: 1.19 $";
 	private static String ReasonerCategory = "Jena";
@@ -3122,6 +3123,11 @@ public class JenaReasonerPlugin extends Reasoner{
 	public boolean isInitialized() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public String getDefaultTranslatorClassName() {
+		return DEFAULT_TRANSLATOR_CLASSNAME;
 	}
 
 

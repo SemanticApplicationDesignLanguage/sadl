@@ -27,12 +27,52 @@ import org.eclipse.xtend.lib.annotations.Delegate
 import org.eclipse.xtext.resource.IResourceServiceProvider
 import org.eclipse.xtext.util.internal.EmfAdaptable
 import org.eclipse.xtext.validation.IResourceValidator
+import com.hp.hpl.jena.ontology.OntModelSpec
+import com.hp.hpl.jena.ontology.OntModel
 
 class ExternalEmfResource extends ResourceImpl {
-	@Accessors Model jenaModel
+	@Accessors OntModel jenaModel
 
 	override protected doLoad(InputStream inputStream, Map<?, ?> options) throws IOException {
-		jenaModel = ModelFactory.createDefaultModel.read(inputStream, URI.toString, getLang())
+//		val om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM) as OntModel
+//		om.documentManager.processImports = false
+//		om.read(inputStream, URI.toString, getLang())
+//		val clsitr = om.listNamedClasses
+//		while (clsitr.hasNext) {
+//			val cls = clsitr.next as OntClass
+//			// TODO add CLASS to index
+//		}
+//		val dpitr = om.listDatatypeProperties
+//		while (dpitr.hasNext) {
+//			val dp = dpitr.next as DatatypeProperty
+//			// TODO add DATATYPE_PROPERTY to index
+//		}
+//		val opitr = om.listObjectProperties
+//		while (opitr.hasNext) {
+//			val op = opitr.next as ObjectProperty
+//			// TODO add CLASS_PROPERTY to index
+//		}
+//		val institr = om.listIndividuals
+//		while (institr.hasNext) {
+//			val inst = institr.next as Individual
+//			if (inst.URIResource) {
+//				// TODO add INSTANCE to index
+//			}
+//		}
+//		val annitr = om.listAnnotationProperties
+//		while (annitr.hasNext) {
+//			val ann = annitr.next as AnnotationProperty
+//			// TODO add ANNOTATION_PROPERTY to index
+//		}
+//		val sitr = om.listStatements(null, RDF.type, RDF.Property)
+//		while (sitr.hasNext) {
+//			val rdfProp = sitr.nextStatement.subject as Resource
+//			// TODO add RDF_PROPERTY to index
+//		}
+//		jenaModel = ModelFactory.createDefaultModel.read(inputStream, URI.toString, getLang())
+		jenaModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM) as OntModel
+		jenaModel.documentManager.processImports = false
+		jenaModel.read(inputStream, URI.toString, getLang())
 		val rootMap = newHashMap()
 		val iterator = jenaModel.listSubjects
 		while (iterator.hasNext) {
@@ -142,6 +182,14 @@ class ExternalEmfResourceServiceProvider implements IResourceServiceProvider {
 	@Inject @Delegate IResourceServiceProvider delegate
 
 	override canHandle(URI uri) {
+		// exclude:
+		// 1) SadlBaseModel.owl
+		// 2) SadlListModel.owl
+		// 3) any file ending in ".metrics.owl"
+		val name = uri.lastSegment
+		if (name.endsWith(".metrics.owl") || name.endsWith("SadlBaseModel.owl") || name.endsWith("SadlListModel.owl")) {
+			return false;
+		}
 		return ExternalEmfResourceFactory.EXTERNAL_EXTENSIONS.contains(uri.fileExtension)
 	}
 

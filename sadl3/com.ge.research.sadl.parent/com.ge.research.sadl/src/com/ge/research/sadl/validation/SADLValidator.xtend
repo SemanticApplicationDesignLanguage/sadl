@@ -52,6 +52,7 @@ class SADLValidator extends AbstractSADLValidator {
 	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI"
 	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
 	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
+	public static String MISSING_MODEL_ALIAS = "MISSING_MODEL_ALIAS"
 	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
 	public static String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
 	public static String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
