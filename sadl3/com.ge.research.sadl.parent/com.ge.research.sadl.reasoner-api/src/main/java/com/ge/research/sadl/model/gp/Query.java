@@ -37,6 +37,7 @@ import java.util.List;
  *
  */
 public class Query extends SadlCommand {
+	private String fqName;
 	private String keyword = null;
 	private List<String> variables = null;
 	private List<GraphPatternElement> patterns = null;
@@ -214,5 +215,22 @@ public class Query extends SadlCommand {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public String getName() {
+		if (fqName != null) {
+			if (fqName.contains("#")) {
+				return fqName.substring(fqName.indexOf("#") + 1);
+			}
+		}
+		return fqName;
+	}
+
+	public String getFqName() {
+		return fqName;
+	}
+
+	public void setFqName(String fqName) {
+		this.fqName = fqName;
 	}
 }

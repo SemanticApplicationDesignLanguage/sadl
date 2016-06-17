@@ -72,6 +72,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected OntModel theJenaModel = null;
 	private DeclarationExtensions declarationExtensions = null;
 	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
+	private List<String> numericOperators = Arrays.asList("*","+","/","-","%");
 	private EObject defaultContext;
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>(); 
@@ -193,7 +194,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo leftTypeCheckInfo = getType(leftExpression);
 			TypeCheckInfo rightTypeCheckInfo = getType(rightExpression);
 			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
-				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo);
+				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, expression.getOp());
 				return false;
 			}
 			return true;
@@ -270,7 +271,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		try {
 			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
-				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo);
+				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, op);
 				return false;
 			}
 		} catch (InvalidNameException e) {
@@ -282,7 +283,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return true;
 	}
 
-	private void createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
+	private void createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, String operation) {
 		String leftName = leftTypeCheckInfo != null ? leftTypeCheckInfo.expressionType != null ? leftTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
 		String leftType = leftTypeCheckInfo != null ? leftTypeCheckInfo.typeCheckType != null ? leftTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
 		String leftRange = leftTypeCheckInfo != null ? leftTypeCheckInfo.rangeValueType != null ? leftTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
@@ -290,11 +291,29 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		String rightType = rightTypeCheckInfo != null ? rightTypeCheckInfo.typeCheckType != null ? rightTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
 		String rightRange = rightTypeCheckInfo != null ? rightTypeCheckInfo.rangeValueType != null ? rightTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
 		
-		errorMessageBuilder.append("Element '" + leftName + "' of type '" + leftType + "'");
+		if (!leftName.equals(leftType)) {
+			errorMessageBuilder.append("Element '" + leftName + "'");
+			errorMessageBuilder.append(" of type '" + leftType + "'");
+		}
+		else {
+			errorMessageBuilder.append("Element of type '" + leftName + "");
+		}
 		if(!leftRange.equals("UNIDENTIFIED")){
 			errorMessageBuilder.append(", with a range of '" + leftRange + "',");
 		}
-		errorMessageBuilder.append(" cannot be compared to element '" + rightName + "' of type " + rightType + "'");
+		if (comparisonOperators.contains(operation)) {
+			errorMessageBuilder.append(" cannot be compared (" + operation + ") with ");
+		}
+		else {
+			errorMessageBuilder.append(" cannot operate (" + operation + ") with ");
+		}
+		if (!rightName.equals(rightType)) {
+			errorMessageBuilder.append("element '" + rightName + "'");
+			errorMessageBuilder.append(" of type " + rightType + "'");
+		}
+		else {
+			errorMessageBuilder.append("element of type '" + rightName + "'");
+		}
 		if(!rightRange.equals("UNIDENTIFIED")){
 			errorMessageBuilder.append(", with a range of '" + rightRange + "'");
 		}
@@ -407,8 +426,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (binopreturn != null) {
 				return binopreturn;
 			}
-			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
-			return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, expression);
+			if (numericOperators.contains(((BinaryOperation) expression).getOp())) {
+				ConceptName decimalLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+				return new TypeCheckInfo(decimalLiteralConceptName, decimalLiteralConceptName, this, expression);
+			}
+			else {
+				// by default assume boolean binary operation
+				ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
+				return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, expression);
+			}
 		}
 		
 		issueAcceptor.addError("This expression cannot be decomposed into a known type", expression);
@@ -874,6 +900,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return true;
 				}
 				else if(isDecimal(leftConceptName) && isInteger(rightConceptName)){
+					return true;
+				}
+				else if(isInteger(leftConceptName) && isDecimal(rightConceptName)){
+					// TODO does this need to be restricted to certain operators? This should work for numerical comparison...
 					return true;
 				}
 				else if(isDecimal(leftConceptName) && isDecimal(rightConceptName)){
