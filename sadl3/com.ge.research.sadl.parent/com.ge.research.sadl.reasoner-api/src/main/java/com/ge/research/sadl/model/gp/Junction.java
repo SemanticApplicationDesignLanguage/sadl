@@ -32,7 +32,11 @@ public class Junction extends GraphPatternElement {
 
 	public static enum JunctionType {
 		Conj, Disj;
-		private String[] tokens;
+		public static final String OR_SYMBOL = "||";
+		public static final String AND_SYMBOL = "&&";
+		public static final String OR_ALPHA = "or";
+		public static final String AND_ALPHA = "and";
+		public String[] tokens;
 
 		private JunctionType setTokens(String... tokens) {
 			this.tokens = tokens;
@@ -59,8 +63,8 @@ public class Junction extends GraphPatternElement {
 		}
 		
 		static {
-			Conj.setTokens("&&", "and");
-			Disj.setTokens("||", "or");
+			Conj.setTokens(AND_SYMBOL, AND_ALPHA);
+			Disj.setTokens(OR_SYMBOL, OR_ALPHA);
 		}
 	}
 

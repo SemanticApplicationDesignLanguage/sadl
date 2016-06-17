@@ -26,6 +26,7 @@ import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
+import com.ge.research.sadl.sADL.QueryStatement
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
@@ -65,6 +66,9 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 				Name : {
 					// check what getName returns. If it returns itself or something of type Name
 					var highlightingId = SadlHighlightingConfiguration.VARIABLE_ID
+					if (v.eContainer instanceof QueryStatement) {
+						highlightingId = SadlHighlightingConfiguration.DEFAULT_ID
+					}
 					var node = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME).head
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}

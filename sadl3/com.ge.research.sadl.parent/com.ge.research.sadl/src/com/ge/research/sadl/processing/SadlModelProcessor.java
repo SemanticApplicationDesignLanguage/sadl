@@ -71,9 +71,11 @@ import com.google.inject.Inject;
 
 public abstract class SadlModelProcessor implements IModelProcessor {
     private static final Logger logger = Logger.getLogger(SadlModelProcessor.class);
-    protected Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
+    private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
     private List<IFTranslationError> errors = null;
-    protected Object encapsulatingTarget = null;	// when a query is in a test
+    private Object encapsulatingTarget = null;	// when a query is in a test
+    public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
+    private RulePart rulePart = RulePart.NOT_A_RULE;
 
 	@Inject
 	public DeclarationExtensions declarationExtensions;
@@ -188,19 +190,19 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 						while (lastPattern.getNext() != null && lastPattern instanceof TripleElement) {
 							lastPattern = (TripleElement) lastPattern.getNext();
 						}
-						if (encapsulatingTarget instanceof Test) {
-							((Test)encapsulatingTarget).setRhs(assignedNode);
-							((Test)encapsulatingTarget).setCompName(optype);
+						if (getEncapsulatingTarget() instanceof Test) {
+							((Test)getEncapsulatingTarget()).setRhs(assignedNode);
+							((Test)getEncapsulatingTarget()).setCompName(optype);
 						}
-						else if (encapsulatingTarget instanceof Query && target instanceof Test) {
-							((Test)target).setRhs(encapsulatingTarget);
-							((Test)target).setLhs(assignedNode);
-							((Test)target).setCompName(optype);
+						else if (getEncapsulatingTarget() instanceof Query && getTarget() instanceof Test) {
+							((Test)getTarget()).setRhs(getEncapsulatingTarget());
+							((Test)getTarget()).setLhs(assignedNode);
+							((Test)getTarget()).setCompName(optype);
 						}
-						else if (target instanceof Test && assignedNode != null) {
-							((Test)target).setLhs(pattern);
-							((Test)target).setRhs(assignedNode);
-							((Test)target).setCompName(optype);
+						else if (getTarget() instanceof Test && assignedNode != null) {
+							((Test)getTarget()).setLhs(pattern);
+							((Test)getTarget()).setRhs(assignedNode);
+							((Test)getTarget()).setCompName(optype);
 							((TripleElement) pattern).setType(TripleModifierType.None);
 							optype = BuiltinType.Equal;
 						}
@@ -212,18 +214,18 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 						}
 					}
 					else {
-						if (target instanceof Test) {
-							((Test)target).setLhs(lobj);
-							((Test)target).setRhs(assignedNode);
-							((Test)target).setCompName(optype);
+						if (getTarget() instanceof Test) {
+							((Test)getTarget()).setLhs(lobj);
+							((Test)getTarget()).setRhs(assignedNode);
+							((Test)getTarget()).setCompName(optype);
 						}
 					}
 				}
-				else if (encapsulatingTarget instanceof Test) {
-					((Test)encapsulatingTarget).setRhs(assignedNode);
-					((Test)encapsulatingTarget).setCompName(optype);
+				else if (getEncapsulatingTarget() instanceof Test) {
+					((Test)getEncapsulatingTarget()).setRhs(assignedNode);
+					((Test)getEncapsulatingTarget()).setCompName(optype);
 				}
-				else if (target instanceof Rule && pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.ITC) && 
+				else if (getTarget() instanceof Rule && pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.ITC) && 
 						((TripleElement)pattern).getSubject() instanceof VariableNode && assignedNode instanceof VariableNode) {
 					// in a rule of this type we just want to replace the pivot node variable
 					doVariableSubstitution(((TripleElement)pattern), (VariableNode)((TripleElement)pattern).getSubject(), (VariableNode)assignedNode);
@@ -295,8 +297,8 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		// if we get to here we want to actually create a BuiltinElement for the BinaryOpExpression
 		// However, if the type is equal ("is", "equal") and the left side is a VariableNode and the right side is a literal
 		//	and the VariableNode hasn't already been bound, change from type equal to type assign.
-		if (optype == BuiltinType.Equal && target instanceof Rule && lobj instanceof VariableNode && robj instanceof Literal && 
-				!variableIsBound((Rule)target, null, (VariableNode)lobj)) {
+		if (optype == BuiltinType.Equal && getTarget() instanceof Rule && lobj instanceof VariableNode && robj instanceof Literal && 
+				!variableIsBound((Rule)getTarget(), null, (VariableNode)lobj)) {
 			return createBinaryBuiltin(expr, "assign", robj, lobj);
 		}
 		return createBinaryBuiltin(expr, op, lobj, robj);
@@ -910,6 +912,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (octype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 			return NodeType.DataTypeProperty;
 		}
+		if (octype.equals(OntConceptType.RDF_PROPERTY)) {
+			return NodeType.PropertyNode;
+		}
 		if (octype.equals(OntConceptType.INSTANCE)) {
 			return NodeType.InstanceNode;
 		}
@@ -924,5 +929,29 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			return NodeType.InstanceNode;
 		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
+	}
+
+	protected Object getTarget() {
+		return target;
+	}
+
+	protected void setTarget(Object target) {
+		this.target = target;
+	}
+
+	protected Object getEncapsulatingTarget() {
+		return encapsulatingTarget;
+	}
+
+	protected void setEncapsulatingTarget(Object encapsulatingTarget) {
+		this.encapsulatingTarget = encapsulatingTarget;
+	}
+
+	protected RulePart getRulePart() {
+		return rulePart;
+	}
+
+	protected void setRulePart(RulePart rulePart) {
+		this.rulePart = rulePart;
 	}
 }

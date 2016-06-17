@@ -861,4 +861,9 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		this.initialized = initialized;
 	}
 
+	@Override
+	public String getDefaultTranslatorClassName() {
+		return "com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin";
+	}
+
 }
