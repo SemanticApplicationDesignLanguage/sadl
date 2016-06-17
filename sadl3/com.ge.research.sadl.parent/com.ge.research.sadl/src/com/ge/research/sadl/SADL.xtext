@@ -232,7 +232,7 @@ RuleStatement returns ExpressionScope :
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	'Ask:' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
+	'Ask' (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
 ;
 
 SelectExpression returns Expression :

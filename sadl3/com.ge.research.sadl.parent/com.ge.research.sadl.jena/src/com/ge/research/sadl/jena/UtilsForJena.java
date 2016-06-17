@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -491,7 +492,7 @@ public class UtilsForJena {
         
         // prepare the new content and return it
 		String pfBase = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager";
-		String format = "RDF/XML-ABBREV";
+		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
 		RDFWriter w = m.getWriter(format);
 		w.setProperty("xmlbase", pfBase);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

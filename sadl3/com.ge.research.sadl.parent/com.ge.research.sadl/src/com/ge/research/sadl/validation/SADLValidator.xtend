@@ -34,6 +34,9 @@ import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.sADL.SadlResource
+import java.util.List
+import java.util.ArrayList
+import com.ge.research.sadl.sADL.QueryStatement
 
 /**
  * This class contains custom validation rules. 
@@ -49,11 +52,20 @@ class SADLValidator extends AbstractSADLValidator {
 	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI"
 	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
 	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
+	public static String MISSING_MODEL_ALIAS = "MISSING_MODEL_ALIAS"
 	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
 	public static String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
+	public static String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
+		
+	protected var List<String> otherNames = new ArrayList	// names of other structures, i.e., rules and named queries
 	
+	new() {
+		otherNames.clear
+	}
+
 	@Check
 	def checkSadlModel(SadlModel model) {
+		initializeValidator()	// this class instance appears to be used repeatedly--need to clear this list for this resource usage this time
 		val thisUri = model.baseUri
 		val errMsg = SadlUtils.validateUri(thisUri);
 		if (errMsg != null) {
@@ -103,6 +115,12 @@ class SADLValidator extends AbstractSADLValidator {
 	
 	@Check
 	def checkRuleStatement(RuleStatement rule) {
+		// make sure rule name is unique
+		if (otherNames.contains(rule.name)) {
+			var errMsg = "The name '" + rule.name + "' in this namespace is already used."
+			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
+		}
+		otherNames.add(rule.name)
 		// make sure all variables used in the head are bound in the bod
 		val itr = EcoreUtil2.getAllContents(rule.thens).filter(Name).toList.iterator
 		while (itr.hasNext) {
@@ -114,6 +132,15 @@ class SADLValidator extends AbstractSADLValidator {
 		}
 	}
 	
+	@Check
+	def checkQueryStatement(QueryStatement query) {
+		// make sure rule name is unique
+		if (query.name != null && otherNames.contains(query.name)) {
+			var errMsg = "The name '" + query.name + "' in this namespace is already used."
+			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
+		}
+	}
+
 //	@Check
 //	def checkResourceName(SadlResource name) {
 //		val nm = declarationExtensions.getConcreteName(name)
@@ -122,4 +149,10 @@ class SADLValidator extends AbstractSADLValidator {
 //		}
 //	}
 
+	/**
+	 * This method initializes this instance of this validator class for use on a specified Resource
+	 */
+	def initializeValidator() {
+		otherNames.clear
+	}
 }

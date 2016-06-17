@@ -218,6 +218,12 @@ public interface IReasoner {
 	public String getReasonerFamily();
 	
 	/**
+	 * Method to get the default translator class name
+	 * @return -- the name of the default translator for this reasoner
+	 */
+	public String getDefaultTranslatorClassName();
+	
+	/**
 	 * Method to obtain the source code control version of this reasoner.
 	 *  
 	 * @return - source code control version

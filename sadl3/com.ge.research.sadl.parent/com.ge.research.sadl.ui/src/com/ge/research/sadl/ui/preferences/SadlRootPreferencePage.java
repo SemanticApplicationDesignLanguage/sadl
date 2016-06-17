@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
@@ -68,6 +69,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         addField(new BooleanFieldEditor(SadlPreferences.DEEP_VALIDATION_OFF.getId(), "Disable Deep Validation of Model", getFieldEditorParent()));
         addField(new StringFieldEditor(SadlPreferences.GRAPH_VIZ_PATH.getId(), "GraphViz bin folder", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
+	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
+		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ", getFieldEditorParent()));
     }
 	
 	@Override

@@ -336,7 +336,12 @@ public class ConfigurationManager implements IConfigurationManager {
 					}
 				}
 			}
-			
+		}
+		if (getReasoner() != null) {
+			String transClsName = getReasoner().getDefaultTranslatorClassName();
+			if (transClsName != null) {
+				return getTranslatorInstanceByClass(transClsName);
+			}
 		}
 		return null;
 	}
@@ -494,6 +499,9 @@ public class ConfigurationManager implements IConfigurationManager {
 				if (cnobj instanceof Literal) {
 					translatorClassName = ((Literal)cnobj).getLexicalForm();
 				}
+			}
+			if (translatorClassName == null) {
+				translatorClassName = reasonerInst.getDefaultTranslatorClassName();
 			}
 		}
 		if (translatorClassName == null) {
