@@ -99,7 +99,7 @@ public class ResourceManager {
 		return prjuri;
     }
     
-    private static URI findProjectUriByTrimming(URI uri){
+    public static URI findProjectUriByTrimming(URI uri){
     	String fstr = uri.toFileString();
     	if (fstr != null) {
 	    	File file = new File(uri.toFileString());
@@ -119,6 +119,7 @@ public class ResourceManager {
 	    			return findProjectUriByTrimming(uri.trimSegments(1));
 	    		}
 	    	}
+
     	}
     	
     	return null;
