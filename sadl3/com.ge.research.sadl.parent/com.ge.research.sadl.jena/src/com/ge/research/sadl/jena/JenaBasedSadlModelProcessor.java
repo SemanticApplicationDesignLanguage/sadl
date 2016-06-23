@@ -2913,7 +2913,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
 			ObjectProperty oprop = getTheJenaModel().getObjectProperty(propuri);
 			if (oprop == null) {
-				addError(SadlErrorMessages.PROP_NOT_EXIST.get(propuri), prop);
+				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			}
 			else {
 				if (val instanceof SadlInstance) {
@@ -2948,7 +2948,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			DatatypeProperty dprop = getTheJenaModel().getDatatypeProperty(propuri);
 			if (dprop == null) {
 //				dumpModel(getTheJenaModel());
-				addError(SadlErrorMessages.PROP_NOT_EXIST.get(propuri), prop);
+				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			}
 			else {
 				if (val instanceof SadlExplicitValue) {
@@ -2966,7 +2966,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (type.equals(OntConceptType.ANNOTATION_PROPERTY)) {
 			AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(propuri);
 			if (annprop == null) {
-				addError(SadlErrorMessages.PROP_NOT_EXIST.get(propuri), prop);
+				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			}
 			else {
 				RDFNode rsrcval;

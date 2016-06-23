@@ -8,19 +8,21 @@ import java.util.ResourceBundle;
 public class ErrorMessage {
 	private String msg;
 	private String description;
-	public final static String SADL_MSG = "sadl";
-	public final static String REQ_MSG = "req";
 	
-	public ErrorMessage(String msg, String sadlOrReq) {
-		ResourceBundle msgBundle = ResourceBundle.getBundle(sadlOrReq + "Messages");
+	public ErrorMessage(String msg) {
+		ResourceBundle msgBundle = ResourceBundle.getBundle("errorMessages");
 		
 		this.msg = msgBundle.getString(msg);
 		try {
 			this.description = msgBundle.getString(msg + ".description");
 		} catch(MissingResourceException e) {
-			System.out.println("  WARNING: Description missing for message '" + msg + "'");
 			this.description = "<em>No description provided</em>";
 		}
+	}
+	
+	public ErrorMessage(String msg, String desc) {
+		this.msg = msg;
+		this.description = desc;
 	}
 	
 	public String get(String... args) {

@@ -15,7 +15,7 @@
 	</properties>
 	<modules>
 		<module>com.ge.research.sadl.xtextgenerator</module>
-		<module>com.ge.research.sadl.utils</module>
+		<module>com.ge.research.document-gen</module>
 		<module>com.ge.research.sadl.reasoner-api</module>
 		<module>com.ge.research.sadl.reasoner-impl</module>
 		<module>com.ge.research.jena</module>

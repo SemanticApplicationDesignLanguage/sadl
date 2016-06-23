@@ -103,9 +103,9 @@
 			<version>3.2.9</version>
 		</dependency>
 		<dependency>
-			<groupId>com.ge.research.sadl.utils</groupId>
-			<artifactId>utils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>com.ge.research.document-gen</groupId>
+			<artifactId>document-gen</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
