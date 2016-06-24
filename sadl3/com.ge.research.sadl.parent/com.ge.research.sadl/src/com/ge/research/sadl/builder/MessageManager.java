@@ -1,48 +1,36 @@
 package com.ge.research.sadl.builder;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import org.eclipse.emf.ecore.resource.Resource;
 
 public class MessageManager {
 	public static enum MessageType { ERROR, WARN, INFO }
 
 	public class HyperlinkInfo {
-		private URI linkFile;
+		private Resource linkResource;
 		private int fileLineNumber;
 		private int fileOffset;
 		private int fileLength;
 		private int offsetInLink;
 		private int linkLength;
 		
-		public HyperlinkInfo(String fname, int lineno, int foffset, int flength) {
-			this(fname, lineno, foffset, flength, -1, -1);
+		public HyperlinkInfo(Resource res, int lineno, int foffset, int flength) {
+			this(res, lineno, foffset, flength, -1, -1);
 		}
 		
-		public HyperlinkInfo(String fname, int lineno, int foffset, int flength, int offsetInLnk, int lnkLength) {
-			URI location;
-			try {
-				SadlUtils su = new SadlUtils();
-				location = new URI(su.fileNameToFileUrl(fname));
-				linkFile = location;
-			} catch (URISyntaxException e) {
-				linkFile = null;
-				e.printStackTrace();
-			}
-			finally {
-				fileLineNumber = lineno;
-				fileOffset = foffset;
-				fileLength = flength;
-				offsetInLink = offsetInLnk;
-				linkLength = lnkLength;
-			}
+		public HyperlinkInfo(Resource res, int lineno, int foffset, int flength, int offsetInLnk, int lnkLength) {
+			linkResource = res;
+			fileLineNumber = lineno;
+			fileOffset = foffset;
+			fileLength = flength;
+			offsetInLink = offsetInLnk;
+			linkLength = lnkLength;
 		}
 		
-		public URI getFile() {
-			return linkFile;
+		public Resource getLinkResource() {
+			return linkResource;
 		}
 		
 		public int getFileLineNumber() {

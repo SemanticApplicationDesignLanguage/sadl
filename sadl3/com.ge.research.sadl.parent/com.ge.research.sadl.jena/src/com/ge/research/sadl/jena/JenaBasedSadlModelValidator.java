@@ -180,6 +180,39 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		this.declarationExtensions = declarationExtensions;
 	}
 	
+	public boolean validate(Expression expr, String xsdType, String op, StringBuilder errorMessageBuilder) {
+		List<String> operations = Arrays.asList(op.split("\\s+"));
+		TypeCheckInfo exprTypeCheckInfo;
+		try {
+			exprTypeCheckInfo = getType(expr);		
+			ConceptName numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
+			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
+			TypeCheckInfo xsdTypeCheckInfo =  new TypeCheckInfo(numberLiteralConceptName, numberLiteralConceptName, this, null);				
+			if(!compareTypes(operations, expr, null, exprTypeCheckInfo, xsdTypeCheckInfo)){
+				createErrorMessage(errorMessageBuilder, exprTypeCheckInfo, xsdTypeCheckInfo, op);
+				return false;
+			}
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DontTypeCheckException e) {
+			return true;
+		}
+		return true;
+	}
+	
 	public boolean validate(BinaryOperation expression, StringBuilder errorMessageBuilder) {
 		setDefaultContext(expression);
 		Expression leftExpression = expression.getLeft();

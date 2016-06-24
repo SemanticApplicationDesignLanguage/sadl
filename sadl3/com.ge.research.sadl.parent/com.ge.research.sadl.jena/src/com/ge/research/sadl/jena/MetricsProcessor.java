@@ -103,8 +103,10 @@ public class MetricsProcessor {
 		w.write(getTheJenaModel().getBaseModel(), out, baseUri);
 		out.close();
 		SadlUtils su = new SadlUtils();
-		configMgr.addMapping(su.fileNameToFileUrl(filename), baseUri, null, false, "SRL_Metrics");
-		configMgr.saveOntPolicyFile();
+		synchronized (this) {
+			configMgr.addMapping(su.fileNameToFileUrl(filename), baseUri, null, false, "SRL_Metrics");
+			configMgr.saveOntPolicyFile();			
+		}
 		return true;
 	}
 	

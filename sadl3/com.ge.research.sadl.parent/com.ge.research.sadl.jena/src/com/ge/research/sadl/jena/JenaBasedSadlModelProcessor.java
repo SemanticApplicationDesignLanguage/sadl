@@ -47,6 +47,7 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.util.CancelIndicator;
+import org.eclipse.xtext.util.IAcceptor;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.CheckType;
 import org.slf4j.Logger;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.DeclarationExtensions;
@@ -404,7 +406,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	   	logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
 	}
 	
-	private void updateMappingFile(IFileSystemAccess2 fsa, String filename, String modelUri) {
+	private synchronized void updateMappingFile(IFileSystemAccess2 fsa, String filename, String modelUri) {
 		String pfileContent = fsa.readTextFile(UtilsForJena.ONT_POLICY_FILENAME).toString();
 		URI actUrl = fsa.getURI(filename);
 		//TODO this has to be converted to actual url? (or just save relative?)
@@ -4632,7 +4634,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	@Override
-	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
+	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, IAcceptor<SadlMessage> resultAcceptor, ProcessorContext context) {
 		setCancelIndicator(cancelIndicator);
 		if (resource.getContents().size() < 1) {
 			return;

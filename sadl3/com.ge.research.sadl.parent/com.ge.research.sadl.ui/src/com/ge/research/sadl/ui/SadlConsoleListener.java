@@ -52,10 +52,10 @@ public class SadlConsoleListener implements IDocumentListener {
 							linkLength = info.getLinkLength();
 						}
 						if (linkOffset >= 0 && linkLength > 0 && info.getFileOffset() >= 0 && info.getFileLength() > 0) {
-							IPath path = new Path(info.getFile().toString());
+							IPath path = new Path(info.getLinkResource().toString());
 							IFile file = null; //project.getFile(path);
-							FileLink fileLink = new FileLink(file, null, info.getFileOffset(), info.getFileLength(), info.getFileLineNumber());
-							mc.addHyperlink(fileLink, linkOffset, linkLength);
+//							FileLink fileLink = new FileLink(file, null, info.getFileOffset(), info.getFileLength(), info.getFileLineNumber());
+//							mc.addHyperlink(fileLink, linkOffset, linkLength);
 						}
 //						if (linkOffset > lastOffset) {
 //							lastOffset = linkOffset;
