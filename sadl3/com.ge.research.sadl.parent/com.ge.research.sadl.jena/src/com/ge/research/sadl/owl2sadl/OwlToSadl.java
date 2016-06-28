@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.jena.UtilsForJena;
@@ -405,7 +406,7 @@ public class OwlToSadl {
 	}
 	
 	private OntModel prepareEmptyOntModel(String modelFolderPathname) throws ConfigurationException {
-		IConfigurationManagerForIDE cm = new ConfigurationManagerForIDE(modelFolderPathname, ConfigurationManagerForIDE.getOWLFormat());
+		IConfigurationManagerForIDE cm = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname, ConfigurationManagerForIDE.getOWLFormat());
 		OntDocumentManager owlDocMgr = cm.getJenaDocumentMgr();
 		OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
 		setSpec(spec);

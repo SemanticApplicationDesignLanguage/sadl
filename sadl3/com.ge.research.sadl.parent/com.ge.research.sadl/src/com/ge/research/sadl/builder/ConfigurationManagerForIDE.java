@@ -141,35 +141,46 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 	}
 
-/**
-     * Call with a list of SADL files to see if all are mapped and if not add the mappings
-     * 
-     * @param sadlFiles
-     * @return - true if mappings are added (changes occur)
-     * @throws CoreException 
-     * @throws IOException 
-     */
-    private synchronized boolean setMappingsFromProjectFiles(List<File> sadlFiles) throws CoreException, IOException {
-    	boolean bChange = false;
-        for (int i = 0; sadlFiles != null && i < sadlFiles.size(); i++) {
-        	File sadlfile = sadlFiles.get(i);
-        	try {
-	        	URI altUrl = ResourceManager.validateAndReturnOwlUrlOfSadlUri(URI.createFileURI(sadlfile.getAbsolutePath()));
-	        	String publicUri = ResourceManager.getModelNameFromSadlFile(sadlfile);
-	        	if (publicUri != null) {
-	        		if (addMapping(altUrl.toString(), publicUri, null, true, SADL)) {
-	        			bChange = true;
-	        		}
-	        	}
-        	}
-        	catch (Exception e) {
-        		throw new IOException("Error finding mappings for SADL file '" + sadlfile.getAbsolutePath() + "'", e);
-        	}
-        }
-
-    	return bChange;
-    }
-
+	@Override
+	public synchronized boolean addMappings(List<String[]> mappings, boolean bKeepPrefix, String source)
+			throws ConfigurationException, IOException, URISyntaxException {
+		boolean bChanged = false;
+		for (int i = 0; i < mappings.size(); i++) {
+			String[] mapping = mappings.get(i);
+			if (addMapping(mapping[0], mapping[1], mapping[2], bKeepPrefix, source, false)) {
+				bChanged = true;
+			}
+		}
+		if (bChanged) {
+			logger.debug("saving mapping file on change after add");
+			super.saveOntPolicyFile();
+		}
+		return bChanged;
+	}
+	
+	@Override
+	public synchronized boolean addMapping(String altUrl, String publicUri,
+			String globalPrefix, boolean bKeepPrefix, String source) throws ConfigurationException, IOException, URISyntaxException {
+		boolean bChanged = super.addMapping(altUrl, publicUri, globalPrefix, bKeepPrefix, source);
+		if (bChanged) {
+			logger.debug("saving mapping file on change after add");
+			super.saveOntPolicyFile();
+		}
+		return bChanged;
+	}
+	
+	private synchronized boolean addMapping(String altUrl, String publicUri,
+			String globalPrefix, boolean bKeepPrefix, String source, boolean bSave) throws ConfigurationException,
+			IOException, URISyntaxException {
+		boolean bChanged = false;
+		bChanged = super.addMapping(altUrl, publicUri, globalPrefix, bKeepPrefix, source);
+		if (bChanged && bSave) {
+			logger.debug("saving mapping file on change after add");
+			super.saveOntPolicyFile();
+		}
+		return bChanged;
+	}
+	
 	/**
 	 * Call this method to add a new mapping or update an existing one for a given altURL. (The assumption is that
 	 * the file name will not change but the model name (uri) may be easily changed.)
@@ -180,6 +191,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	 * @throws ConfigurationException 
 	 */
 	public synchronized boolean addMapping(Resource altv, Resource pubv, Literal prefix, String source) throws ConfigurationException, IOException, URISyntaxException {
+		logger.debug("addMapping: " + altv.getURI() + " <--> " + pubv.getURI() + "(prefix: " + prefix + ")");
 		boolean bChanged = false;
 		boolean mappingFound = false;
 		List<Statement> pendingDeletions = null;
@@ -267,8 +279,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
     		                	bChanged = true;
     						}
     					}
-    					subj.addProperty(publicUrlProp, pubv);
-    					bChanged = true;
+    					else {
+    						subj.addProperty(publicUrlProp, pubv);
+    						bChanged = true;
+    					}
     					
     	                Statement s3 = subj.getProperty(prefixProp);
     	                if (s3 != null) {
@@ -369,6 +383,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		mappings.put(rdfNodeToString(pubv), rdfNodeToString(altv));
 		return bChanged;
 	}
+	
+	@Override
+	public boolean saveOntPolicyFile() {
+		System.err.println("ConfigurationManagerForIDE should not call saveOntPolicyFile as changes are saved in synchronized methods that make changes.");
+		return false;
+	};
 
 //	public void convertProjectToTDB(Dataset repoDataset, String owlModelsFolderPath) throws IOException, URISyntaxException, ConfigurationException {
 //		File modelsFolder = new File(owlModelsFolderPath);
@@ -464,139 +484,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	protected void finalize() throws Throwable {
 		
     }
-
-    /**
-     * Clean up mappings file by deleting all SADL-generated entries that aren't still good files
-     * 
-     * @param configFilename
-     * @param sadlFiles 
-     */
-	public synchronized void cleanAndPopulatePolicyFile(String configFilename, List<File> sadlFiles) {
-        String uri = null ;
-        InputStream in = null;
-        try {
-            Object[] returned = findInputStream(configFilename);
-            if (returned != null && returned[0] != null) {
-                in =  (InputStream) returned[0];
-                uri = (String) returned[1];
-                logger.debug("Found existing ont-policy file at '" + uri + "'; ready to clean file.");
-	            if (in != null) {	            	
-	                boolean bChanged = false;
-	                setMappingModel(ModelFactory.createDefaultModel()) ;
-	                String syntax = FileUtils.guessLang(uri);
-	                getMappingModel().read( in, null, syntax );
-	                
-	                // List subjects will be a list of all of the entries created by SADL
-	                List<com.hp.hpl.jena.rdf.model.Resource> subjects = new ArrayList<com.hp.hpl.jena.rdf.model.Resource>();
-	                // add all entries to subjects List that were created by SADL
-	                StmtIterator sitr = getMappingModel().listStatements(null, createdBy, sadlNode);
-	                while (sitr.hasNext()) {
-	                    Statement s = sitr.nextStatement();
-	                    subjects.add(s.getSubject());
-	                }
-	                
-	                // for each Resource in subjects List, check if the altUrl is valid and if not
-	                //  remove all triples for that subject
-	                //  Note: there should not be multiple entries for the same altUrl as the adding method
-	                //   should check and make sure that never happens
-	                //  Note: there should also not be multiple subjects with the same altUrl.
-	                for (int i = 0; subjects != null && i < subjects.size(); i++) {
-	                	com.hp.hpl.jena.rdf.model.Resource subject = subjects.get(i);
-	                	Statement altStmt = subject.getProperty(altUrlProp);
-	                	boolean subjectValid = true;
-	                	if (altStmt == null) {
-	                		subjectValid = false;
-	                	}
-	                	else {
-		                	RDFNode altUrl = altStmt.getObject();
-		                	// now make sure that there is an actual OWL file at this altUrl; if not delete the entry as it is obsolete
-		                	String fn;
-		                	try {
-		                		fn =fileUrlToFileName(altUrl.toString());
-			                	File altFn = new File(fn);
-			                	if (altFn.exists() ) {
-			                		// now make sure there aren't any old entries for this file but never delete a mapping for defaults.owl as 
-			                		//	this will cause build problems if it is still used
-			                		if (!altFn.getName().equals(IConfigurationManager.ACUITY_DEFAULTS_OWL_FN)) {	
-				                		StmtIterator sitr2 = getMappingModel().listStatements(null, altUrlProp, altUrl);
-				                		int cnt = 0;
-				                		List<Statement> extras = null;
-				                		while (sitr2.hasNext()) {
-			                				Statement badStmt = sitr2.nextStatement();
-				                			if (cnt > 0) {
-				                				Resource badSubject = badStmt.getSubject();
-				                				if (extras == null) {
-				                					extras = new ArrayList<Statement>();
-				                				}
-				                				StmtIterator sitr3 = getMappingModel().listStatements(badSubject, (Property)null, (RDFNode)null);
-				                				while (sitr3.hasNext()) {
-				                					extras.add(sitr3.nextStatement());
-				                				}
-				                			}
-				                			cnt++;
-				                		}
-				                		if (extras != null) {
-				                			for (int j = 0; j < extras.size(); j++) {
-				                				getMappingModel().remove(extras.get(j));
-				                				bChanged = true;
-				                			}
-				                		}
-			                		}
-			                	}
-			                	else {
-			                		subjectValid = false;
-			                	}
-		                	}
-		                	catch (Exception e) {
-		                		subjectValid = false;
-		                	}
-	                	}
-	                	if (!subjectValid) {
-		                	getMappingModel().removeAll(subject, null, null);
-				            bChanged = true;
-		               	}
-	                }
-	                
-	                // now make sure that every SADL file has an entry in the policy model
-	                boolean additions = setMappingsFromProjectFiles(sadlFiles);
-	                
-	                if (bChanged || additions) {
-	                    FileOutputStream fps = null;
-	                    try {
-	                        // save model
-	                        fps = new FileOutputStream(uri);
-	                        getMappingModel().write(fps, RDF_XML_ABBREV_FORMAT);
-	                    }
-	                    catch (Exception e) {
-	                    	logger.error("Failed to save ont-policy file", e);
-	                    }
-	                    finally {
-	                        if (fps != null) {
-	                            try {
-									fps.close();
-								} catch (IOException e) {
-									logger.error("Failed to close ont-policy file", e);
-								}
-	                        }
-	                    }
-	                }
-	            }
-            }
-        }
-        catch (Exception e) {
-        	logger.error("Failed to read or update ont-policy file", e);
-        }
-        finally {
-            if (in != null) {
-                try {
-					in.close();
-				} catch (IOException e) {
-					logger.error("Failed to close ont-policy input file", e);
-				}
-            }
-        }
-
-	}
 
 	/**
 	 * Call this method to set the mapping for the "defaults.owl" model. This should be called if a default is added
@@ -974,36 +861,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return false;
 	}
 
-	@Override
-	public boolean removeMappingByActualUrl(String canonicalPath) throws URISyntaxException {
-		boolean bChanged = false;
-		String altUrl = getSadlUtils().fileNameToFileUrl(canonicalPath);
-		StmtIterator sitr2 = getMappingModel().listStatements(null, altUrlProp, getMappingModel().getResource(altUrl));
-		List<Statement> extras = null;
-		while (sitr2.hasNext()) {
-			Statement badStmt = sitr2.nextStatement();
-			Resource badSubject = badStmt.getSubject();
-			if (extras == null) {
-				extras = new ArrayList<Statement>();
-			}
-			StmtIterator sitr3 = getMappingModel().listStatements(badSubject, (Property)null, (RDFNode)null);
-			while (sitr3.hasNext()) {
-				extras.add(sitr3.nextStatement());
-			}
-		}
-		if (extras != null) {
-			for (int j = 0; j < extras.size(); j++) {
-				getMappingModel().remove(extras.get(j));
-				bChanged = true;
-			}
-		}
-		if (bChanged) {
-			setMappingChanged(true);
-		}
-		return bChanged;
-	}
-
 	private String getDefaultPolicyFileContent() {
+		logger.debug("Getting default policy file content");
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\"?>\n");
 		sb.append("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\" xmlns=\"http://jena.hpl.hp.com/schemas/2003/03/ont-manager#\" xml:base=\"http://jena.hpl.hp.com/schemas/2003/03/ont-manager#\">\n");
@@ -1025,5 +884,5 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();
 	}
-	
+
 }

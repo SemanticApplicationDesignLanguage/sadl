@@ -112,10 +112,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 		w.write(getTheJenaModel().getBaseModel(), out, baseUri);
 		out.close();
 		SadlUtils su = new SadlUtils();
-		synchronized (this) {
-			configMgr.addMapping(su.fileNameToFileUrl(filename), baseUri, null, false, "SRL_Metrics");
-			configMgr.saveOntPolicyFile();			
-		}
+		configMgr.addMapping(su.fileNameToFileUrl(filename), baseUri, null, false, "SRL_Metrics");
 		return true;
 	}
 	

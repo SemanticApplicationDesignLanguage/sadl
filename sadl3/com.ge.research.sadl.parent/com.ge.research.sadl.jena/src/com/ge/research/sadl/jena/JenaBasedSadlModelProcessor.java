@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
@@ -309,7 +310,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
 		generationInProgress  = true;
 		setProcessorContext(context);
-		Map<String,String> newMappings = new HashMap<String,String>();
+		List<String[]> newMappings = new ArrayList<String[]>();
     	logger.debug("onGenerate called for Resource '" + resource.getURI() + "'");
 //    	System.out.println("onGenerate called for Resource '" + resource.getURI() + "'");
 		// save the model
@@ -362,7 +363,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						w2.write(sadlBaseModel.getBaseModel(), out2, SADL_BASE_MODEL_URI);
 						CharSequence seq2 = new String(out2.toByteArray(), charset);
 						fsa.generateFile(fn, seq2);
-						newMappings.put(SADL_BASE_MODEL_URI, su.fileNameToFileUrl(modelFolder + "/" + fn));
+						String[] mapping = new String[3];
+						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+						mapping[1] = SADL_BASE_MODEL_URI;
+						mapping[2] = null;
+						newMappings.add(mapping);
 					}
 				}
 				if(sadlListModel != null) {
@@ -374,7 +379,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						w2.write(sadlListModel.getBaseModel(), out2, SADL_LIST_MODEL_URI);
 						CharSequence seq2 = new String(out2.toByteArray(), charset);
 						fsa.generateFile(fn, seq2);
-						newMappings.put(SADL_LIST_MODEL_URI, su.fileNameToFileUrl(modelFolder + "/" + fn));
+						String[] mapping = new String[3];
+						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+						mapping[1] = SADL_LIST_MODEL_URI;
+						mapping[2] = null;
+						newMappings.add(mapping);
 					}
 				}
 				
@@ -382,8 +391,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	//			if (!fsa.isFile(UtilsForJena.ONT_POLICY_FILENAME)) {
 	//				fsa.generateFile(UtilsForJena.ONT_POLICY_FILENAME, getDefaultPolicyFileContent());
 	//			}
-			
-				newMappings.put(getModelName(), su.fileNameToFileUrl(modelFolder + "/" + owlFN));
+
+				String[] mapping = new String[3];
+				mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + owlFN);
+				mapping[1] = getModelName();
+				mapping[2] = null;
+
+				newMappings.add(mapping);
 				
 				// Output the Rules and any other knowledge structures via the specified translator
 				List<ModelError> results = translateAndSaveModel(resource, owlFN, format, newMappings);
@@ -399,18 +413,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	   	logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
 	}
 	
-	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType, Map<String,String> newMappings) {
+	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType, List<String[]> newMappings) {
 		String modelFolderPathname = getModelFolderPath(resource);
 		try {
 //			IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(modelFolderPathname , _repoType);
 			if (newMappings != null) {
-				Iterator<String> mitr = newMappings.keySet().iterator();
-				while (mitr.hasNext()) {
-					String publicUri = mitr.next();
-					String altUrl = newMappings.get(publicUri);
-					getConfigMgr(resource, _repoType).addMapping(altUrl, publicUri, null, true, "SADL");
-				}
-				getConfigMgr(resource, _repoType).saveOntPolicyFile();
+				getConfigMgr(resource, _repoType).addMappings(newMappings, true, "SADL");
 			}
 			ITranslator translator = getConfigMgr(resource, _repoType).getTranslator();
 			List<ModelError> results = translator
@@ -797,19 +805,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private OntModel prepareEmptyOntModel(Resource resource) throws ConfigurationException {
-		IConfigurationManagerForIDE cm = getConfigMgr(resource, getProcessorContext().getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT));
-		OntDocumentManager owlDocMgr = cm.getJenaDocumentMgr();
-		OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
-		setSpec(spec);
-		String modelFolderPathname = getModelFolderPath(resource);
-		if (modelFolderPathname != null && !modelFolderPathname.startsWith("__synthetic")) {
-			spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
+		try {
+			IConfigurationManagerForIDE cm = getConfigMgr(resource, getProcessorContext().getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT));
+			OntDocumentManager owlDocMgr = cm.getJenaDocumentMgr();
+			OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
+			setSpec(spec);
+			String modelFolderPathname = getModelFolderPath(resource);
+			if (modelFolderPathname != null && !modelFolderPathname.startsWith("__synthetic")) {
+				spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
+			}
+			if (owlDocMgr != null) {
+				spec.setDocumentManager(owlDocMgr);
+				owlDocMgr.setProcessImports(true);
+			}
+			return ModelFactory.createOntologyModel(spec);
 		}
-		if (owlDocMgr != null) {
-			spec.setDocumentManager(owlDocMgr);
-			owlDocMgr.setProcessImports(true);
+		catch (ConfigurationException e) {
+			e.printStackTrace();
+			throw e;
 		}
-		return ModelFactory.createOntologyModel(spec);
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new ConfigurationException(e.getMessage(), e);
+		}
 	}
 	
 	private void setProcessorContext(ProcessorContext ctx) {
@@ -4882,10 +4900,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					resource.getURI().toString().startsWith("synthetic")) ||
 							resource.getURI().toString().startsWith("__synthetic")) {
 				modelFolderPathname = null;
-				configMgr = new ConfigurationManagerForIDE(modelFolderPathname, format, true);
+				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname, format, true);
 			}
 			else {
-				configMgr = new ConfigurationManagerForIDE(modelFolderPathname , format);
+				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname , format);
 			}
 		}
 		return configMgr;

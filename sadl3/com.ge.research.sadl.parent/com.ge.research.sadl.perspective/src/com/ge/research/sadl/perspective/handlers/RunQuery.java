@@ -50,6 +50,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.external.ExternalEmfResource;
@@ -131,7 +132,7 @@ public class RunQuery extends SadlActionHandler {
 				File owlFile = trgtFile.getLocation().toFile();
 				String modelFolderUri = mfFolder.getCanonicalPath();
 				final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-				IConfigurationManagerForIDE configMgr = new ConfigurationManagerForIDE(mfFolder.getCanonicalPath(), format);
+				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(mfFolder.getCanonicalPath(), format);
 				IReasoner reasoner = configMgr.getReasoner();
 				if (!reasoner.isInitialized()) {
 					reasoner.setConfigurationManager(configMgr);
