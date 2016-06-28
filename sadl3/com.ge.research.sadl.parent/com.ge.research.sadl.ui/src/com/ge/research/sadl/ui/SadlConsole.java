@@ -151,27 +151,27 @@ public final class SadlConsole implements IAcceptor {
 			int initialLength = mc.getDocument().getLength();
 			getOutputStream(type).write(lineToWrite);
 			getOutputStream(type).flush();
-			int finalLength = mc.getDocument().getLength();
-			if (foffset >= 0 && flength >= 0) {
-				try {
-					FileLink fileLink = new FileLink(f, null, foffset, flength, flineno);
-					int ilen = len;
-					if (len < 0) {
-						ilen = lineToWrite.length();
-					}
-					int ioset = initialLength + oset;
-					if (ioset < 0) {
-						ioset = initialLength;
-					}
-					if (ioset > finalLength - ilen) {
-						ioset = finalLength - ilen;
-					}
-					mc.addHyperlink(fileLink, ioset, ilen);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+////			int finalLength = mc.getDocument().getLength();
+//			if (foffset >= 0 && flength >= 0) {
+//				try {
+//					FileLink fileLink = new FileLink(f, null, foffset, flength, flineno);
+//					int ilen = len;
+//					if (len < 0) {
+//						ilen = lineToWrite.length();
+//					}
+//					int ioset = initialLength + oset;
+//					if (ioset < 0) {
+//						ioset = initialLength;
+//					}
+////					if (ioset > finalLength - ilen) {
+////						ioset = finalLength - ilen;
+////					}
+//					mc.addHyperlink(fileLink, ioset, ilen);
+//				}
+//				catch (Exception e) {
+////					e.printStackTrace();
+//				}
+//			}
 		} 
 		catch (Exception ex) { 
 				///if you want to - do something 

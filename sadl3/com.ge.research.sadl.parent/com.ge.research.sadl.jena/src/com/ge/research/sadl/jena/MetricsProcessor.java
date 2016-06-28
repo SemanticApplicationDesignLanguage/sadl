@@ -12,6 +12,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
@@ -31,26 +32,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
-public class MetricsProcessor {
-	public static final String SADL_METRICS_NS = "http://com.ge.research.sadl/sadlmetricsmodel#";
-	public static final String MARKER_CLASS_URI = SADL_METRICS_NS + "Marker";
-	public static final String MARKER_PROP_URI = SADL_METRICS_NS + "marker";
-	public static final String MARKER_TYPE_URI = SADL_METRICS_NS + "MarkerType";
-	public static final String MARKER_TYPE_PROP_URI = SADL_METRICS_NS + "markerType";
-	public static final String ERROR_MARKER_URI = SADL_METRICS_NS + "Error";
-	public static final String WARNING_MARKER_URI = SADL_METRICS_NS + "Warning";
-	public static final String INFO_MARKER_URI = SADL_METRICS_NS + "Information";
-	public static final String TYPE_CHECK_FAILURE_URI = SADL_METRICS_NS + "TypeCheckFailure";
-	public static final String UNCLASSIFIED_FAILURE_URI = SADL_METRICS_NS + "UnclassifiedFailure";
-	public static final String RANGE_REDEFINITION_URI = SADL_METRICS_NS + "RangeRedefinition";
-	public static final String DOMAIN_REDEFINITION_URI = SADL_METRICS_NS + "DomainRedefinition";
-	public static final String CIRCULAR_IMPORT_URI = SADL_METRICS_NS + "CircularImport";
-	public static final String CIRCULAR_DEFINITION_URI = SADL_METRICS_NS + "CircularDefinition";
-	public static final String INVALID_EXPRESSION_URI = SADL_METRICS_NS + "InvalidExpression";
-	public static final String NESTED_EQUATION_URI = SADL_METRICS_NS + "NestedEquation";
-	public static final String INVALID_TABLE_FORMAT_URI = SADL_METRICS_NS + "InvalidTableFormat";
-	public static final String DUPLICATE_NAME_URI = SADL_METRICS_NS + "DuplicateName";
-
+public class MetricsProcessor implements IMetricsProcessor {
 	private String filename;
 	private OntModel theJenaModel;
 	private String baseUri;
@@ -61,11 +43,30 @@ public class MetricsProcessor {
 	private IConfigurationManagerForEditing configMgr = null;
 	private Ontology modelOntology;
 	
+	public static String SADL_METRICS_NS = "http://com.ge.research.sadl/sadlmetricsmodel#";
+	public static String MARKER_CLASS_URI = SADL_METRICS_NS + "Marker";
+	public static String MARKER_PROP_URI = SADL_METRICS_NS + "marker";
+	public static String MARKER_TYPE_URI = SADL_METRICS_NS + "MarkerType";
+	public static String MARKER_TYPE_PROP_URI = SADL_METRICS_NS + "markerType";
+	public static String ERROR_MARKER_URI = SADL_METRICS_NS + "Error";
+	public static String WARNING_MARKER_URI = SADL_METRICS_NS + "Warning";
+	public static String INFO_MARKER_URI = SADL_METRICS_NS + "Information";
+	public static String TYPE_CHECK_FAILURE_URI = SADL_METRICS_NS + "TypeCheckFailure";
+	public static String UNCLASSIFIED_FAILURE_URI = SADL_METRICS_NS + "UnclassifiedFailure";
+	public static String RANGE_REDEFINITION_URI = SADL_METRICS_NS + "RangeRedefinition";
+	public static String DOMAIN_REDEFINITION_URI = SADL_METRICS_NS + "DomainRedefinition";
+	public static String CIRCULAR_IMPORT_URI = SADL_METRICS_NS + "CircularImport";
+	public static String CIRCULAR_DEFINITION_URI = SADL_METRICS_NS + "CircularDefinition";
+	public static String INVALID_EXPRESSION_URI = SADL_METRICS_NS + "InvalidExpression";
+	public static String NESTED_EQUATION_URI = SADL_METRICS_NS + "NestedEquation";
+	public static String INVALID_TABLE_FORMAT_URI = SADL_METRICS_NS + "InvalidTableFormat";
+	public static String DUPLICATE_NAME_URI = SADL_METRICS_NS + "DuplicateName";
+
 	public MetricsProcessor() {
 		super();
 	}
 	
-	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource) throws JenaProcessorException, ConfigurationException {
+	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr) throws JenaProcessorException, ConfigurationException {
 		if (resource == null) {
 			throw new JenaProcessorException("MetricsProcessor constructor called with null resource");
 		}
@@ -76,7 +77,7 @@ public class MetricsProcessor {
 			baseUri = uri + ".metrics";
 			filename = fn + ".metrics.owl";
 			setTheJenaModel(ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));
-			configMgr = new ConfigurationManagerForEditing(modelFolder, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+			this.configMgr = configMgr;
 			modelOntology = getTheJenaModel().createOntology(baseUri);
 			modelOntology.addComment("SADL model metrics", "en");
 		}
@@ -85,7 +86,11 @@ public class MetricsProcessor {
 		}
 	}
 	
-	public boolean addMarker(String markerClassUri, String markerTypeUri) {
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IMetricsProcessor#addMarker(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean addMarker(String subjectUri, String markerClassUri, String markerTypeUri) {
 		Individual marker = getTheJenaModel().createIndividual(getMarkerClass(markerClassUri));
 		Individual markerType = getMarkerTypeInstance(markerTypeUri);
 		if (marker != null && markerType != null) {
@@ -96,6 +101,10 @@ public class MetricsProcessor {
 		return false;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IMetricsProcessor#saveMetrics(java.lang.String)
+	 */
+	@Override
 	public boolean saveMetrics(String format) throws IOException, ConfigurationException, URISyntaxException {
 		RDFWriter w = getTheJenaModel().getWriter(format);
 		w.setProperty("xmlbase", baseUri);
@@ -110,6 +119,10 @@ public class MetricsProcessor {
 		return true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IMetricsProcessor#queryProjectMetrics(java.lang.String, java.lang.String)
+	 */
+	@Override
 	public ResultSet queryProjectMetrics(String queryName, String modelFolder) {
 		
 		return null;

@@ -113,9 +113,35 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	// TODO: Do not use directly
 	public ConfigurationManagerForIDE(String modelFolderPathname, String _repoType) throws ConfigurationException {
 		super(modelFolderPathname, _repoType);
+		// if there is no mapping file create one
+		File mf = new File(modelFolderPathname + File.separator + ONT_POLICY_RDF);
+		if (!mf.exists()) {
+			try {
+				new SadlUtils().stringToFile(mf, getDefaultPolicyFileContent(), false);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new ConfigurationException("Failed to create missing 'ont-policy.rdf' file", e);
+			}
+		}
 	}
 	
-   /**
+   public ConfigurationManagerForIDE(String modelFolderPathname, String _repoType, boolean noModelFolderNeeded) throws ConfigurationException {
+		super(modelFolderPathname, _repoType, noModelFolderNeeded);
+		if (!noModelFolderNeeded) {
+			// if there is no mapping file create one
+			File mf = new File(modelFolderPathname + File.separator + ONT_POLICY_RDF);
+			if (!mf.exists()) {
+				try {
+					new SadlUtils().stringToFile(mf, getDefaultPolicyFileContent(), false);
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new ConfigurationException("Failed to create missing 'ont-policy.rdf' file", e);
+				}
+			}
+		}
+	}
+
+/**
      * Call with a list of SADL files to see if all are mapped and if not add the mappings
      * 
      * @param sadlFiles
@@ -977,5 +1003,27 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return bChanged;
 	}
 
-
+	private String getDefaultPolicyFileContent() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<?xml version=\"1.0\"?>\n");
+		sb.append("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\" xmlns=\"http://jena.hpl.hp.com/schemas/2003/03/ont-manager#\" xml:base=\"http://jena.hpl.hp.com/schemas/2003/03/ont-manager#\">\n");
+		sb.append("<OntologySpec>\n");
+		sb.append("<language rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
+		sb.append("<publicURI rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
+		sb.append("<prefix rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">owl</prefix>\n");
+		sb.append("</OntologySpec>\n");
+		sb.append("<OntologySpec>\n");
+		sb.append("<altURL rdf:resource=\"http://protege.stanford.edu/plugins/owl/dc/protege-dc.owl\"/>\n");
+		sb.append("<publicURI rdf:resource=\"http://purl.org/dc/elements/1.1/\"/>\n");
+		sb.append("<language rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
+		sb.append("<prefix rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">dc</prefix>\n");
+		sb.append("</OntologySpec>\n");
+		sb.append("<DocumentManagerPolicy>\n");
+		sb.append("<cacheModels rdf:datatype=\"http://www.w3.org/2001/XMLSchema#boolean\">true</cacheModels>\n");
+		sb.append("<processImports rdf:datatype=\"http://www.w3.org/2001/XMLSchema#boolean\">true</processImports>\n");
+		sb.append("</DocumentManagerPolicy>\n");
+		sb.append("</rdf:RDF>\n");
+		return sb.toString();
+	}
+	
 }
