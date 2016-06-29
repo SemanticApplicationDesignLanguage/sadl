@@ -38,9 +38,15 @@ import javax.activation.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -380,15 +386,16 @@ public class OwlToSadl {
 		if (policyFilename == null) {
 			throw new Exception("Policy file name cannot be null");
 		}
-		theModel = new UtilsForJena().createAndInitializeJenaModel(policyFilename, OntModelSpec.OWL_MEM, true);
+//		theModel = new UtilsForJena().createAndInitializeJenaModel(policyFilename, OntModelSpec.OWL_MEM, true);
 		String modelFolder = new File(policyFilename).getParent();
-		OntDocumentManager owlDocMgr = theModel.getDocumentManager(); //prepare(modelUrl, policyFilename);
-		setSpec(theModel.getSpecification());
+//		OntDocumentManager owlDocMgr = theModel.getDocumentManager(); //prepare(modelUrl, policyFilename);
+//		setSpec(theModel.getSpecification());
+		theModel = prepareEmptyOntModel(modelFolder);
 //		getSpec().setImportModelGetter(new SadlJenaModelGetterPutter(getSpec(), modelFolder));
 //		getSpec().setDocumentManager(owlDocMgr);
 //		owlDocMgr.setProcessImports(true);
 		theModel.read(modelUrl);
-		owlDocMgr.setProcessImports(false);
+		theModel.getDocumentManager().setProcessImports(false);
 		process();
 	}
 	
@@ -398,6 +405,17 @@ public class OwlToSadl {
         process();
 	}
 	
+	private OntModel prepareEmptyOntModel(String modelFolderPathname) throws ConfigurationException {
+		IConfigurationManagerForIDE cm = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname, ConfigurationManagerForIDE.getOWLFormat());
+		OntDocumentManager owlDocMgr = cm.getJenaDocumentMgr();
+		OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
+		setSpec(spec);
+		spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
+		spec.setDocumentManager(owlDocMgr);
+		owlDocMgr.setProcessImports(true);
+		return ModelFactory.createOntologyModel(spec);
+	}
+
 	/**
 	 * Constructor taking the URL of an OWL file and the URL of the policy file to be used to
 	 * resolve imports.

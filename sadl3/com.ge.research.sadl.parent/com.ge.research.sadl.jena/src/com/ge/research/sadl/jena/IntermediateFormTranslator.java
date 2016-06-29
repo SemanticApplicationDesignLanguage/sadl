@@ -918,7 +918,8 @@ public class IntermediateFormTranslator {
 		if (lst != null) {
 			for (int i = 0; i < lst.size(); i++) {
 				GraphPatternElement element = lst.get(i);
-				if (element instanceof BuiltinElement && ((BuiltinElement)element).getFuncName().equals("and")) {
+				if (element instanceof BuiltinElement && 
+						((BuiltinElement)element).getFuncName() != null && ((BuiltinElement)element).getFuncName().equals("and")) {
 					if (results == null) {
 						results = new ArrayList<GraphPatternElement>();
 					}

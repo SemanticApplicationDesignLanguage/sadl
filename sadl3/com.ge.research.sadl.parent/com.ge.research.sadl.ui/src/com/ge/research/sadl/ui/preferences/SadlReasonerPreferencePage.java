@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 
 //import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.google.inject.Inject;
 
@@ -530,7 +531,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		String configDir = project.getLocation().append(ResourceManager.OWLDIR).toPortableString(); 
 		try {
 			if (configurationManager == null) {
-				configurationManager = new ConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
+				configurationManager = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
 			}
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -682,7 +683,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		String configDir = project.getLocation().append(ResourceManager.OWLDIR).toPortableString(); 
 		try {
 			if (configurationManager == null) {
-				configurationManager = new ConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
+				configurationManager = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
 			}
 			reasoners = ConfigurationManagerForIDE.getAvailableReasoners();
 			logger.debug("Number of reasoners: "+reasoners.size());

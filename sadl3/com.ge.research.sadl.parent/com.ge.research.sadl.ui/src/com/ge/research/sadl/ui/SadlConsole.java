@@ -42,13 +42,14 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.xtext.util.IAcceptor;
 
 import com.ge.research.sadl.builder.MessageManager;
 import com.ge.research.sadl.builder.MessageManager.HyperlinkInfo;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 
-public final class SadlConsole {
+public final class SadlConsole implements IAcceptor {
 	private static final String SADL = "SADL";
 
 	private static SadlConsole mInstance = null;
@@ -143,29 +144,34 @@ public final class SadlConsole {
 		final int foffset = fileOffset;
 		final int flength = fileLength;
 		final int flineno = fileLineNo;
-		final int oset = fileOffset;
-		final int len = fileLength;		
+		final int oset = consoleOffset;
+		final int len = consoleLength;		
 		try { 
 			MessageConsole mc = findOrCreateConsole();
 			int initialLength = mc.getDocument().getLength();
 			getOutputStream(type).write(lineToWrite);
-			if (foffset >= 0 && flength > 0) {
-				try {
-					FileLink fileLink = new FileLink(f, null, foffset, flength, flineno);
-					int ilen = len;
-					if (len < 0) {
-						ilen = lineToWrite.length();
-					}
-					int ioset = oset;
-					if (ioset < 0) {
-						ioset = initialLength;
-					}
-					mc.addHyperlink(fileLink, ioset, ilen);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+			getOutputStream(type).flush();
+////			int finalLength = mc.getDocument().getLength();
+//			if (foffset >= 0 && flength >= 0) {
+//				try {
+//					FileLink fileLink = new FileLink(f, null, foffset, flength, flineno);
+//					int ilen = len;
+//					if (len < 0) {
+//						ilen = lineToWrite.length();
+//					}
+//					int ioset = initialLength + oset;
+//					if (ioset < 0) {
+//						ioset = initialLength;
+//					}
+////					if (ioset > finalLength - ilen) {
+////						ioset = finalLength - ilen;
+////					}
+//					mc.addHyperlink(fileLink, ioset, ilen);
+//				}
+//				catch (Exception e) {
+////					e.printStackTrace();
+//				}
+//			}
 		} 
 		catch (Exception ex) { 
 				///if you want to - do something 
@@ -302,15 +308,30 @@ public final class SadlConsole {
 		doc.addDocumentListener(scl);
 		SadlMessage msg;
 		while ((msg = manager.getNextMessage()) != null) {
-			HyperlinkInfo info = msg.getLinkInfo();
-			if (info != null) {
-				links.put(msg.getMessage(), msg.getLinkInfo());
-			}
-			String txt = msg.getMessage();
-			if (!txt.endsWith(System.getProperty("line.separator"))) {
-				txt += System.getProperty("line.separator");
-			}
-			writeToConsole(msg.getType(), txt);
+			links = displayMessage(msg, links);
+		}
+	}
+
+	private static HashMap<String, HyperlinkInfo> displayMessage(SadlMessage msg, HashMap<String, HyperlinkInfo> links) {
+		HyperlinkInfo info = msg.getLinkInfo();
+		if (info != null && links != null) {
+			links.put(msg.getMessage(), msg.getLinkInfo());
+		}
+		String txt = msg.getMessage();
+		if (!txt.endsWith(System.getProperty("line.separator"))) {
+			txt += System.getProperty("line.separator");
+		}
+		writeToConsole(msg.getType(), txt);
+		return links;
+	}
+
+	@Override
+	public void accept(Object t) {
+		if (t instanceof SadlMessage) {
+			displayMessage((SadlMessage)t, null);
+		}
+		else if (t instanceof String) {
+			writeToConsole(MessageType.INFO, (String)t);
 		}
 	}
 
