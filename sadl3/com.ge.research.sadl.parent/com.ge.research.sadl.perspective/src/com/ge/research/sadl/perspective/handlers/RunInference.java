@@ -16,6 +16,8 @@ import org.eclipse.xtext.validation.Issue;
 
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.ui.internal.SadlActivator;
+import com.ge.research.sadl.builder.MessageManager.MessageType;
+import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext;
 
 public class RunInference extends SadlActionHandler {
@@ -34,8 +36,9 @@ public class RunInference extends SadlActionHandler {
 			if (trgtFile.getName().endsWith("sadl")) {
 				// run inference on this model
 				Resource res = prepareActionHandler(trgtFile);
-				output.println("Inference of '" + trgtFile.getName() + "' requested.");
+				output.writeToConsole(MessageType.INFO, "Inference of '" + trgtFile.getName() + "' requested.\n");
 				final List<Issue> issues = new ArrayList<Issue>();
+				final List<SadlMessage> results = null;
 				processor.processCommands(res, new ValidationAcceptor(new IAcceptor<Issue>(){
 
 					@Override
@@ -43,35 +46,33 @@ public class RunInference extends SadlActionHandler {
 						issues.add(t);
 					}
 					
-				}),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(res)));
+				}),  new IAcceptor<SadlMessage>(){
+					public void accept(SadlMessage t) {
+						results.add(t);
+					}
+					
+				}, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(res)));
 				if (issues.size() > 0) {
 					for (Issue issue: issues) {
-						output.println(issue.getMessage());
+						output.writeToConsole(MessageType.ERROR, issue.getMessage() + "\n");
 					}
 				}
 			}
 			else if (trgtFile.getName().endsWith("test")) {
 				// run test suite
-				output.println("Testing of suite '" +  trgtFile.getName() + "' requested.");
+				output.writeToConsole(MessageType.INFO, "Testing of suite '" +  trgtFile.getName() + "' requested.\n");
 			}
 		}
 		catch (Exception e) {
 			if (output != null) {
-				output.println(e.getMessage());
+				output.writeToConsole(MessageType.ERROR, e.getMessage() + "\n");
 			}
 			else {
 				System.err.println(e.getMessage());
 			}
 		}
 		finally {
-			if (output != null) {
-				try {
-					output.flush();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			
 		}
 
 		return event;

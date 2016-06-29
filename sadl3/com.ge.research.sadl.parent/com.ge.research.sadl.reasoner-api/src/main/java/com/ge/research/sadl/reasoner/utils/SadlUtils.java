@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.ge.research.sadl.reasoner.ConfigurationException;
+
 public class SadlUtils {
 	
     public static final String FILE_SHORT_PREFIX = "file:/";
@@ -282,5 +284,47 @@ public class SadlUtils {
         return quotedString;
     }
 
+	public List<String[]> parseQueries(File qf) throws IOException, ConfigurationException {
+		List<String[]> results = new ArrayList<String[]>();
+		String string = fileToString(qf);
+		String[] lines = string.split(System.getProperty("line.separator"));
+		String[] current = new String[2];
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			if (line.trim().startsWith("Ask")) {
+				if (i > 0) {
+					current[1] = trimQuery(sb);
+					results.add(current);
+					current = new String[2];
+					sb.setLength(0);
+				}
+				int colonloc = line.indexOf(":");
+				if (colonloc < 0) {
+					throw new ConfigurationException("Ask line of query missing ':'");
+				}
+				current[0] = line.substring(3,colonloc).trim();
+				int quoteloc = line.indexOf(colonloc,'\"');
+				if (quoteloc > 0 && line.length() > quoteloc) {
+					sb.append(line.substring(quoteloc + 1));
+				}
+			}
+			else {
+				sb.append(line);
+			}
+		}
+		current[1] = trimQuery(sb);
+		results.add(current);
+		return results;
+	}
+
+	private String trimQuery(StringBuilder sb) {
+		String qstr = sb.toString().trim();
+		if (qstr.endsWith(".")) {
+			qstr = qstr.substring(0, qstr.length() - 1);
+		}
+		qstr = SadlUtils.stripQuotes(qstr);
+		return qstr;
+	}
 
 }

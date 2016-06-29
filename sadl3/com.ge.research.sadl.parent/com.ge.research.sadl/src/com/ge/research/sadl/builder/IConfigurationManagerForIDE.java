@@ -129,15 +129,6 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 			throws ConfigurationException;
 
 	/**
-	 * Clean up mappings file by deleting all SADL-generated entries that aren't still good files
-	 * 
-	 * @param configFilename
-	 * @param sadlFiles 
-	 */
-	public abstract void cleanAndPopulatePolicyFile(String configFilename,
-			List<File> sadlFiles);
-
-	/**
 	 * Method to add a ConfigurationItem to the in-memory configuration model and to the persistent cache.
 	 * Note that for items of type Bag (e.g., Builtins) and Sequence, the last element in the array returned
 	 * by the call to getCatgegoryHierchy is not a an instance name for a Category but rather the type of the
@@ -168,13 +159,6 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @return - true if successful else false
 	 */
 	public abstract boolean saveConfiguration();
-
-	/**
-	 * Call this method to save the mapping model to the "ont-policy.rdf" file in the OwlModels folder.
-	 * 
-	 * @return - true if successful else false
-	 */
-	public abstract boolean saveOntPolicyFile();
 
 	public abstract boolean isConfigChanged();
 
@@ -307,10 +291,17 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract List<URI> getExternalModelURIs();
 
 	/**
-	 * Call this method to remove a mapping of a deleted Resource
-	 * @param canonicalPath -- absolute path to OWL file of deleted resource
-	 * @return -- true if something was removed from mapping else false
+	 * Call this method to add a new mapping or update an existing one for a given altURL. (The assumption is that
+	 * the file name will not change but the model name (uri) may be easily changed.)
+	 * 
+	 * @param mappings -- list of String[] where each element of the list contains: 0-altUrl, 1-publicUri, 2-global prefix
+	 * @param bKeepPrefix -- if true keep the old prefix even if other things change
+	 * @param source -- an identifier of what created the mapping, e.g., SADL
+	 * @return -- true if the mappings were changed else false
+	 * @throws ConfigurationException 
 	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract boolean removeMappingByActualUrl(String canonicalPath) throws URISyntaxException;
+	public abstract boolean addMappings(List<String[]> mappings, boolean bKeepPrefix, String source) throws ConfigurationException, IOException, URISyntaxException;
+
 }
