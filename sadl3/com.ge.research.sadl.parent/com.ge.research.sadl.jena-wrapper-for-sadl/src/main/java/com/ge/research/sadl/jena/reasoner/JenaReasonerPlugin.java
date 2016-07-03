@@ -539,8 +539,8 @@ public class JenaReasonerPlugin extends Reasoner{
 	private void loadImports() {
 		if (configurationMgr != null) {
 			try {
-//				imports = configurationMgr.loadImportedModel(schemaModel.getOntology(modelName), 
-//								schemaModel, modelName, null);
+				imports = configurationMgr.loadImportedModel(schemaModel.getOntology(modelName), 
+								schemaModel, modelName, null);
 			} catch (Throwable t) {
 				// TODO Auto-generated catch block
 				t.printStackTrace();
