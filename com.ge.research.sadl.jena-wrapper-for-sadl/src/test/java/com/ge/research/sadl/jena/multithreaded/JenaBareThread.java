@@ -76,9 +76,11 @@ public class JenaBareThread extends Thread {
 		try {
 			InputStream in = FileManager.get().open(rulefn);
 			if (in != null) {
+		    	InputStreamReader isr = null;
+		    	BufferedReader br = null;
 			    try {
-			    	InputStreamReader isr = new InputStreamReader(in);
-			    	BufferedReader br = new BufferedReader(isr);
+			    	isr = new InputStreamReader(in);
+			    	br = new BufferedReader(isr);
 					List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
 					if (rules != null) {
 						ruleList.addAll(rules);
@@ -87,6 +89,22 @@ public class JenaBareThread extends Thread {
 			    	logger.error("Error reading rule file '" + rulefn + "': " + e.getMessage());
 			    }
 			    finally {
+			    	if (br != null) {
+			    		try {
+							br.close();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			    	}
+			    	if (isr != null) {
+			    		try {
+							isr.close();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			    	}
 			    	try {
 						in.close();
 					} catch (IOException e) {

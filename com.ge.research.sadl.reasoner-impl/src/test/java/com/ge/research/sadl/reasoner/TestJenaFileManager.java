@@ -109,11 +109,15 @@ public class TestJenaFileManager extends EclipseOrMavenJUnitTest {
 			    }
 				try {
 					m.read(in, "");
+					in.close();
 					return m;
 				}
 				catch (Throwable t) {
 					t.printStackTrace();
 					System.err.println("Failed to read mapping file '" + mappingFN + "': " + t.getLocalizedMessage());
+				}
+				finally {
+					in.close();
 				}
 			}
 			else {
