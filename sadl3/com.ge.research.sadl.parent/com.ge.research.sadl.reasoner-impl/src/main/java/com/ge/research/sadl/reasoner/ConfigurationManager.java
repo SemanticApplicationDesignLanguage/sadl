@@ -356,13 +356,18 @@ public class ConfigurationManager implements IConfigurationManager {
 				}
 			}
 		}
-		if (getReasoner() != null) {
+		if (getReasoner() != null && getReasoner().getClass().getCanonicalName().equals(reasonerName)) {
 			String transClsName = getReasoner().getDefaultTranslatorClassName();
 			if (transClsName != null) {
 				return getTranslatorInstanceByClass(transClsName);
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public ITranslator getTranslatorForReasoner(IReasoner reasoner) throws ConfigurationException {
+		return getTranslatorInstanceByClass(reasoner.getDefaultTranslatorClassName());
 	}
 
 	public IReasoner getReasoner() throws ConfigurationException {
@@ -1637,4 +1642,5 @@ public class ConfigurationManager implements IConfigurationManager {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

@@ -1588,6 +1588,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			// remove all equations in this namespace
 			for (Object os: (List<?>)otherStructure) {
 				if (os instanceof Equation) {
+					addError(new ModelError(this.getClass().getCanonicalName() + " does not currently translate equations", ErrorType.ERROR));
 					// add equations
 //					System.out.println("Jena translator ready to save equation '" + os.toString() + "'");
 				}

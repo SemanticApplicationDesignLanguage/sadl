@@ -351,16 +351,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			CharSequence seq = new String(out.toByteArray(), charset);
 			fsa.generateFile(owlFN, seq);
 			
-			// if there are equations, output them to a Prolog file
-			List<Equation> eqs = getEquations();
-			if (eqs != null) {
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < eqs.size(); i++) {
-					sb.append(eqs.get(i).toFullyQualifiedString());
-					sb.append("\n");
-				}
-				fsa.generateFile(lastSeg.appendFileExtension("pl").lastSegment().toString(), sb.toString());
-			}
+//			// if there are equations, output them to a Prolog file
+//			List<Equation> eqs = getEquations();
+//			if (eqs != null) {
+//				StringBuilder sb = new StringBuilder();
+//				for (int i = 0; i < eqs.size(); i++) {
+//					sb.append(eqs.get(i).toFullyQualifiedString());
+//					sb.append("\n");
+//				}
+//				fsa.generateFile(lastSeg.appendFileExtension("pl").lastSegment().toString(), sb.toString());
+//			}
 			
 			try {
 				String modelFolder = getModelFolderPath(resource);
@@ -978,7 +978,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		eqinst.addProperty(getTheJenaModel().getDatatypeProperty(SADL_BASE_MODEL_EQ_EXPRESSION_URI), 
 				getTheJenaModel().createTypedLiteral(eq.toString()));
 	}
-	private Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
+	protected Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
 			Expression bdy)
 			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
 		Equation eq = new Equation(declarationExtensions.getConcreteName(nm));
@@ -1072,7 +1072,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	private void addEquation(Equation eq) {
+	protected void addEquation(Equation eq) {
 		if (equations == null) {
 			equations = new ArrayList<Equation>();
 		}
@@ -1437,9 +1437,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private Object processFunction(Name expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		EList<Expression> arglist = expr.getArglist();
-		String funcname = processExpression(expr.getName()).toString();
+		Node fnnode = processExpression(expr.getName());
+		String funcname;
+		if (fnnode instanceof VariableNode) {
+			funcname = ((VariableNode) fnnode).getName();
+		}
+		else {
+			funcname = fnnode.toString();
+		}
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(funcname);
+		if (fnnode instanceof NamedNode && ((NamedNode)fnnode).getNamespace()!= null) {
+			builtin.setFuncUri(fnnode.toFullyQualifiedString());
+		}
 		if (arglist != null && arglist.size() > 0) {
 			List<Object> args = new ArrayList<Object>();
 			for (int i = 0; i < arglist.size(); i++) {
@@ -2636,13 +2646,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					OntClass newRngCls;
 					if (rngValueType.equals(RangeValueType.LIST)) {
 						newRngCls = createListSubclass(null, rngNode.toString(), context.eResource());
-					}
-					else {
-						newRngCls = rngNode.asResource().as(OntClass.class);
 						// TODO this should be removed as soon as translators are updated to new List ontology representation
 						String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
 						AnnotationProperty annprop = getTheJenaModel().createAnnotationProperty(LIST_RANGE_ANNOTATION_PROPERTY);
 						prop.addProperty(annprop, RangeValueType.LIST.toString());
+					}
+					else {
+						newRngCls = rngNode.asResource().as(OntClass.class);
 					}
 					updateObjectPropertyRange(prop, newRngCls, rngValueType, context);
 					propOwlType = OWL.ObjectProperty;
