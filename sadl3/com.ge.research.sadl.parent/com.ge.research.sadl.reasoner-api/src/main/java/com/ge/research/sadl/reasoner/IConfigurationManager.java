@@ -274,6 +274,13 @@ public interface IConfigurationManager {
 	public abstract ITranslator getTranslatorForReasoner(String reasonerClassName) throws ConfigurationException;
 
 	/**
+	 * Call this method to get the translator approriate for a particular reasoner instance
+	 * @param reasoner
+	 * @return
+	 * @throws ConfigurationException 
+	 */
+	public abstract ITranslator getTranslatorForReasoner(IReasoner reasoner) throws ConfigurationException;
+	/**
 	 * Method to determine if a URI (could be public URI or alt URL) is mapped in this ConfigurationManager (project)
 	 * @param uri
 	 * @return

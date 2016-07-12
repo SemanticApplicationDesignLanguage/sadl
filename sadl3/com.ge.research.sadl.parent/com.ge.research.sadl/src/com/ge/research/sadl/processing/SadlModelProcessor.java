@@ -916,7 +916,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			return NodeType.PropertyNode;
 		}
 		else if (octype.equals(OntConceptType.FUNCTION_DEFN)) {
-			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
+//			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
 			return NodeType.InstanceNode;
 		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");

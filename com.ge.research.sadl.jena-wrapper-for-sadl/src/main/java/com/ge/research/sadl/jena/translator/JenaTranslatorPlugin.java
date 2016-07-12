@@ -1134,11 +1134,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 								newItem.addNameValuePair(newItem.new NameValuePair("class", clsname, ConfigurationType.Bag));
 								((IConfigurationManagerForEditing) configurationMgr).addConfiguration(newItem);
 								((IConfigurationManagerForEditing) configurationMgr).saveConfiguration();
-								logger.info("Built-in '" + builtinName + "' found in service registry and added to configuration.");
+								logger.debug("Built-in '" + builtinName + "' found in service registry and added to configuration.");
 							}
 						}
 						else {
-							logger.info("Built-in '" + builtinName + "' found in service registry.");
+							logger.debug("Built-in '" + builtinName + "' found in service registry.");
 						}
 						BuiltinRegistry.theRegistry.register(builtinName, bltin);
 						return true;

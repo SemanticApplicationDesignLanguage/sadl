@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -49,8 +50,15 @@ public class TestUserDefinedDatatype {
         }
 
         System.out.println("\n\nLoading user-defined '" + filename2 + "':");
-        XSDDatatype.loadUserDefined(uri, new FileReader(filename2), null, tm);
-
+        FileReader fr2 = new FileReader(filename2);
+        XSDDatatype.loadUserDefined(uri, fr2, null, tm);
+        try {
+			fr2.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
         types = tm.listTypes();
         while (types.hasNext()) {
         	RDFDatatype dt = types.next();
@@ -58,8 +66,15 @@ public class TestUserDefinedDatatype {
         }
 
         System.out.println("\n\nLoading user-defined '" + filename3 + "':");
-        XSDDatatype.loadUserDefined(uri, new FileReader(filename3), null, tm);
-
+        FileReader fr3 = new FileReader(filename3);
+        XSDDatatype.loadUserDefined(uri, fr3, null, tm);
+        try {
+			fr3.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
         types = tm.listTypes();
         while (types.hasNext()) {
         	RDFDatatype dt = types.next();

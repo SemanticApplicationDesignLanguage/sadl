@@ -302,9 +302,9 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * @throws ConfigurationException 
 	 */
 	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException {
-		if ((configMgr instanceof IConfigurationManagerForEditing)) {
-			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
-		}
+//		if ((configMgr instanceof IConfigurationManagerForEditing)) {
+//			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
+//		}
 		configurationMgr = configMgr;
 	}
 	
@@ -2671,6 +2671,9 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 			if (configurationMgr != null) {
 				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
+				if (translator == null) {
+					translator = configurationMgr.getTranslatorForReasoner(this);
+				}
 				if (translator != null) {
 					translator.setConfigurationManager(configurationMgr);
 					query = translator.prepareQuery(model, query);
