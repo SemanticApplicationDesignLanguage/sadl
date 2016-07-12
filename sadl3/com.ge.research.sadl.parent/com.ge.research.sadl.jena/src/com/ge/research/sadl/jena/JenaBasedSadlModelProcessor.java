@@ -482,7 +482,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return modelFolderPathname;
 	}
 	
-    private static String findModelFolderPath(URI uri){
+    static String findModelFolderPath(URI uri){
     	File file = new File(uri.path());
     	if(file != null){
     		if(file.isDirectory()){

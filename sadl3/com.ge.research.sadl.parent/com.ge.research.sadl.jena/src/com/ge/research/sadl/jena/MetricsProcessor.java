@@ -190,7 +190,10 @@ public class MetricsProcessor implements IMetricsProcessor {
 			 modelFolderPathname = file.getRawLocation().toPortableString();
 		}
 		else {
-			modelFolderPathname = v.toFileString();
+			modelFolderPathname = JenaBasedSadlModelProcessor.findModelFolderPath(resource.getURI());
+			if(modelFolderPathname == null) {
+				modelFolderPathname = v.toFileString();
+			}
 		}
 		return modelFolderPathname;
 	}
