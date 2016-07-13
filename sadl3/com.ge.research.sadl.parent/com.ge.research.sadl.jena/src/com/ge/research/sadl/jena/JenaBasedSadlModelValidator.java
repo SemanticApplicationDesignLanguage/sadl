@@ -58,6 +58,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.UnionClass;
+import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -65,6 +66,8 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.OWL2;
+import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -360,6 +363,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		} catch (InvalidNameException e) {
 			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", rightExpression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.INVALID_EXPRESSION_URI);
+			}
 			e.printStackTrace();
 		} catch (DontTypeCheckException e) {
 			return true;
@@ -676,6 +682,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (qnm.eIsProxy()) {
 			// this is a proxy so we don't know its type
 			issueAcceptor.addWarning("Function is not defined so return type is unknown, can't do type checking", expression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			}
 			throw new DontTypeCheckException();
 		}
 		return getType(qnm);
@@ -781,7 +790,28 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				ConceptName rangeConceptName = new ConceptName(first.asResource().getURI());
 				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 					rangeConceptName.setType(ConceptType.RDFDATATYPE);
-					rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+					OntResource range;
+					try {
+						range = theJenaModel.getOntResource(rangeConceptName.getUri());
+						if (theJenaModel.listStatements(range, RDF.type, RDFS.Datatype).hasNext()) {
+							// this is a user-defined datatype
+							RDFNode rngEC = range.listPropertyValues(OWL.equivalentClass).next();
+							if (rngEC != null && rngEC.canAs(OntResource.class)) {
+								RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.onDatatype).next();
+								if (baseType != null && baseType.isURIResource()) {
+									ConceptName baseTypeConceptName = new ConceptName(baseType.asResource().getURI());
+									baseTypeConceptName.setType(ConceptType.RDFDATATYPE);
+									return new TypeCheckInfo(propConceptName, baseTypeConceptName, this, expression);
+								}
+							}
+						}
+						else {
+							rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+						}
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				else {
 					rangeConceptName.setType(ConceptType.ONTCLASS);

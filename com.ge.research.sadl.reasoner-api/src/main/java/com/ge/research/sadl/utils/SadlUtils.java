@@ -345,13 +345,17 @@ public class SadlUtils {
 		if (is != null) {
 			Writer writer = new StringWriter();
 			char[] buffer = new char[1024];
+			Reader reader = null;
 			try {
-				Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+				reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 				int n;
 				while ((n = reader.read(buffer)) != -1) {
 					writer.write(buffer, 0, n);
 				}
 			} finally {
+				if (reader != null) {
+					reader.close();
+				}
 				is.close();
 			}
 			return writer.toString();

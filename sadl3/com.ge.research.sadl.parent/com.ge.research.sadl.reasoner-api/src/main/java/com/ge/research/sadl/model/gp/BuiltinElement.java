@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public class BuiltinElement extends GraphPatternElement {
     private static final Logger logger = LoggerFactory.getLogger(BuiltinElement.class);
 	private String funcName = null;
+	private String funcUri = null;	// URI of function if given
 	private BuiltinType funcType = null;
 	private List<Node> arguments = null;
 	private int expectedArgCount = 0;
@@ -278,5 +279,13 @@ public class BuiltinElement extends GraphPatternElement {
 
 	public boolean isCreatedFromInterval() {
 		return createdFromInterval;
+	}
+
+	public String getFuncUri() {
+		return funcUri;
+	}
+
+	public void setFuncUri(String funcUri) {
+		this.funcUri = funcUri;
 	}
 }

@@ -21,5 +21,9 @@ public class ConstantNode extends Node {
 	public String toString() {
 		return name;
 	}
+	
+	public String getName() {
+		return name;
+	}
 
 }
