@@ -540,7 +540,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		
 	}
 	
-	private IMetricsProcessor metricsProcessor;
+	protected IMetricsProcessor metricsProcessor;
+	
+	public String getDefaultMakerSubjectUri() {
+		return null;
+	}
 
 	private ProcessorContext processorContext;
 
@@ -672,7 +676,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		try {
 			if (enableMetricsCollection) {
-				metricsProcessor = new MetricsProcessor(modelName, resource, getConfigMgr(resource, context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT)));
+				metricsProcessor = new MetricsProcessor(modelName, resource, getConfigMgr(resource, context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT)), this);
 			}
 		} catch (JenaProcessorException e1) {
 			// TODO Auto-generated catch block
