@@ -341,7 +341,7 @@ Power<EnabledWith> returns Expression:
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject<EnabledWith> returns Expression: // (17)
 	PrimaryExpression<EnabledWith> ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
-					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression<EnabledWith>)+)?
+					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression<EnabledWith>?)+)?
 |   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PropOfSubject<EnabledWith> // this can be applied to other unitary operations
 |   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith>;
 

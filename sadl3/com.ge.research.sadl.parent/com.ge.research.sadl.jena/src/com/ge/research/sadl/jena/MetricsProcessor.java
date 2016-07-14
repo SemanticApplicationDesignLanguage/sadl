@@ -42,6 +42,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 	private Property markerProperty = null;
 	private IConfigurationManagerForEditing configMgr = null;
 	private Ontology modelOntology;
+	private JenaBasedSadlModelProcessor modelProcessor = null;
 	
 	public static String SADL_METRICS_NS = "http://com.ge.research.sadl/sadlmetricsmodel#";
 	public static String MARKER_CLASS_URI = SADL_METRICS_NS + "Marker";
@@ -66,10 +67,11 @@ public class MetricsProcessor implements IMetricsProcessor {
 		super();
 	}
 	
-	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr) throws JenaProcessorException, ConfigurationException {
+	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr, JenaBasedSadlModelProcessor modelProcessor) throws JenaProcessorException, ConfigurationException {
 		if (resource == null) {
 			throw new JenaProcessorException("MetricsProcessor constructor called with null resource");
 		}
+		this.modelProcessor = modelProcessor;
 		String modelFolder = getModelFolderPath(resource);
 		if (modelFolder != null) {
 			// for JUnit tests, this will be null

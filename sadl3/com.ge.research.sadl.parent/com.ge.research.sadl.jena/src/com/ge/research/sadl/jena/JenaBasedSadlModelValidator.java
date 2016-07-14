@@ -363,6 +363,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		} catch (InvalidNameException e) {
 			issueAcceptor.addError("An invalid name exception occurred while type-checking this expression.", rightExpression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.INVALID_EXPRESSION_URI);
+			}
 			e.printStackTrace();
 		} catch (DontTypeCheckException e) {
 			return true;
@@ -679,6 +682,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (qnm.eIsProxy()) {
 			// this is a proxy so we don't know its type
 			issueAcceptor.addWarning("Function is not defined so return type is unknown, can't do type checking", expression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			}
 			throw new DontTypeCheckException();
 		}
 		return getType(qnm);
