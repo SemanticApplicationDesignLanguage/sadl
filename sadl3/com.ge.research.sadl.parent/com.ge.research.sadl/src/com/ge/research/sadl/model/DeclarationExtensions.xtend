@@ -100,7 +100,7 @@ class DeclarationExtensions {
 	}
 	
 	def SadlResource getDeclaration(SadlResource resource) {
-		if (resource.name !== null && !resource.name.eIsProxy) {
+		if (resource != null && resource.name !== null && !resource.name.eIsProxy) {
 			return resource.name
 		}
 		return resource
@@ -264,6 +264,7 @@ class DeclarationExtensions {
 	}
 	
 	public def boolean isExternal(SadlResource resource) {
+		if (resource == null) return false
 		return resource.eResource instanceof ExternalEmfResource
 	}
 	
