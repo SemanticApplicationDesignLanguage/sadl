@@ -195,8 +195,8 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 			
 			SomeClass is a top-level class,
 				described by p1 with a single value of type string,
-				described by p2 has a List of values of type string,
-				described by p3 with Lists of values of type string,
+				described by p2 has a single value of type string List,
+				described by p3 with values of type string List,
 				described by p4 with values of type string.
 				
 		'''.assertNoErrors
@@ -209,8 +209,8 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 			SomeClass is a class.
 			SomeOtherClass is a top-level class,
 				described by p1 with a single value of type SomeClass,
-				described by p2 has a List of values of type string,
-				described by p3 with Lists of values of type int,
+				described by p2 has a single value of type string List,
+				described by p3 with values of type int List,
 				described by p4 with values of type dateTime.
 				
 		'''.assertNoErrors
@@ -305,9 +305,9 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		uri "http://sadl.org/TestSadlIde/SadlTypedLists" alias typedLists version "$Revision:$ Last modified on   $Date:$". 
 		
 		Person is a class.
-		Mother is a class, described by children with a List of values of type Person.
+		Mother is a class, described by children with a single value of type Person List.
 		
-		Flight is a class, described by leg with a List of values of type FlightLeg.
+		Flight is a class, described by leg with a single value of type FlightLeg List.
 		
 			FlightLeg is a class, 
 			described by departureTime with a single value of type dateTime,
@@ -318,7 +318,7 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 			Airport is a class.
 		
 		FlightSchedule is a class,
-			described by flight with Lists of values of type Flight.
+			described by flight with values of type Flight List.
 		'''.assertNoErrors
 	}
 

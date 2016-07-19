@@ -520,7 +520,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with reference_property example_7_6 .
 			
 			  //ObjectId=ASSERT_DM-11
-			  example_8 describes SYSTEM with a List of values of type DATA.
+			  example_8 describes SYSTEM with a single value of type DATA List.
 			  example_8 of SYSTEM has at most 20 values.
 			  example_8 of SYSTEM has at least 3 values.
 			
@@ -535,7 +535,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with resolution 1 .
 			
 			  //ObjectId=ASSERT_DM-12
-			  example_9 describes SYSTEM with a List of values of type DATA.
+			  example_9 describes SYSTEM with a single value of type DATA List.
 			
 			  ASSERT_DM-12 is a INTERFACE_DEFINITION,
 			    with reference_class SYSTEM,
@@ -556,7 +556,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with reference_property example_10 .
 			
 			  //ObjectId=ASSERT_DM-14
-			  example_11 describes SYSTEM with a List of values of type DATA.
+			  example_11 describes SYSTEM with a single value of type DATA List.
 			  example_11 of SYSTEM has exactly 3 values.
 			
 			  ASSERT_DM-14 is a INTERFACE_DEFINITION,
@@ -807,7 +807,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with resolution 1 .
 			
 			  //ObjectId=ASSERT_DM-24
-			  input_10 describes SYSTEM with a List of values of type DATA.
+			  input_10 describes SYSTEM with a single value of type DATA List.
 			  input_10 of SYSTEM has at most 20 values.
 			  input_10 of SYSTEM has at least 1 values.
 			
@@ -822,7 +822,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with resolution 1 .
 			
 			  //ObjectId=ASSERT_DM-25
-			  input_11 describes SYSTEM with a List of values of type DATA.
+			  input_11 describes SYSTEM with a single value of type DATA List.
 			  input_11 of SYSTEM has at most 20 values.
 			  input_11 of SYSTEM has at least 1 values.
 			

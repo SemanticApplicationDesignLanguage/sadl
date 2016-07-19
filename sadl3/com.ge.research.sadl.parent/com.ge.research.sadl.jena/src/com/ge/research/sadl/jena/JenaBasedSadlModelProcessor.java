@@ -2463,7 +2463,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					// this is case 4
 					SadlTypeReference domain = ((SadlTypeAssociation)spr1).getDomain();
 					OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
-					if (domainrsrc.canAs(OntClass.class)){ 
+					if (domainrsrc == null) {
+						addError("Unable to find domain.", domain);
+						return null;
+					}
+					else if (domainrsrc.canAs(OntClass.class)){ 
 						OntClass cls = domainrsrc.as(OntClass.class);
 						Property prop = getTheJenaModel().getProperty(propUri);
 						if (prop != null) {
