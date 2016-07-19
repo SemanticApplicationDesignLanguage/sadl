@@ -853,8 +853,9 @@ class SadlModelManagerProviderTest {
 		Professor is a class described by teaches with values of type Student.
 		A Professor is an AppleProfessor only if teaches has at least one value of type
 			{Student and (owns has at least one value of type {Computer and (manufacturer always has value Apple)})}.
-		AppleLovingStudent is a type of Student, 
-			described by owns with values of type {Computer and (manufacturer always has value Apple)}.
+		A Student is an AppleLovingStudent only if owns only has values of type {Computer and (manufacturer always has value Apple)}.
+		//AppleLovingStudent is a type of Student, 
+		//	described by owns with values of type {Computer and (manufacturer always has value Apple)}.
 		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
 		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
 		'''.assertValidatesTo [ jenaModel, issues |
@@ -883,8 +884,9 @@ class SadlModelManagerProviderTest {
 		Student is a type of Person.
 		A Professor is an AppleProfessor only if teaches has at least one value of type
 			{Student and (owns has at least one value of type {Computer and (manufacturer always has value Apple)})}.
-		AppleLovingStudent is a type of Student, 
-			described by owns with values of type {Computer and (manufacturer always has value Apple)}.
+		A Student is an AppleLovingStudent only if owns only has values of type {Computer and (manufacturer always has value Apple)}.
+		//AppleLovingStudent is a type of Student, 
+		//	described by owns with values of type {Computer and (manufacturer always has value Apple)}.
 		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
 		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
 		'''.assertValidatesTo [ jenaModel, issues |
@@ -929,8 +931,9 @@ class SadlModelManagerProviderTest {
 		Student is a type of Person.
 		A Professor is an AppleProfessor only if teaches has at least one value of type
 			{Student and (owns has at least one value of type {Computer and (manufacturer always has value Apple)})}.
-		AppleLovingStudent is a type of Student, 
-			described by owns only has values of type {Computer and (manufacturer always has value Apple)}.
+		A Student is an AppleLovingStudent only if owns only has values of type {Computer and (manufacturer always has value Apple)}.
+		//AppleLovingStudent is a type of Student, 
+		//	described by owns with values of type {Computer and (manufacturer always has value Apple)}.		
 		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
 		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
 		'''.assertValidatesTo [ jenaModel, issues |
