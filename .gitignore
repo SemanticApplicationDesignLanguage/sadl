@@ -16,3 +16,5 @@ sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.jena.sorted-owl-ntriples/
 sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ui/Models/SadlList.owl
 sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ui/Run SADL IDE (Eclipse) jdk 1.7 (OS).launch
 sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ui/Run SADL IDE (Eclipse) jdk 1.7 (debug).launch
+*.classpath
+*.prefs
