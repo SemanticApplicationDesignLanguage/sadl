@@ -159,6 +159,8 @@ import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
+import com.ge.research.sadl.sADL.ValueRow;
+import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -482,7 +484,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return modelFolderPathname;
 	}
 	
-    private static String findModelFolderPath(URI uri){
+    static String findModelFolderPath(URI uri){
     	File file = new File(uri.path());
     	if(file != null){
     		if(file.isDirectory()){
@@ -970,7 +972,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		q.setSparqlQueryString(qstr);
 		return q;
 	}
-	private void processStatement(EquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+	
+	public void processStatement(EquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		SadlTypeReference rtype = element.getReturnType();
@@ -1015,7 +1018,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return eq;
 	}
 	
-	private void processStatement(ExternalEquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+	protected void processStatement(ExternalEquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		SadlTypeReference rtype = element.getReturnType();
@@ -1174,9 +1177,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof Sublist) {
 			return processExpression((Sublist)expr);
 		}
+		else if (expr instanceof ValueTable) {
+			return processExpression((ValueTable)expr);
+		}
 		else {
 			throw new TranslationException("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
 		}
+	}
+	
+	public Object processExpression(ValueTable expr) {
+		ValueRow row = ((ValueTable)expr).getRow();
+		if (row == null) {
+			EList<ValueRow> rows = ((ValueTable)expr).getRows();
+			if (rows == null || rows.size() == 0) {
+				ValueTable vtbl = ((ValueTable)expr).getValueTable();
+				return processExpression(vtbl);
+			}
+			return null;
+		}
+		return null;
 	}
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -3013,7 +3032,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			SadlResource prop = propinit.getProperty();
 			EObject val = propinit.getValue();
 			if (val != null) {
-				assignInstancePropertyValue(inst, prop, val);
+				assignInstancePropertyValue(inst, cls, prop, val);
 			}
 			else if (val == null) {
 				throw new JenaProcessorException("no value found");
@@ -3042,6 +3061,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return isList;
 	}
+	
 	private void addListValues(Individual inst, OntClass cls, SadlValueList listInitializer) {
 		com.hp.hpl.jena.rdf.model.Resource to = null;
 		ExtendedIterator<OntClass> scitr = cls.listSuperClasses(true);
@@ -3054,11 +3074,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		if (to == null) {
-			addError("No 'to' resource found in restriction of List subclass", listInitializer);
+//			addError("No 'to' resource found in restriction of List subclass", listInitializer);
 		}
 		Iterator<SadlExplicitValue> values = listInitializer.getExplicitValues().iterator();
 		addValueToList(null, inst, cls, to, values);
 	}
+	
 	private Individual addValueToList(Individual lastInst, Individual inst, OntClass cls, com.hp.hpl.jena.rdf.model.Resource type, 
 			Iterator<SadlExplicitValue> valueIterator) {
 		if (inst == null) {
@@ -3103,7 +3124,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return inst;
 	}
 	
-	private void assignInstancePropertyValue(Individual inst, SadlResource prop, EObject val) throws JenaProcessorException {
+	private void assignInstancePropertyValue(Individual inst, OntClass cls, SadlResource prop, EObject val) throws JenaProcessorException {
 		OntConceptType type;
 		try {
 			type = declarationExtensions.getOntConceptType(prop);
@@ -3141,6 +3162,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						inst.addProperty(oprop, lval);
 					}
 				}
+				else if (val instanceof SadlValueList) {
+					EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
+					addListValues(inst, cls, (SadlValueList) val);
+				}
 				else {
 					throw new JenaProcessorException("unhandled value type for object property");
 				}
@@ -3153,7 +3178,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				addError("Property '" + propuri + "' does not exist in the Jena model", prop);
 			}
 			else {
-				if (val instanceof SadlExplicitValue) {
+				if (val instanceof SadlValueList) {
+					EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
+					addListValues(inst, cls, (SadlValueList) val);
+				}
+				else if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, dprop.getRange());
 					if (lval != null) {
 						inst.addProperty(dprop, lval);
