@@ -52,7 +52,6 @@ import org.apache.jena.atlas.web.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarget;
@@ -1732,7 +1731,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			else if (on instanceof com.ge.research.sadl.model.gp.Literal){
 				if (prop.canAs(OntProperty.class)) {
 					try {
-						obj = UtilsForJena.getLiteralMatchingDataPropertyRange(schemaModel, prop.as(OntProperty.class), ((com.ge.research.sadl.model.gp.Literal)on).getValue());
+						obj = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, prop.as(OntProperty.class), ((com.ge.research.sadl.model.gp.Literal)on).getValue());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -2627,7 +2626,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (pred != null && pred.isDatatypeProperty()) {
 				if (pred.getRange() != null) {
 					try {
-						val = UtilsForJena.getLiteralMatchingDataPropertyRange(schemaModel, pred, objValue);
+						val = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, pred, objValue);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -3131,6 +3130,12 @@ public class JenaReasonerPlugin extends Reasoner{
 	@Override
 	public String getDefaultTranslatorClassName() {
 		return DEFAULT_TRANSLATOR_CLASSNAME;
+	}
+
+	@Override
+	public boolean loadInstanceData(Object model) throws ConfigurationException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 

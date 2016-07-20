@@ -83,6 +83,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
@@ -161,6 +162,9 @@ import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.ge.research.sadl.server.ISadlServer;
+import com.ge.research.sadl.server.SessionNotFoundException;
+import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -212,6 +216,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private Resource currentResource;
 	protected OntModel theJenaModel;
 	protected OntModelSpec spec;
+	protected ISadlServer kServer = null;
 	
 	protected enum AnnType {ALIAS, NOTE}
 	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
@@ -2790,11 +2795,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// there's already a range class specified
 				if (!prop.getNameSpace().equals(getModelNamespace())) {
 					// this is changing the range of a property defined in a different model
-					if (classIsSubclassOf((OntClass) rangeCls, existingRange, true, null)) {
-						addWarning("The range is a subclass of the range of property '" + prop.getURI() + "' which is defined in an imported model; perhaps you mean an 'only has values of type' restricion?", context);						
-					}
-					else {
-						addWarning("This changes the range of property '" + prop.getURI() + "' which is defined in an imported model; are you sure that's what you want to do?", context);
+					try {
+						if (SadlUtils.classIsSubclassOf((OntClass) rangeCls, existingRange, true, null)) {
+							addWarning("The range is a subclass of the range of property '" + prop.getURI() + "' which is defined in an imported model; perhaps you mean an 'only has values of type' restricion?", context);						
+						}
+						else {
+							addWarning("This changes the range of property '" + prop.getURI() + "' which is defined in an imported model; are you sure that's what you want to do?", context);
+						}
+					} catch (CircularDependencyException e) {
+						throw new JenaProcessorException(e.getMessage(), e);
 					}
 				}
 				OntResource newRange = addClassToUnionClass(existingRange, rangeCls);
@@ -2856,44 +2865,48 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private OntResource addClassToUnionClass(OntResource existingCls,
 			OntResource cls) throws JenaProcessorException {
 		if (existingCls != null && !existingCls.equals(cls)) {
-			if (existingCls.canAs(OntClass.class) && classIsSubclassOf(existingCls.as(OntClass.class), cls, true, null)) {
-				return cls;
-			}
-			else if (cls.canAs(OntClass.class) && classIsSubclassOf(cls.as(OntClass.class), existingCls, true, null)) {
-				return existingCls;
-			}
-			else {
-				RDFList classes = null;
-				if (existingCls.canAs(UnionClass.class)) {
-					try {
-						 UnionClass ucls = existingCls.as(UnionClass.class);
-						 ucls.addOperand(cls);
-						 return ucls;
-					} catch (Exception e) {
-						// don't know why this is happening
-						logger.error("Union class error that hasn't been resolved or understood.");
-						return cls;
-					}
-				} else {
-					if (cls.equals(existingCls)) {
-						return existingCls;
-					}
-					classes = getTheJenaModel().createList();
-					OntResource inCurrentModel = null;
-					if (existingCls.isURIResource()) {
-						inCurrentModel = getTheJenaModel().getOntResource(existingCls.getURI());
-					}
-					if (inCurrentModel != null) {
-						classes = classes.with(inCurrentModel);
-					}
-					else {
-						classes = classes.with(existingCls);
-					}
-					classes = classes.with(cls);
+			try {
+				if (existingCls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(existingCls.as(OntClass.class), cls, true, null)) {
+					return cls;
 				}
-				OntResource unionClass = getTheJenaModel().createUnionClass(null,
-						classes);
-				return unionClass;
+				else if (cls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(cls.as(OntClass.class), existingCls, true, null)) {
+					return existingCls;
+				}
+				else {
+					RDFList classes = null;
+					if (existingCls.canAs(UnionClass.class)) {
+						try {
+							 UnionClass ucls = existingCls.as(UnionClass.class);
+							 ucls.addOperand(cls);
+							 return ucls;
+						} catch (Exception e) {
+							// don't know why this is happening
+							logger.error("Union class error that hasn't been resolved or understood.");
+							return cls;
+						}
+					} else {
+						if (cls.equals(existingCls)) {
+							return existingCls;
+						}
+						classes = getTheJenaModel().createList();
+						OntResource inCurrentModel = null;
+						if (existingCls.isURIResource()) {
+							inCurrentModel = getTheJenaModel().getOntResource(existingCls.getURI());
+						}
+						if (inCurrentModel != null) {
+							classes = classes.with(inCurrentModel);
+						}
+						else {
+							classes = classes.with(existingCls);
+						}
+						classes = classes.with(cls);
+					}
+					OntResource unionClass = getTheJenaModel().createUnionClass(null,
+							classes);
+					return unionClass;
+				}
+			} catch (CircularDependencyException e) {
+				throw new JenaProcessorException(e.getMessage(), e);
 			}
 		} else {
 			return cls;
@@ -4068,7 +4081,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (value instanceof SadlNumberLiteral) {
 				String val = ((SadlNumberLiteral)value).getLiteralNumber();
 				if (rng != null) {
-					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
 				else {
 					if (val.contains(".")) {
@@ -4082,7 +4095,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else if (value instanceof SadlStringLiteral) {
 				String val = ((SadlStringLiteral)value).getLiteralString();
 				if (rng != null) {
-					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
 				else {
 					return getTheJenaModel().createTypedLiteral(val);
@@ -4091,7 +4104,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else if (value instanceof SadlBooleanLiteral) {
 				SadlBooleanLiteral val = ((SadlBooleanLiteral)value);
 				if (rng != null) {
-					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.toString());
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.toString());
 				}
 				else {
 					getTheJenaModel().createTypedLiteral(Boolean.parseBoolean(val.toString()));
@@ -4103,7 +4116,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else if (value instanceof SadlConstantLiteral) {
 				String val = ((SadlConstantLiteral)value).getTerm();
 				if (rng != null) {
-					return UtilsForJena.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
 				else {
 					try {
@@ -4341,198 +4354,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				while (eitr.hasNext()) {
 					com.hp.hpl.jena.rdf.model.Resource r = eitr.next();				
 					OntResource or = m.getOntResource(r);
-					if (or.isURIResource()) {
-						OntClass oc = m.getOntClass(or.getURI());
-						if (classIsSubclassOf(oc, cls, true, null)) {
-							eitr.close();
-							return true;
-						}
-					}
-					else if (or.canAs(OntClass.class)) {
-						if (classIsSubclassOf(or.as(OntClass.class), cls, true, null)) {
-							eitr.close();
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	}
-	/**
-	 * return true if the first argument class is a subclass of the second
-	 * argument class
-	 * 
-	 * @param subcls
-	 * @param cls
-	 * @return
-	 * @throws JenaProcessorException 
-	 */
-	protected static boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall, List<OntResource> previousClasses) throws JenaProcessorException {
-		if (subcls == null || cls == null) {
-			return false;
-		}
-		if (cls.isURIResource() && subcls.isURIResource()
-				&& cls.getURI().equals(subcls.getURI())) {
-			return true;
-		}
-		int previousClassesSizeOnCall;
-		if (previousClasses == null) {
-			previousClassesSizeOnCall = 0;
-			previousClasses = new ArrayList<OntResource>();
-			previousClasses.add(cls);
-		}
-		else {
-			previousClassesSizeOnCall = previousClasses.size();
-		}
-		if (cls.isAnon()) {
-			if (cls.canAs(OntClass.class)) {
-				OntClass ocls = cls.as(OntClass.class);
-				if (ocls.isUnionClass()) {
-					UnionClass ucls = cls.as(UnionClass.class);
 					try {
-						ExtendedIterator<? extends OntClass> eitr = ucls
-								.listOperands();
-						while (eitr.hasNext()) {
-							OntClass uclsmember = eitr.next();
-							previousClasses = checkPreviousClassList(previousClasses, uclsmember);
-							if (classIsSubclassOf(subcls, uclsmember, false, previousClasses)) {
+						if (or.isURIResource()) {
+							OntClass oc = m.getOntClass(or.getURI());
+							if (SadlUtils.classIsSubclassOf(oc, cls, true, null)) {
 								eitr.close();
 								return true;
 							}
 						}
-					}
-					catch (Exception e) {
-						logger.error("Unexpected error during deep validation: apparent Union Class does not return operands.");
-					}
-				}
-			}
-		}
-		try {
-			if (cls.canAs(OntClass.class)) {
-				ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSubClasses();
-				while (eitr.hasNext()) {
-					OntClass subClsOfCls = eitr.next();
-					if (subClsOfCls.equals(subcls)) {
-						eitr.close();
-						return true;
-					}
-					else {
-						previousClasses = checkPreviousClassList(previousClasses, subClsOfCls);
-						if (classIsSubclassOf(subcls, subClsOfCls, false, previousClasses)) {
-							eitr.close();
-							return true;
-						}
-					}
-				}
-				eitr.close();
-//				if (rootCall && classIsSuperClassOf(cls.as(OntClass.class), subcls)) {
-//					return true;
-//				}
-			}
-			if (subcls.isAnon()) {
-				if (subcls.isIntersectionClass()) {
-					IntersectionClass icls = subcls.asIntersectionClass();
-					try {
-						ExtendedIterator<? extends OntClass> eitr = icls.listOperands();
-						while (eitr.hasNext()) {
-							OntClass iclsmember = eitr.next();
-							previousClasses = checkPreviousClassList(previousClasses, iclsmember);
-							if (classIsSubclassOf(cls.as(OntClass.class), iclsmember, false, previousClasses)) {
+						else if (or.canAs(OntClass.class)) {
+							if (SadlUtils.classIsSubclassOf(or.as(OntClass.class), cls, true, null)) {
 								eitr.close();
 								return true;
 							}
 						}
-					}
-					catch (JenaProcessorException e) {
-						throw e;
-					}
-					catch (Exception e) {
-						logger.error("Unexpected error during deep validation: apparent Intersection Class does not return operands.");
+					} catch (CircularDependencyException e) {
+						throw new JenaProcessorException(e.getMessage(), e);
 					}
 				}
-			}
-// TODO We need to look for equivalent classes that provide a definition for a subclass, 
-//			e.g. Component is equivalent to System is class, (System and connectedTo someValueFrom Network) => Component subclass of System.
-			if (cls.canAs(OntClass.class)) {
-				ExtendedIterator<OntClass> eqitr = cls.as(OntClass.class).listEquivalentClasses();
-				while (eqitr.hasNext()) {
-					OntClass eqcls = eqitr.next();
-					previousClasses = checkPreviousClassList(previousClasses, eqcls);
-					if (classIsSubclassOf(subcls, eqcls, false, previousClasses)) {
-						return true;
-					}
-				}
-			}
-
-		} 
-		catch (JenaProcessorException e) {
-			throw e;
-		}
-		catch (Throwable t) {
-			t.printStackTrace();
-			logger.debug("Error in classIsSubclassOf: " + t.getMessage());
-			throw new JenaProcessorException(t.getMessage(), t);
-		}
-		if (previousClasses.size() > previousClassesSizeOnCall) {
-			// roll back to what it was on call
-			for (int i = previousClasses.size() - 1; i >= previousClassesSizeOnCall; i--) {
-				previousClasses.remove(i);
 			}
 		}
 		return false;
 	}
-
-	private static List<OntResource> checkPreviousClassList(List<OntResource> previousClasses, OntClass cls) throws JenaProcessorException {
-		if (previousClasses.contains(cls)) {
-			StringBuilder msg = new StringBuilder("Cycle encountered while checking subclasses of ");
-			msg.append(previousClasses.get(0).toString());
-			int loopstart = previousClasses.indexOf(cls);
-			msg.append(" (loop contains: ");
-			for (int i = loopstart; i < previousClasses.size(); i++) {
-				if (i > loopstart) msg.append(", ");
-				msg.append(previousClasses.get(i).toString());
-			}
-			msg.append(")");
-			throw new JenaProcessorException(msg.toString());
-		}
-		previousClasses.add(cls);
-		return previousClasses;
-	}
-	
-	private boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
-		ExtendedIterator<OntClass> eitr = subcls.listSuperClasses();
-		try {
-			while (eitr.hasNext()) {
-				OntClass sprcls = eitr.next();
-				if (sprcls.equals(cls)) {
-					return true;
-				}
-				if (classIsSuperClassOf(cls, sprcls)) {
-					return true;
-				}
-			}
-			eitr.close();
-			
-			eitr = cls.listSuperClasses();
-			while (eitr.hasNext()) {
-				OntClass equivCls = eitr.next();
-				if (classIsSubclassOf(subcls, equivCls, false, null)) {
-					eitr.close();
-					return true;
-				}
-			}
-		}
-		catch (Throwable t) {
-			logger.error("Error checking if class '" + cls.toString() + "' is a superclass of '" + subcls.toString() + 
-					"' : " + t.getMessage());
-		}
-		finally {
-			eitr.close();
-		}
-		return false;
-	}
-
 	private List<OntResource> getOntResourcesInUnionClass(OntModel m, UnionClass ucls) {
 		List<OntResource> results = new ArrayList<OntResource>();
 		List<RDFNode> clses = ucls.getOperands().asJavaList();
@@ -4715,6 +4558,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	@Override
 	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, IAcceptor<SadlMessage> resultAcceptor, ProcessorContext context) {
 		setCancelIndicator(cancelIndicator);
+		boolean useKSever = false;
+		String useKS = context.getPreferenceValues().getPreference(SadlPreferences.TEST_WITH_KSERVER);
+		if (useKS != null && useKS.equals("true")) {
+			useKSever = true;
+		}
 		if (resource.getContents().size() < 1) {
 			return;
 		}
@@ -4736,7 +4584,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						try {
 							String query = translate(((QueryStatement)element).getExpr()).toString();
 							query = new SadlUtils().stripQuotes(query);
-							processAdhocQuery(resource, issueAcceptor, context, query);
+							if (useKSever) {
+								getKServer(resource).query(query);
+							}
+							else {
+								processAdhocQuery(resource, issueAcceptor, context, query);
+							}
 						} catch (InvalidNameException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -4744,6 +4597,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} catch (TranslationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (QueryCancelledException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (QueryParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ReasonerNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (SessionNotFoundException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -4763,11 +4628,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		
 	}
 	
+	private ISadlServer getKServer(Resource resource) {
+		if (kServer == null) {
+			String modelFolder;
+			try {
+				modelFolder = getConfigMgr(resource, null).getModelFolder();
+				kServer = new SadlServerImpl(modelFolder);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return kServer;
+	}
+	
 	@Override
 	public void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context,
 			String query) {
 		String queryString;
 		String modelFolderPathname = getModelFolderPath(resource);
+		
 		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
 		try {
 			if (getTheJenaModel() == null) {
