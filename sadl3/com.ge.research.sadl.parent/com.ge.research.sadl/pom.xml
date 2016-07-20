@@ -12,6 +12,27 @@
 	<build>
 		<plugins>
 			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-compiler-plugin</artifactId>
+			  <version>3.5.1</version>
+			  <executions>
+			  	<execution>
+			  		<id>compileGenerator</id>
+			  		<phase>generate-sources</phase>
+			  		<goals>
+			  			<goal>compile</goal>
+			  		</goals>
+			  		<configuration>
+			  			<compilerId>javac</compilerId>
+			  			<includes>
+			  				<include>com/ge/research/generator/*.java</include>
+			  			</includes>
+			  			<includeProjectDependencies>true</includeProjectDependencies>
+			  		</configuration>
+			  	</execution>
+			  </executions>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
@@ -22,18 +43,39 @@
 						<goals>
 							<goal>java</goal>
 						</goals>
+						<configuration>
+							<mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
+							<arguments>
+								<argument>/${project.basedir}/src/com/ge/research/sadl/GenerateSADL.mwe2</argument>
+								<argument>-p</argument>
+								<argument>projectPath=/${project.basedir}</argument>
+							</arguments>
+							<includePluginDependencies>true</includePluginDependencies>
+						</configuration>
 					</execution>
+                    <execution>
+                        <id>errorsCodeGenerator</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+		                    <mainClass>com.ge.research.generator.SadlErrorGenerator</mainClass>
+		                    <arguments>
+		                    	<argument>/${project.basedir}</argument>
+		                    </arguments>
+		                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+		                    <includePluginDependencies>true</includePluginDependencies>
+		                    <includeProjectDependencies>true</includeProjectDependencies>
+		                </configuration>
+                    </execution>
 				</executions>
-				<configuration>
-					<mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
-					<arguments>
-						<argument>/${project.basedir}/src/com/ge/research/sadl/GenerateSADL.mwe2</argument>
-						<argument>-p</argument>
-						<argument>projectPath=/${project.basedir}</argument>
-					</arguments>
-					<includePluginDependencies>true</includePluginDependencies>
-				</configuration>
 				<dependencies>
+					<dependency>
+						<groupId>com.ge.research.doc-gen</groupId>
+						<artifactId>document-gen</artifactId>
+						<version>0.0.1-SNAPSHOT</version>
+					</dependency>
 					<dependency>
 						<groupId>com.ge.research.sadl</groupId>
 						<artifactId>com.ge.research.sadl.xtextgenerator</artifactId>
@@ -41,6 +83,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+            
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>

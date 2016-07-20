@@ -2,10 +2,12 @@ package com.ge.research.generator;
 
 import java.io.IOException;
 
+import com.ge.research.generator.ErrorGeneratorBase;
+
 public class SadlErrorGenerator extends ErrorGeneratorBase{
 	private final static String PROPERTIES_FILE = "sadlMessages";
 	private final static String HTML_FILE_PATH = "html/errormessages.html";
-	private final static String SOURCE_FILE_PATH = "src/com/ge/research/documentation/SadlErrorMessages.java";
+	private final static String SOURCE_FILE_PATH = "src-gen/com/ge/research/documentation/SadlErrorMessages.java";
 
 	@Override
 	String getProjectPrefix() {
@@ -32,6 +34,6 @@ public class SadlErrorGenerator extends ErrorGeneratorBase{
 	}
 
 	public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, IOException {
-		(new SadlErrorGenerator()).generate();
+		(new SadlErrorGenerator()).generate(args[0]);
 	}
 }

@@ -4,8 +4,7 @@ Bundle-Name: Document-gen
 Bundle-SymbolicName: com.ge.research.doc-gen;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: GE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.hp.hpl.jena.util
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.ge.research.generator,
  com.ge.research.logger,
  com.ge.research.messages

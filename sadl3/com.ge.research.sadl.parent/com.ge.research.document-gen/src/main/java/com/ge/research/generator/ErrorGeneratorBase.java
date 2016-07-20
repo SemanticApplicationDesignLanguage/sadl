@@ -3,13 +3,9 @@ package com.ge.research.generator;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
-import com.ge.research.messages.ErrorMessage;
-import com.hp.hpl.jena.util.FileUtils;
 
 
 public abstract class ErrorGeneratorBase {
@@ -51,9 +47,10 @@ public abstract class ErrorGeneratorBase {
 	 */
 	abstract String getSourceFilePath();
 	
-	public void generate() throws IllegalArgumentException, IllegalAccessException, IOException {
+	public void generate(String projectBase) throws IllegalArgumentException, IllegalAccessException, IOException {
 		System.out.println("--------Starting Source Code and Document Generation---------");
 		
+		String projectFileBase = projectBase.replace('\\', '/') + '/';
 		String prefix = getProjectPrefix();
 		
 		//Code generation
@@ -98,14 +95,14 @@ public abstract class ErrorGeneratorBase {
 		sourceCodeString = sourceCodeString.replace("$content", sourceContent);
 		
 		System.out.println("    Writing to source files");
-		writeToFile(getSourceFilePath(), sourceCodeString);
+		writeToFile(projectFileBase +  getSourceFilePath(), sourceCodeString);
 
 		//Finish off documentation and write to html file
 		tableString += "</table>";
 		htmlString = htmlString.replace("$body", tableString);
 		
 		System.out.println("    Writing to HTML file");
-		writeToFile(getDocumentationFilePath(), htmlString);
+		writeToFile(projectFileBase + getDocumentationFilePath(), htmlString);
 		
 		System.out.println("  COMPLETE");
 	}
