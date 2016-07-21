@@ -75,6 +75,7 @@ import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
@@ -96,9 +97,11 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
+import com.ge.research.sadl.sADL.ConstructExpression;
 import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.EndWriteStatement;
 import com.ge.research.sadl.sADL.EquationStatement;
@@ -153,6 +156,7 @@ import com.ge.research.sadl.sADL.SadlTypeAssociation;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.SadlValueList;
+import com.ge.research.sadl.sADL.SelectExpression;
 import com.ge.research.sadl.sADL.StartWriteStatement;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
@@ -286,6 +290,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected List<String> importsInOrderOfAppearance = null;	// an ordered set of import URIs, ordered by appearance in file.
 	private List<Rule> rules = null;
 	private List<Equation> equations = null;
+	private List<SadlCommand> sadlCommands = null;
 	
 	int modelErrorCount = 0;
 	int modelWarningCount = 0;
@@ -953,13 +958,109 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		Expression qexpr = element.getExpr();
 		if (qexpr != null) {
 			Object qobj = processExpression(qexpr);
-			Query query = processQuery(qobj);
+			Query query;
+			if (qobj instanceof Query) {
+				query = (Query) qobj;
+			}
+			else {
+				query = processQuery(qobj);
+			}
 			if (element.getName() != null) {
 				query.setFqName(getModelNamespace() + element.getName());
 			}
+			addSadlCommand(query);
 			return query;
 		}
 		return null;
+	}
+	public Query processExpression(SelectExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Query query = new Query();
+		query.setContext(expr);
+//		setTranslationTarget(query);
+//		if (parent != null) {
+//			getIfTranslator().setEncapsulatingTarget(parent);
+//		}
+		
+		// get variables and other information from the SelectExpression
+		EList<SadlResource> varList = null;
+		if (expr instanceof SelectExpression) {
+			query.setKeyword("select");
+			if (((SelectExpression)expr).isDistinct()) {
+				query.setDistinct(true);
+			}
+			varList = ((SelectExpression)expr).getSelectFrom();
+			if (varList != null) {
+				List<String> names = new ArrayList<String>();
+				for (int i = 0; i < varList.size(); i++) {
+					Object var = translate(varList.get(i));
+					if (!(var instanceof VariableNode)) {
+						throw new InvalidNameException("'" + var.toString() + "' isn't a variable as expected in query select names.");
+					}
+					names.add(((VariableNode)var).getName());
+				}
+				query.setVariables(names);
+			}
+		}
+		else if (expr instanceof ConstructExpression) {
+			query.setKeyword("construct");
+			List<String> names = new ArrayList<String>();
+			names.add(translate(((ConstructExpression)expr).getSubj()).toString());
+			names.add(translate(((ConstructExpression)expr).getPred()).toString());
+			names.add(translate(((ConstructExpression)expr).getObj()).toString());
+			query.setVariables(names);
+		}
+		else if (expr instanceof AskExpression) {
+			query.setKeyword("ask");
+		}
+
+		// Translate the query to the resulting intermediate form.
+		Object pattern = translate(expr.getWhereExpression());
+		
+		Object expandedPattern = null;
+		try {
+			expandedPattern = getIfTranslator().expandProxyNodes(pattern, false, true);
+		} catch (InvalidNameException e) {
+			addError("Invalid name in query: " + pattern.toString(), expr);
+			e.printStackTrace();
+		} catch (InvalidTypeException e) {
+			addError("Invalid type in query: " + pattern.toString(), expr);
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			addError("Translation error in query: " + pattern.toString(), expr);
+			e.printStackTrace();
+		}
+		if (expandedPattern != null && expandedPattern instanceof List<?> && ((List<?>)expandedPattern).size() > 0) {
+			pattern = expandedPattern;
+		}
+		
+		if (pattern instanceof List<?>) {
+			if (query.getVariables() == null) {
+				Set<VariableNode> nodes = getIfTranslator().getSelectVariables((List<GraphPatternElement>)pattern);
+				if (nodes != null && nodes.size() > 0) {
+					List<String> names = new ArrayList<String>(1);
+					for (VariableNode node : nodes) {
+						names.add(node.getName());
+					}
+					query.setVariables(names);
+					if (query.getKeyword() == null) {
+						query.setKeyword("select");
+					}
+				}
+				else {
+					// no variables, assume an ask
+					if (query.getKeyword() == null) {
+						query.setKeyword("ask");
+					}
+				}
+			}
+			query.setPatterns((List<GraphPatternElement>) pattern);
+		}
+		else if (pattern instanceof Literal) {
+			// this must be a SPARQL query
+			query.setSparqlQueryString(((Literal)pattern).getValue().toString());
+		}
+		logger.debug("Ask translation: {}", query);
+		return query;
 	}
 
 	private Query processQuery(Object qobj) throws JenaProcessorException {
@@ -1130,6 +1231,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		rules.add(rule);
 	}
 	
+	protected void addSadlCommand(SadlCommand sadlCommand) {
+		if (sadlCommands == null) {
+			sadlCommands = new ArrayList<SadlCommand>();
+		}
+		sadlCommands.add(sadlCommand);
+	}
+	
+	protected List<SadlCommand> getSadlCommands() {
+		return sadlCommands;
+	}
+
 	public IntermediateFormTranslator getIfTranslator() {
 		if (intermediateFormTranslator == null) {
 			intermediateFormTranslator = new IntermediateFormTranslator(getTheJenaModel());
@@ -1185,9 +1297,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof ValueTable) {
 			return processExpression((ValueTable)expr);
 		}
-		else {
-			throw new TranslationException("Unhanded rule expression type: " + expr.getClass().getCanonicalName());
+		else if (expr instanceof SelectExpression) {
+			return processExpression((SelectExpression)expr);
 		}
+		else if (expr != null){
+			throw new TranslationException("Unhandled rule expression type: " + expr.getClass().getCanonicalName());
+		}
+		return expr;
 	}
 	
 	public Object processExpression(ValueTable expr) {
@@ -4566,6 +4682,54 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (resource.getContents().size() < 1) {
 			return;
 		}
+		if (getTheJenaModel() == null) {
+			// it always is?
+			onValidate(resource, null, CheckMode.FAST_ONLY, context);
+		}
+		
+		List<SadlCommand> toProcess = getSadlCommands();
+		if (toProcess != null) {
+			Iterator<SadlCommand> tpitr = toProcess.iterator();
+			while (tpitr.hasNext()) {
+				SadlCommand cmd = tpitr.next();
+				try {
+					if (cmd instanceof Query) {
+						String query = ((Query)cmd).getSparqlQueryString();
+						if (query == null) {
+							query = getConfigMgr(getCurrentResource(), null).getTranslator().translateQuery(getTheJenaModel(), (Query) cmd);
+						}
+						query = SadlUtils.stripQuotes(query);
+						if (useKSever) {
+							getKServer(resource).query(query);
+						}
+						else {
+							processAdhocQuery(resource, issueAcceptor, context, query);
+						}
+					}
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (QueryCancelledException e) {
+					// OK to cancel--no error
+					issueAcceptor.addInfo("Query cancelled by user", (EObject) cmd.getContext());
+				} catch (QueryParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ReasonerNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SessionNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 		SadlModel model = (SadlModel) resource.getContents().get(0);
 		String modelActualUrl =resource.getURI().lastSegment();
 		if (isReservedName(resource)) {
@@ -4582,13 +4746,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					SadlModelElement element = elitr.next();
 					if (element instanceof QueryStatement) {
 						try {
-							String query = translate(((QueryStatement)element).getExpr()).toString();
-							query = new SadlUtils().stripQuotes(query);
-							if (useKSever) {
-								getKServer(resource).query(query);
+							Object queryObj = translate(((QueryStatement)element).getExpr());
+							if (queryObj instanceof Query) {
+								String query = ((Query)queryObj).getSparqlQueryString();
+								if (query == null) {
+									query = getConfigMgr(getCurrentResource(), null).getTranslator().translateQuery(getTheJenaModel(), (Query) queryObj);
+								}
+								query = SadlUtils.stripQuotes(query);
+								if (useKSever) {
+									getKServer(resource).query(query);
+								}
+								else {
+									processAdhocQuery(resource, issueAcceptor, context, query);
+								}
 							}
 							else {
-								processAdhocQuery(resource, issueAcceptor, context, query);
+								throw new TranslationException("Unexpected query translation result: " + queryObj.toString());
 							}
 						} catch (InvalidNameException e) {
 							// TODO Auto-generated catch block
