@@ -30,6 +30,8 @@ import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.ge.research.sadl.scoping.ErrorAddingLinkingService
+import org.junit.Assert
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -55,6 +57,30 @@ class ValidationTest {
 		''', uri.trimSegments(1).appendSegment("subpath").appendSegment(uri.lastSegment), currentResourceSet) => [
 			validationTestHelper.assertError(it, SADLPackage.Literals.SADL_MODEL, SADLValidator.INVALID_MODEL_FILENAME)
 		]
+	}
+	
+	@Test def void testLinkingAmbiguousElements() {
+		'''
+			uri "http://sadl.org/NS1.sadl" alias ns1.
+			
+			Car is a class.
+		'''.sadl
+		'''
+			uri "http://sadl.org/NS2.sadl" alias ns2.
+			
+			Car is a class.
+		'''.sadl
+		val model = '''
+			uri "http://sadl.org/NS3.sadl" alias ns3.
+			
+			import "http://sadl.org/NS1.sadl".
+			import "http://sadl.org/NS2.sadl".
+			
+			MyCar is a Car.
+			
+		'''.sadl
+		val issues = validationTestHelper.validate(model)
+		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use an alias or choose different names.", issues.head.message)
 	}
 
 	@Inject ValidationTestHelper validationTestHelper

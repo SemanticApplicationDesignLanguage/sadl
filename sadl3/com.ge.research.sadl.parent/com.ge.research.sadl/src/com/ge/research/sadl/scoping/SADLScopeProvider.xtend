@@ -53,6 +53,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import org.eclipse.xtext.resource.ForwardingEObjectDescription
 
 /**
  * This class contains custom scoping description.
@@ -270,13 +271,30 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 		override getSingleElement(QualifiedName name) {
+			var List<IEObjectDescription> candidates = newArrayList()
 			for (scope : delegates) {
 				val element = scope.getSingleElement(name)
 				if (element !== null) {
-					return element
+					candidates += element
 				}
 			}
-			return null
+			if (candidates.size <= 1) {
+				return candidates.head
+			} else {
+				val imports = candidates.map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
+				val message = '''Ambiguously imported name '«candidates.head.name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
+				
+				return new ForwardingEObjectDescription(candidates.head) {
+					
+					override getUserData(String key) {
+						if (key.equals(ErrorAddingLinkingService.ERROR)) {
+							return message
+						}
+						super.getUserData(key)
+					}
+					
+				}
+			}
 		}
 		
 		override getSingleElement(EObject object) {
@@ -290,4 +308,5 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 	}
+	
 }
