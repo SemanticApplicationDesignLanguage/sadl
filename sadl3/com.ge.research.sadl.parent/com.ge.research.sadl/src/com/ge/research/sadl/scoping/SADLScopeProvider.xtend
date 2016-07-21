@@ -225,6 +225,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			if (!externalResource.eIsProxy)
 				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
 		}
+		val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
+		if (element !== null) {
+			val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+			if (eobject !== null) {
+				importScopes += createResourceScope(eobject.eResource, null, importedResources)
+			}
+		}
 		return new ListCompositeScope(importScopes)
 	}
 
