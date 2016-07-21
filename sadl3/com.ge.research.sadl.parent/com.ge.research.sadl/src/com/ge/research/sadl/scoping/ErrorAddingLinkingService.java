@@ -25,6 +25,7 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 	public static final String ISSUE_CODE = "ambiguous_import";
 
 	public static final String ERROR = "ERROR";
+	public static final String ALTERNATIVES = "ALTERNATIVES";
 
 	private static final Logger logger = Logger.getLogger(ErrorAddingLinkingService.class);
 	
@@ -56,7 +57,7 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 			if (eObjectDescription != null) {
 				String errorMessage = eObjectDescription.getUserData(ERROR);
 				if (errorMessage != null) {
-					createAndAddDiagnostic(context.eResource(), node, errorMessage);
+					createAndAddDiagnostic(context.eResource(), node, errorMessage, eObjectDescription.getUserData(ALTERNATIVES));
 				}
 				return Collections.singletonList(eObjectDescription.getEObjectOrProxy());
 			}
@@ -64,8 +65,9 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 		return Collections.emptyList();
 	}
 	
-	protected void createAndAddDiagnostic(Resource resource, INode node, String message) {
-		resource.getErrors().add(new XtextLinkingDiagnostic(node, message, ISSUE_CODE));
+	protected void createAndAddDiagnostic(Resource resource, INode node, String message, String commaSeparatedAlternatives) {
+		resource.getErrors().add(new XtextLinkingDiagnostic(node, message, ISSUE_CODE, commaSeparatedAlternatives));
 	}
+
 	
 }
