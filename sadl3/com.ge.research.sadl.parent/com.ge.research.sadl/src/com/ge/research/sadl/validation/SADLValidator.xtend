@@ -125,8 +125,8 @@ class SADLValidator extends AbstractSADLValidator {
 		val itr = EcoreUtil2.getAllContents(rule.thens).filter(Name).toList.iterator
 		while (itr.hasNext) {
 			var name = itr.next
-			if (name.name.equals(name)) {
-				var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + " which is not bound in the rule premises."
+			if (!name.function && name.name.equals(name)) {
+				var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + "' which is not bound in the rule premises."
 				error(errMsg, SADLPackage.Literals.RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
 			}
 		}

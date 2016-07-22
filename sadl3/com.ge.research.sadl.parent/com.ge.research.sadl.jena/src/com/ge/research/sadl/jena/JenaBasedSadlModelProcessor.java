@@ -213,6 +213,8 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
+	private static final String SYNTHETIC_FROM_TEST = "__synthetic";
+
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelProcessor.class);
 
     public final static String XSDNS = XSD.getURI();
@@ -636,30 +638,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
 				addImportToJenaModel(getModelName(), SADL_BASE_MODEL_URI, sadlBaseModel);
 				String implfn = checkImplicitSadlModelExistence(resource, context);
-				Resource imrsrc = resource.getResourceSet().getResource(URI.createPlatformResourceURI(implfn, true), true);
-				if (sadlImplicitModel == null) {
-					if (imrsrc instanceof XtextResource) {
-						sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
-					}
-					else if (imrsrc instanceof ExternalEmfResource) {
-						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
-					}
+				if (implfn != null) {
+					Resource imrsrc = resource.getResourceSet().getResource(URI.createPlatformResourceURI(implfn, true), true);
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {
-							((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-							sadlImplicitModel = OntModelProvider.find(imrsrc);
-							OntModelProvider.attach(imrsrc, sadlImplicitModel);
+							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
 						}
-						else {
-							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-							if (cm.getModelGetter() == null) {
-								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+						else if (imrsrc instanceof ExternalEmfResource) {
+							sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						}
+						if (sadlImplicitModel == null) {
+							if (imrsrc instanceof XtextResource) {
+								((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+								sadlImplicitModel = OntModelProvider.find(imrsrc);
+								OntModelProvider.attach(imrsrc, sadlImplicitModel);
 							}
-							cm.getModelGetter().getOntModel(SADL_IMPLICIT_MODEL_URI, ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR).appendFragment(OWL_IMPLICIT_MODEL_FILENAME).toFileString(), getOwlModelFormat(context));
+							else {
+								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+								if (cm.getModelGetter() == null) {
+									cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+								}
+								cm.getModelGetter().getOntModel(SADL_IMPLICIT_MODEL_URI, ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR).appendFragment(OWL_IMPLICIT_MODEL_FILENAME).toFileString(), getOwlModelFormat(context));
+							}
 						}
-					}
-					if (sadlImplicitModel != null) {
-						addImportToJenaModel(getModelName(), SADL_IMPLICIT_MODEL_URI, sadlImplicitModel);
+						if (sadlImplicitModel != null) {
+							addImportToJenaModel(getModelName(), SADL_IMPLICIT_MODEL_URI, sadlImplicitModel);
+						}
 					}
 				}
 			} catch (IOException e1) {
@@ -885,7 +889,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
 			setSpec(spec);
 			String modelFolderPathname = getModelFolderPath(resource);
-			if (modelFolderPathname != null && !modelFolderPathname.startsWith("__synthetic")) {
+			if (modelFolderPathname != null && !modelFolderPathname.startsWith(SYNTHETIC_FROM_TEST)) {
 				spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
 			}
 			if (owlDocMgr != null) {
@@ -5089,7 +5093,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			String modelFolderPathname = getModelFolderPath(resource);
 			if ((modelFolderPathname == null && 
 					resource.getURI().toString().startsWith("synthetic")) ||
-							resource.getURI().toString().startsWith("__synthetic")) {
+							resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST)) {
 				modelFolderPathname = null;
 				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname, format, true);
 			}
