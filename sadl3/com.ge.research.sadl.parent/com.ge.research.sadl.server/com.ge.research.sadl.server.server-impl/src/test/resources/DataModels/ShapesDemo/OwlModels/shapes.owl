@@ -1,0 +1,85 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.imp/shapes#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/shapes">
+  <owl:Ontology rdf:about="http://sadl.imp/shapes">
+    <owl:versionInfo>$Revision: 1.2 $ Last modified on $Date: 2014/09/26 17:35:53 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'shapes.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Circle">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="radius"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Shape"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Rectangle">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="width"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="height"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="http://sadl.imp/shapes#Shape"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.imp/shapes#Shape">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="area"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:about="http://sadl.imp/shapes#width">
+    <rdfs:domain rdf:resource="http://sadl.imp/shapes#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.imp/shapes#height">
+    <rdfs:domain rdf:resource="http://sadl.imp/shapes#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.imp/shapes#radius">
+    <rdfs:domain rdf:resource="http://sadl.imp/shapes#Circle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.imp/shapes#area">
+    <rdfs:domain rdf:resource="http://sadl.imp/shapes#Shape"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <Rectangle rdf:ID="MyRect">
+    <width rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >4.5</width>
+    <height rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >3.5</height>
+  </Rectangle>
+  <Circle rdf:ID="MyCircle">
+    <radius rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >3.5</radius>
+  </Circle>
+</rdf:RDF>
