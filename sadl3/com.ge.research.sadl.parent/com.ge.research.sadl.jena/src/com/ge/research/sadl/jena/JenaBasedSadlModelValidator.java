@@ -22,9 +22,11 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
@@ -1078,13 +1080,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				// these next two ifs are a little loose, but not clear how to determine which way the comparison should be? May need tightening... AWC 5/11/2016
 				try {
-					if (classIsSubclassOf(theJenaModel.getOntClass(leftConceptName.getUri()), theJenaModel.getOntResource(rightConceptName.getUri()), true)) {
+					if (SadlUtils.classIsSubclassOf(theJenaModel.getOntClass(leftConceptName.getUri()), theJenaModel.getOntResource(rightConceptName.getUri()), true, null)) {
 						return true;
 					}
-					if (classIsSubclassOf(theJenaModel.getOntClass(rightConceptName.getUri()), theJenaModel.getOntResource(leftConceptName.getUri()), true)) {
+					if (SadlUtils.classIsSubclassOf(theJenaModel.getOntClass(rightConceptName.getUri()), theJenaModel.getOntResource(leftConceptName.getUri()), true, null)) {
 						return true;
 					}
-				} catch (JenaProcessorException e) {
+				} catch (CircularDependencyException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -1143,9 +1145,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	 * @param cls
 	 * @return
 	 * @throws JenaProcessorException 
+	 * @throws CircularDependencyException 
 	 */
-	public boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) throws JenaProcessorException {
-		return JenaBasedSadlModelProcessor.classIsSubclassOf(subcls, cls, rootCall, null);
+//	public boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) throws JenaProcessorException, CircularDependencyException {
+//		return SadlUtils.classIsSubclassOf(subcls, cls, rootCall, null);
 //		if (subcls == null || cls == null) {
 //			return false;
 //		}
@@ -1245,7 +1248,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //			t.printStackTrace();
 //		}
 //		return false;
-	}
+//	}
 
 
 	

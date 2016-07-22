@@ -69,6 +69,9 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					if (v.eContainer instanceof QueryStatement) {
 						highlightingId = SadlHighlightingConfiguration.DEFAULT_ID
 					}
+					else if (v.function) {
+						highlightingId = SadlHighlightingConfiguration.FUNCTION_NAME_ID
+					}
 					var node = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME).head
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}

@@ -1,0 +1,92 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <OntologySpec>
+    <publicURI rdf:resource="http://com.ge.research.sadl/sadlserver/Services"/>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/SadlServicesConfigurationConcepts.owl"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/shape-rules.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shape_rules"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/ServicesConfig.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/sadlserver/ServicesConfig"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/shapesOldSyntax.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapesOldSyntax"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/shapesNoRules.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapesnr"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/otherExamples.owl"/>
+    <publicURI rdf:resource="http://research.ge.com/cds/eal/otherExamples"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/shapes.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes"/>
+  </OntologySpec>
+  <OntologySpec>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <publicURI rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >owl</prefix>
+  </OntologySpec>
+  <DocumentManagerPolicy>
+    <cacheModels rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</cacheModels>
+    <processImports rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</processImports>
+  </DocumentManagerPolicy>
+  <OntologySpec>
+    <altURL rdf:resource="http://protege.stanford.edu/plugins/owl/dc/protege-dc.owl"/>
+    <publicURI rdf:resource="http://purl.org/dc/elements/1.1/"/>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >dc</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/shapes-test.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes_test"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/shapes-top.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes_top"/>
+  </OntologySpec>
+  <OntologySpec>
+    <publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/defaults.owl"/>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <createdBy>SADL</createdBy>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >def</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/ShapesDemo/OwlModels/shapes-specific.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes_specific"/>
+  </OntologySpec>
+</rdf:RDF>

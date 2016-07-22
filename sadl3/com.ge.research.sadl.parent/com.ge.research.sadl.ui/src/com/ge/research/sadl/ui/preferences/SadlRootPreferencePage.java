@@ -61,6 +61,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         		new String[][] {{"Model Namespaces", SadlPreferences.MODEL_NAMESPACES.getId()}, {"SADL File Names", SadlPreferences.SADL_FILE_NAMES.getId()}}, getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.PREFIXES_ONLY_AS_NEEDED.getId(), "Show prefixes for imported concepts only when needed for disambiguation", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.VALIDATE_BEFORE_TEST.getId(), "Validate before Testing", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(SadlPreferences.TEST_WITH_KSERVER.getId(), "Test/Query with Knowledge Server", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId(), "Show Namespaces in Query Results", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.SHOW_TIMING_INFORMATION.getId(), "Show Timing Informaton (Build, Reasoning)", getFieldEditorParent()));
         addField(new RadioGroupFieldEditor("dmyOrder", "Interpret Date 10/11/2012 as:", 2, 
