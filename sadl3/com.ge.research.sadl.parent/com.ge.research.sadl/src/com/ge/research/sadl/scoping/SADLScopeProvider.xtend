@@ -252,7 +252,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 		override getElements(QualifiedName name) {
-			return delegates.map[getElements(name)].flatten
+			val registered = newHashSet
+			return delegates.map[getElements(name)].flatten.filter[registered.add(it.EObjectURI)]
 		}
 		
 		override getElements(EObject object) {
