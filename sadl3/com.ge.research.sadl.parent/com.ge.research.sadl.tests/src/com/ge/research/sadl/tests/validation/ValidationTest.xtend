@@ -28,10 +28,9 @@ import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import com.ge.research.sadl.scoping.ErrorAddingLinkingService
-import org.junit.Assert
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -593,8 +592,29 @@ class ValidationTest {
 			//EndSectionObject
 			
 		'''.sadl
-		val issues = validationTestHelper.validate(model)
-		Assert.assertEquals("Ambiguously imported name 'input_1' from 'http://assert/Properties', 'http://assert/Properties'. Please use an alias or choose different names.", issues.head.message)
+		validationTestHelper.assertNoErrors(model)
+	}
+	
+	@Test def void testLinkingAmbiguousElements_01() {
+		'''
+			uri "http://sadl.org/NS1.sadl" alias ns1.
+			
+			Car is a class.
+		'''.sadl
+		'''
+			uri "http://sadl.org/NS2.sadl" alias ns2.
+			import "http://sadl.org/NS1.sadl".
+		'''.sadl
+		val model = '''
+			uri "http://sadl.org/NS3.sadl" alias ns3.
+			
+			import "http://sadl.org/NS1.sadl".
+			import "http://sadl.org/NS2.sadl".
+			
+			MyCar is a Car.
+			
+		'''.sadl
+		validationTestHelper.assertNoErrors(model)
 	}
 
 	@Inject ValidationTestHelper validationTestHelper
