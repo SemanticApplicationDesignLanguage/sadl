@@ -20,19 +20,21 @@
  ***********************************************************************/
 package com.ge.research.sadl
 
+import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
+import com.ge.research.sadl.resource.ResourceDescriptionStrategy
+import com.ge.research.sadl.scoping.ErrorAddingLinkingService
 import com.ge.research.sadl.scoping.QualifiedNameConverter
 import com.ge.research.sadl.scoping.QualifiedNameProvider
-import com.ge.research.sadl.validation.SoftLinkingMessageProvider
-import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
-import org.eclipse.xtext.naming.IQualifiedNameConverter
-import org.eclipse.xtext.validation.ResourceValidatorImpl
 import com.ge.research.sadl.validation.ResourceValidator
-import org.eclipse.xtext.generator.IOutputConfigurationProvider
-import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
+import com.ge.research.sadl.validation.SoftLinkingMessageProvider
 import com.google.inject.Binder
 import com.google.inject.Singleton
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
+import org.eclipse.xtext.linking.impl.DefaultLinkingService
+import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
+import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
-import com.ge.research.sadl.resource.ResourceDescriptionStrategy
+import org.eclipse.xtext.validation.ResourceValidatorImpl
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -73,4 +75,7 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 		super.bindIGenerator2()
 	}
 	
+	def Class<? extends DefaultLinkingService> bindDefaultLinkingService() {
+		ErrorAddingLinkingService
+	}
 }

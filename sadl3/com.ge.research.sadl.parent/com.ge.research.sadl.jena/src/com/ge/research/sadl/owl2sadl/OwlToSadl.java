@@ -42,7 +42,6 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
-import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;

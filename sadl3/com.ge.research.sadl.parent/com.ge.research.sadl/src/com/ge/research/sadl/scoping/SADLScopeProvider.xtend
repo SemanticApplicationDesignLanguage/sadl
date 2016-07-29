@@ -53,6 +53,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import org.eclipse.xtext.resource.ForwardingEObjectDescription
 
 /**
  * This class contains custom scoping description.
@@ -225,7 +226,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			if (!externalResource.eIsProxy)
 				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
 		}
-		return new ListCompositeScope(importScopes)
+		val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
+		if (element !== null) {
+			val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+			if (eobject !== null) {
+				importScopes += createResourceScope(eobject.eResource, null, importedResources)
+			}
+		}
+		return new ListCompositeScope(importScopes, converter)
 	}
 
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
@@ -237,39 +245,49 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	@Data static class ListCompositeScope implements IScope {
 	
 		List<IScope> delegates
+		IQualifiedNameConverter converter
 		
 		override getAllElements() {
 			delegates.map[allElements].reduce[p1, p2| p1 + p2]
 		}
 		
 		override getElements(QualifiedName name) {
-			for (scope : delegates) {
-				val result = scope.getElements(name)
-				if (!result.isEmpty) {
-					return result
-				}
-			}
-			return emptyList
+			val registered = newHashSet
+			return delegates.map[getElements(name)].flatten.filter[registered.add(it.EObjectURI)]
 		}
 		
 		override getElements(EObject object) {
-			for (scope : delegates) {
-				val result = scope.getElements(object)
-				if (!result.isEmpty) {
-					return result
-				}
-			}
-			return emptyList
+			return delegates.map[getElements(object)].flatten
 		}
 		
 		override getSingleElement(QualifiedName name) {
-			for (scope : delegates) {
-				val element = scope.getSingleElement(name)
-				if (element !== null) {
-					return element
+			var List<IEObjectDescription> candidates = getElements(name).toList
+			if (candidates.size <= 1) {
+				return candidates.head
+			} else {
+				val imports = candidates.map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
+				val message = '''Ambiguously imported name '«candidates.head.name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
+				val alternatives = candidates.map[
+					desc | 
+					this.getElements(desc.EObjectOrProxy)
+						.filter
+						[
+							qualifiedName != desc.qualifiedName
+						]
+				].flatten.toList
+				
+				return new ForwardingEObjectDescription(candidates.head) {
+					override getUserData(String key) {
+						if (key.equals(ErrorAddingLinkingService.ERROR)) {
+							return message
+						}
+						if (key.equals(ErrorAddingLinkingService.ALTERNATIVES)) {
+							return alternatives.join(",", [converter.toString(name)])
+						}
+						super.getUserData(key)
+					}
 				}
 			}
-			return null
 		}
 		
 		override getSingleElement(EObject object) {
@@ -283,4 +301,5 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 	}
+	
 }

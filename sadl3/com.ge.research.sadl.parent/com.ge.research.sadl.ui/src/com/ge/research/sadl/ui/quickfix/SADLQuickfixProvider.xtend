@@ -19,6 +19,10 @@
 package com.ge.research.sadl.ui.quickfix
 
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
+import org.eclipse.xtext.ui.editor.quickfix.Fix
+import com.ge.research.sadl.scoping.ErrorAddingLinkingService
+import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
+import org.eclipse.xtext.validation.Issue
 
 /**
  * Custom quickfixes.
@@ -27,13 +31,14 @@ import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
  */
 class SADLQuickfixProvider extends DefaultQuickfixProvider {
 
-//	@Fix(SADLValidator.INVALID_NAME)
-//	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
-//		acceptor.accept(issue, 'Capitalize name', 'Capitalize the name.', 'upcase.png') [
-//			context |
-//			val xtextDocument = context.xtextDocument
-//			val firstLetter = xtextDocument.get(issue.offset, 1)
-//			xtextDocument.replace(issue.offset, 1, firstLetter.toUpperCase)
-//		]
-//	}
+	@Fix(ErrorAddingLinkingService.ISSUE_CODE)
+	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
+		for (alternative: issue.data.head?.split(",").toList.filter[!isEmpty] ?: emptyList) {
+			acceptor.accept(issue, "Change to '"+alternative+"'", "Change to '"+alternative+"'", 'upcase.png') [
+				context |
+				val xtextDocument = context.xtextDocument
+				xtextDocument.replace(issue.offset, issue.length, alternative)
+			]
+		}
+	}
 }

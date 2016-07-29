@@ -151,7 +151,10 @@ class DeclarationExtensions {
 		try {
 			if (resource instanceof Name) {
 				if (resource.eContainer instanceof QueryStatement) {
-					return OntConceptType.INSTANCE;
+					return OntConceptType.INSTANCE
+				}
+				else if (resource.function) {
+					return OntConceptType.FUNCTION_DEFN
 				}
 				return OntConceptType.VARIABLE
 			}

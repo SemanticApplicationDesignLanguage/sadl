@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!-- Print warning and error messages on standard error -->
+  <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
+    <encoder>
+      <pattern>%date [%10.10thread] %-5level %40.40logger{40} - %msg%n%xThrowable</pattern>
+    </encoder>
+    <!-- Deny all events with a level below WARN -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+  </appender>
+
+  <!-- Print all other messages on standard output -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%date [%10.10thread] %-5level %40.40logger{40} - %msg%n%xThrowable</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>ERROR</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>NEUTRAL</onMismatch>
+    </filter> 
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>WARN</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>ACCEPT</onMismatch>
+    </filter> 
+  </appender>
+
+  <!-- Also save all messages to a file -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <encoder>
+      <pattern>%date [%10.10thread] %-5level %40.40logger{40} - %msg%n%xThrowable</pattern>
+    </encoder>
+    <File>sadl.log</File>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <maxIndex>1</maxIndex>
+      <FileNamePattern>sadl.log.%i</FileNamePattern>
+    </rollingPolicy>
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <MaxFileSize>5000KB</MaxFileSize>
+    </triggeringPolicy>
+  </appender>
+
+ <!--  <logger name="com.ge.research.sadl.reasoner.ConfigurationManager" level="DEBUG"/> -->
+ <!--  <logger name="com.ge.research.sadl.builder.ModelManager" level="DEBUG"/>  -->
+ <!--  <logger name="com.ge.research.sadl.builder.SadlModelManager" level="DEBUG"/> --> 
+<!--  <logger name="com.ge.research.sadl.jena.reasoner.buildin.Abs" level="DEBUG"/> -->
+<!--  <logger name="com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin" level="DEBUG"/> -->
+<!--  <logger name="com.ge.research.sadl.lmsv.jena.builtin.List" level="DEBUG"/> -->
+ 
+  <!-- Send all warning and error messages to standard error and other messages to standard output -->
+  <root level="WARN">
+    <appender-ref ref="STDERR"/>
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
+  </root>
+</configuration>

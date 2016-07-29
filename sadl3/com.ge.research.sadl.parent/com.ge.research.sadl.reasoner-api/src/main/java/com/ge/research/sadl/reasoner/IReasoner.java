@@ -117,7 +117,7 @@ public interface IReasoner {
 	public String getInstanceDataNamespace();
 	
 	/**
-	 * Method to pass the instance data or (Abox) as a stream 
+	 * Methods to pass the instance data or (Abox) as a stream 
 	 * (data on client), as a file identifier (data on server),
 	 * or as an in-memory model (e.g., Jena OntModel).
 	 * 
@@ -128,6 +128,7 @@ public interface IReasoner {
 	public boolean loadInstanceData(String instanceDatafile) throws IOException, ConfigurationException;
 	public boolean loadInstanceData(URI instanceDatafile) throws IOException, ConfigurationException;
 	public boolean loadInstanceData(InputStream is, String format) throws IOException, ConfigurationException;
+	public boolean loadInstanceData(Object model) throws ConfigurationException;
 	public boolean addRules(List<String> rules);
 
 	/**
@@ -304,6 +305,14 @@ public interface IReasoner {
 	 * @return
 	 */
 	public List<ModelError> checkModelValidity();
+	
+	/**
+	 * Method to get the inferred model, in its entirety or deductions only
+	 * @param deductionsOnly
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	public Object getInferredModel(boolean deductionsOnly) throws ConfigurationException;
 	
 	/**
 	 * Provide an explanation of the derivation (or lack of derivation) of the specified list of one or more GraphPatternElements.
