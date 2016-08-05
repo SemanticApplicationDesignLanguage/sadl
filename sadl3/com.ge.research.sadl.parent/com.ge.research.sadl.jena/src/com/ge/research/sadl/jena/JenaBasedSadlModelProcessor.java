@@ -169,9 +169,9 @@ import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
-import com.ge.research.sadl.server.ISadlServer;
-import com.ge.research.sadl.server.SessionNotFoundException;
-import com.ge.research.sadl.server.server.SadlServerImpl;
+//import com.ge.research.sadl.server.ISadlServer;
+//import com.ge.research.sadl.server.SessionNotFoundException;
+//import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -225,7 +225,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private Resource currentResource;
 	protected OntModel theJenaModel;
 	protected OntModelSpec spec;
-	protected ISadlServer kServer = null;
+//	protected ISadlServer kServer = null;
 	
 	protected enum AnnType {ALIAS, NOTE}
 	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
@@ -639,7 +639,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				addImportToJenaModel(getModelName(), SADL_BASE_MODEL_URI, sadlBaseModel);
 				String implfn = checkImplicitSadlModelExistence(resource, context);
 				if (implfn != null) {
-					Resource imrsrc = resource.getResourceSet().getResource(URI.createPlatformResourceURI(implfn, true), true);
+					Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {
 							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
@@ -4725,11 +4725,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	@Override
 	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, IAcceptor<SadlMessage> resultAcceptor, ProcessorContext context) {
 		setCancelIndicator(cancelIndicator);
+//		TODO Need to restore SADL Server functionality
 		boolean useKSever = false;
-		String useKS = context.getPreferenceValues().getPreference(SadlPreferences.TEST_WITH_KSERVER);
-		if (useKS != null && useKS.equals("true")) {
-			useKSever = true;
-		}
+//		String useKS = context.getPreferenceValues().getPreference(SadlPreferences.TEST_WITH_KSERVER);
+//		if (useKS != null && useKS.equals("true")) {
+//			useKSever = true;
+//		}
 		if (resource.getContents().size() < 1) {
 			return;
 		}
@@ -4751,7 +4752,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						}
 						query = SadlUtils.stripQuotes(query);
 						if (useKSever) {
-							getKServer(resource).query(query);
+//							getKServer(resource).query(query);
 						}
 						else {
 							processAdhocQuery(resource, issueAcceptor, context, query);
@@ -4766,19 +4767,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				} catch (ConfigurationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (QueryCancelledException e) {
+				} //catch (QueryCancelledException e) {
 					// OK to cancel--no error
-					issueAcceptor.addInfo("Query cancelled by user", (EObject) cmd.getContext());
-				} catch (QueryParseException e) {
+					//issueAcceptor.addInfo("Query cancelled by user", (EObject) cmd.getContext());
+				//} catch (QueryParseException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ReasonerNotFoundException e) {
+					//e.printStackTrace();
+				//} catch (ReasonerNotFoundException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SessionNotFoundException e) {
+					//e.printStackTrace();
+				//} //catch (SessionNotFoundException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					//e.printStackTrace();
+				//}
 			}
 		}
 		SadlModel model = (SadlModel) resource.getContents().get(0);
@@ -4805,7 +4806,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								}
 								query = SadlUtils.stripQuotes(query);
 								if (useKSever) {
-									getKServer(resource).query(query);
+//									getKServer(resource).query(query);
 								}
 								else {
 									processAdhocQuery(resource, issueAcceptor, context, query);
@@ -4823,19 +4824,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						} catch (TranslationException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-						} catch (QueryCancelledException e) {
+						} //catch (QueryCancelledException e) {
 							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (QueryParseException e) {
+							//e.printStackTrace();
+						//} catch (QueryParseException e) {
 							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (ReasonerNotFoundException e) {
+							//e.printStackTrace();
+						//} catch (ReasonerNotFoundException e) {
 							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (SessionNotFoundException e) {
+							//e.printStackTrace();
+						//} //catch (SessionNotFoundException e) {
 							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+							//e.printStackTrace();
+						//}
 					}
 					else if (element instanceof TestStatement) {
 						
@@ -4852,22 +4853,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		
 	}
 	
-	private ISadlServer getKServer(Resource resource) {
-		if (kServer == null) {
-			String modelFolder;
-			try {
-				modelFolder = getConfigMgr(resource, null).getModelFolder();
-				kServer = new SadlServerImpl(modelFolder);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return kServer;
-	}
+//	private ISadlServer getKServer(Resource resource) {
+//		if (kServer == null) {
+//			String modelFolder;
+//			try {
+//				modelFolder = getConfigMgr(resource, null).getModelFolder();
+//				kServer = new SadlServerImpl(modelFolder);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (ConfigurationException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		return kServer;
+//	}
 	
 	@Override
 	public void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context,
@@ -4963,7 +4964,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				implicitModelFile.getParentFile().mkdirs();
 				su.stringToFile(implicitModelFile, implicitModel, true);
 			}
-			return platformPath;
+			return implicitModelFile.getAbsolutePath();
 		}
 		return null;
 	}
