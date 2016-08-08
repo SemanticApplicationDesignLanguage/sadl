@@ -639,7 +639,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				addImportToJenaModel(getModelName(), SADL_BASE_MODEL_URI, sadlBaseModel);
 				String implfn = checkImplicitSadlModelExistence(resource, context);
 				if (implfn != null) {
-					Resource imrsrc = resource.getResourceSet().getResource(URI.createPlatformResourceURI(implfn, true), true);
+					Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {
 							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
@@ -4964,7 +4964,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				implicitModelFile.getParentFile().mkdirs();
 				su.stringToFile(implicitModelFile, implicitModel, true);
 			}
-			return platformPath;
+			return implicitModelFile.getAbsolutePath();
 		}
 		return null;
 	}
