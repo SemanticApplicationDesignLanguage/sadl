@@ -33,11 +33,14 @@ public class SadlPreferences {
 	public static final PreferenceKey SADL_FILE_NAMES = new PreferenceKey("fn", "");
 	public static final PreferenceKey PREFIXES_ONLY_AS_NEEDED = new PreferenceKey("prefixesOnlyAsNeeded", "");
 	public static final PreferenceKey VALIDATE_BEFORE_TEST = new PreferenceKey("validateBeforeTest", "");
+	public static final PreferenceKey TEST_WITH_KSERVER = new PreferenceKey("testWithKServer", "");	
 	public static final PreferenceKey NAMESPACE_IN_QUERY_RESULTS = new PreferenceKey("namespacesInQueryResults", "");
 	public static final PreferenceKey SHOW_TIMING_INFORMATION = new PreferenceKey("showTimingInformation", "");
 	public static final PreferenceKey DMY_ORDER_DMY = new PreferenceKey("dmy", "");
 	public static final PreferenceKey DMY_ORDER_MDY = new PreferenceKey("mdy", "");
 	public static final PreferenceKey DEEP_VALIDATION_OFF = new PreferenceKey("deepValidationOff", "");
 	public static final PreferenceKey GRAPH_VIZ_PATH = new PreferenceKey("graphvizpath", "");
-	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));	
+	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));
+	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
+	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
 }

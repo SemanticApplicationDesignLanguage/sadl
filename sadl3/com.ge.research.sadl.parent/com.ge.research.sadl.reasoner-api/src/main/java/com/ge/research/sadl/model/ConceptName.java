@@ -129,21 +129,21 @@ public class ConceptName extends ConceptIdentifier {
             return prefix + ":" + name;
         }
     	else if (namespace != null) {
-//    		try {
-//				return getUri();
-//			} catch (InvalidNameException e) {
-//				// this is ok for local names
-//			}
+    		try {
+				return getUri();
+			} catch (InvalidNameException e) {
+				// this is ok for local names
+			}
     	}
         return name;
     }
     
     public String toFQString() {
-//    	try {
-//			return getUri();
-//		} catch (InvalidNameException e) {
-//			// this is ok for local names
-//		}
+    	try {
+			return getUri();
+		} catch (InvalidNameException e) {
+			// this is ok for local names
+		}
 		return name;
     }
     

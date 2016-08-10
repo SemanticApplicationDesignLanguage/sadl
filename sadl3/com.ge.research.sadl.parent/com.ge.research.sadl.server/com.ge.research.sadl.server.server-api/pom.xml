@@ -1,0 +1,137 @@
+<!-- 
+/************************************************************************
+ * Copyright 2007-2015 - General Electric Company, All Rights Reserved
+ *
+ * Project: SADL Knowledge Server
+ *
+ * Description: The Semantic Application Design Language (SADL) is a
+ * language for building semantic models and expressing rules that
+ * capture additional domain knowledge. The SADL-IDE (integrated
+ * development environment) is a set of Eclipse plug-ins that
+ * support the editing and testing of semantic models using the
+ * SADL language. 
+ * 
+ * The SADL Knowledge Server is a set of Java classes implementing 
+ * a service interface for deploying ontology-based knowledge bases
+ * for use in a client-server environment.
+ *
+ * This software is distributed "AS-IS" without ANY WARRANTIES
+ * and licensed under the Eclipse Public License - v 1.0
+ * which is available at http://www.eclipse.org/org/documents/epl-v10.php
+ *
+ ***********************************************************************/
+
+/***********************************************************************
+ * $Last revised by: crapo $ 
+ * $Revision: 1.1 $ Last modified on   $Date: 2013/08/09 14:06:51 $
+ ***********************************************************************/
+ -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.ge.research.sadl</groupId>
+    <artifactId>server</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>sadlserver-api</artifactId>
+  <packaging>jar</packaging>
+  <name>SadlServer API</name>
+  <description>Maven Project to create bundle for SadlServer Interface and supporting classes</description>
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>reasoner-api</artifactId>
+  			<version>${project.version}</version>
+  		</dependency>
+  		<dependency>
+  			<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>reasoner-impl</artifactId>
+  			<version>${project.version}</version>
+  		</dependency>
+  		<dependency>
+  			<groupId>com.ge.research.sadl</groupId>
+  			<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
+  			<version>${project.version}</version>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
+  <dependencies>
+  	<dependency>
+  		<groupId>com.ge.research.sadl</groupId>
+  		<artifactId>reasoner-impl</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.ge.research.sadl</groupId>
+  		<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.ge.research.sadl</groupId>
+  		<artifactId>reasoner-api</artifactId>
+  		</dependency>
+  </dependencies>
+  
+	<!-- Define where to deploy this project's artifacts -->
+	<distributionManagement>
+		<repository>
+			<id>swcoealppcr01</id>
+			<name>swcoealppcr01-releases</name>
+			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
+		</repository>
+	</distributionManagement>
+   
+       <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                     <source>1.7</source>
+                     <target>1.7</target>
+					<encoding>ISO-8859-1</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.4.0</version>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            com.ge.research.sadl.reasoner
+                            <!--
+                            ,
+                            com.ge.research.sadl.geonly.imports
+                            -->
+                        </Import-Package>
+						<Export-Package>
+                            com.ge.research.sadl.sadlserver.server,
+						</Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+        </plugins>
+    </build>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <version>3.0.0-SNAPSHOT</version>
+</project>

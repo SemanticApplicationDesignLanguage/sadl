@@ -235,7 +235,6 @@ class DeclarationExtensionsTest {
               resources.get('Foo').assertIs(OntConceptType.CLASS)
     }
     
-    @Ignore
 	@Test
     def void testIntList() {
        val model = '''
@@ -244,7 +243,7 @@ class DeclarationExtensionsTest {
 		'''.parse
               val resources = model.eAllContents.filter(SadlResource).toMap[concreteName]
               // TODO how do we check that the two rules have separate local variables?
-              resources.get('Grades').assertIs(OntConceptType.CLASS)
+              resources.get('Grades').assertIs(OntConceptType.DATATYPE_LIST)
 	}
 	
 	protected def void assertIs(SadlResource it, OntConceptType type) {

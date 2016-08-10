@@ -861,4 +861,14 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		this.initialized = initialized;
 	}
 
+	@Override
+	public String getDefaultTranslatorClassName() {
+		return "com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin";
+	}
+
+	@Override
+	public boolean loadInstanceData(Object model) throws ConfigurationException {
+		throw new ConfigurationException("Method not supported in this reasoner.");
+	}
+
 }

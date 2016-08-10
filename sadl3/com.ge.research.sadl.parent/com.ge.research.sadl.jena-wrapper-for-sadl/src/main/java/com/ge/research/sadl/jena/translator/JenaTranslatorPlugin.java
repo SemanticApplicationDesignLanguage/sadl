@@ -36,6 +36,7 @@ import com.ge.research.documentation.SadlErrorMessages;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
+import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
@@ -1209,6 +1210,10 @@ public class JenaTranslatorPlugin implements ITranslator {
 				}
 			}
 		}
+		else if (node instanceof ConstantNode) {
+			Literal litval = constantToLiteral((ConstantNode)node);
+			return literalValueToString(litval, target);
+		}
 		else if (node instanceof Literal) {
 			Object litObj = ((Literal)node).getValue();
 			return literalValueToString(litObj, target);
@@ -1223,6 +1228,17 @@ public class JenaTranslatorPlugin implements ITranslator {
 			throw new TranslationException("Nnode '" + node.toString() + "' cannot be translated to Jena format.");
 		}
 	}
+
+	private Literal constantToLiteral(ConstantNode node) throws TranslationException {
+		if (node.getName().equals("PI")) {
+			Literal lit = new Literal();
+			lit.setValue(Math.PI);
+			lit.setOriginalText(node.getName());
+			return lit;
+		}
+		throw new TranslationException("Unknown constant '" + node.getName() + "' cannot be translated");
+	}
+
 
 	public static synchronized String literalValueToString(Object litObj, TranslationTarget target) {
 		if (litObj instanceof String) {
@@ -1574,6 +1590,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			// remove all equations in this namespace
 			for (Object os: (List<?>)otherStructure) {
 				if (os instanceof Equation) {
+					addError(new ModelError(this.getClass().getCanonicalName() + " does not currently translate equations", ErrorType.ERROR));
 					// add equations
 //					System.out.println("Jena translator ready to save equation '" + os.toString() + "'");
 				}

@@ -19,6 +19,7 @@
 package com.ge.research.sadl.tests
 
 import org.junit.Test
+import org.junit.Ignore
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
@@ -113,4 +114,16 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 
+	@Test 
+	def void testSubjHasPropCompareExpr() {
+		'''
+			 uri "http://sadl.org/testrule.sadl" alias testrule.
+			 
+			 Person is a class described by age with values of type int.
+			 
+			 Rule R1: if x is a Person and x has age > 30 then print("hi").
+			 
+			 Rule R2: if x is a Person and age of x > 30 then print("hi").
+ 		'''.assertNoErrors
+	}
 }

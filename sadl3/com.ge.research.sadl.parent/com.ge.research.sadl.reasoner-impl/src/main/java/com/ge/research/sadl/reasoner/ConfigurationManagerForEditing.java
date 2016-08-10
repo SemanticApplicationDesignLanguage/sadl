@@ -87,6 +87,14 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		init(modelFolderPathname);
 	}
 
+	public ConfigurationManagerForEditing(String modelFolderPathname,
+			String repoType, boolean noModelFolderNeeded) throws ConfigurationException {
+		super(modelFolderPathname, repoType, noModelFolderNeeded);
+		if (!noModelFolderNeeded) {
+			init(modelFolderPathname);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1174,6 +1182,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 				fps = new FileOutputStream(mappingFile);
 				getMappingModel().write(fps, RDF_XML_ABBREV_FORMAT);
 				setMappingChanged(false);
+				logger.debug("saved mapping file '" + mappingFilename + "'");
 				return true;
 			} catch (Exception e) {
 				logger.error("Failed to save ont-policy file", e);

@@ -1,33 +1,31 @@
 /************************************************************************
  * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
- *
+ * 
  * Project: SADL
- *
+ * 
  * Description: The Semantic Application Design Language (SADL) is a
  * language for building semantic models and expressing rules that
  * capture additional domain knowledge. The SADL-IDE (integrated
  * development environment) is a set of Eclipse plug-ins that
  * support the editing and testing of semantic models using the
  * SADL language.
- *
+ * 
  * This software is distributed "AS-IS" without ANY WARRANTIES
  * and licensed under the Eclipse Public License - v 1.0
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
- *
+ * 
  ***********************************************************************/
 package com.ge.research.sadl.tests.scoping
 
 import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
+import com.google.common.base.Stopwatch
+import java.util.concurrent.TimeUnit
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Ignore
-import org.eclipse.xtext.EcoreUtil2
-import com.google.common.base.Stopwatch
-import java.util.concurrent.TimeUnit
-import org.eclipse.emf.ecore.util.EcoreUtil
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -44,7 +42,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[aqn:MyShape] is a <aqn:Shape> with <aqn:area> 23 .
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingSimpleNames() {
 		'''
@@ -56,7 +54,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[MyShape] is a <Shape> with <area> 23 .
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinking2Files() {
 		'''
@@ -72,7 +70,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[MyShape] is a <Shape> with <area> 23 .
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinking3Files() {
 		'''
@@ -95,7 +93,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[MyRect] is a <Rectangle> with <height> 3, with <width> 4, with <area> 12 .
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingEquations() {
 		'''
@@ -105,7 +103,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			Equation [bar](int [b], int [c]) returns int: <b> + <c>.
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingEquations_02() {
 		'''
@@ -115,7 +113,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			Equation [bar](int [b], int [c]) returns int: <foo>(<b>, <c>).
 		'''.assertLinking[sadl]
 	}
-	
+
 	// https://github.com/crapo/sadlos2/issues/67
 	@Test
 	def void testLinkingPrecedence_01() {
@@ -126,7 +124,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[Shape] is a class.
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_02() {
 		'''
@@ -137,7 +135,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[Shape] is a class.
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_03() {
 		'''
@@ -147,7 +145,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			A Foo is a [Rectangle] only if <area> has one value of type float.
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_04() {
 		'''
@@ -157,28 +155,28 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			A Foo is a [Rectangle] only if <area> has one value of type float.
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_05() {
 		'''
-			 uri "http://sadl.org/classes.sadl" alias clsses.
-			 
-			 [LivingThing] is a class.
-			 [Mammal] is a type of <LivingThing> described by [friend] with values of type <Mammal>.
-			 {[Earth], [Water], [Air], [Fire], [Aether]} are classes.
-			 
-			 {[Cow], [Horse], [Dog], [Cat], [Human]} are types of <Mammal>.
-			 
-			 A <Dog> is a [Pet] only if <friend> has at least 1 value of type <Human>.
-			 
-			 [NonLivingThing] is the same as not <LivingThing>.
-			 
-			 [Consumable] is a class.
-			 [Liquid] is a class.
-			 [PotableLiquid] is the same as {<Consumable> and <Liquid>}.
- 		'''.assertLinking[sadl]
+			uri "http://sadl.org/classes.sadl" alias clsses.
+			
+			[LivingThing] is a class.
+			[Mammal] is a type of <LivingThing> described by [friend] with values of type <Mammal>.
+			{[Earth], [Water], [Air], [Fire], [Aether]} are classes.
+			
+			{[Cow], [Horse], [Dog], [Cat], [Human]} are types of <Mammal>.
+			
+			A <Dog> is a [Pet] only if <friend> has at least 1 value of type <Human>.
+			
+			[NonLivingThing] is the same as not <LivingThing>.
+			
+			[Consumable] is a class.
+			[Liquid] is a class.
+			[PotableLiquid] is the same as {<Consumable> and <Liquid>}.
+		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_06() {
 		'''
@@ -205,27 +203,27 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[Event] is a class described by [when] with values of type <Season>.
 			[NewYear] is an Event with when <Winter>.
 			[BastilleDay] is an Event with when <Summer>.
- 		'''.assertLinking[sadl]
+		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_07() {
 		'''
-			 uri "http://sadl.org/properties.sadl" alias properties.
-			 
-			 [Shape] is a class described by <area>.
-			 
-			 [area] is a property.	
-			 
-			 [displayColor] is a type of annotation.
-			 [surfaceArea] is a type of <area>.		
-			 
-			 [Circle] is a type of <Shape>.
-			 [radius] describes <Circle> with values of type float.	
- 		'''.assertLinking[sadl]
+			uri "http://sadl.org/properties.sadl" alias properties.
+			
+			[Shape] is a class described by <area>.
+			
+			[area] is a property.	
+			
+			[displayColor] is a type of annotation.
+			[surfaceArea] is a type of <area>.		
+			
+			[Circle] is a type of <Shape>.
+			[radius] describes <Circle> with values of type float.	
+		'''.assertLinking[sadl]
 	}
-	
-	@Test 
+
+	@Test
 	def void testLinkingPrecedence_08() {
 		'''
 			uri "http://sadl.org/TestRequrements/ontology2" alias ont2 version "$Revision:$ Last modified on   $Date:$". 
@@ -250,7 +248,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			[MyCar] is a <Car> with <color> "blue", with <number_of_seats> 4 .
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_09() {
 		'''
@@ -289,7 +287,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 				<p> has child <c>.
 		'''.assertLinking[sadl]
 	}
-	
+
 	@Test
 	def void testLinkingPrecedence_10() {
 		'''
@@ -413,7 +411,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			//SectionObjectId=ASSERT_DM-80
 			input is a property.
 		'''.assertLinking[sadl]
-        '''
+		'''
 			uri "http://ont.sample/SYSTEM" alias SYSTEM.
 			//SectionObjectId=ASSERT_DM-1
 			import "http://assert/Properties".
@@ -520,7 +518,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with reference_property example_7_6 .
 			
 			  //ObjectId=ASSERT_DM-11
-			  example_8 describes SYSTEM with a List of values of type DATA.
+			  example_8 describes SYSTEM with a single value of type DATA List.
 			  example_8 of SYSTEM has at most 20 values.
 			  example_8 of SYSTEM has at least 3 values.
 			
@@ -535,7 +533,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with resolution 1 .
 			
 			  //ObjectId=ASSERT_DM-12
-			  example_9 describes SYSTEM with a List of values of type DATA.
+			  example_9 describes SYSTEM with a single value of type DATA List.
 			
 			  ASSERT_DM-12 is a INTERFACE_DEFINITION,
 			    with reference_class SYSTEM,
@@ -556,7 +554,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with reference_property example_10 .
 			
 			  //ObjectId=ASSERT_DM-14
-			  example_11 describes SYSTEM with a List of values of type DATA.
+			  example_11 describes SYSTEM with a single value of type DATA List.
 			  example_11 of SYSTEM has exactly 3 values.
 			
 			  ASSERT_DM-14 is a INTERFACE_DEFINITION,
@@ -807,7 +805,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with resolution 1 .
 			
 			  //ObjectId=ASSERT_DM-24
-			  input_10 describes SYSTEM with a List of values of type DATA.
+			  input_10 describes SYSTEM with a single value of type DATA List.
 			  input_10 of SYSTEM has at most 20 values.
 			  input_10 of SYSTEM has at least 1 values.
 			
@@ -822,7 +820,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			    with resolution 1 .
 			
 			  //ObjectId=ASSERT_DM-25
-			  input_11 describes SYSTEM with a List of values of type DATA.
+			  input_11 describes SYSTEM with a single value of type DATA List.
 			  input_11 of SYSTEM has at most 20 values.
 			  input_11 of SYSTEM has at least 1 values.
 			
@@ -1062,73 +1060,94 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			//EndSectionObject
 		'''.assertLinking[sadl]
 	}
-	
-    @Test
-    def void testLinkingQnamesNeeded() {
-        '''
-             uri "http://sadl.org/NS1.sadl" alias ns1.
-             
-             [Car] is a class described by [position] with values of type <Location>.
-             [Location] is a class, described by [longitude] with values of type float, described by [latitude] with values of type float.
-         '''.assertLinking[sadl]
-        '''
-             uri "http://sadl.org/NS2.sadl" alias ns2.
-             
-             [Airplane] is a class described by [position] with values of type <Location>.
-             
-             [Location] is a class described by [longitude] with values of type float, 
-                 described by [latitude] with values of type float,
-                 described by [altitude] with values of type float.
-        '''.assertLinking[sadl]
-        '''
-             uri "http://sadl.org/NS3.sadl" alias ns3.
-             
-             import "http://sadl.org/NS1.sadl".
-             import "http://sadl.org/NS2.sadl".
-             
-             [MyCar] is an <Car> with <ns1:position> (a <ns1:Location> with <ns1:longitude> -72.025, with <ns1:latitude> 43.654).
-             [MyPlane] is an <Airplane> with <ns2:position> (a <ns2:Location> with <ns2:longitude> -72.025, with <ns2:latitude> 43.654, with <altitude> 1000).
 
-        '''.assertLinking[sadl]
-    }
-    
-    @Test
-    def void testRecursion() {
-        '''
-             uri "http://sadl.org/NS1.sadl" alias ns1.
-             
-             [Foo2] is a type of <Foo>.
-             [Foo3] is a type of <Foo2>.
-             [Foo] is a type of <Foo2>.
-         '''.assertLinking[sadl]
-    }
-    
-    @Test
-    def void testRecursion_01() {
-        '''
-             uri "http://sadl.org/NS1.sadl" alias ns1.
-             
-             [Foo] is a type of <Foo>.
-         '''.assertLinking[sadl]
-    }
-    
-    @Test
-    def void testImportPerformance() {
-    	for (i : 99..100) {
-    		val started = Stopwatch.createStarted
-    		val resource = '''
-	             uri "http://sadl.org/NS1.sadl«i»" alias ns«i».
-	             «FOR j : 1 ..< i»
-	             	import "http://sadl.org/NS1.sadl«j»" as ns«j»foo.
-	             «ENDFOR»
-	             
-	             «FOR k : 1..100»
-	                 Car«k» is a class described by position with values of type Location«k».
-	                 Location«k» is a class, described by longitude with values of type float, described by latitude with values of type float.
-	             «ENDFOR»
-	         '''.sadl
-	         EcoreUtil.resolveAll(resource)
-	         println("Iteration "+i+" Took : "+started.elapsed(TimeUnit.MILLISECONDS))
-    	}
-    }
+	@Test
+	def void testLinkingQnamesNeeded() {
+		'''
+			uri "http://sadl.org/NS1.sadl" alias ns1.
+			
+			[Car] is a class described by [position] with values of type <Location>.
+			[Location] is a class, described by [longitude] with values of type float, described by [latitude] with values of type float.
+		'''.assertLinking[sadl]
+		'''
+			uri "http://sadl.org/NS2.sadl" alias ns2.
+			
+			[Airplane] is a class described by [position] with values of type <Location>.
+			
+			[Location] is a class described by [longitude] with values of type float, 
+			    described by [latitude] with values of type float,
+			    described by [altitude] with values of type float.
+		'''.assertLinking[sadl]
+		'''
+			uri "http://sadl.org/NS3.sadl" alias ns3.
+			
+			import "http://sadl.org/NS1.sadl".
+			import "http://sadl.org/NS2.sadl".
+			
+			[MyCar] is an <Car> with <ns1:position> (a <ns1:Location> with <ns1:longitude> -72.025, with <ns1:latitude> 43.654).
+			[MyPlane] is an <Airplane> with <ns2:position> (a <ns2:Location> with <ns2:longitude> -72.025, with <ns2:latitude> 43.654, with <altitude> 1000).
+			
+		'''.assertLinking[sadl]
+	}
+
+	/**
+	 * https://github.com/crapo/sadlos2/issues/97
+	 */
+	@Test
+	def void testLinkingImplicitPackage_01() {
+		'''
+			uri "http://sadl.org/sadlimplicitmodel".
+			
+			[Car] is a class described by [position] with values of type <Location>.
+			[Location] is a class
+				, described by [longitude] with values of type float
+				, described by [latitude] with values of type float.
+		'''.assertLinking[sadl]
+		'''
+			uri "http://sadl.org/NS3.sadl" alias ns3.
+			
+			[MyCar] is an <Car> with <position> (a <Location> with <longitude> -72.025, with <latitude> 43.654).
+			
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testRecursion() {
+		'''
+			uri "http://sadl.org/NS1.sadl" alias ns1.
+			
+			[Foo2] is a type of <Foo>.
+			[Foo3] is a type of <Foo2>.
+			[Foo] is a type of <Foo2>.
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testRecursion_01() {
+		'''
+			uri "http://sadl.org/NS1.sadl" alias ns1.
+			
+			[Foo] is a type of <Foo>.
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testImportPerformance() {
+		for (i : 99 .. 100) {
+			val started = Stopwatch.createStarted
+			val resource = '''
+				uri "http://sadl.org/NS1.sadl«i»" alias ns«i».
+				«FOR j : 1 ..< i»
+					import "http://sadl.org/NS1.sadl«j»" as ns«j»foo.
+				«ENDFOR»
+				
+				«FOR k : 1..100»
+					Car«k» is a class described by position with values of type Location«k».
+					Location«k» is a class, described by longitude with values of type float, described by latitude with values of type float.
+				«ENDFOR»
+			'''.sadl
+			EcoreUtil.resolveAll(resource)
+			println("Iteration " + i + " Took : " + started.elapsed(TimeUnit.MILLISECONDS))
+		}
+	}
 }

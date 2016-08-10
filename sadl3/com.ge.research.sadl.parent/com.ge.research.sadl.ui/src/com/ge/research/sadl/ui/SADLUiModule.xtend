@@ -33,12 +33,26 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttribute
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+import org.eclipse.ui.plugin.AbstractUIPlugin
+import com.ge.research.sadl.builder.MessageManager.MessageType
+import java.io.PrintStream
+import org.eclipse.ui.console.IOConsoleOutputStream
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
  */
-@FinalFieldsConstructor class SADLUiModule extends AbstractSADLUiModule {
+//@FinalFieldsConstructor class SADLUiModule extends AbstractSADLUiModule {
 
+class SADLUiModule extends AbstractSADLUiModule {
+
+	new(AbstractUIPlugin plugin) {
+		super(plugin)
+		val iocos = SadlConsole.getOutputStream(MessageType.INFO) as IOConsoleOutputStream
+		System.setOut(new PrintStream(iocos))
+		System.setErr(new PrintStream(SadlConsole.getOutputStream(MessageType.ERROR)))
+		
+	}
+	
 	def Class<? extends SadlModelProcessorProvider> bindSadlModelProcessorProvider() {
 		return ExtensionPointBasedSadlModelProcessorProvider
 	}

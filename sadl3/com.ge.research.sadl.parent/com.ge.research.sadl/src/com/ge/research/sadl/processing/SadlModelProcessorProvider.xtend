@@ -27,6 +27,8 @@ import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.util.OnChangeEvictingCache
 import org.eclipse.xtext.validation.CheckMode
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
+import org.eclipse.xtext.util.IAcceptor
+import com.ge.research.sadl.builder.MessageManager.SadlMessage
 
 class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
@@ -60,8 +62,8 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 			processors.forEach[processExternalModels(mappingFileFolder, fileNames)]
 		}
 		
-		override processCommands(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context) {
-			processors.forEach[processCommands(resource, issueAcceptor, context)]
+		override processCommands(Resource resource, ValidationAcceptor issueAcceptor, IAcceptor<SadlMessage> resultAcceptor, ProcessorContext context) {
+			processors.forEach[processCommands(resource, issueAcceptor, resultAcceptor, context)]
 		}
 		
 		override processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context, String query) {

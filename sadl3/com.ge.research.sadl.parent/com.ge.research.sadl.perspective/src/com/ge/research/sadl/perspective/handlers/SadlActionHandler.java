@@ -46,6 +46,7 @@ import com.ge.research.sadl.perspective.util.Util;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
+import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -59,7 +60,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	protected SadlModelProcessorProvider processorProvider;
 	@Inject
 	protected IPreferenceValuesProvider preferenceProvider;
-	protected MessageConsoleStream output;
+	protected SadlConsole output;
 	protected IModelProcessor processor;
 	
 	public SadlActionHandler() {
@@ -74,9 +75,11 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			    ISelection selection = (ISelection) window.getSelectionService().getSelection();
 			    if (selection instanceof TextSelection) {
 			    	XtextEditor editor = EditorUtils.getActiveXtextEditor();
-			    	IEditorInput editorInput = editor.getEditorInput();
-			    	if (editorInput instanceof IFileEditorInput) {
-			    		return ((IFileEditorInput) editorInput).getFile();
+			    	if (editor != null) {
+				    	IEditorInput editorInput = editor.getEditorInput();
+				    	if (editorInput instanceof IFileEditorInput) {
+				    		return ((IFileEditorInput) editorInput).getFile();
+				    	}
 			    	}
 			    }
 			    if (!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
@@ -169,17 +172,17 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	}
 
 	protected Resource prepareActionHandler(IFile trgtFile) throws ExecutionException {
-		MessageConsole sadlInference = Util.findConsole("SADL Inference");
-		output = sadlInference.newMessageStream();
-		sadlInference.activate();
+		output = SadlConsole.getInstance();
 		
 		ResourceSet resourceSet = resourceSetProvider.get(trgtFile.getProject());
 		if (resourceSet != null) {
 	    	Resource res = resourceSet.getResource(URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true), true);
 	    	if (res != null) {
-	    		IResourceValidator validator = ((XtextResource)res).getResourceServiceProvider().getResourceValidator();
-	    		validator.validate(res, CheckMode.FAST_ONLY, CancelIndicator.NullImpl);
-				processor = processorProvider.getProcessor(res);
+	    		if (res instanceof XtextResource) {
+		    		IResourceValidator validator = ((XtextResource)res).getResourceServiceProvider().getResourceValidator();
+		    		validator.validate(res, CheckMode.FAST_ONLY, CancelIndicator.NullImpl);
+					processor = processorProvider.getProcessor(res);
+	    		}
 				return res;
 	    	}
 			throw new ExecutionException("Unable to obtain a resource for the target file '" + trgtFile.getName() + "'");

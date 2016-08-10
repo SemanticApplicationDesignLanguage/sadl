@@ -133,6 +133,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	public ConfigurationManager() {
 		logger.debug("null-argument constructor called");
 	}
+	
 	/**
 	 * Constructor
 	 * 
@@ -153,12 +154,29 @@ public class ConfigurationManager implements IConfigurationManager {
 		}
 	}
 	
+	public ConfigurationManager(String modelFolderPathname, String _repoType, boolean noModelFolderNeeded) throws ConfigurationException {
+		repoType = _repoType;
+		if (!noModelFolderNeeded) {
+			validateModelFolderPath(modelFolderPathname);
+			setConfigModel(ModelFactory.createDefaultModel()) ;
+			getConfigModel().setNsPrefix("", CONFIG_NAMESPACE);
+			loadConfigurationFile();
+			loadMappingFile();
+			try {
+				loadMappings();
+			} catch (IOException e) {
+				throw new ConfigurationException("Failed to load ontology mappings: " + e.getMessage(), e);
+			}
+		}
+	}
+	
 	protected synchronized void loadMappingFile() throws ConfigurationException {
 		if (getModelFolderPath() != null) {
 			String modelFolderPathname = getModelFolderPath().getAbsolutePath();
 			String mappingFilename = modelFolderPathname + File.separator + ONT_POLICY_RDF;
 			File mappingFile = new File(mappingFilename);
 			if (mappingFile.exists()) {
+				logger.debug("reading existing mapping model '" + mappingFilename + "'");
 				// load mapping info from file
 				setMappingModel(ModelFactory.createDefaultModel()) ;
 			    InputStream in = FileManager.get().open(mappingFilename);
@@ -178,6 +196,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			} 
 		}
 		else if (getModelFolderUrl() != null) {
+			logger.debug("creating new mapping model for '" + getModelFolderUrl() + "'");
 			setMappingModel(ModelFactory.createDefaultModel()) ;
 			getMappingModel().read(getModelFolderUrl() + "/" + ONT_POLICY_RDF);
 		}
@@ -336,9 +355,19 @@ public class ConfigurationManager implements IConfigurationManager {
 					}
 				}
 			}
-			
+		}
+		if (getReasoner() != null && getReasoner().getClass().getCanonicalName().equals(reasonerName)) {
+			String transClsName = getReasoner().getDefaultTranslatorClassName();
+			if (transClsName != null) {
+				return getTranslatorInstanceByClass(transClsName);
+			}
 		}
 		return null;
+	}
+
+	@Override
+	public ITranslator getTranslatorForReasoner(IReasoner reasoner) throws ConfigurationException {
+		return getTranslatorInstanceByClass(reasoner.getDefaultTranslatorClassName());
 	}
 
 	public IReasoner getReasoner() throws ConfigurationException {
@@ -494,6 +523,9 @@ public class ConfigurationManager implements IConfigurationManager {
 				if (cnobj instanceof Literal) {
 					translatorClassName = ((Literal)cnobj).getLexicalForm();
 				}
+			}
+			if (translatorClassName == null) {
+				translatorClassName = reasonerInst.getDefaultTranslatorClassName();
 			}
 		}
 		if (translatorClassName == null) {
@@ -1610,4 +1642,5 @@ public class ConfigurationManager implements IConfigurationManager {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }
