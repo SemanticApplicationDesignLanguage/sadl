@@ -683,8 +683,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				com.ge.research.logger.Logger.Log(e1.getMessage());
-			} catch (InvalidModelInputException e) {
-				addError(e.getMessage(), model);
 			}
 		}
 		
@@ -746,7 +744,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			com.ge.research.logger.Logger.Log(e1.getMessage());
+			com.ge.research.logger.Logger.Log(e.getMessage());
 		}
 
 		boolean disableTypeChecking = true;
@@ -833,7 +831,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				catch (JenaProcessorException e) {
 					e.printStackTrace();
-					com.ge.research.logger.Logger.Log(e1.getMessage());
+					com.ge.research.logger.Logger.Log(e.getMessage());
 				} catch (InvalidNameException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -841,11 +839,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				} catch (InvalidTypeException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					com.ge.research.logger.Logger.Log(e1.getMessage());
+					com.ge.research.logger.Logger.Log(e.getMessage());
 				} catch (TranslationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					com.ge.research.logger.Logger.Log(e1.getMessage());
+					com.ge.research.logger.Logger.Log(e.getMessage());
 				} catch (InvalidModelInputException e) {
 					addError(e.getMessage(), model);
 				}
@@ -882,13 +880,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} catch (ConfigurationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				com.ge.research.logger.Logger.Log(e1.getMessage());
+				com.ge.research.logger.Logger.Log(e.getMessage());
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				com.ge.research.logger.Logger.Log(e1.getMessage());
-			} catch (InvalidModelInputException e) {
-				addError(e.getMessage(), model);
+				com.ge.research.logger.Logger.Log(e.getMessage());
 			}
 		}
 	}
@@ -1164,7 +1160,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	protected Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
 			Expression bdy)
-			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
+			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException, InvalidModelInputException {
 		Equation eq = new Equation(declarationExtensions.getConcreteName(nm));
 		eq.setNamespace(declarationExtensions.getConceptNamespace(nm));
 		Node rtnode = sadlTypeReferenceToNode(rtype);
@@ -1211,7 +1207,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
 			EList<SadlParameterDeclaration> params, String location)
-			throws JenaProcessorException, TranslationException {
+			throws JenaProcessorException, TranslationException, InvalidModelInputException {
 		Equation eq = new Equation(declarationExtensions.getConcreteName(nm));
 		eq.setNamespace(declarationExtensions.getConceptNamespace(nm));
 		eq.setExternal(true);
@@ -2808,7 +2804,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private Property assignRangeToProperty(String propUri, OntConceptType propType, OntResource rngRsrc,
-			RangeValueType rngValueType, SadlTypeReference rng) throws JenaProcessorException {
+			RangeValueType rngValueType, SadlTypeReference rng) throws JenaProcessorException, InvalidModelInputException {
 		Property retProp;
 		if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
 			OntClass rngCls = rngRsrc.asClass();
@@ -3267,7 +3263,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return isList;
 	}
 	
-	private void addListValues(Individual inst, OntClass cls, SadlValueList listInitializer) {
+	private void addListValues(Individual inst, OntClass cls, SadlValueList listInitializer) throws InvalidModelInputException {
 		com.hp.hpl.jena.rdf.model.Resource to = null;
 		ExtendedIterator<OntClass> scitr = cls.listSuperClasses(true);
 		while (scitr.hasNext()) {
@@ -3286,7 +3282,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private Individual addValueToList(Individual lastInst, Individual inst, OntClass cls, com.hp.hpl.jena.rdf.model.Resource type, 
-			Iterator<SadlExplicitValue> valueIterator) {
+			Iterator<SadlExplicitValue> valueIterator) throws InvalidModelInputException {
 		if (inst == null) {
 			inst = getTheJenaModel().createIndividual(cls);
 		}
@@ -3751,7 +3747,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Unable to convert SadlTypeReference '" + sadlTypeRef + "' to OntResource");
 	}
 	
-	private RDFNode sadlTypeReferenceToRDFNode(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
+	private RDFNode sadlTypeReferenceToRDFNode(SadlTypeReference sadlTypeRef) throws JenaProcessorException, InvalidModelInputException {
 		Object obj = sadlTypeReferenceToObject(sadlTypeRef);
 		if (obj == null) {
 			return null;	// this happens when sadlTypeRef is a variable (even if unintended)

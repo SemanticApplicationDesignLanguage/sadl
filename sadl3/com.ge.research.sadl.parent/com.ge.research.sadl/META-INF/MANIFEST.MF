@@ -43,5 +43,4 @@ Export-Package: com.ge.research.documentation,
  com.ge.research.sadl.services,
  com.ge.research.sadl.utils,
  com.ge.research.sadl.validation
-Import-Package: com.ge.research.generator,
- org.apache.log4j
+Import-Package: org.apache.log4j

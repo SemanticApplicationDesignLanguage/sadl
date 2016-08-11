@@ -176,7 +176,7 @@ Bundle-ClassPath: lib/commons-codec.jar,
  lib/stax-api.jar,
  lib/wstx-asl.jar,
  lib/xml-apis.jar,
- lib/document-gen.jar
+ lib/document-gen.jar,
  lib/com.ge.research.sadl.jena-wrapper-for-sadl.jar,
  lib/sadlserver-api.jar,
  lib/sadlserver-impl.jar

@@ -145,12 +145,11 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.ge.research.doc-gen</groupId>
 			<artifactId>document-gen</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

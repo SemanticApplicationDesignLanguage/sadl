@@ -911,9 +911,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo combineTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
-			StringBuilder errorMsgBuilder = new StringBuilder();
-			createErrorMessage(errorMsgBuilder, leftTypeCheckInfo, rightTypeCheckInfo);
-			issueAcceptor.addError(errorMsgBuilder.toString(), leftExpression);   //TODO: Should probably be on the parent expression
 			return null;
 		}
 		
