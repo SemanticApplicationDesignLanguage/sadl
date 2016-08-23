@@ -2,6 +2,7 @@ package com.ge.research.sadl.reasoner.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +19,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.activation.DataSource;
@@ -31,6 +34,7 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -43,6 +47,7 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -989,6 +994,110 @@ public class SadlUtils {
 			eitr.close();
 		}
 		return false;
+	}
+
+	/**
+	 * This method takes an OntModel and a concept name and tries to find the concept in the model or
+	 * one of the models imported by the model.
+	 * 
+	 * @param model -- the OntModel at the root of the search
+	 * @param name -- the concept name
+	 * @return -- the fuly-qualified name of the concept as found in some model
+	 * 
+	 * @throws InvalidNameException -- the concept was not found
+	 */
+	public static synchronized String findNameNs(OntModel model, String name) throws InvalidNameException {
+		String uri = findConceptInSomeModel(model, name);
+		if (uri != null) {
+			return uri;
+		}
+		Iterator<String> impitr = model.listImportedOntologyURIs(true).iterator();
+		while (impitr.hasNext()) {
+			String impuri = impitr.next();
+			if (!impuri.endsWith("#")) {
+				impuri += "#";
+			}
+			impuri = getUriInModel(model, impuri, name);
+			if (impuri != null) {
+				logger.debug("found concept with URI '" + impuri + "'");
+				return impuri;
+			}
+		}
+		ExtendedIterator<Ontology> oitr = model.listOntologies();
+		while (oitr.hasNext()) {
+			Ontology onto = oitr.next();
+			if (onto != null) {
+				ExtendedIterator<OntResource> importsItr = onto.listImports();
+				while (importsItr.hasNext()) {
+					OntResource or = importsItr.next();
+					String ns = or.getURI();
+					if (!ns.endsWith("#")) {
+						ns = ns + "#";
+					}
+					String muri = getUriInModel(model, or.getURI(), name);
+					if (muri != null) {
+						logger.debug("found concept with URI '" + muri + "'");
+						return muri;
+					}
+				}
+				// try this ontology--maybe it wasn't in the map used by findConceptInSomeModel
+				String muri = getUriInModel(model, onto.getURI() + "#", name);
+				if (muri != null) {
+					logger.debug("found concept with URI '" + muri + "'");
+					return muri;
+				}
+			}
+		}
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Failed to find '" + name + "' in any model.");
+			ByteArrayOutputStream sos = new ByteArrayOutputStream();
+			model.write(sos);
+			logger.debug(sos.toString());
+		}
+		throw new InvalidNameException("'" + name + "' not found in any model.");
+	}
+
+	private static synchronized String findConceptInSomeModel(OntModel model, String name) {
+		Map<String, String> map = model.getNsPrefixMap();
+		Iterator<String> uriitr = map.values().iterator();
+		while (uriitr.hasNext()) {
+			String ns = uriitr.next();
+			String uri = getUriInModel(model, ns, name);
+			if (uri != null) {
+				logger.debug("found concept with URI '" + uri + "'");
+				return uri;
+			}
+		}
+		logger.debug("did not find concept with name '" + name + "'");
+		return null;
+	}
+	
+	private static synchronized String getUriInModel(OntModel model, String ns, String name) {
+		Resource r = model.getAnnotationProperty(ns + name);
+        if (r != null) {
+            return r.getURI();
+        }
+        r = model.getDatatypeProperty(ns + name);
+        if (r != null) {
+            return r.getURI();
+        }
+        r = model.getObjectProperty(ns + name);
+        if (r != null) {
+            return r.getURI();
+        }
+        r = model.getOntClass(ns + name);
+        if (r != null) {
+            return r.getURI();
+        }
+        r = model.getIndividual(ns + name);
+        if (r != null) {
+            return r.getURI();
+        }
+        if (RDF.type.getURI().equals(ns + name)) {
+        	return RDF.type.getURI();
+        }
+        return null;
 	}
 
 }

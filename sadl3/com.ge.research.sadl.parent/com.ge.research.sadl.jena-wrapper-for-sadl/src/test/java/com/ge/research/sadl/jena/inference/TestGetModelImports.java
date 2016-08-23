@@ -16,13 +16,12 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.utils.ResourceManager;
-import com.hp.hpl.jena.ontology.OntModelSpec;
 
 public class TestGetModelImports {
 	
@@ -44,7 +43,7 @@ public class TestGetModelImports {
 	}
 
 	@Test
-	public void test() throws ConfigurationException, URISyntaxException {
+	public void test() throws ConfigurationException, URISyntaxException, IOException {
 		String modelFolder = kbroot + "/TestImports/OwlModels";
 		String modelName = "M1.nt";
 		Map<String,Map>imports = getImportHierarch(modelFolder, modelName);
@@ -59,10 +58,11 @@ public class TestGetModelImports {
 	 * @return -- a Map with key the URI of an import, the value a Map of the imported models imports 
 	 * @throws ConfigurationException 
 	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	private Map<String, Map> getImportHierarch(String modelFolder, String owlModelName) throws ConfigurationException, URISyntaxException {
+	private Map<String, Map> getImportHierarch(String modelFolder, String owlModelName) throws ConfigurationException, URISyntaxException, IOException {
 		IConfigurationManager configMgr = new ConfigurationManager(modelFolder, null);
-		ISadlJenaModelGetter getter = new SadlJenaModelGetter(OntModelSpec.OWL_MEM, modelFolder);
+		ISadlJenaModelGetter getter = new SadlJenaModelGetter(configMgr, modelFolder);
 		String modelUrl = new SadlUtils().fileNameToFileUrl(modelFolder + "/" + owlModelName);
 		Map<String,Map> imports = getter.getImportHierarchy(configMgr, configMgr.getPublicUriFromActualUrl(modelUrl));
 		return imports;

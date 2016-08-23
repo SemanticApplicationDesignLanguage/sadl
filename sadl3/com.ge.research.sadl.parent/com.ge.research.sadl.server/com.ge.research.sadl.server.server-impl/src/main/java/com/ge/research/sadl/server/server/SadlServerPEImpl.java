@@ -43,7 +43,6 @@ import java.util.Map;
 
 import javax.activation.DataSource;
 
-import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -148,7 +147,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			throws ConfigurationException, MalformedURLException {
 		if (getConfigurationMgr().getModelGetter() == null) {
         	try {
-				getConfigurationMgr().setModelGetter(new SadlJenaModelGetterPutter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
+				getConfigurationMgr().setModelGetter(new SadlJenaModelGetterPutter(getConfigurationMgr(), getConfigurationMgr().getModelFolder()));
 			} catch (IOException e) {
 				logger.error("Exception setting ModelGetter: " + e.getMessage());
 				e.printStackTrace();
@@ -442,7 +441,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 		else {
 			try {
-				return JenaTranslatorPlugin.findNameNs(getOntModelForEditing(modelName), fragment);
+				return SadlUtils.findNameNs(getOntModelForEditing(modelName), fragment);
 			} catch (InvalidNameException e) {
 				throw new InvalidNameException(e.getMessage());
 			}

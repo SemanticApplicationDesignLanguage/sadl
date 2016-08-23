@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.ge.research.sadl.jena;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-Vendor: GE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.ge.research.sadl.jena,
- com.ge.research.sadl.jena.inference
+Export-Package: com.ge.research.sadl.jena
 Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
  org.eclipse.emf.ecore,
  com.ge.research.jena;bundle-version="3.0.0",

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/com.ge.research.sadl.jena-wrapper-for-sadl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/sadlserver-api.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/sadlserver-impl.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar"/>
@@ -16,7 +13,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jackson-databind.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-arq.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jena-core.jar" sourcepath="C:/Users/200005201/.m2/repository/org/apache/jena/jena-core/2.13.0/jena-core-2.13.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-iri.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-tdb.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsonld-java.jar"/>
@@ -25,11 +22,14 @@
 	<classpathentry exported="true" kind="lib" path="lib/opencsv.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pojava.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/reasoner-api.jar" sourcepath="C:/Users/200005201/sadl3-master5/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-api/target/reasoner-api-3.0.0-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl.jar" sourcepath="/com.ge.research.sadl.reasoner-impl/src/main/java/com/ge/research/sadl/reasoner"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl.jar" sourcepath="/reasoner-impl"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wstx-asl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sadlserver-api.jar" sourcepath="/com.ge.research.sadl.sadlserver-api"/>
+	<classpathentry exported="true" kind="lib" path="lib/sadlserver-impl.jar" sourcepath="/com.ge.research.sadl.sadlserver-impl"/>
+	<classpathentry kind="lib" path="lib/com.ge.research.sadl.jena-wrapper-for-sadl.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

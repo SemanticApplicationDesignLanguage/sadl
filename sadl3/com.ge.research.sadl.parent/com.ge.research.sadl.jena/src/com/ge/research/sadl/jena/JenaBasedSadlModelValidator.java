@@ -885,22 +885,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
-		if (rsrc.getURI().endsWith("#DATA")) {
-			return true;
-		}
-		if (rsrc.canAs(OntClass.class)){
-			ExtendedIterator<OntClass> itr = rsrc.as(OntClass.class).listSuperClasses();
-			while (itr.hasNext()) {
-				OntClass spr = itr.next();
-				if (spr.isURIResource() && spr.getURI().endsWith("#DATA")) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) throws DontTypeCheckException {
 		//Needs filled in for Requirements extension
 		ConceptName declarationConceptName = new ConceptName("TODO");

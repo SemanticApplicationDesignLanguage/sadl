@@ -15,21 +15,8 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
  ***********************************************************************/
-package com.ge.research.sadl.jena.inference;
+package com.ge.research.sadl.jena;
 
-import com.hp.hpl.jena.reasoner.rulesys.Builtin;
-import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
-import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
-
-@SuppressWarnings("serial")
-public class InferenceCanceledException extends BuiltinException {
-
-	/**
-	 * 
-	 */
-	public InferenceCanceledException(Builtin builtin, RuleContext context,
-			String message) {
-		super(builtin, context, message);
-	}
+public class JenaBasedOwlModelBuilder {
 
 }

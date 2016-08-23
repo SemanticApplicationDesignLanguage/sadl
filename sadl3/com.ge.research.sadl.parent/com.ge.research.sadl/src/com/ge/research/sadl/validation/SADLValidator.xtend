@@ -110,7 +110,12 @@ class SADLValidator extends AbstractSADLValidator {
 	}
 	
 	def trimQuotes(String string) {
-		string.substring(1, string.length-1)
+		if (string != null && string.length >= 2) {
+			string.substring(1, string.length-1)
+		}
+		else {
+			string
+		}
 	}
 	
 	@Check

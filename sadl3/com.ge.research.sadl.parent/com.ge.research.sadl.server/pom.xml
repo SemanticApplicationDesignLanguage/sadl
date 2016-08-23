@@ -14,18 +14,14 @@
   	<module>
   		com.ge.research.sadl.server.server-impl
   	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.jena-wrapper-for-sadl
-  	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-api
-  	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-impl
-  	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin
-  	</module>
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
   </modules>
   <dependencyManagement>
   	<dependencies>

@@ -51,21 +51,12 @@
   			<artifactId>reasoner-impl</artifactId>
   			<version>${project.version}</version>
   		</dependency>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
-  			<version>${project.version}</version>
-  		</dependency>
   	</dependencies>
   </dependencyManagement>
   <dependencies>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-impl</artifactId>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.ge.research.sadl</groupId>
-  		<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
   	</dependency>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
@@ -133,5 +124,4 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <version>3.0.0-SNAPSHOT</version>
-</project>
+  </project>

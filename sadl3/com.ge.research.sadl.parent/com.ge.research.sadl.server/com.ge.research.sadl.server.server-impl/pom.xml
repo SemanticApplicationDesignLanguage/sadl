@@ -47,6 +47,12 @@
 	  		<version>${project.version}</version>
 	  		<type>jar</type>
 	  	</dependency>
+<!-- 	  	<dependency> -->
+<!-- 	  		<groupId>com.ge.research.sadl</groupId> -->
+<!-- 	  		<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId> -->
+<!-- 	  		<version>${project.version}</version> -->
+<!-- 	  		<type>jar</type> -->
+<!-- 	  	</dependency> -->
 	  	<dependency>
 	  		<groupId>com.ge.research.sadl</groupId>
 	  		<artifactId>reasoner-api</artifactId>
@@ -62,11 +68,6 @@
 <!-- 	  		<artifactId>prolog-for-sadl</artifactId> -->
 <!-- 	  		<version>${project.version}</version> -->
 <!-- 	  	</dependency> -->
-	  	<dependency>
-	  	  	<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>swi-prolog-plugin</artifactId>
-  			<version>${project.version}</version>
-	  	</dependency>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
@@ -116,6 +117,10 @@
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-impl</artifactId>
   	</dependency>
+<!--   	<dependency> -->
+<!--   		<groupId>com.ge.research.sadl</groupId> -->
+<!--   		<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId> -->
+<!--   	</dependency> -->
   </dependencies>
   
 	<!-- Define where to deploy this project's artifacts -->
@@ -145,6 +150,7 @@
 				<version>2.16</version>
 				<configuration>
 					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
+        			<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
             <plugin>

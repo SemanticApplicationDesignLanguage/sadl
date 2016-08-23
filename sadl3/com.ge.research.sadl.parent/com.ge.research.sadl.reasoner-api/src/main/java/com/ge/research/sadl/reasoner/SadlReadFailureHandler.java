@@ -15,7 +15,7 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
  ***********************************************************************/
-package com.ge.research.sadl.jena;
+package com.ge.research.sadl.reasoner;
 
 import java.io.IOException;
 
@@ -26,7 +26,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 public class SadlReadFailureHandler implements ReadFailureHandler {
 	Logger logger;
-//	private ConfigurationManager sadlConfigMgr = null;
+	private IConfigurationManager sadlConfigMgr = null;
 	
 	public SadlReadFailureHandler(Logger logger) {
 		this.logger = logger;
@@ -43,12 +43,12 @@ public class SadlReadFailureHandler implements ReadFailureHandler {
 //		}
 	}
 
-//	public ConfigurationManager getSadlConfigMgr() {
-//		return sadlConfigMgr;
-//	}
-//
-//	public void setSadlConfigMgr(ConfigurationManager sadlConfigMgr) {
-//		this.sadlConfigMgr = sadlConfigMgr;
-//	}
+	public IConfigurationManager getSadlConfigMgr() {
+		return sadlConfigMgr;
+	}
+
+	public void setSadlConfigMgr(IConfigurationManager sadlConfigMgr) {
+		this.sadlConfigMgr = sadlConfigMgr;
+	}
 
 }

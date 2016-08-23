@@ -335,7 +335,7 @@ public class SadlServerImpl implements ISadlServer {
 			throws ConfigurationException, MalformedURLException {
 		if (getConfigurationMgr().getModelGetter() == null) {
         	try {
-				getConfigurationMgr().setModelGetter(new SadlJenaModelGetter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
+				getConfigurationMgr().setModelGetter(new SadlJenaModelGetter(getConfigurationMgr(), getConfigurationMgr().getModelFolder()));
 			} catch (IOException e) {
 				logger.error("Exception setting ModelGetter: " + e.getMessage());
 				e.printStackTrace();
@@ -954,7 +954,7 @@ public class SadlServerImpl implements ISadlServer {
 	protected IConfigurationManager getConfigurationMgr() throws ConfigurationException, MalformedURLException {
 		if (configurationMgr == null) {
 			// this may have already been set by subclass
-			setConfigurationMgr(ConfigurationManagerFactory.getConfigurationManager(getModelFolder(), getRepoType(getModelFolder()  + "/TDB")));
+			setConfigurationMgr(ConfigurationManagerFactory.getConfigurationManager(getModelFolder(), getRepoType(getModelFolder())));
 		}
 		return configurationMgr;
 	}

@@ -42,9 +42,9 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
-import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -404,12 +404,12 @@ public class OwlToSadl {
         process();
 	}
 	
-	private OntModel prepareEmptyOntModel(String modelFolderPathname) throws ConfigurationException {
+	private OntModel prepareEmptyOntModel(String modelFolderPathname) throws ConfigurationException, IOException {
 		IConfigurationManagerForIDE cm = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname, ConfigurationManagerForIDE.getOWLFormat());
 		OntDocumentManager owlDocMgr = cm.getJenaDocumentMgr();
 		OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
 		setSpec(spec);
-		spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
+		spec.setImportModelGetter(new SadlJenaModelGetterPutter(cm, modelFolderPathname));
 		spec.setDocumentManager(owlDocMgr);
 		owlDocMgr.setProcessImports(true);
 		return ModelFactory.createOntologyModel(spec);

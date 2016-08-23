@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright 2007-2013 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2016 - General Electric Company, All Rights Reserved
  * 
  * Project: SADL
  * 
@@ -31,7 +31,10 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +63,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     protected static final Logger logger = LoggerFactory.getLogger(SadlJenaModelGetter.class);
 
 	private ModelGetter originalModelGetter = null;
+	private String modelFolder = null;
 	protected String tdbFolder = null;
     protected Dataset ds = null;
     
@@ -71,10 +75,16 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     /**
      * This constructor should be called when the repository format is not known
      * @param _tdbFolder
+     * @throws ConfigurationException 
+     * @throws IOException 
      */
-    public SadlJenaModelGetter(IConfigurationManager configMgr, String _tdbFolder) {
+    public SadlJenaModelGetter(IConfigurationManager configMgr, String modelFolder) throws ConfigurationException, IOException {
     	configurationManager = configMgr;
-    	File tdbFile = new File(_tdbFolder);
+    	File modelFolderFile = new File(modelFolder);
+    	if (!modelFolderFile.exists()) {
+    		throw new ConfigurationException("Invalid model folder (" + modelFolder + ")passed to SadlJenaModelGetter");
+    	}
+    	File tdbFile = new File(getTdbFolder(modelFolder));
     	if (tdbFile.exists()) {
     		setFormat(IConfigurationManager.JENA_TDB);	// if the caller doesn't tell us the format
     													// and the TDB folder exists, use it
@@ -82,7 +92,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     	else {
     		setFormat(IConfigurationManager.RDF_XML_ABBREV_FORMAT);
     	}
-    	setTdbFolder(_tdbFolder);
+    	setTdbFolder(getTdbFolder(modelFolder));
      	if (originalModelGetter == null) {
     		// save original (file-based) importModelGetter
     		originalModelGetter = OntModelSpec.getDefaultSpec(OWL.getURI()).getImportModelGetter();
@@ -358,6 +368,36 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 		File f = new File(fn);
 		if (f.exists()) {
 			return f.getParent() + File.separator + uriModified;			
+		}
+		return null;
+	}
+
+	public String getTdbFolder(String modelFolder) throws IOException {
+		return getModelFolder() + "/TDB";
+	}
+
+	private String getModelFolder() {
+		return modelFolder;
+	}
+
+	private void setModelFolder(String modelFolder) {
+		this.modelFolder = modelFolder;
+	}
+
+	@Override
+	public HashMap<String, Map> getImportHierarchy(IConfigurationManager configMgr, String modelUri) throws ConfigurationException {
+		configurationManager = configMgr;
+		String modelUrl = configMgr.getAltUrlFromPublicUri(modelUri);
+		OntModel model = getOntModel(modelUri, modelUrl, null);
+		Set<String> imports = model.listImportedOntologyURIs();
+		if (imports != null) {
+			HashMap<String, Map> thisMap = new HashMap<String,Map>();
+			Iterator<String> impitr = imports.iterator();
+			while (impitr.hasNext()) {
+				String importUri = impitr.next();
+				thisMap.put(importUri, getImportHierarchy(configMgr, importUri));
+			}
+			return thisMap;
 		}
 		return null;
 	}

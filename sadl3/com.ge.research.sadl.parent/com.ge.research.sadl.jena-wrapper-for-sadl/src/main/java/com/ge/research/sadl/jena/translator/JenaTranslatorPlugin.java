@@ -1350,7 +1350,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 				url = expandPrefixedUrl(model, url);
 			}
 			else if (isValidLocalName(url)){
-				url = findNameNs(model, url);
+				url = SadlUtils.findNameNs(model, url);
 			}
 			return before + url + rest;
 		}
@@ -1362,110 +1362,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * This method takes an OntModel and a concept name and tries to find the concept in the model or
-	 * one of the models imported by the model.
-	 * 
-	 * @param model -- the OntModel at the root of the search
-	 * @param name -- the concept name
-	 * @return -- the fuly-qualified name of the concept as found in some model
-	 * 
-	 * @throws InvalidNameException -- the concept was not found
-	 */
-	public static synchronized String findNameNs(OntModel model, String name) throws InvalidNameException {
-		String uri = findConceptInSomeModel(model, name);
-		if (uri != null) {
-			return uri;
-		}
-		Iterator<String> impitr = model.listImportedOntologyURIs(true).iterator();
-		while (impitr.hasNext()) {
-			String impuri = impitr.next();
-			if (!impuri.endsWith("#")) {
-				impuri += "#";
-			}
-			impuri = getUriInModel(model, impuri, name);
-			if (impuri != null) {
-				logger.debug("found concept with URI '" + impuri + "'");
-				return impuri;
-			}
-		}
-		ExtendedIterator<Ontology> oitr = model.listOntologies();
-		while (oitr.hasNext()) {
-			Ontology onto = oitr.next();
-			if (onto != null) {
-				ExtendedIterator<OntResource> importsItr = onto.listImports();
-				while (importsItr.hasNext()) {
-					OntResource or = importsItr.next();
-					String ns = or.getURI();
-					if (!ns.endsWith("#")) {
-						ns = ns + "#";
-					}
-					String muri = getUriInModel(model, or.getURI(), name);
-					if (muri != null) {
-						logger.debug("found concept with URI '" + muri + "'");
-						return muri;
-					}
-				}
-				// try this ontology--maybe it wasn't in the map used by findConceptInSomeModel
-				String muri = getUriInModel(model, onto.getURI() + "#", name);
-				if (muri != null) {
-					logger.debug("found concept with URI '" + muri + "'");
-					return muri;
-				}
-			}
-		}
-		
-		if (logger.isDebugEnabled()) {
-			logger.debug("Failed to find '" + name + "' in any model.");
-			ByteArrayOutputStream sos = new ByteArrayOutputStream();
-			model.write(sos);
-			logger.debug(sos.toString());
-		}
-		throw new InvalidNameException("'" + name + "' not found in any model.");
-	}
-
-	private static synchronized String findConceptInSomeModel(OntModel model, String name) {
-		Map<String, String> map = model.getNsPrefixMap();
-		Iterator<String> uriitr = map.values().iterator();
-		while (uriitr.hasNext()) {
-			String ns = uriitr.next();
-			String uri = getUriInModel(model, ns, name);
-			if (uri != null) {
-				logger.debug("found concept with URI '" + uri + "'");
-				return uri;
-			}
-		}
-		logger.debug("did not find concept with name '" + name + "'");
-		return null;
-	}
-	
-	private static synchronized String getUriInModel(OntModel model, String ns, String name) {
-		Resource r = model.getAnnotationProperty(ns + name);
-        if (r != null) {
-            return r.getURI();
-        }
-        r = model.getDatatypeProperty(ns + name);
-        if (r != null) {
-            return r.getURI();
-        }
-        r = model.getObjectProperty(ns + name);
-        if (r != null) {
-            return r.getURI();
-        }
-        r = model.getOntClass(ns + name);
-        if (r != null) {
-            return r.getURI();
-        }
-        r = model.getIndividual(ns + name);
-        if (r != null) {
-            return r.getURI();
-        }
-        if (RDF.type.getURI().equals(ns + name)) {
-        	return RDF.type.getURI();
-        }
-        return null;
 	}
 
 	protected String expandPrefixedUrl(OntModel model, String name) {

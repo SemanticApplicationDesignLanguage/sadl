@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -39,16 +40,21 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.parser.IParseResult;
+import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IAcceptor;
+import org.eclipse.xtext.util.StringInputStream;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.CheckType;
-import org.eclipse.xtext.validation.IResourceValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +62,6 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
-import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ModelError;
@@ -68,7 +73,7 @@ import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
-//import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
@@ -84,7 +89,6 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlModelProcessor;
-import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -98,7 +102,9 @@ import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
@@ -137,6 +143,7 @@ import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
+import com.ge.research.sadl.sADL.SadlIsFunctional;
 import com.ge.research.sadl.sADL.SadlIsInverseOf;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
 import com.ge.research.sadl.sADL.SadlModel;
@@ -169,9 +176,7 @@ import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
-import com.ge.research.sadl.server.ISadlServer;
-import com.ge.research.sadl.server.SessionNotFoundException;
-import com.ge.research.sadl.server.server.SadlServerImpl;
+import com.ge.research.sadl.services.SADLGrammarAccess;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -225,7 +230,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private Resource currentResource;
 	protected OntModel theJenaModel;
 	protected OntModelSpec spec;
-	protected ISadlServer kServer = null;
 	
 	protected enum AnnType {ALIAS, NOTE}
 	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
@@ -240,6 +244,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	@Inject
 	public DeclarationExtensions declarationExtensions;
+    @Inject
+	private IParser parser;
+    @Inject
+    private SADLGrammarAccess grammar;
 	
 	protected String modelName;
 	protected String modelAlias;
@@ -308,7 +316,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	protected boolean generationInProgress = false;
 
-	
 	public static String[] reservedFileNames = {"SadlBaseModel.sadl", "SadlListModel.sadl", 
 			"RulePatterns.sadl", "RulePatternsData.sadl", "SadlServicesConfigurationConcepts.sadl", "ServicesConfig.sadl"};
 	public static String[] reservedModelURIs = {SADL_BASE_MODEL_URI,SADL_LIST_MODEL_URI,
@@ -324,6 +331,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	 */
 	public OntModel getTheJenaModel() {
 		return theJenaModel;
+	}
+	
+	protected OntModel getTheJenaModel(Resource resource, ProcessorContext context) {
+		if (getTheJenaModel() == null) {
+			// it always is?
+			XtextResource xtrsrc = (XtextResource) resource.getContents().get(0).eResource();
+			if (xtrsrc != null) {
+				URI resourceUri = xtrsrc.getURI();
+				OntModel ontModel = OntModelProvider.find(xtrsrc);
+				if (ontModel != null) {
+					theJenaModel = ontModel;
+				}
+			}
+			if (getTheJenaModel() == null) {
+				onValidate(resource, null, CheckMode.FAST_ONLY, context);
+			}
+		}
+		return getTheJenaModel();
 	}
 	
 	protected void setCurrentResource(Resource currentResource) {
@@ -454,7 +479,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (newMappings != null) {
 				getConfigMgr(resource, _repoType).addMappings(newMappings, true, "SADL");
 			}
-			ITranslator translator = getConfigMgr(resource, _repoType).getTranslator();
+			ITranslator translator = getTranslator(resource, _repoType);
 			List<ModelError> results = translator
 					.translateAndSaveModel(getTheJenaModel(), getRules(),
 							modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), 
@@ -488,7 +513,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return null;
 	}
 	
-	private String getModelFolderPath(Resource resource) {
+	protected String getModelFolderPath(Resource resource) {
 		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
 		v = v.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
 		String modelFolderPathname;
@@ -639,12 +664,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				addImportToJenaModel(getModelName(), SADL_BASE_MODEL_URI, sadlBaseModel);
 				String implfn = checkImplicitSadlModelExistence(resource, context);
 				if (implfn != null) {
-					Resource imrsrc = resource.getResourceSet().getResource(URI.createPlatformResourceURI(implfn, true), true);
+					Resource imrsrc = resource.getResourceSet().getResource(URI.createPlatformResourceURI(implfn, true), true);	// make last arg false so if it isn't loaded will return null (test of existence).
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {
 							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
 						}
-						else if (imrsrc instanceof ExternalEmfResource) {
+						else if (imrsrc instanceof ExternalEmfResource) {		// how could this ever be the case???
 							sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
 						}
 						if (sadlImplicitModel == null) {
@@ -653,7 +678,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								sadlImplicitModel = OntModelProvider.find(imrsrc);
 								OntModelProvider.attach(imrsrc, sadlImplicitModel);
 							}
-							else {
+							else {	// shouldn't need to do any of this; should get resource  or let it be null (and get rid of constant for sim.owl)
 								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
 								if (cm.getModelGetter() == null) {
 									cm.setModelGetter(new SadlJenaModelGetter(cm, null));
@@ -687,7 +712,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			while (impitr.hasNext()) {
 				SadlImport simport = impitr.next();
 				SadlModel importedResource = simport.getImportedResource();
-				if (importedResource != null) {
+				List<SadlModel> importList = new ArrayList<SadlModel>();
+				importList.add(importedResource);
+				String cycle = checkForImportCycles(model, importList);
+				if (cycle != null) {
+					addError(cycle, simport);
+				}
+				else if (importedResource != null) {
 					URI importingResourceUri = resource.getURI();
 					String importUri = importedResource.getBaseUri();
 					String importPrefix = simport.getAlias();
@@ -873,6 +904,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
+	private String checkForImportCycles(SadlModel model, List<SadlModel> importList) {
+		SadlModel lastImport = importList.get(importList.size() - 1);
+		EList<SadlImport> imports = lastImport.getImports();
+		for (int i = 0; imports != null && i < imports.size(); i++) {
+			SadlImport thisImport = imports.get(i);
+			SadlModel newModel = thisImport.getImportedResource();
+			if (newModel.getBaseUri().equals(model.getBaseUri())) {
+				StringBuilder sb = new StringBuilder("Import cycle detected: ");
+				sb.append(model.getBaseUri());
+				for (int j = 0; j < importList.size(); j++) {
+					sb.append(", ");
+					sb.append(importList.get(j).getBaseUri());
+				}
+				sb.append(",");
+				sb.append(newModel.getBaseUri());
+				return sb.toString();
+			}
+			importList.add(newModel);
+			String recursiveCheck = checkForImportCycles(model, importList);
+			if (recursiveCheck != null) {
+				return recursiveCheck;
+			}
+		}
+		return null;
+	}
+	
 	private OntModel getSadlImplicitOntModel(Resource resource) {
 		try {
 			OntModel model = getConfigMgr(resource, null).getModelGetter().getOntModel(SADL_IMPLICIT_MODEL_UNIT_URI, getModelFolderPath(resource), getOwlModelFormat(getProcessorContext()));
@@ -890,7 +947,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			setSpec(spec);
 			String modelFolderPathname = getModelFolderPath(resource);
 			if (modelFolderPathname != null && !modelFolderPathname.startsWith(SYNTHETIC_FROM_TEST)) {
-				spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
+				spec.setImportModelGetter(new SadlJenaModelGetterPutter(cm, modelFolderPathname));
 			}
 			if (owlDocMgr != null) {
 				spec.setDocumentManager(owlDocMgr);
@@ -994,15 +1051,296 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	public Test[] processStatement(TestStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+		Test[] generatedTests = null;
+		Test sadlTest = null;
+		boolean done = false;
+		try {
+			EList<Expression> tests = element.getTests();
+			for (int tidx = 0; tidx < tests.size(); tidx++) {
+				Expression expr = tests.get(tidx);
+				// we know it's a Test so create one and set as translation target
+				Test test = new Test();
+	//			setTranslationTarget(test);
+	
+				// now translate the test expression
+				Object testtrans = translate(expr);
+				
+				// Examine testtrans, the results of the translation.
+				// The recognition of various Test patterns, so that the LHS, RHS, Comparison of the Test can be
+				// properly set is best done on the translation before the ProxyNodes are expanded--their expansion
+				// destroys needed information and introduces ambiguity
+			
+				if (testtrans instanceof BuiltinElement 
+						&& IntermediateFormTranslator.isComparisonBuiltin(((BuiltinElement)testtrans).getFuncName())) {
+					List<Node> args = ((BuiltinElement)testtrans).getArguments();
+					if (args != null && args.size() == 2) {
+						test.setCompName(((BuiltinElement)testtrans).getFuncType());
+						Object lhsObj = getIfTranslator().expandProxyNodes(args.get(0), false, true);
+						Object rhsObj = getIfTranslator().expandProxyNodes(args.get(1), false, true);
+						test.setLhs((lhsObj != null && lhsObj instanceof List<?> && ((List<?>)lhsObj).size() > 0) ? lhsObj : args.get(0));
+						test.setRhs((rhsObj != null && rhsObj instanceof List<?> && ((List<?>)rhsObj).size() > 0) ? rhsObj : args.get(1));
+						generatedTests = new Test[1];
+						generatedTests[0] = test;
+						done = true;
+					}
+				}
+				else if (testtrans instanceof TripleElement) {
+					if (((TripleElement)testtrans).getModifierType() != null &&
+							!((TripleElement)testtrans).getModifierType().equals(TripleModifierType.None)) {
+						// Filtered query with modification
+						TripleModifierType ttype = ((TripleElement)testtrans).getModifierType();
+						Object trans = getIfTranslator().expandProxyNodes(testtrans, false, true);
+						if ((trans != null && trans instanceof List<?> && ((List<?>)trans).size() > 0)) {
+							if (ttype.equals(TripleModifierType.Not)) {
+								if (changeFilterDirection(trans)) {
+									((TripleElement)testtrans).setType(TripleModifierType.None);
+								}
+							}
+							test.setLhs(trans);
+						}
+						else {
+							if (ttype.equals(TripleModifierType.Not)) {
+								changeFilterDirection(testtrans);
+							}
+							test.setLhs(testtrans);
+						}
+						generatedTests = new Test[1];
+						generatedTests[0] = test;
+						done = true;
+					}
+				}
+				
+				if (!done) {
+					// expand ProxyNodes and see what we can do with the expanded form
+					List<Object> expanded = new ArrayList<Object>();
+					Object testExpanded = getIfTranslator().expandProxyNodes(testtrans, false, true);
+					boolean treatAsMultipleTests = false; {
+						if (testExpanded instanceof List<?>) {
+							treatAsMultipleTests = containsMultipleTests((List<GraphPatternElement>) testExpanded);
+						}
+					}
+					if (treatAsMultipleTests && testExpanded instanceof List<?>) {
+						for (int i = 0; i < ((List<?>)testExpanded).size(); i++) {
+							expanded.add(((List<?>)testExpanded).get(i));
+						}
+					}
+					else {
+						expanded.add(testExpanded);
+					}
+	
+					if (expanded.size() == 0) {
+						generatedTests = new Test[1];
+						generatedTests[0] = test;
+					}
+					else {
+						generatedTests = new Test[expanded.size()];
+		
+						for (int i = 0; expanded != null && i < expanded.size(); i++) {
+							Object testgpe = expanded.get(i);
+							if (i > 0) {
+								// not the first element; need a new Test
+								test = new Test();
+							}
+							generatedTests[i] = test;
+		
+							// Case 3: the test translates into a TripleElement
+							if (testgpe instanceof TripleElement) {
+								test.setLhs(testgpe); 
+							}
+							else if (!done && testgpe instanceof List<?>) {
+								test.setLhs(testgpe);
+							}
+						}
+					}
+				}
+			}
+			
+			for (int i = 0; generatedTests != null && i < generatedTests.length; i++) {
+				sadlTest = generatedTests[i];
+				getIfTranslator().postProcessTest(sadlTest, element);
+//				ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
+//				if (node != null) {
+//						test.setLineNo(node.getStartLine());
+//						test.setLength(node.getLength());
+//						test.setOffset(node.getOffset());
+//				}
+		
+				logger.debug("Test translation: {}", sadlTest);
+				List<IFTranslationError> transErrors = getIfTranslator().getErrors();
+				for (int j = 0; transErrors != null && j < transErrors.size(); j++) {
+					IFTranslationError err = transErrors.get(j);
+					try {
+						addError(err.getLocalizedMessage(), element);
+					}
+					catch (Exception e) {
+						// this will happen for standalone testing where there is no Eclipse Workspace
+						logger.error("Test: " + sadlTest.toString());
+						logger.error("  Translation error: " + err.getLocalizedMessage() + 
+								(err.getCause() != null ? (" (" + err.getCause().getLocalizedMessage() + ")") : ""));
+					}
+				}
+		
+				validateTest(element, sadlTest);
+				addSadlCommand(sadlTest);
+			}
+			return generatedTests;
+		} catch (InvalidNameException e) {
+			addError("Invalid name in Test: " + e.getMessage(), element);
+			e.printStackTrace();
+		} catch (InvalidTypeException e) {
+			addError("Invalid type in Test: " + e.getMessage(), element);
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			addError("Translation exception in Test: " + e.getMessage(), element);
+//			e.printStackTrace();
+		}
+		return generatedTests;
 	}
 	
+	private int validateTest(EObject object, Test test) {
+		int numErrors = 0;
+		Object lhs = test.getLhs();
+		if (lhs instanceof GraphPatternElement) {
+			numErrors += validateGraphPatternElement(object, (GraphPatternElement)lhs);
+		}
+		else if (lhs instanceof List<?>) {
+			for (int i = 0; i < ((List<?>)lhs).size(); i++) {
+				Object lhsinst = ((List<?>)lhs).get(i);
+				if (lhsinst instanceof GraphPatternElement) {
+					numErrors += validateGraphPatternElement(object, (GraphPatternElement)lhsinst);
+				}
+			}
+		}
+		Object rhs = test.getLhs();
+		if (rhs instanceof GraphPatternElement) {
+			numErrors += validateGraphPatternElement(object, (GraphPatternElement)rhs);
+		}
+		else if (rhs instanceof List<?>) {
+			for (int i = 0; i < ((List<?>)rhs).size(); i++) {
+				Object rhsinst = ((List<?>)rhs).get(i);
+				if (rhsinst instanceof GraphPatternElement) {
+					numErrors += validateGraphPatternElement(object, (GraphPatternElement)rhsinst);
+				}
+			}
+		}
+		return numErrors;
+	}
+	
+    /**
+     * This method checks a GraphPatternElement for errors and warnings and generates the same if found.
+     * 
+     * @param gpe
+     * @return
+     */
+    private int validateGraphPatternElement(EObject object, GraphPatternElement gpe) {
+    	int numErrors = 0;
+		if (gpe instanceof TripleElement) {
+			if (((TripleElement) gpe).getSubject() instanceof NamedNode &&
+					((NamedNode)((TripleElement)gpe).getSubject()).getNodeType().equals(NodeType.PropertyNode)) {
+				addError("Did not expect a property (" + 
+						((NamedNode)((TripleElement)gpe).getSubject()).getName() + 
+						") as triple pattern subject.", object);
+				numErrors++;
+			}
+			if (((TripleElement) gpe).getObject() instanceof NamedNode &&
+					((NamedNode)((TripleElement)gpe).getObject()).getNodeType().equals(NodeType.PropertyNode)) {
+				if (!(((TripleElement)gpe).getPredicate() instanceof NamedNode) || 
+						!((NamedNode)((TripleElement)gpe).getPredicate()).getNamespace().equals(OWL.NAMESPACE.getNameSpace())) {
+					addError("Did not expect a property (" + 
+							((NamedNode)((TripleElement)gpe).getObject()).getName() + 
+							") as triple pattern object.", object);
+					numErrors++;
+				}
+			}
+			if (((TripleElement) gpe).getPredicate() instanceof NamedNode &&
+					!(((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.PropertyNode)) &&
+					!(((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.ObjectProperty)) &&
+					!(((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.DataTypeProperty))) {
+				if (((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.VariableNode)) {
+					addWarning("It is unusual to have a variable (" + 
+							((NamedNode)((TripleElement)gpe).getPredicate()).getName() + 
+							") rather than a defined property as rule predicate.", object);
+				}
+				else {
+					addError("Expected a property as triple pattern predicate rather than " + 
+							((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().toString() + " " + 
+							((NamedNode)((TripleElement)gpe).getPredicate()).getName(), object);
+					numErrors++;
+				}
+			}
+		}
+		else if (gpe instanceof BuiltinElement) {
+			if (((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Not)) {
+				List<Node> args = ((BuiltinElement)gpe).getArguments();
+				if (args != null && args.size() == 1 && args.get(0) instanceof KnownNode) {
+					addError("Phrase 'not known' is not a valid graph pattern; did you mean 'is not known'?", object);
+				}
+			}
+		}
+		if (gpe.getNext() != null) {
+			numErrors += validateGraphPatternElement(object, gpe.getNext());
+		}
+		return numErrors;
+	}
+    
+    private boolean changeFilterDirection(Object patterns) {
+		if (patterns instanceof List<?>) {
+			for (int i = 0; i < ((List<?>)patterns).size(); i++) {
+				Object litem = ((List<?>)patterns).get(i);
+				if (litem instanceof BuiltinElement) {
+					IntermediateFormTranslator.builtinComparisonComplement((BuiltinElement)litem);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean containsMultipleTests(List<GraphPatternElement> testtrans) {
+		if (testtrans.size() == 1) {
+			return false;
+		}
+		List<VariableNode> vars = new ArrayList<VariableNode>();
+		for (int i = 0; i < testtrans.size(); i++) {
+			GraphPatternElement gpe = testtrans.get(i);
+			if (gpe instanceof TripleElement) {
+				Node anode = ((TripleElement)gpe).getSubject();
+				if (vars.contains(anode)) {
+					return false;  // there are vars between patterns
+				}
+				else if (anode instanceof VariableNode) {
+					vars.add((VariableNode) anode);
+				}
+				anode = ((TripleElement)gpe).getObject();
+				if (vars.contains(anode)) {
+					return false;  // there are vars between patterns
+				}
+				else if (anode instanceof VariableNode){
+					vars.add((VariableNode) anode);
+				}
+			}
+			else if (gpe instanceof BuiltinElement) {
+				List<Node> args = ((BuiltinElement)gpe).getArguments();
+				for (int j = 0; args != null && j < args.size(); j++) {
+					Node anode = args.get(j);
+					if (anode instanceof VariableNode && vars.contains(anode)) {
+						return false;  // there are vars between patterns
+					}
+					else if (anode instanceof VariableNode) {
+						vars.add((VariableNode) anode);
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	private void processStatement(ReadStatement element) throws JenaProcessorException {
 		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
 	private void processStatement(PrintStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+		System.out.println(element.getDisplayString());
 	}
 	
 	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
@@ -1014,7 +1352,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				query = (Query) qobj;
 			}
 			else {
-				query = processQuery(qobj);
+				query = processSparqlQueryString(qobj);
 			}
 			if (element.getName() != null) {
 				query.setFqName(getModelNamespace() + element.getName());
@@ -1114,7 +1452,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return query;
 	}
 
-	private Query processQuery(Object qobj) throws JenaProcessorException {
+	private Query processSparqlQueryString(Object qobj) throws JenaProcessorException {
 		String qstr;
 		if (qobj instanceof com.ge.research.sadl.model.gp.Literal) {
 			qstr = ((com.ge.research.sadl.model.gp.Literal)qobj).getValue().toString();
@@ -1947,12 +2285,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	public String processExpression(BooleanLiteral expr) {
-//		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
 		return expr.getValue();
 	}
 	
 	public ConstantNode processExpression(Constant expr) throws InvalidNameException {
-//		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getConstant());
 		return new ConstantNode(expr.getConstant());
 	}
 	
@@ -2699,6 +3035,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					addPropertyDomain(prop, domainrsrc);
 				}
 			}
+			else if (spr1 instanceof SadlIsFunctional) {
+				boolean isInverse = ((SadlIsFunctional)spr1).isInverse();
+				if (isInverse) {
+					// inverse functional property
+					// TODO
+				}
+				else {
+					// functional property
+					// TODO
+				}
+			}
 			else {
 				throw new JenaProcessorException("Unhandled SadlProperty expression");
 			}
@@ -3005,7 +3352,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return getTheJenaModel().getOntProperty(prop.getURI());
 	}
 
-	private void addError(String msg, EObject context) {
+	protected void addError(String msg, EObject context) {
 		if (getIssueAcceptor() != null) {
 			getIssueAcceptor().addError(msg, context);
 			if (metricsProcessor != null) {
@@ -3017,11 +3364,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
-	private void addWarning(String msg, EObject context) {
+	protected void addWarning(String msg, EObject context) {
 		if (getIssueAcceptor() != null) {
 			getIssueAcceptor().addWarning(msg, context);
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			}
+		}
+		else if (!generationInProgress) {
+			System.out.println(msg);			
+		}
+	}
+
+	protected void addInfo(String msg, EObject context) {
+		if (getIssueAcceptor() != null) {
+			getIssueAcceptor().addInfo(msg, context);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.INFO_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
 		}
 		else if (!generationInProgress) {
@@ -4724,38 +5083,61 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	@Override
 	public void processCommands(Resource resource, ValidationAcceptor issueAcceptor, IAcceptor<SadlMessage> resultAcceptor, ProcessorContext context) {
-		setCancelIndicator(cancelIndicator);
-		boolean useKSever = false;
-		String useKS = context.getPreferenceValues().getPreference(SadlPreferences.TEST_WITH_KSERVER);
-		if (useKS != null && useKS.equals("true")) {
-			useKSever = true;
-		}
-		if (resource.getContents().size() < 1) {
+		if (resource.getContents().size() < 1) {	// no content--don't do anything
 			return;
 		}
-		if (getTheJenaModel() == null) {
+		setCancelIndicator(cancelIndicator);
+
+		if (getTheJenaModel() == null) {	// make sure we have a Jena OntModel for this resource
 			// it always is?
 			onValidate(resource, null, CheckMode.FAST_ONLY, context);
+		}
+		I_InferenceProcessor inferenceProcessor = getInferenceProcessor(resource, context);
+		
+		boolean validateBeforeTesting = false;
+		String vbtest = context.getPreferenceValues().getPreference(SadlPreferences.VALIDATE_BEFORE_TEST);
+		if (vbtest != null && vbtest.equals("true")) {
+			validateBeforeTesting = true;
 		}
 		
 		List<SadlCommand> toProcess = getSadlCommands();
 		if (toProcess != null) {
+			boolean modelValid = true;	// assumed default
+			if (validateBeforeTesting) {
+				try {
+					modelValid = inferenceProcessor.validateModel();
+					if (!modelValid) {
+						addError("Aborting execution of commands, model invalid", null);
+					}
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ReasonerNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			Iterator<SadlCommand> tpitr = toProcess.iterator();
+			int queriesProcessed = 0;
+			int totalNumTests = 0;
+			int testsPassed = 0;
 			while (tpitr.hasNext()) {
 				SadlCommand cmd = tpitr.next();
 				try {
 					if (cmd instanceof Query) {
-						String query = ((Query)cmd).getSparqlQueryString();
-						if (query == null) {
-							query = getConfigMgr(getCurrentResource(), null).getTranslator().translateQuery(getTheJenaModel(), (Query) cmd);
-						}
-						query = SadlUtils.stripQuotes(query);
-						if (useKSever) {
-							getKServer(resource).query(query);
+						ResultSet rs = inferenceProcessor.processQuery((Query)cmd);
+						System.out.println("Results for query '" + cmd.toString() + "':");
+						if (rs != null) {
+							System.out.println(rs.toStringWithIndent(5));
 						}
 						else {
-							processAdhocQuery(resource, issueAcceptor, context, query);
+							System.out.println("No results");
 						}
+						queriesProcessed++;
+					}
+					else if (cmd instanceof Test) {
+						testsPassed += inferenceProcessor.testModel((Test)cmd);
+						totalNumTests++;
 					}
 				} catch (TranslationException e) {
 					// TODO Auto-generated catch block
@@ -4775,135 +5157,53 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				} catch (ReasonerNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (SessionNotFoundException e) {
+				} catch (JenaProcessorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TripleNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidTypeException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			addInfo("Inference summary: processed " + totalNumTests + (totalNumTests > 1 ? " tests" : " test") + ", of which " + testsPassed + " passed; processed " + 
+					queriesProcessed + (queriesProcessed > 1 ? " queries." : " query."), null);
 		}
-		SadlModel model = (SadlModel) resource.getContents().get(0);
-		String modelActualUrl =resource.getURI().lastSegment();
-		if (isReservedName(resource)) {
-			addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
-		}
-		modelName = model.getBaseUri();
-		EList<SadlModelElement> elements = model.getElements();
-		if (elements != null) {
-			String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
-			try {
-				getConfigMgr(resource, _repoType).clearReasoner();
-				Iterator<SadlModelElement> elitr = elements.iterator();
-				while (elitr.hasNext()) {
-					SadlModelElement element = elitr.next();
-					if (element instanceof QueryStatement) {
-						try {
-							Object queryObj = translate(((QueryStatement)element).getExpr());
-							if (queryObj instanceof Query) {
-								String query = ((Query)queryObj).getSparqlQueryString();
-								if (query == null) {
-									query = getConfigMgr(getCurrentResource(), null).getTranslator().translateQuery(getTheJenaModel(), (Query) queryObj);
-								}
-								query = SadlUtils.stripQuotes(query);
-								if (useKSever) {
-									getKServer(resource).query(query);
-								}
-								else {
-									processAdhocQuery(resource, issueAcceptor, context, query);
-								}
-							}
-							else {
-								throw new TranslationException("Unexpected query translation result: " + queryObj.toString());
-							}
-						} catch (InvalidNameException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (InvalidTypeException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (TranslationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (QueryCancelledException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (QueryParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (ReasonerNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (SessionNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					else if (element instanceof TestStatement) {
-						
-					}
-					else if (element instanceof PrintStatement) {
-						
-					}
-				}
-			} catch (ConfigurationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		
 	}
 	
-	private ISadlServer getKServer(Resource resource) {
-		if (kServer == null) {
-			String modelFolder;
-			try {
-				modelFolder = getConfigMgr(resource, null).getModelFolder();
-				kServer = new SadlServerImpl(modelFolder);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	private I_InferenceProcessor getInferenceProcessor(Resource resource, ProcessorContext context) {
+		boolean useKServer = false;
+		String useKS = context.getPreferenceValues().getPreference(SadlPreferences.TEST_WITH_KSERVER);
+		if (useKS != null && useKS.equals("true")) {
+			useKServer = true;
 		}
-		return kServer;
+
+		if (useKServer) {
+			addInfo("Using Knowledge Server for inference request.", null);
+			return new SadlServerInferenceProcessor(resource, getTheJenaModel(resource, context), this, context);
+		}
+		else {
+			return new JenaBasedDirectInferenceProcessor(resource, getTheJenaModel(resource, context), this, context);
+		}
 	}
 	
 	@Override
-	public void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context,
-			String query) {
-		String queryString;
-		String modelFolderPathname = getModelFolderPath(resource);
-		
-		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+	public void processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context, String queryString) {
 		try {
-			if (getTheJenaModel() == null) {
-				// it always is?
-				XtextResource xtrsrc = (XtextResource) resource.getContents().get(0).eResource();
-				if (xtrsrc != null) {
-					URI resourceUri = xtrsrc.getURI();
-					OntModel ontModel = OntModelProvider.find(xtrsrc);
-					if (ontModel != null) {
-						theJenaModel = ontModel;
-					}
-				}
-				if (getTheJenaModel() == null) {
-					onValidate(resource, null, CheckMode.FAST_ONLY, context);
-				}
-			}
-			ITranslator translator = getConfigMgr(resource, _repoType).getTranslator();
-			IReasoner reasoner = getConfigMgr(resource, _repoType).getReasoner();
-			if (!reasoner.isInitialized()) {
-				reasoner.setConfigurationManager(getConfigMgr(resource, _repoType));
-				reasoner.initializeReasoner(modelFolderPathname, modelName, _repoType);
-			}
-			queryString = translator.translateQuery(getTheJenaModel(), processQuery(query));
-			ResultSet results =  reasoner.ask(queryString);
+			QueryStatement query = parseQuery(resource, queryString);
+			Query sadlQuery = processStatement(query);
+			
+			I_InferenceProcessor inferenceProcessor = getInferenceProcessor(resource, context);
+		
+			ResultSet results = inferenceProcessor.processQuery(sadlQuery);
+			System.out.println("Results for query '" + query + "':");
 			if (results != null) {
 				System.out.println(results.toStringWithIndent(5));
 			}
 			else {
-				System.out.println("Query returned no results");
+				System.out.println("No results");
 			}
 		} catch (com.ge.research.sadl.reasoner.ConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -4925,9 +5225,69 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		} catch (JenaProcessorException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
+	private QueryStatement parseQuery (Resource resource, String queryString) {
+		ResourceSet resourceSet = resource.getResourceSet();
+		QueryStatement query = null;
+
+		// Parse string just to test the syntax
+		IParseResult result = parser.parse(grammar.getQueryStatementRule(), new StringReader(queryString));
+		if (result.hasSyntaxErrors()) {
+			Iterable<INode> errors = result.getSyntaxErrors();
+			for (INode nodeWithError : errors) {
+				addError(nodeWithError.getSyntaxErrorMessage().getMessage() + "\n", null);
+			}
+		}
+
+		Resource res = resourceSet.createResource(URI.createURI("http://com.ge.grc.sadl/__runtimequery.sadl"));
+		StringBuilder resContent = new StringBuilder();
+		resContent.append("uri 'http://com.ge.grc.sadl/__runtimequery'\n").append(queryString);
+		try {
+			res.load(new StringInputStream(resContent.toString()), null);
+			SadlModel model = (SadlModel) resource.getContents().get(0);
+			query = (QueryStatement) model.getElements().get(0);
+		} catch (Exception e) {
+			addError("Could not parse query '"+queryString+"': " + e.getMessage(), null);
+		}
+
+		EcoreUtil.resolveAll(resourceSet);
+		return query;
+	}
+	
+	protected ITranslator getTranslator(Resource resource, ProcessorContext context) throws ConfigurationException {
+		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+		String pref = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
+		if (pref != null) {
+			_repoType = pref;
+		}
+		return getTranslator(resource, _repoType);
+	}
+	
+	protected ITranslator getTranslator(Resource resource, String _repoType) throws ConfigurationException {
+		return getConfigMgr(resource, _repoType).getTranslator();
+	}
+	
+	protected IReasoner getReasoner(Resource resource, ProcessorContext context)
+			throws ConfigurationException, ReasonerNotFoundException {
+		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+		String pref = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
+		if (pref != null) {
+			_repoType = pref;
+		}
+		IReasoner reasoner = getConfigMgr(resource, _repoType).getReasoner();
+		if (!reasoner.isInitialized()) {
+			reasoner.setConfigurationManager(getConfigMgr(resource, _repoType));
+			String modelFolderPathname = getModelFolderPath(resource);
+			reasoner.initializeReasoner(modelFolderPathname, getModelName(), _repoType);
+		}
+		return reasoner;
+	}
+		
 //	@Override
 	public ResultSet processNamedQuery(Resource resource, String queryName) throws JenaProcessorException {
 		SadlModel model = (SadlModel) resource.getContents().get(0);
@@ -5085,11 +5445,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 	
-	private IConfigurationManagerForIDE getConfigMgr(Resource resource, String format) throws ConfigurationException {
-		if (format == null) {
-			format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
-		}
+	protected IConfigurationManagerForIDE getConfigMgr(Resource resource, String format) throws ConfigurationException {
 		if (configMgr == null) {
+			if (resource == null) {
+				throw new ConfigurationException("Unable to get ConfigurationManagerForIDE, null resource");
+			}
 			String modelFolderPathname = getModelFolderPath(resource);
 			if ((modelFolderPathname == null && 
 					resource.getURI().toString().startsWith("synthetic")) ||
@@ -5103,6 +5463,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return configMgr;
 	}
+	
 	protected boolean isBooleanOperator(String op) {
 		OPERATORS_RETURNING_BOOLEAN[] ops = OPERATORS_RETURNING_BOOLEAN.values();
 		for (int i = 0; i < ops.length; i++) {

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright 2007-2013 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2016 - General Electric Company, All Rights Reserved
  * 
  * Project: SADL
  * 
@@ -16,11 +16,6 @@
  *
  ***********************************************************************/
 
-/***********************************************************************
- * $Last revised by: crapo $ 
- * $Revision: 1.6 $ Last modified on   $Date: 2015/07/31 11:32:33 $
- ***********************************************************************/
-
 package com.ge.research.sadl.reasoner;
 
 import java.io.File;
@@ -30,8 +25,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.tdb.TDB;
@@ -48,9 +45,11 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
     /**
      * This constructor should be called when the repository format is not known
      * @param _tdbFolder
+     * @throws ConfigurationException 
+     * @throws IOException 
      */
-    public SadlJenaModelGetterPutter(IConfigurationManager configMgr, String _tdbFolder) {
-    	super(configMgr, _tdbFolder);
+    public SadlJenaModelGetterPutter(IConfigurationManager configMgr, String modelFolder) throws ConfigurationException, IOException {
+    	super(configMgr, modelFolder);
     	setAddMissingModelToTDB(false);
     }
     
