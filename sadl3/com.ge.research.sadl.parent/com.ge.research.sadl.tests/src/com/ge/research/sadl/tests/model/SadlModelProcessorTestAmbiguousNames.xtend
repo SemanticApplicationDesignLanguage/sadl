@@ -408,15 +408,15 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 		'''.sadl
 		sadlModel1.assertNoErrors
 		sadlModel2.assertNoErrors
-		sadlModel4.assertNoErrors
-		val rprocessor = getReqProcessor(sadlModel4)
-		val List<Issue> issues= newArrayList
-		rprocessor.onValidate(sadlModel4, new ValidationAcceptor([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel4)))
-		if (issues != null) {
-			for (issue: issues) {
+		val sprocessor3 = getReqProcessor(sadlModel3)
+		val List<Issue> issues3= newArrayList
+		sprocessor3.onValidate(sadlModel4, new ValidationAcceptor([issues3 += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel4)))
+		if (issues3 != null) {
+			for (issue: issues3) {
 				System.err.println(issue.toString)
 			}
 		}
+		sadlModel4.assertNoErrors
 	}
 	
 }

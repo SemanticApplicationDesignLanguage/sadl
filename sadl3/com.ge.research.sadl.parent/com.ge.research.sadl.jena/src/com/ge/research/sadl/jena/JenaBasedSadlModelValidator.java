@@ -871,9 +871,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private List<ConceptName> getImpliedProperties(Resource first) {
+		List<ConceptName> retlst = null;
+		// check superclasses
+		if (first.canAs(OntClass.class)) {
+			OntClass ontcls = first.as(OntClass.class);
+			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
+			while (eitr.hasNext()) {
+				OntClass supercls = eitr.next();
+				List<ConceptName> scips = getImpliedProperties(supercls);
+				if (retlst == null) {
+					retlst = scips;
+				}
+				else {
+					retlst.addAll(scips);
+				}
+			}
+		}
 		StmtIterator sitr = theJenaModel.listStatements(first, theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
 		if (sitr.hasNext()) {
-			List<ConceptName> retlst = new ArrayList<ConceptName>();
+			if (retlst == null) {
+				retlst = new ArrayList<ConceptName>();
+			}
 			while (sitr.hasNext()) {
 				RDFNode obj = sitr.nextStatement().getObject();
 				if (obj.isURIResource()) {
@@ -882,7 +900,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			return retlst;
 		}
-		return null;
+		return retlst;
 	}
 
 	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
