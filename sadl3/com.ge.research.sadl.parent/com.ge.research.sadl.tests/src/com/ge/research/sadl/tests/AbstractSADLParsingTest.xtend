@@ -42,7 +42,7 @@ abstract class AbstractSADLParsingTest{
 	@Inject extension ValidationTestHelper
 
 	@Inject ParseHelper<SadlModel> parseHelper
-	@Inject ValidationTestHelper validationTestHelper
+	@Inject protected ValidationTestHelper validationTestHelper
 	@Inject Provider<XtextResourceSet> resourceSetProvider
 	XtextResourceSet resourceSet
 	

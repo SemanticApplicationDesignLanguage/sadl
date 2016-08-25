@@ -47,7 +47,7 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 	
 	@Test
 	def void testPerformance() {
-		val models = 16
+		val models = 32
 		val classesPerModel = 10
 		for (i : 0..<models) {
 			'''
@@ -454,13 +454,11 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 		'''.sadl
 		sadlModel1.assertNoErrors
 		sadlModel2.assertNoErrors
-		val sprocessor3 = getReqProcessor(sadlModel3)
-		val List<Issue> issues3= newArrayList
-		sprocessor3.onValidate(sadlModel4, new ValidationAcceptor([issues3 += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel4)))
-		if (issues3 != null) {
-			for (issue: issues3) {
-				System.err.println(issue.toString)
-			}
+		val issues3 = validationTestHelper.validate(sadlModel3)
+		assertNotNull(issues3)
+		assertTrue(issues3.size() > 0)
+		for (issue: issues3) {
+			System.err.println(issue.toString)
 		}
 		sadlModel4.assertNoErrors
 	}

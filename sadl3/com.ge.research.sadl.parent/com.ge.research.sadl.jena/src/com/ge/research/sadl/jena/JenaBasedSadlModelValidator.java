@@ -82,6 +82,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private EObject defaultContext;
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
+	private Map<EObject, Property> impliedPropertiesUsed = null;
+	
 	private IMetricsProcessor metricsProcessor = null; 
 	
 	public class TypeCheckInfo {
@@ -1003,6 +1005,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, leftExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, newltci, rightTypeCheckInfo)) {
+					issueAcceptor.addInfo("Implied property '" + cn.getUri() + "' used (left side) to pass type check", leftExpression);
+					addImpliedPropertiesUsed(leftExpression, prop);
 					return true;
 				}
 			}
@@ -1023,6 +1027,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newrtci = getTypeInfoFromRange(cn, prop, rightExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, newrtci)) {
+					issueAcceptor.addInfo("Implied property '" + cn.getUri() + "' used (right side) to pass type check", rightExpression);
+					addImpliedPropertiesUsed(rightExpression, prop);
 					return true;
 				}
 			}
@@ -1299,6 +1305,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private void setDefaultContext(EObject defaultContext) {
 		this.defaultContext = defaultContext;
+	}
+
+	public Map<EObject, Property> getImpliedPropertiesUsed() {
+		return impliedPropertiesUsed;
+	}
+
+	protected boolean addImpliedPropertiesUsed(EObject context, Property impliedPropertyUsed) {
+		if (impliedPropertiesUsed == null) {
+			impliedPropertiesUsed = new HashMap<EObject, Property>();
+			impliedPropertiesUsed.put(context, impliedPropertyUsed);
+			return true;
+		}
+		else {
+			if (!impliedPropertiesUsed.containsKey(context)) {
+				impliedPropertiesUsed.put(context, impliedPropertyUsed);
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

@@ -1,15 +1,21 @@
 package com.ge.research.sadl.jena;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.Property;
 
 public class OntModelProvider {
 	
 	static class OntModelAdapter extends AdapterImpl  {
 		OntModel model;
+		Map<EObject, Property> impliedPropertiesUsed = null;
 		boolean isLoading = false;
 		
 		@Override
@@ -35,10 +41,28 @@ public class OntModelProvider {
 		OntModelAdapter adapter = findAdapter(resource);
 		if (adapter == null) {
 			adapter = new OntModelAdapter();
+			resource.eAdapters().add(adapter);
 		}
 		adapter.model = model;
 		adapter.isLoading = false;  // loading is complete
-		resource.eAdapters().add(adapter);
+	}
+	
+	public static void addImpliedProperties(Resource resource, Map<EObject, Property> impliedProperties) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a == null) {
+			a = new OntModelAdapter();
+			a.isLoading = true;
+			resource.eAdapters().add(a);
+		}
+		a.impliedPropertiesUsed = impliedProperties;
+	}
+	
+	public static Property getImpliedProperty(Resource resource, EObject context) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null && a.impliedPropertiesUsed != null) {
+			return a.impliedPropertiesUsed.get(context);
+		}
+		return null;
 	}
 	
 	public static OntModelAdapter findAdapter(Resource resource) {

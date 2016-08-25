@@ -1380,10 +1380,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		//Validate BinaryOperation expression
 		StringBuilder errorMessage = new StringBuilder();
-		if(modelValidator != null && !modelValidator.validate(expr, errorMessage)) {
-			issueAcceptor.addError(errorMessage.toString(), expr);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+		if(modelValidator != null) {
+			if (!modelValidator.validate(expr, errorMessage)) {
+				issueAcceptor.addError(errorMessage.toString(), expr);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+				}
+			}
+			else {
+				OntModelProvider.addImpliedProperties(expr.eResource(), modelValidator.getImpliedPropertiesUsed());
+				// TODO must add implied properties to rules, tests, etc.
 			}
 		}
 		
