@@ -48,13 +48,15 @@ public class OntModelProvider {
 	}
 	
 	public static void addImpliedProperties(Resource resource, Map<EObject, Property> impliedProperties) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a == null) {
-			a = new OntModelAdapter();
-			a.isLoading = true;
-			resource.eAdapters().add(a);
+		if (resource != null) {
+			OntModelAdapter a = findAdapter(resource);
+			if (a == null) {
+				a = new OntModelAdapter();
+				a.isLoading = true;
+				resource.eAdapters().add(a);
+			}
+			a.impliedPropertiesUsed = impliedProperties;
 		}
-		a.impliedPropertiesUsed = impliedProperties;
 	}
 	
 	public static Property getImpliedProperty(Resource resource, EObject context) {
@@ -66,9 +68,11 @@ public class OntModelProvider {
 	}
 	
 	public static OntModelAdapter findAdapter(Resource resource) {
-		for (Adapter a : resource.eAdapters()) {
-			if (a instanceof OntModelAdapter) {
-				return ((OntModelAdapter) a);
+		if (resource != null) {
+			for (Adapter a : resource.eAdapters()) {
+				if (a instanceof OntModelAdapter) {
+					return ((OntModelAdapter) a);
+				}
 			}
 		}
 		return null;
