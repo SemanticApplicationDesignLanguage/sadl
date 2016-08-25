@@ -32,6 +32,9 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 import org.eclipse.xtext.validation.CheckMode
 import java.util.Map
+import org.eclipse.xtext.EcoreUtil2
+import com.google.common.base.Stopwatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(XtextRunner)
 //@InjectWith(RequirementsInjectorProvider)
@@ -41,6 +44,49 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 	@Inject ValidationTestHelper validationTestHelper
 	@Inject Provider<JenaBasedSadlModelProcessor> sadlProcessorProvider
 	@Inject IPreferenceValuesProvider preferenceProvider
+	
+	@Test
+	def void testPerformance() {
+		val models = 16
+		val classesPerModel = 10
+		for (i : 0..<models) {
+			'''
+				uri "http://sadl.org/Names«i».sadl" alias Names«i».
+				
+				«FOR z : 0..<i»
+					import "http://sadl.org/Names«z».sadl".
+				«ENDFOR»
+				
+				«FOR j : 0..<classesPerModel»
+					RClass«i»_«j» is a class.
+					Class«i»_«j» is a class described by oprop1 with values of type RClass«i»_«j»,
+					 	described by iprop1 with values of type int,
+					 	described by fprop1 with values of type float,
+					 	described by sprop1 with values of type string.
+				«ENDFOR»
+			'''.sadl
+		}
+		
+		val sadlModel3 = '''
+			 uri "http://sadl.org/Instances.sadl".
+			 
+			 «FOR z : 0..<models»
+			 	import "http://sadl.org/Names«z».sadl".
+			 «ENDFOR»
+			 
+			 «FOR i : 0..<models»
+			 	«FOR j : 0..<classesPerModel»
+			 		R«i»_«j» is a RClass«i»_«j».
+			 		C«i»_«j» is a Class«i»_«j» with oprop1 R1, with iprop1 3, with fprop1 4.5, with sprop1 "hello world".
+				 «ENDFOR»
+			 «ENDFOR»
+			 
+
+		'''.sadl
+		val sw = Stopwatch.createStarted
+		EcoreUtil2.resolveAll(sadlModel3.resourceSet)
+		println(sw.elapsed(TimeUnit.MILLISECONDS))
+	}
 	
 	@Test
 	def void testRequirement_Model() {
