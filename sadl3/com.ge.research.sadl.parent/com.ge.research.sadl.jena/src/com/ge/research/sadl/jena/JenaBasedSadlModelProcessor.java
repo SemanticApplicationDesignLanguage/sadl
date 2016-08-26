@@ -346,8 +346,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //    	System.out.println("onGenerate called for Resource '" + resource.getURI() + "'");
 		// save the model
 		if (getTheJenaModel() == null) {
-			// it always is?
-			onValidate(resource, null, CheckMode.FAST_ONLY, context);
+			OntModel m = OntModelProvider.find(resource);
+			if (m == null) {
+				onValidate(resource, null, CheckMode.FAST_ONLY, context);
+			}
+			else {
+				theJenaModel = m;
+				setModelName(OntModelProvider.getModelName(resource));
+			}
 		}
 		if (fsa !=null) {
 			if (isReservedName(resource)) {
@@ -636,6 +642,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		
 		if (!resource.getURI().lastSegment().equals(SADL_IMPLICIT_MODEL_FILENAME)) {
+			OntModelProvider.registerResource(resource);
 			try {
 				sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
 				addImportToJenaModel(getModelName(), SADL_BASE_MODEL_URI, sadlBaseModel);
@@ -653,7 +660,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							if (imrsrc instanceof XtextResource) {
 								((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 								sadlImplicitModel = OntModelProvider.find(imrsrc);
-								OntModelProvider.attach(imrsrc, sadlImplicitModel);
+								OntModelProvider.attach(imrsrc, sadlImplicitModel, SADL_IMPLICIT_MODEL_URI);
 							}
 							else {
 								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
@@ -699,7 +706,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						URI importedResourceUri = xtrsrc.getURI();
 						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
 						if (importedOntModel == null) {
-							if (OntModelProvider.checkForCircularImport(resource)) {
+							if (OntModelProvider.checkForCircularImport(eResource)) {
 								addError("Import of '" + importedResourceUri.toString() + "' appears to be part of a circular set of imports.", simport);
 							}
 							else {
@@ -844,7 +851,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
     	logger.debug("onValidate completed for Resource '" + resource.getURI() + "'");
-		OntModelProvider.attach(model.eResource(), getTheJenaModel());
+		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName());
 		if (issueAcceptor != null) {
 			try {
 				if (!resource.getURI().lastSegment().equals("SadlImplicitModel.sadl")) {
