@@ -19,6 +19,7 @@ public class OntModelProvider {
 		Object otherContent;
 		Map<EObject, Property> impliedPropertiesUsed = null;
 		boolean isLoading = false;
+		boolean hasCircularImport = false;
 		
 		@Override
 		public boolean isAdapterForType(Object type) {
@@ -39,12 +40,21 @@ public class OntModelProvider {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null) {
 			if (a.isLoading) {
+				a.hasCircularImport = true;
 				return true;
 			}
 		}
 		return false;
 	}
 	
+	public static boolean hasCircularImport(Resource resource) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null) {
+			return a.hasCircularImport;
+		}
+		return false;
+	}
+
 	public static void attach(Resource resource, OntModel model, String modelName) {
 		OntModelAdapter adapter = findAdapter(resource);
 		if (adapter == null) {

@@ -56,11 +56,18 @@ class SadlModelProcessorTestCircularImports extends AbstractProcessorTest {
  		'''.sadl
 //		sadlModel1.assertNoErrors
 //		sadlModel2.assertNoErrors
-		val sprocessor1 = getReqProcessor(sadlModel1)
-		val List<Issue> issues1= newArrayList
-		sprocessor1.onValidate(sadlModel1, new ValidationAcceptor([issues1 += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel1)))
+		val issues1 = validationTestHelper.validate(sadlModel1)
+		val issues2 = validationTestHelper.validate(sadlModel2)
+//		val sprocessor1 = getReqProcessor(sadlModel1)
+//		val List<Issue> issues1= newArrayList
+//		sprocessor1.onValidate(sadlModel1, new ValidationAcceptor([issues1 += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel1)))
 		if (issues1 != null) {
 			for (issue: issues1) {
+				System.err.println(issue.toString)
+			}
+		}
+		if (issues2 != null) {
+			for (issue: issues2) {
 				System.err.println(issue.toString)
 			}
 		}

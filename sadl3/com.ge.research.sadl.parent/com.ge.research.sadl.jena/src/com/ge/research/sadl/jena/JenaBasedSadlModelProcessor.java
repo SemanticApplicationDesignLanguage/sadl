@@ -713,6 +713,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					        	logger.debug("JenaBasedSadlModelProcessor encountered null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
 								xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 						        importedOntModel = OntModelProvider.find(xtrsrc);
+						        if (OntModelProvider.hasCircularImport(resource)) {
+									addError("Import of '" + importedResourceUri.toString() + "' appears to be part of a circular set of imports.", simport);
+						        }
 							}
 						}
 						if (importedOntModel == null) {
