@@ -82,6 +82,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private EObject defaultContext;
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
+	private Map<EObject, Property> impliedPropertiesUsed = null;
+	
 	private IMetricsProcessor metricsProcessor = null; 
 	
 	public class TypeCheckInfo {
@@ -871,9 +873,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private List<ConceptName> getImpliedProperties(Resource first) {
+		List<ConceptName> retlst = null;
+		// check superclasses
+		if (first.canAs(OntClass.class)) {
+			OntClass ontcls = first.as(OntClass.class);
+			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
+			while (eitr.hasNext()) {
+				OntClass supercls = eitr.next();
+				List<ConceptName> scips = getImpliedProperties(supercls);
+				if (retlst == null) {
+					retlst = scips;
+				}
+				else {
+					retlst.addAll(scips);
+				}
+			}
+		}
 		StmtIterator sitr = theJenaModel.listStatements(first, theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
 		if (sitr.hasNext()) {
-			List<ConceptName> retlst = new ArrayList<ConceptName>();
+			if (retlst == null) {
+				retlst = new ArrayList<ConceptName>();
+			}
 			while (sitr.hasNext()) {
 				RDFNode obj = sitr.nextStatement().getObject();
 				if (obj.isURIResource()) {
@@ -882,7 +902,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			return retlst;
 		}
-		return null;
+		return retlst;
 	}
 
 	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
@@ -985,6 +1005,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, leftExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, newltci, rightTypeCheckInfo)) {
+					issueAcceptor.addInfo("Implied property '" + cn.getUri() + "' used (left side) to pass type check", leftExpression);
+					addImpliedPropertiesUsed(leftExpression, prop);
 					return true;
 				}
 			}
@@ -1005,6 +1027,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newrtci = getTypeInfoFromRange(cn, prop, rightExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, newrtci)) {
+					issueAcceptor.addInfo("Implied property '" + cn.getUri() + "' used (right side) to pass type check", rightExpression);
+					addImpliedPropertiesUsed(rightExpression, prop);
 					return true;
 				}
 			}
@@ -1281,6 +1305,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private void setDefaultContext(EObject defaultContext) {
 		this.defaultContext = defaultContext;
+	}
+
+	public Map<EObject, Property> getImpliedPropertiesUsed() {
+		return impliedPropertiesUsed;
+	}
+
+	protected boolean addImpliedPropertiesUsed(EObject context, Property impliedPropertyUsed) {
+		if (impliedPropertiesUsed == null) {
+			impliedPropertiesUsed = new HashMap<EObject, Property>();
+			impliedPropertiesUsed.put(context, impliedPropertyUsed);
+			return true;
+		}
+		else {
+			if (!impliedPropertiesUsed.containsKey(context)) {
+				impliedPropertiesUsed.put(context, impliedPropertyUsed);
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

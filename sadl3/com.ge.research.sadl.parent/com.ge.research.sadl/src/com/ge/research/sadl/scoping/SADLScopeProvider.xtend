@@ -226,11 +226,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			if (!externalResource.eIsProxy)
 				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
 		}
-		val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
-		if (element !== null) {
-			val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
-			if (eobject !== null) {
-				importScopes += createResourceScope(eobject.eResource, null, importedResources)
+		if (importScopes.isEmpty) {
+			val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
+			if (element !== null) {
+				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+				if (eobject !== null) {
+					importScopes += createResourceScope(eobject.eResource, null, importedResources)
+				}
 			}
 		}
 		return new ListCompositeScope(importScopes, converter)
@@ -261,12 +263,28 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 		override getSingleElement(QualifiedName name) {
-			var List<IEObjectDescription> candidates = getElements(name).toList
-			if (candidates.size <= 1) {
-				return candidates.head
+			var List<IEObjectDescription> candidates = null
+			var IEObjectDescription firstMatch = null
+			for (s : delegates) {
+				val candidate = s.getSingleElement(name)
+				if (candidate !== null && firstMatch !== candidate) {
+					if (firstMatch === null) {
+						firstMatch = candidate 
+					} else {
+						if (candidates === null) {
+							candidates = newArrayList
+							candidates.add(firstMatch)
+						}
+						if (!candidates.contains(candidate))
+							candidates.add(candidate)
+					}
+				}
+			}
+			if (candidates === null) {
+				return firstMatch
 			} else {
 				val imports = candidates.map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
-				val message = '''Ambiguously imported name '«candidates.head.name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
+				val message = '''Ambiguously imported name '«name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
 				val alternatives = candidates.map[
 					desc | 
 					this.getElements(desc.EObjectOrProxy)
