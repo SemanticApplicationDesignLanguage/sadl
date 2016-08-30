@@ -9,6 +9,8 @@ public class TestScopeProvider {
 	
 	static class TestScopeAdapter extends AdapterImpl  {
 		IScope scope;
+		boolean detectAmbiguousNames;
+		
 		
 		@Override
 		public boolean isAdapterForType(Object type) {
@@ -22,6 +24,23 @@ public class TestScopeProvider {
 			a = new TestScopeAdapter();
 			resource.eAdapters().add(a);
 		}
+	}
+	
+	public static void registerResource(Resource resource, boolean ambiguousNameDectectionOn) {
+		TestScopeAdapter a = findAdapter(resource);
+		if (a == null) {
+			a = new TestScopeAdapter();
+			resource.eAdapters().add(a);
+		}
+		a.detectAmbiguousNames = ambiguousNameDectectionOn;
+	}
+	
+	public static boolean getDetectAmbiguousNames(Resource resource) {
+		TestScopeAdapter a = findAdapter(resource);
+		if (a != null) {
+			return a.detectAmbiguousNames;
+		}
+		return false; 	// default
 	}
 	
 	public static void attach(Resource resource, IScope scope) {

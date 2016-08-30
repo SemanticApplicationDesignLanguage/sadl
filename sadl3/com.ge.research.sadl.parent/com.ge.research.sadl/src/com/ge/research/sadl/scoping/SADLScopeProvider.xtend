@@ -144,13 +144,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				newParent = wrap(newParent)
 			val aliasToUse = alias ?: resource.getAlias
 			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
-			System.out.println("createResourceScope: " + resource.URI.toString)
+//			System.out.println("createResourceScope: " + resource.URI.toString)
 			newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
-			System.out.println("   after call to getPrimaryLocalResourceScope: " + newParent.toString)
+//			System.out.println("   after call to getPrimaryLocalResourceScope: " + newParent.toString)
 			newParent = getSecondaryLocalResourceScope(resource, namespace, newParent)
-			System.out.println("   after call to getSecondaryLocalResourceScope: " + newParent.toString)
+//			System.out.println("   after call to getSecondaryLocalResourceScope: " + newParent.toString)
 			newParent = getTertiaryLocalResourceScope(resource, namespace, newParent)
-			System.out.println("   after call to getTertiaryLocalResourceScope: " + newParent.toString)
+//			System.out.println("   after call to getTertiaryLocalResourceScope: " + newParent.toString)
 			return newParent
 		]
 	}
@@ -232,15 +232,18 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
 		}
 		if (importScopes.isEmpty) {
-			val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
-			if (element !== null) {
-				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
-				if (eobject !== null) {
-					importScopes += createResourceScope(eobject.eResource, null, importedResources)
+			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl")) {
+				val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
+				if (element !== null) {
+					val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+					if (eobject !== null) {
+						importScopes += createResourceScope(eobject.eResource, null, importedResources)
+					}
 				}
 			}
 		}
-		return new ListCompositeScope(importScopes, converter)
+		val detectAmbiguousNames = TestScopeProvider.getDetectAmbiguousNames(resource)
+		return new ListCompositeScope(importScopes, converter, detectAmbiguousNames)
 	}
 
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
@@ -253,8 +256,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 		List<IScope> delegates
 		IQualifiedNameConverter converter
-		
-		boolean detectAmbiguousNames = true;
+		boolean detectAmbiguousNames;
 		
 		override getAllElements() {
 			delegates.map[allElements].reduce[p1, p2| p1 + p2]

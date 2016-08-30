@@ -36,14 +36,24 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.CancelIndicator
 import com.ge.research.sadl.model.CircularDefinitionException
+import com.ge.research.sadl.scoping.TestScopeProvider
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import org.eclipse.xtext.preferences.IPreferenceValues
+import com.ge.research.sadl.preferences.SadlPreferences
+import com.google.inject.Injector
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl
+import com.ge.research.sadl.ui.internal.SadlActivator
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
+	@Inject IPreferenceValuesProvider preferenceProvider;
 
 	override void provideHighlightingFor(XtextResource resource, IHighlightedPositionAcceptor acceptor,
 		CancelIndicator cancelIndicator) {
 		if (resource === null || resource.contents.isEmpty())
 			return;
+			
+		TestScopeProvider.registerResource(resource, false);
 		var SadlModel model = resource.contents.head as SadlModel
 		// Highlighting for URI strings
 		for (imp : model.imports) {
@@ -103,6 +113,26 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 				}
 			}
 		}
+				
+		// get the SADL preferences from a pseudo SADL resource and apply the preference setting to the current 
+		//	resource (so it applies to both SADL and derived types)				
+		val reqInjector = SadlActivator.getInstance().getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
+		val pvp = reqInjector.getInstance(IPreferenceValuesProvider);
+		val r = new ResourceImpl();
+		r.setURI(org.eclipse.emf.common.util.URI.createFileURI("/"));
+		val prefValues = pvp.getPreferenceValues(r);
+		val ambiguousnames = prefValues.getPreference(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES);
+		if (ambiguousnames != null) {
+			val bAmbNmDet = try {
+				Boolean.parseBoolean(ambiguousnames);
+			} catch (Throwable t) {
+				false;
+			}
+			TestScopeProvider.registerResource(resource, bAmbNmDet);
+		}
+		else {
+			TestScopeProvider.registerResource(resource, false);
+		}		
 	}
 	
 	protected def void highlight(IHighlightedPositionAcceptor acceptor, EObject object, EStructuralFeature feature, String id) {
