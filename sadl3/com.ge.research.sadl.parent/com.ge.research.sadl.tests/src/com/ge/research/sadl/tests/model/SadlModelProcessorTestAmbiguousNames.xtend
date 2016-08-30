@@ -89,6 +89,52 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 	}
 	
 	@Test
+	def void testAmbiguousDetection() {
+		val models = 2
+		val classesPerModel = 1
+		for (i : 0..<models) {
+			'''
+				uri "http://sadl.org/Names«i».sadl" alias Names«i».
+				
+				«FOR z : 0..<i»
+					import "http://sadl.org/Names«z».sadl".
+				«ENDFOR»
+				
+				«FOR j : 0..<classesPerModel»
+					RClass«i»_«j» is a class.
+					Class«i»_«j» is a class described by oprop1 with values of type RClass«i»_«j»,
+					 	described by iprop1 with values of type int,
+					 	described by fprop1 with values of type float,
+					 	described by sprop1 with values of type string.
+				«ENDFOR»
+			'''.sadl
+		}
+		
+		val sadlModel3 = '''
+			 uri "http://sadl.org/Instances.sadl".
+			 
+			 «FOR z : 0..<models»
+			 	import "http://sadl.org/Names«z».sadl".
+			 «ENDFOR»
+			 
+			 «FOR i : 0..<models»
+			 	«FOR j : 0..<classesPerModel»
+			 		R«i»_«j» is a RClass«i»_«j».
+			 		C«i»_«j» is a Class«i»_«j» with oprop1 R1, with iprop1 3, with fprop1 4.5, with sprop1 "hello world".
+				 «ENDFOR»
+			 «ENDFOR»
+			 
+
+		'''.sadl
+		val issues3 = validationTestHelper.validate(sadlModel3)
+		assertNotNull(issues3)
+		assertTrue(issues3.size() > 0)
+		for (issue: issues3) {
+			System.err.println(issue.toString)
+		}
+	}
+
+	@Test
 	def void testRequirement_Model() {
 		val sadlModel1 = '''
 			 uri "http://sadl.org/Names1.sadl" alias Names1.
@@ -461,6 +507,85 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 			System.err.println(issue.toString)
 		}
 		sadlModel4.assertNoErrors
+	}
+	
+	@Test
+	def void testRequirement_ModelMinimal() {
+		val sadlModel1 = '''
+			 uri "http://sadl.org/Names1.sadl" alias Names1.
+			 
+			 RClass1 is a class.
+			 Class1 is a class described by oprop1 with values of type RClass1,
+			 	described by iprop1 with values of type int,
+			 	described by fprop1 with values of type float,
+			 	described by sprop1 with values of type string.
+			 	
+			 RClass2 is a class.
+			 Class2 is a class described by oprop2 with values of type RClass2,
+			 	described by iprop2 with values of type int,
+			 	described by fprop2 with values of type float,
+			 	described by sprop2 with values of type string.
+			 	
+		'''.sadl
+		val sadlModel2 = '''
+			 uri "http://sadl.org/Names2.sadl" alias Names2.
+			 
+			 RClass1 is a class.
+			 Class1 is a class described by oprop1 with values of type RClass1,
+			 	described by iprop1 with values of type int,
+			 	described by fprop1 with values of type float,
+			 	described by sprop1 with values of type string.
+			 	
+			 RClass2 is a class.
+			 Class2 is a class described by oprop2 with values of type RClass2,
+			 	described by iprop2 with values of type int,
+			 	described by fprop2 with values of type float,
+			 	described by sprop2 with values of type string.
+			 	
+		'''.sadl
+		val sadlModel3 = '''
+			 uri "http://sadl.org/Names3.sadl" alias Names3.
+			 
+			 import "http://sadl.org/Names1.sadl".
+			 import "http://sadl.org/Names2.sadl".
+			 
+			 R1 is a RClass1.
+			 C1 is a Class1 with oprop1 R1, with iprop1 3, with fprop1 4.5, with sprop1 "hello world".
+			  
+			 R2 is a RClass2.
+			 C2 is a Class2 with oprop2 R2, with iprop2 3, with fprop2 4.5, with sprop2 "hello world".
+			  
+		'''.sadl
+		val sadlModel4 = '''	
+			 uri "http://sadl.org/Names4.sreq" alias Names4.
+			 
+			 import "http://sadl.org/Names3.sadl".
+			 
+			 R1 is a RClass1.
+			 C1 is a Class1 with oprop1 R1, with iprop1 3, with fprop1 4.5, with sprop1 "hello world".
+			  
+			 R2 is a RClass2.
+			 C2 is a Class2 with oprop2 R2, with iprop2 3, with fprop2 4.5, with sprop2 "hello world".
+			 
+			 Ask: select p, v where R1 has p v.
+		'''.sadl
+		sadlModel1.assertNoErrors
+		sadlModel2.assertNoErrors
+		sadlModel3.assertNoErrors
+		sadlModel4.assertNoErrors
+		val issues3 = validationTestHelper.validate(sadlModel3)
+		assertNotNull(issues3)
+//		assertTrue(issues3.size() > 0)
+		for (issue: issues3) {
+			System.err.println(issue.toString)
+		}
+////		sadlModel4.assertNoErrors
+//		val issues4 = validationTestHelper.validate(sadlModel4)
+//		assertNotNull(issues4)
+////		assertTrue(issues4.size() > 0)
+//		for (issue: issues4) {
+//			System.err.println(issue.toString)
+//		}
 	}
 	
 }

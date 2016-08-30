@@ -66,7 +66,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	@Inject extension DeclarationExtensions
 	@Inject OnChangeEvictingCache cache
 	@Inject IQualifiedNameConverter converter
-
+	
 	override getScope(EObject context, EReference reference) {
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADLPackage.Literals.SADL_MODEL) {
@@ -144,9 +144,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				newParent = wrap(newParent)
 			val aliasToUse = alias ?: resource.getAlias
 			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
+			System.out.println("createResourceScope: " + resource.URI.toString)
 			newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
+			System.out.println("   after call to getPrimaryLocalResourceScope: " + newParent.toString)
 			newParent = getSecondaryLocalResourceScope(resource, namespace, newParent)
-			return getTertiaryLocalResourceScope(resource, namespace, newParent)
+			System.out.println("   after call to getSecondaryLocalResourceScope: " + newParent.toString)
+			newParent = getTertiaryLocalResourceScope(resource, namespace, newParent)
+			System.out.println("   after call to getTertiaryLocalResourceScope: " + newParent.toString)
+			return newParent
 		]
 	}
 	
@@ -249,6 +254,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		List<IScope> delegates
 		IQualifiedNameConverter converter
 		
+		boolean detectAmbiguousNames = true;
+		
 		override getAllElements() {
 			delegates.map[allElements].reduce[p1, p2| p1 + p2]
 		}
@@ -263,6 +270,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 		override getSingleElement(QualifiedName name) {
+			if (!detectAmbiguousNames) {
+				for (s : delegates) {
+					val element = s.getSingleElement(name);
+					if (element !== null) {
+						return element
+					}
+				}
+				return null;
+			}
 			var List<IEObjectDescription> candidates = null
 			var IEObjectDescription firstMatch = null
 			for (s : delegates) {
