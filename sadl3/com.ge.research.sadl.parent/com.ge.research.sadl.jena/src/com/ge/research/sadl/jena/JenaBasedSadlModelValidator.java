@@ -93,8 +93,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     	private RangeValueType rangeValueType = null;
     	private List<ConceptName> implicitProperties = null;
     	
+    	private List<TypeCheckInfo> compoundTypes = null;
+    	
     	public TypeCheckInfo(ConceptIdentifier eType) {
     		setExpressionType(eType);
+    	}
+    	
+    	/* Constructor for compound types (union, e.g. range) */
+    	public TypeCheckInfo(ConceptIdentifier eType, JenaBasedSadlModelValidator validator, EObject ctx) {
+    		setExpressionType(eType);
+    		context = ctx;
+    		if (ctx != null) {
+    			validator.expressionsValidated.put(ctx,  this);
+    		}
+    		compoundTypes = new ArrayList<TypeCheckInfo>();
     	}
     	
     	public TypeCheckInfo(ConceptIdentifier eType, ConceptIdentifier tcType, JenaBasedSadlModelValidator validator, EObject ctx) {
@@ -155,16 +167,29 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		
 		public String toString() {
-			StringBuffer sb = new StringBuffer("TypeCheckInfo(");
-			if (getRangeValueType() != null && !getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) {
-				sb.append(getRangeValueType().toString());
-				sb.append(" of values of type, ");
+			if (compoundTypes != null) {
+				StringBuffer sb = new StringBuffer("Compound TypeCheckInfo([");
+				for (int i = 0; i < compoundTypes.size(); i++) {
+					if (i > 0) {
+						sb.append(",");
+					}
+					sb.append(compoundTypes.get(i).toString());
+				}
+				sb.append("]");
+				return sb.toString();
 			}
-			sb.append(expressionType.toString());
-			sb.append(", ");
-			sb.append(typeCheckType.toString());
-			sb.append(")");
-			return sb.toString();
+			else {
+				StringBuffer sb = new StringBuffer("TypeCheckInfo(");
+				if (getRangeValueType() != null && !getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) {
+					sb.append(getRangeValueType().toString());
+					sb.append(" of values of type, ");
+				}
+				sb.append(expressionType.toString());
+				sb.append(", ");
+				sb.append(typeCheckType.toString());
+				sb.append(")");
+				return sb.toString();
+			}
 		}
 		
 		public void addImplicitProperty(ConceptName implicitProp) {
@@ -180,6 +205,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		public List<ConceptName> getImplicitProperties() {
 			return implicitProperties;
+		}
+
+		private List<TypeCheckInfo> getCompoundType() {
+			return compoundTypes;
+		}
+
+		private void addCompoundType(TypeCheckInfo additionalType) {
+			if (compoundTypes == null) {
+				compoundTypes= new ArrayList<TypeCheckInfo>();
+			}
+			if (!compoundTypes.contains(additionalType)) {
+				compoundTypes.add(additionalType);
+			}
 		}
     }
 	
@@ -379,12 +417,67 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private void createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, String operation) {
 		String leftName = leftTypeCheckInfo != null ? leftTypeCheckInfo.expressionType != null ? leftTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
-		String leftType = leftTypeCheckInfo != null ? leftTypeCheckInfo.typeCheckType != null ? leftTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
-		String leftRange = leftTypeCheckInfo != null ? leftTypeCheckInfo.rangeValueType != null ? leftTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
 		String rightName = rightTypeCheckInfo != null ? rightTypeCheckInfo.expressionType != null ? rightTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
-		String rightType = rightTypeCheckInfo != null ? rightTypeCheckInfo.typeCheckType != null ? rightTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
-		String rightRange = rightTypeCheckInfo != null ? rightTypeCheckInfo.rangeValueType != null ? rightTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
-		
+		String leftType;
+		if (leftTypeCheckInfo.compoundTypes == null) {
+			leftType = leftTypeCheckInfo != null ? leftTypeCheckInfo.typeCheckType != null ? leftTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		}
+		else {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < leftTypeCheckInfo.getCompoundType().size(); i++) {
+				if (i > 0) {
+					sb.append(" or ");
+				}
+				TypeCheckInfo tic = leftTypeCheckInfo.getCompoundType().get(i);
+				sb.append(tic != null ? tic.typeCheckType != null ? tic.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED");
+			}
+			leftType = sb.toString();
+		}
+		String leftRange;
+		if (leftTypeCheckInfo.compoundTypes == null) {
+			leftRange = leftTypeCheckInfo != null ? leftTypeCheckInfo.rangeValueType != null ? leftTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		}
+		else {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < leftTypeCheckInfo.getCompoundType().size(); i++) {
+				if (i > 0) {
+					sb.append(" or ");
+				}
+				TypeCheckInfo tic = leftTypeCheckInfo.getCompoundType().get(i);
+				sb.append(tic != null ? tic.rangeValueType != null ? tic.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED");
+			}
+			leftRange = sb.toString();
+		}
+		String rightType;
+		if (rightTypeCheckInfo.compoundTypes == null) {
+			rightType = rightTypeCheckInfo != null ? rightTypeCheckInfo.typeCheckType != null ? rightTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		}
+		else {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < rightTypeCheckInfo.getCompoundType().size(); i++) {
+				if (i > 0) {
+					sb.append(" or ");
+				}
+				TypeCheckInfo tic = rightTypeCheckInfo.getCompoundType().get(i);
+				sb.append(tic != null ? tic.typeCheckType != null ? tic.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED");
+			}
+			rightType = sb.toString();
+		}
+		String rightRange;
+		if (rightTypeCheckInfo.compoundTypes == null) {
+			rightRange = rightTypeCheckInfo != null ? rightTypeCheckInfo.rangeValueType != null ? rightTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
+		}
+		else {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < rightTypeCheckInfo.getCompoundType().size(); i++) {
+				if (i > 0) {
+					sb.append(" or ");
+				}
+				TypeCheckInfo tic = rightTypeCheckInfo.getCompoundType().get(i);
+				sb.append(tic != null ? tic.rangeValueType != null ? tic.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED");
+			}
+			rightRange = sb.toString();
+		}
 		if (!leftName.equals(leftType)) {
 			errorMessageBuilder.append("Element '" + leftName + "'");
 			errorMessageBuilder.append(" of type '" + leftType + "'");
@@ -744,17 +837,37 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			ConceptName instConceptName = new ConceptName(conceptUri);
 			instConceptName.setType(ConceptType.INDIVIDUAL);
-//			Resource ontResource = individual.getRDFType(true);
-//			if(!ontResource.isURIResource()){
-//				//Unhandled condition
-//				//TODO
-//				ConceptName declarationConceptName = new ConceptName("TODO");
-//				return new TypeCheckInfo(declarationConceptName, declarationConceptName);
-//			}
-//			String uriOfTypeToBeReturned = ontResource.getURI();
-//			ConceptName conceptName = new ConceptName(uriOfTypeToBeReturned);
-//			conceptName.setType(ConceptType.ONTCLASS);
-			return new TypeCheckInfo(instConceptName, instConceptName, this, expression);
+// TODO could belong to multiple classes
+			ExtendedIterator<Resource> typeitr = individual.listRDFTypes(true);
+			TypeCheckInfo compoundTci = null;
+			TypeCheckInfo tci = null;
+			while (typeitr.hasNext()) {
+				Resource ontResource = typeitr.next();
+				if(!ontResource.isURIResource()){
+					//Unhandled condition
+	//TODO
+					ConceptName declarationConceptName = new ConceptName("TODO");
+					tci =  new TypeCheckInfo(instConceptName, instConceptName, this, expression);
+				}
+				else {
+					String uriOfTypeToBeReturned = ontResource.getURI();
+					ConceptName conceptName = new ConceptName(uriOfTypeToBeReturned);
+					conceptName.setType(ConceptType.ONTCLASS);
+					tci = new TypeCheckInfo(instConceptName, conceptName, this, expression);
+				}
+				if (typeitr.hasNext() && compoundTci == null) {
+					compoundTci = new TypeCheckInfo(instConceptName, this, expression);
+				}
+				if (compoundTci != null) {
+					if (!compoundTci.getCompoundType().contains(tci)) {
+						compoundTci.addCompoundType(tci);
+					}
+				}
+			}
+			if (compoundTci != null) {
+				return compoundTci;
+			}
+			return tci;
 		}
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
 			return getVariableType(ConceptType.VARIABLE, conceptUri, expression);
@@ -789,73 +902,90 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		ConceptType propertyType = propConceptName.getType();
 		StmtIterator sitr = theJenaModel.listStatements(property, RDFS.range, (RDFNode)null);
 		if (sitr.hasNext()) {
-			RDFNode first = sitr.next().getObject();
-			if(first.isURIResource()){
-				ConceptName rangeConceptName = new ConceptName(first.asResource().getURI());
-				if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
-					rangeConceptName.setType(ConceptType.RDFDATATYPE);
-					OntResource range;
-					try {
-						range = theJenaModel.getOntResource(rangeConceptName.getUri());
-						if (theJenaModel.listStatements(range, RDF.type, RDFS.Datatype).hasNext()) {
-							// this is a user-defined datatype
-							RDFNode rngEC = range.listPropertyValues(OWL.equivalentClass).next();
-							if (rngEC != null && rngEC.canAs(OntResource.class)) {
-								RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.onDatatype).next();
-								if (baseType != null && baseType.isURIResource()) {
-									ConceptName baseTypeConceptName = new ConceptName(baseType.asResource().getURI());
-									baseTypeConceptName.setType(ConceptType.RDFDATATYPE);
-									return new TypeCheckInfo(propConceptName, baseTypeConceptName, this, expression);
+			TypeCheckInfo compoundTci = null;
+			TypeCheckInfo tci = null;
+			int cntr = 0;
+			while (sitr.hasNext()) {
+				RDFNode first = sitr.next().getObject();
+				if(first.isURIResource()){
+					ConceptName rangeConceptName = new ConceptName(first.asResource().getURI());
+					if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+						rangeConceptName.setType(ConceptType.RDFDATATYPE);
+						OntResource range;
+						try {
+							range = theJenaModel.getOntResource(rangeConceptName.getUri());
+							if (theJenaModel.listStatements(range, RDF.type, RDFS.Datatype).hasNext()) {
+								// this is a user-defined datatype
+								RDFNode rngEC = range.listPropertyValues(OWL.equivalentClass).next();
+								if (rngEC != null && rngEC.canAs(OntResource.class)) {
+									RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.onDatatype).next();
+									if (baseType != null && baseType.isURIResource()) {
+										ConceptName baseTypeConceptName = new ConceptName(baseType.asResource().getURI());
+										baseTypeConceptName.setType(ConceptType.RDFDATATYPE);
+										tci = new TypeCheckInfo(propConceptName, baseTypeConceptName, this, expression);
+									}
 								}
 							}
+							else {
+								rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+							}
+						} catch (InvalidNameException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						else {
-							rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
-						}
-					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
+					else {
+						rangeConceptName.setType(ConceptType.ONTCLASS);
+					}
+					List<ConceptName> impliedProperties = getImpliedProperties(first.asResource());
+					tci = new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
 				}
 				else {
-					rangeConceptName.setType(ConceptType.ONTCLASS);
-				}
-				sitr.close();
-				List<ConceptName> impliedProperties = getImpliedProperties(first.asResource());
-				return new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
-			}
-			else {
-				// this will be the case for unnamed lists
-				if (first.canAs(OntClass.class)){
-					if (((OntClass)first.as(OntClass.class)).hasSuperClass(theJenaModel.getOntResource(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_LIST_URI))) {
-						ExtendedIterator<OntClass> eitr = ((OntClass)first.as(OntClass.class)).listSuperClasses(true);
-						while (eitr.hasNext()) {
-							OntClass cls = eitr.next();
-							if (cls.isRestriction()) {
-								if (cls.canAs(AllValuesFromRestriction.class)) {
-									if (((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).onProperty(theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
-										Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
-										eitr.close();
-										if (avf.isURIResource()) {
-											List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
-											ConceptName rangeConceptName = new ConceptName(avf.getURI());
-											if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
-												rangeConceptName.setType(ConceptType.RDFDATATYPE);
-												rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+					// this will be the case for unnamed lists
+					if (first.canAs(OntClass.class)){
+						if (((OntClass)first.as(OntClass.class)).hasSuperClass(theJenaModel.getOntResource(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_LIST_URI))) {
+							ExtendedIterator<OntClass> eitr = ((OntClass)first.as(OntClass.class)).listSuperClasses(true);
+							while (eitr.hasNext()) {
+								OntClass cls = eitr.next();
+								if (cls.isRestriction()) {
+									if (cls.canAs(AllValuesFromRestriction.class)) {
+										if (((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).onProperty(theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
+											Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
+											eitr.close();
+											if (avf.isURIResource()) {
+												List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+												ConceptName rangeConceptName = new ConceptName(avf.getURI());
+												if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+													rangeConceptName.setType(ConceptType.RDFDATATYPE);
+													rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+												}
+												else {
+													rangeConceptName.setType(ConceptType.ONTCLASS);
+												}
+												tci = new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
 											}
-											else {
-												rangeConceptName.setType(ConceptType.ONTCLASS);
-											}
-											return new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
 										}
 									}
 								}
 							}
+							
 						}
-						
+					}
+				}
+				if (tci != null) {
+					if (sitr.hasNext() && compoundTci == null) {
+						compoundTci = new TypeCheckInfo(propConceptName, this, expression);
+					}
+					if (compoundTci != null) {
+						compoundTci.addCompoundType(tci);
 					}
 				}
 			}
+			sitr.close();
+			if (compoundTci != null) {
+				return compoundTci;
+			}
+			return tci;
 		}
 		else {
 			StmtIterator sitr2 = theJenaModel.listStatements(property, RDFS.subPropertyOf, (RDFNode)null);
@@ -956,6 +1086,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	 */
 	private boolean compareTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
+		List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundType() : null;
+		if (ltciCompound != null) {
+			for (int i = 0; i < ltciCompound.size(); i++) {
+				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+				if (thisResult) {
+					return true;
+				}
+			}
+			return false;
+		}
+		List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundType() : null;
+		if (rtciCompound != null) {
+			for (int i = 0; i < rtciCompound.size(); i++) {
+				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
+				if (thisResult) {
+					return true;
+				}
+			}
+			return false;
+		}
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? leftTypeCheckInfo.getTypeCheckType(): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? rightTypeCheckInfo.getTypeCheckType() : null; 
 		if (leftConceptIdentifier == null) {
