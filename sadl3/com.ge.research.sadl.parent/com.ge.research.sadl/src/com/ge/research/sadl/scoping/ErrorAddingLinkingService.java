@@ -40,7 +40,6 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 	@Override
 	public List<EObject> getLinkedObjects(EObject context, EReference ref, INode node)
 			throws IllegalNodeException {
-		Resource ctxrsrc = context.eResource();
 		final EClass requiredType = ref.getEReferenceType();
 		if (requiredType == null)
 			return Collections.<EObject> emptyList();

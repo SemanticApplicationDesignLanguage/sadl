@@ -67,7 +67,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	@Inject OnChangeEvictingCache cache
 	@Inject IQualifiedNameConverter converter
 	
+	boolean ambiguousNameDetection;
+	
 	override getScope(EObject context, EReference reference) {
+		val ctxrsrc = context.eResource();
+		setAmbiguousNameDetection(TestScopeProvider.getDetectAmbiguousNames(ctxrsrc));
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADLPackage.Literals.SADL_MODEL) {
 			return super.getGlobalScope(context.eResource, reference)
@@ -77,6 +81,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		throw new UnsupportedOperationException(
 			"Couldn't build scope for elements of type " + reference.EReferenceType.name)
+	}
+	
+	def setAmbiguousNameDetection(boolean bval) {
+		ambiguousNameDetection = bval
 	}
 
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
@@ -242,8 +250,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				}
 			}
 		}
-		val detectAmbiguousNames = TestScopeProvider.getDetectAmbiguousNames(resource)
-		return new ListCompositeScope(importScopes, converter, detectAmbiguousNames)
+		return new ListCompositeScope(importScopes, converter, ambiguousNameDetection)
 	}
 
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
