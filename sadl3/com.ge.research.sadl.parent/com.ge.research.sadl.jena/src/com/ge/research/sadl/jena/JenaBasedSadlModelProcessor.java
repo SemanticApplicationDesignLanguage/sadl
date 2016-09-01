@@ -271,8 +271,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
 	
 	private OntModel sadlImplicitModel = null;
-	private static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
-	private static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
+	public static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
+	public static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
 	private static final String OWL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.owl";
 	private static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
 	private static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
@@ -3598,13 +3598,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return prop;
 	}
 	
-	private OntProperty getOrCreateRdfProperty(String propUri) {
-		Property op = getTheJenaModel().getProperty(propUri);
-		if (op != null) {
-			return op.as(OntProperty.class);
-		}
-		return createRdfProperty(propUri, null);
-	}
+    private OntProperty getOrCreateRdfProperty(String propUri) {
+        Property op = getTheJenaModel().getProperty(propUri);
+        if (op != null && op.canAs(OntProperty.class)) {
+               return op.as(OntProperty.class);
+        }
+        return createRdfProperty(propUri, null);
+ }
+
 
 	private boolean checkForExistingCompatibleDatatypeProperty(
 			String propUri, RDFNode rngNode) {
@@ -5048,19 +5049,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
 		if (policyFilename != null) {
 			File projectFolder = new File(policyFilename).getParentFile().getParentFile();
-			String relPath = SADL_IMPLICIT_MODEL_FOLDER + "/" + SADL_IMPLICIT_MODEL_FILENAME;
-			String platformPath = projectFolder.getName() + "/" + relPath;
-			String implicitSadlModelFN = projectFolder + "/" + relPath;
-			File implicitModelFile = new File(implicitSadlModelFN);
-			if (!implicitModelFile.exists()) {
-				String implicitModel = getSadlImplicitModel();
-				SadlUtils su = new SadlUtils();
-				implicitModelFile.getParentFile().mkdirs();
-				su.stringToFile(implicitModelFile, implicitModel, true);
-			}
-			return implicitModelFile.getAbsolutePath();
+			return createImplicitSadlModelFileIfNeeded(projectFolder);
 		}
 		return null;
+	}
+	
+	public String createImplicitSadlModelFileIfNeeded(File projectFolder) throws IOException{
+		String relPath = SADL_IMPLICIT_MODEL_FOLDER + "/" + SADL_IMPLICIT_MODEL_FILENAME;
+		String implicitSadlModelFN = projectFolder.getAbsolutePath() + "/" + relPath;
+		File implicitModelFile = new File(implicitSadlModelFN);
+		if (!implicitModelFile.exists()) {
+			String implicitModel = getSadlImplicitModel();
+			SadlUtils su = new SadlUtils();
+			implicitModelFile.getParentFile().mkdirs();
+			su.stringToFile(implicitModelFile, implicitModel, true);
+		}
+		return implicitModelFile.getAbsolutePath();
 	}
 	
 	static public String getSadlImplicitModel() {
