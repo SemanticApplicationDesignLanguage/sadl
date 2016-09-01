@@ -1,6 +1,7 @@
 package com.ge.research.sadl.jena;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.notify.Adapter;
@@ -13,10 +14,13 @@ import com.hp.hpl.jena.rdf.model.Property;
 
 public class OntModelProvider {
 	
+	private static OntModel sadlBaseModel;
+	private static OntModel sadlListModel;
+	
 	static class OntModelAdapter extends AdapterImpl  {
 		String modelName;
 		OntModel model;
-		Object otherContent;
+		List<Object> otherContent;
 		Map<EObject, Property> impliedPropertiesUsed = null;
 		boolean isLoading = false;
 		boolean hasCircularImport = false;
@@ -69,11 +73,14 @@ public class OntModelProvider {
 	public static void addOtherContent(Resource resource, Object otherContent) {
 		OntModelAdapter adapter = findAdapter(resource);
 		if (adapter != null) {
-			adapter.otherContent = otherContent;
+			if (adapter.otherContent == null) {
+				adapter.otherContent = new ArrayList<Object>();
+			}
+			adapter.otherContent.add(otherContent);
 		}
 	}
 	
-	public static Object getOtherContent(Resource resource) {
+	public static List<Object> getOtherContent(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null) {
 			return a.otherContent;
@@ -126,6 +133,22 @@ public class OntModelProvider {
 			return a.modelName;
 		}
 		return null;
+	}
+
+	public static OntModel getSadlBaseModel() {
+		return sadlBaseModel;
+	}
+
+	public static void setSadlBaseModel(OntModel model) {
+		sadlBaseModel = model;
+	}
+
+	public static OntModel getSadlListModel() {
+		return sadlListModel;
+	}
+
+	public static void setSadlListModel(OntModel model) {
+		sadlListModel = model;
 	}
 	
 }
