@@ -17,6 +17,7 @@ import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
+import org.eclipse.xtext.scoping.impl.MapBasedScope;
 
 import com.google.inject.Inject;
 
@@ -59,11 +60,25 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 				if (errorMessage != null) {
 					createAndAddDiagnostic(context.eResource(), node, errorMessage, eObjectDescription.getUserData(ALTERNATIVES));
 				}
-				return Collections.singletonList(eObjectDescription.getEObjectOrProxy());
+				List<EObject> results = Collections.singletonList(eObjectDescription.getEObjectOrProxy());
+				return results;
 			}
 		}
 		return Collections.emptyList();
 	}
+	
+//	protected IScope getScope(EObject context, EReference ref) {
+//		Resource rsrc = context.eResource();
+//		IScope scope = TestScopeProvider.find(rsrc);
+//		if (scope == null) { 
+//			scope = super.getScope(context, ref);
+//			if (scope instanceof MapBasedScope) {
+//				TestScopeProvider.attach(rsrc, scope);
+////				System.out.println("Attaching scope to '" + rsrc.toString() + "': " + scope.toString());
+//			}
+//		}
+//		return scope;
+//	}
 	
 	protected void createAndAddDiagnostic(Resource resource, INode node, String message, String commaSeparatedAlternatives) {
 		resource.getErrors().add(new XtextLinkingDiagnostic(node, message, ISSUE_CODE, commaSeparatedAlternatives));

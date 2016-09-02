@@ -28,14 +28,29 @@ import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.junit.Assert
 import org.junit.runner.RunWith
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.resource.XtextResourceSet
+import org.eclipse.emf.common.util.URI
+import org.eclipse.xtext.util.StringInputStream
+import org.eclipse.xtext.resource.XtextResource
+import org.junit.Before
+import com.google.inject.Provider
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 abstract class AbstractSADLParsingTest{
+	@Inject extension ValidationTestHelper
 
 	@Inject ParseHelper<SadlModel> parseHelper
-	@Inject ValidationTestHelper validationTestHelper
+	@Inject protected ValidationTestHelper validationTestHelper
+	@Inject Provider<XtextResourceSet> resourceSetProvider
+	XtextResourceSet resourceSet
 	
+	@Before
+	def void initialize() {
+		resourceSet = resourceSetProvider.get
+	}
+		
 	protected def void assertNoErrors(CharSequence text) {
 		val model = parseHelper.parse(text)
 		val issues = validationTestHelper.validate(model)
@@ -64,6 +79,17 @@ abstract class AbstractSADLParsingTest{
 		}
 	}
 	
+	protected def Resource sadl(CharSequence seq) {
+		return resource(seq, 'sadl');
+	}
+	
+	protected def Resource resource(CharSequence seq, String fileExtension) {
+		val name = "Resource"+resourceSet.resources.size+"."+fileExtension
+		val resource = resourceSet.createResource(URI.createURI("synthetic://test/"+name))
+		resource.load(new StringInputStream(seq.toString), null)
+		return resource;
+	}
+
 	def void assertAST(CharSequence text, (SadlModel)=>void assertion) {
 		val model = parseHelper.parse(text)
 		validationTestHelper.assertNoErrors(model)
@@ -79,7 +105,24 @@ abstract class AbstractSADLParsingTest{
 	
 	protected def String model() {
 		val name = Thread.currentThread.stackTrace.findFirst[className!=AbstractSADLParsingTest.simpleName].methodName
-		return '''uri "http://sadl.org/TestRequrements/«name»" alias «name».'''
+		return '''uri "http://sadl.org/TestSadl/«name»" alias «name».'''
 	}
 
+	protected def void assertNoErrors(Resource resource) {
+		val issues = validate(resource).toList.sortBy[-(offset?:0)]
+		val text = (resource as XtextResource).parseResult.rootNode.text
+		var errorText = text
+		if (text === null) {
+			issues.head.data
+			Assert.fail(issues.join(',')[message])
+		}
+		for (issue : issues) {
+			if (issue.offset === null || issue.length === null) {
+				errorText = errorText+"\n!["+issue.message+"] ATTENTION : The produced issue doesn't have an offset or length attached!"
+			} else {
+				errorText = errorText.substring(0, issue.offset)+"!"+errorText.substring(issue.offset, issue.offset + issue.length)+"!["+issue.message+"]"+errorText.substring(issue.offset+issue.length)
+			}
+		}
+		Assert.assertEquals(text, errorText)
+	}
 }
