@@ -275,8 +275,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
 	
 	private OntModel sadlImplicitModel = null;
-	private static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
-	private static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
+	public static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
+	public static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
 	private static final String OWL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.owl";
 	private static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
 	private static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
@@ -5084,10 +5084,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			String implicitSadlModelFN = projectFolder + "/" + relPath;
 			File implicitModelFile = new File(implicitSadlModelFN);
 			if (!implicitModelFile.exists()) {
-				String implicitModel = getSadlImplicitModel();
-				SadlUtils su = new SadlUtils();
-				implicitModelFile.getParentFile().mkdirs();
-				su.stringToFile(implicitModelFile, implicitModel, true);
+				createSadlImplicitModel(implicitModelFile);
 				try {
 					Resource newRsrc = resource.getResourceSet().createResource(URI.createPlatformResourceURI(platformPath, false)); // createFileURI(implicitSadlModelFN));
 //					newRsrc.load(new StringInputStream(implicitModel), resource.getResourceSet().getLoadOptions());
@@ -5099,6 +5096,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return implicitModelFile.getAbsolutePath();
 		}
 		return null;
+	}
+	
+	static public void createSadlImplicitModel(File implicitModelFile) throws IOException{
+		String implicitModel = getSadlImplicitModel();
+		SadlUtils su = new SadlUtils();
+		implicitModelFile.getParentFile().mkdirs();
+		su.stringToFile(implicitModelFile, implicitModel, true);
 	}
 	
 	static public String getSadlImplicitModel() {
