@@ -685,35 +685,34 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				OntModelProvider.setSadlBaseModel(sadlBaseModel);
 				addImportToJenaModel(getModelName(), SADL_BASE_MODEL_URI, sadlBaseModel);
 				String implfn = checkImplicitSadlModelExistence(resource, context);
-//				if (implfn != null) {
-//					Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
-////TODO would be nice to refresh folder--can that be done from here? //					imrsrc.refreshLocal();
-//					if (sadlImplicitModel == null) {
-//						if (imrsrc instanceof XtextResource) {
-//							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
-//						}
-//						else if (imrsrc instanceof ExternalEmfResource) {
-//							sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
-//						}
-//						if (sadlImplicitModel == null) {
-//							if (imrsrc instanceof XtextResource) {
-//								((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-//								sadlImplicitModel = OntModelProvider.find(imrsrc);
-//								OntModelProvider.attach(imrsrc, sadlImplicitModel, SADL_IMPLICIT_MODEL_URI);
-//							}
-//							else {
-//								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-//								if (cm.getModelGetter() == null) {
-//									cm.setModelGetter(new SadlJenaModelGetter(cm, null));
-//								}
-//								cm.getModelGetter().getOntModel(SADL_IMPLICIT_MODEL_URI, ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR).appendFragment(OWL_IMPLICIT_MODEL_FILENAME).toFileString(), getOwlModelFormat(context));
-//							}
-//						}
-//						if (sadlImplicitModel != null) {
-//							addImportToJenaModel(getModelName(), SADL_IMPLICIT_MODEL_URI, sadlImplicitModel);
-//						}
-//					}
-//				}
+				if (implfn != null) {
+					Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
+					if (sadlImplicitModel == null) {
+						if (imrsrc instanceof XtextResource) {
+							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
+						}
+						else if (imrsrc instanceof ExternalEmfResource) {
+							sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						}
+						if (sadlImplicitModel == null) {
+							if (imrsrc instanceof XtextResource) {
+								((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+								sadlImplicitModel = OntModelProvider.find(imrsrc);
+								OntModelProvider.attach(imrsrc, sadlImplicitModel, SADL_IMPLICIT_MODEL_URI);
+							}
+							else {
+								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+								if (cm.getModelGetter() == null) {
+									cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+								}
+								cm.getModelGetter().getOntModel(SADL_IMPLICIT_MODEL_URI, ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR).appendFragment(OWL_IMPLICIT_MODEL_FILENAME).toFileString(), getOwlModelFormat(context));
+							}
+						}
+						if (sadlImplicitModel != null) {
+							addImportToJenaModel(getModelName(), SADL_IMPLICIT_MODEL_URI, sadlImplicitModel);
+						}
+					}
+				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

@@ -87,15 +87,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	private IMetricsProcessor metricsProcessor = null; 
 	
+	/**
+	 * This inner class captures the information about the left or right hand side of an expression that is subject
+	 * to type checking, e.g., and assignment, a comparison, etc.
+	 * 
+	 */
 	public class TypeCheckInfo {
-		private EObject context = null;
-    	private ConceptIdentifier expressionType = null;
-    	private ConceptIdentifier typeCheckType = null;
-    	private RangeValueType rangeValueType = null;
-    	private List<ConceptName> implicitProperties = null;
-    	
-    	private List<TypeCheckInfo> compoundTypes = null;
-    	
+		private EObject context = null;							// the parsetree element from which this is derived, 
+																//	used to add an error, warning, or info so that a marker can be placed in the editor
+    	private ConceptIdentifier expressionType = null;		// the identity, type, etc. of the concept that determines the type, 
+    															//	e.g., the property of a "<property> of <subject>" expression
+    	private ConceptIdentifier typeCheckType = null;			// the type of the TypeCheckInfo which must match the other side of the expression,
+    															//	e.g., the range of the property of a "<property> of <subject>" expression
+    	private RangeValueType rangeValueType = RangeValueType.CLASS_OR_DT;	
+    															// the range type, one of RangeValueType.CLASS_OR_DT (Class or RDFDataType)
+    															//	or LIST (a subclass of http://sadl.org/sadllistmodel#List)
+    	private List<ConceptName> implicitProperties = null;	// Implied properties, if any, that apply to this expressionType
+ 
+    	private List<TypeCheckInfo> compoundTypes = null;		// If this is a disjunction of multiple types, this contains the next
+    															//	lower level of TypeCheckInfos in the hierarchy, e.g., a property whose
+    															//	range is a union of classes or which is given range in multiple imports
     	public TypeCheckInfo(ConceptIdentifier eType) {
     		setExpressionType(eType);
     	}
@@ -506,6 +517,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			else {
+				if (typeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
+					sb2.append("a List of values of type ");
+				}
 				if (sb2 != null && typeCheckInfo.getTypeCheckType() != null) {
 					sb2.append(typeCheckInfo.getTypeCheckType().toString());
 				}
@@ -905,10 +919,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			while (typeitr.hasNext()) {
 				Resource ontResource = typeitr.next();
 				if(!ontResource.isURIResource()){
-					//Unhandled condition
-	//TODO
-					ConceptName declarationConceptName = new ConceptName("TODO");
-					tci =  new TypeCheckInfo(instConceptName, instConceptName, this, expression);
+					if (isSadlTypedList(ontResource) && ontResource.canAs(OntClass.class)) {
+						tci = getSadlTypedListTypeCheckInfo(ontResource.as(OntClass.class), null, expression, null);
+					}
+					else {
+						ConceptName declarationConceptName = new ConceptName("TODO");
+						declarationConceptName.setType(ConceptType.ONTCLASS);
+						tci =  new TypeCheckInfo(instConceptName, instConceptName, this, expression);
+					}
 				}
 				else {
 					String uriOfTypeToBeReturned = ontResource.getURI();
@@ -965,85 +983,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (sitr.hasNext()) {
 			TypeCheckInfo compoundTci = null;
 			TypeCheckInfo tci = null;
-			int cntr = 0;
 			while (sitr.hasNext()) {
 				RDFNode first = sitr.next().getObject();
 				if(first.isURIResource()){
 					tci = createTypeCheckInfoForPropertyRange(first, propConceptName, expression, propertyType);
 				}
+				else if (isSadlTypedList(first)) {
+					// get type restriction on "first" property--this is the type
+					tci = getSadlTypedListTypeCheckInfo(first.as(OntClass.class), propConceptName, expression, propertyType);
+				}
 				else {
-					if (first.canAs(UnionClass.class)){
-						UnionClass ucls = first.as(UnionClass.class);
-						try {
-							ExtendedIterator<? extends OntClass> eitr = ucls
-									.listOperands();
-							if (eitr.hasNext()) {
-								tci = new TypeCheckInfo(propConceptName, this, expression);
-								while (eitr.hasNext()) {
-									OntClass uclsmember = eitr.next();
-									if (uclsmember.isURIResource()) {
-										TypeCheckInfo utci = createTypeCheckInfoForPropertyRange(uclsmember, propConceptName, expression, propertyType);
-										tci.addCompoundType(utci);
-									}
-									else {
-										if (uclsmember.canAs(UnionClass.class)) {
-											issueAcceptor.addWarning("Type checking doesn't handle union inside a union", expression);
-										}
-										else if (uclsmember.canAs(IntersectionClass.class)){
-											issueAcceptor.addWarning("type checking doesn't handle intersection", expression);;
-										}
-										else if (uclsmember.canAs(Restriction.class)){
-											issueAcceptor.addWarning("type checking doesn't handle restrictions", expression);
-										}
-										else {
-											ExtendedIterator<OntClass> uclstypeitr = uclsmember.listSuperClasses(true);
-											while (uclstypeitr.hasNext()) {
-												Resource r2 = uclstypeitr.next();
-												if (r2.isURIResource() && r2.getURI().equals(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_LIST_URI)) {
-													TypeCheckInfo utci = createTypeCheckInfoForPropertyRange(r2, propConceptName, expression, propertyType);
-													utci.setRangeValueType(RangeValueType.LIST);
-													tci.addCompoundType(utci);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-						catch (Exception e) {
-							issueAcceptor.addError("Unexpected error during deep validation: apparent Union Class does not return operands.", getDefaultContext());
-						}
-					}
-					// this will be the case for unnamed lists
-					else if (first.canAs(OntClass.class)){
-						if (((OntClass)first.as(OntClass.class)).hasSuperClass(theJenaModel.getOntResource(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_LIST_URI))) {
-							ExtendedIterator<OntClass> eitr = ((OntClass)first.as(OntClass.class)).listSuperClasses(true);
-							while (eitr.hasNext()) {
-								OntClass cls = eitr.next();
-								if (cls.isRestriction()) {
-									if (cls.canAs(AllValuesFromRestriction.class)) {
-										if (((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).onProperty(theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
-											Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
-											eitr.close();
-											if (avf.isURIResource()) {
-												List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
-												ConceptName rangeConceptName = new ConceptName(avf.getURI());
-												if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
-													rangeConceptName.setType(ConceptType.RDFDATATYPE);
-													rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
-												}
-												else {
-													rangeConceptName.setType(ConceptType.ONTCLASS);
-												}
-												tci = new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
-											}
-										}
-									}
-								}
-							}
-							
-						}
-					}
+					tci = createTypeCheckInfoForNonUriPropertyRange(first, propConceptName, expression, propertyType);
 				}
 				if (tci != null) {
 					if (sitr.hasNext() && compoundTci == null) {
@@ -1061,18 +1011,99 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else {
+			// no range on this property, check super properties
 			StmtIterator sitr2 = theJenaModel.listStatements(property, RDFS.subPropertyOf, (RDFNode)null);
 			while (sitr2.hasNext()) {
 				RDFNode psuper = sitr2.next().getObject();
 				if (psuper.isLiteral()) {
 					TypeCheckInfo superTCInfo = getNameProperty(propertyType, psuper.asResource().getURI(), expression);
 					if (superTCInfo != null) {
+						sitr2.close();
 						return superTCInfo;
 					}
 				}
 			}
 		}
 		return null;
+	}
+
+	private TypeCheckInfo createTypeCheckInfoForNonUriPropertyRange(RDFNode rng, ConceptName propConceptName,
+			EObject expression, ConceptType propertyType) {
+		TypeCheckInfo tci = null;
+		if (isSadlTypedList(rng)) {
+			// get type restriction on "first" property--this is the type
+			tci = getSadlTypedListTypeCheckInfo(rng.as(OntClass.class), propConceptName, expression, propertyType);
+		}
+		 else if (rng.canAs(UnionClass.class)){
+			UnionClass ucls = rng.as(UnionClass.class);
+			try {
+				ExtendedIterator<? extends OntClass> eitr = ucls.listOperands();
+				if (eitr.hasNext()) {
+					tci = new TypeCheckInfo(propConceptName, this, expression);
+					while (eitr.hasNext()) {
+						OntClass uclsmember = eitr.next();
+						if (uclsmember.isURIResource()) {
+							TypeCheckInfo utci = createTypeCheckInfoForPropertyRange(uclsmember, propConceptName, expression, propertyType);
+							tci.addCompoundType(utci);
+						}
+						else {
+							TypeCheckInfo utci = createTypeCheckInfoForNonUriPropertyRange(uclsmember, propConceptName, expression, propertyType);
+							tci.addCompoundType(utci);
+						}
+					}
+				}
+			}
+			catch (Exception e) {
+				issueAcceptor.addError("Unexpected error processing type check for union range: " + e.getMessage(), getDefaultContext());
+			}
+		}
+		else if (rng.canAs(IntersectionClass.class)){
+			issueAcceptor.addWarning("type checking doesn't handle intersection", expression);
+		}
+		else if (rng.canAs(Restriction.class)){
+			issueAcceptor.addWarning("type checking doesn't handle restrictions", expression);
+		}
+		return tci;
+	}
+
+	private TypeCheckInfo getSadlTypedListTypeCheckInfo(OntClass lst, ConceptName propConceptName, EObject expression, ConceptType propertyType) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lst.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(AllValuesFromRestriction.class)) {
+					if (((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).onProperty(theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
+						Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
+						eitr.close();
+						if (avf.isURIResource()) {
+							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+							ConceptName rangeConceptName = new ConceptName(avf.getURI());
+							if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+								rangeConceptName.setType(ConceptType.RDFDATATYPE);
+								rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
+							}
+							else {
+								rangeConceptName.setType(ConceptType.ONTCLASS);
+							}
+							TypeCheckInfo tci = new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
+							tci.setRangeValueType(RangeValueType.LIST);
+							return tci;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean isSadlTypedList(RDFNode node) {
+		if (node instanceof Resource && ((Resource)node).canAs(OntClass.class)) {
+			OntClass cls = ((Resource)node).as(OntClass.class);
+			if (cls.hasSuperClass(theJenaModel.getOntResource(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_LIST_URI))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private TypeCheckInfo createTypeCheckInfoForPropertyRange(RDFNode first, ConceptName propConceptName,
