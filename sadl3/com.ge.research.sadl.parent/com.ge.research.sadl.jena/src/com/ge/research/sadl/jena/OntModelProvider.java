@@ -89,7 +89,7 @@ public class OntModelProvider {
 	}
 	
 	public static void addImpliedProperties(Resource resource, Map<EObject, Property> impliedProperties) {
-		if (resource != null) {
+		if (resource != null && impliedProperties != null) {
 			OntModelAdapter a = findAdapter(resource);
 			if (a == null) {
 				a = new OntModelAdapter();
