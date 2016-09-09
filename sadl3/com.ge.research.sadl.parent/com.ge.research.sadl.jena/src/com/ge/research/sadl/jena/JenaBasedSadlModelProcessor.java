@@ -65,6 +65,7 @@ import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
+import com.ge.research.sadl.model.ConceptName.RangeValueType;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.OntConceptType;
@@ -235,9 +236,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected OntModelSpec spec;
 //	protected ISadlServer kServer = null;
 	
-	protected enum AnnType {ALIAS, NOTE}
-	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
-	
+	protected enum AnnType {ALIAS, NOTE}	
 
 	public enum OPERATORS_RETURNING_BOOLEAN {contains, unique, is, gt, ge, lt, le, and, or, not, was, hasBeen}
 	
