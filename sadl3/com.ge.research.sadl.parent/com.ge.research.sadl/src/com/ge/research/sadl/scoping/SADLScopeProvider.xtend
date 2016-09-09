@@ -171,6 +171,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		return internalGetLocalResourceScope(resource, namespace, parentScope) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES
+				|| eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_DECLARATIONS
 			} 
 			return false
 		]
@@ -181,7 +182,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADLPackage.Literals.SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
 					|| eContainer instanceof SadlProperty && (eContainer as SadlProperty).isPrimaryDeclaration() && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
-					|| eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF
+//					|| eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF
 			} 
 			return false
 		]
