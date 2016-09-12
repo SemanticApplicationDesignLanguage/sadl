@@ -991,7 +991,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				RDFNode dmn = domainItr.next().getObject();
 				if (dmn instanceof Resource) {
 					for (int i = 0; subjClasses != null && i < subjClasses.size(); i++) {
-						if (subjClasses.get(i).equals(((Resource) dmn).getURI())) {
+						if (subjClasses.get(i).getURI().equals(((Resource) dmn).getURI())) {
 							domainItr.close();
 							domainMatched = true;		// this is a direct match
 							break;
