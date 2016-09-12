@@ -120,7 +120,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     	public TypeCheckInfo(ConceptIdentifier eType, JenaBasedSadlModelValidator validator, EObject ctx) {
     		setExpressionType(eType);
     		context = ctx;
-    		if (ctx != null) {
+    		if (ctx != null && this.getTypeCheckType() != null) {
     			validator.expressionsValidated.put(ctx,  this);
     		}
     	}
@@ -220,7 +220,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				sb.append(expressionType.toString());
 				sb.append(", ");
-				sb.append(typeCheckType.toString());
+				sb.append(typeCheckType != null ? typeCheckType.toString() : "unknown type");
 				sb.append(")");
 				if (getImplicitProperties() != null) {
 					if (getImplicitProperties().size() > 1)
@@ -772,11 +772,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (numericOperators.contains(((BinaryOperation) expression).getOp())) {
 				ConceptName decimalLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+				decimalLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 				return new TypeCheckInfo(decimalLiteralConceptName, decimalLiteralConceptName, this, expression);
 			}
 			else {
 				// by default assume boolean binary operation
 				ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
+				booleanLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 				return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, expression);
 			}
 		}
@@ -974,33 +976,43 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private void checkEmbeddedPropOfSubject(Expression subject, Expression predicate) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
 		if (predicate instanceof Name) {
 			String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
+			OntConceptType oct = declarationExtensions.getOntConceptType(((Name)predicate).getName());
+			if (oct.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+				issueAcceptor.addWarning("Unable to do domain-range matching on an annotation property", predicate);
+				return;
+			}
 			Property prop = theJenaModel.getProperty(propuri);
 			TypeCheckInfo subjType = getType(subject);
+			List<OntClass> subjClasses = getTypeCheckTypeClasses(subjType);
 			StmtIterator domainItr = prop.listProperties(RDFS.domain);
 			boolean domainMatched = false;
 			List<Resource> domainList = null;
 			while (domainItr.hasNext()) {
 				RDFNode dmn = domainItr.next().getObject();
 				if (dmn instanceof Resource) {
-					if (subjType.getTypeCheckType() != null && subjType.getTypeCheckType().toString().equals(((Resource) dmn).getURI())) {
-						domainItr.close();
-						domainMatched = true;		// this is a direct match
-						break;
+					for (int i = 0; subjClasses != null && i < subjClasses.size(); i++) {
+						if (subjClasses.get(i).equals(((Resource) dmn).getURI())) {
+							domainItr.close();
+							domainMatched = true;		// this is a direct match
+							break;
+						}
+						if (domainList == null) domainList = new ArrayList<Resource>();
+						domainList.add((Resource) dmn);
 					}
-					if (domainList == null) domainList = new ArrayList<Resource>();
-					domainList.add((Resource) dmn);
 				}
 			}
 			if (!domainMatched) {
 				// there was no direct match
-				OntClass subj = theJenaModel.getOntClass(subjType.getTypeCheckType().toString());
 				for (int i = 0; domainList != null && i < domainList.size(); i++) {
 					Resource dmn = domainList.get(i);
 					if ((dmn instanceof OntResource || dmn.canAs(OntResource.class)) && subjType.getTypeCheckType() != null) {
 						try {
-							if (subj != null && SadlUtils.classIsSubclassOf(subj, dmn.as(OntResource.class),true, null)) {
-								domainMatched = true;
-								break;
+							for (int j = 0; subjClasses != null && j < subjClasses.size(); j++) {
+								OntClass subj = subjClasses.get(j);
+								if ( SadlUtils.classIsSubclassOf(subj, dmn.as(OntResource.class),true, null)) {
+									domainMatched = true;
+									break;
+								}
 							}
 						} catch (CircularDependencyException e) {
 							// TODO Auto-generated catch block
@@ -1011,7 +1023,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (!domainMatched && domainList != null) {
 				// there wasn't any subclass match either so create an appropriate error message
-				OntConceptType oct;
 				try {
 					oct = declarationExtensions.getOntConceptType(((Name)predicate).getName());
 					StringBuilder errorMessageBuilder = new StringBuilder();
@@ -1048,6 +1059,30 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private List<OntClass> getTypeCheckTypeClasses(TypeCheckInfo tci) {
+		List<OntClass> results = null;
+		if (tci.compoundTypes != null) {
+			for (int i = 0; i < tci.compoundTypes.size(); i++) {
+				TypeCheckInfo subtci = tci.compoundTypes.get(i);
+				List<OntClass> subresults = getTypeCheckTypeClasses(subtci);
+				if (results == null) {
+					results = subresults;
+				}
+				else {
+					results.addAll(subresults);
+				}
+			}
+		}
+		else {
+			if (tci.getTypeCheckType() != null && tci.getTypeCheckType().toString() != null) {
+				OntClass result = theJenaModel.getOntClass(tci.getTypeCheckType().toString());
+				results = new ArrayList<OntClass>();
+				results.add(result);
+			}
+		}
+		return results;
+	}
+
 	private TypeCheckInfo getTypeFromRestriction(Expression subject, Expression predicate) throws CircularDefinitionException {
 		if (subject instanceof Name && predicate instanceof Name) {
 			String subjuri = declarationExtensions.getConceptUri(((Name)subject).getName());
