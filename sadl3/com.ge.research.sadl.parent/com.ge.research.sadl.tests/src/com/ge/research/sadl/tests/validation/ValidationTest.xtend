@@ -31,6 +31,7 @@ import org.eclipse.xtext.resource.XtextResourceSet
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.ge.research.sadl.scoping.TestScopeProvider
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -78,6 +79,7 @@ class ValidationTest {
 			MyCar is a Car.
 			
 		'''.sadl
+		TestScopeProvider.registerResource(model, true)
 		val issues = validationTestHelper.validate(model)
 		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use an alias or choose different names.", issues.head.message)
 	}
