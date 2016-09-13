@@ -1253,6 +1253,7 @@ public class IntermediateFormTranslator {
 					addError(new IFTranslationError("Translation to Intermediate Form failed: " + te.toString()));
 				}
 				((ProxyNode)obj).setReplacementNode(nodeCheck(objNode));
+// TODO this has a problem, run on 	TestSadlIde/Sandbox/UnionClassInRule.sadl			
 				retiredProxyNodes.put((GraphPatternElement) ((ProxyNode)obj).getProxyFor(), (ProxyNode)obj);
 				obj = nodeCheck(objNode);
 			}
