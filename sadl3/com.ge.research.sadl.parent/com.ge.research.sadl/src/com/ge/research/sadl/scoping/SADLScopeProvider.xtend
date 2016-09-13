@@ -66,8 +66,12 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	@Inject extension DeclarationExtensions
 	@Inject OnChangeEvictingCache cache
 	@Inject IQualifiedNameConverter converter
-
+	
+	boolean ambiguousNameDetection;
+	
 	override getScope(EObject context, EReference reference) {
+		val ctxrsrc = context.eResource();
+		setAmbiguousNameDetection(TestScopeProvider.getDetectAmbiguousNames(ctxrsrc));
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADLPackage.Literals.SADL_MODEL) {
 			return super.getGlobalScope(context.eResource, reference)
@@ -77,6 +81,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		throw new UnsupportedOperationException(
 			"Couldn't build scope for elements of type " + reference.EReferenceType.name)
+	}
+	
+	def setAmbiguousNameDetection(boolean bval) {
+		ambiguousNameDetection = bval
 	}
 
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
@@ -144,9 +152,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				newParent = wrap(newParent)
 			val aliasToUse = alias ?: resource.getAlias
 			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
+//			System.out.println("createResourceScope: " + resource.URI.toString)
 			newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
+//			System.out.println("   after call to getPrimaryLocalResourceScope: " + newParent.toString)
 			newParent = getSecondaryLocalResourceScope(resource, namespace, newParent)
-			return getTertiaryLocalResourceScope(resource, namespace, newParent)
+//			System.out.println("   after call to getSecondaryLocalResourceScope: " + newParent.toString)
+			newParent = getTertiaryLocalResourceScope(resource, namespace, newParent)
+//			System.out.println("   after call to getTertiaryLocalResourceScope: " + newParent.toString)
+			return newParent
 		]
 	}
 	
@@ -226,14 +239,18 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			if (!externalResource.eIsProxy)
 				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
 		}
-		val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
-		if (element !== null) {
-			val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
-			if (eobject !== null) {
-				importScopes += createResourceScope(eobject.eResource, null, importedResources)
+		if (importScopes.isEmpty) {
+			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl")) {
+				val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
+				if (element !== null) {
+					val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+					if (eobject !== null) {
+						importScopes += createResourceScope(eobject.eResource, null, importedResources)
+					}
+				}
 			}
 		}
-		return new ListCompositeScope(importScopes, converter)
+		return new ListCompositeScope(importScopes, converter, ambiguousNameDetection)
 	}
 
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
@@ -246,6 +263,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 		List<IScope> delegates
 		IQualifiedNameConverter converter
+		boolean detectAmbiguousNames;
 		
 		override getAllElements() {
 			delegates.map[allElements].reduce[p1, p2| p1 + p2]
@@ -261,12 +279,37 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 		override getSingleElement(QualifiedName name) {
-			var List<IEObjectDescription> candidates = getElements(name).toList
-			if (candidates.size <= 1) {
-				return candidates.head
+			if (!detectAmbiguousNames) {
+				for (s : delegates) {
+					val element = s.getSingleElement(name);
+					if (element !== null) {
+						return element
+					}
+				}
+				return null;
+			}
+			var List<IEObjectDescription> candidates = null
+			var IEObjectDescription firstMatch = null
+			for (s : delegates) {
+				val candidate = s.getSingleElement(name)
+				if (candidate !== null && firstMatch !== candidate) {
+					if (firstMatch === null) {
+						firstMatch = candidate 
+					} else {
+						if (candidates === null) {
+							candidates = newArrayList
+							candidates.add(firstMatch)
+						}
+						if (!candidates.contains(candidate))
+							candidates.add(candidate)
+					}
+				}
+			}
+			if (candidates === null) {
+				return firstMatch
 			} else {
 				val imports = candidates.map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
-				val message = '''Ambiguously imported name '«candidates.head.name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
+				val message = '''Ambiguously imported name '«name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
 				val alternatives = candidates.map[
 					desc | 
 					this.getElements(desc.EObjectOrProxy)

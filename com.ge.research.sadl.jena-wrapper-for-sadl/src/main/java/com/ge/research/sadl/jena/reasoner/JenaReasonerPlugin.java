@@ -279,8 +279,12 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * Method used by translators that need the OntModel with import closure for translation
 	 * 
 	 * @return
+	 * @throws ConfigurationException 
 	 */
-	public OntModel getSchemaModel() {
+	public OntModel getSchemaModel() throws ConfigurationException {
+		if (schemaModel == null) {
+			getReasonerOnlyWhenNeeded();
+		}
 		return schemaModel;
 	}
 	

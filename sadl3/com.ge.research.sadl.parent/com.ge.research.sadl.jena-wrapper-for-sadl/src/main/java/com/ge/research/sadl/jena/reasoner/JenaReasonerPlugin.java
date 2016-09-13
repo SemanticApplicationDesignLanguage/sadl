@@ -795,7 +795,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			while (ontItr.hasNext()) {
 				Ontology ont = ontItr.next();
 				if (modelBaseUri == null) {
-					modelBaseUri = ont.getURI();	// first is default incase imports are circular
+					modelBaseUri = ont.getURI();	// first is default in case imports are circular
 				}
 				if (!importuris.contains(ont.getURI())) {
 					modelBaseUri = ont.getURI();
