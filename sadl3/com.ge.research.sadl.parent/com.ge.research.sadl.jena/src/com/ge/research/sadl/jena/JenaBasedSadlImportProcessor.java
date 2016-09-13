@@ -40,7 +40,6 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	private OntModel theJenaModel;
 	
 	enum AnnType {ALIAS, NOTE}
-	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
 	
 	@Inject DeclarationExtensions declarationExtensions;
 	
