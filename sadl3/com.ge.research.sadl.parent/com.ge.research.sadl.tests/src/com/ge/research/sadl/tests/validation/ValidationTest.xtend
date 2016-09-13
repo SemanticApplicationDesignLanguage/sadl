@@ -84,6 +84,35 @@ class ValidationTest {
 		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use an alias or choose different names.", issues.head.message)
 	}
 	
+	@Test def void testLinkingAmbiguousElementsIndirect() {
+		'''
+			uri "http://sadl.org/NS1.sadl" alias ns1.
+			
+			Car is a class.
+		'''.sadl
+		'''
+			uri "http://sadl.org/NS2.sadl" alias ns2.
+			
+			Car is a class.
+		'''.sadl
+		'''
+			uri "http://sadl.org/NS3.sadl" alias ns3.
+			
+			import "http://sadl.org/NS1.sadl".
+			import "http://sadl.org/NS2.sadl".
+						
+		'''.sadl
+		val model = '''
+			uri "http://sadl.org/NS4.sadl" alias ns4.
+			
+			import "http://sadl.org/NS3.sadl".
+			MyCar is a Car.
+		'''.sadl
+		TestScopeProvider.registerResource(model, true)
+		val issues = validationTestHelper.validate(model)
+		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use an alias or choose different names.", issues.head.message)
+	}
+	
 	@Test def void testLinkingAmbiguousElementsBigger() {
 		'''
 			uri "http://assert/Properties" alias Properties.
