@@ -14,4 +14,10 @@ public interface IMetricsProcessor {
 
 	boolean addMarker(String subjectUri, String markerClassUri, String markerTypeUri);
 
+	boolean addControlledVariable(String specName, String propertyUri);
+
+	boolean addMonitoredVariable(String specName, String propertyUri);
+
+	boolean addControlledOrMonitoredVariable(String specName, String propertyUri, boolean isControlled);
+
 }

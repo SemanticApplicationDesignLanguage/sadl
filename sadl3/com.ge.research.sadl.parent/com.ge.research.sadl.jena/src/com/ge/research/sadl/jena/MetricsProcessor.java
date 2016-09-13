@@ -198,4 +198,16 @@ public class MetricsProcessor implements IMetricsProcessor {
 		}
 		return modelFolderPathname;
 	}
+
+	@Override
+	public boolean addControlledVariable(String specName, String propertyUri) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addMonitoredVariable(String specName, String propertyUri) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
