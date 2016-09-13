@@ -3012,8 +3012,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else {
 						newRngCls = rngNode.asResource().as(OntClass.class);
 					}
-					updateObjectPropertyRange(prop, newRngCls, rngValueType, context);
-					propOwlType = OWL.ObjectProperty;
+					if (updateObjectPropertyRange(prop, newRngCls, rngValueType, context)) {
+						propOwlType = OWL.ObjectProperty;
+					}
 				}
 				else {
 					throw new JenaProcessorException("Unable to convert object property range to a class");
@@ -3123,7 +3124,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					// this is changing the range of a property defined in a different model
 					try {
 						if (SadlUtils.classIsSubclassOf((OntClass) rangeCls, existingRange, true, null)) {
-							addWarning("The range is a subclass of the range of property '" + prop.getURI() + "' which is defined in an imported model; perhaps you mean an 'only has values of type' restricion?", context);						
+							addError("The range is a subclass of the range of property '" + prop.getURI() + "' which is defined in an imported model; perhaps you mean an 'only has values of type' restricion? Range is not added.", context);		
+							return false;
 						}
 						else {
 							addWarning("This changes the range of property '" + prop.getURI() + "' which is defined in an imported model; are you sure that's what you want to do?", context);
@@ -3132,18 +3134,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						throw new JenaProcessorException(e.getMessage(), e);
 					}
 				}
-				OntResource newRange = addClassToUnionClass(existingRange, rangeCls);
 				if (!prop.getNameSpace().equals(getModelNamespace())) {
 					prop = createObjectPropertyInCurrentModel(prop);
+					OntResource newRange = createUnionClassInCurrentModel(existingRange, rangeCls);
+					prop.addRange(newRange); 
+					retval = true;
 				}
 				else {
 					prop.removeRange(existingRange);
-				}
-				if (prop != null) {
+					OntResource newRange = addClassToUnionClass(existingRange, rangeCls);
 					prop.addRange(newRange); 
-					retval = false;
-				}
-				else {
 					retval = true;
 				}
 			} else {
@@ -3205,6 +3205,69 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							 UnionClass ucls = existingCls.as(UnionClass.class);
 							 ucls.addOperand(cls);
 							 return ucls;
+						} catch (Exception e) {
+							// don't know why this is happening
+							logger.error("Union class error that hasn't been resolved or understood.");
+							return cls;
+						}
+					} else {
+						if (cls.equals(existingCls)) {
+							return existingCls;
+						}
+						classes = getTheJenaModel().createList();
+						OntResource inCurrentModel = null;
+						if (existingCls.isURIResource()) {
+							inCurrentModel = getTheJenaModel().getOntResource(existingCls.getURI());
+						}
+						if (inCurrentModel != null) {
+							classes = classes.with(inCurrentModel);
+						}
+						else {
+							classes = classes.with(existingCls);
+						}
+						classes = classes.with(cls);
+					}
+					OntResource unionClass = getTheJenaModel().createUnionClass(null,
+							classes);
+					return unionClass;
+				}
+			} catch (CircularDependencyException e) {
+				throw new JenaProcessorException(e.getMessage(), e);
+			}
+		} else {
+			return cls;
+		}
+	}
+
+	private OntResource createUnionClassInCurrentModel(OntResource existingCls, OntResource cls) throws JenaProcessorException {
+		if (existingCls != null && !existingCls.equals(cls)) {
+			try {
+				if (existingCls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(existingCls.as(OntClass.class), cls, true, null)) {
+					return cls;
+				}
+				else if (cls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(cls.as(OntClass.class), existingCls, true, null)) {
+					return existingCls;
+				}
+				else {
+					RDFList classes = null;
+					if (existingCls.canAs(UnionClass.class)) {
+						try {
+							classes = getTheJenaModel().createList();
+							UnionClass ucls = existingCls.as(UnionClass.class);
+							RDFList members = ucls.getOperands();
+							for (int i = 0; i < members.size(); i++) {
+								RDFNode mcls = members.get(i);
+								if (mcls.canAs(OntResource.class)) {
+									if (mcls.asResource().isURIResource()) {
+										OntResource inCurrentModel = getTheJenaModel().getOntResource(mcls.as(OntResource.class).getURI());
+										classes = classes.with(inCurrentModel);
+									}
+									else {
+										throw new JenaProcessorException("Nested union classes not yet supported");
+									}
+								}
+							}
+							classes = classes.with(cls);
 						} catch (Exception e) {
 							// don't know why this is happening
 							logger.error("Union class error that hasn't been resolved or understood.");
@@ -3707,14 +3770,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				return;	// nothing to do
 			}
 			if (existingDomain.canAs(OntResource.class)){ 
-				OntResource domainCls = addClassToUnionClass(existingDomain.as(OntResource.class), cls);
 				if (!prop.getNameSpace().equals(getModelNamespace()) && prop.canAs(OntProperty.class)) {
 					prop = createOntPropertyInCurrentModel(prop.as(OntProperty.class));
+					cls = createUnionClassInCurrentModel(existingDomain.as(OntResource.class), cls);
 				}
 				else {
 					getTheJenaModel().remove(s);
+					cls = addClassToUnionClass(existingDomain.as(OntResource.class), cls);
 				}
-				cls = domainCls;
 			}
 		}
 		getTheJenaModel().add(prop, RDFS.domain, cls);
