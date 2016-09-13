@@ -157,7 +157,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	    			if (context.equals(((TypeCheckInfo)o).context)) {
 	    				if (getExpressionType().equals(((TypeCheckInfo)o).getExpressionType()) &&
 	    						getRangeValueType().equals(((TypeCheckInfo)o).getRangeValueType()) &&
-	    						getTypeCheckType().equals(((TypeCheckInfo)o).getTypeCheckType())) {
+	    						getTypeCheckType() != null && getTypeCheckType().equals(((TypeCheckInfo)o).getTypeCheckType())) {
 	    					return true;
 	    				}
 	    			}
@@ -1080,8 +1080,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else {
 			if (tci.getTypeCheckType() != null && tci.getTypeCheckType().toString() != null) {
 				OntClass result = theJenaModel.getOntClass(tci.getTypeCheckType().toString());
-				results = new ArrayList<OntClass>();
-				results.add(result);
+				if (result != null) {
+					results = new ArrayList<OntClass>();
+					results.add(result);
+				}
 			}
 		}
 		return results;
