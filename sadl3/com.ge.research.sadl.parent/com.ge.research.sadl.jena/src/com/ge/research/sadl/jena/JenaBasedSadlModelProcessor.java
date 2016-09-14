@@ -2913,7 +2913,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// No restrictions--this will become an rdf:Property
 			retProp = createRdfProperty(propUri, null);
 		}
-		if (sr.getAnnotations() != null && retProp.canAs(OntResource.class)) {
+		if (sr != null && retProp != null && sr.getAnnotations() != null && retProp.canAs(OntResource.class)) {
 			addAnnotationsToResource(retProp.as(OntResource.class), sr.getAnnotations());
 		}
 		return retProp;
