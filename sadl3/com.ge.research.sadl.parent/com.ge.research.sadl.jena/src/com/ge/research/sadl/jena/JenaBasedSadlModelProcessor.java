@@ -4408,6 +4408,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (dtype.equals(ptype)) {
 			return true;
 		}
+		if (dtype.equals(XSD.xint.getURI())) {	// the literal is an integer
+			if (ptype.equals(XSD.integer.getURI())) return true;
+			if (ptype.equals(XSD.xlong.getURI())) return true;
+		}
 		return false;
 	}
 
