@@ -200,13 +200,19 @@ public class MetricsProcessor implements IMetricsProcessor {
 	}
 
 	@Override
-	public boolean addControlledVariable(String specName, String propertyUri) {
+	public boolean addControlledOrMonitoredVariable(String specName, String propertyUri, boolean isControlled) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean addMonitoredVariable(String specName, String propertyUri) {
+	public boolean addEffectiveRange(String specName, String property, String range, boolean isList) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addEffectiveDomain(String specName, String property, String domain, boolean isList) {
 		// TODO Auto-generated method stub
 		return false;
 	}
