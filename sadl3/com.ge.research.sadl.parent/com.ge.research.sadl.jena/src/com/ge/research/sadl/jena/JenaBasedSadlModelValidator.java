@@ -336,6 +336,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		try {	
 			TypeCheckInfo leftTypeCheckInfo = getType(leftExpression);
 			TypeCheckInfo rightTypeCheckInfo = getType(rightExpression);
+			if (leftTypeCheckInfo == null && rightTypeCheckInfo == null) {
+				// this condition happens when a file is loaded in the editor and clean/build is invoked
+				return true;
+			}
 			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, expression.getOp());
 				return false;
@@ -477,6 +481,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			e.printStackTrace();
 		}
 		try {
+			if (leftTypeCheckInfo == null && rightTypeCheckInfo == null) {
+				// this condition happens when a file is loaded in the editor and clean/build is invoked
+				return true;
+			}
 			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, op);
 				return false;
@@ -867,8 +875,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo subjtype = null;
 			if (constantRequiresListNext(cnstval)) {
 				subjtype = getType(subject);
-				if (!subjtype.getRangeValueType().equals(RangeValueType.LIST)) {
-					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + subjtype.typeCheckType.toString() + "' is not a List)", subject);
+				if (subjtype != null && !subjtype.getRangeValueType().equals(RangeValueType.LIST)) {
+					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
 				}
 			}
 			else if (constantFollowedByIntThenList(cnstval)) {
@@ -945,6 +953,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return predicateType;
 	}
 	
+	private String getTypeCheckTypeString(TypeCheckInfo tci) {
+		if (tci != null) {
+			if (tci.typeCheckType != null) {
+				return tci.typeCheckType.toString();
+			}
+			if (tci.getCompoundTypes() != null) {
+				StringBuilder sb = new StringBuilder();
+				Iterator<TypeCheckInfo> itr = tci.getCompoundTypes().iterator();
+				while (itr.hasNext()) {
+					sb.append(getTypeCheckTypeString(itr.next()));
+				}
+				return sb.toString();
+			}
+		}
+		return "(null)";
+	}
+
 	protected TypeCheckInfo getApplicableLocalRestriction(Expression subject, Expression predicate) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
 		return null;
 	}
@@ -983,7 +1008,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			Property prop = theJenaModel.getProperty(propuri);
 			TypeCheckInfo subjType = getType(subject);
-			List<OntClass> subjClasses = getTypeCheckTypeClasses(subjType);
+			List<OntClass> subjClasses = subjType != null ? getTypeCheckTypeClasses(subjType) : null;
 			StmtIterator domainItr = prop.listProperties(RDFS.domain);
 			boolean domainMatched = false;
 			List<Resource> domainList = null;
@@ -1286,12 +1311,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo tci = null;
 			while (sitr.hasNext()) {
 				RDFNode first = sitr.next().getObject();
+				boolean isList = false;
 				if(first.isURIResource()){
 					tci = createTypeCheckInfoForPropertyRange(first, propConceptName, expression, propertyType);
 				}
 				else if (isSadlTypedList(first)) {
 					// get type restriction on "first" property--this is the type
 					tci = getSadlTypedListTypeCheckInfo(first.as(OntClass.class), propConceptName, expression, propertyType);
+					isList = true;
 				}
 				else {
 					tci = createTypeCheckInfoForNonUriPropertyRange(first, propConceptName, expression, propertyType);
@@ -1299,6 +1326,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (tci != null) {
 					if (sitr.hasNext() && compoundTci == null) {
 						compoundTci = new TypeCheckInfo(propConceptName, this, expression);
+						if (isList) {
+							compoundTci.setRangeValueType(RangeValueType.LIST);
+						}
 					}
 					if (compoundTci != null) {
 						compoundTci.addCompoundType(tci);
@@ -1453,11 +1483,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			while (eitr.hasNext()) {
 				OntClass supercls = eitr.next();
 				List<ConceptName> scips = getImpliedProperties(supercls);
-				if (retlst == null) {
-					retlst = scips;
-				}
-				else {
-					retlst.addAll(scips);
+				if (scips != null) {
+					if (retlst == null) {
+						retlst = scips;
+					}
+					else {
+						retlst.addAll(scips);
+					}
 				}
 			}
 		}
