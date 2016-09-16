@@ -2994,8 +2994,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			setImportSadlListModel(true);
 		}
 		RDFNode propOwlType = null;
+		boolean existingRangeAnywhere = false;
+		boolean existingRangeThisModel = false;
 		StmtIterator existingRngItr = getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null);
 		while (existingRngItr.hasNext()) {
+			existingRangeAnywhere = true;
 			RDFNode existingRngNode = existingRngItr.next().getObject();
 			if (rngNode.equals(existingRngNode)) {
 				// do nothing-- rngNode is already in range
@@ -3006,26 +3009,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// is the new range a subclass of the existing range, or vice versa?
 				if (rngNode.canAs(OntClass.class) && checkForSubclassing(rngNode.as(OntClass.class), existingRngNode.as(OntClass.class), context)) {
 					StringBuilder sb = new StringBuilder("This range is a subclass of the range which is already defined");
-					if (existingRngNode.isURIResource()) {
-						sb.append("(");
-						sb.append(existingRngNode.toString());
-						sb.append(")");
+					String existingRange = nodeToString(existingRngNode);
+					if (existingRange != null) {
+						sb.append(" (");
+						sb.append(existingRange);
+						sb.append(") ");
 					}
 					sb.append("; perhaps you meant to restrict values of this property on this class with an 'only has values of type' restriction?");
-					addError(sb.toString(), context);		
+					addWarning(sb.toString(), context);		
 					return;
 				}
 			}
 		}
 
 		StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null);
-		if (existingRngItr.hasNext() && !inModelStmtItr.hasNext()) {
+		if (inModelStmtItr.hasNext()) {
+			existingRangeThisModel = true;
+		}
+		if (existingRangeAnywhere && !existingRangeThisModel) {
 			addWarning("This changes the range of property '" + prop.getURI() + "' which has an imported range; are you sure that's what you want to do?", context);
 		}
-		if (existingRngItr.hasNext() && inModelStmtItr.hasNext()) {
+		if (existingRangeAnywhere && existingRangeThisModel) {
 			// property has existing range known to this model
 			if (prop.isDatatypeProperty()) {
-				addError("Data type property '" + prop.getURI() + "' has range '" + existingRngItr.next().getObject().toString() + "' so can't assign range '" + rngNode.toString(), context);
+				String existingRange = stmtIteratorToObjectString(getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null));
+				addError("Data type property '" + prop.getURI() + "' has range '" + existingRange + "' so can't assign range '" + rngNode.toString(), context);
 			}
 			else {
 				if (rngNode.isResource() && rngNode.asResource().canAs(OntClass.class)) {
@@ -3039,9 +3047,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else {
 						newRngCls = rngNode.asResource().as(OntClass.class);
 					}
-					if (updateObjectPropertyRange(prop, newRngCls, inModelStmtItr, rngValueType, context)) {
+					ExtendedIterator<? extends OntResource> ritr = prop.listRange();
+					if (updateObjectPropertyRange(prop, newRngCls, ritr, rngValueType, context)) {
 						propOwlType = OWL.ObjectProperty;
 					}
+					ritr.close();
 				}
 				else {
 					throw new JenaProcessorException("Unable to convert object property range to a class");
@@ -3086,6 +3096,53 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
+	private String stmtIteratorToObjectString(StmtIterator stmtitr) {
+		StringBuilder sb = new StringBuilder();
+		while (stmtitr.hasNext()) {
+			RDFNode obj = stmtitr.next().getObject();
+			if (sb.length() > 0) {
+				sb.append(", ");
+			}
+			sb.append(nodeToString(obj));
+		}
+		return sb.toString();
+	}
+	
+	private String nodeToString(RDFNode obj) {
+		StringBuilder sb = new StringBuilder();
+		if (obj.isURIResource()) {
+			sb.append(obj.toString());
+		}
+		else if (obj.canAs(UnionClass.class)){
+			UnionClass ucls = obj.as(UnionClass.class);
+			ExtendedIterator<RDFNode> uitr = ucls.getOperands().iterator();
+			sb.append("(");
+			while (uitr.hasNext()) {
+				if (sb.length() > 1) {
+					sb.append(" or ");
+				}
+				sb.append(nodeToString(uitr.next()));
+			}
+			sb.append(")");
+		}
+		else if (obj.canAs(IntersectionClass.class)){
+			IntersectionClass icls = obj.as(IntersectionClass.class);
+			ExtendedIterator<RDFNode> iitr = icls.getOperands().iterator();
+			sb.append("(");
+			while (iitr.hasNext()) {
+				if (sb.length() > 1) {
+					sb.append(" and ");
+				}
+				sb.append(nodeToString(iitr.next()));
+			}
+			sb.append(")");
+		}
+		else {
+			sb.append("<blank node>");
+		}
+		return sb.toString();
+	}
+	
 	private boolean checkForSubclassing(OntClass rangeCls, OntResource existingRange, EObject context) throws JenaProcessorException {
 		// this is changing the range of a property defined in a different model
 		try {
@@ -3098,10 +3155,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 	
-	private boolean updateObjectPropertyRange(OntProperty prop, OntResource rangeCls, StmtIterator thisModelRangeIter, RangeValueType rngValueType, EObject context) throws JenaProcessorException {
+	private boolean updateObjectPropertyRange(OntProperty prop, OntResource rangeCls, ExtendedIterator<? extends OntResource> ritr, RangeValueType rngValueType, EObject context) throws JenaProcessorException {
 		boolean retval = false;
 		if (rangeCls != null) {
-			OntResource newRange = createUnionOfClasses(rangeCls, thisModelRangeIter);
+			OntResource newRange = createUnionOfClasses(rangeCls, ritr);
 			if (newRange != null) {
 				if (newRange.equals(rangeCls)) {
 					return retval;	// do nothing--the rangeCls is already in the range
@@ -3717,18 +3774,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private void addPropertyDomain(Property prop, OntResource cls) throws JenaProcessorException {
+		boolean existingDomainAnywhere = false;
+		boolean existingDomainThisModel = false;
 		StmtIterator sitr = getTheJenaModel().listStatements(prop, RDFS.domain, (RDFNode)null);
 		if (sitr.hasNext()) {
+			existingDomainAnywhere = true;
 			// property already has a domain known to this model
 			StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null);
 			if (inModelStmtItr.hasNext()) {
+				existingDomainThisModel = true;
+			}
+			ExtendedIterator<? extends OntResource> ditr = prop.as(OntProperty.class).listDomain();
+			if (existingDomainThisModel && ditr.hasNext()) {
 				// domain is already specified in this model
-				OntResource newCls = createUnionOfClasses(cls, inModelStmtItr);
+				OntResource newCls = createUnionOfClasses(cls, ditr);
+				ditr.close();
 				if (newCls != null) {
 					if (newCls.equals(cls)) {
 						return;		// do nothing--the cls is already in domain
 					}
 					cls = newCls;
+					getTheJenaModel().remove(getTheJenaModel().listStatements(prop, RDFS.domain, (RDFNode)null));
 				}
 			}
 			else {
@@ -3746,12 +3812,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
 	}
 
-	private OntResource createUnionOfClasses(OntResource cls, StmtIterator inModelStmtItr) throws JenaProcessorException {
+	private OntResource createUnionOfClasses(OntResource cls, ExtendedIterator<? extends OntResource> ditr) throws JenaProcessorException {
 		OntResource unionClass = null;
 		RDFList classes = null;
 		boolean allEqual = true;
-		while (inModelStmtItr.hasNext()) {
-			RDFNode existingCls = inModelStmtItr.next().getObject();
+		while (ditr.hasNext()) {
+			OntResource existingCls = ditr.next();
 			if (!existingCls.canAs(OntResource.class)){
 				throw new JenaProcessorException("Unable to '" + existingCls.toString() + "' to OntResource to put into union of classes");
 			}
@@ -3767,7 +3833,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					return existingCls.as(UnionClass.class);
 				} catch (Exception e) {
 					// don't know why this is happening
-					logger.error("Union class error that hasn't been resolved or understood.");
+					logger.error("Union class error that hasn't been resolved or understood.");					
 					return cls;
 				}
 			} else {
