@@ -760,7 +760,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if(expression instanceof ElementInList){
 			Expression el = ((ElementInList)expression).getElement();
 			if (el instanceof PropOfSubject) {
-				return getType(((PropOfSubject)el).getRight());
+				TypeCheckInfo listtype = getType(((PropOfSubject)el).getRight());
+				if (listtype.getRangeValueType() != RangeValueType.LIST) {
+					issueAcceptor.addError("Expected a List", el);
+				}
+				else {
+					// the element's type is the type of the list but not necessarily a list
+					listtype.setRangeValueType((listtype.getTypeCheckType() != null && listtype.getTypeCheckType() instanceof ConceptName) ? ((ConceptName)listtype.getTypeCheckType()).getRangeValueType() : RangeValueType.CLASS_OR_DT);
+					return listtype;
+				}
 			}
 			else {
 				issueAcceptor.addError("Unhandled element type in element in list construct: " + el.getClass().getCanonicalName() + "; please report", expression);
@@ -906,7 +914,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (predicate instanceof Name) {
 			try {
 				OntConceptType predtype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
-				if (ofOp.equals("in")) {
+				if (ofOp != null && ofOp.equals("in")) {
 					// this is a list construct: element in list
 				}
 				else if (!predtype.equals(OntConceptType.CLASS_PROPERTY) && !predtype.equals(OntConceptType.DATATYPE_PROPERTY) && 
