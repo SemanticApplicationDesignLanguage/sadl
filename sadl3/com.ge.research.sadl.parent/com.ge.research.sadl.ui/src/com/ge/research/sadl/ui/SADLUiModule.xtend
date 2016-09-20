@@ -85,7 +85,7 @@ class SADLUiModule extends AbstractSADLUiModule {
 	}
 	
 	def configurePreferenceStoreInitializer(Binder binder) {
-        binder.bind(IPreferenceStoreInitializer).annotatedWith(Names.named("sadlPrefernceInitializer")) // $NON-NLS-1$
+        binder.bind(IPreferenceStoreInitializer).annotatedWith(Names.named("SadlPreferencesInitializer")) // $NON-NLS-1$
         .to(SadlPreferencesInitializer);
     }
 }
