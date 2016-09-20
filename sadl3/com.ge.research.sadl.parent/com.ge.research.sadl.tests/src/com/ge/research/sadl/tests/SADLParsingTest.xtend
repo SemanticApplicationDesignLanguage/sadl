@@ -126,4 +126,16 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 Rule R2: if x is a Person and age of x > 30 then print("hi").
  		'''.assertNoErrors
 	}
+	
+	@Ignore
+	@Test
+	def void testUnitsOnNumbers() {
+		''' uri "http://sadl.org/OntologyWithUnittedQuantity.sadl" alias OntologyWithUnittedQuantity.
+		 
+		 	Person is a class described by height with values of type UnittedQuantity.
+		 	
+		 	George is a Person.	
+		 	George has height 70 inches .
+		'''.assertNoErrors
+	}
 }
