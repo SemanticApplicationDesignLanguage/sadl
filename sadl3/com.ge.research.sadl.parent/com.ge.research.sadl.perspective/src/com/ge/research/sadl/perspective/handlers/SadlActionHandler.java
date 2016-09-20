@@ -9,6 +9,8 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -46,6 +48,7 @@ import com.ge.research.sadl.perspective.util.Util;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.google.inject.Inject;
@@ -67,6 +70,95 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		SadlActivator.getInstance().getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL).injectMembers(this);
 	}
 
+	protected IPath[] getCommandTarget(String[] validTargetTypes) throws TranslationException {
+		IFile trgtFile = null;
+		IPath prjFolder;
+		IPath trgtFolder;
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+	    if (window != null)
+	    {
+	        ISelection selection = (ISelection) window.getSelectionService().getSelection();
+	        if (!(selection instanceof IStructuredSelection)) {
+	        	System.err.println("No project is selected for action");
+	        	return null;
+	        }
+	        Object firstElement = ((IStructuredSelection)selection).getFirstElement();
+	        if (firstElement instanceof IAdaptable)
+	        {
+	        	if (firstElement instanceof org.eclipse.core.resources.IFile) {
+	        		boolean validType = false;
+	        		for (int i = 0; validTargetTypes != null && i < validTargetTypes.length; i++) {
+	        			if (((org.eclipse.core.resources.IFile)firstElement).getFileExtension().equals(validTargetTypes[i])) {
+	        				validType = true;
+	        				break;
+	        			}
+	        		}
+	        		if (validType) {
+	        			trgtFile = (IFile) firstElement;
+	        			trgtFolder =  ((org.eclipse.core.resources.IFile)firstElement).getParent().getFullPath();	
+	        			prjFolder = ((org.eclipse.core.resources.IFile)firstElement).getProject().getFullPath();
+	        		}
+	        		else {
+	        			StringBuilder sb = new StringBuilder();
+	        			if (validTargetTypes == null) {
+	        				sb.append("No valid file types for this command. Select a folder or project");
+	        			}
+	        			else {
+	        				for (int i = 0; i < validTargetTypes.length; i++) {
+	        					if (i > 0) sb.append(", ");
+		        				sb.append(validTargetTypes[i]);
+	        				}
+	        			}
+	        			throw new TranslationException("Only files of type " + sb.toString() + " are valid for this command");
+	        		}
+	        	}
+	        	else if (firstElement instanceof IFolder) {
+	        		trgtFolder = ((IFolder)firstElement).getFullPath();
+        			prjFolder = ((IFolder)firstElement).getProject().getFullPath();
+	        	}
+	        	else if (firstElement instanceof IProject) {
+	        		prjFolder = ((IProject)firstElement).getFullPath();
+	        		trgtFolder = prjFolder;
+	        	}
+	        	else {
+	        		// project?
+	        		IProject project = (IProject)((IAdaptable)firstElement).getAdapter(IProject.class);
+		            if (project == null) {
+		            	if (firstElement instanceof org.eclipse.core.resources.IFile) {
+		            		project = ((org.eclipse.core.resources.IFile)firstElement).getProject();
+		            	}
+		            	else if (firstElement instanceof IFolder) {
+		            		project = ((IFolder)firstElement).getProject();
+		            	}
+		            	else {
+		            		throw new TranslationException("Unable to identify file, folder, or project to translate");
+		            	}
+		            }
+		            IPath path = project.getFullPath();
+		            prjFolder = path;
+		            trgtFolder = prjFolder;
+	        	}
+//	            System.out.println(path);
+//	            IPath owlModelsPath =  prjFolder.append("OwlModels");
+//	            String absOwlModelsPath = convertProjectRelativePathToAbsolutePath(owlModelsPath.toString());
+//	            File ifPathFile =  new File(absOwlModelsPath);
+//	            if (ifPathFile.exists() && !ifPathFile.isDirectory()) {
+//	            	throw new TranslationException("Folder '" + absOwlModelsPath + "' exists but is not a directory");
+//	            }
+//	            if (!ifPathFile.exists()) {
+//	            	ifPathFile.mkdirs();
+//	            }
+         		IPath[] results = new IPath[3];
+        		results[0] = prjFolder;
+       			results[1] = trgtFolder;
+        		IPath trgtFilePath = trgtFile.getFullPath();
+         		results[2] = trgtFilePath;
+        		return results;
+	        }
+	    }
+	    throw new TranslationException("Nothing selected, unable to process command");
+	}
+	
 	protected IFile getTargetFile(String[] validTargetTypes) throws ExecutionException {
 			IPath prjFolder = null;
 			IPath trgtFile = null;
@@ -155,7 +247,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return null;
 	}
 
-	private static String convertProjectRelativePathToAbsolutePath(String relPath) {
+	protected static String convertProjectRelativePathToAbsolutePath(String relPath) {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IPath path = root.getFile(new Path(relPath)).getLocation();
