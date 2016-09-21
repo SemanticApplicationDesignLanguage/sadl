@@ -81,15 +81,23 @@ public class RunQuery extends SadlActionHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
 			String[] validTargetTypes = {"sadl","owl"};
-			IPath[] target = getCommandTarget(validTargetTypes);
+			Object[] target = getCommandTarget(validTargetTypes);
+			IProject project = null;
+			IPath trgtFolder = null;
+			IFile trgtFile = null;
+			if (target != null) {
+				if (target.length > 0) project = (IProject) target[0];
+				if (target.length > 1) trgtFolder = (IPath) target[1];
+				if (target.length > 2) trgtFile = (IFile) target[2];
+			}
 			String owlFileName = null;
 
 			Map<String,String> prefMap = getPreferences();
-			if (target != null && target.length == 3 && target[2] != null) {
-				if (target[2].getFileExtension().equals("sadl")) {
+			if (trgtFile != null) {
+				if (trgtFile.getFileExtension().equals("sadl")) {
 					// run query on this model
 	//				Resource res = prepareActionHandler(target[2]);
-					output.writeToConsole(MessageType.INFO, "Adhoc Query of '" + target[2].toPortableString() + "' requested.\n");
+					SadlConsole.writeToConsole(MessageType.INFO, "Adhoc Query of '" + trgtFile.getFullPath().toPortableString() + "' requested.\n");
 					
 	//				final List<Issue> issues = new ArrayList<Issue>();
 	//				processor.processAdhocQuery(res, new ValidationAcceptor(new IAcceptor<Issue>(){
@@ -105,13 +113,13 @@ public class RunQuery extends SadlActionHandler {
 	//						output.writeToConsole(MessageType.ERROR, issue.getMessage() + "\n");
 	//					}
 	//				}
-					owlFileName = target[2].removeFileExtension().addFileExtension("owl").lastSegment();
+					owlFileName = trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment();
 				}
-				else if (target[2].getFileExtension().equals("owl")) {
+				else if (trgtFile.getFileExtension().equals("owl")) {
 					// run query on this model
 	//				Resource res = prepareActionHandler(trgtFile);
-					output.writeToConsole(MessageType.INFO, "Adhoc Query of '" + target[2].toPortableString() + "' requested.\n");
-					owlFileName = target[2].lastSegment();
+					SadlConsole.writeToConsole(MessageType.INFO, "Adhoc Query of '" + trgtFile.getFullPath().toPortableString() + "' requested.\n");
+					owlFileName = trgtFile.getFullPath().lastSegment();
 				}
 				String query = getQuery();
 				File qf = new File(query);
@@ -130,7 +138,7 @@ public class RunQuery extends SadlActionHandler {
 					qlist.add(query);
 				}
 				{
-					String modelFolderUri = convertProjectRelativePathToAbsolutePath(target[0].append(ResourceManager.OWLDIR).toPortableString()); 
+					String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
 //					File owlFile = null; //trgtFile.getLocation().toFile();
 //					String modelFolderUri = mfFolder.getCanonicalPath();
 					final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
@@ -179,12 +187,7 @@ public class RunQuery extends SadlActionHandler {
 			}
 		}
 		catch (Exception e) {
-			if (output != null) {
-				output.writeToConsole(MessageType.ERROR, e.getMessage() + "\n");
-			}
-			else {
-				System.err.println(e.getMessage());
-			}
+			SadlConsole.writeToConsole(MessageType.ERROR, e.getMessage() + "\n");
 		}
 		finally {
 
