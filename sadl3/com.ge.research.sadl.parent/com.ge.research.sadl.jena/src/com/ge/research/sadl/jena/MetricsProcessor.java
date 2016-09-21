@@ -206,7 +206,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 	}
 
 	@Override
-	public boolean addEffectiveRange(String specName, String property, String range, boolean isList) {
+	public boolean addEffectiveRange(String specName, String property, String classname, String range, boolean isList) {
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -760,7 +760,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if(expression instanceof ElementInList){
 			Expression el = ((ElementInList)expression).getElement();
 			if (el instanceof PropOfSubject) {
-				return getType(((PropOfSubject)el).getRight());
+				TypeCheckInfo listtype = getType(((PropOfSubject)el).getRight());
+				if (listtype.getRangeValueType() != RangeValueType.LIST) {
+					issueAcceptor.addError("Expected a List", el);
+				}
+				else {
+					// the element's type is the type of the list but not necessarily a list
+					listtype.setRangeValueType((listtype.getTypeCheckType() != null && listtype.getTypeCheckType() instanceof ConceptName) ? ((ConceptName)listtype.getTypeCheckType()).getRangeValueType() : RangeValueType.CLASS_OR_DT);
+				}
+				return listtype;
 			}
 			else {
 				issueAcceptor.addError("Unhandled element type in element in list construct: " + el.getClass().getCanonicalName() + "; please report", expression);
@@ -906,7 +914,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (predicate instanceof Name) {
 			try {
 				OntConceptType predtype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
-				if (ofOp.equals("in")) {
+				if (ofOp != null && ofOp.equals("in")) {
 					// this is a list construct: element in list
 				}
 				else if (!predtype.equals(OntConceptType.CLASS_PROPERTY) && !predtype.equals(OntConceptType.DATATYPE_PROPERTY) && 
@@ -928,6 +936,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (subject instanceof PropOfSubject) {
 						checkEmbeddedPropOfSubject(subject, predicate);
 					}
+					//
+					//addEffectiveRange(predicateType, subject);
 					return predicateType;
 				}
 			} catch (PrefixNotFoundException e) {
@@ -943,6 +953,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (subject instanceof PropOfSubject) {
 					checkEmbeddedPropOfSubject(subject, predicate);
 				}
+				//
+				//addEffectiveRange(predicateType, subject);
 				return predicateType;
 			}
 		}
@@ -950,7 +962,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (subject instanceof PropOfSubject) {
 			checkEmbeddedPropOfSubject(subject, predicate);			
 		}
+		//add interface range
+		//addEffectiveRange(predicateType, subject);
 		return predicateType;
+	}
+	
+	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject){
+		if(metricsProcessor != null){
+			String className = declarationExtensions.getConceptUri(((Name) subject).getName());
+			String propertyName = predicateType.getExpressionType().toString();
+			String rangeStr = predicateType.getTypeCheckType().toString();
+			boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
+			metricsProcessor.addEffectiveRange(null, className, propertyName, rangeStr, isList);
+		}
 	}
 	
 	private String getTypeCheckTypeString(TypeCheckInfo tci) {
