@@ -937,7 +937,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						checkEmbeddedPropOfSubject(subject, predicate);
 					}
 					//
-					//addEffectiveRange(predicateType, subject);
+					addEffectiveRange(predicateType, subject);
 					return predicateType;
 				}
 			} catch (PrefixNotFoundException e) {
@@ -954,7 +954,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					checkEmbeddedPropOfSubject(subject, predicate);
 				}
 				//
-				//addEffectiveRange(predicateType, subject);
+				addEffectiveRange(predicateType, subject);
 				return predicateType;
 			}
 		}
@@ -963,11 +963,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			checkEmbeddedPropOfSubject(subject, predicate);			
 		}
 		//add interface range
-		//addEffectiveRange(predicateType, subject);
+		addEffectiveRange(predicateType, subject);
 		return predicateType;
 	}
 	
 	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject){
+		//TODO fix?
 		if(metricsProcessor != null){
 			String className = declarationExtensions.getConceptUri(((Name) subject).getName());
 			String propertyName = predicateType.getExpressionType().toString();
