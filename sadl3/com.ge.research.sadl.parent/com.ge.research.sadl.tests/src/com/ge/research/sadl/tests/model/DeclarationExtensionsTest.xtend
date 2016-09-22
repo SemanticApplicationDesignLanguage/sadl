@@ -196,7 +196,7 @@ class DeclarationExtensionsTest {
 			Hardness is a top-level class, must be one of {Hard (alias "not soft"), Soft (note "not hard")}. 
 			
 			ofInterestTo is a type of annotation.
-			//color has ofInterestTo Everyone .	// uncommenting this causes color to be a declared instance
+			color has ofInterestTo Everyone .	// uncommenting this causes color to be a declared instance
 		'''.parse
 		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
 		
