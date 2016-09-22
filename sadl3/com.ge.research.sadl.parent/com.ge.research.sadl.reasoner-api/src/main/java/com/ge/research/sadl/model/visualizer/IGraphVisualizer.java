@@ -54,9 +54,9 @@ public interface IGraphVisualizer {
 	 * @param tempDir--the fully qualified path to a file system directory into which temporary files may be written
 	 * @param baseFileName--a base filename for use in generating temporary and output files associated with the graph to be rendered (may be called repeatedly for multiple graph generation
 	 * @param graphName--the name to be given to this graph
-	 * @param anchorNode--a node (if any) to be colored or otherwise marked as the "anchor" node of the graph
+	 * @param anchorNode--a node (if any else null) to be colored or otherwise marked as the "anchor" node of the graph
 	 * @param orientation--orientation of the graph, top-down (Orientation.TD) or left-right (Orientation.LR)
-	 * @param description--description text for this graph (if any)
+	 * @param description--description text for this graph (if any else null)
 	 */
 	public void initialize(String tempDir, String baseFileName, String graphName, String anchorNode, Orientation orientation, String description);
 

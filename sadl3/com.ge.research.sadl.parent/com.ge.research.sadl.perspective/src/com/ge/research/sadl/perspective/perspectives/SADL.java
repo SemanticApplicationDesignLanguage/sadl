@@ -81,7 +81,6 @@ public class SADL implements IPerspectiveFactory {
 		// factory.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");//NON-NLS-1
 		factory.addNewWizardShortcut("test.wizards.SadlProject");// NON-NLS-1
 		factory.addNewWizardShortcut("test.wizards.SADL_File");// NON-NLS-1
-		factory.addNewWizardShortcut("test.wizards.REQ_File");
 	}
 
 	private void addViewShortcuts() {

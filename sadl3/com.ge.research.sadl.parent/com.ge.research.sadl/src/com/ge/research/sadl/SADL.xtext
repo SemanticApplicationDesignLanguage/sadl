@@ -196,7 +196,7 @@ CardinalityValue :
 
 SadlExplicitValue:
 		SadlResource		// e.g., George
-	|	{SadlNumberLiteral} literalNumber=FacetNumber
+	|	{SadlNumberLiteral} literalNumber=FacetNumber (-> unit=UNIT)?
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
     |   SadlValueList

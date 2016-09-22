@@ -8,46 +8,25 @@
  */
 package com.ge.research.sadl.tests.model
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import com.ge.research.sadl.processing.ValidationAcceptor
-import com.ge.research.sadl.sADL.SadlModel
+import com.google.common.base.Stopwatch
 import com.google.inject.Inject
-import com.google.inject.Provider
-import com.hp.hpl.jena.ontology.OntModel
-import java.util.ArrayList
-import java.util.List
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.junit4.InjectWith
+import java.util.concurrent.TimeUnit
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
-import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.validation.Issue
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.xtext.validation.CheckMode
-import java.util.Map
-import org.eclipse.xtext.EcoreUtil2
-import com.google.common.base.Stopwatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(XtextRunner)
-//@InjectWith(RequirementsInjectorProvider)
 class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 	
-	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper
-	@Inject Provider<JenaBasedSadlModelProcessor> sadlProcessorProvider
-	@Inject IPreferenceValuesProvider preferenceProvider
 	
 	@Test
 	def void testPerformance() {
-		val models = 32
+		val models = 10
 		val classesPerModel = 10
 		for (i : 0..<models) {
 			'''
