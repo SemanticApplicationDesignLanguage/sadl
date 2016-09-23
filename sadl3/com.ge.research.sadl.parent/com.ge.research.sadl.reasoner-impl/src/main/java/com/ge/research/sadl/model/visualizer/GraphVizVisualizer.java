@@ -3,7 +3,9 @@ package com.ge.research.sadl.model.visualizer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.activation.DataSource;
 
@@ -48,6 +50,16 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 
 	public static void createGraphVizGraph(String dotfilepath) throws IOException {
 		String exec = System.getenv("GraphVizPath");
+		if (exec == null) {
+			Map<String, String> map = System.getenv();
+			Iterator<String> mitr = map.keySet().iterator();
+			while (mitr.hasNext()) {
+				String key = mitr.next();
+				String val = map.get(key);
+				System.out.println(key + " -> " + val);
+			}
+			exec = "C:\\Apps\\graphviz-2.36\\release\\bin";
+		}
 		if (exec == null || exec.length() == 0) {
 			throw new IOException("Unable to find GraphVizPath. Please set GraphVizPath environment variable to the GraphViz bin folder path.");
 		}

@@ -18,14 +18,24 @@
             name="Run Query">
       </command>
       <command
+            categoryId="sadl.commands.category"
+            id="SADL.GraphImports"
+            name="Show Graph">
+      </command>
+      <command
             defaultHandler="com.ge.research.sadl.perspective.handlers.RunInference"
             id="referenceToSadlMenuId"
-            name="Run Inference">
+            name="Test Model">
       </command>
       <command
             defaultHandler="com.ge.research.sadl.perspective.handlers.RunQuery"
             id="referenceToSadlMenuId2"
             name="Run Query">
+      </command>
+      <command
+            defaultHandler="com.ge.research.sadl.perspective.handlers.GraphImports"
+            id="referenceToSadlMenuId3"
+            name="Show Graph">
       </command>
    </extension>
    
@@ -38,6 +48,10 @@
       <handler
             commandId="SADL.RunQuery"
             class="com.ge.research.sadl.perspective.handlers.RunQuery">
+      </handler>
+      <handler
+            commandId="SADL.GraphImports"
+            class="com.ge.research.sadl.perspective.handlers.GraphImports">
       </handler>
    </extension>
   
@@ -54,6 +68,12 @@
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+q">
+      </key>
+      <key
+            commandId="SADL.GraphImports"            
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+g">
       </key>
    </extension>
    <extension
@@ -74,14 +94,19 @@
              <command
                    commandId="referenceToSadlMenuId"
                    icon="icons/releng_gears.gif"
-                   tooltip="Run Inference">
+                   tooltip="Test Model">
              </command>
              <command
                    commandId="referenceToSadlMenuId2"
                    icon="icons/releng_gears.gif"
                    tooltip="Run Query">
              </command>
-         </menu>
+             <command
+                   commandId="referenceToSadlMenuId3"
+                   icon="icons/releng_gears.gif"
+                   tooltip="Show Graph">
+             </command>
+        </menu>
          
       </menuContribution>
       <menuContribution
@@ -107,7 +132,7 @@
          <command
                commandId="referenceToSadlMenuId"
                icon="icons/releng_gears.gif"
-               label="Run Inference"
+               label="Test Model"
                style="push">
          </command>
          <command
@@ -116,7 +141,13 @@
                label="Run Query"
                style="push">
          </command>
-      </menuContribution>
+         <command
+               commandId="referenceToSadlMenuId3"
+               icon="icons/releng_gears.gif"
+               label="Show Graph"
+               style="push">
+         </command>
+       </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.viewer">
