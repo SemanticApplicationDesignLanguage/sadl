@@ -134,4 +134,27 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		 	George has height 70 inches.
 		'''.assertNoErrors
 	}
+	
+	@Test
+	def void testConstants() {
+		'''
+			 uri "http://sadl.org/OntologyWithoutUnittedQuantity.sadl" alias OntologyWithoutUnittedQuantity.
+			 
+			 Person is a class described by gender with a single value of type Gender,
+			 	described by age with values of type decimal,
+			 	described by height with values of type decimal,
+			 	described by weight with values of type decimal.
+			 Gender is a class, can only be one of {Male, Female}. 	
+			 Obese is a type of Person.
+			 	
+			 George is a Person with age 23, with height 70, with weight 165.	
+			 
+			 Mary is a Person with weight PI.
+			// Emily is a Person with weight e .		// why does this statement fail?
+			 
+			 Rule DumbRule:
+			 	if p is a Person
+			 	then weight of p is age of p * PI * e^3.
+		'''.assertNoErrors
+	}
 }

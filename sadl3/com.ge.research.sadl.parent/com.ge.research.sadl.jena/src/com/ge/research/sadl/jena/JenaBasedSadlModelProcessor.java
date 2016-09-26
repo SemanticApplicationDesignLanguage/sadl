@@ -273,7 +273,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
 	private static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
 	private static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
-	private static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
+	public static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
 	private static final String SADL_IMPLICIT_MODEL_UNIT_URI = SADL_IMPLICIT_MODEL_URI + "#unit";
 	private static final String SADL_IMPLICIT_MODEL_VALUE_URI = SADL_IMPLICIT_MODEL_URI + "#value";
 	public static final String SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#impliedProperty";
@@ -2738,19 +2738,63 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			while (ritr.hasNext()) {
 				SadlPropertyRestriction rest = ritr.next();
 				if (rest instanceof SadlMustBeOneOf) {
+					//
 					EList<SadlExplicitValue> instances = ((SadlMustBeOneOf)rest).getValues();
 					if (instances != null) {
 						Iterator<SadlExplicitValue> iitr = instances.iterator();
+						List<Individual> individuals = new ArrayList<Individual>();
 						while (iitr.hasNext()) {
 							SadlExplicitValue inst = iitr.next();
 							if (inst instanceof SadlResource) {
 								for (int i = 0; i < rsrcList.size(); i++) {
-									createIndividual((SadlResource)inst, rsrcList.get(i).asClass());
+									individuals.add(createIndividual((SadlResource)inst, rsrcList.get(i).asClass()));
 								}
 							}
 							else {
 								throw new JenaProcessorException("Unhandled type of SadlExplicitValue: " + inst.getClass().getCanonicalName());
 							}
+						}
+						// create equivalent class
+						RDFList collection = getTheJenaModel().createList();
+						Iterator<Individual> iter = individuals.iterator();
+						while (iter.hasNext()) {
+							RDFNode dt = iter.next();
+							collection = collection.with(dt);
+						}
+						EnumeratedClass enumcls = getTheJenaModel().createEnumeratedClass(null, collection);
+						OntResource cls = rsrcList.get(0);
+						if (cls.canAs(OntClass.class)){
+							cls.as(OntClass.class).addEquivalentClass(enumcls);
+						}
+					}
+				}
+				else if (rest instanceof SadlCanOnlyBeOneOf) {
+					EList<SadlExplicitValue> instances = ((SadlCanOnlyBeOneOf)rest).getValues();
+					if (instances != null) {
+						Iterator<SadlExplicitValue> iitr = instances.iterator();
+						List<Individual> individuals = new ArrayList<Individual>();
+						while (iitr.hasNext()) {
+							SadlExplicitValue inst = iitr.next();
+							if (inst instanceof SadlResource) {
+								for (int i = 0; i < rsrcList.size(); i++) {
+									individuals.add(createIndividual((SadlResource)inst, rsrcList.get(i).asClass()));
+								}
+							}
+							else {
+								throw new JenaProcessorException("Unhandled type of SadlExplicitValue: " + inst.getClass().getCanonicalName());
+							}
+						}
+						// create equivalent class
+						RDFList collection = getTheJenaModel().createList();
+						Iterator<Individual> iter = individuals.iterator();
+						while (iter.hasNext()) {
+							RDFNode dt = iter.next();
+							collection = collection.with(dt);
+						}
+						EnumeratedClass enumcls = getTheJenaModel().createEnumeratedClass(null, collection);
+						OntResource cls = rsrcList.get(0);
+						if (cls.canAs(OntClass.class)){
+							cls.as(OntClass.class).addEquivalentClass(enumcls);
 						}
 					}
 				}
@@ -3787,13 +3831,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				else if (val instanceof SadlExplicitValue) {
 					OntResource rng = oprop.getRange();
-					if (rng == null) {
-						// this isn't really an ObjectProperty--should probably be an rdf:Property
-						Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, null);
-						inst.addProperty(oprop, lval);
+					if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral)val).getUnit() != null) {
+						String unit = ((SadlNumberLiteral)val).getUnit();
+						if (rng != null) {
+							if (rng.canAs(OntClass.class) && checkForSubclassing(rng.as(OntClass.class), getTheJenaModel().getOntClass(SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI), val)) {
+								addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, ((SadlNumberLiteral)val).getLiteralNumber(), unit);
+							}
+							else {
+								addError("A unit has been given to a numeric value for a property whose range is not a sublcass of UnittedQuantity", val);
+							}
+						}
+						else {
+							addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, ((SadlNumberLiteral)val).getLiteralNumber(), unit);
+						}
 					}
 					else {
-						addError("A SadlExplicitValue is given to an an ObjectProperty", val);
+						if (rng == null) {
+							// this isn't really an ObjectProperty--should probably be an rdf:Property
+							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, null);
+							inst.addProperty(oprop, lval);
+						}
+						else {
+							addError("A SadlExplicitValue is given to an an ObjectProperty", val);
+						}
 					}
 				}
 				else if (val instanceof SadlValueList) {
@@ -3880,6 +3940,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
+	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, ObjectProperty oprop, OntResource rng, String literalNumber, String unit) {
+		Individual unittedVal;
+		if (rng != null && rng.canAs(OntClass.class)) {
+			unittedVal = getTheJenaModel().createIndividual(rng.as(OntClass.class));
+		}
+		else {
+			unittedVal = getTheJenaModel().createIndividual(getTheJenaModel().getOntClass(SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI));
+		}
+		// TODO this may need to check for property restrictions on a subclass of UnittedQuantity
+		unittedVal.addProperty(getTheJenaModel().getProperty(SADL_IMPLICIT_MODEL_VALUE_URI), getTheJenaModel().createTypedLiteral(literalNumber));
+		unittedVal.addProperty(getTheJenaModel().getProperty(SADL_IMPLICIT_MODEL_UNIT_URI), getTheJenaModel().createTypedLiteral(unit));
+		inst.addProperty(oprop, unittedVal);
+	}
+	
 	private void dumpModel(OntModel m) {
 		System.out.println("Dumping OntModel");
 		PrintStream strm = System.out;
@@ -4761,7 +4835,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			else if (value instanceof SadlConstantLiteral) {
 				String val = ((SadlConstantLiteral)value).getTerm();
-				if (rng != null) {
+				if (val.equals("PI")) {
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), Math.PI);
+				}
+				else if (val.equals("e")) {
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), Math.E);					
+				}
+				else if (rng != null) {
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
 				else {
