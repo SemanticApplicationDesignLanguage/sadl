@@ -36,6 +36,7 @@ import java.util.ServiceLoader;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.reasoner.AvailablePlugin.PluginType;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -754,6 +755,24 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	}
 
 	/**
+	 * Method to get a list of all the available implementations of IGraphVisualizer using a
+	 * {@link ServiceLoader}
+	 * 
+	 * @return A list of all available IGraphVisualizer implementations
+	 */
+	public List<IGraphVisualizer> getAvailableGraphRenderers() {
+		List<IGraphVisualizer> renderers = new ArrayList<IGraphVisualizer>();
+		ServiceLoader<IGraphVisualizer> serviceLoader = getGraphRenderersFromServiceLoader(IGraphVisualizer.class);
+		if (serviceLoader != null) {
+			for (Iterator<IGraphVisualizer> itr = serviceLoader.iterator(); itr
+					.hasNext();) {
+				renderers.add(itr.next());
+			}
+		}
+		return renderers;
+	}
+
+	/**
 	 * Method to get a list of all the available translator plugins using a
 	 * {@link ServiceLoader}
 	 * 
@@ -806,12 +825,17 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		return ServiceLoader.load(cls);
 	}
 
-	protected static ServiceLoader<Class<?>> getServiceLoader(Class<?> bcls) {
+	public ServiceLoader<Class<?>> getServiceLoader(Class<?> bcls) {
 		return (ServiceLoader<Class<?>>) ServiceLoader.load(bcls);
 	}
 
 	protected static ServiceLoader<IReasoner> getReasonersFromServiceLoader(
 			Class<IReasoner> cls) {
+		return ServiceLoader.load(cls);
+	}
+
+	protected static ServiceLoader<IGraphVisualizer> getGraphRenderersFromServiceLoader(
+			Class<IGraphVisualizer> cls) {
 		return ServiceLoader.load(cls);
 	}
 

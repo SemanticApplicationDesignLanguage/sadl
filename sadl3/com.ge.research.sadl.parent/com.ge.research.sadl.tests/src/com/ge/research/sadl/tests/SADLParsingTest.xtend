@@ -127,15 +127,11 @@ class SADLParsingTest extends AbstractSADLParsingTest {
  		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test
 	def void testUnitsOnNumbers() {
 		''' uri "http://sadl.org/OntologyWithUnittedQuantity.sadl" alias OntologyWithUnittedQuantity.
 		 
-		 	Person is a class described by height with values of type UnittedQuantity.
-		 	
-		 	George is a Person.	
-		 	George has height 70 inches .
+		 	George has height 70 inches.
 		'''.assertNoErrors
 	}
 }

@@ -313,6 +313,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			SADL_RULE_PATTERN_URI, SADL_RULE_PATTERN_DATA_URI,SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,SADL_SERIVCES_CONFIGURATION_URI};
 	public static String[] reservedPrefixes = {SADL_BASE_MODEL_PREFIX,SADL_LIST_MODEL_PREFIX};
 
+	//members needed by child processors
+	protected StringBuilder serialize = null;
+	protected boolean includeImpliedPropertiesInDirectWrite = false;	// should implied properties be included in Direct Write Prolog output? default false
+	
 	public JenaBasedSadlModelProcessor() {
 		logger.debug("New " + this.getClass().getCanonicalName() + "' created");
 	}
@@ -5365,4 +5369,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //		}
 //		return false;
 //	}
+	protected Object translateAndApplyImpliedProperties(Expression expr, Property impliedPropertyWrapper) throws InvalidNameException, InvalidTypeException, TranslationException {
+		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
+			serialize.append("impliedProperty('");
+			serialize.append(impliedPropertyWrapper.toString());
+			serialize.append("',");
+		}
+		Object obj = translate(expr);
+		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
+			serialize.append(")");
+		}
+		return obj;
+	}
 }

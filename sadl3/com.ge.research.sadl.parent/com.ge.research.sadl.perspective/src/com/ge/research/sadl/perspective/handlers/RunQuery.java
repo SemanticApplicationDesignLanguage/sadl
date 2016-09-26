@@ -80,7 +80,7 @@ public class RunQuery extends SadlActionHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
-			String[] validTargetTypes = {"sadl","owl"};
+			String[] validTargetTypes = getValidTargetFileTypes();
 			Object[] target = getCommandTarget(validTargetTypes);
 			IProject project = null;
 			IPath trgtFolder = null;
@@ -209,6 +209,12 @@ public class RunQuery extends SadlActionHandler {
 			return null;
 		}
 		return dlg.getValue();
+	}
+
+	@Override
+	protected String[] getValidTargetFileTypes() {
+		String[] types = {"sadl","owl"};
+		return types;
 	}
 
 }

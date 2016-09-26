@@ -7,6 +7,7 @@ import java.util.ServiceLoader;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Literal;
@@ -185,5 +186,7 @@ public interface IConfigurationManagerForEditing extends IConfigurationManager {
 			Scope scope) throws InvalidNameException;
 
 	public abstract OntDocumentManager getJenaDocumentMgr();
+
+	public abstract List<IGraphVisualizer> getAvailableGraphRenderers();
 
 }
