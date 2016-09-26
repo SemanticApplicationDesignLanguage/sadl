@@ -33,4 +33,5 @@ Import-Package: com.ge.research.sadl.utils
 Export-Package: com.ge.research.sadl.perspective,
  com.ge.research.sadl.perspective.handlers,
  com.ge.research.sadl.perspective.perspectives,
- com.ge.research.sadl.perspective.util
+ com.ge.research.sadl.perspective.util,
+ com.ge.research.sadl.perspective.visualize

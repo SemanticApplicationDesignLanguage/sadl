@@ -34,7 +34,7 @@ public class RunInference extends SadlActionHandler {
 	
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {	
-			String[] validTargetTypes = {"sadl","test"};
+			String[] validTargetTypes = getValidTargetFileTypes();
 			Object[] target = getCommandTarget(validTargetTypes);
 			IProject project = null;
 			IPath trgtFolder = null;
@@ -86,6 +86,12 @@ public class RunInference extends SadlActionHandler {
 		}
 
 		return event;
+	}
+
+	@Override
+	protected String[] getValidTargetFileTypes() {
+		String[] types = {"sadl","test"};
+		return types;
 	}
 
 }

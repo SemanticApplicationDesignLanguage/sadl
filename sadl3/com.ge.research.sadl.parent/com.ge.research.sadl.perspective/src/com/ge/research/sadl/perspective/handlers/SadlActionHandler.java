@@ -1,6 +1,5 @@
 package com.ge.research.sadl.perspective.handlers;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +9,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -54,11 +52,8 @@ import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.sADL.SadlModel;
-import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
-import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -80,12 +75,14 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	public SadlActionHandler() {
 		SadlActivator.getInstance().getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL).injectMembers(this);
 	}
+	
+	protected abstract String[] getValidTargetFileTypes();
 
 	protected Object[] getCommandTarget(String[] validTargetTypes) throws TranslationException {
 		IProject project = null;
 		IPath trgtFolder = null;
 		IFile trgtFile = null;
-		SadlResource selectedConcept = null;
+		EObject selectedConcept = null;
 		IPath prjFolder;
 
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
@@ -103,9 +100,9 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	    		if (iei instanceof FileEditorInput) {
 	    			trgtFile = ((FileEditorInput)iei).getFile();
 	    			trgtFolder = trgtFile.getFullPath().removeLastSegments(1);
-	    			IContainer prnt;
+	    			IContainer prnt = null;
 	    			do {
-	    				prnt = trgtFile.getParent();
+	    				prnt = prnt == null ? trgtFile.getParent() : prnt.getParent();
 	    			} while (prnt != null && !(prnt instanceof IProject));
 	    			if (prnt != null) {
 	    				project = ((IProject)prnt).getProject();
@@ -138,8 +135,8 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	    		                            return NodeModelUtils.findActualSemanticObjectFor(node);
 	    		                    }
 	    		                });	
-	    		        		if (selectedObject != null && selectedObject instanceof SadlResource) {
-    		    					selectedConcept = (SadlResource) selectedObject;
+	    		        		if (selectedObject != null) {
+    		    					selectedConcept = selectedObject;
     		    				}
     		    				else {
 	    		        			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find a concept with name '" + seltxt + "'");
@@ -167,23 +164,23 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		        				validType = true;
 		        				break;
 		        			}
-		        			else if (validTargetTypes[i].equals("owl")) {
-		        				// a type of owl is also valid for any file that has a derived (same base name) .owl file in the OwlModels folder--return the file
-		        				String owlFileName = convertProjectRelativePathToAbsolutePath(
-		        						project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment()).toPortableString());
-		        				if (new File(owlFileName).exists()) {
-		        					validType = true;
-		        					break;
-		        				}
-		        				else {
-		        					owlFileName = convertProjectRelativePathToAbsolutePath(
-			        						project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().addFileExtension("owl").lastSegment()).toPortableString());
-			        				if (new File(owlFileName).exists()) {
-			        					validType = true;
-			        					break;
-			        				}
-		        				}
-		        			}
+//		        			else if (validTargetTypes[i].equals("owl")) {
+//		        				// a type of owl is also valid for any file that has a derived (same base name) .owl file in the OwlModels folder--return the file
+//		        				String owlFileName = convertProjectRelativePathToAbsolutePath(
+//		        						project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment()).toPortableString());
+//		        				if (new File(owlFileName).exists()) {
+//		        					validType = true;
+//		        					break;
+//		        				}
+//		        				else {
+//		        					owlFileName = convertProjectRelativePathToAbsolutePath(
+//			        						project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().addFileExtension("owl").lastSegment()).toPortableString());
+//			        				if (new File(owlFileName).exists()) {
+//			        					validType = true;
+//			        					break;
+//			        				}
+//		        				}
+//		        			}
 		        		}
 		        		if (!validType) {
 		        			StringBuilder sb = new StringBuilder();

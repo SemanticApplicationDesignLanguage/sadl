@@ -33,7 +33,7 @@
             name="Run Query">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.perspective.handlers.GraphImports"
+            defaultHandler="com.ge.research.sadl.perspective.handlers.GraphGeneratorHandler"
             id="referenceToSadlMenuId3"
             name="Show Graph">
       </command>
@@ -51,7 +51,7 @@
       </handler>
       <handler
             commandId="SADL.GraphImports"
-            class="com.ge.research.sadl.perspective.handlers.GraphImports">
+            class="com.ge.research.sadl.perspective.handlers.GraphGeneratorHandler">
       </handler>
    </extension>
   
