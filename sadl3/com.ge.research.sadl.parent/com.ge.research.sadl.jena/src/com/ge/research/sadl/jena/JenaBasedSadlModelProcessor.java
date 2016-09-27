@@ -255,16 +255,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private boolean importSadlListModel = false;
 	private OntModel sadlListModel = null;
 	private static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
-	private static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
 	private static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
-	public static final String SADL_LIST_MODEL_LIST_URI = SADL_LIST_MODEL_URI + "#List";
-	public static final String SADL_LIST_MODEL_FIRST_URI = SADL_LIST_MODEL_URI + "#first";
-	private static final String SADL_LIST_MODEL_REST_URI = SADL_LIST_MODEL_URI + "#rest";
-	private static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthRestriction";
-	private static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMinRestriction";
-	private static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
 	
-	private static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
 	
 	private OntModel sadlImplicitModel = null;
 	public static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
@@ -2327,6 +2319,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			addError("translate(Name) called with a SadlResource which resolved to null; this needs to be caught in validation", expr);
 			nm = "nullvarname";
+			throw new InvalidNameException("Unable to resolve SadlResource to a name");
 		}
 		return processExpression(qnm);
 	}
@@ -5405,8 +5398,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} catch (Exception e) {
 				throw new JenaProcessorException(e.getMessage(), e);
 			}
-			getTheJenaModel().addSubModel(sadlListModel);
+//			getTheJenaModel().addSubModel(sadlListModel);
 			setImportSadlListModel(true);
+			addImportToJenaModel(getModelName(), SADL_LIST_MODEL_URI, sadlListModel);
 			return true;
 		}
 		return false;

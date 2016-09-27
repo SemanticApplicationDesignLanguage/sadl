@@ -1,4 +1,4 @@
-package com.ge.research.sadl.perspective.visualize;
+package com.ge.research.sadl.visualize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -50,6 +51,7 @@ public class GraphGenerator {
 		Object subject;
 		Object predicate;
 		Object object;
+		private boolean objectIsList = false;
 		
 		public GraphSegment(Object s, Object p, Object o) {
 			subject = s;
@@ -57,6 +59,13 @@ public class GraphGenerator {
 			object = o;
 		}
 		
+		public GraphSegment(Object s, Object p, Object o, boolean objIsList) {
+			subject = s;
+			predicate = p;
+			object = o;
+			setObjectIsList(objIsList);
+		}
+
 		public boolean equals(Object otherSeg) {
 			if (otherSeg instanceof GraphSegment) {
 				if (otherSeg != null) {
@@ -64,7 +73,7 @@ public class GraphGenerator {
 							predicate != null && ((GraphSegment)otherSeg).predicate != null && 
 							object != null && ((GraphSegment)otherSeg).object != null) {
 						if (subject.equals(((GraphSegment)otherSeg).subject) && predicate.equals(((GraphSegment)otherSeg).predicate) && 
-								object.equals(((GraphSegment)otherSeg).object)) {
+								object.equals(((GraphSegment)otherSeg).object) && ((GraphSegment)otherSeg).isObjectIsList() == isObjectIsList()) {
 							return true;
 						}
 					}
@@ -82,7 +91,12 @@ public class GraphGenerator {
 		}
 		
 		String objectToString() {
-			return stringForm(object);
+			if (!isObjectIsList()) {
+				return stringForm(object);
+			}
+			else {
+				return stringForm(object) + " List";
+			}
 		}
 		
 		String stringForm(Object obj) {
@@ -335,6 +349,14 @@ public class GraphGenerator {
 			}
 			return "Untranslated Restriction: " + ontcls.toString();
 		}
+
+		boolean isObjectIsList() {
+			return objectIsList;
+		}
+
+		void setObjectIsList(boolean objectIsList) {
+			this.objectIsList = objectIsList;
+		}
 	}
 	
 	public GraphGenerator(OntModel m, ConceptName startNode) {
@@ -474,10 +496,47 @@ public class GraphGenerator {
 
 	private List<GraphSegment> generatePropertyRange(OntClass cls,
 			Resource prop, List<GraphSegment> data) {
+		boolean isList = false;
+		Statement stmt = prop.getProperty(model.getAnnotationProperty(SadlModelProcessor.LIST_RANGE_ANNOTATION_PROPERTY));
+		if (stmt != null) {
+			RDFNode obj = stmt.getObject();
+			if (obj.isLiteral()) {
+				Object lit = obj.asLiteral().getValue();
+				if (lit != null && lit.toString().equals("LIST")) {
+					isList = true;
+				}
+			}
+		}
 		ExtendedIterator<? extends OntResource> eitr = prop.as(OntProperty.class).listRange();
 		while (eitr.hasNext()) {
 			OntResource rng = eitr.next();
-			GraphSegment sg = new GraphSegment(cls, prop, rng);
+			if (isList && rng.canAs(OntClass.class)) {
+				Resource listClass = model.getResource(SadlModelProcessor.SADL_LIST_MODEL_LIST_URI);
+				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
+					StmtIterator stmtitr = model.listStatements(rng, RDFS.subClassOf, (RDFNode)null);
+					while (stmtitr.hasNext()) {
+//					ExtendedIterator<OntClass> scitr = rng.as(OntClass.class).listSuperClasses(true);
+//					while (scitr.hasNext()) {
+						Statement supclsstmt = stmtitr.nextStatement();
+						RDFNode supclsnode = supclsstmt.getObject();
+						if (supclsnode.canAs(OntClass.class)){ 
+							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
+							if (subcls.hasProperty(OWL.onProperty, model.getProperty(SadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
+								Statement avf = subcls.getProperty(OWL.allValuesFrom);
+								if (avf != null) {
+									RDFNode listtype = avf.getObject();
+									if (listtype.canAs(OntResource.class)){
+										rng = listtype.as(OntResource.class);
+									}
+								}
+								stmtitr.close();
+								break;
+							}
+						}
+					}
+				}
+			}
+			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList) : new GraphSegment(cls, prop, rng);
 			if (!data.contains(sg)) {
 				data.add(sg);
 				if (prop.as(OntProperty.class).isObjectProperty()) {

@@ -1,4 +1,4 @@
-package com.ge.research.sadl.perspective.handlers;
+package com.ge.research.sadl.ui.handlers;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,17 +11,23 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
+
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
-import com.ge.research.sadl.perspective.visualize.GraphGenerator;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.ui.SadlConsole;
+import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.ge.research.sadl.visualize.GraphGenerator;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -32,10 +38,14 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 
 public class GraphGeneratorHandler extends SadlActionHandler {
+
+	@Inject
+	public DeclarationExtensions declarationExtensions;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -99,21 +109,21 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				if (target.length > 3 && target[3] != null) {
 					OntModel m = configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS);
 					if (target[3] instanceof SadlResource) {
-						SadlResource sr = (SadlResource) target[3];
-						String srnm = declarationExtensions.getConcreteName(sr);
-						OntConceptType srType = declarationExtensions.getOntConceptType(sr);
+						SadlResource sr = getSadlResource(target[3]);
+						String srnm = getSadlResourceConcreteName(sr);
+						OntConceptType srType = getSadlResourceOntConceptType(sr);
 						if (srType.equals(OntConceptType.CLASS)) {
-							GraphGenerator gg = new GraphGenerator(m, new ConceptName(declarationExtensions.getConceptUri(sr)));
+							GraphGenerator gg = new GraphGenerator(m, new ConceptName(getSadlResourceUri(sr)));
 							ResultSet rs = gg.generateClassNeighborhood(10); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
 							if (rs != null) {
-								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", declarationExtensions.getConceptUri(sr), "Domains and ranges", rs);
+								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
 							}
 							else {
 								SadlConsole.writeToConsole(MessageType.INFO, "No properties found for this class.\n");
 							}
 							rs = gg.generateClassHierarchy(10); //sadlResourceToClassHierarchy(configMgr, publicUri, sr);
 							if (rs != null) {
-								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"ch", "ch", declarationExtensions.getConcreteName(sr), "Class hierarchy", rs);
+								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"ch", "ch", srnm, "Class hierarchy", rs);
 							}
 							else {
 								SadlConsole.writeToConsole(MessageType.INFO, "No class hierarchy found for this class.\n");
@@ -122,20 +132,20 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 						else if (srType.equals(OntConceptType.CLASS_PROPERTY) ||
 								srType.equals(OntConceptType.DATATYPE_PROPERTY) ||
 								srType.equals(OntConceptType.RDF_PROPERTY)) {
-							GraphGenerator gg = new GraphGenerator(m, new ConceptName(declarationExtensions.getConceptUri(sr)));
+							GraphGenerator gg = new GraphGenerator(m, new ConceptName(getSadlResourceUri(sr)));
 							ResultSet rs = gg.generatePropertyNeighborhood(10);
 							if (rs != null) {
-								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", declarationExtensions.getConceptUri(sr), "Domains and ranges", rs);
+								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
 							}
 							else {
 								SadlConsole.writeToConsole(MessageType.INFO, "No information found for this property.\n");
 							}
 						}
 						else if (srType.equals(OntConceptType.INSTANCE)) {
-							GraphGenerator gg = new GraphGenerator(m, new ConceptName(declarationExtensions.getConceptUri(sr)));
+							GraphGenerator gg = new GraphGenerator(m, new ConceptName(getSadlResourceUri(sr)));
 							ResultSet rs = gg.generateIndividualNeighborhood(10);
 							if (rs != null) {
-								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", declarationExtensions.getConceptUri(sr), "Domains and ranges", rs);
+								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
 							}
 							else {
 								SadlConsole.writeToConsole(MessageType.INFO, "No information found for this instance.\n");
@@ -172,6 +182,45 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return event;
 	}
 
+	protected SadlResource getSadlResource(Object target3) throws IOException {
+		if (target3 instanceof Name) {
+			return ((Name)target3).getName();
+		}
+		else if (target3 instanceof SadlResource) {
+			return (SadlResource) target3;
+		}
+		throw new IOException("Selection '" + target3.toString() + "' is not a SadlResource");
+	}
+
+	protected String getSadlResourceUri(SadlResource sr) {
+		if (declarationExtensions == null) {
+			Injector reqInjector = SadlActivator.getInstance()
+					.getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
+			declarationExtensions = reqInjector.getInstance(DeclarationExtensions.class);
+		}
+		return declarationExtensions.getConceptUri(sr);
+	}
+
+	protected OntConceptType getSadlResourceOntConceptType(SadlResource sr) throws CircularDefinitionException {
+		if (declarationExtensions == null) {
+			Injector reqInjector = SadlActivator.getInstance()
+					.getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
+			declarationExtensions = reqInjector.getInstance(DeclarationExtensions.class);
+		}
+		OntConceptType srType = declarationExtensions.getOntConceptType(sr);
+		return srType;
+	}
+
+	protected String getSadlResourceConcreteName(SadlResource sr) {
+		if (declarationExtensions == null) {
+			Injector reqInjector = SadlActivator.getInstance()
+					.getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
+			declarationExtensions = reqInjector.getInstance(DeclarationExtensions.class);
+		}
+		String srnm = declarationExtensions.getConcreteName(sr);
+		return srnm;
+	}
+
 	protected String[] getValidTargetFileTypes() {
 		String[] types = {"owl", "sadl"};
 		return types;
@@ -195,7 +244,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 
 	private ResultSet sadlResourceToDomainRangeResultSet(IConfigurationManagerForIDE configMgr, String publicUri, SadlResource sr) throws CircularDefinitionException, ConfigurationException, IOException {
-		String srUri = declarationExtensions.getConceptUri(sr);
+		String srUri = getSadlResourceUri(sr);
 		OntModel m = configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS);
 		OntClass cls = m.getOntClass(srUri);
 		if (cls != null) {
@@ -231,7 +280,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 	private ResultSet sadlResourceToClassHierarchy(IConfigurationManagerForIDE configMgr, String publicUri,
 			SadlResource sr) throws ConfigurationException, IOException {
-		String srUri = declarationExtensions.getConceptUri(sr);
+		String srUri = getSadlResourceUri(sr);
 		OntModel m = configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS);
 		OntClass cls = m.getOntClass(srUri);
 		if (cls != null) {
@@ -312,7 +361,12 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 					String[] row = new String[3];
 					row[2] = nodeText(parentPublicUri, parentPrefix);
 					row[1] = "importedBy";
-					row[0] = nodeText(key, val);
+					if (key.equals("http://sadl.org/sadllistmodel")) {
+						row[0] = nodeText(key, "List");
+					}
+					else {
+						row[0] = nodeText(key, val);
+					}
 					if (!rowAlreadyInList(importList,row)) {
 						importList.add(row);
 						importList = findImports(importList, configMgr, key, val);

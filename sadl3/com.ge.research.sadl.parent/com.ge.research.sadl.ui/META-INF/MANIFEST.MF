@@ -25,6 +25,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.builder,
  com.ge.research.sadl.ui.contentassist,
+ com.ge.research.sadl.ui.handlers,
  com.ge.research.sadl.ui.imports,
  com.ge.research.sadl.ui.internal,
  com.ge.research.sadl.ui.labeling,
@@ -32,7 +33,8 @@ Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.preferences,
  com.ge.research.sadl.ui.processing,
  com.ge.research.sadl.ui.quickfix,
- com.ge.research.sadl.ui.syntaxcoloring
+ com.ge.research.sadl.ui.syntaxcoloring,
+ com.ge.research.sadl.visualize
 Import-Package: org.apache.log4j,
  org.pojava.datetime,
  com.ge.research.sadl.reasoner,
