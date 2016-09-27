@@ -81,7 +81,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected OntModel theJenaModel = null;
 	protected DeclarationExtensions declarationExtensions = null;
 	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
-	private List<String> numericOperators = Arrays.asList("*","+","/","-","%");
+	private List<String> numericOperators = Arrays.asList("*","+","/","-","%","^");
 	private EObject defaultContext;
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
@@ -699,6 +699,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			BigDecimal value;
 			if (expression instanceof Unit) {
 				value = ((Unit)expression).getValue().getValue();
+				String unit = ((Unit)expression).getUnit();
+				ConceptName uqcn = new ConceptName(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+				return new TypeCheckInfo(uqcn, uqcn, this, expression);
 			}
 			else {
 				value = ((NumberLiteral)expression).getValue();
@@ -722,7 +725,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			//What do we do about the rest of the constants?
 			/*'--' | 'a'? 'type' ;*/
 			String constant = ((Constant) expression).getConstant();	
-			if(constant.equals("PI")){
+			if(constant.equals("PI") || constant.equals("e")){
 				ConceptName constantConceptName = new ConceptName(XSD.decimal.getURI());
 				constantConceptName.setType(ConceptType.DATATYPEPROPERTY);
 				return new TypeCheckInfo(constantConceptName, constantConceptName, this, expression);
@@ -786,7 +789,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (binopreturn != null) {
 				return binopreturn;
 			}
-			if (numericOperators.contains(((BinaryOperation) expression).getOp())) {
+			if (isNumericOperator(((BinaryOperation) expression).getOp())) {
 				ConceptName decimalLiteralConceptName = new ConceptName(XSD.decimal.getURI());
 				decimalLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 				return new TypeCheckInfo(decimalLiteralConceptName, decimalLiteralConceptName, this, expression);
@@ -1703,6 +1706,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (leftConceptName.equals(rightConceptName)) {
 				return true;
 			}
+			else if (isNumericOperator(operations)) {
+				if (isNumericType(leftConceptName) && isNumericType(rightConceptName)) {
+					return true;
+				}
+			}
 			else if (leftConceptName.getType() == null || rightConceptName.getType() == null) {
 				if (rightConceptName.getType() == null && leftConceptName.getType() == null) {
 					return true;
@@ -1775,6 +1783,36 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
+	private boolean isNumericOperator(String op) {
+		if (numericOperators.contains(op)) return true;
+		return false;
+	}
+
+	private boolean isNumericOperator(List<String> operations) {
+		Iterator<String> itr = operations.iterator();
+		while (itr.hasNext()) {
+			if (isNumericOperator(itr.next())) return true;
+		}
+		return false;
+	}
+
+	private boolean isNumericType(ConceptName conceptName) {
+		try {
+			if (conceptName.getUri().equals(XSD.decimal.getURI()) ||
+					conceptName.getUri().equals(XSD.integer.getURI()) ||
+					conceptName.getUri().equals(XSD.xdouble.getURI()) ||
+					conceptName.getUri().equals(XSD.xfloat.getURI()) ||
+					conceptName.getUri().equals(XSD.xint.getURI()) ||
+					conceptName.getUri().equals(XSD.xlong.getURI())) {
+				return true;
+			}
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 	protected boolean isQualifyingListOperation(List<String> operations, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
 		if (operations.contains("contain") || operations.contains("contains") && leftTypeCheckInfo != null && 
 				leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
