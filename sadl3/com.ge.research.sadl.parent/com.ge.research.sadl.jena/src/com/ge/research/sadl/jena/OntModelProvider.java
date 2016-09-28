@@ -9,6 +9,7 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
+import com.ge.research.sadl.model.gp.SadlCommand;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Property;
 
@@ -21,6 +22,7 @@ public class OntModelProvider {
 		String modelName;
 		OntModel model;
 		List<Object> otherContent;
+		List<SadlCommand> sadlCommands = null;
 		Map<EObject, Property> impliedPropertiesUsed = null;
 		boolean isLoading = false;
 		boolean hasCircularImport = false;
@@ -70,6 +72,19 @@ public class OntModelProvider {
 		adapter.isLoading = false;  // loading is complete
 	}
 	
+	public static void attach(Resource resource, OntModel model, String modelName,
+			List<SadlCommand> sadlCommands) {
+		OntModelAdapter adapter = findAdapter(resource);
+		if (adapter == null) {
+			adapter = new OntModelAdapter();
+			resource.eAdapters().add(adapter);
+		}
+		adapter.modelName = modelName;
+		adapter.model = model;
+		adapter.sadlCommands = sadlCommands;
+		adapter.isLoading = false;  // loading is complete
+	}
+	
 	public static void addOtherContent(Resource resource, Object otherContent) {
 		OntModelAdapter adapter = findAdapter(resource);
 		if (adapter != null) {
@@ -84,6 +99,14 @@ public class OntModelProvider {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null) {
 			return a.otherContent;
+		}
+		return null;
+	}
+	
+	public static List<SadlCommand> getSadlCommands(Resource resource) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null) {
+			return a.sadlCommands;
 		}
 		return null;
 	}
@@ -150,5 +173,5 @@ public class OntModelProvider {
 	public static void setSadlListModel(OntModel model) {
 		sadlListModel = model;
 	}
-	
+
 }
