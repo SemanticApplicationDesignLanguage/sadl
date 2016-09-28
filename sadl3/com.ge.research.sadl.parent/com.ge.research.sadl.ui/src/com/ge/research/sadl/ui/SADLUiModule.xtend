@@ -28,7 +28,6 @@ import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorP
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
@@ -37,6 +36,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin
 import com.ge.research.sadl.builder.MessageManager.MessageType
 import java.io.PrintStream
 import org.eclipse.ui.console.IOConsoleOutputStream
+import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlInferenceProcessorProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -59,6 +60,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends SadlImportProcessorProvider> bindSadlImportProcessorProvider() {
 		return ExtensionPointBasedSadlImportProcessorProvider
+	}
+
+	def Class<? extends SadlInferenceProcessorProvider> bindSadlInferenceProcessorProvider() {
+		return ExtensionPointBasedSadlInferenceProcessorProvider
 	}
 
 	// Registers our own syntax coloring styles.
