@@ -2326,7 +2326,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				return processExpression(srnm);
 			}
 			addError("translate(Name) called with a SadlResource which resolved to null; this needs to be caught in validation", expr);
-			nm = "nullvarname";
+//			nm = "nullvarname";
+			throw new InvalidNameException("Unresolved Name");
 		}
 		return processExpression(qnm);
 	}
