@@ -346,7 +346,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
 				TypeCheckInfo subjtype = getType(((PropOfSubject)leftExpression).getRight());
-				addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
+				ConceptIdentifier subject = subjtype.getTypeCheckType();
+				if (subject != null) {
+					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
+				}
 			}
 			return true;
 		} catch (InvalidNameException e) {
@@ -685,7 +688,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof Declaration){
 			SadlTypeReference decltype = ((Declaration)expression).getType();
-			return getType(decltype);
+			if (decltype != null) {
+				return getType(decltype);
+			}
+			else {
+				issueAcceptor.addError("Unexpected null type error", expression);
+			}
 			//Need to return passing case for time being
 //			ConceptName declarationConceptName = new ConceptName("TODO");
 //			return new TypeCheckInfo(declarationConceptName, declarationConceptName);
@@ -764,7 +772,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Expression el = ((ElementInList)expression).getElement();
 			if (el instanceof PropOfSubject) {
 				TypeCheckInfo listtype = getType(((PropOfSubject)el).getRight());
-				if (listtype.getRangeValueType() != RangeValueType.LIST) {
+				if (listtype == null) {
+					issueAcceptor.addError("Unable to get the List type", el);
+				}
+				else if (listtype.getRangeValueType() != RangeValueType.LIST) {
 					issueAcceptor.addError("Expected a List", el);
 				}
 				else {
@@ -1086,7 +1097,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					TypeCheckInfo leftTypeCheckInfo;
 					if (domainList.size() == 1) {
 						ConceptName cn1 = createTypedConceptName(propuri, oct);
-						leftTypeCheckInfo = new TypeCheckInfo(createTypedConceptName(propuri, oct), createTypedConceptName(domainList.get(0).getURI(), OntConceptType.CLASS), this, predicate);
+						ConceptName cn2 = null;
+						if (domainList.get(0).isURIResource()) {
+							cn2 = createTypedConceptName(domainList.get(0).getURI(), OntConceptType.CLASS);
+							leftTypeCheckInfo = new TypeCheckInfo(createTypedConceptName(propuri, oct), cn2, this, predicate);
+						}
+						else {						
+							leftTypeCheckInfo = createTypeCheckInfoForNonUriPropertyRange(domainList.get(0), cn1, predicate, cn1.getType());
+						}
 						leftTypeCheckInfo.setTypeToExprRelationship("domain");
 					}
 					else {
