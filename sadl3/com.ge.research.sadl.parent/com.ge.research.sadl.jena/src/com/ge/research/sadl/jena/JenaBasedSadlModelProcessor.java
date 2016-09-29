@@ -345,6 +345,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				theJenaModel = m;
 				setModelName(OntModelProvider.getModelName(resource));
+				setModelAlias(OntModelProvider.getModelPrefix(resource));
 			}
 		}
 		if (fsa !=null) {
@@ -392,7 +393,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 						mapping[1] = SADL_BASE_MODEL_URI;
-						mapping[2] = null;
+						mapping[2] = SADL_BASE_MODEL_PREFIX;
 						newMappings.add(mapping);
 					}
 				}
@@ -409,7 +410,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 						mapping[1] = SADL_LIST_MODEL_URI;
-						mapping[2] = null;
+						mapping[2] = SADL_LIST_MODEL_PREFIX;
 						newMappings.add(mapping);
 					}
 				}
@@ -422,7 +423,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				String[] mapping = new String[3];
 				mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + owlFN);
 				mapping[1] = getModelName();
-				mapping[2] = null;
+				mapping[2] = getModelAlias();
 
 				newMappings.add(mapping);
 				
@@ -671,7 +672,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							if (imrsrc instanceof XtextResource) {
 								((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 								sadlImplicitModel = OntModelProvider.find(imrsrc);
-								OntModelProvider.attach(imrsrc, sadlImplicitModel, SADL_IMPLICIT_MODEL_URI);
+								OntModelProvider.attach(imrsrc, sadlImplicitModel, SADL_IMPLICIT_MODEL_URI, SADL_IMPLICIT_MODEL_PREFIX);
 							}
 							else {
 								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
@@ -866,10 +867,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
     	logger.debug("onValidate completed for Resource '" + resource.getURI() + "'");
     	if (getSadlCommands() != null && getSadlCommands().size() > 0) {
-    		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getSadlCommands());
+    		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getModelAlias(), getSadlCommands());
     	}
     	else {
-       		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName());
+       		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getModelAlias());
     	}
 		if (issueAcceptor != null) {
 			try {

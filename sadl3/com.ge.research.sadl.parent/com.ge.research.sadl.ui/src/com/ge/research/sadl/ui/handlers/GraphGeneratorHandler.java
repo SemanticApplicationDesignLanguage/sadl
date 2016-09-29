@@ -113,7 +113,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 						String srnm = getSadlResourceConcreteName(sr);
 						OntConceptType srType = getSadlResourceOntConceptType(sr);
 						if (srType.equals(OntConceptType.CLASS)) {
-							GraphGenerator gg = new GraphGenerator(m, new ConceptName(getSadlResourceUri(sr)));
+							GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 							ResultSet rs = gg.generateClassNeighborhood(10); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
 							if (rs != null) {
 								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
@@ -132,7 +132,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 						else if (srType.equals(OntConceptType.CLASS_PROPERTY) ||
 								srType.equals(OntConceptType.DATATYPE_PROPERTY) ||
 								srType.equals(OntConceptType.RDF_PROPERTY)) {
-							GraphGenerator gg = new GraphGenerator(m, new ConceptName(getSadlResourceUri(sr)));
+							GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 							ResultSet rs = gg.generatePropertyNeighborhood(10);
 							if (rs != null) {
 								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
@@ -142,7 +142,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 							}
 						}
 						else if (srType.equals(OntConceptType.INSTANCE)) {
-							GraphGenerator gg = new GraphGenerator(m, new ConceptName(getSadlResourceUri(sr)));
+							GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 							ResultSet rs = gg.generateIndividualNeighborhood(10);
 							if (rs != null) {
 								graphResultSet(visualizers.get(0), project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
@@ -380,6 +380,9 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	private String nodeText(String publicUri, String prefix) {
 		if (prefix == null) {
 			return publicUri;
+		}
+		else if (publicUri.contains("#")) {
+			return prefix + ":" + publicUri.substring(publicUri.indexOf("#") + 1);
 		}
 		return prefix + " (" + publicUri + ")";
 	}

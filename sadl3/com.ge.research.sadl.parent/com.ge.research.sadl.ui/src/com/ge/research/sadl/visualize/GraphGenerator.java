@@ -1,15 +1,18 @@
 package com.ge.research.sadl.visualize;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.Individual;
@@ -44,6 +47,7 @@ public class GraphGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
 	OntModel model = null;
 	ConceptName anchor = null;
+	private IConfigurationManagerForIDE configMgr;
 	
 	public enum Orientation {TD, LR}
 	
@@ -145,7 +149,8 @@ public class GraphGenerator {
 					}
 				}
 				else if (ontcls.isURIResource()) {
-					return ontcls.getLocalName();
+					return uriResourceToString(ontcls);
+//					return ontcls.getLocalName();
 				}
 				else if (ontcls.isRestriction()) {
 					return restrictionToString(ontcls);
@@ -156,7 +161,7 @@ public class GraphGenerator {
 			}
 			else if (obj instanceof Resource) {
 				if (((Resource)obj).isURIResource()) {
-					return ((Resource) obj).getLocalName();
+					return uriResourceToString((Resource) obj);
 				}
 				else {
 					return obj.toString();
@@ -182,12 +187,36 @@ public class GraphGenerator {
 				}
 			}
 			else if (obj instanceof ConceptName) {
-				return ((ConceptName)obj).getName();
+				return conceptNameToString((ConceptName)obj);
 			}
 			else {
 				return obj.toString();
 			}
 			return null;
+		}
+
+		private String conceptNameToString(ConceptName obj) {
+			// get the prefix and if there is one generate qname
+			if (obj.getPrefix() != null) {
+				return obj.getPrefix() + ":" + obj.getName();
+			}
+			return obj.getName();
+		}
+
+		private String uriResourceToString(Resource rsrc) {
+			if (!rsrc.isURIResource()) {
+				return rsrc.toString();
+			}
+			String ns = rsrc.getNameSpace();
+			if (ns.endsWith("#")) {
+				ns = ns.substring(0, ns.length() - 1);
+			}
+			// get the prefix and if there is one generate qname
+			String prefix = configMgr.getGlobalPrefix(ns);
+			if (prefix != null) {
+				return prefix + ":" + rsrc.getLocalName();
+			}
+			return rsrc.getLocalName();
 		}
 
 		private String restrictionToString(OntClass ontcls) {
@@ -359,11 +388,12 @@ public class GraphGenerator {
 		}
 	}
 	
-	public GraphGenerator(OntModel m, ConceptName startNode) {
-		model = m;
+	public GraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, ConceptName startNode) throws ConfigurationException, IOException {
+		this.configMgr = configMgr;
+		model = configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS);
 		anchor = startNode;
 	}
-	
+
 	public ResultSet generateClassHierarchy(int size) throws ConfigurationException {
 		OntClass cls = model.getOntClass(anchor.toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();

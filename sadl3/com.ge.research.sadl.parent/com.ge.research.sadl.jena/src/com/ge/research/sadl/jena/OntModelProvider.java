@@ -20,6 +20,7 @@ public class OntModelProvider {
 	
 	static class OntModelAdapter extends AdapterImpl  {
 		String modelName;
+		String modelPrefix;
 		OntModel model;
 		List<Object> otherContent;
 		List<SadlCommand> sadlCommands = null;
@@ -61,18 +62,19 @@ public class OntModelProvider {
 		return false;
 	}
 
-	public static void attach(Resource resource, OntModel model, String modelName) {
+	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix) {
 		OntModelAdapter adapter = findAdapter(resource);
 		if (adapter == null) {
 			adapter = new OntModelAdapter();
 			resource.eAdapters().add(adapter);
 		}
 		adapter.modelName = modelName;
+		adapter.modelPrefix = modelPrefix;
 		adapter.model = model;
 		adapter.isLoading = false;  // loading is complete
 	}
 	
-	public static void attach(Resource resource, OntModel model, String modelName,
+	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix, 
 			List<SadlCommand> sadlCommands) {
 		OntModelAdapter adapter = findAdapter(resource);
 		if (adapter == null) {
@@ -80,6 +82,7 @@ public class OntModelProvider {
 			resource.eAdapters().add(adapter);
 		}
 		adapter.modelName = modelName;
+		adapter.modelPrefix = modelPrefix;
 		adapter.model = model;
 		adapter.sadlCommands = sadlCommands;
 		adapter.isLoading = false;  // loading is complete
@@ -154,6 +157,14 @@ public class OntModelProvider {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null) {
 			return a.modelName;
+		}
+		return null;
+	}
+
+	public static String getModelPrefix(Resource resource) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null) {
+			return a.modelPrefix;
 		}
 		return null;
 	}
