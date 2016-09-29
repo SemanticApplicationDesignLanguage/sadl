@@ -3,14 +3,28 @@ package com.ge.research.sadl.perspective.handlers;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.xtext.findReferences.IReferenceFinder;
+import org.eclipse.xtext.findReferences.TargetURIs;
+import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.resource.IReferenceDescription;
+import org.eclipse.xtext.resource.IResourceDescription;
+import org.eclipse.xtext.resource.IResourceDescriptions;
+import org.eclipse.xtext.ui.editor.findrefs.EditorResourceAccess;
+import org.eclipse.xtext.ui.editor.findrefs.TargetURIConverter;
+
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
@@ -20,22 +34,29 @@ import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.perspective.visualize.GraphGenerator;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.SADLPackage;
+import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDFS;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.sADL.SadlResource;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 
+@SuppressWarnings("restriction")
 public class GraphGeneratorHandler extends SadlActionHandler {
+	
+	public GraphGeneratorHandler() {
+		System.out.println("hello");
+	}
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -259,8 +280,50 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	protected ResultSet importsToResultSet(IConfigurationManagerForIDE configMgr, String publicUri, String prefix, IFile trgtFile, boolean derivedFN) throws ConfigurationException, IOException {
 		List<String[]> importList = new ArrayList<String[]>();
 		importList = findImports(importList, configMgr, publicUri, prefix);
+		findIncomingImports(trgtFile, importList);
 		if (importList != null && importList.size() > 0) {
 			return listToResultSet(importList, trgtFile, derivedFN);
+		}
+		return null;
+	}
+	
+	
+	
+	@Inject TargetURIConverter uriConverter;
+	@Inject IReferenceFinder referenceFinder;
+	@Inject EditorResourceAccess editorResourceAccess;
+	@Inject IResourceDescriptions indexData;
+
+	private void findIncomingImports(IFile trgtFile, final List<String[]> imports) {
+		URI uri = URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true);
+		final IEObjectDescription targetDesc = getModelOf(uri);
+		TargetURIs targetURIs = uriConverter.fromIterable(Collections.singleton(targetDesc.getEObjectURI()));
+		referenceFinder.findAllReferences(targetURIs, editorResourceAccess, indexData, new IReferenceFinder.Acceptor() {
+			
+			@Override
+			public void accept(EObject source, URI sourceURI, EReference eReference, int index, EObject targetOrProxy,
+					URI targetURI) {
+				// ignore
+			}
+			
+			@Override
+			public void accept(IReferenceDescription description) {
+				IEObjectDescription sourceDesc = getModelOf(description.getSourceEObjectUri());
+				String[] entry = new String[3];
+				entry[0] = targetDesc.getQualifiedName().toString();
+				entry[1] = "importedBy";
+				entry[2] = sourceDesc.getQualifiedName().toString();
+				imports.add(entry);
+			}
+		}, null);
+	}
+	
+	private IEObjectDescription getModelOf(URI uri) {
+		IResourceDescription sourceResourceDescription = indexData.getResourceDescription(uri.trimFragment());
+		for (IEObjectDescription desc: sourceResourceDescription.getExportedObjects()) {
+			if (desc.getEClass() == SADLPackage.Literals.SADL_MODEL) {
+				return desc;
+			}
 		}
 		return null;
 	}
