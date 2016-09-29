@@ -480,8 +480,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (results != null) {
 				modelErrorsToOutput(resource, results);
 			}
-			else if (getOtherKnowledgeStructure() != null) {
-				results = translator.translateAndSaveModelWithOtherStructure(getTheJenaModel(), getOtherKnowledgeStructure(), 
+			else if (getOtherKnowledgeStructure(resource) != null) {
+				results = translator.translateAndSaveModelWithOtherStructure(getTheJenaModel(), getOtherKnowledgeStructure(resource), 
 						modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), owlFN);
 				return results;
 			}
@@ -549,9 +549,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     	return null;
     }
 	
-	private Object getOtherKnowledgeStructure() {
-		if (getEquations() != null) {
-			return getEquations();
+	private Object getOtherKnowledgeStructure(Resource resource) {
+		if (getEquations(resource) != null) {
+			return getEquations(resource);
 		}
 		return null;
 	}
@@ -1576,7 +1576,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		equations.add(eq);
 	}
 	
-	public List<Equation> getEquations() {
+	public List<Equation> getEquations(Resource resource) {
+		List<Object> other = OntModelProvider.getOtherContent(resource);
 		return equations;
 	}
 	
