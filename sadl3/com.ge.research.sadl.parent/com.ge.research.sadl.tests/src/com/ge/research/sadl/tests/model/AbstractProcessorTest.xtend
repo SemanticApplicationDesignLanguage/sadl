@@ -10,7 +10,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import com.ge.research.sadl.processing.SadlModelProcessorProvider.CompositeModelProcessor
 import com.ge.research.sadl.tests.AbstractSADLParsingTest
 
-class AbstractProcessorTest extends AbstractSADLParsingTest {
+abstract class AbstractProcessorTest extends AbstractSADLParsingTest {
 	
 	@Inject IModelProcessorProvider processorProvider
 	

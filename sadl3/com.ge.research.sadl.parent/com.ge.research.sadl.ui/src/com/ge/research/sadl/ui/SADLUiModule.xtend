@@ -36,10 +36,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin
 import com.ge.research.sadl.builder.MessageManager.MessageType
 import java.io.PrintStream
 import org.eclipse.ui.console.IOConsoleOutputStream
-import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
-import com.google.inject.name.Names
-import com.google.inject.Binder
-import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
+import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlInferenceProcessorProvider
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -64,6 +62,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 		return ExtensionPointBasedSadlImportProcessorProvider
 	}
 
+	def Class<? extends SadlInferenceProcessorProvider> bindSadlInferenceProcessorProvider() {
+		return ExtensionPointBasedSadlInferenceProcessorProvider
+	}
+
 	// Registers our own syntax coloring styles.
 	def Class<? extends IHighlightingConfiguration> bindILexicalHighlightingConfiguration() {
 		return SadlHighlightingConfiguration
@@ -84,8 +86,4 @@ class SADLUiModule extends AbstractSADLUiModule {
     	return SadlRootPreferencePage
 	}
 	
-	def configurePreferenceStoreInitializer(Binder binder) {
-        binder.bind(IPreferenceStoreInitializer).annotatedWith(Names.named("SadlPreferencesInitializer")) // $NON-NLS-1$
-        .to(SadlPreferencesInitializer);
-    }
 }

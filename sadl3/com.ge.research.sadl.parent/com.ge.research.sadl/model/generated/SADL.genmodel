@@ -233,6 +233,7 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlNumberLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlNumberLiteral/literalNumber"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlNumberLiteral/unit"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlStringLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlStringLiteral/literalString"/>

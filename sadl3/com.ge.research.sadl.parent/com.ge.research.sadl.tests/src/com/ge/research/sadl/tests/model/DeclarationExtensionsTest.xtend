@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.model.CircularDefinitionException
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -31,10 +32,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.model.CircularDefinitionException
-import org.junit.Ignore
-import com.ge.research.sadl.sADL.SadlInstance
-import com.ge.research.sadl.sADL.SadlStatement
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -190,13 +187,9 @@ class DeclarationExtensionsTest {
 			uri "http://sadl.imp/annotation" alias ann.
 			
 			Rock (alias "rock") is a top-level class, 
-				described by color (note "what color it is") with values of type string,
-				described by hardness with values of type Hardness.
+				described by color (note "what color it is") with values of type string.
 			
-			Hardness is a top-level class, must be one of {Hard (alias "not soft"), Soft (note "not hard")}. 
-			
-			ofInterestTo is a type of annotation.
-			//color has ofInterestTo Everyone .	// uncommenting this causes color to be a declared instance
+			color has ofInterestTo Everyone .	// uncommenting this causes color to be a declared instance
 		'''.parse
 		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
 		

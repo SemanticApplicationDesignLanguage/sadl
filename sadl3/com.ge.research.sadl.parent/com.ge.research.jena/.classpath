@@ -22,7 +22,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/opencsv.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pojava.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/reasoner-api.jar" sourcepath="C:/Users/200005201/sadl3-master5/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-api/target/reasoner-api-3.0.0-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl.jar" sourcepath="lib/reasoner-impl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl.jar" sourcepath="/reasoner-impl"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax-api.jar"/>
