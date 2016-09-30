@@ -70,10 +70,6 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	
 	protected ISadlInferenceProcessor processor;
 	
-	public SadlActionHandler() {
-//		SadlActivator.getInstance().getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL).injectMembers(this);
-	}
-	
 	protected abstract String[] getValidTargetFileTypes();
 
 	protected Object[] getCommandTarget(String[] validTargetTypes) throws TranslationException {

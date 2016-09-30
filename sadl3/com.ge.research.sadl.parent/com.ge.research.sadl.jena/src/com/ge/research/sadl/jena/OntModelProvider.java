@@ -90,12 +90,15 @@ public class OntModelProvider {
 	
 	public static void addOtherContent(Resource resource, Object otherContent) {
 		OntModelAdapter adapter = findAdapter(resource);
-		if (adapter != null) {
-			if (adapter.otherContent == null) {
-				adapter.otherContent = new ArrayList<Object>();
-			}
-			adapter.otherContent.add(otherContent);
+		if (adapter == null) {
+			adapter = new OntModelAdapter();
+			adapter.isLoading = true;
+			resource.eAdapters().add(adapter);
 		}
+		if (adapter.otherContent == null) {
+			adapter.otherContent = new ArrayList<Object>();
+		}
+		adapter.otherContent.add(otherContent);
 	}
 	
 	public static List<Object> getOtherContent(Resource resource) {

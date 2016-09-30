@@ -19,21 +19,21 @@
       </command>
       <command
             categoryId="sadl.commands.category"
-            id="SADL.GraphImports"
+            id="SADL.GenerateGraph"
             name="Show Graph">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.ui.handlers.RunInference"
+            defaultHandler="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.perspective.handlers.RunInference"
             id="referenceToSadlMenuId"
             name="Test Model">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.ui.handlers.RunQuery"
+            defaultHandler="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.perspective.handlers.RunQuery"
             id="referenceToSadlMenuId2"
             name="Run Query">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.ui.handlers.GraphGeneratorHandler"
+            defaultHandler="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.perspective.handlers.GraphGeneratorHandler"
             id="referenceToSadlMenuId3"
             name="Show Graph">
       </command>
@@ -43,17 +43,17 @@
          point="org.eclipse.ui.handlers">
       <handler
             commandId="SADL.RunInference"
-            class="com.ge.research.sadl.ui.handlers.RunInference">
+            class="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.perspective.handlers.RunInference">
       </handler>
       <handler
             commandId="SADL.RunQuery"
-            class="com.ge.research.sadl.ui.handlers.RunQuery">
+             class="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.perspective.handlers.RunQuery">
       </handler>
       <handler
-            commandId="SADL.GraphImports"
-            class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.ui.handlers.GraphGeneratorHandler">
+            commandId="SADL.GenerateGraph"
+            class="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.perspective.handlers.RunInference">
       </handler>
-   </extension>
+    </extension>
   
    <extension
          point="org.eclipse.ui.bindings">
@@ -70,7 +70,7 @@
             sequence="M1+q">
       </key>
       <key
-            commandId="SADL.GraphImports"            
+            commandId="SADL.GenerateGraph"            
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+g">
