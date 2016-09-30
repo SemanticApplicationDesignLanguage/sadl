@@ -3,6 +3,7 @@ package com.ge.research.sadl.ui.handlers;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,18 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.xtext.findReferences.IReferenceFinder;
+import org.eclipse.xtext.findReferences.TargetURIs;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
+import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.resource.IReferenceDescription;
+import org.eclipse.xtext.resource.IResourceDescription;
+import org.eclipse.xtext.resource.IResourceDescriptions;
+import org.eclipse.xtext.ui.editor.findrefs.EditorResourceAccess;
+import org.eclipse.xtext.ui.editor.findrefs.TargetURIConverter;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
@@ -39,6 +51,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.Name;
+import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 
@@ -308,12 +321,55 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	protected ResultSet importsToResultSet(IConfigurationManagerForIDE configMgr, String publicUri, String prefix, IFile trgtFile, boolean derivedFN) throws ConfigurationException, IOException {
 		List<String[]> importList = new ArrayList<String[]>();
 		importList = findImports(importList, configMgr, publicUri, prefix);
+		findIncomingImports(trgtFile, importList);
 		if (importList != null && importList.size() > 0) {
 			return listToResultSet(importList, trgtFile, derivedFN);
 		}
 		return null;
 	}
 
+	@SuppressWarnings("restriction")
+	@Inject TargetURIConverter uriConverter;
+	@SuppressWarnings("restriction")
+	@Inject IReferenceFinder referenceFinder;
+	@SuppressWarnings("restriction")
+	@Inject EditorResourceAccess editorResourceAccess;
+	@Inject IResourceDescriptions indexData;
+
+	private void findIncomingImports(IFile trgtFile, final List<String[]> imports) {
+		URI uri = URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true);
+		final IEObjectDescription targetDesc = getModelOf(uri);
+		TargetURIs targetURIs = uriConverter.fromIterable(Collections.singleton(targetDesc.getEObjectURI()));
+		referenceFinder.findAllReferences(targetURIs, editorResourceAccess, indexData, new IReferenceFinder.Acceptor() {
+
+			@Override
+			public void accept(EObject source, URI sourceURI, EReference eReference, int index, EObject targetOrProxy,
+					URI targetURI) {
+				// ignore
+			}
+
+			@Override
+			public void accept(IReferenceDescription description) {
+				IEObjectDescription sourceDesc = getModelOf(description.getSourceEObjectUri());
+				String[] entry = new String[3];
+				entry[0] = targetDesc.getQualifiedName().toString();
+				entry[1] = "importedBy";
+				entry[2] = sourceDesc.getQualifiedName().toString();
+				imports.add(entry);
+			}
+		}, null);
+	}
+
+	private IEObjectDescription getModelOf(URI uri) {
+		IResourceDescription sourceResourceDescription = indexData.getResourceDescription(uri.trimFragment());
+		for (IEObjectDescription desc: sourceResourceDescription.getExportedObjects()) {
+			if (desc.getEClass() == SADLPackage.Literals.SADL_MODEL) {
+				return desc;
+			}
+		}
+		return null;
+	}
+		
 	private ResultSet listToResultSet(List<String[]> importList, IFile trgtFile, boolean derivedFN) {
 		String[][] data = new String[importList.size()][];
 		for (int i = 0; i < importList.size(); i++) {
