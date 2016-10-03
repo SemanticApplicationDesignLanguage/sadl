@@ -705,7 +705,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof NumberLiteral || expression instanceof Unit){
 			BigDecimal value;
-			if (expression instanceof Unit) {
+			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
 				String unit = ((Unit)expression).getUnit();
 				ConceptName uqcn = new ConceptName(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
@@ -951,7 +951,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						checkEmbeddedPropOfSubject(subject, predicate);
 					}
 					//
-					addEffectiveRange(predicateType, subject);
+					if(predicateType.getTypeCheckType() != null){
+						addEffectiveRange(predicateType, subject);
+					}
 					return predicateType;
 				}
 			} catch (PrefixNotFoundException e) {
@@ -968,16 +970,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					checkEmbeddedPropOfSubject(subject, predicate);
 				}
 				//
-				addEffectiveRange(predicateType, subject);
+				if(predicateType.getTypeCheckType() != null){
+					addEffectiveRange(predicateType, subject);
+				}
 				return predicateType;
 			}
 		}
 		TypeCheckInfo predicateType = getType(predicate);
 		if (subject instanceof PropOfSubject) {
-			checkEmbeddedPropOfSubject(subject, predicate);			
+			checkEmbeddedPropOfSubject(subject, predicate);	
+			//TODO figure out how to add effective range for propOfSubj		
+		}else if(predicateType != null && predicateType.getTypeCheckType() != null){
+			//add interface range
+			addEffectiveRange(predicateType, subject);
 		}
-		//add interface range
-		addEffectiveRange(predicateType, subject);
 		return predicateType;
 	}
 	
