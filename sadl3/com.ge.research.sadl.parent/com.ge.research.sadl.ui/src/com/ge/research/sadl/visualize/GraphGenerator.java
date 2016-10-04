@@ -218,7 +218,7 @@ public class GraphGenerator {
 			}
 			return rsrc.getLocalName();
 		}
-
+		
 		private String restrictionToString(OntClass ontcls) {
 			if (ontcls.as(Restriction.class).isSomeValuesFromRestriction()) {
 				StringBuilder sb = new StringBuilder("some values of ");
@@ -726,6 +726,21 @@ public class GraphGenerator {
 			return rs;
 		}
 		return null;
+	}
+
+	public String uriStringToString(String uri) {
+		int sep = uri.lastIndexOf('#');
+		if (sep > 0) {
+			String ns = uri.substring(0, sep - 1);
+			String ln = uri.substring(sep);
+			// get the prefix and if there is one generate qname
+			String prefix = configMgr.getGlobalPrefix(ns);
+			if (prefix != null) {
+				return prefix + ":" + ln;
+			}
+			return ln;
+		}
+		return uri;
 	}
 
 }
