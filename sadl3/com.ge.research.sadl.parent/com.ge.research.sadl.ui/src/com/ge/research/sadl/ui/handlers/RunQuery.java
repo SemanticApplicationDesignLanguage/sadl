@@ -1,4 +1,4 @@
-package com.ge.research.sadl.perspective.handlers;
+package com.ge.research.sadl.ui.handlers;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +54,6 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.external.ExternalEmfResource;
-import com.ge.research.sadl.perspective.util.Util;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext;
 import com.ge.research.sadl.reasoner.ConfigurationManager;

@@ -1,4 +1,4 @@
-package com.ge.research.sadl.perspective.handlers;
+package com.ge.research.sadl.ui.handlers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,8 +67,6 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	protected SadlInferenceProcessorProvider processorProvider;
 	@Inject
 	protected IPreferenceValuesProvider preferenceProvider;
-	@Inject
-	public DeclarationExtensions declarationExtensions;
 	
 	protected ISadlInferenceProcessor processor;
 	
