@@ -1,4 +1,4 @@
-package com.ge.research.sadl.perspective.handlers;
+package com.ge.research.sadl.ui.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
