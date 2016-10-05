@@ -1344,6 +1344,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (element.getName() != null) {
 				query.setFqName(getModelNamespace() + element.getName());
 			}
+			if (element.getStart().equals("Graph")) {
+				query.setGraph(true);
+			}
 			addSadlCommand(query);
 			return query;
 		}

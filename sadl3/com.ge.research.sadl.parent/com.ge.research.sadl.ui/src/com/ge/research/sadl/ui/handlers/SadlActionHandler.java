@@ -1,6 +1,9 @@
 package com.ge.research.sadl.ui.handlers;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -48,9 +51,12 @@ import org.eclipse.xtext.validation.IResourceValidator;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.model.DeclarationExtensions;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
@@ -345,4 +351,26 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		}
 		return null;
 	}
+
+	protected IGraphVisualizer getVisualizer(IConfigurationManagerForEditing configMgr) {
+		Map<String,String> prefMap = getPreferences();
+		String renderClass = prefMap.get(SadlPreferences.GRAPH_RENDERER_CLASS.getId());
+		
+		List<IGraphVisualizer> visualizers = configMgr.getAvailableGraphRenderers();
+	
+		if (visualizers != null && visualizers.size() > 0) {
+			IGraphVisualizer visualizer = visualizers.get(0);		// replace this by selection and setting preference
+			return visualizer;
+		}
+		return null;
+	}
+
+	protected void graphResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
+			String description, ResultSet rs) throws IOException {
+				String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+				File tmpDirFile = new File(tempDir);
+				tmpDirFile.mkdirs();
+				iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
+				iGraphVisualizer.graphResultSetData(rs);
+			}
 }

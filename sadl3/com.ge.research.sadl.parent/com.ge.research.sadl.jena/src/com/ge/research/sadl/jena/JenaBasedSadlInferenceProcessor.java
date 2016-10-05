@@ -76,10 +76,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		List<SadlCommand> cmds = OntModelProvider.getSadlCommands(resource);
 		if (cmds == null || cmds.size() < 1) {
-			Object[] results = new Object[2];
+			Object[] results = new Object[3];
 			List<String> errors = new ArrayList<String>();
 			errors.add("No commands to process. Inference complete.");
-			results[1] = errors;
+			results[2] = errors;
 			return results;
 		}
 		setModelFolderPath(modelFolderPath);
@@ -94,9 +94,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			e1.printStackTrace();
 		}
 		setTheJenaModel(OntModelProvider.find(resource));
-		Object[] results = new Object[2];
-		List<String> infresults = new ArrayList<String>();
-		results[0] = infresults;
+		Object[] results = new Object[3];
+		results[0] = cmds;
+		List<Object> infresults = new ArrayList<Object>();
+		results[1] = infresults;
 		Iterator<SadlCommand> tpitr = cmds.iterator();
 		while (tpitr.hasNext()) {
 			SadlCommand cmd = tpitr.next();
@@ -112,7 +113,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 //					}
 //					else {
 						ResultSet rs = processAdhocQuery(query);
-						results[0] = rs;
+						infresults.add(rs);
 //					}
 				}
 			} catch (TranslationException e) {
