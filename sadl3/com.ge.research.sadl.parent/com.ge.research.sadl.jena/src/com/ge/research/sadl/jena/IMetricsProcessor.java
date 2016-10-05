@@ -17,8 +17,6 @@ public interface IMetricsProcessor {
 	
 	boolean addControlledOrMonitoredVariable(String specName, String propertyUri);
 
-	boolean addEffectiveDomain(String specName, String property, String domain, boolean isList);
-
 	boolean addEffectiveRange(String specName, String className, String property, String range, boolean isList);
 
 	void setMetricsTargetModel(OntModel metricsTargetModel);

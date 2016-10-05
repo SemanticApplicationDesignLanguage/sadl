@@ -212,12 +212,6 @@ public class MetricsProcessor implements IMetricsProcessor {
 	}
 
 	@Override
-	public boolean addEffectiveDomain(String specName, String property, String domain, boolean isList) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public void setMetricsTargetModel(OntModel metricsTargetModel) {
 		// TODO Auto-generated method stub
 		
