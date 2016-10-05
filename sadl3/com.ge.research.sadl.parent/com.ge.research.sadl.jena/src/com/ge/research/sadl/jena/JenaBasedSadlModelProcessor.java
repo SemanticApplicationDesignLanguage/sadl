@@ -432,7 +432,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				if (otherContent != null) {
 					for (int i = 0;  i < otherContent.size(); i++) {
 						if (otherContent.get(i) instanceof List<?>) {
-							equations = (List<Equation>) otherContent.get(i); 
+							setEquations((List<Equation>) otherContent.get(i)); 
 						}
 					}
 				}
@@ -451,9 +451,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private String getOwlModelFormat(ProcessorContext context) {
 		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
-		String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
-		if (pv != null && pv.length() > 0) {
-			format = pv;
+		if (context != null) {
+			String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
+			if (pv != null && pv.length() > 0) {
+				format = pv;
+			}
 		}
 		return format;
 	}
@@ -1565,11 +1567,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	protected void addEquation(Resource resource, Equation eq) {
-		if (equations == null) {
-			equations = new ArrayList<Equation>();
-			OntModelProvider.addOtherContent(resource, equations);
+		if (getEquations() == null) {
+			setEquations(new ArrayList<Equation>());
+			OntModelProvider.addOtherContent(resource, getEquations());
 		}
-		equations.add(eq);
+		getEquations().add(eq);
 	}
 	
 	public List<Equation> getEquations(Resource resource) {
@@ -5387,7 +5389,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		this.importSadlListModel = importSadlListModel;
 	}
 	
-	private OntModel getOntModelFromString(Resource resource, String serializedModel) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+	public OntModel getOntModelFromString(Resource resource, String serializedModel) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		OntModel listModel = prepareEmptyOntModel(resource);
 		InputStream stream = new ByteArrayInputStream(serializedModel.getBytes());
 		listModel.read(stream, null);
@@ -5458,5 +5460,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			serialize.append(")");
 		}
 		return obj;
+	}
+	public List<Equation> getEquations() {
+		return equations;
+	}
+	public void setEquations(List<Equation> equations) {
+		this.equations = equations;
 	}
 }
