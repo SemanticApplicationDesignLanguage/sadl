@@ -8,7 +8,7 @@
             id="sadl.commands.category">
       </category>
       <command
-            name="Run Inference"
+            name="Test Model"
             categoryId="sadl.commands.category"
             id="SADL.RunInference">
       </command>
@@ -23,22 +23,21 @@
             name="Show Graph">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.ui.handlers.RunInference"
+            defaultHandler="com.ge.research.sadl.ui.handlers.RunInference"
             id="referenceToSadlMenuId"
             name="Test Model">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.ui.handlers.RunQuery"
+            defaultHandler="com.ge.research.sadl.ui.handlers.RunQuery"
             id="referenceToSadlMenuId2"
             name="Run Query">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.ui.handlers.GraphGeneratorHandler"
+            defaultHandler="com.ge.research.sadl.ui.handlers.GraphGeneratorHandler"
             id="referenceToSadlMenuId3"
-            name="Show Graph">
+            name="Test Model">
       </command>
    </extension>
-   
    <extension
          point="org.eclipse.ui.handlers">
       <handler
@@ -73,7 +72,7 @@
             commandId="SADL.GenerateGraph"            
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+g">
+            sequence="M1+v">
       </key>
    </extension>
    <extension
@@ -81,28 +80,27 @@
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               icon="icons/releng_gears.gif"
                id="sadl.menus.sadlMenu"
                label="SADL"
                mnemonic="M">
                
-             <visibleWhen checkEnabled="false">
+<!--             <visibleWhen checkEnabled="false">
   				<with variable="activeWorkbenchWindow.activePerspective">
      	   			<equals value="sadl.perspectives.SADL"/>
     			</with>
-			</visibleWhen>
+			</visibleWhen> -->
              <command
-                   commandId="referenceToSadlMenuId"
+                   commandId="SADL.RunInference"
                    icon="icons/releng_gears.gif"
                    tooltip="Test Model">
              </command>
              <command
-                   commandId="referenceToSadlMenuId2"
+                   commandId="SADL.RunQuery"
                    icon="icons/releng_gears.gif"
                    tooltip="Run Query">
              </command>
              <command
-                   commandId="referenceToSadlMenuId3"
+                   commandId="SADL.GenerateGraph"
                    icon="icons/releng_gears.gif"
                    tooltip="Show Graph">
              </command>
@@ -116,13 +114,13 @@
                id="sadl.toolbar">
             <command
                   commandId="referenceToSadlMenuId"
-                  icon="icons/06-link.png"
+                  icon="icons/releng_gears.gif"
                   style="pulldown">
-              <visibleWhen checkEnabled="false">
+<!--              <visibleWhen checkEnabled="false">
   				<with variable="activeWorkbenchWindow.activePerspective">
-     	   			<equals value="sadl.perspectives.SADL"/>
+     	   			<equals value="com.ge.research.sadl.perspectives.SADL"/>
     			</with>
-			  </visibleWhen>
+			  </visibleWhen> -->
             </command>
          </toolbar>
       </menuContribution>
@@ -130,19 +128,19 @@
             allPopups="false"
             locationURI="menu:referenceToSadlMenuId">
          <command
-               commandId="referenceToSadlMenuId"
+               commandId="SADL.RunInference"
                icon="icons/releng_gears.gif"
                label="Test Model"
                style="push">
          </command>
          <command
-               commandId="referenceToSadlMenuId2"
+               commandId="SADL.RunQuery"
                icon="icons/releng_gears.gif"
                label="Run Query"
                style="push">
          </command>
          <command
-               commandId="referenceToSadlMenuId3"
+               commandId="SADL.GenerateGraph"
                icon="icons/releng_gears.gif"
                label="Show Graph"
                style="push">
@@ -177,7 +175,7 @@
          </includes>
       </viewerContentBinding>
    </extension>
-   <extension
+<!--   <extension
          point="org.eclipse.ui.newWizards">
       <category
             id="sadl.wizards.SADL"
@@ -201,12 +199,12 @@
             name="SADL Ontology File"
             project="false">
       </wizard>
-   </extension>
+   </extension> -->
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
             class="com.ge.research.sadl.perspective.perspectives.SADL"
-            icon="icons/06-link.png"
+            icon="icons/releng_gears.gif"
             id="sadl.perspectives.SADL"
             name="SADL">
       </perspective>

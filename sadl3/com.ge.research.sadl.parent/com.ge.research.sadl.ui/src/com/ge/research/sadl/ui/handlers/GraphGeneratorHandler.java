@@ -32,10 +32,8 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
-import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -43,8 +41,8 @@ import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.ui.SadlConsole;
+import com.ge.research.sadl.ui.visualize.GraphGenerator;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.ge.research.sadl.visualize.GraphGenerator;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -160,19 +158,6 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		}
 	}
 	
-	protected IGraphVisualizer getVisualizer(IConfigurationManagerForEditing configMgr) {
-		Map<String,String> prefMap = getPreferences();
-		String renderClass = prefMap.get(SadlPreferences.GRAPH_RENDERER_CLASS.getId());
-		
-		List<IGraphVisualizer> visualizers = configMgr.getAvailableGraphRenderers();
-
-		if (visualizers != null && visualizers.size() > 0) {
-			IGraphVisualizer visualizer = visualizers.get(0);		// replace this by selection and setting preference
-			return visualizer;
-		}
-		return null;
-	}
-
 	protected void graphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
 			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius)
 			throws CircularDefinitionException, ConfigurationException, IOException {
@@ -259,15 +244,6 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		graphResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
 	}
 
-	protected void graphResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName,
-			String graphName, String anchorNode, String description, ResultSet rs) throws IOException {
-		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
-		File tmpDirFile = new File(tempDir);
-		tmpDirFile.mkdirs();
-		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
-		iGraphVisualizer.graphResultSetData(rs);
-	}
-
 	private ResultSet sadlResourceToDomainRangeResultSet(IConfigurationManagerForIDE configMgr, String publicUri, SadlResource sr) throws CircularDefinitionException, ConfigurationException, IOException {
 		String srUri = getSadlResourceUri(sr);
 		OntModel m = configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS);
@@ -275,7 +251,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		if (cls != null) {
 			List<String[]> domainRange = new ArrayList<String[]>();
 			domainRange = addToDomainRangeGraph(domainRange, m, cls);
-			return listToResultSet(domainRange);
+			String[] headers = null;
+			return listToResultSet(headers, domainRange);
 		}
 		return null;
 	}
@@ -311,7 +288,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		if (cls != null) {
 			List<String[]> clsHier = new ArrayList<String[]>();
 			clsHier = addToClassHierarchy(cls, clsHier);
-			return listToResultSet(clsHier);
+			String[] headers = null;
+			return listToResultSet(headers, clsHier);
 		}
 		return null;
 	}
@@ -335,7 +313,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		importList = findImports(importList, configMgr, publicUri, prefix, graphRadius);
 		findIncomingImports(trgtFile, importList, graphRadius);
 		if (importList != null && importList.size() > 0) {
-			return listToResultSet(importList, trgtFile, derivedFN);
+			String[] headers = null;
+			return listToResultSet(headers, importList, trgtFile, derivedFN);
 		}
 		return null;
 	}
@@ -393,7 +372,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return null;
 	}
 
-	private ResultSet listToResultSet(List<String[]> importList, IFile trgtFile, boolean derivedFN) {
+	private ResultSet listToResultSet(String[] headers, List<String[]> importList, IFile trgtFile, boolean derivedFN) {
 		String[][] data = new String[importList.size()][];
 		for (int i = 0; i < importList.size(); i++) {
 			data[i] = importList.get(i);
@@ -401,16 +380,16 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				data[i][2] = trgtFile.getFullPath().lastSegment();
 			}
 		}
-		return new ResultSet(data);
+		return new ResultSet(headers, data);
 	}
 
-	private ResultSet listToResultSet(List<String[]> importList) {
+	private ResultSet listToResultSet(String[] headers, List<String[]> importList) {
 		if (importList.size() > 0) {
 			String[][] data = new String[importList.size()][];
 			for (int i = 0; i < importList.size(); i++) {
 				data[i] = importList.get(i);
 			}
-			return new ResultSet(data);
+			return new ResultSet(headers, data);
 		}
 		return null;
 	}

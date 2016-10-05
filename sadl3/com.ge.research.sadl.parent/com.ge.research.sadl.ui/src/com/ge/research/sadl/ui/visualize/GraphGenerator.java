@@ -1,4 +1,4 @@
-package com.ge.research.sadl.visualize;
+package com.ge.research.sadl.ui.visualize;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,8 +45,8 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class GraphGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
-	OntModel model = null;
-	ConceptName anchor = null;
+	private OntModel model = null;
+	private ConceptName anchor = null;
 	private IConfigurationManagerForIDE configMgr;
 	
 	public enum Orientation {TD, LR}
@@ -390,12 +390,12 @@ public class GraphGenerator {
 	
 	public GraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, ConceptName startNode) throws ConfigurationException, IOException {
 		this.configMgr = configMgr;
-		model = configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS);
-		anchor = startNode;
+		setModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
+		setAnchor(startNode);
 	}
 
 	public ResultSet generateClassHierarchy(int size) throws ConfigurationException {
-		OntClass cls = model.getOntClass(anchor.toFQString());
+		OntClass cls = getModel().getOntClass(getAnchor().toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		data = generateClassSubclasses(cls, data);
 		data = generateClassSuperclasses(cls, data);
@@ -404,7 +404,7 @@ public class GraphGenerator {
 	}
 
 	public ResultSet generateClassNeighborhood(int size) throws ConfigurationException {
-		OntClass cls = model.getOntClass(anchor.toFQString());
+		OntClass cls = getModel().getOntClass(getAnchor().toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		data = generateClassPropertiesWithDomain(cls, data);
 		data = generateClassPropertiesWithRange(cls, data);
@@ -412,7 +412,7 @@ public class GraphGenerator {
 	}
 
 	public ResultSet generatePropertyNeighborhood(int size) throws ConfigurationException {
-		OntProperty ontprop = model.getOntProperty(anchor.toFQString());
+		OntProperty ontprop = getModel().getOntProperty(getAnchor().toFQString());
 
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		ExtendedIterator<? extends OntResource> eitr = ontprop.listDomain();
@@ -434,7 +434,7 @@ public class GraphGenerator {
 	}
 
 	public ResultSet generateIndividualNeighborhood(int size) throws ConfigurationException {
-		Individual inst = model.getIndividual(anchor.toFQString());
+		Individual inst = getModel().getIndividual(getAnchor().toFQString());
 
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		data = generateIndividualNeighborhood(inst, data);
@@ -444,7 +444,7 @@ public class GraphGenerator {
 	private List<GraphSegment> generateIndividualNeighborhood(Individual inst,
 			List<GraphSegment> data) {
 		// as object
-		StmtIterator sitr = model.listStatements(null, null, inst);
+		StmtIterator sitr = getModel().listStatements(null, null, inst);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Property prop = stmt.getPredicate();
@@ -479,7 +479,7 @@ public class GraphGenerator {
 
 	private List<GraphSegment> generateClassPropertiesWithRange(OntClass cls,
 			List<GraphSegment> data) {
-		StmtIterator sitr = model.listStatements(null, RDFS.range, cls);
+		StmtIterator sitr = getModel().listStatements(null, RDFS.range, cls);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Resource prop = stmt.getSubject();
@@ -501,7 +501,7 @@ public class GraphGenerator {
 
 	private List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls,
 			List<GraphSegment> data) {
-		StmtIterator sitr = model.listStatements(null, RDFS.domain, cls);
+		StmtIterator sitr = getModel().listStatements(null, RDFS.domain, cls);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Resource prop = stmt.getSubject();
@@ -512,7 +512,7 @@ public class GraphGenerator {
 		// now look for unions? or intersections containing the cls
 		String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 		qstr += "select ?prop where {?prop rdfs:domain/(owl:unionOf/rdf:rest*/rdf:first)? <" + cls.getURI() + ">}";
-		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), model);;		
+		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getModel());;		
 		com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
 		while (results.hasNext()) {
 			QuerySolution soln = results.next();
@@ -527,7 +527,7 @@ public class GraphGenerator {
 	private List<GraphSegment> generatePropertyRange(OntClass cls,
 			Resource prop, List<GraphSegment> data) {
 		boolean isList = false;
-		Statement stmt = prop.getProperty(model.getAnnotationProperty(SadlModelProcessor.LIST_RANGE_ANNOTATION_PROPERTY));
+		Statement stmt = prop.getProperty(getModel().getAnnotationProperty(SadlModelProcessor.LIST_RANGE_ANNOTATION_PROPERTY));
 		if (stmt != null) {
 			RDFNode obj = stmt.getObject();
 			if (obj.isLiteral()) {
@@ -541,9 +541,9 @@ public class GraphGenerator {
 		while (eitr.hasNext()) {
 			OntResource rng = eitr.next();
 			if (isList && rng.canAs(OntClass.class)) {
-				Resource listClass = model.getResource(SadlModelProcessor.SADL_LIST_MODEL_LIST_URI);
+				Resource listClass = getModel().getResource(SadlModelProcessor.SADL_LIST_MODEL_LIST_URI);
 				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
-					StmtIterator stmtitr = model.listStatements(rng, RDFS.subClassOf, (RDFNode)null);
+					StmtIterator stmtitr = getModel().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
 					while (stmtitr.hasNext()) {
 //					ExtendedIterator<OntClass> scitr = rng.as(OntClass.class).listSuperClasses(true);
 //					while (scitr.hasNext()) {
@@ -551,7 +551,7 @@ public class GraphGenerator {
 						RDFNode supclsnode = supclsstmt.getObject();
 						if (supclsnode.canAs(OntClass.class)){ 
 							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
-							if (subcls.hasProperty(OWL.onProperty, model.getProperty(SadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
+							if (subcls.hasProperty(OWL.onProperty, getModel().getProperty(SadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
 								Statement avf = subcls.getProperty(OWL.allValuesFrom);
 								if (avf != null) {
 									RDFNode listtype = avf.getObject();
@@ -678,7 +678,7 @@ public class GraphGenerator {
 			String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 	//		qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? ?superclass}";
 			qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? <" + cls.getURI() + ">}";
-			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), model);;		
+			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getModel());;		
 			com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
 			while (results.hasNext()) {
 				QuerySolution soln = results.next();
@@ -741,6 +741,22 @@ public class GraphGenerator {
 			return ln;
 		}
 		return uri;
+	}
+
+	protected OntModel getModel() {
+		return model;
+	}
+
+	protected void setModel(OntModel model) {
+		this.model = model;
+	}
+
+	protected ConceptName getAnchor() {
+		return anchor;
+	}
+
+	protected void setAnchor(ConceptName anchor) {
+		this.anchor = anchor;
 	}
 
 }
