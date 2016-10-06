@@ -67,6 +67,16 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     private Object encapsulatingTarget = null;	// when a query is in a test
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private RulePart rulePart = RulePart.NOT_A_RULE;
+    
+	public static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
+	public static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
+	public static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
+	public static final String SADL_LIST_MODEL_LIST_URI = SADL_LIST_MODEL_URI + "#List";
+	public static final String SADL_LIST_MODEL_FIRST_URI = SADL_LIST_MODEL_URI + "#first";
+	public static final String SADL_LIST_MODEL_REST_URI = SADL_LIST_MODEL_URI + "#rest";
+	public static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthRestriction";
+	public static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMinRestriction";
+	public static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
 
 	@Inject
 	public DeclarationExtensions declarationExtensions;

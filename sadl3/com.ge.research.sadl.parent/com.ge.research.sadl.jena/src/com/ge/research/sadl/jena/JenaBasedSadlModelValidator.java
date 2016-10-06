@@ -705,7 +705,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof NumberLiteral || expression instanceof Unit){
 			BigDecimal value;
-			if (expression instanceof Unit) {
+			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
 				String unit = ((Unit)expression).getUnit();
 				ConceptName uqcn = new ConceptName(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
@@ -950,6 +950,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (subject instanceof PropOfSubject) {
 						checkEmbeddedPropOfSubject(subject, predicate);
 					}
+					//
+					if(predicateType.getTypeCheckType() != null){
+						addEffectiveRange(predicateType, subject);
+					}
 					return predicateType;
 				}
 			} catch (PrefixNotFoundException e) {
@@ -965,14 +969,33 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (subject instanceof PropOfSubject) {
 					checkEmbeddedPropOfSubject(subject, predicate);
 				}
+				//
+				if(predicateType.getTypeCheckType() != null){
+					addEffectiveRange(predicateType, subject);
+				}
 				return predicateType;
 			}
 		}
 		TypeCheckInfo predicateType = getType(predicate);
 		if (subject instanceof PropOfSubject) {
-			checkEmbeddedPropOfSubject(subject, predicate);			
+			checkEmbeddedPropOfSubject(subject, predicate);	
+			//TODO figure out how to add effective range for propOfSubj		
+		}else if(predicateType != null && predicateType.getTypeCheckType() != null){
+			//add interface range
+			addEffectiveRange(predicateType, subject);
 		}
 		return predicateType;
+	}
+	
+	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject){
+		//TODO fix?
+		if(metricsProcessor != null){
+			String className = declarationExtensions.getConceptUri(((Name) subject).getName());
+			String propertyName = predicateType.getExpressionType().toString();
+			String rangeStr = predicateType.getTypeCheckType().toString();
+			boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
+			metricsProcessor.addEffectiveRange(null, className, propertyName, rangeStr, isList);
+		}
 	}
 	
 	private String getTypeCheckTypeString(TypeCheckInfo tci) {

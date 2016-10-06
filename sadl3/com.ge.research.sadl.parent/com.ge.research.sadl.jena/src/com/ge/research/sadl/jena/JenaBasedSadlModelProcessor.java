@@ -255,16 +255,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private boolean importSadlListModel = false;
 	private OntModel sadlListModel = null;
 	private static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
-	private static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
 	private static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
-	public static final String SADL_LIST_MODEL_LIST_URI = SADL_LIST_MODEL_URI + "#List";
-	public static final String SADL_LIST_MODEL_FIRST_URI = SADL_LIST_MODEL_URI + "#first";
-	private static final String SADL_LIST_MODEL_REST_URI = SADL_LIST_MODEL_URI + "#rest";
-	private static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthRestriction";
-	private static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMinRestriction";
-	private static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
 	
-	private static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
 	
 	private OntModel sadlImplicitModel = null;
 	public static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
@@ -353,6 +345,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				theJenaModel = m;
 				setModelName(OntModelProvider.getModelName(resource));
+				setModelAlias(OntModelProvider.getModelPrefix(resource));
 			}
 		}
 		if (fsa !=null) {
@@ -400,7 +393,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 						mapping[1] = SADL_BASE_MODEL_URI;
-						mapping[2] = null;
+						mapping[2] = SADL_BASE_MODEL_PREFIX;
 						newMappings.add(mapping);
 					}
 				}
@@ -417,7 +410,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 						mapping[1] = SADL_LIST_MODEL_URI;
-						mapping[2] = null;
+						mapping[2] = SADL_LIST_MODEL_PREFIX;
 						newMappings.add(mapping);
 					}
 				}
@@ -430,7 +423,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				String[] mapping = new String[3];
 				mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + owlFN);
 				mapping[1] = getModelName();
-				mapping[2] = null;
+				mapping[2] = getModelAlias();
 
 				newMappings.add(mapping);
 				
@@ -439,7 +432,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				if (otherContent != null) {
 					for (int i = 0;  i < otherContent.size(); i++) {
 						if (otherContent.get(i) instanceof List<?>) {
-							equations = (List<Equation>) otherContent.get(i); 
+							setEquations((List<Equation>) otherContent.get(i)); 
 						}
 					}
 				}
@@ -458,9 +451,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private String getOwlModelFormat(ProcessorContext context) {
 		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
-		String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
-		if (pv != null && pv.length() > 0) {
-			format = pv;
+		if (context != null) {
+			String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
+			if (pv != null && pv.length() > 0) {
+				format = pv;
+			}
 		}
 		return format;
 	}
@@ -679,7 +674,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							if (imrsrc instanceof XtextResource) {
 								((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 								sadlImplicitModel = OntModelProvider.find(imrsrc);
-								OntModelProvider.attach(imrsrc, sadlImplicitModel, SADL_IMPLICIT_MODEL_URI);
+								OntModelProvider.attach(imrsrc, sadlImplicitModel, SADL_IMPLICIT_MODEL_URI, SADL_IMPLICIT_MODEL_PREFIX);
 							}
 							else {
 								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
@@ -874,10 +869,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
     	logger.debug("onValidate completed for Resource '" + resource.getURI() + "'");
     	if (getSadlCommands() != null && getSadlCommands().size() > 0) {
-    		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getSadlCommands());
+    		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getModelAlias(), getSadlCommands());
     	}
     	else {
-       		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName());
+       		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getModelAlias());
     	}
 		if (issueAcceptor != null) {
 			try {
@@ -1351,6 +1346,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (element.getName() != null) {
 				query.setFqName(getModelNamespace() + element.getName());
 			}
+			if (element.getStart().equals("Graph")) {
+				query.setGraph(true);
+			}
 			addSadlCommand(query);
 			return query;
 		}
@@ -1569,11 +1567,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	protected void addEquation(Resource resource, Equation eq) {
-		if (equations == null) {
-			equations = new ArrayList<Equation>();
-			OntModelProvider.addOtherContent(resource, equations);
+		if (getEquations() == null) {
+			setEquations(new ArrayList<Equation>());
+			OntModelProvider.addOtherContent(resource, getEquations());
 		}
-		equations.add(eq);
+		getEquations().add(eq);
 	}
 	
 	public List<Equation> getEquations(Resource resource) {
@@ -2327,8 +2325,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				return processExpression(srnm);
 			}
 			addError("translate(Name) called with a SadlResource which resolved to null; this needs to be caught in validation", expr);
-//			nm = "nullvarname";
-			throw new InvalidNameException("Unresolved Name");
+			throw new InvalidNameException("Unable to resolve SadlResource to a name");
 		}
 		return processExpression(qnm);
 	}
@@ -5392,7 +5389,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		this.importSadlListModel = importSadlListModel;
 	}
 	
-	private OntModel getOntModelFromString(Resource resource, String serializedModel) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+	public OntModel getOntModelFromString(Resource resource, String serializedModel) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		OntModel listModel = prepareEmptyOntModel(resource);
 		InputStream stream = new ByteArrayInputStream(serializedModel.getBytes());
 		listModel.read(stream, null);
@@ -5407,8 +5404,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} catch (Exception e) {
 				throw new JenaProcessorException(e.getMessage(), e);
 			}
-			getTheJenaModel().addSubModel(sadlListModel);
+//			getTheJenaModel().addSubModel(sadlListModel);
 			setImportSadlListModel(true);
+			addImportToJenaModel(getModelName(), SADL_LIST_MODEL_URI, sadlListModel);
 			return true;
 		}
 		return false;
@@ -5462,5 +5460,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			serialize.append(")");
 		}
 		return obj;
+	}
+	public List<Equation> getEquations() {
+		return equations;
+	}
+	public void setEquations(List<Equation> equations) {
+		this.equations = equations;
 	}
 }
