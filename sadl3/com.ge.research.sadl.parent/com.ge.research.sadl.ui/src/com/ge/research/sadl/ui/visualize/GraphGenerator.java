@@ -709,7 +709,7 @@ public class GraphGenerator {
 		return data;
 	}
 
-	private ResultSet convertDataToResultSet(List<GraphSegment> data) {
+	protected ResultSet convertDataToResultSet(List<GraphSegment> data) {
 		Object array[][] = new Object[data.size()][3];
 		boolean dataFound = false;
 		for(int i = 0; i < data.size(); i++) {

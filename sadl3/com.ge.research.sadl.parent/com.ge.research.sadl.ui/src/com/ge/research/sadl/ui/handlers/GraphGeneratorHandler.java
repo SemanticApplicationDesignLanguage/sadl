@@ -15,6 +15,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.xtext.findReferences.IReferenceFinder;
 import org.eclipse.xtext.findReferences.TargetURIs;
 import org.eclipse.xtext.resource.IEObjectDescription;
@@ -113,11 +116,10 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
 				}
 				
-				int graphRadius = getGraphingRadius();
-				
 				if (target.length > 3 && target[3] != null) {
 					if (target[3] instanceof SadlResource) {
 						SadlResource sr = getSadlResource(target[3]);
+						int graphRadius = getGraphingRadius(5);		
 						graphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius);
 					}
 					else {
@@ -125,6 +127,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 					}
 				}
 				else {
+					int graphRadius = getGraphingRadius(10);		
 					graphSelectedResourceImports(project, trgtFile, derivedFN, configMgr, visualizer, publicUri, prefix, graphRadius);
 				}
 			}
@@ -141,9 +144,27 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return event;
 	}
 
-	protected int getGraphingRadius() {
-		// TODO get from preferences or dialog?
-		return 5;
+	protected int getGraphingRadius(int defaultSize) {
+		Shell shell = new Shell();
+		InputDialog dlg = new InputDialog(
+				shell,
+				"Graph Radius",
+				"How many edges from anchor?",
+				"" + defaultSize,
+				null);
+		dlg.open();
+		if (dlg.getReturnCode() != Window.OK) {
+			return defaultSize;
+		}
+		String strval = dlg.getValue();
+		try {
+			int intVal = Integer.parseInt(strval.trim());
+			return intVal;
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return defaultSize;
 	}
 
 	protected void graphSelectedResourceImports(IProject project, IFile trgtFile, boolean derivedFN,
@@ -167,12 +188,13 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generateClassNeighborhood(graphRadius); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
+				String anchorNode = nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", anchorNode, "Domains and ranges", rs);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No properties found for this class.\n");
 			}
-			rs = gg.generateClassHierarchy(10); //sadlResourceToClassHierarchy(configMgr, publicUri, sr);
+			rs = gg.generateClassHierarchy(graphRadius); //sadlResourceToClassHierarchy(configMgr, publicUri, sr);
 			if (rs != null) {
 				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"ch", "ch", srnm, "Class hierarchy", rs);
 			}
@@ -186,7 +208,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generatePropertyNeighborhood(graphRadius);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No information found for this property.\n");
@@ -207,6 +229,15 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		}
 	}
 
+	protected String getSadlResourceAnchor(SadlResource sr) {
+		String anchorNode = nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
+		return anchorNode;
+	}
+
+	private String getSadlResourcePrefix(SadlResource sr) {
+		return declarationExtensions.getConceptPrefix(sr);
+	}
+
 	protected SadlResource getSadlResource(Object target3) throws IOException {
 		if (target3 instanceof Name) {
 			return ((Name)target3).getName();
@@ -222,6 +253,9 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 
 	protected OntConceptType getSadlResourceOntConceptType(SadlResource sr) throws CircularDefinitionException {
+		if (sr instanceof Name && ((Name)sr).getName() != null) {
+			return declarationExtensions.getOntConceptType(((Name)sr).getName());
+		}
 		OntConceptType srType = declarationExtensions.getOntConceptType(sr);
 		return srType;
 	}
@@ -240,6 +274,13 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		String baseFileName = trgtFile.getFullPath().removeFileExtension().lastSegment().toString();
 		String graphName = prefix;
 		String anchorNode = nodeText(publicUri, prefix);
+		if (prefix == null) {
+			anchorNode = publicUri.substring(publicUri.lastIndexOf('/') + 1);
+			if (anchorNode.endsWith(".owl")) {
+				anchorNode = anchorNode.substring(0, anchorNode.length() - 4);
+			}
+			graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
+		}
 		String description = "Graph of Imports";
 		graphResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
 	}
@@ -380,7 +421,10 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				data[i][2] = trgtFile.getFullPath().lastSegment();
 			}
 		}
-		return new ResultSet(headers, data);
+		if (headers != null && headers.length > 0) {
+			return new ResultSet(headers, data);
+		}
+		return new ResultSet(data);
 	}
 
 	private ResultSet listToResultSet(String[] headers, List<String[]> importList) {
