@@ -279,7 +279,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append("];\n");
 		}
 		sb.append("}\n");
-		System.out.println(sb.toString());
+//		System.out.println(sb.toString());
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
 				((bfn != null ? bfn : "") + "Graph.dot"));
 		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
