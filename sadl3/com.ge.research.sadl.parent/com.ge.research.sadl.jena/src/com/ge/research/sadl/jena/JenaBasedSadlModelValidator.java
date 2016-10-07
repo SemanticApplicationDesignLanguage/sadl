@@ -1720,8 +1720,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? leftTypeCheckInfo.getTypeCheckType(): null;
-		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? rightTypeCheckInfo.getTypeCheckType() : null; 
+		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
+		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
 		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
 				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
 				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
@@ -1751,6 +1751,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return false;
 		}
 		return true;
+	}
+	
+	private ConceptIdentifier getConceptIdentifierFromTypeCheckInfo(TypeCheckInfo tci) {
+		if (tci.getExplicitValue() != null) {
+			RDFNode val = tci.getExplicitValue();
+			if (val.isURIResource()) {
+				ConceptName cn = new ConceptName(val.asResource().getURI());
+				cn.setType(ConceptType.INDIVIDUAL);
+				return cn;
+			}
+			else if (val.isLiteral()) {
+				ConceptName literalConceptName = new ConceptName(val.asLiteral().getDatatype().getURI());
+				literalConceptName.setType(ConceptType.RDFDATATYPE);
+				return literalConceptName;
+			}
+		}
+		return tci.getTypeCheckType();
 	}
 
 	private boolean compareTypesUsingImpliedProperties(List<String> operations, Expression leftExpression,
@@ -1813,8 +1830,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
-		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo.getTypeCheckType();
-		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo.getTypeCheckType();
+		ConceptIdentifier leftConceptIdentifier = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+		ConceptIdentifier rightConceptIdentifier = getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
 		if (leftConceptIdentifier == null || rightConceptIdentifier == null) {
 			return false;
 		}

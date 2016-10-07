@@ -43,6 +43,7 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.sADL.SadlResource;
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.visualize.GraphGenerator;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -117,8 +118,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				}
 				
 				if (target.length > 3 && target[3] != null) {
-					if (target[3] instanceof SadlResource) {
-						SadlResource sr = getSadlResource(target[3]);
+					SadlResource sr = getSadlResource(target[3]);
+					if (sr != null) {
 						int graphRadius = getGraphingRadius(5);		
 						graphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius);
 					}
@@ -241,10 +242,13 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		if (target3 instanceof Name) {
 			return ((Name)target3).getName();
 		}
+		else if (target3 instanceof SadlSimpleTypeReference) {
+			return ((SadlSimpleTypeReference)target3).getType();
+		}
 		else if (target3 instanceof SadlResource) {
 			return (SadlResource) target3;
 		}
-		throw new IOException("Selection '" + target3.toString() + "' is not a SadlResource");
+		throw new IOException("Selection '" + target3.toString() + "' is a '" + target3.getClass().getCanonicalName() + "', don't know how to get a SadlResource from it.");
 	}
 
 	protected String getSadlResourceUri(SadlResource sr) {

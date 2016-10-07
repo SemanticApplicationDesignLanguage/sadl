@@ -665,30 +665,35 @@ public class GraphGenerator {
 
 	private List<GraphSegment> generateClassSuperclasses(OntClass cls, int size, List<GraphSegment> data) {
 		if (size <= 0) return data;
-		ExtendedIterator<OntClass> eitr = cls.listSuperClasses(true);
-		while (eitr.hasNext()) {
-			Resource scr = eitr.next();
-
-//		StmtIterator sitr = getJenaModel().listStatements(cls, RDFS.subClassOf, (Resource)null);
-//		while (sitr.hasNext()) {
-//			Resource scr = sitr.next().getSubject();
-			
-			if (scr != null && !scr.equals(cls) && scr.canAs(OntClass.class)) {
-				OntClass supercls = scr.as(OntClass.class);
-				GraphSegment sg;
-				if (supercls.isRestriction()) {
-					sg = new GraphSegment(supercls, "restricts", cls);
-					sg.addHeadAttribute(COLOR, RED);
-					sg.addEdgeAttribute(COLOR, RED);
+		try {
+			ExtendedIterator<OntClass> eitr = cls.listSuperClasses(true);
+			while (eitr.hasNext()) {
+				Resource scr = eitr.next();
+	
+	//		StmtIterator sitr = getJenaModel().listStatements(cls, RDFS.subClassOf, (Resource)null);
+	//		while (sitr.hasNext()) {
+	//			Resource scr = sitr.next().getSubject();
+				
+				if (scr != null && !scr.equals(cls) && scr.canAs(OntClass.class)) {
+					OntClass supercls = scr.as(OntClass.class);
+					GraphSegment sg;
+					if (supercls.isRestriction()) {
+						sg = new GraphSegment(supercls, "restricts", cls);
+						sg.addHeadAttribute(COLOR, RED);
+						sg.addEdgeAttribute(COLOR, RED);
+					}
+					else {
+						sg = new GraphSegment(supercls, "subClass", cls);
+					}
+					if (!data.contains(sg)) {
+						data.add(sg);
+					}
+					data = generateClassSuperclasses(supercls, size - 1, data);
 				}
-				else {
-					sg = new GraphSegment(supercls, "subClass", cls);
-				}
-				if (!data.contains(sg)) {
-					data.add(sg);
-				}
-				data = generateClassSuperclasses(supercls, size - 1, data);
 			}
+		}
+		catch (Throwable t) {
+			
 		}
 		if (cls.isUnionClass()) {
 			// if all of the members of a Union class are subclasses of a common super class, then that common super class is a super class of the Union class
