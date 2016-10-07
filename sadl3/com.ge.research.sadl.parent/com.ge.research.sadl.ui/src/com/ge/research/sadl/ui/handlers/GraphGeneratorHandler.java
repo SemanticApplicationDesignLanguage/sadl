@@ -188,15 +188,14 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generateClassNeighborhood(graphRadius); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
 			if (rs != null) {
-				String anchorNode = nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", anchorNode, "Domains and ranges", rs);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No properties found for this class.\n");
 			}
 			rs = gg.generateClassHierarchy(graphRadius); //sadlResourceToClassHierarchy(configMgr, publicUri, sr);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"ch", "ch", srnm, "Class hierarchy", rs);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"ch", "ch", getSadlResourceAnchor(sr), "Class hierarchy", rs);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No class hierarchy found for this class.\n");
@@ -218,7 +217,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generateIndividualNeighborhood(graphRadius);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceUri(sr), "Domains and ranges", rs);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Instance", rs);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No information found for this instance.\n");

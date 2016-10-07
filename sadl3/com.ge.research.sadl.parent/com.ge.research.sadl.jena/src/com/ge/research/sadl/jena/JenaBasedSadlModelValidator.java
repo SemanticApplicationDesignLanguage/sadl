@@ -101,6 +101,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     															//	e.g., the property of a "<property> of <subject>" expression
     	private ConceptIdentifier typeCheckType = null;			// the type of the TypeCheckInfo which must match the other side of the expression,
     															//	e.g., the range of the property of a "<property> of <subject>" expression
+    	private RDFNode explicitValue = null;					// the explicit value that is allowed, as in a hasValue restriction
     	private RangeValueType rangeValueType = RangeValueType.CLASS_OR_DT;	
     															// the range type, one of RangeValueType.CLASS_OR_DT (Class or RDFDataType)
     															//	or LIST (a subclass of http://sadl.org/sadllistmodel#List)
@@ -134,6 +135,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     		}
     	}
     	
+    	public TypeCheckInfo(ConceptName eType, RDFNode valueRestriction, JenaBasedSadlModelValidator validator, Expression ctx) {
+    		setExpressionType(eType);
+    		context = ctx;
+    		if (ctx != null && this.getTypeCheckType() != null) {
+    			validator.expressionsValidated.put(ctx,  this);
+    		}
+    		setExplicitValue(valueRestriction);
+		}
+
     	public TypeCheckInfo(ConceptIdentifier eType, ConceptIdentifier tcType, List<ConceptName> impliedProps, JenaBasedSadlModelValidator validator, EObject ctx) {
     		setExpressionType(eType);
     		setTypeCheckType(tcType);
@@ -151,7 +161,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     		}
     	}
     	
-    	public boolean equals(Object o) {
+		public boolean equals(Object o) {
     		if (o instanceof TypeCheckInfo) {
     			try {
 	    			if (context.equals(((TypeCheckInfo)o).context)) {
@@ -277,6 +287,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 		public void setTypeToExprRelationship(String typeToExprRelationship) {
 			this.typeToExprRelationship = typeToExprRelationship;
+		}
+
+		public RDFNode getExplicitValue() {
+			return explicitValue;
+		}
+
+		public void setExplicitValue(RDFNode explicitValue) {
+			this.explicitValue = explicitValue;
 		}
     }
 	
@@ -1195,6 +1213,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									return new TypeCheckInfo(createTypedConceptName(propuri, declarationExtensions.getOntConceptType(((Name)predicate).getName())), 
 											createTypedConceptName(avf.getURI(), OntConceptType.CLASS), impliedProperties, this, predicate);
 								}
+							}
+							else if (sr.as(OntClass.class).asRestriction().isHasValueRestriction()) {
+								RDFNode hvr = sr.as(OntClass.class).asRestriction().asHasValueRestriction().getHasValue();
+								return new TypeCheckInfo(createTypedConceptName(propuri, declarationExtensions.getOntConceptType(((Name)predicate).getName())), 
+									hvr, this, predicate);
 							}
 						}
 					}
