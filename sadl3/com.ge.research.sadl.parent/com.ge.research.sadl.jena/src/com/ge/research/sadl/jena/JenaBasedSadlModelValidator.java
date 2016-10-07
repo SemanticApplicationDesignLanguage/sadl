@@ -243,7 +243,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				sb.append(", ");
 				sb.append(typeCheckType != null ? typeCheckType.toString() : "unknown type");
 				if (getExplicitValue() != null) {
-					sb.append(", restricted to explicit value '");
+					if (getExplicitValueType().equals(ExplicitValueType.RESTRICTION)) {
+						sb.append(", restricted to explicit value '");
+					}
+					else {
+						sb.append(", is the explicit value '");
+					}
 					sb.append(getExplicitValue().toString());
 					sb.append("'");
 				}
@@ -1717,7 +1722,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? leftTypeCheckInfo.getTypeCheckType(): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? rightTypeCheckInfo.getTypeCheckType() : null; 
-		if (leftConceptIdentifier == null) {
+		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
+				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
+			// Can't type-check on "None" as it represents that it doesn't exist.
+			//TODO
+			return true;
+		}
+		else if (leftConceptIdentifier == null) {
 			issueAcceptor.addError("Type comparison not possible", leftExpression);
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
@@ -1730,12 +1743,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
 			return false;
-		}
-		else if (leftConceptIdentifier.toString().equals("None") || rightConceptIdentifier.toString().equals("None") ||
-				 leftConceptIdentifier.toString().equals("TODO") || rightConceptIdentifier.toString().equals("TODO")) {
-			// Can't type-check on "None" as it represents that it doesn't exist.
-			//TODO
-			return true;
 		}
 		else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
 			if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
