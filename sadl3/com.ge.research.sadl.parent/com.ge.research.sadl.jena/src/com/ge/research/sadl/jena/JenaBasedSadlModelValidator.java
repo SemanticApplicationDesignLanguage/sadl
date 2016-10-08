@@ -28,6 +28,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
@@ -52,7 +53,9 @@ import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
+import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.IntersectionClass;
@@ -63,6 +66,7 @@ import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.UnionClass;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -82,6 +86,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected DeclarationExtensions declarationExtensions = null;
 	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
 	private List<String> numericOperators = Arrays.asList("*","+","/","-","%","^");
+	private List<String> canBeNumericOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=");
 	private EObject defaultContext;
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
@@ -656,6 +661,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else {
 				if (typeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
+					if (sb2 == null) sb2 = new StringBuilder();
 					sb2.append("a List of values of type ");
 				}
 				if (sb2 != null && typeCheckInfo.getTypeCheckType() != null) {
@@ -667,7 +673,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						sb1.replace(0, sb1.length(), "explicit value ");
 					}
 					if (ev.isLiteral()) {
-						sb2.append(ev.asLiteral().getValue().toString());
+						try {
+							sb2.append(ev.asLiteral().getValue().toString());
+						}
+						catch (DatatypeFormatException e) {
+							issueAcceptor.addError(e.getMessage(), typeCheckInfo.context);
+						}
 					}
 					else {
 						sb2.append(ev.toString());
@@ -765,6 +776,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof NumberLiteral || expression instanceof Unit){
 			BigDecimal value;
+			Literal litval;
 			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
 				String unit = ((Unit)expression).getUnit();
@@ -777,12 +789,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName numberLiteralConceptName = null;
 			if (value.stripTrailingZeros().scale() <= 0 || value.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0) {
 				numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
+				litval = theJenaModel.createTypedLiteral(value.intValue());
+				
 			}
 			else {
 				numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+				litval = theJenaModel.createTypedLiteral(value.doubleValue());
 			}
 			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
-			return new TypeCheckInfo(numberLiteralConceptName, theJenaModel.createTypedLiteral(value), ExplicitValueType.VALUE, this, expression);
+			return new TypeCheckInfo(numberLiteralConceptName, litval, ExplicitValueType.VALUE, this, expression);
 		}
 		else if(expression instanceof BooleanLiteral){
 			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
@@ -875,7 +890,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (expression instanceof Sublist) {
 			// the type is the type of the list
 			TypeCheckInfo listtype = getType((((Sublist)expression).getList()));
-			if (!listtype.getRangeValueType().equals(RangeValueType.LIST)) {
+			if (listtype != null && !listtype.getRangeValueType().equals(RangeValueType.LIST)) {
 				issueAcceptor.addError("expected a List", ((Sublist)expression).getList());
 			}
 			return listtype;
@@ -1256,13 +1271,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									TypeCheckInfo avftci = new TypeCheckInfo(createTypedConceptName(propuri, declarationExtensions.getOntConceptType(((Name)predicate).getName())), 
 											createTypedConceptName(avf.getURI(), OntConceptType.CLASS), impliedProperties, this, predicate);
 									avftci.setTypeToExprRelationship("restriction to");
+									if (isListAnnotatedProperty(prop)) {
+										avftci.setRangeValueType(RangeValueType.LIST);
+									}
 									return avftci;
 								}
 							}
 							else if (sr.as(OntClass.class).asRestriction().isHasValueRestriction()) {
 								RDFNode hvr = sr.as(OntClass.class).asRestriction().asHasValueRestriction().getHasValue();
-								return new TypeCheckInfo(createTypedConceptName(propuri, declarationExtensions.getOntConceptType(((Name)predicate).getName())), 
+								TypeCheckInfo hvtci = new TypeCheckInfo(createTypedConceptName(propuri, declarationExtensions.getOntConceptType(((Name)predicate).getName())), 
 									hvr, ExplicitValueType.RESTRICTION, this, predicate);
+								if (isListAnnotatedProperty(prop)) {
+									hvtci.setRangeValueType(RangeValueType.LIST);
+								}
+								return hvtci;
 							}
 						}
 					}
@@ -1270,6 +1292,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return null;
+	}
+
+	private boolean isListAnnotatedProperty(Property prop) {
+		AnnotationProperty annprop = theJenaModel.getAnnotationProperty(JenaBasedSadlModelProcessor.LIST_RANGE_ANNOTATION_PROPERTY);
+		if (annprop != null) {
+			if (prop.hasProperty(annprop)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
@@ -1712,10 +1744,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			return false;
 		}
-		if (leftTypeCheckInfo.getExplicitValue() != null) {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null) {
 			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
 			if (rExprType instanceof ConceptName) {
-				if (!((ConceptName)rExprType).getUri().equals(leftTypeCheckInfo.getExplicitValue().toString())) {
+				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
 					return false;
 				}
 			}
@@ -1842,10 +1875,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (leftConceptName.equals(rightConceptName)) {
 				return true;
 			}
-			else if (isNumericOperator(operations)) {
-				if (isNumericType(leftConceptName) && isNumericType(rightConceptName)) {
-					return true;
-				}
+			else if ((isNumericOperator(operations) || canBeNumericOperator(operations)) && 
+				(isNumericType(leftConceptName) && isNumericType(rightConceptName))) {
+				return true;
 			}
 			else if (leftConceptName.getType() == null || rightConceptName.getType() == null) {
 				if (rightConceptName.getType() == null && leftConceptName.getType() == null) {
@@ -1930,6 +1962,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
+	private boolean canBeNumericOperator(List<String> operations) {
+		Iterator<String> itr = operations.iterator();
+		while (itr.hasNext()) {
+			if (canBeNumericOperator(itr.next())) return true;
+		}
+		return false;
+	}
+	
+	private boolean canBeNumericOperator(String op) {
+		if (canBeNumericOperators.contains(op)) return true;
+		return false;
+	}
+
 	private boolean isNumericOperator(String op) {
 		if (numericOperators.contains(op)) return true;
 		return false;

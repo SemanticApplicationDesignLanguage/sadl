@@ -35,7 +35,7 @@
       <command
             defaultHandler="com.ge.research.sadl.ui.handlers.GraphGeneratorHandler"
             id="referenceToSadlMenuId3"
-            name="Test Model">
+            name="Show Graph">
       </command>
    </extension>
    <extension
