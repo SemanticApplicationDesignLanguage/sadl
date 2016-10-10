@@ -1744,7 +1744,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			return false;
 		}
-		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null) {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
 			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
 			if (rExprType instanceof ConceptName) {
 				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
