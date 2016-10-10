@@ -202,20 +202,31 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				}
 				sb.append(s.toString());
 				sb.append("\"");
+				boolean anchored = false;
 				if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
+					anchored = true;
 					// color the "anchor" node
-					sb.append(" color=lightblue style=filled fontcolor=navyblue");
+					sb.append(" color=lightblue");
+//					if (headAttributes == null || !headAttributes.containsValue("color")) {
+						sb.append(" style=filled");
+//					}
+//					else {
+//						sb.append(" style=bold");
+//					}
+					sb.append(" fontcolor=navyblue");
 				}
 				if (headAttributes != null) {
 					Iterator<Integer> itr = headAttributes.keySet().iterator();
 					while (itr.hasNext()) {
 						Integer key = itr.next();
 						String value = headAttributes.get(key);
-						if (row[key.intValue()] != null) {
-							sb.append(" ");
-							sb.append(value);
-							sb.append("=");
-							sb.append(row[key.intValue()]);
+						if (!anchored || !value.equals("color")) {
+							if (row[key.intValue()] != null) {
+								sb.append(" ");
+								sb.append(value);
+								sb.append("=");
+								sb.append(row[key.intValue()]);
+							}
 						}
 					}
 				}
@@ -232,20 +243,30 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				}
 				sb.append(o.toString());
 				sb.append("\"");
+				boolean anchored = false;
 				if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
 					// color the "anchor" node
-					sb.append(" color=lightblue style=filled fontcolor=navyblue");
+					sb.append(" color=lightblue");
+//					if (tailAttributes == null || !tailAttributes.containsValue("color")) {
+						sb.append(" style=filled");
+//					}
+//					else {
+//						sb.append(" style=bold");
+//					}
+					sb.append(" fontcolor=navyblue");
 				}
 				if (tailAttributes != null) {
 					Iterator<Integer> itr = tailAttributes.keySet().iterator();
 					while (itr.hasNext()) {
 						Integer key = itr.next();
 						String value = tailAttributes.get(key);
-						if (row[key.intValue()] != null) {
-							sb.append(" ");
-							sb.append(value);
-							sb.append("=");
-							sb.append(row[key.intValue()]);
+						if (!anchored || !value.equals("color")) {
+							if (row[key.intValue()] != null) {
+								sb.append(" ");
+								sb.append(value);
+								sb.append("=");
+								sb.append(row[key.intValue()]);
+							}
 						}
 					}
 				}

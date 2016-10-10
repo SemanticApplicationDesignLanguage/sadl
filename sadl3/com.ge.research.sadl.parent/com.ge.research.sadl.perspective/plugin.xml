@@ -35,7 +35,7 @@
       <command
             defaultHandler="com.ge.research.sadl.ui.handlers.GraphGeneratorHandler"
             id="referenceToSadlMenuId3"
-            name="Test Model">
+            name="Show Graph">
       </command>
    </extension>
    <extension
@@ -84,11 +84,11 @@
                label="SADL"
                mnemonic="M">
                
-<!--             <visibleWhen checkEnabled="false">
+             <visibleWhen checkEnabled="false">
   				<with variable="activeWorkbenchWindow.activePerspective">
      	   			<equals value="sadl.perspectives.SADL"/>
     			</with>
-			</visibleWhen> -->
+			</visibleWhen>
              <command
                    commandId="SADL.RunInference"
                    icon="icons/releng_gears.gif"
@@ -116,13 +116,13 @@
                   commandId="referenceToSadlMenuId"
                   icon="icons/releng_gears.gif"
                   style="pulldown">
-<!--              <visibleWhen checkEnabled="false">
-  				<with variable="activeWorkbenchWindow.activePerspective">
-     	   			<equals value="com.ge.research.sadl.perspectives.SADL"/>
-    			</with>
-			  </visibleWhen> -->
             </command>
-         </toolbar>
+              <visibleWhen checkEnabled="false">
+  				<with variable="activeWorkbenchWindow.activePerspective">
+     	   			<equals value="sadl.perspectives.SADL"/>
+    			</with>
+			  </visibleWhen>
+          </toolbar>
       </menuContribution>
       <menuContribution
             allPopups="false"

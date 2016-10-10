@@ -778,7 +778,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		// create validator for expressions
 		if (!disableTypeChecking) {
-			modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions, metricsProcessor);
+			modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions, this, metricsProcessor);
 		}
 		
 		// process rest of parse tree
@@ -4986,7 +4986,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	 * @return
 	 * @throws JenaProcessorException 
 	 */
-	private boolean instanceBelongsToClass(OntModel m, OntResource inst, OntResource cls) throws JenaProcessorException {
+	public boolean instanceBelongsToClass(OntModel m, OntResource inst, OntResource cls) throws JenaProcessorException {
 		// The following cases must be considered:
 		// 1) The class is a union of other classes. Check to see if the instance is a member of any of
 		//		the union classes and if so return true.
@@ -5467,4 +5467,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public void setEquations(List<Equation> equations) {
 		this.equations = equations;
 	}
+	
+	protected boolean isProperty(OntConceptType oct) {
+		if (oct.equals(OntConceptType.DATATYPE_PROPERTY) || 
+				oct.equals(OntConceptType.CLASS_PROPERTY) || 
+				oct.equals(OntConceptType.RDF_PROPERTY) || 
+				oct.equals(OntConceptType.ANNOTATION_PROPERTY)){
+			return true;
+		}
+		return false;
+	}
+	
 }
