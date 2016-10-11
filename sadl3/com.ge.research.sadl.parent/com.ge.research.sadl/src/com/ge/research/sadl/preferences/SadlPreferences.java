@@ -17,6 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.preferences;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.xtext.preferences.PreferenceKey;
 
 @SuppressWarnings("restriction")
@@ -39,9 +42,40 @@ public class SadlPreferences {
 	public static final PreferenceKey DMY_ORDER_DMY = new PreferenceKey("dmy", "");
 	public static final PreferenceKey DMY_ORDER_MDY = new PreferenceKey("mdy", "");
 	public static final PreferenceKey DEEP_VALIDATION_OFF = new PreferenceKey("deepValidationOff", "");
-	public static final PreferenceKey GRAPH_VIZ_PATH = new PreferenceKey("graphvizpath", "");
+	public static final PreferenceKey GRAPH_RENDERER_CLASS= new PreferenceKey("graphrendererclass", "");
 	public static final PreferenceKey CHECK_FOR_AMBIGUOUS_NAMES = new PreferenceKey("ambiguousNameCheckOn", String.valueOf(false));
 	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));
 	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
 	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
+	
+	// Don't forget to add new property to the list below
+	
+	private static final PreferenceKey[] allKeys = {
+			SADL_BASE_URI,
+			OWL_MODEL_FORMAT,
+			RDF_XML_FORMAT,
+			RDF_XML_ABBREV_FORMAT,
+			N_TRIPLE_FORMAT,
+			N3_FORMAT,
+			JENA_TDB,
+			MODEL_NAMESPACES,
+			SADL_FILE_NAMES,
+			PREFIXES_ONLY_AS_NEEDED,
+			VALIDATE_BEFORE_TEST,
+			TEST_WITH_KSERVER,
+			NAMESPACE_IN_QUERY_RESULTS,
+			SHOW_TIMING_INFORMATION,
+			DMY_ORDER_DMY,
+			DMY_ORDER_MDY,
+			DEEP_VALIDATION_OFF,
+			GRAPH_RENDERER_CLASS,
+			CHECK_FOR_AMBIGUOUS_NAMES,
+			DISABLE_TYPE_CHECKING,
+			ENABLE_METRICS_COLLECTION,
+			METRICS_QUERY_FILENAME
+	};
+	
+	public static final List<PreferenceKey> preferences() {
+		return Arrays.asList(allKeys);
+	}
 }

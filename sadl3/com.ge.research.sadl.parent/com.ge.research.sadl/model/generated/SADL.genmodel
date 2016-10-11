@@ -233,6 +233,7 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlNumberLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlNumberLiteral/literalNumber"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlNumberLiteral/unit"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlStringLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlStringLiteral/literalString"/>
@@ -253,6 +254,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//RuleStatement/thens"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//QueryStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//QueryStatement/start"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//QueryStatement/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//QueryStatement/expr"/>
     </genClasses>

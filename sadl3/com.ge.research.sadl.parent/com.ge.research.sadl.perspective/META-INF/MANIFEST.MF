@@ -24,11 +24,12 @@ Require-Bundle: org.eclipse.ui,
  com.google.inject,
  com.ge.research.jena,
  com.ge.research.sadl.ui,
- com.ge.research.sadl
+ com.ge.research.sadl,
+ org.eclipse.xtext.util,
+ org.eclipse.xtext
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: com.ge.research.sadl.utils
 Export-Package: com.ge.research.sadl.perspective,
- com.ge.research.sadl.perspective.handlers,
  com.ge.research.sadl.perspective.perspectives,
  com.ge.research.sadl.perspective.util

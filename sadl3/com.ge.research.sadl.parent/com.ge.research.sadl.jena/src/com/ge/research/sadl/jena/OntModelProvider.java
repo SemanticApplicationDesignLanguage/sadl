@@ -9,6 +9,7 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
+import com.ge.research.sadl.model.gp.SadlCommand;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Property;
 
@@ -19,8 +20,10 @@ public class OntModelProvider {
 	
 	static class OntModelAdapter extends AdapterImpl  {
 		String modelName;
+		String modelPrefix;
 		OntModel model;
 		List<Object> otherContent;
+		List<SadlCommand> sadlCommands = null;
 		Map<EObject, Property> impliedPropertiesUsed = null;
 		boolean isLoading = false;
 		boolean hasCircularImport = false;
@@ -59,31 +62,57 @@ public class OntModelProvider {
 		return false;
 	}
 
-	public static void attach(Resource resource, OntModel model, String modelName) {
+	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix) {
 		OntModelAdapter adapter = findAdapter(resource);
 		if (adapter == null) {
 			adapter = new OntModelAdapter();
 			resource.eAdapters().add(adapter);
 		}
 		adapter.modelName = modelName;
+		adapter.modelPrefix = modelPrefix;
 		adapter.model = model;
+		adapter.isLoading = false;  // loading is complete
+	}
+	
+	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix, 
+			List<SadlCommand> sadlCommands) {
+		OntModelAdapter adapter = findAdapter(resource);
+		if (adapter == null) {
+			adapter = new OntModelAdapter();
+			resource.eAdapters().add(adapter);
+		}
+		adapter.modelName = modelName;
+		adapter.modelPrefix = modelPrefix;
+		adapter.model = model;
+		adapter.sadlCommands = sadlCommands;
 		adapter.isLoading = false;  // loading is complete
 	}
 	
 	public static void addOtherContent(Resource resource, Object otherContent) {
 		OntModelAdapter adapter = findAdapter(resource);
-		if (adapter != null) {
-			if (adapter.otherContent == null) {
-				adapter.otherContent = new ArrayList<Object>();
-			}
-			adapter.otherContent.add(otherContent);
+		if (adapter == null) {
+			adapter = new OntModelAdapter();
+			adapter.isLoading = true;
+			resource.eAdapters().add(adapter);
 		}
+		if (adapter.otherContent == null) {
+			adapter.otherContent = new ArrayList<Object>();
+		}
+		adapter.otherContent.add(otherContent);
 	}
 	
 	public static List<Object> getOtherContent(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null) {
 			return a.otherContent;
+		}
+		return null;
+	}
+	
+	public static List<SadlCommand> getSadlCommands(Resource resource) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null) {
+			return a.sadlCommands;
 		}
 		return null;
 	}
@@ -135,6 +164,14 @@ public class OntModelProvider {
 		return null;
 	}
 
+	public static String getModelPrefix(Resource resource) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null) {
+			return a.modelPrefix;
+		}
+		return null;
+	}
+
 	public static OntModel getSadlBaseModel() {
 		return sadlBaseModel;
 	}
@@ -150,5 +187,5 @@ public class OntModelProvider {
 	public static void setSadlListModel(OntModel model) {
 		sadlListModel = model;
 	}
-	
+
 }

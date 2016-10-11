@@ -196,7 +196,7 @@ CardinalityValue :
 
 SadlExplicitValue:
 		SadlResource		// e.g., George
-	|	{SadlNumberLiteral} literalNumber=FacetNumber
+	|	{SadlNumberLiteral} literalNumber=FacetNumber (-> unit=UNIT)?
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
     |   SadlValueList
@@ -232,7 +232,7 @@ RuleStatement returns ExpressionScope :
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	'Ask' (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
+	start = ('Ask'|'Graph') (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
 ;
 
 SelectExpression returns Expression :
@@ -380,7 +380,7 @@ BooleanValue:
 	
 
 Constants:
-	'PI' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element' | 'value';
+	'PI' | 'e' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element' | 'value';
 
 ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111

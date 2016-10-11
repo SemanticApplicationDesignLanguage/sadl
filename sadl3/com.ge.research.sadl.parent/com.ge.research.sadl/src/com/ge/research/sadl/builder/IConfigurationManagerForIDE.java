@@ -303,5 +303,15 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @throws IOException 
 	 */
 	public abstract boolean addMappings(List<String[]> mappings, boolean bKeepPrefix, String source) throws ConfigurationException, IOException, URISyntaxException;
+	/**
+	 * Call this method to get an OntModel from a URI (or URL)
+	 * 
+	 * @param publicUri--URI of model (will also work with actual URL)
+	 * @param scope--Scope.LOCALONLY or Scope.INCLUDEIMPORTS
+	 * @return
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
+	public abstract OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException;
 
 }
