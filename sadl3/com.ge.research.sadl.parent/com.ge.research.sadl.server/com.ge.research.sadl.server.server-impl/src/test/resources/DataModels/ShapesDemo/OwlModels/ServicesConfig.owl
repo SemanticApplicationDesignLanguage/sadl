@@ -1,0 +1,29 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:j.0="http://com.ge.research.sadl/sadlserver/Services#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research.sadl/sadlserver/ServicesConfig">
+  <owl:Ontology rdf:about="http://com.ge.research.sadl/sadlserver/ServicesConfig">
+    <owl:imports rdf:resource="http://com.ge.research.sadl/sadlserver/Services"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'ServicesConfig.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.0:KnowledgeBase>
+    <j.0:entryPoint>
+      <j.0:NamedService rdf:ID="ShapesTest">
+        <rdfs:comment>model with instance data included</rdfs:comment>
+        <rdfs:label>Shapes Test</rdfs:label>
+        <j.0:modelName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >http://sadl.imp/shapes_test</j.0:modelName>
+      </j.0:NamedService>
+    </j.0:entryPoint>
+    <j.0:entryPoint>
+      <j.0:NamedService rdf:ID="Shapes">
+        <rdfs:comment>t-box for the Shapes Demo</rdfs:comment>
+        <rdfs:label>Shapes Demo</rdfs:label>
+        <j.0:modelName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >http://sadl.imp/shape_rules</j.0:modelName>
+      </j.0:NamedService>
+    </j.0:entryPoint>
+  </j.0:KnowledgeBase>
+</rdf:RDF>

@@ -38,10 +38,8 @@ import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.ProxyNode;
-import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
-import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
@@ -51,21 +49,14 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
-import com.ge.research.sadl.sADL.Constant;
-import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.Expression;
-import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
-import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.SadlDataType;
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
-import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.StringLiteral;
-import com.ge.research.sadl.sADL.SubjHasProp;
 import com.google.inject.Inject;
 
 
@@ -76,269 +67,279 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     private Object encapsulatingTarget = null;	// when a query is in a test
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private RulePart rulePart = RulePart.NOT_A_RULE;
+    
+	public static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
+	public static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
+	public static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
+	public static final String SADL_LIST_MODEL_LIST_URI = SADL_LIST_MODEL_URI + "#List";
+	public static final String SADL_LIST_MODEL_FIRST_URI = SADL_LIST_MODEL_URI + "#first";
+	public static final String SADL_LIST_MODEL_REST_URI = SADL_LIST_MODEL_URI + "#rest";
+	public static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthRestriction";
+	public static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMinRestriction";
+	public static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
 
 	@Inject
 	public DeclarationExtensions declarationExtensions;
 
 	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
-	protected Object translate(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
-//		StringBuilder sb = new StringBuilder();
+//	protected Object translate(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+////		StringBuilder sb = new StringBuilder();
+////		String op = expr.getOp();
+////		sb.append(translate(expr.getLeft()));
+////		sb.append(" ");
+////		sb.append(op);
+////		sb.append(" ");
+////		sb.append(translate(expr.getRight()));
+////		return sb.toString();
 //		String op = expr.getOp();
+//		BuiltinType optype = BuiltinType.getType(op);
+//		
+//		Expression lexpr = expr.getLeft();
+//		Expression rexpr = expr.getRight();
+//		Object lobj = translate(lexpr);
+//		Object robj = translate(rexpr);
+//		
+//		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
+//			// If we're doing an assignment, we can simplify the pattern.
+//			Node assignedNode = null;
+//			Object pattern = null;
+//			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
+//				TripleElement trel = (TripleElement)robj;
+//				while (trel != null) {
+//					trel.setSubject((Node) lobj);
+//					trel = (TripleElement) trel.getNext();
+//				}
+//				return robj;
+//			}
+//			if ((lobj instanceof TripleElement || (lobj instanceof Literal && isSparqlQuery(((Literal)lobj).toString())))
+//					&& robj instanceof BuiltinElement) {
+//				if (isModifiedTriple(((BuiltinElement)robj).getFuncType())) {
+//					assignedNode = ((BuiltinElement)robj).getArguments().get(0);
+//					optype = ((BuiltinElement)robj).getFuncType();
+//					pattern = lobj;
+//				}
+//				else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
+//					if ( ((BuiltinElement)robj).getArguments().get(0) instanceof Literal) {
+//						((TripleElement)lobj).setObject(nodeCheck(robj));
+//						return lobj;
+//					}
+//					else {
+//						return createBinaryBuiltin(rexpr, ((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
+//					}
+//				}
+//			}
+//			else if (lobj instanceof Node && robj instanceof TripleElement) {
+//				assignedNode = validateNode((Node) lobj);
+//				pattern = (TripleElement) robj;
+//			}
+//			else if (robj instanceof Node && lobj instanceof TripleElement) {
+//				assignedNode = validateNode((Node) robj);
+//				pattern = (TripleElement) lobj;
+//			}
+//			if (assignedNode != null && pattern != null) {
+//				// We're expressing the type of a named thing.
+//				if (pattern instanceof TripleElement && ((TripleElement)pattern).getSubject() == null) {
+//					if (isModifiedTripleViaBuiltin(robj)) {
+//						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();	
+//						((TripleElement)pattern).setNext(null);
+//					}
+//					((TripleElement)pattern).setSubject(assignedNode);
+//					if (optype != BuiltinType.Equal) {
+//						((TripleElement)pattern).setType(getTripleModifierType(optype));
+//					}
+//				}
+//				else if (pattern instanceof TripleElement && ((TripleElement)pattern).getObject() == null && 
+//						(((TripleElement)pattern).getSourceType().equals(TripleSourceType.PSnewV) 
+//								|| ((TripleElement)pattern).getSourceType().equals(TripleSourceType.PSV))) {
+//					if (isModifiedTripleViaBuiltin(robj)) {
+//						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();	
+//						((TripleElement)pattern).setNext(null);
+//					}
+//					((TripleElement)pattern).setObject(assignedNode);
+//					if (optype != BuiltinType.Equal) {
+//						((TripleElement)pattern).setType(getTripleModifierType(optype));
+//					}
+//				}
+//				else if (pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.SPV)
+//						&& assignedNode instanceof NamedNode && getProxyWithNullSubject(((TripleElement)pattern)) != null) {
+//					TripleElement proxyFor = getProxyWithNullSubject(((TripleElement)pattern));
+//					assignNullSubjectInProxies(((TripleElement)pattern), proxyFor, assignedNode);
+//					if (optype != BuiltinType.Equal) {
+//						proxyFor.setType(getTripleModifierType(optype));
+//					}
+//				}
+//				else if (isModifiedTriple(optype) || 
+//						(optype.equals(BuiltinType.Equal) && pattern instanceof TripleElement && 
+//								(((TripleElement)pattern).getObject() == null || 
+//										((TripleElement)pattern).getObject() instanceof NamedNode ||
+//										((TripleElement)pattern).getObject() instanceof Literal))){
+//					if (pattern instanceof TripleElement && isModifiedTripleViaBuiltin(robj)) {
+//						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();
+//						((TripleElement)pattern).setObject(assignedNode);
+//						((TripleElement)pattern).setNext(null);
+//						((TripleElement)pattern).setType(getTripleModifierType(optype));
+//					}
+//					else if (isComparisonViaBuiltin(robj, lobj)) {
+//						BuiltinElement be = (BuiltinElement)((TripleElement)robj).getNext();
+//						be.addMissingArgument((Node) lobj);
+//						return pattern;
+//					}
+//					else if (pattern instanceof TripleElement){
+//						TripleElement lastPattern = (TripleElement)pattern;
+//						// this while may need additional conditions to narrow application to nested triples?
+//						while (lastPattern.getNext() != null && lastPattern instanceof TripleElement) {
+//							lastPattern = (TripleElement) lastPattern.getNext();
+//						}
+//						if (getEncapsulatingTarget() instanceof Test) {
+//							((Test)getEncapsulatingTarget()).setRhs(assignedNode);
+//							((Test)getEncapsulatingTarget()).setCompName(optype);
+//						}
+//						else if (getEncapsulatingTarget() instanceof Query && getTarget() instanceof Test) {
+//							((Test)getTarget()).setRhs(getEncapsulatingTarget());
+//							((Test)getTarget()).setLhs(assignedNode);
+//							((Test)getTarget()).setCompName(optype);
+//						}
+//						else if (getTarget() instanceof Test && assignedNode != null) {
+//							((Test)getTarget()).setLhs(pattern);
+//							((Test)getTarget()).setRhs(assignedNode);
+//							((Test)getTarget()).setCompName(optype);
+//							((TripleElement) pattern).setType(TripleModifierType.None);
+//							optype = BuiltinType.Equal;
+//						}
+//						else {
+//							lastPattern.setObject(assignedNode);
+//						}
+//						if (!optype.equals(BuiltinType.Equal)) {
+//							((TripleElement)pattern).setType(getTripleModifierType(optype));
+//						}
+//					}
+//					else {
+//						if (getTarget() instanceof Test) {
+//							((Test)getTarget()).setLhs(lobj);
+//							((Test)getTarget()).setRhs(assignedNode);
+//							((Test)getTarget()).setCompName(optype);
+//						}
+//					}
+//				}
+//				else if (getEncapsulatingTarget() instanceof Test) {
+//					((Test)getEncapsulatingTarget()).setRhs(assignedNode);
+//					((Test)getEncapsulatingTarget()).setCompName(optype);
+//				}
+//				else if (getTarget() instanceof Rule && pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.ITC) && 
+//						((TripleElement)pattern).getSubject() instanceof VariableNode && assignedNode instanceof VariableNode) {
+//					// in a rule of this type we just want to replace the pivot node variable
+//					doVariableSubstitution(((TripleElement)pattern), (VariableNode)((TripleElement)pattern).getSubject(), (VariableNode)assignedNode);
+//				}
+//				return pattern;
+//			}
+//			BuiltinElement bin = null;
+//			boolean binOnRight = false;
+//			Object retObj = null;
+//			if (lobj instanceof Node && robj instanceof BuiltinElement) {
+//				assignedNode = validateNode((Node)lobj);
+//				bin = (BuiltinElement)robj;
+//				retObj = robj;
+//				binOnRight = true;
+//			}
+//			else if (robj instanceof Node && lobj instanceof BuiltinElement) {
+//				assignedNode = validateNode((Node)robj);
+//				bin = (BuiltinElement)lobj;
+//				retObj = lobj;
+//				binOnRight = false;
+//			}
+//			if (bin != null && assignedNode != null) {
+//				if ((assignedNode instanceof VariableNode ||
+//					(assignedNode instanceof NamedNode && ((NamedNode)assignedNode).getNodeType().equals(NodeType.VariableNode)))) {
+//					while (bin.getNext() instanceof BuiltinElement) {
+//						bin = (BuiltinElement) bin.getNext();
+//					}
+//					if (bin.isCreatedFromInterval()) {
+//						bin.addArgument(0, assignedNode);
+//					}
+//					else {
+//						bin.addArgument(assignedNode);
+//					}
+//					return retObj;
+//				}
+//				else if (assignedNode instanceof Node && isComparisonBuiltin(bin.getFuncName())) {
+//					// this is a comparison with an extra "is"
+//					if (bin.getArguments().size() == 1) {
+//						if (bin.isCreatedFromInterval() || binOnRight) {
+//							bin.addArgument(0, assignedNode);
+//						}
+//						else {
+//							bin.addArgument(assignedNode);
+//						}
+//						return bin;
+//					}
+//				}
+//			}
+//			// We're describing a thing with a graph pattern.
+//			Set<VariableNode> vars = pattern instanceof TripleElement ? getSelectVariables(((TripleElement)pattern)) : null; 
+//			if (vars != null && vars.size() == 1) {
+//				// Find where the unbound variable occurred in the pattern
+//				// and replace each place with the assigned node.
+//				VariableNode var = vars.iterator().next();
+//				GraphPatternElement gpe = ((TripleElement)pattern);
+//				while (gpe instanceof TripleElement) {
+//					TripleElement triple = (TripleElement) gpe;
+//					if (var.equals(triple.getSubject())) {
+//						triple.setSubject(assignedNode);
+//					}
+//					if (var.equals(triple.getObject())) {
+//						triple.setObject(assignedNode);
+//					}
+//					gpe = gpe.getNext();
+//				}
+//				return pattern;
+//			}
+//		}
+//		// if we get to here we want to actually create a BuiltinElement for the BinaryOpExpression
+//		// However, if the type is equal ("is", "equal") and the left side is a VariableNode and the right side is a literal
+//		//	and the VariableNode hasn't already been bound, change from type equal to type assign.
+//		if (optype == BuiltinType.Equal && getTarget() instanceof Rule && lobj instanceof VariableNode && robj instanceof Literal && 
+//				!variableIsBound((Rule)getTarget(), null, (VariableNode)lobj)) {
+//			return createBinaryBuiltin(expr, "assign", robj, lobj);
+//		}
+//		return createBinaryBuiltin(expr, op, lobj, robj);
+//	}
+
+//	protected String translate(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+//		StringBuilder sb = new StringBuilder();
 //		sb.append(translate(expr.getLeft()));
 //		sb.append(" ");
-//		sb.append(op);
+//		sb.append(translate(expr.getProp()));
 //		sb.append(" ");
 //		sb.append(translate(expr.getRight()));
 //		return sb.toString();
-		String op = expr.getOp();
-		BuiltinType optype = BuiltinType.getType(op);
-		
-		Expression lexpr = expr.getLeft();
-		Expression rexpr = expr.getRight();
-		Object lobj = translate(lexpr);
-		Object robj = translate(rexpr);
-		
-		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
-			// If we're doing an assignment, we can simplify the pattern.
-			Node assignedNode = null;
-			Object pattern = null;
-			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
-				TripleElement trel = (TripleElement)robj;
-				while (trel != null) {
-					trel.setSubject((Node) lobj);
-					trel = (TripleElement) trel.getNext();
-				}
-				return robj;
-			}
-			if ((lobj instanceof TripleElement || (lobj instanceof Literal && isSparqlQuery(((Literal)lobj).toString())))
-					&& robj instanceof BuiltinElement) {
-				if (isModifiedTriple(((BuiltinElement)robj).getFuncType())) {
-					assignedNode = ((BuiltinElement)robj).getArguments().get(0);
-					optype = ((BuiltinElement)robj).getFuncType();
-					pattern = lobj;
-				}
-				else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
-					if ( ((BuiltinElement)robj).getArguments().get(0) instanceof Literal) {
-						((TripleElement)lobj).setObject(nodeCheck(robj));
-						return lobj;
-					}
-					else {
-						return createBinaryBuiltin(rexpr, ((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
-					}
-				}
-			}
-			else if (lobj instanceof Node && robj instanceof TripleElement) {
-				assignedNode = validateNode((Node) lobj);
-				pattern = (TripleElement) robj;
-			}
-			else if (robj instanceof Node && lobj instanceof TripleElement) {
-				assignedNode = validateNode((Node) robj);
-				pattern = (TripleElement) lobj;
-			}
-			if (assignedNode != null && pattern != null) {
-				// We're expressing the type of a named thing.
-				if (pattern instanceof TripleElement && ((TripleElement)pattern).getSubject() == null) {
-					if (isModifiedTripleViaBuiltin(robj)) {
-						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();	
-						((TripleElement)pattern).setNext(null);
-					}
-					((TripleElement)pattern).setSubject(assignedNode);
-					if (optype != BuiltinType.Equal) {
-						((TripleElement)pattern).setType(getTripleModifierType(optype));
-					}
-				}
-				else if (pattern instanceof TripleElement && ((TripleElement)pattern).getObject() == null && 
-						(((TripleElement)pattern).getSourceType().equals(TripleSourceType.PSnewV) 
-								|| ((TripleElement)pattern).getSourceType().equals(TripleSourceType.PSV))) {
-					if (isModifiedTripleViaBuiltin(robj)) {
-						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();	
-						((TripleElement)pattern).setNext(null);
-					}
-					((TripleElement)pattern).setObject(assignedNode);
-					if (optype != BuiltinType.Equal) {
-						((TripleElement)pattern).setType(getTripleModifierType(optype));
-					}
-				}
-				else if (pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.SPV)
-						&& assignedNode instanceof NamedNode && getProxyWithNullSubject(((TripleElement)pattern)) != null) {
-					TripleElement proxyFor = getProxyWithNullSubject(((TripleElement)pattern));
-					assignNullSubjectInProxies(((TripleElement)pattern), proxyFor, assignedNode);
-					if (optype != BuiltinType.Equal) {
-						proxyFor.setType(getTripleModifierType(optype));
-					}
-				}
-				else if (isModifiedTriple(optype) || 
-						(optype.equals(BuiltinType.Equal) && pattern instanceof TripleElement && 
-								(((TripleElement)pattern).getObject() == null || 
-										((TripleElement)pattern).getObject() instanceof NamedNode ||
-										((TripleElement)pattern).getObject() instanceof Literal))){
-					if (pattern instanceof TripleElement && isModifiedTripleViaBuiltin(robj)) {
-						optype = ((BuiltinElement)((TripleElement)pattern).getNext()).getFuncType();
-						((TripleElement)pattern).setObject(assignedNode);
-						((TripleElement)pattern).setNext(null);
-						((TripleElement)pattern).setType(getTripleModifierType(optype));
-					}
-					else if (isComparisonViaBuiltin(robj, lobj)) {
-						BuiltinElement be = (BuiltinElement)((TripleElement)robj).getNext();
-						be.addMissingArgument((Node) lobj);
-						return pattern;
-					}
-					else if (pattern instanceof TripleElement){
-						TripleElement lastPattern = (TripleElement)pattern;
-						// this while may need additional conditions to narrow application to nested triples?
-						while (lastPattern.getNext() != null && lastPattern instanceof TripleElement) {
-							lastPattern = (TripleElement) lastPattern.getNext();
-						}
-						if (getEncapsulatingTarget() instanceof Test) {
-							((Test)getEncapsulatingTarget()).setRhs(assignedNode);
-							((Test)getEncapsulatingTarget()).setCompName(optype);
-						}
-						else if (getEncapsulatingTarget() instanceof Query && getTarget() instanceof Test) {
-							((Test)getTarget()).setRhs(getEncapsulatingTarget());
-							((Test)getTarget()).setLhs(assignedNode);
-							((Test)getTarget()).setCompName(optype);
-						}
-						else if (getTarget() instanceof Test && assignedNode != null) {
-							((Test)getTarget()).setLhs(pattern);
-							((Test)getTarget()).setRhs(assignedNode);
-							((Test)getTarget()).setCompName(optype);
-							((TripleElement) pattern).setType(TripleModifierType.None);
-							optype = BuiltinType.Equal;
-						}
-						else {
-							lastPattern.setObject(assignedNode);
-						}
-						if (!optype.equals(BuiltinType.Equal)) {
-							((TripleElement)pattern).setType(getTripleModifierType(optype));
-						}
-					}
-					else {
-						if (getTarget() instanceof Test) {
-							((Test)getTarget()).setLhs(lobj);
-							((Test)getTarget()).setRhs(assignedNode);
-							((Test)getTarget()).setCompName(optype);
-						}
-					}
-				}
-				else if (getEncapsulatingTarget() instanceof Test) {
-					((Test)getEncapsulatingTarget()).setRhs(assignedNode);
-					((Test)getEncapsulatingTarget()).setCompName(optype);
-				}
-				else if (getTarget() instanceof Rule && pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType().equals(TripleSourceType.ITC) && 
-						((TripleElement)pattern).getSubject() instanceof VariableNode && assignedNode instanceof VariableNode) {
-					// in a rule of this type we just want to replace the pivot node variable
-					doVariableSubstitution(((TripleElement)pattern), (VariableNode)((TripleElement)pattern).getSubject(), (VariableNode)assignedNode);
-				}
-				return pattern;
-			}
-			BuiltinElement bin = null;
-			boolean binOnRight = false;
-			Object retObj = null;
-			if (lobj instanceof Node && robj instanceof BuiltinElement) {
-				assignedNode = validateNode((Node)lobj);
-				bin = (BuiltinElement)robj;
-				retObj = robj;
-				binOnRight = true;
-			}
-			else if (robj instanceof Node && lobj instanceof BuiltinElement) {
-				assignedNode = validateNode((Node)robj);
-				bin = (BuiltinElement)lobj;
-				retObj = lobj;
-				binOnRight = false;
-			}
-			if (bin != null && assignedNode != null) {
-				if ((assignedNode instanceof VariableNode ||
-					(assignedNode instanceof NamedNode && ((NamedNode)assignedNode).getNodeType().equals(NodeType.VariableNode)))) {
-					while (bin.getNext() instanceof BuiltinElement) {
-						bin = (BuiltinElement) bin.getNext();
-					}
-					if (bin.isCreatedFromInterval()) {
-						bin.addArgument(0, assignedNode);
-					}
-					else {
-						bin.addArgument(assignedNode);
-					}
-					return retObj;
-				}
-				else if (assignedNode instanceof Node && isComparisonBuiltin(bin.getFuncName())) {
-					// this is a comparison with an extra "is"
-					if (bin.getArguments().size() == 1) {
-						if (bin.isCreatedFromInterval() || binOnRight) {
-							bin.addArgument(0, assignedNode);
-						}
-						else {
-							bin.addArgument(assignedNode);
-						}
-						return bin;
-					}
-				}
-			}
-			// We're describing a thing with a graph pattern.
-			Set<VariableNode> vars = pattern instanceof TripleElement ? getSelectVariables(((TripleElement)pattern)) : null; 
-			if (vars != null && vars.size() == 1) {
-				// Find where the unbound variable occurred in the pattern
-				// and replace each place with the assigned node.
-				VariableNode var = vars.iterator().next();
-				GraphPatternElement gpe = ((TripleElement)pattern);
-				while (gpe instanceof TripleElement) {
-					TripleElement triple = (TripleElement) gpe;
-					if (var.equals(triple.getSubject())) {
-						triple.setSubject(assignedNode);
-					}
-					if (var.equals(triple.getObject())) {
-						triple.setObject(assignedNode);
-					}
-					gpe = gpe.getNext();
-				}
-				return pattern;
-			}
-		}
-		// if we get to here we want to actually create a BuiltinElement for the BinaryOpExpression
-		// However, if the type is equal ("is", "equal") and the left side is a VariableNode and the right side is a literal
-		//	and the VariableNode hasn't already been bound, change from type equal to type assign.
-		if (optype == BuiltinType.Equal && getTarget() instanceof Rule && lobj instanceof VariableNode && robj instanceof Literal && 
-				!variableIsBound((Rule)getTarget(), null, (VariableNode)lobj)) {
-			return createBinaryBuiltin(expr, "assign", robj, lobj);
-		}
-		return createBinaryBuiltin(expr, op, lobj, robj);
-	}
+//	}
 
-	protected String translate(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
-		StringBuilder sb = new StringBuilder();
-		sb.append(translate(expr.getLeft()));
-		sb.append(" ");
-		sb.append(translate(expr.getProp()));
-		sb.append(" ");
-		sb.append(translate(expr.getRight()));
-		return sb.toString();
-	}
+//	protected String translate(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append(translate(expr.getLeft()));
+//		sb.append(" of ");
+//		sb.append(translate(expr.getRight()));
+//		return sb.toString();
+//	}
 
-	protected String translate(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
-		StringBuilder sb = new StringBuilder();
-		sb.append(translate(expr.getLeft()));
-		sb.append(" of ");
-		sb.append(translate(expr.getRight()));
-		return sb.toString();
-	}
+//	protected String translate(Name expr) {
+//		return declarationExtensions.getConceptUri(expr.getName());
+//	
+//	}
 
-	protected String translate(Name expr) {
-		return declarationExtensions.getConceptUri(expr.getName());
-	
-	}
-
-	protected String translate(Declaration expr) throws InvalidNameException, InvalidTypeException, TranslationException {
-		StringBuilder sb = new StringBuilder();
-		String article = expr.getArticle();
-		sb.append(article);
-		sb.append(" ");
-		sb.append(translate(expr.getType()));
-		if (expr.getNewName() != null) {
-			sb.append(" ");
-			sb.append(expr.getNewName());
-		}
-		return sb.toString();
-	}
+//	protected String translate(Declaration expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+//		StringBuilder sb = new StringBuilder();
+//		String article = expr.getArticle();
+//		sb.append(article);
+//		sb.append(" ");
+//		sb.append(translate(expr.getType()));
+//		if (expr.getNewName() != null) {
+//			sb.append(" ");
+//			sb.append(expr.getNewName());
+//		}
+//		return sb.toString();
+//	}
 
 	private Object translate(SadlTypeReference type) throws TranslationException, InvalidNameException, InvalidTypeException {
 		if (type instanceof SadlSimpleTypeReference) {
@@ -380,9 +381,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return lit;
 	}
 
-	protected String translate(Constant expr) {
-		return expr.getConstant();
-	}
+//	protected String translate(Constant expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+//		return expr.getConstant();
+//	}
 
 	private boolean hasCommonVariableSubject(Object robj) {
 		if (robj instanceof TripleElement && 
@@ -925,7 +926,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			return NodeType.PropertyNode;
 		}
 		else if (octype.equals(OntConceptType.FUNCTION_DEFN)) {
-			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
+//			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
 			return NodeType.InstanceNode;
 		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");

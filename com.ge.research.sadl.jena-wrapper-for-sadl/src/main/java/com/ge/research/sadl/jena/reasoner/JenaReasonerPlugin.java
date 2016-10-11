@@ -279,8 +279,12 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * Method used by translators that need the OntModel with import closure for translation
 	 * 
 	 * @return
+	 * @throws ConfigurationException 
 	 */
-	public OntModel getSchemaModel() {
+	public OntModel getSchemaModel() throws ConfigurationException {
+		if (schemaModel == null) {
+			getReasonerOnlyWhenNeeded();
+		}
 		return schemaModel;
 	}
 	
@@ -577,9 +581,11 @@ public class JenaReasonerPlugin extends Reasoner{
 			try {
 				InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
 				if (in != null) {
+					InputStreamReader isr = null;
+					BufferedReader br = null;
 				    try {
-				    	InputStreamReader isr = new InputStreamReader(in);
-				    	BufferedReader br = new BufferedReader(isr);
+				    	isr = new InputStreamReader(in);
+				    	br = new BufferedReader(isr);
 						List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
 						if (rules != null) {
 							ruleList.addAll(rules);
@@ -592,6 +598,12 @@ public class JenaReasonerPlugin extends Reasoner{
 				    	addError(new ModelError(msg, ErrorType.ERROR));
 				    }
 				    finally {
+				    	if (isr != null) {
+					    	isr.close();
+				    	}
+				    	if (br != null) {
+				    		br.close();
+				    	}
 				    	in.close();
 				    }
 				}
@@ -1002,6 +1014,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				long t2 = System.currentTimeMillis();
 				timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, constructQuery, t2 - t1));
 			}
+			out.close();
 			return ds;
 		} 
 		catch (com.hp.hpl.jena.query.QueryCancelledException e) {
@@ -3087,7 +3100,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 	
 	public void setQueryTimeout(long timeout) {
-		logger.info("Setting query timeout to "+timeout+" ms.");
+		logger.debug("Setting query timeout to "+timeout+" ms.");
 		this.queryTimeout = timeout;
 	}
 

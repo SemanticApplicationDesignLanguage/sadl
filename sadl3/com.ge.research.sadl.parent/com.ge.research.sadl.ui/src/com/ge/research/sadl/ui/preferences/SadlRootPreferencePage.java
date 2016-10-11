@@ -61,13 +61,15 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         		new String[][] {{"Model Namespaces", SadlPreferences.MODEL_NAMESPACES.getId()}, {"SADL File Names", SadlPreferences.SADL_FILE_NAMES.getId()}}, getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.PREFIXES_ONLY_AS_NEEDED.getId(), "Show prefixes for imported concepts only when needed for disambiguation", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.VALIDATE_BEFORE_TEST.getId(), "Validate before Testing", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(SadlPreferences.TEST_WITH_KSERVER.getId(), "Test/Query with Knowledge Server", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId(), "Show Namespaces in Query Results", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.SHOW_TIMING_INFORMATION.getId(), "Show Timing Informaton (Build, Reasoning)", getFieldEditorParent()));
         addField(new RadioGroupFieldEditor("dmyOrder", "Interpret Date 10/11/2012 as:", 2, 
         		new String[][] {{"MM/DD/YYYY", SadlPreferences.DMY_ORDER_MDY.getId()}, 
         						{"DD/MM/YYYY", SadlPreferences.DMY_ORDER_DMY.getId()}}, getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DEEP_VALIDATION_OFF.getId(), "Disable Deep Validation of Model", getFieldEditorParent()));
-        addField(new StringFieldEditor(SadlPreferences.GRAPH_VIZ_PATH.getId(), "GraphViz bin folder", getFieldEditorParent()));
+        addField(new StringFieldEditor(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), "Graph renderer package and class", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
 		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ", getFieldEditorParent()));

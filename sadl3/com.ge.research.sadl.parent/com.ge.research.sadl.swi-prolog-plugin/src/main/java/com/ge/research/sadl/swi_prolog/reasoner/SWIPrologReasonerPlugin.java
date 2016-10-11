@@ -697,7 +697,8 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		}
 		
 		String runServiceFile = getConfigMgr().getModelFolder() + "/" + SWIPrologTranslatorPlugin.SWI_RUN_PROLOG_SERVICE_PL;
-		String contents = "start /min swipl-win.exe -s " + runServiceFile + "\nexit\n";
+//		String contents = "start /min swipl-win.exe -s " + runServiceFile + "\nexit\n";
+		String contents = "start /min swipl-win.exe --traditional -s " + runServiceFile + "\nexit\n";
 		SadlUtils su = new SadlUtils();
 		su.stringToFile(bf, contents, false);
 		
@@ -864,6 +865,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	@Override
 	public String getDefaultTranslatorClassName() {
 		return "com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin";
+	}
+
+	@Override
+	public boolean loadInstanceData(Object model) throws ConfigurationException {
+		throw new ConfigurationException("Method not supported in this reasoner.");
 	}
 
 }

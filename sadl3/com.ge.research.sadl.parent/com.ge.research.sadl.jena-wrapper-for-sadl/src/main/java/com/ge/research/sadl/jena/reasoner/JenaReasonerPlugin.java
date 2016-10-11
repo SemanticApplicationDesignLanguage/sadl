@@ -52,7 +52,6 @@ import org.apache.jena.atlas.web.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarget;
@@ -302,9 +301,9 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * @throws ConfigurationException 
 	 */
 	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException {
-		if ((configMgr instanceof IConfigurationManagerForEditing)) {
-			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
-		}
+//		if ((configMgr instanceof IConfigurationManagerForEditing)) {
+//			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
+//		}
 		configurationMgr = configMgr;
 	}
 	
@@ -539,8 +538,8 @@ public class JenaReasonerPlugin extends Reasoner{
 	private void loadImports() {
 		if (configurationMgr != null) {
 			try {
-//				imports = configurationMgr.loadImportedModel(schemaModel.getOntology(modelName), 
-//								schemaModel, modelName, null);
+				imports = configurationMgr.loadImportedModel(schemaModel.getOntology(modelName), 
+								schemaModel, modelName, null);
 			} catch (Throwable t) {
 				// TODO Auto-generated catch block
 				t.printStackTrace();
@@ -796,7 +795,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			while (ontItr.hasNext()) {
 				Ontology ont = ontItr.next();
 				if (modelBaseUri == null) {
-					modelBaseUri = ont.getURI();	// first is default incase imports are circular
+					modelBaseUri = ont.getURI();	// first is default in case imports are circular
 				}
 				if (!importuris.contains(ont.getURI())) {
 					modelBaseUri = ont.getURI();
@@ -1732,7 +1731,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			else if (on instanceof com.ge.research.sadl.model.gp.Literal){
 				if (prop.canAs(OntProperty.class)) {
 					try {
-						obj = UtilsForJena.getLiteralMatchingDataPropertyRange(schemaModel, prop.as(OntProperty.class), ((com.ge.research.sadl.model.gp.Literal)on).getValue());
+						obj = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, prop.as(OntProperty.class), ((com.ge.research.sadl.model.gp.Literal)on).getValue());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -2627,7 +2626,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (pred != null && pred.isDatatypeProperty()) {
 				if (pred.getRange() != null) {
 					try {
-						val = UtilsForJena.getLiteralMatchingDataPropertyRange(schemaModel, pred, objValue);
+						val = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, pred, objValue);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -2671,6 +2670,9 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 			if (configurationMgr != null) {
 				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
+				if (translator == null) {
+					translator = configurationMgr.getTranslatorForReasoner(this);
+				}
 				if (translator != null) {
 					translator.setConfigurationManager(configurationMgr);
 					query = translator.prepareQuery(model, query);
@@ -3128,6 +3130,12 @@ public class JenaReasonerPlugin extends Reasoner{
 	@Override
 	public String getDefaultTranslatorClassName() {
 		return DEFAULT_TRANSLATOR_CLASSNAME;
+	}
+
+	@Override
+	public boolean loadInstanceData(Object model) throws ConfigurationException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 

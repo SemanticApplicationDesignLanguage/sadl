@@ -5,6 +5,9 @@ public class SadlCommand {
 	private int length;
 	private int offset;
 	
+	// editor object for marker addition to editor
+	private Object context;
+	
 	public SadlCommand() {
 		super();
 	}
@@ -31,6 +34,14 @@ public class SadlCommand {
 
 	public int getOffset() {
 		return offset;
+	}
+
+	public Object getContext() {
+		return context;
+	}
+
+	public void setContext(Object context) {
+		this.context = context;
 	}
 
 }

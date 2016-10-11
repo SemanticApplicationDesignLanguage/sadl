@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -42,6 +41,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 	private Property markerProperty = null;
 	private IConfigurationManagerForEditing configMgr = null;
 	private Ontology modelOntology;
+	private JenaBasedSadlModelProcessor modelProcessor = null;
 	
 	public static String SADL_METRICS_NS = "http://com.ge.research.sadl/sadlmetricsmodel#";
 	public static String MARKER_CLASS_URI = SADL_METRICS_NS + "Marker";
@@ -66,10 +66,11 @@ public class MetricsProcessor implements IMetricsProcessor {
 		super();
 	}
 	
-	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr) throws JenaProcessorException, ConfigurationException {
+	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr, JenaBasedSadlModelProcessor modelProcessor) throws JenaProcessorException, ConfigurationException {
 		if (resource == null) {
 			throw new JenaProcessorException("MetricsProcessor constructor called with null resource");
 		}
+		this.modelProcessor = modelProcessor;
 		String modelFolder = getModelFolderPath(resource);
 		if (modelFolder != null) {
 			// for JUnit tests, this will be null
@@ -190,8 +191,29 @@ public class MetricsProcessor implements IMetricsProcessor {
 			 modelFolderPathname = file.getRawLocation().toPortableString();
 		}
 		else {
-			modelFolderPathname = v.toFileString();
+			modelFolderPathname = JenaBasedSadlModelProcessor.findModelFolderPath(resource.getURI());
+			if(modelFolderPathname == null) {
+				modelFolderPathname = v.toFileString();
+			}
 		}
 		return modelFolderPathname;
+	}
+
+	@Override
+	public boolean addControlledOrMonitoredVariable(String specName, String propertyUri) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addEffectiveRange(String specName, String property, String classname, String range, boolean isList) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setMetricsTargetModel(OntModel metricsTargetModel) {
+		// TODO Auto-generated method stub
+		
 	}
 }
