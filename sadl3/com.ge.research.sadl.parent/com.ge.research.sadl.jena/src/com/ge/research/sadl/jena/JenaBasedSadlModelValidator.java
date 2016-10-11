@@ -1318,9 +1318,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		//If the expression is a function, find equation definition from name and get the return type
 		if(expression.isFunction()){
-			EquationStatement es = (EquationStatement) qnm.eContainer();
-			if(es != null){
-				return getType(es.getReturnType());
+			if(qnm.eContainer() instanceof EquationStatement){
+				EquationStatement es = (EquationStatement) qnm.eContainer();
+				if(es != null){
+					return getType(es.getReturnType());
+				}
 			}
 		}
 		
