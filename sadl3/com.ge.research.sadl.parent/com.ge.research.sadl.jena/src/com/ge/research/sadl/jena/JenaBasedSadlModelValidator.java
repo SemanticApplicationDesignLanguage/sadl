@@ -1306,10 +1306,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
-		if(expression.isFunction()){
-			//TODO
-		}
-		
 		SadlResource qnm =expression.getName();
 		if (qnm.eIsProxy()) {
 			// this is a proxy so we don't know its type
@@ -1319,6 +1315,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			throw new DontTypeCheckException();
 		}
+		
+		//If the expression is a function, find equation definition from name and get the return type
+		if(expression.isFunction()){
+			EquationStatement es = (EquationStatement) qnm.eContainer();
+			if(es != null){
+				return getType(es.getReturnType());
+			}
+		}
+		
 		return getType(qnm);
 	}
 	
