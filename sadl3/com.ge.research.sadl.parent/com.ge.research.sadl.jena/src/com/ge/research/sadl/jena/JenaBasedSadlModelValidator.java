@@ -781,7 +781,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				value = ((Unit)expression).getValue().getValue();
 				String unit = ((Unit)expression).getUnit();
 				ConceptName uqcn = new ConceptName(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
-				return new TypeCheckInfo(uqcn, uqcn, this, expression);
+				List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
+				if (impliedProperties != null) {
+					return new TypeCheckInfo(uqcn, uqcn, impliedProperties, this, expression);
+				}
+				else {
+					return new TypeCheckInfo(uqcn, uqcn, this, expression);
+				}
 			}
 			else {
 				value = ((NumberLiteral)expression).getValue();
