@@ -2337,7 +2337,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return qn;
 	}
 	public Object 	processExpression(NumberLiteral expr) {
-		Object lit = translate(expr);
+		Object lit = super.translate(expr);
 		return lit;
 	}
 	

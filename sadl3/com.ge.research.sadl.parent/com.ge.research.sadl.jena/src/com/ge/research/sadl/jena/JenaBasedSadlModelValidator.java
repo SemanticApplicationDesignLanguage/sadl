@@ -35,6 +35,7 @@ import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.ElementInList;
+import com.ge.research.sadl.sADL.EquationStatement;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
@@ -1305,6 +1306,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
+		if(expression.isFunction()){
+			//TODO
+		}
+		
 		SadlResource qnm =expression.getName();
 		if (qnm.eIsProxy()) {
 			// this is a proxy so we don't know its type
@@ -1442,6 +1447,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (conceptType.equals(OntConceptType.VARIABLE)) {
 			cn.setType(ConceptType.VARIABLE);
+		}
+		else if (conceptType.equals(OntConceptType.FUNCTION_DEFN)) {
+			cn.setType(ConceptType.FUNCTION_DEFN);
 		}
 		return cn;
 	}
