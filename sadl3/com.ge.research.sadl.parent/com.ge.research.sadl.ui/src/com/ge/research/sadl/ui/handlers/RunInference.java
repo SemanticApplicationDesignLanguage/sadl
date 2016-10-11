@@ -22,9 +22,15 @@ import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
+import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.ResultSet;
 
 public class RunInference extends SadlActionHandler {
 
@@ -56,13 +62,49 @@ public class RunInference extends SadlActionHandler {
 					String modelFolderPath = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toOSString());
 					String owlModelPath = modelFolderPath + "/" + trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment();
 		        	Object[] retvals = processor.runInference(res, owlModelPath, modelFolderPath, prefMap);
-		        	if (retvals != null && retvals.length > 0) {
-		        		Object infresults = retvals[0];
+		        	if (retvals != null && retvals.length > 1) {
+		        		Object cmds = retvals[0];
+		        		Object infresults = retvals[1];
 		        		if (infresults != null) {
-		        			SadlConsole.writeToConsole(MessageType.INFO, infresults.toString());
+		        			if (infresults instanceof List<?>) {
+		        				for (int i = 0; i < ((List<?>)infresults).size(); i++) {
+		        					if (((List<?>)infresults).get(i) instanceof ResultSet && cmds != null && cmds instanceof List<?> && ((List<?>)cmds).size() >= i && 
+		        							((List<?>)cmds).get(i) instanceof Query && ((Query)((List<?>)cmds).get(i)).isGraph()) {
+		        						ResultSet rs = (ResultSet) ((List<?>)infresults).get(i);
+		        						if (rs.getColumnCount() >= 3) {
+			        						String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+			        						final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			        						IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
+	
+			        						IGraphVisualizer visualizer = getVisualizer(configMgr);
+			        						if (visualizer != null) {
+			        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + i;
+			        							String desc = ((Query)((List<?>)cmds).get(i)).getName();
+			        							if (desc == null) desc = "Cmd " + (i + 1) + "  (Graph)";
+			        							graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs);
+			        						}
+			        						else {
+			        							SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query " + i + ".\n");
+			        						}
+		        						}
+		        						else {
+		        							SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query " + i + ", ResultSet has less than 3 columns.\n");
+		        						}
+		        					}
+		        					else if (((List<?>)infresults).get(i) == null) {
+		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + " is empty");
+		        					}
+		        					else {
+		        						SadlConsole.writeToConsole(MessageType.INFO, ((List<?>)infresults).get(i).toString());
+		        					}
+		        				}
+		        			}
+		        			else {
+		        				SadlConsole.writeToConsole(MessageType.ERROR, "Results returned not of expected type. Please report.");
+		        			}
 		        		}
-		        		if (retvals.length > 1) {
-		        			Object errors = retvals[1];
+		        		if (retvals.length > 2) {
+		        			Object errors = retvals[2];
 		        			if (errors instanceof List<?>) {
 		        				Iterator<?> erritr = ((List<?>)errors).iterator();
 		        				while (erritr.hasNext()) {

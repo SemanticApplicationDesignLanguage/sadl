@@ -71,7 +71,7 @@ public class SADL implements IPerspectiveFactory {
 
 	private void addPerspectiveShortcuts() {
 
-		factory.addPerspectiveShortcut("test.perspectives.SADL_Perspective"); // NON-NLS-1
+		factory.addPerspectiveShortcut("sadl.perspectives.SADL_Perspective"); // NON-NLS-1
 	}
 
 	private void addNewWizardShortcuts() {

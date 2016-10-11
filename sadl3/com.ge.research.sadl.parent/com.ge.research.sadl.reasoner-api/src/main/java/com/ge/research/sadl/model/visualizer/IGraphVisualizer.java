@@ -38,12 +38,12 @@ import com.ge.research.sadl.reasoner.ResultSet;
  * 		
  * The following capabilities are needed to support the obvious graphing needs 
  *  of ontologies:
- *  - Directed
+ *  - Nodes with text descriptions
+ *  - Directed edges
  *  - Edges labeled
  *   
- * In addition, it would be nice to allow descriptive information for each node 
- *  and/or edge label that might be used for, for example, to color the arrow,
- *  to color or shape the node, or to generate mouse-over display text.
+ * In addition, descriptive information for each node and/or edge label may be included, e.g., 
+ *  how to color the edge, how to color or shape the node.
  */
 public interface IGraphVisualizer {
 	public enum Orientation {TD, LR}

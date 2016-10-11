@@ -18,6 +18,7 @@
 package com.ge.research.sadl.tests
 
 import org.junit.Test
+import org.junit.Ignore
 
 class InstanceCreationParserTest extends AbstractSADLParsingTest {
 	
@@ -112,4 +113,40 @@ class InstanceCreationParserTest extends AbstractSADLParsingTest {
 			husband is a type of spouse with values of type {Person and (gender always has value Male)}.
 		'''.assertNoErrors
 	}
+	
+	@Test def void testWith1() {
+		'''uri "http://sadl.org/concepts.sadl" alias concepts.
+		 
+		 Class is a class described by reference with values of type Class,
+		 	described by description with values of type string.
+		 
+		 Inst1 is a Class.
+		 Inst2 is a Class,
+		  with reference Inst1,
+		  with description "Hello world".
+		  
+		 Expr: Inst2 is (a Class
+		  		with reference Inst1
+				with description "arc tangent of the x over y between -1/2 Pi and 1/2 Pi").
+		'''.assertNoErrors
+	}
+	
+	@Ignore
+	@Test def void testWith2() {
+		'''uri "http://sadl.org/concepts.sadl" alias concepts.
+		 
+		 Class is a class described by reference with values of type Class,
+		 	described by description with values of type string.
+		 
+		 Inst1 is a Class.
+		 Inst2 is a Class,
+		  with reference Inst1,
+		  with description "Hello world".
+		  
+		 Expr: Inst2 is (a Class,
+		  		with reference Inst1,
+				with description "arc tangent of the x over y between -1/2 Pi and 1/2 Pi").
+		'''.assertNoErrors
+	}
+	
 }

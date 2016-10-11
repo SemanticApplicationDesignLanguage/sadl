@@ -45,6 +45,7 @@ public class Query extends SadlCommand {
 	private List<OrderingPair> orderBy = null;
 	private boolean distinct = false;
 	private boolean toBeEvaluated = false;
+	private boolean isGraph = false;
 
 	public enum Order {ASC, DESC}
 	
@@ -232,5 +233,13 @@ public class Query extends SadlCommand {
 
 	public void setFqName(String fqName) {
 		this.fqName = fqName;
+	}
+
+	public boolean isGraph() {
+		return isGraph;
+	}
+
+	public void setGraph(boolean isGraph) {
+		this.isGraph = isGraph;
 	}
 }
