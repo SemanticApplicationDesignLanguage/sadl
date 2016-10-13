@@ -157,4 +157,31 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 	then weight of p is age of p * PI * e^3.
 		'''.assertNoErrors
 	}
+	
+//	@Ignore
+	@Test
+	def void testTestWithCommas() {
+		'''
+			uri "http://sadl.imp/abs".
+			
+			Thingy is a top-level class.
+			intVal describes Thingy has values of type int.
+			flVal describes Thingy has values of type float.
+			dblVal describes Thingy has values of type double.
+			
+			Rule Rule_Name
+				given
+					x is a Thingy
+			//	if
+					
+				then
+					intVal of x is abs(-1) and
+					flVal of x is abs(-1.0) and
+					dblVal of x is abs(-1.0).
+					
+			MyThingy is a Thingy.
+			
+			Test: MyThingy has intVal 1, has flVal 1.0, has dblVal 1.0 .
+		'''.assertNoErrors
+	}
 }

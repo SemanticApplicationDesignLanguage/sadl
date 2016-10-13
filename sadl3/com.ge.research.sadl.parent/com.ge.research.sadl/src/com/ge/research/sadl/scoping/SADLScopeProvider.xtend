@@ -54,6 +54,8 @@ import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
 import com.ge.research.sadl.sADL.SadlInstance
+import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.sADL.TestStatement
 
 /**
  * This class contains custom scoping description.
@@ -99,6 +101,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return MapBasedScope.createScope(parent, 
 				equation.parameter.map[EObjectDescription.create(name.concreteName, it.name)])
 		}
+		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
+		if (ask !== null) {
+			return getLocalVariableScope(ask.expr, parent)
+		}
+		val test = EcoreUtil2.getContainerOfType(context, TestStatement)
+		if (test !== null) {
+			return getLocalVariableScope(test.tests, parent)
+		}
 		return parent
 	}
 	
@@ -117,6 +127,21 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return false
 		]
 		return doGetLocalVariableScope(expressions, newParent) [true]
+	}
+	
+	protected def IScope getLocalVariableScope(Expression expression, IScope parent) {
+		var newParent = doGetLocalVariableScope(expression, parent) [
+			var container = eContainer
+			if (container instanceof PropOfSubject || container instanceof SubjHasProp) {
+				container = container.eContainer
+			}
+			if (container instanceof BinaryOperation) {
+				if (container.op == 'is' || container.op == '==' || container.op == '=') 
+					return true
+			}
+			return false
+		]
+		return doGetLocalVariableScope(expression, newParent) [true]
 	}
 	
 	protected def IScope doGetLocalVariableScope(Iterable<Expression> expressions, IScope parent, Predicate<SadlResource> predicate) {
@@ -139,6 +164,22 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		return MapBasedScope.createScope(parent, map.values)
 	}
 	
+	
+	protected def IScope doGetLocalVariableScope(Expression expression, IScope parent, Predicate<SadlResource> predicate) {
+		val map = newHashMap
+		val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate)
+		while (iter.hasNext) {
+			val name = iter.next
+			val concreteName = name.concreteName
+			if (concreteName !== null) {
+				val qn = QualifiedName.create(concreteName)
+				if (!map.containsKey(qn) && parent.getSingleElement(qn) === null) {
+					map.put(qn, new EObjectDescription(qn, name, emptyMap))
+				}
+			}
+		}
+		return MapBasedScope.createScope(parent, map.values)
+	}
 	
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
 		return cache.get('resource_scope'->alias, resource) [
@@ -238,7 +279,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def pruneScope(EObject object) {
-		return object instanceof RuleStatement || object instanceof EquationStatement
+		return object instanceof RuleStatement || object instanceof EquationStatement || object instanceof QueryStatement || object instanceof TestStatement
 	}
 	
 	protected def String getAlias(Resource resource) {

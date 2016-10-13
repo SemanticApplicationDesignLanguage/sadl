@@ -32,6 +32,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.sADL.TestStatement
+import com.ge.research.sadl.sADL.QueryStatement
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -102,6 +105,98 @@ class ScopingTest {
 			assertEquals("color", names.get(1).concreteName)
 			assertSame(x, names.get(2).name)
 		]
+	}
+	
+//	@Ignore
+	@Test def void testLocalVariable_03() {
+		val model = '''
+			uri "http://com.ge.research.sadl/Bug3434542" alias Bug3434542. 
+			
+			Aa is a class.
+			
+			Ask: x is a Aa .
+		'''.parse
+		
+		validationTestHelper.assertNoErrors(model.eResource)
+		
+		model.elements.get(1) as QueryStatement => [
+			val names = EcoreUtil2.getAllContents(it, false).filter(Name).toList
+			assertEquals(1, names.size)
+			val x = names.get(0)
+			assertSame(x, x.name)
+		]
+			
+		
+		
+	}
+		
+	@Ignore
+	@Test def void testLocalVariable_04() {
+		val model = '''
+			uri "http://com.ge.research.sadl/Bug3434542" alias Bug3434542. 
+			
+			
+			Aa is a class.
+			
+			Ab is a type of Aa.
+			
+			Ac is a type of Aa.
+			
+			_one_ is a Ab.
+			_two_ is a Ac.
+			
+			
+			Ask: x is a Ab .
+			Ask: x is not a Ab .
+			Ask: x is a Aa and x is not a Ab .
+			Ask: select x where x is a Aa and x is not a Ab .
+			
+			Ask: "select ?x where {?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?t . FILTER (!EXISTS { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/Bug3434542#Ab> })}".
+			
+			Test: x is an Ab is _one_.
+			Test: (select x where x is an Aa and x is not an Ab) is _two_.
+		'''.parse
+		
+		validationTestHelper.assertNoErrors(model.eResource)
+		
+		model.elements.get(5) as QueryStatement => [
+			val names = EcoreUtil2.getAllContents(it, false).filter(Name).toList
+			assertEquals(1, names.size)
+			val x = names.get(0)
+			assertSame(x, x.name)
+		]
+			
+	}
+	
+	@Test def void testLocalVariableRule1() {
+		val model = '''
+			uri "http://sadl.org/TestSadlIde/DateMinMax" alias dtminmax version "$Revision: 1.1 $ Last modified on   $Date: 2015/07/15 12:51:12 $". 
+			
+			Event is a class, 
+				described by when with values of type dateTime,
+				described by openingEvent with a single value of type Event,			
+				described by closingEvent with a single value of type Event.
+	
+			Circus is a class,
+				described by event with values of type Event.
+				
+			Rule OpeningEvent:
+				if 	c is a Circus
+					eventList is list(c, event, e, e, when)
+					oet is min(eventList)
+					oe has when oet
+				then c has openingEvent oe.
+		'''.parse
+		
+		validationTestHelper.assertNoErrors(model.eResource)
+		
+		model.elements.get(5) as QueryStatement => [
+			val names = EcoreUtil2.getAllContents(it, false).filter(Name).toList
+			assertEquals(1, names.size)
+			val x = names.get(0)
+			assertSame(x, x.name)
+		]
+			
 	}
 		
 	@Test def void testScopingSlowdown() {
