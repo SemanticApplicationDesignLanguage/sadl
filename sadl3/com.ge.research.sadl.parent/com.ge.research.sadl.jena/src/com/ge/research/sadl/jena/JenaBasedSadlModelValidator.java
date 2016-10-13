@@ -768,9 +768,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getType(Expression expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException{
-//		if (expressionsValidated.containsKey(expression)) {
-//			return expressionsValidated.get(expression);
-//		}
+		if (expressionsValidated.containsKey(expression)) {
+			return expressionsValidated.get(expression);
+		}
 		if(expression instanceof Name){
 			return getType((Name)expression);
 		}
@@ -887,7 +887,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			List<String> operations = Arrays.asList(((BinaryOperation) expression).getOp().split("\\s+"));
 			TypeCheckInfo leftTypeCheckInfo = getType(((BinaryOperation) expression).getLeft());
 			TypeCheckInfo rightTypeCheckInfo = getType(((BinaryOperation) expression).getRight());
-			if (isVariable(leftTypeCheckInfo) && ((BinaryOperation)expression).getRight() instanceof Declaration) {
+			if (leftTypeCheckInfo != null && isVariable(leftTypeCheckInfo) && ((BinaryOperation)expression).getRight() instanceof Declaration) {
 				return rightTypeCheckInfo;
 			}
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
@@ -1727,6 +1727,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException {
 		//Needs filled in for Requirements extension
+		if (conceptUri == null) {
+			return null;
+		}
 		ConceptName declarationConceptName = new ConceptName(conceptUri);
 		declarationConceptName.setType(ConceptType.VARIABLE);
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
@@ -1787,15 +1790,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			return false;
 		}
-		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
-			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
-			if (rExprType instanceof ConceptName) {
-				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
-				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
-					return false;
-				}
-			}
-		}
+//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
+//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
+//			if (rExprType instanceof ConceptName) {
+//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
+//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
+//						// no chance of implied properties fixing the problem
+//						return false;
+//					}
+//				}
+//			}
+//		}
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
 		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
@@ -1987,13 +1993,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (SadlUtils.classIsSubclassOf(theJenaModel.getOntClass(rightConceptName.getUri()), theJenaModel.getOntResource(leftConceptName.getUri()), true, null)) {
 						return true;
 					}
-					StmtIterator sitr = theJenaModel.listStatements(theJenaModel.getOntClass(rightConceptName.getUri()), OWL.equivalentClass, (RDFNode)null);
-					if (sitr.hasNext()) {
-						System.out.println(sitr.nextStatement().toString());
-					}
-					else {
-						theJenaModel.write(System.out, "N-TRIPLE");
-					}
+// TODO handle equivalent classes.					
+//					StmtIterator sitr = theJenaModel.listStatements(theJenaModel.getOntClass(rightConceptName.getUri()), OWL.equivalentClass, (RDFNode)null);
+//					if (sitr.hasNext()) {
+//						System.out.println(sitr.nextStatement().toString());
+//					}
+//					else {
+//						theJenaModel.write(System.out, "N-TRIPLE");
+//					}
 				} catch (CircularDependencyException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
