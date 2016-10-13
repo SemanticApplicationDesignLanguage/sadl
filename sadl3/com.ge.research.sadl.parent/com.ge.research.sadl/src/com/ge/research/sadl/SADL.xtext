@@ -261,13 +261,14 @@ TestStatement returns ExpressionScope :
 
 PrintStatement :
 	'Print:'
-			displayString=STRING 
-		|	model=('Deductions'|'Model');
+			(displayString=STRING 
+		|	model='Deductions'
+		|	model='Model');
 
 ExplainStatement :
 	'Explain:'
-			expr=Expression EOS
-		| 	'Rule' rulename=QNAME 
+			expr=Expression
+		| 	'Rule' rulename=QNAME
 			;
 			
 StartWriteStatement :
