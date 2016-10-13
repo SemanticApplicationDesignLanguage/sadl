@@ -168,6 +168,7 @@ class ScopingTest {
 			
 	}
 	
+	@Ignore
 	@Test def void testLocalVariableRule1() {
 		val model = '''
 			uri "http://sadl.org/TestSadlIde/DateMinMax" alias dtminmax version "$Revision: 1.1 $ Last modified on   $Date: 2015/07/15 12:51:12 $". 
