@@ -35,6 +35,7 @@ import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.ElementInList;
+import com.ge.research.sadl.sADL.EquationStatement;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
@@ -1314,6 +1315,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			throw new DontTypeCheckException();
 		}
+		
+		//If the expression is a function, find equation definition from name and get the return type
+		if(expression.isFunction()){
+			if(qnm.eContainer() instanceof EquationStatement){
+				EquationStatement es = (EquationStatement) qnm.eContainer();
+				if(es != null){
+					return getType(es.getReturnType());
+				}
+			}
+		}
+		
 		return getType(qnm);
 	}
 	
@@ -1442,6 +1454,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (conceptType.equals(OntConceptType.VARIABLE)) {
 			cn.setType(ConceptType.VARIABLE);
+		}
+		else if (conceptType.equals(OntConceptType.FUNCTION_DEFN)) {
+			cn.setType(ConceptType.FUNCTION_DEFN);
 		}
 		return cn;
 	}
