@@ -74,6 +74,7 @@ import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
@@ -1041,7 +1042,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				Expression expr = tests.get(tidx);
 				// we know it's a Test so create one and set as translation target
 				Test test = new Test();
-	//			setTranslationTarget(test);
+				setTarget(test);
 	
 				// now translate the test expression
 				Object testtrans = translate(expr);
@@ -1329,7 +1330,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private void processStatement(PrintStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+		String dispStr = ((PrintStatement)element).getDisplayString();
+		Print print = new Print(dispStr);
+		String mdl = ((PrintStatement)element).getModel();
+		if (mdl != null) {
+			print.setModel(mdl);
+		}
+		addSadlCommand(print);
 	}
 	
 	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
@@ -1375,9 +1382,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				for (int i = 0; i < varList.size(); i++) {
 					Object var = translate(varList.get(i));
 					if (!(var instanceof VariableNode)) {
-						throw new InvalidNameException("'" + var.toString() + "' isn't a variable as expected in query select names.");
+						try {
+							OntConceptType vtype = declarationExtensions.getOntConceptType(varList.get(i));
+							if (vtype.equals(OntConceptType.VARIABLE)) {
+								int k = 0;
+							}
+						} catch (CircularDefinitionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+//						throw new InvalidNameException("'" + var.toString() + "' isn't a variable as expected in query select names.");
+						addError("'" + var.toString() + "' isn't a variable as expected in query select names.", expr);
 					}
-					names.add(((VariableNode)var).getName());
+					else {
+						names.add(((VariableNode)var).getName());
+					}
 				}
 				query.setVariables(names);
 			}
@@ -1445,18 +1464,42 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private Query processQuery(Object qobj) throws JenaProcessorException {
-		String qstr;
+		String qstr = null;
+		Query q = new Query();
 		if (qobj instanceof com.ge.research.sadl.model.gp.Literal) {
 			qstr = ((com.ge.research.sadl.model.gp.Literal)qobj).getValue().toString();
+			q.setSparqlQueryString(qstr);
 		}
 		else if (qobj instanceof String) {
 			qstr = qobj.toString();
+			q.setSparqlQueryString(qstr);
+		}
+		else if (qobj instanceof TripleElement) {
+			Set<VariableNode> vars = getIfTranslator().getSelectVariables((GraphPatternElement) qobj);
+			List<IFTranslationError> errs = getIfTranslator().getErrors();
+			if (errs == null || errs.size() == 0) {
+				if (vars != null && vars.size() > 0) {
+					List<String> varNames = new ArrayList<String>();
+					Iterator<VariableNode> vitr = vars.iterator();
+					while (vitr.hasNext()) {
+						varNames.add(vitr.next().getName());
+					}
+					q.setVariables(varNames);
+				}
+				q.addPattern((GraphPatternElement) qobj);
+			}
+		}
+		else if (qobj instanceof BuiltinElement) {
+			String fn = ((BuiltinElement)qobj).getFuncName();
+			List<Node> args = ((BuiltinElement)qobj).getArguments();
+			int i = 0;
+		}
+		else if (qobj instanceof Junction) {
+			q.addPattern((Junction)qobj);
 		}
 		else {
 			throw new JenaProcessorException("Unexpected query type: " + qobj.getClass().getCanonicalName());
 		}
-		Query q = new Query();
-		q.setSparqlQueryString(qstr);
 		return q;
 	}
 	
@@ -1683,6 +1726,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof SelectExpression) {
 			return processExpression((SelectExpression)expr);
 		}
+		else if (expr instanceof AskExpression) {
+			addError("Unhandled AskExpression", expr);
+		}
 		else if (expr != null){
 			throw new TranslationException("Unhandled rule expression type: " + expr.getClass().getCanonicalName());
 		}
@@ -1749,7 +1795,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					return trel;
 				}
 				else {
-					throw new TranslationException("Unhandled binary operation condition: left and right are not both nodes.");
+//					throw new TranslationException("Unhandled binary operation condition: left and right are not both nodes.");
+					addError("Unhandled binary operation condition: left and right are not both nodes.", expr);
 				}
 			}
 			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
@@ -2284,9 +2331,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return null;
 	}
 
-	public String processExpression(BooleanLiteral expr) {
-//		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getValue());
-		return expr.getValue();
+	public Object processExpression(BooleanLiteral expr) {
+		Object lit = super.translate(expr);
+		return lit;
 	}
 	
 	public ConstantNode processExpression(Constant expr) throws InvalidNameException {
@@ -2392,7 +2439,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				subjNode = (Node) sn;
 			}
 			else {
-				throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node");
+//				throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node");
+				addError("Subject '" + sn.toString() + "' did not translate to Node", subject);
 			}
 		}
 		else {
@@ -3576,7 +3624,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private void processSadlNecessaryAndSufficient(SadlNecessaryAndSufficient element) throws JenaProcessorException {
 		OntClass supercls = sadlTypeReferenceToOntResource(element.getSubject()).asClass();
-		OntClass rolecls = getOrCreateOntClass(declarationExtensions.getConcreteName(element.getObject()));
+		OntClass rolecls = getOrCreateOntClass(declarationExtensions.getConceptUri(element.getObject()));
 		Iterator<SadlPropertyCondition> itr = element.getPropConditions().iterator();
 		List<OntClass> conditionClasses = new ArrayList<OntClass>();
 		while (itr.hasNext()) {
