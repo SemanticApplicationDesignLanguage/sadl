@@ -21,6 +21,5 @@ public interface IMetricsProcessor {
 
 	void setMetricsTargetModel(OntModel metricsTargetModel);
 
-	
 
 }

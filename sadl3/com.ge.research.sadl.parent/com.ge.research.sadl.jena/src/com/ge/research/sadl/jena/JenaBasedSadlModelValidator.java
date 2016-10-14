@@ -297,7 +297,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return implicitProperties;
 		}
 
-		private List<TypeCheckInfo> getCompoundTypes() {
+		public List<TypeCheckInfo> getCompoundTypes() {
 			return compoundTypes;
 		}
 

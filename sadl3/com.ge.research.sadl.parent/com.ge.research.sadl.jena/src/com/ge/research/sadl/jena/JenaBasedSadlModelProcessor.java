@@ -5140,7 +5140,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return false;
 	}
-	private List<OntResource> getOntResourcesInUnionClass(OntModel m, UnionClass ucls) {
+	public List<OntResource> getOntResourcesInUnionClass(OntModel m, UnionClass ucls) {
 		List<OntResource> results = new ArrayList<OntResource>();
 		List<RDFNode> clses = ucls.getOperands().asJavaList();
 		for (int i = 0; i < clses.size(); i++) {
@@ -5152,7 +5152,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return results;
 	}
 	
-	private List<OntResource> getOntResourcesInIntersectionClass(OntModel m, IntersectionClass icls) {
+	public List<OntResource> getOntResourcesInIntersectionClass(OntModel m, IntersectionClass icls) {
 		List<OntResource> results = new ArrayList<OntResource>();
 		List<RDFNode> clses = icls.getOperands().asJavaList();
 		for (int i = 0; i < clses.size(); i++) {
