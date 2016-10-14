@@ -1515,6 +1515,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		eqinst.addProperty(getTheJenaModel().getDatatypeProperty(SADL_BASE_MODEL_EQ_EXPRESSION_URI), 
 				getTheJenaModel().createTypedLiteral(eq.toString()));
 	}
+	
 	protected Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
 			Expression bdy)
 			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
@@ -1543,6 +1544,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		else if (bdyobj instanceof GraphPatternElement) {
 			eq.addBodyElement((GraphPatternElement)bdyobj);
+		}
+		if (modelValidator != null) {
+			// check return type against body expression
+			StringBuilder errorMessageBuilder = new StringBuilder();
+			if (!modelValidator.validate(rtype, bdy, "function return", errorMessageBuilder)) {
+				issueAcceptor.addError(errorMessageBuilder.toString(), bdy);
+			}
 		}
 		logger.debug("Equation: " + eq.toFullyQualifiedString());
 		return eq;
