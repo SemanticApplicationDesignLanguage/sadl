@@ -59,7 +59,6 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				String val = map.get(key);
 				System.out.println(key + " -> " + val);
 			}
-			exec = "C:\\Apps\\graphviz-2.36\\release\\bin";
 		}
 		if (exec == null || exec.length() == 0) {
 			throw new IOException("Unable to find GraphVizPath. Please set GraphVizPath environment variable to the GraphViz bin folder path.");
