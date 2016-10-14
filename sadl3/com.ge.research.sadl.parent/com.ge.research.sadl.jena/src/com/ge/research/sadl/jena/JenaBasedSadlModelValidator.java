@@ -757,6 +757,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		if(expression instanceof Name){
 			return getType((Name)expression);
+		}else if(expression instanceof SadlResource){
+			return getType((SadlResource)expression);
 		}
 		else if(expression instanceof Declaration){
 			SadlTypeReference decltype = ((Declaration)expression).getType();
@@ -1064,7 +1066,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject){
-		//TODO fix?
 		if(metricsProcessor != null){
 			String className = declarationExtensions.getConceptUri(((Name) subject).getName());
 			String propertyName = predicateType.getExpressionType().toString();
