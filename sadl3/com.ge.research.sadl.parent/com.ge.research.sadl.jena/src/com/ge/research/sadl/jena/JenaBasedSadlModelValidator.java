@@ -1426,7 +1426,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
 			String nm = declarationExtensions.getConcreteName(qnm);
-			return getVariableType(ConceptType.VARIABLE, nm, expression);
+			String uri = declarationExtensions.getConceptUri(qnm);
+			return getVariableType(ConceptType.VARIABLE, nm, uri, expression);
 
 		}
 		else if(conceptType.equals(OntConceptType.ANNOTATION_PROPERTY)){
@@ -1708,7 +1709,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException {
+	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException {
 		//Needs filled in for Requirements extension
 		if (conceptUri == null) {
 			return null;
