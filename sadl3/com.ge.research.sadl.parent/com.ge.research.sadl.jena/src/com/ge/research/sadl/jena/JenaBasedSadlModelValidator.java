@@ -1718,6 +1718,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			SadlTypeReference exprType = ((SadlParameterDeclaration)expression).getType();
 			return getType(exprType);
 		}
+		else if (expression instanceof SubjHasProp) {
+			SadlResource psr = ((SubjHasProp)expression).getProp();
+			TypeCheckInfo ptci = getType(psr);
+			return ptci;
+		}
 		ConceptName declarationConceptName = new ConceptName(conceptUri);
 		declarationConceptName.setType(ConceptType.VARIABLE);
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);

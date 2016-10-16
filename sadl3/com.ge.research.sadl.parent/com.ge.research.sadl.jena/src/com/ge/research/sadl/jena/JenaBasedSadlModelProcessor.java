@@ -136,6 +136,7 @@ import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
 import com.ge.research.sadl.sADL.SadlIsInverseOf;
+import com.ge.research.sadl.sADL.SadlIsSymmetrical;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
@@ -3208,6 +3209,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				ObjectProperty prop = getOrCreateObjectProperty(propUri);
 				if (domainrsrc != null) {
 					addPropertyDomain(prop, domainrsrc);
+				}
+			}
+			else if (spr1 instanceof SadlIsSymmetrical) {
+				ObjectProperty prop = getOrCreateObjectProperty(propUri);
+				if (prop != null) {
+					if (!prop.isObjectProperty()) {
+						addError("Only Object Properties can be symmetrical", spr1);
+					}
+					else {
+						getTheJenaModel().add(prop,RDF.type,OWL.SymmetricProperty);
+					}
 				}
 			}
 			else {
