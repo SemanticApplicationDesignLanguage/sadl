@@ -14,6 +14,10 @@ public class TestGraphVizVisualizer {
 
 	@Test
 	public void test() throws IOException {
+		String exec = System.getenv("GraphVizPath");
+		if (exec == null) {
+			return;
+		}
 		String[] header = {"Head","Edge","Tail","Head_color", "Edge_color", "Tail_color"};
 		String[][] data = {
 				{"N1","p1","N2","blue","blue","yellow"},
