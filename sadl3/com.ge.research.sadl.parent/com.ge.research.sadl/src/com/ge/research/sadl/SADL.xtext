@@ -267,8 +267,8 @@ PrintStatement :
 
 ExplainStatement :
 	'Explain:'
-			expr=Expression
-		| 	'Rule' rulename=QNAME
+			(expr=Expression
+		| 	'Rule' rulename=QNAME)
 			;
 			
 StartWriteStatement :

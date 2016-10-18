@@ -2669,10 +2669,11 @@ public class JenaReasonerPlugin extends Reasoner{
 				t1 = System.currentTimeMillis();
 			}
 			if (configurationMgr != null) {
-				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
-				if (translator == null) {
-					translator = configurationMgr.getTranslatorForReasoner(this);
-				}
+//				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
+//				if (translator == null) {
+//					translator = configurationMgr.getTranslatorForReasoner(this);
+//				}
+				ITranslator translator = configurationMgr.getTranslatorForReasoner(this);
 				if (translator != null) {
 					translator.setConfigurationManager(configurationMgr);
 					query = translator.prepareQuery(model, query);

@@ -136,6 +136,7 @@ import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
 import com.ge.research.sadl.sADL.SadlIsInverseOf;
+import com.ge.research.sadl.sADL.SadlIsSymmetrical;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
@@ -1515,6 +1516,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		eqinst.addProperty(getTheJenaModel().getDatatypeProperty(SADL_BASE_MODEL_EQ_EXPRESSION_URI), 
 				getTheJenaModel().createTypedLiteral(eq.toString()));
 	}
+	
 	protected Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
 			Expression bdy)
 			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
@@ -1543,6 +1545,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		else if (bdyobj instanceof GraphPatternElement) {
 			eq.addBodyElement((GraphPatternElement)bdyobj);
+		}
+		if (modelValidator != null) {
+			// check return type against body expression
+			StringBuilder errorMessageBuilder = new StringBuilder();
+			if (!modelValidator.validate(rtype, bdy, "function return", errorMessageBuilder)) {
+				issueAcceptor.addError(errorMessageBuilder.toString(), bdy);
+			}
 		}
 		logger.debug("Equation: " + eq.toFullyQualifiedString());
 		return eq;
@@ -3200,6 +3209,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				ObjectProperty prop = getOrCreateObjectProperty(propUri);
 				if (domainrsrc != null) {
 					addPropertyDomain(prop, domainrsrc);
+				}
+			}
+			else if (spr1 instanceof SadlIsSymmetrical) {
+				ObjectProperty prop = getOrCreateObjectProperty(propUri);
+				if (prop != null) {
+					if (!prop.isObjectProperty()) {
+						addError("Only Object Properties can be symmetrical", spr1);
+					}
+					else {
+						getTheJenaModel().add(prop,RDF.type,OWL.SymmetricProperty);
+					}
 				}
 			}
 			else {
