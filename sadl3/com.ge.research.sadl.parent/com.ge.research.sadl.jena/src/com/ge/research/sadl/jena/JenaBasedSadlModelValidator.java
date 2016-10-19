@@ -1074,7 +1074,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				String propertyName = predicateType.getExpressionType().toString();
 				String rangeStr = predicateType.getTypeCheckType().toString();
 				boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
-				metricsProcessor.addEffectiveRange(null, className, propertyName, rangeStr, isList);
+				metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
 			}
 			else {
 				int i = 0;	// TODO 

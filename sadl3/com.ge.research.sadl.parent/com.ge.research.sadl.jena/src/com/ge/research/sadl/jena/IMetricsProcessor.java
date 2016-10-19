@@ -15,9 +15,9 @@ public interface IMetricsProcessor {
 
 	boolean addMarker(String subjectUri, String markerClassUri, String markerTypeUri);
 	
-	boolean addControlledOrMonitoredVariable(String specName, String propertyUri);
+	boolean addControlledOrMonitoredProperty(String specName, String propertyUri);
 
-	boolean addEffectiveRange(String specName, String className, String property, String range, boolean isList);
+	boolean addEffectiveRangeAndDomain(String specName, String className, String property, String range, boolean isList);
 
 	void setMetricsTargetModel(OntModel metricsTargetModel);
 
