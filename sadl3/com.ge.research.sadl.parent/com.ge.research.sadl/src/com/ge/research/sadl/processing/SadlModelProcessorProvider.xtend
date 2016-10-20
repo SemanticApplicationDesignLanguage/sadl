@@ -62,14 +62,6 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 			processors.forEach[processExternalModels(mappingFileFolder, fileNames)]
 		}
 		
-		override processCommands(Resource resource, ValidationAcceptor issueAcceptor, IAcceptor<SadlMessage> resultAcceptor, ProcessorContext context) {
-			processors.forEach[processCommands(resource, issueAcceptor, resultAcceptor, context)]
-		}
-		
-		override processAdhocQuery(Resource resource, ValidationAcceptor issueAcceptor, ProcessorContext context, String query) {
-			processors.forEach[processAdhocQuery(resource, issueAcceptor, context, query)]
-		}
-		
 	}
 	
 	protected def Iterable<? extends Provider<? extends IModelProcessor>> getAllProviders() {

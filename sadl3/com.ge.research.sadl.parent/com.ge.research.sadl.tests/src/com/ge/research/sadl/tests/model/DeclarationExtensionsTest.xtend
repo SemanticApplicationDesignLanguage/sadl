@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.model.CircularDefinitionException
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -31,8 +32,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.model.CircularDefinitionException
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -181,6 +180,21 @@ class DeclarationExtensionsTest {
 		'''.parse
 		val airport = model.elements.get(1) as SadlClassOrPropertyDeclaration
 		airport.describedBy.head.eContents.filter(SadlResource).head.assertIs(OntConceptType.DATATYPE_PROPERTY)
+	}
+	
+	@Test def void testGetOntConceptType_07() {
+		val model = '''
+			uri "http://sadl.imp/annotation" alias ann.
+			
+			Rock (alias "rock") is a top-level class, 
+				described by color (note "what color it is") with values of type string.
+			
+			color has ofInterestTo Everyone .	// uncommenting this causes color to be a declared instance
+		'''.parse
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		
+		assertEquals(OntConceptType.DATATYPE_PROPERTY, name2resource.get('color').ontConceptType)
+		assertEquals(OntConceptType.CLASS, name2resource.get('Rock').ontConceptType)
 	}
 	
 	@Test def void testEscapedName() {

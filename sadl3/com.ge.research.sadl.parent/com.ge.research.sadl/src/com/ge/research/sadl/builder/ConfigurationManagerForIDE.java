@@ -582,10 +582,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return ServiceLoader.load(cls);
 	}
 
-	protected static ServiceLoader<Class<?>> getServiceLoader(Class<?> bcls) {
-		return (ServiceLoader<Class<?>>) ServiceLoader.load(bcls);
-	}
-
 	protected static ServiceLoader<IReasoner> getReasonersFromServiceLoader(Class<IReasoner> cls) {
 		return ServiceLoader.load(cls);
 	}
@@ -720,7 +716,32 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			Ontology onto = theModel.getOntology(publicUri);
-			if (onto != null) {
+			if (onto == null) {
+				ExtendedIterator<Ontology> ontoLst = theModel.listOntologies();
+				if (ontoLst.hasNext()) {
+					Map<String, String> map = new HashMap<String, String>();
+					while (ontoLst.hasNext()) {
+						onto = ontoLst.next();
+						ExtendedIterator<OntResource> importsItr = onto.listImports();
+						if (importsItr.hasNext()) {
+							while (importsItr.hasNext()) {
+								OntResource or = importsItr.next();
+								String importUri = or.toString();
+								String prefix = theModel.getNsURIPrefix(importUri);
+								if (prefix == null) {
+									prefix = getGlobalPrefix(importUri);
+								}
+								logger.debug("Ontology of model '" + publicUri + "' has import '" + importUri + "' with prefix '" + prefix + "'");
+								if (!map.containsKey(importUri)) {
+									map.put(importUri, prefix);
+								}
+							}
+						}
+					}
+					return map;
+				}
+			}
+			else {
 				ExtendedIterator<OntResource> importsItr = onto.listImports();
 				if (importsItr.hasNext()) {
 					Map<String, String> map = new HashMap<String, String>();
@@ -770,6 +791,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				// ok to fail; may not exist
 			}
 		} else {
+			if (getModelGetter() == null) {
+			    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), repoType);
+			    setModelGetter(modelGetter);
+			}
 			if (getModelGetter() != null) {
 				boolean resetProcessImports = false;
 				boolean processImports = OntDocumentManager.getInstance().getProcessImports();

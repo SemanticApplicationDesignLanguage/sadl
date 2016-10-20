@@ -53,16 +53,16 @@ public class ConceptName extends ConceptIdentifier {
 	 */
 	public enum ConceptType {
 		ANNOTATIONPROPERTY, RDFPROPERTY, DATATYPEPROPERTY, OBJECTPROPERTY, ONTCLASS, INDIVIDUAL, MODELNAME, 
-		RDFDATATYPE, VARIABLE, CONCEPT_NOT_FOUND_IN_MODEL
+		RDFDATATYPE, VARIABLE, CONCEPT_NOT_FOUND_IN_MODEL, FUNCTION_DEFN
 	}
 
-	public enum RangeValueType {CLASS_OR_DT, LIST, LISTS}
+	public enum RangeValueType {CLASS_OR_DT, LIST}
 
     private String name;
     private String prefix = null;
     private String namespace = null;;
     private ConceptType type = null;
-    private RangeValueType rangeValueType = RangeValueType.CLASS_OR_DT;
+    private RangeValueType rangeValueType = RangeValueType.CLASS_OR_DT;	// default
     
     /**
      * This constructor takes a single String input. However, this String may

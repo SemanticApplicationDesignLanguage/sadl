@@ -68,7 +68,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         		new String[][] {{"MM/DD/YYYY", SadlPreferences.DMY_ORDER_MDY.getId()}, 
         						{"DD/MM/YYYY", SadlPreferences.DMY_ORDER_DMY.getId()}}, getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DEEP_VALIDATION_OFF.getId(), "Disable Deep Validation of Model", getFieldEditorParent()));
-        addField(new StringFieldEditor(SadlPreferences.GRAPH_VIZ_PATH.getId(), "GraphViz bin folder", getFieldEditorParent()));
+        addField(new StringFieldEditor(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), "Graph renderer package and class", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
 		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ", getFieldEditorParent()));

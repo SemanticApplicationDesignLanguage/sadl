@@ -196,7 +196,7 @@ CardinalityValue :
 
 SadlExplicitValue:
 		SadlResource		// e.g., George
-	|	{SadlNumberLiteral} literalNumber=FacetNumber
+	|	{SadlNumberLiteral} literalNumber=FacetNumber (-> unit=UNIT)?
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
     |   SadlValueList
@@ -232,7 +232,7 @@ RuleStatement returns ExpressionScope :
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	'Ask' (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
+	start = ('Ask'|'Graph') (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
 ;
 
 SelectExpression returns Expression :
@@ -261,13 +261,14 @@ TestStatement returns ExpressionScope :
 
 PrintStatement :
 	'Print:'
-			displayString=STRING 
-		|	model=('Deductions'|'Model');
+			(displayString=STRING 
+		|	model='Deductions'
+		|	model='Model');
 
 ExplainStatement :
 	'Explain:'
-			expr=Expression EOS
-		| 	'Rule' rulename=QNAME 
+			(expr=Expression
+		| 	'Rule' rulename=QNAME)
 			;
 			
 StartWriteStatement :
@@ -340,7 +341,7 @@ Power<EnabledWith> returns Expression:
 
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject<EnabledWith> returns Expression: // (17)
-	PrimaryExpression<EnabledWith> ->(({PropOfSubject.left=current} ('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
+	PrimaryExpression<EnabledWith> ->(({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
 					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression<EnabledWith>?)+)?
 |   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PropOfSubject<EnabledWith> // this can be applied to other unitary operations
 |   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith>;
@@ -380,7 +381,7 @@ BooleanValue:
 	
 
 Constants:
-	'PI' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element' | 'value';
+	'PI' | 'e' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element' | 'value';
 
 ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111

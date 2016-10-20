@@ -795,7 +795,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			while (ontItr.hasNext()) {
 				Ontology ont = ontItr.next();
 				if (modelBaseUri == null) {
-					modelBaseUri = ont.getURI();	// first is default incase imports are circular
+					modelBaseUri = ont.getURI();	// first is default in case imports are circular
 				}
 				if (!importuris.contains(ont.getURI())) {
 					modelBaseUri = ont.getURI();
@@ -2669,10 +2669,11 @@ public class JenaReasonerPlugin extends Reasoner{
 				t1 = System.currentTimeMillis();
 			}
 			if (configurationMgr != null) {
-				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
-				if (translator == null) {
-					translator = configurationMgr.getTranslatorForReasoner(this);
-				}
+//				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
+//				if (translator == null) {
+//					translator = configurationMgr.getTranslatorForReasoner(this);
+//				}
+				ITranslator translator = configurationMgr.getTranslatorForReasoner(this);
 				if (translator != null) {
 					translator.setConfigurationManager(configurationMgr);
 					query = translator.prepareQuery(model, query);
