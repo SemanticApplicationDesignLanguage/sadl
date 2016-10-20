@@ -264,9 +264,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
 	public static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
 	private static final String OWL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.owl";
-	private static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
+	protected static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
 	private static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
-	private static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
+	protected static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
 	public static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
 	private static final String SADL_IMPLICIT_MODEL_UNIT_URI = SADL_IMPLICIT_MODEL_URI + "#unit";
 	private static final String SADL_IMPLICIT_MODEL_VALUE_URI = SADL_IMPLICIT_MODEL_URI + "#value";
