@@ -30,13 +30,28 @@ import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 import org.eclipse.xtext.RuleCall
 import org.eclipse.swt.graphics.Image
 import org.eclipse.jface.text.contentassist.ICompletionProposal
+import org.eclipse.xtext.CrossReference
+import org.eclipse.xtext.resource.IEObjectDescription
+import com.google.common.base.Predicates
+import org.eclipse.xtext.scoping.IScope
+import com.google.common.base.Predicate
+import org.eclipse.emf.ecore.EReference
+import com.google.common.base.Function
+import org.eclipse.xtext.ParserRule
+import org.eclipse.xtext.GrammarUtil
+import java.util.ArrayList
+import java.util.HashMap
+import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.EcoreUtil2
+import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.sADL.SadlImport
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
  */
 class SADLProposalProvider extends AbstractSADLProposalProvider {
-	@Inject package DeclarationExtensions declarationExtensions
+	@Inject protected DeclarationExtensions declarationExtensions
 	
 	override void completeSadlModel_BaseUri(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		var rsrcNm = context.resource.URI.lastSegment
@@ -51,6 +66,49 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		
 	}
 	
+	override def void completeSadlImport_ImportedResource(EObject model,  Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		val term = assignment.terminal
+		val container = EcoreUtil2.getContainerOfType(model, SadlModel)
+		
+// When there is a partial statement of the form "import ", cursor at end, the call on the next line results in a NullPointerException and no proposals are generated.		
+//		val imports = container.imports.map[importedResource.baseUri].toSet
+		
+// An alternative for the above is the code below, up to the call to lookupCrossReference, which has sufficient not null checks to work
+		val imports = new ArrayList<String>()
+		val importsList = container.imports
+		if (importsList != null) {
+			for (imp:importsList) {
+				if (imp != null) {
+					val import = imp.importedResource
+					if (import != null) {
+						val impUri = import.baseUri
+						if (impUri != null) {
+							imports.add(impUri)
+						}
+					}
+				}
+			}
+		}
+
+		lookupCrossReference(term as CrossReference, context, acceptor, new Predicate<IEObjectDescription>() {
+					override apply(IEObjectDescription input) {
+						val fnm = input.EObjectURI.lastSegment
+						if (fnm != null && (fnm.toLowerCase().endsWith(".sadl") || 
+							fnm.toLowerCase().endsWith(".owl") ||
+							 fnm.toLowerCase().endsWith(".n3") || 
+							 fnm.toLowerCase().endsWith(".ntriple") ||
+							 fnm.toLowerCase().endsWith(".nt")) && 
+							!fnm.equals("SadlImplicitModel.sadl") &&
+							!imports.contains(input.name.toString)
+						) {
+							return true;
+						}
+						return false
+					}
+					
+				})
+	}
+
 	// Creates a proposal for an EOS terminal.  Xtext can't guess (at
     // the moment) what the valid values for a terminal rule are, so
     // that's why there is no automatic content assist for EOS.
@@ -78,7 +136,96 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		getPriorityHelper().adjustKeywordPriority(proposal, context.getPrefix());
 		acceptor.accept(proposal);
 	}
+	
+//	// this is without filtering out duplicates
+	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
+			ICompletionProposalAcceptor acceptor) {
+		lookupCrossReference(crossReference, context, acceptor,
+				Predicates.<IEObjectDescription> alwaysTrue());
+	}
 
+	// this is with filtering out of duplicates
+	/**
+	 * Method to lookup cross reference but eliminating duplicates. A given SadlResource will appear twice, 
+	 * once as an unqualified name, e.g., "foo" and once as a qualified name, e.g., "ns1:foo".
+	 * If multiple imports contain a SadlResource with the same localname but in different namespaces, 
+	 * then there will be a "foo", "ns1:foo" in one import and a "foo", "ns2:foo" in another. If this
+	 * happens then we want to include the qualified name (apply return true) otherwise the unqualified name.
+	 */
+//	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
+//				ICompletionProposalAcceptor acceptor) {
+//		val criterable = getFilteredCrossReferenceList(crossReference, context)		//Iterable<IEObjectDescription>
+//		val itr = criterable.iterator
+//		
+//		val nmMap = new HashMap<String, QualifiedName>		// a map of qualified names with simple name as key, qualified name as value
+//		val qnmList = new ArrayList<QualifiedName>
+//		val eliminatedNames = new ArrayList<String>			// simple names of SadlReferences that require a qualified name
+//		try {
+//			if (!itr.empty) {
+//				while (!itr.empty) {
+//					val nxt = itr.next
+//					if (nxt.qualifiedName.segmentCount > 1) {
+//						val nm = nxt.qualifiedName.lastSegment
+//						if (nmMap.containsValue(nxt.qualifiedName)) {
+//							// we already have a qname with the same local name 
+//							qnmList.add(nxt.qualifiedName)
+//							if (!qnmList.contains(nmMap.get(nm))) {
+//								qnmList.add(nmMap.get(nm))
+//							}
+//							eliminatedNames.add(nxt.qualifiedName.lastSegment)
+//						}
+//						else {
+//							nmMap.put(nxt.name.lastSegment, nxt.qualifiedName)
+//						}
+//					}
+//				}			
+//			}
+//		}
+//		catch (Throwable t) {}
+//		
+//		lookupCrossReference(crossReference, context, acceptor,new Predicate<IEObjectDescription>() {
+//				override apply(IEObjectDescription input) {
+//					val isQName = input.qualifiedName.segmentCount > 1
+//					if (isQName) {
+//						if (qnmList.contains(input.name)) {
+//							// qnmList only contains qualified names that are ambiguous so return true for this qualified name
+//							return true
+//						}
+//						else {
+//							return false
+//						}
+//					}
+//					val nm = input.name.lastSegment
+//					if (eliminatedNames.contains(nm)) {
+//						return false;
+//					}
+//					return true;
+//				}
+//			})
+//	}
+//	
+//	def getFilteredCrossReferenceList(CrossReference crossReference, ContentAssistContext context) {
+//		val containingParserRule = GrammarUtil.containingParserRule(crossReference);	// ParserRule
+//		if (!GrammarUtil.isDatatypeRule(containingParserRule)) {
+//			if (containingParserRule.isWildcard()) {
+//				// TODO we need better ctrl flow analysis here
+//				// The cross reference may come from another parser rule then the current model 
+//				val ref = GrammarUtil.getReference(crossReference, context.getCurrentModel().eClass());
+//				if (ref != null) {
+//					val scope = getScopeProvider().getScope(context.currentModel, ref) as IScope;	//IScope
+//					return scope.allElements
+//				}
+//			} else {
+//				val ref = GrammarUtil.getReference(crossReference);
+//				if (ref != null) {
+//					val scope = getScopeProvider().getScope(context.currentModel, ref) as IScope;	//IScope
+//					return scope.allElements
+//				}
+//			}
+//		}
+//		return null
+//	}
+	
 	def isInvokedDirectlyAfterKeyword (ContentAssistContext context) {
 		return context.getLastCompleteNode().getTotalEndOffset()==context.getOffset();
 	}

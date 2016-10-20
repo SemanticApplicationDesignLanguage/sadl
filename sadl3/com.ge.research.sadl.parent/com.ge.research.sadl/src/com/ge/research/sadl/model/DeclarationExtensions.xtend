@@ -271,6 +271,18 @@ class DeclarationExtensions {
 		return resource.eResource instanceof ExternalEmfResource
 	}
 	
+	public def boolean isProperty(SadlResource resource) {
+		val octype = getOntConceptType(resource)
+		if (octype != null && 
+			(octype.equals(OntConceptType.DATATYPE_PROPERTY) || 
+				octype.equals(OntConceptType.CLASS_PROPERTY) || 
+				octype.equals(OntConceptType.RDF_PROPERTY) ||
+				octype.equals(OntConceptType.ANNOTATION_PROPERTY))) {
+					return true;
+				}
+		return false;
+	}
+	
 	public def ExternalResourceAdapter getExternalResourceAdapter(SadlResource resource) {
 		ExternalResourceAdapter.findInEmfObject(resource)
 	}
