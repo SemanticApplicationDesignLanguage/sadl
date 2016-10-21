@@ -298,7 +298,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return implicitProperties;
 		}
 
-		private List<TypeCheckInfo> getCompoundTypes() {
+		public List<TypeCheckInfo> getCompoundTypes() {
 			return compoundTypes;
 		}
 
@@ -705,6 +705,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		if(expression instanceof Name){
 			return getType((Name)expression);
+		}else if(expression instanceof SadlResource){
+			return getType((SadlResource)expression);
 		}
 		else if(expression instanceof Declaration){
 			SadlTypeReference decltype = ((Declaration)expression).getType();
@@ -1066,14 +1068,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject){
-		//TODO fix?
 		if(metricsProcessor != null){
 			if (subject instanceof Name) {
 				String className = declarationExtensions.getConceptUri(((Name) subject).getName());
 				String propertyName = predicateType.getExpressionType().toString();
 				String rangeStr = predicateType.getTypeCheckType().toString();
 				boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
-				metricsProcessor.addEffectiveRange(null, className, propertyName, rangeStr, isList);
+				metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
 			}
 			else {
 				int i = 0;	// TODO 
