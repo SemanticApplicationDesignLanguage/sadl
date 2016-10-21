@@ -138,11 +138,11 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 	}
 	
 //	// this is without filtering out duplicates
-	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
-			ICompletionProposalAcceptor acceptor) {
-		lookupCrossReference(crossReference, context, acceptor,
-				Predicates.<IEObjectDescription> alwaysTrue());
-	}
+//	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
+//			ICompletionProposalAcceptor acceptor) {
+//		lookupCrossReference(crossReference, context, acceptor,
+//				Predicates.<IEObjectDescription> alwaysTrue());
+//	}
 
 	// this is with filtering out of duplicates
 	/**
@@ -152,79 +152,81 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 	 * then there will be a "foo", "ns1:foo" in one import and a "foo", "ns2:foo" in another. If this
 	 * happens then we want to include the qualified name (apply return true) otherwise the unqualified name.
 	 */
-//	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
-//				ICompletionProposalAcceptor acceptor) {
-//		val criterable = getFilteredCrossReferenceList(crossReference, context)		//Iterable<IEObjectDescription>
-//		val itr = criterable.iterator
-//		
-//		val nmMap = new HashMap<String, QualifiedName>		// a map of qualified names with simple name as key, qualified name as value
-//		val qnmList = new ArrayList<QualifiedName>
-//		val eliminatedNames = new ArrayList<String>			// simple names of SadlReferences that require a qualified name
-//		try {
-//			if (!itr.empty) {
-//				while (!itr.empty) {
-//					val nxt = itr.next
-//					if (nxt.qualifiedName.segmentCount > 1) {
-//						val nm = nxt.qualifiedName.lastSegment
-//						if (nmMap.containsValue(nxt.qualifiedName)) {
-//							// we already have a qname with the same local name 
-//							qnmList.add(nxt.qualifiedName)
-//							if (!qnmList.contains(nmMap.get(nm))) {
-//								qnmList.add(nmMap.get(nm))
-//							}
-//							eliminatedNames.add(nxt.qualifiedName.lastSegment)
-//						}
-//						else {
-//							nmMap.put(nxt.name.lastSegment, nxt.qualifiedName)
-//						}
-//					}
-//				}			
-//			}
-//		}
-//		catch (Throwable t) {}
-//		
-//		lookupCrossReference(crossReference, context, acceptor,new Predicate<IEObjectDescription>() {
-//				override apply(IEObjectDescription input) {
-//					val isQName = input.qualifiedName.segmentCount > 1
-//					if (isQName) {
-//						if (qnmList.contains(input.name)) {
-//							// qnmList only contains qualified names that are ambiguous so return true for this qualified name
-//							return true
-//						}
-//						else {
-//							return false
-//						}
-//					}
-//					val nm = input.name.lastSegment
-//					if (eliminatedNames.contains(nm)) {
-//						return false;
-//					}
-//					return true;
-//				}
-//			})
-//	}
-//	
-//	def getFilteredCrossReferenceList(CrossReference crossReference, ContentAssistContext context) {
-//		val containingParserRule = GrammarUtil.containingParserRule(crossReference);	// ParserRule
-//		if (!GrammarUtil.isDatatypeRule(containingParserRule)) {
-//			if (containingParserRule.isWildcard()) {
-//				// TODO we need better ctrl flow analysis here
-//				// The cross reference may come from another parser rule then the current model 
-//				val ref = GrammarUtil.getReference(crossReference, context.getCurrentModel().eClass());
-//				if (ref != null) {
-//					val scope = getScopeProvider().getScope(context.currentModel, ref) as IScope;	//IScope
-//					return scope.allElements
-//				}
-//			} else {
-//				val ref = GrammarUtil.getReference(crossReference);
-//				if (ref != null) {
-//					val scope = getScopeProvider().getScope(context.currentModel, ref) as IScope;	//IScope
-//					return scope.allElements
-//				}
-//			}
-//		}
-//		return null
-//	}
+	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
+				ICompletionProposalAcceptor acceptor) {
+		val criterable = getFilteredCrossReferenceList(crossReference, context)		//Iterable<IEObjectDescription>
+		val itr = criterable.iterator
+		
+		val nmMap = new HashMap<String, QualifiedName>		// a map of qualified names with simple name as key, qualified name as value
+		val qnmList = new ArrayList<QualifiedName>
+		val eliminatedNames = new ArrayList<String>			// simple names of SadlReferences that require a qualified name
+		try {
+			if (!itr.empty) {
+				while (!itr.empty) {
+					val nxt = itr.next
+					if (nxt.qualifiedName.segmentCount > 1) {
+						val nm = nxt.qualifiedName.lastSegment
+						if (nmMap.containsValue(nxt.qualifiedName)) {
+							// we already have a qname with the same local name 
+							qnmList.add(nxt.qualifiedName)
+							if (!qnmList.contains(nmMap.get(nm))) {
+								qnmList.add(nmMap.get(nm))
+							}
+							eliminatedNames.add(nxt.qualifiedName.lastSegment)
+						}
+						else {
+							nmMap.put(nxt.name.lastSegment, nxt.qualifiedName)
+						}
+					}
+				}			
+			}
+		}
+		catch (Throwable t) {
+			t.printStackTrace
+		}
+		
+		lookupCrossReference(crossReference, context, acceptor,new Predicate<IEObjectDescription>() {
+				override apply(IEObjectDescription input) {
+					val isQName = input.qualifiedName.segmentCount > 1
+					if (isQName) {
+						if (qnmList.contains(input.name)) {
+							// qnmList only contains qualified names that are ambiguous so return true for this qualified name
+							return true
+						}
+						else {
+							return false
+						}
+					}
+					val nm = input.name.lastSegment
+					if (eliminatedNames.contains(nm)) {
+						return false;
+					}
+					return true;
+				}
+			})
+	}
+	
+	def getFilteredCrossReferenceList(CrossReference crossReference, ContentAssistContext context) {
+		val containingParserRule = GrammarUtil.containingParserRule(crossReference);	// ParserRule
+		if (!GrammarUtil.isDatatypeRule(containingParserRule)) {
+			if (containingParserRule.isWildcard()) {
+				// TODO we need better ctrl flow analysis here
+				// The cross reference may come from another parser rule then the current model 
+				val ref = GrammarUtil.getReference(crossReference, context.getCurrentModel().eClass());
+				if (ref != null) {
+					val scope = getScopeProvider().getScope(context.currentModel, ref) as IScope;	//IScope
+					return scope.allElements
+				}
+			} else {
+				val ref = GrammarUtil.getReference(crossReference);
+				if (ref != null) {
+					val scope = getScopeProvider().getScope(context.currentModel, ref) as IScope;	//IScope
+					return scope.allElements
+				}
+			}
+		}
+		return null
+	}
 	
 	def isInvokedDirectlyAfterKeyword (ContentAssistContext context) {
 		return context.getLastCompleteNode().getTotalEndOffset()==context.getOffset();
