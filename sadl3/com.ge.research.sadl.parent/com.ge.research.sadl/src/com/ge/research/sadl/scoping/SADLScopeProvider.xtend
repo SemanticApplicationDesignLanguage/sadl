@@ -183,9 +183,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
 		return cache.get('resource_scope'->alias, resource) [
-			if (importedResources.contains(resource)) {
-				importedResources.remove(resource)
-			}
 			val shouldWrap = importedResources.empty
 			if (!importedResources.add(resource)) {
 				return IScope.NULLSCOPE

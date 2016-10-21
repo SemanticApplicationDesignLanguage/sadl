@@ -45,6 +45,14 @@ import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.EcoreUtil2
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlImport
+import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SubjHasProp
+import java.util.List
+import com.ge.research.sadl.sADL.Declaration
+import com.ge.research.sadl.sADL.PropOfSubject
+import com.ge.research.sadl.sADL.Name
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -52,6 +60,8 @@ import com.ge.research.sadl.sADL.SadlImport
  */
 class SADLProposalProvider extends AbstractSADLProposalProvider {
 	@Inject protected DeclarationExtensions declarationExtensions
+	
+	protected List<OntConceptType> typeRestrictions
 	
 	override void completeSadlModel_BaseUri(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		var rsrcNm = context.resource.URI.lastSegment
@@ -123,6 +133,9 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 
 	override void completeKeyword(Keyword keyword, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
+		if (!includeKeyword(context)) {
+			return
+		}
 		var proposalText = keyword.getValue();
 		if (isInvokedDirectlyAfterKeyword(context) && requireSpaceBefore(keyword, context) && !hasSpaceBefore(context)) {
 			proposalText = " " + proposalText;
@@ -135,6 +148,21 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				getImage(keyword), context);
 		getPriorityHelper().adjustKeywordPriority(proposal, context.getPrefix());
 		acceptor.accept(proposal);
+	}
+	
+	def includeKeyword(ContentAssistContext context) {
+		var model = context.currentModel
+		if (model == null) {
+			model = context.previousModel
+		}
+		if (model != null) {
+			if (model instanceof Declaration) { return false}
+			val container = model.eContainer
+			if (container instanceof SadlProperty) {
+				return false
+			}
+		}
+		return true
 	}
 	
 //	// this is without filtering out duplicates
@@ -156,6 +184,39 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				ICompletionProposalAcceptor acceptor) {
 		val criterable = getFilteredCrossReferenceList(crossReference, context)		//Iterable<IEObjectDescription>
 		val itr = criterable.iterator
+				
+		val pm = context.previousModel
+		if (pm != null) {
+			if (pm instanceof Declaration) {
+				val declcontainer = (pm as Declaration).eContainer
+				if (declcontainer != null && declcontainer instanceof SubjHasProp) {
+					val sadlprop = (declcontainer as SubjHasProp).prop
+					restrictTypeToClass(sadlprop)
+				}
+			}
+			else if (pm instanceof SubjHasProp) {
+				restrictTypeToAllPropertyTypes
+			}
+			else if (pm instanceof PropOfSubject && (pm as PropOfSubject).left != null) {
+				val prop = (pm as PropOfSubject).left
+				if (prop instanceof Name) {
+					restrictTypeToClassPlusVars((prop as Name).name)
+				}
+				else if (prop instanceof SadlResource) {
+					restrictTypeToClassPlusVars(prop as SadlResource)	
+				}
+			}
+			else {
+				val container = pm.eContainer
+				if (container instanceof SubjHasProp) {
+					restrictTypeToAllPropertyTypes
+				}
+				else if (container instanceof SadlProperty) {
+					val propsr = (container as SadlProperty).nameOrRef
+					restrictTypeToClass(propsr)
+				}
+			}
+		}
 		
 		val nmMap = new HashMap<String, QualifiedName>		// a map of qualified names with simple name as key, qualified name as value
 		val qnmList = new ArrayList<QualifiedName>
@@ -166,7 +227,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					val nxt = itr.next
 					if (nxt.qualifiedName.segmentCount > 1) {
 						val nm = nxt.qualifiedName.lastSegment
-						if (nmMap.containsValue(nxt.qualifiedName)) {
+						if (nmMap.containsKey(nm) && !nxt.qualifiedName.equals(nmMap.get(nm))) {
 							// we already have a qname with the same local name 
 							qnmList.add(nxt.qualifiedName)
 							if (!qnmList.contains(nmMap.get(nm))) {
@@ -187,6 +248,15 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		
 		lookupCrossReference(crossReference, context, acceptor,new Predicate<IEObjectDescription>() {
 				override apply(IEObjectDescription input) {
+					if (typeRestrictions != null && typeRestrictions.size > 0) {
+						val element = input.EObjectOrProxy
+						if (element instanceof SadlResource) {
+							val eltype = declarationExtensions.getOntConceptType(element as SadlResource)
+							if (!typeRestrictions.contains(eltype)) {
+								return false;
+							}
+						}
+					}
 					val isQName = input.qualifiedName.segmentCount > 1
 					if (isQName) {
 						if (qnmList.contains(input.name)) {
@@ -204,6 +274,37 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					return true;
 				}
 			})
+	}
+	
+	def restrictTypeToClassPlusVars(SadlResource resource) {
+		restrictTypeToClass(resource)
+		if (typeRestrictions != null) {
+			typeRestrictions.add(OntConceptType.VARIABLE)
+		}
+		else {
+			val typeList = new ArrayList<OntConceptType>
+			typeList.add(OntConceptType.VARIABLE)
+			typeRestrictions = typeList
+		}
+	}
+	
+	def restrictTypeToClass(SadlResource propsr) {
+		// only classes in the domain of the property
+		if (propsr != null) {
+			// for now just filter to classes
+			val typeList = new ArrayList<OntConceptType>
+			typeList.add(OntConceptType.CLASS)
+			typeRestrictions = typeList
+		}
+	}
+	
+	def restrictTypeToAllPropertyTypes() {
+				val typeList = new ArrayList<OntConceptType>
+				typeList.add(OntConceptType.ANNOTATION_PROPERTY)
+				typeList.add(OntConceptType.CLASS_PROPERTY)
+				typeList.add(OntConceptType.DATATYPE_PROPERTY)
+				typeList.add(OntConceptType.RDF_PROPERTY)
+				typeRestrictions = typeList
 	}
 	
 	def getFilteredCrossReferenceList(CrossReference crossReference, ContentAssistContext context) {
