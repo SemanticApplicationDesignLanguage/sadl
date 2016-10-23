@@ -186,6 +186,9 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		val itr = criterable.iterator
 				
 		val pm = context.previousModel
+		val cm = context.currentModel
+		displayModel(pm, "Previous")
+		displayModel(cm, "Current")
 		if (pm != null) {
 			if (pm instanceof Declaration) {
 				val declcontainer = (pm as Declaration).eContainer
@@ -274,6 +277,19 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					return true;
 				}
 			})
+	}
+	
+	def displayModel(EObject object, String label) {
+		System.out.println(label)
+		if (object instanceof SadlResource) {
+			System.out.println(declarationExtensions.getConceptUri(object as SadlResource))
+			System.out.println(declarationExtensions.getOntConceptType(object as SadlResource))
+		}
+		else if (object instanceof SubjHasProp) {
+			displayModel((object as SubjHasProp).left, "SubjHasProp left")
+			displayModel((object as SubjHasProp).prop, "SubHasProp prop")
+			displayModel((object as SubjHasProp).right, "SubjHasProp right")
+		}
 	}
 	
 	def restrictTypeToClassPlusVars(SadlResource resource) {
