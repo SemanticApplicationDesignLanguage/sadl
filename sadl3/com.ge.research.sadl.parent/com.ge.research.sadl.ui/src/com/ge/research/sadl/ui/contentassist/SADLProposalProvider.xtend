@@ -187,8 +187,8 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				
 		val pm = context.previousModel
 		val cm = context.currentModel
-		displayModel(pm, "Previous")
-		displayModel(cm, "Current")
+//		displayModel(pm, "Previous")
+//		displayModel(cm, "Current")
 		if (pm != null) {
 			if (pm instanceof Declaration) {
 				val declcontainer = (pm as Declaration).eContainer
