@@ -209,6 +209,10 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					restrictTypeToClassPlusVars(prop as SadlResource)	
 				}
 			}
+			else if (pm instanceof SadlResource && cm != null && cm.eContainer instanceof SadlModel) {
+				// just a name on a new line--can't be followed by another name
+				return
+			}
 			else {
 				val container = pm.eContainer
 				if (container instanceof SubjHasProp) {
@@ -279,8 +283,8 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			})
 	}
 	
-	def displayModel(EObject object, String label) {
-		System.out.println(label)
+	def void displayModel(EObject object, String label) {
+		System.out.println(label + ": " + object.class.canonicalName)
 		if (object instanceof SadlResource) {
 			System.out.println(declarationExtensions.getConceptUri(object as SadlResource))
 			System.out.println(declarationExtensions.getOntConceptType(object as SadlResource))
