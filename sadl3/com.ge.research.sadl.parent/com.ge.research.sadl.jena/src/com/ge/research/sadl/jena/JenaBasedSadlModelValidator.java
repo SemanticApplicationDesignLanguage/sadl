@@ -700,9 +700,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException{
-		if (expressionsValidated.containsKey(expression)) {
-			return expressionsValidated.get(expression);
-		}
+//		if (expressionsValidated.containsKey(expression)) {
+//			return expressionsValidated.get(expression);
+//		}
 		if(expression instanceof Name){
 			return getType((Name)expression);
 		}else if(expression instanceof SadlResource){
@@ -1742,10 +1742,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (isNumericOperator(operations)) {
 			ConceptName lcn = getTypeCheckInfoType(leftTypeCheckInfo);
 			ConceptName rcn = getTypeCheckInfoType(rightTypeCheckInfo);
-			if (lcn == null) {
+			if (lcn == null || lcn.getNamespace() == null) {
 				return leftTypeCheckInfo;
 			}
-			if (rcn == null) {
+			if (rcn == null || rcn.getNamespace() == null) {
 				return rightTypeCheckInfo;
 			}
 			if (rcn.equals(lcn)) {
