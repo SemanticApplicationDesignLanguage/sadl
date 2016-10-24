@@ -321,7 +321,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		boolean detectAmbiguousNames;
 		
 		override getAllElements() {
-			delegates.map[allElements].reduce[p1, p2| p1 + p2]
+			delegates.map[allElements].reduce[p1, p2| p1 + p2] ?: #[]
 		}
 		
 		override getElements(QualifiedName name) {
