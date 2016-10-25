@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 
+import com.ge.research.sadl.errorgenerator.generator.*;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
@@ -978,7 +979,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (constantRequiresListNext(cnstval)) {
 				subjtype = getType(subject);
 				if (subjtype != null && !subjtype.getRangeValueType().equals(RangeValueType.LIST)) {
-					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
+					issueAcceptor.addError(SadlErrorMessages.MUST_BE_APPLIED_TO_LIST.get(cnstval, getTypeCheckTypeString(subjtype)), subject);
+//					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
 				}
 			}
 			else if (constantFollowedByIntThenList(cnstval)) {

@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ErrorGenerator
+Bundle-SymbolicName: com.ge.research.sadl.errorgenerator
+Bundle-Version: 3.0.0.qualifier
+Bundle-Vendor: GE
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: com.ge.research.sadl.errorgenerator.generator,
+ com.ge.research.sadl.errorgenerator.messages,
+ com.ge.research.sadl.errorgeneratorbase
