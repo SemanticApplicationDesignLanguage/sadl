@@ -1,0 +1,8 @@
+diff a/sadl3/com.ge.research.sadl.parent/com.ge.research.jena/.classpath b/sadl3/com.ge.research.sadl.parent/com.ge.research.jena/.classpath	(rejected hunks)
+@@ -28,6 +28,5 @@
+ 	<classpathentry exported="true" kind="lib" path="lib/stax-api.jar"/>
+ 	<classpathentry exported="true" kind="lib" path="lib/wstx-asl.jar"/>
+ 	<classpathentry exported="true" kind="lib" path="lib/xml-apis.jar"/>
+-	<classpathentry exported="true" kind="lib" path="lib/document-gen.jar"/>
+ 	<classpathentry kind="output" path="target/classes"/>
+ </classpath>

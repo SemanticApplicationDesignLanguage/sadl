@@ -13,11 +13,14 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 
+import com.ge.research.documentation.SadlErrorMessages;
+import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.ConceptName.RangeValueType;
+import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
@@ -125,6 +128,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     															//	range is a union of classes or which is given range in multiple imports
     	
     	private String typeToExprRelationship = "range";		// the relationship between the typeCheckType and the expressionType, e.g., range (the default)
+
     	
     	public TypeCheckInfo(ConceptIdentifier eType) {
     		setExpressionType(eType);
@@ -979,8 +983,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				subjtype = getType(subject);
 				if (subjtype != null && !subjtype.getRangeValueType().equals(RangeValueType.LIST)) {
 					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
+ 					String test = SadlErrorMessages.MUST_BE_APPLIED_TO_LIST.get(cnstval, getTypeCheckTypeString(subjtype));
+					//issueAcceptor.addError(SadlErrorMessages.MUST_BE_APPLIED_TO_LIST.get(cnstval, getTypeCheckTypeString(subjtype)).toString(), subject);
+// 					if(test.equals(null)){
+// 						
+// 					}
 				}
 			}
+			
 			else if (constantFollowedByIntThenList(cnstval)) {
 				subjtype = getType(subject);
 				

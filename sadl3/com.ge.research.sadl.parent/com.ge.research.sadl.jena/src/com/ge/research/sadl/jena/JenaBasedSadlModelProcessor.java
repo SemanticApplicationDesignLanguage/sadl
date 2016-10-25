@@ -53,6 +53,7 @@ import org.eclipse.xtext.validation.CheckType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.documentation.SadlErrorMessages;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.external.ExternalEmfResource;
@@ -624,7 +625,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		SadlModel model = (SadlModel) resource.getContents().get(0);
 		String modelActualUrl =resource.getURI().lastSegment();
 		if (isReservedName(resource)) {
-			addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
+			addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+			//addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
 		}
 		String modelName = model.getBaseUri();
 		setModelName(modelName);
