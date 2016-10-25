@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -32,6 +34,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.ILeafNode;
@@ -367,10 +370,27 @@ public abstract class SadlActionHandler extends AbstractHandler {
 
 	protected void graphResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
 			String description, ResultSet rs) throws IOException {
-				String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
-				File tmpDirFile = new File(tempDir);
-				tmpDirFile.mkdirs();
-				iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
-				iGraphVisualizer.graphResultSetData(rs);
+		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		File tmpDirFile = new File(tempDir);
+		tmpDirFile.mkdirs();
+		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
+		iGraphVisualizer.graphResultSetData(rs);
+		String fileToOpen = iGraphVisualizer.getGraphFileToOpen();
+		if (fileToOpen != null) {
+			File fto = new File(fileToOpen);
+			if (fto.isFile()) {
+				IFileStore fileStore = EFS.getLocalFileSystem().getStore(fto.toURI());
+				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				try {
+					IDE.openEditorOnFileStore(page, fileStore);
+				}
+				catch (Throwable t) {
+					SadlConsole.writeToConsole(MessageType.ERROR, "Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
+				}
 			}
+			else if (fileToOpen != null) {
+				SadlConsole.writeToConsole(MessageType.ERROR, "Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+			}
+		}
+	}
 }
