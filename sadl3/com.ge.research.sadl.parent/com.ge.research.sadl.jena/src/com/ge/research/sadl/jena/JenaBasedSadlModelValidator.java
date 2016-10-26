@@ -996,7 +996,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				nlcn.setType(ConceptType.RDFDATATYPE);
 				return new TypeCheckInfo(nlcn, nlcn, this, expression);
 			}
-			else if (cnstval.equals("first element") || cnstval.equals("last element")) {
+			else if (subjtype != null && (cnstval.equals("first element") || cnstval.equals("last element")) ) {
 				subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
 				return subjtype;
 			}

@@ -103,7 +103,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage INVALID_MEMBER_TYPE = new SadlErrorMessage("invalid_member_type");
 /**
-* {0} must be applied to a List ({1} is not a List)
+* {0} must be applied to a List ({1} is not a List).
 **/
     public static final SadlErrorMessage MUST_BE_APPLIED_TO_LIST = new SadlErrorMessage("must_be_applied_to_list");
 /**
