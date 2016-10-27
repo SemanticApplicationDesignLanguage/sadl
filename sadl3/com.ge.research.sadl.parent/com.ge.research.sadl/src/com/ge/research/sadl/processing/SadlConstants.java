@@ -1,0 +1,45 @@
+package com.ge.research.sadl.processing;
+
+public class SadlConstants {
+	public static final String SADL_BASE_MODEL_FILENAME = "SadlBaseModel";
+	public static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
+	public static final String SADL_BASE_MODEL_PREFIX = "sadlbasemodel";
+	public static final String SADL_BASE_MODEL_EQUATION_URI = SADL_BASE_MODEL_URI + "#Equation";
+	public static final String SADL_BASE_MODEL_EXTERNAL_URI = SADL_BASE_MODEL_URI + "#ExternalEquation";
+	public static final String SADL_BASE_MODEL_EQ_EXPRESSION_URI = SADL_BASE_MODEL_URI + "#expression";
+	public static final String SADL_BASE_MODEL_EXTERNALURI_URI = SADL_BASE_MODEL_URI + "#externalURI";
+	
+	public static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
+	public static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
+	public static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
+	public static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
+	public static final String SADL_LIST_MODEL_LIST_URI = SADL_LIST_MODEL_URI + "#List";
+	public static final String SADL_LIST_MODEL_FIRST_URI = SADL_LIST_MODEL_URI + "#first";
+	public static final String SADL_LIST_MODEL_REST_URI = SADL_LIST_MODEL_URI + "#rest";
+	public static final String SADL_LIST_MODEL_LENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthRestriction";
+	public static final String SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMinRestriction";
+	public static final String SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI = SADL_LIST_MODEL_URI + "#lengthMaxRestriction";
+
+	public static final String SADL_IMPLICIT_MODEL_FOLDER = "ImplicitModel";
+	public static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
+	public static final String OWL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.owl";
+	public static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
+	public static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
+	public static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
+	public static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
+	public static final String SADL_IMPLICIT_MODEL_UNIT_URI = SADL_IMPLICIT_MODEL_URI + "#unit";
+	public static final String SADL_IMPLICIT_MODEL_VALUE_URI = SADL_IMPLICIT_MODEL_URI + "#value";
+	public static final String SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#impliedProperty";
+	public static final String SADL_IMPLICIT_MODEL_QUERY_STRING_URI = SADL_IMPLICIT_MODEL_URI + "#queryString";
+	
+	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
+	public static final String SADL_RULE_PATTERN_PREFIX = "";
+	public static final String SADL_RULE_PATTERN_DATA_URI = "http://sadl.org/rule/patterns/data";
+	public static final String SADL_RULE_PATTERN_DATA_PREFIX = "";
+	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI = "http://com.ge.research.sadl/sadlserver/Services";
+	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX = "";
+	public static final String SADL_SERIVCES_CONFIGURATION_URI = "http://com.ge.research.sadl/sadlserver/ServicesConfig";
+	public static final String SADL_SERIVCES_CONFIGURATION_PREFIX = "";
+
+
+}
