@@ -53,6 +53,11 @@ import java.util.List
 import com.ge.research.sadl.sADL.Declaration
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.Name
+import org.eclipse.xtext.AbstractElement
+import org.eclipse.xtext.ui.editor.contentassist.IFollowElementAcceptor
+import org.eclipse.xtext.ui.editor.contentassist.AbstractContentProposalProvider.NullSafeCompletionProposalAcceptor
+import com.ge.research.sadl.processing.SadlConstants
+import com.ge.research.sadl.sADL.BinaryOperation
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -62,6 +67,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 	@Inject protected DeclarationExtensions declarationExtensions
 	
 	protected List<OntConceptType> typeRestrictions
+	protected List<String> excludedNamespaces
 	
 	override void completeSadlModel_BaseUri(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		var rsrcNm = context.resource.URI.lastSegment
@@ -133,7 +139,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 
 	override void completeKeyword(Keyword keyword, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
-		if (!includeKeyword(context)) {
+		if (!includeKeyword(keyword, context)) {
 			return
 		}
 		var proposalText = keyword.getValue();
@@ -150,7 +156,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		acceptor.accept(proposal);
 	}
 	
-	def includeKeyword(ContentAssistContext context) {
+	def boolean includeKeyword(Keyword keyword, ContentAssistContext context) {
 		var model = context.currentModel
 		if (model == null) {
 			model = context.previousModel
@@ -158,13 +164,76 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		if (model != null) {
 			if (model instanceof Declaration) { return false}
 			val container = model.eContainer
+			val kval = keyword.value
 			if (container instanceof SadlProperty) {
 				return false
 			}
+			else if (container instanceof Declaration) {
+				if (kval.equals("with") ||
+					kval.equals("only") ||
+					kval.equals("when") ||
+					kval.equals("where")
+				) {
+					return true
+				}
+				else {
+					return false
+				}
+			}
+			else if (container instanceof SubjHasProp) {
+				if ((container as SubjHasProp).prop != null) {
+					if ((container as SubjHasProp).right == null) {
+						// this is ready for a value but doesn't have one yet
+						if (kval.equals("(") ||
+							kval.equals("[") ||
+							kval.equals("{")
+						) {
+							return true;
+						}
+						else {
+							return false;
+						}
+					} else if ((container as SubjHasProp).right instanceof Name) {
+						val valnm =((container as SubjHasProp).right as Name)
+						if (declarationExtensions.isProperty(valnm)) {
+							if (!kval.equals("of")) {
+								return false
+							}
+							return true
+						}
+					}
+				}
+			}
+			if (model instanceof Name) {
+				if (declarationExtensions.isProperty(model as Name)) {
+					if (!kval.equals("of")) {
+						return false
+					}
+				}
+			}
+			else if (model instanceof PropOfSubject) {
+				val lcn = context.lastCompleteNode
+				val lcnText = lcn.text
+				if (lcnText.equals("a")) {
+					return false
+				}
+				if (kval.equals("(")
+				) {
+					return true
+				}
+				return false
+			}
+			
 		}
 		return true
 	}
 	
+	override void createProposals(ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		if (excludedNamespaces != null) excludedNamespaces.clear
+		if (typeRestrictions != null) typeRestrictions.clear
+		super.createProposals(context, acceptor)
+	}
+
 //	// this is without filtering out duplicates
 //	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
 //			ICompletionProposalAcceptor acceptor) {
@@ -202,16 +271,46 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			}
 			else if (pm instanceof PropOfSubject && (pm as PropOfSubject).left != null) {
 				val prop = (pm as PropOfSubject).left
-				if (prop instanceof Name) {
+				if ((pm as PropOfSubject).right != null && (pm as PropOfSubject).right instanceof Declaration) {
+					if (((pm as PropOfSubject).right as Declaration).type != null) {
+						excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
+						restrictTypeToAllPropertyTypes
+					}
+					else {
+						excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
+						restrictTypeToClass(prop as SadlResource)
+					}
+				}
+				else if (prop instanceof Name) {
+					excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
 					restrictTypeToClassPlusVars((prop as Name).name)
 				}
 				else if (prop instanceof SadlResource) {
+					excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
 					restrictTypeToClassPlusVars(prop as SadlResource)	
+				}
+				else if (prop instanceof Declaration) {
+					excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
+					restrictTypeToAllPropertyTypes
 				}
 			}
 			else if (pm instanceof SadlResource && cm != null && cm.eContainer instanceof SadlModel) {
 				// just a name on a new line--can't be followed by another name
 				return
+			}
+			else if (pm instanceof BinaryOperation) {
+				val left = (pm as BinaryOperation).left
+				val op = (pm as BinaryOperation).op
+				val right = (pm as BinaryOperation).right
+				if (op.equals("is")) {
+					if (left instanceof Name) {
+						val ltype = declarationExtensions.getOntConceptType(left as Name)
+						if (ltype.equals(OntConceptType.VARIABLE)) {
+							// no restrictions
+							excludeNamespace(SadlConstants.SADL_BASE_MODEL_URI)
+						}
+					}
+				}
 			}
 			else {
 				val container = pm.eContainer
@@ -255,12 +354,22 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		
 		lookupCrossReference(crossReference, context, acceptor,new Predicate<IEObjectDescription>() {
 				override apply(IEObjectDescription input) {
+					val element = input.EObjectOrProxy
 					if (typeRestrictions != null && typeRestrictions.size > 0) {
-						val element = input.EObjectOrProxy
 						if (element instanceof SadlResource) {
 							val eltype = declarationExtensions.getOntConceptType(element as SadlResource)
 							if (!typeRestrictions.contains(eltype)) {
 								return false;
+							}
+						}
+					}
+					if (excludedNamespaces != null) {
+						if (element instanceof SadlResource) {
+							val uri = declarationExtensions.getConceptUri(element as SadlResource)
+							for (ens:excludedNamespaces) {
+								if (uri.startsWith(ens)) {
+									return false;
+								}
 							}
 						}
 					}
@@ -293,6 +402,16 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			displayModel((object as SubjHasProp).left, "SubjHasProp left")
 			displayModel((object as SubjHasProp).prop, "SubHasProp prop")
 			displayModel((object as SubjHasProp).right, "SubjHasProp right")
+		}
+	}
+	
+	def excludeNamespace(String nsuri) {
+		if (excludedNamespaces == null) {
+			val ens = new ArrayList<String>
+			excludedNamespaces = ens
+		}
+		if (!excludedNamespaces.contains(nsuri)) {
+			excludedNamespaces.add(nsuri)
 		}
 	}
 	

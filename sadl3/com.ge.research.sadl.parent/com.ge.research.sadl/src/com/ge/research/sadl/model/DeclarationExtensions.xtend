@@ -272,6 +272,9 @@ class DeclarationExtensions {
 	}
 	
 	public def boolean isProperty(SadlResource resource) {
+		if (resource instanceof Name && !(resource as Name).name.equals(resource)) {
+			return isProperty((resource as Name).name)
+		}
 		val octype = getOntConceptType(resource)
 		if (octype != null && 
 			(octype.equals(OntConceptType.DATATYPE_PROPERTY) || 

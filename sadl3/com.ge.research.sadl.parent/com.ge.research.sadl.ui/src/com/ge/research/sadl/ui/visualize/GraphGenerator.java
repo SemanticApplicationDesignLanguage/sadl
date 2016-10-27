@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
@@ -613,7 +614,7 @@ public class GraphGenerator {
 			Resource prop, int graphRadius, List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		boolean isList = false;
-		Statement stmt = prop.getProperty(getModel().getAnnotationProperty(SadlModelProcessor.LIST_RANGE_ANNOTATION_PROPERTY));
+		Statement stmt = prop.getProperty(getModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
 		if (stmt != null) {
 			RDFNode obj = stmt.getObject();
 			if (obj.isLiteral()) {
@@ -627,7 +628,7 @@ public class GraphGenerator {
 		while (eitr.hasNext()) {
 			OntResource rng = eitr.next();
 			if (isList && rng.canAs(OntClass.class)) {
-				Resource listClass = getModel().getResource(SadlModelProcessor.SADL_LIST_MODEL_LIST_URI);
+				Resource listClass = getModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
 				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
 					StmtIterator stmtitr = getModel().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
 					while (stmtitr.hasNext()) {
@@ -637,7 +638,7 @@ public class GraphGenerator {
 						RDFNode supclsnode = supclsstmt.getObject();
 						if (supclsnode.canAs(OntClass.class)){ 
 							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
-							if (subcls.hasProperty(OWL.onProperty, getModel().getProperty(SadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
+							if (subcls.hasProperty(OWL.onProperty, getModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
 								Statement avf = subcls.getProperty(OWL.allValuesFrom);
 								if (avf != null) {
 									RDFNode listtype = avf.getObject();
