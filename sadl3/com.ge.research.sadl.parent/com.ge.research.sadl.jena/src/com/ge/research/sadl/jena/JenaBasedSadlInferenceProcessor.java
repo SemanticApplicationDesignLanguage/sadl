@@ -21,8 +21,10 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -115,6 +117,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 						ResultSet rs = processAdhocQuery(query);
 						infresults.add(rs);
 //					}
+				}
+				else if (cmd instanceof Test) {
+					
 				}
 			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
@@ -223,7 +228,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					throw new JenaProcessorException("Unable to retrieve OntModel for resource '" + resourceUri + "'");
 				}
 				OntResource query = m.getOntResource(queryName);
-				Statement s = query.getProperty(m.getProperty(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_QUERY_STRING_URI));
+				Statement s = query.getProperty(m.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_QUERY_STRING_URI));
 			}
 		}
 		return null;
