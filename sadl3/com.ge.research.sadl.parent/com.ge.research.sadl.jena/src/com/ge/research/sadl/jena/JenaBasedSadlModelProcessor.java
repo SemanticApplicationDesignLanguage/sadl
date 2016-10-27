@@ -136,6 +136,7 @@ import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
+import com.ge.research.sadl.sADL.SadlIsFunctional;
 import com.ge.research.sadl.sADL.SadlIsInverseOf;
 import com.ge.research.sadl.sADL.SadlIsSymmetrical;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
@@ -3204,6 +3205,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else {
 						getTheJenaModel().add(prop,RDF.type,OWL.SymmetricProperty);
 					}
+				}
+			}
+			else if (spr1 instanceof SadlIsFunctional) {
+				ObjectProperty prop = getOrCreateObjectProperty(propUri);
+				if (prop != null) {
+					getTheJenaModel().add(prop, RDF.type, OWL.FunctionalProperty);
 				}
 			}
 			else {
