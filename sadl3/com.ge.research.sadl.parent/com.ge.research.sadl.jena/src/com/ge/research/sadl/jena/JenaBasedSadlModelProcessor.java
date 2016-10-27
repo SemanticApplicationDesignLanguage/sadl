@@ -1758,15 +1758,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			lobj = translate(lexpr);			
 		}
 		else {
-			throw new TranslationException("Left side of '" + op + "' is null (Resource '" + expr.eResource().getURI() + "')");
+			addError("Left side of '" + op + "' is null", lexpr);
+			return null;
 		}
 		Expression rexpr = expr.getRight();
-		Object robj;
+		Object robj = null;
 		if (rexpr != null) {
 			robj = translate(rexpr);
 		}
 		else {
-			throw new TranslationException("Right side of '" + op + "' is null (Resource '" + expr.eResource().getURI() + "')");
+			addError("Right side of '" + op + "' is null", rexpr);
+			return null;
 		}
 				
 		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
