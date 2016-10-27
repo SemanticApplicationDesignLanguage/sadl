@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 
+import com.ge.research.sadl.errorgenerator.generator.*;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
@@ -979,7 +980,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (constantRequiresListNext(cnstval)) {
 				subjtype = getType(subject);
 				if (subjtype != null && !subjtype.getRangeValueType().equals(RangeValueType.LIST)) {
-					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
+					issueAcceptor.addError(SadlErrorMessages.MUST_BE_APPLIED_TO_LIST.get(cnstval, getTypeCheckTypeString(subjtype)), subject);
+//					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
 				}
 			}
 			else if (constantFollowedByIntThenList(cnstval)) {
@@ -995,7 +997,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				nlcn.setType(ConceptType.RDFDATATYPE);
 				return new TypeCheckInfo(nlcn, nlcn, this, expression);
 			}
-			else if (cnstval.equals("first element") || cnstval.equals("last element")) {
+			else if (subjtype != null && (cnstval.equals("first element") || cnstval.equals("last element")) ) {
 				subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
 				return subjtype;
 			}
