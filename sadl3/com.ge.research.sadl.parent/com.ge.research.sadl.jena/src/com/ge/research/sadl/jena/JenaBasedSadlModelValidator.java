@@ -23,6 +23,7 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.processing.ISadlModelValidator;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -732,7 +733,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
 				String unit = ((Unit)expression).getUnit();
-				ConceptName uqcn = new ConceptName(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+				ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
 				List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
 				if (impliedProperties != null) {
 					return new TypeCheckInfo(uqcn, uqcn, impliedProperties, this, expression);
@@ -1306,7 +1307,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean isListAnnotatedProperty(Property prop) {
-		AnnotationProperty annprop = theJenaModel.getAnnotationProperty(JenaBasedSadlModelProcessor.LIST_RANGE_ANNOTATION_PROPERTY);
+		AnnotationProperty annprop = theJenaModel.getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY);
 		if (annprop != null) {
 			if (prop.hasProperty(annprop)) {
 				return true;
@@ -1590,7 +1591,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			OntClass cls = eitr.next();
 			if (cls.isRestriction()) {
 				if (cls.canAs(AllValuesFromRestriction.class)) {
-					if (((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).onProperty(theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_FIRST_URI))) {
+					if (((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
 						Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
 						eitr.close();
 						if (avf.isURIResource()) {
@@ -1617,7 +1618,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private boolean isSadlTypedList(RDFNode node) {
 		if (node instanceof Resource && ((Resource)node).canAs(OntClass.class)) {
 			OntClass cls = ((Resource)node).as(OntClass.class);
-			if (cls.hasSuperClass(theJenaModel.getOntResource(JenaBasedSadlModelProcessor.SADL_LIST_MODEL_LIST_URI))) {
+			if (cls.hasSuperClass(theJenaModel.getOntResource(SadlConstants.SADL_LIST_MODEL_LIST_URI))) {
 				return true;
 			}
 		}
@@ -1680,7 +1681,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-		StmtIterator sitr = theJenaModel.listStatements(first, theJenaModel.getProperty(JenaBasedSadlModelProcessor.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
+		StmtIterator sitr = theJenaModel.listStatements(first, theJenaModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
 		if (sitr.hasNext()) {
 			if (retlst == null) {
 				retlst = new ArrayList<ConceptName>();

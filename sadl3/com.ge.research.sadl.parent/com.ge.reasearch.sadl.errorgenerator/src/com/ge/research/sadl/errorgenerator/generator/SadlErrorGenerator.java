@@ -50,15 +50,24 @@ public class SadlErrorGenerator extends ErrorGeneratorBase{
 	@Override
 	public
 	String getSourceTemplate() {
-		return String.join("\n",
-				"$warning-comment",
+		String[] sa = {"$warning-comment",
 				"package com.ge.research.sadl.errorgenerator.generator;",
 				"",
 				"import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;",
 				"",
 				"public final class $classname {",
 				"$content",
-				"}");
+				"}"};
+		return strJoin("\n", sa);
+//		return String.join("\n",
+//				"$warning-comment",
+//				"package com.ge.research.sadl.errorgenerator.generator;",
+//				"",
+//				"import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;",
+//				"",
+//				"public final class $classname {",
+//				"$content",
+//				"}");
 	}
 	
 	public static void main(String args[]) throws IllegalArgumentException, IllegalAccessException, IOException {

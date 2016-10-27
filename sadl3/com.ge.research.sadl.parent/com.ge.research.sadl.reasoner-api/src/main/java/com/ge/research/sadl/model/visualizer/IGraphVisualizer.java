@@ -88,4 +88,11 @@ public interface IGraphVisualizer {
 	 */
 	public List<String> graphResultSetData(ResultSet rs) throws IOException;
 	
+	/**
+	 * Some graph renderers will prepare a file which is to be opened by the client, e.g., 
+	 * GraphViz generates a .svg file that should be opened in a browser. If the renderer 
+	 * creates such a file, this method should return the full file path and name.
+	 * @return
+	 */
+	public String getGraphFileToOpen();
 }
