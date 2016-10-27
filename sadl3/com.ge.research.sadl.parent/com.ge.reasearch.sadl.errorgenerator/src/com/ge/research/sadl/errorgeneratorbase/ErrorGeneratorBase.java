@@ -20,8 +20,24 @@ import java.util.ResourceBundle;
  *
  */
 public abstract class ErrorGeneratorBase {
-	private final static String warningComment = 
-			String.join("\n", 
+//	private final static String warningComment = 
+//			String.join("\n", 
+//			"/**WARNING: This document is auto-generated. DO NOT manually edit this file!",
+//			"*   ==Generated based on appropriate .properties file==",
+//			"*",
+//			"* To add new errors to this list, use the following process:",
+//			"*",
+//			"* 1. Add new error to associated sadlMessages/requirementsMessages.properties file",
+//			"*      -File is found in either com.ge.research.sadl.errorgenerator/src or ",
+//			"*       com.ge.research.sadl.requirements.errorgenerator/src",
+//			"* 2. Select respective ErrorGenerator class (SadlErrorGenerator/RequirmentsErrorGenerator)",
+//			"* 3. Right click -> Run As -> Java Application",
+//			"*",
+//			"* This process should generate a new Sadl/Req ErrorMessages class and updated html table",
+//			"*",
+//			"*/",
+//			"");	
+	private static String[] strArray =	{ 
 			"/**WARNING: This document is auto-generated. DO NOT manually edit this file!",
 			"*   ==Generated based on appropriate .properties file==",
 			"*",
@@ -36,7 +52,9 @@ public abstract class ErrorGeneratorBase {
 			"* This process should generate a new Sadl/Req ErrorMessages class and updated html table",
 			"*",
 			"*/",
-			"");
+			"" };
+	private final static String warningComment = strJoin("\n", strArray);
+
 	private final static String indent = "    ";
 	private final static String varDeclaration1 = "public static final ";
 	private final static String varDeclaration2 = "ErrorMessage ";
@@ -47,6 +65,21 @@ public abstract class ErrorGeneratorBase {
 	
 	protected final static String REQUIREMENTS_PREFIX = "Requirements";
 	protected final static String SADL_PREFIX = "Sadl";
+	
+	/**
+	 * This method is used for Java 1.7 compatibility
+	 * @param aSep
+	 * @param aArray
+	 * @return
+	 */
+	public static String strJoin(String aSep, String[] aArray) {
+		StringBuilder sb = new StringBuilder();
+		for (int i =0; i < aArray.length; i++) {
+			if (i > 0) sb.append(aSep);
+			sb.append(aArray[i]);
+		}
+		return sb.toString();
+	}
 	
 	/**
 	 * Must be implemented
@@ -106,13 +139,20 @@ public abstract class ErrorGeneratorBase {
 			if(!key.contains(".")){
 				//Add content to source file
 				String msg = msgBundle.getString(key);
-				sourceContent += String.join(newline, 
-								"/**",
-								"* " + msg,
-								"**/",
-								indent + varDeclaration1 + getProjectPrefix() + varDeclaration2 + key.toUpperCase() + " = " + newErrorMsg1 + getProjectPrefix() + newErrorMsg2 + "\"" + key 
-										+ "\"" + endErrorMsg,
-								"");
+				String[] sa = {"/**",
+						"* " + msg,
+						"**/",
+						indent + varDeclaration1 + getProjectPrefix() + varDeclaration2 + key.toUpperCase() + " = " + newErrorMsg1 + getProjectPrefix() + newErrorMsg2 + "\"" + key 
+								+ "\"" + endErrorMsg,
+						""};
+				sourceContent += strJoin(newline, sa);
+//				sourceContent += String.join(newline, 
+//								"/**",
+//								"* " + msg,
+//								"**/",
+//								indent + varDeclaration1 + getProjectPrefix() + varDeclaration2 + key.toUpperCase() + " = " + newErrorMsg1 + getProjectPrefix() + newErrorMsg2 + "\"" + key 
+//										+ "\"" + endErrorMsg,
+//								"");
 				//Add content to HTML file
 				String description = "";
 				try {
