@@ -21,6 +21,7 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -116,6 +117,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 						ResultSet rs = processAdhocQuery(query);
 						infresults.add(rs);
 //					}
+				}
+				else if (cmd instanceof Test) {
+					
 				}
 			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
