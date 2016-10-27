@@ -5531,6 +5531,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		this.equations = equations;
 	}
 	
+	protected boolean isClass(OntConceptType oct){
+		if(oct.equals(OntConceptType.CLASS)){
+			return true;
+		}
+		return false;
+	}
+	
 	protected boolean isProperty(OntConceptType oct) {
 		if (oct.equals(OntConceptType.DATATYPE_PROPERTY) || 
 				oct.equals(OntConceptType.CLASS_PROPERTY) || 
