@@ -29,7 +29,6 @@ import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 import com.ge.research.sadl.sADL.SadlImport
-import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
 import com.ge.research.sadl.sADL.SadlProperty
@@ -48,12 +47,15 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.resource.EObjectDescription
+import org.eclipse.xtext.resource.ForwardingEObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import org.eclipse.xtext.resource.ForwardingEObjectDescription
+import com.ge.research.sadl.sADL.SadlInstance
+import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.sADL.TestStatement
 
 /**
  * This class contains custom scoping description.
@@ -99,6 +101,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return MapBasedScope.createScope(parent, 
 				equation.parameter.map[EObjectDescription.create(name.concreteName, it.name)])
 		}
+		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
+		if (ask !== null) {
+			return getLocalVariableScope(ask.expr, parent)
+		}
+		val test = EcoreUtil2.getContainerOfType(context, TestStatement)
+		if (test !== null) {
+			return getLocalVariableScope(test.tests, parent)
+		}
 		return parent
 	}
 	
@@ -117,6 +127,21 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return false
 		]
 		return doGetLocalVariableScope(expressions, newParent) [true]
+	}
+	
+	protected def IScope getLocalVariableScope(Expression expression, IScope parent) {
+		var newParent = doGetLocalVariableScope(expression, parent) [
+			var container = eContainer
+			if (container instanceof PropOfSubject || container instanceof SubjHasProp) {
+				container = container.eContainer
+			}
+			if (container instanceof BinaryOperation) {
+				if (container.op == 'is' || container.op == '==' || container.op == '=') 
+					return true
+			}
+			return false
+		]
+		return doGetLocalVariableScope(expression, newParent) [true]
 	}
 	
 	protected def IScope doGetLocalVariableScope(Iterable<Expression> expressions, IScope parent, Predicate<SadlResource> predicate) {
@@ -140,6 +165,22 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	
+	protected def IScope doGetLocalVariableScope(Expression expression, IScope parent, Predicate<SadlResource> predicate) {
+		val map = newHashMap
+		val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate)
+		while (iter.hasNext) {
+			val name = iter.next
+			val concreteName = name.concreteName
+			if (concreteName !== null) {
+				val qn = QualifiedName.create(concreteName)
+				if (!map.containsKey(qn) && parent.getSingleElement(qn) === null) {
+					map.put(qn, new EObjectDescription(qn, name, emptyMap))
+				}
+			}
+		}
+		return MapBasedScope.createScope(parent, map.values)
+	}
+	
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
 		return cache.get('resource_scope'->alias, resource) [
 			val shouldWrap = importedResources.empty
@@ -152,37 +193,50 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				newParent = wrap(newParent)
 			val aliasToUse = alias ?: resource.getAlias
 			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
-//			System.out.println("createResourceScope: " + resource.URI.toString)
-			newParent = getPrimaryLocalResourceScope(resource, namespace, newParent)
-//			System.out.println("   after call to getPrimaryLocalResourceScope: " + newParent.toString)
-			newParent = getSecondaryLocalResourceScope(resource, namespace, newParent)
-//			System.out.println("   after call to getSecondaryLocalResourceScope: " + newParent.toString)
-			newParent = getTertiaryLocalResourceScope(resource, namespace, newParent)
-//			System.out.println("   after call to getTertiaryLocalResourceScope: " + newParent.toString)
+			newParent = getLocalScope1(resource, namespace, newParent)
+			newParent = getLocalScope2(resource, namespace, newParent)
+			newParent = getLocalScope3(resource, namespace, newParent)
+			newParent = getLocalScope4(resource, namespace, newParent)
+			// finally all the rest
+			newParent = internalGetLocalResourceScope(resource, namespace, newParent) [true]
 			return newParent
 		]
 	}
 	
-	protected def getTertiaryLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope) {
-		return internalGetLocalResourceScope(resource, namespace, parentScope) [true]
-	}
-	
-	protected def getSecondaryLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope) {
+	protected def getLocalScope4(Resource resource, QualifiedName namespace, IScope parentScope) {
 		return internalGetLocalResourceScope(resource, namespace, parentScope) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES
-				|| eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_DECLARATIONS
 			} 
 			return false
 		]
 	}
 	
-	protected def getPrimaryLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope) {
+	protected def getLocalScope3(Resource resource, QualifiedName namespace, IScope parentScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope) [
+			if (it instanceof SadlResource) {
+				return eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF
+			} 
+			return false
+		]
+	}
+	
+	protected def getLocalScope2(Resource resource, QualifiedName namespace, IScope parentScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope) [
+			if (it instanceof SadlResource) {
+				return eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
+					|| eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_DECLARATIONS
+			} 
+			return false
+		]
+	}
+	
+	protected def getLocalScope1(Resource resource, QualifiedName namespace, IScope parentScope) {
 		return internalGetLocalResourceScope(resource, namespace, parentScope) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADLPackage.Literals.SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
 					|| eContainer instanceof SadlProperty && (eContainer as SadlProperty).isPrimaryDeclaration() && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
-//					|| eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF
+					
 			} 
 			return false
 		]
@@ -225,7 +279,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def pruneScope(EObject object) {
-		return object instanceof RuleStatement || object instanceof EquationStatement
+		return object instanceof RuleStatement || object instanceof EquationStatement || object instanceof QueryStatement || object instanceof TestStatement
 	}
 	
 	protected def String getAlias(Resource resource) {
@@ -267,7 +321,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		boolean detectAmbiguousNames;
 		
 		override getAllElements() {
-			delegates.map[allElements].reduce[p1, p2| p1 + p2]
+			delegates.map[allElements].reduce[p1, p2| p1 + p2] ?: #[]
 		}
 		
 		override getElements(QualifiedName name) {

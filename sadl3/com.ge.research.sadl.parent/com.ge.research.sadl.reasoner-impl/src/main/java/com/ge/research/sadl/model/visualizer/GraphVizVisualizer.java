@@ -3,6 +3,7 @@ package com.ge.research.sadl.model.visualizer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import javax.activation.DataSource;
 
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.hp.hpl.jena.sparql.graph.GraphFactory;
 import com.hp.hpl.jena.vocabulary.OWL;
 
 public class GraphVizVisualizer implements IGraphVisualizer {
@@ -21,6 +23,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	private String anchorNode = null;
 	private Orientation orientation = null;
 	private String description = null;
+	
+	private String graphFileToOpen = null;
 
 	@Override
 	public void initialize(String tempDir, String bfn, String graphName, String anchorNode, Orientation orientation, String description) {
@@ -48,7 +52,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		return null;
 	}
 
-	public static void createGraphVizGraph(String dotfilepath) throws IOException {
+	public void createGraphVizGraph(String dotfilepath) throws IOException {
 		String exec = System.getenv("GraphVizPath");
 		if (exec == null) {
 			Map<String, String> map = System.getenv();
@@ -58,7 +62,6 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				String val = map.get(key);
 				System.out.println(key + " -> " + val);
 			}
-			exec = "C:\\Apps\\graphviz-2.36\\release\\bin";
 		}
 		if (exec == null || exec.length() == 0) {
 			throw new IOException("Unable to find GraphVizPath. Please set GraphVizPath environment variable to the GraphViz bin folder path.");
@@ -68,19 +71,43 @@ public class GraphVizVisualizer implements IGraphVisualizer {
     		dotexec = exec + File.separator + "dot";
     		exec = exec + File.separator + "dotty";
     	}
-		ProcessBuilder pb = new ProcessBuilder(exec, dotfilepath);
-		try {
-			pb.start();
-		} catch (IOException e) {
-			throw new IOException("Unable to run GraphViz dotty; is GraphViz installed and on path? (" + e.getMessage() + ")");
-		}
 		if (dotexec != null) {
 			// dot -Tps filename.dot -o outfile.ps
-			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tpng", dotfilepath,"-o", dotfilepath + ".png");
+			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tsvg", dotfilepath,"-o", dotfilepath + ".svg");
 			try {
 				bppng.start();
+				Thread.sleep(100);
+				graphFileToOpen = dotfilepath + ".svg";
 			} catch (IOException e) {
 				throw new IOException("Unable to run GraphViz dot to generate PNG file; is GraphViz path set properly? (" + e.getMessage() + ")");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			int cntr = 0;
+			File fto = new File(graphFileToOpen);
+			while (cntr++ < 10 && !fto.exists()) {
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (!fto.exists()) {
+				ProcessBuilder pb = new ProcessBuilder(exec, dotfilepath);
+				try {
+					pb.start();
+				} catch (IOException e2) {
+					throw new IOException("Unable to run GraphViz dotty; is GraphViz installed and on path? (" + e2.getMessage() + ")");
+				}
+			}
+			else {
+				// delete the .dot file
+				File dotfile = new File(dotfilepath);
+				if (dotfile.exists()) {
+					dotfile.delete();
+				}
 			}
 		}
 	}
@@ -97,7 +124,32 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	 * @return
 	 * @throws IOException
 	 */
-	public static File constructResultSetToDotFile(ResultSet rs, File tmpdir, String bfn, String anchorNodeName, String anchorNodeLabel, String description, Orientation orientation) throws IOException {
+	public File constructResultSetToDotFile(ResultSet rs, File tmpdir, String bfn, String anchorNodeName, String anchorNodeLabel, String description, Orientation orientation) throws IOException {
+		Map<Integer,String> headAttributes = null;
+		Map<Integer,String> edgeAttributes = null;
+		Map<Integer,String> tailAttributes = null;
+		if (rs.getColumnCount() > 3) {
+			String[] headers = rs.getColumnNames();
+			String headName = headers[0];
+			String edgeName = headers[1];
+			String tailName = headers[2];
+			for (int i = 3; i < rs.getColumnCount(); i++) {
+				String attrHeader = headers[i];
+				if (attrHeader.startsWith(headName)) {
+					headAttributes = addAttribute(headAttributes, headName, i, attrHeader);
+				}
+				else if (attrHeader.startsWith(edgeName)) {
+					edgeAttributes = addAttribute(edgeAttributes, edgeName, i, attrHeader);
+				}
+				else if (attrHeader.startsWith(tailName)) {
+					tailAttributes = addAttribute(tailAttributes, tailName, i, attrHeader);
+				}
+				else {
+					throw new IOException("Column " + (i + 1) + " header '" + headers[i] + "' does not begin with a valid identifier from the first 3 headers: '" + headName + "' or '" + edgeName + "' or '" + tailName + "')");
+				}
+			}
+			
+		}
 		StringBuilder sb = new StringBuilder("digraph g");
 		sb.append(anchorNodeName);
 		sb.append(" {\n");
@@ -176,9 +228,33 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				}
 				sb.append(s.toString());
 				sb.append("\"");
+				boolean anchored = false;
 				if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
+					anchored = true;
 					// color the "anchor" node
-					sb.append(" color=lightblue style=filled fontcolor=navyblue");
+					sb.append(" color=lightblue");
+//					if (headAttributes == null || !headAttributes.containsValue("color")) {
+						sb.append(" style=filled");
+//					}
+//					else {
+//						sb.append(" style=bold");
+//					}
+					sb.append(" fontcolor=navyblue");
+				}
+				if (headAttributes != null) {
+					Iterator<Integer> itr = headAttributes.keySet().iterator();
+					while (itr.hasNext()) {
+						Integer key = itr.next();
+						String value = headAttributes.get(key);
+						if (!anchored || !value.equals("color")) {
+							if (row[key.intValue()] != null) {
+								sb.append(" ");
+								sb.append(value);
+								sb.append("=");
+								sb.append(row[key.intValue()]);
+							}
+						}
+					}
 				}
 				sb.append("];\n");
 			}
@@ -193,9 +269,32 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				}
 				sb.append(o.toString());
 				sb.append("\"");
+				boolean anchored = false;
 				if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
 					// color the "anchor" node
-					sb.append(" color=lightblue style=filled fontcolor=navyblue");
+					sb.append(" color=lightblue");
+//					if (tailAttributes == null || !tailAttributes.containsValue("color")) {
+						sb.append(" style=filled");
+//					}
+//					else {
+//						sb.append(" style=bold");
+//					}
+					sb.append(" fontcolor=navyblue");
+				}
+				if (tailAttributes != null) {
+					Iterator<Integer> itr = tailAttributes.keySet().iterator();
+					while (itr.hasNext()) {
+						Integer key = itr.next();
+						String value = tailAttributes.get(key);
+						if (!anchored || !value.equals("color")) {
+							if (row[key.intValue()] != null) {
+								sb.append(" ");
+								sb.append(value);
+								sb.append("=");
+								sb.append(row[key.intValue()]);
+							}
+						}
+					}
 				}
 				sb.append("];\n");
 			}
@@ -211,49 +310,91 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
 				sb.append(" color=red");
 			}
+			if (edgeAttributes != null) {
+				Iterator<Integer> itr = edgeAttributes.keySet().iterator();
+				while (itr.hasNext()) {
+					Integer key = itr.next();
+					String value = edgeAttributes.get(key);
+					if (row[key.intValue()] != null) {
+						sb.append(" ");
+						sb.append(value);
+						sb.append("=");
+						sb.append(row[key.intValue()]);
+					}
+				}
+			}
 			sb.append("];\n");
 		}
 		sb.append("}\n");
+//		System.out.println(sb.toString());
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
 				((bfn != null ? bfn : "") + "Graph.dot"));
 		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
 		return dotFile;
 	}
+	
+	private Map<Integer, String> addAttribute(Map<Integer, String> attrMap, String headName, int columnNumber, String attrHeader) {
+		String attrName = attrHeader.substring(headName.length() + 1);
+		char c = attrHeader.charAt(headName.length());
+		if (c == '_') {
+			if (attrMap == null) {
+				attrMap = new HashMap<Integer, String>();
+			}
+			attrMap.put(columnNumber, attrName);
+		}
+		return attrMap;
+	}
+	
 	private String getTempFolder() {
 		return tempFolder;
 	}
+	
 	private void setTempFolder(String tempFolder) {
 		this.tempFolder = tempFolder;
 	}
+	
 	private String getBaseFileName() {
 		return baseFileName;
 	}
+	
 	private void setBaseFileName(String baseFileName) {
 		this.baseFileName = baseFileName;
 	}
+	
 	private String getAnchorNode() {
 		return anchorNode;
 	}
+	
 	private void setAnchorNode(String anchorNode) {
 		this.anchorNode = anchorNode;
 	}
+	
 	private Orientation getOrientation() {
 		return orientation;
 	}
+	
 	private void setOrientation(Orientation orientation) {
 		this.orientation = orientation;
 	}
+	
 	private String getDescription() {
 		return description;
 	}
+	
 	private void setDescription(String description) {
 		this.description = description;
 	}
+	
 	private String getGraphName() {
 		return graphName;
 	}
+	
 	private void setGraphName(String graphName) {
 		this.graphName = graphName;
+	}
+	@Override
+	public String getGraphFileToOpen() {
+		return graphFileToOpen;
 	}
 
 }

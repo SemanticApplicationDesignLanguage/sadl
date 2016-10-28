@@ -28,8 +28,9 @@ interface ISadlInferenceProcessor {
 	
 	/**
 	 * Called to do an inference operation on a SADL Resource
-	 * 0th element of returned Object array is a list of inference results (if any)
-	 * 1st element is a list of error Strings (if any)
+	 * 0th element is a list of the SADL commands processed
+	 * 1st element of returned Object array is a list of inference results (if any)
+	 * 2nd element is a list of error Strings (if any)
 	 * Note: all results are returned on call to runInference because separate calls go to different instances of the processor
 	 */	
 	def Object[] runInference(Resource resource, String owlModelPath, String modelFolderPath, Map<String,String> prefMap) throws SadlInferenceException;

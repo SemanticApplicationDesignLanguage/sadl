@@ -1,14 +1,22 @@
-package com.ge.research.sadl.perspective.visualize;
+package com.ge.research.sadl.ui.visualize;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.Individual;
@@ -41,8 +49,15 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class GraphGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
-	OntModel model = null;
-	ConceptName anchor = null;
+	protected static final String BLUE = "blue";
+	protected static final String COLOR = "color";
+	protected static final String SHAPE = "shape";
+	protected static final String OCTAGON = "octagon";
+	protected static final String RED = "red";
+
+	private OntModel model = null;
+	private ConceptName anchor = null;
+	private IConfigurationManagerForIDE configMgr;
 	
 	public enum Orientation {TD, LR}
 	
@@ -50,6 +65,11 @@ public class GraphGenerator {
 		Object subject;
 		Object predicate;
 		Object object;
+		private Map<String,String> headAttributes;
+		private Map<String,String> edgeAttributes;
+		private Map<String,String> tailAttributes;
+		
+		private boolean objectIsList = false;
 		
 		public GraphSegment(Object s, Object p, Object o) {
 			subject = s;
@@ -57,6 +77,13 @@ public class GraphGenerator {
 			object = o;
 		}
 		
+		public GraphSegment(Object s, Object p, Object o, boolean objIsList) {
+			subject = s;
+			predicate = p;
+			object = o;
+			setObjectIsList(objIsList);
+		}
+
 		public boolean equals(Object otherSeg) {
 			if (otherSeg instanceof GraphSegment) {
 				if (otherSeg != null) {
@@ -64,7 +91,7 @@ public class GraphGenerator {
 							predicate != null && ((GraphSegment)otherSeg).predicate != null && 
 							object != null && ((GraphSegment)otherSeg).object != null) {
 						if (subject.equals(((GraphSegment)otherSeg).subject) && predicate.equals(((GraphSegment)otherSeg).predicate) && 
-								object.equals(((GraphSegment)otherSeg).object)) {
+								object.equals(((GraphSegment)otherSeg).object) && ((GraphSegment)otherSeg).isObjectIsList() == isObjectIsList()) {
 							return true;
 						}
 					}
@@ -82,7 +109,12 @@ public class GraphGenerator {
 		}
 		
 		String objectToString() {
-			return stringForm(object);
+			if (!isObjectIsList()) {
+				return stringForm(object);
+			}
+			else {
+				return stringForm(object) + " List";
+			}
 		}
 		
 		String stringForm(Object obj) {
@@ -131,7 +163,8 @@ public class GraphGenerator {
 					}
 				}
 				else if (ontcls.isURIResource()) {
-					return ontcls.getLocalName();
+					return uriResourceToString(ontcls);
+//					return ontcls.getLocalName();
 				}
 				else if (ontcls.isRestriction()) {
 					return restrictionToString(ontcls);
@@ -142,7 +175,7 @@ public class GraphGenerator {
 			}
 			else if (obj instanceof Resource) {
 				if (((Resource)obj).isURIResource()) {
-					return ((Resource) obj).getLocalName();
+					return uriResourceToString((Resource) obj);
 				}
 				else {
 					return obj.toString();
@@ -168,7 +201,7 @@ public class GraphGenerator {
 				}
 			}
 			else if (obj instanceof ConceptName) {
-				return ((ConceptName)obj).getName();
+				return conceptNameToString((ConceptName)obj);
 			}
 			else {
 				return obj.toString();
@@ -176,6 +209,30 @@ public class GraphGenerator {
 			return null;
 		}
 
+		private String conceptNameToString(ConceptName obj) {
+			// get the prefix and if there is one generate qname
+			if (obj.getPrefix() != null) {
+				return obj.getPrefix() + ":" + obj.getName();
+			}
+			return obj.getName();
+		}
+
+		private String uriResourceToString(Resource rsrc) {
+			if (!rsrc.isURIResource()) {
+				return rsrc.toString();
+			}
+			String ns = rsrc.getNameSpace();
+			if (ns.endsWith("#")) {
+				ns = ns.substring(0, ns.length() - 1);
+			}
+			// get the prefix and if there is one generate qname
+			String prefix = configMgr.getGlobalPrefix(ns);
+			if (prefix != null) {
+				return prefix + ":" + rsrc.getLocalName();
+			}
+			return rsrc.getLocalName();
+		}
+		
 		private String restrictionToString(OntClass ontcls) {
 			if (ontcls.as(Restriction.class).isSomeValuesFromRestriction()) {
 				StringBuilder sb = new StringBuilder("some values of ");
@@ -335,41 +392,100 @@ public class GraphGenerator {
 			}
 			return "Untranslated Restriction: " + ontcls.toString();
 		}
+
+		boolean isObjectIsList() {
+			return objectIsList;
+		}
+
+		void setObjectIsList(boolean objectIsList) {
+			this.objectIsList = objectIsList;
+		}
+
+		Map<String,String> getHeadAttributes() {
+			return headAttributes;
+		}
+
+		public void addHeadAttribute(String key, String value) {
+			if (headAttributes == null) headAttributes = new HashMap<String,String>();
+			headAttributes.put(key, value);
+		}
+
+		public Map<String,String> getEdgeAttributes() {
+			return edgeAttributes;
+		}
+
+		public void addEdgeAttribute(String key, String value) {
+			if (edgeAttributes == null) edgeAttributes = new HashMap<String,String>();
+			edgeAttributes.put(key, value);
+		}
+
+		public Map<String,String> getTailAttributes() {
+			return tailAttributes;
+		}
+
+		public void addTailAttribute(String key, String value) {
+			if (tailAttributes == null) tailAttributes = new HashMap<String,String>();
+			tailAttributes.put(key,value);
+		}
 	}
 	
-	public GraphGenerator(OntModel m, ConceptName startNode) {
-		model = m;
-		anchor = startNode;
+	public GraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, ConceptName startNode) throws ConfigurationException, IOException {
+		this.configMgr = configMgr;
+		setModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
+		setAnchor(startNode);
 	}
-	
+
 	public ResultSet generateClassHierarchy(int size) throws ConfigurationException {
-		OntClass cls = model.getOntClass(anchor.toFQString());
+		OntClass cls = getModel().getOntClass(getAnchor().toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
-		data = generateClassSubclasses(cls, data);
-		data = generateClassSuperclasses(cls, data);
+		data = generateClassHierarchy(cls, size, data);
 		ResultSet rs = convertDataToResultSet(data);
 		return rs;
 	}
 
+	private List<GraphSegment> generateClassHierarchy(OntClass cls, int size, List<GraphSegment> data) {
+		data = generateClassSubclasses(cls, size, data);
+		data = generateClassSuperclasses(cls, size, data);
+		data = generateClassInstances(cls, size, data);
+		return data;
+	}
+
+	private List<GraphSegment> generateClassInstances(OntClass cls, int size, List<GraphSegment> data) {
+		if (size <= 0) return data;
+		List<GraphSegment> instData = new ArrayList<GraphSegment>();
+		instData = classInstances(cls, instData);
+		for (int i = 0; i < data.size(); i++) {
+			GraphSegment gs = data.get(i);
+			if (gs.subject instanceof OntClass) {
+				instData = classInstances((OntClass)gs.subject, instData);
+			}
+			if (gs.object instanceof OntClass) {
+				instData = classInstances((OntClass)gs.object, instData);
+			}
+		}
+		data.addAll(instData);
+		return data;
+	}
+
 	public ResultSet generateClassNeighborhood(int size) throws ConfigurationException {
-		OntClass cls = model.getOntClass(anchor.toFQString());
+		OntClass cls = getModel().getOntClass(getAnchor().toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
-		data = generateClassPropertiesWithDomain(cls, data);
-		data = generateClassPropertiesWithRange(cls, data);
+		data = generateClassPropertiesWithDomain(cls, size, data);
+		data = generateClassPropertiesWithRange(cls, size, data);
 		return convertDataToResultSet(data);
 	}
 
 	public ResultSet generatePropertyNeighborhood(int size) throws ConfigurationException {
-		OntProperty ontprop = model.getOntProperty(anchor.toFQString());
+		OntProperty ontprop = getModel().getOntProperty(getAnchor().toFQString());
 
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		ExtendedIterator<? extends OntResource> eitr = ontprop.listDomain();
 		while (eitr.hasNext()) {
 			OntResource dmn = eitr.next();
 			if (dmn.canAs(OntClass.class)){
-				data = generatePropertyRange(dmn.as(OntClass.class), ontprop, data);
+				data = generatePropertyRange(dmn.as(OntClass.class), ontprop, size - 1, data);
 			}
-			data = generateClassPropertiesWithRange(dmn.as(OntClass.class), data);
+			data = generateClassPropertiesWithRange(dmn.as(OntClass.class), size - 1, data);
 		}
 //		ExtendedIterator<? extends OntResource> eitr2 = ontprop.listRange();
 //		while (eitr2.hasNext()) {
@@ -382,17 +498,33 @@ public class GraphGenerator {
 	}
 
 	public ResultSet generateIndividualNeighborhood(int size) throws ConfigurationException {
-		Individual inst = model.getIndividual(anchor.toFQString());
+		Individual inst = getModel().getIndividual(getAnchor().toFQString());
 
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
-		data = generateIndividualNeighborhood(inst, data);
+		data = generateIndividualNeighborhood(inst, size, data);
 		return convertDataToResultSet(data);
 	}
 
-	private List<GraphSegment> generateIndividualNeighborhood(Individual inst,
+	private List<GraphSegment> classInstances(OntClass cls, List<GraphSegment> instData) {
+		ExtendedIterator<? extends OntResource> itr = cls.listInstances(true);
+		while (itr.hasNext()) {
+			OntResource or = itr.next();
+			if (or.canAs(Individual.class)){
+				GraphSegment gs = new GraphSegment(cls, "instance", or.as(Individual.class));
+				if (!instData.contains(gs)) {
+					instData.add(gs);
+				}
+				gs.addTailAttribute(COLOR, BLUE);
+			}
+		}
+		return instData;
+	}
+
+	private List<GraphSegment> generateIndividualNeighborhood(Individual inst, int graphRadius,
 			List<GraphSegment> data) {
+		if (graphRadius <= 0) return data;
 		// as object
-		StmtIterator sitr = model.listStatements(null, null, inst);
+		StmtIterator sitr = getModel().listStatements(null, null, inst);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Property prop = stmt.getPredicate();
@@ -404,7 +536,7 @@ public class GraphGenerator {
 			if (!stmt.getPredicate().getNameSpace().equals(RDF.getURI()) && !data.contains(sg)) {
 				data.add(sg);
 				if (subj.canAs(Individual.class)) {
-					data = generateIndividualNeighborhood(subj.as(Individual.class), data);
+					data = generateIndividualNeighborhood(subj.as(Individual.class), graphRadius - 1, data);
 				}
 			}
 		}
@@ -416,18 +548,23 @@ public class GraphGenerator {
 			RDFNode obj = stmt.getObject();
 			GraphSegment sg = new GraphSegment(stmt.getSubject(), prop, obj);
 			if (!data.contains(sg)) {
+				sg.addHeadAttribute(COLOR, BLUE);
 				data.add(sg);
 				if (!stmt.getPredicate().equals(RDF.type) && obj.canAs(Individual.class)) {
-					data = generateIndividualNeighborhood(obj.as(Individual.class), data);
+					data = generateIndividualNeighborhood(obj.as(Individual.class), graphRadius - 1, data);
+				}
+				else if (obj.canAs(OntClass.class)) {
+					data = generateClassHierarchy(obj.as(OntClass.class), graphRadius - 1, data);
 				}
 			}
 		}
 		return data;
 	}
 
-	private List<GraphSegment> generateClassPropertiesWithRange(OntClass cls,
+	private List<GraphSegment> generateClassPropertiesWithRange(OntClass cls, int graphRadius,
 			List<GraphSegment> data) {
-		StmtIterator sitr = model.listStatements(null, RDFS.range, cls);
+		if (graphRadius <= 0) return data;
+		StmtIterator sitr = getModel().listStatements(null, RDFS.range, cls);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Resource prop = stmt.getSubject();
@@ -439,7 +576,7 @@ public class GraphGenerator {
 					GraphSegment sg = new GraphSegment(dmn, prop, cls);
 					if (!data.contains(sg)) {
 						data.add(sg);
-						data = generateClassPropertiesWithRange(dmn.as(OntClass.class), data);
+						data = generateClassPropertiesWithRange(dmn.as(OntClass.class), graphRadius - 1, data);
 					}
 				}
 			}
@@ -447,70 +584,117 @@ public class GraphGenerator {
 		return data;
 	}
 
-	private List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls,
+	private List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, int graphRadius,
 			List<GraphSegment> data) {
-		StmtIterator sitr = model.listStatements(null, RDFS.domain, cls);
+		if (graphRadius <= 0) return data;
+		StmtIterator sitr = getModel().listStatements(null, RDFS.domain, cls);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Resource prop = stmt.getSubject();
 			if (prop.canAs(OntProperty.class)) {
-				data = generatePropertyRange(cls, prop, data);
+				data = generatePropertyRange(cls, prop, graphRadius - 1, data);
 			}
 		}
 		// now look for unions? or intersections containing the cls
 		String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 		qstr += "select ?prop where {?prop rdfs:domain/(owl:unionOf/rdf:rest*/rdf:first)? <" + cls.getURI() + ">}";
-		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), model);;		
+		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getModel());;		
 		com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
 		while (results.hasNext()) {
 			QuerySolution soln = results.next();
 			RDFNode prop = soln.get("?prop");
 			if (prop.canAs(OntProperty.class)) {
-				data = generatePropertyRange(cls, prop.as(OntProperty.class), data);
+				data = generatePropertyRange(cls, prop.as(OntProperty.class), graphRadius - 1, data);
 			}
 		}
 		return data;
 	}
 
 	private List<GraphSegment> generatePropertyRange(OntClass cls,
-			Resource prop, List<GraphSegment> data) {
+			Resource prop, int graphRadius, List<GraphSegment> data) {
+		if (graphRadius <= 0) return data;
+		boolean isList = false;
+		Statement stmt = prop.getProperty(getModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
+		if (stmt != null) {
+			RDFNode obj = stmt.getObject();
+			if (obj.isLiteral()) {
+				Object lit = obj.asLiteral().getValue();
+				if (lit != null && lit.toString().equals("LIST")) {
+					isList = true;
+				}
+			}
+		}
 		ExtendedIterator<? extends OntResource> eitr = prop.as(OntProperty.class).listRange();
 		while (eitr.hasNext()) {
 			OntResource rng = eitr.next();
-			GraphSegment sg = new GraphSegment(cls, prop, rng);
+			if (isList && rng.canAs(OntClass.class)) {
+				Resource listClass = getModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
+					StmtIterator stmtitr = getModel().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
+					while (stmtitr.hasNext()) {
+//					ExtendedIterator<OntClass> scitr = rng.as(OntClass.class).listSuperClasses(true);
+//					while (scitr.hasNext()) {
+						Statement supclsstmt = stmtitr.nextStatement();
+						RDFNode supclsnode = supclsstmt.getObject();
+						if (supclsnode.canAs(OntClass.class)){ 
+							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
+							if (subcls.hasProperty(OWL.onProperty, getModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
+								Statement avf = subcls.getProperty(OWL.allValuesFrom);
+								if (avf != null) {
+									RDFNode listtype = avf.getObject();
+									if (listtype.canAs(OntResource.class)){
+										rng = listtype.as(OntResource.class);
+									}
+								}
+								stmtitr.close();
+								break;
+							}
+						}
+					}
+				}
+			}
+			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList) : new GraphSegment(cls, prop, rng);
 			if (!data.contains(sg)) {
 				data.add(sg);
 				if (prop.as(OntProperty.class).isObjectProperty()) {
-					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), data);
+					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), graphRadius - 1, data);
 				}
 			}
 		}
 		return data;
 	}
 
-	private List<GraphSegment> generateClassSuperclasses(OntClass cls, List<GraphSegment> data) {
-		ExtendedIterator<OntClass> eitr = cls.listSuperClasses(true);
-		while (eitr.hasNext()) {
-			Resource scr = eitr.next();
-
-//		StmtIterator sitr = getJenaModel().listStatements(cls, RDFS.subClassOf, (Resource)null);
-//		while (sitr.hasNext()) {
-//			Resource scr = sitr.next().getSubject();
-			
-			if (scr != null && !scr.equals(cls) && scr.canAs(OntClass.class)) {
-				OntClass supercls = scr.as(OntClass.class);
-				GraphSegment sg;
-				if (supercls.isRestriction()) {
-					sg = new GraphSegment(supercls, "restricts", cls);
+	private List<GraphSegment> generateClassSuperclasses(OntClass cls, int size, List<GraphSegment> data) {
+		if (size <= 0) return data;
+		try {
+			ExtendedIterator<OntClass> eitr = cls.listSuperClasses(true);
+			while (eitr.hasNext()) {
+				Resource scr = eitr.next();
+	
+	//		StmtIterator sitr = getJenaModel().listStatements(cls, RDFS.subClassOf, (Resource)null);
+	//		while (sitr.hasNext()) {
+	//			Resource scr = sitr.next().getSubject();
+				
+				if (scr != null && !scr.equals(cls) && scr.canAs(OntClass.class)) {
+					OntClass supercls = scr.as(OntClass.class);
+					GraphSegment sg;
+					if (supercls.isRestriction()) {
+						sg = new GraphSegment(supercls, "restricts", cls);
+						sg.addHeadAttribute(COLOR, RED);
+						sg.addEdgeAttribute(COLOR, RED);
+					}
+					else {
+						sg = new GraphSegment(supercls, "subClass", cls);
+					}
+					if (!data.contains(sg)) {
+						data.add(sg);
+					}
+					data = generateClassSuperclasses(supercls, size - 1, data);
 				}
-				else {
-					sg = new GraphSegment(supercls, "subClass", cls);
-				}
-				if (!data.contains(sg)) {
-					data.add(sg);
-				}
-				data = generateClassSuperclasses(supercls, data);
 			}
+		}
+		catch (Throwable t) {
+			
 		}
 		if (cls.isUnionClass()) {
 			// if all of the members of a Union class are subclasses of a common super class, then that common super class is a super class of the Union class
@@ -549,7 +733,7 @@ public class GraphGenerator {
 					if (!data.contains(sg)) {
 						data.add(sg);
 					}
-					data = generateClassSuperclasses(cscls, data);
+					data = generateClassSuperclasses(cscls, size - 1, data);
 				}
 			}
 		}
@@ -561,26 +745,29 @@ public class GraphGenerator {
 				GraphSegment sg = new GraphSegment(member, "subClass", cls);
 				if (!data.contains(sg)) {
 					data.add(sg);
-					data = generateClassSuperclasses(member, data);
+					data = generateClassSuperclasses(member, size - 1, data);
 				}
 			}
 		}
 		return data;
 	}
-	private List<GraphSegment> generateClassSubclasses(OntClass cls, List<GraphSegment> data) {
+	private List<GraphSegment> generateClassSubclasses(OntClass cls, int size, List<GraphSegment> data) {
+		if (size <= 0) return data;
 		ExtendedIterator<OntClass> eitr = cls.listSubClasses(true);
 		while (eitr.hasNext()) {
 			OntClass subcls = eitr.next();
 			GraphSegment sg;
 			if (subcls.isRestriction()) {
 				sg = new GraphSegment(cls, "restricts", subcls);
+				sg.addHeadAttribute(COLOR, RED);
+				sg.addEdgeAttribute(COLOR, RED);
 			}
 			else {
 				sg = new GraphSegment(cls, "subClass", subcls);
 			}
 			if (!data.contains(sg)) {
 				data.add(sg);
-				data = generateClassSubclasses(subcls, data);
+				data = generateClassSubclasses(subcls, size - 1, data);
 			}
 		}
 		
@@ -589,7 +776,7 @@ public class GraphGenerator {
 			String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 	//		qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? ?superclass}";
 			qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? <" + cls.getURI() + ">}";
-			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), model);;		
+			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getModel());;		
 			com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
 			while (results.hasNext()) {
 				QuerySolution soln = results.next();
@@ -599,7 +786,7 @@ public class GraphGenerator {
 					GraphSegment sg = new GraphSegment(cls, "subClass", subcls);
 					if (!data.contains(sg)) {
 						data.add(sg);
-						data = generateClassSubclasses(subcls, data);
+						data = generateClassSubclasses(subcls, size - 1, data);
 					}	
 				}
 			}
@@ -620,23 +807,122 @@ public class GraphGenerator {
 		return data;
 	}
 
-	private ResultSet convertDataToResultSet(List<GraphSegment> data) {
-		Object array[][] = new Object[data.size()][3];
+	protected ResultSet convertDataToResultSet(List<GraphSegment> data) {
+		List<String> columnList = new ArrayList<String>();
+		columnList.add("head");
+		columnList.add("edge");
+		columnList.add("tail");
+		List<String> headKeyList = null;
+		List<String> edgeKeyList = null;
+		List<String> tailKeyList = null;
+		
+		for (int i = 0; i < data.size(); i++) {
+			GraphSegment gs = data.get(i);
+			if (gs.getHeadAttributes() != null) {
+				if (headKeyList == null) headKeyList = new ArrayList<String>();
+				Iterator<String> keyitr = gs.getHeadAttributes().keySet().iterator();
+				while (keyitr.hasNext()) {
+					String key = keyitr.next();
+					if (!headKeyList.contains(key)) {
+						headKeyList.add(key);
+						columnList.add("head_" + key);
+					}
+				}
+			}
+			if (gs.getEdgeAttributes() != null) {
+				if (edgeKeyList == null) edgeKeyList = new ArrayList<String>();
+				Iterator<String> keyitr = gs.getEdgeAttributes().keySet().iterator();
+				while (keyitr.hasNext()) {
+					String key = keyitr.next();
+					if (!edgeKeyList.contains(key)) {
+						edgeKeyList.add(key);
+						columnList.add("edge_" + key);
+					}
+				}
+			}
+			if (gs.getTailAttributes() != null) {
+				if (tailKeyList == null) tailKeyList = new ArrayList<String>();
+				Iterator<String> keyitr = gs.getTailAttributes().keySet().iterator();
+				while (keyitr.hasNext()) {
+					String key = keyitr.next();
+					if (!tailKeyList.contains(key)) {
+						tailKeyList.add(key);
+						columnList.add("tail_" + key);
+					}
+				}
+			}
+		}
+		int maxColumns = 3 + 
+				(headKeyList != null ? headKeyList.size() : 0) + 
+				(edgeKeyList != null ? edgeKeyList.size() : 0) +
+				(tailKeyList != null ? tailKeyList.size() : 0);
+		Object array[][] = new Object[data.size()][maxColumns];
+		
 		boolean dataFound = false;
 		for(int i = 0; i < data.size(); i++) {
-			String s = data.get(i).subjectToString();
-			String p = data.get(i).predicateToString();
-			String o = data.get(i).objectToString();
+			GraphSegment gs = data.get(i);
+			String s = gs.subjectToString();
+			String p = gs.predicateToString();
+			String o = gs.objectToString();
 			array[i][0] = s;
 			array[i][1] = p;
 			array[i][2] = o;
 			dataFound = true;
+			array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
+			array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
+			array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
 		}
 		if (dataFound) {
-			ResultSet rs = new ResultSet(array);
+			String[] headers = columnList.toArray(new String[0]);
+			ResultSet rs = new ResultSet(headers, array);
 			return rs;
 		}
 		return null;
+	}
+
+	private Object[][] attributeToDataArray(String graphPart, Map<String,String> map, List<String> columnList, Object[][] array, int i, GraphSegment gs) {
+		if (map != null) {
+			Iterator<String> attritr = map.keySet().iterator();
+			while (attritr.hasNext()) {
+				String key = attritr.next();
+				int cidx = columnList.indexOf(graphPart + "_" + key);
+				if (cidx > 0) {
+					array[i][cidx] = map.get(key);
+				}
+			}
+		}
+		return array;
+	}
+
+	public String uriStringToString(String uri) {
+		int sep = uri.lastIndexOf('#');
+		if (sep > 0) {
+			String ns = uri.substring(0, sep - 1);
+			String ln = uri.substring(sep);
+			// get the prefix and if there is one generate qname
+			String prefix = configMgr.getGlobalPrefix(ns);
+			if (prefix != null) {
+				return prefix + ":" + ln;
+			}
+			return ln;
+		}
+		return uri;
+	}
+
+	protected OntModel getModel() {
+		return model;
+	}
+
+	protected void setModel(OntModel model) {
+		this.model = model;
+	}
+
+	protected ConceptName getAnchor() {
+		return anchor;
+	}
+
+	protected void setAnchor(ConceptName anchor) {
+		this.anchor = anchor;
 	}
 
 }

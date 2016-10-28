@@ -198,4 +198,22 @@ public class MetricsProcessor implements IMetricsProcessor {
 		}
 		return modelFolderPathname;
 	}
+
+	@Override
+	public boolean addControlledOrMonitoredProperty(String specName, String propertyUri) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addEffectiveRangeAndDomain(String specName, String property, String classname, String range, boolean isList) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setMetricsTargetModel(OntModel metricsTargetModel) {
+		// TODO Auto-generated method stub
+		
+	}
 }

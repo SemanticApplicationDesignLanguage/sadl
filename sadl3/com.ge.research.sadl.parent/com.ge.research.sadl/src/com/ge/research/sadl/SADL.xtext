@@ -232,7 +232,7 @@ RuleStatement returns ExpressionScope :
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	'Ask' (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
+	start = ('Ask'|'Graph') (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
 ;
 
 SelectExpression returns Expression :
@@ -261,13 +261,14 @@ TestStatement returns ExpressionScope :
 
 PrintStatement :
 	'Print:'
-			displayString=STRING 
-		|	model=('Deductions'|'Model');
+			(displayString=STRING 
+		|	model='Deductions'
+		|	model='Model');
 
 ExplainStatement :
 	'Explain:'
-			expr=Expression EOS
-		| 	'Rule' rulename=QNAME 
+			(expr=Expression
+		| 	'Rule' rulename=QNAME)
 			;
 			
 StartWriteStatement :
@@ -380,7 +381,7 @@ BooleanValue:
 	
 
 Constants:
-	'PI' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element' | 'value';
+	'PI' | 'e' | '--' | 'None' | 'a'? 'type' | 'length' | 'count' | 'index' | ('first'|'last') 'element' | 'value';
 
 ValueRow:
 	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111

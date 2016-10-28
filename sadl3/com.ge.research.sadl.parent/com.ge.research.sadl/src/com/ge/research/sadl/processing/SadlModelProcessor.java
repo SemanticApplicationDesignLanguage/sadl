@@ -67,7 +67,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     private Object encapsulatingTarget = null;	// when a query is in a test
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private RulePart rulePart = RulePart.NOT_A_RULE;
-
+    
 	@Inject
 	public DeclarationExtensions declarationExtensions;
 
