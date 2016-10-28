@@ -92,15 +92,16 @@ public class RunInference extends SadlActionHandler {
 		        						}
 		        					}
 		        					else if (((List<?>)infresults).get(i) == null) {
-		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + " is empty");
+		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + " is empty\n");
 		        					}
 		        					else {
+		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + ":\n");
 		        						SadlConsole.writeToConsole(MessageType.INFO, ((List<?>)infresults).get(i).toString());
 		        					}
 		        				}
 		        			}
 		        			else {
-		        				SadlConsole.writeToConsole(MessageType.ERROR, "Results returned not of expected type. Please report.");
+		        				SadlConsole.writeToConsole(MessageType.ERROR, "Results returned not of expected type. Please report.\n");
 		        			}
 		        		}
 		        		if (retvals.length > 2) {

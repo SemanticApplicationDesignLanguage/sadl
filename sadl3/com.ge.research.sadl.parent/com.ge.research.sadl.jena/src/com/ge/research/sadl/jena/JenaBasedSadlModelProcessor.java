@@ -406,8 +406,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				List<Object> otherContent = OntModelProvider.getOtherContent(resource);
 				if (otherContent != null) {
 					for (int i = 0;  i < otherContent.size(); i++) {
-						if (otherContent.get(i) instanceof List<?>) {
-							setEquations((List<Equation>) otherContent.get(i)); 
+						Object oc = otherContent.get(i);
+						if (oc instanceof List<?>) {
+							if (((List<?>)oc).get(0) instanceof Equation) {
+								setEquations((List<Equation>) oc); 
+							}
+							else if (((List<?>)oc).get(0) instanceof Rule) {
+								rules = (List<Rule>) oc;
+							}
 						}
 					}
 				}
@@ -422,17 +428,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		generationInProgress   = false;
 	   	logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
-	}
-	
-	private String getOwlModelFormat(ProcessorContext context) {
-		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
-		if (context != null) {
-			String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
-			if (pv != null && pv.length() > 0) {
-				format = pv;
-			}
-		}
-		return format;
 	}
 	
 	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType, List<String[]> newMappings) {
@@ -852,6 +847,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     	}
     	else {
        		OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getModelAlias());
+    	}
+    	if (rules != null && rules.size() > 0) {
+    		List<Object> other = OntModelProvider.getOtherContent(model.eResource());
+    		if (other != null) {
+    			other.add(rules);
+    		}
+    		else {
+    			OntModelProvider.addOtherContent(model.eResource(), rules);
+    		}
     	}
 		if (issueAcceptor != null) {
 			try {

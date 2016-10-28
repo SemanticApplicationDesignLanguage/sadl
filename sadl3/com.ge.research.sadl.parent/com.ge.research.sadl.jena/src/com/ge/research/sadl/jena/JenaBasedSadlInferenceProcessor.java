@@ -19,9 +19,15 @@ import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.model.gp.EndWrite;
+import com.ge.research.sadl.model.gp.Explain;
+import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.Read;
 import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.model.gp.StartWrite;
 import com.ge.research.sadl.model.gp.Test;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -53,9 +59,31 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	@Inject
 	private IPreferenceValuesProvider preferenceProvider;
 	private IConfigurationManagerForIDE configMgr;
+	private Map<String, String> preferenceMap;
+	private String _repoType = null;
 
 	@Override
 	public Object[] runInference(Resource resource, String owlModelPath, String modelFolderPath, Map<String,String> prefMap) throws SadlInferenceException {
+		try {
+			setModelFolderPath(modelFolderPath);
+			setCurrentResource(resource);
+			setModelName(getConfigMgr(getOwlFormat()).getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(owlModelPath)));
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		// clear old reasoner
+		try {
+			getConfigMgr(getOwlFormat()).clearReasoner();
+		} catch (ConfigurationException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		preferenceMap = prefMap;
 		OntModel om = OntModelProvider.find(resource);
 		if (om == null) {
 			// This should never happen as the SadlActionHandler makes a call to validate the Resource. However, not deleting this code yet... AWC 9/21/2016
@@ -84,19 +112,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			results[2] = errors;
 			return results;
 		}
-		setModelFolderPath(modelFolderPath);
-		setCurrentResource(resource);
+		setTheJenaModel(OntModelProvider.find(resource));
+		
 		try {
-			setModelName(getConfigMgr(null).getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(owlModelPath)));
+			checkIfExplanationNeeded(cmds);
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
-		setTheJenaModel(OntModelProvider.find(resource));
-		Object[] results = new Object[3];
+			
+		Object[] results = new Object[3];	// [0] = commands, [1] = inference results, [2] = errors
 		results[0] = cmds;
 		List<Object> infresults = new ArrayList<Object>();
 		results[1] = infresults;
@@ -104,7 +129,13 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		while (tpitr.hasNext()) {
 			SadlCommand cmd = tpitr.next();
 			try {
-				if (cmd instanceof Query) {
+				if (cmd instanceof Explain) {
+					
+				}
+				else if (cmd instanceof Print) {
+					results =  processPrint(cmds, (Print) cmd, results);
+				}
+				else if (cmd instanceof Query) {
 					String query = ((Query)cmd).getSparqlQueryString();
 					if (query == null) {
 						query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), (Query) cmd);
@@ -118,7 +149,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 						infresults.add(rs);
 //					}
 				}
+				else if (cmd instanceof Read) {
+					
+				}
 				else if (cmd instanceof Test) {
+					results = processTest(cmds, (Test)cmd, results);
+				}
+				else if (cmd instanceof StartWrite) {
+					
+				}
+				else if (cmd instanceof EndWrite) {
 					
 				}
 			} catch (TranslationException e) {
@@ -147,10 +187,66 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return results;
 	}
 
+	private void checkIfExplanationNeeded(List<SadlCommand> cmds) throws ConfigurationException {
+		if (cmds != null) {
+			for (int i = 0; i < cmds.size(); i++) {
+				SadlCommand cmd = cmds.get(i);
+				if (cmd instanceof Explain) {
+					IReasoner reasoner = getConfigMgr(getOwlFormat()).getReasoner();
+					reasoner.enableExplanation(true);
+				}
+			}
+		}
+		
+	}
+
+	private String getOwlFormat() {
+		if (_repoType == null) {
+			_repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			if (preferenceMap != null) {
+				if (preferenceMap.containsKey(SadlPreferences.OWL_MODEL_FORMAT.getId())) {
+					_repoType = preferenceMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
+				}
+			}
+		}
+		return _repoType;
+	}
+
+	private Object[] processTest(List<SadlCommand> cmds, Test cmd, Object[] results) {
+		
+		return results;
+	}
+
+	private Object[] processPrint(List<SadlCommand> cmds, Print cmd, Object[] results) {
+		String dispStr = cmd.getDisplayString();
+		if (dispStr != null) {
+			results[1] = dispStr;
+		}
+		else {
+			String model = cmd.getModel();
+			String outfn = getPrintModelFileName(model);
+//			msg = "Printing "
+//					+ ((Print) cmd).getModel();
+//			reasoner.saveInferredModel(
+//					outputfilename, modelName,
+//					(type.equals("Model") ? false
+//							: true));
+
+		}
+		return results;
+		
+	}
+
+	private String getPrintModelFileName(String model) {
+		URI mfp = URI.createURI(modelFolderPath);
+		mfp = mfp.trimSegments(1);
+		mfp = mfp.appendSegment(getCurrentResource().getURI().lastSegment()+ "." + model + ".owl");
+		return mfp.toString();
+	}
+
 	public ResultSet processAdhocQuery(String query) {
 		String queryString;
 		
-		String _repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
 		try {
 			if (getTheJenaModel() == null) {
 				// it always is?
@@ -167,11 +263,11 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					// load from OWL file
 				}
 			}
-			ITranslator translator = getConfigMgr(_repoType).getTranslator();
-			IReasoner reasoner = getConfigMgr(_repoType).getReasoner();
+			ITranslator translator = getConfigMgr(getOwlFormat()).getTranslator();
+			IReasoner reasoner = getConfigMgr(getOwlFormat()).getReasoner();
 			if (!reasoner.isInitialized()) {
-				reasoner.setConfigurationManager(getConfigMgr(_repoType));
-				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), _repoType);
+				reasoner.setConfigurationManager(getConfigMgr(getOwlFormat()));
+				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
 			}
 			queryString = translator.translateQuery(getTheJenaModel(), processQuery(query));
 			ResultSet results =  reasoner.ask(queryString);
@@ -229,6 +325,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				}
 				OntResource query = m.getOntResource(queryName);
 				Statement s = query.getProperty(m.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_QUERY_STRING_URI));
+// TODO what happens to s?				
 			}
 		}
 		return null;
