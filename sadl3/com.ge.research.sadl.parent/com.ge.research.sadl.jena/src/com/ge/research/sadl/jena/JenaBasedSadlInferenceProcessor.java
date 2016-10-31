@@ -71,6 +71,7 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -476,6 +477,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		((List<Object>) results[1]).add(testResult);
 		return results;
 	}
 
