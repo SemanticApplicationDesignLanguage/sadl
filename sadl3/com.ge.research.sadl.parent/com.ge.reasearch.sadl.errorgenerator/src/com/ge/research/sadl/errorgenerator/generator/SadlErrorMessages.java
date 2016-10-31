@@ -19,10 +19,6 @@ import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 
 public final class SadlErrorMessages {
 /**
-* Left and right sides of {0} are of incompatible types: {1} and {2}.
-**/
-    public static final SadlErrorMessage INCOMPATIBLE_MEMBER_TYPES = new SadlErrorMessage("incompatible_member_types");
-/**
 * Subject '{0}' did not translate to node
 **/
     public static final SadlErrorMessage TRANSLATE_TO_NODE = new SadlErrorMessage("translate_to_node");
@@ -59,10 +55,6 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage INVALID_PROP_TYPE = new SadlErrorMessage("invalid_prop_type");
 /**
-* Unhandled {0}: {1}
-**/
-    public static final SadlErrorMessage UNHANDLED_ALT = new SadlErrorMessage("unhandled_alt");
-/**
 * Fatal Configuration Error: {0}
 **/
     public static final SadlErrorMessage CONFIGURATION_ERROR = new SadlErrorMessage("configuration_error");
@@ -74,10 +66,6 @@ public final class SadlErrorMessages {
 * Type comparison not possible
 **/
     public static final SadlErrorMessage TYPE_COMPARISON = new SadlErrorMessage("type_comparison");
-/**
-* Invalid Format: {0}.
-**/
-    public static final SadlErrorMessage INVALID_FORMAT = new SadlErrorMessage("invalid_format");
 /**
 * Import of '{0}' is part of a circular set of imports.
 **/
@@ -99,21 +87,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNIQUE_NAME = new SadlErrorMessage("unique_name");
 /**
-* Member of {0} is an invalid type: {1}.
-**/
-    public static final SadlErrorMessage INVALID_MEMBER_TYPE = new SadlErrorMessage("invalid_member_type");
-/**
-* {0} must be applied to a List ({1} is not a List).
-**/
-    public static final SadlErrorMessage MUST_BE_APPLIED_TO_LIST = new SadlErrorMessage("must_be_applied_to_list");
-/**
 * translate(Name) called with a SadlResource which resolved to null; this needs to be caught in validation
 **/
     public static final SadlErrorMessage TRANSLATE_NAME_SADLRESOURCE = new SadlErrorMessage("translate_name_sadlresource");
 /**
-* Cannot create unnamed instance with no class given.
+* {0} must be applied to a List ({1} is not a List).
 **/
-    public static final SadlErrorMessage CREATE_UNNAMED_INSTANCE = new SadlErrorMessage("create_unnamed_instance");
+    public static final SadlErrorMessage MUST_BE_APPLIED_TO_LIST = new SadlErrorMessage("must_be_applied_to_list");
 /**
 * Invalid name in {0}: {1}
 **/
@@ -127,15 +107,15 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
 /**
-* Unexpected: Property has more than 2 restrictions.
-**/
-    public static final SadlErrorMessage PROPERTY_RESTRICTIONS = new SadlErrorMessage("property_restrictions");
-/**
 * {0} is not defined so return type is unknown, can't do type checking
 **/
     public static final SadlErrorMessage RETURN_TYPE_WARNING = new SadlErrorMessage("return_type_warning");
 /**
-* Imported model has null OntModel
+* Unexpected: Property has more than 2 restrictions.
+**/
+    public static final SadlErrorMessage PROPERTY_RESTRICTIONS = new SadlErrorMessage("property_restrictions");
+/**
+* 
 **/
     public static final SadlErrorMessage NULL_ONT_MODEL = new SadlErrorMessage("null_ont_model");
 /**
@@ -143,7 +123,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNDEFINED = new SadlErrorMessage("undefined");
 /**
-* Unhandled {0} value: '{1}'
+* Unhandled {0}: '{1}'
 **/
     public static final SadlErrorMessage UNHANDLED = new SadlErrorMessage("unhandled");
 /**
@@ -199,13 +179,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage ONLY_ONE = new SadlErrorMessage("only_one");
 /**
-* "Translation error in {0}: {1}
-**/
-    public static final SadlErrorMessage TRANSLATION_ERROR = new SadlErrorMessage("translation_error");
-/**
 * Phrase 'not known' is not a valid graph pattern. Did you mean 'is not known'?
 **/
     public static final SadlErrorMessage PHRASE_NOT_KNOWN = new SadlErrorMessage("phrase_not_known");
+/**
+* "Translation error in {0}: {1}
+**/
+    public static final SadlErrorMessage TRANSLATION_ERROR = new SadlErrorMessage("translation_error");
 /**
 * A unit has been given to a numeric value for a property whose range is not a sublcass of UnittedQuantity
 **/
@@ -235,17 +215,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage EXPECTED_A = new SadlErrorMessage("expected_a");
 /**
-* Unable to do domain-range matching on a(n) {0}
-**/
-    public static final SadlErrorMessage DOMAIN_MATCHING = new SadlErrorMessage("domain_matching");
-/**
 * unable to add {0}: {1}
 **/
     public static final SadlErrorMessage UNABLE_TO_ADD = new SadlErrorMessage("unable_to_add");
 /**
-* Unexpected value '{0}' ({1}) does not match expected range type {2}.
+* Unable to do domain-range matching on a(n) {0}
 **/
-    public static final SadlErrorMessage INCOMPATIBLE_RANGE = new SadlErrorMessage("incompatible_range");
+    public static final SadlErrorMessage DOMAIN_MATCHING = new SadlErrorMessage("domain_matching");
 /**
 * unable to create {0}: {1}
 **/
