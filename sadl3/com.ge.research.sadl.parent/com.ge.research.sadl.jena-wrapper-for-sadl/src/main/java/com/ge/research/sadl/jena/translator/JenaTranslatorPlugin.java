@@ -1805,4 +1805,18 @@ public class JenaTranslatorPlugin implements ITranslator {
 		throw new TranslationException("Equation translation not yet implemented in " + this.getClass().getCanonicalName());
 	}
 
+
+	@Override
+	public String[] getBuiltinFunctionSignature(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public boolean isBuiltinFunction(String arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
