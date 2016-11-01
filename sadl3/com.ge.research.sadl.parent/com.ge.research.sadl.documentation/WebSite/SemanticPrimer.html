@@ -1,0 +1,92 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Semantic Technology Standards and Tools</title>
+</head>
+
+<body>
+
+<h1>Semantic Technology Standards and Tools</h1>
+<h5>
+<a href="mailto:crapo@research.ge.com?subject=Semantic Technology Standards and Tools">
+A. W. Crapo</a>, Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->01/10/2011<!--webbot bot="Timestamp" endspan i-checksum="12489" -->.</h5>
+<h2>Some Definitions</h2>
+<p><b>Semantic Technology</b> -- a way of encoding meaning in formal, logical models 
+(called ontologies). The formal semantics allow inferences to be drawn. Rules 
+may also be expressed in terms of the model concepts.</p>
+<p><b>Ontology</b> -- a formal model that defines what does or can exist in a 
+domain, including</p>
+<ol>
+  <li>Classes (concepts) -- abstract groups or sets<ol type="a">
+    <li>defined intensionally by specifying the conditions of set membership, 
+    e.g., Woman <font face="Times New Roman">&#8801; a Person whose age &gt;= 18 and 
+    whose gender is Female</font></li>
+    <li>defined extensionally by specifying the members of the set, e.g., 
+    Season <font face="Times New Roman">&#8801; </font>{Spring, Summer, Fall, 
+    Winter}</li>
+  </ol>
+  </li>
+  <li>Individuals (instances) -- proxies for &quot;real things&quot; in the modeled 
+  domain, e.g., a Dog &quot;Lassie&quot;</li>
+  <li>Properties -- [generalization of] characteristics or relationships of 
+  individuals<ol type="a">
+    <li>[simple] attributes (data type properties) have values that do not have 
+    individual identity apart from the individual they describe: &quot;Lassie age 5&quot; 
+    (&quot;5&quot; does not identify an instance in the domain)</li>
+    <li>relationships associate an individual with another individual that has 
+    separate identity: &quot;Lassie friend Spot&quot;</li>
+  </ol>
+  </li>
+</ol>
+<p><b>OWL (Web Ontology Language)</b> -- a formal (unambiguous) language that 
+builds on RDF and RDFS and is informed by prior work including Description 
+Logics (DL), OIL, DAML, and DAML+OIL</p>
+<ol>
+  <li>Classes, individuals, and properties are RDF resources and are identified 
+  by URIs</li>
+  <li>A model is built using statements (RDF triples) of the form &lt;subject&gt; 
+  &lt;predicate&gt; &lt;object&gt;</li>
+  <li>A model is a [mathematical] graph</li>
+  <li>Different flavors of OWL have different expressiveness and different 
+  decidability: OWL-Lite, OWL-DL, OWL-Full</li>
+  <li>Models may be distributed, modular, extensible by language design</li>
+</ol>
+<p><b>SWRL (Semantic Web Rule Language)</b> -- A W3C proposal that combines OWL 
+(DL and Lite) with a subset of the Rule Markup Language (RuleML) </p>
+<ol>
+  <li>Provides a rule language that allows Horn-like rules to be combined with 
+  an OWL knowledge base</li>
+  <li>An extension of the OWL model-theoretic semantics to include rules</li>
+  <li>May be part of a given model or an extension of it</li>
+</ol>
+<p>Note: Jena Rules are similar to SWRL.</p>
+<p><b>SPARQL (RDF query language)</b> -- A W3C proposed recommendation query 
+language for RDF (and therefore OWL) models</p>
+<ol>
+  <li>Defined semantics as well as syntax</li>
+  <li>A language for specifying graph patterns to be matched from a model</li>
+</ol>
+<p><b>Reasoner</b> -- a piece of software able to infer logical consequences 
+from a model (set of assertions)</p>
+<ol>
+  <li>Given definition of Woman above and assertion &quot;Jane is a Woman&quot;, reasoner 
+  infers 1) Jane age &gt;= 18 and 2) Jane gender Female</li>
+  <li>Some reasoners can also process SWRL rules</li>
+  <li>Reasoners may also be integrated with SPARQL query support</li>
+  <li>Interesting reasoners:<ol type="a">
+    <li>Pellet -- open source Java OWL-DL reasoner with explanation (version 
+    supporting uncertainty nearing release)</li>
+    <li>Jena -- open source Java framework supporting model&nbsp; creation, 
+    persistence, and inference</li>
+  </ol>
+  </li>
+</ol>
+
+</body>
+
+</html>

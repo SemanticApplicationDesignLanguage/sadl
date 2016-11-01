@@ -1,0 +1,87 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>New Page 1</title>
+</head>
+
+<body>
+
+<h1>SADL Version 3 Build Instructions</h1>
+<h2>Introduction</h2>
+<p>SADL Version 3 uses GitHub as a source code repository. These instructions 
+cover setting up an Eclipse environment, obtaining the requisite Eclipse plug-in 
+projects from GitHub, and configuring the environment so as to be able to build 
+from source code a working set of SADL plug-ins for Eclipse. </p>
+<h2>The Eclipse Environment</h2>
+<p>SADL Version 3 currently is built in and for Eclipse Kepler.</p>
+<ol>
+  <li>If not already installed, install Java 1.7 JDK from
+  <a href="http://www.java.com">http://www.java.com</a>&nbsp; (Java 1.7 required!). 
+  (See <a href="#CheckJavaVersion">How to check Java Version</a>.) </li>
+  <li>Download and install Eclipse Kepler (Eclipse Standard 4.3.x) from
+  <a href="http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a> 
+  .</li>
+  <li>Make sure that Eclipse is using your Java 1.7 JDK as the default:<ul>
+    <li>Open Window -&gt; Preferences -&gt; Java -&gt; Installed JREs</li>
+    <li>If you jdk1.7... is not in the list of installed JREs, click on Add... 
+    and browse to it (to the folder above &quot;bin&quot;)</li>
+    <li>Check jdk1.7... as the default JRE</li>
+  </ul>
+  </li>
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Install
+the Maven plug-in, <span style="font-weight: bold;">m2eclipse</span>, via the
+Eclipse Update Manager from the update site: <a href="http://m2eclipse.sonatype.org/sites/m2e">http://m2eclipse.sonatype.org/sites/m2e</a></span></li>
+  <li>Install Xtext 2.9 from the update site
+  <a href="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/milestones/">
+  http://download.eclipse.org/modeling/tmf/xtext/updates/composite/milestones/</a>.&nbsp; 
+  The required features are Xtext and Xtend.</li>
+</ol>
+<h2>The Source</h2>
+<ol>
+  <li>Obtain the source code from GitHub (<a href="http://github.com">http://github.com</a>). 
+  The repository URL is: <a href="https://github.com/crapo/sadlos2.git">
+  https://github.com/crapo/sadlos2.git</a>. </li>
+</ol>
+<h2>Setting up the target platform</h2>
+<ol>
+  <li>In Eclipse open the preferences </li>
+  <li>Choose &quot;Plug-in Development&quot; -&gt; &quot;Target Platform&quot;</li>
+  <li>Under &quot;Target definitions:&quot;, add if necessary and then select &quot;com.ge.research.sadl.target&quot; (if you see two, just pick the first)</li>
+  <li>Double-click on the selected line. This will cause all components to be 
+  located. When that [lengthy] process completes, click OK.</li>
+  <li>Open the file &quot;com.ge.research.sadl.target.target&quot; in the 
+  com.ge.research.sadl.target project in the target editor. Click on &quot;Set as 
+  Target Platform&quot; in the upper right corner of the editor.</li>
+</ol>
+<h2>The Configuration</h2>
+<p>Going in the order of project dependencies, identify and remove build errors. 
+These might include:</p>
+<ol>
+  <li>The project build path may not be valid:<ul>
+    <li>Right-click on the project and click Properties</li>
+    <li>On the Libraries tab, fix anything that has an error marker. This might 
+    include:<ul>
+      <li>Removing the JRE System Library and adding the one for your JDK</li>
+      <li>Unchecking project-specific Java Compiler settings that set a 
+      different JDK compliance than that set at the workspace level (should be 
+      1.7)</li>
+    </ul>
+    </li>
+    <li>&nbsp;</li>
+  </ul>
+  </li>
+</ol>
+<h2>Building the Plug-ins</h2>
+<p>Once the configuration is correct, all project compile errors should be 
+resolved. At this point the plug-ins can be tested/exercised in several ways:</p>
+<ol>
+  <li>&nbsp;</li>
+</ol>
+
+</body>
+
+</html>
