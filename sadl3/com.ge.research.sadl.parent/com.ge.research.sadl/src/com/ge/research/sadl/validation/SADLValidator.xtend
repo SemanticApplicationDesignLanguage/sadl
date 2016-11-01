@@ -37,6 +37,8 @@ import com.ge.research.sadl.sADL.SadlResource
 import java.util.List
 import java.util.ArrayList
 import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference
+import org.eclipse.emf.ecore.EStructuralFeature
 
 /**
  * This class contains custom validation rules. 
@@ -49,15 +51,20 @@ class SADLValidator extends AbstractSADLValidator {
 	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
 	@Inject IResourceDescription.Manager resourceDescriptionManager
 
-	public static String INVALID_MODEL_URI = "INVALID_MODEL_URI"
-	public static String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
-	public static String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
-	public static String MISSING_MODEL_ALIAS = "MISSING_MODEL_ALIAS"
-	public static String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
-	public static String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
-	public static String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
+	public static final String INVALID_MODEL_URI = "INVALID_MODEL_URI"
+	public static final String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
+	public static final String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
+	public static final String MISSING_MODEL_ALIAS = "MISSING_MODEL_ALIAS"
+	public static final String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
+	public static final String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
+	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
+	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
 		
-	protected var List<String> otherNames = new ArrayList	// names of other structures, i.e., rules and named queries
+	protected var List<String> otherNames = new ArrayList
+	
+//	EStructuralFeature UNRESOLVED_SADL_RESOURCE
+	
+	// names of other structures, i.e., rules and named queries
 	
 	new() {
 		otherNames.clear
@@ -145,6 +152,15 @@ class SADLValidator extends AbstractSADLValidator {
 			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
 		}
 	}
+	
+	@Check
+	def checkSadlSimpleTypeReference(SadlSimpleTypeReference sstr) {
+		val type = sstr.type
+		val nm = type.name
+		if (nm == null) {
+			error("Undefined type", SADLPackage.Literals.SADL_SIMPLE_TYPE_REFERENCE__TYPE, UNRESOLVED_SADL_RESOURCE)
+		}
+	}
 
 //	@Check
 //	def checkResourceName(SadlResource name) {
@@ -153,7 +169,50 @@ class SADLValidator extends AbstractSADLValidator {
 //			error("", SADLPackage.Literals.SADL_RESOURCE__NAME, <constant>)
 //		}
 //	}
-
+	@Check
+	def checkSadlResource(SadlResource sr) {
+		var nm = null as String
+		var isProxy = sr.eIsProxy
+		val nm1 = sr.name
+		if (nm1 != null) {
+			nm = declarationExtensions.getConcreteName(nm1) 
+		}
+		else {
+			nm = declarationExtensions.getConcreteName(sr)
+		}
+		if (nm == null) {
+			try {
+				if (sr instanceof Name) {
+					val isFunc = (sr as Name).function
+					if (!isFunc) {	
+						error("Is this an undeclared variable?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
+					}
+					else {
+						// this might be a built-in so get the text and check the name
+						val srNode = NodeModelUtils.getNode(sr)
+						var boolean isBuiltin = false
+						if (srNode.hasChildren) {
+							val itr = srNode.children
+							for (c:itr) {
+								val txt = NodeModelUtils.getTokenText(c)
+	//							val b = RequirementsConstants.isFunctionConsideredBuiltin(null, txt)
+	//							if (b) {
+	//								isBuiltin = b
+	//							}
+							}
+						}
+						if (!isBuiltin) {
+							error("Is this an undeclared function?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
+						}
+					}
+				}
+			}
+			catch (Throwable t) {
+				t.printStackTrace
+			}
+		}
+	}
+	
 	/**
 	 * This method initializes this instance of this validator class for use on a specified Resource
 	 */

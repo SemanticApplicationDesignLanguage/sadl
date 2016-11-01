@@ -1363,7 +1363,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		} 
 	}
 	
-	private boolean isBuiltinFunction(String name) {
+	public boolean isBuiltinFunction(String name) {
 		if (functionListArity1.contains(name)) {
 			return true;
 		}
@@ -1730,6 +1730,12 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public String translateEquation(OntModel model, Equation equation) throws TranslationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String[] getBuiltinFunctionSignature(String arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}

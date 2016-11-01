@@ -212,4 +212,19 @@ public interface ITranslator {
 	 * @return -- any errors found
 	 */
 	public List<ModelError> validateRule(com.ge.research.sadl.model.gp.Rule rule);
+	
+	/**
+	 * Method to determine if a function used in the model is considered a built-in function by this reasoner/translator pair. 
+	 * A translator might hard-code knowledge of built-ins or it might query the reasoner, e.g., SWI-Prolog or Jena built-ins.
+	 * @param builtinFunctionName -- name of the function as used in the model
+	 * @return-- true if considered a built-in function else false
+	 */
+	public boolean isBuiltinFunction(String builtinFunctionName);
+	
+	/**
+	 * Method to find the signature of a function considered a built-in function by this reasoner/translator pair.
+	 * @param builtinFunctionName -- name of the function as used in the model
+	 * @return -- String array containing function signature: 0th element is return type, subsequent elements are argument types in order
+	 */
+	public String[] getBuiltinFunctionSignature(String builtinFunctionName);
 }
