@@ -154,6 +154,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} catch (ReasonerNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 			
 		Object[] results = new Object[3];	// [0] = commands, [1] = inference results, [2] = errors
@@ -238,12 +241,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return results;
 	}
 
-	private void checkIfExplanationNeeded(List<SadlCommand> cmds) throws ConfigurationException {
+	private void checkIfExplanationNeeded(List<SadlCommand> cmds) throws ConfigurationException, ReasonerNotFoundException {
 		if (cmds != null) {
 			for (int i = 0; i < cmds.size(); i++) {
 				SadlCommand cmd = cmds.get(i);
 				if (cmd instanceof Explain) {
-					IReasoner reasoner = getConfigMgr(getOwlFormat()).getReasoner();
+					IReasoner reasoner = getInitializedReasoner();
 					reasoner.enableExplanation(true);
 				}
 			}
@@ -283,19 +286,19 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					triple = (TripleElement) rhs;
 				}
 				if (triple != null) {
-					testResult = testTriple(getConfigMgr(getOwlFormat()).getReasoner(), triple);
+					testResult = testTriple(getInitializedReasoner(), triple);
 				} else if (lhs instanceof List<?>
 						&& ((List<?>) lhs).size() == 2) {
-					testResult = testFilteredQuery(getConfigMgr(getOwlFormat()).getReasoner(),
+					testResult = testFilteredQuery(getInitializedReasoner(),
 							(List<?>) lhs);
 				} else if (rhs instanceof List<?>
 						&& ((List<?>) rhs).size() == 2) {
-					testResult = testFilteredQuery(getConfigMgr(getOwlFormat()).getReasoner(),
+					testResult = testFilteredQuery(getInitializedReasoner(),
 							(List<?>) rhs);
 				} else if (lhs instanceof List<?>
 						&& rhs == null) {
 					Object lhobj = convertToComparableObject(
-							getModelFolderPath(), getConfigMgr(getOwlFormat()).getReasoner(),
+							getModelFolderPath(), getInitializedReasoner(),
 							lhs, ((Test) cmd).getLhsVariables());
 					if (lhobj instanceof ResultSet
 							&& ((ResultSet) lhobj)
@@ -319,11 +322,11 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			}
 		} else {
 			Object lhobj = convertToComparableObject(
-					getModelFolderPath(), getConfigMgr(getOwlFormat()).getReasoner(),
+					getModelFolderPath(), getInitializedReasoner(),
 					((Test) cmd).getLhs(),
 					((Test) cmd).getLhsVariables());
 			Object rhobj = convertToComparableObject(
-					getModelFolderPath(), getConfigMgr(getOwlFormat()).getReasoner(),
+					getModelFolderPath(), getInitializedReasoner(),
 					((Test) cmd).getRhs(),
 					((Test) cmd).getRhsVariables());
 			ComparisonType type = ((Test) cmd).getCompType();
@@ -1080,7 +1083,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			Query q = processQuery(query);
 			
 //			queryString = translator.translateQuery(getTheJenaModel(), q);
-//			IReasoner reasoner = getConfigMgr(getOwlFormat()).getReasoner();
+//			IReasoner reasoner = getInitializedReasoner();
 //			if (!reasoner.isInitialized()) {
 //				reasoner.setConfigurationManager(getConfigMgr(getOwlFormat()));
 //				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
@@ -1113,13 +1116,18 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	
 	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString = translator.translateQuery(getTheJenaModel(), q);
+		IReasoner reasoner = getInitializedReasoner();
+		ResultSet results =  reasoner.ask(queryString);
+		return results;
+	}
+
+	private IReasoner getInitializedReasoner() throws ConfigurationException, ReasonerNotFoundException {
 		IReasoner reasoner = getConfigMgr(getOwlFormat()).getReasoner();
 		if (!reasoner.isInitialized()) {
 			reasoner.setConfigurationManager(getConfigMgr(getOwlFormat()));
 			reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
 		}
-		ResultSet results =  reasoner.ask(queryString);
-		return results;
+		return reasoner;
 	}
 
 	private Query processQuery(Object qobj) throws JenaProcessorException {
