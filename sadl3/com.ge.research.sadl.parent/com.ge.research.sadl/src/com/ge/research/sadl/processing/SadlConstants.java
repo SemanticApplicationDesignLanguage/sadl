@@ -40,6 +40,10 @@ public class SadlConstants {
 	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX = "";
 	public static final String SADL_SERIVCES_CONFIGURATION_URI = "http://com.ge.research.sadl/sadlserver/ServicesConfig";
 	public static final String SADL_SERIVCES_CONFIGURATION_PREFIX = "";
+	
+	public static final String SADL_DEFAULTS_MODEL_FILENAME = "defaults";
+	public static final String SADL_DEFAULTS_MODEL_PREFIX = "defs";
+	public static final String SADL_DEFAULTS_MODEL_URI = "http://research.ge.com/Acuity/defaults.owl";
 
 
 }
