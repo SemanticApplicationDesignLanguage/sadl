@@ -47,6 +47,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage NOT_IN_RANGE = new SadlErrorMessage("not_in_range");
 /**
+* Must select folder (not file) for running Batch ATPT
+**/
+    public static final SadlErrorMessage ATPT_FOLDER_NOT_SELECT = new SadlErrorMessage("atpt_folder_not_select");
+/**
 * {0} is a special reserved name. Please choose a different name.
 **/
     public static final SadlErrorMessage RESERVED_NAME = new SadlErrorMessage("reserved_name");
@@ -67,6 +71,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage TYPE_COMPARISON = new SadlErrorMessage("type_comparison");
 /**
+* Only files of type {0} are valid for this command
+**/
+    public static final SadlErrorMessage FILE_TYPE_ERROR = new SadlErrorMessage("file_type_error");
+/**
 * Import of '{0}' is part of a circular set of imports.
 **/
     public static final SadlErrorMessage CIRCULAR_IMPORT = new SadlErrorMessage("circular_import");
@@ -78,6 +86,10 @@ public final class SadlErrorMessages {
 * {0} should not be null.
 **/
     public static final SadlErrorMessage INVALID_NULL = new SadlErrorMessage("invalid_null");
+/**
+* No folder or xml file selected for ATPT
+**/
+    public static final SadlErrorMessage ATPT_NO_XML_SELECTED = new SadlErrorMessage("atpt_no_xml_selected");
 /**
 * Cannot assign {0}: property '{1}' already has {0} assigned to '{2}'.
 **/
@@ -178,6 +190,10 @@ public final class SadlErrorMessages {
 * There can only be one {0} in a {1}.
 **/
     public static final SadlErrorMessage ONLY_ONE = new SadlErrorMessage("only_one");
+/**
+* Was not able to find atpt.exe in ASSERT/ATPT/atpt.exe
+**/
+    public static final SadlErrorMessage ATPT_EXE_NOT_FOUND = new SadlErrorMessage("atpt_exe_not_found");
 /**
 * Phrase 'not known' is not a valid graph pattern. Did you mean 'is not known'?
 **/
