@@ -116,7 +116,7 @@ public class RunInference extends SadlActionHandler {
 		        							msg = "Test passed: " + cmds.get(i).toString() + "\n";
 		        						}
 		        						else {
-		        							msg = tr.toString();
+		        							msg = "Test failed: " + cmds.get(i).toString() + "(" + tr.toString() + ")\n";
 		        						}
 		        						SadlConsole.writeToConsole(MessageType.INFO, msg);
 		        					}
