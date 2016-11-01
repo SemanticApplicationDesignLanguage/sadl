@@ -1,0 +1,40 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Jena Reasoner in SADL</title>
+</head>
+
+<body>
+
+<h1>Jena Reasoner in SADL</h1>
+<h2>Introduction</h2>
+<p>SADL uses a plug-in architecture allowing various reasoners, along with a 
+corresponding translator, to be used with SADL. The first of these reasoners to 
+be implemented, and the current default, is the Jena reasoner, wrapped in the 
+class JenaReasonerPlugin.</p>
+<h2>Jena Configuration</h2>
+<p>The Jena reasoner is highly configurable, and the configuration can make a 
+significant difference in inferencing results. For example, if an OWL 
+equivalence class is created thought the use of the SADL construct &quot;only if&quot; in 
+a class definition, a reasoner supporting OWL entailments may use this for 
+classification. However, if the Jena reasoner configuration does not enable OWL 
+entailments, no such results will occur. For details on Jena reasoner 
+configurion, see <a href="JenaConfiguration.html">Jena Reasoner Configuration</a>.</p>
+<h2>Jena Rule Built-ins Included in SADL</h2>
+<p>Jena rules are very flexible in the way that they allow the inclusion of 
+custom built-ins. Some built-ins are a part of the Jena distribution (see
+<a href="http://jena.apache.org/documentation/inference/#RULEbuiltins">
+http://jena.apache.org/documentation/inference/#RULEbuiltins</a>) while SADL 
+supplies a variety of other built-ins found to be of practical value. For more 
+information about Jena built-ins available in SADL see
+<a href="BuiltinsProvided.html">Provided Jena Built-ins</a>.</p>
+<p>In addition, Jena custom built-ins may be coded and deployed within SADL. For 
+directions in doing so see <a href="CustomJenaBuiltins.html">Creating and Deploying Custom Jena Built-ins</a>.</p>
+
+</body>
+
+</html>

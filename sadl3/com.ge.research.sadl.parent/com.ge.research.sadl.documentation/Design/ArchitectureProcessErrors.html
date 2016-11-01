@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+
+<h1>SADL Architecture, Translation, Execution, and Error Handling</h1>
+<h2>Architecture</h2>
+<h2>Translation, Execution, and Error Handling</h2>
+<p>The process of translating a SADL model into an OWL model happens in several 
+distinct phases. </p>
+<ol>
+  <li>When a model is loaded from a SADL file or when the modeler edits a model, 
+  the SADL expressions are parsed by the Xtext (ANTLR) parser. This may result 
+  in errors because the model statements do not comply with the grammar of the 
+  language. If the SADL file is open, these errors are reported by putting error 
+  markers in the Xtext editor.&nbsp; </li>
+  <li>The parse tree created by the parser is processed by calls to the 
+  SadlModelManager. SadlModelManager translates parse tree nodes into instances 
+  of the classes belonging to the Intermediate Form (IF). The IF classes are 
+  generally found in the com.ge.research.sadl.model and 
+  com.ge.research.sadl.model.gp packages. Some additional errors may be 
+  discovered during this translation to IF.</li>
+  <li>SadlModelManager passes the IF structures in calls to ModelManager. 
+  ModelManager uses this information to generate an OWL model defining classes, 
+  properties, instances, and triple statements. ModelManager also organizes 
+  certain IF structures to store rules and lists of queries, tests, and other 
+  SADL commands. At this point the OWL model, IF rules, etc. are only in memory. 
+  Calls to ModelManager may detect important errors as this is the first step at 
+  which semantics and not just syntax is checked. For example, it might be 
+  detected that an instance is given two values for a functional property.</li>
+  <li>When the saved, the OWL model and the IF rules are passed to the IF 
+  Translator (implementation of ITranslator). The Translator saves the model and 
+  rules in the appropriate form for the target Reasoner. For example, if the 
+  target Reasoner (implementation of IReasoner) is Jena, the OWL model is simply 
+  written as an OWL model and the rules are translated to Jena rules and saved 
+  in a rule file with the same base name as the OWL model file but with &quot;.rules&quot; 
+  instead of &quot;.owl&quot; as the file extension. Errors generated at this phase will 
+  normally relate to the translation to the target representation. For example, 
+  an error would be generated if a built-in function is used in a rule but is 
+  not known to Jena reasoner (not in the configuration).</li>
+  <li>A model may contain test and/or queries which can be executed via the Test 
+  Model command or a modeler may query the model interactively through the Run 
+  Query command. In either case, the target reasoner is instantiated via the 
+  ConfigurationManager and and the inferred model is used to evaluate the tests 
+  and queries. Additional errors may occur and be reported. The results of 
+  executing tests and queries, along with any errors encountered, are generally 
+  reported with messages to the console window. Where appropriate, these 
+  messages are hyperlinked to the SADL model file statement containing the test 
+  or query. Errors at this stage are not generally related to translation but to 
+  model content.</li>
+</ol>
+
+</body>
+</html>

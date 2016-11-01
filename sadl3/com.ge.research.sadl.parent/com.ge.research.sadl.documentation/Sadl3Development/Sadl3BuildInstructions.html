@@ -46,6 +46,17 @@ Eclipse Update Manager from the update site: <a href="http://m2eclipse.sonatype.
   The repository URL is: <a href="https://github.com/crapo/sadlos2.git">
   https://github.com/crapo/sadlos2.git</a>. </li>
 </ol>
+<h2>Setting up the target platform</h2>
+<ol>
+  <li>In Eclipse open the preferences </li>
+  <li>Choose &quot;Plug-in Development&quot; -&gt; &quot;Target Platform&quot;</li>
+  <li>Under &quot;Target definitions:&quot;, add if necessary and then select &quot;com.ge.research.sadl.target&quot; (if you see two, just pick the first)</li>
+  <li>Double-click on the selected line. This will cause all components to be 
+  located. When that [lengthy] process completes, click OK.</li>
+  <li>Open the file &quot;com.ge.research.sadl.target.target&quot; in the 
+  com.ge.research.sadl.target project in the target editor. Click on &quot;Set as 
+  Target Platform&quot; in the upper right corner of the editor.</li>
+</ol>
 <h2>The Configuration</h2>
 <p>Going in the order of project dependencies, identify and remove build errors. 
 These might include:</p>
