@@ -1,0 +1,2981 @@
+<html>
+<head>
+  <meta http-equiv="Content-Language" content="en-us">
+  <meta name="ProgId" content="FrontPage.Editor.Document">
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  <title>Semantic Application Design Language</title>
+</head>
+
+<body>
+<h1>Semantic Application Design Language (SADL) (Version 2): A Detailed Look</h1>
+
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/09/2011<!--webbot bot="Timestamp" endspan i-checksum="12635" -->
+by <a href="mailto:crapo@research.ge.com?subject=SADL">A. W. Crapo</a></h5>
+
+
+<h2>Table of Contents</h2>
+
+<ol>
+  <li><a href="#Introduction">Introduction</a></li>
+  <li><a href="#Modeling in SADL">Modeling in SADL</a><ol type="a">
+    <li><a href="#ClassAndPropertyHierarchies">Class and Property Hierarchies</a></li>
+    <li><a href="#GroupsSetOperationsOnClassesLists of Instances">Groups, Set Operations on Classes, and Lists of Instances</a></li>
+    <li><a href="#DomainRangeProperty">Domain and Range of a Property</a></li>
+    <li><a href="#StatementsInTheABoxClass Membership">Statements in the A- Box: Class Membership</a></li>
+    <li><a href="#StatementsInTheABoxPropertyValues">Statements in the A-Box: Property Values</a></li>
+    <li><a href="#BlankNodesInInstanceData">Blank Nodes in Instance Data</a></li>
+    <li><a href="#TriplePatternsVaiablesNesting">Triple Patterns, Variables, and 
+    Nesting</a></li>
+    <li><a href="#Rules">Rules</a></li>
+    <li><a href="#Tests">Tests</a></li>
+    <li><a href="#SADLQueryLanguage">SADL Query Language</a></li>
+    <li><font color="#400040"><a href="#TestsRevisited">Rules, Queries, and 
+    Tests Revisited</a></font></li>
+  </ol>
+  </li>
+  <li><a href="#RefiningModelDefinitions">Refining Model Definitions</a><ol type="a">
+    <li><a href="#OtherThingsToSayAboutInstances">Other Things to Say about 
+    Instances</a></li>
+    <li><a href="#OtherThingsToSayAboutProperties">Other Things to Say about 
+    Properties</a></li>
+    <li><a href="#OtherThingsToSayAboutClasses">Other Things to Say about Classes</a></li>
+    <li><a href="#PropertyRestrictionsOnClass">Property Restrictions on a Class</a></li>
+  </ol>
+  </li>
+  <li><a href="#Annotations">Annotations</a></li>
+  <li><a href="#Summary">Summary</a></li>
+</ol>
+
+<p>See also <a href="SadlGrammar.html">SADL Xtext Grammar</a>.</p>
+
+<h2><a name="Introduction">Introduction</a></h2>
+
+<p>The Semantic Application Design Language (SADL) has been developed to
+provide a more intuitive language and authoring environment for developing
+models using Semantic Web technology and more especially the <a
+href="http://www.w3.org/2004/OWL/">Web Ontology Language (OWL)</a> and
+associated rule languages such as the <a
+href="http://www.w3.org/Submission/SWRL/">Semantic Web Rule Language (SWRL)</a>
+and <a href="http://jena.sourceforge.net/inference/index.html#rules">Jena
+Rules</a>. This document describes the constructs available in SADL for
+building models. It is meant to explain the design of the SADL language and to
+provide a detailed description of what can be said in SADL along with its
+translation into OWL. For an introduction to the underlying concepts of
+semantic modeling, please see <a
+href="tutorial/foundationalconcepts.html">Semantic
+Modeling Using SADL</a>.</p>
+
+<h2><a name="Modeling in SADL">Modeling in SADL</a></h2>
+
+<p>SADL is a controlled English language for expressing models with an
+unambiguous mapping to OWL. Its purpose is to provide an authoring and
+testing/validation environment that is friendly to subject matter experts
+(SMEs) who are not expert in OWL and semantic technology. SADL provides several
+things useful to SMEs:</p>
+<ol>
+  <li>A language that is much more like natural English than any OWL
+    representation. (N-triples are probably the most human-readable OWL format
+    but lack connectives to be English-like)</li>
+  <li>A more compact representation allowing grouping of statement with common
+    parts (subject, predicate, or object) together. Names are grouped by placing 
+  them inside curly brackets, separated the names by a comma or "and" or "or". Multiple phrases are listed
+    sequentially, optionally separated by commas.</li>
+  <li>An integrated development environment (IDE) with token coloring (see
+    below), error checking with error location and description, and templates
+    and statement completion proposals to help authors compose valid model
+    statements.</li>
+  <li>Extensions that beyond OWL for testing and querying models. In
+    general, these aim at supporting the model lifecycle from debugging through
+    regression testing and version control.</li>
+</ol>
+
+<p>In the examples in this section we will use SADL coloring of terms and will
+use the standard convention of capitalization in OWL.</p>
+<ol>
+  <li>Class: dark blue bold, first letter is capitalized, e.g., <font size="2"
+    color="#000080"><b>Shape</b></font></li>
+  <li>Property: green bold, first letter is lower case, e.g., <font size="2"
+    color="#008000"><b>teaches</b></font></li>
+  <li>Instance: light blue, first letter is capitalized, e.g., <font size="2"
+    color="#0000ff">George</font><font size="2"></font></li>
+</ol>
+
+<p>Keywords in the language are dark magenta, e.g., <font size="2"
+color="#800080">describes</font>. SADL models are made of statements, and each
+statement ends with a period. A statement may be on multiple lines; multiple 
+statements may be on one line. White space is not significant so statements may 
+be preceded with spaces or tabs to improve grouping and readability.</p>
+
+<h3><a name="ClassAndPropertyHierarchies">Class and Property Hierarchies</a></h3>
+
+<p>In SADL, a class is a set and we can define top-level classes (classes not
+specified as subclasses (subsets) of any other class).</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#000080"><b>
+  <p>Person</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">top-level class</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+
+<p style="margin-left: 0em;">or just</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#000080"><b>
+  <p>Person</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+
+<p>In SADL, we use the "is a type of" to state the subset relationship for both
+classes and properties. </p>
+
+<blockquote>
+  <p><font size="2" color="#000080"><b>Student </b></font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#800080">type</font> <font size="2" color="#800080">of
+  </font><font size="2"><font
+  color="#000080"><b>Person</b></font>.
+  <i><font size="2" color="#808080">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //  translates to rdfs:subClassOf </font>
+  </i> </font></p>
+
+  <p><font size="2" color="#008000"><b>lectures </b></font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#800080">type</font> <font size="2" color="#800080">of</font>
+  <font size="2" color="#008000"><b>teaches</b></font><font size="2">.&nbsp;&nbsp;
+  <i><font size="2" color="#808080">  //
+  translates to rdfs:subPropertyOf</font></i></font></p>
+</blockquote>
+
+<h3><a name="GroupsSetOperationsOnClassesLists of Instances">Groups, Set Operations on Classes, and Lists of Instances</a><br>
+</h3>
+
+<p>Grouping of statements is supported in SADL to facilitate more succinct and
+readable models. For example, rather than make four separate "is a type of"
+statements, one can say in SADL:</p>
+
+<blockquote>
+  <font SIZE="2">
+  <p>{</font><font SIZE="2" COLOR="#000080"><b>Dog</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#000080"><b>Cat</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#000080"><b>Cow</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#000080"><b>Horse</b></font><font SIZE="2">} </font>
+  <font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Mammal</b></font><font SIZE="2">.&nbsp;  
+  <i><font size="2" color="#808080">//each subclass name translates to an
+  rdfs:subClassOf statement</font></i></font></p>
+</blockquote>
+
+<p>This is exactly equivalent to the four separate statements. All it says is
+that every member of each of the subclasses (Dog, Cat, Cow, Horse) is also a
+member of the superclass (Mammal). Note that this does not tell us anything
+about whether Dog, Cat, Cow, and Horse have any common members. Either of the
+Venn Diagrams below are consistent with this statement (as would many other
+interpretations).</p>
+
+<table border="1">
+  <caption></caption>
+  <col>
+  <col>
+  <tbody>
+    <tr>
+      <td style="margin-left:2em;">
+      <img alt="Mammal Venn Diagram 1"
+        src="images/MammalVD1.gif" width="436" height="406"></td>
+      <td style="margin-left:2em;">
+      <img alt="Mammal Venn Diagram 2"
+        src="images/MammalVD2.gif" width="448" height="413"></td>
+    </tr>
+    <tr>
+      <td colspan="2"
+      style="text-align:center;margin-left:auto;margin-right:auto;"><strong>Both 
+      Diagrams Are Consistent with the Statement &quot; </strong><font SIZE="2">{</font><font SIZE="2" COLOR="#000080"><b>Dog</b></font><font SIZE="2">,
+      </font><font SIZE="2" COLOR="#000080"><b>Cat</b></font><font SIZE="2">,
+      </font><font SIZE="2" COLOR="#000080"><b>Cow</b></font><font SIZE="2">,
+      </font><font SIZE="2" COLOR="#000080"><b>Horse</b></font><font SIZE="2">}
+      </font><font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#000080"><b>Mammal</b></font><font SIZE="2">.</font><strong>&quot;</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p>Now consider the statement below.</p>
+
+<font SIZE="2" COLOR="#000080"><b>
+<p>Bicycle</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Vehicle</b></font><font SIZE="2">,
+</font><font SIZE="2" COLOR="#000080"><b>SportsEquipment</b></font><font SIZE="2">}.</font>&nbsp;//
+Bicycle is a subclass of Vehicle and is a subclass of SportsEquipment</p>
+
+<p>The Venn Diagram below depicts an interpretation of this situation. Note
+that since every instance of a Bicycle must also be both an instance of a
+Vehicle and an instance of a SportsEquipment, unless Bicycle is the empty set
+(no Bicycle can exist), Vehicle and SportsEquipment must intersect (have
+members in common). Note that this statement does not say that every member of
+the intersection of Vehicle and SportsEquipment is a Bicycle.</p>
+
+<table border="1">
+  <caption></caption>
+  <col>
+  <tbody>
+    <tr>
+      <td style="text-align:center;margin-left:auto;margin-right:auto;">
+      <img
+        alt="Bicycle Venn Diagram" src="images/BicycleVD.gif" width="374"
+        height="354"></td>
+    </tr>
+    <tr>
+      <td
+        style="text-align:center;margin-left:auto;margin-right:auto;"><strong>
+      Venn Diagram for the Statement &quot;</strong><font SIZE="2" COLOR="#000080"><b>Bicycle</b></font><font SIZE="2">
+      </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Vehicle</b></font><font SIZE="2">,
+      </font><font SIZE="2" COLOR="#000080"><b>SportsEquipment</b></font><font SIZE="2">}.</font><strong>&quot;</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p>When names of classes are grouped in SADL by putting them in curley brackets, 
+the exact meaning depends on the context and the connective between the names 
+within the group. Besides the comma connective used above, &quot;and&quot; and &quot;or&quot; may be 
+used to explicitly indicate the set operation on the connected classes. An &quot;and&quot; 
+indicates an intersection. For example, &quot;{Person and Female}&quot; means the 
+intersection of the Person class and the Female class. In other words, the set 
+of all instances that are both of type Person and of type Female. Note that in 
+the second example above, &quot;<font SIZE="2" COLOR="#000080"><b>Bicycle</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Vehicle</b></font><font SIZE="2">,
+</font><font SIZE="2" COLOR="#000080"><b>SportsEquipment</b></font><font SIZE="2">}.</font>", we interpreted the statement as saying that Bicycle is a
+subclass of Vehicle AND Bicycle is a subclass of SportsEquipment. Therefore the 
+statement is equivalent to &quot;<font SIZE="2" COLOR="#000080"><b>Bicycle</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Vehicle</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>SportsEquipment</b></font><font SIZE="2">}.</font>&quot;</p>
+
+<p></p>
+
+<p>An "or" connective within a grouping of class names indicates the "union"
+set operation. For example, "<font SIZE="2">{</font><font SIZE="2" COLOR="#000080"><b>Food</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Drink</b></font><font SIZE="2">}</font>&quot; means 
+the union of the Food class and the Drink class--all of the instances that are 
+of type Food plus all of the instances that are of type Drink. In the first 
+example above (&quot;<font SIZE="2">{</font><font SIZE="2" COLOR="#000080"><b>Dog</b></font><font SIZE="2">,
+</font><font SIZE="2" COLOR="#000080"><b>Cat</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#000080"><b>Cow</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#000080"><b>Horse</b></font><font SIZE="2">} </font>
+<font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Mammal</b></font><font SIZE="2">.</font>"), the interpretation is that of a
+union. The statement is equivalent to, "<font SIZE="2">{</font><font SIZE="2" COLOR="#000080"><b>Dog</b></font><font SIZE="2" COLOR="#800080"> 
+or</font><font SIZE="2">&nbsp; </font><font SIZE="2" COLOR="#000080"><b>Cat</b></font><font SIZE="2" COLOR="#800080"> 
+or</font><font SIZE="2">&nbsp; </font><font SIZE="2" COLOR="#000080"><b>Cow</b></font><font SIZE="2" COLOR="#800080"> 
+or</font><font SIZE="2">&nbsp; </font><font SIZE="2" COLOR="#000080"><b>Horse</b></font><font SIZE="2">}
+</font><font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Mammal</b></font><font SIZE="2">.</font>&quot; However, it is probably more intuitive 
+for most people to write this statement with commas and think of it as a 
+shorthand for four subclass statements so SADL will use this form. (The 
+statement with the &quot;or&quot; connectives is not allowed syntax in SADL.)</p>
+
+<h4>General Use of Group as Set Operations Over Classes</h4>
+The general form of a group of class names connected by "and" or "or" specifies
+an unnamed class and as such can be used anywhere a single class name could be
+used. We will see this pattern used repeatedly in the following sections.<br>
+
+
+<h4>Backward Compatibility</h4>
+In SADL V1 one could have a grouping of class names, separated by commas and
+within curley brackets, in the following situations. With each situation is
+listed the V2 equivalents.<br>
+
+<ol>
+  <li>A list of classes being declared as subclasses, e.g., &quot;<font SIZE="2">{</font><font SIZE="2" COLOR="#000080"><b>Dog</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#000080"><b>Cat</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#000080"><b>Cow</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#000080"><b>Horse</b></font><font SIZE="2">} </font>
+  <font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Mammal</b></font><font SIZE="2">.</font>&quot; In this case the commas are interpreted as
+    "or"s and only commas are allowed.</li>
+  <li>A list of classes being sub-classed, e.g., &quot;<font SIZE="2" COLOR="#000080"><b>Woman</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#000080"><b>Female</b></font><font SIZE="2">}.</font>&quot; In this case
+    the commas are interpreted as "and"s.</li>
+  <li>In a class restriction, e.g., "... <font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">at</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">least</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Horse</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#000080"><b>Cow</b></font><font SIZE="2">}.</font>" In this case we interpret the commas as "or"s.<br>
+  </li>
+  <li>In a list of classes forming the domain or range of a property, e.g., "<font SIZE="2" COLOR="#008000"><b>pet</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Cat</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#000080"><b>Dog</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#000080"><b>Fish</b></font><font SIZE="2">}.</font>" In this case
+    the commas are interpreted as "or"s.<br>
+  </li>
+</ol>
+One final note about groups of names--a group of comma-separated instance names
+can be used either to define a set by enumeration. Note that the use of "and" or "or" 
+in this case as a connective between instance names does
+not make sense as the implied set operations do not apply to instances. 
+
+<h3><a name="DomainRangeProperty">Domain and Range of a Property</a></h3>
+
+<p>The domain and/or range of a property can be specified as part of the
+description of a class or they can be specified as a separate statement
+describing the property.</p>
+
+<blockquote>
+  <p><font size="2" color="#000080"><b>Circle </b></font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#800080">type</font> <font size="2" color="#800080">of</font>
+  <font size="2" color="#000080"><b>Shape</b></font><font size="2">,</font>
+  <font size="2" color="#800080">described by </font><font size="2" color="#008000"><b>radius</b></font>
+  <font size="2" color="#800080">with values of type float</font><font size="2">.  <font size="2"
+  color="#808080"><i>// Circle (domain) --&gt; radius --&gt; float (range);
+  part of definition of Circle</i></font></font> </p>
+
+  <p><font size="2" color="#008000"><b>radius </b></font><font size="2"
+  color="#800080">describes </font><font size="2" color="#000080"><b>Circle
+  </b></font><font size="2" color="#800080">with </font><font size="2"
+  color="#800080">values</font> <font size="2" color="#800080">of</font> <font
+  size="2" color="#800080">type</font> <font size="2"
+  color="#800080">float</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font size="2"
+  color="#808080"><i>// Circle (domain) --&gt; radius --&gt; float (range);
+  Circle defined elsewhere</i></font> </p>
+
+  <p><font size="2" color="#008000"><b>gender </b></font><font size="2"
+  color="#800080">describes </font><font size="2"
+  color="#000080"><b>Person </b></font><font size="2"><font
+  color="#800080">with</font> </font><font size="2"
+  color="#800080">a single value</font> <font size="2" color="#800080">of</font> <font
+  size="2" color="#800080">type</font> <font size="2"
+  color="#000080"><b>Gender</b></font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp; <font size="2"
+  color="#808080"><i>// Person  (domain) --&gt; gender --&gt; Gender (range);
+  Person and Gender defined elsewhere (gender of a Person can only have at most 
+  one value, 
+  discussed below)</i></font></font></p>
+</blockquote>
+
+<p>Sometimes it makes more sense to say something like:</p>
+
+<blockquote>
+  <p><font size="2" color="#800080">relationship </font><font size="2"
+  color="#800080">of </font><font size="2" color="#000080"><b>Professor
+  </b></font><font size="2" color="#800080">to</font> <font size="2"
+  color="#000080"><b>Student</b></font> <font size="2"
+  color="#800080">is</font> <font size="2"
+  color="#008000"><b>teaches</b></font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font
+  size="2" color="#808080"><i>// Professor (domain) --&gt; teaches --&gt;
+  Student (range); Professor and Student defined elsewhere</i></font> </p>
+</blockquote>
+
+<p>In all of these examples, it is very important to be able to differentiate
+between the domain and the range--to be clear on the direction of the
+relationship. This is shown in the comment after each statement.</p>
+
+<p>Grouping may be used in property definitions in various ways.</p>
+
+<blockquote>
+  <p><font size="2" color="#000080"><b>Circle </b></font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#800080">type</font> <font size="2" color="#800080">of</font>
+  <font size="2" color="#000080"><b>Shape</b></font><font size="2">, </font>
+  <font size="2" color="#800080"><br>
+  &nbsp;&nbsp;&nbsp; described</font> <font size="2" color="#800080">by</font> <font
+  size="2" color="#008000"><b>radius</b></font> <font size="2"
+  color="#800080">with</font> <font size="2" color="#800080">values</font>
+  <font size="2" color="#800080">of</font> <font size="2"
+  color="#800080">type</font><font size="2">  </font> <font size="2"
+  color="#800080">float</font><font size="2"><i>,<br>
+  &nbsp;&nbsp;&nbsp; </i><font color="#800080">described by </font><font
+  color="#008000"><b>area </b></font><font color="#800080">with values of type
+  float</font><i>.</i>&nbsp;&nbsp;&nbsp; <font size="2"
+  color="#808080"><i>&nbsp;&nbsp;&nbsp;&nbsp;  // Circle is the
+  domain of the two properties, radius and area, each of which has a
+  range of float</i></font></font></p>
+
+  <p><font size="2" color="#008000"><b>area </b></font><font size="2" color="#800080">describes </font><font size="2" color="#000080"><b>{Circle </b></font><font
+  size="2">or </font><font size="2" color="#000080"><b>Rectangle</b>}</font><font size="2" color="#800080"> with values</font><font
+  size="2"></font> <font size="2" color="#800080">of</font><font
+  size="2"></font> <font size="2" color="#800080">type</font><font
+  size="2"></font> <font size="2" color="#800080">float</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp; </font><font size="2"
+  color="#808080"><i>// The domain of the area property is the union of Circle
+  and Rectangle</i></font></p>
+
+  <font SIZE="2" COLOR="#008000"><b>
+  <p>conveyance</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+  describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>
+  Journey</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Car</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Bus</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Plane</b></font><font SIZE="2">}.&nbsp;&nbsp;&nbsp;&nbsp; <font size="2" color="#808080"><i>// The range of
+  conveyance is the union of Car, Bus, and Plane</i></font></font></p>
+</blockquote>
+
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>relationship</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> 
+  {</font><font SIZE="2" COLOR="#000080"><b>Professor</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Teacher</b></font><font SIZE="2">} </font>
+  <font SIZE="2" COLOR="#800080">to</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Student</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Pupil</b></font><font SIZE="2">} </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>teaches</b></font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font
+  size="2" color="#808080"><i>// The domain of teaches is the union of
+  Professor and Teacher, the range is the union of Student and Pupil</i></font>
+  </p>
+</blockquote>
+
+<p>When a property's domain or range is specified in separate statements to be
+different classes, it is interpreted as meaning that the domain or range is
+the union of those classes. For example, the last statement above is equivalent
+to the following two statements:</p>
+
+<p style="margin-left:2em;">relationship <font size="2"
+color="#800080">of </font><font size="2"
+color="#000080"><b>Professor</b></font><font size="2"><font color="#000080"><b>
+</b></font></font><font size="2" color="#800080">to</font> <font size="2"
+color="#000080"><b>Student </b></font><font size="2" color="#800080">is</font>
+<font size="2" color="#008000"><b>teaches</b></font>. </p>
+
+<p style="margin-left:2em;">relationship <font size="2"
+color="#800080">of</font><font size="2"> </font><font size="2"><font
+color="#000080"><b>Teacher</b></font> </font><font size="2"
+color="#800080">to</font> <font size="2" color="#000080"><b>Pupil</b></font>
+<font size="2" color="#800080">is</font> <font size="2"
+color="#008000"><b>teaches</b></font>. </p>
+
+<p>Note that there are two types of properties in OWL. A property that can have
+primitive XML data type values, e.g., int, float, string, date, etc., is called
+a DatatypeProperty. A property that can have an instance of a defined class as
+a value is called an ObjectProperty. In the examples above, radius is a
+DatatypeProperty while gender is an ObjectProperty. SADL allows the range of a
+property to be given the value "data", which simply identifies the property as
+a DatatypeProperty without giving it a range. A property with no range is
+assumed to be an ObjectProperty. Note that there is no way in SADL to define a
+property without giving it at least a domain or a range (well, <a
+href="#Annotations">annotation properties</a> excepted). Note also that these
+two types of properties (DatatypeProperty and ObjectProperty) cannot be both
+present in the same sub-property/super-property hierarchy. In other words, a
+property of one type cannot be a sub property of a property of the other
+type.</p>
+
+<h3><a name="StatementsInTheABoxClass Membership">Statements in the A- Box: Class Membership</a></h3>
+
+<p>We use "is a" (or "is an") to state that an instance belongs to a particular
+class.</p>
+
+<blockquote>
+  <p><font size="2" color="#0000ff">George </font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#000080"><b>Student</b></font><font size="2">.</font> </p>
+</blockquote>
+
+<blockquote>
+  <font SIZE="2" COLOR="#0000ff">
+  <p>Feely</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">an</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Octopus</b></font><font SIZE="2">.</font></p>
+</blockquote>
+
+<p>Alternatively, the class may be given first:</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+
+<h3><a name="StatementsInTheABoxPropertyValues">Statements in the A-Box: Property Values</a></h3>
+
+<p>Using the RDF terminology, a statement is called a triple and consists of a 
+subject, a predicate, and an object or value. Specification of property values 
+for instances in a model is one form of triple. SADL tries to make such 
+statements more English-like by allowing some connective words and by allowing 
+combining of phrases with, for example, the same subject. This section discusses 
+the various way of stating a-box property value triples.</p>
+
+<p>Sometimes it seems normal in English to precede the property name with "has"
+when making a triple statement. For example:</p>
+
+<blockquote>
+  <p><font size="2" color="#0000ff">My</font><font size="2"
+  color="#0000FF">Plate</font> <font size="2" color="#800080">is</font> <font
+  size="2" color="#800080">a</font> <font size="2"
+  color="#000080"><b>Circle</b></font><font size="2">, </font> <font size="2"
+  color="#800080">has</font> <font size="2"
+  color="#008000"><b>radius </b></font><font size="2">9.5.</font> </p>
+
+  <font SIZE="2" COLOR="#0000ff">
+  <p>YourPlate</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Circle</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>radius</b></font><font SIZE="2"> 10.5.&nbsp;
+  <font SIZE="2" COLOR="#808080"><i>&nbsp;&nbsp; // this is equivalent and 
+  sometimes sounds more natural</p>
+  </i></font></font>
+
+  <p><font size="2" color="#0000ff">Jane </font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#000080"><b>Student</b></font><font size="2">, </font> <font
+  size="2" color="#800080">has</font> <font size="2"
+  color="#008000"><b>age</b></font><font size="2">19, </font> <font size="2"
+  color="#800080">has</font> <font size="2"
+  color="#008000"><b>gender</b></font> <font size="2"
+  color="#0000ff">Female</font><font size="2">.&nbsp;   </font> <font size="2"
+  color="#808080"><i>// This type of grouping allows the various property
+  values of a subject instance to be listed together</i></font></p>
+  <font SIZE="2" COLOR="#800080">
+  <p>A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">Marge</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Jane</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> 43 .</p>
+  </font>
+</blockquote>
+
+<p>In other situations it does not work so well. For example:</p>
+
+<blockquote>
+  <p><font size="2" color="#0000ff">Socrates </font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#000080"><b>Professor</b></font><font size="2">, </font>
+  <font size="2" color="#800080">has</font> <font size="2"
+  color="#008000"><b>teaches</b></font> <font size="2"
+  color="#0000ff">Plato</font><font size="2">.&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>// This doesn't sound quite right; teaches is an active
+  verb rather than a noun-role property like age and gender</i></font></p>
+</blockquote>
+
+<p>It is much more natural to say:</p>
+
+<blockquote>
+  <p><font size="2" color="#0000ff">Socrates </font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <font
+  size="2" color="#000080"><b>Professor</b></font><font size="2">, </font>
+  <font size="2" color="#008000"><b>teaches</b></font> <font size="2"
+  color="#0000ff">Plato</font><font size="2">.&nbsp;&nbsp;&nbsp; </font> <font
+  size="2" color="#808080"><i>// This sounds more normal</i></font></p>
+</blockquote>
+
+<p>Note that this difficulty corresponds with the t-box in that we did not say
+"<font size="2" color="#008000"><b>teaches</b></font><font size="2" color="#800080"> describes</font><font
+size="2"></font> <font size="2" color="#000080"><b>Professor</b></font><font
+size="2"></font> <font size="2" color="#800080">with</font><font
+size="2"></font> <font size="2" color="#800080">values</font><font
+size="2"></font> <font size="2" color="#800080">of</font><font size="2"></font>
+<font size="2" color="#800080">type</font><font size="2"></font> <font size="2"
+color="#000080"><b>Student</b></font><font size="2">.</font>" Teaches is an
+active (as opposed to passive) verb and takes a direct object. The property
+names that conformed well to our "has &lt;property&gt;" format were not active
+verbs. Rather they were nouns describing the role that the object plays
+relative to the subject. Using a noun-role property name, we can reasonably
+follow the same form as the first examples:</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#000080"><b>Professor </b></font> <font
+  size="2" color="#800080">is</font> <font size="2" color="#800080">a</font>
+  <font size="2" color="#800080">top-level</font> <font size="2"
+  color="#800080">class</font><font size="2">, </font> <font size="2"
+  color="#800080">described</font> <font size="2" color="#800080">by</font>
+  <font size="2" color="#008000"><b>student</b></font> <font size="2"
+  color="#800080">with</font> <font size="2" color="#800080">values</font>
+  <font size="2" color="#800080">of</font> <font size="2"
+  color="#800080">type</font> <font size="2"
+  color="#000080"><b>Student</b></font><font size="2">.</font> </p>
+
+  <p><font size="2" color="#0000ff">Socrates </font><font size="2"
+  color="#800080">is a</font> <font
+  size="2" color="#000080"><b>Professor</b></font><font size="2">, </font>
+  <font size="2" color="#800080">has</font> <font size="2"
+  color="#008000"><b>student</b></font> <font size="2"
+  color="#0000ff">Plato</font><font size="2">. </font></p>
+</blockquote>
+
+<p>Besides the noun-role and the active verb formats, there are two additional
+ways to express a triple statement in SADL. In these formats an optional "a" or
+"an" for a multi-valued property or an optional "the" for a single-valued
+property may be placed in the statement to make it sound more like natural
+language. This optional connective can start with an upper-case letter as would
+be expected at the beginning of a statement.</p>
+
+<blockquote>
+  <p><font size="2">9.5 </font> <font size="2" color="#800080">is</font><font
+  size="2">  </font><font size="2" color="#008000"><b>radius</b></font><font
+  size="2"><font color="#800080"> of </font> </font><font size="2"
+  color="#0000ff">My</font><font size="2" color="#0000FF">Plate</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>// This puts the value first and the subject
+  last</i></font></p>
+
+  <p><font size="2" color="#008000"><b>radius </b></font><font size="2"><font
+  color="#800080">of</font>  </font><font size="2"
+  color="#0000ff">My</font><font size="2" color="#0000FF">Plate</font><font
+  size="2"></font> <font size="2" color="#800080">is </font><font size="2">9.5
+  .&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>// This puts the property first</i></font></p>
+
+</blockquote>
+
+  <p style="margin-left:0em">Note that these could also be stated as:</p>
+
+<blockquote>
+
+  <p><font size="2" color="#FF0000"><i></i></font><font size="2">9.5 </font>
+  <font size="2" color="#800080">is</font><font size="2"> <font
+  color="#800080">the</font> </font> <font size="2"
+  color="#008000"><b>radius</b></font><font size="2"><font color="#800080"> of
+  </font> </font><font size="2" color="#0000ff">My</font><font size="2"
+  color="#0000FF">Plate</font><font size="2">. </font></p>
+
+  <p><font size="2"><font color="#800080">The</font> </font> <font size="2"
+  color="#008000"><b>radius</b></font><font size="2"><font color="#800080"> of
+  </font> </font><font size="2" color="#0000ff">My</font><font size="2"
+  color="#0000FF">Plate</font><font size="2"></font> <font size="2"
+  color="#800080">is</font><font size="2"> 9.5 . </font></p>
+
+  <p><font size="2" color="#0000ff">Female </font><font size="2"
+  color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#008000"><b>gender</b></font><font size="2" color="#0000ff"></font>
+  <font size="2" color="#800080">of</font><font size="2"></font> <font size="2"
+  color="#0000ff">Jane</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>// Value first for an instance value</i></font></p>
+
+  <p><font size="2" color="#008000"><b>gender</b></font><font size="2"
+  color="#0000ff"></font> <font size="2" color="#800080">of</font><font
+  size="2"></font> <font size="2" color="#0000ff">Jane </font> <font size="2"
+  color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#0000ff">Female</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>// Property first for an instance value</i></font></p>
+
+</blockquote>
+
+  <p>or</p>
+
+<blockquote>
+
+  <font SIZE="2" COLOR="#0000ff">
+  <p>Female</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>gender</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Jane</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font> <font size="2"
+  color="#808080"><i>// Value first for an instance value</i></font></p>
+  <font SIZE="2" COLOR="#800080">
+  <p>The</font><font SIZE="2"> </font><font SIZE="2" COLOR="#008000"><b>gender</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Jane</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Female</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font> <font size="2"
+  color="#808080"><i>// Property first for an instance value</i></font></p>
+
+  <p></p>
+
+  <p><font size="2" color="#0000ff">Plato </font> <font size="2"
+  color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#008000"><b>teaches </b></font> <font size="2"
+  color="#800080">of</font><font size="2"></font> <font size="2"
+  color="#0000ff">Socrates</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>// Well, this doesn't sound so clear...</i></font></p>
+
+  <p><font size="2" color="#008000"><b>teaches </b></font> <font size="2"
+  color="#800080">of</font><font size="2"></font> <font size="2"
+  color="#0000ff">Socrates </font> <font size="2"
+  color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#0000ff">Plato</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>// Nor this, but it is legal</i></font></p>
+
+  <p><font size="2" color="#0000ff">Plato </font> <font size="2"
+  color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#008000"><b>student</b></font><font size="2"></font> <font size="2"
+  color="#800080">of</font><font size="2"></font> <font size="2"
+  color="#0000ff">Socrates</font><font
+  size="2">.  </font> </p>
+
+  <p><font size="2" color="#008000"><b>student</b></font><font size="2"></font>
+  <font size="2" color="#800080">of</font><font size="2"></font> <font size="2"
+  color="#0000ff">Socrates </font> <font size="2"
+  color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#0000ff">Plato</font><font
+  size="2">.  </font> </p>
+
+</blockquote>
+
+  <p>or</p>
+
+<blockquote>
+
+  <font SIZE="2" COLOR="#0000ff">
+  <p>Plato</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>student</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Socrates</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font></p>
+
+  <p><font size="2" color="#800080">A</font><b><font size="2" color="#008000"> student</font></b><font
+  size="2"></font> <font size="2" color="#800080">of</font><font
+  size="2"></font> <font size="2" color="#0000ff">Socrates </font> <font
+  size="2" color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#0000ff">Plato</font><font
+  size="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> </p>
+</blockquote>
+
+<p>Once again, these wordings work better for noun-role property names than for
+active verb property names. Note also that they do not permit the expression of
+several properties of a single subject together. These syntaxes are more often
+used in rules and queries, as described in subsequent sections. </p>
+
+<p>In summary, there are four forms for expressing triples in SADL.</p>
+<ol>
+  <li>&lt;InstanceName&gt; is a &lt;ClassName&gt;. as in <font size="2" color="#0000ff">Socrates </font><font size="2"
+  color="#800080">is a</font> <font
+  size="2" color="#000080"><b>Professor</b></font><font size="2">. </font>
+  The &quot;a&quot;, or &quot;an&quot; if desired in front of a class name beginning with a vowel,&nbsp; 
+  is required in this case.</li>
+  <li>&lt;subject&gt; [has|with] [the|a|an] &lt;property1&gt; &lt;value1&gt;, has
+    &lt;property2&gt; &lt;value2&gt; .... as in "<font size="2"
+    color="#0000ff">Jane</font><font size="2"></font> <font size="2"
+    color="#800080">has</font><font size="2"></font> <font size="2"
+    color="#008000"><b>age</b></font><font size="2">19, </font> <font size="2"
+    color="#800080">has</font><font size="2"></font> <font size="2"
+    color="#008000"><b>gender</b></font><font size="2"></font> <font size="2"
+    color="#0000ff">Female</font><font size="2">." </font> The &quot;has&quot; or &quot;with&quot; 
+  is optional, the article in front of the property name is optional, and the commas are
+    optional. This is the only form that allows multiple triples with a single 
+  subject.</li>
+  <li>&lt;value&gt; is [the|a|an] &lt;property&gt; of &lt;subject&gt;. as in
+    "<font size="2" color="#0000ff">Plato </font> <font size="2"
+    color="#800080">is</font><font size="2"></font> a <font size="2"
+    color="#008000"><b>student</b></font><font size="2"></font> <font size="2"
+    color="#800080">of</font><font size="2"></font> <font size="2"
+    color="#0000ff">Socrates</font><font size="2">.</font>" The optional "a" or "an" 
+  sound natural for multi-valued property, the optional "the" for
+    a functional or cardinality 1 property.</li>
+  <li>[The|A|An] &lt;property&gt; of &lt;subject&gt; is &lt;value&gt;. as in
+    "The <font size="2" color="#008000"><b>radius </b></font><font
+    size="2"><font color="#800080">of </font> </font><font size="2"
+    color="#0000ff">My</font><font size="2" color="#0000FF">Plate</font><font
+    size="2"></font> <font size="2" color="#800080">is</font><font size="2"> 
+    9.5 .</font>" Again, o<font color="#FF0000"><span
+    style="color:#400040">ptional &quot;A&quot; or &quot;An&quot; for multi-valued property, 
+  optional &quot;The&quot; for a functional or cardinality 1 property. The capitalization 
+  of the article as the first word of the statement is also optional.</span></font></li>
+</ol>
+
+<p>The alternate syntaxes of 2 can be mixed as in: <font size="2"
+color="#0000ff">Socrates</font><font size="2"></font> <font size="2"
+color="#008000"><b>teaches</b></font><font size="2"></font> <font size="2"
+color="#0000ff">Plato, </font> <font size="2" color="#800080">has</font><font
+size="2"></font> <font size="2" color="#008000"><b>age </b></font><font
+size="2">49 .</font></p>
+
+<h3><a name="BlankNodesInInstanceData">Blank Nodes in Instance Data</a></h3>
+
+<p>Many of the instance nodes in our a-box (instance data), for example declared 
+in
+test case models, will not have explicit names unless we are forced to create them.
+Nodes that do not have a specified name (URI) are called blank nodes or bnodes.
+While computer systems will assign a unique identifier to a bnode for
+efficiency of reference, we identify them by one or more relationships to named
+nodes in their local subgraph. In SADL Version 1 a declared instance had to be
+given a name. In SADL Version 2 it is possible to specify instance data without
+having to generate unwanted names. This is done by using a syntax for
+specifying the local sub graph just as one would in a natural language. For
+example, in English we might say, "Mary gave birth to George at Pope's Creek
+Estate (near Colonial Beach, VA, 38.186111 lat, -76.930556 long) on 2-22-1732."
+The equivalent in SADL is:</p>
+
+<p> <font SIZE="2" COLOR="#800080">A</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>birthMother</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">Mary</font><font SIZE="2">, <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> 38.186111,
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>longitude</b></font><font SIZE="2"> 
+-76.930556, <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>description</b></font><font SIZE="2"> &quot;Pope's 
+Creek Estate near present-day Colonial Beach, Virginia, USA&quot;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>when</b></font><font SIZE="2"> &quot;1732-02-22&quot;.</p>
+
+</font>
+
+<p>The delimiters (parentheses) are needed to disambiguate the properties of the 
+nested bnode (a Location) from other properties of the containing instance (a
+Birth). This delimiting is useful to human readers as well as to the SADL
+language parser.</p>
+
+<h3><a name="TriplePatternsVaiablesNesting">Triple Patterns, Variables, and 
+Nesting</a></h3>
+
+<p>In the previous sections we have seen how to make statements (express 
+triples) in SADL, including the creation of blank instance nodes when desired. 
+Making statements allows us to put information into a model. However, sometimes 
+we want to get information out of or reference information in an existing model. 
+This is essential for the following desired functions:</p>
+
+<ol>
+  <li>Rules: when expressing domain rules we need to specify in the rule 
+  premises conditions on the information in 
+  the model which, if satisfied, will mean that the 
+  conclusions of the rule should be drawn</li>
+  <li>Queries: we wish to retrieve certain information from the model and need 
+  to express exactly what we wish to retrieve</li>
+  <li>Tests: we wish to test the model to assure ourselves that certain 
+  information is in the model; the information could be assertions 
+  (triples  added explicitly) or inferences (information added by the 
+  reasoner/rule engine)</li>
+</ol>
+
+<p>Remember that a triple consists of&nbsp; three parts: a &lt;subject&gt;, a 
+&lt;predicate&gt;, and an &lt;object&gt;. Using the instance data in the previous sections 
+and leaving out, for the moment, optional connectives, the following are 
+examples of triples:</p>
+
+<blockquote>
+
+<p><font size="2" color="#0000ff">Socrates </font> <font size="2"
+color="#008000"><b>teaches</b></font> <font size="2" color="#0000ff">Plato<br>
+My</font><font size="2"
+  color="#0000FF">Plate</font> <font size="2"
+  color="#008000"><b>radius</b></font><font size="2"><font color="#800080">
+  </font>&nbsp;9.5</font></p>
+
+</blockquote>
+
+<p>Suppose that we left one or more parts of a triple &quot;unspecified&quot;--we'll use a 
+question mark for the moment to indicate the missing element(s) of the triple. Here are some examples and what 
+they mean:</p>
+
+<blockquote>
+
+<p><font size="2" color="#0000ff">Socrates </font> <font size="2"
+color="#008000"><b>teaches</b></font> ? -- Socrates teaches whom? (match all the 
+ 
+triples with subject Socrates and predicate teaches)<br>
+<font size="2" color="#0000ff">My</font><font size="2"
+  color="#0000FF">Plate</font> <font size="2"
+  color="#008000"><b>radius</b></font><font size="2"><font color="#800080">
+  </font>&nbsp;</font>? -- what is the radus of MyPlate? (match all the triples with subject MyPlate and predicate radius)<br>
+?<font size="2"
+color="#008000"><b> teaches</b></font> <font size="2" color="#0000ff">Plato</font> 
+-- who teaches Plato? (match all of the triples with predicate 
+teaches and object Plato)<font size="2" color="#0000ff"><br>
+My</font><font size="2"
+  color="#0000FF">Plate</font> ?<font size="2"> </font>? -- what are the 
+properties of MyPlate and their values? (match all the triples with subject MyPlate)<br>
+? ? ? -- tell me everything (match all of the triples in the model)</p>
+
+</blockquote>
+
+<p>The question mark works ok to indicate something which is not specified 
+(unbound) for a single unspecified element of a triple pattern, but suppose that 
+we have multiple triple patterns where we want to link the results of matching one pattern with the 
+results of matching another? For example, suppose that we wanted to know the 
+ages of all of those that Socrates teaches?</p>
+
+<blockquote>
+
+<p><font size="2" color="#0000ff">Socrates </font> <font size="2"
+color="#008000"><b>teaches</b></font> ?<font size="2" color="#0000FF"> , </font><font size="2" color="#0000ff">&nbsp;</font>?<b><font size="2" color="#008000"> 
+age</font></b> ?</p>
+
+</blockquote>
+
+<p>For each triple that matches the first pattern, we wish to use the object value 
+as the subject of the second pattern. One solution is to introduce the concept 
+of a named variable. (One could think of the question mark as an unnamed 
+variable.) Then our pattern becomes:</p>
+
+<blockquote>
+
+<p><font size="2" color="#0000ff">Socrates </font> <font size="2"
+color="#008000"><b>teaches</b></font> <font size="2" color="#ff00ff"><b>x ,&nbsp; x </b></font>
+<b><font size="2" color="#008000">age</font></b> ?</p>
+
+</blockquote>
+
+<p>In SADL variables are colored pink. A question mark isn't a legal character 
+so we we  also  give the 
+second variable a name, making the statement something like:</p>
+
+<blockquote>
+
+<p><font size="2" color="#0000ff">Socrates </font> <font size="2"
+color="#008000"><b>teaches</b></font> <font size="2" color="#ff00ff"><b>x ,&nbsp; x </b></font>
+<b><font size="2" color="#008000">age</font></b> <font size="2" color="#ff00ff"><b>
+y </b></font></p>
+
+</blockquote>
+
+<p>While sometimes named variables are necessary so that we can make explicit 
+the results of matching a pattern, there are times when we can eliminate variables by 
+nesting triple patterns together. To facilitate expressing patterns without 
+using variables, we will reuse a SADL phrase from declaring instance data with bnodes. Just as we used the syntax &quot;a &lt;ClassName&gt;&quot; to represent an unnamed instance of 
+the class in the instance data declaration above, we can use it to represent an 
+unnamed node (bnode) in a triple pattern. For example:</p>
+
+<blockquote>
+
+<p><font color="#800080" size="2">the</font> <font color="#008000" size="2"><b>
+latitude</b></font> <font color="#800080" size="2">of the</font>
+<font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">of a</font> <font color="#000080" size="2"><b>
+Birth</b></font> <font color="#800080" size="2">with</font>
+<font color="#008000" size="2"><b>child</b></font>
+<font color="#0000ff" size="2">George</font></p>
+
+</blockquote>
+
+<p>is an unambiguous reference to the floating point number 38.186111 if applied 
+to the instance data above. This is equivalent to, using variables:</p>
+
+<blockquote>
+
+<p><font size="2" color="#ff00ff"><b>x</b></font> <font color="#800080" size="2">
+is a</font> <font color="#000080" size="2"><b>
+Birth</b></font> , <font size="2" color="#ff00ff"><b>x</b></font>
+<font color="#008000" size="2"><b>child</b></font>
+<font color="#0000ff" size="2">George</font>, <font size="2" color="#ff00ff"><b>
+x</b></font>
+<font color="#008000" size="2"><b>location</b></font>
+<font size="2" color="#ff00ff"><b>y</b></font> , <font size="2" color="#ff00ff">
+<b>y</b></font> <font color="#008000" size="2"><b>
+latitude</b></font> <font size="2" color="#ff00ff"><b>z</b></font></p>
+
+</blockquote>
+
+<p>Note that the original expression above assumes, by the use of the definite article 
+&quot;the&quot;, that the properties latitude and location are single-valued. If not, it 
+might be stated as:</p>
+
+<blockquote>
+
+<p><font size="2" color="#800080">a</font> <font color="#008000" size="2"><b>
+latitude</b></font> <font color="#800080" size="2">of a</font>
+<font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">of a</font> <font color="#000080" size="2"><b>
+Birth</b></font> <font color="#800080" size="2">with</font>
+<font color="#008000" size="2"><b>child</b></font>
+<font color="#0000ff" size="2">George</font></p>
+
+</blockquote>
+
+<p>Note also that there are several optional connectives in this pattern--it 
+could be expressed simply as:</p>
+
+<blockquote>
+
+<p><font color="#008000" size="2"><b>latitude</b></font>
+<font color="#800080" size="2">of </font><font color="#008000" size="2"><b>
+location</b></font> <font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+child</b></font> <font color="#0000ff" size="2">George</font></p>
+
+</blockquote>
+
+<p>These SADL patterns use two kinds of nesting. The first kind uses the keyword 
+&quot;of&quot; and is of the form (see <a href="#StatementsInTheABoxPropertyValues">
+Statements in the A-Box</a> above): </p>
+
+<blockquote>
+
+<p>&lt;property&gt; of &lt;subject&gt; </p>
+
+</blockquote>
+
+<p>This pattern allows us to &quot;walk the graph&quot; in the backward direction (see 
+figure below), e.g.:</p>
+
+<blockquote>
+
+<p><font color="#008000" size="2"><b>latitude</b></font>
+<font color="#800080" size="2">of </font><font color="#008000" size="2"><b>
+location</b></font> <font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth</b></font></p>
+
+</blockquote>
+
+<blockquote>
+
+<p>
+<img border="1" src="images/graphwithbnodes.gif" width="369" height="199"></p>
+
+</blockquote>
+
+<p>The second nesting pattern uses the keyword &quot;with&quot; and is of the form:</p>
+
+<blockquote>
+
+<p>&lt;subject&gt; with &lt;property&gt;</p>
+
+</blockquote>
+
+<p>This pattern allows us to &quot;walk the graph&quot; in the forward direction, e.g.:</p>
+
+<blockquote>
+
+<p><font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font size="2" color="#008000"><b>
+child</b></font> <font color="#0000ff" size="2">George</font></p>
+
+</blockquote>
+
+<p>or</p>
+
+<blockquote>
+
+<p><font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111</font></p>
+
+</blockquote>
+
+<p>The graph in the figure above has two unlabeled nodes. If this graph is a 
+representation of instance  data then these two nodes can be bnodes as 
+described in the previous section. If this graph is a graph pattern to be 
+matched, the nodes can be thought of as unbound or unspecified nodes or variable 
+nodes. When used as a pattern, the matching subgraph is &quot;pinned&quot; to the 
+instance node &quot;George&quot;, to the class node &quot;Birth&quot;, and to 
+the value 38.186111. In addition, all of the edges 
+of the pattern are specified. </p>
+
+<p>The two nesting patterns can be combined to create a graph pattern containing 
+both. For example, this pattern would be matched by all of the people in our 
+model who were born at latitude 38.186111:</p>
+
+<blockquote>
+
+<p><font color="#008000" size="2"><b>child</b></font>
+<font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111</font></p>
+
+</blockquote>
+
+<p>The graph pattern in the figure above further constrains the results by specifying a specific value of 
+the child property. How would we express this pattern in SADL? Like this? </p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111 </font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>child</b></font> <font color="#0000ff" size="2">George</font></p>
+
+</blockquote>
+
+<p>The SADL language parser will interpret this to mean that the matching 
+instance of the object of &quot;location&quot; is the subject of the property &quot;child&quot; 
+and, of course, this doesn't match the model or the data. The subject of with 
+phrase (e.g., &quot;with child&quot;) is assumed to be the object of the first 
+preceding 
+with phrase having no specified object--the object of &quot;with location&quot; in this case. 
+This is not what we want as &quot;child&quot; has domain Birth. We modify the statement to make it what we intend with the use of parentheses just as we did in the 
+declaration of instance data. The pattern becomes:</p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> 38.186111)
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">George</font></p>
+
+</blockquote>
+
+<p>Now it is clear that &quot;with child George&quot; modifies &quot;a&nbsp;Birth&quot;. </p>
+
+<p>Consider this pattern:</p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111 </font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>child</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+spouse</b></font><font color="#0000ff" size="2"> Martha</font></p>
+
+</blockquote>
+
+<p>Here we have two <i>with</i> clauses that have a specified object value, 
+e.g., &quot;latitude 38.186111&quot; and &quot;spouse Martha&quot;. It is clear that &quot;with spouse Martha&quot; 
+must provide the object of &quot;with child&quot; as otherwise it would have no object 
+value. However, it is still unclear whether the subject of the &quot;with child&quot; 
+pattern is the Birth or the Location. Again we obtain the intended meaning with the 
+use of parentheses. The pattern becomes:</p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font size="2">(</font><font color="#800080" size="2">with </font><b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111) </font>
+<font color="#800080" size="2">with</font> <b><font color="#008000" size="2">child</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+spouse</b></font><font color="#0000ff" size="2"> Martha</font><font size="2"> </font></p>
+
+</blockquote>
+
+<p>As another example of nesting, this pattern  identifies the ages of the spouses 
+of all of the people born at latitude 38.186111:</p>
+
+<blockquote>
+
+<p><font color="#008000" size="2"><b>age </b></font>
+<font color="#800080" size="2">of a</font> <font color="#008000" size="2"><b>
+spouse</b></font><font color="#800080" size="2"> of a</font>
+<font color="#008000" size="2"><b>child</b></font>
+<font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111</font></p>
+
+</blockquote>
+
+<p>As we'll see in the following sections, we can add comparisons and other 
+operations between graph patterns. This pattern would identify elephants with 
+the same age as those identified by the previous pattern:</p>
+
+<blockquote>
+
+<p><font color="#800080" size="2">an</font><b><font color="#008000" size="2">
+</font><font color="#000080" size="2">Elephant</font><font color="#008000" size="2">
+</font></b><font color="#800080" size="2">with</font> <b>
+<font color="#008000" size="2">age </font></b><font color="#800080" size="2">==
+</font><b><font color="#008000" size="2">age </font></b>
+<font color="#800080" size="2">of a</font> <font color="#008000" size="2"><b>
+spouse</b></font><font color="#800080" size="2"> of a</font>
+<font color="#008000" size="2"><b>child</b></font>
+<font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111</font></p>
+
+</blockquote>
+
+<h3><a name="Rules">Rules</a></h3>
+
+<p>A rule is of the form "Rule &lt;name&gt;&lt;optional :&gt; given &lt;set of
+conditions&gt; if &lt;set of conditions&gt; then &lt;set of conclusions&gt;.
+For example, the rule below essentially defines the meaning of the "grandChild"
+property in terms of the "child" property. While the "grandChild" property and
+its domain and range will have been defined previously in the t-box of the
+model, the rule allows the actual triples in the a-box containing this property
+to be inferred from known "child" relationships.</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Rule</font><font SIZE="2"> GrandChild_Rule<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">given</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>&nbsp; x</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2" COLOR="#000080"><b><br>
+&nbsp;&nbsp;&nbsp; </b></font><font SIZE="2" COLOR="#800080">if</font><font SIZE="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>z<br>
+&nbsp;&nbsp;&nbsp; </b></font><font SIZE="2" COLOR="#800080">then</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>&nbsp;&nbsp;&nbsp; x</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>grandChild</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>z</b></font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+
+<p>The rule's conditions are also called the premises. In SADL, the premises
+can be stated in the "given" block or in the "if" block, but the division is
+arbitrary and exists only to make the rule more readable. Only one premise block is
+required. Note that a SADL rule has a name which should be unique within a
+given model. </p>
+
+<p>The premises of a rule specify a pattern to be matched. This pattern may be
+expressed in the form of triples as in the given block in the rule above. What
+is different in these triples is the use of a "variable": "x", "y", and &quot;z&quot; are
+variables, colored pink in SADL. A variable is a placeholder or a wild card. A
+premise statement of this type with a variable is a triple pattern to be
+matched in the model. The statement "<font size="2"
+color="#ff00ff"><b>x </b></font><font size="2"
+color="#800080">is</font><font size="2"></font> <font size="2"
+color="#800080">a</font><font size="2"></font> <font size="2"
+color="#000080"><b>Person</b></font>" means find all of the instances of Person
+in the a-box. All of the matching instances, e.g., all of the instances of
+Person, are said to be "bound" to the variable.</p>
+
+<p>Note that in the example rule, x is constrained to be instances of
+Person but y and z are not. This makes sense if an instance of Person can only 
+have a &quot;child&quot; which is an instance of Person.
+Certainly the pattern "y is a Person and z is a Person" could be added to the given block.
+Note that a rule that starts with such a declaration of &quot;x&quot;, &quot;y&quot;, and &quot;z&quot; may 
+not be very efficient because it will have to bind each of the variables to all 
+of the instances of Person. If the domain and range of &quot;child&quot; is Person, the 
+type declarations may be unnecessary and the and the rule can simply be stated 
+as:</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Rule</font><font SIZE="2"> GrandChild_Rule<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">if</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>z<br>
+&nbsp;&nbsp;&nbsp; </b></font><font SIZE="2" COLOR="#800080">then</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>grandChild</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>z</b></font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+
+<p>Using the nesting concepts discussed in the previous section, we could 
+eliminate the intermediate variable and just say:</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Rule</font><font SIZE="2"> GrandChild_Rule<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">if</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>z</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x<br>
+&nbsp;&nbsp;&nbsp; </b></font><font SIZE="2" COLOR="#800080">then</font><font SIZE="2">
+  <font color="#FF00FF"><b>z</b></font> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>grandChild</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+
+<p>Proper
+specification of a rule requires, of course, an understanding of the domain
+model upon which the rule is built. SADL Version 2 has a reasoner-specific 
+translator which can embed rule engine knowledge to generate efficient rules. 
+For example, if the first rule above were expressed in SADL and the domain and 
+range of &quot;child&quot; is Person, the translator might drop the costly bindings of the 
+variables to all instances of Person.</p>
+
+<p>The conclusions of a rule specify one or more new triples to be created in
+the a-box model if the premises are satisfied. The example rule above states
+that a new triple should be added of the form "x --&gt; grandChild --&gt; z"
+for each binding of x and z. The statement in the then block can have any of
+the forms described above for triples in the a-box. It could be any of:</p>
+<ol>
+  <li><font size="2" color="#ff00ff"><b>z</b></font><font size="2"></font>
+    <font size="2" color="#800080">is</font><font size="2"></font> <font
+    size="2" color="#008000"><b>grandChild</b></font><font size="2"></font>
+    <font size="2" color="#800080">of</font><font size="2"></font> <font
+    size="2" color="#ff00ff"><b>x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </b></font> <font size="2"
+    color="#808080"><i>// could be "z is a grandChild of x"</i></font><font
+    color="#FF0000"></font></li>
+  <li><font size="2" color="#ff00ff"><b>x</b></font><font size="2"></font>
+    <font size="2" color="#800080">has</font><font size="2"></font> <font
+    size="2" color="#008000"><b>grandChild</b></font><font size="2"></font>
+    <font size="2" color="#ff00ff"><b>z </b></font></li>
+  <li><font size="2" color="#ff00ff"><b>x</b></font><font size="2"></font>
+    <font size="2" color="#008000"><b>grandChild</b></font><font
+    size="2"></font> <font size="2" color="#ff00ff"><b>z 
+    </b></font></li>
+  <li><font size="2" color="#008000"><b>grandChild</b></font><font size="2" color="#800080"> of</font><font
+    size="2"></font> <font size="2" color="#ff00ff"><b>x</b></font><font
+    size="2"></font> <font size="2" color="#800080">is</font><font
+    size="2"></font> <font size="2" color="#ff00ff"><b>z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </b></font>
+    <font size="2" color="#808080"><i>// could be "a grandChild of x is
+    z"</i></font><font color="#FF0000"></font></li>
+</ol>
+
+<p>Similarly, the statements in the if block can have any of the forms
+described above for triples in the a-box. The first statement in the example
+rule if block can be any of:</p>
+<ol>
+  <li><font size="2" color="#ff00ff"><b>y</b></font><font size="2"></font>
+    <font size="2" color="#800080">is</font><font size="2"></font> <font
+    size="2" color="#008000"><b>child</b></font><font size="2"></font> <font
+    size="2" color="#800080">of</font><font size="2"></font> <font size="2"
+    color="#ff00ff"><b>x</b></font><font
+    color="#FF0000">&nbsp;&nbsp;&nbsp;  </font><font size="2" color="#808080"><i>// or "y is a
+    child of x"</i></font><font color="#FF0000"></font></li>
+  <li><font size="2" color="#ff00ff"><b>x </b></font> <font size="2"
+    color="#800080">has</font><font size="2"></font> <font size="2"
+    color="#008000"><b>child</b></font><font size="2"></font> <font size="2"
+    color="#ff00ff"><b>y</b></font><font
+    size="2"> </font></li>
+  <li><font size="2" color="#ff00ff"><b>x </b></font> <font size="2"
+    color="#008000"><b>child</b></font><font size="2"></font> <font size="2"
+    color="#ff00ff"><b>y</b></font></li>
+  <li><font size="2" color="#008000"><b>child </b></font><font size="2"
+    color="#800080">of</font><font size="2"
+    color="#ff00ff"><b> y </b> </font><font size="2"
+    color="#800080">is</font><font size="2"></font> <font size="2"
+    color="#ff00ff"><b>x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </b></font> <font size="2"
+    color="#808080"><i>// or "a child of y is x"</i></font><font
+    color="#FF0000"></font></li>
+</ol>
+
+<p>As noted above, graph pattern forms that use "of" are particularly useful in rules because they allow
+for a nesting of triples inside triples and an elimination of variables so that
+the rule reads much more succinctly, more like a formula. For example, consider
+these two forms of a rule to calculate the area of a Rectangle:</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#800080">Rule </font><font
+  size="2">AreaOfRectangle<br>
+  </font><font size="2" color="#800080">&nbsp;&nbsp;&nbsp; given&nbsp;&nbsp;&nbsp;
+  </font> <font size="2" color="#ff00ff"><b>x</b></font> <font size="2"
+  color="#800080">is</font> <font size="2" color="#800080">any</font> <font
+  size="2" color="#000080"><b>Rectangle<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; </b></font><font size="2" color="#800080">if &nbsp;&nbsp;&nbsp;&nbsp; </font> <font size="2" color="#ff00ff"><b>&nbsp; h</b></font> <font size="2"
+  color="#800080">is</font> <font size="2" color="#008000"><b>height</b></font>
+  <font size="2" color="#800080">of</font> <font size="2"
+  color="#ff00ff"><b>x<br>
+  &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; w</b></font> <font size="2" color="#800080">is</font> <font size="2"
+  color="#008000"><b>width</b></font> <font size="2" color="#800080">of</font>
+  <font size="2" color="#ff00ff"><b>x<br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p</b></font><font size="2">= </font> <font size="2"
+  color="#ff00ff"><b>h</b></font><font size="2">* </font> <font size="2"
+  color="#ff00ff"><b>w<br>
+  &nbsp;&nbsp;&nbsp;
+  </b></font><font size="2" color="#800080">&nbsp;then  </font> <font size="2" color="#008000"><b>area</b></font> <font
+  size="2" color="#800080">of</font> <font size="2"
+  color="#ff00ff"><b>x</b></font> <font size="2" color="#800080">is</font>
+  <font size="2" color="#ff00ff"><b>p</b></font><font size="2">. </font> </p>
+
+<p align="left"><font size="2" color="#800080">Rule </font><font
+size="2">AreaOfRectangle2<br>
+&nbsp;   <font color="#800080">if</font></font><font size="2" color="#800080">  &nbsp;&nbsp;&nbsp; </font> <font size="2" color="#ff00ff"><b>&nbsp;&nbsp; x</b></font> <font size="2"
+color="#800080">is</font> <font size="2" color="#800080">any</font> <font
+size="2" color="#000080"><b>Rectangle<br>
+&nbsp;
+</b></font><font size="2" color="#800080">  then   </font> <font size="2" color="#008000"><b>area</b></font> <font
+size="2" color="#800080">of</font> <font size="2" color="#ff00ff"><b>x
+</b></font><font size="2">is</font> <font size="2"
+color="#008000"><b>height</b></font> <font size="2" color="#800080">of</font>
+<font size="2" color="#ff00ff"><b>x </b></font><font size="2">*&nbsp; </font> <font
+size="2" color="#008000"><b>width</b></font> <font size="2"
+color="#800080">of</font> <font size="2" color="#ff00ff"><b>x</b></font><font
+size="2">.</font> </p>
+
+</blockquote>
+
+<p>As another example, the grandchild rule from above might be written as:</p>
+
+<blockquote>
+  <p><font size="2" color="#800080">Rule </font><font
+  size="2">GrandChild_Rule<br>
+  &nbsp;   <font color="#800080">if</font></font><font size="2" color="#800080">  </font> <font size="2" color="#ff00ff"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x</b></font> <font size="2" color="#800080">is</font><font
+  size="2"></font> <font size="2" color="#800080">a</font><font
+  size="2"></font> <font size="2" color="#000080"><b>Person</b></font><font
+  size="2" color="#ff00ff"><b><br>
+  &nbsp;   </b></font><font size="2" color="#800080">then </font><b><font size="2" color="#008000">&nbsp;</font></b><font size="2" color="#800080">a</font><font
+  size="2"></font> <font size="2" color="#008000"><b>child</b></font><font
+  size="2"></font> <font size="2" color="#800080">of a</font><font
+  size="2"></font> <font size="2" color="#008000"><b>child</b></font><font
+  size="2"></font> <font size="2" color="#800080">of</font><font
+  size="2"></font> <font size="2" color="#ff00ff"><b>x</b></font><font
+  size="2"> </font> <font size="2" color="#800080">is a</font><b><font size="2" color="#008000"> grandChild</font></b><font size="2" color="#800080"> of</font><font size="2" color="#ff00ff"><b> x</b></font> <font
+  size="2">.</font></p>
+</blockquote>
+
+<p>Note that in SADL Version 2, &quot;is&quot;, &quot;=&quot;, and &quot;==&quot; are aliases for the same 
+operator in triple patterns. In a rule conclusion, "is" in a statement where an assignment
+is being made (a conclusion) should be read as "is equal to". In a statement
+where a comparison is being made (in the premise), &quot;is&quot; should be read "is equivalent to". To illustrate, consider this
+traffic rule:</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#800080">Rule </font><font
+  size="2">Rule_Go<br>
+  &nbsp;   </font><font size="2" color="#800080">given&nbsp;&nbsp;   </font> <font size="2" color="#ff00ff"><b>x</b></font> <font size="2"
+  color="#800080">is</font> <font size="2" color="#800080">a</font> <font
+  size="2" color="#000080"><b>Vehicle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   </b></font> <font size="2" color="#ff00ff"><b>y</b></font> <font
+  size="2" color="#800080">is</font> <font size="2" color="#800080">a</font>
+  <font size="2" color="#000080"><b>TrafficLight</b></font><font size="2"><br>
+  &nbsp;&nbsp;   </font><font size="2" color="#800080">if&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font size="2" color="#ff00ff"><b>x</b></font> <font size="2"
+  color="#800080">is</font> <font size="2"
+  color="#008000"><b>approaching</b></font> <font size="2"
+  color="#800080">of</font> <font size="2" color="#ff00ff"><b>y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b></font> <font size="2" color="#008000"><b>color</b></font> <font
+  size="2" color="#800080">of</font> <font size="2"
+  color="#ff00ff"><b>y</b></font> <font size="2" color="#800080">==</font>
+  <font size="2" color="#0000ff">Green</font><font size="2"><br>
+  &nbsp;&nbsp;   </font><font size="2" color="#800080">then&nbsp;&nbsp;&nbsp;   </font> <font size="2" color="#008000"><b>action</b></font> <font
+  size="2" color="#800080">of</font> <font size="2"
+  color="#ff00ff"><b>x </b></font><font size="2">= </font> <font size="2"
+  color="#0000ff">Go</font><font size="2">. </font> </p>
+</blockquote>
+
+<p>Using the nesting patterns described in the previous section, this rule might 
+also be written as:</p>
+
+<blockquote>
+
+<p><font size="2" color="#800080">Rule </font><font
+  size="2">Rule_Go: </font><font size="2" color="#800080">given&nbsp; </font> <font size="2" color="#ff00ff"><b>x</b></font> <font size="2"
+  color="#800080">is</font> <font size="2" color="#800080">a</font> <font
+  size="2" color="#000080"><b>Vehicle </b></font> <font size="2">&nbsp;if </font> <font size="2" color="#008000"><b>color</b></font> <font
+  size="2" color="#800080">of</font> <font size="2" color="#800080">a</font> <b>
+  <font size="2" color="#000080">TrafficLight</font><font size="2" color="#FF00FF"> </font></b> <font size="2"
+  color="#800080">with</font> <font size="2"
+  color="#008000"><b>approaching</b></font> <font size="2" color="#ff00ff"><b>x</b></font> 
+<font size="2" color="#800080">is</font>
+  <font size="2" color="#0000ff">Green </font><font size="2" color="#800080">then&nbsp; </font> <font size="2" color="#008000"><b>action</b></font> <font
+  size="2" color="#800080">of</font> <font size="2"
+  color="#ff00ff"><b>x </b></font><font size="2"><font color="#800080">is</font>
+</font> <font size="2"
+  color="#0000ff">Go</font><font size="2">. </font> </p>
+
+</blockquote>
+
+<p>Note that a rule need not be spread across multiple lines. The grandchild
+rule could just as well be written as:</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#800080">Rule </font><font
+  size="2">GrandChild_Rule: </font> <font size="2" color="#800080">given
+  </font><font size="2" color="#ff00ff"><b>x </b></font><font size="2"
+  color="#800080">is </font><font size="2" color="#800080">a</font> <b><font
+  size="2" color="#000080">Person </font> </b><font size="2"
+  color="#800080">and</font><b><font size="2" color="#000080"></font> </b>
+  <font size="2" color="#ff00ff"><b>y</b></font> <font size="2"
+  color="#800080">is</font> <font size="2" color="#800080">a</font> <font
+  size="2" color="#000080"><b>Person</b></font><font size="2">;</font> <font
+  size="2" color="#800080">if </font><font size="2"
+  color="#ff00ff"><b>y </b></font><font size="2" color="#800080">is a</font>
+  <font size="2" color="#008000"><b>child</b></font> <font size="2"
+  color="#800080">of</font> <b><font size="2" color="#ff00ff">x  </font></b>
+  <font size="2" color="#800080">and </font><b><font size="2"
+  color="#ff00ff">z</font></b> <font size="2" color="#800080">is a</font> <font
+  size="2" color="#008000"><b>child</b></font> <font size="2"
+  color="#800080">of</font> <b><font size="2" color="#ff00ff">y</font></b><font
+  size="2"><b>;</b></font><font size="2" color="#800080"> then </font> <font size="2"
+  color="#ff00ff"><b>z </b></font>
+  <font size="2" color="#800080">is</font> <font size="2" color="#800080">a </font><font
+  size="2" color="#008000"><b>grandChild</b></font><font size="2"
+  color="#800080"> of</font> <font size="2" color="#ff00ff"><b>x</b></font> <font size="2">.</font><font size="2"
+  color="#ff00ff"><b>&nbsp;  </b></font><font size="2" color="#808080"><i>// note
+  addition of optional colon after the rule name for
+  readability</i></font><font color="#FF0000"></font> </p>
+
+</blockquote>
+
+  <p align="left">Note: rule elements must be separated
+  by \n, ",", or "and". (a newline, a comma,  or an "and").</p>
+
+  <p align="left">SADL has three additional keywords related to various forms of 
+  negation and specific OWL constructs that map to built-ins (at least in Jena) and are available 
+  in rules. They are &quot;not&quot;, &quot;only&quot;, and &quot;known&quot;. For example, these might appear 
+  in rule premises:</p>
+<blockquote>
+
+  <p align="left"><font size="2" color="#0000ff">Lassie</font>
+  <font size="2" color="#800080">is not a </font><font size="2" color="#000080">
+  <b>Person</b></font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  <font size="2" color="#808080"><i>// passes if Lassie belongs to the owl:complimentOf Person (see below)</i></font></p>
+
+  <p align="left"><font size="2" color="#800080">the</font>
+  <font size="2" color="#008000"><b>spouse</b></font>
+  <font size="2" color="#800080">of</font> <font size="2" color="#0000ff">Tarzan</font>
+  <font size="2" color="#800080">is only</font> <font size="2" color="#0000ff">
+  Jane</font>&nbsp;&nbsp;&nbsp; <font size="2" color="#808080"><i>// passes only if the only triple with Tarzan as 
+  subject and spouse as predicate has Jane as object value</i></font></p>
+
+  <p align="left"><font size="2" color="#800080">the</font>
+  <font size="2" color="#008000"><b>spouse</b></font>
+  <font size="2" color="#800080">of</font> <font size="2" color="#0000ff">Tarzan</font>
+  <font size="2" color="#800080">is not only </font>
+  <font size="2" color="#0000ff">Jane</font>&nbsp;&nbsp;&nbsp; 
+  <font size="2" color="#808080"><i>// passes only if 
+  there is at least one triple with subject Tarzan, predicate spouse, and object 
+  value not the same as Jane</i></font></p>
+
+  <p align="left"><font size="2" color="#800080">the</font>
+  <font size="2" color="#008000"><b>age</b></font>
+  <font size="2" color="#800080">of</font> <font size="2" color="#0000ff">
+  William</font><font size="2" color="#800080"> is known</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  <font size="2" color="#808080"><i>// passes if there is any triple with William as subject and age as predicate</i></font></p>
+
+  <p align="left"><font size="2" color="#800080">the</font>
+  <font size="2" color="#008000"><b>age</b></font>
+  <font size="2" color="#800080">of</font> <font size="2" color="#0000ff">Susan</font>
+  <font size="2" color="#800080">is not known</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  <font size="2" color="#808080"><i>// passes if there is not a triple in the model with Susan as subject and age 
+  as predicate</i></font></p>
+</blockquote>
+
+<h3><a name="Tests">Tests </a> </h3>
+
+<p>Tests can have two forms. The first is a triple, or combination of triples,
+and can be any of the syntaxes defined above.</p>
+
+<blockquote>
+  <p><font size="2" color="#800080">Test</font><font size="2">: </font><font
+  size="2" color="#0000ff">MyRect</font> <font size="2"
+  color="#800080">has</font><font size="2"><font
+  color="#008000"><b> width</b></font> 5.0, </font> <font size="2"
+  color="#800080">has</font> <font size="2" color="#008000"><b>area
+  </b></font><font size="2">15.75 .   </font> <font size="2"
+  color="#808080"><i>// Grouping of properties and their values with a single
+  subject is also valid in tests</i></font></p>
+
+  <p><font size="2" color="#800080">Test</font><font size="2">: </font><font
+  size="2" color="#0000ff">MyRect</font> <font size="2"
+  color="#008000"><b>area </b></font><font size="2">15.75
+  .  </font> </p>
+
+  <p><font size="2" color="#800080">Test</font><font size="2">: </font> <font
+  size="2" color="#008000"><b>area</b></font><font size="2"> <font
+  color="#800080">of</font> </font> <font size="2"
+  color="#0000ff">&nbsp;MyRect</font> <font size="2" color="#800080">is </font><font
+  size="2">15.75 .&nbsp;&nbsp;&nbsp;   </font> <font size="2"
+  color="#808080"><i>&nbsp; // or Test: the area of MyRect is 15.75.</i></font></p>
+
+  <p><font size="2" color="#800080">Test</font><font size="2">: 15.75 </font>
+  <font size="2" color="#800080">is</font><font size="2">  </font> <font
+  size="2" color="#008000"><b>area</b></font><font size="2">  <font
+  color="#800080">of</font> </font> <font size="2"
+  color="#0000ff">MyRect</font><font size="2">.&nbsp;  
+  </font> <font size="2" color="#808080"><i>// or Test: 15.75 is the area of
+  MyRect.</i></font></p>
+</blockquote>
+
+<p>Tests of instance data containing bnodes can use the nested triple patterns 
+described above. For example, referring to the instance data with bnodes used 
+previously, one might 
+write the following:</p>
+
+<blockquote>
+
+<p><font color="#800080" size="2">Test: the</font>
+<font color="#008000" size="2"><b>latitude</b></font>
+<font color="#800080" size="2">of the</font> <font color="#008000" size="2"><b>
+location</b></font> <font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+child</b></font> <font color="#0000ff" size="2">George </font>
+<font color="#800080" size="2">is</font><font color="#0000ff" size="2"> </font>
+<font size="2">38.186111</font><font color="#0000ff" size="2"> .</font></p>
+
+</blockquote>
+
+<p>The article &quot;the&quot; in front of &quot;latitude&quot; and &quot;location&quot; are optional.</p>
+
+<p>As another example, </p>
+
+<blockquote>
+
+<p><font color="#800080" size="2">Test:</font> <font color="#800080" size="2">the</font>
+<font color="#008000" size="2"><b>age</b></font> <font color="#800080" size="2">of the</font>
+<font color="#008000" size="2"><b>parent</b></font>
+<font color="#800080" size="2">of</font> <font color="#0000ff" size="2">Susan</font>
+<font color="#800080" size="2">is</font> <font size="2">45</font> .</p>
+
+</blockquote>
+
+<p>One side of a test may  be specified in terms of a SPARQL query, in which case the
+results may be a table of values-- one or more rows with each row containing one 
+or more values. A table of values in SADL is expressed using comma-separated 
+values inside square brackets to indicate a row and comma-separated rows inside curly brackets 
+to indicate multiple rows. (The comas between rows are optional.) Note that the additional keywords "not", "only", and "known" may be
+used with the suggested meaning. The examples below use strict SPARQL syntax with
+the query in quotes. The tests could also use the SADL query syntax discussed
+below, in which case the query would not be in quotes.</p>
+
+<blockquote>
+  <p align="left"><font color="#800080" size="2">Test</font><font size="2">:
+  "select ?s where {&lt;Tom&gt; &lt;spouse&gt; ?s}" </font><font
+  color="#800080" size="2">is</font> <font color="#0000ff"
+  size="2">Betty</font><font size="2">.</font> </p>
+
+  <p><font color="#800080" size="2">Test</font><font size="2">:
+  "select ?p ?yrs where {?p &lt;rdf:type&gt; &lt;Person&gt; . ?p &lt;age&gt;
+  ?yrs}" == { [ </font> <font color="#0000ff" size="2">Tom</font><font
+  size="2">, 35 ] } .&nbsp;&nbsp; <font color="#808080"><i>// since there is 
+  only one row, the curly brackets are optional</i></font></font></p>
+
+  <p align="left"><font color="#800080" size="2">Test</font><font size="2">:
+  "select ?p ?n where {?p &lt;rdf:type&gt; &lt;Person&gt; . ?p &lt;name&gt;
+  ?n}" == { [ </font> <font color="#0000ff" size="2">Tom</font><font size="2">,
+  "Tom Dunham"], [ </font><font color="#0000ff" size="2">Betty</font><font
+  size="2">, "Betty Dunham"] }.  </font></p>
+
+  <p align="left"><font color="#800080" size="2">Test</font><font size="2">:
+  "select ?s where {&lt;Tom&gt; &lt;spouse&gt; ?s}" </font><font
+  color="#800080" size="2">is only</font>
+  <font color="#0000ff" size="2">Betty</font><font size="2">.</font></p>
+
+  <p align="left"><font color="#800080" size="2">Test</font><font size="2">:
+  "select ?y where {&lt;Tom&gt; &lt;age&gt; ?y}" </font><font color="#800080"
+  size="2">is not</font><font size="2"> 40
+  .</font></p>
+
+  <p align="left"><font color="#800080" size="2">Test</font><font size="2">:
+  "select ?y where {&lt;Betty&gt; &lt;age&gt; ?y}" </font><font color="#800080"
+  size="2">is not</font> <font
+  color="#800080" size="2">known</font><font size="2">.</font></p>
+</blockquote>
+
+<h3><a name="SADLQueryLanguage">SADL Query Language</a></h3>
+
+<p>SPARQL is the W3C graph query language normally used to retrieve information
+from a semantic model. A SPARQL query is fundamentally a graph pattern
+specified as triple patterns to be matched in the data. Variables in the query
+serve two functions. First, they are used after the "select" to identify which
+information is to be returned by the query. Second, they provide constraints
+between triple patterns allowing combination of triples to form a complex graph pattern.</p>
+
+<p>Since a set of rule premises is also a graph pattern, SADL already has most
+of the syntax necessary to provide a query language. Retaining the "select" and
+"where" query keywords, and expressing variables without the SPARQL-style
+question mark, we have the beginnings of a SADL query language.</p>
+
+<p>Suppose that we wished to retrieve a list of all of the instances of Person
+who have grandchildren, along with the instances of Person who are the
+grandchildren.  In SADL queries are preceded by the &quot;Ask:&quot; keyword. Raw SPARQL 
+queries are placed in double quotes. The question we wish to ask can be 
+expressed as:</p>
+
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p>Ask:</font><font SIZE="2"> &quot;select ?gp ?gc where {?gp &lt;rdf:type&gt; &lt;Person&gt; . 
+  &lt;?gp &lt;hasChild&gt; ?c . ?c &lt;hasChild&gt; ?gc}&quot;.</p>
+</blockquote>
+</font>
+
+<p>The SADL query equivalent to the SPARQL query above is:</p>
+
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p>Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2">.</p>
+</blockquote>
+</font>
+
+<p>This illustrates one of the advantages of a SADL query: the query is parsed 
+and color coded and errors will be found when the query is entered whereas the 
+SPARQL query is opaque and any errors in the query will not be found until it is 
+executed.</p>
+
+<p>Using some of the alternate triple syntaxes discussed above, we could also say:</p>
+
+<p style="margin-left:2em;"><font SIZE="2" COLOR="#800080">Ask:</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2">.</p>
+
+</font>
+
+<p>or:</p>
+
+<blockquote>
+
+<p><font SIZE="2" COLOR="#800080">Ask:</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">select</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2">.</p>
+
+</blockquote>
+</font>
+
+<p>or:</p>
+
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p>Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2">,&nbsp;
+  </font><font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>gc</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>gp</b></font><font SIZE="2">.</p>
+</blockquote>
+</font>
+
+<p>The last example illustrates that variables can be separated by a comma if 
+desired.</p>
+
+<p>One of the useful features of SPARQL is the ability to do unions of query
+results. For example, in SPARQL one might select all of the instances of Woman
+over 40 and of Man over 50 with this query:</p>
+
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p ALIGN="LEFT">Ask:</font><font SIZE="2"> &quot;select ?p ?y where {{?p &lt;rdf:type&gt; 
+  &lt;Woman&gt; . ?p &lt;age&gt; ?y . FILTER(?y &gt; 40)} UNION {?p &lt;rdf:type&gt; &lt;Man&gt; . ?p &lt;age&gt; 
+  ?y . FILTER(?y &gt; 50)}}&quot;.</p>
+</blockquote>
+</font>
+
+<p>In SADL the equivalent is:</p>
+
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p>Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Woman</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> &gt; 40 </font>
+  <font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Man</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> &gt; 50 .</font></p>
+</blockquote>
+<p><font size="2" color="#FF0000"><b>Note (1/13/2011)</b>: the Jena translator 
+in the current release 
+of SADL V2 does not yet translate a query with &quot;or&quot; into SPARQL so this query 
+will not yet actually work.</font></p>
+
+<p>If desired, the elements of the union can be enclosed in parentheses to make 
+the meaning clearer.</p>
+
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p>Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Woman</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> &gt; 40) </font>
+  <font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Man</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> &gt; 50).</p>
+</blockquote>
+</font>
+
+<p>Finally, using the bnode implicit reference pattern we might query for the 
+latitude where George was born as follows:</p>
+<blockquote>
+
+<font SIZE="2" COLOR="#800080">
+<p>Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#ff00ff"><b>l</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>l</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">.</p>
+</font>
+</blockquote>
+
+<p>In many instances, the &quot;select ... where&quot; may be dropped from the SADL query, 
+making the variables implicit. For example, this query will return the same 
+results as the query above:</p>
+
+<blockquote>
+
+<p><font SIZE="2" COLOR="#800080">Ask:</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">George</font></p>
+
+</blockquote>
+
+<p>Note that the SADL-IDE allows ad hoc queries to be executed via a popup menu 
+obtained by right-clicking on the model file name in the Project Explorer or by 
+the key press Alt-Shift-R with the focus on the editor window. Queries entered 
+in the resulting dialog box may be SADL queries or SPARQL queries.</p>
+
+<h3>Rules, Queries, and <a name="TestsRevisited">Tests
+Revisited</a></h3>
+Rules, queries, and tests have in common that they embody one or more triple 
+patterns to be matched against a model graph. In the case of rules, the set of 
+graph patterns captured in the rule premises do two things. First, they either 
+match (return true) or they don't (return false). If they match, then the rule 
+is a candidate for rule firing and they then do the second thing: provide a set 
+of bound variables available to the rule conclusions for use during rule firing. 
+The rule conclusions will also normally be a set of triple patterns which, when 
+the bound variables of the premises are employed, may assert additional triples 
+into the model. Note that rules can include built-in functions for, for example, 
+math operations or for custom operations provided by the model developer.<p>
+SPARQL queries are very much like a set of rule premises in that they are a 
+graph pattern to be matched against the model. The &quot;where&quot; clause of a query is, 
+in essence, a rule premise. Something more or less equivalent to the rules' 
+built-in functions are available in the SPARQL query FILTER. In fact, 
+user-supplied functions are allowed by the Jena ARQ query engine. The SPARQL 
+&quot;select&quot; query begins with the phrase &quot;select ?x ?y ?z ... where ...&quot;. The list 
+of variables after the select and before the where simply identifies which 
+variable bindings from the graph pattern are to be returned by the query and in 
+what order. As noted, the where is followed by the graph pattern to be matched.</p>
+<p>The SADL test has as its purpose to return one or more values by graph 
+pattern matching and compare this value or values to explicitly specified 
+values or possibly to the values returned by another matching graph pattern.. The more general form of Test (see <a href="#Tests">Tests</a> above) 
+can use a SPARQL query or a SADL query as the left-hand side of a comparison and a value, a list of 
+values, a table of values, or another query as the right-hand side of the 
+comparison. The simple or shorthand 
+test notation gives a set of one or more edges (a graph pattern without any 
+variables--really a SADL query without the variables specified) and the test passes if the pattern is found in the model. Any simple 
+test pattern can be converted into a query test format. For example:</p>
+
+<blockquote>
+  <p><font size="2" color="#800080">Test</font><font size="2">: </font><font
+  size="2" color="#0000ff">MyRect</font> <font size="2"
+  color="#800080">has</font><font size="2"><font
+  color="#008000"><b> width</b></font> 5.0, </font> <font size="2"
+  color="#800080">has</font> <font size="2" color="#008000"><b>area
+  </b></font><font size="2">15.75 .  <font color="#808080"><i>// means&nbsp;(SADL 
+  syntax)&nbsp; 
+  Test: select x, y where MyRect width x and MyRect area y 
+  is [4.5, 15.75].</i></font></font></p>
+
+</blockquote>
+
+<blockquote>
+
+<p><font color="#800080" size="2">Test: the</font>
+<font color="#008000" size="2"><b>latitude</b></font>
+<font color="#800080" size="2">of the</font> <font color="#008000" size="2"><b>
+location</b></font> <font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+child</b></font> <font color="#0000ff" size="2">George </font>
+<font color="#800080" size="2">is</font><font color="#0000ff" size="2"> </font>
+<font size="2">38.186111</font><font color="#0000ff" size="2"> .&nbsp;&nbsp;&nbsp; </font>
+<font size="2" color="#808080"><i>// means&nbsp;&nbsp;(SPARQL syntax)&nbsp; Test: &quot;select ?x where {?y &lt;rdf:type&gt; &lt;Birth&gt; . ?y 
+&lt;child&gt; &lt;George&gt; . ?y &lt;location&gt; ?z . ?z &lt;latitude&gt; ?x }&quot; is 38.186111 .</i></font></p>
+
+</blockquote>
+
+<blockquote>
+
+<p><font color="#800080" size="2">Test:</font> <font color="#800080" size="2">the</font>
+<font color="#008000" size="2"><b>age</b></font> <font color="#800080" size="2">of the</font>
+<font color="#008000" size="2"><b>parent</b></font>
+<font color="#800080" size="2">of</font> <font color="#0000ff" size="2">Susan</font>
+<font color="#800080" size="2">is</font> <font size="2">45</font> .&nbsp;&nbsp;
+<font size="2" color="#808080"><i>// means&nbsp; (SPARQL syntax)&nbsp; Test: </i>
+</font><i> <font size="2" color="#808080">&quot;select ?x where {&lt;Susan&gt; &lt;parent&gt; ?y 
+. ?y &lt;age&gt; ?x}&quot; is 45 .</font></i></p>
+
+<font SIZE="2" COLOR="#800080">
+<p>Test:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>birthMother</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">Mary</font><font SIZE="2"> = </font>
+<font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">Martha</font><font SIZE="2">. </font>
+<font SIZE="2" COLOR="#808080"><i>// here both sides of the test are graph 
+patterns</p>
+</i></font>
+
+</blockquote>
+
+<p>Using syntax from the SADL query language, it is possible to formulate much
+more complex tests over more complex subgraphs. However, the SADL query language 
+does not have the full expressivity of SPARQL. For example, it does not support 
+OPTIONAL patterns. When required, queries can always be expressed as quoted 
+SPARQL query strings in SPARQL syntax. <br>
+</p>
+<h3>More Graph Patterns Examples</h3>
+<p>In this section we give some additional graph pattern examples.</p>
+<blockquote>
+  <p>
+<font size="2">Rule R23: if</font> <b><font color="#FF00FF" size="2">x</font></b>
+<font size="2">is</font>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font>
+<font size="2">(</font><b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111) </font>
+<font color="#800080" size="2">with</font> <b><font color="#008000" size="2">child</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+  spouse</b></font><font color="#0000ff" size="2"> Martha </font><font size="2">
+then print (&quot;This is an important date:&quot;,<font color="#008000"><b> when</b></font> 
+of </font><b><font color="#FF00FF" size="2">x</font></b><font size="2">).</font></p>
+</blockquote>
+<blockquote>
+  <p>
+<font size="2">Ask: select <b><font color="#FF00FF">b</font></b>,
+<font color="#FF00FF"><b>d</b></font> where <b><font color="#FF00FF">b</font></b></font>
+<font size="2">is</font>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font>
+<font size="2">(</font><b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111) </font>
+<font color="#800080" size="2">with</font> <b><font color="#008000" size="2">child</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+  spouse</b></font><font color="#0000ff" size="2"> Martha </font><font size="2">
+and <font color="#FF00FF"><b>d</b></font> is <font color="#008000"><b>&nbsp;when</b></font> 
+of <font color="#FF00FF"><b>b</b></font> .<br>
+Ask: select <font color="#FF00FF"><b>c</b></font>, <font color="#FF00FF"><b>d, 
+t, s</b></font> 
+where <b><font color="#FF00FF">b</font></b></font> <font size="2">is</font>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font>
+<font size="2">(</font><b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2"><font color="#FF00FF"><b>t</b></font>) </font>
+<font color="#800080" size="2">with</font> <b><font color="#008000" size="2">child</font></b>
+<font color="#FF00FF" size="2"><b>c </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+  spouse</b></font><font color="#0000ff" size="2"> </font>
+<font color="#FF00FF" size="2"><b>s</b></font><font color="#0000ff" size="2"> </font>
+<font size="2">and <font color="#FF00FF"><b>d</b></font> is
+<font color="#008000"><b>&nbsp;when</b></font> of <font color="#FF00FF"><b>b</b></font> 
+.</font></p>
+</blockquote>
+<blockquote>
+  <p>
+<font size="2"><font color="#800080">Test</font>: <font color="#800080">the</font>
+<font color="#008000"><b>when</b></font> <font color="#800080">of a</font></font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font size="2">(</font><font color="#800080" size="2">with</font> <b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111) </font>
+<font color="#800080" size="2">with</font> <b><font color="#008000" size="2">child</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+  spouse</b></font><font color="#0000ff" size="2"> Martha </font><font size="2">
+is &quot;1732-02-22&quot;.<br>
+<font color="#800080">Test</font>: select <font color="#FF00FF"><b>n</b></font>,
+<font color="#FF00FF"><b>d</b></font> where <b><font color="#FF00FF">b</font></b></font>
+<font size="2">is</font>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font size="2">(</font><font color="#800080" size="2">with</font> <b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111) (</font><font color="#800080" size="2">with</font> <b><font color="#008000" size="2">child</font></b>
+<font color="#FF00FF" size="2"><b>n </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+  spouse</b></font><font color="#0000ff" size="2"> Martha</font><font size="2">)</font><font color="#0000ff" size="2"> </font>
+<font size="2">and <font color="#FF00FF"><b>d</b></font> is
+<font color="#008000"><b>&nbsp;when</b></font> of <font color="#FF00FF"><b>b</b></font></font><font color="#0000ff" size="2"> </font>
+<font size="2">is [<font color="#0000ff">George</font>, &quot;1732-02-22&quot;].</font></p>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> 
+  38.186111) </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Mary</font><font SIZE="2"> . </font>
+  <font SIZE="2" COLOR="#808080"><i>// this pretty fully constrains the match to 
+  a single Birth</i></font><font SIZE="2" COLOR="#800080"><br>
+  a</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> 
+  (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> 
+  38.186111) </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Martha</font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Mary</font><font SIZE="2"> . </font>
+<font color="#800080" size="2"><br>
+  a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font size="2">(</font><font color="#800080" size="2">with</font> <b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111) </font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>child</b></font><font size="2">
+  <font color="#0000ff">George</font></font><font color="#800080" size="2"> with</font>
+  <font color="#008000" size="2"><b>mother</b></font><font color="#0000ff" size="2"> 
+  Mary</font><font size="2"> </font>
+<font color="#800080" size="2">with</font>
+<font size="2"><font color="#008000"><b>weight</b></font> 10</font></p>
+</blockquote>
+<p>I</p>
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p ALIGN="LEFT">a</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
+  <b>Birth</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> == </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Philadelphia</font><font SIZE="2">) (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> == </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Samuel</font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> == </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Ruby</font><font SIZE="2">.</font><br>
+
+
+  </p>
+</blockquote>
+
+
+<p>This pattern tries to identify an instance of Birth at a location with the 
+same latitude as the latitude of Philadelphia (an instance of location), with 
+George a child of the Birth, with a mother who is the same Woman as the mother 
+of a Birth with child Samuel, and with a weight of the Birth which is the same 
+as the weight of a Birth with child Ruby. The graph pattern looks like this.</p>
+
+<blockquote>
+
+
+<p>
+<img border="0" src="images/sadl2.1.gif" width="520" height="333"></p>
+
+
+<p>where the unlabeled nodes represent implied variables and the yellow node represents the implicit 
+subject &lt;s&gt; of the pattern--the instances of Birth 
+that match the pattern.</p>
+
+</blockquote>
+
+
+<h2><a name="RefiningModelDefinitions">Refining Model Definitions</a></h2>
+
+<p>OWL permits one to say a number of additional kinds of things. While the
+additional expressiveness of OWL can be very powerful, it comes with a cost.
+For large models, the performance payment for added levels of reasoning can be
+significant. However, the SADL [V2] language includes these constructs and when
+appropriately used they can be very powerful both in model validation and in
+inferring conclusions. In general, the constructs in this section will need
+enablement of some level of OWL reasoning to have the expected effect on
+inferences. The constructs may also be used in the model, then queried, even if
+OWL reasoning is not enabled. </p>
+
+<h3><a name="OtherThingsToSayAboutInstances">Other Things to Say about Instances</a></h3>
+
+<p>While the triple of the a-box is the way that most information about an
+instance is specified, there are other important OWL mechanisms for saying
+things about instances.</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#0000ff">Bill_Clinton</font> <font
+  size="2" color="#800080">is the same as</font> <font size="2"
+  color="#0000ff">William_Jefferson_Clinton</font>.<font
+  size="2">  </font> <font size="2"
+  color="#808080"><i>// owl:sameAs. This means that the two named instances are
+  really the same thing in the modeled world  (new in SADL 2)</i></font></p>
+
+  <p align="left"><font size="2" color="#0000FF">Hillary</font><font size="2"
+  color="#0000ff">_Clinton</font> <font size="2" color="#800080">is not the
+  same as</font> <font size="2"
+  color="#0000ff">William_Jefferson_Clinton</font>.<font
+  size="2"> </font> <font size="2"
+  color="#808080"><i>// owl:differentFrom. This means that the two named
+  instances are not the same thing in the modeled world  (new in SADL
+  2)</i></font></p>
+
+  <p align="left"><font size="2" color="#0000FF">{Chelsea_Clinton,
+  Hillary</font><font size="2" color="#0000ff">_Clinton, Bill_Clinton}</font>
+  <font size="2" color="#800080">are not the same</font>.<font
+  size="2">  </font> <font size="2" color="#808080"><i>//
+  owl:allDifferent. This means that the list of named instances all refer to
+  different things in the modeled world  (new in SADL 2)</i></font><font
+  size="2" color="#0000FF"><br>
+  {Chelsea_Clinton, Hillary</font><font size="2" color="#0000ff">_Clinton,
+  Bill_Clinton}</font> <font size="2" color="#800080">are unique</font>.<font color="#808080" size="2"><i>  //
+  owl:allDifferent: mg-prefers this form (con: looses "balance" of same/not
+  same</i></font></p>
+</blockquote>
+
+<h3><a name="OtherThingsToSayAboutProperties">Other Things to Say about Properties</a></h3>
+
+<p>Besides the specification of an OWL property type (DatatypeProperty or
+ObjectProperty) and the domain and range of the property, here are a few other
+OWL constructs of interest with their SADL syntax.</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#008000"><b>spouse</b></font> <font
+  size="2" color="#800080">has a single value</font>.<font
+  size="2">  </font> <font size="2"
+  color="#808080"><i>// owl:FunctionalProperty. This means that there can only
+  be one triple in the model with this property for a given subject. <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // 
+  (Assuming domain and range are Person, an instance of Person can only have
+  one spouse.)  (new in SADL 2)</i></font></p>
+
+  <p align="left"><font size="2"
+  color="#008000"><b>biologicalMotherOf</b></font> <font size="2"
+  color="#800080">has a single subject</font>.<font size="2">  </font> <font
+  size="2" color="#808080"><i>// owl:InverseFunctionalProperty. This means that
+  there can only be one triple in the model with this property for a given
+  object value..<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  // (Assuming domain and range are Person, an instance of Person can only have
+  one mother.)  (new in SADL 2)</i></font></p>
+
+  <font SIZE="2" COLOR="#008000"><b>
+  <p>spouse</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">symmetrical</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font> <font size="2"
+  color="#808080"><i>// owl:SymmetricProperty. This means that A --&gt; spouse
+  --&gt;B implies that B --&gt; spouse --&gt; A is also true.  (new in SADL
+  2)</i></font></p>
+
+  <p align="left"><font size="2" color="#008000"><b>descendant</b></font> <font
+  size="2" color="#800080">is transitive</font>.<font size="2"
+  color="#808080"><i>&nbsp;   // owl:TransitiveProperty. This means that A --&gt;
+  descendant --&gt;B  and b --&gt; descendant --&gt; C implies that A --&gt;
+  descendant --&gt; C is also true.  (new in SADL 2)</i></font></p>
+
+  <p align="left"><font size="2" color="#008000"><b>wife </b></font><font size="2" color="#800080">is the
+  inverse of </font> <font size="2" color="#008000"><b>husband</b></font><font
+  size="2" color="#808080"><i>.</i></font><font size="2" color="#808080"><i>  // owl:inverseOf. This means that A
+  --&gt; wife --&gt;B  implies that B --&gt; husband --&gt; A is also true. 
+  (new in SADL 2)</i></font></p>
+
+  <p align="left"><font size="2" color="#008000"><b>hammer</b></font> <font
+  size="2" color="#800080">is the same as</font> <font size="2"
+  color="#008000"><b>pound</b></font>.<font
+  size="2" color="#808080"><i> // owl:equivalentProperty. This means that
+  hammer and pound have exactly the same set of possible values (those things
+  you can hammer you can also pound); <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // it
+  does not mean that they are the same concept.  (new in SADL 2)</i></font></p>
+</blockquote>
+
+<p>Note that these additional property definitional statements can be combined 
+with some property declarations. For example:</p>
+
+<blockquote>
+
+<font SIZE="2" COLOR="#008000"><b>
+<p>spouse</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">symmetrical</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font size="2" color="#808080"><i>&nbsp;// spouse of Person can have at 
+most one value, spouse is symmetrical&nbsp;&nbsp;&nbsp; </i></font><font SIZE="2">
+<br>
+<br>
+</font>
+
+<font SIZE="2" COLOR="#008000"><b>
+spouse</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+<font color="#800080">values</font> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">symmetrical</font><font SIZE="2">,
+</font>
+<font SIZE="2" COLOR="#800080">has a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+<font size="2" color="#808080"><i>&nbsp;// spouse is symmetrical, is a 
+functional property (can only have a single value, regardless of the subject)</i></font></p>
+<font SIZE="2" COLOR="#008000"><b>
+<p>ancestor</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">transitive</font><font SIZE="2">.</p>
+</font><font SIZE="2" COLOR="#008000"><b>
+<p>biologicalMotherOf</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">subject</font><font SIZE="2">.</p>
+</font>
+
+</blockquote>
+
+<h3><a name="OtherThingsToSayAboutClasses">Other Things to Say about Classes</a></h3>
+
+<p>A class may be defining by enumeration: </p>
+
+<blockquote>
+  <p><font size="2" color="#000080"><b>Season </b></font><font size="2"
+  color="#800080">is a top-level class, must be one of {</font><font size="2"
+  color="#0000ff">Spring, Summer, Fall, Winter</font><font size="2"
+  color="#800080">}</font>.   <font size="2" color="#808080"><i>// The class
+  Season consists of exactly the four named instances of the
+  class.</i></font></p>
+</blockquote>
+
+<p>Note that an enumeration may also be used to define a subclass:</p>
+
+<blockquote>
+  <p><font size="2" color="#000080"><b>MammalGender </b></font> <font size="2" color="#800080">is</font><font
+  size="2"></font> <font size="2" color="#800080">a</font><font
+  size="2"></font> <font size="2" color="#800080">type</font><font
+  size="2"></font> <font size="2" color="#800080">of</font><font
+  size="2"></font> <font size="2" color="#000080"><b>Gender</b></font><font
+  size="2">, </font> <font size="2" color="#800080">must</font><font
+  size="2"></font> <font size="2" color="#800080">be</font><font
+  size="2"></font> <font size="2" color="#800080">one</font><font
+  size="2"></font> <font size="2" color="#800080">of</font><font
+  size="2"> {</font><font size="2" color="#0000ff">Male</font><font size="2">,
+  </font><font size="2" color="#0000ff">Female</font><font size="2">}.
+  </font> <i><font size="2" color="#808080">&nbsp;// The class MammalGender is a subclass of Gender and consists of exactly the two named
+  instances of the class.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  //  (from this we can infer that Male and Female are also members of the
+  class Gender</font></i>)</p>
+  </blockquote>
+
+<p>Enumeration is a concept that will be encountered again in later
+sections. In these two instances, the enumerated class is given a name. The
+actual enumeration of a class in SADL is accomplished with "one of" followed by
+a grouping of instances.</p>
+
+<blockquote>
+  <p><font size="2" color="#800080">one of {</font><font size="2"
+  color="#0000ff">Spring, Summer, Fall, Winter</font><font size="2"
+  color="#800080">} </font>  <font size="2" color="#808080"><i>// This
+  defines an unnamed class that consists of exactly the four named instances;
+  it is not a legal statement by itself</i></font></p>
+</blockquote>
+
+<p>Equivalent classesÂ  are two classes that have the same members, expressed in
+OWL with owl:equivalentClass. This is usually used to relate classes in
+different namespaces by specifying that they mean the same thing (have the same
+extension). In SADL we use the same syntax as for equivalent properties and
+same instances.</p>
+
+<blockquote>
+  <p><font size="2" color="#000080"><b>US_President</b></font> <font size="2"
+  color="#800080">is the same as</font> <font size="2"
+  color="#000080"><b>PrincipalResidentOfWhiteHouse</b></font>. <font
+  size="2" color="#808080"><i>  // (new in SADL 2)</i></font></p>
+</blockquote>
+
+<p>Necessary and sufficient conditions (a particular use of
+owl:equivalentClass) can be expressed with a statement of the form: a
+&lt;Class&gt; is a &lt;SubClass&gt; only if &lt;condition&gt; .</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#800080">a </font> <font size="2"
+  color="#000080"><b>Teacher </b></font><font size="2" color="#800080">is a
+  </font><font size="2" color="#000080"><b>Professor </b></font><font size="2"
+  color="#800080">only if </font><font size="2"
+  color="#008000"><b>teaches </b></font><font size="2" color="#800080">has at
+  least one value of type </font><font size="2"
+  color="#000080"><b>CollegeStudent</b></font><font size="2"
+  color="#800080">.<br>
+  a</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Woman</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Mother</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">only</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">if</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">at</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">least</font><font SIZE="2"> 1 </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+
+<p>In set theory, two classes are disjoint if no member of one class is also a
+member of the other class. Lacking any better way to say it in SADL:</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#000080"><b>Man</b></font> <font
+  size="2" color="#800080">and</font> <font size="2"
+  color="#000080"><b>Woman</b></font> <font size="2" color="#800080">are
+  disjoint</font>.   <i><font size="2" color="#808080">//
+  owl:disjointWith. No instance of Man can be an instance of Woman, and vice
+  versa</font></i><font size="2" color="#808080"><i>  (new in SADL
+  2)</i></font></p>
+</blockquote>
+
+<p>Two important concepts in set theory are intersection and union. The
+intersection of two sets is that set of instances that belong to both sets. The
+union of two sets is that set of instances that belong to either set--in other
+words all of the instances in the two sets. In SADL we use curly brackets to
+group things together. We've already seen this used in enumeration above. In
+general, any place in a SADL statement that could have the name of a class can
+have instead an unnamed union of classes or an unnamed intersection of
+classes.</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#000080"><b>Woman </b></font><font
+  size="2" color="#800080">is the same as </font><font size="2">{</font><font
+  size="2" color="#000080"><b>Person</b></font> <font size="2"
+  color="#800080">and</font> <font size="2"
+  color="#000080"><b>Female</b></font><font size="2">}</font>.   <i><font
+  size="2" color="#808080">// Woman is the intersection of the classes Person
+  and Female</font></i><font size="2" color="#808080"><i>  (new in SADL
+  2)</i></font></p>
+
+  <p align="left"><font size="2" color="#000080"><b>Refreshment </b></font><font
+  size="2" color="#800080">is the same as </font><font size="2">{<font
+  color="#000080"><b>Food</b></font></font><font size="2"
+  color="#800080">,</font> <font size="2"><font
+  color="#000080"><b>Drink</b></font>}</font>.&nbsp;&nbsp;   <i><font size="2"
+  color="#808080">// Refreshment is the union of the classes Food and
+  Drink</font></i><font size="2" color="#808080"><i>  (new in SADL 2)&nbsp;</i></font></p>
+
+  <p align="left"><font size="2" color="#000080"><b>Refreshment </b></font><font
+  size="2" color="#800080">is the same as </font><font size="2">{<font
+  color="#000080"><b>Food</b></font></font><font size="2"
+  color="#800080"> or</font> <font size="2"><font
+  color="#000080"><b>Drink</b></font>}</font>.   <i><font size="2"
+  color="#808080">// </font></i><font size="2" color="#808080"><i>Same as
+  above; the separator can be either a comma or the word "or&quot;  (new in SADL
+  2)</i></font></p>
+</blockquote>
+
+<p>Another useful concept from set theory is the idea of a compliment. The
+compliment of a set is a second set made up of every instance which does not belong to the 
+first set. In SADL, we
+use the word "not" before a class name to indicate its complement.</p>
+
+<blockquote>
+  <p align="left"><font size="2" color="#000080"><b>Vegetable </b></font><font
+  size="2" color="#800080">is the same as not</font> <b><font size="2"
+  color="#000080">Meat</font><font size="2">. </font>
+  <font size="2" color="#000080">&nbsp;  </font></b><font size="2" color="#808080"><i>//
+  owl:complimentOf. The class Vegetable is the set of all things which do not
+  belong to the class Meat  (new in SADL 2)</i></font></p>
+</blockquote>
+
+<h3><a name="PropertyRestrictionsOnClass">Property Restrictions on a Class</a></h3>
+
+<p>Property restrictions on a class are an important expressive capability of
+OWL. However, the logical implications of restrictions will generally not be
+seen unless OWL reasoning is enabled at an appropriate level. </p>
+
+<blockquote>
+  <p><font color="#008000" size="2"><b>teaches</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Professor</b></font><font size="2"></font> <font
+  color="#800080" size="2">only</font><font size="2"></font> <font
+  color="#800080" size="2">has</font><font size="2"></font> <font
+  color="#800080" size="2">value</font><font size="2">s </font> <font
+  color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#800080" size="2">type</font><font size="2"></font> <font
+  color="#000080" size="2"><b>College_Student</b></font><font size="2">. 
+  </font><font color="#808080" size="2"><i>// owl:Restriction,
+  owl:allValuesFrom. This means that an instance of Professor cannot have any
+  values of teaches from any <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+  // class except College_Student (although it may have no
+  values)</i></font></p>
+
+  <p><font color="#008000" size="2"><b>teaches</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Professor</b></font><font size="2"></font> <font
+  color="#800080" size="2">has</font><font size="2"></font> <font
+  color="#800080" size="2">at</font><font size="2"></font> <font
+  color="#800080" size="2">least</font><font size="2"></font> <font
+  color="#800080" size="2">one</font><font size="2"></font> <font
+  color="#800080" size="2">value</font><font size="2"></font> <font
+  color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#800080" size="2">type</font><font size="2"></font> <font
+  color="#000080" size="2"><b>College_Student</b></font><font size="2">. 
+  </font><font color="#808080" size="2"><i>// owl:Restriction,
+  owl:someValuesFrom. This means that an instance of Professor must have at
+  least one value of teaches <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  // from the range class College_Student (and it could also have values from
+  other classes)</i></font></p>
+
+  <p><b><font color="#008000" size="2">teaches<font size="2"></font> <font
+  color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2">Professor</font><font size="2"></font>
+  </font></b><font color="#800080" size="2">has at least one value each of
+  types</font><font color="#008000" size="2"><b><font size="2"></font> <font
+  color="#000080" size="2">{Fulltime_Student</font><font size="2">, </font>
+  <font color="#000080" size="2">Parttime_Student}</font><font size="2">. 
+  </font></b><font color="#808080" size="2"><i>//  This allows combining of
+  many someValuesFrom restrictions on a class and property <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // in a single statement.</i></font></font></p>
+
+  <p><font color="#008000" size="2"><b>teaches</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Professor</b></font><font size="2"></font> <font
+  color="#800080" size="2">has</font><font size="2"></font> <font
+  color="#800080" size="2">at</font><font size="2"></font> <font
+  color="#800080" size="2">least</font><font size="2"></font> <font
+  color="#800080" size="2">one</font><font size="2"></font> <font
+  color="#800080" size="2">value</font><font size="2"></font> <font
+  color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#800080" size="2">type</font><font size="2"></font> <font
+  color="#000080" size="2"><b>{Fulltime_Student </b></font><font size="2"><font
+  color="#800080">or</font> </font><font color="#000080"
+  size="2"><b>Parttime_Student}</b></font><font size="2">.  </font><font
+  color="#808080" size="2"><i>// This means that the required value must come
+  from an unnamed class which is the union, <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // </i><i>that is 
+  either  </i>Fulltime_Strudent or Parttime_Student ( {A, B}
+  is interpreted as A or B) </font></p>
+
+  <p><font color="#008000" size="2"><b>teaches</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>MusicProfessor </b></font><font color="#800080" size="2">has</font><font
+  size="2"></font> <font color="#800080" size="2">at</font><font
+  size="2"></font> <font color="#800080" size="2">least</font><font
+  size="2"></font> <font color="#800080" size="2">one</font><font
+  size="2"></font> <font color="#800080" size="2">value</font><font
+  size="2"></font> <font color="#800080" size="2">of</font><font
+  size="2"></font> <font color="#800080" size="2">type</font><font
+  size="2"></font> <font color="#000080"
+  size="2"><b>{Music_Student</b></font><font size="2"><font
+  color="#800080"> and</font> </font><font color="#000080"
+  size="2"><b>Fulltime_Student}</b></font><font size="2">.   </font> <font
+  color="#808080" size="2"><i>// This means that the required value must come
+  from an unnamed class which is the intersection,<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // </i><i>that is both a Music_Student and a </i>Fulltime_Strudent ( {A and
+  B} is interpreted as both A and B)</font></p>
+
+  <p><font color="#008000" size="2"><b>rating</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>GoodProfessor</b></font><font size="2"></font>
+  <font color="#800080" size="2">always has value </font><font size="2"><font
+  color="#0000ff">Good</font>.  <font color="#808080"><i> // owl</i></font><i><font
+  color="#808080">:Restriction, owl:hasValue. This means that every
+  instance of the class GoodProfessor has Good as the value of
+  rating</font></i></font></p>
+
+  <p><font color="#008000" size="2"><b>teaches</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Professor</b></font><font size="2"></font> <font
+  color="#800080" size="2">has</font><font size="2"></font> <font
+  color="#800080" size="2">at</font><font size="2"></font> <font
+  color="#800080" size="2">least</font><font size="2"> 1 </font> <font
+  color="#800080" size="2">values</font><font size="2">.  
+  </font><font color="#808080" size="2"><i>// owl:Restriction,
+  owl:minCardinality. This mans that an instance of Professor must have at
+  least one value of the property teaches</i></font></p>
+
+  <p><font color="#000080" size="2"><b>Professor</b></font><font
+  size="2"></font> <font color="#008000" size="2"><b>teaches</b></font><font
+  size="2"><font color="#800080"> only</font> </font> <font color="#800080"
+  size="2">has</font><font size="2"></font> <font color="#800080"
+  size="2">value</font><font size="2">s </font> <font color="#800080"
+  size="2">of</font><font size="2"></font> <font color="#800080"
+  size="2">type</font><font size="2"></font> <font color="#000080"
+  size="2"><b>College_Student</b></font><font size="2">.   <i><font
+  color="#808080">// alternate representation of allValuesFrom restriction</font></i></font></p>
+
+  <p><font color="#000080" size="2"><b>Professor</b></font><font
+  size="2"></font> <font color="#008000" size="2"><b>teaches</b></font><font
+  size="2"></font> <font color="#800080" size="2">has at</font><font
+  size="2"></font> <font color="#800080" size="2">least</font><font
+  size="2"></font> <font color="#800080" size="2">one</font><font
+  size="2"><font color="#800080">value of type</font> </font> <font
+  color="#000080" size="2"><b>College_Student</b></font><font size="2">.  
+  <i><font color="#808080">// alternate representation of&nbsp; someValuesFrom 
+  raestriction</font></i></font></p>
+
+  <p><font color="#000080" size="2"><b>GoodProfessor</b></font><font
+  size="2"></font> <font color="#008000" size="2"><b>rating</b></font><font
+  size="2"></font> <font color="#800080" size="2">always has value </font><font
+  size="2"><font
+  color="#0000ff">Good</font>.&nbsp;   <i><font
+  color="#808080">//&nbsp; alternate representation of hasValue restriction</font></i></font></p>
+</blockquote>
+
+<p>Note that when the phrase &quot;with a single value&quot; is used in a property's range 
+in the definition of a class it means that the property is restricted to a 
+maximum cardinality of one on the class defined. When the phrase&nbsp; "has a single value" is used in the definition of
+a property's range as part of a property definition, it implies that the 
+property is a functional property and does not mean there is a cardinality 
+restriction on the class. This is illustrated by the following two statements:</p>
+
+<blockquote>
+
+<font SIZE="2" COLOR="#008000"><b>
+<p>spouse</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">symmetrical</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font size="2" color="#808080"><i>&nbsp;// spouse of Person can have at 
+most one value (a maximum cardinality restriction), spouse is symmetrical&nbsp;&nbsp;&nbsp; </i></font><font SIZE="2">
+<br>
+<br>
+</font>
+
+<font SIZE="2" COLOR="#008000"><b>
+spouse</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+<font color="#800080">values</font> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">symmetrical</font><font SIZE="2">,
+</font>
+<font SIZE="2" COLOR="#800080">has a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2">.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+<font size="2" color="#808080"><i>&nbsp;// spouse is symmetrical, is a 
+functional property (can only have a single value, regardless of the subject)</i></font></p>
+</blockquote>
+
+<p>Other cardinality restrictions on classes include:</p>
+
+<blockquote>
+  <p><font color="#008000" size="2"><b>teaches</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Professor</b></font><font size="2"></font> <font
+  color="#800080" size="2">has</font><font size="2"></font> <font
+  color="#800080" size="2">at</font><font size="2"></font> <font
+  color="#800080" size="2">most</font><font size="2"> 500 </font> <font
+  color="#800080" size="2">values</font><font size="2">.   </font><font
+  color="#808080" size="2"><i>// owl:Restriction, owl:maxCardinality. This
+  means that an instance of Professor cannot have more than 500 values of the
+  property teaches</i></font></p>
+
+  <p><font color="#008000" size="2"><b>teaches</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Professor</b></font><font size="2"></font> <font
+  color="#800080" size="2">has</font><font size="2"></font> <font
+  color="#800080" size="2">exactly</font><font size="2"> 30 </font> <font
+  color="#800080" size="2">values</font><font size="2">.&nbsp;   //
+  </font><font color="#808080" size="2"><i>owl:Restriction, owl:cardinality.
+  This means that an instance of Professor must have exactly 30 values of the
+  property teaches; no more and no less</i></font></p>
+</blockquote>
+
+<p><font size="4" color="#FF0000">Note: the rest of this section relates to an 
+as yet unresolved issue.&nbsp; </font></p>
+
+<p>When enumeration is used to define the class of the restriction, a slightly
+different syntax is used in SADL. (This is really an inconsistency...)</p>
+
+<blockquote>
+  <p><font color="#008000" size="2"><b>rating</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Professor</b></font><font size="2"></font> <font
+  color="#800080" size="2">must</font><font size="2"></font> <font
+  color="#800080" size="2">be</font><font size="2"></font> <font
+  color="#800080" size="2">one</font><font size="2"></font> <font
+  color="#800080" size="2">of </font><font size="2">{<font
+  color="#0000ff">Excellent, Good, Average, Poor</font>}.   </font><font
+  color="#808080" size="2"><i>// This is an owl:allValuesFrom restriction to an
+  enumeration. It means that an instance of Professor cannot have a <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // value of rating that is not either Excellent, Good, Average, or Poor<br>
+  &nbsp;</i></font></p>
+
+  <p> <font color="#FF0000" size="2">[This would be more consistent
+  with the syntax above for restriction to a named class if it were
+  worded</font><font color="#808080" size="2"><i><br>
+  &nbsp;</i></font></p>
+
+  <p><font color="#008000" size="2"><b>rating</b></font><font
+  size="2"></font> <font color="#800080" size="2">of</font><font
+  size="2"></font> <font color="#000080" size="2"><b>Professor</b></font><font
+  size="2"></font> <font color="#800080" size="2">can only be</font><font
+  size="2"></font> <font color="#800080" size="2">one</font><font
+  size="2"></font> <font color="#800080" size="2">of</font><font
+  size="2">{<font color="#0000ff">Excellent, Good, Average, Poor</font>}. <font
+  color="#FF0000">] </font></font></p>
+
+  <p> <font
+  color="#FF0000" size="2">mg add this new syntax, map old to allValuesFrom AND
+  someValuesFrom</font></p>
+
+  <p><font color="#008000" size="2"><b>gender</b></font><font size="2"></font>
+  <font color="#800080" size="2">of</font><font size="2"></font> <font
+  color="#000080" size="2"><b>Person</b></font><font size="2"></font> <font
+  color="#800080" size="2">must</font><font size="2"></font> <font
+  color="#800080" size="2">be</font><font size="2"></font> <font
+  color="#800080" size="2">one</font><font size="2"></font> <font
+  color="#800080" size="2">of </font><font size="2">{"Male", "Female&quot;}.   <font
+  color="#808080"><i>// T</i></font><i><font color="#808080">his is a data
+  property range restriction using an enumeration. Unlike the above example,
+  gender in this case has as range xsd:string.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // This restriction says that the value of gender for an instance of Person
+  can only be the string "Male" or the string "Female". Like the<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // example above, it does not say that a value of the property is required;
+  only what it can be if it exists.</font></i></font></p>
+
+  <p> <font color="#FF0000" size="2">[This would be more consistent
+  with the syntax for restriction to a named class if it were
+  worded</font></p>
+
+  <p><font color="#008000" size="2"><b>gender</b></font><font
+  size="2"></font> <font color="#800080" size="2">of</font><font
+  size="2"></font> <font color="#000080" size="2"><b>Person</b></font><font
+  size="2"></font> <font color="#800080" size="2">can only</font><font
+  size="2"></font> <font color="#800080" size="2">be</font><font
+  size="2"></font> <font color="#800080" size="2">one</font><font
+  size="2"></font> <font color="#800080" size="2">of</font><font
+  size="2"> {"Male", "Female"}. </font> <font color="#FF0000" size="2">]</font></p>
+
+  <p> <font color="#FF0000" size="2">the "must be one of" could be interpreted as datatype enumeration PLUS
+  mincardinality restriction of 1</font></p>
+
+  <div dir="ltr">
+  <span class="334515217-25032010"><font size="2" color="#FF0000"
+  face="Arial"><span class="858120721-25032010">The issue is what wording in
+  SADL translates to what OWL construct:</span></font></span></div>
+
+  <div dir="ltr">
+  <span class="334515217-25032010"><font size="2" color="#FF0000"
+  face="Arial"><span class="858120721-25032010">The OWL allValuesFrom
+  restriction says if there is a value it must be from.. (but there doesn't
+  have to be a value). "can only have values of type"</span></font></span></div>
+
+  <div dir="ltr">
+  <span class="334515217-25032010"><font size="2" color="#FF0000"
+  face="Arial"><span class="858120721-25032010">The OWL someValuesFrom
+  restriction says that there must be a value from... (but there could be other
+  values from other classes). "has at least one value of
+  type"</span></font></span></div>
+
+  <div dir="ltr">
+  &nbsp;<p>
+  <span class="334515217-25032010"><font size="2" color="#FF0000"
+  face="Arial"><span class="858120721-25032010">In restrictions in SADL we use
+  "only has values of type NamedClass" to map to OWL allValuesFrom; we use "has
+  at least one value of type NamedClass" to map to OWL
+  someValuesFrom.</span></font></span></div>
+
+  <div dir="ltr">
+  <span class="334515217-25032010"><font size="2" color="#FF0000"
+  face="Arial"><span class="858120721-25032010">In SADL V1 we have used "must
+  be one of {...}" to express enumerations which create an unnamed class in the
+  OWL model and places an OWL allValuesFrom restriction for the property of the
+  restricted class. We do NOT interpret this to also imply an OWL
+  someValuesFrom restriction. This can be viewed as inconsistent. "can only be
+  one of {....}" is more like "only has values of type NamedClass"
+  above.</span></font></span></div>
+
+  <div dir="ltr">
+  <span class="334515217-25032010"><font size="2" color="#FF0000"
+  face="Arial"><span class="858120721-25032010">It would be reasonable to use
+  the syntax "must be one of {...}" to imply both an allValuesFrom and a
+  someValuesFrom restriction to the unnamed enumerated class. This would
+  introduce a backward incompatibility between V2 and V1. </span></font></span>
+  </div>
+</blockquote>
+
+<h2><a name="Annotations">Annotations</a></h2>
+
+<p>Annotation properties are properties that are ignored by most reasoners but
+can still be used in queries and other circumstances. SADL-supported annotation
+properties include rdfs:comment and rdfs:label. There are two supported 
+syntaxes. The first can be used anywhere::</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#0000ff">
+  <p>Green</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000">comment</font><font SIZE="2"> &quot;This is 
+  Jane's favorite color.&quot;.&nbsp;&nbsp; <font color="#808080"><i>// rdfs:comment</i></font></font><font color="#808080" size="2"><i><br>
+  </i></font><font SIZE="2" COLOR="#0000ff">Elizabeth</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000">label</font><font SIZE="2"> &quot;Lizzy&quot;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <font color="#808080"><i>// rdfs:label</i></font></p>
+  </font>
+</blockquote>
+
+  <p><font size="2">The other form can only be used when a concept is defined:</font></p>
+
+  <font SIZE="2" COLOR="#0000ff">
+<blockquote>
+  <p>Green</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">note</font><font SIZE="2"> 
+  &quot;This is an alternate way to say it's Jane's favorite color.&quot;) </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Color</b></font><font SIZE="2">.&nbsp;&nbsp;&nbsp;
+  <font color="#808080"><i>// rdfs:comment</i></font><br>
+  <font SIZE="2" COLOR="#0000ff">Elizabeth</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> 
+  &quot;Betty&quot;) </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font>.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <font color="#808080"><i>// rdfs:label</i></font></font></p>
+</blockquote>
+
+<p>SADL also allows one to define additional annotation properties (properties 
+of type owl:AnnotationProperty). In OWL, an annotation property cannot
+have a domain or a range, so we do not allow domain or range in SADL either.
+Note that annotation property names are green but not bold.</p>
+
+<blockquote>
+  <p><font size="2" color="#008000">display</font><font size="2"></font> <font
+  size="2" color="#800080">is</font><font size="2"></font> <font size="2"
+  color="#800080">a</font><font size="2"></font> <font size="2"
+  color="#800080">type</font><font size="2"></font> <font size="2"
+  color="#800080">of</font><font size="2"></font> <font size="2"
+  color="#800080">annotation</font><font size="2">.   </font><font
+  size="2" color="#808080"><i>// Note that an annotation cannot have a
+  specified domain and range.<br>
+  </i></font><b><font size="2" color="#008000">age </font></b><font size="2"
+  color="#800080">has</font><font size="2" color="#808080"><i><font
+  size="2"></font></i></font><font size="2"><font size="2"
+  color="#008000"> display</font><i><font size="2"
+  color="#808080"></font></i> "Never"<font size="2"
+  color="#808080"><i>.</i></font>   </font><i><font size="2"
+  color="#808080">// This annotates the age property with value of display
+  "Never"; perhaps used to drive a user-interface</font></i></p>
+</blockquote>
+
+<h2><a name="Summary">Summary</a></h2>
+
+<p>With the release of Version 2, SADL provides a much more expressive language 
+for defining OWL-DL models with Semantic Rules layered on the models. With the 
+plug-in translator/reasoner architecture of Version 2, SADL models, rules, and 
+queries can potentially be translated to any compatible ontology language for 
+use with a targeted reasoner.</p>
+
+<p>SADL provides support for model development and maintenance over the model 
+lifecycle. This includes integration with version management systems via Eclipse 
+functionalities, testing and regression testing for model validation, and ad hoc 
+querying for easy model interaction. </p>
+
+</body>
+</html>

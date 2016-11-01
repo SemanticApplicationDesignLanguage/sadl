@@ -1,0 +1,3 @@
+There are no download files for the Semantic Application Design Language (SADL) project. Releases occur in the form of Eclipse updates. Go to http://sadl.sourceforge.net and click on Downloads -> Installation Instructions for detailed instructions on SADL installation.
+
+Sample SADL modeling projects are also available and are checked out of the project CVS repository. Instructions for obtaining these sample projects are available at http://sadl.sourceforge.net by clicking on the Tutorials menu item.
