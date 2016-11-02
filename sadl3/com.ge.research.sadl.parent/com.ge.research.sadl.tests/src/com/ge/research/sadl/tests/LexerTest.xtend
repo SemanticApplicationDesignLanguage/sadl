@@ -22,8 +22,8 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import org.antlr.runtime.ANTLRStringStream
 import org.antlr.runtime.Token
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -19,8 +19,8 @@ package com.ge.research.sadl.tests.scoping
 
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
 import org.junit.Test

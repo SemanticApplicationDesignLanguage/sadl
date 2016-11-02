@@ -12,8 +12,8 @@ import com.google.common.base.Stopwatch
 import com.google.inject.Inject
 import java.util.concurrent.TimeUnit
 import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.junit.Test
 import org.junit.runner.RunWith
 

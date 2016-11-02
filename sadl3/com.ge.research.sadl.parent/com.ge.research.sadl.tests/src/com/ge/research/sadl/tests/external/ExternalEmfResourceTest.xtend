@@ -6,7 +6,7 @@ import org.junit.Assert
 import com.google.inject.Inject
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.SadlResource
-import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import com.ge.research.sadl.resource.ResourceDescriptionStrategy
 import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.naming.IQualifiedNameConverter
