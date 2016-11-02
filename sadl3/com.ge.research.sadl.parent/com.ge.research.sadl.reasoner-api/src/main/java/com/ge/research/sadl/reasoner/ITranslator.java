@@ -227,4 +227,10 @@ public interface ITranslator {
 	 * @return -- String array containing function signature: 0th element is return type, subsequent elements are argument types in order
 	 */
 	public String[] getBuiltinFunctionSignature(String builtinFunctionName);
+	
+	/**
+	 * Method to obtain a list of all built in functions for this reasoner/translator pair
+	 * @return -- String array of builtin functions
+	 */
+	public String[] getListOfBuiltinFunctions();
 }
