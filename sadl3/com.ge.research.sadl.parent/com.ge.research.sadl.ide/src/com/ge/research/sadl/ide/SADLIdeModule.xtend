@@ -17,9 +17,16 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide
 
+import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
+import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 
 /**
- * Use this class to register ide components.
+ * Use this class to register generic IDE components.
  */
 class SADLIdeModule extends AbstractSADLIdeModule {
+	
+	def Class<? extends IdeContentProposalProvider> bindIdeContentProposalProvider() {
+		return SadlIdeContentProposalProvider
+	}
+	
 }

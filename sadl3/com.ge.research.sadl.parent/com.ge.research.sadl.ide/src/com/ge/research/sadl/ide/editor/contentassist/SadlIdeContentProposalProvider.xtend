@@ -17,6 +17,18 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide.editor.contentassist
 
+import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.services.SADLGrammarAccess
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import org.eclipse.xtext.Assignment
+import org.eclipse.xtext.CrossReference
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.RuleCall
+import org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ide.editor.contentassist.IIdeContentProposalAcceptor
+import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalCreator
+import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalPriorities
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 
 /**
@@ -27,6 +39,95 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
  * 
  * @author akos.kitta
  */
+@Singleton
 class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
+
+	/** A set of all file extensions that can be imported into the resource. */
+	static val KNOWN_FILE_EXTENSION = #{'sadl', 'owl', 'n3', 'ntriple', 'nt'};
+	
+	static val IMPLICIT_MODEL_NAME = 'SadlImplicitModel.sadl';
+
+	@Inject 
+	SADLGrammarAccess grammarAccess;
+	
+	@Inject
+	IdeContentProposalCreator proposalCreator;
+	
+	@Inject
+	IdeContentProposalPriorities proposalPriorities;
+	
+	@Override
+	override protected _createProposals(RuleCall ruleCall, ContentAssistContext ctx, IIdeContentProposalAcceptor acceptor) {
+		val rule = ruleCall.rule;
+		switch (rule) {
+			case grammarAccess.EOSRule: {
+				ctx.completeEOS(acceptor);
+			}
+			default: {
+				super._createProposals(ruleCall, ctx, acceptor)
+			}
+		}
+	}
+	
+	@Override
+	override protected _createProposals(Assignment assignment, ContentAssistContext ctx, IIdeContentProposalAcceptor acceptor) {
+		switch (assignment) {
+			case grammarAccess.sadlModelAccess.getBaseUriAssignment_1: {
+				ctx.completeBaseUri(acceptor);
+			}
+			case grammarAccess.sadlModelAccess.aliasAssignment_2_1: {
+				ctx.completeAlias(acceptor);
+			}
+			case grammarAccess.sadlImportAccess.importedResourceAssignment_1: {
+				ctx.completeImports(acceptor);
+			}
+			default: {
+				super._createProposals(assignment, ctx, acceptor);
+			}
+		}
+	}
+	
+	@Override
+	override protected getCrossrefFilter(CrossReference reference, ContentAssistContext ctx) {
+		// Special case for filtering out all those resources among import proposals which are already imported.
+		if (reference.eContainer == grammarAccess.sadlImportAccess.importedResourceAssignment_1) {
+			val model = EcoreUtil2.getContainerOfType(ctx.currentModel, SadlModel);
+			val imports = model.imports.map[importedResource].filterNull.map[baseUri].toSet;
+			return [
+				return IMPLICIT_MODEL_NAME !== EObjectURI?.lastSegment
+					&& KNOWN_FILE_EXTENSION.contains(EObjectURI?.fileExtension)
+					&& !imports.contains(name.toString)
+			];
+		}
+		super.getCrossrefFilter(reference, ctx)
+	}
+
+	private def completeEOS(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
+		val proposalText = ".\n";
+		val proposal = proposalCreator.createProposal(proposalText, ctx, [
+			description = '. - End of Sentence';
+		]);
+		val priority = proposalPriorities.getDefaultPriority(proposal);
+		accept(proposal, priority);
+	}
+	
+	private def completeBaseUri(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
+		val proposalText = '''"http://sadl.org/«ctx.resource.URI.lastSegment»"''';
+		val proposal = proposalCreator.createProposal(proposalText, ctx);
+		val priority = proposalPriorities.getDefaultPriority(proposal);
+		accept(proposal, priority);
+	}
+	
+	private def completeAlias(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
+		val proposalText = ctx.resource.URI.trimFileExtension.lastSegment;
+		val proposal = proposalCreator.createProposal(proposalText, ctx);
+		val priority = proposalPriorities.getDefaultPriority(proposal);
+		accept(proposal, priority);
+	}
+
+	private def completeImports(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
+		val crossRef = grammarAccess.sadlImportAccess.importedResourceAssignment_1.terminal as CrossReference;
+		_createProposals(crossRef, ctx, it);
+	}
 	
 }
