@@ -1,0 +1,186 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+  <title>Setting up the SADL IDE Environment</title>
+</head>
+
+<h1>Setting up the SADL IDE Environment</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->02/02/2010<!--webbot bot="Timestamp" endspan i-checksum="12513" --> 
+by <a href="mailto:crapo@research.ge.com?subject=SADL Tutorial">A. W. Crapo</a></h5>
+<h2>Install Eclipse 3.2.2</h2>
+<ol>
+  <li>Download Eclipse 3.2.2 as a ZIP file from either of these two sources and 
+  save as a temporary file:<ul>
+    <li><font face="Arial" size="2"><span class="833234519-01022010">
+    <a title="http://crapo.research.ge.com/djst/downloads/sadl-ide1.0.0.zip" href="http://crapo.research.ge.com/djst/downloads/sadl-ide1.0.0.zip">
+    http://crapo.research.ge.com/djst/downloads/sadl-ide1.0.0.zip</a>&nbsp;(156 MB)</span></font>
+    </li>
+    <li><font face="Arial" size="2"><span class="833234519-01022010">
+    <a title="http://archive.eclipse.org/eclipse/downloads/drops/R-3.2.2-200702121330/download.php?dropFile=eclipse-SDK-3.2.2-win32.zip" href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.2.2-200702121330/download.php?dropFile=eclipse-SDK-3.2.2-win32.zip">
+    http://archive.eclipse.org/eclipse/downloads/drops/R-3.2.2-200702121330/download.php?dropFile=eclipse-SDK-3.2.2-win32.zip</a>&nbsp;(121 
+    MB)</span></font></li>
+  </ul>
+  </li>
+  <li>Unzip Eclipse 3.2.2 to a location on a local drive. The path should NOT 
+  contain any spaces or non-alphanumeric characters<ul>
+    <li>Acceptable path: C:\sadl</li>
+    <li>Not acceptable: C:\Program Files\eclipse</li>
+  </ul>
+  </li>
+  <li>Edit the &quot;eclipse.ini&quot; file, e.g., C:\sadl\eclipse\eclipse.ini so that it 
+  contains:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -vmargs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -Xms256m<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -Xmx1024m<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -Xss1m</li>
+  <li>If you wish create a shortcut to the Eclipse executable, e.g., to C:\sadl\eclipse\eclipse.exe</li>
+</ol>
+<h2>Install or Update the SADL for GE Plug-in</h2>
+<ol>
+  <li>Download the latest SADL Plug-in for GE update file from
+  <a href="http://crapo.research.ge.com/djst/sadlide.html#WhatsNewbyVersion">
+  http://crapo.research.ge.com/djst/sadlide.html#WhatsNewbyVersion</a>. 
+  Save as a temporary file.</li>
+  <li>Unzip the latest SADL Plug-in to a temporary location, e.g., 
+  C:\temp\sadlgeupdate</li>
+  <li>Start Eclipse by running &quot;...\eclipse.exe&quot; or from the shortcut if you 
+  created one in step 4.</li>
+  <li>From the Help menu, select Find and Install Software Updates:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin1.jpg" width="376" height="252"></li>
+  <li>Select &quot;Search for new features to install&quot; and click Next</li>
+  <li>Click on &quot;New Local Site...&quot;, then browse to the directory where you 
+  unzipped the latest version of the plug-in, e.g., C:\temp\sadlgeupdate, and 
+  click OK</li>
+  <li>Change the name if you wish and then click OK<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin2.jpg" width="356" height="154"></li>
+  <li>Click Finsh and follow the prompts to complete the plug-in update. Then 
+  restart Eclipse when prompted.</li>
+</ol>
+<h2>Check-out and Exercise SADL Test Models</h2>
+<ol>
+  <li>Go to the Eclipse CVS Repository Exploring Perspective<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin3.jpg" width="321" height="321"><br>
+  Select CVS Repository Exploring and click OK</li>
+  <li>Click on the icon to add a CVS repository<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin4.jpg" width="401" height="58"></li>
+  <li>Fill in the repository properties as shown, using your own OpenGE userid 
+  and password. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin5.jpg" width="438" height="542"><br>
+  Click Finish to complete.</li>
+  <li>Check-out the ShapesDemo project by expanding the new CVS repository and 
+  right-clicking on the folder with that name and selecting Check Out<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin6.jpg" width="402" height="394"><br>
+  Repeat for TestGeSadl and TestSadlIde projects</li>
+  <li>Switch to the Resources perspective</li>
+  <li>Select all three projects, right-click, and select Enable SADL Builder (or 
+  do one project at a time)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin7.jpg" width="299" height="507"><br>
+  Note: building a SADL model means generating an OWL and possibly a rule file 
+  from the SADL file. Building a SADL project means regenerating OWL and rule 
+  files from any SADL files which have been modified.</li>
+  <li>Turn off Build Automatically by un-checking<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin8.jpg" width="356" height="216"><br>
+  (This isn't necessary but generally it is best to build SADL model files when 
+  editing is complete.)</li>
+  <li>Close all but the ShapesDemo project. This can be done by right-clicking 
+  on the project name in the Navigator view and selecting &quot;Close Unrelated 
+  Projects&quot;.</li>
+  <li>Select the ShapesDemo project and remove all OWL and rule files by 
+  &quot;cleaning&quot; the project<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin9.jpg" width="356" height="215"></li>
+  <li>Build the ShapesDemo project<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin10.jpg" width="301" height="538"></li>
+  <li>Scroll through the Console window content and find the error in 
+  otherExamples.sadl<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin11.jpg" width="744" height="166"><br>
+  Click on the hyperlink &quot;otherExamples.sadl (line 20)&quot; to show the error in an 
+  editor window.</li>
+  <li>Make the Console window full-size by double clicking on the tab label 
+  (Console). Return it to normal size by double clicking on the tab label again.</li>
+  <li>Clear the Console window content by clicking on the &quot;Clear Console&quot; icon<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin13.jpg" width="742" height="165"></li>
+  <li>Show the location of the current editor file in the Navigator view by clicking on the 
+  alignment icon<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin12.jpg" width="427" height="308"></li>
+  <li>Close otherExamples.sadl by clicking on the &quot;x&quot; on the editor tab<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin14.gif" width="182" height="37"></li>
+  <li>Open the Tests folder in the ShapesDemo project by clicking on the &quot;+&quot; in 
+  front of &quot;Tests&quot;</li>
+  <li>Open shapes-test.sadl by double-clicking on the file name in the Navigator 
+  view.</li>
+  <li>Run this test case by right-clicking on the file name in the Navigator 
+  view and selecting SADL Actions -&gt; Test<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin15.jpg" width="406" height="486"></li>
+  <li>Examine the test results in the Console window<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin16.gif" width="624" height="297"></li>
+  <li>Change the content of shapes-test.sadl by deleting the comment on MyCircle.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin21.gif" width="662" height="229"></li>
+  <li>Compare with the CVS version of the file by right-clicking on the file 
+  name in the Navigator view and selecting Compare With -&gt; Latest from HEAD<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin22.jpg" width="428" height="415"><br>
+  The result should be:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin23.jpg" width="1005" height="269"></li>
+  <li>Restore the file content to the latest in CVS by right-clicking on the 
+  file name in the Navigator view and selecting Replace With -&gt; Latest from 
+  HEAD. Click OK to overwrite local changes.</li>
+</ol>
+
+<h2>SADL IDE Basics</h2>
+<ol>
+  <li>Create your own SADL Project by selecting File -&gt; New -&gt; Project...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin17.jpg" width="455" height="99"></li>
+  <li>Select General as the project type and click on Next<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin18.jpg" width="500" height="500"></li>
+  <li>Enter a project name, e.g., MyFirstSadlProject, and click Finish.</li>
+  <li>Right-click on the new project name in the Navigator view and select New 
+  -&gt; File<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin19.jpg" width="426" height="268"><br>
+  Enter a SADL file name, e.g., test.sadl, and click Finish.</li>
+  <li>With the cursor still in the editor for the new SADL file, hold down the 
+  Ctrl key and press the space bar. This requests content completion proposals.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img border="0" src="images/settin20.gif" width="452" height="256"><br>
+  Press the Enter key to select the proposed completion. <br>
+  Note: sometimes you will get useful completion help and sometimes you won't 
+  (sorry). The next version of the SADL-IDE will focus on robust completion 
+  proposal.</li>
+</ol>
+<h3>Known Bugs/Limitations and Workarounds</h3>
+<ol>
+  <li>Large text outputs to the Console window (&gt; 160,000 characters) will 
+  freeze Eclipse 3.2.2. To get around this, change the SADL preference to send 
+  output to a file, which can then be opened to examine output. This should be 
+  fixed with SADL Version 2 on Eclipse 3.4 or 3.5.</li>
+  <li>Sometimes the Eclipse text editor gets confused and stops displaying new 
+  characters while they are actually entered in reverse order. When this 
+  happens, save the file, close the editor window, and re-open. This should be 
+  resolved with newer versions of Eclipse and IMP.</li>
+  <li>Not all of OWL DL expressivity is covered in SADL Version 1. It will be in 
+  Version 2.</li>
+</ol>
+
+
+</html>

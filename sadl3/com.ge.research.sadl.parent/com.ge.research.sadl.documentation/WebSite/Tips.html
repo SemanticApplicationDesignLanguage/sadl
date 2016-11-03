@@ -1,0 +1,74 @@
+<title>SADL Tips</title>
+<h1>SADL Tips</h1>
+<h6>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/30/2012<!--webbot bot="Timestamp" endspan i-checksum="12508" --> 
+by <a href="mailto:crapo@research.ge.com?subject=SADL Tips">A. W. Crapo</a></h6>
+<p>This document is a list of useful tips about how to do things in SADL. </p>
+<ol>
+  <li>Content assistance can help you by providing a list of legal things to add 
+  at the current cursor location. This list includes templates (identified with 
+  a green dot before the menu item) that allow you to 
+  create and customize entire phrases or statements by typing or 
+  selecting from a menu and then tabbing to the next input in the template. When 
+  using a template, first click on the template and then type in a template item 
+  if there is no menu or pick an item from the menu if there is a menu.</li>
+  <li><a name="Escape">Escape</a> a reserved word: to &quot;escape&quot; a reserved word 
+  so that it can be used as the name of a user-defined concept, precede the word 
+  with a &quot;^&quot;. For example, &quot;where&quot; is a reserved word in SADL V2 (can be used in 
+  queries). To define a property named &quot;where&quot;, do the following:<font SIZE="2" COLOR="#000080"><b><p>
+  TS_Event</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">top-level</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>^where</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2">.<br>
+  <br>
+  </font>There is a particular twist to this when the name needs to be prefixed. 
+  For example, if &quot;rdf:type&quot; were to be passed as an argument to a built-in 
+  function it would need to be written as follows.<br>
+  <br>
+  <b><font SIZE="2" COLOR="#008000">rdf:^type</font></b><br>
+&nbsp;</li>
+  <li>When a SADL Version 1 project is first loaded into SADL Version 2, some 
+  model file changes will be done automatically to make the file compatible with 
+  Version 2. The first action after opening the project or checking it out of a 
+  repository should be to clean and rebuild the project (from the menu bar 
+  Project -&gt; Clean...). This should be repeated two times.</li>
+  <li>Project -&gt; Build Automatically must be checked on the menu bar dropdown 
+  menu for the save operation on a SADL file to also create the OWL and 
+  associated translation files. </li>
+  <li>There is a key binding for running the tests in a model. With the focus on 
+  the opened model editor window, press Alt-Shift-T.</li>
+  <li>There is a key binding for running ad hoc queries on a model. With the 
+  focus on the opened model editor window, press Alt-Shift-R.</li>
+  <li>A reasoner is selected and configured using the project preferences. With 
+  the project open (and highlighted in the Project Explorer pane, select Project 
+  -&gt; Properties. In the resulting dialog, click on the &quot;+&quot; in front of &quot;Sadl&quot; in the left-hand pane and click on &quot;Reasoner 
+  Preferences&quot;. This allows selection and configuration of the reasoner. 
+  Reasoner configuration is saved in the &quot;configuration.rdf&quot; 
+  file in the OwlModels folder of the project. For more information about the 
+  default reasoner, see <a href="JenaConfiguration.html">Jena Reasoner 
+  Configuration</a>.</li>
+  <li>You can define domain-specific templates for a project. For an example, 
+  see <a href="tutorial/DomainTemplates.html">Domain-Specific Templates</a>.</li>
+  <li>You can do &quot;recursive&quot; queries in SPARQL by using &quot;+&quot; after the property 
+  to be recursed. See
+  <a href="http://answers.semanticweb.com/questions/9909/sparql-recursive-query">
+  http://answers.semanticweb.com/questions/9909/sparql-recursive-query</a>. 
+  There is an example named RecursiveQuery.sadl in the AutoTests folder of the 
+  TestSadlIde project on SourceForge.</li>
+  <li>You can use Lucene in conjunction with SPARQL to do a textual search of 
+  annotations (rdfs:label, rdfs:comment) in a model. The predicate is &quot;http://jena.hpl.hp.com/ARQ/property#textMatch&quot; 
+  and the object is of the form &quot; '+&lt;text&gt;' where &lt;text&gt; is the replaced with 
+  the text to be matched. &quot;For more information on syntax and function, see
+  <a href="http://jena.apache.org/documentation/larq/index.html">
+  http://jena.apache.org/documentation/larq/index.html</a>. For use of a custom 
+  Lucene indexer to generate annotations from URI's, see
+  <a href="JenaConfiguration.html">Jena Configuration</a>.</li>
+</ol>

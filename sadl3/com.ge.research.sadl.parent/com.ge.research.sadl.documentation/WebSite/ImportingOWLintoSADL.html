@@ -1,0 +1,79 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Importing OWL Models into SADL</title>
+</head>
+
+<body>
+
+<h1>Importing OWL Models into SADL</h1>
+<h6>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->08/30/2011<!--webbot bot="Timestamp" endspan i-checksum="12519" --></h6>
+<p>An existing OWL model may be imported directly into a SADL model just as one 
+would import another SADL model. Imports of OWL model do so by its public URI, 
+e.g.:</p>
+<font SIZE="2" COLOR="#800080">
+<blockquote>
+  <p>import</font><font SIZE="2"> <b>&quot;http://research.ge.com/Acuity/aulo.owl&quot;</b>
+  </font><font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> aulo.</p>
+</blockquote>
+</font>
+<p>Once an OWL model has been imported, concepts in the model may be referenced 
+using the specified alias:</p>
+<blockquote>
+  <font SIZE="2"><font SIZE="2" COLOR="#000080"><b>
+  <p>Genius</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>aulo:Person</b></font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+</font>
+<p>In order for the OWL model to be found and loaded, its actual location must 
+be specified in the &quot;ont-policy.rdf&quot; file in the OwlModels folder of the 
+project. Note that the OwlModels folder is created by Eclipse as soon as a valid 
+SADL model file is saved. The &quot;ont-policy.rdf&quot; file is created to contain all of 
+the mapping information necessary for deploying the SADL models of the project. 
+An OntologySpec entry must be added for the OWL model being referenced. This 
+will look something like:</p>
+<blockquote>
+  <span LANG="EN"><font SIZE="2">
+  <p>&lt;OntologySpec&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;publicURI rdf:resource=&quot;http://research.ge.com/Acuity/aulo.owl#&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;language rdf:resource=&quot;http://www.w3.org/2002/07/owl&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;altURL rdf:resource=&quot;file:///G:/sadl/eclipse/workspace/TestSadlXtext/OtherOwlModels/aulo.owl&quot;/&gt;<br>
+  &lt;/OntologySpec&gt;</p>
+  </font></span>
+</blockquote>
+<p>Note that the &quot;altURL&quot; may be a &quot;file:///...&quot; URL referencing a file system 
+resource or it may be an &quot;http://...&quot; URL referencing the ontology from an HTTP 
+server. </p>
+<p>When a SADL project is moved to another computing environment, as when a 
+collaborator checks a project out of a version control repository such as CVS, 
+an OntologySpec mapping for an OWL file may need to be updated to point to the 
+OWL model file at another location.</p>
+<p>Note that a global alias can be specified in the OntologySpec section for an 
+OWL file. This is of the form: </p>
+<blockquote>
+<p><font SIZE="2">
+  &nbsp;<span LANG="EN">&lt;OntologySpec&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;publicURI rdf:resource=&quot;http://research.ge.com/Acuity/aulo.owl#&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;language rdf:resource=&quot;http://www.w3.org/2002/07/owl&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;altURL rdf:resource=&quot;file:///G:/sadl/eclipse/workspace/TestSadlXtext/OtherOwlModels/aulo.owl&quot;/&gt;<br>
+  </span>
+  </font><font size="2">&nbsp;&nbsp;&nbsp; &lt;prefix rdf:datatype=&quot;http://www.w3.org/2001/XMLSchema#string&quot;&gt;aulo&lt;/prefix&gt;</font><span LANG="EN"><font SIZE="2"><br>
+  &lt;/OntologySpec&gt;</p>
+  </font></span>
+</blockquote>
+<p>If a global alias is provided, the import statement does not need to include 
+&quot;as aulo&quot;. See <a href="ModelNames.html">Model Names, Namespaces, and Aliases in SADL</a>.</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

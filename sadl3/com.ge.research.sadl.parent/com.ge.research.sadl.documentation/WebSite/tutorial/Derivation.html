@@ -1,0 +1,219 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Derivation Logging and Creating Derived Model Snapshot</title>
+</head>
+
+<body>
+
+<h1>Derivation Logging and Creating a Derived Model Snapshot</h1>
+
+<h2>Contents</h2>
+<ul>
+  <li><a href="#The Derivation Log">The Derivation Log</a></li>
+  <li><a href="#Explain">Explain</a></li>
+  <li><a href="#Model Snapshots">Derived Model Snapshots</a></li>
+</ul>
+
+<h2><a name="The Derivation Log">The Derivation Log</a></h2>
+<p ALIGN="LEFT">If the current reasoner supports derivation logging and it is 
+enabled, the derivations can be shown in one of two ways. For illustration 
+purposes, we will use the following small example which defines a
+<font size="2" color="#000080"><b>Person</b></font> with some attributes 
+including their <font size="2" color="#008000"><b>birthdate</b></font> and 
+calculates their <font size="2" color="#008000"><b>age</b></font>.</p>
+<blockquote>
+  <font SIZE="2" COLOR="#000080"><b>
+  <p ALIGN="LEFT">Gender</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">must</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">Male</font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#0000ff">Female</font><font SIZE="2">}.</font><font SIZE="2" COLOR="#000080"><b><br>
+  Person</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>gender</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Gender</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">int</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>birthdate</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">date</font><font SIZE="2">.</p>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Rule</font><font SIZE="2"> AgeRule: </font>
+  <font SIZE="2" COLOR="#800080"><br>
+&nbsp;&nbsp;&nbsp; given</font><font SIZE="2">&nbsp; </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person <br>
+&nbsp;&nbsp;&nbsp; </b></font><font SIZE="2" COLOR="#800080">if</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  bd</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>birthdate</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  cd</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> 
+  now()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> subtractDates( </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>cd</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>bd</b></font><font SIZE="2">, &quot;y&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#ff00ff"><b>xi</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> floor(</font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2">)<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">then</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>&nbsp; age</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>xi</b></font><font SIZE="2"> .</font></p>
+  <font SIZE="2" COLOR="#0000ff">
+  <p ALIGN="LEFT">Joe</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#008000"><b>gender</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Male</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#008000"><b>birthdate</b></font><font SIZE="2"> 
+  &quot;2000-03-15&quot; . </font><font SIZE="2" COLOR="#0000ff"><br>
+  Susan</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#008000"><b>gender</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Female</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#008000"><b>birthdate</b></font><font SIZE="2"> 
+  &quot;1980-04-09&quot;. </font><font SIZE="2" COLOR="#0000ff"><br>
+  Jake</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#008000"><b>gender</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Male</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#008000"><b>birthdate</b></font><font SIZE="2"> 
+  &quot;1951-04-20&quot;. </p>
+  </font>
+</blockquote>
+<p ALIGN="LEFT">The first method of derivation logging happens automatically by 
+turning on derivations in the reasoner configuration preferences (see
+<a href="../JenaConfiguration.html">Jena Reasoner Configuration</a> for an 
+example). The derivations are placed in a log file in the Temp folder of the 
+project with a filename containing the SADL file name. If the above model is 
+defined in the project file &quot;zdecl.sadl&quot;, then the console output will contain a 
+hyperlink to the derivation output and the contents of the derivation log will 
+look something like this:</p>
+<blockquote>
+  <p ALIGN="LEFT">Derivations from instance data 'file:/G:/sadl/eclipse/workspace/SmallTest/OwlModels/zdecl.owl', 
+  2011-05-03 12:01:03<br>
+  <br>
+  Joe age 11<br>
+&nbsp;&nbsp;&nbsp; was concluded by: Rule AgeRule<br>
+&nbsp;&nbsp;&nbsp; based on matching conditions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Joe type Person<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Joe birthdate 2000-03-15<br>
+  <br>
+  Jake age 60<br>
+&nbsp;&nbsp;&nbsp; was concluded by: Rule AgeRule<br>
+&nbsp;&nbsp;&nbsp; based on matching conditions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Jake type Person<br>
+&nbsp;&nbsp;&nbsp; Jake birthdate 1951-04-20<br>
+  <br>
+  Susan age 31<br>
+&nbsp;&nbsp;&nbsp; was concluded by: Rule AgeRule<br>
+&nbsp;&nbsp;&nbsp; based on matching conditions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Susan type Person<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Susan birthdate 1980-04-09</p>
+</blockquote>
+<h2 ALIGN="LEFT"><a name="Explain">Explain</a></h2>
+<p ALIGN="LEFT">The other means of obtaining derivation information is much more 
+precise to a specific conclusion. Suppose that the following statement is added 
+to our model above:</p>
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>Explain:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#0000ff">Joe</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> 11 .</p>
+  </font>
+</blockquote>
+<p>This would result in the following output to the console window with a 
+hyperlink to the statement generating the output:</p>
+<blockquote>
+  <font SIZE="2" COLOR="#000080"><u>
+  <p ALIGN="LEFT">Explanation of 'Joe, age, 11':</u></font></p>
+  <p ALIGN="LEFT"><font SIZE="2">&nbsp;&nbsp;&nbsp; Derivation of <br>
+&nbsp;&nbsp;&nbsp; Joe, age, 11:</p>
+  <p ALIGN="LEFT"></p>
+  <p ALIGN="LEFT">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; was concluded by: 
+  Rule AgeRule<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; based on 
+  matching conditions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  Joe type Person<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  Joe birthdate 2000-03-15</p>
+  </font>
+</blockquote>
+<p>Note that the &quot;Explain&quot; statement will provide information about how 
+statements that are not found in the model might have been inferred and why they 
+weren't and about the matching of rule premises. See the
+<a href="../sadlQR.html">Quick Reference Guide</a> for examples.</p>
+
+<h2>Derived <a name="Model Snapshots">Model Snapshots</a></h2>
+<p>Snapshots of two models are available using the &quot;Print&quot; statement. The first 
+usage is:</p>
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>Print:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+  Deductions</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+<p>This will cause the deductions OWL model to be saved to a file in the 
+project's Temp folder. The file name is derived from the model being inferred 
+and ends in &quot;Deductions.owl&quot;.</p>
+<p>The second usage is:</p>
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>Print:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">Model</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+<p>This causes the entire inferred model, which will include the conceptual 
+model, the instance data, and the inferences, to be saved to an OWL model file 
+in the project's Temp folder. The file name is derived from the model being 
+inferred and ends in &quot;Model.owl&quot;.</p>
+
+</body>
+
+</html>
