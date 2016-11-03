@@ -1,0 +1,359 @@
+<title>Semantic Modeling</title>
+<h1>Semantic Modeling Using SADL</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/12/2010<!--webbot bot="Timestamp" endspan i-checksum="12520" --> 
+by <a href="mailto:crapo@research.ge.com?subject=SADL Tutorial">A. W. Crapo</a></h5>
+<h2>Foundational Concepts</h2>
+<p>SADL is for modeling. Modeling is the process of creating a simplified 
+representation of some part of the universe (of things or ideas). A model 
+organizes that part of the universe that is of interest for some purpose. Of 
+necessity, a model makes commitments to a particular way of organizing or 
+viewing the world. We will take an approach to modeling that is consistent with 
+the <a href="http://www.w3.org/2004/OWL/">Web Ontology Language (OWL) </a>since 
+we wish ultimately to translate our models to that language.</p>
+<h3>Classes, Sub-classes, Super-classes, and Instances</h3>
+<p>The most fundamental concepts in modeling are those of a class, also 
+sometimes called a category or a type, and an instance. Our discussion of 
+modeling will be founded on set theory. A class is a set: a collection of 
+instances (things) that are similar in some way that is of interest. It is 
+useful to [partially] order classes into a hierarchy using the subset 
+relationship. By definition, every member of a subset (subclass) is also a 
+member the set (class). Such an ordering of classes is called a taxonomy. For 
+example, all instances of <i>Dog</i> are also instances of <i>Mammal</i> so <i>
+Dog</i> is a subset (subclass) of <i>Mammal</i>. The relationships between 
+instance, class, subclass, and super class are shown, with an Example, in Figure 
+1.</p>
+<blockquote>
+  <p><img src="images/ClassDiagram.gif" border="0" width="641" height="433"><br>
+  <b>Figure 1: Class, Subclass, Super class, and Instances with an Example</b></p>
+</blockquote>
+<p>The dots in Figure 1 represent instances, the bounded areas represent 
+classes. <i>Dog</i> is a subclass of <i>Mammal</i>, which is a subclass of <i>
+Living thing</i>. <i>Lassie</i> is an instance of a <i>Dog</i>, of a <i>Mammal</i>, 
+and of a <i>Living thing</i>. <i>Seabiscuit</i> is an instance of a <i>Mammal</i> 
+and of a <i>Living thing</i> but is not an instance of a <i>Dog</i>. (<i>Seabuscuit</i> 
+is an instance of a <i>Horse</i>.) <i>Angel Oak</i>, a famous <i>Tree</i>, is an 
+instance of a <i>Living thing</i> but is not an instance of a <i>Mammal</i> nor 
+of a <i>Dog</i>.</p>
+<p><b><i>Syntax: </i></b></p>
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="84%">
+    <tr>
+      <td width="25%"><b>Concept</b></td>
+      <td width="31%"><b>SADL Syntax (Template)</b></td>
+      <td width="94%"><b>Examples</b></td>
+    </tr>
+    <tr>
+      <td width="25%">A class (set) only has as [defined] superset the set of 
+      all things</td>
+      <td width="31%"><font COLOR="#000080"><b>New_Name</b></font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">top-level</font> <font COLOR="#800080">class</font>.</td>
+      <td width="94%"><font COLOR="#000080"><b>Rock</b></font> <font SIZE="2">
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">top-level</font> <font COLOR="#800080">class</font>.</font></td>
+    </tr>
+    <tr>
+      <td width="25%">A class (set) is a sub-class (subset) of another class 
+      (set)</td>
+      <td width="31%"><font COLOR="#000080"><b>New_Name</b></font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">type</font> <font COLOR="#800080">of</font>
+      <font COLOR="#000080"><b>Existing_Name</b></font>.</td>
+      <td width="94%"><font color="#000080"><b>PetRock</b></font>
+      <font COLOR="#800080">is</font><font SIZE="2"> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">type</font> <font COLOR="#800080">of</font>
+      <font COLOR="#000080"><b>Rock</b></font>.</font></td>
+    </tr>
+    <tr>
+      <td width="25%">Multiple sub-classes can be defined together, improving 
+      the organization and readability of the model</td>
+      <td width="31%">{<font COLOR="#000080"><b>New_Name-1</b></font>,<font COLOR="#000080"><b>New_Name-2</b></font>}
+      <font COLOR="#800080">are</font> <font COLOR="#800080">types</font>
+      <font COLOR="#800080">of</font> <font COLOR="#000080"><b>Existing_Name</b></font>.</td>
+      <td width="94%">{<font COLOR="#000080"><b>Granite</b></font>,
+      <font COLOR="#000080"><b>Limestone</b></font>, <font COLOR="#000080"><b>
+      Marble</b></font>, <font COLOR="#000080"><b>Sandstone</b></font>}
+      <font COLOR="#800080">are</font> <font COLOR="#800080">types</font>
+      <font COLOR="#800080">of</font> <font COLOR="#000080"><b>Rock</b></font>.</td>
+    </tr>
+    <tr>
+      <td width="25%">An instance belongs to a specified class (set)</td>
+      <td width="31%"><font COLOR="#0000ff">Instance_Name</font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">an</font>
+      <font COLOR="#000080"><b>Existing_Name</b></font>.</td>
+      <td width="94%"><font COLOR="#0000ff">GaryDahlsBaby</font> <font SIZE="2">
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#000080"><b>PetRock</b></font>.</font></td>
+    </tr>
+  </table>
+</blockquote>
+<p><i><b>Exercise 1: Build a SADL model representing the information in the 
+right-hand side of Figure 1. Add a test that confirms that Lassie is an instance 
+of Living thing.</b></i></p>
+<p>While one can declare that something is a class, that does not specify what 
+instances belong to the class. It would be useful to make class declarations 
+more informative. There are two kinds of class definitions:</p>
+<ol>
+  <li>Extensional (by enumeration): the class is defined as being exactly the 
+  set of named instances. </li>
+  <li>Intensional: the properties are listed that an instance must have to 
+  belong to the class. (More on this later.)</li>
+</ol>
+<p><b><i>Syntax: </i></b></p>
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="77%">
+    <tr>
+      <td width="19%"><b>Concept</b></td>
+      <td width="32%"><b>SADL Syntax (Template)</b></td>
+      <td width="40%"><b>Examples</b></td>
+    </tr>
+    <tr>
+      <td width="19%">Extensional (enumerated) class</td>
+      <td width="32%"><font COLOR="#000080"><b>New_Name</b></font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">top-level</font> <font COLOR="#800080">class</font>,
+      <font COLOR="#800080">must</font> <font COLOR="#800080">be</font>
+      <font COLOR="#800080">one</font> <font COLOR="#800080">of</font> {<font COLOR="#0000ff">Inst1</font>,<font COLOR="#0000ff">Inst2</font>,<font COLOR="#0000ff">Inst3</font>}.</td>
+      <td width="40%"><font COLOR="#000080"><b>Gender</b></font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">top-level</font> <font COLOR="#800080">class</font>,
+      <font COLOR="#800080">must</font> <font COLOR="#800080">be</font>
+      <font COLOR="#800080">one</font> <font COLOR="#800080">of</font> {<font COLOR="#0000ff">Male</font>,
+      <font COLOR="#0000ff">Female</font>}.<br>
+      <font color="#000080"><b>Season</b></font> <font COLOR="#800080">is</font>
+      <font COLOR="#800080">a</font> <font COLOR="#800080">top-level</font>
+      <font COLOR="#800080">class</font>, <font COLOR="#800080">must</font>
+      <font COLOR="#800080">be</font> <font COLOR="#800080">one</font>
+      <font COLOR="#800080">of</font> {<font color="#0000FF">Spring</font>,<font color="#0000FF"> 
+      Summer</font>,<font color="#0000FF"> Fall</font>, <font color="#0000FF">
+      Winter</font>}.</td>
+    </tr>
+  </table>
+</blockquote>
+<p>There is one more thing to consider: when does it make more sense to create a 
+concept as an instance and when does it make more sense to create it is class? 
+The answer, like the answer to most model questions, is it depends on the 
+purpose of your model. Generally speaking, you might create an instance when 
+something is truly unique--there is only one of them in the domain - or when the 
+instance is an invariant for purposes of the model--you never wish to consider 
+variations in the concept. In the first of the two examples above, &quot;Male&quot; can 
+probably be adequately modeled as an instance because the &quot;maleness&quot; is, for all 
+practical purposes, the same across subjects which may have this instance as the 
+value of the property, e.g., &quot;gender&quot;. In the second example above, &quot;Spring&quot; can 
+be modeled as an instance only if we do not wish to distinguish one spring from 
+another. If, on the other hand, the purpose of our model is to represent 
+historical information about weather then this may not be appropriate. If we 
+wish to characterize the spring of a particular year as being warm or cold, wet 
+or dry, etc., then Spring will need to be a class so that a specific spring can 
+be the subject of statements indicating the year of which the instance is a 
+part, the temperature, the rainfall, etc.</p>
+<p>To further illustrate this point, suppose that we model Spring as an instance 
+but then create additional instances of Season with various attributes. Instead 
+of being able to use the reasoner to classify these instances, we would be 
+forced to state that particular instances of Season are the same individual as 
+our instance Spring. That would be most inconvenient! A reasoner would then also 
+conclude that all of the properties of each of these instances of Season are 
+also properties of all of the other instances (since they are all the same 
+instance). Thus a particular spring might be both wet and dry, warm and cold, 
+etc. This illustrates a mismatch between the purpose of our model and the 
+conceptualization of Spring as an instance; here Spring should be a class as 
+there will be multiple instances of Spring with varying properties which we wish 
+to represent.</p>
+<h3>Properties</h3>
+<p>A third fundamental concept in modeling is that of a property, also sometimes 
+called an attribute or a relationship. A property is the generalization of an 
+association between an instance of something and some other instance or value. 
+For example, in the physical world we usually think of living things as having 
+an <i>age.</i> Since lots of instances have this property (<i>age</i>), it's 
+useful to create a property in our model (a generalization) of that name. The <i>
+age</i> of a living thing usually has a numerical value--we count <i>age</i> 
+(time) in some unit (rotations of the earth, phases of the moon, etc.). For 
+example, the <i>Angel Oak</i> has as value of <i>age</i> of about 1400 [years].</p>
+<p>An example of a property relating two instances is <i>friendship</i>. It 
+generalizes what can be observed repeatedly to exist between two people. An 
+historical example of <i>friendship</i> is the relationship between <i>David</i> 
+and <i>Jonathan</i>.</p>
+<h3>Triples</h3>
+<p>Using instances and properties, we can make statements about what exists. 
+These are in the form of a simple sentence: &lt;subject&gt; &lt;property&gt; &lt;object&gt;. For 
+example, &quot;Adam wife Eve&quot; or &quot;Adam weight 175.&quot; (Modeling units of numerical 
+values is a bit more complex.) We call such a statement or a triple. </p>
+<p><b><i>Syntax: </i></b></p>
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="84%">
+    <tr>
+      <td width="25%"><b>Concept</b></td>
+      <td width="31%"><b>SADL Syntax (Template)</b></td>
+      <td width="94%"><b>Examples</b></td>
+    </tr>
+    <tr>
+      <td width="25%">A triple (statement) specifies a property of an instance</td>
+      <td width="31%"><font COLOR="#0000ff">Instance_Name</font>
+      <font COLOR="#800080">has</font> <font COLOR="#008000"><b>
+      existing_Property</b></font> <font COLOR="#0000ff">Value</font>.</td>
+      <td width="94%"><font COLOR="#0000ff">
+      <p ALIGN="LEFT">Adam</font> <font COLOR="#800080">has</font>
+      <font COLOR="#008000"><b>wife</b></font> <font COLOR="#0000ff">Eve</font>.
+      <font COLOR="#0000ff"><br>
+      Adam</font> <font COLOR="#800080">has</font> <font COLOR="#008000"><b>
+      weight</b></font> 175 .</td>
+    </tr>
+    <tr>
+      <td width="25%">Triples can be combined to group information about a 
+      common subject.</td>
+      <td width="31%"><font COLOR="#0000ff">Instance_Name</font>
+      <font COLOR="#800080">has</font> <font COLOR="#008000"><b>
+      existing_Property1</b></font> <font COLOR="#0000ff">Value1</font><font COLOR="#800080">, 
+      has</font> <font COLOR="#008000"><b>existing_Property2</b></font>
+      <font COLOR="#0000ff">Value</font><font color="#0000FF">2</font>.</td>
+      <td width="94%"><font COLOR="#0000ff">Adam</font> <font COLOR="#800080">
+      has</font> <font COLOR="#008000"><b>wife</b></font> <font COLOR="#0000ff">
+      Eve, </font><font COLOR="#800080">has</font> <font COLOR="#008000"><b>
+      weight</b></font> 175 .</td>
+    </tr>
+    <tr>
+      <td width="25%">Instance declaration and attribution can be combined for 
+      better organization and readability</td>
+      <td width="31%"><font COLOR="#0000ff">Instance_Name</font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">an</font>
+      <font COLOR="#000080"><b>Existing_Name</b></font>, <font COLOR="#800080">
+      has</font> <font COLOR="#008000"><b>existing_Property</b></font>
+      <font COLOR="#0000ff">Value</font>.</td>
+      <td width="94%"><font color="#0000FF">Adam</font> <font COLOR="#800080">is</font>
+      <font COLOR="#800080">a</font> <font color="#000080"><b>Person</b></font>, <font COLOR="#800080">
+      has</font> <font COLOR="#008000"><b>wife</b></font> <font COLOR="#0000ff">
+      Eve, </font><font COLOR="#800080">has</font> <font COLOR="#008000"><b>
+      weight</b></font> 175 .</td>
+    </tr>
+  </table>
+  <p><b>Note</b>: the period at the end of a statement that ends with a number 
+  must have a space before the period to distinguish it from a decimal point.</p>
+</blockquote>
+<h3>Domain and Range of a Property</h3>
+<p>We can significantly increase the level of organization in our model by 
+specifying the types of things that a property can relate. Properties are 
+directional. Consider the subclass property: every Dog is a Mammal, but not 
+every Mammal is a Dog. By convention, we will say that the direction of a 
+property is from the subject of a triple (statement) using the property to the 
+object. With this direction in mind, the set of things which can be the subject 
+of a triple using a given property is called the domain of that property. The 
+set of things which can be the object of such a triple is called the range of 
+the&nbsp; property. Of course the sets which are the domain and range can be, 
+and usually are, defined in terms of other sets. Figure 2 shows the domain and 
+range of the property <i>p</i>.</p>
+<p>&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/founda24.gif" width="474" height="110"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>Figure 2: Domain and Range of a 
+Property p</b></p>
+<p><b><i>Syntax: </i></b></p>
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="77%">
+    <tr>
+      <td width="22%"><b>Concept</b></td>
+      <td width="32%"><b>SADL Syntax (Template)</b></td>
+      <td width="96%"><b>Examples</b></td>
+    </tr>
+    <tr>
+      <td width="22%">The definition of a property in SADL includes the domain 
+      class and range class or primitive data type.</td>
+      <td width="32%"><font COLOR="#008000"><b>new_Property</b></font>
+      <font COLOR="#800080">describes</font> <font COLOR="#000080"><b>
+      Domain_Name</b></font> <font COLOR="#800080">has</font>
+      <font COLOR="#800080">values</font> <font COLOR="#800080">of</font>
+      <font COLOR="#800080">type</font> <font COLOR="#000080"><b>Range_Name</b></font>.</td>
+      <td width="96%"><font COLOR="#008000"><b>weight</b></font>
+      <font COLOR="#800080">describes</font> <font COLOR="#000080"><b>Rock</b></font>
+      <font COLOR="#800080">has</font> <font COLOR="#800080">values</font>
+      <font COLOR="#800080">of</font> <font COLOR="#800080">type</font>
+      <font COLOR="#800080">float</font>.<br>
+      <font COLOR="#008000"><b>gender</b></font> <font COLOR="#800080">describes</font>
+      <font COLOR="#000080"><b>Person</b></font> <font COLOR="#800080">has</font>
+      <font COLOR="#800080">values</font> <font COLOR="#800080">of</font>
+      <font COLOR="#800080">type</font> <font COLOR="#000080"><b>Gender</b></font>.</td>
+    </tr>
+    <tr>
+      <td width="22%">Property definitions can be combined with class 
+      definitions.</td>
+      <td width="32%"><font color="#000080"><b>New_Name</b></font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">type</font> <font COLOR="#800080">of</font>
+      <font color="#000080"><b>Existing_Name</b></font>, <font COLOR="#800080">
+      described</font> <font COLOR="#800080">by</font> <font color="#008000"><b>
+      new_Property</b></font> <font COLOR="#800080">with</font>
+      <font COLOR="#800080">values</font> <font COLOR="#800080">of</font>
+      <font COLOR="#800080">type</font> <font COLOR="#000080"><b>Range_Name</b></font>.</td>
+      <td width="96%"><font COLOR="#000080"><b>PetRock</b></font>
+      <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+      <font COLOR="#800080">type</font> <font COLOR="#800080">of</font>
+      <font COLOR="#000080"><b>Rock</b></font>, <font COLOR="#800080">described</font>
+      <font COLOR="#800080">by</font> <font COLOR="#008000"><b>name</b></font>
+      <font COLOR="#800080">with</font> <font COLOR="#800080">values</font>
+      <font COLOR="#800080">of</font> <font COLOR="#800080">type</font>
+      <font COLOR="#800080">string</font>.<br>
+      <font COLOR="#000080"><b>Person</b></font> <font COLOR="#800080">is</font>
+      <font COLOR="#800080">a</font> <font COLOR="#800080">top-level</font>
+      <font COLOR="#800080">class</font>, <font COLOR="#800080">described</font>
+      <font COLOR="#800080">by</font> <font COLOR="#008000"><b>gender</b></font>
+      <font COLOR="#800080">with</font> <font COLOR="#800080">values</font>
+      <font COLOR="#800080">of</font> <font COLOR="#800080">type</font>
+      <font COLOR="#000080"><b>Gender</b></font>.</td>
+    </tr>
+  </table>
+  <p><b>Note</b>: the primitive data types that can be used in range 
+  declarations in SADL are <i>boolean</i>, <i>date</i>, <i>double</i>, <i>float</i>,
+  <i>int</i>, and <i>string</i>. </p>
+</blockquote>
+<p><i><b>Exercise 2: Add the properties age and weight to the appropriate class 
+in the model you built in exercise 1. Add triples stating values of these 
+properties for the instances in exercise 1.</b></i></p>
+<h3>The t-box and the a-box</h3>
+<p>In organizing our universe, it can be helpful to divide our model&nbsp; into two 
+parts. The first is a description of what can exist, which will include 
+definitions of the classes and properties. We call this the &quot;t-box&quot;. The second 
+part is the &quot;a-box&quot;--a description of what actually does exist, which will 
+include the instances and the actual properties of and relationships that exist 
+between those instances. While the t-box is actually expressed in triples in the 
+OWL model, we don't see most of the t-box as triples. However, the instance data 
+in the a-box is more clearly composed of triples, as shown in Figure 2.</p>
+<p><img src="images/theboxes.gif" border="0" width="496" height="274"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>Figure 3: Relationships between t-box and a-box concepts</b></p>
+<h3>Sub-Properties</h3>
+<p>Figure 3 shows the domain and range in the t-box and their relationship to 
+triples in the a-box. Figure 4 expands the ideas in Figure 3 to include subclass 
+and sub-property concepts in the form of a specific example. Note that the 
+subclass relationship shown with
+<a href="http://en.wikipedia.org/wiki/Venn_diagram">Venn Diagram</a> notation in 
+Figure 1 are represented in Figure 4 with an arrow labeled &quot;subclass&quot;.</p>
+<blockquote>
+  <p>
+  <img src="images/SubclassSubproperty.gif" border="0" width="436" height="361"><br>
+  <b>Figure 4: Example of domain, range, subclass, sub-property, with mapping to 
+  instances and triple in the a-box</b></p>
+</blockquote>
+<p>In Figure 4, &quot;son&quot; is a sub-property of &quot;child&quot;. It is a more narrowly 
+defined property with a range which is a subclass of the range of &quot;child&quot;. It is 
+the case that for every triple in the a-box with the property &quot;son&quot; one could 
+infer a triple with the same subject and object. For example, &quot;Adam --&gt; son --&gt; 
+Abel&quot; implies that it is also the case that &quot;Adam --&gt; child --&gt; Abel.&quot; More 
+formally, if property <i>p1</i> is a sub-property of <i>p2</i>, then the 
+property extension of <i>p1</i> (all of the subject-object pairs from triples 
+having <i>p1</i> as the property) is a subset of the property extension of <i>p2</i>.</p>
+<p><i><b>Exercise 3: a) Build the model shown in Figure 4. Try some variations: 
+b) if Abel is declared to be an instance of Person and son of Adam, is Abel 
+inferred to be an instance of Man? c) if Abel is declared to be an instance of 
+Man and child of Adam, is Abel inferred to be a son of Adam?</b></i></p>
+<hr>
+<blockquote>
+  <blockquote>
+    <p><b><i>That's the basics--classes, instances, and properties. In case you 
+    didn't notice, in SADL class names are </i><font color="#000080">dark blue 
+    bold</font><i>, instance names are </i></b><font color="#0000ff">light blue</font><b><i>, 
+    and property names are </i><font color="#008000">green bold</font><i>. 
+    Keywords are </i></b><font color="#800080">magenta</font><i><b>. </b></i></p>
+    <p><i><b>By convention, class and instance names start with Upper case and 
+    property names start with lower case.</b></i></p>
+  </blockquote>
+</blockquote>
+<hr>
+    <p>&nbsp;</p>

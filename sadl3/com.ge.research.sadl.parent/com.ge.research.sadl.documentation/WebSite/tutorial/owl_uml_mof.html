@@ -1,0 +1,147 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="File-List" href="owl_uml_mof_files/filelist.xml">
+<title>New Page 1</title>
+<!--[if !mso]>
+<style>
+v\:*         { behavior: url(#default#VML) }
+o\:*         { behavior: url(#default#VML) }
+.shape       { behavior: url(#default#VML) }
+</style>
+<![endif]--><!--[if gte mso 9]>
+<xml><o:shapedefaults v:ext="edit" spidmax="1027"/>
+</xml><![endif]-->
+</head>
+
+<body>
+
+<h1>OWL, UML, and MOF</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/20/2010<!--webbot bot="Timestamp" endspan i-checksum="12503" --> 
+by <a href="mailto:crapo@research.ge.com?subject=OWL, UML, and MOF">A. W. Crapo</a></h5>
+<p>Modeling as a science has greatly benefited from the computational 
+capabilities of the Information Age and has steadily evolved over the past 
+several decades. The development of the Object Modeling Technique (OMT) at GE 
+Research (<a href="#Rumbaugh">1</a>,<a href="#Lorensen">2</a>) and its evolution 
+into the Unified Modeling Language (UML) was a significant milestone. No less 
+significant was the work in description logics (DL) and artificial intelligence, 
+which produced the Knowledge Interchange Format (KIF), the Resource Description 
+Framework (RDF), the Web Ontology Language (OWL), conceptual graphs (CG), and 
+Common Logic (CL). More recent work by the Object Management Group (OMG) has 
+produced the Meta-Object Facility (MOF) and its variants, which promise to unify 
+UML, OWL, and any other modeling language or paradigm (OMG’s MOF). This is an 
+exciting time to be involved in modeling!</p>
+<h2>Common Building Blocks</h2>
+<p>&nbsp;UML was born in the software engineering domain. OWL and CL were born in the 
+domain of formal models and logical inference and classification. It is 
+instructive to compare their meta-models. MOF, first and foremost the meta-model 
+of UML, captures four main concepts: 1) classes, 2) associations, 3) datatypes, 
+and 4) packages. OWL models are composed of 1) classes, 2) properties, and 3) 
+instances. The alignment is, however, much closer than it may appear. The MOF 
+architecture has the meta-meta-model or MOF model at layer M3 with UML (for 
+example) at layer M2, an actual UML model at layer M1, and the real-world data 
+at layer M0 (see Figure 1). This M0 real-world data is a software engineer’s 
+version of what an ontologist would call instances. </p>
+<p class="MsoNormal"><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
+ coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
+ filled="f" stroked="f">
+ <v:stroke joinstyle="miter"/>
+ <v:formulas>
+  <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+  <v:f eqn="sum @0 1 0"/>
+  <v:f eqn="sum 0 0 @1"/>
+  <v:f eqn="prod @2 1 2"/>
+  <v:f eqn="prod @3 21600 pixelWidth"/>
+  <v:f eqn="prod @3 21600 pixelHeight"/>
+  <v:f eqn="sum @0 0 1"/>
+  <v:f eqn="prod @6 1 2"/>
+  <v:f eqn="prod @7 21600 pixelWidth"/>
+  <v:f eqn="sum @8 21600 0"/>
+  <v:f eqn="prod @7 21600 pixelHeight"/>
+  <v:f eqn="sum @10 21600 0"/>
+ </v:formulas>
+ <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+ <o:lock v:ext="edit" aspectratio="t"/>
+</v:shapetype><v:shape id="_x0000_s1025" type="#_x0000_t75" style='width:6in;
+ height:350.25pt'>
+ <v:imagedata src="owl_uml_mof_files/image001.png" o:title="MofLayers"/>
+</v:shape><![endif]--><![if !vml]><img border=0 width=576 height=467
+src="owl_uml_mof_files/image002.gif" v:shapes="_x0000_s1025"><![endif]></p>
+<blockquote>
+  <p class="MsoCaption" dir="ltr"><b>Figure 1: MOF Layers with Example (after 
+  illustration on UML at
+  <a href="http://en.wikipedia.org/wiki/Unified_Modeling_Language">
+  http://en.wikipedia.org/wiki/Unified_Modeling_Language</a>) </b></p>
+</blockquote>
+<p>Datatypes exist in OWL as well as in MOF and represent those primitive data 
+constructs that are not unique “instances” of a class. To illustrate, if John 
+has brother Jim and Susan has husband Jim, then (assuming the same Jim) we would 
+have only one instance of Jim in our model and both statements would reference 
+it. However, if John has age 12 years and Susan owns 12 apples, we would not 
+normally say that there is only one number 12 in our model. A datatype allows us 
+to use things like numbers, strings, dates, etc. (XML Schema datatypes) without 
+giving them a unique identifier. </p>
+<p>In OWL, concepts (classes, properties, and instances) are identified by a 
+Uniform Resource Identifier (URI) (except for “blank class nodes” which are 
+identified by a system-generated unique identifier for proper local handling). A 
+URI consists of two parts: a namespace and a local name, separated by a “#” 
+symbol. In this way local names are only required to be unique within the 
+namespace. MOF 2 moves in the direction of making identifiers more compatible 
+with OWL by requiring package names to be legal URIs. This makes sense since the 
+concept of a namespace is in many ways similar to the package in MOF. Class 
+names are only required to be unique within the package. Closely related classes 
+will normally be found in the same package just as closely related concepts in 
+OWL will normally be defined in the same namespace. In summary, the basic 
+building blocks of MOF and of OWL are very similar. MOF metamodels of OWL have 
+been constructed under work on the Ontology Definition Metamodel (ODM) (ref OMG 
+ODM). Automatic translation of at least most of UML and OWL models from one to 
+the other is a work in-progress.</p>
+<h2>Differences between UML and OWL</h2>
+<p>There are some fundamental differences between UML and OWL (<a href="#ODM">3</a>). 
+They include:</p>
+<ol>
+  <li>While both UML and OWL are based on sets, the set semantics of UML are not 
+  as complete as are those of OWL</li>
+  <li>In OWL an individual can exist and may have properties independent from 
+  membership in any classes. This is particularly an issue when starting from 
+  individuals with properties and doing classification to determine to which 
+  classes they belong</li>
+  <li>In UML there is not as much care taken to ensure that the semantics are 
+  sufficiently followed to support automatic inference<ol>
+    <li>UML disjointedness requires that disjoint classes have a common 
+    super-class, which is not the case in OWL (other than every class is a 
+    subclass of owl:Thing)</li>
+    <li>Modeling set intersection in UML allows an instance of all the 
+    super-classes to be omitted from the subclass</li>
+    <li>There is no UML construct for set complement</li>
+  </ol>
+  </li>
+  <li>UML lacks a formal model theoretic semantics; OCL has neither a formal 
+  model theory nor a formal proof theory. This prevents the use of automated 
+  reasoners on UML models</li>
+</ol>
+<hr>
+<h1>References</h1>
+<ol>
+  <li><span lang="EN" style="font-size: 12.0pt; font-family: Times New Roman">
+  <a name="Rumbaugh">Rumbaugh</a>, James , Michael Blaha, William Premerlani, 
+  Frederick Eddy, William Lorensen (1991). <i>Object-Oriented Modeling and 
+  Design</i>. Prentice Hall. ISBN 0-13-629841-9.</span></li>
+  <li><span style="font-size: 12.0pt; font-family: Times New Roman">
+  <a name="Lorensen">Lorensen</a>, William. <i>Object Oriented Modeling</i>, 
+  available on-line at
+  <a href="http://marchingcubes.org/index.php/Object_Oriented_Modeling" style="color: blue; text-decoration: underline; text-underline: single">
+  http://marchingcubes.org/index.php/Object_Oriented_Modeling</a></span></li>
+  <li><i><a name="ODM">Ontology Definition Metamodel </a>Version 1.0</i>, 
+  available on-line at <a href="http://www.omg.org/spec/ODM/1.0/PDF/">
+  http://www.omg.org/spec/ODM/1.0/PDF/</a> </li>
+</ol>
+
+</body>
+
+</html>

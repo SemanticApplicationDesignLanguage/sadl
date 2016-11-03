@@ -1,0 +1,559 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Reasoning, Rules, and Information Retrieval</title>
+</head>
+
+<body>
+
+<h1>Reasoning, Rules, and Model Information Retrieval</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->03/30/2010<!--webbot bot="Timestamp" endspan i-checksum="12507" --> 
+by <a href="mailto:crapo@research.ge.com?subject=SADL Tutorial">A. W. Crapo</a></h5>
+
+<h2>Adding Rules to Express Domain Logic</h2>
+<p>A rule expresses domain logic that is not already expressed in the formalism 
+of an OWL model. A SADL rule consists of two parts.</p>
+<ol>
+  <li>The premise expresses a graph pattern, with optional additional filters, 
+  that must be matched for the rule to fire. Remember that a semantic model is a 
+  graph--it consists of triples identifying &lt;node, edge, node&gt;. Graph patterns 
+  will be expressed in terms of triples. </li>
+  <li>The conclusion expresses what is to happen when the rule fires, which 
+  might include injecting new triples into the model (graph). </li>
+</ol>
+<p>Because the graph pattern is just that--a pattern--it will have some nodes 
+and/or edges that are not fully specified. These are called variables. In SADL 
+these variables are colored pink to make them easily identifiable. Note that in 
+SADL Version 1, when a variable precedes the period at the end of the rule they 
+must be separated by a space.</p>
+<p>In SADL, the premise can be expressed in two parts--the <i>given</i> and the
+<i>if</i> sections. This division is entirely a SADL-ism and is meant to help 
+the user separate the type of things (in the <i>given</i>) from the more complex 
+conditions (in the <i>if</i>).</p>
+<p>Here is a simple rule from the ShapesDemo project that states, &quot;for any 
+instance of a Rectangle (x), the area of the Rectangle (x) is equal to the 
+height of the Rectangle (x) times the width of the Rectangle (x)&quot;:</p>
+<blockquote>
+  <p><font COLOR="#800080">Rule</font> AreaOfRectangle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font COLOR="#800080">given&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font COLOR="#ff00ff"><b>x</b></font> <font COLOR="#800080">is</font>
+  <font COLOR="#800080">any</font> <font COLOR="#000080"><b>Rectangle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b></font><font COLOR="#800080">then&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font COLOR="#008000"><b>area</b></font> <font COLOR="#800080">of</font>
+  <font COLOR="#ff00ff"><b>x</b></font> = <font COLOR="#008000"><b>height</b></font>
+  <font COLOR="#800080">of</font> <font COLOR="#ff00ff"><b>x</b></font> *
+  <font COLOR="#008000"><b>width</b></font> <font COLOR="#800080">of</font>
+  <font COLOR="#ff00ff"><b>x</b></font> .</p>
+</blockquote>
+<p>Another example of a SADL rules is the definition of the <i>cousin</i> 
+relationship in terms of the <i>sibling</i> and <i>child</i> relationships. It 
+is from FamilyRelationships.sadl in the TestSadlIde project:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font COLOR="#800080">Rule</font> 
+Cousin_Rule<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<font COLOR="#800080">given&nbsp;&nbsp;&nbsp; </font><font COLOR="#ff00ff"><b>&nbsp; 
+x</b></font> <font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+<font COLOR="#000080"><b>Person<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</b></font><font COLOR="#ff00ff"><b>y</b></font> <font COLOR="#800080">is</font>
+<font COLOR="#800080">a</font> <font COLOR="#000080"><b>Person<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</b></font><font COLOR="#800080">if&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font COLOR="#ff00ff"><b>x</b></font> <font COLOR="#800080">is</font>
+<font COLOR="#008000"><b>sibling</b></font> <font COLOR="#800080">of</font>
+<font COLOR="#ff00ff"><b>y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+c1</b></font> <font COLOR="#800080">is</font> <font COLOR="#008000"><b>child</b></font>
+<font COLOR="#800080">of</font> <font COLOR="#ff00ff"><b>x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+c2</b></font> <font COLOR="#800080">is</font> <font COLOR="#008000"><b>child</b></font>
+<font COLOR="#800080">of</font> <font COLOR="#ff00ff"><b>y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+c1</b></font> != <font COLOR="#ff00ff"><b>c2</b></font> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<font COLOR="#800080">then&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+<font COLOR="#ff00ff"><b>&nbsp; c1</b></font> <font COLOR="#800080">is</font>
+<font COLOR="#008000"><b>cousin</b></font> <font COLOR="#800080">of</font>
+<font COLOR="#ff00ff"><b>c2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+c2</b></font> <font COLOR="#800080">is</font> <font COLOR="#008000"><b>cousin</b></font>
+<font COLOR="#800080">of</font> <font COLOR="#ff00ff"><b>c1 </b></font>.</p>
+<p>Recall that we discussed using necessary and sufficient conditions to define 
+a Role class, e.g., </p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#800080">a </font><b><font color="#000080">Woman</font></b><font color="#800080"> 
+      is a </font><b><font color="#000080">Mother</font></b><font color="#800080"> 
+      only if </font><b><font color="#008000">child</font></b><font color="#800080"> 
+      has at least 1 values.</font></p>
+<p>If we do not wish to use this level of OWL reasoning, we can also use a class 
+declaration and rule to express the same logic.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font COLOR="#000080"><b>Mother</b></font>
+<font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+<font COLOR="#800080">type</font> <font COLOR="#800080">of</font>
+<font COLOR="#000080"><b>Woman</b></font>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font COLOR="#800080">Rule</font> 
+Mother_Rule<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<font COLOR="#800080">given</font> <font COLOR="#ff00ff"><b>&nbsp; x</b></font>
+<font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+<font COLOR="#000080"><b>Woman<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b></font>
+<font COLOR="#800080">if</font> <font COLOR="#ff00ff"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+y</b></font> <font COLOR="#800080">is</font> <font COLOR="#008000"><b>child</b></font>
+<font COLOR="#800080">of</font> <font COLOR="#ff00ff"><b>x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b></font>
+<font COLOR="#800080">then</font> <font COLOR="#ff00ff"><b>&nbsp;&nbsp; x</b></font>
+<font COLOR="#800080">is</font> <font COLOR="#800080">a</font>
+<font COLOR="#000080"><b>Mother</b></font>.</p>
+<p>A rule can make a function call, either in the premise or in the conclusion, 
+to a piece of procedural code called a built-in function. A built-in function is 
+a connection from the declarative world of semantic models and rules into the 
+procedural code world. SADL allows the expression of a number of common 
+mathematical operations in formula syntax and then translates them to standard 
+built-ins in the target rule language. However, the built-in could have been 
+used explicitly in SADL and doing so illustrates usage. For example, the 
+multiplication in the conclusion of the AreaOfRectangle rule above could have 
+used the &quot;product&quot; built-in:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font COLOR="#800080">Rule</font> 
+AreaOfRectangle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font COLOR="#800080">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+given&nbsp;&nbsp;&nbsp;&nbsp; </font><font COLOR="#ff00ff"><b>x</b></font>
+<font COLOR="#800080">is</font> <font COLOR="#800080">any</font>
+<font COLOR="#000080"><b>Rectangle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</b></font><font COLOR="#800080">then&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+<font COLOR="#008000"><b>area</b></font> <font COLOR="#800080">of</font>
+<font COLOR="#ff00ff"><b>x</b></font> = product(<b><font COLOR="#008000">height</font></b>
+<font COLOR="#800080">of</font> <font COLOR="#ff00ff"><b>x,</b></font>
+<font COLOR="#008000"><b>width</b></font> <font COLOR="#800080">of</font> <b>
+<font COLOR="#ff00ff">x</font></b>) .</p>
+<p>Note that this rule is translated to the following in Jena rule syntax:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [AreaOfRectangle: (?x rdf:type 
+p0:Rectangle) , (?x p0:height ?var2) , (?x p0:width ?var3) , product(?var2, 
+?var3, ?var1) -&gt; (?x p0:area ?var1) ]</p>
+<p>The SADL syntax is [hopefully] more easily expressed and understood. </p>
+<p>The following built-ins are available:</p>
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="982">
+    <tr>
+      <td width="155"><b>Target Rule Language</b></td>
+      <td width="824"><b>Built-in Available</b></td>
+    </tr>
+    <tr>
+      <td width="155">Jena Rules</td>
+      <td width="824">Jena-provided built-ins:
+      <a href="http://jena.sourceforge.net/inference/index.html#RULEbuiltins">
+      http://jena.sourceforge.net/inference/index.html#RULEbuiltins</a> </td>
+    </tr>
+    <tr>
+      <td width="155">Jena Rules</td>
+      <td width="824">SADL-GE built-ins:
+      <a href="http://crapo.research.ge.com/djst/SadlBuiltins.html">
+      http://crapo.research.ge.com/djst/SadlBuiltins.html</a> </td>
+    </tr>
+    <tr>
+      <td width="155">Pellet/SWRL</td>
+      <td width="824">SWRL built-ins:
+      <a href="http://www.w3.org/Submission/SWRL/#8">
+      http://www.w3.org/Submission/SWRL/#8</a></td>
+    </tr>
+  </table>
+</blockquote>
+<p><i><b>Exercise 11: a)Enhance your t-box model of Exercise 10 by defining Aunt 
+and Uncle and adding rules to infer the triples to connect people to their aunts 
+and uncles. b) Add instances and relationships to your a-box model (if more are 
+needed) and test your enhanced model.</b></i></p>
+<h2>The SPARQL Query Language</h2>
+<p>SPARQL is a W3C graph query language for RDF/OWL. Remember that a semantic 
+model is a graph--it consists of triples identifying &lt;node, edge, node&gt;. A query 
+is fundamentally a graph pattern specification, with optional additional 
+filters, which is used to identify what elements from the model (graph) matches 
+the pattern and therefore match the query.</p>
+<p>A SPARQL query begins with one of (not case sensitive):</p>
+<ol>
+  <li>SELECT</li>
+  <li>DESCRIBE</li>
+  <li>CONSTRUCT</li>
+  <li>ASK</li>
+</ol>
+<p>We will mostly use SELECT. SELECT is of the form:</p>
+<p>&nbsp;&nbsp;&nbsp; select [distinct] &lt;variables&gt; WHERE { &lt;graph pattern&gt; } 
+[limit &lt;n&gt;] [order by ...]</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;: a list of variables, 
+each preceded by question mark, separated by spaces<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;graph pattern&gt;: a set of triples 
+separated by dots; each element of each triple can be a variable or a concept 
+from the graph</p>
+<p>Examples:</p>
+<blockquote>
+<p>select ?p ?u where {?p &lt;uncle&gt; ?u}</p>
+<p>select distinct ?p where {?p &lt;rdf:type&gt; &lt;Mother&gt;}</p>
+<p>select ?livingthing ?age where {?livingthing &lt;rdf:type&gt; &lt;LivingThing&gt; . ?livingthing 
+&lt;age&gt; ?age}</p>
+<p>construct { ?s ?p ?o} where { {&lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; 
+&lt;http://ctp.geae.ge.com/iws/iws#module&gt; ?m . ?m &lt;http://ctp.geae.ge.com/iws/iws#component&gt; 
+?s . ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#remaining_cycles&gt;))} <br>
+UNION {&lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; &lt;http://ctp.geae.ge.com/iws/iws#module&gt; 
+?m . ?m &lt;http://ctp.geae.ge.com/iws/iws#component&gt; ?s . ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#remaining_hours&gt;))} <br>
+UNION {&lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; &lt;http://ctp.geae.ge.com/iws/iws#module&gt; 
+?m . ?m &lt;http://ctp.geae.ge.com/iws/iws#component&gt; ?s . ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#llp_life_limit&gt;))} <br>
+UNION {&lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; &lt;http://ctp.geae.ge.com/iws/iws#module&gt; 
+?m . ?m &lt;http://ctp.geae.ge.com/iws/iws#component&gt; ?s . ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#non_llp_life_limit&gt;))} <br>
+UNION { &lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; &lt;http://ctp.geae.ge.com/iws/iws#module&gt; 
+?m . ?m &lt;http://ctp.geae.ge.com/iws/iws#component&gt; ?s . OPTIONAL {?s ?p ?o . 
+FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/iws#Replace&gt;) ) } . OPTIONAL 
+{?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/iws#ReplaceQ&gt;) ) } 
+. OPTIONAL {?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/iws#Continue&gt;) 
+) } . FILTER (sameTerm(?p, &lt;http://ctp.geae.ge.com/iws/iws#disposition&gt;) ) } <br>
+UNION { &lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; &lt;http://ctp.geae.ge.com/iws/iws#module&gt; 
+?s . OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34#Heavy&gt; 
+) ) } . OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34#Light&gt; 
+) ) } . OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34#TC&gt; 
+) ) } . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#recommended_Workscope&gt;) ) } <br>
+UNION { &lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; &lt;http://ctp.geae.ge.com/iws/iws#module&gt; 
+?m . ?m &lt;http://ctp.geae.ge.com/iws/iws#component&gt; ?s . OPTIONAL {?s ?p ?o . 
+FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34#Major&gt;) ) } . OPTIONAL {?s 
+?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34#Minor&gt;) ) } . 
+OPTIONAL {?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34#GVI&gt;) 
+) } . FILTER (sameTerm(?p, &lt;http://ctp.geae.ge.com/iws/cf34#exposure_level&gt;) ) }
+<br>
+UNION { &lt;http://ctp.geae.ge.com/iws/test#ESN123456&gt; &lt;http://ctp.geae.ge.com/iws/iws#tmcm_module&gt; 
+?s . OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34-3_djst_tmcm_model#Heavy_Work&gt; 
+) ) } . OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34-3_djst_tmcm_model#Light_Work&gt; 
+) ) } . OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?o, &lt;http://ctp.geae.ge.com/iws/cf34-3_djst_tmcm_model#Inspection&gt; 
+) ) } . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#tmcm_workscope_action&gt;) )} <br>
+UNION { ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#flight_Leg&gt;) ) } <br>
+UNION { OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#sb_selected&gt;) ) } } <br>
+UNION { OPTIONAL { ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/cf34-3#jet_type&gt;) ) } } <br>
+UNION { ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/cf34#itt_margin_improvement&gt;) ) } <br>
+UNION { ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#addl_llp_usage&gt;) ) } <br>
+UNION { ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws#addl_non_llp_usage&gt;) ) } <br>
+UNION { ?s ?p ?o . FILTER (sameTerm(?p, 
+&lt;http://ctp.geae.ge.com/iws/iws_data_inavailability_handles#flight_Leg_model&gt;) ) 
+} <br>
+UNION { OPTIONAL {?s ?p ?o . FILTER (sameTerm(?p, &lt;http://www.w3.org/2000/01/rdf-schema#comment&gt;) 
+&amp;&amp; regex(str(?s), &quot;http://ctp.geae.ge.com/iws/test#&quot;) )} } }</p>
+</blockquote>
+<p>A SPARQL Quick Reference is available here:
+<a href="http://www.dajobe.org/2005/04-sparql/SPARQLreference-1.7.pdf">
+http://www.dajobe.org/2005/04-sparql/SPARQLreference-1.7.pdf</a>.</p>
+<p><i><b>Exercise 12: Run some queries against some of the models that you have 
+created.</b></i></p>
+<h3>ARQ Extensions</h3>
+<p>The Jena implementation of SPARQL is called ARQ. ARQ extends SPARQL by adding 
+functionality not currently part of the W3C recommendation. Some of these 
+extensions that may be useful include:</p>
+<ol>
+  <li>Aggregation: functions that do some kind of aggregation over the query 
+  results<ul>
+    <li>SUM: sum over the query results</li>
+    <li>&nbsp;</li>
+  </ul>
+  </li>
+</ol>
+<h2>SADL Preferences</h2>
+<p>Eclipse uses Preferences to customize a plug-ins behavior. SADL uses Eclipse 
+Preferences to manage the kind of reasoning used, the level of explanation of 
+inferences made by the reasoner, the default namespace base URL for new models, 
+and whether model validation is performed before a test or query is executed. In 
+addition, there is a preference to allow Console Window output to be sent to a 
+log file. This is primarily a workaround for an Eclipse 3.2.2 bug limiting 
+output to the Console Window.</p>
+<p>To open SADL Preferences, click on Window -&gt; Preferences...</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/reason29.gif" width="209" height="321"></p>
+<p>By default, the SADL Preferences will appear with the Project tab selected:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/reason30.jpg" width="775" height="687"></p>
+<p>Using the Select Project button on this tab, you can change the preferences 
+for specified projects only. Alternatively, you can change preferences for all 
+projects by going to the Configuration tab:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/reason31.jpg" width="774" height="554"></p>
+<p>Here's a little more detail on what the various preferences mean.</p>
+<ul>
+  <li>Derivation Level: this controls the level of detail showing the logic of 
+  how each inferred value was derived.</li>
+  <li>Reasoner: SADL currently supports the Jena reasoner with Jena Rules or the 
+  Pellet reasoner with SWRL rules. We have mostly used the Jena reasoner, which 
+  is the default.</li>
+  <li>Reasoner Specification (Jena Only): Jena uses sets of rules to implement 
+  various levels of RDF and OWL reasoning. Each choice in this section specifies 
+  a different set of rules. Performance will vary significantly depending upon 
+  the choice made. The first choice, Domain Model Rules Only, will only use the 
+  rules that you supply and will do essentially no RDF/OWL reasoning. It will be 
+  the fastest. However, if you need transitive reasoning or more complex 
+  reasoning you will need to make another choice. OWL Memory RDFS will provide 
+  transitive reasoning. OWL DL Memory Rules will provide most of OWL DL 
+  reasoning.</li>
+  <li>Default Namespace Base: this will be the default base namespace for new 
+  models when content assist is used to automatically name the model.</li>
+  <li>Validate before Testing/Querying: if this is checked, a model validation 
+  will be performed before a test is run or a query executed.</li>
+  <li>Send Console Error/Warning Messages to Log File: if this is checked most 
+  output will go to a log file rather than to the Console Window. The log file 
+  will then be opened and displayed in an editor window so that its contents may 
+  be examined.</li>
+</ul>
+<p><i><b>Exercise 12: Open the AutoTests/hasValue.sadl model in the TestSadlIde 
+project. Make sure that Jena Reasoner Specification is set to Domain Model Rules 
+Only. Run the test. Now change the Jena Reasoner Specification to OWL Memory 
+RDFS and re-run the test. What difference did you observe? Why was there a 
+difference?</b></i></p>
+<h2>Understanding OWL Reasoning</h2>
+<h3>The Open World Assumption (OWA) and Monotonicity</h3>
+<p>Many information systems assume that all relevant information is contained in 
+the system--the system is &quot;closed.&quot; In such a system, any assertion which is not 
+known to be true is assumed to be false. For example, an application using an 
+LDAP repository containing the SSO credentials of GE employees will assume that 
+if someone is not found in the repository then they are not a GE employee. This 
+assumption is sometimes called the closed world assumption.</p>
+<p>OWL was designed for the Semantic Web. In an environment as distributed and 
+diverse as the Web it is not likely that one will know everything or have access 
+to all the information. Therefore OWL adopts the open world assumption (OWA). 
+This means that OWL assumes that the truth-value of a statement is independent 
+of whether or not it is known by any single observer or agent (e.g., the current 
+reasoner's knowledge base) to be true. This limits the kinds of inference and 
+deductions the reasoner can make to those that follow from what is known to be 
+true, not from what is not known. Another way of looking at it is that we take 
+the view that we are discovering information and we have no guarantee that we 
+have discovered or will discover complete information. </p>
+<p>A system is monotonic if the set of statements in the system is only added 
+to; no statement is ever removed. In practical terms, this not only means that 
+we don't remove assertions, it also means that adding a new assertion never 
+falsifies a conclusion previously reached by the reasoner. The OWA enables an 
+OWL knowledge base to be monotonic. We do not assume that something that is 
+unknown is false and then later, when we come to know the missing information is 
+true, have to retract our assumption that it is false. If a system is not 
+monotonic, then it needs a truth maintenance capability so that whenever a 
+statement is removed all statements which depend on the removed statement for 
+their conclusion are also removed, but not if there is [now] some way of 
+substantiating the statement.</p>
+<h3>Flavors of OWL 1</h3>
+<h4>OWL Lite</h4>
+<p>OWL Lite is a less complex, more easily computable version of OWL. It does 
+not support enumeration, hasValue restrictions, disjoint classes, union of 
+classes, intersection of classes, and complement of a class. In addition, 
+cardinality restrictions are limited to 0 or 1. OWL Lite also has the 
+restrictions lited below for OWL DL.</p>
+<h4>OWL DL</h4>
+<p>OWL DL (Description Logics) is a decidable version of OWL. It removes the 
+limitations of OWL Lite listed above. However, OWL DL requires a strict 
+separation of instances, properties, and classes. Something cannot be more than 
+one of these. It also requires strict separation of DatatypeProperties (that 
+take a primitive data type as a value) and ObjectProperties (that take an 
+instance as a value). </p>
+<h4>OWL Full</h4>
+<p>This flavor of OWL is very expressive. For example, a class can be used as an 
+instance or a property, statements can be reified and used in other statements, 
+etc. However, inference is not necessarily computable in finite time meaning 
+that there is no guarantee that a call to do reasoning will ever return. </p>
+<h3>Jena Rules Engine </h3>
+<p>(See <a href="http://jena.sourceforge.net/inference/index.html">
+http://jena.sourceforge.net/inference/index.html</a>). </p>
+<p>Several reasoners are available in Jena. </p>
+<ol>
+  <li>Transitive Reasoner</li>
+  <li>RDFS Rule Reasoner</li>
+  <li>OWL, OWL Mini, OWL Micro Reasoners</li>
+  <li>Generic Rule Reasoner</li>
+</ol>
+<p>Which of these is used depends upon the SADL preferences settings and upon 
+the presence of user-defined rules. If your model includes rules, the Generic 
+Rule Reasoner will be used but additional rules will be loaded to achieve the 
+level of RDFS/OWL reasoning specified in the SADL preferences. Note that when 
+Jena is the reasoner selected in the SADL Preferences, user-defined rules will 
+be translated into Jena rules files.</p>
+<h3>Pellet DL Reasoner</h3>
+<p>Pellet is an OWL DL reasoner from Clark &amp; Parsia (see
+<a href="http://clarkparsia.com/pellet">http://clarkparsia.com/pellet</a>). 
+Pellet was included in SADL before it was covered under a dual license. The 
+version distributed with SADL is an older version (version 1.7?). When Pellet is 
+the reasoner selected in the SADL Preferences, user-defined rules are stored 
+within the OWL model file in Semantic Web Rule Language (SWRL) syntax.</p>
+<h3>DL-Safe Rules</h3>
+<p dir="ltr">The Semantic Web Rule Language (SWRL) is enormously powerful but is 
+undecidable. However, if rule variables are only allowed to bind to explicitly 
+defined instances in the ontology, then the rule is decidable and is DL-safe. 
+That is, in the absence of built-in functions. Any built-in which modifies the 
+model (graph) is not DL-safe. Pellet takes a very strict approach to this and 
+only supports a subset of the standard SWRL built-ins (see
+<a href="http://www.w3.org/Submission/SWRL/#8">
+http://www.w3.org/Submission/SWRL/#8</a>). It is not possible to extend the set 
+of built-ins. Jena, on the other hand, adopts a &quot;user-beware&quot; policy and has a 
+variety of built-ins, some safe and some not. In addition users can add their 
+own built-ins. The Jena rule engine allows a built-in to tell the rule engine if 
+it is safe or not and if it is monotonic or not. The rule engine will try to 
+deal with some level of unsafeness/non-monotonicity.</p>
+<h3>Negation</h3>
+<p>Negation in the classical sense (classical negation) is an operation on 
+something that evaluates to a single Boolean value, i.e., a proposition. If the 
+proposition is true then its negation is false and if the proposition is false 
+then its negation is true. A triple pattern in a rule, with a specific binding, 
+can be thought of as a proposition. As such, it can be evaluated as true if the 
+triple, with the specific binding, is found in the knowledge base. In general, 
+if the triple is not found in the knowledge base, the Open World Assumption does 
+not permit us to conclude that the proposition is false as the triple may be 
+added to the knowledge base in the future. However, there are some special 
+conditions where we may be able to infer failure (negation).</p>
+<ol>
+  <li>If the triple has to do with class membership, and we know that an 
+  instance is a member of one of two disjoint classes, then we can conclude that 
+  the instance cannot be a member of the other disjoint class and hence we can 
+  conclude that the proposition is false. For example, if Dog and Human are 
+  declared to be disjoint classes and Lassie is an instance of Dog, then the 
+  statement &quot;Lassie is a Human&quot; can be inferred to be false, or more interesting 
+  to the author of a rule, the statement &quot;Lassie is not a Human&quot; can be inferred 
+  to be true. </li>
+  <li>If a property is a functional property then if there is a triple in the 
+  knowledge base with that property for a given subject then a statement that 
+  that property of that subject is a different value can be inferred false (or 
+  not that statement is true).</li>
+  <li>If a property has a class cardinality restriction of 1 or a maxCardinality 
+  restriction of 1, then if there is a triple in the knowledge base with that 
+  property, for a subject that belongs to the restricted class, then a statement 
+  that that property of that subject is a different value can be inferred false 
+  (or not that statement is true).</li>
+</ol>
+<p>Knowledge representation systems sometimes talk about two kinds of negation: 
+a weak negation expressing that something is not known to be true, and a strong 
+negation expressing that something is known to be false. In Jena rules, the 
+noValue build-in implements weak negation. There are several versions of noValue:</p>
+<ol>
+  <li>noValue(s, p) -- this will return true if there is no triple with subject 
+  s (or some binding of s if s is a variable) and property p (or some binding of 
+  p if p is a variable)</li>
+  <li>noValue(s, p, o) -- </li>
+  <li>noValue(s, p1, p2, p3, ..., pn) --</li>
+  <li>noValue(s, p1, p2, p3, ..., pn, o) -- </li>
+</ol>
+<p>&nbsp;</p>
+<p>Classical negation is closely related to the Closed World Assumption. </p>
+<h2>Default Values</h2>
+<p>Standard OWL only allows us to state what is true. (If instance <i>i</i> has
+<i>false</i> as value of Boolean property <i>p </i>(model contains triple &lt;<i>i</i>&gt; 
+&lt;<i>p</i>&gt; <i>false</i>), then what is stated is that it is true that <i>i</i> 
+has value <i>false</i> for <i>p</i>). OWL reasoners adopt the open world 
+assumption. Therefore if something isn't known at the present time we should not 
+assume that it won't be known at some future time.</p>
+<p>A default value is a value that we assign as the value of some property of an 
+instance of some class if there is no triple with this property and this 
+instance as subject in the knowledge base. You can see perhaps that the idea of 
+a default value is incongruous with the OWA. Nevertheless, default values can be 
+very useful when we wish to act on the best information currently available with 
+no immediate expectation of obtaining additional information. Therefore SADL 
+implements default values. Note that default values are not an integral part of 
+OWL and are not part of any standard. Note also that default values are not part 
+of the Open Source release of SADL--they are for internal GE use only.</p>
+<p>Here is an example of SADL default values for both object and data type 
+properties.</p>
+<font SIZE="2" COLOR="#000080"><b>
+<p ALIGN="LEFT">Thingy</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">top-level</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, <br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>dp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">float</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>op</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Color</p>
+</b></font>
+<p ALIGN="LEFT"><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b>Color</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">top-level</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">must</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">Black</font><font SIZE="2">,
+</font><font SIZE="2" COLOR="#0000ff">White</font><font SIZE="2">}.</font></p>
+<p ALIGN="LEFT"><font SIZE="2" COLOR="#008000"><b>dp</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Thingy</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">default</font><font SIZE="2"> 2.3 .</font><font SIZE="2" COLOR="#008000"><b><br>
+op</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#000080"><b>Thingy</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">default</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">White</font><font SIZE="2">.</font></p>
+<font SIZE="2" COLOR="#800080">
+<p ALIGN="LEFT">Test</font><font SIZE="2">: </font>
+<font SIZE="2" COLOR="#0000ff">MyThing</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>dp</b></font><font SIZE="2"> 2.3 .</font><font SIZE="2" COLOR="#800080"><br>
+Test</font><font SIZE="2">: </font><font SIZE="2" COLOR="#0000ff">MyThing</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>op</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">White</font><font SIZE="2">.</p>
+</font>
+<p>Do you think the two tests will pass? Does it depend upon which reasoner is 
+used? Where do you think the default values are stored?</p>
+
+<p>When a SADL model uses default values, the OWL file &quot;defaults.owl&quot; is 
+automatically added to the OwlModels directory and imported into the model file. 
+A default value is associated with a class using the rdfs:seeAlso annotation 
+property. This should cause reasoners other than the JenaReasonerForGE to 
+entirely ignore it.</p>
+
+<h3>Levels</h3>
+
+<p>Default values can be given an integer value for the property &quot;level&quot;. 
+Defaults with levels are applied in groups in ascending order. This can be used 
+to stage inference when one set of rules must be applied before another. For 
+example:</p>
+<font SIZE="2" COLOR="#008000"><b>
+<p ALIGN="LEFT">level_one_complete</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>RuleGroupingController</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">level</font><font SIZE="2"> 1 </font>
+<font SIZE="2" COLOR="#800080">default</font><font SIZE="2"> true.</font><font SIZE="2" COLOR="#008000"><b><br>
+level_two_complete</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>RuleGroupingController</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">level</font><font SIZE="2"> 2 </font>
+<font SIZE="2" COLOR="#800080">default</font><font SIZE="2"> true.</font><font SIZE="2" COLOR="#008000"><b><br>
+level_three_complete</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>RuleGroupingController</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">level</font><font SIZE="2"> 3 </font>
+<font SIZE="2" COLOR="#800080">default</font><font SIZE="2"> true.</p>
+</font>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

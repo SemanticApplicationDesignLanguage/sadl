@@ -1,0 +1,803 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>SADL Triple Patterns</title>
+</head>
+
+<body>
+
+<h1>SADL Triple Patterns: Queries, Rules, and Tests</h1>
+<h6>Last edited on
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->01/20/2011<!--webbot bot="Timestamp" endspan i-checksum="12497" --> 
+by <a href="mailto:crapo@research.ge.com?subject=SADL Query Language">A. W. 
+Crapo</a></h6>
+<h2>Introduction</h2>
+<p>Our objective in creating a SADL query language is the same as our objective 
+in creating SADL itself--to enable subject matter experts to build, validate, 
+and maintain semantic models in OWL with as little knowledge of the syntax and 
+idiosyncrasies of the modeling language itself as possible (by substituting 
+another syntax and idiosyncrasies which are closer to English).</p>
+<p>Key points:</p>
+<ol>
+  <li>A semantic model (ontology) is a mathematical graph; therefore an OWL 
+  model is a graph.</li>
+  <li>A graphs may be expressed as a set of &lt;node-edge-node&gt; statements called 
+  triples.</li>
+  <li>SADL is an English-like language for expressing OWL models; therefore a 
+  SADL model is also a graph.</li>
+  <li>Rules layered on top of a semantic model express their conditions as graph 
+  patterns to be matched in the model.</li>
+  <li>SPARQL is a  query language for retrieving information from a graph; SPARQL 
+  also expresses graph patterns to be matched in the model.</li>
+  <li>A SADL test compares the results of graph pattern matching in the model 
+  with some expected result.</li>
+</ol>
+<p>Other  points to consider:</p>
+<ol>
+  <li>A world of things and/or ideas can be modeled as a graph whose nodes are 
+  instances or types (abstractions) and whose edges are labeled with property 
+  names (abstractions).</li>
+  <li>Many (most?) instances of things in such a world are identified by 
+  association, not by name (my house, your car, the tree by the fountain, Mary's 
+  goal,...).</li>
+  <li>In ontology terms, an unnamed instance is called a bnode (blank node).</li>
+  <li>English handles identification by association very well; an ontology language should try to do the same</li>
+</ol>
+<p>Unimportant (but useful):</p>
+<ol>
+  <li>In SADL syntax, <font color="#000080"><b>classes</b></font> are dark blue 
+  bold, <font color="#008000"><b>properties</b></font> are green bold,
+  <font color="#0000ff">instances</font> are light blue.</li>
+  <li>In SADL we will normally use the OWL convention: class and instance names 
+  begin with upper-case, properties begin with lower-case.</li>
+</ol>
+<h2>Query Over a Simple Model</h2>
+<p>Consider this very model:</p>
+<blockquote>
+  <u><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">uri</font><font SIZE="2"> <b>
+  &quot;http://sadl.org/ReferenceProblem/test&quot;</b>.</font></p>
+  <p ALIGN="LEFT"></u><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">int</font><font SIZE="2">.</font><font SIZE="2" COLOR="#0000ff"><br>
+  George</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> 23 .</font><font SIZE="2" COLOR="#0000ff"><br>
+  Mary</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> 12 .</p>
+  </font>
+</blockquote>
+<p>What might we ask?</p>
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="680">
+    <tr>
+      <td width="130"><b>SADL Query</b></td>
+      <td width="109"><b>Answer</b></td>
+      <td width="437"><b>SPARQL Equivalent</b></td>
+    </tr>
+    <tr>
+      <td width="130"><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+      </font><font SIZE="2" COLOR="#000080"><b>Person</b></font></td>
+      <td width="109">George, Mary</td>
+      <td width="437">select ?p where {?p rdf:type Person}</td>
+    </tr>
+    <tr>
+      <td width="130"><font SIZE="2">&nbsp;</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+      </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+      </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> &lt; 20</font></td>
+      <td width="109">Mary</td>
+      <td width="437">select ?p where {?p rdf:type Person . ?p age ?x . 
+      FILTER(?x &lt; 20)}</td>
+    </tr>
+  </table>
+</blockquote>
+<h2>Graph Patterns in SADL</h2>
+<h3>Instance of a Class</h3>
+<p>The pattern for an instance of a class is the same as the instance data 
+declaration form. Either name can be a variable.</p>
+<blockquote>
+<p>&lt;InstanceName&gt; is a &lt;ClassName&gt;</p>
+  <font SIZE="2" COLOR="#0000ff">
+  <p>&nbsp;MyRect</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Shape<br>
+  <font SIZE="2" COLOR="#ff00ff">&nbsp;x</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080">Circle<br>
+  <font SIZE="2" COLOR="#0000ff">&nbsp;MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">an</font><font SIZE="2">
+  <font SIZE="2" COLOR="#ff00ff">x<br>
+&nbsp;x<font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>y</p>
+  </font></font></font></b></font>
+</blockquote>
+<h3>Other Triples</h3>
+<p>The pattern for other triples has three forms, depending upon the order of 
+the &lt;subject&gt;, &lt;predicate&gt;, and &lt;object&gt;. One or more of the elements of the 
+triple may be a variable.</p>
+<ol>
+  <li>The standard form is &quot;&lt;subject&gt; &lt;predicate&gt; &lt;object&gt;&quot;. The predicate can 
+  be preceded by &quot;has&quot; or &quot;with&quot;.<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> 15.75<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> 15.75<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font> <font SIZE="2" COLOR="#008000"><b>
+  area</b></font><font SIZE="2"> 15.75<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font></font>
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> 15.75<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <font SIZE="2" COLOR="#0000ff">MyCircle</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><br>
+&nbsp;</font></li>
+  <li>An alternate form supported by SADL is &quot;&lt;predicate&gt; of &lt;subject&gt; is 
+  &lt;object&gt;&quot;. The predicate can be preceded by an article.<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> 15.75<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+  <font SIZE="2" COLOR="#800080">The</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> 15.75<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font><b>
+  <font SIZE="2" COLOR="#ff00ff">y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font></b></li>
+  <li>A third form is like the previous but with the value first. Again the 
+  predicate can be preceded by an article.<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#0000ff">Mary</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Jimmy<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><b>
+  <font SIZE="2" COLOR="#ff00ff">&nbsp;y<font SIZE="2"> </font></font></b>
+  <font size="2" color="#800080">is the</font><font SIZE="2" COLOR="#ff00ff"><b><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000">area</font><font SIZE="2"> </font></b>
+  </font><font size="2" color="#800080">of</font><font SIZE="2" COLOR="#ff00ff"><b><font SIZE="2">
+  </font>x</b></font></li>
+</ol>
+<p>&nbsp;</p>
+<h2>Model Showing Common Rule, Query, and Test Syntax</h2>
+<p>The following model illustrates the common syntax across rules, queries, and 
+tests.</p>
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">uri</font><font SIZE="2"> <b>&quot;http://sadl.imp/shapes&quot;</b>
+  </font><font SIZE="2" COLOR="#800080">version</font><font SIZE="2"> 
+  &quot;$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:06:25 $&quot;.</p>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#000080"><b>
+  <p ALIGN="LEFT">Shape</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">.<br>
+  </font><font SIZE="2" COLOR="#000080"><b>Circle</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Shape</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>radius</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">.</p>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Rule</font><font SIZE="2"> AreaOfCircle: <br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">if</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Circle<br>
+&nbsp;&nbsp;&nbsp; </b></font><font SIZE="2" COLOR="#800080">then</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> = </font>
+  <font SIZE="2" COLOR="#008000"><b>radius</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> ^2 * </font>
+  <font SIZE="2" COLOR="#800080">PI</font><font SIZE="2">.</p>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#000080"><b>
+  <p ALIGN="LEFT">Rectangle</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Shape</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>height</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>width</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">.</p>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Rule</font><font SIZE="2"> AreaOfRectangle:<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">if</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Rectangle</b></font><font SIZE="2"> <br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">then</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> = </font>
+  <font SIZE="2" COLOR="#008000"><b>height</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> * </font>
+  <font SIZE="2" COLOR="#008000"><b>width</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> .</p>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#0000ff">
+  <p ALIGN="LEFT">MyCircle</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Circle</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>radius</b></font><font SIZE="2"> 3.5.<br>
+  </font><font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Rectangle</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>height</b></font><font SIZE="2"> 3.5, </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>width</b></font><font SIZE="2"> 4.5.</p>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Test:</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Shape</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#800080"><br>
+  Test:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">The</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">MyRect</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> 15.75.</font><font SIZE="2" COLOR="#800080"><br>
+  </font><font SIZE="2"><font SIZE="2" COLOR="#800080">Test:</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">MyCircle</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> (&gt; 38.4845110
+  </font><font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> &lt; 38.4845111).&nbsp;&nbsp;&nbsp;
+  <font SIZE="2" COLOR="#808080"><i>// testing for an exact floating point value 
+  is unreliable</p>
+  </i></font></font>
+  <p ALIGN="LEFT"></p>
+  </font><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Ask:</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">MyCircle</font><font SIZE="2">.</font><font SIZE="2" COLOR="#800080"><br>
+  Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#800080"><br>
+  Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Shape</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#800080"><br>
+  Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>area</b></font><font SIZE="2"> 15.75.</p>
+  </font>
+</blockquote>
+<h2>Nesting to Eliminate Variables in Chains of Triple Patterns</h2>
+
+<p>In this section we will use this model snippet for illustration.</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#000080"><b>
+  <p ALIGN="LEFT">Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font size="2" color="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">.</font></p>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described by</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">.</font></p>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">double</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>longitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">double</font><font SIZE="2">. </p>
+  </font>
+</blockquote>
+
+<p>Nesting partial triple patterns together can be a way of expressing more 
+complex chains of patterns without variables. SADL patterns use two kinds of 
+nesting. The first uses the keyword &quot;of&quot; and is of the form: </p>
+
+<blockquote>
+
+<p>&lt;property&gt; of &lt;subject&gt; </p>
+
+</blockquote>
+
+<p>This pattern allows us to &quot;walk the graph&quot; in the backward direction (see 
+figure below), e.g.:</p>
+
+<blockquote>
+
+<p><font color="#008000" size="2"><b>latitude</b></font>
+<font color="#800080" size="2">of </font><font color="#008000" size="2"><b>
+location</b></font> <font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth</b></font></p>
+
+</blockquote>
+
+<blockquote>
+
+<p>
+<img border="1" src="../images/graphwithbnodes.gif" width="369" height="199"></p>
+
+</blockquote>
+
+<p>For example:</p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p>Test:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">the</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> 38.186111.</p>
+  </font>
+</blockquote>
+
+<p>The second nesting pattern uses the keyword &quot;with&quot; and is of the form:</p>
+
+<blockquote>
+
+<p>&lt;subject&gt; with &lt;property&gt;</p>
+
+</blockquote>
+
+<p>This pattern allows us to &quot;walk the graph&quot; in the forward direction, e.g.:</p>
+
+<blockquote>
+
+<p><font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font></p>
+
+</blockquote>
+
+<p>For example:</p>
+
+<blockquote>
+
+<font SIZE="2" COLOR="#800080">
+<p>Ask:</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> 38.186111.</p>
+</font>
+
+</blockquote>
+
+<p>The two nesting patterns can be combined to create a graph pattern containing 
+both. We call the node at which the direction of walking changes the &quot;pivot 
+node&quot;. For example, this pattern would be matched by all of the people in our 
+model who were born at latitude 38.186111:</p>
+
+<blockquote>
+
+<p><font color="#008000" size="2"><b>child</b></font>
+<font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111</font></p>
+
+</blockquote>
+
+<p>The graph pattern in the figure above further constrains the results by 
+specifying a specific value of the child property. Does this pattern represent 
+the figure?</p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111 </font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>child</b></font> <font color="#0000ff" size="2">George</font></p>
+
+</blockquote>
+
+<p>The SADL language parser will interpret this to mean that the matching 
+instance of the object of &quot;location&quot; is the subject of the property &quot;child&quot; 
+and, of course, this doesn't match the model or the data. The subject of with 
+phrase (e.g., &quot;with child&quot;) is assumed to be the object of the first 
+preceding 
+with phrase having no specified object--the object of &quot;with location&quot; in this case. 
+This is not what we want as &quot;child&quot; has domain Birth. We modify the statement to make it what we intend with the use of parentheses just as we did in the 
+declaration of instance data. The pattern becomes:</p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> 38.186111)
+</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">George</font></p>
+
+</blockquote>
+
+<p>Now it is clear that &quot;with child George&quot; modifies &quot;a&nbsp;Birth&quot;. </p>
+
+<p>Consider this pattern:</p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111 </font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>child</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+spouse</b></font><font color="#0000ff" size="2"> Martha</font></p>
+
+</blockquote>
+
+<p>Here we have two <i>with</i> clauses that have a specified object value, 
+e.g., &quot;latitude 38.186111&quot; and &quot;spouse Martha&quot;. It is clear that &quot;with spouse Martha&quot; 
+must provide the object of &quot;with child&quot; as otherwise it would have no object 
+value. However, it is still unclear whether the subject of the &quot;with child&quot; 
+pattern is the Birth or the Location. Again we obtain the intended meaning with the 
+use of parentheses. The pattern becomes:</p>
+
+<blockquote>
+
+<p>
+<font color="#800080" size="2">a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font size="2">(</font><font color="#800080" size="2">with </font><b><font color="#008000" size="2">location</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111) </font>
+<font color="#800080" size="2">with</font> <b><font color="#008000" size="2">child</font></b>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>
+spouse</b></font><font color="#0000ff" size="2"> Martha</font><font size="2"> </font></p>
+
+</blockquote>
+
+<p>As another example of nesting, this pattern  identifies the ages of the spouses 
+of all of the people born at latitude 38.186111:</p>
+
+<blockquote>
+
+<p><font SIZE="2" COLOR="#800080">Ask:</font><font SIZE="2"> </font><font color="#008000" size="2"><b>age </b></font>
+<font color="#800080" size="2">of the</font> <font color="#008000" size="2"><b>
+spouse</b></font><font color="#800080" size="2"> of a</font>
+<font color="#008000" size="2"><b>child</b></font>
+<font color="#800080" size="2">of a</font>
+<font color="#000080" size="2"><b>Birth </b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>location</b></font>
+<font color="#800080" size="2">with</font> <font color="#008000" size="2"><b>latitude</b></font>
+<font size="2">38.186111.</font></p>
+
+</blockquote>
+
+<h2>Nesting Phrases to Represent Graphs Containing Bnodes</h2>
+<p>In English we often nest phrases together to traverse a semantic graph 
+without explicitly identifying the nodes by name. A node without a name is 
+called a &quot;bnode&quot;, short for blank node.</p>
+<blockquote>
+  <p>What color is the hat owned by the friend of the man who owns the boot with 
+  the silver buckle?<br>
+  <br>
+  <img border="0" src="../images/SadlTr1.gif" width="488" height="296"></p>
+</blockquote>
+<p>&nbsp;</p>
+<blockquote>
+  <p>How many named instance nodes are there in this graph pattern?</p>
+</blockquote>
+<p>SPARQL allows this and much more complex queries. In SPARQL variables are 
+used to link the triple patterns together into a single graph pattern:</p>
+<blockquote>
+  <p>select ?c where {?h &lt;rdf:type&gt; &lt;Hat&gt; . ?h &lt;color&gt; ?c . ?p &lt;owns&gt; ?h . ?p 
+  &lt;friend&gt; ?m . ?m &lt;rdf:type&gt; &lt;Man&gt; . ?m &lt;owns&gt; ?bt .?bt &lt;rdf:type&gt; &lt;Boot&gt; . ?bt 
+  &lt;part&gt; ?bk . ?bk &lt;rdf:type&gt; &lt;Buckle&gt; . ?bk &lt;color&gt; &lt;Silver&gt;}</p>
+  <font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Ask:</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>color</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Hat</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>ownedBy</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Man</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>owns</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Boot</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>part</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Buckle</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>color</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Silver</font><font SIZE="2">)))).</font></p>
+  <font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Ask:</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">select</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>h</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Hat</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>h</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>color</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>c</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>h</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>ownedBy</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>owns</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>z</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>z</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>part</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>u</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>u</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>color</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Silver</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+<p>Consider this graph pattern:</p>
+
+<blockquote>
+<p><font SIZE="2" COLOR="#800080">Ask:</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">
+a</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
+  <b>Birth</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> == </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Philadelphia</font><font SIZE="2">) (</font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> == </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Samuel</font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> == </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Ruby</font><font SIZE="2">.</font></p>
+
+<p>
+<img border="0" src="../images/sadl2.1.gif" width="520" height="333"></p>
+
+</blockquote>
+<p>What are we likely to want to know? Possibilities include the instance of a 
+Birth referred to by the first phrase (but that instance is unlikely to have a 
+name), the location of that Birth (which is unlikely to have a name), the mother 
+of that Birth, and the weight of that Birth. This is more clearly seen if we 
+look at the graph pattern in SPARQL:</p>
+<blockquote>
+  <p>?b1 rdf:type Birth . ?b1 location ?loc . ?loc latitude ?lat . Philadelphia 
+  latitude ?lat . ?b1 child George . ?b1 mother ?m . ?b2 rdf:type Birth . ?b2 
+  mother ?m . ?b2 child Samuel . ?b1 weight ?w . ?b3 rdf:type Birth . ?b3 child 
+  Ruby . ?b3 weight ?w</p>
+</blockquote>
+<p>or more likely:</p>
+<blockquote>
+  <p>?b1 rdf:type Birth . ?b1 location ?loc . ?loc latitude ?lat1 . Philadelphia 
+  latitude ?lat2 . ?b1 child George . ?b1 mother ?m . ?b2 rdf:type Birth . ?b2 
+  mother ?m . ?b2 child Samuel . ?b1 weight ?w1 . ?b3 rdf:type Birth . ?b3 child 
+  Ruby . ?b3 weight ?w2 . FILTER (?lat1 = ?lat2 &amp;&amp; ?w1 = ?w2)</p>
+</blockquote>
+<p>If the variables to return are not specified with &quot;select...&quot;, what should we 
+return?</p>
+<h2>Summary</h2>
+<p>We have illustrated the following points with examples.</p>
+<ol>
+  <li>SADL uses common graph pattern syntaxes across rules, queries, and tests. 
+  It is similar to the syntaxes used in instance data declaration.</li>
+  <li>The &quot;select...&quot; part of a SADL query is optional, but what to return isn't 
+  clearly worked out.</li>
+  <li>Nesting of graph patterns with &quot;of&quot; and &quot;with&quot; can be useful to eliminate 
+  variables and to reference bnodes by association.</li>
+  <li>Comparisons can appear in rules (where they are converted to built-ins), 
+  in queries (where they are converted to FILTERs), and in tests (where they are 
+  used in determining whether the test passed or failed).</li>
+</ol>
+
+</body>
+
+</html>
