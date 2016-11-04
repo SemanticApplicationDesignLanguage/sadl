@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -5321,6 +5322,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return implicitModelFile.getAbsolutePath();
 		}
 		return null;
+	}
+	
+	static public void createBuiltinFunctionImplicitModel(String projectRootPath) throws IOException, ConfigurationException{
+		//First, obtain proper translator for project
+		SadlUtils su = new SadlUtils();
+		final File mfFolder = new File(projectRootPath + "/" + ResourceManager.OWLDIR);
+		final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+		String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
+		IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(fixedModelFolderName, format);
+		ITranslator translator = configMgr.getTranslator();
+		//Second, obtain built-in function implicit model contents
+		String builtinFunctionModel = translator.getBuiltinFunctionModel();
+		//Third, create built-in function implicit model file
+		File builtinFunctionFile = new File(projectRootPath + "/" +
+											SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" +
+											SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME);	
+		su.stringToFile(builtinFunctionFile, builtinFunctionModel, true);
 	}
 	
 	static public void createSadlImplicitModel(File implicitModelFile) throws IOException{

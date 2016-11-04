@@ -40,6 +40,8 @@ public class SadlConstants {
 	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX = "";
 	public static final String SADL_SERIVCES_CONFIGURATION_URI = "http://com.ge.research.sadl/sadlserver/ServicesConfig";
 	public static final String SADL_SERIVCES_CONFIGURATION_PREFIX = "";
-
-
+	
+	public static final String SADL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.sadl";
+	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
+	public static final String SADL_BUILTIN_FUNCTIONS_ALIAS = "builtinfunctions";
 }
