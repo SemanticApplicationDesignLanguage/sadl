@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,7 +29,6 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
@@ -73,7 +71,6 @@ import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -218,7 +215,36 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		
 		public RangeValueType getRangeValueType() {
-			return rangeValueType;
+			if(this.getCompoundTypes() != null){
+				return getCompoundRangeValueType(this);
+			}else{
+				return rangeValueType;
+			}
+		}
+		
+		private RangeValueType getCompoundRangeValueType(TypeCheckInfo tci){
+			List<TypeCheckInfo> types = this.getCompoundTypes();
+			Iterator<TypeCheckInfo> iter = types.iterator();
+			RangeValueType rvt = null;
+			while(iter.hasNext()){
+				TypeCheckInfo type = iter.next();
+				RangeValueType rvt2 = null;
+				if(type.getCompoundTypes() != null){
+					rvt2 = getCompoundRangeValueType(type);
+				}else{
+					rvt2 = type.getRangeValueType();
+				}
+				
+				if(rvt != null){
+					if(rvt != rvt2){
+						issueAcceptor.addError("Incompatable Range Types", tci.context); //TODO add new error message
+					}
+				}else{
+					rvt = rvt2;
+				}
+			}
+			
+			return rvt;
 		}
 		
 		protected void setContext(JenaBasedSadlModelValidator validator, EObject ctx) {
@@ -735,7 +761,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Literal litval;
 			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
-				String unit = ((Unit)expression).getUnit();
+				//String unit = ((Unit)expression).getUnit();
 				ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
 				List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
 				if (impliedProperties != null) {
@@ -790,11 +816,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					issueAcceptor.addError("Unable to get the List type", el);
 				}
 				else if (listtype.getRangeValueType() != RangeValueType.LIST) {
-					issueAcceptor.addError("Expected a List", el);
+						issueAcceptor.addError("Expected a List", el);
 				}
 				else {
 					// the element's type is the type of the list but not necessarily a list
-					listtype.setRangeValueType((listtype.getTypeCheckType() != null && listtype.getTypeCheckType() instanceof ConceptName) ? ((ConceptName)listtype.getTypeCheckType()).getRangeValueType() : RangeValueType.CLASS_OR_DT);
+					listtype = convertListTypeToElementOfListType(listtype);
 				}
 				return listtype;
 			}
@@ -869,6 +895,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 	
+	private TypeCheckInfo convertListTypeToElementOfListType(TypeCheckInfo listtype) {
+		listtype.setRangeValueType((listtype.getTypeCheckType() != null && listtype.getTypeCheckType() instanceof ConceptName) ? ((ConceptName)listtype.getTypeCheckType()).getRangeValueType() : RangeValueType.CLASS_OR_DT);
+		
+		if(listtype.getCompoundTypes() == null){
+			//not compound
+			ConceptIdentifier tct = listtype.getTypeCheckType();
+			if(tct instanceof ConceptName){
+				((ConceptName) tct).setRangeValueType(RangeValueType.CLASS_OR_DT); 
+			}
+		}else{
+			  Iterator<TypeCheckInfo> tci_iter = listtype.getCompoundTypes().iterator();
+			  while(tci_iter.hasNext()){
+				  convertListTypeToElementOfListType(tci_iter.next());
+			  }
+		}
+		
+		return listtype;
+	}
+
 	protected TypeCheckInfo getType(Constant expression) throws DontTypeCheckException {
 		//What do we do about the rest of the constants?
 		/*'--' | 'a'? 'type' ;*/
@@ -1020,7 +1065,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if (!predtype.equals(OntConceptType.CLASS_PROPERTY) && !predtype.equals(OntConceptType.DATATYPE_PROPERTY) && 
 						!predtype.equals(OntConceptType.RDF_PROPERTY) && !predtype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
 					issueAcceptor.addError(SadlErrorMessages.EXPECTED_A.get("property in property chain"), predicate);
-					String preduri = declarationExtensions.getConceptUri(((Name)predicate).getName());
+					//String preduri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 				}
 			} catch (CircularDefinitionException e) {
 				e.printStackTrace();
@@ -1080,7 +1125,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
 			}
 			else {
-				int i = 0;	// TODO 
+				//int i = 0; 
 			}
 		}
 	}
@@ -1389,7 +1434,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			ConceptName instConceptName = new ConceptName(conceptUri);
 			instConceptName.setType(ConceptType.INDIVIDUAL);
-// TODO could belong to multiple classes
+			// TODO could belong to multiple classes
 			ExtendedIterator<Resource> typeitr = individual.listRDFTypes(true);
 			TypeCheckInfo compoundTci = null;
 			TypeCheckInfo tci = null;
@@ -1694,21 +1739,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return retlst;
 	}
 
-	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
-		if (rsrc.getURI().endsWith("#DATA")) {
-			return true;
-		}
-		if (rsrc.canAs(OntClass.class)){
-			ExtendedIterator<OntClass> itr = rsrc.as(OntClass.class).listSuperClasses();
-			while (itr.hasNext()) {
-				OntClass spr = itr.next();
-				if (spr.isURIResource() && spr.getURI().endsWith("#DATA")) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+//	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
+//		if (rsrc.getURI().endsWith("#DATA")) {
+//			return true;
+//		}
+//		if (rsrc.canAs(OntClass.class)){
+//			ExtendedIterator<OntClass> itr = rsrc.as(OntClass.class).listSuperClasses();
+//			while (itr.hasNext()) {
+//				OntClass spr = itr.next();
+//				if (spr.isURIResource() && spr.getURI().endsWith("#DATA")) {
+//					return true;
+//				}
+//			}
+//		}
+//		return false;
+//	}
 
 	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException {
 		//Needs filled in for Requirements extension
