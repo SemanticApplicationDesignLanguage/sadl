@@ -1,7 +1,7 @@
 dependencies {
-	compile project(':com.ge.research.sadl')
-	compile "org.eclipse.xtext:org.eclipse.xtext.ide:${xtextVersion}"
-	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:${xtextVersion}"
+	compile project(":com.ge.research.sadl")
+	compile "org.eclipse.xtext:org.eclipse.xtext.ide:$versions.xtext"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:$versions.xtext"
 }
 
 eclipseClasspath.enabled=false

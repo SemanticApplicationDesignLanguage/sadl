@@ -1,0 +1,28 @@
+{
+  "name": "lsp-monaco",
+  "version": "1.0.0",
+  "scripts": {
+    "compile": "tsc --project src",
+    "clean": "rimraf lib",
+    "watch": "watch 'npm run compile' src --wait 10",
+    "build": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.7.0",
+    "monaco-editor-core": "^0.7.3",
+    "monaco-languages": "^0.6.1",
+    "reconnecting-websocket": "^2.0.0",
+    "vscode-jsonrpc": "^3.0.0-alpha.3",
+    "vscode-languageclient": "^3.0.0-alpha.2",
+    "vscode-languageserver-types": "^2.0.0-alpha.1"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.42",
+    "copy-webpack-plugin": "^3.0.1",
+    "rimraf": "^2.5.4",
+    "ts-loader": "^0.9.0",
+    "typescript": "^2.0.3",
+    "watch": "^1.0.1",
+    "webpack": "^1.13.1"
+  }
+}

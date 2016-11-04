@@ -1,10 +1,10 @@
 dependencies {
-	compile project(':com.ge.research.sadl.errorgenerator')
-	compile project(':com.ge.research.sadl')
-	compile project(':com.ge.research.jena')
+	compile project(":com.ge.research.sadl.errorgenerator")
+	compile project(":com.ge.research.sadl")
+	compile project(":com.ge.research.jena")
 	compile "org.eclipse.core:org.eclipse.core.resources:3.8.101.v20130717-0806"
-	compile "org.eclipse.xtext:org.eclipse.xtext.ide:${xtextVersion}"
-	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:${xtextVersion}"
+	compile "org.eclipse.xtext:org.eclipse.xtext.ide:$versions.xtext"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:$versions.xtext"
 }
 
 eclipseClasspath.enabled=false

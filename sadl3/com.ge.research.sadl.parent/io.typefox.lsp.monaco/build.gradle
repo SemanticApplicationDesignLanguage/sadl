@@ -1,0 +1,93 @@
+import com.moowork.gradle.node.task.NodeTask
+
+buildscript {
+	repositories {
+		maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        mavenLocal()
+        jcenter()
+	}
+	dependencies {
+		classpath "com.moowork.gradle:gradle-node-plugin:0.12"
+		classpath "org.akhikhl.gretty:gretty:+"
+	}
+}
+
+plugins {
+	id "war"
+}
+
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "org.akhikhl.gretty"
+apply plugin: "com.moowork.node"
+
+node {
+	version = "$versions.nodeJs"
+	npmVersion = "$versions.npm"
+	distBaseUrl = "https://nodejs.org/dist"
+	// true: download false: use local Node.js installation
+	download = true
+}
+
+gretty {
+	servletContainer = "tomcat7"
+	port = 8080
+	contextPath = "/sadlmonaco"
+	loggingLevel = "INFO"
+}
+
+war {
+	baseName = "sadlmonaco"
+	version = ""
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+	compile project(":io.typefox.lsp.endpoint")
+	compile project(":com.ge.research.sadl")
+	compile project(":com.ge.research.sadl.ide")
+	compile "org.slf4j:slf4j-api:$versions.slf4j"
+	compile "org.glassfish.jersey.core:jersey-server:$versions.jerseyServer"
+	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$versions.jerseyServletContainerCore"
+	compile "javax.ws.rs:javax.ws.rs-api:$versions.jaxRs"
+	compile "org.webjars:bootstrap:$versions.webjarsBootstrap"
+	testCompile "junit:junit:$versions.junit"
+}
+
+jar {
+    from sourceSets.main.allJava
+}
+
+clean.doFirst {
+	delete file("node_modules")
+	delete file("src/main/webapp/dist")
+}
+
+task webpack(type: NodeTask, dependsOn: "npmInstall") {
+	def osName = System.getProperty("os.name").toLowerCase();
+	if (osName.contains("windows")) {
+		script = project.file("node_modules/webpack/bin/webpack.js")
+	} else {
+		script = project.file("node_modules/.bin/webpack")
+	}
+}
+
+task buildStandaloneTomcat(type:Tar, dependsOn: "buildProduct") {
+    from ("${buildDir}/output/sadlmonaco/")
+    archiveName "tomcat.tar.gz"
+    include "**/*"
+    destinationDir file("${buildDir}/")
+    extension = "tgz"
+    compression = Compression.GZIP
+}
+
+processResources.dependsOn "webpack"
+war.dependsOn "webpack"

@@ -1,0 +1,19 @@
+.footer {
+	margin-top: 40px;
+	margin-bottom: 80px;
+}
+
+#editor_div {
+    width: 49%;
+    height: 600px;
+    border: 1px solid grey;
+    float: left;
+}
+
+#content_div {
+    width: 40%;
+    height: 600px;
+    float: left;
+    margin-top: 40px;
+	margin-left: 40px;
+}

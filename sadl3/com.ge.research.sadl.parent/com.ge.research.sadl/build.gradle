@@ -1,10 +1,10 @@
 dependencies {
-	compile project(':com.ge.research.jena')
-	compile project(':com.ge.research.sadl.xtextgenerator')
-	compile "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
-	compile "org.eclipse.xtext:org.eclipse.xtext.xbase:${xtextVersion}"
-	compile "org.eclipse.core:org.eclipse.core.runtime:3.7.0"
-	compile "org.slf4j:slf4j-api:1.7.21"
+	compile project(":com.ge.research.jena")
+	compile project(":com.ge.research.sadl.xtextgenerator")
+	compile "org.eclipse.xtext:org.eclipse.xtext:$versions.xtext"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase:$versions.xtext"
+	compile "org.eclipse.core:org.eclipse.core.runtime:$versions.eclipseCoreRuntime"
+	compile "org.slf4j:slf4j-api:$versions.slf4j"
 }
 
 configurations {
@@ -14,15 +14,15 @@ configurations {
 }
 
 dependencies {
-	mwe2 "de.jflex:jflex:1.4.3"
-	mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:2.8.3"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.generator:${xtextVersion}"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext:${xtextVersion}"
+	mwe2 "de.jflex:jflex:$versions.jflex"
+	mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:$versions.mwe2"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:$versions.xtext"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.generator:$versions.xtext"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext:$versions.xtext"
 }
 
 task generateXtextLanguage(type: JavaExec) {
-	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+	main = "org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher"
 	classpath = configurations.mwe2
 	inputs.file "src/com/ge/research/sadl/GenerateSADL.mwe2"
 	inputs.file "src/com/ge/research/sadl/SADL.xtext"
@@ -33,7 +33,7 @@ task generateXtextLanguage(type: JavaExec) {
 }
 
 task generateJFlexLexer(type: JavaExec) {
-    main = 'JFlex.Main'
+    main = "JFlex.Main"
     classpath = configurations.mwe2
     inputs.file "src-gen/com/ge/research/sadl/parser/antlr/lexer/jflex/SADLFlexer.flex"
     inputs.file "src/com/ge/research/sadl/SADL.xtext"

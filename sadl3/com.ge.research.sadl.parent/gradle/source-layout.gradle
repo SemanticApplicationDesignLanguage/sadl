@@ -1,4 +1,4 @@
-apply plugin: 'org.xtext.xtend'
+apply plugin: "org.xtext.xtend"
 
 if (name.endsWith(".tests")) {
 	sourceSets {
@@ -7,30 +7,30 @@ if (name.endsWith(".tests")) {
 			resources.srcDirs = []
 		}
 		test {
-			java.srcDirs = ['src', 'src-gen']
-			resources.srcDirs = ['src', 'src-gen']
-			xtendOutputDir = 'xtend-gen'
+			java.srcDirs = ["src", "src-gen"]
+			resources.srcDirs = ["src", "src-gen"]
+			xtendOutputDir = "xtend-gen"
 		}
 	}
-} else if (name.endsWith(".monaco")) {
+} else if (name.startsWith("io.typefox")) {
 	sourceSets {
 		main {
-			java.srcDirs = ['src/main/java', 'src/main/xtext-gen']
-			resources.srcDirs = ['src/main/resources', 'src/main/xtext-gen']
-			xtendOutputDir = 'src/main/xtend-gen'
+			java.srcDirs = ["src/main/java", "src/main/xtext-gen"]
+			resources.srcDirs = ["src/main/resources", "src/main/xtext-gen"]
+			xtendOutputDir = "src/main/xtend-gen"
 		}
 		test {
-			java.srcDirs = ['src/test/java', 'src/test/xtext-gen']
-			resources.srcDirs = ['src/test/resources', 'src/test/xtext-gen']
-			xtendOutputDir = 'src/test/xtend-gen'
+			java.srcDirs = ["src/test/java", "src/test/xtext-gen"]
+			resources.srcDirs = ["src/test/resources", "src/test/xtext-gen"]
+			xtendOutputDir = "src/test/xtend-gen"
 		}
 	}
 } else {
 	sourceSets {
 		main {
-			java.srcDirs = ['src', 'src-gen']
-			resources.srcDirs = ['src', 'src-gen']
-			xtendOutputDir = 'xtend-gen'
+			java.srcDirs = ["src", "src-gen"]
+			resources.srcDirs = ["src", "src-gen"]
+			xtendOutputDir = "xtend-gen"
 		}
 		test {
 			java.srcDirs = []
@@ -40,22 +40,22 @@ if (name.endsWith(".tests")) {
 }
 
 sourceSets.all {
-	resources.exclude '**/*.g', '**/*.xtext', '**/*.mwe2', '**/*.xtend', '**/*._trace'
+	resources.exclude "**/*.g", "**/*.xtext", "**/*.mwe2", "**/*.xtend", "**/*._trace"
 }
 
 jar {
-	from('model') {
-		into('model')
+	from("model") {
+		into("model")
 	}
 	manifest {
-		attributes 'Bundle-SymbolicName': project.name
+		attributes "Bundle-SymbolicName": project.name
 	}
 }
 
 plugins.withId('war') {
-	webAppDirName = "WebRoot"
+	webAppDirName = "src/main/webapp"
 }
 
-plugins.withId('org.xtext.idea-plugin') {
-	assembleSandbox.metaInf.from('META-INF')
+plugins.withId("org.xtext.idea-plugin") {
+	assembleSandbox.metaInf.from("META-INF")
 }
