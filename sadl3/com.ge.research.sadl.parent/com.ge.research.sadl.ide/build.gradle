@@ -1,0 +1,8 @@
+dependencies {
+	compile project(':com.ge.research.sadl')
+	compile "org.eclipse.xtext:org.eclipse.xtext.ide:${xtextVersion}"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:${xtextVersion}"
+}
+
+eclipseClasspath.enabled=false
+cleanEclipseClasspath.enabled=false

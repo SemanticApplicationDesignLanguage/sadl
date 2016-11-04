@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -67,6 +68,7 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 		println(sw.elapsed(TimeUnit.MILLISECONDS))
 	}
 	
+	@Ignore
 	@Test
 	def void testAmbiguousDetection() {
 		val models = 2
@@ -113,6 +115,7 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 		}
 	}
 
+	@Ignore
 	@Test
 	def void testRequirement_Model() {
 		val sadlModel1 = '''

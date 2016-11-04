@@ -1,0 +1,11 @@
+dependencies {
+	compile project(':com.ge.research.sadl')
+	compile project(':com.ge.research.jena')
+	testCompile project(':com.ge.research.sadl.jena')
+	testCompile project(':com.ge.research.sadl.ide')
+	testCompile "org.eclipse.xtext:org.eclipse.xtext.testing:${xtextVersion}"
+	testCompile "org.eclipse.xtext:org.eclipse.xtext.xbase.junit:${xtextVersion}"
+}
+
+eclipseClasspath.enabled=false
+cleanEclipseClasspath.enabled=false

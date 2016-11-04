@@ -1,0 +1,52 @@
+dependencies {
+	compile project(':com.ge.research.jena')
+	compile project(':com.ge.research.sadl.xtextgenerator')
+	compile "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase:${xtextVersion}"
+	compile "org.eclipse.core:org.eclipse.core.runtime:3.7.0"
+	compile "org.slf4j:slf4j-api:1.7.21"
+}
+
+configurations {
+	mwe2 {
+		extendsFrom compile
+	}
+}
+
+dependencies {
+	mwe2 "de.jflex:jflex:1.4.3"
+	mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:2.8.3"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.generator:${xtextVersion}"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext:${xtextVersion}"
+}
+
+task generateXtextLanguage(type: JavaExec) {
+	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+	classpath = configurations.mwe2
+	inputs.file "src/com/ge/research/sadl/GenerateSADL.mwe2"
+	inputs.file "src/com/ge/research/sadl/SADL.xtext"
+	outputs.dir "src-gen"
+	args += "src/com/ge/research/sadl/GenerateSADL.mwe2"
+	args += "-p"
+	args += "rootPath=/${projectDir}/.."
+}
+
+task generateJFlexLexer(type: JavaExec) {
+    main = 'JFlex.Main'
+    classpath = configurations.mwe2
+    inputs.file "src-gen/com/ge/research/sadl/parser/antlr/lexer/jflex/SADLFlexer.flex"
+    inputs.file "src/com/ge/research/sadl/SADL.xtext"
+    outputs.dir "src-gen"
+    args += "-d" 
+    args += "src-gen/com/ge/research/sadl/parser/antlr/lexer/jflex"
+    args += "src-gen/com/ge/research/sadl/parser/antlr/lexer/jflex/SADLFlexer.flex"
+}
+
+generateXtext.dependsOn(generateJFlexLexer)
+generateXtext.dependsOn(generateXtextLanguage)
+generateJFlexLexer.dependsOn(generateXtextLanguage)
+clean.dependsOn(cleanGenerateXtextLanguage)
+eclipse.classpath.plusConfigurations += [configurations.mwe2]
+eclipseClasspath.enabled=false
+cleanEclipseClasspath.enabled=false

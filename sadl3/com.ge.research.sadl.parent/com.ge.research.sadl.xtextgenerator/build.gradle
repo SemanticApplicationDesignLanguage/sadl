@@ -1,0 +1,6 @@
+dependencies {
+	compile "org.eclipse.xtext:org.eclipse.xtext.xtext:${xtextVersion}"	
+}
+
+eclipseClasspath.enabled=false
+cleanEclipseClasspath.enabled=false
