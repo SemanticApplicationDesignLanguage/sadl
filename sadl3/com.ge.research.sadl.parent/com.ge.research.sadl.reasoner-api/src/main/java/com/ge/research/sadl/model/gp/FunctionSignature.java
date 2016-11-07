@@ -22,7 +22,7 @@ public class FunctionSignature {
 		sb.append("(");		
 		for(int i = 0; i < this.parameterTypes.length; i++){
 			if(!this.parameterTypes[i].isEmpty()){
-				sb.append(this.parameterTypes[i].toUpperCase());
+				sb.append(this.parameterTypes[i].toLowerCase());
 				sb.append(" X");
 				if(i != this.parameterTypes.length - 1){
 					sb.append(", ");
@@ -30,7 +30,7 @@ public class FunctionSignature {
 			}
 		}
 		sb.append(") returns ");
-		sb.append(this.returnType.toUpperCase());
+		sb.append(this.returnType.toLowerCase());
 		sb.append(":\n\""); 
 		sb.append(this.uri);
 		sb.append("\".");

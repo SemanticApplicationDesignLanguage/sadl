@@ -5327,6 +5327,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	static public void createBuiltinFunctionImplicitModel(String projectRootPath) throws IOException, ConfigurationException{
 		//First, obtain proper translator for project
 		SadlUtils su = new SadlUtils();
+		if(projectRootPath.startsWith("file")){
+			projectRootPath = su.fileUrlToFileName(projectRootPath);
+		}
 		final File mfFolder = new File(projectRootPath + "/" + ResourceManager.OWLDIR);
 		final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
 		String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
