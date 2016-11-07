@@ -3,8 +3,7 @@ buildscript {
     	jcenter()
 	}
 	dependencies {
-		classpath "org.xtext:xtext-gradle-plugin:1.0.5"
-        classpath "co.tomlee.gradle.plugins:gradle-jflex-plugin:0.0.1"
+		classpath "org.xtext:xtext-gradle-plugin:1.0.12"
 	}
 }
 
@@ -18,7 +17,6 @@ subprojects {
 	}
 	
 	apply plugin: "java"
-	apply plugin: "jflex"
 	apply plugin: "eclipse"
 	apply from: "${rootDir}/gradle/versions.gradle"
 	apply from: "${rootDir}/gradle/source-layout.gradle"
