@@ -177,7 +177,7 @@ class ScopingTest {
 				described by when with values of type dateTime,
 				described by openingEvent with a single value of type Event,			
 				described by closingEvent with a single value of type Event.
-	
+
 			Circus is a class,
 				described by event with values of type Event.
 				
@@ -199,19 +199,5 @@ class ScopingTest {
 		]
 			
 	}
-		
-	@Test def void testScopingSlowdown() {
-		for (i:1 ..< 10) {
-			var modeltext = "uri \"http://com.ge.research.sadl/scopingscaletest\".\n"
-			for (j:0 ..< i*100) {
-				modeltext += "Pr" + j + " is a property.\n"
-			}
-//			print(modeltext)
-			var t1 = System.currentTimeMillis
-			var model = modeltext.parse
-			validationTestHelper.assertNoErrors(model.eResource)
-			var t2 = System.currentTimeMillis;
-			print(i*100 + "," + (t2-t1) + "ms\n")
-		}
-	}
+
 }
