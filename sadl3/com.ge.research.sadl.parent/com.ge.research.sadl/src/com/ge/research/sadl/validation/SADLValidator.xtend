@@ -39,6 +39,7 @@ import java.util.ArrayList
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import org.eclipse.emf.ecore.EStructuralFeature
+import com.ge.research.sadl.sADL.SubjHasProp
 
 /**
  * This class contains custom validation rules. 
@@ -169,6 +170,7 @@ class SADLValidator extends AbstractSADLValidator {
 //			error("", SADLPackage.Literals.SADL_RESOURCE__NAME, <constant>)
 //		}
 //	}
+
 	@Check
 	def checkSadlResource(SadlResource sr) {
 		var nm = null as String
