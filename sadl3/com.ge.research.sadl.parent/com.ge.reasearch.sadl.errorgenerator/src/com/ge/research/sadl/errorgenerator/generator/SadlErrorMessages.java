@@ -131,6 +131,14 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage DECOMPOSITION_ERROR = new SadlErrorMessage("decomposition_error");
 /**
+* Function has no reference.
+**/
+    public static final SadlErrorMessage TYPE_CHECK_UNDEFINED_EXCEPTION = new SadlErrorMessage("type_check_undefined_exception");
+/**
+* Built-in function, {0}, was found, but the reasoner and translator pair does not provide further type-checking information
+**/
+    public static final SadlErrorMessage TYPE_CHECK_BUILTIN_EXCEPTION = new SadlErrorMessage("type_check_builtin_exception");
+/**
 * expected a {0}
 **/
     public static final SadlErrorMessage EXPECTED_A = new SadlErrorMessage("expected_a");

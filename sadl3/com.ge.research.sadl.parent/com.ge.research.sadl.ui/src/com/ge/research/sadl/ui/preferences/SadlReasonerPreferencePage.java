@@ -739,21 +739,6 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	private void saveTranslatorSpec() throws ConfigurationException, IOException, URISyntaxException, CoreException {
 		this.configurationManager.setTranslatorClassName(checkedTranslator != null ? checkedTranslator.getClass().getName() : null);
 		this.configurationManager.saveConfiguration();
-		
-		//Update implicit built-in function model to align with new translator spec.
-		updateBuiltinFunctionImplicitModel();
-	}
-
-	/**
-	 * Updates BuiltinFunctionImplicitModel.sadl file to align with newly selected translator.
-	 * @throws URISyntaxException 
-	 * @throws ConfigurationException 
-	 * @throws IOException 
-	 * @throws CoreException 
-	 */
-	private void updateBuiltinFunctionImplicitModel() throws IOException, ConfigurationException, URISyntaxException, CoreException {
-		JenaBasedSadlModelProcessor.createBuiltinFunctionImplicitModel(this.configurationManager.getProjectFolderPath());
-		this.project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 	}
 
 	/**

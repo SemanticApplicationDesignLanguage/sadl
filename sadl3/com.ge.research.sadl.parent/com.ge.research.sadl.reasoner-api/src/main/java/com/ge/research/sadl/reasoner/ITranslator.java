@@ -27,6 +27,7 @@ import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.*;
 import com.hp.hpl.jena.ontology.OntModel;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -213,19 +214,18 @@ public interface ITranslator {
 	 */
 	public List<ModelError> validateRule(com.ge.research.sadl.model.gp.Rule rule);
 	
+	/**
+	 * Checks if function name is a built-in function for a reasoner/translator pair
+	 * @param name of built-in function
+	 * @return true if valid built-in function name for translator/reasoner pair, false otherwise
+	 */
+	public boolean isBuiltinFunction(String name);
 	
 	/**
-	 * Method to obtain a list of built in functions for this reasoner/translator pair.
-	 * Function definitions should be in the form "functionName(ParmeterType0,...,ParmeterTypeN)ReturnType"
-	 * @return --An array of function definition strings
+	 * Checks if reasoner/translator pair provide any type-checking information for built-in functions
+	 * @return -- an enumeration of the amount of information available for type-checking built-in functions:
 	 */
-	public String[] getBuiltinFunctions();
-	
-	/**
-	 * Method to obtain a list of all built in function signatures for this reasoner/translator pair
-	 * @return -- List of Function Signatures
-	 */
-	public List<FunctionSignature> getBuiltinFunctionSignatures();
+	public Enum isBuiltinFunctionTypeCheckingAvailable();
 	
 	/**
 	 * Method to obtain the implicit model for built-in functions for this reasoner/translator pair

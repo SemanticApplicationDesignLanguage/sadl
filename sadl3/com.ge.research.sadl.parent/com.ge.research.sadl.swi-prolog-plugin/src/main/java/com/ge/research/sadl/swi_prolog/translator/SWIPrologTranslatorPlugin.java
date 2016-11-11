@@ -1365,16 +1365,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		} 
 	}
 	
-	public boolean isBuiltinFunction(String name) {
-		if (functionListArity1.contains(name)) {
-			return true;
-		}
-		if (functionListArity2.contains(name)) {
-			return true;
-		}
-		return false;
-	}
-	
 	private String sadlVariableToPrologVariable(String varName) {
 		return "PV" + varName;
 	}
@@ -1735,20 +1725,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public String[] getBuiltinFunctions(){
-		return new String[]{"function(parameter)return"};
-	}
-	
-	@Override
-	public List<FunctionSignature> getBuiltinFunctionSignatures(){
-		List<FunctionSignature> fsList = new ArrayList<FunctionSignature>();
-		for(String s : getBuiltinFunctions()){
-			fsList.add(new FunctionSignature(s,SadlConstants.SADL_BUILTIN_FUNCTIONS_URI));
-		}
-		return fsList;
-	}
 	
 	@Override
 	public String getBuiltinFunctionModel(){
@@ -1758,12 +1734,25 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		sb.append("\" alias ");
 		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
-		for(FunctionSignature fs : getBuiltinFunctionSignatures()){
-			sb.append(fs.FunctionSignatureToSadlModelFormat());
-			sb.append("\n\n");
-		}
 		
 		return sb.toString();
+	}
+	
+	//This method existed before built-in function type-checking was added to the interface.
+	@Override
+	public boolean isBuiltinFunction(String name) {
+		if (functionListArity1.contains(name)) {
+			return true;
+		}
+		if (functionListArity2.contains(name)) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public Enum isBuiltinFunctionTypeCheckingAvailable(){
+		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 
 }

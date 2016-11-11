@@ -1806,21 +1806,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 	public String translateEquation(OntModel model, Equation equation) throws TranslationException {
 		throw new TranslationException("Equation translation not yet implemented in " + this.getClass().getCanonicalName());
 	}
-
-
-	@Override
-	public String[] getBuiltinFunctions(){
-		return new String[]{"function(parameter)return"};
-	}
-	
-	@Override
-	public List<FunctionSignature> getBuiltinFunctionSignatures(){
-		List<FunctionSignature> fsList = new ArrayList<FunctionSignature>();
-		for(String s : getBuiltinFunctions()){
-			fsList.add(new FunctionSignature(s,SadlConstants.SADL_BUILTIN_FUNCTIONS_URI));
-		}
-		return fsList;
-	}
 	
 	@Override
 	public String getBuiltinFunctionModel(){
@@ -1830,12 +1815,51 @@ public class JenaTranslatorPlugin implements ITranslator {
 		sb.append("\" alias ");
 		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
-		for(FunctionSignature fs : getBuiltinFunctionSignatures()){
-			sb.append(fs.FunctionSignatureToSadlModelFormat());
-			sb.append("\n\n");
-		}
 		
 		return sb.toString();
+	}
+	
+	@Override
+	public boolean isBuiltinFunction(String builtinName){
+		// is it known to the ConfigurationManager?
+		String[] categories = new String[2];
+		try {
+			categories[0] = configurationMgr.getReasoner().getReasonerFamily();
+			categories[1] = IConfigurationManager.BuiltinCategory;
+			List<ConfigurationItem> knownBuiltins = configurationMgr.getConfiguration(categories, false);
+			for (ConfigurationItem item : knownBuiltins) {
+				Object itemName = item.getNamedValue("name");
+				if (itemName != null && itemName instanceof String && ((String)itemName).equals(builtinName)) {
+					return true;
+				}
+			}
+		} catch (ConfigurationException e) {
+			// this is ok--one more check to go.
+		}
+
+		// Use ServiceLoader to find an implementation of Builtin that has this name
+		ServiceLoader<Builtin> serviceLoader = ServiceLoader.load(Builtin.class);
+		if( serviceLoader != null ){
+			for( Iterator<Builtin> itr = serviceLoader.iterator(); itr.hasNext() ; ){
+				try {
+					Builtin bltin = itr.next();
+					if (bltin.getName().equals(builtinName)) {
+						return true;
+					}
+				}
+				catch (Throwable t) {
+					t.printStackTrace();
+					logger.error(t.getLocalizedMessage());
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public Enum isBuiltinFunctionTypeCheckingAvailable(){
+		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 	
 }
