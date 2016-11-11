@@ -37,7 +37,7 @@ import org.junit.Before
 import com.google.inject.Provider
 
 @RunWith(XtextRunner)
-@InjectWith(SADLInjectorProvider)
+@InjectWith(SADLNoopModelProcessorsInjectorProvider)
 abstract class AbstractSADLParsingTest{
 	@Inject extension ValidationTestHelper
 

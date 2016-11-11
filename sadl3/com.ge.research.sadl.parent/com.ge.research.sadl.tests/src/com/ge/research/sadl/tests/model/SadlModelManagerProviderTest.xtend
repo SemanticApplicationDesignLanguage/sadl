@@ -20,24 +20,28 @@ package com.ge.research.sadl.tests.model
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.ValidationAcceptor
+import com.ge.research.sadl.reasoner.ConfigurationManager
 import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.tests.SADLInjectorProvider
+import com.ge.research.sadl.tests.SADLNoopModelProcessorsInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.hp.hpl.jena.ontology.OntModel
 import com.hp.hpl.jena.ontology.Ontology
 import com.hp.hpl.jena.query.QueryExecutionFactory
+import com.hp.hpl.jena.rdf.model.RDFList
 import com.hp.hpl.jena.rdf.model.RDFNode
+import com.hp.hpl.jena.vocabulary.OWL
 import com.hp.hpl.jena.vocabulary.RDF
+import com.hp.hpl.jena.vocabulary.XSD
 import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
@@ -46,14 +50,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.hp.hpl.jena.vocabulary.RDFS
-import com.hp.hpl.jena.vocabulary.OWL
-import com.hp.hpl.jena.rdf.model.RDFList
-import com.hp.hpl.jena.vocabulary.XSD
-import com.ge.research.sadl.reasoner.ConfigurationManager
 
 @RunWith(XtextRunner)
-@InjectWith(SADLInjectorProvider)
+@InjectWith(SADLNoopModelProcessorsInjectorProvider)
 class SadlModelManagerProviderTest {
 	
 	@Inject ParseHelper<SadlModel> parser
@@ -547,9 +546,9 @@ class SadlModelManagerProviderTest {
 // TODO use datatype facets to check validity?			
 			var stmtitr = jenaModel.listStatements(null, OWL.unionOf, null as RDFNode).toIterable().iterator
 			if (stmtitr != null && stmtitr.hasNext) {
-				var obj = stmtitr.next.object as com.hp.hpl.jena.rdf.model.RDFNode;
-				if (obj.canAs(com.hp.hpl.jena.rdf.model.RDFList)) {
-					var lst = obj.^as(com.hp.hpl.jena.rdf.model.RDFList)
+				var obj = stmtitr.next.object as RDFNode;
+				if (obj.canAs(RDFList)) {
+					var lst = obj.^as(RDFList)
 					var jlst = lst.asJavaList
 					if (jlst.contains(XSD.date))
 					found = true;
