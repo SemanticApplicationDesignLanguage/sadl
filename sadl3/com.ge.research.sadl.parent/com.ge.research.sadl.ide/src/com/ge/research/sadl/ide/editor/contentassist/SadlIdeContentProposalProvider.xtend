@@ -31,6 +31,8 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalCreator
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalPriorities
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 
+import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
+
 /**
  * Generic content proposal provider for the {@code SADL} language.
  * 
@@ -44,8 +46,6 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 
 	/** A set of all file extensions that can be imported into the resource. */
 	static val KNOWN_FILE_EXTENSION = #{'sadl', 'owl', 'n3', 'ntriple', 'nt'};
-	
-	static val IMPLICIT_MODEL_NAME = 'SadlImplicitModel.sadl';
 
 	@Inject 
 	SADLGrammarAccess grammarAccess;
@@ -94,7 +94,7 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			val model = EcoreUtil2.getContainerOfType(ctx.currentModel, SadlModel);
 			val imports = model.imports.map[importedResource].filterNull.map[baseUri].toSet;
 			return [
-				return IMPLICIT_MODEL_NAME !== EObjectURI?.lastSegment
+				return SADL_IMPLICIT_MODEL_FILENAME !== EObjectURI?.lastSegment
 					&& KNOWN_FILE_EXTENSION.contains(EObjectURI?.fileExtension)
 					&& !imports.contains(name.toString)
 			];

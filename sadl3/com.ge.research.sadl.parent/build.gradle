@@ -1,5 +1,6 @@
 buildscript {
 	repositories {
+		mavenLocal()
     	jcenter()
 	}
 	dependencies {
@@ -8,10 +9,11 @@ buildscript {
 }
 
 subprojects {
-	ext.xtextVersion = "2.11.0-SNAPSHOT"
 	repositories {
+    	mavenLocal()
         maven { 
-        	url "https://oss.sonatype.org/content/repositories/snapshots/"
+        	url "http://services.typefox.io/open-source/jenkins/job/lsp4j/lastSuccessfulBuild/artifact/build/maven-repository"
+			url "https://oss.sonatype.org/content/repositories/snapshots/"
     	}
 		jcenter()
 	}

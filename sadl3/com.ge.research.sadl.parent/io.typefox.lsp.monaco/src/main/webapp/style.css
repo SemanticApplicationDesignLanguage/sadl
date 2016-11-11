@@ -17,3 +17,59 @@
     margin-top: 40px;
 	margin-left: 40px;
 }
+
+.keyword {
+    color: #801480 !important;
+}
+
+.uri {
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.class {
+    color: #000080 !important;
+    font-weight: bold;  
+}
+
+.instance {
+    color: #0000FF !important;
+}
+
+.variable {
+    color: #FF00FF !important;
+    font-weight: bold;
+}
+
+.dataProperty {
+    color: #008000 !important;
+    font-weight: bold;
+}
+
+.objectProperty {
+    color: #008000 !important;
+    font-weight: bold;
+}
+
+.annotationProperty {
+    color: #008000 !important;
+    font-weight: bold;
+}
+
+.rdfProperty {
+    color: #00CC00 !important;
+    font-weight: bold;
+}
+
+.rdfDataType {
+    color: #000080 !important;
+}
+
+.functionName {
+    color: #801480 !important;
+    font-weight: bold;
+}
+
+.underline {
+    text-decoration: underline;
+}

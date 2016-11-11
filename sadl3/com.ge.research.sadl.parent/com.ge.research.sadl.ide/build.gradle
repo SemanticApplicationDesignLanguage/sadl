@@ -1,7 +1,11 @@
 dependencies {
 	compile project(":com.ge.research.sadl")
+	compile project(":com.ge.research.jena")
+	compile project(":com.ge.research.sadl.jena")
+	compile project(":com.ge.research.sadl.errorgenerator")
 	compile "org.eclipse.xtext:org.eclipse.xtext.ide:$versions.xtext"
 	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:$versions.xtext"
+	compile "org.slf4j:slf4j-api:$versions.slf4j"
 }
 
 eclipseClasspath.enabled=false

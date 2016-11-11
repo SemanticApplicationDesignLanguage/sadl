@@ -2,7 +2,7 @@ version = "0.0.1-SNAPSHOT"
 
 ext.versions = [
 	"che": "4.4.0",
-	"lsapi": "0.4.0-SNAPSHOT",
+	"lsp4j": "0.1.0-SNAPSHOT",
 	"antlr": "3.2",
 	"xtext": "2.11.0-SNAPSHOT",
 	"guava": "18.0",

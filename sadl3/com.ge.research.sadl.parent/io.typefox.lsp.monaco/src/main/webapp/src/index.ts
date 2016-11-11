@@ -21,6 +21,7 @@ window.onload = () => {
             monaco.languages.setMonarchTokensProvider(languageId, conf);
 
             const editor = monaco.editor.create(document.getElementById('monaco_editor_div'));
+            client.enableSemanticHighlighting(editor);
 
             const updateDocument = () => {
                 const uri = editor.getModel().uri.toString();
@@ -41,7 +42,29 @@ window.onload = () => {
 }
 
 function getEditorInitContent(): string {
-    return [
-        ''
-	].join('');
+    return `uri "http://sadl.org/dummy.sadl".
+
+Person is a class 
+    described by birth with a single value of type Birth,
+    described by father with a single value of type Man,
+    described by gender with a single value of type Gender.
+
+{Man, Woman} are types of Person.
+Gender is a class must be one of {Male,Female}.
+
+Location is a class 
+    described by latitude with a single value of type double, 
+    described by longitude with a single value of type double,
+    described by description with values of type string.
+
+locatedIn describes Location with values of type Location, is transitive.
+
+Event is a class
+    described by location with a single value of type Location,
+    described by when with a single value of type date.
+    
+Birth is a type of Event 
+    described by mother with a single value of type Person, 
+    described by child with values of type Person.
+    `;
 }

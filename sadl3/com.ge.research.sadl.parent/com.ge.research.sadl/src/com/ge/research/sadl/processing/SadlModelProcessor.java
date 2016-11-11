@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -57,7 +56,6 @@ import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.StringLiteral;
-import com.google.inject.Inject;
 
 
 public abstract class SadlModelProcessor implements IModelProcessor {
@@ -68,9 +66,6 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private RulePart rulePart = RulePart.NOT_A_RULE;
     
-	@Inject
-	public DeclarationExtensions declarationExtensions;
-
 	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 //	protected Object translate(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {

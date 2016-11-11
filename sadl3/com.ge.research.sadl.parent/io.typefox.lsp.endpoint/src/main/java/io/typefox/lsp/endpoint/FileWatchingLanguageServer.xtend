@@ -1,17 +1,22 @@
 package io.typefox.lsp.endpoint
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import io.typefox.lsapi.InitializeParams
-import io.typefox.lsapi.services.LanguageServer
 import io.typefox.lsp.endpoint.nio.file.FileManager
+import java.io.IOException
 import java.nio.file.Paths
+import java.util.Collections
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import org.apache.log4j.Logger
+import org.eclipse.lsp4j.InitializeParams
+import org.eclipse.lsp4j.jsonrpc.json.JsonRpcMethodProvider
+import org.eclipse.lsp4j.services.LanguageClient
+import org.eclipse.lsp4j.services.LanguageClientAware
+import org.eclipse.lsp4j.services.LanguageServer
 import org.eclipse.xtend.lib.annotations.Delegate
 
-class FileWatchingLanguageServer implements LanguageServer {
+class FileWatchingLanguageServer implements LanguageServer, LanguageClientAware, JsonRpcMethodProvider {
 
     val static DELAY = 500
 
@@ -53,7 +58,11 @@ class FileWatchingLanguageServer implements LanguageServer {
         if (rootPath !== null) {
             promise.thenRunAsync([
                 val root = Paths.get(rootPath)
-                fileManager.open(root)
+                try {
+                    fileManager.open(root)
+                } catch (IOException e) {
+                	LOGGER.error("Failed to open file manager for watching: " + root, e)
+                }
             ], this.executorService)
         }
         return promise
@@ -70,5 +79,18 @@ class FileWatchingLanguageServer implements LanguageServer {
         this.executorService.shutdownNow
         languageServer.exit
     }
+    
+    override connect(LanguageClient client) {
+        if (languageServer instanceof LanguageClientAware) {
+            languageServer.connect(client)
+        }
+    }
+				
+	override supportedMethods() {
+		if (languageServer instanceof JsonRpcMethodProvider) {
+			return languageServer.supportedMethods; 
+		}
+		return Collections.emptyMap;
+	}
 
 }

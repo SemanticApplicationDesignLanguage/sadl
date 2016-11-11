@@ -239,9 +239,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private int vNum = 0;	// used to create unique variables
 	private List<String> userDefinedVariables = new ArrayList<String>();
 	
-	@Inject
-	public DeclarationExtensions declarationExtensions;
-	
 	protected String modelName;
 	protected String modelAlias;
 	protected String modelNamespace;
@@ -284,9 +281,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	//members needed by child processors
 	protected StringBuilder serialize = null;
 	protected boolean includeImpliedPropertiesInDirectWrite = false;	// should implied properties be included in Direct Write Prolog output? default false
+
+	private DeclarationExtensions declarationExtensions;
 	
 	public JenaBasedSadlModelProcessor() {
 		logger.debug("New " + this.getClass().getCanonicalName() + "' created");
+		declarationExtensions = new DeclarationExtensions();
 	}
 	/**
 	 * For TESTING
@@ -473,20 +473,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private String getModelFolderPath(Resource resource) {
-		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
-		v = v.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
-		String modelFolderPathname;
-		if (v.isPlatform()) {
-			 IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(v.toPlatformString(true)));
-			 modelFolderPathname = file.getRawLocation().toPortableString();
+		final URI resourceUri = resource.getURI();
+		final URI modelFolderUri = resourceUri
+				.trimSegments(resourceUri.isFile() ? 1 : resourceUri.segmentCount() - 2)
+				.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
+		
+		if (resourceUri.isPlatformResource()) {
+			 final IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(modelFolderUri.toPlatformString(true)));
+			 return file.getRawLocation().toPortableString();
+		} else {
+			final String modelFolderPathname = findModelFolderPath(resource.getURI());
+			return modelFolderPathname == null ? modelFolderUri.toFileString() : modelFolderPathname;
 		}
-		else {
-			modelFolderPathname = findModelFolderPath(resource.getURI());
-			if(modelFolderPathname == null) {
-				modelFolderPathname = v.toFileString();
-			}
-		}
-		return modelFolderPathname;
 	}
 	
     static String findModelFolderPath(URI uri){

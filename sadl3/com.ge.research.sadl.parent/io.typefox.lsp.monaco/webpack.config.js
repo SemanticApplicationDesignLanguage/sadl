@@ -6,10 +6,10 @@ var SRC = path.resolve(ROOT, 'src');
 var DEST = path.resolve(__dirname, 'src/main/webapp/dist');
 var VS_ROOT = path.resolve(__dirname, 'node_modules/monaco-editor/min/vs');
 
-var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
-	compress: true,
-	mangle: false
-});
+//var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
+//	compress: true,
+//	mangle: false
+//});
 
 module.exports = {
 
@@ -43,7 +43,7 @@ module.exports = {
 		new require('copy-webpack-plugin')([{
 			from: VS_ROOT,
 			to: 'vs',
-		}]),
-		uglifyPlugin
+		}])
+//		,uglifyPlugin
 	]
 };

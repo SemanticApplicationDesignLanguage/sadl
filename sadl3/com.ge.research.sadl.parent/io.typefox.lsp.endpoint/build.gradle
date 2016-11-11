@@ -1,6 +1,5 @@
 dependencies {
-    compile "io.typefox.lsapi:io.typefox.lsapi:$versions.lsapi"
-    compile "io.typefox.lsapi:io.typefox.lsapi.services:$versions.lsapi"
+    compile "org.eclipse.lsp4j:org.eclipse.lsp4j:$versions.lsp4j"
     compile "com.google.guava:guava:$versions.guava"
     compile "com.google.inject:guice:$versions.guice"
     compile "org.eclipse.xtext:org.eclipse.xtext.ide:$versions.xtext"

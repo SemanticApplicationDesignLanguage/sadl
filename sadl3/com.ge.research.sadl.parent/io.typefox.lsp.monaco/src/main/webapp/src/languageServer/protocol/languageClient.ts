@@ -2,18 +2,32 @@
 
 import * as is from 'vscode-jsonrpc/lib/is'
 import { Disposable } from 'vscode-jsonrpc/lib/events'
-import { MessageConnection } from 'vscode-jsonrpc'
+import { MessageConnection, NotificationType } from 'vscode-jsonrpc'
 
 import * as lstypes from 'vscode-languageserver-types'
 import * as protocol from 'vscode-languageclient/lib/protocol'
 import * as protocolConverter from './protocolConverter'
 import * as languageConverter from './languageConverter'
 
-
-
 import { LanguageDescription } from './registry'
-
 import Workspace from './workspace';
+
+
+class SemanticHighlight {
+    infos: SemanticHighlightInformation[];
+}
+
+class SemanticHighlightInformation {
+    range: lstypes.Range;
+    ids: string[];
+}
+
+class SemanticHighlightNotification  {
+    static type: NotificationType<SemanticHighlight> = {
+        method: 'lsp4j/pushSemanticHighlight',
+        _: undefined
+    };
+}
 
 export class LanguageClient implements
         monaco.languages.DefinitionProvider,
@@ -26,6 +40,7 @@ export class LanguageClient implements
     private _languages: LanguageDescription[]
     private _connection: MessageConnection
     private _rootPath: string
+    private _semanticHighlightDecorationIds: string[] = [];
 
     private _capabilites: protocol.ServerCapabilities
 
@@ -44,13 +59,32 @@ export class LanguageClient implements
             uriToDiagnosticMap.set(params.uri, diagnostics)
             this.updateMarkers(params.uri, diagnostics)
         })
+
         this._connection.onDispose(params => {
             this.dispose();
         })
+
         this._disposables.push(Workspace.onDidOpenTextDocument(textDocument => {
             let diagnostics = uriToDiagnosticMap.get(textDocument.uri)
             this.updateMarkers(textDocument.uri, diagnostics)
         }));
+    }
+
+    public enableSemanticHighlighting(editor: monaco.editor.IStandaloneCodeEditor) {
+        this._connection.onNotification(SemanticHighlightNotification.type, params => {
+            // Clear all exising semantic highlighting decorations.
+            while (this._semanticHighlightDecorationIds.length != 0) {
+                const id = this._semanticHighlightDecorationIds.pop();
+                editor.deltaDecorations([id], []);
+            }
+            // Add new semantic highlighting decorations.
+            params.infos.forEach(info => {
+                const monacoRange = protocolConverter.asRange(info.range);
+                const id = editor.deltaDecorations([], [{ range: monacoRange, options: { inlineClassName: info.ids[0] } }])[0];
+                this._semanticHighlightDecorationIds.push(id);
+                
+            });
+        });
     }
 
     dispose() {
@@ -139,7 +173,7 @@ export class LanguageClient implements
         }
     }
 
-    // TODO neccessary checks? workspace already checks document before fire
+    // TODO necessary checks? workspace already checks document before fire
     protected filterTextDocument(textDocument: lstypes.TextDocument, acceptor: (textDocument: lstypes.TextDocument) => void) {
         if (is.undefined(textDocument)) {
             return;
@@ -275,7 +309,7 @@ export class LanguageClient implements
         )
     }
 
-    // TODO is this check really neccessary? How could it happen?
+    // TODO is this check really necessary? How could it happen?
     protected provideForOpened<T>(uri: string, provider: (uri: string) => PromiseLike<T>): PromiseLike<T> {
         if (!Workspace.isOpened(uri)) {
             return Promise.reject<T>(new Error(`A document for the given uri has not been opened yet, uri "${uri}"`));
