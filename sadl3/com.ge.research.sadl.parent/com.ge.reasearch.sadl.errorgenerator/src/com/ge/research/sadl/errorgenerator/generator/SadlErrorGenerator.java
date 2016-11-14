@@ -1,6 +1,9 @@
 package com.ge.research.sadl.errorgenerator.generator;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 import com.ge.research.sadl.errorgeneratorbase.ErrorGeneratorBase;
 
@@ -69,6 +72,36 @@ public class SadlErrorGenerator extends ErrorGeneratorBase{
 //				"$content",
 //				"}");
 	}
+	
+	public static String getSadlErrorHtmlFile() {
+		String prefix = "Sadl";
+		
+		String htmlString = getHtmlTemplate();//FileUtils.readWholeFileAsUTF8("templates/htmlTemplate.tmpl");
+		htmlString = htmlString.replace("$title", prefix + " Error Messages");
+		String tableString = "<table><tr><th>Error Message</th><th>Description</th></tr>";
+		
+		//Read the error messages from the .properties file
+		ResourceBundle msgBundle = ResourceBundle.getBundle("sadlMessages");
+		for(Enumeration<String> keys = msgBundle.getKeys(); keys.hasMoreElements();) {
+			String key = keys.nextElement();
+			if(!key.contains(".")){
+				//Add content to HTML file
+				String msg = msgBundle.getString(key);
+				String description = "";
+				try {
+					description = msgBundle.getString(key + ".description");
+				} catch(MissingResourceException e) {
+					description = "<em>No description provided</em>";
+				}
+				tableString += "<tr><td class=\"absorbing-column\">" + msg + "</td><td>" + description + "</td></tr>";
+			}
+		}
+		tableString += "</table>";
+		htmlString = htmlString.replace("$body", tableString);
+		
+		return htmlString;
+	}
+	
 	
 	public static void main(String args[]) throws IllegalArgumentException, IllegalAccessException, IOException {
 		String dir = System.getProperty("user.dir");
