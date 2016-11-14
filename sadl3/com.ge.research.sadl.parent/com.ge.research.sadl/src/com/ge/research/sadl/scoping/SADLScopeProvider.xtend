@@ -295,16 +295,28 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
 		}
 		if (importScopes.isEmpty) {
-			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl")) {
-				val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
-				if (element !== null) {
-					val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl"))
+			{
+				val elementImplicit = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
+				if (elementImplicit !== null) {
+					val eobject = resource.resourceSet.getEObject(elementImplicit.EObjectURI, true)
 					if (eobject !== null) {
 						importScopes += createResourceScope(eobject.eResource, null, importedResources)
 					}
 				}
 			}
 		}
+		if(!resource.URI.toString.endsWith("SadlBuiltinFunctions.sadl"))
+		{
+			val elementBuiltin = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
+			if (elementBuiltin !== null) {
+				val eobject = resource.resourceSet.getEObject(elementBuiltin.EObjectURI, true)
+				if (eobject !== null) {
+					importScopes += createResourceScope(eobject.eResource, null, importedResources)
+				}
+			}
+		}
+		
 		return new ListCompositeScope(importScopes, converter, ambiguousNameDetection)
 	}
 

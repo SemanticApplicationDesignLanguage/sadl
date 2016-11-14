@@ -629,36 +629,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		EList<SadlAnnotation> anns = model.getAnnotations();
 		addAnnotationsToResource(modelOntology, anns);
 		
-		//Add SadlBaseModel to Builtin Functions Implicit Model
-		if(!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)){
-			try {
-				addSadlBaseModelImportToJenaModel(resource);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (ConfigurationException e1) {
-				e1.printStackTrace();
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
-			} catch (JenaProcessorException e1) {
-				e1.printStackTrace();
+		try {
+			//Add SadlBaseModel to Builtin Functions Implicit Model
+			if(!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)){
+					addSadlBaseModelImportToJenaModel(resource);
 			}
-		}
-		
-		if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME) &&
-			!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-			OntModelProvider.registerResource(resource);
-			try {
-				addImplicitSadlModelImportToJenaModel(resource, context);
-				addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (ConfigurationException e1) {
-				e1.printStackTrace();
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
-			} catch (JenaProcessorException e1) {
-				e1.printStackTrace();
+			
+			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME) &&
+				!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
+					OntModelProvider.registerResource(resource);
+					addImplicitSadlModelImportToJenaModel(resource, context);
+					addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
+	
 			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (ConfigurationException e1) {
+			e1.printStackTrace();
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+		} catch (JenaProcessorException e1) {
+			e1.printStackTrace();
 		}
 		
 		EList<SadlImport> implist = model.getImports();
