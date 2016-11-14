@@ -370,7 +370,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	@Inject EditorResourceAccess editorResourceAccess;
 	@Inject IResourceDescriptions indexData;
 
-	private void findIncomingImports(IFile trgtFile, final List<String[]> imports, int graphRadius) {
+	protected void findIncomingImports(IFile trgtFile, final List<String[]> imports, int graphRadius) {
 		URI uri = URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true);
 		findIncomingImportsByUri(imports, uri, graphRadius);
 	}
@@ -416,7 +416,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return null;
 	}
 
-	private ResultSet listToResultSet(String[] headers, List<String[]> importList, IFile trgtFile, boolean derivedFN) {
+	protected ResultSet listToResultSet(String[] headers, List<String[]> importList, IFile trgtFile, boolean derivedFN) {
 		String[][] data = new String[importList.size()][];
 		for (int i = 0; i < importList.size(); i++) {
 			data[i] = importList.get(i);
@@ -454,7 +454,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return null;
 	}
 
-	private List<String[]> findImports(List<String[]> importList,
+	protected List<String[]> findImports(List<String[]> importList,
 			IConfigurationManagerForIDE configMgr, String parentPublicUri, String parentPrefix, int graphRadius) throws ConfigurationException, IOException {
 		Map<String,String> map = configMgr.getImports(parentPublicUri, Scope.LOCALONLY);
 		if (map != null) {
@@ -472,8 +472,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 					else {
 						row[0] = nodeText(key, val);
 					}
-					if (!rowAlreadyInList(importList,row) && graphRadius > 0) {
 						importList.add(row);
+						if (!rowAlreadyInList(importList,row) && graphRadius > 0) {
 						importList = findImports(importList, configMgr, key, val, graphRadius - 1);
 					}
 				}

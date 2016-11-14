@@ -37,6 +37,11 @@
             id="referenceToSadlMenuId3"
             name="Show Graph">
       </command>
+      <command
+            categoryId="sadl.commands.category"
+            id="SADL.GenerateOntGraph"
+            name="Graph Ontology">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -51,6 +56,10 @@
       <handler
             commandId="SADL.GenerateGraph"
             class="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.ui.handlers.GraphGeneratorHandler">
+      </handler>
+      <handler
+            class="com.ge.research.sadl.ui.handlers.OntologyGraphGeneratorHandler"
+            commandId="SADL.GenerateOntGraph">
       </handler>
     </extension>
   
@@ -73,6 +82,12 @@
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+v">
+      </key>
+      <key
+            commandId="SADL.GenerateOntGraph"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+g+2">
       </key>
    </extension>
    <extension
@@ -103,6 +118,11 @@
                    commandId="SADL.GenerateGraph"
                    icon="icons/releng_gears.gif"
                    tooltip="Show Graph">
+             </command>
+             <command
+                   commandId="SADL.GenerateOntGraph"
+                   icon="icons/releng_gears.gif"
+                   tooltip="Graph Ontology">
              </command>
         </menu>
          
@@ -143,6 +163,12 @@
                commandId="SADL.GenerateGraph"
                icon="icons/releng_gears.gif"
                label="Show Graph"
+               style="push">
+         </command>
+         <command
+               commandId="SADL.GenerateOntGraph"
+               icon="icons/releng_gears.gif"
+               label="Graph Ontology"
                style="push">
          </command>
        </menuContribution>
