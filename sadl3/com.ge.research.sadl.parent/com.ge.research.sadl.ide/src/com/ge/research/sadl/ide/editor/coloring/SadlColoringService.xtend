@@ -11,7 +11,7 @@
  * and licensed under the Eclipse Public License - v 1.0
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  */
-package com.ge.research.sadl.ide.editor.syntaxcoloring
+package com.ge.research.sadl.ide.editor.coloring
 
 import com.ge.research.sadl.model.CircularDefinitionException
 import com.ge.research.sadl.model.DeclarationExtensions
@@ -30,53 +30,57 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.lsp4j.Range
 import org.eclipse.xtext.ide.server.Document
-import org.eclipse.xtext.ide.server.syntaxColoring.ISemanticHighlightService
-import org.eclipse.xtext.ide.server.syntaxColoring.SemanticHighlight
-import org.eclipse.xtext.ide.server.syntaxColoring.SemanticHighlightInformation
+import org.eclipse.xtext.ide.server.coloring.ColoringInformation
+import org.eclipse.xtext.ide.server.coloring.ColoringParams
+import org.eclipse.xtext.ide.server.coloring.IColoringService
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import static java.util.Collections.emptyList
 
 /**
- * Generic semantic highlighting service for the {@code SADL} language.
+ * Generic highlighting and coloring service for the {@code SADL} language.
  * 
  * @author akos.kitta
  * 
  * @see ISemanticHighlightService
  */
-class SadlSemanticHighlightService implements ISemanticHighlightService {
+class SadlColoringService implements IColoringService {
 
-	static val LOGGER = LoggerFactory.getLogger(SadlSemanticHighlightService);
+	static val LOGGER = LoggerFactory.getLogger(SadlColoringService);
+
+	static val MISSING_RESOURCE_URI = 'MISSING_RESOURCE';
 
 	static val DEFAULT_ID = 'default';
 	static val URI_ID = 'uri';
 	static val CLASS_ID = 'class';
-	static val INSTANCE_ID = 'instance';
 	static val VARIABLE_ID = 'variable';
+	static val INSTANCE_ID = 'instance';
+	static val RDFDATATYPE_ID = 'rdfDataType';
+	static val RDF_PROPERTY_ID = 'rdfProperty';
+	static val FUNCTION_NAME_ID = 'functionName';
 	static val DATA_PROPERTY_ID = 'dataProperty';
 	static val OBJECT_PROPERTY_ID = 'objectProperty';
 	static val ANNOTATION_PROPERTY_ID = 'annotationProperty';
-	static val RDF_PROPERTY_ID = 'rdfProperty';
-	static val RDFDATATYPE_ID = 'rdfDataType';
-	static val FUNCTION_NAME_ID = 'functionName';
 
 	@Inject
 	extension DeclarationExtensions;
 
 	@Override
-	override SemanticHighlight getSemanticHighlight(XtextResource resource, Document doc) {
+	override ColoringParams getColoring(XtextResource resource, Document doc) {
 
 		if (resource === null) {
-			return EMPTY;
+			return new ColoringParams(MISSING_RESOURCE_URI, emptyList());
 		}
 
 		val SadlModel model = resource.contents.head as SadlModel;
+		val resourceUri = '''«resource.URI»'''
 		if (model === null) {
-			return EMPTY;
+			return new ColoringParams(resourceUri, emptyList());
 		}
-		val builder = ImmutableList.<SemanticHighlightInformation>builder;
+		val builder = ImmutableList.<ColoringInformation>builder;
 
 		// Imported resource URIs.
 		builder.add(doc.createInfos(model.imports, SADL_IMPORT__IMPORTED_RESOURCE, URI_ID));
@@ -140,7 +144,7 @@ class SadlSemanticHighlightService implements ISemanticHighlightService {
 				}
 			}
 		];
-		return new SemanticHighlight(builder.build);
+		return new ColoringParams(resourceUri, builder.build);
 	}
 
 	private def createInfos(Document doc, EObject object, EStructuralFeature feature, String id) {
@@ -155,7 +159,7 @@ class SadlSemanticHighlightService implements ISemanticHighlightService {
 
 	private def createInfos(Document doc, int offset, int length, String id) {
 		val range = new Range(doc.getPosition(offset), doc.getPosition(offset + length));
-		return new SemanticHighlightInformation(range, Collections.singletonList(id));
+		return new ColoringInformation(range, Collections.singletonList(id));
 	}
 
 	private def getId(SadlResource it) {

@@ -45,22 +45,22 @@ class SADLNoopModelProcessorsInjectorProvider extends SADLInjectorProvider {
 
 	@Override
 	override protected createRuntimeModule() {
-		val delegate = super.createRuntimeModule();
-		return new SADLRuntimeModule() {
+		return new NoopModelProcessorsRuntimeModule();
+	}
 
-			@Override
-			override bindClassLoaderToInstance() {
-				return delegate.bindClassLoaderToInstance();
-			}
+	/**
+	 * Customized {@code SADL} runtime module that does not have any use any
+	 * model processor instances.
+	 */
+	protected static class NoopModelProcessorsRuntimeModule extends SADLRuntimeModule {
 
-			/**
-			 * A composite model processor is used with zero delegates.
-			 */
-			def <Class extends IModelProcessorProvider> bindIModelProcessorProvider() {
-				return NOOP_PROCESSOR_PROVIDER;
-			}
+		/**
+		 * A composite model processor is used with zero delegates.
+		 */
+		def <Class extends IModelProcessorProvider> bindIModelProcessorProvider() {
+			return NOOP_PROCESSOR_PROVIDER;
+		}
 
-		};
 	}
 
 }

@@ -171,6 +171,7 @@ import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.ISadlServer;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
@@ -630,9 +631,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
 				OntModelProvider.setSadlBaseModel(sadlBaseModel);
 				addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, sadlBaseModel);
-				String implfn = checkImplicitSadlModelExistence(resource, context);
+				java.nio.file.Path implfn = checkImplicitSadlModelExistence(resource, context);
 				if (implfn != null) {
-					Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
+					final PathToFileUriConverter uriConverter = getUriConverter(resource);
+					final URI resourceUri = uriConverter.createFileUri(implfn);
+					Resource imrsrc = resource.getResourceSet().getResource(resourceUri, true);
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {
 							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
@@ -870,6 +873,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				e.printStackTrace();
 			}
 		}
+	}
+	private PathToFileUriConverter getUriConverter(Resource resource) {
+		return ((XtextResource) resource).getResourceServiceProvider().get(PathToFileUriConverter.class);
 	}
     
 	private void addAnnotationsToResource(OntResource modelOntology, EList<SadlAnnotation> anns) {
@@ -5296,7 +5302,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return rules;
 	}
 		
-	private String checkImplicitSadlModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+	private java.nio.file.Path checkImplicitSadlModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		UtilsForJena ufj = new UtilsForJena();
 		String policyFileUrl = ufj.getPolicyFilename(resource);
 		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
@@ -5316,7 +5322,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				catch (Throwable t) {}
 			}
-			return implicitModelFile.getAbsolutePath();
+			return implicitModelFile.getAbsoluteFile().toPath();
 		}
 		return null;
 	}
@@ -5453,6 +5459,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		if (configMgr == null) {
 			String modelFolderPathname = getModelFolderPath(resource);
+			System.out.println("JenaBasedSadlModelProcessor.getConfigMgr() " + modelFolderPathname);
 			if ((modelFolderPathname == null && 
 					resource.getURI().toString().startsWith("synthetic")) ||
 							resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST)) {

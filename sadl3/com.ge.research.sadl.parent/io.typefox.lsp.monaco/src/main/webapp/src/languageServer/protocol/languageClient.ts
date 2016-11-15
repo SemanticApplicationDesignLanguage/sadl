@@ -24,7 +24,7 @@ class SemanticHighlightInformation {
 
 class SemanticHighlightNotification  {
     static type: NotificationType<SemanticHighlight> = {
-        method: 'lsp4j/pushSemanticHighlight',
+        method: 'textDocument/updateColoring',
         _: undefined
     };
 }

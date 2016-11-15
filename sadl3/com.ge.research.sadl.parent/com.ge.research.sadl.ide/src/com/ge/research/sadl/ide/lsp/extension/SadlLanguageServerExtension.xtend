@@ -28,8 +28,8 @@ import org.eclipse.lsp4j.jsonrpc.services.ServiceEndpoints
 import org.eclipse.xtext.ide.server.ILanguageServerAccess
 import org.eclipse.xtext.ide.server.ILanguageServerAccess.IBuildListener
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
-import org.eclipse.xtext.ide.server.syntaxColoring.ISemanticHighlightClient
-import org.eclipse.xtext.ide.server.syntaxColoring.ISemanticHighlightService
+import org.eclipse.xtext.ide.server.coloring.IColoringClient
+import org.eclipse.xtext.ide.server.coloring.IColoringService
 import org.eclipse.xtext.resource.IResourceDescription.Delta
 import org.eclipse.xtext.resource.XtextResource
 
@@ -46,17 +46,17 @@ interface SadlLanguageServerExtension extends ILanguageServerExtension {
 	static class Impl implements ILanguageServerExtension, SadlLanguageServerExtension, IBuildListener, JsonRpcMethodProvider {
 
 		@Inject
-		extension ISemanticHighlightService;
+		extension IColoringService;
 
 		ILanguageServerAccess access;
-		Supplier<ISemanticHighlightClient> client;
+		Supplier<IColoringClient> client;
 
 		@Override
 		override initialize(ILanguageServerAccess access) {
 			this.access = access;
 			this.access.addBuildListener(this);
 			this.client = Suppliers.memoize [
-				ServiceEndpoints.toServiceObject(this.access.languageClient as Endpoint, ISemanticHighlightClient)
+				ServiceEndpoints.toServiceObject(this.access.languageClient as Endpoint, IColoringClient)
 			];
 		}
 
@@ -68,8 +68,8 @@ interface SadlLanguageServerExtension extends ILanguageServerExtension {
 						val resource = ctx.resource as XtextResource;
 //						if (!resource.errors.nullOrEmpty) {
 						val doc = ctx.document;
-						val highlight = resource.getSemanticHighlight(doc);
-						client.get.pushSemanticHighlight(highlight);
+						val highlight = resource.getColoring(doc);
+						client.get.updateColoring(highlight);
 						return /*void*/ null;
 //						}
 					}
@@ -79,7 +79,7 @@ interface SadlLanguageServerExtension extends ILanguageServerExtension {
 
 		@Override
 		override supportedMethods() {
-			return ServiceEndpoints.getSupportedMethods(ISemanticHighlightClient).unmodifiableMap;
+			return ServiceEndpoints.getSupportedMethods(IColoringClient).unmodifiableMap;
 		}
 
 	}

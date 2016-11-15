@@ -22,6 +22,10 @@
     color: #801480 !important;
 }
 
+.string {
+    color: #000000 !important;
+}
+
 .uri {
     color: #000000 !important;
     font-weight: bold;

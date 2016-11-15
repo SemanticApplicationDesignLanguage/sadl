@@ -66,5 +66,10 @@ Event is a class
 Birth is a type of Event 
     described by mother with a single value of type Person, 
     described by child with values of type Person.
+
+George is a Person has birth 
+    (a Birth with mother (a Person Mary), with location 
+        (a Location with latitude 38.186111, with longitude -76.930556, with description "Pope's Creek Estate"),
+        with when "1732-02-22").
     `;
 }

@@ -17,12 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide
 
+import com.ge.research.sadl.ide.editor.coloring.SadlColoringService
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
-import com.ge.research.sadl.ide.editor.syntaxcoloring.SadlSemanticHighlightService
 import com.ge.research.sadl.ide.lsp.^extension.SadlLanguageServerExtension
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
-import org.eclipse.xtext.ide.server.syntaxColoring.ISemanticHighlightService
+import org.eclipse.xtext.ide.server.coloring.IColoringService
 
 /**
  * Use this class to register generic IDE components.
@@ -37,8 +37,8 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 		return SadlLanguageServerExtension;
 	}
 
-	def Class<? extends ISemanticHighlightService> bindISemanticHighlightService() {
-		return SadlSemanticHighlightService;
+	def Class<? extends IColoringService> bindISemanticHighlightService() {
+		return SadlColoringService;
 	}
 
 }
