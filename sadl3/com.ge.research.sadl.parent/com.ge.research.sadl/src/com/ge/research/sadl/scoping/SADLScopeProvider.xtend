@@ -318,6 +318,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				}
 			}
 		}
+		
+		if (!resource.URI.toString.endsWith("SadlBuiltinFunctions.sadl")) {
+			val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
+			if (element !== null) {
+				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+				if (eobject !== null) {
+					createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
+						importedSymbols.put(name, it)
+					]
+				}
+			}
+		}
+		
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
 	}
 	
