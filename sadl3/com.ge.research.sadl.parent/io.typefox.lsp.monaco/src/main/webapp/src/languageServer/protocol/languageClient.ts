@@ -55,8 +55,6 @@ export class LanguageClient implements
         monaco.languages.DocumentHighlightProvider,
         Disposable {
 
-    static styleIdToCssStyleMap: Map<number, string> = new Map<number, string>();
-
     private _languages: LanguageDescription[]
     private _connection: MessageConnection
     private _rootPath: string
