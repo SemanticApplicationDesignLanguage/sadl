@@ -1,6 +1,5 @@
 package com.ge.research.sadl.ui.handlers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,15 +11,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.preferences.*;
-import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.IAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
-import com.ge.research.sadl.processing.ISadlImportProcessor;
-import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.ui.SadlConsole;
-import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
@@ -28,7 +21,6 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ResultSet;
 

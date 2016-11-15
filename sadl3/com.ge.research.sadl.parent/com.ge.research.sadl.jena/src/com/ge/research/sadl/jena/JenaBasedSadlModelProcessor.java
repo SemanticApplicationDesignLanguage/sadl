@@ -2548,8 +2548,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public Object processExpression(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
 		Expression subj = expr.getLeft();
-		Expression pred = expr.getProp();
+		SadlResource pred = expr.getProp();
 		Expression obj = expr.getRight();
+		if (modelValidator != null) {
+			modelValidator.checkPropertyDomain(getTheJenaModel(), subj, pred);
+		}
 		Object sobj = null;
 		Object pobj = null;
 		Object oobj = null;

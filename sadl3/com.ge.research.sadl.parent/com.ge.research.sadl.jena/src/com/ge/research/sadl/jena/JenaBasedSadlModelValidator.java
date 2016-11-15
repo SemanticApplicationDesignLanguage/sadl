@@ -2325,4 +2325,41 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate) {
+		if (subject instanceof SadlResource) {
+			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
+			if (rsrc != null) {
+				if (ontModel != null) {
+					OntResource subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
+					Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+					StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
+					boolean matchFound = false;
+					while (stmtitr.hasNext()) {
+						RDFNode obj = stmtitr.nextStatement().getObject();
+						if (obj.isResource()) {
+							if (obj.canAs(UnionClass.class)){
+								ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = obj.as(UnionClass.class).listOperands();
+								while (itr.hasNext()) {
+									com.hp.hpl.jena.rdf.model.Resource cls = itr.next();
+									if (cls.isURIResource() && cls.asResource().getURI().equals(subj.getURI())) {
+										matchFound = true;			
+										break;
+									}
+								}
+							}
+							else if (obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
+								matchFound = true;	
+								break;
+							}
+						}
+					}
+					stmtitr.close();
+					if (!matchFound) {
+						issueAcceptor.addWarning("'" + subj.getURI() + "' is not in domain of property '" + prop.getURI() + "'", subject);
+					}
+				}
+			}
+		}
+	}
+
 }
