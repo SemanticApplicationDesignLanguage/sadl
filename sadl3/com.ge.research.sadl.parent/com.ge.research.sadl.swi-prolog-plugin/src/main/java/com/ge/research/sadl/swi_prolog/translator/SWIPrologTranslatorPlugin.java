@@ -16,6 +16,7 @@ import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
@@ -31,6 +32,7 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -1363,16 +1365,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		} 
 	}
 	
-	public boolean isBuiltinFunction(String name) {
-		if (functionListArity1.contains(name)) {
-			return true;
-		}
-		if (functionListArity2.contains(name)) {
-			return true;
-		}
-		return false;
-	}
-	
 	private String sadlVariableToPrologVariable(String varName) {
 		return "PV" + varName;
 	}
@@ -1733,11 +1725,34 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
-	public String[] getBuiltinFunctionSignature(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getBuiltinFunctionModel(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("uri \"");
+		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI);
+		sb.append("\" alias ");
+		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+		sb.append(".\n\n");
+		
+		return sb.toString();
+	}
+	
+	//This method existed before built-in function type-checking was added to the interface.
+	@Override
+	public boolean isBuiltinFunction(String name) {
+		if (functionListArity1.contains(name)) {
+			return true;
+		}
+		if (functionListArity2.contains(name)) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public Enum isBuiltinFunctionTypeCheckingAvailable(){
+		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 
 }

@@ -26,6 +26,7 @@ import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -37,6 +38,7 @@ import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.ElementInList;
 import com.ge.research.sadl.sADL.EquationStatement;
 import com.ge.research.sadl.sADL.Expression;
+import com.ge.research.sadl.sADL.ExternalEquationStatement;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
@@ -1362,12 +1364,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
 		SadlResource qnm =expression.getName();
 		if (qnm.eIsProxy()) {
-			// this is a proxy so we don't know its type
-			issueAcceptor.addWarning(SadlErrorMessages.RETURN_TYPE_WARNING.get("Function" + expression.getName().toString()), expression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
-			}
-			throw new DontTypeCheckException();
+			handleUndefinedFunctions(expression);
 		}
 		
 		//If the expression is a function, find equation definition from name and get the return type
@@ -1377,10 +1374,44 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(es != null){
 					return getType(es.getReturnType());
 				}
+			}else if(qnm.eContainer() instanceof ExternalEquationStatement){
+				ExternalEquationStatement ees = (ExternalEquationStatement)qnm.eContainer();
+				if(ees != null){
+					return getType(ees.getReturnType());
+				}
 			}
+			handleUndefinedFunctions(expression);
 		}
 		
 		return getType(qnm);
+	}
+	
+	protected void handleUndefinedFunctions(Name expression) throws ConfigurationException, DontTypeCheckException{
+		String expressionName = declarationExtensions.getConcreteName(expression);
+		ITranslator translator = sadlModelProcessor.configMgr.getTranslator();
+		//If only names for built-in functions are avialable, check the name matches a built-in functions. If not, error.
+		if(translator.isBuiltinFunctionTypeCheckingAvailable() == SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY){	
+			if(translator.isBuiltinFunction(expressionName)){
+				issueAcceptor.addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get(expressionName), expression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+			}else{
+				issueAcceptor.addError(SadlErrorMessages.RETURN_TYPE_WARNING.get("Function " + expressionName), expression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+				}
+			}				
+		}
+		//Either the Reasoner/Translator provides full built-in information or provides nothing. 
+		//Regardless, if this point is reached, error.
+		else {
+			issueAcceptor.addError(SadlErrorMessages.RETURN_TYPE_WARNING.get("Function " + expressionName), expression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+			}
+		}
+		throw new DontTypeCheckException();
 	}
 	
 	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException, CircularDefinitionException{
