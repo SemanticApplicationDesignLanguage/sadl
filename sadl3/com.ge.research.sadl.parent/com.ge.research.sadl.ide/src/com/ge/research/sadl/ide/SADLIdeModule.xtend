@@ -19,9 +19,7 @@ package com.ge.research.sadl.ide
 
 import com.ge.research.sadl.ide.editor.coloring.SadlColoringService
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
-import com.ge.research.sadl.ide.lsp.^extension.SadlLanguageServerExtension
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
-import org.eclipse.xtext.ide.server.ILanguageServerExtension
 import org.eclipse.xtext.ide.server.coloring.IColoringService
 
 /**
@@ -31,10 +29,6 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 
 	def Class<? extends IdeContentProposalProvider> bindIdeContentProposalProvider() {
 		return SadlIdeContentProposalProvider;
-	}
-
-	def Class<? extends ILanguageServerExtension> bindILanguageServerExtension() {
-		return SadlLanguageServerExtension;
 	}
 
 	def Class<? extends IColoringService> bindISemanticHighlightService() {

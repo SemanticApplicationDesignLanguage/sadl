@@ -13,21 +13,39 @@ import { LanguageDescription } from './registry'
 import Workspace from './workspace';
 
 
-class SemanticHighlight {
-    infos: SemanticHighlightInformation[];
+export class ColoringParams {
+    uri: string;
+    infos: ColoringInformation[];
 }
 
-class SemanticHighlightInformation {
+export class ColoringInformation {
     range: lstypes.Range;
-    ids: string[];
+    styles: number[];
 }
 
-class SemanticHighlightNotification  {
-    static type: NotificationType<SemanticHighlight> = {
+export class ColoringIdToCssStyleMap {
+    static map: Map<number, string> = new Map<number, string>([
+        [27, 'default'],
+        [28, 'uri'],
+        [29, 'class'],
+        [30, 'variable'],
+        [31, 'instance'],
+        [32, 'rdfDataType'],
+        [33, 'rdfProperty'],
+        [34, 'functionName'],
+        [35, 'dataProperty'],
+        [36, 'objectProperty'],
+        [37, 'annotationProperty']
+    ]);
+}
+
+class ColoringNotification  {
+    static type: NotificationType<ColoringParams> = {
         method: 'textDocument/updateColoring',
         _: undefined
     };
 }
+
 
 export class LanguageClient implements
         monaco.languages.DefinitionProvider,
@@ -36,6 +54,8 @@ export class LanguageClient implements
         monaco.languages.ReferenceProvider, 
         monaco.languages.DocumentHighlightProvider,
         Disposable {
+
+    static styleIdToCssStyleMap: Map<number, string> = new Map<number, string>();
 
     private _languages: LanguageDescription[]
     private _connection: MessageConnection
@@ -60,6 +80,13 @@ export class LanguageClient implements
             this.updateMarkers(params.uri, diagnostics)
         })
 
+        let uriToColoringDecorationIdsMap = new Map<string, string[]>();
+        this._connection.onNotification(ColoringNotification.type, params => {
+            let infos = params.infos;
+            let uri = params.uri;
+            this.updateColoringDecorators(uri, infos, uriToColoringDecorationIdsMap);
+        });
+
         this._connection.onDispose(params => {
             this.dispose();
         })
@@ -70,21 +97,30 @@ export class LanguageClient implements
         }));
     }
 
-    public enableSemanticHighlighting(editor: monaco.editor.IStandaloneCodeEditor) {
-        this._connection.onNotification(SemanticHighlightNotification.type, params => {
-            // Clear all exising semantic highlighting decorations.
-            while (this._semanticHighlightDecorationIds.length != 0) {
-                const id = this._semanticHighlightDecorationIds.pop();
-                editor.deltaDecorations([id], []);
+    protected updateColoringDecorators(uri: string, infos: ColoringInformation[], uriToColoringDecorationIdsMap: Map<string, string[]>) {
+            let modelUri = monaco.Uri.parse(uri)
+            let model = monaco.editor.getModel(modelUri)
+            if (is.undefined(model) || is.nil(model)) {
+                return;
             }
-            // Add new semantic highlighting decorations.
-            params.infos.forEach(info => {
+
+            const decorationIdsToRemove = uriToColoringDecorationIdsMap.get(uri);
+            if (decorationIdsToRemove) {
+                while (decorationIdsToRemove.length !== 0) {
+                    const oldId = decorationIdsToRemove.pop();
+                    model.deltaDecorations([oldId], []);
+                }
+            }
+
+            const newDecorationIds: string[] = [];
+            infos.forEach(info => {
                 const monacoRange = protocolConverter.asRange(info.range);
-                const id = editor.deltaDecorations([], [{ range: monacoRange, options: { inlineClassName: info.ids[0] } }])[0];
-                this._semanticHighlightDecorationIds.push(id);
-                
+                info.styles.forEach(style => {
+                    const cssClass = ColoringIdToCssStyleMap.map.get(style);
+                    newDecorationIds.push(model.deltaDecorations([], [{ range: monacoRange, options: { inlineClassName: cssClass } }])[0]);
+                })
             });
-        });
+            uriToColoringDecorationIdsMap.set(uri, newDecorationIds);
     }
 
     dispose() {

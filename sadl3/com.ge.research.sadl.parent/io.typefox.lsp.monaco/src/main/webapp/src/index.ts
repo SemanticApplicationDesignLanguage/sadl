@@ -21,8 +21,6 @@ window.onload = () => {
             monaco.languages.setMonarchTokensProvider(languageId, conf);
 
             const editor = monaco.editor.create(document.getElementById('monaco_editor_div'));
-            client.enableSemanticHighlighting(editor);
-
             const updateDocument = () => {
                 const uri = editor.getModel().uri.toString();
                 const languageId = editor.getModel().getModeId();

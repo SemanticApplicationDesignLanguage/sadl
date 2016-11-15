@@ -46,19 +46,25 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 	def void checkColoring_01() {
 		val file = root.toPath.resolve('''MyModel.«fileExtension»''').toFile;
 		val uri = file.toURI.toString;
-		uri.open('''uri "http://sadl.imp/shapes_top".
+
+		uri.open('''
+		uri "http://sadl.imp/shapes_top".
 
 		Shape is a top-level class.''');
-		assertEquals('''«uriConverter.createFileUri(file)» -> 
- * [[0, 4] .. [0, 32]] -> [uri]
- * [[2, 2] .. [2, 7]] -> [class]''', coloringParams.toExpectation);
+		
+		assertEquals('''
+		«uriConverter.createFileUri(file)» ->
+		 * [[0, 4] .. [0, 32]] -> [28]
+		 * [[2, 0] .. [2, 5]] -> [29]''', coloringParams.toExpectation);
 	}
 
 	@Test
 	def void checkColoring_02() {
 		val file = root.toPath.resolve('''MyModel.«fileExtension»''').toFile;
 		val uri = file.toURI.toString;
-		uri.open('''uri "http://sadl.imp/shapes_specific".
+		
+		uri.open('''
+		uri "http://sadl.imp/shapes_specific".
 		import "file://shapes-top.sadl" as shapes-top.
 
 		Circle is a type of Shape,
@@ -67,23 +73,27 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 		Rectangle is a type of Shape,
 		       described by height with values of type float,
 		        described by width with values of type float.''');
-		assertEquals('''«uriConverter.createFileUri(file)» -> 
- * [[1, 9] .. [1, 33]] -> [uri]
- * [[0, 4] .. [0, 37]] -> [uri]
- * [[3, 2] .. [3, 8]] -> [class]
- * [[3, 22] .. [3, 27]] -> [variable]
- * [[4, 23] .. [4, 29]] -> [dataProperty]
- * [[6, 2] .. [6, 11]] -> [class]
- * [[6, 25] .. [6, 30]] -> [variable]
- * [[7, 22] .. [7, 28]] -> [dataProperty]
- * [[8, 23] .. [8, 28]] -> [dataProperty]''', coloringParams.toExpectation);
+		
+		assertEquals('''
+		«uriConverter.createFileUri(file)» ->
+		 * [[1, 7] .. [1, 31]] -> [28]
+		 * [[0, 4] .. [0, 37]] -> [28]
+		 * [[3, 0] .. [3, 6]] -> [29]
+		 * [[3, 20] .. [3, 25]] -> [30]
+		 * [[4, 21] .. [4, 27]] -> [35]
+		 * [[6, 0] .. [6, 9]] -> [29]
+		 * [[6, 23] .. [6, 28]] -> [30]
+		 * [[7, 20] .. [7, 26]] -> [35]
+		 * [[8, 21] .. [8, 26]] -> [35]''', coloringParams.toExpectation);
 	}
 
 	@Test
 	def void checkColoring_03() {
 		val file = root.toPath.resolve('''MyModel.«fileExtension»''').toFile;
 		val uri = file.toURI.toString;
-		uri.open('''uri "http://sadl.imp/shapes_test" .
+		
+		uri.open('''
+		uri "http://sadl.imp/shapes_test" .
 		import "file://shape-rules.sadl" as shape-rules.
 
 		MyCircle is a Circle, has radius 3.5 .
@@ -91,18 +101,20 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 		MyRect is a Rectangle, has height 3.5, has width 4.5.
 
 		Test: MyCircle has area 38.48 .''');
-		assertEquals('''«uriConverter.createFileUri(file)» -> 
- * [[1, 9] .. [1, 34]] -> [uri]
- * [[0, 4] .. [0, 33]] -> [uri]
- * [[3, 2] .. [3, 10]] -> [instance]
- * [[3, 16] .. [3, 22]] -> [variable]
- * [[3, 28] .. [3, 34]] -> [variable]
- * [[5, 2] .. [5, 8]] -> [instance]
- * [[5, 14] .. [5, 23]] -> [variable]
- * [[5, 29] .. [5, 35]] -> [variable]
- * [[5, 45] .. [5, 50]] -> [variable]
- * [[7, 8] .. [7, 16]] -> [instance]
- * [[7, 21] .. [7, 25]] -> [variable]''', coloringParams.toExpectation);
+		
+		assertEquals('''
+		«uriConverter.createFileUri(file)» ->
+		 * [[1, 7] .. [1, 32]] -> [28]
+		 * [[0, 4] .. [0, 33]] -> [28]
+		 * [[3, 0] .. [3, 8]] -> [31]
+		 * [[3, 14] .. [3, 20]] -> [30]
+		 * [[3, 26] .. [3, 32]] -> [30]
+		 * [[5, 0] .. [5, 6]] -> [31]
+		 * [[5, 12] .. [5, 21]] -> [30]
+		 * [[5, 27] .. [5, 33]] -> [30]
+		 * [[5, 43] .. [5, 48]] -> [30]
+		 * [[7, 6] .. [7, 14]] -> [31]
+		 * [[7, 19] .. [7, 23]] -> [30]''', coloringParams.toExpectation);
 	}
 
 	@Override

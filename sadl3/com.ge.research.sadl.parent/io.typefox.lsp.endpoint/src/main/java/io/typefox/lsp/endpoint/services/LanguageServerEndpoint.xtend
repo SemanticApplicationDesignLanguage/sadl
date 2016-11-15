@@ -15,8 +15,8 @@ import org.eclipse.lsp4j.jsonrpc.json.JsonRpcMethod
 import org.eclipse.lsp4j.jsonrpc.json.JsonRpcMethodProvider
 import org.eclipse.lsp4j.jsonrpc.json.MessageJsonHandler
 import org.eclipse.lsp4j.jsonrpc.services.ServiceEndpoints
-import org.eclipse.lsp4j.services.LanguageClient
 import org.eclipse.lsp4j.services.LanguageClientAware
+import org.eclipse.lsp4j.services.LanguageClientExtensions
 import org.eclipse.lsp4j.services.LanguageServer
 
 @Singleton
@@ -40,7 +40,7 @@ class LanguageServerEndpoint {
 	        supportedMethods.putAll(languageServer.supportedMethods());
         } else  {
         	supportedMethods.putAll(ServiceEndpoints.getSupportedMethods(languageServer.getClass()));	
-	        supportedMethods.putAll(ServiceEndpoints.getSupportedMethods(LanguageClient));
+	        supportedMethods.putAll(ServiceEndpoints.getSupportedMethods(LanguageClientExtensions));
         }
         
         val jsonHandler = new MessageJsonHandler(supportedMethods);
@@ -53,7 +53,7 @@ class LanguageServerEndpoint {
             writer.consume(it)
         ], ServiceEndpoints.toEndpoint(languageServer))
         
-        val client = ServiceEndpoints.toServiceObject(endpoint, LanguageClient);
+        val client = ServiceEndpoints.toServiceObject(endpoint, LanguageClientExtensions);
         if (languageServer instanceof LanguageClientAware) {
             languageServer.connect(client)
         }

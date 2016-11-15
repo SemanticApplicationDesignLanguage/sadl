@@ -28,17 +28,19 @@ import com.google.inject.Inject
 import java.util.Collections
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.lsp4j.ColoringInformation
+import org.eclipse.lsp4j.ColoringParams
 import org.eclipse.lsp4j.Range
 import org.eclipse.xtext.ide.server.Document
-import org.eclipse.xtext.ide.server.coloring.ColoringInformation
-import org.eclipse.xtext.ide.server.coloring.ColoringParams
 import org.eclipse.xtext.ide.server.coloring.IColoringService
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.slf4j.LoggerFactory
 
+import static com.ge.research.sadl.ide.editor.coloring.SadlColoringStyle.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import static java.util.Collections.emptyList
+
+import static extension org.eclipse.xtext.ide.server.coloring.ColoringParamsExtensions.*
 
 /**
  * Generic highlighting and coloring service for the {@code SADL} language.
@@ -51,20 +53,6 @@ class SadlColoringService implements IColoringService {
 
 	static val LOGGER = LoggerFactory.getLogger(SadlColoringService);
 
-	static val MISSING_RESOURCE_URI = 'MISSING_RESOURCE';
-
-	static val DEFAULT_ID = 'default';
-	static val URI_ID = 'uri';
-	static val CLASS_ID = 'class';
-	static val VARIABLE_ID = 'variable';
-	static val INSTANCE_ID = 'instance';
-	static val RDFDATATYPE_ID = 'rdfDataType';
-	static val RDF_PROPERTY_ID = 'rdfProperty';
-	static val FUNCTION_NAME_ID = 'functionName';
-	static val DATA_PROPERTY_ID = 'dataProperty';
-	static val OBJECT_PROPERTY_ID = 'objectProperty';
-	static val ANNOTATION_PROPERTY_ID = 'annotationProperty';
-
 	@Inject
 	extension DeclarationExtensions;
 
@@ -72,13 +60,13 @@ class SadlColoringService implements IColoringService {
 	override ColoringParams getColoring(XtextResource resource, Document doc) {
 
 		if (resource === null) {
-			return new ColoringParams(MISSING_RESOURCE_URI, emptyList());
+			return emptyColoringParams;
 		}
 
 		val SadlModel model = resource.contents.head as SadlModel;
-		val resourceUri = '''«resource.URI»'''
+		val resourceUri = '''«resource.URI»''';
 		if (model === null) {
-			return new ColoringParams(resourceUri, emptyList());
+			return resourceUri.emptyColoringParams;
 		}
 		val builder = ImmutableList.<ColoringInformation>builder;
 
@@ -147,17 +135,17 @@ class SadlColoringService implements IColoringService {
 		return new ColoringParams(resourceUri, builder.build);
 	}
 
-	private def createInfos(Document doc, EObject object, EStructuralFeature feature, String id) {
+	private def createInfos(Document doc, EObject object, EStructuralFeature feature, Integer id) {
 		return doc.createInfos(Collections.singleton(object), feature, id);
 	}
 
-	private def createInfos(Document doc, Iterable<? extends EObject> objects, EStructuralFeature feature, String id) {
+	private def createInfos(Document doc, Iterable<? extends EObject> objects, EStructuralFeature feature, Integer id) {
 		return objects.map[NodeModelUtils.findNodesForFeature(it, feature)].flatten.map [
-			doc.createInfos(offset, length, id)
+			doc.createInfos(offset, length, id);
 		];
 	}
 
-	private def createInfos(Document doc, int offset, int length, String id) {
+	private def createInfos(Document doc, int offset, int length, Integer id) {
 		val range = new Range(doc.getPosition(offset), doc.getPosition(offset + length));
 		return new ColoringInformation(range, Collections.singletonList(id));
 	}

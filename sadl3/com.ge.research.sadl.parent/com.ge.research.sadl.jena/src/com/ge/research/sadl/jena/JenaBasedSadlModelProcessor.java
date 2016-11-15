@@ -5459,7 +5459,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		if (configMgr == null) {
 			String modelFolderPathname = getModelFolderPath(resource);
-			System.out.println("JenaBasedSadlModelProcessor.getConfigMgr() " + modelFolderPathname);
 			if ((modelFolderPathname == null && 
 					resource.getURI().toString().startsWith("synthetic")) ||
 							resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST)) {
