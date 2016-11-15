@@ -29,7 +29,6 @@ import java.util.Collections
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.lsp4j.ColoringInformation
-import org.eclipse.lsp4j.ColoringParams
 import org.eclipse.lsp4j.Range
 import org.eclipse.xtext.ide.server.Document
 import org.eclipse.xtext.ide.server.coloring.IColoringService
@@ -39,8 +38,6 @@ import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.ide.editor.coloring.SadlColoringStyle.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-
-import static extension org.eclipse.xtext.ide.server.coloring.ColoringParamsExtensions.*
 
 /**
  * Generic highlighting and coloring service for the {@code SADL} language.
@@ -57,16 +54,15 @@ class SadlColoringService implements IColoringService {
 	extension DeclarationExtensions;
 
 	@Override
-	override ColoringParams getColoring(XtextResource resource, Document doc) {
+	override getColoring(XtextResource resource, Document doc) {
 
 		if (resource === null) {
-			return emptyColoringParams;
+			return emptyList;
 		}
 
 		val SadlModel model = resource.contents.head as SadlModel;
-		val resourceUri = '''«resource.URI»''';
 		if (model === null) {
-			return resourceUri.emptyColoringParams;
+			return emptyList;
 		}
 		val builder = ImmutableList.<ColoringInformation>builder;
 
@@ -132,7 +128,7 @@ class SadlColoringService implements IColoringService {
 				}
 			}
 		];
-		return new ColoringParams(resourceUri, builder.build);
+		return builder.build;
 	}
 
 	private def createInfos(Document doc, EObject object, EStructuralFeature feature, Integer id) {
