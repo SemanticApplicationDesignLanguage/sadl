@@ -22,7 +22,8 @@ Require-Bundle: com.ge.research.sadl;bundle-version="3.0.0",
  com.ge.research.jena;bundle-version="3.0.0",
  org.eclipse.xtext,
  org.eclipse.swt,
- org.eclipse.core.filesystem;bundle-version="1.4.0"
+ org.eclipse.core.filesystem;bundle-version="1.4.0",
+ com.ge.research.sadl.jena-wrapper-for-sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.builder,
@@ -37,8 +38,10 @@ Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.quickfix,
  com.ge.research.sadl.ui.syntaxcoloring,
  com.ge.research.sadl.ui.visualize
-Import-Package: org.apache.log4j,
- org.pojava.datetime,
+Import-Package: com.ge.research.sadl.errorgenerator.generator,
+ com.ge.research.sadl.errorgenerator.messages,
  com.ge.research.sadl.reasoner,
- com.ge.research.sadl.reasoner.utils
+ com.ge.research.sadl.reasoner.utils,
+ org.apache.log4j,
+ org.pojava.datetime
 Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator

@@ -1,6 +1,5 @@
 package com.ge.research.sadl.ui.handlers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,23 +11,18 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.preferences.*;
-import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.IAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
-import com.ge.research.sadl.processing.ISadlImportProcessor;
-import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.ui.SadlConsole;
-import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.model.gp.TestResult;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ResultSet;
 
@@ -63,44 +57,69 @@ public class RunInference extends SadlActionHandler {
 					String owlModelPath = modelFolderPath + "/" + trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment();
 		        	Object[] retvals = processor.runInference(res, owlModelPath, modelFolderPath, prefMap);
 		        	if (retvals != null && retvals.length > 1) {
-		        		Object cmds = retvals[0];
+		        		List<SadlCommand> cmds = (List<SadlCommand>) retvals[0];
 		        		Object infresults = retvals[1];
 		        		if (infresults != null) {
 		        			if (infresults instanceof List<?>) {
 		        				for (int i = 0; i < ((List<?>)infresults).size(); i++) {
 		        					if (((List<?>)infresults).get(i) instanceof ResultSet && cmds != null && cmds instanceof List<?> && ((List<?>)cmds).size() >= i && 
-		        							((List<?>)cmds).get(i) instanceof Query && ((Query)((List<?>)cmds).get(i)).isGraph()) {
+		        							((List<?>)cmds).get(i) instanceof Query) {
 		        						ResultSet rs = (ResultSet) ((List<?>)infresults).get(i);
-		        						if (rs.getColumnCount() >= 3) {
-			        						String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			        						final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-			        						IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
-	
-			        						IGraphVisualizer visualizer = getVisualizer(configMgr);
-			        						if (visualizer != null) {
-			        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + i;
-			        							String desc = ((Query)((List<?>)cmds).get(i)).getName();
-			        							if (desc == null) desc = "Cmd " + (i + 1) + "  (Graph)";
-			        							graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs);
+		        						if (((Query)((List<?>)cmds).get(i)).isGraph()) {
+			        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + ":\n");
+			    							String msg = "Graph: " + cmds.get(i).toString() + "\n";
+			    							msg += rs.toStringWithIndent(5);
+			        						SadlConsole.writeToConsole(MessageType.INFO, msg);
+			        						if (rs.getColumnCount() >= 3) {
+				        						String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+				        						final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+				        						IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
+		
+				        						IGraphVisualizer visualizer = getVisualizer(configMgr);
+				        						if (visualizer != null) {
+				        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + i;
+				        							String desc = ((Query)((List<?>)cmds).get(i)).getName();
+				        							if (desc == null) desc = "Cmd " + (i + 1) + "  (Graph)";
+				        							graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs);
+				        						}
+				        						else {
+				        							SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query " + i + ".\n");
+				        						}
 			        						}
 			        						else {
-			        							SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query " + i + ".\n");
+			        							SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query " + i + ", ResultSet has less than 3 columns.\n");
 			        						}
 		        						}
 		        						else {
-		        							SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query " + i + ", ResultSet has less than 3 columns.\n");
+			        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + ":\n");
+			    							String msg = "Query: " + cmds.get(i).toString() + "\n";
+			    							msg += rs.toStringWithIndent(5);
+			        						SadlConsole.writeToConsole(MessageType.INFO, msg);
 		        						}
 		        					}
 		        					else if (((List<?>)infresults).get(i) == null) {
-		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + " is empty");
+		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + " is empty\n");
+		        					}
+		        					else if (((List<?>)infresults).get(i) instanceof TestResult) {
+		        						TestResult tr = (TestResult)((List<?>)infresults).get(i);
+		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + ":\n");
+		        						String msg;
+		        						if (tr.isPassed()) {
+		        							msg = "Test passed: " + cmds.get(i).toString() + "\n";
+		        						}
+		        						else {
+		        							msg = "Test failed: " + cmds.get(i).toString() + "(" + tr.toString() + ")\n";
+		        						}
+		        						SadlConsole.writeToConsole(MessageType.INFO, msg);
 		        					}
 		        					else {
+		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + ":\n");
 		        						SadlConsole.writeToConsole(MessageType.INFO, ((List<?>)infresults).get(i).toString());
 		        					}
 		        				}
 		        			}
 		        			else {
-		        				SadlConsole.writeToConsole(MessageType.ERROR, "Results returned not of expected type. Please report.");
+		        				SadlConsole.writeToConsole(MessageType.ERROR, "Results returned not of expected type. Please report.\n");
 		        			}
 		        		}
 		        		if (retvals.length > 2) {

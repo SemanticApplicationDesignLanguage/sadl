@@ -100,8 +100,10 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_CONDITION__PROPERTY, highlightingId)
 				}
 				SadlPropertyInitializer : {
-					var highlightingId = getHighlightingId(v.property)
-					acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_INITIALIZER__PROPERTY, highlightingId)
+					if (v.property != null) {
+						var highlightingId = getHighlightingId(v.property)
+						acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_INITIALIZER__PROPERTY, highlightingId)
+					}
 				}
 				SadlSimpleTypeReference : {
 					var highlightingId = getHighlightingId(v.type)

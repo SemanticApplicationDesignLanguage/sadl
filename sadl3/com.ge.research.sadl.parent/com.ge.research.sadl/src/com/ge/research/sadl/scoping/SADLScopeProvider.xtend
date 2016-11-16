@@ -25,18 +25,20 @@ import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.Expression
 import com.ge.research.sadl.sADL.PropOfSubject
+import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 import com.ge.research.sadl.sADL.SadlImport
+import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
+import com.ge.research.sadl.sADL.TestStatement
 import com.google.common.base.Predicate
 import com.google.inject.Inject
-import java.util.List
 import java.util.Map
 import java.util.Set
 import org.eclipse.emf.ecore.EObject
@@ -53,9 +55,6 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.ge.research.sadl.sADL.SadlInstance
-import com.ge.research.sadl.sADL.QueryStatement
-import com.ge.research.sadl.sADL.TestStatement
 
 /**
  * This class contains custom scoping description.
@@ -79,7 +78,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return super.getGlobalScope(context.eResource, reference)
 		}
 		if (SADLPackage.Literals.SADL_RESOURCE.isSuperTypeOf(reference.EReferenceType)) {
-			return getSadlResourceScope(context, reference)
+			val result = getSadlResourceScope(context, reference)
+			return result
 		}
 		throw new UnsupportedOperationException(
 			"Couldn't build scope for elements of type " + reference.EReferenceType.name)
@@ -181,8 +181,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		return MapBasedScope.createScope(parent, map.values)
 	}
 	
+	@Data static class LocalSymbols {
+	}
+	
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
-		return cache.get('resource_scope'->alias, resource) [
+		return cache.get('resource_scope' -> alias, resource) [
 			val shouldWrap = importedResources.empty
 			if (!importedResources.add(resource)) {
 				return IScope.NULLSCOPE
@@ -288,116 +291,81 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	protected def IScope createImportScope(Resource resource, Set<Resource> importedResources) {
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
-		var importScopes = newArrayList
+		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
 			val externalResource = imp.importedResource
-			if (externalResource !== null && !externalResource.eIsProxy)
-				importScopes += createResourceScope(externalResource.eResource, imp.alias, importedResources)
+			if (externalResource !== null && !externalResource.eIsProxy) {
+				createResourceScope(externalResource.eResource, imp.alias, importedResources).allElements.forEach[
+					val existing = importedSymbols.put(name, it)
+					val duplicateProblem = checkDuplicate(existing, it)
+					if (duplicateProblem !== null) {
+						importedSymbols.put(duplicateProblem.name, duplicateProblem)
+					}
+				]
+			}
+				
 		}
-		if (importScopes.isEmpty) {
+		if (importedSymbols.isEmpty) {
 			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl")) {
 				val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
 				if (element !== null) {
 					val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 					if (eobject !== null) {
-						importScopes += createResourceScope(eobject.eResource, null, importedResources)
+						createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
+							importedSymbols.put(name, it)
+						]
 					}
 				}
 			}
 		}
-		return new ListCompositeScope(importScopes, converter, ambiguousNameDetection)
+		
+		if (!resource.URI.toString.endsWith("SadlBuiltinFunctions.sadl")) {
+			val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
+			if (element !== null) {
+				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+				if (eobject !== null) {
+					createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
+						importedSymbols.put(name, it)
+					]
+				}
+			}
+		}
+		
+		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
+	}
+	
+	def private IEObjectDescription checkDuplicate(IEObjectDescription first, IEObjectDescription second) {
+		if (!ambiguousNameDetection || first === null || second === null || first.EObjectURI == second.EObjectURI) {
+			return null
+		}
+		val imports = #[first, second].map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
+		val message = '''Ambiguously imported name '«first.name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
+		
+		return new ForwardingEObjectDescription(first) {
+			override getUserData(String key) {
+				if (key.equals(ErrorAddingLinkingService.ERROR)) {
+					return message
+				}
+				if (key.equals(ErrorAddingLinkingService.ALTERNATIVES)) {
+					return first.qualifiedName+","+second.qualifiedName
+				}
+				super.getUserData(key)
+			}
+		}
 	}
 
+	static class MapScope extends MapBasedScope {
+	
+		new(IScope parent, Map<QualifiedName, IEObjectDescription> elements, boolean ignoreCase) {
+			super(parent, elements, ignoreCase)
+		}
+		
+	}
+	
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 		if (!scope.containsKey(qn)) {
 			scope.put(qn, new EObjectDescription(qn, obj, emptyMap))
 		}
-	}
-
-	@Data static class ListCompositeScope implements IScope {
-	
-		List<IScope> delegates
-		IQualifiedNameConverter converter
-		boolean detectAmbiguousNames;
-		
-		override getAllElements() {
-			delegates.map[allElements].reduce[p1, p2| p1 + p2] ?: #[]
-		}
-		
-		override getElements(QualifiedName name) {
-			val registered = newHashSet
-			return delegates.map[getElements(name)].flatten.filter[registered.add(it.EObjectURI)]
-		}
-		
-		override getElements(EObject object) {
-			return delegates.map[getElements(object)].flatten
-		}
-		
-		override getSingleElement(QualifiedName name) {
-			if (!detectAmbiguousNames) {
-				for (s : delegates) {
-					val element = s.getSingleElement(name);
-					if (element !== null) {
-						return element
-					}
-				}
-				return null;
-			}
-			var List<IEObjectDescription> candidates = null
-			var IEObjectDescription firstMatch = null
-			for (s : delegates) {
-				val candidate = s.getSingleElement(name)
-				if (candidate !== null && firstMatch !== candidate) {
-					if (firstMatch === null) {
-						firstMatch = candidate 
-					} else {
-						if (candidates === null) {
-							candidates = newArrayList
-							candidates.add(firstMatch)
-						}
-						if (!candidates.contains(candidate))
-							candidates.add(candidate)
-					}
-				}
-			}
-			if (candidates === null) {
-				return firstMatch
-			} else {
-				val imports = candidates.map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
-				val message = '''Ambiguously imported name '«name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
-				val alternatives = candidates.map[
-					desc | 
-					this.getElements(desc.EObjectOrProxy)
-						.filter
-						[
-							qualifiedName != desc.qualifiedName
-						]
-				].flatten.toList
-				
-				return new ForwardingEObjectDescription(candidates.head) {
-					override getUserData(String key) {
-						if (key.equals(ErrorAddingLinkingService.ERROR)) {
-							return message
-						}
-						if (key.equals(ErrorAddingLinkingService.ALTERNATIVES)) {
-							return alternatives.join(",", [converter.toString(name)])
-						}
-						super.getUserData(key)
-					}
-				}
-			}
-		}
-		
-		override getSingleElement(EObject object) {
-			for (scope : delegates) {
-				val element = scope.getSingleElement(object)
-				if (element !== null) {
-					return element
-				}
-			}
-			return null
-		}
-		
 	}
 	
 }

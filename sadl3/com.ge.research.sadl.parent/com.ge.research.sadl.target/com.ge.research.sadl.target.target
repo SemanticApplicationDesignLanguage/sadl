@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.8"?>
-<target includeMode="feature" name="com.ge.research.sadl.target" sequenceNumber="14">
+<target includeMode="feature" name="com.ge.research.sadl.target" sequenceNumber="23">
    <locations>
       <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
          <unit id="org.eclipse.emf.mwe2.launcher.feature.group" version="0.0.0" />
@@ -27,13 +27,13 @@
          <repository location="http://services.typefox.io/open-source/jenkins/job/xtext/job/master/lastSuccessfulBuild/artifact/build/p2-repository/" />
       </location>
       <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-         <unit id="org.eclipse.lsp4j.jsonrpc" version="0.1.0.201611111228" />
-         <unit id="org.eclipse.lsp4j.source" version="0.1.0.201611111228" />
-         <unit id="org.eclipse.lsp4j.generator.source" version="0.1.0.201611111228" />
-         <unit id="org.eclipse.lsp4j.generator" version="0.1.0.201611111228" />
-         <unit id="org.eclipse.lsp4j" version="0.1.0.201611111228" />
+         <unit id="org.eclipse.lsp4j.jsonrpc.source" version="0.1.0.201611160845" />
+         <unit id="org.eclipse.lsp4j.jsonrpc" version="0.1.0.201611160845" />
+         <unit id="org.eclipse.lsp4j" version="0.1.0.201611160845" />
+         <unit id="org.eclipse.lsp4j.generator.source" version="0.1.0.201611160845" />
          <unit id="com.google.gson" version="2.5.0" />
-         <unit id="org.eclipse.lsp4j.jsonrpc.source" version="0.1.0.201611111228" />
+         <unit id="org.eclipse.lsp4j.generator" version="0.1.0.201611160845" />
+         <unit id="org.eclipse.lsp4j.source" version="0.1.0.201611160845" />
          <repository location="http://services.typefox.io/open-source/jenkins/job/lsp4j/lastSuccessfulBuild/artifact/build/p2-repository/" />
       </location>
    </locations>
