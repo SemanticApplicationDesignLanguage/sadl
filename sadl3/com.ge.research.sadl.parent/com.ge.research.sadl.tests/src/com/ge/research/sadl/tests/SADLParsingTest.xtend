@@ -251,4 +251,14 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Test
+	def void testConstantKnown() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Test: dps of MyThingy2 is known.
+			Test: dpf of MyThingy1 is not known.
+		'''.assertNoErrors
+	}
+	
 }
