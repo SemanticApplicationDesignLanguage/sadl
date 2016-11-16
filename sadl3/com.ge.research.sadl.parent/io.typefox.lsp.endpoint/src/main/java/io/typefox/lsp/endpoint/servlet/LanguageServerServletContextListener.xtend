@@ -1,17 +1,17 @@
 package io.typefox.lsp.endpoint.servlet
 
 import com.squarespace.jersey2.guice.JerseyGuiceServletContextListener
-import io.typefox.lsp.endpoint.MonacoServerModule
 import io.typefox.lsp.endpoint.services.LanguageServerEndpoint
 import javax.servlet.ServletContext
 import javax.servlet.ServletContextEvent
 import javax.websocket.server.ServerContainer
+import io.typefox.lsp.endpoint.WorkspaceServerModule
 
 class LanguageServerServletContextListener extends JerseyGuiceServletContextListener {
 
 	@Override
 	override protected modules() {
-		#[new LanguageServerServletModule, new MonacoServerModule]
+		#[new LanguageServerServletModule, new WorkspaceServerModule]
 	}
 
 	@Override
