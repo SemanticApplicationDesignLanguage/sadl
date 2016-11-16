@@ -90,8 +90,8 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				
 				int graphRadius = 99;	//so radius should not play a part	
 				List<String[]> ontologyResults = gatherImports(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
-				OntologyGraphGenerator ogg = new OntologyGraphGenerator(configMgr, publicUri);
-				ResultSet oggResults = ogg.generateOntologyResultSet(ontologyResults, publicUri);
+				OntologyGraphGenerator ogg = new OntologyGraphGenerator(configMgr, publicUri, project);
+				ResultSet oggResults = ogg.generateOntologyResultSet(null, publicUri);
 				
 				if (oggResults != null) {
 					graphImportResultSet(visualizer, project, trgtFile, publicUri, prefix, oggResults);

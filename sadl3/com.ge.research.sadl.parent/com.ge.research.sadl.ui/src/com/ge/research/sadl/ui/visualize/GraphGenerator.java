@@ -57,7 +57,7 @@ public class GraphGenerator {
 
 	private OntModel model = null;
 	private ConceptName anchor = null;
-	private IConfigurationManagerForIDE configMgr;
+	protected IConfigurationManagerForIDE configMgr;
 	
 	public enum Orientation {TD, LR}
 

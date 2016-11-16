@@ -88,6 +88,9 @@ public class GraphSegment {
 	}
 	
 	String stringForm(Object obj) {
+		if(obj == null){
+			return null;
+		}
 		if (obj instanceof OntClass) {
 			OntClass ontcls = (OntClass) obj;
 			if (ontcls.isUnionClass()) {
@@ -204,7 +207,7 @@ public class GraphSegment {
 		return rsrc.getLocalName();
 	}
 	
-	private String restrictionToString(OntClass ontcls) {
+	public String restrictionToString(OntClass ontcls) {
 		if (ontcls.as(Restriction.class).isSomeValuesFromRestriction()) {
 			StringBuilder sb = new StringBuilder("some values of ");
 			SomeValuesFromRestriction svfr = ontcls.as(SomeValuesFromRestriction.class);
@@ -382,6 +385,9 @@ public class GraphSegment {
 	}
 	
 	String stringFormNoPrefix(Object obj) {
+		if(obj == null){
+			return null;
+		}
 		if (obj instanceof OntClass) {
 			OntClass ontcls = (OntClass) obj;
 			if (ontcls.isUnionClass()) {

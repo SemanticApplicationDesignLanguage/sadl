@@ -309,7 +309,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return null;
 	}
 
-	protected static String convertProjectRelativePathToAbsolutePath(String relPath) {
+	public static String convertProjectRelativePathToAbsolutePath(String relPath) {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IPath path = root.getFile(new Path(relPath)).getLocation();
