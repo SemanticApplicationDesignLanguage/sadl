@@ -232,17 +232,8 @@ RuleStatement returns ExpressionScope :
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	start = ('Ask'|'Graph') (name=QNAME)? ':' expr=(SelectExpression | ConstructExpression | AskExpression | Expression) 
+	start = ('Ask'|'Graph') (name=QNAME)? ':' expr=(ConstructExpression | AskExpression | Expression) 
 ;
-
-SelectExpression returns Expression :
-	{SelectExpression}
-	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (',' selectFrom+=SadlResource)*) 'where' whereExpression=Expression (orderby='order by' orderList+=OrderElement (',' (orderList+=OrderElement))*)?
-;
-
-OrderElement :
-	('asc' | desc?='desc')? orderBy=SadlResource;
-
 
 ConstructExpression returns Expression :
 	{ConstructExpression}
@@ -285,8 +276,18 @@ ReadStatement :
 
 
 Expression returns Expression: // (1)
-	ExpressionParameterized<true>
+	SelectExpression<true>
 ;
+
+SelectExpression<EnabledWith> returns Expression :
+	->({SelectExpression}
+	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (',' selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(',' (orderList+=OrderElement))*)?)
+	| ExpressionParameterized<true>
+;
+
+OrderElement :
+	('asc' | desc?='desc')? orderBy=SadlResource;
+
 // Real expressions start here
 ExpressionParameterized<EnabledWith> returns Expression: // (1)
     {Sublist} AnArticle? 'sublist' 'of' list=OrExpression<EnabledWith> 'matching' where=OrExpression<EnabledWith>
@@ -351,7 +352,7 @@ PropOfSubject<EnabledWith> returns Expression: // (17)
 
 // primary expressions are the atom units of expression in the grammar	
 PrimaryExpression<EnabledWith> returns Expression: // (20)
-	'(' ExpressionParameterized<EnabledWith> ')' 
+	'(' SelectExpression<EnabledWith> ')' 
 	| {Declaration} article=AnArticle type=SadlPrimaryTypeReference 
 	->('[' arglist+=Expression? (',' arglist+=Expression)* ']'|
 		newName=DNAME
