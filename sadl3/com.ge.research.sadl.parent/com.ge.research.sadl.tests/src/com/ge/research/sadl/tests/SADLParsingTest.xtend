@@ -228,4 +228,27 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		Assert.assertTrue((test.tests.head as BinaryOperation).left instanceof SelectExpression)
 	}
 	
+	@Test
+	def void testRdfAndOwlNamespace() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			x has comment "set by Rule1".
+			Test: select x,y where x has owl:equivalentClass y.
+			Rule testrule
+			if x is a Thingy
+			then print(x, rdf:^type, "This works!").
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testNegationOfObjectTriple() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Test: x has color not Red.
+			Test: color of x is not Red.
+		'''.assertNoErrors
+	}
+	
 }
