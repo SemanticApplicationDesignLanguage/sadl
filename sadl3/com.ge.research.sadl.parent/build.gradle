@@ -1,6 +1,5 @@
 buildscript {
 	repositories {
-		mavenLocal()
     	jcenter()
 	}
 	dependencies {
@@ -10,9 +9,7 @@ buildscript {
 
 subprojects {
 	repositories {
-    	mavenLocal()
         maven { 
-        	url "http://services.typefox.io/open-source/jenkins/job/lsp4j/lastSuccessfulBuild/artifact/build/maven-repository"
 			url "https://oss.sonatype.org/content/repositories/snapshots/"
     	}
 		jcenter()

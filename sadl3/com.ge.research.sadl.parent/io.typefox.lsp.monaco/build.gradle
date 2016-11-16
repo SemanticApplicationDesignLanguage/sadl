@@ -3,7 +3,6 @@ import com.moowork.gradle.node.task.NodeTask
 buildscript {
 	repositories {
 		maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        mavenLocal()
         jcenter()
 	}
 	dependencies {
@@ -46,7 +45,6 @@ targetCompatibility = 1.8
 
 repositories {
 	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    mavenLocal()
     jcenter()
 }
 

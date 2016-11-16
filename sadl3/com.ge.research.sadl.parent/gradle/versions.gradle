@@ -31,6 +31,5 @@ ext.versions = [
     "jerseyServletContainerCore": "2.17",
     "jaxRs": "2.0.1",
     "webjarsBootstrap": "3.3.7",
-    
-    
+    "eclipseCoreResources": "3.8.101.v20130717-0806"
 ]
