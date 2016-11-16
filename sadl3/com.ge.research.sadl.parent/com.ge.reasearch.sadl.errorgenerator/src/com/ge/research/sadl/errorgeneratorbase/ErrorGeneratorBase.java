@@ -65,6 +65,7 @@ public abstract class ErrorGeneratorBase {
 	
 	protected final static String REQUIREMENTS_PREFIX = "Requirements";
 	protected final static String SADL_PREFIX = "Sadl";
+	private String errorListHtmlFileContent = "";
 	
 	/**
 	 * This method is used for Java 1.7 compatibility
@@ -193,7 +194,7 @@ public abstract class ErrorGeneratorBase {
 	
 	
 	
-	private static String getHtmlTemplate() {
+	public static String getHtmlTemplate() {
 		return "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"" +
 		"\"http://www.w3.org/TR/html4/loose.dtd\">" +
 		"<html>" +
@@ -239,4 +240,6 @@ public abstract class ErrorGeneratorBase {
 		"</body>" +
 		"</html>";
 	}
+
+	
 }

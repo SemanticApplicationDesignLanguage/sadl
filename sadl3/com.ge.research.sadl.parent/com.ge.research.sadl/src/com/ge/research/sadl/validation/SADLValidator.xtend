@@ -133,13 +133,23 @@ class SADLValidator extends AbstractSADLValidator {
 			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
 		}
 		otherNames.add(rule.name)
-		// make sure all variables used in the head are bound in the bod
+		// make sure all variables used in the head are bound in the body
 		val itr = EcoreUtil2.getAllContents(rule.thens).filter(Name).toList.iterator
 		while (itr.hasNext) {
 			var name = itr.next
 			if (!name.function && name.name.equals(name)) {
-				var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + "' which is not bound in the rule premises."
-				error(errMsg, SADLPackage.Literals.RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+				val bodyitr = EcoreUtil2.getAllContents(rule.ifs).filter(Name).toList.iterator
+				var foundInBody = false;
+				while (bodyitr.hasNext) {
+					var bName = bodyitr.next
+					if (bName.name.equals(name)) {
+						foundInBody = true
+					}
+				}
+				if (!foundInBody) {
+					var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + "' which is not bound in the rule premises."
+					error(errMsg, SADLPackage.Literals.RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+				}
 			}
 		}
 	}
