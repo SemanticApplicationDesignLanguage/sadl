@@ -219,6 +219,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNHANDLED = new SadlErrorMessage("unhandled");
 /**
+* {0} is not in domain of property {1}
+**/
+    public static final SadlErrorMessage PROPERTY_NOT_IN_DOMAIN = new SadlErrorMessage("property_not_in_domain");
+/**
 * A(n) {0} requires a {1} but it is missing.
 **/
     public static final SadlErrorMessage MISSING = new SadlErrorMessage("missing");
