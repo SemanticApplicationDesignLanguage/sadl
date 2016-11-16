@@ -158,7 +158,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test
 	def void testTestWithCommas() {
 		'''
@@ -184,4 +183,5 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			Test: MyThingy has intVal 1, has flVal 1.0, has dblVal 1.0 .
 		'''.assertNoErrors
 	}
+	
 }

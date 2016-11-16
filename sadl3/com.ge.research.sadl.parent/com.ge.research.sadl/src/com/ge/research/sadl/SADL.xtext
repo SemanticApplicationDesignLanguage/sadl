@@ -299,10 +299,13 @@ OpOr:
 	'or' | '||';
 
 AndExpression<EnabledWith> returns Expression:
-	EqualityExpression<EnabledWith> ({BinaryOperation.left=current} op=OpAnd right=EqualityExpression<EnabledWith>)*;
+	CommaSeparatedAbreviatedExpression<EnabledWith> ({BinaryOperation.left=current} op=OpAnd right=CommaSeparatedAbreviatedExpression<EnabledWith>)*;
 
 OpAnd:
 	'and' | '&&';
+	
+CommaSeparatedAbreviatedExpression<EnabledWith> returns Expression:
+	EqualityExpression<EnabledWith> ({CommaSeparatedAbreviatedExpression.left=current} ',' =>((<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression<EnabledWith>?)*;
 
 EqualityExpression<EnabledWith> returns Expression:
 	RelationalExpression<EnabledWith> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<EnabledWith>)*;

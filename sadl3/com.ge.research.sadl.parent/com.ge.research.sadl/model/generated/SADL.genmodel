@@ -286,6 +286,11 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BinaryOperation/op"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//BinaryOperation/right"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//CommaSeparatedAbreviatedExpression">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CommaSeparatedAbreviatedExpression/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CommaSeparatedAbreviatedExpression/prop"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CommaSeparatedAbreviatedExpression/right"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//PropOfSubject">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/left"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//PropOfSubject/of"/>
