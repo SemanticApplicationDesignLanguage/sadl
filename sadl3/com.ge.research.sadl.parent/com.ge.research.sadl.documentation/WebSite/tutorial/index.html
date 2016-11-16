@@ -1,0 +1,131 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>SADL/Semantics Workshop Outline</title>
+</head>
+
+<body>
+
+<h1>Outline for SADL/Semantics Workshop</h1>
+<ol>
+  <li>
+  <a href="settingupsadlide.html">Setting up a SADL-IDE environment</a> (Session 
+  1)<ul>
+    <li>Install Eclipse 3.2.2 </li>
+    <li>Update to latest SADL-for-GE version </li>
+    <li>Check out and exercise&nbsp;SADL test models from SourceForge and OpenGE (<span style="COLOR: #ff0000">make 
+    sure you have at least an OpenGE userid</span>) </li>
+    <li>SADL basics
+    <ul>
+      <li>Language syntax&nbsp; (see the
+      <a href="http://crapo.crd.ge.com/djst/sadlQR.html">SADL Quick Reference 
+      Guide</a>)</li>
+      <li>Content completion proposals (what can I say?) </li>
+      <li>Known bugs/limitations and workarounds</li>
+    </ul>
+    </li>
+  </ul>
+    <li>Semantic Modeling Using SADL
+    <ul>
+      <li>
+      <a title="http://crapo.research.ge.com/sadl/tutorial/foundationalconcepts.html" target="_blank" href="foundationalconcepts.html">
+      Foundational Concepts </a>
+      (Session 2)<ul>
+        <li>Classes, sub-classes, super-classes, and instances </li>
+        <li>Properties </li>
+        <li>Triples </li>
+        <li>Domain and range of a property </li>
+        <li>The t-box and the a-box </li>
+        <li>Sub-properties</li>
+      </ul>
+      </li>
+      <li><a href="beyondbasics.html">Beyond the Basics </a>
+      (Session 3)<ul>
+        <li>Properties revisited </li>
+        <li>Refining class definitions with restrictions </li>
+        <li>Necessary and sufficient conditions </li>
+        <li>Reification</li>
+        <li>Principles of classification: Firstness, Secondness (Roles), and 
+        Thirdness (beyond binary relationships) </li>
+        <li>Namespaces, modularity, and using <span style="FONT-STYLE: italic">
+        import </span>to&nbsp;layer ontologies (examples from Aviation) </li>
+        <li>Annotations </li>
+        <li>Bnodes and local subgraphs</li>
+      </ul>
+      </li>
+      <li><a href="reasoningrulesqueries.html">Reasoning, Rules, and Model Information Retrieval</a> 
+      (Session 4)<ul>
+    <li>Adding rules to express domain knowledge </li>
+        <li>SPARQL graph query language (including ARQ extensions)</li>
+    <li>Preferences: derivation level, reasoner specification, etc. </li>
+        <li>Understanding OWL reasoning
+        <ul>
+          <li>Open world assumption and monotonicity</li>
+          <li>Flavors of OWL </li>
+          <li>Jena Rules Engine, Pellet DL Reasoner</li>
+        </ul>
+        <ul>
+          <li>DL-safe rules </li>
+          <li>Negation</li>
+        </ul>
+        </li>
+        <li>Default values</li>
+      </ul>
+      </li>
+    </ul>
+  </ul>
+    </li>
+  <li>Advanced SADL and&nbsp;semantic&nbsp;topics
+  <ul>
+    <li>Tests and test suites </li>
+    <li>Ask keyword </li>
+    <li>Explain keyword </li>
+    <li>Print keyword </li>
+    <li>When a rule doesn't fire (and you thought it should have...) </li>
+    <li>Generating SADL rule sets from Lookup Tables--when and how </li>
+    <li>Built-ins for use in rules
+    <ul>
+      <li>Jena-provided built-ins (see
+      <a href="http://jena.sourceforge.net/inference/index.html#RULEbuiltins" target="_new">
+      http://jena.sourceforge.net/inference/index.html#RULEbuiltins</a>) </li>
+      <li>SADL built-ins (see
+      <a href="http://crapo.research.ge.com/djst/SadlBuiltins.html" target="_new">
+      http://crapo.research.ge.com/djst/SadlBuiltins.html</a>)
+      <ul>
+        <li>getInstance </li>
+        <li>getDataValue </li>
+        <li>noValue </li>
+        <li>noValuesOtherThan </li>
+        <li>update</li>
+      </ul>
+      </li>
+      <li>Creating and registering your own built-in functions</li>
+    </ul>
+    </li>
+    <li>OWL repositories: RDF/XML, N-triple, RDB (Jena) </li>
+    <li><a href="importingowlfiles.html">Importing OWL models into SADL</a></li>
+    <li><a href="owl_uml_mof.html">OWL, UML, and MOF </a>(optional)</li>
+    <li>Model granularity: a largely unsolved problem</li>
+    <li>Alignment of/mapping between multiple ontologies </li>
+    <li>Java code generation </li>
+    <li>What's coming: SADL Version 2 </li>
+    <li>What's coming:&nbsp;OWL 2 versus OWL 1</li>
+  </ul>
+  </li>
+  <li>Architectures for Semantic Model Delivery
+  <ul>
+    <li>Embedded in Java applications (using API) </li>
+    <li>SadlServer and SOAs </li>
+    <li>Java source code generation from semantic models</li>
+  </ul>
+  </li>
+</ol>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

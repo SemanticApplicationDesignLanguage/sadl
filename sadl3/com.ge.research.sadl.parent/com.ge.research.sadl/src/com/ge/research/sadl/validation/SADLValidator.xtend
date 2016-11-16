@@ -39,6 +39,7 @@ import java.util.ArrayList
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import org.eclipse.emf.ecore.EStructuralFeature
+import com.ge.research.sadl.sADL.SubjHasProp
 
 /**
  * This class contains custom validation rules. 
@@ -179,6 +180,7 @@ class SADLValidator extends AbstractSADLValidator {
 //			error("", SADLPackage.Literals.SADL_RESOURCE__NAME, <constant>)
 //		}
 //	}
+
 	@Check
 	def checkSadlResource(SadlResource sr) {
 		var nm = null as String
@@ -197,24 +199,24 @@ class SADLValidator extends AbstractSADLValidator {
 					if (!isFunc) {	
 						error("Is this an undeclared variable?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
 					}
-					else {
-						// this might be a built-in so get the text and check the name
-						val srNode = NodeModelUtils.getNode(sr)
-						var boolean isBuiltin = false
-						if (srNode.hasChildren) {
-							val itr = srNode.children
-							for (c:itr) {
-								val txt = NodeModelUtils.getTokenText(c)
-	//							val b = RequirementsConstants.isFunctionConsideredBuiltin(null, txt)
-	//							if (b) {
-	//								isBuiltin = b
-	//							}
-							}
-						}
-						if (!isBuiltin) {
-							error("Is this an undeclared function?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
-						}
-					}
+//					else {
+//						// this might be a built-in so get the text and check the name
+//						val srNode = NodeModelUtils.getNode(sr)
+//						var boolean isBuiltin = false
+//						if (srNode.hasChildren) {
+//							val itr = srNode.children
+//							for (c:itr) {
+//								val txt = NodeModelUtils.getTokenText(c)
+//	//							val b = RequirementsConstants.isFunctionConsideredBuiltin(null, txt)
+//	//							if (b) {
+//	//								isBuiltin = b
+//	//							}
+//							}
+//						}
+//						if (!isBuiltin) {
+//							error("Is this an undeclared function?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
+//						}
+//					}
 				}
 			}
 			catch (Throwable t) {

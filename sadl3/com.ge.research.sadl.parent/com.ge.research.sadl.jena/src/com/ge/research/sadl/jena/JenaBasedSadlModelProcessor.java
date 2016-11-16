@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -42,6 +43,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.XtextResource;
@@ -260,6 +262,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	
 	private OntModel sadlImplicitModel = null;
+	private OntModel sadlBuiltinFunctionModel = null;
 
 	private JenaBasedSadlModelValidator modelValidator = null;
 	protected ValidationAcceptor issueAcceptor = null;
@@ -646,54 +649,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		EList<SadlAnnotation> anns = model.getAnnotations();
 		addAnnotationsToResource(modelOntology, anns);
 		
-		if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)) {
-			OntModelProvider.registerResource(resource);
-			try {
-				sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
-				OntModelProvider.setSadlBaseModel(sadlBaseModel);
-				addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, sadlBaseModel);
-				String implfn = checkImplicitSadlModelExistence(resource, context);
-				if (implfn != null) {
-					Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
-					if (sadlImplicitModel == null) {
-						if (imrsrc instanceof XtextResource) {
-							sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
-						}
-						else if (imrsrc instanceof ExternalEmfResource) {
-							sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
-						}
-						if (sadlImplicitModel == null) {
-							if (imrsrc instanceof XtextResource) {
-								((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-								sadlImplicitModel = OntModelProvider.find(imrsrc);
-								OntModelProvider.attach(imrsrc, sadlImplicitModel, SadlConstants.SADL_IMPLICIT_MODEL_URI, SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
-							}
-							else {
-								IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-								if (cm.getModelGetter() == null) {
-									cm.setModelGetter(new SadlJenaModelGetter(cm, null));
-								}
-								cm.getModelGetter().getOntModel(SadlConstants.SADL_IMPLICIT_MODEL_URI,
-										ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
-												.appendFragment(SadlConstants.OWL_IMPLICIT_MODEL_FILENAME)
-												.toFileString(),
-										getOwlModelFormat(context));
-							}
-						}
-						if (sadlImplicitModel != null) {
-							addImportToJenaModel(getModelName(), SadlConstants.SADL_IMPLICIT_MODEL_URI, sadlImplicitModel);
-						}
-					}
-				}
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (ConfigurationException e1) {
-				e1.printStackTrace();
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
-			} catch (JenaProcessorException e1) {
-				e1.printStackTrace();
+		try {
+			//Add SadlBaseModel to Builtin Functions Implicit Model
+			if(!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)){
+					addSadlBaseModelImportToJenaModel(resource);
 			}
+			
+			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME) &&
+				!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
+					OntModelProvider.registerResource(resource);
+					addImplicitSadlModelImportToJenaModel(resource, context);
+					addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
+	
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (ConfigurationException e1) {
+			e1.printStackTrace();
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+		} catch (JenaProcessorException e1) {
+			e1.printStackTrace();
 		}
 		
 		EList<SadlImport> implist = model.getImports();
@@ -873,7 +849,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     	}
 		if (issueAcceptor != null) {
 			try {
-				if (!resource.getURI().lastSegment().equals("SadlImplicitModel.sadl")) {
+				if (!resource.getURI().lastSegment().equals("SadlImplicitModel.sadl") &&
+					!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
 //					System.out.println("Metrics for '" + resource.getURI().lastSegment() + "':");
 					if (issueAcceptor.getErrorCount() > 0) {
 						String msg = "    Model totals: " + countPlusLabel(issueAcceptor.getErrorCount(), "error") + ", " + 
@@ -903,6 +880,106 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
     
+	private void addImplicitBuiltinFunctionModelImportToJenaModel(Resource resource, ProcessorContext context) throws ConfigurationException, IOException, URISyntaxException, JenaProcessorException {
+		String implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
+		if (implfn != null) {
+			Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
+			if (sadlBuiltinFunctionModel == null) {
+				if (imrsrc instanceof XtextResource) {
+					sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource)imrsrc);
+				}
+				else if (imrsrc instanceof ExternalEmfResource) {
+					sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+				}
+				if (sadlBuiltinFunctionModel == null) {
+					if (imrsrc instanceof XtextResource) {
+						((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+						sadlBuiltinFunctionModel = OntModelProvider.find(imrsrc);
+						OntModelProvider.attach(imrsrc, sadlBuiltinFunctionModel, SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+					}
+					else {
+						IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+						if (cm.getModelGetter() == null) {
+							cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+						}
+						cm.getModelGetter().getOntModel(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI,
+								ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
+										.appendFragment(SadlConstants.OWL_BUILTIN_FUNCTIONS_FILENAME)
+										.toFileString(),
+								getOwlModelFormat(context));
+					}
+				}
+				if (sadlBuiltinFunctionModel != null) {
+					addImportToJenaModel(getModelName(), SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, sadlBuiltinFunctionModel);
+				}
+			}
+		}
+	}
+	
+	private String checkImplicitBuiltinFunctionModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException {
+		UtilsForJena ufj = new UtilsForJena();
+		String policyFileUrl = ufj.getPolicyFilename(resource);
+		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
+		if (policyFilename != null) {
+			File projectFolder = new File(policyFilename).getParentFile().getParentFile();
+			String relPath = SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" + SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
+			String platformPath = projectFolder.getName() + "/" + relPath;
+			String implicitSadlModelFN = projectFolder + "/" + relPath;
+			File implicitModelFile = new File(implicitSadlModelFN);
+			if (!implicitModelFile.exists()) {
+				createBuiltinFunctionImplicitModel(implicitSadlModelFN);
+				try {
+					Resource newRsrc = resource.getResourceSet().createResource(URI.createPlatformResourceURI(platformPath, false)); 
+					newRsrc.load(resource.getResourceSet().getLoadOptions());
+					refreshResource(newRsrc);
+				}
+				catch (Throwable t) {}
+			}
+			return implicitModelFile.getAbsolutePath();
+		}
+		return null;
+	}
+	
+	private void addImplicitSadlModelImportToJenaModel(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+		String implfn = checkImplicitSadlModelExistence(resource, context);
+		if (implfn != null) {
+			Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
+			if (sadlImplicitModel == null) {
+				if (imrsrc instanceof XtextResource) {
+					sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
+				}
+				else if (imrsrc instanceof ExternalEmfResource) {
+					sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+				}
+				if (sadlImplicitModel == null) {
+					if (imrsrc instanceof XtextResource) {
+						((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+						sadlImplicitModel = OntModelProvider.find(imrsrc);
+						OntModelProvider.attach(imrsrc, sadlImplicitModel, SadlConstants.SADL_IMPLICIT_MODEL_URI, SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
+					}
+					else {
+						IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+						if (cm.getModelGetter() == null) {
+							cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+						}
+						cm.getModelGetter().getOntModel(SadlConstants.SADL_IMPLICIT_MODEL_URI,
+								ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
+										.appendFragment(SadlConstants.OWL_IMPLICIT_MODEL_FILENAME)
+										.toFileString(),
+								getOwlModelFormat(context));
+					}
+				}
+				if (sadlImplicitModel != null) {
+					addImportToJenaModel(getModelName(), SadlConstants.SADL_IMPLICIT_MODEL_URI, sadlImplicitModel);
+				}
+			}
+		}
+	}
+	private void addSadlBaseModelImportToJenaModel(Resource resource) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+		sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
+		OntModelProvider.setSadlBaseModel(sadlBaseModel);
+		addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, sadlBaseModel);
+	}
 	private void addAnnotationsToResource(OntResource modelOntology, EList<SadlAnnotation> anns) {
 		Iterator<SadlAnnotation> iter = anns.iterator();
 		while (iter.hasNext()) {
@@ -1500,8 +1577,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		addEquation(element.eResource(), eq);
 		Individual eqinst = getTheJenaModel().createIndividual(declarationExtensions.getConceptUri(nm), 
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EQUATION_URI));
-		eqinst.addProperty(getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EQ_EXPRESSION_URI), 
-				getTheJenaModel().createTypedLiteral(eq.toString()));
+		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EQ_EXPRESSION_URI);
+		Literal literal = getTheJenaModel().createTypedLiteral(eq.toString());
+		eqinst.addProperty(dtp, literal);
 	}
 	
 	protected Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
@@ -1545,17 +1623,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	protected void processStatement(ExternalEquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+		String uri = element.getUri();
+//		if(uri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)){
+//			return;
+//		}
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		SadlTypeReference rtype = element.getReturnType();
-		String uri = element.getUri();
 		String location = element.getLocation();
 		Equation eq = createExternalEquation(nm, uri, rtype, params, location);
 		addEquation(element.eResource(), eq);
 		Individual eqinst = getTheJenaModel().createIndividual(declarationExtensions.getConceptUri(nm), 
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EXTERNAL_URI));
-		eqinst.addProperty(getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI),
-				getTheJenaModel().createTypedLiteral(uri));
+		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI);
+		Literal literal = getTheJenaModel().createTypedLiteral(uri);
+		eqinst.addProperty(dtp,literal);
 	}
 	
 	private Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
@@ -2495,8 +2577,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public Object processExpression(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
 		Expression subj = expr.getLeft();
-		Expression pred = expr.getProp();
+		SadlResource pred = expr.getProp();
 		Expression obj = expr.getRight();
+		if (modelValidator != null) {
+			modelValidator.checkPropertyDomain(getTheJenaModel(), subj, pred);
+		}
 		Object sobj = null;
 		Object pobj = null;
 		Object oobj = null;
@@ -5493,6 +5578,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return null;
 	}
 	
+	static public File createBuiltinFunctionImplicitModel(String projectRootPath) throws IOException, ConfigurationException{
+		//First, obtain proper translator for project
+		SadlUtils su = new SadlUtils();
+		if(projectRootPath.startsWith("file")){
+			projectRootPath = su.fileUrlToFileName(projectRootPath);
+		}
+		final File mfFolder = new File(projectRootPath + "/" + ResourceManager.OWLDIR);
+		final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+		String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
+		IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(fixedModelFolderName, format);
+		ITranslator translator = configMgr.getTranslator();
+		//Second, obtain built-in function implicit model contents
+		String builtinFunctionModel = translator.getBuiltinFunctionModel();
+		//Third, create built-in function implicit model file
+		File builtinFunctionFile = new File(projectRootPath + "/" +
+											SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" +
+											SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME);	
+		su.stringToFile(builtinFunctionFile, builtinFunctionModel, true);
+		
+		return builtinFunctionFile;
+	}
+	
 	static public void createSadlImplicitModel(File implicitModelFile) throws IOException{
 		String implicitModel = getSadlImplicitModel();
 		SadlUtils su = new SadlUtils();
@@ -5670,7 +5777,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 	
-	private IConfigurationManagerForIDE getConfigMgr(Resource resource, String format) throws ConfigurationException {
+	protected IConfigurationManagerForIDE getConfigMgr(Resource resource, String format) throws ConfigurationException {
 		if (format == null) {
 			format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
 		}

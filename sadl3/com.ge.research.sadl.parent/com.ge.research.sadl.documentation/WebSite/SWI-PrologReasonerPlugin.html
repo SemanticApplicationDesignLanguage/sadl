@@ -1,0 +1,78 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>New Page 1</title>
+</head>
+
+<body>
+
+<h1>SWI-Prolog Reasoner/Translator Plug-in Pair for SADL</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->02/19/2016<!--webbot bot="Timestamp" endspan i-checksum="12645" -->.</h5>
+<p>Note: This plug-in currently runs on Windows. Some additional work is 
+required for launching the service on other operating systems.</p>
+<h2>Introduction</h2>
+<p><a href="http://www.swi-prolog.org/">SWI-Prolog</a> is a popular flavor of 
+Prolog and one which is particularly well-suited for use with OWL due to its 
+ability to load RDF Data. </p>
+<h2>Installation Instructions</h2>
+<p>Both the SWI-Prolog reasoner plug-in and the associated translator plug-in 
+require that SWI-Prolog be available as a service. The translator uses the 
+service to verify that built-in predicates used in rules are actually defined 
+and the reasoner uses the service to do inference and to respond to queries.</p>
+<h3>Install SWI-Prolog </h3>
+<p>Assuming that an SWI-Prolog service is not already available and running, 
+please follow these instructions to set up a local service.</p>
+<ol>
+  <li>Download SWI-Prolog from <a href="http://www.swi-prolog.org/Download.html">
+  http://www.swi-prolog.org/Download.html</a>. If you are running 64-bit 
+  Eclipse, download the 64-bit version of SWI-Prolog. If you are running 32-bit 
+  Eclipse, download the 32-bit version of SWI-Prolog. Version 6.2.5 of SWI-Prolog 
+  is recommended. Later 6.x.x versions have been found to work in most respects 
+  but may not properly handle exceptions. For a complete list of versions, 
+  including 6.2.5, see
+  <a href="http://www.swi-prolog.org/download/stable?show=all">
+  http://www.swi-prolog.org/download/stable?show=all</a>. </li>
+  <li>Install per instructions from download site.</li>
+  <li>Add the Prolog bin folder to the environment path. Restart Eclipse if it 
+  is already running. It may be necessary to reboot in order for SWI-Prolog to 
+  work correctly from the Eclipse IDE.</li>
+</ol>
+<h3>Install SWI-Prolog for SADL</h3>
+<p>&nbsp;Install the SADL-IDE and SWI-Prolog for SADL by following<a href="http://sadl.sourceforge.net/sadlv2release.html"> 
+these instructions</a> but use the update site
+<a href="http://sadl.sourceforge.net/kepler/swiprolog/update/">
+http://sadl.sourceforge.net/kepler/swiprolog/update/</a>. </p>
+<h2>User Guidance</h2>
+<p>When the SWI-Prolog reasoner for SADL is requested, SADL will start the 
+service provided that the executable (swipl-win.exe) is on the path.</p>
+<p dir="ltr">In the SWI-Prolog plug-ins for SADL, custom built-in functions 
+(predicates) can be defined in Prolog and used in SADL rules. A template file is 
+generated in which predicates can be defined or which can &quot;consult&quot; other .pl 
+files containing the predicates. The following files are created in the 
+OwlModels folder when the SWI-Prolog translator plug-in is run for a project.</p>
+<ol>
+  <li dir="ltr">
+  <p dir="ltr">swi-run-prolog-service.pl -- this file is passed to the SWI-Prolog 
+  executable and starts the service</li>
+  <li dir="ltr">
+  <p dir="ltr">swi-prolog-service.pl -- this file is loaded by the previous and 
+  sets up the HTTP service used by the reasoner</li>
+  <li dir="ltr">
+  <p dir="ltr">swi-standard-declarations.pl -- contains standard declarations 
+  and loads standard libraries for semantic web; loaded by first file in this 
+  list</li>
+  <li dir="ltr">
+  <p dir="ltr">swi-custom-predicates.pl -- this is mean for the user to edit to 
+  define custom predicates and/or to load other files; it is loaded by the first 
+  file in this list</li>
+</ol>
+<p dir="ltr">&nbsp;</p>
+
+</body>
+
+</html>

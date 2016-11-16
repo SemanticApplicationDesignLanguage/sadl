@@ -53,7 +53,7 @@ import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
-import com.ge.research.sadl.model.DeclarationExtensions;
+import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
@@ -196,7 +196,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			        				sb.append(validTargetTypes[i]);
 		        				}
 		        			}
-		        			throw new TranslationException("Only files of type " + sb.toString() + " are valid for this command");
+		        			throw new TranslationException(SadlErrorMessages.FILE_TYPE_ERROR.get(sb.toString()));
 		        		}
 		        	}
 		        	else if (firstElement instanceof IFolder) {
