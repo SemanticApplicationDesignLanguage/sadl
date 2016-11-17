@@ -2347,14 +2347,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									}
 								}
 							}
-							else if (obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
+							else if (subj != null && obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
 								matchFound = true;	
 								break;
 							}
 						}
 					}
 					stmtitr.close();
-					if (!matchFound) {
+					if (subj != null && !matchFound) {
 						issueAcceptor.addWarning("'" + subj.getURI() + "' is not in domain of property '" + prop.getURI() + "'", subject);
 					}
 				}
