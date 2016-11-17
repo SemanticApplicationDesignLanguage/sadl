@@ -13,7 +13,7 @@ abstract class AbstractProcessorTest extends AbstractSADLParsingTest {
 	@Inject IModelProcessorProvider processorProvider
 	
 	@Inject def void registerProcessors(SadlModelProcessorProvider processorProvider, JenaBasedSadlModelProcessor instance) {
-		processorProvider.registerModelProcessor(instance);
+		processorProvider.registerProcessor(instance);
 	}
 	
 	def JenaBasedSadlModelProcessor getReqProcessor(Resource resource) {
