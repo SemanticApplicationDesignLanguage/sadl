@@ -21,7 +21,6 @@ import com.ge.research.sadl.processing.IModelProcessor
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
 import com.google.inject.Inject
 import com.google.inject.Injector
-import org.eclipse.core.runtime.RegistryFactory
 
 /**
  * Eclipse extension-point based {@code SADL} model processor provider. Discovers 
@@ -29,19 +28,34 @@ import org.eclipse.core.runtime.RegistryFactory
  */
 class ExtensionPointBasedSadlModelProcessorProvider extends SadlModelProcessorProvider {
 
-	static val EXTENSION_ID = 'com.ge.research.sadl.ui.sadl_model_processor'
-
-	@Inject 
-	Injector injector;
+	@Inject
+	ModelProcessorDelegate delegate;
 
 	@Override
 	override getAllProcessors() {
-		val registry = RegistryFactory.getRegistry();
-		return registry.getConfigurationElementsFor(EXTENSION_ID).map [ configElement |
-			val result = configElement.createExecutableExtension("class") as IModelProcessor;
-			injector.injectMembers(result);
-			return result;
-		];
+		return delegate.allProviders;
+	}
+
+	/**
+	 * Model processor provider delegate that does the discovery via extension-points. 
+	 * Caches all the provided processors.
+	 * 
+	 * @author akos.kitta
+	 */
+	private static final class ModelProcessorDelegate extends AbstractExtensionPointBasedSadlProcessorProviderDelegate<IModelProcessor> {
+
+		static val EXTENSION_ID = 'com.ge.research.sadl.ui.sadl_model_processor';
+
+		@Inject
+		protected new(Injector injector) {
+			super(IModelProcessor, injector)
+		}
+
+		@Override
+		override protected getExtensionPointId() {
+			EXTENSION_ID;
+		}
+
 	}
 
 }

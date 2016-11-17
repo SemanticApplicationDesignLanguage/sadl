@@ -21,7 +21,6 @@ import com.ge.research.sadl.processing.ISadlInferenceProcessor
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
 import com.google.inject.Inject
 import com.google.inject.Injector
-import org.eclipse.core.runtime.RegistryFactory
 
 /**
  * Eclipse extension-point based {@code SADL} inference provider. Discovers and collects the 
@@ -29,19 +28,34 @@ import org.eclipse.core.runtime.RegistryFactory
  */
 class ExtensionPointBasedSadlInferenceProcessorProvider extends SadlInferenceProcessorProvider {
 
-	static val EXTENSION_ID = 'com.ge.research.sadl.ui.sadl_inference_processor'
-
-	@Inject 
-	Injector injector;
+	@Inject
+	InferenceProcessorDelegate delegate;
 
 	@Override
 	override getAllProcessors() {
-		val registry = RegistryFactory.getRegistry();
-		return registry.getConfigurationElementsFor(EXTENSION_ID).map [ configElement |
-			val result = configElement.createExecutableExtension("class") as ISadlInferenceProcessor
-			injector.injectMembers(result)
-			return result
-		];
+		return delegate.allProviders;
+	}
+
+	/**
+	 * Inference processor provider delegate that does the discovery via extension-points. 
+	 * Caches all the provided inference processors.
+	 * 
+	 * @author akos.kitta
+	 */
+	private static final class InferenceProcessorDelegate extends AbstractExtensionPointBasedSadlProcessorProviderDelegate<ISadlInferenceProcessor> {
+
+		static val EXTENSION_ID = 'com.ge.research.sadl.ui.sadl_inference_processor';
+
+		@Inject
+		protected new(Injector injector) {
+			super(ISadlInferenceProcessor, injector)
+		}
+
+		@Override
+		override protected getExtensionPointId() {
+			EXTENSION_ID;
+		}
+
 	}
 
 }
