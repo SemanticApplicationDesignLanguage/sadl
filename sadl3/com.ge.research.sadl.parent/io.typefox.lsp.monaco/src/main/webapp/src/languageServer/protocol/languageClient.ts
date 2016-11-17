@@ -46,7 +46,6 @@ class ColoringNotification  {
     };
 }
 
-
 export class LanguageClient implements
         monaco.languages.DefinitionProvider,
         monaco.languages.DocumentFormattingEditProvider,
@@ -54,6 +53,7 @@ export class LanguageClient implements
         monaco.languages.ReferenceProvider, 
         monaco.languages.DocumentHighlightProvider,
         monaco.languages.CodeLensProvider,
+        monaco.languages.CodeActionProvider,
         Disposable {
 
     private _languages: LanguageDescription[]
@@ -209,6 +209,10 @@ export class LanguageClient implements
             if (this._capabilites.codeLensProvider) {
                 this._disposables.push(monaco.languages.registerCodeLensProvider(language.languageId, this));
             }
+            // code action support
+            if (this._capabilites.codeActionProvider) {
+                this._disposables.push(monaco.languages.registerCodeActionProvider(language.languageId, this));
+            }
 
         }
     }
@@ -326,6 +330,16 @@ export class LanguageClient implements
     resolveCodeLens?(model: monaco.editor.IReadOnlyModel, codeLens: monaco.languages.ICodeLensSymbol, token: monaco.CancellationToken): monaco.languages.ICodeLensSymbol | Thenable<monaco.languages.ICodeLensSymbol> {
         return this._connection.sendRequest(protocol.CodeLensResolveRequest.type, languageConverter.asCodeLens(codeLens)).then(
             protocolConverter.asCodeLens,
+            error => Promise.resolve([])
+        );
+    }
+
+    provideCodeActions(model: monaco.editor.IReadOnlyModel, range: monaco.Range, context: monaco.languages.CodeActionContext, token: monaco.CancellationToken): monaco.languages.CodeAction[] | Thenable<monaco.languages.CodeAction[]> {
+        const uriOwner = model.uri.toString();
+        const params = languageConverter.asCodeActionParams(uriOwner, range, context);
+
+        return this._connection.sendRequest(protocol.CodeActionRequest.type, params).then(
+            protocolConverter.asCodeActions,
             error => Promise.resolve([])
         );
     }

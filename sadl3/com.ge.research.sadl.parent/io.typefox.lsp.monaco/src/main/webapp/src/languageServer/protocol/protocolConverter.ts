@@ -115,7 +115,7 @@ export function asCodeLens(codeLens: lstypes.CodeLens | lstypes.CodeLens[]): mon
         return {
             range: asRange(codeLens.range),
             command: asCommand(codeLens.command),
-            id: codeLens.command.command //TODO handle undefined/null
+            id: codeLens.command ? codeLens.command.command : undefined
         }
     }
 
@@ -158,5 +158,31 @@ export function asCommand(command: lstypes.Command): monaco.languages.Command {
         title: command.title,
         id: command.command,
         arguments: command.arguments
+    }
+}
+
+export function asCodeActions(commands: lstypes.Command[]): monaco.languages.CodeAction[] {
+    if (is.undefined(commands)) {
+        return undefined;
+    }
+
+    if (is.nil(commands)) {
+        return null;
+    }
+    return commands.map(asCodeAction);
+}
+
+export function asCodeAction(command: lstypes.Command): monaco.languages.CodeAction {
+    if (is.undefined(command)) {
+        return undefined;
+    }
+
+    if (is.nil(command)) {
+        return null;
+    }
+
+    return {
+        command: asCommand(command),
+        score: 1
     }
 }

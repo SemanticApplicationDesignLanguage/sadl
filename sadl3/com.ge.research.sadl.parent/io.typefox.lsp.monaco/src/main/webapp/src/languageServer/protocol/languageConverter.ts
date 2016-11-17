@@ -162,3 +162,46 @@ export function asCodeLensParams(uriOwner: UriOwner): protocol.CodeLensParams {
         textDocument: asTextDocumentIdentifier(uriOwner)
     };
 }
+
+export function asCodeActionParams(uriOwner: UriOwner, range: monaco.Range, context: monaco.languages.CodeActionContext): protocol.CodeActionParams {
+    return {
+        textDocument: asTextDocumentIdentifier(uriOwner),
+        range: asRange(range),
+        context: asCodeActionContext(context)
+    };
+}
+
+export function asCodeActionContext(context: monaco.languages.CodeActionContext): lstypes.CodeActionContext {
+    return {
+        diagnostics: asDiagnostics(context.markers)
+    };
+}
+
+export function asDiagnostics(markers:  monaco.editor.IMarkerData[]): lstypes.Diagnostic[] {
+    return markers.map(asDiagnostic);
+}
+
+export function asDiagnostic(marker: monaco.editor.IMarkerData): lstypes.Diagnostic {
+    return {
+        code: marker.code as string,
+        message: marker.message,
+        severity: asSeverity(marker.severity),
+        range:  {
+            start: asPosition(marker.startLineNumber, marker.startColumn),
+            end: asPosition(marker.endLineNumber, marker.endColumn)
+        },
+        source: marker.source
+    };
+}
+
+export function asSeverity(severity: monaco.Severity): number {
+    if (severity === monaco.Severity.Error) {
+        return 1;
+    } else if (severity === monaco.Severity.Warning) {
+        return 2;
+    } else if (severity === monaco.Severity.Info) {
+        return 3;
+    } else {
+        return 0;
+    }
+}
