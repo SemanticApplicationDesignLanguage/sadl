@@ -2,7 +2,7 @@
   "name": "lsp-monaco",
   "version": "1.0.0",
   "scripts": {
-    "compile": "tsc --project src",
+    "compile": "tsc --project src/main/ts",
     "clean": "rimraf lib",
     "watch": "watch 'npm run compile' src --wait 10",
     "build": "webpack --config webpack.config.js"

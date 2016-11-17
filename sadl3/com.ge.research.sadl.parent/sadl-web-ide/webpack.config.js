@@ -19,7 +19,7 @@ var common = {
         extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js", ".jsx"]
     },
     module: {
-        loaders: [,
+        loaders: [
             { test: /\.css$/, loaders: ['style', 'css'] },
             { test: /\.tsx?$/, loaders: ['react-hot-loader/webpack', 'ts-loader'] }
         ]
