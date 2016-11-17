@@ -37,6 +37,38 @@ export function asTextEdit(textEdit: monaco.editor.ISingleEditOperation): lstype
     }
 }
 
+export function asCodeLens(codeLens: monaco.languages.ICodeLensSymbol): lstypes.CodeLens {
+    if (is.undefined(codeLens)) {
+        return undefined;
+    }
+
+    if (is.nil(codeLens)) {
+        return null;
+    }
+
+    return {
+        range: asRange(codeLens.range),
+        command : asCommand(codeLens.command),
+        data: undefined // TODO ?
+    }
+}
+
+export function asCommand(command : monaco.languages.Command): lstypes.Command {
+    if (is.undefined(command)) {
+        return undefined;
+    }
+
+    if (is.nil(command)) {
+        return null;
+    }
+
+    return {
+        title: command.title,
+        command: command.id,
+        arguments: command.arguments
+    }
+}
+
 export function asCompletionItem(completionItem: ProtocolCompletionItem): lstypes.CompletionItem {
     return {
         label: completionItem.label,
@@ -120,6 +152,12 @@ export function asDidSaveTextDocumentParams(uriOwner:UriOwner): protocol.DidSave
 }
 
 export function asDidCloseTextDocumentParams(uriOwner:UriOwner): protocol.DidCloseTextDocumentParams {
+    return {
+        textDocument: asTextDocumentIdentifier(uriOwner)
+    };
+}
+
+export function asCodeLensParams(uriOwner: UriOwner): protocol.CodeLensParams {
     return {
         textDocument: asTextDocumentIdentifier(uriOwner)
     };

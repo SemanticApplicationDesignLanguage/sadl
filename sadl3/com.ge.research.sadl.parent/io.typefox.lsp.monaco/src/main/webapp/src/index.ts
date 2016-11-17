@@ -42,32 +42,15 @@ window.onload = () => {
 function getEditorInitContent(): string {
     return `uri "http://sadl.org/dummy.sadl".
 
-Person is a class 
-    described by birth with a single value of type Birth,
-    described by father with a single value of type Man,
-    described by gender with a single value of type Gender.
+Shape is a class described by area with values of type float.
 
-{Man, Woman} are types of Person.
-Gender is a class must be one of {Male,Female}.
+Rectangle is a type of Shape,
+	described by height with values of type float,
+	described by width with values of type float.
 
-Location is a class 
-    described by latitude with a single value of type double, 
-    described by longitude with a single value of type double,
-    described by description with values of type string.
+Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
 
-locatedIn describes Location with values of type Location, is transitive.
+MyRect is a Rectangle with height 2.5, with width 5.5.
 
-Event is a class
-    described by location with a single value of type Location,
-    described by when with a single value of type date.
-    
-Birth is a type of Event 
-    described by mother with a single value of type Person, 
-    described by child with values of type Person.
-
-George is a Person has birth 
-    (a Birth with mother (a Person Mary), with location 
-        (a Location with latitude 38.186111, with longitude -76.930556, with description "Pope's Creek Estate"),
-        with when "1732-02-22").
-    `;
+Test: area of MyRect is 13.75.`;
 }

@@ -102,6 +102,30 @@ export function asDocumentHighlight(highlights: lstypes.DocumentHighlight[]): mo
     return highlights.map(converter);
 }
 
+export function asCodeLens(codeLens: lstypes.CodeLens | lstypes.CodeLens[]): monaco.languages.ICodeLensSymbol | monaco.languages.ICodeLensSymbol[] {
+    if (is.undefined(codeLens)) {
+        return undefined;
+    }
+
+    if (is.nil(codeLens)) {
+        return null;
+    }
+
+    let converter = (codeLens: lstypes.CodeLens) => {
+        return {
+            range: asRange(codeLens.range),
+            command: asCommand(codeLens.command),
+            id: codeLens.command.command //TODO handle undefined/null
+        }
+    }
+
+    if (!is.array(codeLens)) {
+        return converter(codeLens)
+    } else {
+        return codeLens.map(converter)
+    }
+}
+
 export function asLocation(location: lstypes.Location|lstypes.Location[]) : monaco.languages.Location|monaco.languages.Location[] {
     if (is.undefined(location)) {
         return undefined;
@@ -119,5 +143,20 @@ export function asLocation(location: lstypes.Location|lstypes.Location[]) : mona
         return converter(location)
     } else {
         return location.map(converter)
+    }
+}
+
+export function asCommand(command: lstypes.Command): monaco.languages.Command {
+    if (is.undefined(command)) {
+        return undefined;
+    }
+
+    if (is.nil(command)) {
+        return null;
+    }
+    return {
+        title: command.title,
+        id: command.command,
+        arguments: command.arguments
     }
 }

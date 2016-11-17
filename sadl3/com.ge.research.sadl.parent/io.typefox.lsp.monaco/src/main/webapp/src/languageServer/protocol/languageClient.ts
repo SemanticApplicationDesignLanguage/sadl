@@ -53,6 +53,7 @@ export class LanguageClient implements
         monaco.languages.HoverProvider,
         monaco.languages.ReferenceProvider, 
         monaco.languages.DocumentHighlightProvider,
+        monaco.languages.CodeLensProvider,
         Disposable {
 
     private _languages: LanguageDescription[]
@@ -195,15 +196,20 @@ export class LanguageClient implements
             if (this._capabilites.documentFormattingProvider) {
                 this._disposables.push(monaco.languages.registerDocumentFormattingEditProvider(language.languageId, this));
             }
-
+            // signature helper
             if (this._capabilites.signatureHelpProvider) {
                 this.signatureHelpTriggerCharacters = this._capabilites.signatureHelpProvider.triggerCharacters
                 this._disposables.push(monaco.languages.registerSignatureHelpProvider(language.languageId, this));
             }
-
+            // document highlight (also known as mark occurrence)
             if (this._capabilites.documentHighlightProvider) {
                 this._disposables.push(monaco.languages.registerDocumentHighlightProvider(language.languageId, this));
             }
+            // code lens support
+            if (this._capabilites.codeLensProvider) {
+                this._disposables.push(monaco.languages.registerCodeLensProvider(language.languageId, this));
+            }
+
         }
     }
 
@@ -305,6 +311,21 @@ export class LanguageClient implements
 
         return this._connection.sendRequest(protocol.DocumentHighlightRequest.type, params).then(
             protocolConverter.asDocumentHighlight,
+            error => Promise.resolve([])
+        );
+    }
+
+    provideCodeLenses(model: monaco.editor.IReadOnlyModel, token: monaco.CancellationToken): monaco.languages.ICodeLensSymbol[] | Thenable<monaco.languages.ICodeLensSymbol[]> {
+        let params = languageConverter.asCodeLensParams(model.uri.toString());
+        return this._connection.sendRequest(protocol.CodeLensRequest.type, params).then(
+            protocolConverter.asCodeLens,
+            error => Promise.resolve([])
+        );
+    }
+
+    resolveCodeLens?(model: monaco.editor.IReadOnlyModel, codeLens: monaco.languages.ICodeLensSymbol, token: monaco.CancellationToken): monaco.languages.ICodeLensSymbol | Thenable<monaco.languages.ICodeLensSymbol> {
+        return this._connection.sendRequest(protocol.CodeLensResolveRequest.type, languageConverter.asCodeLens(codeLens)).then(
+            protocolConverter.asCodeLens,
             error => Promise.resolve([])
         );
     }
