@@ -42,6 +42,7 @@ import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import com.google.inject.Binder
 import com.google.inject.name.Names
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
+import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -93,6 +94,13 @@ class SADLUiModule extends AbstractSADLUiModule {
 	// registers our own root preference page.
 	def Class<? extends LanguageRootPreferencePage> bindLanguageRootPreferencePage() {
     	return SadlRootPreferencePage
+	}
+	
+	/**
+	 * Bind a callback that always adds the Xtext nature to the SADL project silently.
+	 */
+	override bindIXtextEditorCallback() {
+		AlwaysAddXtextNatureCallback
 	}
 	
 }
