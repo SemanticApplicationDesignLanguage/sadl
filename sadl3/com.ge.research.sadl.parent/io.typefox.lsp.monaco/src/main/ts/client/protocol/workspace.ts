@@ -95,6 +95,15 @@ export class Workspace {
         return this._documents;
     }
 
+    openAll(): void {
+        const allOpened = this.allOpened();
+        for (const uri in allOpened) {
+            if (allOpened.hasOwnProperty(uri)) {
+                this.fireOpen(uri);
+            }
+        }
+    }
+
     saveAll() {
         for (const uri in this._documents) {
             if (this._documents.hasOwnProperty(uri)) {

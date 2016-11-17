@@ -1,5 +1,5 @@
 import { Writable } from 'stream'
-import { Message} from 'vscode-jsonrpc/lib/messages'
+import { Message } from 'vscode-jsonrpc/lib/messages'
 import { MessageWriter, AbstractMessageWriter, StreamMessageWriter } from 'vscode-jsonrpc/lib/messageWriter'
 
 export class WebSocketMessageWriter extends AbstractMessageWriter implements MessageWriter {
@@ -29,14 +29,16 @@ class BufferWritable extends Writable {
     data = new Buffer('')
 
     _write(data: any, encoding: string, callback: Function): void {
-        let buffer: Buffer = null
-        if (Buffer.isBuffer(data)) {
-            buffer = data
-        } else {
-            buffer = new Buffer(data, encoding)
-        }
-        this.data = Buffer.concat([this.data, data])
+        const buffer = this.toBuffer(data, encoding);
+        this.data = Buffer.concat([this.data, buffer])
         callback()
+    }
+
+    protected toBuffer(data: any, encoding: string): Buffer {
+        if (Buffer.isBuffer(data)) {
+            return data;
+        }
+        return new Buffer(data, encoding)
     }
 
 }

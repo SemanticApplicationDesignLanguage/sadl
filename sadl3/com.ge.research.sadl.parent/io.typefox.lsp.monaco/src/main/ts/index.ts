@@ -1,42 +1,68 @@
-import openWebSocket from './languageServer/plugin';
-import workspace from './languageServer/protocol/workspace';
+import {
+    registerLanguages, LanguageClient, workspace, getRootPath
+} from './client';
+
+import {
+    sadlLanguage
+} from './sadl';
+
+import {
+    createWebSocketConnection
+} from './jsonrpc-websocket';
+
+import {
+    URL, wsProtocol
+} from './utils/network';
+
+const port = 8080;
+const basePath = 'sadlmonaco';
+
+const rootPathProviderUrl = new URL({
+    port, basePath,
+    path: 'rest/rootPathProvider'
+});
+
+const languageServerUrl = new URL({
+    protocol: wsProtocol,
+    port, basePath,
+    path: 'languageServer'
+});
+
+const supportedLanguages = [sadlLanguage];
 
 // TODO this should happen after the static monaco load in index.html
 // TODO remove window.onLoad()
 window.onload = () => {
+    registerLanguages(supportedLanguages);
+    getRootPath(rootPathProviderUrl).then(rootPath => {
+        createEditor(rootPath);
 
-    const xhr = new XMLHttpRequest();
-    const restEndpoint = location.href + 'rest/rootPathProvider';
-    xhr.open('GET', restEndpoint);
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            const rootPath = xhr.responseText;
-            const client = openWebSocket(rootPath);
+        const connection = createWebSocketConnection(languageServerUrl);
+        connection.webSocket.onopen = () => {
+            const languageClient = new LanguageClient(
+                connection.connection, supportedLanguages, rootPath
+            );
+            languageClient.start();
+        };
+    });
+}
 
-			const fileExtension = 'sadl';
-            const languageId = 'com.ge.research.sadl.SADL';
-            // Register the syntax coloring for the web-calc language
-            const conf = require('./languageServer/languages/sadlLanguageSyntax').conf;
-            monaco.languages.setLanguageConfiguration(languageId, conf);
-            monaco.languages.setMonarchTokensProvider(languageId, conf);
+function createEditor(rootPath: string) {
+    const editor = monaco.editor.create(document.getElementById('monaco_editor_div'));
+    const updateDocument = () => {
+        const uri = editor.getModel().uri.toString();
+        const languageId = editor.getModel().getModeId();
+        workspace.update(uri, languageId, editor.getModel().getValue());
+    }
+    editor.onDidChangeModel(updateDocument)
+    editor.onDidChangeModelContent(updateDocument);
 
-            const editor = monaco.editor.create(document.getElementById('monaco_editor_div'));
-            const updateDocument = () => {
-                const uri = editor.getModel().uri.toString();
-                const languageId = editor.getModel().getModeId();
-                workspace.update(uri, languageId, editor.getModel().getValue());
-            }
-            editor.onDidChangeModel(updateDocument)
-            editor.onDidChangeModelContent(updateDocument);
-
-            const model = monaco.editor.createModel(getEditorInitContent(), languageId, monaco.Uri.parse('file://' + rootPath + '/dummy.' + fileExtension));
-            editor.setModel(model);
-        }
-        else {
-            throw Error('Error while getting root path for language server. Return status was: ' + xhr.status);
-        }
-    };
-    xhr.send();
+    const model = monaco.editor.createModel(
+        getEditorInitContent(),
+        sadlLanguage.languageId,
+        monaco.Uri.parse('file://' + rootPath + '/dummy.' + sadlLanguage.fileExtensions[0])
+    );
+    editor.setModel(model);
 }
 
 function getEditorInitContent(): string {

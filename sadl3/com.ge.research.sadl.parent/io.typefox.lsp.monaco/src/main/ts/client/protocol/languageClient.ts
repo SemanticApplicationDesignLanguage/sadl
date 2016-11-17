@@ -1,5 +1,3 @@
-
-
 import * as is from 'vscode-jsonrpc/lib/is'
 import { Disposable } from 'vscode-jsonrpc/lib/events'
 import { MessageConnection, NotificationType } from 'vscode-jsonrpc'
@@ -9,9 +7,8 @@ import * as protocol from 'vscode-languageclient/lib/protocol'
 import * as protocolConverter from './protocolConverter'
 import * as languageConverter from './languageConverter'
 
-import { LanguageDescription } from './registry'
+import { LanguageDescription } from '../languages';
 import Workspace from './workspace';
-
 
 export class ColoringParams {
     uri: string;
@@ -39,7 +36,7 @@ export class ColoringIdToCssStyleMap {
     ]);
 }
 
-class ColoringNotification  {
+class ColoringNotification {
     static type: NotificationType<ColoringParams> = {
         method: 'textDocument/updateColoring',
         _: undefined
@@ -47,21 +44,20 @@ class ColoringNotification  {
 }
 
 export class LanguageClient implements
-        monaco.languages.DefinitionProvider,
-        monaco.languages.DocumentFormattingEditProvider,
-        monaco.languages.HoverProvider,
-        monaco.languages.ReferenceProvider, 
-        monaco.languages.DocumentHighlightProvider,
-        monaco.languages.CodeLensProvider,
-        monaco.languages.CodeActionProvider,
-        Disposable {
+    monaco.languages.DefinitionProvider,
+    monaco.languages.DocumentFormattingEditProvider,
+    monaco.languages.HoverProvider,
+    monaco.languages.ReferenceProvider,
+    monaco.languages.DocumentHighlightProvider,
+    monaco.languages.CodeLensProvider,
+    monaco.languages.CodeActionProvider,
+    Disposable {
 
-    private _languages: LanguageDescription[]
-    private _connection: MessageConnection
-    private _rootPath: string
-    private _semanticHighlightDecorationIds: string[] = [];
+    private _languages: LanguageDescription[];
+    private _connection: MessageConnection;
+    private _rootPath: string;
 
-    private _capabilites: protocol.ServerCapabilities
+    private _capabilites: protocol.ServerCapabilities;
 
     private _disposables: Disposable[] = [];
     private _isDisposed: boolean;
@@ -97,29 +93,29 @@ export class LanguageClient implements
     }
 
     protected updateColoringDecorators(uri: string, infos: ColoringInformation[], uriToColoringDecorationIdsMap: Map<string, string[]>) {
-            let modelUri = monaco.Uri.parse(uri)
-            let model = monaco.editor.getModel(modelUri)
-            if (is.undefined(model) || is.nil(model)) {
-                return;
-            }
+        let modelUri = monaco.Uri.parse(uri)
+        let model = monaco.editor.getModel(modelUri)
+        if (is.undefined(model) || is.nil(model)) {
+            return;
+        }
 
-            const decorationIdsToRemove = uriToColoringDecorationIdsMap.get(uri);
-            if (decorationIdsToRemove) {
-                while (decorationIdsToRemove.length !== 0) {
-                    const oldId = decorationIdsToRemove.pop();
-                    model.deltaDecorations([oldId], []);
-                }
+        const decorationIdsToRemove = uriToColoringDecorationIdsMap.get(uri);
+        if (decorationIdsToRemove) {
+            while (decorationIdsToRemove.length !== 0) {
+                const oldId = decorationIdsToRemove.pop();
+                model.deltaDecorations([oldId], []);
             }
+        }
 
-            const newDecorationIds: string[] = [];
-            infos.forEach(info => {
-                const monacoRange = protocolConverter.asRange(info.range);
-                info.styles.forEach(style => {
-                    const cssClass = ColoringIdToCssStyleMap.map.get(style);
-                    newDecorationIds.push(model.deltaDecorations([], [{ range: monacoRange, options: { inlineClassName: cssClass } }])[0]);
-                })
-            });
-            uriToColoringDecorationIdsMap.set(uri, newDecorationIds);
+        const newDecorationIds: string[] = [];
+        infos.forEach(info => {
+            const monacoRange = protocolConverter.asRange(info.range);
+            info.styles.forEach(style => {
+                const cssClass = ColoringIdToCssStyleMap.map.get(style);
+                newDecorationIds.push(model.deltaDecorations([], [{ range: monacoRange, options: { inlineClassName: cssClass } }])[0]);
+            })
+        });
+        uriToColoringDecorationIdsMap.set(uri, newDecorationIds);
     }
 
     dispose() {
@@ -134,13 +130,15 @@ export class LanguageClient implements
     }
 
     public start(): PromiseLike<void> {
+        this._connection.onDispose(() => this.dispose());
         this._connection.listen()
 
         let initializeParams = this.getInitializeParams()
         return this._connection.sendRequest(protocol.InitializeRequest.type, initializeParams).then(initializeResult => {
-            this._capabilites = initializeResult.capabilities
-            this.hookCapabilites()
-        })
+            this._capabilites = initializeResult.capabilities;
+            this.hookCapabilites();
+            Workspace.openAll();
+        });
     }
 
     protected updateMarkers(uri: string, diagnostics: lstypes.Diagnostic[]): void {
@@ -169,7 +167,6 @@ export class LanguageClient implements
     }
 
     protected hookCapabilites(): void {
-        
         if (this._capabilites.textDocumentSync !== protocol.TextDocumentSyncKind.None) {
             this._disposables.push(Workspace.onDidOpenTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidOpenTextDocument(document))));
             this._disposables.push(Workspace.onDidChangeTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidChangeTextDocument(document))));
@@ -258,7 +255,7 @@ export class LanguageClient implements
         this._connection.sendNotification(protocol.DidCloseTextDocumentNotification.type, params);
     }
 
-    provideDefinition(model: monaco.editor.IReadOnlyModel, position: monaco.IPosition, token: monaco.CancellationToken) : PromiseLike<monaco.languages.Location | monaco.languages.Location[]> {
+    provideDefinition(model: monaco.editor.IReadOnlyModel, position: monaco.IPosition, token: monaco.CancellationToken): PromiseLike<monaco.languages.Location | monaco.languages.Location[]> {
         const params = languageConverter.asTextDocumentPositionParams(model.uri.toString(), position);
         return this._connection.sendRequest(protocol.DefinitionRequest.type, params).then(
             protocolConverter.asLocation,
@@ -286,10 +283,10 @@ export class LanguageClient implements
 
     provideDocumentFormattingEdits(model: monaco.editor.IReadOnlyModel, options: monaco.languages.FormattingOptions, token: monaco.CancellationToken): monaco.editor.ISingleEditOperation[] | Thenable<monaco.editor.ISingleEditOperation[]> {
         const params = {
-            textDocument : {
-                uri : model.uri.toString()
+            textDocument: {
+                uri: model.uri.toString()
             },
-            options : options
+            options: options
         }
         return this._connection.sendRequest(protocol.DocumentFormattingRequest.type, params).then(
             (edits) => edits.map(protocolConverter.asTextEdit),
@@ -298,9 +295,9 @@ export class LanguageClient implements
     }
 
     signatureHelpTriggerCharacters: string[];
-        /**
-         * Provide help for the signature at the given position and document.
-         */
+    /**
+     * Provide help for the signature at the given position and document.
+     */
     provideSignatureHelp(model: monaco.editor.IReadOnlyModel, position: monaco.Position, token: monaco.CancellationToken): monaco.languages.SignatureHelp | Thenable<monaco.languages.SignatureHelp> {
         let params = languageConverter.asTextDocumentPositionParams(model.uri.toString(), position) as protocol.ReferenceParams;
 
@@ -386,7 +383,7 @@ export class LanguageClient implements
         return provider(uri);
     }
 
-    protected isLanguageSupported(languageId:string): boolean {
+    protected isLanguageSupported(languageId: string): boolean {
         return this._languages.map(l => l.languageId).indexOf(languageId) !== -1;
     }
 

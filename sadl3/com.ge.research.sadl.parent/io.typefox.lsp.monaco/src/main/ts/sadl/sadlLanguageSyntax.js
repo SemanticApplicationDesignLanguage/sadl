@@ -113,3 +113,5 @@ exports.conf = {
 
 	}
 };
+
+exports.language = exports.conf;

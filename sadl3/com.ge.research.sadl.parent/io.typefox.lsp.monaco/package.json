@@ -4,7 +4,7 @@
   "scripts": {
     "compile": "tsc --project src/main/ts",
     "clean": "rimraf lib",
-    "watch": "watch 'npm run compile' src --wait 10",
+    "watch": "watch 'npm run compile' src/main/ts --wait 10",
     "build": "webpack --config webpack.config.js"
   },
   "dependencies": {

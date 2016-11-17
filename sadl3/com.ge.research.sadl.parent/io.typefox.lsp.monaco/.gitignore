@@ -1,6 +1,8 @@
 /.gradle/
 /build/
+/lib/
 /node_modules/
 /src/main/webapp/dist/
 .DS_Store
 /.vscode/
+npm-debug.log

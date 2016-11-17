@@ -1,20 +1,15 @@
 import {
-    LanguageDescription
-} from '../protocol/registry';
-
-import {
-    ILanguage
+    ILanguage, registerLanguage
 } from '../../monaco/languages';
 
-export const supportedLanguages: LanguageDescription[] = [
-    {
-        languageId: 'com.ge.research.sadl.SADL',
-        aliases: ['sadl'],
-        mimeTypes: [],
-        fileExtensions: ["sadl"],
-        highlightingConfiguration: ''
-    }
-];
+export interface LanguageDescription {
+    languageId: string
+    aliases: string[]
+    mimeTypes: string[]
+    fileExtensions: string[]
+    highlightingConfiguration: string
+    module?: any
+}
 
 export function toMonacoLanguage(language: LanguageDescription): ILanguage {
     const extensions = language.fileExtensions.map((it) => {
@@ -28,4 +23,10 @@ export function toMonacoLanguage(language: LanguageDescription): ILanguage {
         configuration: language.highlightingConfiguration,
         module: language.module
     };
+}
+
+export function registerLanguages(supportedLanguages: LanguageDescription[]) {
+    for (const language of supportedLanguages) {
+        registerLanguage(toMonacoLanguage(language));
+    }
 }
