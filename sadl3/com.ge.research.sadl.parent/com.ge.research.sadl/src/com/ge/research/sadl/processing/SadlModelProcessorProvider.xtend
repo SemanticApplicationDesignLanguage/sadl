@@ -21,6 +21,7 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import com.google.inject.Injector
 
 @Singleton
 class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelProcessor> implements IModelProcessorProvider {
@@ -30,14 +31,15 @@ class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelPro
 	@Inject
 	OnChangeEvictingCache cache
 
-	new() {
-		super(IModelProcessor)
+	@Inject
+	new(Injector injector) {
+		super(IModelProcessor, injector);
 	}
 
 	@Override
 	override IModelProcessor getProcessor(Resource resource) {
 		return cache.get(MODEL_PROCESSOR_CACHE_KEY, resource) [
-			doCreateProcessor(resource)
+			doCreateProcessor(resource);
 		];
 	}
 
@@ -51,6 +53,5 @@ class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelPro
 	protected def IModelProcessor doCreateProcessor(Resource resource) {
 		return new CompositeModelProcessor(allProcessors);
 	}
-
 
 }

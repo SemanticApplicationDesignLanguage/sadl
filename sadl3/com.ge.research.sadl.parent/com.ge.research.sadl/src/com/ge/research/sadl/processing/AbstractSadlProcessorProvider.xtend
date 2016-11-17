@@ -23,7 +23,8 @@ import com.google.common.base.Suppliers
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Maps
-import com.google.common.collect.MutableClassToInstanceMap
+import com.google.inject.Injector
+import com.google.inject.Provider
 import java.util.Map
 import java.util.ServiceLoader
 import org.eclipse.emf.ecore.resource.Resource
@@ -42,19 +43,23 @@ abstract class AbstractSadlProcessorProvider<P> {
 
 	static val LOGGER = LoggerFactory.getLogger(AbstractSadlProcessorProvider);
 
-	val Supplier<Map<Class<? extends P>, P>> processors;
+	val Supplier<Map<Class<? extends P>, Provider<P>>> processors;
 
 	/**
 	 * Creates a new provider instance with the class of the processors this
 	 * instance provides. This class lazily discovers all service
 	 * implementations.
 	 */
-	protected new(Class<P> processorClass) {
+	protected new(Class<P> processorClass, Injector injector) {
 		processors = Suppliers.memoize [
-			val builder = ImmutableMap.<Class<? extends P>, P>builder;
+			val builder = ImmutableMap.<Class<? extends P>, Provider<P>>builder;
 			val services = ServiceLoader.load(processorClass).iterator;
-			services.forEach[builder.put(class as Class<? extends P>, it)];
-			return MutableClassToInstanceMap.create(Maps.newHashMap(builder.build));
+			services.forEach [ instance |
+				injector.injectMembers(instance);
+				val Provider<P> provider = [instance];
+				builder.put(instance.class as Class<? extends P>, provider);
+			];
+			return Maps.newHashMap(builder.build);
 		];
 	}
 
@@ -67,7 +72,7 @@ abstract class AbstractSadlProcessorProvider<P> {
 	 * Returns with a view of all available processor instances.
 	 */
 	def Iterable<P> getAllProcessors() {
-		ImmutableSet.copyOf(processors.get.values);
+		ImmutableSet.copyOf(processors.get.values.map[get]);
 	}
 
 	/**
@@ -75,18 +80,19 @@ abstract class AbstractSadlProcessorProvider<P> {
 	 * registered processor instance will be discarded and the argument will be
 	 * registered instead.
 	 * 
-	 * @param processor
-	 *            the new processor to register. Cannot be {@code null}.
+	 * @param processorProvider
+	 *            the provider that provides the new processor instances. Cannot be {@code null}.
 	 */
-	def registerProcessor(P processor) {
-		Preconditions.checkNotNull(processor, 'processor');
-		val key = processor.class;
-		val oldProcessor = processors.get.put(key as Class<? extends P>, processor);
+	def registerProcessor(Provider<P> processorProvider) {
+		Preconditions.checkNotNull(processorProvider, 'processorProvider');
+		val newProcessor = processorProvider.get;
+		val key = newProcessor.class;
+		val oldProcessor = processors.get.put(key as Class<? extends P>, processorProvider);
 		if (oldProcessor === null) {
 			LOGGER.info('''Processor has been successfully registered into the cache with class: '«key»'.''');
 		} else {
 			LOGGER.
-				info('''Processor has been updated for class: '«key»'. New implementation is '«processor»'. Old implementation was '«oldProcessor»'.''')
+				info('''Processor has been updated for class: '«key»'. New implementation is '«newProcessor»'. Old implementation was '«oldProcessor»'.''')
 		}
 	}
 

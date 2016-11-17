@@ -21,6 +21,8 @@ import com.google.common.collect.ImmutableList
 import org.eclipse.emf.ecore.resource.Resource
 
 import static java.util.Collections.singletonList
+import com.google.inject.Inject
+import com.google.inject.Injector
 
 /**
  * Provides {@code SADL} inferences in a headless case.
@@ -33,13 +35,14 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 		return result;
 	];
 
-	new() {
-		super(ISadlInferenceProcessor)
+	@Inject
+	new(Injector injector) {
+		super(ISadlInferenceProcessor, injector);
 	}
 
 	@Override
 	override ISadlInferenceProcessor getProcessor(Resource resource) {
-		return doCreateProcessor(resource)
+		return doCreateProcessor(resource);
 	}
 
 	protected def doCreateProcessor(Resource resource) {

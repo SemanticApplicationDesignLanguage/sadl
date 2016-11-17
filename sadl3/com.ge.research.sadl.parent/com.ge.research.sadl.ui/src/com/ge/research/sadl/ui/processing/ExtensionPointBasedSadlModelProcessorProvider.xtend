@@ -21,28 +21,35 @@ import com.ge.research.sadl.processing.IModelProcessor
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
 import com.google.inject.Inject
 import com.google.inject.Injector
+import com.google.inject.Singleton
 
 /**
  * Eclipse extension-point based {@code SADL} model processor provider. Discovers 
  * and collects the implementations via extension-points.
  */
+@Singleton
 class ExtensionPointBasedSadlModelProcessorProvider extends SadlModelProcessorProvider {
 
-	@Inject
-	ModelProcessorDelegate delegate;
+	val ModelProcessorDelegate delegate;
 
+	@Inject
+	new(Injector injector, ModelProcessorDelegate delegate) {
+		super(injector);
+		this.delegate = delegate;
+	}
+	
 	@Override
 	override getAllProcessors() {
-		return delegate.allProviders;
+		return delegate.allProcessors;
 	}
 
 	/**
 	 * Model processor provider delegate that does the discovery via extension-points. 
-	 * Caches all the provided processors.
 	 * 
 	 * @author akos.kitta
 	 */
-	private static final class ModelProcessorDelegate extends AbstractExtensionPointBasedSadlProcessorProviderDelegate<IModelProcessor> {
+	@Singleton
+	private static final class ModelProcessorDelegate extends ExtensionPointBasedSadlProcessorProviderDelegate<IModelProcessor> {
 
 		static val EXTENSION_ID = 'com.ge.research.sadl.ui.sadl_model_processor';
 

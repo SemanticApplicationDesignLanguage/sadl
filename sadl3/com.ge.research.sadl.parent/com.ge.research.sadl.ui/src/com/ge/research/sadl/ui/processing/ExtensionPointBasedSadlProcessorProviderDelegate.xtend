@@ -22,6 +22,7 @@ import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.inject.Inject
 import com.google.inject.Injector
+import com.google.inject.Provider
 import org.eclipse.core.runtime.Platform
 import org.eclipse.core.runtime.RegistryFactory
 
@@ -33,27 +34,31 @@ import org.eclipse.core.runtime.RegistryFactory
  * 
  * @author akos.kitta
  */
-abstract class AbstractExtensionPointBasedSadlProcessorProviderDelegate<P> {
-	
-	val Supplier<Iterable<P>> processors;
+abstract class ExtensionPointBasedSadlProcessorProviderDelegate<P> {
 
-	@Inject	
+	val Supplier<Iterable<Provider<P>>> processors;
+
+	@Inject
 	protected new(Class<? extends P> processorClass, Injector injector) {
-		processors = Suppliers.memoize[
-			val registry = RegistryFactory.getRegistry();
-			registry.getConfigurationElementsFor(extensionPointId).map[
-				val processor = processorClass.cast(createExecutableExtension(classPropertyName));
-				// XXX: why not use AbstractGuiceAwareExecutableExtensionFactory instead?
-				injector.injectMembers(processor);
-				return processor;
-			];		
+		val registry = RegistryFactory.getRegistry();
+		processors = Suppliers.memoize [
+			registry.getConfigurationElementsFor(extensionPointId).map [ element |
+				val Provider<P> provider = [
+					val instance = element.createExecutableExtension(classPropertyName);
+					val processor = processorClass.cast(instance);
+					// XXX: why not use AbstractGuiceAwareExecutableExtensionFactory instead?
+					injector.injectMembers(processor);
+					return processor;
+				];
+				return provider
+			]
 		];
 	}
-	
-	def Iterable<P> getAllProviders() {
-		return processors.get;
+
+	def Iterable<P> getAllProcessors() {
+		return processors.get.map[get];
 	}
-	
+
 	/**
 	 * Returns with the unique extension-point ID of the processor that has to 
 	 * be discovered by this provider.
@@ -66,9 +71,9 @@ abstract class AbstractExtensionPointBasedSadlProcessorProviderDelegate<P> {
 	 * 
 	 * <p>
 	 * By default it returns with the {@code class} string. Clients may change it.
-	 */	
+	 */
 	protected def String getClassPropertyName() {
 		return 'class';
 	}
-	
+
 }
