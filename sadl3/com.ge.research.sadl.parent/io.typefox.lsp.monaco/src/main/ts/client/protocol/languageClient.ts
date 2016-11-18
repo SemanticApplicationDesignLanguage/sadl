@@ -1,11 +1,11 @@
-import * as is from 'vscode-jsonrpc/lib/is'
-import { Disposable } from 'vscode-jsonrpc/lib/events'
-import { MessageConnection, NotificationType } from 'vscode-jsonrpc'
+import * as is from 'vscode-jsonrpc/lib/is';
+import { Disposable } from 'vscode-jsonrpc/lib/events';
+import { MessageConnection, NotificationType } from 'vscode-jsonrpc';
 
-import * as lstypes from 'vscode-languageserver-types'
-import * as protocol from 'vscode-languageclient/lib/protocol'
-import * as protocolConverter from './protocolConverter'
-import * as languageConverter from './languageConverter'
+import * as lstypes from 'vscode-languageserver-types';
+import * as protocol from 'vscode-languageclient/lib/protocol';
+import * as protocolConverter from './protocolConverter';
+import * as languageConverter from './languageConverter';
 
 import { LanguageDescription } from '../languages';
 import Workspace from './workspace';
@@ -37,7 +37,7 @@ export class ColoringIdToCssStyleMap {
 }
 
 class ColoringNotification {
-    static type: NotificationType<ColoringParams> = {
+    static type: NotificationType<ColoringParams, void> = {
         method: 'textDocument/updateColoring',
         _: undefined
     };

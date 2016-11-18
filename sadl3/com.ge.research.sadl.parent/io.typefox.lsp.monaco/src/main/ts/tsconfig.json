@@ -1,12 +1,13 @@
 {
 	"compilerOptions": {
+		"outDir": "../../../lib",
+		"sourceMap": true,
+		"module": "commonjs",
+		"target": "ES5",
+        "jsx": "react",
 		"declaration": true,
 		"noImplicitAny": true,
 		"noEmitOnError": true,
-		"module": "commonjs",
-		"target": "ES5",
-		"outDir": "../../../lib",
-		"sourceMap": true,
 		"noImplicitThis": true,
 		"strictNullChecks": false
 	}

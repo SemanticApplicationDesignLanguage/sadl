@@ -1,45 +1,42 @@
 var path = require('path');
 var webpack = require('webpack');
+var CopyWebpackPlugin = new require('copy-webpack-plugin');
 
 var SRC_PATH = path.resolve(__dirname, 'src/main/ts');
 var BUILD_PATH = path.resolve(__dirname, 'src/main/webapp/dist');
 var VS_ROOT = path.resolve(__dirname, 'node_modules/monaco-editor/min/vs');
 
-//var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
-//	compress: true,
-//	mangle: false
-//});
+// TODO: extract a prod webpack config
+/*var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
+	compress: true,
+	mangle: false
+});*/
 
 module.exports = {
-
-	entry: {
-		app: SRC_PATH
-	},
-
+	entry: SRC_PATH,
 	output: {
 		path: BUILD_PATH,
-		filename: 'bundle.js',
-		publicPath: '/dist/'
+		filename: 'bundle.js'
 	},
-
 	devtool: 'source-map',
-
 	resolve: {
-		extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js']
+		extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js", ".jsx"]
 	},
-
 	module: {
-		loaders: [{
-			test: /\.tsx?$/,
-			loader: 'ts-loader'
-		}]
+		loaders: [
+			{ test: /\.css$/, loaders: ['style', 'css'] },
+			{ test: /\.tsx?$/, loaders: ['ts-loader'] }
+		],
+		preLoaders: [
+			{ test: /\.js$/, loader: "source-map-loader" }
+		]
 	},
-
 	plugins: [
-		new require('copy-webpack-plugin')([{
+		new CopyWebpackPlugin([{
 			from: VS_ROOT,
 			to: 'vs',
 		}])
-		//		,uglifyPlugin
+		/*,
+		uglifyPlugin*/
 	]
 };

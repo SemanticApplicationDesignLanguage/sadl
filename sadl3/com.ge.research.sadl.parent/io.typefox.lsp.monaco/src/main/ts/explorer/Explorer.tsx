@@ -1,5 +1,3 @@
-import 'react-treebeard/lib/index';
-
 import * as React from 'react';
 import { Treebeard, TreeNode } from 'react-treebeard';
 
@@ -7,7 +5,7 @@ import {
     IWorkspace, File
 } from '../workspace';
 
-class FileNode implements TreeNode {
+export class FileNode implements TreeNode {
 
     readonly file: File
     readonly name: string
@@ -52,11 +50,11 @@ class FileNode implements TreeNode {
 
 }
 
-interface IExplorerProps {
+export interface IExplorerProps {
     readonly workspace: IWorkspace
 }
 
-interface IExplorerState {
+export interface IExplorerState {
     rootNode?: TreeNode | FileNode
     selectedNode?: TreeNode
 }

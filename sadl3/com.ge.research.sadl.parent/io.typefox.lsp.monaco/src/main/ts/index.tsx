@@ -1,3 +1,6 @@
+import './style.css';
+import './resizer.css';
+
 import {
     registerLanguages, LanguageClient, workspace, getRootPath
 } from './client';
@@ -13,6 +16,24 @@ import {
 import {
     URL, wsProtocol
 } from './utils/network';
+
+import {
+    Explorer
+} from './explorer/Explorer';
+
+import {
+    Editor
+} from './monaco/Editor';
+
+
+import * as React from 'react';
+import { render } from 'react-dom';
+
+import * as SplitPane from 'react-split-pane';
+
+import {
+    RemoteWorkspace
+} from './workspace';
 
 const port = 8080;
 const basePath = 'sadlmonaco';
@@ -35,20 +56,29 @@ const supportedLanguages = [sadlLanguage];
 window.onload = () => {
     registerLanguages(supportedLanguages);
     getRootPath(rootPathProviderUrl).then(rootPath => {
-        createEditor(rootPath);
-
-        const connection = createWebSocketConnection(languageServerUrl);
-        connection.webSocket.onopen = () => {
-            const languageClient = new LanguageClient(
-                connection.connection, supportedLanguages, rootPath
-            );
+        const { webSocket, connection } = createWebSocketConnection(languageServerUrl);
+        webSocket.onopen = () => {
+            const workspace = new RemoteWorkspace({ rootPath, connection });
+            const languageClient = new LanguageClient(connection, supportedLanguages, rootPath);
             languageClient.start();
+
+            const app = <SplitPane split='vertical' minSize='300'>
+                <Explorer workspace={workspace} />
+                <Editor onEditorDidMount={e => onEditorDidMount(e, rootPath)}
+                    onEditorWillUnmount={onEditorWillUnmount} />
+            </SplitPane>
+            renderApp(app);
         };
     });
 }
 
-function createEditor(rootPath: string) {
-    const editor = monaco.editor.create(document.getElementById('monaco_editor_div'));
+function renderApp(app: JSX.Element) {
+    const appContainer = document.createElement('app-container');
+    document.body.appendChild(appContainer);
+    render(app, appContainer);
+}
+
+function onEditorDidMount(editor: monaco.editor.IStandaloneCodeEditor, rootPath: string) {
     const updateDocument = () => {
         const uri = editor.getModel().uri.toString();
         const languageId = editor.getModel().getModeId();
@@ -63,6 +93,10 @@ function createEditor(rootPath: string) {
         monaco.Uri.parse('file://' + rootPath + '/dummy.' + sadlLanguage.fileExtensions[0])
     );
     editor.setModel(model);
+}
+
+function onEditorWillUnmount(editor: monaco.editor.IStandaloneCodeEditor) {
+    editor.getModel().dispose();
 }
 
 function getEditorInitContent(): string {

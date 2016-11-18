@@ -56,7 +56,7 @@ export function asCompletionItem(completionItem: lstypes.CompletionItem): Protoc
         detail: completionItem.detail,
         documentation: completionItem.documentation,
         filterText: completionItem.filterText,
-        insertText: completionItem.insertText,
+        insertText: <string>completionItem.insertText,
         kind: completionItem.kind - 1,
         sortText: completionItem.sortText,
         textEdit: asTextEdit(completionItem.textEdit),

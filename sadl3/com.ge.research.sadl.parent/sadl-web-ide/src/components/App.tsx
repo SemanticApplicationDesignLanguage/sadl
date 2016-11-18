@@ -35,7 +35,7 @@ export default () => {
         connection.webSocket.onopen = () => {
             getRootPath(rootPathProviderUrl).then(rootPath => {
                 const workspace = new RemoteWorkspace({
-                    rootPath,
+                    rootPath: '/Users/kosyakov/git/sadlos2/sadl3/com.ge.research.sadl.parent/sadl-web-ide',
                     connection: connection.connection
                 });
                 const explorer = <Explorer workspace={workspace} />;

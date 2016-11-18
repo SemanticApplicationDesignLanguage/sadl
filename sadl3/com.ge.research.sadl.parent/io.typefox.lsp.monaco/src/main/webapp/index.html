@@ -2,29 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Language" content="en-us">
-  <title>Embedded Monaco Editor</title>
-  <link rel="stylesheet" type="text/css" href="webjars/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="style.css"/>
+  <title>SADL Web IDE</title>
 </head>
 <body>
-
-<div class="container">
-	<div class="row">
-	<h1>SADL Monaco Editor</h1>
-    <div class="col-md-8" id="monaco_container_div" style="border: 1px solid grey;">
-    	<div class="col-md-12" id="monaco_editor_div" style="height: 600px;">
-    	</div>
-    </div>
-	
-	<div class="col-md-4" id="instructions_div">
-	<h3>Instructions</h3>
-	<ul>
-		<li>TODO.</li>
-	</div>
-</div>
-
 <script src="dist/vs/loader.js"></script>
 <script>
     require.config({ paths: { 'vs': 'dist/vs' }});
@@ -33,5 +13,4 @@
 </script>
 <script type="text/javascript" src="dist/bundle.js" charset="utf-8"></script>
 </body>
-
 </html>
