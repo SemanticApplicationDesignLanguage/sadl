@@ -3,3 +3,8 @@ export interface File {
     readonly directory: boolean;
     readonly children?: File[];
 }
+
+export interface FileContent {
+    readonly value: string;
+    readonly encoding: string;
+}

@@ -91,7 +91,7 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 		]
 	}
 
-	override resolveContent(ResolveContentParams params) {
+	override resolveFileContent(ResolveFileContentParams params) {
 		return CompletableFutures.computeAsync [ cancelChecker |
 			val path = params.uri.toPath
 			if (path.regularFile) {

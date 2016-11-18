@@ -1,9 +1,9 @@
 import {
-    File
+    File, FileContent
 } from './types';
 
 import {
-    ResolveFileRequest
+    ResolveFileRequest, ResolveFileContentRequest
 } from './protocol';
 
 import {
@@ -12,7 +12,8 @@ import {
 
 export interface IWorkspace {
     readonly rootPath: string;
-    resolveFile(uri: string, maxDepth?: number): Thenable<File | null>;
+    resolveFile(uri: string, maxDepth?: number): PromiseLike<File | null>;
+    resolveContent(uri: string): PromiseLike<FileContent | null>;
 }
 
 export class RemoteWorkspace implements IWorkspace {
@@ -23,9 +24,14 @@ export class RemoteWorkspace implements IWorkspace {
         this.rootPath = props.rootPath;
     }
 
-    resolveFile(uri: string, maxDepth?: number): Thenable<File | null> {
+    resolveFile(uri: string, maxDepth?: number): PromiseLike<File | null> {
         const params = { uri, maxDepth };
         return this.props.connection.sendRequest(ResolveFileRequest.type, params);
+    }
+
+    resolveContent(uri: string): PromiseLike<FileContent | null> {
+        const params = { uri };
+        return this.props.connection.sendRequest(ResolveFileContentRequest.type, params);
     }
 
 }

@@ -27,3 +27,30 @@ export function registerLanguage(language: ILanguage, loadLanguageConfiguration:
         monaco.languages.setLanguageConfiguration(languageId, module.conf);
     });
 }
+
+export function findLanguageIdByURI(uri: string): string | null {
+    const language = findLanguageByURI(uri);
+    return language ? language.id : null;
+}
+
+export function findLanguageByURI(uri: string): monaco.languages.ILanguageExtensionPoint | null {
+    const extension = getExtension(uri);
+    if (extension) {
+        return findLanguageByExtension(uri);
+    }
+    return null;
+}
+
+export function findLanguageByExtension(extension: string): monaco.languages.ILanguageExtensionPoint | null {
+    for (const language of monaco.languages.getLanguages()) {
+        if (language.extensions && language.extensions.indexOf(extension) !== -1) {
+            return language;
+        }
+    }
+    return null;
+}
+
+export function getExtension(uri: string): string | null {
+    const index = uri.indexOf('.');
+    return index === -1 ? null : uri.substr(index + 1);
+}

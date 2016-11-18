@@ -170,5 +170,6 @@ export class Workspace {
 
 }
 
+// FIXME: move workspace out of protocol
 export const workspace = new Workspace();
 export default workspace;

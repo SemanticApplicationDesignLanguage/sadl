@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Treebeard, TreeNode } from 'react-treebeard';
 
 import {
-    IWorkspace, File
+    File
 } from '../workspace';
 
 export class FileNode implements TreeNode {
@@ -29,7 +29,7 @@ export class FileNode implements TreeNode {
     getName(file: File): string {
         const path = file.uri.replace(/\/$/, "");
         const index = path.lastIndexOf('/');
-        return (index === -1 ? path : path.substring(index + 1)) + 'B';
+        return index === -1 ? path : path.substring(index + 1);
     }
 
     getChildren(file: File): FileNode[] {
@@ -51,7 +51,10 @@ export class FileNode implements TreeNode {
 }
 
 export interface IExplorerProps {
-    readonly workspace: IWorkspace
+    readonly onDidMount?: (explorer: Explorer) => void;
+    readonly onWillUnmount?: (explorer: Explorer) => void;
+    readonly onOpen?: (file: File) => void;
+    readonly onExpand?: (file: File) => PromiseLike<File | null>;
 }
 
 export interface IExplorerState {
@@ -60,6 +63,7 @@ export interface IExplorerState {
 }
 
 export class Explorer extends React.Component<IExplorerProps, IExplorerState> {
+
     constructor() {
         super();
         this.state = {
@@ -67,16 +71,23 @@ export class Explorer extends React.Component<IExplorerProps, IExplorerState> {
         };
     }
 
+    componentDidMount() {
+        if (this.props.onDidMount) {
+            this.props.onDidMount(this);
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.props.onWillUnmount) {
+            this.props.onWillUnmount(this);
+        }
+    }
+
     render() {
         return <Treebeard
             data={this.state.rootNode!}
             onToggle={(node, toggled) => this.onToggle(node, toggled)}
             />;
-    }
-
-    componentDidMount(): void {
-        const workspace = this.props.workspace;
-        workspace.resolveFile('file://' + workspace.rootPath, 1).then(file => file && this.open(file));
     }
 
     open(file: File) {
@@ -95,15 +106,13 @@ export class Explorer extends React.Component<IExplorerProps, IExplorerState> {
             const index = parent.children.indexOf(node);
             parent.children[index] = new FileNode(file, parent);
             this.update();
-        } else {
-            this.open(file);
         }
     }
 
     expand(node: FileNode) {
-        if (!node.file.children) {
+        if (!node.file.children && this.props.onExpand) {
             node.loading = true;
-            this.props.workspace.resolveFile(node.file.uri, 1).then(file => {
+            this.props.onExpand(node.file).then(file => {
                 node.loading = false;
                 if (file) {
                     this.merge(node, file);
@@ -118,10 +127,14 @@ export class Explorer extends React.Component<IExplorerProps, IExplorerState> {
         }
         node.active = true;
 
-        if (node instanceof FileNode && node.file.directory) {
-            node.toggled = toggled;
-            if (toggled) {
-                this.expand(node);
+        if (node instanceof FileNode) {
+            if (node.file.directory) {
+                node.toggled = toggled;
+                if (toggled) {
+                    this.expand(node);
+                }
+            } else if (this.props.onOpen) {
+                this.props.onOpen(node.file);
             }
         }
 

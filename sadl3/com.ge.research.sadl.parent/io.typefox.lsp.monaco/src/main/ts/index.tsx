@@ -18,13 +18,12 @@ import {
 } from './utils/network';
 
 import {
-    Explorer
-} from './explorer/Explorer';
+    Explorer, ExplorerPart
+} from './explorer';
 
 import {
-    Editor
-} from './monaco/Editor';
-
+    Editor, EditorPart
+} from './editor';
 
 import * as React from 'react';
 import { render } from 'react-dom';
@@ -34,6 +33,10 @@ import * as SplitPane from 'react-split-pane';
 import {
     RemoteWorkspace
 } from './workspace';
+
+import {
+    IWorkbench, Workbench
+} from './workbench';
 
 const port = 8080;
 const basePath = 'sadlmonaco';
@@ -53,8 +56,27 @@ const supportedLanguages = [sadlLanguage];
 
 // TODO this should happen after the static monaco load in index.html
 // TODO remove window.onLoad()
-window.onload = () => {
+window.onload = activate;
+
+function activate(): void {
     registerLanguages(supportedLanguages);
+
+    let workbench: IWorkbench | null = null;
+    const explorerPart = new ExplorerPart();
+    const editorPart = new EditorPart();
+
+    const app = <SplitPane split='vertical' minSize={300}>
+        <Explorer
+            onDidMount={explorer => explorerPart.explorer = explorer}
+            onOpen={file => workbench!.open(file.uri)}
+            onExpand={file => workbench!.workspace.resolveFile(file.uri, 1)}
+            />
+        <Editor onEditorDidMount={e => editorPart.onEditorDidMount(e)}
+            onEditorWillUnmount={e => editorPart.onEditorWillUnmount(e)}
+            />
+    </SplitPane>
+    renderApp(app);
+
     getRootPath(rootPathProviderUrl).then(rootPath => {
         const { webSocket, connection } = createWebSocketConnection(languageServerUrl);
         webSocket.onopen = () => {
@@ -62,55 +84,14 @@ window.onload = () => {
             const languageClient = new LanguageClient(connection, supportedLanguages, rootPath);
             languageClient.start();
 
-            const app = <SplitPane split='vertical' minSize='300'>
-                <Explorer workspace={workspace} />
-                <Editor onEditorDidMount={e => onEditorDidMount(e, rootPath)}
-                    onEditorWillUnmount={onEditorWillUnmount} />
-            </SplitPane>
-            renderApp(app);
+            workbench = new Workbench({ workspace, explorerPart, editorPart });
+            workbench.openWorkspace();
         };
     });
 }
 
-function renderApp(app: JSX.Element) {
+function renderApp(app: JSX.Element, callback?: () => void) {
     const appContainer = document.createElement('app-container');
     document.body.appendChild(appContainer);
-    render(app, appContainer);
-}
-
-function onEditorDidMount(editor: monaco.editor.IStandaloneCodeEditor, rootPath: string) {
-    const updateDocument = () => {
-        const uri = editor.getModel().uri.toString();
-        const languageId = editor.getModel().getModeId();
-        workspace.update(uri, languageId, editor.getModel().getValue());
-    }
-    editor.onDidChangeModel(updateDocument)
-    editor.onDidChangeModelContent(updateDocument);
-
-    const model = monaco.editor.createModel(
-        getEditorInitContent(),
-        sadlLanguage.languageId,
-        monaco.Uri.parse('file://' + rootPath + '/dummy.' + sadlLanguage.fileExtensions[0])
-    );
-    editor.setModel(model);
-}
-
-function onEditorWillUnmount(editor: monaco.editor.IStandaloneCodeEditor) {
-    editor.getModel().dispose();
-}
-
-function getEditorInitContent(): string {
-    return `uri "http://sadl.org/dummy.sadl".
-
-Shape is a class described by area with values of type float.
-
-Rectangle is a type of Shape,
-	described by height with values of type float,
-	described by width with values of type float.
-
-Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
-
-MyRect is a Rectangle with height 2.5, with width 5.5.
-
-Test: area of MyRect is 13.75.`;
+    render(app, appContainer, callback);
 }

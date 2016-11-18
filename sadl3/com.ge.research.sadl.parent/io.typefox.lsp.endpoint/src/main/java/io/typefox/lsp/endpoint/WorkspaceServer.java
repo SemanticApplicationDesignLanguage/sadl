@@ -15,8 +15,10 @@ public interface WorkspaceServer {
 	 * 
 	 * @return
 	 *         <ol>
-	 *         <li>{@code null} if a file does not exist for {@link ResolveFileParams#uri params.uri}</li>
-	 *         <li>otherwise a file if {@link ResolveFileParams#uri params.uri} corresponds to an existing file</li>
+	 *         <li>{@code null} if a file does not exist for
+	 *         {@link ResolveFileParams#uri params.uri}</li>
+	 *         <li>otherwise a file if {@link ResolveFileParams#uri params.uri}
+	 *         corresponds to an existing file</li>
 	 *         <li>otherwise:
 	 *         <ol>
 	 *         <li>a directory if {@link ResolveFileParams#maxDepth
@@ -36,7 +38,16 @@ public interface WorkspaceServer {
 	@JsonRequest
 	CompletableFuture<File> resolveFile(ResolveFileParams params);
 
+	/**
+	 * <p>
+	 * Computes a file content for the given URI.
+	 * </p>
+	 * 
+	 * @return {@code null} if a file does exist for
+	 *         {@link ResolveFileContentParams#uri params.uri};
+	 *         otherwise a file content
+	 */
 	@JsonRequest
-	CompletableFuture<FileContent> resolveContent(ResolveContentParams params);
+	CompletableFuture<FileContent> resolveFileContent(ResolveFileContentParams params);
 
 }

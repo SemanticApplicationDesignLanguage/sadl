@@ -131,7 +131,7 @@ export class LanguageClient implements
 
     public start(): PromiseLike<void> {
         this._connection.onDispose(() => this.dispose());
-        this._connection.listen()
+        this._connection.listen();
 
         let initializeParams = this.getInitializeParams()
         return this._connection.sendRequest(protocol.InitializeRequest.type, initializeParams).then(initializeResult => {

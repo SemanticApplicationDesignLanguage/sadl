@@ -57,7 +57,7 @@ class ResolveFileParams {
 }
 
 @LanguageServerAPI
-class ResolveContentParams {
+class ResolveFileContentParams {
 	@NonNull
 	String uri
 }
