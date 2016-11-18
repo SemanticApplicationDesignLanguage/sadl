@@ -7,9 +7,15 @@ import * as protocol from 'vscode-languageclient/lib/protocol';
 import * as protocolConverter from './protocolConverter';
 import * as languageConverter from './languageConverter';
 
-import { LanguageDescription } from '../languages';
-import Workspace from './workspace';
+import {
+    LanguageDescription
+} from './languages';
 
+import {
+    IDocumentManager
+} from '../documentManager';
+
+// FIXME move to types module
 export class ColoringParams {
     uri: string;
     infos: ColoringInformation[];
@@ -20,6 +26,7 @@ export class ColoringInformation {
     styles: number[];
 }
 
+// FIXME move to coloring service
 export class ColoringIdToCssStyleMap {
     static map: Map<number, string> = new Map<number, string>([
         [27, 'default'],
@@ -36,11 +43,21 @@ export class ColoringIdToCssStyleMap {
     ]);
 }
 
+// FIXME move to protocol module
 class ColoringNotification {
     static type: NotificationType<ColoringParams, void> = {
         method: 'textDocument/updateColoring',
         _: undefined
     };
+}
+
+export namespace LanguageClient {
+    export interface Props {
+        readonly rootPath: string;
+        readonly connection: MessageConnection;
+        readonly languages: LanguageDescription[];
+        readonly documentManager: IDocumentManager;
+    }
 }
 
 export class LanguageClient implements
@@ -53,45 +70,38 @@ export class LanguageClient implements
     monaco.languages.CodeActionProvider,
     Disposable {
 
-    private _languages: LanguageDescription[];
-    private _connection: MessageConnection;
-    private _rootPath: string;
-
     private _capabilites: protocol.ServerCapabilities;
 
     private _disposables: Disposable[] = [];
     private _isDisposed: boolean;
 
-    constructor(connection: MessageConnection, languages: LanguageDescription[], rootPath: string) {
-        this._languages = languages
-        this._connection = connection
-        this._rootPath = rootPath
-
+    constructor(protected props: LanguageClient.Props) {
         let uriToDiagnosticMap = new Map<string, lstypes.Diagnostic[]>()
         // TODO: handle disposable
-        this._connection.onNotification(protocol.PublishDiagnosticsNotification.type, params => {
+        props.connection.onNotification(protocol.PublishDiagnosticsNotification.type, params => {
             let diagnostics = params.diagnostics
             uriToDiagnosticMap.set(params.uri, diagnostics)
             this.updateMarkers(params.uri, diagnostics)
         })
 
         let uriToColoringDecorationIdsMap = new Map<string, string[]>();
-        this._connection.onNotification(ColoringNotification.type, params => {
+        props.connection.onNotification(ColoringNotification.type, params => {
             let infos = params.infos;
             let uri = params.uri;
             this.updateColoringDecorators(uri, infos, uriToColoringDecorationIdsMap);
         });
 
-        this._connection.onDispose(params => {
+        props.connection.onDispose(params => {
             this.dispose();
         })
 
-        this._disposables.push(Workspace.onDidOpenTextDocument(textDocument => {
+        this._disposables.push(props.documentManager.onDidOpenTextDocument(textDocument => {
             let diagnostics = uriToDiagnosticMap.get(textDocument.uri)
             this.updateMarkers(textDocument.uri, diagnostics)
         }));
     }
 
+    // FIXME move to coloring service
     protected updateColoringDecorators(uri: string, infos: ColoringInformation[], uriToColoringDecorationIdsMap: Map<string, string[]>) {
         let modelUri = monaco.Uri.parse(uri)
         let model = monaco.editor.getModel(modelUri)
@@ -130,14 +140,14 @@ export class LanguageClient implements
     }
 
     public start(): PromiseLike<void> {
-        this._connection.onDispose(() => this.dispose());
-        this._connection.listen();
+        this.props.connection.onDispose(() => this.dispose());
+        this.props.connection.listen();
 
         let initializeParams = this.getInitializeParams()
-        return this._connection.sendRequest(protocol.InitializeRequest.type, initializeParams).then(initializeResult => {
+        return this.props.connection.sendRequest(protocol.InitializeRequest.type, initializeParams).then(initializeResult => {
             this._capabilites = initializeResult.capabilities;
             this.hookCapabilites();
-            Workspace.openAll();
+            this.props.documentManager.openAll();
         });
     }
 
@@ -160,7 +170,7 @@ export class LanguageClient implements
     protected getInitializeParams(): protocol.InitializeParams {
         return {
             processId: null,
-            rootPath: this._rootPath,
+            rootPath: this.props.rootPath,
             capabilities: {},
             initializationOptions: {}
         }
@@ -168,15 +178,15 @@ export class LanguageClient implements
 
     protected hookCapabilites(): void {
         if (this._capabilites.textDocumentSync !== protocol.TextDocumentSyncKind.None) {
-            this._disposables.push(Workspace.onDidOpenTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidOpenTextDocument(document))));
-            this._disposables.push(Workspace.onDidChangeTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidChangeTextDocument(document))));
-            this._disposables.push(Workspace.onDidSaveTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidSaveTextDocument(document))));
-            this._disposables.push(Workspace.onDidCloseTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidCloseTextDocument(document))));
+            this._disposables.push(this.props.documentManager.onDidOpenTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidOpenTextDocument(document))));
+            this._disposables.push(this.props.documentManager.onDidChangeTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidChangeTextDocument(document))));
+            this._disposables.push(this.props.documentManager.onDidSaveTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidSaveTextDocument(document))));
+            this._disposables.push(this.props.documentManager.onDidCloseTextDocument((t) => this.filterTextDocument(t, (document) => this.onDidCloseTextDocument(document))));
         }
         // TODO: move completion registration to below for loop once, TODOs are clarified.
         this.hookCompletionProvider()
 
-        for (let language of this._languages) {
+        for (let language of this.props.languages) {
             // hover
             if (this._capabilites.hoverProvider) {
                 this._disposables.push(monaco.languages.registerHoverProvider(language.languageId, this));
@@ -214,7 +224,7 @@ export class LanguageClient implements
         }
     }
 
-    // TODO necessary checks? workspace already checks document before fire
+    // TODO necessary checks? this.props.documentManager already checks document before fire
     protected filterTextDocument(textDocument: lstypes.TextDocument, acceptor: (textDocument: lstypes.TextDocument) => void) {
         if (is.undefined(textDocument)) {
             return;
@@ -230,7 +240,7 @@ export class LanguageClient implements
 
     protected onDidOpenTextDocument(textDocument: lstypes.TextDocument): void {
         const params = languageConverter.asDidOpenTextDocumentParams(textDocument);
-        this._connection.sendNotification(protocol.DidOpenTextDocumentNotification.type, params);
+        this.props.connection.sendNotification(protocol.DidOpenTextDocumentNotification.type, params);
     }
 
     protected onDidChangeTextDocument(textDocument: lstypes.TextDocument, contentChanges?: lstypes.TextDocumentContentChangeEvent[]): void {
@@ -242,22 +252,22 @@ export class LanguageClient implements
                 })
             }
         }
-        this._connection.sendNotification(protocol.DidChangeTextDocumentNotification.type, params);
+        this.props.connection.sendNotification(protocol.DidChangeTextDocumentNotification.type, params);
     }
 
     protected onDidSaveTextDocument(textDocument: lstypes.TextDocument): void {
         const params = languageConverter.asDidSaveTextDocumentParams(textDocument);
-        this._connection.sendNotification(protocol.DidSaveTextDocumentNotification.type, params);
+        this.props.connection.sendNotification(protocol.DidSaveTextDocumentNotification.type, params);
     }
 
     protected onDidCloseTextDocument(textDocument: lstypes.TextDocument): void {
         const params = languageConverter.asDidCloseTextDocumentParams(textDocument);
-        this._connection.sendNotification(protocol.DidCloseTextDocumentNotification.type, params);
+        this.props.connection.sendNotification(protocol.DidCloseTextDocumentNotification.type, params);
     }
 
     provideDefinition(model: monaco.editor.IReadOnlyModel, position: monaco.IPosition, token: monaco.CancellationToken): PromiseLike<monaco.languages.Location | monaco.languages.Location[]> {
         const params = languageConverter.asTextDocumentPositionParams(model.uri.toString(), position);
-        return this._connection.sendRequest(protocol.DefinitionRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.DefinitionRequest.type, params).then(
             protocolConverter.asLocation,
             error => Promise.resolve([])
         );
@@ -265,7 +275,7 @@ export class LanguageClient implements
 
     provideHover(model: monaco.editor.IReadOnlyModel, position: monaco.IPosition, token: monaco.CancellationToken) {
         const params = languageConverter.asTextDocumentPositionParams(model.uri.toString(), position);
-        return this._connection.sendRequest(protocol.HoverRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.HoverRequest.type, params).then(
             protocolConverter.asHover,
             error => Promise.resolve([])
         );
@@ -275,7 +285,7 @@ export class LanguageClient implements
         let params = languageConverter.asTextDocumentPositionParams(model.uri.toString(), position) as protocol.ReferenceParams;
         params.context = context;
 
-        return this._connection.sendRequest(protocol.ReferencesRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.ReferencesRequest.type, params).then(
             protocolConverter.asLocation,
             error => Promise.resolve([])
         );
@@ -288,7 +298,7 @@ export class LanguageClient implements
             },
             options: options
         }
-        return this._connection.sendRequest(protocol.DocumentFormattingRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.DocumentFormattingRequest.type, params).then(
             (edits) => edits.map(protocolConverter.asTextEdit),
             error => Promise.resolve([])
         )
@@ -301,7 +311,7 @@ export class LanguageClient implements
     provideSignatureHelp(model: monaco.editor.IReadOnlyModel, position: monaco.Position, token: monaco.CancellationToken): monaco.languages.SignatureHelp | Thenable<monaco.languages.SignatureHelp> {
         let params = languageConverter.asTextDocumentPositionParams(model.uri.toString(), position) as protocol.ReferenceParams;
 
-        return this._connection.sendRequest(protocol.SignatureHelpRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.SignatureHelpRequest.type, params).then(
             (help) => help as monaco.languages.SignatureHelp,
             error => Promise.resolve([])
         );
@@ -310,7 +320,7 @@ export class LanguageClient implements
     provideDocumentHighlights(model: monaco.editor.IReadOnlyModel, position: monaco.Position, token: monaco.CancellationToken): monaco.languages.DocumentHighlight[] | Thenable<monaco.languages.DocumentHighlight[]> {
         let params = languageConverter.asTextDocumentPositionParams(model.uri.toString(), position) as protocol.ReferenceParams;
 
-        return this._connection.sendRequest(protocol.DocumentHighlightRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.DocumentHighlightRequest.type, params).then(
             protocolConverter.asDocumentHighlight,
             error => Promise.resolve([])
         );
@@ -318,14 +328,14 @@ export class LanguageClient implements
 
     provideCodeLenses(model: monaco.editor.IReadOnlyModel, token: monaco.CancellationToken): monaco.languages.ICodeLensSymbol[] | Thenable<monaco.languages.ICodeLensSymbol[]> {
         let params = languageConverter.asCodeLensParams(model.uri.toString());
-        return this._connection.sendRequest(protocol.CodeLensRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.CodeLensRequest.type, params).then(
             protocolConverter.asCodeLens,
             error => Promise.resolve([])
         );
     }
 
     resolveCodeLens?(model: monaco.editor.IReadOnlyModel, codeLens: monaco.languages.ICodeLensSymbol, token: monaco.CancellationToken): monaco.languages.ICodeLensSymbol | Thenable<monaco.languages.ICodeLensSymbol> {
-        return this._connection.sendRequest(protocol.CodeLensResolveRequest.type, languageConverter.asCodeLens(codeLens)).then(
+        return this.props.connection.sendRequest(protocol.CodeLensResolveRequest.type, languageConverter.asCodeLens(codeLens)).then(
             protocolConverter.asCodeLens,
             error => Promise.resolve([])
         );
@@ -335,7 +345,7 @@ export class LanguageClient implements
         const uriOwner = model.uri.toString();
         const params = languageConverter.asCodeActionParams(uriOwner, range, context);
 
-        return this._connection.sendRequest(protocol.CodeActionRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.CodeActionRequest.type, params).then(
             protocolConverter.asCodeActions,
             error => Promise.resolve([])
         );
@@ -345,7 +355,7 @@ export class LanguageClient implements
         if (!this._capabilites.completionProvider) {
             return;
         }
-        for (let language of this._languages) {
+        for (let language of this.props.languages) {
             // TODO: handle disposable
             this._disposables.push(monaco.languages.registerCompletionItemProvider(language.languageId, {
                 triggerCharacters: this._capabilites.completionProvider.triggerCharacters,
@@ -358,7 +368,7 @@ export class LanguageClient implements
                 },
                 resolveCompletionItem: this._capabilites.completionProvider.resolveProvider ?
                     (item, token) => {
-                        return this._connection.sendRequest(protocol.CompletionResolveRequest.type, languageConverter.asCompletionItem(item)).then(
+                        return this.props.connection.sendRequest(protocol.CompletionResolveRequest.type, languageConverter.asCompletionItem(item)).then(
                             protocolConverter.asCompletionItem,
                             error => Promise.resolve(item)
                         )
@@ -369,7 +379,7 @@ export class LanguageClient implements
 
     protected completion(uri: string, position: monaco.IPosition, token: monaco.CancellationToken) {
         const params = languageConverter.asTextDocumentPositionParams(uri, position);
-        return this._connection.sendRequest(protocol.CompletionRequest.type, params).then(
+        return this.props.connection.sendRequest(protocol.CompletionRequest.type, params).then(
             protocolConverter.asCompletionList,
             error => Promise.resolve([])
         )
@@ -377,14 +387,14 @@ export class LanguageClient implements
 
     // TODO is this check really necessary? How could it happen?
     protected provideForOpened<T>(uri: string, provider: (uri: string) => PromiseLike<T>): PromiseLike<T> {
-        if (!Workspace.isOpened(uri)) {
+        if (!this.props.documentManager.isOpened(uri)) {
             return Promise.reject<T>(new Error(`A document for the given uri has not been opened yet, uri "${uri}"`));
         }
         return provider(uri);
     }
 
     protected isLanguageSupported(languageId: string): boolean {
-        return this._languages.map(l => l.languageId).indexOf(languageId) !== -1;
+        return this.props.languages.map(l => l.languageId).indexOf(languageId) !== -1;
     }
 
 }

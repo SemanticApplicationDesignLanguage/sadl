@@ -6,5 +6,4 @@ export interface File {
 
 export interface FileContent {
     readonly value: string;
-    readonly encoding: string;
 }

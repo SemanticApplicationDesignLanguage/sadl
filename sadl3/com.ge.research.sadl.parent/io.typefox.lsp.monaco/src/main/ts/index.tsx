@@ -2,7 +2,7 @@ import './style.css';
 import './resizer.css';
 
 import {
-    registerLanguages, LanguageClient, workspace, getRootPath
+    registerLanguages, LanguageClient, getRootPath
 } from './client';
 
 import {
@@ -38,6 +38,10 @@ import {
     IWorkbench, Workbench
 } from './workbench';
 
+import {
+    DocumentManager
+} from './documentManager';
+
 const port = 8080;
 const basePath = 'sadlmonaco';
 
@@ -52,24 +56,26 @@ const languageServerUrl = new URL({
     path: 'languageServer'
 });
 
-const supportedLanguages = [sadlLanguage];
+const languages = [sadlLanguage];
 
 // TODO this should happen after the static monaco load in index.html
 // TODO remove window.onLoad()
 window.onload = activate;
 
 function activate(): void {
-    registerLanguages(supportedLanguages);
+    registerLanguages(languages);
+
+    const documentManager = new DocumentManager();
 
     let workbench: IWorkbench | null = null;
     const explorerPart = new ExplorerPart();
-    const editorPart = new EditorPart();
+    const editorPart = new EditorPart({ documentManager });
 
     const app = <SplitPane split='vertical' minSize={300}>
         <Explorer
             onDidMount={explorer => explorerPart.explorer = explorer}
             onOpen={file => workbench!.open(file.uri)}
-            onExpand={file => workbench!.workspace.resolveFile(file.uri, 1)}
+            onExpand={file => workbench!.props.workspace.resolveFile(file.uri, 1)}
             />
         <Editor onEditorDidMount={e => editorPart.onEditorDidMount(e)}
             onEditorWillUnmount={e => editorPart.onEditorWillUnmount(e)}
@@ -81,10 +87,14 @@ function activate(): void {
         const { webSocket, connection } = createWebSocketConnection(languageServerUrl);
         webSocket.onopen = () => {
             const workspace = new RemoteWorkspace({ rootPath, connection });
-            const languageClient = new LanguageClient(connection, supportedLanguages, rootPath);
+            const languageClient = new LanguageClient({
+                documentManager, connection, languages, rootPath
+            });
             languageClient.start();
 
-            workbench = new Workbench({ workspace, explorerPart, editorPart });
+            workbench = new Workbench({
+                workspace, documentManager, explorerPart, editorPart
+            });
             workbench.openWorkspace();
         };
     });

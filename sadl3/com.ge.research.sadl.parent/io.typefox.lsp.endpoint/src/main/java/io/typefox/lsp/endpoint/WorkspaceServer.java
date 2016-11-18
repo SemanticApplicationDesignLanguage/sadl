@@ -49,5 +49,13 @@ public interface WorkspaceServer {
 	 */
 	@JsonRequest
 	CompletableFuture<FileContent> resolveFileContent(ResolveFileContentParams params);
+	
+	/**
+	 * <p>
+	 * Updates a file content for the given URI.
+	 * </p>
+	 */
+	@JsonRequest
+	CompletableFuture<Void> updateFileContent(UpdateFileContentParams params);
 
 }

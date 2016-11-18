@@ -3,6 +3,10 @@ import {
 } from '../workspace';
 
 import {
+    IDocumentManager
+} from '../documentManager';
+
+import {
     IEditorPart
 } from '../editor';
 
@@ -11,38 +15,46 @@ import {
 } from '../explorer';
 
 export interface IWorkbench {
-    readonly workspace: IWorkspace
+    readonly props: IWorkbench.Props
     openWorkspace(): void;
     open(uri: string): void;
 }
 
+export namespace IWorkbench {
+    export interface Props {
+        readonly workspace: IWorkspace;
+        readonly documentManager: IDocumentManager;
+        readonly explorerPart: IExplorerPart;
+        readonly editorPart: IEditorPart;
+    }
+}
+
+
 export class Workbench implements IWorkbench {
 
-    constructor(protected props: Workbench.Props) { }
+    constructor(readonly props: IWorkbench.Props) {
+        this.updateFileContentOnDocumentSave();
+    }
 
-    get workspace() {
-        return this.props.workspace;
+    protected updateFileContentOnDocumentSave() {
+        this.props.documentManager.onDidSaveTextDocument(document => {
+            this.props.workspace.updateFileContent(document.uri, {
+                value: document.getText()
+            });
+        });
     }
 
     openWorkspace(): void {
-        const uri = 'file://' + this.workspace.rootPath
-        this.workspace.resolveFile(uri, 1).then(
+        const uri = 'file://' + this.props.workspace.rootPath
+        this.props.workspace.resolveFile(uri, 1).then(
             file => this.props.explorerPart.open(file)
         );
     }
 
     open(uri: string): void {
-        this.workspace.resolveContent(uri).then(
+        this.props.workspace.resolveFileContent(uri).then(
             content => this.props.editorPart.open(uri, content)
         );
     }
 
-}
-
-export namespace Workbench {
-    export interface Props {
-        readonly workspace: IWorkspace;
-        readonly explorerPart: IExplorerPart;
-        readonly editorPart: IEditorPart;
-    }
 }

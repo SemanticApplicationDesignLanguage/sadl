@@ -34,9 +34,6 @@ class FileContent {
 	@NotNull
 	String value
 
-	@NotNull
-	String encoding
-
 }
 
 @LanguageServerAPI
@@ -60,4 +57,15 @@ class ResolveFileParams {
 class ResolveFileContentParams {
 	@NonNull
 	String uri
+}
+
+@LanguageServerAPI
+class UpdateFileContentParams {
+	
+	@NonNull
+	String uri
+	
+	@NonNull
+	FileContent content
+	
 }

@@ -1,6 +1,6 @@
 import {
     ILanguage, registerLanguage
-} from '../../monaco/languages';
+} from '../monaco/languages';
 
 export interface LanguageDescription {
     languageId: string

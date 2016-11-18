@@ -3,8 +3,8 @@ import {
 } from '../workspace';
 
 import {
-    workspace
-} from '../client/protocol/workspace';
+    IDocumentManager
+} from '../documentManager';
 
 import {
     findLanguageIdByURI
@@ -14,16 +14,24 @@ export interface IEditorPart {
     open(uri: string, fileContent: FileContent | null): void;
 }
 
+export namespace EditorPart {
+    export interface Props {
+        readonly documentManager: IDocumentManager;
+    }
+}
+
 export class EditorPart implements IEditorPart {
 
     protected model: monaco.editor.IModel | null;
     protected editor: monaco.editor.IStandaloneCodeEditor | null;
 
+    constructor(protected props: EditorPart.Props) { }
+
     onEditorDidMount(editor: monaco.editor.IStandaloneCodeEditor) {
         this.editor = editor;
         editor.onDidChangeModel(e => {
             if (e.oldModelUrl) {
-                workspace.close(e.oldModelUrl.toString());
+                this.props.documentManager.close(e.oldModelUrl.toString());
             }
             if (this.editor) {
                 this.updateDocument();
@@ -43,10 +51,12 @@ export class EditorPart implements IEditorPart {
     protected updateDocument() {
         const editor = this.editor;
         if (editor) {
-            const uri = editor.getModel().uri;
-            if (uri) {
+            const modelUri = editor.getModel().uri;
+            if (modelUri) {
+                const uri = modelUri.toString();
                 const languageId = editor.getModel().getModeId();
-                workspace.update(uri.toString(), languageId, editor.getModel().getValue());
+                this.props.documentManager.update(uri, languageId, editor.getModel().getValue());
+                this.props.documentManager.save(uri);
             }
         }
     }
@@ -58,7 +68,7 @@ export class EditorPart implements IEditorPart {
                 if (oldModel.uri.toString() === uri) {
                     oldModel.setValue(fileContent.value);
                 } else {
-                    const languageId = findLanguageIdByURI(uri)!;
+                    const languageId = findLanguageIdByURI(uri) !;
                     this.updateModel(fileContent.value, languageId, uri);
                 }
             } else {

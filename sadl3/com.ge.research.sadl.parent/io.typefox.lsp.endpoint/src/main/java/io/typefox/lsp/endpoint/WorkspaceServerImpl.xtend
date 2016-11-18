@@ -35,7 +35,7 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 	val LanguageServer languageServer
 
 	val ScheduledExecutorService executorService
-	
+
 	WorkspaceClient client
 
 	new(LanguageServer languageServer) {
@@ -43,7 +43,7 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 
 		this.fileManager = new FileManager
 		fileManager.eventEmitter = [
-			new DidChangeWatchedFilesEvent[ params |
+			new DidChangeWatchedFilesEvent [ params |
 				languageServer.workspaceService.didChangeWatchedFiles(params)
 				client?.didChangeWatchedFiles(params)
 			]
@@ -97,11 +97,21 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 			if (path.regularFile) {
 				val charset = Charset.defaultCharset
 				val bytes = path.readAllBytes
-				
+
 				val content = new FileContent
 				content.value = new String(bytes, charset)
-				content.encoding = charset.name
 				return content
+			}
+			return null
+		]
+	}
+
+	override updateFileContent(UpdateFileContentParams params) {
+		return CompletableFutures.computeAsync [ cancelChecker |
+			val path = params.uri.toPath
+			if (path.regularFile) {
+				val bytes = params.content.value.bytes;
+				path.write(bytes);
 			}
 			return null
 		]

@@ -6,56 +6,62 @@ import {
     Event, Emitter
 } from 'vscode-jsonrpc/lib/events';
 
-export class Workspace {
+export interface IDocumentManager {
+    onDidOpenTextDocument: Event<TextDocument>;
+    onDidChangeTextDocument: Event<TextDocument>;
+    onDidSaveTextDocument: Event<TextDocument>;
+    onDidCloseTextDocument: Event<TextDocument>;
 
-    isDisposed: boolean = false;
+    isOpened(uri: string): boolean;
+    getContent(uri: string): string | null;
+    getLanguage(uri: string): string | null;
+
+    open(uri: string, language: string, content: string): void;
+    setContent(uri: string, content: string): void;
+    update(uri: string, language: string, content: string): void;
+    rename(oldUri: string, newUri: string, language: string): void;
+    save(uri: string): void;
+    close(uri: string): void;
+
+    getAll(): string[];
+    openAll(): void;
+    saveAll(): void;
+    closeAll(): void;
+}
+
+export class DocumentManager implements IDocumentManager {
 
     private onDidOpenTextDocumentEmitter = new Emitter<TextDocument>();
-    onDidOpenTextDocument = this.onDidOpenTextDocumentEmitter.event;
+    readonly onDidOpenTextDocument = this.onDidOpenTextDocumentEmitter.event;
 
     private onDidChangeTextDocumentEmitter = new Emitter<TextDocument>();
-    onDidChangeTextDocument = this.onDidChangeTextDocumentEmitter.event;
+    readonly onDidChangeTextDocument = this.onDidChangeTextDocumentEmitter.event;
 
     private onDidSaveTextDocumentEmitter = new Emitter<TextDocument>();
-    onDidSaveTextDocument = this.onDidSaveTextDocumentEmitter.event;
+    readonly onDidSaveTextDocument = this.onDidSaveTextDocumentEmitter.event;
 
     private onDidCloseTextDocumentEmitter = new Emitter<TextDocument>();
-    onDidCloseTextDocument = this.onDidCloseTextDocumentEmitter.event;
+    readonly onDidCloseTextDocument = this.onDidCloseTextDocumentEmitter.event;
 
-    private _documents: { [uri: string]: TextDocument } = {}
-
-    dispose() {
-        if (this.isDisposed) {
-            return;
-        }
-        this.isDisposed = true;
-        this.closeAll();
-        this._documents = null;
-
-        this.onDidOpenTextDocumentEmitter.dispose();
-        this.onDidOpenTextDocumentEmitter = null;
-        this.onDidOpenTextDocument = null;
-
-        this.onDidChangeTextDocumentEmitter.dispose();
-        this.onDidChangeTextDocumentEmitter = null;
-        this.onDidChangeTextDocument = null;
-
-        this.onDidSaveTextDocumentEmitter.dispose();
-        this.onDidSaveTextDocumentEmitter = null;
-        this.onDidSaveTextDocument = null;
-
-        this.onDidCloseTextDocumentEmitter.dispose();
-        this.onDidCloseTextDocumentEmitter = null;
-        this.onDidCloseTextDocument = null;
-    }
+    private _documents: { [uri: string]: TextDocument | null } = {};
 
     isOpened(uri: string) {
         const document = this._documents[uri];
         return document !== null && document !== undefined;
     }
 
-    open(uri: string, languageId: string, content: string) {
-        if (this.createDocument(uri, languageId, content)) {
+    getContent(uri: string) {
+        const document = this._documents[uri];
+        return document ? document.getText() : null;
+    }
+
+    getLanguage(uri: string): string | null {
+        const document = this._documents[uri];
+        return document ? document.languageId : null;
+    }
+
+    open(uri: string, language: string, content: string) {
+        if (this.createDocument(uri, language, content)) {
             this.fireOpen(uri);
         }
     }
@@ -66,19 +72,19 @@ export class Workspace {
         }
     }
 
-    update(uri: string, languageId: string, content: string) {
+    update(uri: string, language: string, content: string) {
         if (this.isOpened(uri)) {
             this.setContent(uri, content);
         } else {
-            this.open(uri, languageId, content);
+            this.open(uri, language, content);
         }
     }
 
-    rename(oldUri: string, newUri: string, languageId: string) {
-        if (this.isOpened(oldUri)) {
-            const document = this._documents[oldUri];
+    rename(oldUri: string, newUri: string, language: string) {
+        const document = this._documents[oldUri];
+        if (document) {
             this.close(oldUri);
-            this.open(newUri, languageId, document.getText());
+            this.open(newUri, language, document!.getText());
         }
     }
 
@@ -91,14 +97,13 @@ export class Workspace {
         delete this._documents[uri];
     }
 
-    allOpened() {
-        return this._documents;
+    getAll() {
+        return Object.keys(this._documents);
     }
 
     openAll(): void {
-        const allOpened = this.allOpened();
-        for (const uri in allOpened) {
-            if (allOpened.hasOwnProperty(uri)) {
+        for (const uri in this._documents) {
+            if (this._documents.hasOwnProperty(uri)) {
                 this.fireOpen(uri);
             }
         }
@@ -120,11 +125,11 @@ export class Workspace {
         }
     }
 
-    protected createDocument(uri: string, languageId: string, content: string): boolean {
+    protected createDocument(uri: string, language: string, content: string): boolean {
         if (this.isOpened(uri)) {
             return false;
         }
-        this._documents[uri] = TextDocument.create(uri, languageId, 1, content);
+        this._documents[uri] = TextDocument.create(uri, language, 1, content);
         return true;
     }
 
@@ -169,7 +174,3 @@ export class Workspace {
     }
 
 }
-
-// FIXME: move workspace out of protocol
-export const workspace = new Workspace();
-export default workspace;

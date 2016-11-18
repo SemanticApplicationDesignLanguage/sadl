@@ -32,3 +32,17 @@ export namespace ResolveFileContentRequest {
         _: undefined
     }
 }
+
+export interface UpdateFileContentParams {
+    uri: string;
+    content: FileContent;
+}
+
+export namespace UpdateFileContentRequest {
+    export const type: RequestType<UpdateFileContentParams, void, void, void> = {
+        get method() {
+            return 'workspace/updateFileContent'
+        },
+        _: undefined
+    }
+}

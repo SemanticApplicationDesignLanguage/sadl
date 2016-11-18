@@ -3,17 +3,18 @@ import {
 } from './types';
 
 import {
-    ResolveFileRequest, ResolveFileContentRequest
+    ResolveFileRequest, ResolveFileContentRequest, UpdateFileContentRequest
 } from './protocol';
 
 import {
     MessageConnection
-} from 'vscode-jsonrpc'
+} from 'vscode-jsonrpc';
 
 export interface IWorkspace {
     readonly rootPath: string;
     resolveFile(uri: string, maxDepth?: number): PromiseLike<File | null>;
-    resolveContent(uri: string): PromiseLike<FileContent | null>;
+    resolveFileContent(uri: string): PromiseLike<FileContent | null>;
+    updateFileContent(uri: string, content: FileContent): PromiseLike<void>;
 }
 
 export class RemoteWorkspace implements IWorkspace {
@@ -29,9 +30,14 @@ export class RemoteWorkspace implements IWorkspace {
         return this.props.connection.sendRequest(ResolveFileRequest.type, params);
     }
 
-    resolveContent(uri: string): PromiseLike<FileContent | null> {
+    resolveFileContent(uri: string): PromiseLike<FileContent | null> {
         const params = { uri };
         return this.props.connection.sendRequest(ResolveFileContentRequest.type, params);
+    }
+
+    updateFileContent(uri: string, content: FileContent): PromiseLike<void> {
+        const params = { uri, content };
+        return this.props.connection.sendRequest(UpdateFileContentRequest.type, params);
     }
 
 }
