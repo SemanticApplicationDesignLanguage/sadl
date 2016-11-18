@@ -22,6 +22,7 @@ import com.ge.research.sadl.ide.lsp.inference.InferenceResult
 import com.google.inject.ImplementedBy
 import java.util.List
 import java.util.concurrent.CompletableFuture
+import org.eclipse.lsp4j.jsonrpc.json.JsonRpcMethodProvider
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
 
@@ -31,7 +32,7 @@ import org.eclipse.xtext.ide.server.ILanguageServerExtension
  * @author akos.kitta
  */
 @ImplementedBy(SadlLanguageServerExtension)
-interface ISadlLanguageServerExtension extends ILanguageServerExtension {
+interface ISadlLanguageServerExtension extends ILanguageServerExtension, JsonRpcMethodProvider {
 
 	/**
 	 * Calculates and returns with a list of inferencer results for a text document.
@@ -40,7 +41,7 @@ interface ISadlLanguageServerExtension extends ILanguageServerExtension {
 	 * 
 	 * @return a list of inferencer results. Could be empty but never {@code null}.
 	 */
-	@JsonRequest
+	@JsonRequest('sadl/inferenceResults')
 	def CompletableFuture<List<? extends InferenceResult>> getInferenceResults(InferenceParams param);
 
 }

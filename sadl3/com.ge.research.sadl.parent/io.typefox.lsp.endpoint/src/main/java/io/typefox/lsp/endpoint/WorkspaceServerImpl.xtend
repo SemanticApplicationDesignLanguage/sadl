@@ -23,7 +23,7 @@ import org.eclipse.xtend.lib.annotations.Delegate
 
 import static extension java.nio.file.Files.*
 
-class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRpcMethodProvider, WorkspaceServer {
+class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRpcMethodProvider, WorkspaceServer, Endpoint {
 
 	val static DELAY = 500
 
@@ -148,6 +148,18 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 			supportedMethods.putAll(languageServer.supportedMethods)
 		}
 		return supportedMethods
+	}
+	
+	override notify(String method, Object parameter) {
+		if (languageServer instanceof Endpoint) {
+			languageServer.notify(method, parameter);
+		}
+	}
+	
+	override request(String method, Object parameter) {
+		if (languageServer instanceof Endpoint) {
+			languageServer.request(method, parameter);
+		}
 	}
 
 }

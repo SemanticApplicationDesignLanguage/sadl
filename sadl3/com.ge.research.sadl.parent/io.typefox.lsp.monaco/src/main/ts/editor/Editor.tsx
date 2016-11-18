@@ -12,7 +12,7 @@ export class Editor extends React.Component<EditorProps, {}> {
 
     render() {
         const style = {
-            height: '100%'
+            height: '600px'
         };
         return <div style={style} />;
     }

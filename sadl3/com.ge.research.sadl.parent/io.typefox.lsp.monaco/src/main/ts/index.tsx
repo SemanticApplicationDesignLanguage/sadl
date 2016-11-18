@@ -6,7 +6,7 @@ import {
 } from './client';
 
 import {
-    sadlLanguage
+    sadlLanguage, InferenceEditorService, InferenceResultProvider
 } from './sadl';
 
 import {
@@ -70,6 +70,7 @@ function activate(): void {
     let workbench: IWorkbench | null = null;
     const explorerPart = new ExplorerPart();
     const editorPart = new EditorPart({ documentManager });
+    const inferenceEditorService = new InferenceEditorService();
 
     const app = <SplitPane split='vertical' minSize={300}>
         <Explorer
@@ -77,7 +78,10 @@ function activate(): void {
             onOpen={file => workbench!.open(file.uri)}
             onExpand={file => workbench!.props.workspace.resolveFile(file.uri, 1)}
             />
-        <Editor onEditorDidMount={e => editorPart.onEditorDidMount(e)}
+        <Editor onEditorDidMount={editor => {
+            editorPart.onEditorDidMount(editor);
+            inferenceEditorService.editor = editor;
+        }}
             onEditorWillUnmount={e => editorPart.onEditorWillUnmount(e)}
             />
     </SplitPane>
@@ -91,6 +95,8 @@ function activate(): void {
                 documentManager, connection, languages, rootPath
             });
             languageClient.start();
+
+            inferenceEditorService.provider = new InferenceResultProvider(connection);
 
             workbench = new Workbench({
                 workspace, documentManager, explorerPart, editorPart

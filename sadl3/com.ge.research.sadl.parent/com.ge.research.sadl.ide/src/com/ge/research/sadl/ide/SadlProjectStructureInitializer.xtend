@@ -42,6 +42,7 @@ class SadlProjectStructureInitializer {
 	 */
 	public static val DOT_PROJECT_FILENAME = '.project';
 	
+	static val SAMPLE_FILENAME = '''Samle.sadl''';
 	static val OWL_BASE_MODEL_FILENAME = '''«SADL_BASE_MODEL_FILENAME».owl''';
 
 	static val IMPLICIT_MODEL_CONTENT = '''
@@ -100,6 +101,24 @@ class SadlProjectStructureInitializer {
 		  </owl:DatatypeProperty>
 		</rdf:RDF>	
 	''';
+	
+	static val SAMPLE_FILE_CONTENT = '''
+		uri "http://sadl.org/«SAMPLE_FILENAME»".
+		
+		Shape is a class described by area with values of type float.
+		
+		Rectangle is a type of Shape,
+			described by height with values of type float,
+			described by width with values of type float.
+		
+		Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
+		
+		MyRect is a Rectangle with height 2.5, with width 5.5.
+		
+		Test: area of MyRect is 14.75.
+		
+		Test: area of MyRect is 13.75.
+	'''
 
 	@Inject
 	DotProjectContentProvider dotProjectContentProvider;
@@ -116,6 +135,7 @@ class SadlProjectStructureInitializer {
 		// This is just a hack to be able to locate the project root and 
 		// the implicit model folder in a web project as well. 
 		projectRoot.createDotProjectFileIfMissing;
+		projectRoot.createSampleFileIfMissing;
 
 		val implicitModelRoot = projectRoot.resolve(SADL_IMPLICIT_MODEL_FOLDER);
 		if (!implicitModelRoot.toFile.exists) {
@@ -162,6 +182,10 @@ class SadlProjectStructureInitializer {
 	def void createDotProjectFileIfMissing(Path projectRoot) {
 		val projectName = projectRoot.toFile.name;
 		projectRoot.createFileIfMissing(DOT_PROJECT_FILENAME, dotProjectContentProvider.getContent(projectName));
+	}
+	
+	def void createSampleFileIfMissing(Path projectRoot) {
+		projectRoot.createFileIfMissing(SAMPLE_FILENAME, SAMPLE_FILE_CONTENT);	
 	}
 
 	private def void createOntologyPolicyRdfFileIfMissing(Path owlModelsRoot) {

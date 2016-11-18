@@ -20,10 +20,12 @@ package com.ge.research.sadl.ide.lsp.^extension
 import com.ge.research.sadl.ide.lsp.inference.InferenceParams
 import com.ge.research.sadl.ide.lsp.inference.SadlInferencer
 import com.google.inject.Inject
+import org.eclipse.lsp4j.jsonrpc.services.ServiceEndpoints
 import org.eclipse.xtext.ide.server.ILanguageServerAccess
 import org.eclipse.xtext.resource.XtextResource
 
 import static java.util.Collections.emptyMap
+import static extension java.util.Collections.unmodifiableMap
 
 /**
  * {@code SADL} language server extension implementation.
@@ -53,6 +55,11 @@ class SadlLanguageServerExtension implements ISadlLanguageServerExtension {
 				}
 			}
 		];
+	}
+	
+	@Override
+	override supportedMethods() {
+		return ServiceEndpoints.getSupportedMethods(ISadlLanguageServerExtension).unmodifiableMap;
 	}
 
 }

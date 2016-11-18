@@ -98,7 +98,7 @@ class SadlInferencer {
 	private def toPath(URI it) {
 		val uri = it.toString;
 		Preconditions.checkState(uri.startsWith(URI_PREFIX), '''URI must start with «URI_PREFIX». URI was: «it».''');
-		val path = Paths.get(uri.substring(URI_PREFIX.length));
+		val path = Paths.get(uri.substring(URI_PREFIX.length - 1));
 		Preconditions.checkState(path.toFile.exists, '''Resource does not exist under «path». URI was: «it».''');
 		return path;
 	}

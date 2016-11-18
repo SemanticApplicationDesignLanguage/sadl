@@ -22,7 +22,7 @@ import org.eclipse.lsp4j.generator.LanguageServerAPI
 import org.eclipse.lsp4j.jsonrpc.validation.NonNull
 
 /**
- * Parameter, sent by the client which invokes the {@code SADL} inferencer.
+ * Parameter used for invoking the {@code SADL} inferencer.
  */
 @LanguageServerAPI
 class InferenceParams {
