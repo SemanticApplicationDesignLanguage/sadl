@@ -37,7 +37,11 @@ import static extension com.google.common.base.Preconditions.*
 @Singleton
 class SadlProjectStructureInitializer {
 
-	static val DOT_PROJECT_FILENAME = '.project';
+	/**
+	 * The file name of the {@code .project} file that is available in the project root.
+	 */
+	public static val DOT_PROJECT_FILENAME = '.project';
+	
 	static val OWL_BASE_MODEL_FILENAME = '''«SADL_BASE_MODEL_FILENAME».owl''';
 
 	static val IMPLICIT_MODEL_CONTENT = '''

@@ -46,6 +46,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.nodemodel.ICompositeNode;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
@@ -1145,6 +1147,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				Expression expr = tests.get(tidx);
 				// we know it's a Test so create one and set as translation target
 				Test test = new Test();
+				final ICompositeNode node = NodeModelUtils.findActualNodeFor(expr);
+				if (node != null) {
+					test.setOffset(node.getOffset());
+					test.setLength(node.getLength());
+				}
 				setTarget(test);
 	
 				// now translate the test expression
