@@ -1,0 +1,8 @@
+dependencies {
+	compile project(":com.ge.research.jena")
+	compile project(":com.ge.research.sadl")
+	compile project(":com.ge.research.sadl.jena")
+}
+
+eclipseClasspath.enabled=false
+cleanEclipseClasspath.enabled=false

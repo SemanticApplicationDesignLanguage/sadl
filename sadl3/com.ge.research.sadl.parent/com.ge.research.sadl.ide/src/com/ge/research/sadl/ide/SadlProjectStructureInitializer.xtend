@@ -42,7 +42,7 @@ class SadlProjectStructureInitializer {
 	 */
 	public static val DOT_PROJECT_FILENAME = '.project';
 	
-	static val SAMPLE_FILENAME = '''Samle.sadl''';
+	static val SAMPLE_FILENAME = '''Sample.sadl''';
 	static val OWL_BASE_MODEL_FILENAME = '''«SADL_BASE_MODEL_FILENAME».owl''';
 
 	static val IMPLICIT_MODEL_CONTENT = '''

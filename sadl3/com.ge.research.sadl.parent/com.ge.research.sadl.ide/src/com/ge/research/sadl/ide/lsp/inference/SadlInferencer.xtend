@@ -111,7 +111,8 @@ class SadlInferencer {
 			Preconditions.checkState(path !== null, '''Cannot locate conatiner project path for «it».''');
 			dotProjectPath = path.resolve(DOT_PROJECT_FILENAME);
 		}
-		return dotProjectPath;
+		val projectPath = dotProjectPath.parent;
+		return Preconditions.checkNotNull(projectPath, '''Cannot locate conatiner project path for «it».''');
 	}
 
 }

@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ServiceLoader;
 import java.util.StringTokenizer;
 
 import org.apache.xerces.util.XMLChar;
@@ -65,7 +66,6 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.FileUtils;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 /**
@@ -381,7 +381,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	public IReasoner getOtherReasoner(String reasonerClassName) throws ConfigurationException {
 		IReasoner otherReasoner = null;
 		try {
-			otherReasoner = (IReasoner) getClassInstance(reasonerClassName);
+			otherReasoner = getClassInstance(reasonerClassName, IReasoner.class);
 			otherReasoner.setConfigurationManager(this);
 			if (getConfigModel() != null) {
 				// first apply configuration for the reasoner family
@@ -538,7 +538,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	private ITranslator getTranslatorInstanceByClass(String translatorClassName) throws ConfigurationException {
 		ITranslator translatorClass = null;
 		try {
-			translatorClass = (ITranslator) getClassInstance(translatorClassName);
+			translatorClass = getClassInstance(translatorClassName, ITranslator.class);
 			if (translatorClass == null) {
 				throw new ConfigurationException("Unable to instantiate Translator '" + translatorClassName + "'");
 			}
@@ -589,7 +589,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			reasonerClassName = DEFAULT_REASONER;
 		}
 		try {
-			reasoner = (IReasoner) getClassInstance(reasonerClassName);
+			reasoner = getClassInstance(reasonerClassName, IReasoner.class);
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 			throw new ConfigurationException("Unable to instantiate Reasoner '" + reasonerClassName + "'", e);
@@ -621,10 +621,27 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws ClassNotFoundException
 	 * 
 	 */
-	public Object getClassInstance(String className)
+	public <T> T getClassInstance(String name, Class<? extends T> clazz)
 			throws InstantiationException, IllegalAccessException,
 			ClassNotFoundException {
-		return this.getClass().getClassLoader().loadClass(className).newInstance();
+
+		if (name == null) {
+			throw new NullPointerException("Service class name cannot be null.");
+		}
+		
+		if (clazz == null) {
+			throw new NullPointerException("Service class API (inertface / abstract class) cannot be null.");
+		}
+		
+		final Iterator<? extends T> itr = ServiceLoader.load(clazz).iterator();
+		while (itr.hasNext()) {
+			T service = itr.next();
+			if (name.equals(service.getClass().getName())) {
+				return service;
+			}
+		}
+		
+		throw new ClassNotFoundException("Cannot find service class for name: " + name + " for service API " + clazz + ".");
 	}
 
 	private void applyConfigurationToReasoner(IReasoner theReasoner, Resource category) throws ConfigurationException {
@@ -1594,7 +1611,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			reasonerClassName = DEFAULT_REASONER;
 		}
 		try {
-			cloneReasonerInstance = (IReasoner) getClassInstance(reasonerClassName);
+			cloneReasonerInstance = getClassInstance(reasonerClassName, IReasoner.class);
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 			throw new ConfigurationException("Unable to instantiate Reasoner '" + reasonerClassName + "'", e);

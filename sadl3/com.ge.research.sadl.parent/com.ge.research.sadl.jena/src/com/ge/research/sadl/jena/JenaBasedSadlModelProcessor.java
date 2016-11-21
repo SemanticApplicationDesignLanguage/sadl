@@ -39,11 +39,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
@@ -61,6 +63,7 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.external.ExternalEmfResource;
+import com.ge.research.sadl.jena.OntModelProvider.OntModelAdapter;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptName;
@@ -371,7 +374,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				String modelFolder = getModelFolderPath(resource);
 				SadlUtils su = new SadlUtils();
 				String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fsa.isFile(fn)) {
+				if (!fileExists(fsa, fn)) {
 					sadlBaseModel = OntModelProvider.getSadlBaseModel();
 					if(sadlBaseModel != null) {
 						RDFWriter w2 = sadlBaseModel.getWriter(format);
@@ -388,7 +391,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 				fn = SadlConstants.SADL_LIST_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fsa.isFile(fn)) {
+				if (!fileExists(fsa, fn)) {
 					sadlListModel = OntModelProvider.getSadlListModel();
 					if(sadlListModel != null) {
 						RDFWriter w2 = sadlListModel.getWriter(format);
@@ -405,7 +408,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 				fn = SadlConstants.SADL_DEFAULTS_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fsa.isFile(fn)) {
+				if (!fileExists(fsa, fn)) {
 					sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
 					if(sadlDefaultsModel != null) {
 						RDFWriter w2 = sadlDefaultsModel.getWriter(format);
@@ -460,6 +463,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		generationInProgress   = false;
 	   	logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
+	}
+	
+	// akitta: get rid of this hack once https://github.com/eclipse/xtext-core/issues/180 is fixed
+	private boolean fileExists(IFileSystemAccess2 fsa, String fileName) {
+		try {
+			return fsa.isFile(fileName);
+		} catch (Exception e) {
+			return false;
+		}
 	}
 	
 	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType, List<String[]> newMappings) {

@@ -1,5 +1,4 @@
 dependencies {
-	compile "org.eclipse.xtext:org.eclipse.xtext.xtext:$versions.xtext"
 	compile files("lib/commons-codec.jar")
 	compile files("lib/commons-csv.jar")
 	compile files("lib/commons-lang3.jar")

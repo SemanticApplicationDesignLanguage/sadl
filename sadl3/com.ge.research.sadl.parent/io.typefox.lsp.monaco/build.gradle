@@ -51,7 +51,10 @@ repositories {
 dependencies {
 	compile project(":io.typefox.lsp.endpoint")
 	compile project(":com.ge.research.sadl")
+	compile project(":com.ge.research.jena")
+	compile project(":com.ge.research.sadl.jena")
 	compile project(":com.ge.research.sadl.ide")
+	compile project(":com.ge.research.sadl.jena-wrapper-for-sadl")
 	compile "org.slf4j:slf4j-api:$versions.slf4j"
 	compile "org.glassfish.jersey.core:jersey-server:$versions.jerseyServer"
 	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$versions.jerseyServletContainerCore"

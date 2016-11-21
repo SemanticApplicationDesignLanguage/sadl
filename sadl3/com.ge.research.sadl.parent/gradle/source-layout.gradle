@@ -12,6 +12,17 @@ if (name.endsWith(".tests")) {
 			xtendOutputDir = "xtend-gen"
 		}
 	}
+} else if (name.endsWith("jena-wrapper-for-sadl")) {
+	sourceSets {
+		main {
+			java.srcDirs = ["src/main/java"]
+			resources.srcDirs = ["src/main/resources"]
+		}
+		test {
+			java.srcDirs = ["src/test/java"]
+			resources.srcDirs = ["src/test/resources"]
+		}
+	}
 } else if (name.startsWith("io.typefox")) {
 	sourceSets {
 		main {

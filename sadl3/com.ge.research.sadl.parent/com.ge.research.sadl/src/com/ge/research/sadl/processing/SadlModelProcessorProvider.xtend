@@ -18,10 +18,10 @@
 package com.ge.research.sadl.processing
 
 import com.google.inject.Inject
+import com.google.inject.Injector
 import com.google.inject.Singleton
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.google.inject.Injector
 
 @Singleton
 class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelProcessor> implements IModelProcessorProvider {

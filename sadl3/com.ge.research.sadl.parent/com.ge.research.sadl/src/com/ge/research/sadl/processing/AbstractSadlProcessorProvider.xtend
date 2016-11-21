@@ -18,8 +18,6 @@
 package com.ge.research.sadl.processing
 
 import com.google.common.base.Preconditions
-import com.google.common.base.Supplier
-import com.google.common.base.Suppliers
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Maps
@@ -43,7 +41,10 @@ abstract class AbstractSadlProcessorProvider<P> {
 
 	static val LOGGER = LoggerFactory.getLogger(AbstractSadlProcessorProvider);
 
-	val Supplier<Map<Class<? extends P>, Provider<P>>> processors;
+	val Injector injector;
+	val Class<P> processorClass;
+	val Map<Class<? extends P>, Provider<P>> manuallyAddedProcessors;
+	
 
 	/**
 	 * Creates a new provider instance with the class of the processors this
@@ -51,16 +52,9 @@ abstract class AbstractSadlProcessorProvider<P> {
 	 * implementations.
 	 */
 	protected new(Class<P> processorClass, Injector injector) {
-		processors = Suppliers.memoize [
-			val builder = ImmutableMap.<Class<? extends P>, Provider<P>>builder;
-			val services = ServiceLoader.load(processorClass).iterator;
-			services.forEach [ instance |
-				injector.injectMembers(instance);
-				val Provider<P> provider = [instance];
-				builder.put(instance.class as Class<? extends P>, provider);
-			];
-			return Maps.newHashMap(builder.build);
-		];
+		this.processorClass = processorClass;
+		this.injector = injector;
+		manuallyAddedProcessors = Maps.newHashMap();
 	}
 
 	/**
@@ -72,7 +66,20 @@ abstract class AbstractSadlProcessorProvider<P> {
 	 * Returns with a view of all available processor instances.
 	 */
 	def Iterable<P> getAllProcessors() {
-		ImmutableSet.copyOf(processors.get.values.map[get]);
+		val builder = ImmutableMap.<Class<? extends P>, Provider<P>>builder;
+		val services = ServiceLoader.load(processorClass).iterator;
+		
+		services.forEach [ instance |
+			injector.injectMembers(instance);
+			val Provider<P> provider = [instance];
+			val key = instance.class as Class<? extends P>;
+			if (!manuallyAddedProcessors.containsKey(key)) {
+				builder.put(key, provider);
+			}
+		];
+		builder.putAll(manuallyAddedProcessors);
+
+		ImmutableSet.copyOf(builder.build.values.map[get]);
 	}
 
 	/**
@@ -87,7 +94,7 @@ abstract class AbstractSadlProcessorProvider<P> {
 		Preconditions.checkNotNull(processorProvider, 'processorProvider');
 		val newProcessor = processorProvider.get;
 		val key = newProcessor.class;
-		val oldProcessor = processors.get.put(key as Class<? extends P>, processorProvider);
+		val oldProcessor = manuallyAddedProcessors.put(key as Class<? extends P>, processorProvider);
 		if (oldProcessor === null) {
 			LOGGER.info('''Processor has been successfully registered into the cache with class: '«key»'.''');
 		} else {
