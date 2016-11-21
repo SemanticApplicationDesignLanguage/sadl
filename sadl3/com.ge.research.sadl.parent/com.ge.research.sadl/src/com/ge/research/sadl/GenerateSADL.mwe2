@@ -66,7 +66,7 @@ Workflow {
 			}
 		}
 		//TODO fix for bug in beta. Remove me after 2.9
-		language = SerializerDisablingStandardLanguage {
+		language = StandardLanguage { // SerializerDisablingStandardLanguage {
 			name = "com.ge.research.sadl.SADL"
 			fileExtensions = "sadl"
 
