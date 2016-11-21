@@ -38,7 +38,6 @@ Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.sADL.impl,
  com.ge.research.sadl.sADL.util,
  com.ge.research.sadl.scoping,
- com.ge.research.sadl.serializer,
  com.ge.research.sadl.services,
  com.ge.research.sadl.utils,
  com.ge.research.sadl.validation
