@@ -6,6 +6,46 @@ import {
     File, FileContent
 } from './types';
 
+export interface CreateFileParams {
+    uri: string;
+    content?: FileContent;
+}
+
+export namespace CreateFileRequest {
+    export const type: RequestType<CreateFileParams, void, void, void> = {
+        get method() {
+            return 'workspace/createFile'
+        },
+        _: undefined
+    }
+}
+
+export interface CreateDirectoryParams {
+    uri: string;
+}
+
+export namespace CreateDirectoryRequest {
+    export const type: RequestType<CreateDirectoryParams, void, void, void> = {
+        get method() {
+            return 'workspace/createDirectory'
+        },
+        _: undefined
+    }
+}
+
+export interface DeleteFileParams {
+    uri: string;
+}
+
+export namespace DeleteFileRequest {
+    export const type: RequestType<DeleteFileParams, void, void, void> = {
+        get method() {
+            return 'workspace/deleteFile'
+        },
+        _: undefined
+    }
+}
+
 export interface ResolveFileParams {
     uri: string;
     maxDepth?: number;

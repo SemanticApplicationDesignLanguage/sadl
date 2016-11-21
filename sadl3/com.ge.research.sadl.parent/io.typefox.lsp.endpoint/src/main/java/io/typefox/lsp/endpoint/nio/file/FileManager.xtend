@@ -46,6 +46,38 @@ class FileManager implements Closeable {
 		watcher = null
 	}
 
+	def Path createFile(Path path) {
+		if (Files.exists(path)) {
+			return null
+		}
+		Files.createDirectories(path.parent)
+		return Files.createFile(path)
+	}
+
+	def Path createDirectory(Path path) {
+		if (Files.exists(path)) {
+			return null
+		}
+		Files.createDirectories(path.parent)
+		return Files.createDirectory(path)
+	}
+
+	def void delete(Path path) {
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
+			override visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Files.delete(file)
+				return super.visitFile(file, attrs)
+			}
+
+			override postVisitDirectory(Path dir, IOException exc) throws IOException {
+				Files.delete(dir)
+				super.postVisitDirectory(dir, exc)
+			}
+
+		})
+	}
+
 	def void resolve(Path path, int maxDepth, PathAcceptor acceptor) {
 		Files.walkFileTree(path, EnumSet.noneOf(FileVisitOption), maxDepth, new SimpleFileVisitor<Path>() {
 

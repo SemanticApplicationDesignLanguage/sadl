@@ -37,6 +37,26 @@ class FileContent {
 }
 
 @LanguageServerAPI
+class CreateFileParams {
+	@NonNull
+	String uri
+	
+	FileContent content
+}
+
+@LanguageServerAPI
+class CreateDirectoryParams {
+	@NonNull
+	String uri
+}
+
+@LanguageServerAPI
+class DeleteFileParams {
+	@NonNull
+	String uri
+}
+
+@LanguageServerAPI
 class ResolveFileParams {
 	@NonNull
 	String uri

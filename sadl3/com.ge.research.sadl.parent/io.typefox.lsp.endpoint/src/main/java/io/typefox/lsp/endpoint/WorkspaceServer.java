@@ -9,6 +9,44 @@ import org.eclipse.lsp4j.jsonrpc.services.JsonSegment;
 public interface WorkspaceServer {
 
 	/**
+	 * <ol>
+	 * <li>if a file or directory for {@link CreateFileParams#uri params.uri}
+	 * already exists then do nothing</li>
+	 * <li>otherwise:</li>
+	 * <ol>
+	 * <li>creates a new file and all non-existing parent directories</li>
+	 * <li>if {@link CreateFileParams#content params.content} != null then
+	 * updates a created file with the given content</li>
+	 * </ol>
+	 * </ol>
+	 */
+	CompletableFuture<Void> createFile(CreateFileParams params);
+
+	/**
+	 * <ol>
+	 * <li>if a file or directory for {@link CreateDirectoryParams#uri params.uri}
+	 * already exists then do nothing</li>
+	 * <li>otherwise creates a new directory and all non-existing parent
+	 * directories</li>
+	 * </ol>
+	 */
+	CompletableFuture<Void> createDirectory(CreateDirectoryParams params);
+
+	/**
+	 * <ol>
+	 * <li>if a file or directory for {@link DeleteFileParams#uri params.uri}
+	 * does not exist then do nothing</li>
+	 * <li>otherwise:</li>
+	 * <ol>
+	 * <li>if {@link DeleteFileParams#uri params.uri} corresponds to a file
+	 * then deletes a file</li>
+	 * <li>if {@link DeleteFileParams#uri params.uri} corresponds to a
+	 * directory then deletes a directory and its children</li>
+	 * </ol>
+	 */
+	CompletableFuture<Void> deleteFile(DeleteFileParams params);
+
+	/**
 	 * <p>
 	 * Computes a file state for the given URI and its children.
 	 * </p>
@@ -44,12 +82,12 @@ public interface WorkspaceServer {
 	 * </p>
 	 * 
 	 * @return {@code null} if a file does exist for
-	 *         {@link ResolveFileContentParams#uri params.uri};
-	 *         otherwise a file content
+	 *         {@link ResolveFileContentParams#uri params.uri}; otherwise a file
+	 *         content
 	 */
 	@JsonRequest
 	CompletableFuture<FileContent> resolveFileContent(ResolveFileContentParams params);
-	
+
 	/**
 	 * <p>
 	 * Updates a file content for the given URI.

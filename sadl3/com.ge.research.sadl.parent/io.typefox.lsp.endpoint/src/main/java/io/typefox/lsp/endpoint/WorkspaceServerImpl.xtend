@@ -80,6 +80,33 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 		return promise
 	}
 
+	override createFile(CreateFileParams params) {
+		return CompletableFutures.computeAsync [ cancelChecker |
+			val path = params.uri.toPath
+			val file = fileManager.createFile(path)
+			if (file !== null && params.content !== null) {
+				path.content = params.content
+			}
+			return null;
+		]
+	}
+
+	override createDirectory(CreateDirectoryParams params) {
+		return CompletableFutures.computeAsync [ cancelChecker |
+			val path = params.uri.toPath
+			fileManager.createDirectory(path)
+			return null;
+		]
+	}
+
+	override deleteFile(DeleteFileParams params) {
+		return CompletableFutures.computeAsync [ cancelChecker |
+			val path = params.uri.toPath
+			fileManager.delete(path)
+			return null;
+		]
+	}
+
 	override resolveFile(ResolveFileParams params) {
 		return CompletableFutures.computeAsync [ cancelChecker |
 			val rootPath = params.uri.toPath
@@ -110,11 +137,15 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 		return CompletableFutures.computeAsync [ cancelChecker |
 			val path = params.uri.toPath
 			if (path.regularFile) {
-				val bytes = params.content.value.bytes;
-				path.write(bytes);
+				path.content = params.content
 			}
 			return null
 		]
+	}
+
+	protected def void setContent(Path path, FileContent content) {
+		val bytes = content.value.bytes
+		path.write(bytes)
 	}
 
 	protected def Path toPath(String uri) {
@@ -149,13 +180,13 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 		}
 		return supportedMethods
 	}
-	
+
 	override notify(String method, Object parameter) {
 		if (languageServer instanceof Endpoint) {
 			languageServer.notify(method, parameter);
 		}
 	}
-	
+
 	override request(String method, Object parameter) {
 		if (languageServer instanceof Endpoint) {
 			languageServer.request(method, parameter);
