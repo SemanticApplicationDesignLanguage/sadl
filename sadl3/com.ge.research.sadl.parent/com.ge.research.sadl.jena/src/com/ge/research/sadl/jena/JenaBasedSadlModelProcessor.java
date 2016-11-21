@@ -2580,7 +2580,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		SadlResource pred = expr.getProp();
 		Expression obj = expr.getRight();
 		if (modelValidator != null) {
-			modelValidator.checkPropertyDomain(getTheJenaModel(), subj, pred);
+			modelValidator.checkPropertyDomain(getTheJenaModel(), subj, pred, false);
 		}
 		Object sobj = null;
 		Object pobj = null;

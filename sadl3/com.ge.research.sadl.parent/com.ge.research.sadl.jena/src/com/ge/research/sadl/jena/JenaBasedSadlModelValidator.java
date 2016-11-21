@@ -2325,7 +2325,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate) {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean PropOfSubjectCheck) {
 		if (subject instanceof SadlResource) {
 			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
 			if (rsrc != null) {
@@ -2369,7 +2369,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					stmtitr.close();
 					if (subj != null && !matchFound) {
-						issueAcceptor.addWarning("'" + subj.getURI() + "' is not in domain of property '" + prop.getURI() + "'", subject);
+						if(PropOfSubjectCheck){
+							issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+						}else{
+							issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+						}
 					}
 				}
 			}
