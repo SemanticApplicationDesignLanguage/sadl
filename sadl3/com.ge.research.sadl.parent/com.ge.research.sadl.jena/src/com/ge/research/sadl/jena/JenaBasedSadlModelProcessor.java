@@ -922,12 +922,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
 		if (policyFilename != null) {
 			File projectFolder = new File(policyFilename).getParentFile().getParentFile();
+			if(projectFolder == null){
+				return null;
+			}
 			String relPath = SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" + SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
 			String platformPath = projectFolder.getName() + "/" + relPath;
 			String implicitSadlModelFN = projectFolder + "/" + relPath;
 			File implicitModelFile = new File(implicitSadlModelFN);
 			if (!implicitModelFile.exists()) {
-				createBuiltinFunctionImplicitModel(implicitSadlModelFN);
+				createBuiltinFunctionImplicitModel(projectFolder.getAbsolutePath());
 				try {
 					Resource newRsrc = resource.getResourceSet().createResource(URI.createPlatformResourceURI(platformPath, false)); 
 					newRsrc.load(resource.getResourceSet().getLoadOptions());
