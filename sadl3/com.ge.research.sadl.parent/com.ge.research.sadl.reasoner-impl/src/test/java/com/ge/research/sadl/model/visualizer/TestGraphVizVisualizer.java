@@ -28,7 +28,8 @@ public class TestGraphVizVisualizer {
 				{"N5","p1","N1","magenta","blue","blue"}};
 		ResultSet rs = new ResultSet(header, data);
 		IGraphVisualizer gv = new GraphVizVisualizer();
-		String tempDir = "c:/tmp/graphviztest";
+		File cd = new File(".");
+		String tempDir = cd.getCanonicalPath() + "/tmp/graphviztest";
 		File tdf = new File(tempDir);
 		tdf.mkdirs();
 		String baseFileName = "testGraphVizVisualizer";

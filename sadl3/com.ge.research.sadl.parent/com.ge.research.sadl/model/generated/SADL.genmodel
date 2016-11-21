@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
-    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="***********************************************************************&#xD;&#xA;Copyright 2007-2016- General Electric Company, All Rights Reserved&#xD;&#xA; *&#xD;&#xA;Project: SADL&#xD;&#xA; *&#xD;&#xA;Description: The Semantic Application Design Language (SADL) is a&#xD;&#xA;language for building semantic models and expressing rules that&#xD;&#xA;capture additional domain knowledge. The SADL-IDE (integrated&#xD;&#xA;development environment) is a set of Eclipse plug-ins that&#xD;&#xA;support the editing and testing of semantic models using the&#xD;&#xA;SADL language.&#xD;&#xA; *&#xD;&#xA;This software is distributed &quot;AS-IS&quot; without ANY WARRANTIES&#xD;&#xA;and licensed under the Eclipse Public License - v 1.0&#xD;&#xA;which is available at http://www.eclipse.org/org/documents/epl-v10.php&#xD;&#xA; *&#xD;&#xA; **********************************************************************"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="***********************************************************************&#xA;Copyright 2007-2016- General Electric Company, All Rights Reserved&#xA; *&#xA;Project: SADL&#xA; *&#xA;Description: The Semantic Application Design Language (SADL) is a&#xA;language for building semantic models and expressing rules that&#xA;capture additional domain knowledge. The SADL-IDE (integrated&#xA;development environment) is a set of Eclipse plug-ins that&#xA;support the editing and testing of semantic models using the&#xA;SADL language.&#xA; *&#xA;This software is distributed &quot;AS-IS&quot; without ANY WARRANTIES&#xA;and licensed under the Eclipse Public License - v 1.0&#xA;which is available at http://www.eclipse.org/org/documents/epl-v10.php&#xA; *&#xA; **********************************************************************"
     modelDirectory="/com.ge.research.sadl/src-gen" modelPluginID="com.ge.research.sadl"
     forceOverwrite="true" modelName="SADL" updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
     complianceLevel="6.0" copyrightFields="false" runtimeVersion="2.10">
@@ -130,10 +130,6 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//ExpressionScope"/>
     <genClasses ecoreClass="SADL.ecore#//Expression"/>
-    <genClasses ecoreClass="SADL.ecore#//OrderElement">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//OrderElement/desc"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//OrderElement/orderBy"/>
-    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//PrintStatement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//PrintStatement/displayString"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//PrintStatement/model"/>
@@ -152,6 +148,10 @@
     <genClasses ecoreClass="SADL.ecore#//ReadStatement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ReadStatement/filename"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ReadStatement/templateFilename"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//OrderElement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//OrderElement/desc"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//OrderElement/orderBy"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//ValueTable">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ValueTable/valueTable"/>
@@ -258,13 +258,6 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//QueryStatement/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//QueryStatement/expr"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//SelectExpression">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SelectExpression/distinct"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SelectExpression/selectFrom"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SelectExpression/whereExpression"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SelectExpression/orderby"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SelectExpression/orderList"/>
-    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//ConstructExpression">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ConstructExpression/subj"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ConstructExpression/pred"/>
@@ -277,6 +270,13 @@
     <genClasses ecoreClass="SADL.ecore#//TestStatement">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TestStatement/tests"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//SelectExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SelectExpression/distinct"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SelectExpression/selectFrom"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SelectExpression/whereExpression"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SelectExpression/orderby"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SelectExpression/orderList"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Sublist">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Sublist/list"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Sublist/where"/>
@@ -285,6 +285,11 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//BinaryOperation/left"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BinaryOperation/op"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//BinaryOperation/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//CommaSeparatedAbreviatedExpression">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CommaSeparatedAbreviatedExpression/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CommaSeparatedAbreviatedExpression/prop"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//CommaSeparatedAbreviatedExpression/right"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//PropOfSubject">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/left"/>

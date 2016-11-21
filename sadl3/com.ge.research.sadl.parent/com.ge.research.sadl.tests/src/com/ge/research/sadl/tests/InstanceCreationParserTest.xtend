@@ -131,7 +131,6 @@ class InstanceCreationParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test def void testWith2() {
 		'''uri "http://sadl.org/concepts.sadl" alias concepts.
 		 

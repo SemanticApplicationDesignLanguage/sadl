@@ -35,6 +35,10 @@ import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
 import org.eclipse.xtext.validation.ResourceValidatorImpl
+import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.parsetree.reconstr.ITokenStream
+import java.io.IOException
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -77,5 +81,17 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	
 	def Class<? extends DefaultLinkingService> bindDefaultLinkingService() {
 		ErrorAddingLinkingService
+	}
+	
+	def Class<? extends IParseTreeConstructor> bindIParseTreeConstructor() {
+		NoImplParseTreeConstructor
+	}
+	
+	static class NoImplParseTreeConstructor implements IParseTreeConstructor {
+		
+		override serializeSubtree(EObject object, ITokenStream out) throws IOException {
+			throw new UnsupportedOperationException("TODO: auto-generated method stub")
+		}
+		
 	}
 }

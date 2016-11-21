@@ -56,7 +56,6 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
-import com.ge.research.sadl.model.DeclarationExtensions;
 
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
