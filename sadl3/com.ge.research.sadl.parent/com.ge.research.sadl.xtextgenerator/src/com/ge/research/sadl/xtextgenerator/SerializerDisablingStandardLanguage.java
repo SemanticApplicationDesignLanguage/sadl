@@ -1,4 +1,4 @@
-package com.ge.research.sadl;
+package com.ge.research.sadl.xtextgenerator;
 
 import java.util.List;
 
