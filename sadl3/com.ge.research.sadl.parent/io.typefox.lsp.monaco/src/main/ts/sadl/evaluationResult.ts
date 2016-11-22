@@ -1,23 +1,49 @@
+import '../style.css';
 import { EvaluationResultData } from './evaluationResultData'
 
 export class EvaluationResult {
 
     protected viewZoneId: number;
     protected decorationId: string;
-    protected element: HTMLElement;
+    protected element: ElementDetails;
     protected editor: monaco.editor.ICodeEditor;
     protected viewZone: monaco.editor.IViewZone;
+    protected expanded: boolean = false;
 
     constructor(editor: monaco.editor.ICodeEditor, data: EvaluationResultData, viewChangeAccessor: monaco.editor.IViewZoneChangeAccessor) {
         this.editor = editor;
+
+        this.editor.onMouseDown((e) => {
+            const target = e!.target;
+            if (target && target.type === monaco.editor.MouseTargetType.CONTENT_VIEW_ZONE && this.isValid()) {
+                const targetRange = target.range;
+                const currentRange = this.getRange();
+                if (targetRange.endLineNumber === currentRange.endLineNumber
+                    && targetRange.endColumn === (currentRange.endColumn + 1)) {
+
+                    this.expanded = !this.expanded;
+                    this.setData(data);
+                    this.viewZone.heightInLines = this.expanded ? this.element.heightInLines : 1;
+                    editor.changeViewZones((accessor) => {
+                        this.update(accessor);
+                    });
+
+                }
+            }
+        });
 
         const range = data.range;
         this.decorationId = editor.deltaDecorations([], [{ range, options: {} }])[0];
 
         this.element = this.createEvaluationResultElement();
-        this.viewZone = { afterLineNumber: range.endLineNumber, domNode: this.element };
-        this.viewZoneId = viewChangeAccessor.addZone(this.viewZone);
         this.setData(data);
+        this.viewZone = {
+            afterLineNumber: range.endLineNumber,
+            domNode: this.element.node,
+            suppressMouseDown: true,
+            heightInLines: this.element.heightInLines
+        };
+        this.viewZoneId = viewChangeAccessor.addZone(this.viewZone);
     }
 
     isValid(): boolean {
@@ -49,7 +75,8 @@ export class EvaluationResult {
 
             if (newStartLine !== range.startLineNumber) {
                 const newRange = new monaco.Range(newStartLine, 0, range.endLineNumber, range.endColumn);
-                this.decorationId = this.editor.deltaDecorations([this.decorationId], [{ range: newRange, options: {} }])[0];
+                const decorationOptions: monaco.editor.IModelDecorationOptions = { };
+                this.decorationId = this.editor.deltaDecorations([this.decorationId], [{ range: newRange, options: decorationOptions }])[0];
             }
 
             this.viewZone.afterLineNumber = range.endLineNumber;
@@ -74,21 +101,33 @@ export class EvaluationResult {
     }
 
     protected setData(data: EvaluationResultData) {
-        this.element.style.background = data.successful ? '#C7F2B1' : '#F2BBB1';
-        if (data.successful) {
-            this.element.textContent = 'Test passed.';
-        } else {
-            this.element.textContent = `Test failed. ${data.value}`;
+        const node = this.element.node;
+        node.style.background = data.successful ? '#C7F2B1' : '#F2BBB1';
+        this.element.heightInLines = 1;
+        if (this.expanded) {
+            this.element.heightInLines = (data.value.match(/\n/g) || []).length + 1;
+            node.style.whiteSpace = 'pre-wrap';
         }
+        const segments = data.value.split('\n') || [''];
+        const value = this.expanded ? data.value : `${segments[0]} ${segments.length > 1 ? '...' : ''}`;
+        node.textContent = value;
     }
 
-    protected createEvaluationResultElement(): HTMLDivElement {
-        const node = document.createElement('div');
+    protected createEvaluationResultElement(): ElementDetails {
+        const node = document.createElement('a');
         node.style.fontSize = '12px';
         node.style.fontFamily = 'Menlo, Monaco, \'Courier New\', monospace';
         node.style.lineHeight = '18px';
         node.style.fontStyle = 'italic';
-        return node;
+        return {
+            node
+        };
     }
 
+}
+
+export interface ElementDetails {
+    node: HTMLElement,
+    heightInLines?: number;
+    heightInPx?: number;
 }

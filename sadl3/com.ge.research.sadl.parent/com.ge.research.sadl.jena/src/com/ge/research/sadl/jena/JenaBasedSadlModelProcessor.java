@@ -1473,6 +1473,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (element.getStart().equals("Graph")) {
 				query.setGraph(true);
 			}
+			final ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
+			if (node != null) {
+				query.setOffset(node.getOffset() - 1);
+				query.setLength(node.getLength());
+			}
 			addSadlCommand(query);
 			return query;
 		}

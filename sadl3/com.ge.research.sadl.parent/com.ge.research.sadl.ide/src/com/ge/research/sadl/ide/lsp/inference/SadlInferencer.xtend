@@ -36,6 +36,9 @@ import org.eclipse.xtext.resource.XtextResource
 import static com.ge.research.sadl.ide.SadlProjectStructureInitializer.*
 import static com.ge.research.sadl.ide.lsp.inference.InferenceStatus.*
 import static com.ge.research.sadl.jena.UtilsForJena.*
+import com.ge.research.sadl.model.gp.Query
+import com.ge.research.sadl.reasoner.ResultSet
+import com.ge.research.sadl.model.gp.SadlCommand
 
 /**
  * Headless implementation of the {@code SADL} inferencer.
@@ -74,6 +77,14 @@ class SadlInferencer {
 						testResult instanceof TestResult, '''Expected a test result. Was: «testResult».''');
 
 					builder.add(doc.createInferenceResult(command, testResult as TestResult));
+				} else if (command instanceof Query) {
+					// TODO handle graphs
+					val resultSet = (testResults as List<?>).get(i);
+					Preconditions.checkState(
+						resultSet instanceof ResultSet, '''Expected a result set. Was: «resultSet».''');
+
+					builder.add(doc.createInferenceResult(command, resultSet as ResultSet));
+						
 				}
 			}
 		}
@@ -81,17 +92,26 @@ class SadlInferencer {
 		return builder.build;
 	}
 
-	private def createInferenceResult(Document doc, Test test, TestResult testResult) {
+	private def createInferenceResult(Document doc, Query query, ResultSet resultSet) {
 		new InferenceResult => [
-			status = if (testResult.passed) Passed else Failed;
-			value = '''[«test»] «testResult.toString»''';
+			status = Passed;
+			value = '''Query: «query»«'\n'»«resultSet.toStringWithIndent(5)»''';
+			range = getRange(doc, query);
+		];
+	}
+
+	private def createInferenceResult(Document doc, Test test, TestResult testResult) {
+		val passed = testResult.passed;
+		new InferenceResult => [
+			status = if (passed) Passed else Failed;
+			value = '''Test «IF passed»passed«ELSE»failed«ENDIF»: «test»«IF !passed» («testResult»)«ENDIF»''';
 			range = getRange(doc, test);
 		];
 	}
 
-	private def getRange(Document doc, Test test) {
-		val start = test.offset;
-		val end = start + test.length;
+	private def getRange(Document doc, SadlCommand command) {
+		val start = command.offset;
+		val end = start + command.length;
 		new Range(doc.getPosition(start), doc.getPosition(end));
 	}
 
