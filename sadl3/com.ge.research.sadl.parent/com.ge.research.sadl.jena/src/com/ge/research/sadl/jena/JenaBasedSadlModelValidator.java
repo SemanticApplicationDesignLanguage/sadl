@@ -33,6 +33,7 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
+import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.ElementInList;
@@ -807,6 +808,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if(expression instanceof SubjHasProp){
 			return getType(((SubjHasProp)expression).getLeft());
 		}
+		else if (expression instanceof CommaSeparatedAbreviatedExpression) {
+			return getType(((CommaSeparatedAbreviatedExpression)expression).getLeft());
+		}
 		else if(expression instanceof UnaryExpression){
 			return getType(((UnaryExpression) expression).getExpr());
 		}
@@ -1005,7 +1009,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);		
 	}
-
+	
 	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException {
 		TypeCheckInfo tci = getType(expression.getType());
 		if (expression.isList()) {
