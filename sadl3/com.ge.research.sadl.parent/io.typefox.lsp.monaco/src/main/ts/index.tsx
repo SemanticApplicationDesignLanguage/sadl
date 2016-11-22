@@ -1,5 +1,6 @@
 import './style.css';
 import './resizer.css';
+import './contextmenu.css';
 
 import {
     registerLanguages, LanguageClient, getRootPath
@@ -75,13 +76,16 @@ function activate(): void {
     const app = <SplitPane split='vertical' minSize={300}>
         <Explorer
             onDidMount={explorer => explorerPart.explorer = explorer}
-            onOpen={file => workbench!.open(file.uri)}
-            onExpand={file => workbench!.props.workspace.resolveFile(file.uri, 1)}
+            onOpenFile={file => workbench!.open(file.uri)}
+            onOpenFolder={file => workbench!.props.workspace.resolveFile(file.uri, 1)}
+            onNewFile={(file, name) => workbench!.props.workspace.createFile(file.uri + name)}
+            onNewFolder={(file, name) => workbench!.props.workspace.createDirectory(file.uri + name)}
+            onDelete={file => workbench!.props.workspace.deleteFile(file.uri)}
             />
         <Editor onEditorDidMount={editor => {
             editorPart.onEditorDidMount(editor);
             inferenceEditorService.editor = editor;
-        }}
+        } }
             onEditorWillUnmount={e => editorPart.onEditorWillUnmount(e)}
             />
     </SplitPane>
@@ -89,8 +93,11 @@ function activate(): void {
 
     getRootPath(rootPathProviderUrl).then(rootPath => {
         const { webSocket, connection } = createWebSocketConnection(languageServerUrl);
+        const workspace = new RemoteWorkspace({ rootPath, connection });
+        workbench = new Workbench({
+            workspace, documentManager, explorerPart, editorPart
+        });
         webSocket.onopen = () => {
-            const workspace = new RemoteWorkspace({ rootPath, connection });
             const languageClient = new LanguageClient({
                 documentManager, connection, languages, rootPath
             });
@@ -98,9 +105,6 @@ function activate(): void {
 
             inferenceEditorService.provider = new InferenceResultProvider(connection);
 
-            workbench = new Workbench({
-                workspace, documentManager, explorerPart, editorPart
-            });
             workbench.openWorkspace();
         };
     });

@@ -20,6 +20,7 @@ public interface WorkspaceServer {
 	 * </ol>
 	 * </ol>
 	 */
+	@JsonRequest
 	CompletableFuture<Void> createFile(CreateFileParams params);
 
 	/**
@@ -30,6 +31,7 @@ public interface WorkspaceServer {
 	 * directories</li>
 	 * </ol>
 	 */
+	@JsonRequest
 	CompletableFuture<Void> createDirectory(CreateDirectoryParams params);
 
 	/**
@@ -44,6 +46,7 @@ public interface WorkspaceServer {
 	 * directory then deletes a directory and its children</li>
 	 * </ol>
 	 */
+	@JsonRequest
 	CompletableFuture<Void> deleteFile(DeleteFileParams params);
 
 	/**

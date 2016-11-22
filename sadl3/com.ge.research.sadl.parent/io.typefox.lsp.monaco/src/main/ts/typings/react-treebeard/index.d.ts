@@ -7,10 +7,27 @@ declare module 'react-treebeard' {
         active?: boolean;
         loading?: boolean;
     }
-    export interface TreeBeardProps {
-        data: TreeNode | TreeNode[],
-        onToggle?: (node: TreeNode, toggled: boolean) => void;
+    export namespace Container {
+        export interface Props {
+            node: TreeNode
+        }
     }
-    export class Treebeard extends React.Component<TreeBeardProps, {}> {
+    export class Container extends React.Component<Container.Props, {}> {
     }
+    export interface TreeNodeDecorators {
+        Loading: any
+        Toggle: any
+        Header: any
+        Container: typeof Container
+    }
+    export namespace TreeBeard {
+        export interface Props {
+            data: TreeNode | TreeNode[];
+            onToggle?: (node: TreeNode, toggled: boolean) => void;
+            decorators?: TreeNodeDecorators;
+        }
+    }
+    export class Treebeard extends React.Component<TreeBeard.Props, {}> {
+    }
+    export var decorators: TreeNodeDecorators
 }

@@ -14,6 +14,7 @@
     "monaco-editor-core": "^0.7.3",
     "monaco-languages": "^0.6.1",
     "react": "^15.3.2",
+    "react-contextmenu": "^2.0.0-alpha.2",
     "react-dom": "^15.3.2",
     "react-split-pane": "^0.1.54",
     "react-treebeard": "^1.1.4",
