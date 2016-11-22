@@ -2329,13 +2329,24 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate) {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean PropOfSubjectCheck) {
 		if (subject instanceof SadlResource) {
 			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
 			if (rsrc != null) {
 				if (ontModel != null) {
-					OntResource subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
-					Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+					String subjString = declarationExtensions.getConceptUri((SadlResource)subject);
+					if(subjString == null || subjString.isEmpty()){
+						return;
+					}
+					OntResource subj = ontModel.getOntResource(subjString);
+					if(subj == null){
+						return;
+					}
+					String propString = declarationExtensions.getConceptUri(predicate);
+					if(propString == null || propString.isEmpty()){
+						return;
+					}
+					Property prop = ontModel.getProperty(propString);
 					StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
 					boolean matchFound = false;
 					while (stmtitr.hasNext()) {
@@ -2345,9 +2356,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = obj.as(UnionClass.class).listOperands();
 								while (itr.hasNext()) {
 									com.hp.hpl.jena.rdf.model.Resource cls = itr.next();
-									if (cls.isURIResource() && cls.asResource().getURI().equals(subj.getURI())) {
-										matchFound = true;			
-										break;
+									if (cls.isURIResource()){ 
+										String clsURI = cls.asResource().getURI();
+										if(clsURI != null && clsURI.equals(subj.getURI())) {
+											matchFound = true;			
+											break;
+										}
 									}
 								}
 							}
@@ -2359,7 +2373,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					stmtitr.close();
 					if (subj != null && !matchFound) {
-						issueAcceptor.addWarning("'" + subj.getURI() + "' is not in domain of property '" + prop.getURI() + "'", subject);
+						if(PropOfSubjectCheck){
+							issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+						}else{
+							issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+						}
 					}
 				}
 			}
