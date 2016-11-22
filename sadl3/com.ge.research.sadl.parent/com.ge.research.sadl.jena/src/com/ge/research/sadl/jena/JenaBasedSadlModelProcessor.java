@@ -1159,9 +1159,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				Expression expr = tests.get(tidx);
 				// we know it's a Test so create one and set as translation target
 				Test test = new Test();
-				final ICompositeNode node = NodeModelUtils.findActualNodeFor(expr);
+				final ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
 				if (node != null) {
-					test.setOffset(node.getOffset());
+					test.setOffset(node.getOffset() - 1);
 					test.setLength(node.getLength());
 				}
 				setTarget(test);

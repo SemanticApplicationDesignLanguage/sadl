@@ -1,13 +1,13 @@
-import './style.css';
 import './resizer.css';
+import './style.css';
 import './contextmenu.css';
 
 import {
-    registerLanguages, LanguageClient, getRootPath
+    getRootPath, LanguageClient, registerLanguages
 } from './client';
 
 import {
-    sadlLanguage, InferenceEditorService, InferenceResultProvider
+    InferenceEditorService, InferenceResultProvider, sadlLanguage
 } from './sadl';
 
 import {

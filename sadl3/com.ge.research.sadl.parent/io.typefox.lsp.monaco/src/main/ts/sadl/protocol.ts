@@ -1,6 +1,9 @@
 import { RequestType } from 'vscode-jsonrpc';
 import * as lstypes from 'vscode-languageserver-types'
 
+export const FAILED = 0;
+export const PASSED = 1;
+
 export interface InferenceResult {
     range: lstypes.Range;
     status: number;

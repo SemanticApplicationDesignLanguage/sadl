@@ -1,2 +1,3 @@
 export * from './sadlLanguage';
-export * from './inferenceService';
+export * from './inferenceEditorService';
+export * from './inferenceResultProvider';

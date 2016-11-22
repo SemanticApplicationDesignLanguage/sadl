@@ -84,7 +84,7 @@ class SadlInferencer {
 	private def createInferenceResult(Document doc, Test test, TestResult testResult) {
 		new InferenceResult => [
 			status = if (testResult.passed) Passed else Failed;
-			value = testResult.toString;
+			value = '''[«test»] «testResult.toString»''';
 			range = getRange(doc, test);
 		];
 	}
