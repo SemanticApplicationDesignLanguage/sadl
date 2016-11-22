@@ -17,10 +17,15 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide
 
+import com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex.JFlexBasedInternalSADLLexer
 import com.ge.research.sadl.ide.editor.coloring.SadlColoringService
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
 import com.ge.research.sadl.ide.lsp.^extension.ISadlLanguageServerExtension
+import com.google.inject.Binder
+import com.google.inject.name.Names
+import org.eclipse.xtext.ide.LexerIdeBindings
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
+import org.eclipse.xtext.ide.editor.contentassist.antlr.internal.Lexer
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
 import org.eclipse.xtext.ide.server.coloring.IColoringService
 
@@ -41,4 +46,10 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 		return ISadlLanguageServerExtension
 	}
 
+	override configureContentAssistLexer(Binder binder) {
+		binder.bind(Lexer)
+			.annotatedWith(Names.named(LexerIdeBindings.CONTENT_ASSIST))
+			.to(JFlexBasedInternalSADLLexer)
+	}
+	
 }
