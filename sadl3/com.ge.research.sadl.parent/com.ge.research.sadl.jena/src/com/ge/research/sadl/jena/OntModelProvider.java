@@ -8,8 +8,10 @@ import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.resource.XtextResource;
 
 import com.ge.research.sadl.model.gp.SadlCommand;
+import com.google.inject.Provider;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Property;
 
@@ -26,7 +28,7 @@ public class OntModelProvider {
 		List<Object> otherContent;
 		List<SadlCommand> sadlCommands = null;
 		Map<EObject, Property> impliedPropertiesUsed = null;
-		boolean isLoading = false;
+		boolean isLoading = true;
 		boolean hasCircularImport = false;
 		
 		@Override
@@ -36,39 +38,25 @@ public class OntModelProvider {
 	}
 	
 	public static void registerResource(Resource resource) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a == null) {
-			a = new OntModelAdapter();
-			a.isLoading = true;
-			resource.eAdapters().add(a);
-		}
+		findAdapter(resource);
 	}
 	
 	public static boolean checkForCircularImport(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			if (a.isLoading) {
-				a.hasCircularImport = true;
-				return true;
-			}
+		if (a.isLoading) {
+			a.hasCircularImport = true;
+			return true;
 		}
 		return false;
 	}
 	
 	public static boolean hasCircularImport(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.hasCircularImport;
-		}
-		return false;
+		return a.hasCircularImport;
 	}
 
 	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix) {
 		OntModelAdapter adapter = findAdapter(resource);
-		if (adapter == null) {
-			adapter = new OntModelAdapter();
-			resource.eAdapters().add(adapter);
-		}
 		adapter.modelName = modelName;
 		adapter.modelPrefix = modelPrefix;
 		adapter.model = model;
@@ -78,10 +66,6 @@ public class OntModelProvider {
 	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix, 
 			List<SadlCommand> sadlCommands) {
 		OntModelAdapter adapter = findAdapter(resource);
-		if (adapter == null) {
-			adapter = new OntModelAdapter();
-			resource.eAdapters().add(adapter);
-		}
 		adapter.modelName = modelName;
 		adapter.modelPrefix = modelPrefix;
 		adapter.model = model;
@@ -91,11 +75,6 @@ public class OntModelProvider {
 	
 	public static void addOtherContent(Resource resource, Object otherContent) {
 		OntModelAdapter adapter = findAdapter(resource);
-		if (adapter == null) {
-			adapter = new OntModelAdapter();
-			adapter.isLoading = true;
-			resource.eAdapters().add(adapter);
-		}
 		if (adapter.otherContent == null) {
 			adapter.otherContent = new ArrayList<Object>();
 		}
@@ -104,18 +83,12 @@ public class OntModelProvider {
 	
 	public static List<Object> getOtherContent(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.otherContent;
-		}
-		return null;
+		return a.otherContent;
 	}
 	
 	public static List<SadlCommand> getSadlCommands(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.sadlCommands;
-		}
-		return null;
+		return a.sadlCommands;
 	}
 	
 	public static void addImpliedProperties(Resource resource, Map<EObject, Property> impliedProperties) {
@@ -139,38 +112,41 @@ public class OntModelProvider {
 	}
 	
 	public static OntModelAdapter findAdapter(Resource resource) {
+		return findAdapter(resource, new Provider<OntModelAdapter>() {
+					@Override
+					public OntModelAdapter get() {
+						return new OntModelAdapter();
+					}
+				});
+	}
+	
+	public static OntModelAdapter findAdapter(Resource resource, Provider<OntModelAdapter> provider) {
 		if (resource != null) {
-			for (Adapter a : resource.eAdapters()) {
-				if (a instanceof OntModelAdapter) {
-					return ((OntModelAdapter) a);
-				}
+			if (resource instanceof XtextResource) {
+				return ((XtextResource) resource).getCache().get("ontmodel", resource, new Provider<OntModelAdapter>() {
+					@Override
+					public OntModelAdapter get() {
+						return new OntModelAdapter();
+					}
+				});
 			}
 		}
-		return null;
+		return new OntModelAdapter();
 	}
 	
 	public static OntModel find(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.model;
-		}
-		return null;
+		return a.model;
 	}
 	
 	public static String getModelName(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.modelName;
-		}
-		return null;
+		return a.modelName;
 	}
 
 	public static String getModelPrefix(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.modelPrefix;
-		}
-		return null;
+		return a.modelPrefix;
 	}
 
 	public static OntModel getSadlBaseModel() {
