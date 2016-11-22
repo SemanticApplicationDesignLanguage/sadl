@@ -193,7 +193,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore("Hard to do see https://github.com/crapo/sadlos2/issues/119#issuecomment-260898534")
 	@Test
 	def void testNewlineSeparation() {
 		val model = '''

@@ -302,13 +302,16 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append(slbl);
 			sb.append("->");
 			sb.append(olbl);
-			sb.append("[label=\"");
-			String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
-			sb.append(edgeLbl);
-			sb.append("\"");
-			// color the "anchor" edge
-			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
-				sb.append(" color=red");
+			sb.append("[");
+			if (row[1] != null && row[1].toString().length() > 0) {
+				sb.append("label=\"");
+				String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
+				sb.append(edgeLbl);
+				sb.append("\"");
+				// color the "anchor" edge
+				if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
+					sb.append(" color=red");
+				}
 			}
 			if (edgeAttributes != null) {
 				Iterator<Integer> itr = edgeAttributes.keySet().iterator();
