@@ -2329,7 +2329,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate) {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean propOfSubjectCheck) {
 		if (subject instanceof SadlResource) {
 			OntConceptType stype;
 			try {
@@ -2343,7 +2343,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (ontModel != null) {
 						OntResource subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
 						Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-						checkPropertyDomain(ontModel, subj, prop, subject);
+						if (subj != null && prop != null) {
+							checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck);
+						}
 					}
 				}
 			} catch (CircularDefinitionException e) {
@@ -2353,7 +2355,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
-	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject) {
+	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject, boolean propOfSubjectCheck) {
 		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
 		boolean matchFound = false;
 		while (stmtitr.hasNext()) {
@@ -2367,7 +2369,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		stmtitr.close();
 		if (subj != null && !matchFound) {
-			issueAcceptor.addWarning("'" + subj.getURI() + "' is not in domain of property '" + prop.getURI() + "'", subject);
+			if(propOfSubjectCheck){
+				issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+			}else{
+				issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+			}
 		}
 	}
 	
