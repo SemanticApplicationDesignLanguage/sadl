@@ -25,6 +25,7 @@ declare module 'react-treebeard' {
             data: TreeNode | TreeNode[];
             onToggle?: (node: TreeNode, toggled: boolean) => void;
             decorators?: TreeNodeDecorators;
+            style: any;
         }
     }
     export class Treebeard extends React.Component<TreeBeard.Props, {}> {
