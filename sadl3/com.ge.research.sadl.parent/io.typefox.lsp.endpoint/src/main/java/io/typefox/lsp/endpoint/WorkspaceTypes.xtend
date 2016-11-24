@@ -57,6 +57,14 @@ class DeleteFileParams {
 }
 
 @LanguageServerAPI
+class RenameFileParams {
+	@NonNull
+	String oldUri
+	@NonNull
+	String newUri
+}
+
+@LanguageServerAPI
 class ResolveFileParams {
 	@NonNull
 	String uri

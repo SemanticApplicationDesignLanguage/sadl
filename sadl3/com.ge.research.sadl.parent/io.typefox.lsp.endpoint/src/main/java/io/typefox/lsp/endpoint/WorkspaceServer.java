@@ -48,6 +48,9 @@ public interface WorkspaceServer {
 	 */
 	@JsonRequest
 	CompletableFuture<Void> deleteFile(DeleteFileParams params);
+	
+	@JsonRequest
+	CompletableFuture<Void> renameFile(RenameFileParams params);
 
 	/**
 	 * <p>

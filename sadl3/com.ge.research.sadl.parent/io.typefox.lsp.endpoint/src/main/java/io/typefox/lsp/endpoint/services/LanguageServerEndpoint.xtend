@@ -3,6 +3,7 @@ package io.typefox.lsp.endpoint.services
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.google.inject.Singleton
+import io.typefox.lsp.endpoint.WorkspaceClient
 import io.typefox.lsp.endpoint.servlet.LanguageServerEndpointConfigurator
 import java.util.LinkedHashMap
 import javax.websocket.OnClose
@@ -16,7 +17,6 @@ import org.eclipse.lsp4j.jsonrpc.json.JsonRpcMethodProvider
 import org.eclipse.lsp4j.jsonrpc.json.MessageJsonHandler
 import org.eclipse.lsp4j.jsonrpc.services.ServiceEndpoints
 import org.eclipse.lsp4j.services.LanguageClientAware
-import org.eclipse.lsp4j.services.LanguageClientExtensions
 import org.eclipse.lsp4j.services.LanguageServer
 
 @Singleton
@@ -40,7 +40,7 @@ class LanguageServerEndpoint {
 	        supportedMethods.putAll(languageServer.supportedMethods());
         } else  {
         	supportedMethods.putAll(ServiceEndpoints.getSupportedMethods(languageServer.getClass()));	
-	        supportedMethods.putAll(ServiceEndpoints.getSupportedMethods(LanguageClientExtensions));
+	        supportedMethods.putAll(ServiceEndpoints.getSupportedMethods(WorkspaceClient));
         }
         
         val jsonHandler = new MessageJsonHandler(supportedMethods);
@@ -53,7 +53,7 @@ class LanguageServerEndpoint {
             writer.consume(it)
         ], ServiceEndpoints.toEndpoint(languageServer))
         
-        val client = ServiceEndpoints.toServiceObject(endpoint, LanguageClientExtensions);
+        val client = ServiceEndpoints.toServiceObject(endpoint, WorkspaceClient);
         if (languageServer instanceof LanguageClientAware) {
             languageServer.connect(client)
         }

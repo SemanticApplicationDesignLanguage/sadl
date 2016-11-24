@@ -19,7 +19,7 @@ import {
 } from './utils/network';
 
 import {
-    Explorer, ExplorerPart
+    Explorer, ExplorerPart, setOnRename
 } from './explorer';
 
 import {
@@ -68,33 +68,15 @@ function activate(): void {
 
     const documentManager = new DocumentManager();
 
-    let workbench: IWorkbench | null = null;
     const explorerPart = new ExplorerPart();
     const editorPart = new EditorPart({ documentManager });
     const inferenceEditorService = new InferenceEditorService();
 
-    const app = <SplitPane split='vertical' minSize={300}>
-        <Explorer
-            onDidMount={explorer => explorerPart.explorer = explorer}
-            onOpenFile={file => workbench!.open(file.uri)}
-            onOpenFolder={file => workbench!.props.workspace.resolveFile(file.uri, 1)}
-            onNewFile={(file, name) => workbench!.props.workspace.createFile(file.uri + name)}
-            onNewFolder={(file, name) => workbench!.props.workspace.createDirectory(file.uri + name)}
-            onDelete={file => workbench!.props.workspace.deleteFile(file.uri)}
-            />
-        <Editor onEditorDidMount={editor => {
-            editorPart.onEditorDidMount(editor);
-            inferenceEditorService.editor = editor;
-        } }
-            onEditorWillUnmount={e => editorPart.onEditorWillUnmount(e)}
-            />
-    </SplitPane>
-    renderApp(app);
-
     getRootPath(rootPathProviderUrl).then(rootPath => {
         const { webSocket, connection } = createWebSocketConnection(languageServerUrl);
         const workspace = new RemoteWorkspace({ rootPath, connection });
-        workbench = new Workbench({
+        setOnRename((o,n)=>workspace.renameFile(o,n))
+        const workbench = new Workbench({
             workspace, documentManager, explorerPart, editorPart
         });
         webSocket.onopen = () => {
@@ -107,6 +89,30 @@ function activate(): void {
 
             workbench.openWorkspace();
         };
+
+        const app = <SplitPane split='vertical' minSize={300}>
+            <Explorer
+                onDidMount={explorer => {
+                    explorerPart.explorer = explorer
+                    workspace.onFileChange((events) => {
+                        explorer.handleFileEvent(events)
+                    })
+                }}
+                onOpenFile={file => workbench.open(file.uri)}
+                onOpenFolder={file => workbench.props.workspace.resolveFile(file.uri, 1)}
+                onNewFile={(file, name) => workbench.props.workspace.createFile(file.uri + name)}
+                onNewFolder={(file, name) => workbench.props.workspace.createDirectory(file.uri + name)}
+                onDelete={file => workbench.props.workspace.deleteFile(file.uri)}
+                onRename={ (old, newName) => workbench.props.workspace.renameFile(old, newName)}
+                />
+            <Editor onEditorDidMount={editor => {
+                editorPart.onEditorDidMount(editor);
+                inferenceEditorService.editor = editor;
+            } }
+                onEditorWillUnmount={e => editorPart.onEditorWillUnmount(e)}
+                />
+        </SplitPane>
+        renderApp(app);
     });
 }
 

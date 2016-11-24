@@ -23,11 +23,14 @@ class PathWatcher implements Closeable {
     new(Path path) {
         this.path = path
         watchService = path.fileSystem.newWatchService
+        val clazz = class.classLoader.loadClass("com.sun.nio.file.SensitivityWatchEventModifier")
+        val conf = clazz.enumConstants.findFirst[toString == 'HIGH']
         path.register(
             watchService,
-            ENTRY_CREATE,
+            #[ENTRY_CREATE,
             ENTRY_MODIFY,
-            ENTRY_DELETE
+            ENTRY_DELETE],
+            conf as WatchEvent.Modifier
         )
     }
 

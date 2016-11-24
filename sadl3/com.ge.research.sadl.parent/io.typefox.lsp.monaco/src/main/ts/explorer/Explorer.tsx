@@ -7,6 +7,15 @@ import {
     File
 } from '../workspace';
 
+import * as protocol from 'vscode-languageclient/lib/protocol';
+
+
+export function setOnRename(func: (old:string, newUri:string) => void):void {
+    doRename = func
+}
+
+let doRename: (old:string, newUri:string) => void = null;
+
 export class FileNode implements TreeNode {
 
     readonly file: File
@@ -89,6 +98,7 @@ export interface IExplorerProps {
     readonly onNewFile?: CreateElement;
     readonly onNewFolder?: CreateElement;
     readonly onDelete?: (file: File) => void;
+    readonly onRename?: (oldName: string, newName:string) => void;
 }
 
 export interface IExplorerState {
@@ -127,8 +137,13 @@ const folderContextMenuId = 'folderContextMenu';
 export class FileNodeContainer extends decorators.Container {
     render() {
         const node = this.props.node;
-        if (node instanceof NewElementNode) {
-            return <input ref="nameInput" onBlur={() => this.createNewElement(node)} />
+        if (node.name == "unnamed") {
+            return <form onSubmit={(e) => {
+                e.preventDefault();
+                this.rename(e, node);
+            }} >
+                <input ref="nameInput"/>
+            </form>
         } else if (FileNode.is(node)) {
             const contextMenuId = node.file.directory ? folderContextMenuId : fileContextMenuId;
             return <ContextMenuTrigger id={contextMenuId}>
@@ -138,10 +153,11 @@ export class FileNodeContainer extends decorators.Container {
         return super.render();
     }
 
-    createNewElement(node: NewElementNode) {
-        const input = ReactDOM.findDOMNode<HTMLInputElement>(this);
-        node.name = input.value;
-        node.create();
+    rename(event: React.FormEvent<HTMLElement>, node: TreeNode) {
+        const oldUri = (node as FileNode).file.uri
+        const newName = (event.currentTarget.firstChild as HTMLInputElement).value;
+        const newUri = oldUri.substr(0,oldUri.lastIndexOf("/")+1) + newName
+        doRename(oldUri, newUri);
     }
 
     componentDidMount() {
@@ -297,6 +313,30 @@ export class Explorer extends React.Component<IExplorerProps, IExplorerState> {
         this.setState({});
     }
 
+    handleFileEvent(events: protocol.FileEvent[]) {
+        const node = (this.state.rootNode as FileNode)
+        this.props.onOpenFolder(node.file).then(file => {
+            this.setState({
+                rootNode: new FileNode(file)
+            });
+            return node;
+        });
+    }
+
+    find(node: FileNode, uri: string) : FileNode | null {
+        if (uri === node.file.uri) {
+            return node
+        } else if (uri.substring(0, node.file.uri.length) === node.file.uri) {
+            for (let c of node.children) {
+                const candidate = this.find(c as FileNode, uri);
+                if (candidate !== null) 
+                    return candidate;
+            }
+        }
+        return null
+    }
+
+
     merge(node: FileNode, file: File): FileNode | null {
         const parent = node.parent;
         if (parent && parent.children) {
@@ -346,19 +386,18 @@ export class Explorer extends React.Component<IExplorerProps, IExplorerState> {
     }
 
     onMenuItemClick(event: MouseEvent, data: ExplorerMenu.ItemData, target: Element): void {
-        if ('node' in target) {
-            // FIXME: it is bogus, we should retrieve a node from a state, otherwise setState(...) don't work
-            const node = (target as any).node as FileNode;
+        const node = this.state.selectedNode as FileNode;
+        if (node) {
             if (data.action === 'open' && this.props.onOpenFile) {
                 this.props.onOpenFile(node.file);
             } else if (data.action === 'delete' && this.props.onDelete) {
                 this.props.onDelete(node.file);
             } else if (data.action === 'newFile' && this.props.onNewFile) {
-                this.insertNewElement(node, this.props.onNewFile);
+                this.props.onNewFile(node.file, "unnamed");
             } else if (data.action === 'newFolder' && this.props.onNewFolder) {
                 this.expand(node).then(n => {
                     this.update();
-                    this.insertNewElement(n, this.props.onNewFolder!);
+                    this.props.onNewFolder(node.file, "unnamed");
                 });
                 this.update();
             }

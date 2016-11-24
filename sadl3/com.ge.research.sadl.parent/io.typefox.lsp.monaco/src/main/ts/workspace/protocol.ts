@@ -33,6 +33,21 @@ export namespace CreateDirectoryRequest {
     }
 }
 
+
+export interface RenameFileParams {
+    oldUri: string;
+    newUri: string;
+}
+
+export namespace RenameFileRequest {
+    export const type: RequestType<RenameFileParams, void, void, void> = {
+        get method() {
+            return 'workspace/renameFile'
+        },
+        _: undefined
+    }
+}
+
 export interface DeleteFileParams {
     uri: string;
 }

@@ -22,6 +22,7 @@ import org.eclipse.lsp4j.services.LanguageServer
 import org.eclipse.xtend.lib.annotations.Delegate
 
 import static extension java.nio.file.Files.*
+import java.nio.file.Files
 
 class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRpcMethodProvider, WorkspaceServer, Endpoint {
 
@@ -48,7 +49,7 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 				client?.didChangeWatchedFiles(params)
 			]
 		]
-
+		
 		val builder = new ThreadFactoryBuilder
 		builder.nameFormat = WorkspaceServerImpl.simpleName + ' %d'
 		val threadFactory = builder.build
@@ -103,6 +104,13 @@ class WorkspaceServerImpl implements LanguageServer, LanguageClientAware, JsonRp
 		return CompletableFutures.computeAsync [ cancelChecker |
 			val path = params.uri.toPath
 			fileManager.delete(path)
+			return null;
+		]
+	}
+	
+	override renameFile(RenameFileParams params) {
+		return CompletableFutures.computeAsync [ cancelChecker |
+			Files.move(params.oldUri.toPath, params.newUri.toPath)
 			return null;
 		]
 	}
