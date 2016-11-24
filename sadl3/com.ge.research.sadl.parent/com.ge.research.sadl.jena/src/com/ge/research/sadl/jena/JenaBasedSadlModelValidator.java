@@ -2329,59 +2329,97 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean PropOfSubjectCheck) {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean propOfSubjectCheck) {
 		if (subject instanceof SadlResource) {
-			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
-			if (rsrc != null) {
-				if (ontModel != null) {
-					String subjString = declarationExtensions.getConceptUri((SadlResource)subject);
-					if(subjString == null || subjString.isEmpty()){
-						return;
-					}
-					OntResource subj = ontModel.getOntResource(subjString);
-					if(subj == null){
-						return;
-					}
-					String propString = declarationExtensions.getConceptUri(predicate);
-					if(propString == null || propString.isEmpty()){
-						return;
-					}
-					Property prop = ontModel.getProperty(propString);
-					StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
-					boolean matchFound = false;
-					while (stmtitr.hasNext()) {
-						RDFNode obj = stmtitr.nextStatement().getObject();
-						if (obj.isResource()) {
-							if (obj.canAs(UnionClass.class)){
-								ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = obj.as(UnionClass.class).listOperands();
-								while (itr.hasNext()) {
-									com.hp.hpl.jena.rdf.model.Resource cls = itr.next();
-									if (cls.isURIResource()){ 
-										String clsURI = cls.asResource().getURI();
-										if(clsURI != null && clsURI.equals(subj.getURI())) {
-											matchFound = true;			
-											break;
-										}
-									}
-								}
-							}
-							else if (subj != null && obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
-								matchFound = true;	
-								break;
-							}
-						}
-					}
-					stmtitr.close();
-					if (subj != null && !matchFound) {
-						if(PropOfSubjectCheck){
-							issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
-						}else{
-							issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+			OntConceptType stype;
+			try {
+				stype = declarationExtensions.getOntConceptType((SadlResource)subject);
+				if (stype.equals(OntConceptType.VARIABLE)) {
+					// for now don't do any checking--may be able to do so later with variable definitions
+					return;
+				}
+				org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
+				if (rsrc != null) {
+					if (ontModel != null) {
+						OntResource subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
+						Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+						if (subj != null && prop != null) {
+							checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck);
 						}
 					}
 				}
+			} catch (CircularDefinitionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+	}
+
+	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject, boolean propOfSubjectCheck) {
+		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
+		boolean matchFound = false;
+		while (stmtitr.hasNext()) {
+			RDFNode obj = stmtitr.nextStatement().getObject();
+			if (obj.isResource()) {
+				matchFound = checkForPropertyDomainMatch(subj, prop, obj.asResource());
+			}
+			if (matchFound) {
+				break;
+			}
+		}
+		stmtitr.close();
+		if (subj != null && !matchFound) {
+			if(propOfSubjectCheck){
+				issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+			}else{
+				issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+			}
+		}
+	}
+	
+	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) {
+		if (obj.isResource()) {
+			if (obj.canAs(UnionClass.class)){
+				ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = obj.as(UnionClass.class).listOperands();
+				while (itr.hasNext()) {
+					com.hp.hpl.jena.rdf.model.Resource cls = itr.next();
+					if (cls.isURIResource() && cls.asResource().getURI().equals(subj.getURI())) {
+						itr.close();
+						return true;
+					}
+				}
+				itr.close();
+			}
+			else if (subj != null && obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
+				return true;	
+			}
+			else {
+				if (subj.canAs(OntClass.class)){
+					try {
+						if ( SadlUtils.classIsSubclassOf(subj.as(OntClass.class), obj.as(OntResource.class),true, null)) {
+							return true;
+						}
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else if (subj.canAs(Individual.class)){
+					Individual inst = subj.as(Individual.class);
+					ExtendedIterator<Resource> itr = inst.listRDFTypes(false);
+					while (itr.hasNext()) {
+						Resource cls = itr.next();
+						boolean match = checkForPropertyDomainMatch(subj, prop, cls);
+						if (match) {
+							itr.close();
+							return true;
+						}
+					}
+					
+				}
+			}
+		}
+		return false;
 	}
 
 }
