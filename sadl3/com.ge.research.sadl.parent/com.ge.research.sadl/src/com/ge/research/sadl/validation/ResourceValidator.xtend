@@ -23,13 +23,13 @@ import com.ge.research.sadl.processing.ValidationAcceptor
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.service.OperationCanceledError
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.IAcceptor
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
 import org.eclipse.xtext.validation.ResourceValidatorImpl
-import org.eclipse.xtext.resource.XtextResource
-import org.eclipse.xtext.service.OperationCanceledError
 
 class ResourceValidator extends ResourceValidatorImpl {
 	
@@ -38,9 +38,11 @@ class ResourceValidator extends ResourceValidatorImpl {
 	
 	override validate(Resource resource, CheckMode mode, CancelIndicator mon) throws OperationCanceledError {
 		if (resource instanceof XtextResource) {
-			resource.cache.get('issues', resource) [
+			return resource.cache.get('issues', resource) [
 				super.validate(resource, mode, mon)
-			]
+			];
+		} else {
+			return emptyList;
 		}
 	}
 	

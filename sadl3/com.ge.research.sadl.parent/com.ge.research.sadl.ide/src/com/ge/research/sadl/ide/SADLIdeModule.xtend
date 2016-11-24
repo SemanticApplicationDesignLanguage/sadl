@@ -34,6 +34,11 @@ import org.eclipse.xtext.ide.server.coloring.IColoringService
  */
 class SADLIdeModule extends AbstractSADLIdeModule {
 
+	@Override
+	override configureContentAssistLexer(Binder binder) {
+		binder.bind(Lexer).annotatedWith(Names.named(LexerIdeBindings.CONTENT_ASSIST)).to(JFlexBasedInternalSADLLexer)
+	}
+
 	def Class<? extends IdeContentProposalProvider> bindIdeContentProposalProvider() {
 		return SadlIdeContentProposalProvider;
 	}
@@ -41,15 +46,13 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 	def Class<? extends IColoringService> bindISemanticHighlightService() {
 		return SadlColoringService;
 	}
-	
+
 	def Class<? extends ILanguageServerExtension> bindILanguageServerExtension() {
 		return ISadlLanguageServerExtension
 	}
 
-	override configureContentAssistLexer(Binder binder) {
-		binder.bind(Lexer)
-			.annotatedWith(Names.named(LexerIdeBindings.CONTENT_ASSIST))
-			.to(JFlexBasedInternalSADLLexer)
-	}
-	
+//	def Class<? extends ICodeLensService> bindICodeLensService() {
+//		return SadlCodeLensService;
+//	}
+
 }

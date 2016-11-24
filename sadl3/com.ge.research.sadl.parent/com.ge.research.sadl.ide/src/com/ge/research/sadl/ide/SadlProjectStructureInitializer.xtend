@@ -1,5 +1,4 @@
 /************************************************************************
- * Copyright 2007-2016- General Electric Company, All Rights Reserved
  * 
  * Project: SADL
  * 
@@ -17,7 +16,6 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide
 
-import com.ge.research.sadl.utils.PathToFileUriConverter
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import java.io.FileWriter
@@ -42,8 +40,10 @@ class SadlProjectStructureInitializer {
 	 */
 	public static val DOT_PROJECT_FILENAME = '.project';
 	
-	static val SAMPLE_FILENAME = '''Sample.sadl''';
-	static val OWL_BASE_MODEL_FILENAME = '''«SADL_BASE_MODEL_FILENAME».owl''';
+	static val SHAPES_FILENAME = 'Shapes.sadl';
+	static val CIRCLE_FILENAME = 'Circle.sadl';
+	static val RECTANGLE_FILENAME = 'Rectangle.sadl';
+	static val TEST_FILENAME = 'Test.sadl';
 
 	static val IMPLICIT_MODEL_CONTENT = '''
 		uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
@@ -54,77 +54,52 @@ class SadlProjectStructureInitializer {
 		 	described by unit with values of type string.
 	''';
 
-	static val IMPLICIT_OWL_MODEL_CONTENT = '''
-		<rdf:RDF
-		    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		    xmlns:owl="http://www.w3.org/2002/07/owl#"
-		    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel#"
-		    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-		    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-		  xml:base="http://sadl.org/sadlimplicitmodel">
-		  <owl:Ontology rdf:about="">
-		    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'SadlImplicitModel.sadl' and should not be directly edited.</rdfs:comment>
-		  </owl:Ontology>
-		  <owl:Class rdf:ID="UnittedQuantity"/>
-		  <owl:Class rdf:ID="Event"/>
-		  <owl:DatatypeProperty rdf:ID="value">
-		    <rdfs:domain rdf:resource="#UnittedQuantity"/>
-		    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
-		  </owl:DatatypeProperty>
-		  <owl:DatatypeProperty rdf:ID="unit">
-		    <rdfs:domain rdf:resource="#UnittedQuantity"/>
-		    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-		  </owl:DatatypeProperty>
-		  <owl:AnnotationProperty rdf:ID="impliedProperty"/>
-		</rdf:RDF>
-	''';
-
-	static val BASE_OWL_MODEL_CONTENT = '''
-		<rdf:RDF
-		    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		    xmlns:owl="http://www.w3.org/2002/07/owl#"
-		    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-		    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel#"
-		    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
-		  <owl:Ontology rdf:about="">
-		    <rdfs:comment xml:lang="en">Base model for SADL. These concepts can be used without importing.</rdfs:comment>
-		  </owl:Ontology>
-		  <owl:Class rdf:ID="ExternalEquation"/>
-		  <owl:Class rdf:ID="Equation"/>
-		  <owl:DatatypeProperty rdf:ID="externalURI">
-		    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#anyURI"/>
-		    <rdfs:domain rdf:resource="#Equation"/>
-		  </owl:DatatypeProperty>
-		  <owl:DatatypeProperty rdf:ID="expression">
-		    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-		    <rdfs:domain rdf:resource="#Equation"/>
-		  </owl:DatatypeProperty>
-		</rdf:RDF>	
-	''';
+	static val SHAPES_FILE_CONTENT = '''
+	uri "http://sadl.org/«SHAPES_FILENAME»" alias Shapes.
 	
-	static val SAMPLE_FILE_CONTENT = '''
-		uri "http://sadl.org/«SAMPLE_FILENAME»".
-		
-		Shape is a class described by area with values of type float.
-		
-		Rectangle is a type of Shape,
-			described by height with values of type float,
-			described by width with values of type float.
-		
-		Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
-		
-		MyRect is a Rectangle with height 2.5, with width 5.5.
-		
-		Test: area of MyRect is 14.75.
-		
-		Test: area of MyRect is 13.75.
+	Shape is a class described by area with values of type float.
+	'''
+	
+	static val CIRCLE_FILE_CONTENT = '''
+	uri "http://sadl.org/«CIRCLE_FILENAME»" alias Circle.
+	
+	import "http://sadl.org/«SHAPES_FILENAME»".
+	
+	Circle is a type of Shape described by radius with values of type float.
+	
+	Rule Area: if x is a Circle then area of x is radius of x ^2 * PI.
+	'''
+	
+	static val RECTANGLE_FILE_CONTENT = '''
+	uri "http://sadl.org/«RECTANGLE_FILENAME»" alias Rectangle.
+
+	import "http://sadl.org/«SHAPES_FILENAME»".
+
+	Rectangle is a type of Shape,
+		described by height with values of type float,
+		described by width with values of type float.
+
+	Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
+	'''
+	
+	static val TEST_FILE_CONTENT = '''
+	uri "http://sadl.org/«TEST_FILENAME»" alias Test.
+	
+	import "http://sadl.org/«CIRCLE_FILENAME»".
+	import "http://sadl.org/Rectangle.sadl".
+	
+	MyCircle is a Circle with radius 4.5.
+	MyRect is a Rectangle with height 2.5, with width 5.5.
+
+	Ask: "select ?sh ?ar where {?sh <area> ?ar}".
+
+	Test: area of MyCircle is 63.61.
+
+	Test: area of MyCircle is 53.51.
 	'''
 
 	@Inject
 	DotProjectContentProvider dotProjectContentProvider;
-
-	@Inject
-	PathToFileUriConverter uriConverter;
 
 	/**
 	 * Initializes the SADL project structure on demand.
@@ -135,7 +110,10 @@ class SadlProjectStructureInitializer {
 		// This is just a hack to be able to locate the project root and 
 		// the implicit model folder in a web project as well. 
 		projectRoot.createDotProjectFileIfMissing;
-		projectRoot.createSampleFileIfMissing;
+		projectRoot.createShapesFileIfMissing;
+		projectRoot.createCircleFileIfMissing;
+		projectRoot.createRectangleFileIfMissing;
+		projectRoot.createTestFileIfMissing;
 
 		val implicitModelRoot = projectRoot.resolve(SADL_IMPLICIT_MODEL_FOLDER);
 		if (!implicitModelRoot.toFile.exists) {
@@ -147,57 +125,27 @@ class SadlProjectStructureInitializer {
 		if (!owlModelsRoot.toFile.exists) {
 			Files.createDirectories(owlModelsRoot);
 		}
-		owlModelsRoot.createBaseOwlFileIfMissing;
-		owlModelsRoot.createImplicitModelOwlFileIfMissing;
-		owlModelsRoot.createOntologyPolicyRdfFileIfMissing;
 	}
 
-	private def String getOntologyPolicyRdfContent(Path owlModelsRoot) '''
-		<rdf:RDF
-		    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		    xmlns:j.0="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#">
-		  <j.0:OntologySpec>
-		    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
-		    <j.0:altURL rdf:resource="«owlModelsRoot.toUriString»/«OWL_IMPLICIT_MODEL_FILENAME»"/>
-		    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-		    <j.0:createdBy>SADL</j.0:createdBy>
-		    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-		    >sadlimplicitmodel</j.0:prefix>
-		  </j.0:OntologySpec>
-		  <j.0:OntologySpec>
-		    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
-		    <j.0:altURL rdf:resource="«owlModelsRoot.toUriString»/«OWL_BASE_MODEL_FILENAME»"/>
-		    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-		    <j.0:createdBy>SADL</j.0:createdBy>
-		    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-		    >sadlbasemodel</j.0:prefix>
-		  </j.0:OntologySpec>
-		</rdf:RDF>
-	'''
-
-	private def String toUriString(Path path) {
-		return uriConverter.createFileUri(path).toString;
-	}
-
-	def void createDotProjectFileIfMissing(Path projectRoot) {
+	private def void createDotProjectFileIfMissing(Path projectRoot) {
 		val projectName = projectRoot.toFile.name;
 		projectRoot.createFileIfMissing(DOT_PROJECT_FILENAME, dotProjectContentProvider.getContent(projectName));
 	}
 	
-	def void createSampleFileIfMissing(Path projectRoot) {
-		projectRoot.createFileIfMissing(SAMPLE_FILENAME, SAMPLE_FILE_CONTENT);	
+	private def void createShapesFileIfMissing(Path projectRoot) {
+		projectRoot.createFileIfMissing(SHAPES_FILENAME, SHAPES_FILE_CONTENT);
+	}
+	
+	private def void createCircleFileIfMissing(Path projectRoot) {
+		projectRoot.createFileIfMissing(CIRCLE_FILENAME, CIRCLE_FILE_CONTENT);
 	}
 
-	private def void createOntologyPolicyRdfFileIfMissing(Path owlModelsRoot) {
-		owlModelsRoot.createFileIfMissing(ONT_POLICY_FILENAME, getOntologyPolicyRdfContent(owlModelsRoot));
+	private def void createRectangleFileIfMissing(Path projectRoot) {
+		projectRoot.createFileIfMissing(RECTANGLE_FILENAME, RECTANGLE_FILE_CONTENT);
 	}
-
-	private def createImplicitModelOwlFileIfMissing(Path owlModelsRoot) {
-		owlModelsRoot.createFileIfMissing(OWL_IMPLICIT_MODEL_FILENAME, IMPLICIT_OWL_MODEL_CONTENT);
-	}
-
-	private def createBaseOwlFileIfMissing(Path owlModelsRoot) {
-		owlModelsRoot.createFileIfMissing(OWL_BASE_MODEL_FILENAME, BASE_OWL_MODEL_CONTENT);
+	
+	private def void createTestFileIfMissing(Path projectRoot) {
+		projectRoot.createFileIfMissing(TEST_FILENAME, TEST_FILE_CONTENT);	
 	}
 
 	private def createImplicitModelFileIfMissing(Path implicitModelRoot) {

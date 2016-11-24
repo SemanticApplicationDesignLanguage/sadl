@@ -28,7 +28,7 @@ public class OntModelProvider {
 		List<Object> otherContent;
 		List<SadlCommand> sadlCommands = null;
 		Map<EObject, Property> impliedPropertiesUsed = null;
-		boolean isLoading = true;
+		boolean isLoading = false;
 		boolean hasCircularImport = false;
 		
 		@Override
@@ -38,7 +38,7 @@ public class OntModelProvider {
 	}
 	
 	public static void registerResource(Resource resource) {
-		findAdapter(resource);
+		findAdapter(resource).isLoading = true;
 	}
 	
 	public static boolean checkForCircularImport(Resource resource) {
@@ -75,6 +75,7 @@ public class OntModelProvider {
 	
 	public static void addOtherContent(Resource resource, Object otherContent) {
 		OntModelAdapter adapter = findAdapter(resource);
+		adapter.isLoading = true;
 		if (adapter.otherContent == null) {
 			adapter.otherContent = new ArrayList<Object>();
 		}

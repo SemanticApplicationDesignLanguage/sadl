@@ -95,7 +95,7 @@ class SadlInferencer {
 	private def createInferenceResult(Document doc, Query query, ResultSet resultSet) {
 		new InferenceResult => [
 			status = Passed;
-			value = '''Query: «query»«'\n'»«resultSet.toStringWithIndent(5)»''';
+			value = '''Query: «query»«'\n'»«resultSet.toStringWithIndent(5)»'''.trim;
 			range = getRange(doc, query);
 		];
 	}
@@ -104,7 +104,7 @@ class SadlInferencer {
 		val passed = testResult.passed;
 		new InferenceResult => [
 			status = if (passed) Passed else Failed;
-			value = '''Test «IF passed»passed«ELSE»failed«ENDIF»: «test»«IF !passed» («testResult»)«ENDIF»''';
+			value = '''Test «IF passed»passed«ELSE»failed«ENDIF»: «test»«IF !passed» («testResult»)«ENDIF»'''.trim;
 			range = getRange(doc, test);
 		];
 	}
@@ -113,6 +113,10 @@ class SadlInferencer {
 		val start = command.offset;
 		val end = start + command.length;
 		new Range(doc.getPosition(start), doc.getPosition(end));
+	}
+	
+	private def trim(CharSequence s) {
+		return if (s instanceof String) s.trim else s?.toString.trim;
 	}
 
 	private def toPath(URI it) {

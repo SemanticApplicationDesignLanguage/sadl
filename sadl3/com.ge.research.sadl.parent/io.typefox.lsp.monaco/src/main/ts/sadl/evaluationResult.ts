@@ -109,12 +109,21 @@ export class EvaluationResult {
             node.style.whiteSpace = 'pre-wrap';
         }
         const segments = data.value.split('\n') || [''];
-        const value = this.expanded ? data.value : `${segments[0]} ${segments.length > 1 ? '...' : ''}`;
-        node.textContent = value;
+        const multiline = segments.length > 1;
+        const html: string[] = [];
+
+        const height = this.editor.getConfiguration().fontInfo.fontSize;
+        const svg = multiline ? `<img src="./media/${this.expanded ? 'collapse' : 'expand'}.svg" style="width:${height}px;height:${height}px;"/>` : undefined;
+        if (svg) {
+            html.push(svg);
+        }
+        html.push(this.expanded ? data.value : `${segments[0]} ${multiline ? '...' : ''}`);
+        node.innerHTML = html.join('<span>&nbsp;</span>');
     }
 
     protected createEvaluationResultElement(): ElementDetails {
-        const node = document.createElement('a');
+        const node = document.createElement('div');
+        node.style.height = `${this.editor.getConfiguration().lineHeight}px`;
         node.style.fontSize = '12px';
         node.style.fontFamily = 'Menlo, Monaco, \'Courier New\', monospace';
         node.style.lineHeight = '18px';

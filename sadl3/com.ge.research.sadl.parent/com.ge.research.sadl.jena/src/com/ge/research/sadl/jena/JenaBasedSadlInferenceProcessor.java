@@ -1,6 +1,5 @@
 package com.ge.research.sadl.jena;
 
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -56,8 +55,6 @@ import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
-import com.ge.research.sadl.reasoner.ModelError;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
@@ -71,7 +68,6 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -150,6 +146,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		setTheJenaModel(OntModelProvider.find(resource));
 		
 		try {
+			// This call discards the configuration manager state (if any) in headless case.
+			getConfigMgr(getOwlFormat(), true);
 			checkIfExplanationNeeded(cmds);
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
@@ -1164,8 +1162,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		return null;
 	}
-	
+
 	private IConfigurationManagerForIDE getConfigMgr(String format) throws ConfigurationException {
+		return getConfigMgr(format, false);
+	}
+	
+	private IConfigurationManagerForIDE getConfigMgr(String format, boolean discardState) throws ConfigurationException {
 		if (configMgr == null) {
 			if (format == null) {
 				format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
@@ -1176,7 +1178,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath(), format, true);
 			}
 			else {
-				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath() , format);
+				final String modelFolder = getModelFolderPath();
+				if (discardState) {
+					boolean success = ConfigurationManagerForIdeFactory.discardConfigurationManagerState(modelFolder);
+					if (success) {
+						logger.info(
+								"Configuration manager state has been successfully discard on purpose. Model folder: "
+										+ modelFolder);
+					}
+				}
+				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder , format);
 			}
 		}
 		return configMgr;

@@ -13,8 +13,9 @@ import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import java.nio.file.Files
 import java.nio.file.Paths
+
+import static java.nio.file.Files.*
 
 /**
  * Singleton service class for initializing the root folder for the language server.
@@ -26,13 +27,13 @@ class RootPathProviderService implements Supplier<String> {
 	
 	private Supplier<String> delegate = Suppliers.memoize([
 		val tempRoot = Paths.get(StandardSystemProperty.JAVA_IO_TMPDIR.value);
-		val temp = Files.createTempDirectory(tempRoot, 'sadlRoot');
-		temp.initialize
+		val temp = createDirectory(createTempDirectory(tempRoot, 'sadlRoot').resolve('SADLExample'));
+		temp.initialize;
 		return temp.toFile.absolutePath;
 	]);
 
 	@Inject
-	extension SadlProjectStructureInitializer
+	extension SadlProjectStructureInitializer;
 
 	@Override
 	override get() {
