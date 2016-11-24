@@ -24,11 +24,17 @@
 
 .string {
     color: #000000 !important;
+    background: #E6F0FF !important;
+}
+
+.number {
+    color: #000000 !important;
+    background: #E6F0FF !important;
 }
 
 .uri {
     color: #000000 !important;
-    font-weight: bold;
+    background: white !important;
 }
 
 .class {

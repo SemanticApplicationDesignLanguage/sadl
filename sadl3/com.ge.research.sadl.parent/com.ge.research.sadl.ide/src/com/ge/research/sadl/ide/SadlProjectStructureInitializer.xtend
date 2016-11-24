@@ -83,7 +83,7 @@ class SadlProjectStructureInitializer {
 	'''
 	
 	static val TEST_FILE_CONTENT = '''
-	uri "http://sadl.org/«TEST_FILENAME»" alias Test.
+	uri "http://sadl.org/«TEST_FILENAME»".
 	
 	import "http://sadl.org/«CIRCLE_FILENAME»".
 	import "http://sadl.org/Rectangle.sadl".
