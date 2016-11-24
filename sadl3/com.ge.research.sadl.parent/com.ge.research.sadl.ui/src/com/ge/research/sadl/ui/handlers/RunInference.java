@@ -65,7 +65,9 @@ public class RunInference extends SadlActionHandler {
 		        					if (((List<?>)infresults).get(i) instanceof ResultSet && cmds != null && cmds instanceof List<?> && ((List<?>)cmds).size() >= i && 
 		        							((List<?>)cmds).get(i) instanceof Query) {
 		        						ResultSet rs = (ResultSet) ((List<?>)infresults).get(i);
-		        						if (((Query)((List<?>)cmds).get(i)).isGraph()) {
+		        						if (((Query)((List<?>)cmds).get(i)).isGraph() ||
+		        								(((Query)((List<?>)cmds).get(i)).getSparqlQueryString() != null && 
+		        										(((Query)((List<?>)cmds).get(i)).getSparqlQueryString().toLowerCase().startsWith("construct")))) {
 			        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (i + 1) + ":\n");
 			    							String msg = "Graph: " + cmds.get(i).toString() + "\n";
 			    							msg += rs.toStringWithIndent(5);
