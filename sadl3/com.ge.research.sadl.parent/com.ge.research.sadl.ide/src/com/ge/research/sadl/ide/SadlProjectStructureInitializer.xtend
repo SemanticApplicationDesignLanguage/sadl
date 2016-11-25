@@ -51,52 +51,47 @@ class SadlProjectStructureInitializer {
 		impliedProperty is a type of annotation.
 		UnittedQuantity is a class,
 		 	described by ^value with values of type decimal,
-		 	described by unit with values of type string.
-	''';
+		 	described by unit with values of type string.''';
 
 	static val SHAPES_FILE_CONTENT = '''
-	uri "http://sadl.org/«SHAPES_FILENAME»" alias Shapes.
-	
-	Shape is a class described by area with values of type float.
-	'''
+		uri "http://sadl.org/«SHAPES_FILENAME»" alias Shapes.
+		
+		Shape is a class described by area with values of type float.''';
 	
 	static val CIRCLE_FILE_CONTENT = '''
-	uri "http://sadl.org/«CIRCLE_FILENAME»" alias Circle.
-	
-	import "http://sadl.org/«SHAPES_FILENAME»".
-	
-	Circle is a type of Shape described by radius with values of type float.
-	
-	Rule Area: if x is a Circle then area of x is radius of x ^2 * PI.
-	'''
+		uri "http://sadl.org/«CIRCLE_FILENAME»" alias Circle.
+		
+		import "http://sadl.org/«SHAPES_FILENAME»".
+		
+		Circle is a type of Shape described by radius with values of type float.
+		
+		Rule Area: if x is a Circle then area of x is radius of x ^2 * PI.''';
 	
 	static val RECTANGLE_FILE_CONTENT = '''
-	uri "http://sadl.org/«RECTANGLE_FILENAME»" alias Rectangle.
+		uri "http://sadl.org/«RECTANGLE_FILENAME»" alias Rectangle.
 
-	import "http://sadl.org/«SHAPES_FILENAME»".
+		import "http://sadl.org/«SHAPES_FILENAME»".
 
-	Rectangle is a type of Shape,
-		described by height with values of type float,
-		described by width with values of type float.
+		Rectangle is a type of Shape,
+			described by height with values of type float,
+			described by width with values of type float.
 
-	Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
-	'''
+		Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.''';
 	
 	static val TEST_FILE_CONTENT = '''
-	uri "http://sadl.org/«TEST_FILENAME»".
-	
-	import "http://sadl.org/«CIRCLE_FILENAME»".
-	import "http://sadl.org/Rectangle.sadl".
-	
-	MyCircle is a Circle with radius 4.5.
-	MyRect is a Rectangle with height 2.5, with width 5.5.
+		uri "http://sadl.org/«TEST_FILENAME»".
+		
+		import "http://sadl.org/«CIRCLE_FILENAME»".
+		import "http://sadl.org/Rectangle.sadl".
+		
+		MyCircle is a Circle with radius 4.5.
+		MyRect is a Rectangle with height 2.5, with width 5.5.
 
-	Ask: "select ?sh ?ar where {?sh <area> ?ar}".
+		Ask: "select ?sh ?ar where {?sh <area> ?ar}".
 
-	Test: area of MyCircle is 63.61.
+		Test: area of MyCircle is 63.61.
 
-	Test: area of MyCircle is 53.51.
-	'''
+		Test: area of MyCircle is 53.51.''';
 
 	@Inject
 	DotProjectContentProvider dotProjectContentProvider;
@@ -110,6 +105,7 @@ class SadlProjectStructureInitializer {
 		// This is just a hack to be able to locate the project root and 
 		// the implicit model folder in a web project as well. 
 		projectRoot.createDotProjectFileIfMissing;
+
 		projectRoot.createShapesFileIfMissing;
 		projectRoot.createCircleFileIfMissing;
 		projectRoot.createRectangleFileIfMissing;

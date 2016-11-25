@@ -32,54 +32,40 @@
     background: #E6F0FF !important;
 }
 
-.uri {
+.attribute {
     color: #000000 !important;
     background: white !important;
 }
 
-.class {
+.type {
     color: #000080 !important;
     font-weight: bold;  
 }
 
-.instance {
+.tag {
     color: #0000FF !important;
 }
 
-.variable {
+.constant {
     color: #FF00FF !important;
     font-weight: bold;
 }
 
-.dataProperty {
+.constructor {
     color: #008000 !important;
     font-weight: bold;
 }
 
-.objectProperty {
-    color: #008000 !important;
-    font-weight: bold;
-}
-
-.annotationProperty {
-    color: #008000 !important;
-    font-weight: bold;
-}
-
-.rdfProperty {
+.namespace {
     color: #00CC00 !important;
     font-weight: bold;
 }
 
-.rdfDataType {
+.warn-token {
     color: #000080 !important;
 }
 
-.functionName {
+.predefined {
     color: #801480 !important;
     font-weight: bold;
-}
-
-.underline {
-    text-decoration: underline;
 }

@@ -26,20 +26,35 @@ export class ColoringInformation {
     styles: number[];
 }
 
-// FIXME move to coloring service
 export class ColoringIdToCssStyleMap {
     static map: Map<number, string> = new Map<number, string>([
-        [27, 'default'],
-        [28, 'uri'],
-        [29, 'class'],
-        [30, 'variable'],
-        [31, 'instance'],
-        [32, 'rdfDataType'],
-        [33, 'rdfProperty'],
-        [34, 'functionName'],
-        [35, 'dataProperty'],
-        [36, 'objectProperty'],
-        [37, 'annotationProperty']
+        [1, 'identifier'],
+        [2, 'entity'],
+        [3, 'constructor'],
+        [4, 'operators'],
+        [5, 'tag'],
+        [6, 'namespace'],
+        [7, 'keyword'],
+        [8, 'info-token'],
+        [9, 'type'],
+        [10, 'string'],
+        [11, 'warn-token'],
+        [12, 'predefined'],
+        [13, 'string.escape'],
+        [14, 'error-token'],
+        [15, 'invalid'],
+        [16, 'comment'],
+        [17, 'debug-token'],
+        [18, 'commen.doc'],
+        [19, 'regexp'],
+        [20, 'constant'],
+        [21, 'attribute'],
+
+        [22, 'public'],
+        [23, 'private'],
+        [24, 'protected'],
+        [25, 'static'],
+        [26, 'final']
     ]);
 }
 

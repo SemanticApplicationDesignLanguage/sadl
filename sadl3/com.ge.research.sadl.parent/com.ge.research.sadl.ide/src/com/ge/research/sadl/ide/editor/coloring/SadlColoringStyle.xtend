@@ -24,17 +24,17 @@ import org.eclipse.lsp4j.ColoringStyle
  */
 abstract class SadlColoringStyle extends ColoringStyle {
 
-	public static val DEFAULT_ID = 27;
-	public static val URI_ID = 28;
-	public static val CLASS_ID = 29;
-	public static val VARIABLE_ID = 30;
-	public static val INSTANCE_ID = 31;
-	public static val RDFDATATYPE_ID = 32;
-	public static val RDF_PROPERTY_ID = 33;
-	public static val FUNCTION_NAME_ID = 34;
-	public static val DATA_PROPERTY_ID = 35;
-	public static val OBJECT_PROPERTY_ID = 36;
-	public static val ANNOTATION_PROPERTY_ID = 37;
+	public static val DEFAULT_ID = 0;
+	public static val URI_ID = ColoringStyle.Attribute;
+	public static val CLASS_ID = ColoringStyle.Type;
+	public static val VARIABLE_ID = ColoringStyle.Constant;
+	public static val INSTANCE_ID = ColoringStyle.Tag;
+	public static val RDF_DATATYPE_ID = ColoringStyle.Warn_token;
+	public static val RDF_PROPERTY_ID = ColoringStyle.Namespace;
+	public static val FUNCTION_NAME_ID = ColoringStyle.Predefined;
+	public static val DATA_PROPERTY_ID = ColoringStyle.Constructor;
+	public static val OBJECT_PROPERTY_ID = ColoringStyle.Constructor;
+	public static val ANNOTATION_PROPERTY_ID = ColoringStyle.Constructor;
 
 	private new() {
 		// Only for constants.

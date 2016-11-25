@@ -182,7 +182,7 @@ class SadlColoringService implements IColoringService {
 				return CLASS_ID;
 			}
 			case DATATYPE: {
-				return RDFDATATYPE_ID;
+				return RDF_DATATYPE_ID;
 			}
 			case DATATYPE_LIST: {
 				return CLASS_ID;
