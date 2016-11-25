@@ -73,7 +73,7 @@ class SadlCompletionTest extends AbstractSadlLanguageServerTest {
 			model = '''uri «BASE_URI». import ''';
 			column = model.length;
 			expectedCompletionItems = '''
-				http://sadl.org/other.sadl (SadlModel) -> http://sadl.org/other.sadl [[0, 43] .. [0, 43]]
+				"http://sadl.org/other.sadl" (SadlModel) -> "http://sadl.org/other.sadl" [[0, 43] .. [0, 43]]
 			''';
 		];
 	}
@@ -88,7 +88,7 @@ class SadlCompletionTest extends AbstractSadlLanguageServerTest {
 			model = '''uri «BASE_URI». import "http://sadl.org/another.sadl". import ''';
 			column = model.length;
 			expectedCompletionItems = '''
-				http://sadl.org/other.sadl (SadlModel) -> http://sadl.org/other.sadl [[0, 82] .. [0, 82]]
+				"http://sadl.org/other.sadl" (SadlModel) -> "http://sadl.org/other.sadl" [[0, 82] .. [0, 82]]
 			''';
 		];
 	}

@@ -64,7 +64,7 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 				ctx.completeEOS(acceptor);
 			}
 			default: {
-				super._createProposals(ruleCall, ctx, acceptor)
+				super._createProposals(ruleCall, ctx, acceptor);
 			}
 		}
 	}
@@ -94,12 +94,12 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			val model = EcoreUtil2.getContainerOfType(ctx.currentModel, SadlModel);
 			val imports = model.imports.map[importedResource].filterNull.map[baseUri].toSet;
 			return [
-				return SADL_IMPLICIT_MODEL_FILENAME !== EObjectURI?.lastSegment
+				return SADL_IMPLICIT_MODEL_FILENAME != EObjectURI?.lastSegment
 					&& KNOWN_FILE_EXTENSION.contains(EObjectURI?.fileExtension)
-					&& !imports.contains(name.toString)
+					&& !imports.contains(name.toString);
 			];
 		}
-		super.getCrossrefFilter(reference, ctx)
+		super.getCrossrefFilter(reference, ctx);
 	}
 
 	private def completeEOS(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
