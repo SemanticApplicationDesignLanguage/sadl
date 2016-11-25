@@ -30,6 +30,7 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeCrossrefProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.antlr.internal.Lexer
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
 import org.eclipse.xtext.ide.server.coloring.IColoringService
+import org.eclipse.xtext.resource.impl.DefaultResourceServiceProvider
 
 /**
  * Use this class to register generic IDE components.
@@ -57,4 +58,7 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 		return ISadlLanguageServerExtension
 	}
 
+	def Class<? extends DefaultResourceServiceProvider> bindResourceServiceProvider() {
+		return SadlResourceServiceProvider
+	}
 }
