@@ -111,7 +111,10 @@ public class RunInference extends SadlActionHandler {
 		        			if (errors instanceof List<?>) {
 		        				Iterator<?> erritr = ((List<?>)errors).iterator();
 		        				while (erritr.hasNext()) {
-		        					SadlConsole.writeToConsole(MessageType.ERROR, erritr.next().toString());
+		        					Object nxt = erritr.next();
+		        					if (nxt != null && nxt.toString() != null) {
+		        						SadlConsole.writeToConsole(MessageType.ERROR, nxt.toString());
+		        					}
 		        				}
 		        			}
 		        		}
