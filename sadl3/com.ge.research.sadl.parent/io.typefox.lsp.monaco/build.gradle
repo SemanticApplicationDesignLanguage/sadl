@@ -1,12 +1,9 @@
-import com.moowork.gradle.node.task.NodeTask
-
 buildscript {
 	repositories {
 		maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         jcenter()
 	}
 	dependencies {
-		classpath "com.moowork.gradle:gradle-node-plugin:0.12"
 		classpath "org.akhikhl.gretty:gretty:+"
 	}
 }
@@ -18,15 +15,6 @@ plugins {
 apply plugin: "java"
 apply plugin: "war"
 apply plugin: "org.akhikhl.gretty"
-apply plugin: "com.moowork.node"
-
-node {
-	version = "$versions.nodeJs"
-	npmVersion = "$versions.npm"
-	distBaseUrl = "https://nodejs.org/dist"
-	// true: download false: use local Node.js installation
-	download = true
-}
 
 gretty {
 	servletContainer = "tomcat7"
@@ -59,26 +47,11 @@ dependencies {
 	compile "org.glassfish.jersey.core:jersey-server:$versions.jerseyServer"
 	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$versions.jerseyServletContainerCore"
 	compile "javax.ws.rs:javax.ws.rs-api:$versions.jaxRs"
-	compile "org.webjars:bootstrap:$versions.webjarsBootstrap"
 	testCompile "junit:junit:$versions.junit"
 }
 
 jar {
     from sourceSets.main.allJava
-}
-
-clean.doFirst {
-	delete file("node_modules")
-	delete file("src/main/webapp/dist")
-}
-
-task webpack(type: NodeTask, dependsOn: "npmInstall") {
-	def osName = System.getProperty("os.name").toLowerCase();
-	if (osName.contains("windows")) {
-		script = project.file("node_modules/webpack/bin/webpack.js")
-	} else {
-		script = project.file("node_modules/.bin/webpack")
-	}
 }
 
 task buildStandaloneTomcat(type:Tar, dependsOn: "buildProduct") {
@@ -89,6 +62,3 @@ task buildStandaloneTomcat(type:Tar, dependsOn: "buildProduct") {
     extension = "tgz"
     compression = Compression.GZIP
 }
-
-processResources.dependsOn "webpack"
-war.dependsOn "webpack"
