@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.IntersectionClass;

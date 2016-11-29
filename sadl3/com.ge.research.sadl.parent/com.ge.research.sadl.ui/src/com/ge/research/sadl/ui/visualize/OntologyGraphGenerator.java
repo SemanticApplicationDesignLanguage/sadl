@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
@@ -22,7 +20,6 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.impl.OntClassImpl;
-import com.hp.hpl.jena.ontology.impl.OntResourceImpl;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -36,6 +33,10 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
+/**
+ * @author Tyler Dicks
+ *
+ */
 public class OntologyGraphGenerator {
 
 	protected static String COLOR = "color";
@@ -64,12 +65,29 @@ public class OntologyGraphGenerator {
 	
 	public enum Orientation {TD, LR}
 	
+	/**
+	 * Contructor for the OntologyGraphGenerator class
+	 * 
+	 * @param configMgr
+	 * @param publicUri
+	 * @param project
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
 	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, IProject project) throws ConfigurationException, IOException {
 		this.configMgr = configMgr;
 		this.project  = project;
 		setModels(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS), configMgr.getOntModel(publicUri, Scope.LOCALONLY));
 	}
 	
+	/**
+	 * Method that generates the ontology graph RestultSet, which is fed in to the handler to turn into a 
+	 * graphviz graph.
+	 * 
+	 * @param ontologyResults 	- List of data gathered from the ontology imports, (no longer used)
+	 * @param publicUri 		- The uri of the file being graphed
+	 * @return 					- The ResultSet containing all the classes, instances, and properties.  
+	 */
 	public ResultSet generateOntologyResultSet(List<String[]> ontologyResults, String publicUri){
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		boolean isImport = false;
@@ -100,65 +118,19 @@ public class OntologyGraphGenerator {
 							data = generateClassSubclasses(classInst, data, publicUri);
 						}	
 						
+					}else if(classInst.isRestriction()){
+						data = addRestrictionClassAndProperties(classInst, data, publicUri);
+						
 					}
 					
 				}
 
 			}
 			//check for any single classes (no parents, children, or properties)
-			ExtendedIterator<OntClass> classIter2 = getLocalModel().listClasses();
-			while(classIter2.hasNext()){
-				Object obj2 = classIter2.next();			
-				if(obj2 instanceof OntClass){
-					OntClass classInst = (OntClass)obj2;
-					if(!isInImports(classInst, publicUri)){
-						if(!classInst.isComplementClass() && !classInst.isRestriction() && 
-								!classInst.isUnionClass() && !classInst.isEnumeratedClass() && 
-								!classInst.isIntersectionClass()){
-						//add a single node for the class instance
-							GraphSegment gs = new GraphSegment(classInst, null, null, configMgr);
-							if (!hasClassAsHead(data, classInst)) {
-								data.add(gs);
-								gs.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
-								gs.addHeadAttribute(STYLE, FILLED);
-								gs.addHeadAttribute(FONTCOLOR, WHITE);
-							}
-						}
-					}	
-				}
-			}
+			addSingleNodes(publicUri, data);
 			
-			
-			ExtendedIterator<Individual> individualIter = getLocalModel().listIndividuals();
-			//List<Individual> ilist = individualIter.toList();
 			//Add all instances that have an imported parent:
-			while(individualIter.hasNext()){
-				Individual inst = individualIter.next();
-				if(!isInImports(inst, publicUri)){
-					OntClass parent = inst.getOntClass();
-					GraphSegment gs = new GraphSegment((Resource)inst, "is a",parent , configMgr);
-					gs.addHeadAttribute(SHAPE, DIAMOND);
-					if(isInImports(parent, publicUri)){
-						if(getImportUrl(parent) != null) gs.addTailAttribute(LINK_URL, getImportUrl(parent));
-						gs.addTailAttribute(IS_IMPORT, "true");
-					}else{
-						gs.addTailAttribute(STYLE, FILLED);
-						gs.addTailAttribute(FILL_COLOR, INSTANCE_BLUE);
-						gs.addTailAttribute(FONTCOLOR, WHITE);
-					}
-					gs.addHeadAttribute(STYLE, FILLED);
-					gs.addHeadAttribute(FILL_COLOR, INSTANCE_BLUE);
-					gs.addHeadAttribute(FONTCOLOR, WHITE);
-					if (!data.contains(gs)) {
-						data.add(gs);
-					}
-					//add properties of the instance
-					//data = addInstanceProperties(inst, data, publicUri);
-					
-					
-				}
-				
-			} 
+			addInstancesWithImportParent(publicUri, data); 
 			
 			
 		}catch(Exception e){
@@ -170,8 +142,106 @@ public class OntologyGraphGenerator {
 
 		return rs;
 	}
+
+	/**
+	 * This method is used to add instances contained in the ontology file whose parent class
+	 * is not defined in this ontology file. 
+	 * 
+	 * @param publicUri	- The uri of the ontology file being graphed
+	 * @param data		- The GraphSegment list containing all the ontology graph data up to this point
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
+	private void addInstancesWithImportParent(String publicUri, List<GraphSegment> data)
+			throws ConfigurationException, IOException {
+		ExtendedIterator<Individual> individualIter = getLocalModel().listIndividuals();
+		//Add all instances that have an imported parent:
+		while(individualIter.hasNext()){
+			Individual inst = individualIter.next();
+			if(!isInImports(inst, publicUri)){
+				OntClass parent = inst.getOntClass();
+				GraphSegment gs = new GraphSegment((Resource)inst, "is a",parent , configMgr);
+				gs.addHeadAttribute(SHAPE, DIAMOND);
+				if(isInImports(parent, publicUri)){
+					if(getImportUrl(parent) != null) gs.addTailAttribute(LINK_URL, getImportUrl(parent));
+					gs.addTailAttribute(IS_IMPORT, "true");
+				}else{
+					gs.addTailAttribute(STYLE, FILLED);
+					gs.addTailAttribute(FILL_COLOR, INSTANCE_BLUE);
+					gs.addTailAttribute(FONTCOLOR, WHITE);
+				}
+				gs.addHeadAttribute(STYLE, FILLED);
+				gs.addHeadAttribute(FILL_COLOR, INSTANCE_BLUE);
+				gs.addHeadAttribute(FONTCOLOR, WHITE);
+				if (!data.contains(gs)) {
+					data.add(gs);
+				}
+				//add properties of the instance
+				//data = addInstanceProperties(inst, data, publicUri);
+			}
+			
+		}
+	}
+
+	/**
+	 * Method used to add single class nodes that don't have any child or parent nodes
+	 * 
+	 * @param publicUri	- URI of ontology file being graphed
+ 	 * @param data		- GraphSegment list containing all graph data up to this point
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
+	private void addSingleNodes(String publicUri, List<GraphSegment> data) throws ConfigurationException, IOException {
+		ExtendedIterator<OntClass> classIter2 = getLocalModel().listClasses();
+		while(classIter2.hasNext()){
+			Object obj2 = classIter2.next();			
+			if(obj2 instanceof OntClass){
+				OntClass classInst = (OntClass)obj2;
+				if(!isInImports(classInst, publicUri)){
+					if(!classInst.isComplementClass() && !classInst.isRestriction() && 
+							!classInst.isUnionClass() && !classInst.isEnumeratedClass() && 
+							!classInst.isIntersectionClass()){
+						//add a single node for the class instance
+						GraphSegment gs = new GraphSegment(classInst, null, null, configMgr);
+						if (!hasClassNode(data, classInst)) {
+							data.add(gs);
+							gs.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
+							gs.addHeadAttribute(STYLE, FILLED);
+							gs.addHeadAttribute(FONTCOLOR, WHITE);
+						}
+					}
+				}	
+			}
+		}
+	}
 	
 	
+	/**
+	 * Currently a test method used to try to add class property restrictions
+	 * 
+	 * @param classInst - The class that is being checked for restrictions
+	 * @param data 		- The GraphSegment list continaing all graph data up to this point
+	 * @param publicUri	- The URI of the ontology file being graphed
+	 * @return			- The graph segment list with the added nodes (not implemented yet)
+	 */
+	private List<GraphSegment> addRestrictionClassAndProperties(OntClass classInst, List<GraphSegment> data,
+			String publicUri) {
+		if(classInst.asRestriction().isAllValuesFromRestriction()){
+			 ExtendedIterator<OntProperty> props = classInst.asRestriction().asAllValuesFromRestriction().listDeclaredProperties();
+			 while(props.hasNext()){
+				 //OntProperty prop = props.next();
+				 //String propUri = prop.getURI();
+			 }
+		}
+		return data;
+	}
+
+	/**
+	 * Method used to find the File URL of the graph associated with an imported class
+	 * 
+	 * @param	- Imported class or concept
+	 * @return	- File URL to be added to node hyperlink
+	 */
 	private String getImportUrl(OntResource rsrc) {
 		if (!rsrc.isURIResource()) {
 			return rsrc.toString();
@@ -188,130 +258,135 @@ public class OntologyGraphGenerator {
 		if(prefix!=null){
 			return "\"file:///" + tempDir + "/" + prefix + "Graph.dot.svg\"";
 		}
-	
 		return null;
-
 	}
 
-	private List<GraphSegment> addInstanceProperties(Individual inst, List<GraphSegment> data, String publicUri) throws ConfigurationException, IOException {
-		OntClass parent = inst.getOntClass();
-		StmtIterator sitr = getLocalModel().listStatements(null, RDFS.domain, parent);
-		while (sitr.hasNext()) {
-			Statement stmt = sitr.nextStatement();
-			Resource prop = stmt.getSubject();
-			String name = prop.getLocalName();
-			RDFNode obj = stmt.getObject();
-			String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
-			qstr += "select ?prop where {"
-					+ "?iface <rdf:ID>  <" + inst.getURI() + "> ."
-							+ "}";
-			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getLocalModel());;		
-			com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
-			
-			if (prop.canAs(OntProperty.class)) {
-				if(parent.hasProperty((OntProperty)prop)){
-					data = generateInstancePropertyRange(inst, prop, data, publicUri);
-				}
-			}
-		}
-		// now look for unions? or intersections containing the cls
-		String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
-		qstr += "select ?prop where {?prop rdfs:domain/(owl:unionOf/rdf:rest*/rdf:first)? <" + inst.getURI() + ">}";
-		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getLocalModel());;		
-		com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
-		while (results.hasNext()) {
-			QuerySolution soln = results.next();
-			RDFNode prop = soln.get("?prop");
-			if (prop.canAs(OntProperty.class)) {
-				data = generateInstancePropertyRange(inst, prop.as(OntProperty.class), data, publicUri);
-			}
-		}
-		return data;
-	}
+//	private List<GraphSegment> addInstanceProperties(Individual inst, List<GraphSegment> data, String publicUri) throws ConfigurationException, IOException {
+//		OntClass parent = inst.getOntClass();
+//		StmtIterator sitr = getLocalModel().listStatements(null, RDFS.domain, parent);
+//		while (sitr.hasNext()) {
+//			Statement stmt = sitr.nextStatement();
+//			Resource prop = stmt.getSubject();
+//			String name = prop.getLocalName();
+//			RDFNode obj = stmt.getObject();
+//			String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
+//			qstr += "select ?prop where {"
+//					+ "?iface <rdf:ID>  <" + inst.getURI() + "> ."
+//							+ "}";
+//			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getLocalModel());;		
+//			com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
+//			
+//			if (prop.canAs(OntProperty.class)) {
+//				if(parent.hasProperty((OntProperty)prop)){
+//					data = generateInstancePropertyRange(inst, prop, data, publicUri);
+//				}
+//			}
+//		}
+//		// now look for unions? or intersections containing the cls
+//		String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
+//		qstr += "select ?prop where {?prop rdfs:domain/(owl:unionOf/rdf:rest*/rdf:first)? <" + inst.getURI() + ">}";
+//		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getLocalModel());;		
+//		com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
+//		while (results.hasNext()) {
+//			QuerySolution soln = results.next();
+//			RDFNode prop = soln.get("?prop");
+//			if (prop.canAs(OntProperty.class)) {
+//				data = generateInstancePropertyRange(inst, prop.as(OntProperty.class), data, publicUri);
+//			}
+//		}
+//		return data;
+//	}
+//
+//	private List<GraphSegment> generateInstancePropertyRange(Individual inst, Resource prop, List<GraphSegment> data,
+//			String publicUri) throws ConfigurationException, IOException {
+//		boolean isList = false;
+//		Statement stmt = prop.getProperty(getLocalModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
+//		if (stmt != null) {
+//			RDFNode obj = stmt.getObject();
+//			if (obj.isLiteral()) {
+//				Object lit = obj.asLiteral().getValue();
+//				if (lit != null && lit.toString().equals("LIST")) {
+//					isList = true;
+//				}
+//			}
+//		}
+//		ExtendedIterator<? extends OntResource> eitr = prop.as(OntProperty.class).listRange();
+//		while (eitr.hasNext()) {
+//			//get range of prop
+//			OntResource rng = eitr.next();
+//			//if it's a list and range class
+//			if (isList && rng.canAs(OntClass.class)) {
+//				//get list class
+//				//Check for an all values from restriction
+//				Resource listClass = getLocalModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+//				//if list class exists or the range has a superclass that is a list
+//				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
+//					//iterate across all of the statements that are subclasses of range?
+//					StmtIterator stmtitr = getLocalModel().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
+//					while (stmtitr.hasNext()) {
+////					ExtendedIterator<OntClass> scitr = rng.as(OntClass.class).listSuperClasses(true);
+////					while (scitr.hasNext()) {
+//						Statement supclsstmt = stmtitr.nextStatement();
+//						RDFNode supclsnode = supclsstmt.getObject();
+//						//if the superclass is a class
+//						if (supclsnode.canAs(OntClass.class)){
+//							//get the subclass
+//							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
+//							if (subcls.hasProperty(OWL.onProperty, getLocalModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
+//								Statement avf = subcls.getProperty(OWL.allValuesFrom);
+//								if (avf != null) {
+//									RDFNode listtype = avf.getObject();
+//									if (listtype.canAs(OntResource.class)){
+//										rng = listtype.as(OntResource.class);
+//									}
+//								}
+//								stmtitr.close();
+//								break;
+//							}
+//						}
+//					}
+//				}
+//			}
+//			GraphSegment sg = isList ? new GraphSegment(inst, prop, rng, isList, configMgr) : new GraphSegment(inst, prop, rng, configMgr);
+//			if (!data.contains(sg)) {
+//				data.add(sg);
+//				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+//				//String s = sg.restrictionToString(cls.as(OntClass.class));
+//				//sg.addEdgeAttribute("labeltooltip", s);
+//				if(!isInImports(rng, publicUri)){
+//					sg.addTailAttribute(STYLE, FILLED);
+//					sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
+//					sg.addTailAttribute(FONTCOLOR, WHITE);
+//				}else{
+//					if(getImportUrl(rng) != null) sg.addTailAttribute(LINK_URL, getImportUrl(rng));
+//					sg.addTailAttribute(IS_IMPORT, "true");
+//				}
+//				
+//				if(!isInImports(inst, publicUri)){
+//					sg.addHeadAttribute(STYLE, FILLED);
+//					sg.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
+//					sg.addHeadAttribute(FONTCOLOR, WHITE);
+//				}else{
+//					if(getImportUrl(inst) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(inst));
+//					sg.addHeadAttribute(IS_IMPORT, "true");
+//				}
+//
+//				if (prop.as(OntProperty.class).isObjectProperty()) {
+//					//data = addClassProperties(rng.as(OntClass.class), data, parentPublicUri);
+//				}
+//			}
+//		}
+//		return data;
+//	}
 
-	private List<GraphSegment> generateInstancePropertyRange(Individual inst, Resource prop, List<GraphSegment> data,
-			String publicUri) throws ConfigurationException, IOException {
-		boolean isList = false;
-		Statement stmt = prop.getProperty(getLocalModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
-		if (stmt != null) {
-			RDFNode obj = stmt.getObject();
-			if (obj.isLiteral()) {
-				Object lit = obj.asLiteral().getValue();
-				if (lit != null && lit.toString().equals("LIST")) {
-					isList = true;
-				}
-			}
-		}
-		ExtendedIterator<? extends OntResource> eitr = prop.as(OntProperty.class).listRange();
-		while (eitr.hasNext()) {
-			//get range of prop
-			OntResource rng = eitr.next();
-			//if it's a list and range class
-			if (isList && rng.canAs(OntClass.class)) {
-				//get list class
-				//Check for an all values from restriction
-				Resource listClass = getLocalModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
-				//if list class exists or the range has a superclass that is a list
-				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
-					//iterate across all of the statements that are subclasses of range?
-					StmtIterator stmtitr = getLocalModel().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
-					while (stmtitr.hasNext()) {
-//					ExtendedIterator<OntClass> scitr = rng.as(OntClass.class).listSuperClasses(true);
-//					while (scitr.hasNext()) {
-						Statement supclsstmt = stmtitr.nextStatement();
-						RDFNode supclsnode = supclsstmt.getObject();
-						//if the superclass is a class
-						if (supclsnode.canAs(OntClass.class)){
-							//get the subclass
-							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
-							if (subcls.hasProperty(OWL.onProperty, getLocalModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
-								Statement avf = subcls.getProperty(OWL.allValuesFrom);
-								if (avf != null) {
-									RDFNode listtype = avf.getObject();
-									if (listtype.canAs(OntResource.class)){
-										rng = listtype.as(OntResource.class);
-									}
-								}
-								stmtitr.close();
-								break;
-							}
-						}
-					}
-				}
-			}
-			GraphSegment sg = isList ? new GraphSegment(inst, prop, rng, isList, configMgr) : new GraphSegment(inst, prop, rng, configMgr);
-			if (!data.contains(sg)) {
-				data.add(sg);
-				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
-				//String s = sg.restrictionToString(cls.as(OntClass.class));
-				//sg.addEdgeAttribute("labeltooltip", s);
-				if(!isInImports(rng, publicUri)){
-					sg.addTailAttribute(STYLE, FILLED);
-					sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
-					sg.addTailAttribute(FONTCOLOR, WHITE);
-				}else{
-					if(getImportUrl(rng) != null) sg.addTailAttribute(LINK_URL, getImportUrl(rng));
-					sg.addTailAttribute(IS_IMPORT, "true");
-				}
-				
-				if(!isInImports(inst, publicUri)){
-					sg.addHeadAttribute(STYLE, FILLED);
-					sg.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
-					sg.addHeadAttribute(FONTCOLOR, WHITE);
-				}else{
-					if(getImportUrl(inst) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(inst));
-					sg.addHeadAttribute(IS_IMPORT, "true");
-				}
-
-				if (prop.as(OntProperty.class).isObjectProperty()) {
-					//data = addClassProperties(rng.as(OntClass.class), data, parentPublicUri);
-				}
-			}
-		}
-		return data;
-	}
-
-	private boolean hasClassAsHead(List<GraphSegment> gsList, OntClass oclass){
+	/**
+	 * Method used to check if a node exists in the graph segment list
+	 * 
+	 * @param gsList	- Graph segment List
+	 * @param oclass	- The class being searched for
+	 * @return
+	 */
+	private boolean hasClassNode(List<GraphSegment> gsList, OntClass oclass){
 		Iterator<GraphSegment> itr = gsList.iterator();
 		while(itr.hasNext()){
 			GraphSegment gs = itr.next();
@@ -319,12 +394,21 @@ public class OntologyGraphGenerator {
 				return true;
 			}
 		}
-		
 		return false;
 	}
 
 	
 
+	/**
+	 * Method called to add properties of a class to the ontology graph
+	 * 
+	 * @param cls				- The class whose properties are being added
+	 * @param data				- The list of GraphSegments containing graph data added to this point
+	 * @param parentPublicUri	- The URI of the ontology file being graphed
+	 * @return					- The list of GraphSegments with the property edges and nodes added
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
 	private List<GraphSegment> addClassProperties(OntClass cls,
 			List<GraphSegment> data, String parentPublicUri) throws ConfigurationException, IOException {
 		StmtIterator sitr = getLocalModel().listStatements(null, RDFS.domain, cls);
@@ -350,6 +434,17 @@ public class OntologyGraphGenerator {
 		return data;
 	}
 
+	/**
+	 * Method called in addClassProperties to generate the range values added to properties
+	 * 
+	 * @param cls				- Class whose properties are being added
+	 * @param prop				- Property that is being added
+	 * @param data				- List of GraphSegment containing ontology graph data
+	 * @param parentPublicUri	- URI of ontology file being graphed
+	 * @return					- List of Graph Segments with Range nodes added
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
 	private List<GraphSegment> generatePropertyRange(OntClass cls,
 			Resource prop, List<GraphSegment> data, String parentPublicUri) throws ConfigurationException, IOException {
 		boolean isList = false;
@@ -402,8 +497,11 @@ public class OntologyGraphGenerator {
 			}
 			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
 			if (!data.contains(sg)) {
+				
+				
 				data.add(sg);
 				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+				//boolean test = cls.asRestriction().isAllValuesFromRestriction();
 				//String s = sg.restrictionToString(cls.as(OntClass.class));
 				//sg.addEdgeAttribute("labeltooltip", s);
 				if(!isInImports(rng, parentPublicUri)){
@@ -435,30 +533,39 @@ public class OntologyGraphGenerator {
 	
 	
 	
+	/**
+	 * Method used to add class instances to the ontology graph
+	 * 
+	 * @param classInst			- Class whose instances will be added
+	 * @param data				- List of GraphSegments containing current graph data
+	 * @param ontologyResults	- No longer used
+	 * @param publicUri			- URI of ontology file being graphed
+	 * @return
+	 */
 	private List<GraphSegment> addClassInstances(OntClass classInst, List<GraphSegment> data, List<String[]> ontologyResults, String publicUri){
 		ExtendedIterator<? extends OntResource> itr = classInst.listInstances(true);
 		try{
-		while (itr.hasNext()) {
-			OntResource or = itr.next();
-			if (or.canAs(Individual.class)){
-				GraphSegment gs = new GraphSegment(or.as(Individual.class), "is a", classInst, configMgr);
-				if (!data.contains(gs)) {
-					data.add(gs);
-				}
-				gs.addHeadAttribute(SHAPE, DIAMOND);
-				gs.addHeadAttribute(FILL_COLOR, INSTANCE_BLUE);
-				gs.addHeadAttribute(STYLE, FILLED);
-				gs.addHeadAttribute(FONTCOLOR, WHITE);
-				if(!isInImports(classInst, publicUri)){
-					gs.addTailAttribute(FILL_COLOR, CLASS_BLUE);
-					gs.addTailAttribute(STYLE, FILLED);
-					gs.addTailAttribute(FONTCOLOR, WHITE);
-				}else{
-					if(getImportUrl(classInst) != null) gs.addTailAttribute(LINK_URL, getImportUrl(classInst));
-					gs.addTailAttribute(IS_IMPORT, "true");
+			while (itr.hasNext()) {
+				OntResource or = itr.next();
+				if (or.canAs(Individual.class)){
+					GraphSegment gs = new GraphSegment(or.as(Individual.class), "is a", classInst, configMgr);
+					if (!data.contains(gs)) {
+						data.add(gs);
+					}
+					gs.addHeadAttribute(SHAPE, DIAMOND);
+					gs.addHeadAttribute(FILL_COLOR, INSTANCE_BLUE);
+					gs.addHeadAttribute(STYLE, FILLED);
+					gs.addHeadAttribute(FONTCOLOR, WHITE);
+					if(!isInImports(classInst, publicUri)){
+						gs.addTailAttribute(FILL_COLOR, CLASS_BLUE);
+						gs.addTailAttribute(STYLE, FILLED);
+						gs.addTailAttribute(FONTCOLOR, WHITE);
+					}else{
+						if(getImportUrl(classInst) != null) gs.addTailAttribute(LINK_URL, getImportUrl(classInst));
+						gs.addTailAttribute(IS_IMPORT, "true");
+					}
 				}
 			}
-		}
 		}catch(Exception e){
 			System.err.println(e.getMessage());
 		}
@@ -466,6 +573,15 @@ public class OntologyGraphGenerator {
 		return data;
 	}
 
+	/**
+	 * Adds parent classes of classInst to the ontology graph
+	 * 
+	 * @param classInst			- Class whose parents are being added to graph
+	 * @param data				- List of GraphSegments containing current graph data
+	 * @param ontologyResults	- No longer used
+	 * @param publicUri			- URI of ontology file being graphed
+	 * @return
+	 */
 	private List<GraphSegment> addParentClasses(OntClass classInst, List<GraphSegment> data, List<String[]> ontologyResults, String publicUri) {
 		try {
 			boolean hasParents = false;
@@ -518,14 +634,24 @@ public class OntologyGraphGenerator {
 			
 		}
 		if (classInst.isUnionClass()) {
-			//data = addUnionClassData(classInst, data);
+			data = addUnionClassData(classInst, data);
 		}
 		else if (classInst.isIntersectionClass()) {
-			//data = addIntersectionClassData(classInst, data);
+			data = addIntersectionClassData(classInst, data);
 		}
 		return data;
 	}
 	
+	/**
+	 * Adds subclasses of input class to the ontology graph
+	 * 
+	 * @param cls		- The class whose subclasses are being added to graph
+	 * @param data		- List of GraphSegments containing current graph data
+	 * @param publicUri	- URI of ontology file being graphed
+	 * @return
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
 	private List<GraphSegment> generateClassSubclasses(OntClass cls, List<GraphSegment> data, String publicUri) throws ConfigurationException, IOException {
 		ExtendedIterator<OntClass> eitr = cls.listSubClasses(true);
 		while (eitr.hasNext()) {
@@ -600,7 +726,7 @@ public class OntologyGraphGenerator {
 					}
 					if (!data.contains(sg)) {
 						data.add(sg);
-						data = generateClassSubclasses(subcls, data, publicUri);
+						//data = generateClassSubclasses(subcls, data, publicUri);
 					}	
 				}
 			}
@@ -622,6 +748,16 @@ public class OntologyGraphGenerator {
 	}
 	
 	
+	/**
+	 * Method used to see if a class/instance/etc. is an imported item 
+	 * (i.e) not defined in this file/namespace
+	 * 
+	 * @param classInst			- Item being checked against imports 
+	 * @param parentPublicUri	- URI of file being graphed
+	 * @return
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
 	private boolean isInImports(RDFNode classInst, String parentPublicUri) throws ConfigurationException, IOException{
 		try{
 			if(classInst.isURIResource()){
@@ -666,6 +802,13 @@ public class OntologyGraphGenerator {
 //		}
 	}
 
+	/**
+	 * Adds class data to graph if it's an intersection class
+	 * 
+	 * @param classInst
+	 * @param data
+	 * @return
+	 */
 	private List<GraphSegment> addIntersectionClassData(OntClass classInst, List<GraphSegment> data) {
 		// each member class of an Intersection class is a super class of the Intersection class
 		ExtendedIterator<? extends OntClass> einteritr = classInst.asIntersectionClass().listOperands();
@@ -680,6 +823,13 @@ public class OntologyGraphGenerator {
 		return data;
 	}
 
+	/**
+	 * Adds class data to graph if it's a union class
+	 * 
+	 * @param classInst
+	 * @param data
+	 * @return
+	 */
 	private List<GraphSegment> addUnionClassData(OntClass classInst, List<GraphSegment> data) {
 		// if all of the members of a Union class are subclasses of a common super class, then that common super class is a super class of the Union class
 		ExtendedIterator<? extends OntClass> eunitr = classInst.asUnionClass().listOperands();
@@ -723,19 +873,33 @@ public class OntologyGraphGenerator {
 		return data;
 	}
 
+	/**
+	 * @return
+	 */
 	protected OntModel getLocalModel() {
 		return localModel;
 	}
 	
+	/**
+	 * @return
+	 */
 	protected OntModel getModelWithImports() {
 		return withImportModel;
 	}
 
+	/**
+	 * @param imports
+	 * @param local
+	 */
 	protected void setModels(OntModel imports, OntModel local) {
 		this.withImportModel = imports;
 		this.localModel = local;
 	}
 	
+	/**
+	 * @param data
+	 * @return
+	 */
 	public ResultSet convertDataToResultSet(List<GraphSegment> data) {
 		List<String> columnList = new ArrayList<String>();
 		columnList.add("head");
@@ -783,9 +947,9 @@ public class OntologyGraphGenerator {
 		}
 		int maxColumns = 3 + 
 				(headKeyList != null ? headKeyList.size() : 0) + 
-				(edgeKeyList != null ? edgeKeyList.size() : 0) +
-				(tailKeyList != null ? tailKeyList.size() : 0);
-		Object array[][] = new Object[data.size()][maxColumns];
+				(edgeKeyList != null ? edgeKeyList.size() : 0) + 
+				(tailKeyList != null ? tailKeyList.size() : 0); 
+		Object array[][] = new Object[data.size()][maxColumns]; 
 		
 		boolean dataFound = false;
 		for(int i = 0; i < data.size(); i++) {
@@ -809,6 +973,15 @@ public class OntologyGraphGenerator {
 		return null;
 	}
 
+	/**
+	 * @param graphPart
+	 * @param map
+	 * @param columnList
+	 * @param array
+	 * @param i
+	 * @param gs
+	 * @return
+	 */
 	private Object[][] attributeToDataArray(String graphPart, Map<String,String> map, List<String> columnList, Object[][] array, int i, GraphSegment gs) {
 		if (map != null) {
 			Iterator<String> attritr = map.keySet().iterator();
@@ -823,9 +996,16 @@ public class OntologyGraphGenerator {
 		return array;
 	}
 	
+	/**
+	 * Used to see if a node in a GraphSegment is marked as an import
+	 * through the IS_IMPORT attribute.
+	 * 
+	 * @param gs
+	 * @param isHead
+	 * @return
+	 */
 	private boolean isAnImport(GraphSegment gs, boolean isHead){
 		Map<String, String> attr = isHead ? gs.getHeadAttributes() : gs.getTailAttributes();
-		
 		if(attr != null && attr.containsKey(IS_IMPORT)){
 			return true;
 		}else{

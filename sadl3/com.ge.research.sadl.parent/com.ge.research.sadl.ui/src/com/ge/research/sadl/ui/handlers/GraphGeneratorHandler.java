@@ -254,7 +254,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	protected String getSadlResourceUri(SadlResource sr) {
 		return declarationExtensions.getConceptUri(sr);
 	}
-
+ 
 	protected OntConceptType getSadlResourceOntConceptType(SadlResource sr) throws CircularDefinitionException {
 		if (sr instanceof Name && ((Name)sr).getName() != null) {
 			return declarationExtensions.getOntConceptType(((Name)sr).getName());

@@ -99,18 +99,13 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				else {
 					SadlConsole.writeToConsole(MessageType.ERROR, "No imports found.\n");
 				}
-				
-				
 			}
-			
-			
 		} catch (Exception e) {
 			SadlConsole.writeToConsole(MessageType.ERROR, e.getMessage() + "\n");
 		}
 		finally {
 			
 		}
-		
 		return event;
 	}
 	
