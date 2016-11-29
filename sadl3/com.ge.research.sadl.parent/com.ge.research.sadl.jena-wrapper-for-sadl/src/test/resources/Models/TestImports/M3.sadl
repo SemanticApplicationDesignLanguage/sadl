@@ -1,3 +1,0 @@
-uri "http://sadl.org/TestImports/M3" alias m3. 
-
-import "http://sadl.org/TestImports/M4". 

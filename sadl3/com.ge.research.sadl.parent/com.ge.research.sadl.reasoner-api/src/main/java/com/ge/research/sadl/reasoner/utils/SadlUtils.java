@@ -604,6 +604,7 @@ public class SadlUtils {
 			            }
 			            else if (v instanceof Long) {
 			            	v = new Float(((Long)v).floatValue());
+			                val = m.createTypedLiteral(v);
 			            }
 			            else {
 			                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range float";
@@ -623,6 +624,7 @@ public class SadlUtils {
 			            }
 			            else if (v instanceof Long) {
 			            	v = new Double(((Long)v).doubleValue());
+			                val = m.createTypedLiteral(v);
 			            }
 			            else {
 			                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range double";

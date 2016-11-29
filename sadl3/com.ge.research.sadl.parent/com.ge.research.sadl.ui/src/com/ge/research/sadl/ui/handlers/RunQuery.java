@@ -171,7 +171,14 @@ public class RunQuery extends SadlActionHandler {
 								String currentQuery = reasoner.prepareQuery(query);
 								ResultSet rs = reasoner.ask(currentQuery);
 								if (rs != null) {
-									SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
+									if (currentQuery.toLowerCase().startsWith("construct")) {
+										String desc = "Adhoc query Graph";
+	        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + System.currentTimeMillis(); 							
+		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName);
+									}
+									else {
+										SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
+									}
 								}
 								else {
 									SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + currentQuery + "' returned no results\n");

@@ -1,4 +1,0 @@
-<http://sadl.org/TestImports/M1> <http://www.w3.org/2002/07/owl#imports> <http://sadl.org/TestImports/M3> .
-<http://sadl.org/TestImports/M1> <http://www.w3.org/2002/07/owl#imports> <http://sadl.org/TestImports/M2> .
-<http://sadl.org/TestImports/M1> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'M1.sadl' and should not be edited."@en .
-<http://sadl.org/TestImports/M1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .

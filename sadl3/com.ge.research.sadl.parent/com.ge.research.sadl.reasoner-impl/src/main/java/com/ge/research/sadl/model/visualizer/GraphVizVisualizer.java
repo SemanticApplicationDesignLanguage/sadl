@@ -73,6 +73,14 @@ public class GraphVizVisualizer implements IGraphVisualizer {
     	}
 		if (dotexec != null) {
 			// dot -Tps filename.dot -o outfile.ps
+			String fn = dotfilepath + ".svg";
+			File f = new File(fn);
+			if (f.exists()) {
+				boolean status = f.delete();
+				if (!status) {
+					throw new IOException("Unable to delete existing file '" + fn + "'.");
+				}
+			}
 			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tsvg", dotfilepath,"-o", dotfilepath + ".svg");
 			try {
 				bppng.start();

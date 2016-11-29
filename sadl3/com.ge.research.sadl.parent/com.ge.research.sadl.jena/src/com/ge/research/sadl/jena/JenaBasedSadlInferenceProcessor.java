@@ -1,5 +1,6 @@
 package com.ge.research.sadl.jena;
 
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
@@ -62,10 +64,12 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.SadlCommandResult;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SadlModel;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -159,55 +163,59 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			e.printStackTrace();
 		}
 			
-		Object[] results = new Object[3];	// [0] = commands, [1] = inference results, [2] = errors
-		results[0] = cmds;
-		List<Object> infresults = new ArrayList<Object>();
-		results[1] = infresults;
-		testCnt = 0;
-		Iterator<SadlCommand> tpitr = cmds.iterator();
-		while (tpitr.hasNext()) {
-			SadlCommand cmd = tpitr.next();
+		List<SadlCommandResult> results = new ArrayList<SadlCommandResult>();
+		for (int cmdIndex = 0; cmdIndex < cmds.size(); cmdIndex++) {
+			SadlCommand cmd =cmds.get(cmdIndex);
 			try {
 				if (cmd instanceof Explain) {
-					
+					try {
+						results.add(processExplain((Explain) cmd));
+					} catch (ReasonerNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				else if (cmd instanceof Print) {
-					results =  processPrint(cmds, (Print) cmd, results);
+					try {
+						results.add(processPrint((Print) cmd));
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ReasonerNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				else if (cmd instanceof Query) {
-					String query = ((Query)cmd).getSparqlQueryString();
-					if (query == null) {
-						query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), (Query) cmd);
+					try {
+						results.add(processAdhocQuery((Query) cmd));
+					} catch (JenaProcessorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ReasonerNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (QueryParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (QueryCancelledException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					query = SadlUtils.stripQuotes(query);
-//					if (useKSever) {
-////						getKServer(resource).query(query);
-//					}
-//					else {
-						ResultSet rs;
-						try {
-							rs = processAdhocQuery(query);
-							infresults.add(rs);
-						} catch (JenaProcessorException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (ReasonerNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (QueryParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (QueryCancelledException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-//					}
 				}
 				else if (cmd instanceof Read) {
 					
 				}
 				else if (cmd instanceof Test) {
-					results = processTest(cmds, (Test)cmd, results);
+					try {
+						results.add(processTest((Test)cmd));
+					} catch (ReasonerNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				else if (cmd instanceof StartWrite) {
 					
@@ -238,7 +246,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				//e.printStackTrace();
 			//}
 		}
-		return results;
+		return results.toArray(new SadlCommandResult[results.size()]);
 	}
 
 	private void checkIfExplanationNeeded(List<SadlCommand> cmds) throws ConfigurationException, ReasonerNotFoundException {
@@ -248,6 +256,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				if (cmd instanceof Explain) {
 					IReasoner reasoner = getInitializedReasoner();
 					reasoner.enableExplanation(true);
+					break;
 				}
 			}
 		}
@@ -266,8 +275,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return _repoType;
 	}
 
-	private Object[] processTest(List<SadlCommand> cmds, Test cmd, Object[] results) {
+	private SadlCommandResult processTest(Test cmd) throws TranslationException, ConfigurationException, ReasonerNotFoundException {
 		testCnt ++;
+		SadlCommandResult result = new SadlCommandResult(cmd);
 		TestResult testResult = null;
 		Object lhs = ((Test) cmd).getLhs();
 		Object rhs = ((Test) cmd).getRhs();
@@ -480,8 +490,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		((List<Object>) results[1]).add(testResult);
-		return results;
+		result.setResults(testResult);
+		result.setErrors(getInitializedReasoner().getErrors());
+		return result;
 	}
 
 	private TestResult testTriple(IReasoner reasoner, TripleElement triple)
@@ -1033,85 +1044,76 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return obj;
 	}
 
-	private Object[] processPrint(List<SadlCommand> cmds, Print cmd, Object[] results) {
+	private SadlCommandResult processPrint(Print cmd) throws FileNotFoundException, ConfigurationException, ReasonerNotFoundException, TranslationException, URISyntaxException {
 		String dispStr = cmd.getDisplayString();
+		SadlCommandResult result = new SadlCommandResult(cmd);
 		if (dispStr != null) {
-			results[1] = dispStr;
+			result.setResults(dispStr);
 		}
 		else {
 			String model = cmd.getModel();
 			String outfn = getPrintModelFileName(model);
-//			msg = "Printing "
-//					+ ((Print) cmd).getModel();
-//			reasoner.saveInferredModel(
-//					outputfilename, modelName,
-//					(type.equals("Model") ? false
-//							: true));
-
+			getInitializedReasoner().saveInferredModel(
+					outfn, modelName,
+					(model.equals("Model") ? false
+							: true));
+			result.setResults(new SadlUtils().fileNameToFileUrl(outfn));
+			result.setErrors(getInitializedReasoner().getErrors());
 		}
-		return results;
+		return result;
 		
+	}
+
+	private SadlCommandResult processExplain(Explain cmd) throws TranslationException, ConfigurationException, ReasonerNotFoundException {
+		SadlCommandResult result = new SadlCommandResult(cmd);
+		List<Explanation> explanations = null;
+		if (cmd.getRuleName() != null) {
+			explanations = getInitializedReasoner().explain(cmd.getRuleName());
+		}
+		else if (cmd.getPatterns() != null) {
+			explanations = getInitializedReasoner().explain(cmd.getPatterns());
+		}
+		result.setResults(explanations);
+		result.setErrors(getInitializedReasoner().getErrors());
+		return result;
 	}
 
 	private String getPrintModelFileName(String model) {
 		URI mfp = URI.createURI(modelFolderPath);
 		mfp = mfp.trimSegments(1);
-		mfp = mfp.appendSegment(getCurrentResource().getURI().lastSegment()+ "." + model + ".owl");
+		mfp = mfp.appendSegment("Temp");
+		mfp = mfp.appendSegment(getCurrentResource().getURI().lastSegment()+ "." + model + ".owl.txt");
 		return mfp.toString();
 	}
 
-	public ResultSet processAdhocQuery(String query) throws ConfigurationException, JenaProcessorException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
+	private SadlCommandResult processAdhocQuery(Query cmd) throws ConfigurationException, JenaProcessorException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString;
-//		
-//		try {
-			if (getTheJenaModel() == null) {
-				// it always is?
-				XtextResource xtrsrc = (XtextResource) getCurrentResource().getContents().get(0).eResource();
-				if (xtrsrc != null) {
-					URI resourceUri = xtrsrc.getURI();
-					OntModel ontModel = OntModelProvider.find(xtrsrc);
-					if (ontModel != null) {
-						setTheJenaModel(ontModel);
-					}
-				}
-				if (getTheJenaModel() == null) {
-					// TODO
-					// load from OWL file
+		String query = cmd.getSparqlQueryString();
+		if (query == null) {
+			query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+		}
+		query = SadlUtils.stripQuotes(query);
+		if (getTheJenaModel() == null) {
+			// it always is?
+			XtextResource xtrsrc = (XtextResource) getCurrentResource().getContents().get(0).eResource();
+			if (xtrsrc != null) {
+				URI resourceUri = xtrsrc.getURI();
+				OntModel ontModel = OntModelProvider.find(xtrsrc);
+				if (ontModel != null) {
+					setTheJenaModel(ontModel);
 				}
 			}
-			ITranslator translator = getConfigMgr(getOwlFormat()).getTranslator();
-			Query q = processQuery(query);
-			
-//			queryString = translator.translateQuery(getTheJenaModel(), q);
-//			IReasoner reasoner = getInitializedReasoner();
-//			if (!reasoner.isInitialized()) {
-//				reasoner.setConfigurationManager(getConfigMgr(getOwlFormat()));
-//				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
-//			}
-//			ResultSet results =  reasoner.ask(queryString);
-			return processAdhocQuery(translator, q);
-//		} catch (com.ge.research.sadl.reasoner.ConfigurationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (TranslationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (InvalidNameException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (QueryParseException e) {
-//			System.err.println("Query parse exception: " + e.getMessage());
-//		} catch (QueryCancelledException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ReasonerNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (JenaProcessorException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return null;
+			if (getTheJenaModel() == null) {
+				// TODO
+				// load from OWL file
+			}
+		}
+		ITranslator translator = getConfigMgr(getOwlFormat()).getTranslator();
+		Query q = processQuery(query);
+		SadlCommandResult result = new SadlCommandResult(cmd);
+		result.setResults(processAdhocQuery(translator, q));
+		result.setErrors(getInitializedReasoner().getErrors());
+		return result;
 	}
 	
 	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {

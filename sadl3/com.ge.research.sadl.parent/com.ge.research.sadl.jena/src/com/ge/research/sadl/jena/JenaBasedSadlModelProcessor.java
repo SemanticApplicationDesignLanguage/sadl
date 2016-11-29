@@ -71,6 +71,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
@@ -1385,8 +1386,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return numErrors;
 	}
     
-	private void processStatement(ExplainStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+	private void processStatement(ExplainStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+		String ruleName = element.getRulename();
+		if (ruleName != null) {
+			Explain cmd = new Explain(ruleName);
+			addSadlCommand(cmd);
+		}
+		else {
+			Object result = translate(element.getExpr());
+			if (result instanceof GraphPatternElement) {
+				Explain cmd = new Explain((GraphPatternElement)result);
+				addSadlCommand(cmd);
+			}
+			else {
+				throw new TranslationException("Unhandled ExplainStatement: " + result.toString());
+			}
+		}
 	}
 	
 	private void processStatement(EndWriteStatement element) throws JenaProcessorException {
@@ -2572,7 +2587,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			NamedNode n = new NamedNode(nm, ontConceptTypeToNodeType(type));
 			n.setNamespace(ns);
 			n.setPrefix(prfx);
-			n.setNodeType(ontConceptTypeToNodeType(type));
 			return n;
 		}
 	}
