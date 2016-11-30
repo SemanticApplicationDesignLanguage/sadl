@@ -1121,19 +1121,90 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return predicateType;
 	}
 	
-	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject){
+	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject) throws CircularDefinitionException{
 		if(metricsProcessor != null){
 			if (subject instanceof Name) {
 				String className = declarationExtensions.getConceptUri(((Name) subject).getName());
-				String propertyName = predicateType.getExpressionType().toString();
-				String rangeStr = predicateType.getTypeCheckType().toString();
-				boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
-				metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
+				SadlResource cls = ((Name) subject).getName();
+				if (!declarationExtensions.getOntConceptType(cls).equals(OntConceptType.CLASS)) {
+					// need to convert this to the Class representing the type; use existing type checking functionality
+					try {
+						TypeCheckInfo subjTCI = getType(cls);
+						addEffectiveRangeByTypeCheckInfo(predicateType, subjTCI);
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else {
+//					cls = ((Name)subject).getName();
+					addEffectiveRangeUnit(className, predicateType);
+				}
 			}
 			else {
-				//int i = 0; 
+				try {
+					if (subject instanceof ElementInList) {
+						try {
+							TypeCheckInfo tci = getType(((ElementInList)subject));
+							addEffectiveRangeByTypeCheckInfo(predicateType, tci);
+						} catch (TranslationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (URISyntaxException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ConfigurationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (DontTypeCheckException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
+					}
+					else {
+						throw new InvalidNameException("addEffectiveRange given a subject which isn't a Name (" + subject.getClass().getCanonicalName() + "), not handled.");
+					}
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
 			}
 		}
+	}
+
+	private void addEffectiveRangeByTypeCheckInfo(TypeCheckInfo predicateType, TypeCheckInfo subjTCI)
+			throws InvalidNameException, CircularDefinitionException {
+		if (subjTCI.getCompoundTypes() != null) {
+			Iterator<TypeCheckInfo> itr = subjTCI.getCompoundTypes().iterator();
+			while (itr.hasNext()) {
+				TypeCheckInfo nexttci = itr.next();
+				addEffectiveRangeByTypeCheckInfo(predicateType, nexttci);
+			}
+		}
+		else {
+			ConceptIdentifier ci = subjTCI.getTypeCheckType();
+			if (ci instanceof ConceptName) {
+				// this should be the class name
+				String className = ((ConceptName) ci).getUri();
+				addEffectiveRangeUnit(className, predicateType);
+			}
+			else {
+				throw new InvalidNameException("addEffectiveRangeByTypeCheckInfo called with TypeCheckInfo '" + subjTCI.toString() + ", which isn't handled.");
+			}
+		}
+	}
+
+	private void addEffectiveRangeUnit(String className, TypeCheckInfo predicateType) {
+		String propertyName = predicateType.getExpressionType().toString();
+		String rangeStr = predicateType.getTypeCheckType().toString();
+		boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
+		metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
 	}
 	
 	private String getTypeCheckTypeString(TypeCheckInfo tci) {
