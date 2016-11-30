@@ -288,8 +288,10 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		graphResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
 	}
 	
+	
+	
 	protected void graphOntologyResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
-		String baseFileName = trgtFile.getFullPath().removeFileExtension().lastSegment().toString();
+		String baseFileName = trgtFile.getFullPath().removeFileExtension().lastSegment().toString() + "_ONT";
 		String graphName = prefix;
 		String anchorNode = nodeText(publicUri, prefix);
 		if (prefix == null) {
@@ -299,8 +301,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			}
 			graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
 		}
-		String description = "Graph of Ontology";
-		graphResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
+		String description = "Graph of Ontology File";
+		createGraphFromResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
 	}
 
 	private ResultSet sadlResourceToDomainRangeResultSet(IConfigurationManagerForIDE configMgr, String publicUri, SadlResource sr) throws CircularDefinitionException, ConfigurationException, IOException {

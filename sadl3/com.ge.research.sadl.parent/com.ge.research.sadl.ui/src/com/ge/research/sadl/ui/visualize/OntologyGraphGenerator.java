@@ -19,18 +19,21 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.impl.OntClassImpl;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -105,7 +108,13 @@ public class OntologyGraphGenerator {
 					}else{
 						isImport = false;
 					}
-					if(!classInst.isRestriction() && !classInst.isUnionClass() && !classInst.isEnumeratedClass()){
+					if(!classInst.isRestriction() && !classInst.isUnionClass() && !classInst.isEnumeratedClass() && !classInst.isIntersectionClass()){
+						if(classInst.hasProperty(RDFS.subClassOf, getLocalModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI))){
+							//if it's a list
+							continue;	
+						}
+						
+						
 						//if not an import do the next three steps
 						if(!isImport){
 							//add parents to this node
@@ -116,13 +125,8 @@ public class OntologyGraphGenerator {
 							data = addClassProperties(classInst, data, publicUri);
 							//add children of this node
 							data = generateClassSubclasses(classInst, data, publicUri);
-						}	
-						
-					}else if(classInst.isRestriction()){
-						data = addRestrictionClassAndProperties(classInst, data, publicUri);
-						
+						}		
 					}
-					
 				}
 
 			}
@@ -202,6 +206,11 @@ public class OntologyGraphGenerator {
 							!classInst.isUnionClass() && !classInst.isEnumeratedClass() && 
 							!classInst.isIntersectionClass()){
 						//add a single node for the class instance
+						if(classInst.hasProperty(RDFS.subClassOf, getLocalModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI))){
+							//if it's a list
+							continue;	
+						}
+						
 						GraphSegment gs = new GraphSegment(classInst, null, null, configMgr);
 						if (!hasClassNode(data, classInst)) {
 							data.add(gs);
@@ -213,27 +222,6 @@ public class OntologyGraphGenerator {
 				}	
 			}
 		}
-	}
-	
-	
-	/**
-	 * Currently a test method used to try to add class property restrictions
-	 * 
-	 * @param classInst - The class that is being checked for restrictions
-	 * @param data 		- The GraphSegment list continaing all graph data up to this point
-	 * @param publicUri	- The URI of the ontology file being graphed
-	 * @return			- The graph segment list with the added nodes (not implemented yet)
-	 */
-	private List<GraphSegment> addRestrictionClassAndProperties(OntClass classInst, List<GraphSegment> data,
-			String publicUri) {
-		if(classInst.asRestriction().isAllValuesFromRestriction()){
-			 ExtendedIterator<OntProperty> props = classInst.asRestriction().asAllValuesFromRestriction().listDeclaredProperties();
-			 while(props.hasNext()){
-				 //OntProperty prop = props.next();
-				 //String propUri = prop.getURI();
-			 }
-		}
-		return data;
 	}
 
 	/**
@@ -256,7 +244,7 @@ public class OntologyGraphGenerator {
 		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
 		
 		if(prefix!=null){
-			return "\"file:///" + tempDir + "/" + prefix + "Graph.dot.svg\"";
+			return "\"file:///" + tempDir + "/" + prefix + "_ONT" + "Graph.dot.svg\"";
 		}
 		return null;
 	}
@@ -406,11 +394,10 @@ public class OntologyGraphGenerator {
 	 * @param data				- The list of GraphSegments containing graph data added to this point
 	 * @param parentPublicUri	- The URI of the ontology file being graphed
 	 * @return					- The list of GraphSegments with the property edges and nodes added
-	 * @throws ConfigurationException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	private List<GraphSegment> addClassProperties(OntClass cls,
-			List<GraphSegment> data, String parentPublicUri) throws ConfigurationException, IOException {
+			List<GraphSegment> data, String parentPublicUri) throws Exception {
 		StmtIterator sitr = getLocalModel().listStatements(null, RDFS.domain, cls);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
@@ -442,11 +429,10 @@ public class OntologyGraphGenerator {
 	 * @param data				- List of GraphSegment containing ontology graph data
 	 * @param parentPublicUri	- URI of ontology file being graphed
 	 * @return					- List of Graph Segments with Range nodes added
-	 * @throws ConfigurationException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	private List<GraphSegment> generatePropertyRange(OntClass cls,
-			Resource prop, List<GraphSegment> data, String parentPublicUri) throws ConfigurationException, IOException {
+			Resource prop, List<GraphSegment> data, String parentPublicUri) throws Exception {
 		boolean isList = false;
 		Statement stmt = prop.getProperty(getLocalModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
 		if (stmt != null) {
@@ -513,6 +499,28 @@ public class OntologyGraphGenerator {
 					sg.addTailAttribute(IS_IMPORT, "true");
 				}
 				
+				ExtendedIterator<OntClass> iter = cls.listSuperClasses(true);
+				StringBuilder rstrString = new StringBuilder();
+				while(iter.hasNext()){
+					OntClass superClass = iter.next();
+					if(superClass.isRestriction()){
+						OntProperty restrictionProperty = superClass.asRestriction().getOnProperty();
+						if(restrictionProperty.equals(prop)){
+							if(prop.canAs(Property.class)){
+								rstrString.append(getRestrictionString(superClass.asRestriction(),prop.as(Property.class),rng, isList));
+							}else{
+								throw new Exception("prop is not a property");
+							}
+						}
+					}
+				}
+				if(rstrString.length() > 0){	
+					sg.addEdgeAttribute("URL",getCurrentFileLink(parentPublicUri));
+					sg.addEdgeAttribute(FONTCOLOR, RED);
+					String str = "\"" + rstrString.toString() + "\"";
+					sg.addEdgeAttribute("labeltooltip", str);
+				}
+				
 				if(!isInImports(cls, parentPublicUri)){
 					sg.addHeadAttribute(STYLE, FILLED);
 					sg.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
@@ -531,6 +539,109 @@ public class OntologyGraphGenerator {
 	}
 	
 	
+	private String getCurrentFileLink(String parentUri) throws Exception{
+		String[] splitFile = parentUri.split("/");
+		String filename = splitFile[splitFile.length-1];
+		
+		// get the prefix and if there is one generate qname
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		
+		if(filename!=null){
+			return "\"file:///" + tempDir + "/" + filename + "_ONTGraph.dot.svg\"";
+		}
+		throw new Exception("Cannot find graph file in getCurrentFileLink()");
+	}
+//	if(superClass.asRestriction().isCardinalityRestriction() && (superClass.asRestriction().getProperty(OWL2.onClass) != null)){
+//		Statement var = superClass.asRestriction().getProperty(OWL2.onClass);
+//		RDFNode obj = var.getObject();
+//		if(obj.equals(rng)){
+//			if(prop.canAs(Property.class)){
+//				String rst = getRestrictionString(superClass.asRestriction(),prop.as(Property.class));
+//				
+//				//rstrString.append();
+//			}else{
+//				throw new Exception("prop is not a property");
+//			}
+//		}
+//	}
+	
+	private String getRestrictionString(Restriction rstr, Property prop, OntResource rng, boolean isList) throws Exception{
+		
+		StringBuilder sb = new StringBuilder();
+		if(rstr.isCardinalityRestriction() || rstr.isMinCardinalityRestriction() || rstr.isMaxCardinalityRestriction()){
+			if(rstr.isCardinalityRestriction()){
+				sb.append("Must have exactly ");
+				int num = rstr.asCardinalityRestriction().getCardinality();
+				sb.append(num);
+				if(num == 1){
+					sb.append(" value");
+				} else{
+					sb.append(" values");
+				}
+
+			}else if(rstr.isMinCardinalityRestriction()){
+				sb.append("Must have at least ");
+				int num = rstr.asMinCardinalityRestriction().getMinCardinality();
+				sb.append(num);
+				if(num == 1){
+					sb.append(" value");
+				} else{
+					sb.append(" values");
+				}
+			}else if(rstr.isMaxCardinalityRestriction()){
+				sb.append("Must have at most ");
+				int num = rstr.asMaxCardinalityRestriction().getMaxCardinality();
+				sb.append(num);
+				if(num == 1){
+					sb.append(" value");
+				} else{
+					sb.append(" values");
+				}
+			}
+			if((rstr.getProperty(OWL2.onClass) != null)){
+				Statement var = rstr.getProperty(OWL2.onClass);
+				RDFNode obj = var.getObject();
+				if(obj.equals(rng)){
+					if(prop.canAs(Property.class)){
+						sb.append(" of this type.");
+						//rstrString.append();
+					}else{
+						throw new Exception("prop is not a property");
+					}
+				}
+			}else{
+				sb.append(". ");
+			}
+			
+		}else if(rstr.isHasValueRestriction()){
+			sb.append("Must have value ");
+			RDFNode node = rstr.asHasValueRestriction().getHasValue();
+			//TODO may need to change this toString
+			sb.append(node.toString());
+			sb.append(isList ? " list" : "");
+			sb.append(". ");
+			
+		}else if(rstr.isSomeValuesFromRestriction()){
+			sb.append("Must have some value of type ");
+			Resource node = rstr.asSomeValuesFromRestriction().getSomeValuesFrom();
+			//TODO may need to change this toString
+			sb.append(node.toString());
+			sb.append(isList ? " list" : "");
+			sb.append(". ");
+			
+		}else if(rstr.isAllValuesFromRestriction()){
+			sb.append("Can only have values of type ");
+			Resource node = rstr.asAllValuesFromRestriction().getAllValuesFrom();
+			//TODO may need to change this toString
+			sb.append(node.toString());
+			sb.append(isList ? " list" : "");
+			sb.append(". ");
+			
+		}else{
+			throw new Exception("no restriction type found");
+		}
+		return sb.toString();
+	}
 	
 	
 	/**
@@ -768,7 +879,12 @@ public class OntologyGraphGenerator {
 					return true;
 				}
 			}else{
-				return false;
+				if(getLocalModel().getBaseModel().containsResource(classInst)){
+					return false;
+					
+				}else{
+					return true;
+				}
 			}
 		}catch(NullPointerException e){
 			return false;
