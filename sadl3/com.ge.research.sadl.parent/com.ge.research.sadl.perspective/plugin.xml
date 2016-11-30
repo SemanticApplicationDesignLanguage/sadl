@@ -87,7 +87,7 @@
             commandId="SADL.GenerateOntGraph"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+g+2">
+            sequence="M1+M2+o">
       </key>
    </extension>
    <extension
