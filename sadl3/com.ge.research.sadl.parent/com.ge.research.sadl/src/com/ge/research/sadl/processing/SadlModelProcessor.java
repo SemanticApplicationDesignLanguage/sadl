@@ -954,7 +954,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		this.encapsulatingTarget = encapsulatingTarget;
 	}
 
-	protected RulePart getRulePart() {
+	public RulePart getRulePart() {
 		return rulePart;
 	}
 

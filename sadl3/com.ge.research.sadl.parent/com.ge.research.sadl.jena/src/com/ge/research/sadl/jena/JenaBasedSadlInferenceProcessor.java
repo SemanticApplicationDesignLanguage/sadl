@@ -1,6 +1,9 @@
 package com.ge.research.sadl.jena;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -23,6 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.importer.ITabularDataImporter;
+import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.EndWrite;
@@ -44,6 +49,7 @@ import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TestResult;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
@@ -54,6 +60,7 @@ import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -163,90 +170,165 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			e.printStackTrace();
 		}
 			
+		StartWrite writeInEffect = null;
+		StringBuilder writeAccumulator = null;
 		List<SadlCommandResult> results = new ArrayList<SadlCommandResult>();
 		for (int cmdIndex = 0; cmdIndex < cmds.size(); cmdIndex++) {
 			SadlCommand cmd =cmds.get(cmdIndex);
 			try {
 				if (cmd instanceof Explain) {
-					try {
-						results.add(processExplain((Explain) cmd));
-					} catch (ReasonerNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					results.add(processExplain((Explain) cmd));
 				}
 				else if (cmd instanceof Print) {
-					try {
-						results.add(processPrint((Print) cmd));
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ReasonerNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					results.add(processPrint((Print) cmd));
 				}
 				else if (cmd instanceof Query) {
-					try {
-						results.add(processAdhocQuery((Query) cmd));
-					} catch (JenaProcessorException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ReasonerNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (QueryParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (QueryCancelledException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					results.add(processAdhocQuery((Query) cmd));
 				}
 				else if (cmd instanceof Read) {
-					
+					results.add(processRead((Read)cmd));
 				}
 				else if (cmd instanceof Test) {
-					try {
-						results.add(processTest((Test)cmd));
-					} catch (ReasonerNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					results.add(processTest((Test)cmd));
 				}
 				else if (cmd instanceof StartWrite) {
-					
+					writeInEffect = (StartWrite) cmd;
+					if (writeAccumulator == null) {
+						writeAccumulator = new StringBuilder();
+					}
+					else if (writeAccumulator.length() > 0){
+						writeAccumulator.delete(0, writeAccumulator.length());
+					}
 				}
 				else if (cmd instanceof EndWrite) {
-					
+					String ofn = ((EndWrite)cmd).getOutputFilename(); 
+					File of = new File(ofn); 
+					if (of.getParentFile() != null && of.getParentFile().exists()
+							&& of.getParentFile().isDirectory()) {
+						// this must be an absolute path
+					}
+					else {
+						// assume a relative path
+						File modelFolderFile = new File(getModelFolderPath());
+						String prjDir = modelFolderFile.getParent();
+						String filepath = prjDir + File.separator + ofn;
+						of = new File(filepath);
+					}
+					getConfigMgr(getOwlFormat()).getSadlUtils().stringToFile(of, writeAccumulator.toString(), false);
+					writeInEffect = null;
+					SadlCommandResult result = new SadlCommandResult(cmd);
+					result.setResults(new SadlUtils().fileNameToFileUrl(of.getCanonicalPath()));
+					results.add(result);
 				}
-			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvalidNameException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} //catch (QueryCancelledException e) {
-				// OK to cancel--no error
-				//issueAcceptor.addInfo("Query cancelled by user", (EObject) cmd.getContext());
-			//} catch (QueryParseException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			//} catch (ReasonerNotFoundException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			//} //catch (SessionNotFoundException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			//}
+			} catch (Throwable t) {
+				results.add(convertCmdExceptionToSadlCommandError(cmd, t));
+			} 
 		}
 		return results.toArray(new SadlCommandResult[results.size()]);
+	}
+	
+	protected ITabularDataImporter getTabularDataImporter(IConfigurationManagerForEditing configMgr) {
+		String tabularImporterClass = preferenceMap.get(SadlPreferences.TABULAR_DATA_IMPORTER_CLASS.getId());
+		
+		List<ITabularDataImporter> importers = configMgr.getAvailableTabularImporters();
+	
+		if (importers != null && importers.size() > 0) {
+			ITabularDataImporter importer = importers.get(0);		// replace this by selection and setting preference
+			return importer;
+		}
+		return null;
+	}
+
+	private SadlCommandResult processRead(Read cmd) throws ConfigurationException, IOException, TemplateException, URISyntaxException, InvalidNameException, ReasonerNotFoundException {
+		SadlCommandResult result = new SadlCommandResult(cmd);
+		String ifn = ((Read)cmd).getInputFilename();
+		String tfn = ((Read)cmd).getTemplateFilename();
+		File inFile = getConfigMgr(getOwlFormat()).resolveFilename(ifn);
+		if (inFile == null) {
+			String msg = "Failed to find Read file '" + ifn + ".\n";
+			addErrorToSadlCommand(result, msg, ErrorType.ERROR);
+			return result;
+		}
+		if (tfn != null) {		// this is a mapped read with template
+			File tf = getConfigMgr(getOwlFormat()).resolveFilename(tfn);
+			if (tf == null) {
+				String msg = "Failed to find Template file '" + tfn + "'.\n";
+				addErrorToSadlCommand(result, msg, ErrorType.ERROR);
+				return result;
+			}
+			else {
+				ITabularDataImporter importer = getTabularDataImporter(getConfigMgr(getOwlFormat()));
+				if (importer == null) {
+					String msg = "Failed to find an importer implementing ITabularDataImporter.\n";
+					addErrorToSadlCommand(result, msg, ErrorType.ERROR);
+					return result;
+				}
+				importer.setImportFilename(inFile.getAbsolutePath(), true);
+				importer.setModelFolder(getConfigMgr(getOwlFormat()).getModelFolder());
+//				importer.setImportModelNamespace(defaultInstanceDataNS);		
+//				Object[] o = scanTemplateForImports(csvTemplateString);
+//				int numImports = 0;
+//				if (o != null && o.length > 0) {
+//					if (o[1] != null && o[1] instanceof List && ((List)o[1]).size() > 0) {
+//						List<String> templateImports = (List<String>) o[1];
+//						importer.setImports(templateImports);
+//						numImports = templateImports.size();
+//					}
+//					else {
+//						importer.setImports(getModelName());
+//						numImports = 1;
+//					}
+//					String processedTemplate = (String) o[0];
+//					importer.setTemplates(processedTemplate);
+//					logger.info("Scanned template statistics: Original size = "+csvTemplateString.length()+
+//							"  Processed size = "+processedTemplate.length()+
+//							"  Number of imports = "+numImports);
+//				}
+				importer.setTemplates(getConfigMgr(getOwlFormat()).getSadlUtils().fileNameToFileUrl(tf.getAbsolutePath()));
+				Object om;
+				try {
+					om = importer.getOwlModel();
+					if (logger.isDebugEnabled()) {
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						if (om instanceof OntModel) {
+							((OntModel) om).write(baos, "N3");
+						}
+						logger.debug(baos.toString());
+					}
+					getInitializedReasoner().loadInstanceData(om);
+				} catch (ReasonerNotFoundException e) {
+					throw new ConfigurationException(e.getMessage(), e);
+				}
+				
+			}
+		}
+		else {	// this is a straight read of an input file
+			getInitializedReasoner().loadInstanceData(inFile.getAbsolutePath());						
+		}
+		return null;
+	}
+
+	private void addErrorToSadlCommand(SadlCommandResult scr, String msg, ErrorType errorType) {
+		ModelError me = new ModelError(msg, errorType);
+		List<ModelError> errors = new ArrayList<ModelError>();
+		errors.add(me);
+		scr.setErrors(errors);
+	}
+
+	private SadlCommandResult convertCmdExceptionToSadlCommandError(SadlCommand cmd, Throwable t) {
+		SadlCommandResult scr = new SadlCommandResult(cmd);
+		String msg;
+		ErrorType etype;
+		if (t instanceof QueryCancelledException) {
+			msg = "Query cancelled by user";
+			etype = ErrorType.INFO;
+		}
+		else {
+			msg = t.getMessage();
+			etype = ErrorType.ERROR;
+		}
+		addErrorToSadlCommand(scr, msg, etype);
+		return scr;
 	}
 
 	private void checkIfExplanationNeeded(List<SadlCommand> cmds) throws ConfigurationException, ReasonerNotFoundException {

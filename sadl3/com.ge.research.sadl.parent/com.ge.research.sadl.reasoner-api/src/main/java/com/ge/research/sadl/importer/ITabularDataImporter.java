@@ -12,7 +12,7 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.hp.hpl.jena.ontology.OntModel;
 
-public interface ICsvImporter {
+public interface ITabularDataImporter {
 
 	String HTTP_URI_SCHEME = "http://";
 
@@ -40,21 +40,21 @@ public interface ICsvImporter {
 	void setModelFolder(String _modelDir) throws IOException;
 
 	/**
-	 * Method to specify the CSV file to be used as input.
-	 * @param _csvFilename -- path and name to CSV file
-	 * @param _includesHeader -- true if the CSV file first row is header information (which will be used as variable names)
+	 * Method to specify the import file to be used as input.
+	 * @param _importFilename -- path and name to import data file
+	 * @param _includesHeader -- true if the import data file first row is header information (which will be used as variable names)
 	 * @throws IOException
 	 */
-	void setCsvFilename(String _csvFilename, boolean _includesHeader) throws IOException;
+	void setImportFilename(String _importFilename, boolean _includesHeader) throws IOException;
 
 	/**
-	 * Set the CSV input to a DataSource data stream.
+	 * Set the import input to a DataSource data stream.
 	 * 
-	 * @param csvDs
+	 * @param importDs
 	 * @param _includesHeader
 	 * @throws IOException
 	 */
-	void setCsvDataSource(DataSource csvDs, boolean _includesHeader) throws IOException;
+	void setImportDataSource(DataSource importDs, boolean _includesHeader) throws IOException;
 
 	/**
 	 * Set the namespace to be used as the base URI of the created model.
@@ -105,14 +105,14 @@ public interface ICsvImporter {
 	 * Set the RDF Triple patterns to be used in generating the OWL output. 
 	 * The Triple patterns can be preceeded by "validate" and "transform" statements.
 	 * Variables in the pattern that are to be replaced with content from the 
-	 * CSV file are of the form "[Prefix]<ID>[Postfix]" where the square brackets
+	 * import file are of the form "[Prefix]<ID>[Postfix]" where the square brackets
 	 * indicate that the prefix to the required identifying section are manditory
 	 * and the "ID" can be one of:
-	 *   1) the name of a column header in the CSV file
-	 *   2) the CSV column identified by letter, e.g., "A", "Z", "AA"
+	 *   1) the name of a column header in the import file
+	 *   2) the import file column identified by letter, e.g., "A", "Z", "AA"
 	 *   3) a number identifying a blank node that will be constructed to link triples
 	 *   4) the result of a transform
-	 * For example, if the header of the the first two columns in the CSV data were "Name"
+	 * For example, if the header of the the first two columns in the import data were "Name"
 	 * and "SSN", the data in the second row, first two columns were "JohnDoe" and "123-45-6789",
 	 * and the imported ontology (imp) included the class "Person" and the property "hasSSN"
 	 * with range xsd:string, then the template
@@ -128,7 +128,7 @@ public interface ICsvImporter {
 	void setTemplates(String template) throws ConfigurationException, TemplateException;
 
 	/**
-	 * Save the OWL model created from the CSV file in the file specified.
+	 * Save the OWL model created from the import data file in the file specified.
 	 * 
 	 * @param saveAsFileName -- the name of the file with path, relative to the specified project directory, in which to write the output OWL file
 	 * @return -- true if successful else false
@@ -157,7 +157,7 @@ public interface ICsvImporter {
 			QueryCancelledException, ReasonerNotFoundException;
 
 	/**
-	 * Return the OWL model created from the CSV file serialized in the specified format as a DataSource data stream.
+	 * Return the OWL model created from the import data file serialized in the specified format as a DataSource data stream.
 	 * 
 	 * @param format -- "RDF/XML", "RDF/XML-ABBREV", "N-TRIPLE", or "N3"; if null output will be "RDF/XML-ABBREV"
 	 * @return
@@ -170,18 +170,14 @@ public interface ICsvImporter {
 			throws ConfigurationException, IOException, InvalidNameException, ReasonerNotFoundException;
 
 	/**
-	 * Return the OWL model as a Jena OntModel in-memory structure.
+	 * Return the OWL model as an in-memory model structure.
 	 * @return
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 * @throws InvalidNameException
 	 * @throws ReasonerNotFoundException 
 	 */
-	OntModel getOwlModel() throws ConfigurationException, IOException, InvalidNameException, ReasonerNotFoundException;
-
-	void incrementModelsInUse();
-
-	void decrementModelsInUse();
+	Object getOwlModel() throws ConfigurationException, IOException, InvalidNameException, ReasonerNotFoundException;
 
 	boolean enableTriplesAddedInOrderLogging(String filename) throws IOException;
 

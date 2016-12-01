@@ -23,6 +23,7 @@ import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -415,7 +416,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					// you can't tell what type a query will return
 					return true;
 				}
-				createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, expression.getOp());
+				if (!rulePremiseVariableAssignment(operations, leftTypeCheckInfo,rightTypeCheckInfo)) {
+					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, expression.getOp());
+				}
 				return false;
 			}
 			if (leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
@@ -431,6 +434,36 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private boolean rulePremiseVariableAssignment(List<String> operations, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
+		if (possibleAssignment(operations)) {
+			if (sadlModelProcessor.getRulePart().equals(SadlModelProcessor.RulePart.PREMISE)) {
+				if (isVariable(leftTypeCheckInfo)) {
+					if (!isAlreadyReferenced(leftTypeCheckInfo.getExpressionType())) {
+						return true;
+					}
+				}
+				else if (isVariable(rightTypeCheckInfo)) {
+					if (!isAlreadyReferenced(rightTypeCheckInfo.getExpressionType())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isAlreadyReferenced(ConceptIdentifier expressionType) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private boolean possibleAssignment(List<String> operations) {
+		if (operations.contains("is") || operations.contains("=")) {
+			return true;
+		}
+		return false;
+	}
+
 	private boolean isQuery(Expression expr) {
 		if (expr instanceof StringLiteral) {
 			String val = ((StringLiteral)expr).getValue();
