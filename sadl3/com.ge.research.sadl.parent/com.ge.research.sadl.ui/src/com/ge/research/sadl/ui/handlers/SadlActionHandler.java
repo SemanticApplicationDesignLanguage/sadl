@@ -58,7 +58,6 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
-
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
@@ -316,7 +315,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return null;
 	}
 
-	protected static String convertProjectRelativePathToAbsolutePath(String relPath) {
+	public static String convertProjectRelativePathToAbsolutePath(String relPath) {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IPath path = root.getFile(new Path(relPath)).getLocation();
@@ -401,7 +400,15 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			}
 		}
 	}
-
+	
+	protected void createGraphFromResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
+			String description, ResultSet rs) throws IOException {
+		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		File tmpDirFile = new File(tempDir);
+		tmpDirFile.mkdirs();
+		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
+		iGraphVisualizer.graphResultSetData(rs);
+	}
 	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName)
 			throws ConfigurationException, IOException {
 				if (rs.getColumnCount() >= 3) {

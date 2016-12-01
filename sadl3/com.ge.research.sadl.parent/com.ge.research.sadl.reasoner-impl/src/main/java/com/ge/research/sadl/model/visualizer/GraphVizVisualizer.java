@@ -184,7 +184,71 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			String slbl;			// name of start of directed edge
 			String olbl;			// name of end of directed edge
 			Object s;
-			if (row[0] == null || row[1] == null || row[2] == null) {
+			if(row[0] != null && row[1] == null && row[2] == null){
+				//is a single node
+				if (row[0].equals(OWL.Nothing.getURI())) {
+					s = OWL.Nothing;
+					slbl = OWL.Nothing.getLocalName() + nothingCount;
+					nothingCount++;
+					repeatSubjNode = false;
+				}
+				else {
+					s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
+					if (!nodes.contains(s.toString())) {
+						nodes.add(s.toString());
+						slbl = "n" + nodes.size();
+						repeatSubjNode = false;
+					}
+					else {
+						slbl = "n" + (nodes.indexOf(s.toString()) + 1);
+						repeatSubjNode = true;
+					}
+				}
+				sb.append("     ");
+				if (!repeatSubjNode) {
+					sb.append(slbl);
+					if(s.equals(OWL.Nothing)) {
+						sb.append("[shape=point label=\"");
+					}
+					else {
+						sb.append("[shape=box label=\"");
+					}
+					sb.append(s.toString());
+					sb.append("\"");
+					boolean anchored = false;
+					if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
+						anchored = true;
+						// color the "anchor" node
+						sb.append(" color=lightblue");
+//						if (headAttributes == null || !headAttributes.containsValue("color")) {
+							sb.append(" style=filled");
+//						}
+//						else {
+//							sb.append(" style=bold");
+//						}
+						sb.append(" fontcolor=navyblue");
+					}
+					if (headAttributes != null) {
+						Iterator<Integer> itr = headAttributes.keySet().iterator();
+						while (itr.hasNext()) {
+							Integer key = itr.next();
+							String value = headAttributes.get(key);
+							if (!anchored || !value.equals("color")) {
+								if (row[key.intValue()] != null) {
+									sb.append(" ");
+									sb.append(value);
+									sb.append("=");
+									sb.append(row[key.intValue()]);
+								}
+							}
+						}
+					}
+					sb.append("];\n");
+				}
+
+				continue;
+				
+			}else if (row[0] == null && row[1] == null && row[2] == null) {
 				continue;
 			}
 			

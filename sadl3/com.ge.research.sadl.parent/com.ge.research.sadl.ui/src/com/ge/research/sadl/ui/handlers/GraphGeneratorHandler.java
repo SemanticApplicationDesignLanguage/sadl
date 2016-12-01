@@ -254,7 +254,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	protected String getSadlResourceUri(SadlResource sr) {
 		return declarationExtensions.getConceptUri(sr);
 	}
-
+ 
 	protected OntConceptType getSadlResourceOntConceptType(SadlResource sr) throws CircularDefinitionException {
 		if (sr instanceof Name && ((Name)sr).getName() != null) {
 			return declarationExtensions.getOntConceptType(((Name)sr).getName());
@@ -286,6 +286,23 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		}
 		String description = "Graph of Imports";
 		graphResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
+	}
+	
+	
+	
+	protected void graphOntologyResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
+		String baseFileName = trgtFile.getFullPath().removeFileExtension().lastSegment().toString() + "_ONT";
+		String graphName = prefix;
+		String anchorNode = nodeText(publicUri, prefix);
+		if (prefix == null) {
+			anchorNode = publicUri.substring(publicUri.lastIndexOf('/') + 1);
+			if (anchorNode.endsWith(".owl")) {
+				anchorNode = anchorNode.substring(0, anchorNode.length() - 4);
+			}
+			graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
+		}
+		String description = "Graph of Ontology File";
+		createGraphFromResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
 	}
 
 	private ResultSet sadlResourceToDomainRangeResultSet(IConfigurationManagerForIDE configMgr, String publicUri, SadlResource sr) throws CircularDefinitionException, ConfigurationException, IOException {
@@ -370,7 +387,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	@Inject EditorResourceAccess editorResourceAccess;
 	@Inject IResourceDescriptions indexData;
 
-	private void findIncomingImports(IFile trgtFile, final List<String[]> imports, int graphRadius) {
+	protected void findIncomingImports(IFile trgtFile, final List<String[]> imports, int graphRadius) {
 		URI uri = URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true);
 		findIncomingImportsByUri(imports, uri, graphRadius);
 	}
@@ -416,7 +433,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return null;
 	}
 
-	private ResultSet listToResultSet(String[] headers, List<String[]> importList, IFile trgtFile, boolean derivedFN) {
+	protected ResultSet listToResultSet(String[] headers, List<String[]> importList, IFile trgtFile, boolean derivedFN) {
 		String[][] data = new String[importList.size()][];
 		for (int i = 0; i < importList.size(); i++) {
 			data[i] = importList.get(i);
@@ -454,7 +471,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return null;
 	}
 
-	private List<String[]> findImports(List<String[]> importList,
+	protected List<String[]> findImports(List<String[]> importList,
 			IConfigurationManagerForIDE configMgr, String parentPublicUri, String parentPrefix, int graphRadius) throws ConfigurationException, IOException {
 		Map<String,String> map = configMgr.getImports(parentPublicUri, Scope.LOCALONLY);
 		if (map != null) {
@@ -472,8 +489,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 					else {
 						row[0] = nodeText(key, val);
 					}
-					if (!rowAlreadyInList(importList,row) && graphRadius > 0) {
 						importList.add(row);
+						if (!rowAlreadyInList(importList,row) && graphRadius > 0) {
 						importList = findImports(importList, configMgr, key, val, graphRadius - 1);
 					}
 				}
