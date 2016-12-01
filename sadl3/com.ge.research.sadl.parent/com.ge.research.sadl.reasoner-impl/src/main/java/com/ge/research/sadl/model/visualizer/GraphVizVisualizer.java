@@ -73,6 +73,14 @@ public class GraphVizVisualizer implements IGraphVisualizer {
     	}
 		if (dotexec != null) {
 			// dot -Tps filename.dot -o outfile.ps
+			String fn = dotfilepath + ".svg";
+			File f = new File(fn);
+			if (f.exists()) {
+				boolean status = f.delete();
+				if (!status) {
+					throw new IOException("Unable to delete existing file '" + fn + "'.");
+				}
+			}
 			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tsvg", dotfilepath,"-o", dotfilepath + ".svg");
 			try {
 				bppng.start();
@@ -366,13 +374,16 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append(slbl);
 			sb.append("->");
 			sb.append(olbl);
-			sb.append("[label=\"");
-			String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
-			sb.append(edgeLbl);
-			sb.append("\"");
-			// color the "anchor" edge
-			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
-				sb.append(" color=red");
+			sb.append("[");
+			if (row[1] != null && row[1].toString().length() > 0) {
+				sb.append("label=\"");
+				String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
+				sb.append(edgeLbl);
+				sb.append("\"");
+				// color the "anchor" edge
+				if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
+					sb.append(" color=red");
+				}
 			}
 			if (edgeAttributes != null) {
 				Iterator<Integer> itr = edgeAttributes.keySet().iterator();

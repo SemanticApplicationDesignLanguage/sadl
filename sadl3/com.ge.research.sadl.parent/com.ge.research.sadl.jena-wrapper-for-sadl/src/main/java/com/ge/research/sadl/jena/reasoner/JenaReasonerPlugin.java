@@ -2080,7 +2080,8 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 
 			if (altUrl != null) {
-				String rulefn = altUrl.substring(0, altUrl.lastIndexOf(".")) + ".rules";
+				String altFN = new SadlUtils().fileUrlToFileName(altUrl);
+				String rulefn = altFN.substring(0, altFN.lastIndexOf(".")) + ".rules";
 				if (!ruleFilesLoaded.contains(rulefn)) {
 					if (loadRules(rulefn)) {
 						ruleFilesLoaded.add(rulefn);

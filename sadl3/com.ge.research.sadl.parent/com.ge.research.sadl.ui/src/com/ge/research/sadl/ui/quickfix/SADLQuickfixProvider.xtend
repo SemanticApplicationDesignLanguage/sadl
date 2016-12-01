@@ -80,7 +80,7 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 				} 
 				val replacement = "\nShape is "
 				xtextDocument.replace(afterContext, 0, replacement)
-				EditorUtils.activeXtextEditor.selectAndReveal(afterContext + replacement.length, 1)		// this doesn't work--how to locat cursor after replacement?
+				EditorUtils.activeXtextEditor.selectAndReveal(afterContext + replacement.length, 1)		// this doesn't work--how to locate cursor after replacement?
 			}
 		]);	
 		

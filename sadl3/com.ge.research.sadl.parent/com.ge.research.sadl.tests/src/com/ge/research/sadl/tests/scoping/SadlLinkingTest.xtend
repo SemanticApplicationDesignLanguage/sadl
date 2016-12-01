@@ -1133,7 +1133,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 
 	@Test
 	def void testImportPerformance() {
-		for (i : 99 .. 100) {
+		for (i : 1 .. 19) {
 			val started = Stopwatch.createStarted
 			val resource = '''
 				uri "http://sadl.org/NS1.sadl«i»" alias ns«i».

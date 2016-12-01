@@ -131,6 +131,14 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage DECOMPOSITION_ERROR = new SadlErrorMessage("decomposition_error");
 /**
+* Function has no reference.
+**/
+    public static final SadlErrorMessage TYPE_CHECK_UNDEFINED_EXCEPTION = new SadlErrorMessage("type_check_undefined_exception");
+/**
+* Built-in function, {0}, was found, but the reasoner and translator pair does not provide further type-checking information
+**/
+    public static final SadlErrorMessage TYPE_CHECK_BUILTIN_EXCEPTION = new SadlErrorMessage("type_check_builtin_exception");
+/**
 * expected a {0}
 **/
     public static final SadlErrorMessage EXPECTED_A = new SadlErrorMessage("expected_a");
@@ -210,6 +218,14 @@ public final class SadlErrorMessages {
 * Unhandled {0}: '{1}'
 **/
     public static final SadlErrorMessage UNHANDLED = new SadlErrorMessage("unhandled");
+/**
+* {0} is not in domain of property {1} 
+**/
+    public static final SadlErrorMessage SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("subject_not_in_domain_of_property");
+/**
+* {0} is not in domain of property {1}
+**/
+    public static final SadlErrorMessage PROPERTY_NOT_IN_DOMAIN = new SadlErrorMessage("property_not_in_domain");
 /**
 * A(n) {0} requires a {1} but it is missing.
 **/

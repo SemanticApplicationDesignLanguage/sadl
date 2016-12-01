@@ -25,7 +25,7 @@ public class NamedNode extends Node {
 	private String namespace = null;
 	private NodeType nodeType = null;
 	
-	public static enum NodeType {ClassNode, InstanceNode, PropertyNode, DataTypeProperty, ObjectProperty, VariableNode}
+	public static enum NodeType {ClassNode, InstanceNode, DataTypeNode, PropertyNode, DataTypeProperty, ObjectProperty, VariableNode}
 	
 	public NamedNode() {
 		super();

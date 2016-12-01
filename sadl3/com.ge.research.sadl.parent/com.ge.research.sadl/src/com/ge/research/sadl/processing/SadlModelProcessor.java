@@ -44,7 +44,9 @@ import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -72,6 +74,17 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	public DeclarationExtensions declarationExtensions;
 
 	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
+	
+	public static String getOwlModelFormat(ProcessorContext context) {
+		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+		if (context != null) {
+			String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
+			if (pv != null && pv.length() > 0) {
+				format = pv;
+			}
+		}
+		return format;
+	}
 	
 //	protected Object translate(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 ////		StringBuilder sb = new StringBuilder();
@@ -919,6 +932,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
 			return NodeType.InstanceNode;
 		}
+		else if (octype.equals(OntConceptType.DATATYPE)) {
+			return NodeType.DataTypeNode;
+		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
 	}
 
@@ -938,7 +954,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		this.encapsulatingTarget = encapsulatingTarget;
 	}
 
-	protected RulePart getRulePart() {
+	public RulePart getRulePart() {
 		return rulePart;
 	}
 

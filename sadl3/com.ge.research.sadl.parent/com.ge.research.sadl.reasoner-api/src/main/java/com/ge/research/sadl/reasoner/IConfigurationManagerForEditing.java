@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
@@ -188,5 +189,7 @@ public interface IConfigurationManagerForEditing extends IConfigurationManager {
 	public abstract OntDocumentManager getJenaDocumentMgr();
 
 	public abstract List<IGraphVisualizer> getAvailableGraphRenderers();
+	
+	public abstract List<ITabularDataImporter> getAvailableTabularImporters();
 
 }

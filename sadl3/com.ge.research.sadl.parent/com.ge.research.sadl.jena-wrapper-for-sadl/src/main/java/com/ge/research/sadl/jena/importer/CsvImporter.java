@@ -62,7 +62,7 @@ import au.com.bytecode.opencsv.CSVParser;
 import au.com.bytecode.opencsv.CSVReader;
 
 import com.ge.research.sadl.importer.AbortDataRowException;
-import com.ge.research.sadl.importer.ICsvImporter;
+import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.SkipGroupException;
 import com.ge.research.sadl.importer.SkipTripleException;
 import com.ge.research.sadl.importer.TemplateException;
@@ -116,7 +116,7 @@ import com.hp.hpl.jena.vocabulary.XSD;
  * @author 200005201
  *
  */
-public class CsvImporter implements ICsvImporter {
+public class CsvImporter implements ITabularDataImporter {
 	private static final String CSV_IMPORTER = "CsvImporter";
 	private static final Logger logger = LoggerFactory.getLogger(CsvImporter.class);
 	public enum NewResourceType {Class, Property, Individual}
@@ -885,7 +885,7 @@ public class CsvImporter implements ICsvImporter {
 	 * @see com.ge.research.sadl.importer.ICsvImporter#setCsvFilename(java.lang.String, boolean)
 	 */
 	@Override
-	public void setCsvFilename(String _csvFilename, boolean _includesHeader) throws IOException {
+	public void setImportFilename(String _csvFilename, boolean _includesHeader) throws IOException {
 		_csvFilename = validateFile(_csvFilename, false);
 		csvInputStream = new FileInputStream(_csvFilename);
 		setIncludesHeader(_includesHeader);
@@ -895,7 +895,7 @@ public class CsvImporter implements ICsvImporter {
 	 * @see com.ge.research.sadl.importer.ICsvImporter#setCsvDataSource(javax.activation.DataSource, boolean)
 	 */
 	@Override
-	public void setCsvDataSource(DataSource csvDs, boolean _includesHeader) throws IOException {
+	public void setImportDataSource(DataSource csvDs, boolean _includesHeader) throws IOException {
 		csvInputStream = csvDs.getInputStream();
 		setIncludesHeader(_includesHeader);
 	}
@@ -2216,18 +2216,10 @@ public class CsvImporter implements ICsvImporter {
 		executor.execute(worker);
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.ge.research.sadl.importer.ICsvImporter#incrementModelsInUse()
-	 */
-	@Override
 	public synchronized void incrementModelsInUse() {
 		modelsInUse ++;
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.ge.research.sadl.importer.ICsvImporter#decrementModelsInUse()
-	 */
-	@Override
 	public synchronized void decrementModelsInUse() {
 		modelsInUse--;
 	}	

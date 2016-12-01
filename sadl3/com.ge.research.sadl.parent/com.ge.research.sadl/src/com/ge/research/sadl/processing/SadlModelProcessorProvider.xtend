@@ -26,9 +26,6 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.util.OnChangeEvictingCache
 import org.eclipse.xtext.validation.CheckMode
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import org.eclipse.xtext.util.IAcceptor
-import com.ge.research.sadl.builder.MessageManager.SadlMessage
 
 class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
