@@ -314,4 +314,10 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 */
 	public abstract OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException;
 
+	/**
+	 * Call this method to find a file treating it first as an absolute path and that failing as a project-relative path
+	 * @param fn
+	 * @return
+	 */
+	public abstract File resolveFilename(String fn);
 }

@@ -18,6 +18,7 @@ import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.model.Explanation;
+import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Print;
@@ -114,7 +115,7 @@ public class RunInference extends SadlActionHandler {
 								consoleOutput((List<?>) infresults);
         					}
         					else if (infresults instanceof String) {
-        						if (cmd instanceof Print) {
+        						if (cmd instanceof Print || cmd instanceof EndWrite) {
         							if (((String)infresults).startsWith("file:/")) {
         								SadlConsole.writeToConsole(MessageType.INFO, ((Print)cmd).getModel() + " written to '" + ((String)infresults).substring(6) + "\n");
         							}

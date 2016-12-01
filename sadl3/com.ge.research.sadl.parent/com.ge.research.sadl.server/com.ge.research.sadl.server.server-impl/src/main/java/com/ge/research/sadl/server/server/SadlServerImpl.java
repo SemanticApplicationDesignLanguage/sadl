@@ -61,7 +61,7 @@ import javax.activation.URLDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.importer.ICsvImporter;
+import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.jena.importer.CsvImporter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -206,13 +206,13 @@ public class SadlServerImpl implements ISadlServer {
 				throw new ConfigurationException("Instance data namespace must be set before CSV data can be imported.");
 			}
 		}
-		ICsvImporter importer = new CsvImporter(getConfigurationMgr());
-		importer.setCsvFilename(serverCsvDataLocator, includesHeader);
+		ITabularDataImporter importer = new CsvImporter(getConfigurationMgr());
+		importer.setImportFilename(serverCsvDataLocator, includesHeader);
 		importer.setModelFolder(getKBaseIdentifier());
 		importer.setImportModelNamespace(defaultInstanceDataNS);
 		importer.setImports(getModelName());
 		importer.setTemplates(csvTemplate);
-		OntModel om;
+		Object om;
 		try {
 			om = importer.getOwlModel();
 			reasoner.loadInstanceData(om);
@@ -430,7 +430,7 @@ public class SadlServerImpl implements ISadlServer {
 			}
 		}
 		CsvImporter importer = new CsvImporter(getConfigurationMgr());
-		importer.setCsvDataSource(csvDataSrc, includesHeader);
+		importer.setImportDataSource(csvDataSrc, includesHeader);
 		importer.setModelFolder(getKBaseIdentifier());
 		importer.setImportModelNamespace(defaultInstanceDataNS);
 		

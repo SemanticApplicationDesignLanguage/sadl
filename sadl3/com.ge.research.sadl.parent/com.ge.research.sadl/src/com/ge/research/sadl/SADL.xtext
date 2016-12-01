@@ -43,7 +43,7 @@ SadlModelElement :
 	| 	PrintStatement => EOS
 	|	ReadStatement => EOS
 	| 	ExplainStatement => EOS
-	|	StartWriteStatement => EOS
+	|	StartWriteStatement
 	|	EndWriteStatement => EOS
 	|   EquationStatement => EOS
 	|   ExternalEquationStatement => EOS

@@ -55,6 +55,7 @@
 				<configuration>
 					<services>
 						<param>com.ge.research.sadl.model.visualizer.IGraphVisualizer</param>
+						<param>com.ge.research.sadl.importer.ITabularDataImporter</param>
 					</services>
 				</configuration>
 				<executions>
