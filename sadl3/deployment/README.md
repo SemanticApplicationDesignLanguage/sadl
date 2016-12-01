@@ -5,6 +5,10 @@ docker pull typefox/websadl
 docker run -p 8080:8080 -p 8888:8888 typefox/websadl
 
 ```
+### Open SADL in the browser
+
+Open a browser and go to "http://docker-image-ip:8080/sadl"
+
 
 ## Prepare image payload
 
@@ -45,9 +49,5 @@ docker run -p 8080:8080 -p 8888:8888 typefox/websadl
 
 ### sh to container 
 `sudo docker exec -i -t <name> /bin/bash`
-
-### Open SADL in the browser
-
-Open a browser and go to "http://docker-image-ip:8080/sadl"
 
 
