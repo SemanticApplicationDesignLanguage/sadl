@@ -1,6 +1,14 @@
+## Pull and start image
+
+```
+docker pull typefox/websadl
+docker run -p 8080:8080 -p 8888:8888 typefox/websadl
+
+```
+
 ## Prepare image payload
 
-# in git/sadlos2-master/sadl3/com.ge.research.sadl.parent/io.typefox.lsp.monaco
+In git/sadlos2-master/sadl3/com.ge.research.sadl.parent/io.typefox.lsp.monaco
 run
 
 ```
@@ -13,7 +21,7 @@ gradle buildStandaloneTomcat
 and copy .build/tomcat.tar.gz to here
 
 
-# in git/sadl-jupyterlab/sadl-client
+In git/sadl-jupyterlab/sadl-client
 run
 
 ```
