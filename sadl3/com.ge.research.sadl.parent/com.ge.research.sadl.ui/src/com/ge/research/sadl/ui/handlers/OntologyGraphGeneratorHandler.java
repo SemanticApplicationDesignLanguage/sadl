@@ -52,7 +52,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					for (int i = 0; i < ontFiles.length; i++) {
 						boolean worked = GenerateOntologyFileGraph(ontFiles[i], project);
 						if(!worked){
-							SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFiles[i].getName() + "' does not exist.\n");	
+							SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFiles[i].getName() + "' does not exist, or does not contain valid data for graphing.\n");	
 						}else{
 							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontFiles[i].getName() + "' Generated Successfully.\n\n");
 						}
@@ -64,11 +64,14 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 				if(ontImplFiles != null){
 					for (int i = 0; i < ontImplFiles.length; i++) {
-						boolean worked = GenerateOntologyFileGraph(ontImplFiles[i], project);
-						if(!worked){
-							SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontImplFiles[i].getName() + "' does not exist.\n");	
-						}else{
-							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontImplFiles[i].getName() + "' Generated Successfully.\n\n");
+						//the builtin functions ontology file does not contain valid data for graphing (type externalEquation) at this point. 
+						if(!ontImplFiles[i].getName().equals("SadlBuiltinFunctions.sadl")){
+							boolean worked = GenerateOntologyFileGraph(ontImplFiles[i], project);
+							if(!worked){
+								SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontImplFiles[i].getName() + "' does not exist, or does not contain valid data for graphing.\n");	
+							}else{
+								SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontImplFiles[i].getName() + "' Generated Successfully.\n\n");
+							}
 						}
 					}
 				}   
