@@ -184,6 +184,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			String slbl;			// name of start of directed edge
 			String olbl;			// name of end of directed edge
 			Object s;
+			//If this is a single node to be graphed
 			if(row[0] != null && row[1] == null && row[2] == null){
 				//is a single node
 				if (row[0].equals(OWL.Nothing.getURI())) {
@@ -260,7 +261,13 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 			else {
 				s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
-				if (!nodes.contains(s.toString())) {
+				//check if this node should be duplicated: Used in graphing context AATIM-1389
+				if(headAttributes != null && headAttributes.get("duplicate").equals(true)){
+					//don't check to see if this node is in nodes
+					nodes.add(s.toString());
+					slbl = "n" + nodes.size();
+					repeatSubjNode = false;
+				}else if (!nodes.contains(s.toString())) {
 					nodes.add(s.toString());
 					slbl = "n" + nodes.size();
 					repeatSubjNode = false;
@@ -279,7 +286,13 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 			else {
 				o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
-				if (!nodes.contains(o.toString())) {
+				//check if this node should be duplicated: Used in graphing context AATIM-1389
+				if(tailAttributes != null && tailAttributes.get("duplicate").equals(true)){
+					//don't check to see if this node is in nodes
+					nodes.add(s.toString());
+					olbl = "n" + nodes.size();
+					repeatObjNode = false;
+				}else if (!nodes.contains(o.toString())) {
 					nodes.add(o.toString());
 					olbl = "n" + nodes.size();
 					repeatObjNode = false;
