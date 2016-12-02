@@ -232,6 +232,7 @@ public class OntologyGraphGenerator {
 	 */
 	private String getImportUrl(OntResource rsrc) {
 		if (!rsrc.isURIResource()) {
+			//int i = 0;
 			return rsrc.toString();
 		}
 		String ns = rsrc.getNameSpace();
@@ -481,64 +482,145 @@ public class OntologyGraphGenerator {
 					}
 				}
 			}
-			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
-			if (!data.contains(sg)) {
+			//-------------------------check for union classes--------------------------
+			
+			try{
+			if(rng.canAs(OntClass.class) && rng.as(OntClass.class).isUnionClass()) {
 				
-				
-				data.add(sg);
-				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
-				//boolean test = cls.asRestriction().isAllValuesFromRestriction();
-				//String s = sg.restrictionToString(cls.as(OntClass.class));
-				//sg.addEdgeAttribute("labeltooltip", s);
-				if(!isInImports(rng, parentPublicUri)){
-					sg.addTailAttribute(STYLE, FILLED);
-					sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
-					sg.addTailAttribute(FONTCOLOR, WHITE);
-				}else{
-					if(getImportUrl(rng) != null) sg.addTailAttribute(LINK_URL, getImportUrl(rng));
-					sg.addTailAttribute(IS_IMPORT, "true");
-				}
-				
-				ExtendedIterator<OntClass> iter = cls.listSuperClasses(true);
-				StringBuilder rstrString = new StringBuilder();
-				while(iter.hasNext()){
-					OntClass superClass = iter.next();
-					if(superClass.isRestriction()){
-						OntProperty restrictionProperty = superClass.asRestriction().getOnProperty();
-						if(restrictionProperty.equals(prop)){
-							if(prop.canAs(Property.class)){
-								rstrString.append(getRestrictionString(superClass.asRestriction(),prop.as(Property.class),rng, isList));
-							}else{
-								throw new Exception("prop is not a property");
+				//get list of union classes
+				List<OntClass> unionclasses = getUnionClasses(rng);
+				Iterator<OntClass> clsiter = unionclasses.iterator();
+				while(clsiter.hasNext()){
+					OntClass newcls = clsiter.next();
+					GraphSegment sg = isList ? new GraphSegment(cls, prop, newcls, isList, configMgr) : new GraphSegment(cls, prop, newcls, configMgr);
+					
+					if (!data.contains(sg)) {	
+						
+						data.add(sg);
+						sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+						//boolean test = cls.asRestriction().isAllValuesFromRestriction();
+						//String s = sg.restrictionToString(cls.as(OntClass.class));
+						//sg.addEdgeAttribute("labeltooltip", s);
+						if(!isInImports(newcls, parentPublicUri)){
+							sg.addTailAttribute(STYLE, FILLED);
+							sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
+							sg.addTailAttribute(FONTCOLOR, WHITE);
+						}else{
+							if(getImportUrl(newcls) != null) sg.addTailAttribute(LINK_URL, getImportUrl(newcls));
+							sg.addTailAttribute(IS_IMPORT, "true");
+						}
+						
+						ExtendedIterator<OntClass> iter = cls.listSuperClasses(true);
+						StringBuilder rstrString = new StringBuilder();
+						while(iter.hasNext()){
+							OntClass superClass = iter.next();
+							if(superClass.isRestriction()){
+								OntProperty restrictionProperty = superClass.asRestriction().getOnProperty();
+								if(restrictionProperty.equals(prop)){
+									if(prop.canAs(Property.class)){
+										rstrString.append(getRestrictionString(superClass.asRestriction(),prop.as(Property.class),newcls, isList));
+									}else{
+										throw new Exception("prop is not a property");
+									}
+								}
+							}
+						}
+						if(rstrString.length() > 0){	
+							sg.addEdgeAttribute("URL",getCurrentFileLink(parentPublicUri));
+							sg.addEdgeAttribute(FONTCOLOR, RED);
+							String str = "\"" + rstrString.toString() + "\"";
+							sg.addEdgeAttribute("labeltooltip", str);
+						}
+						
+						if(!isInImports(cls, parentPublicUri)){
+							sg.addHeadAttribute(STYLE, FILLED);
+							sg.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
+							sg.addHeadAttribute(FONTCOLOR, WHITE);
+						}else{
+							sg.addHeadAttribute(IS_IMPORT, "true");
+							if(getImportUrl(cls) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(cls));
+						}
+					}
+					
+					
+					
+				}	
+			}else{
+				GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
+				if (!data.contains(sg)) {	
+					
+					data.add(sg);
+					sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+					//boolean test = cls.asRestriction().isAllValuesFromRestriction();
+					//String s = sg.restrictionToString(cls.as(OntClass.class));
+					//sg.addEdgeAttribute("labeltooltip", s);
+					if(!isInImports(rng, parentPublicUri)){
+						sg.addTailAttribute(STYLE, FILLED);
+						sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
+						sg.addTailAttribute(FONTCOLOR, WHITE);
+					}else{
+						if(getImportUrl(rng) != null) sg.addTailAttribute(LINK_URL, getImportUrl(rng));
+						sg.addTailAttribute(IS_IMPORT, "true");
+					}
+					
+					ExtendedIterator<OntClass> iter = cls.listSuperClasses(true);
+					StringBuilder rstrString = new StringBuilder();
+					while(iter.hasNext()){
+						OntClass superClass = iter.next();
+						if(superClass.isRestriction()){
+							OntProperty restrictionProperty = superClass.asRestriction().getOnProperty();
+							if(restrictionProperty.equals(prop)){
+								if(prop.canAs(Property.class)){
+									rstrString.append(getRestrictionString(superClass.asRestriction(),prop.as(Property.class),rng, isList));
+								}else{
+									throw new Exception("prop is not a property");
+								}
 							}
 						}
 					}
+					if(rstrString.length() > 0){	
+						sg.addEdgeAttribute("URL",getCurrentFileLink(parentPublicUri));
+						sg.addEdgeAttribute(FONTCOLOR, RED);
+						String str = "\"" + rstrString.toString() + "\"";
+						sg.addEdgeAttribute("labeltooltip", str);
+					}
+					
+					if(!isInImports(cls, parentPublicUri)){
+						sg.addHeadAttribute(STYLE, FILLED);
+						sg.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
+						sg.addHeadAttribute(FONTCOLOR, WHITE);
+					}else{
+						sg.addHeadAttribute(IS_IMPORT, "true");
+						if(getImportUrl(cls) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(cls));
+					}
+	
+					if (prop.as(OntProperty.class).isObjectProperty()) {
+						//data = addClassProperties(rng.as(OntClass.class), data, parentPublicUri);
+					}
 				}
-				if(rstrString.length() > 0){	
-					sg.addEdgeAttribute("URL",getCurrentFileLink(parentPublicUri));
-					sg.addEdgeAttribute(FONTCOLOR, RED);
-					String str = "\"" + rstrString.toString() + "\"";
-					sg.addEdgeAttribute("labeltooltip", str);
-				}
-				
-				if(!isInImports(cls, parentPublicUri)){
-					sg.addHeadAttribute(STYLE, FILLED);
-					sg.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
-					sg.addHeadAttribute(FONTCOLOR, WHITE);
-				}else{
-					sg.addHeadAttribute(IS_IMPORT, "true");
-					if(getImportUrl(cls) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(cls));
-				}
-
-				if (prop.as(OntProperty.class).isObjectProperty()) {
-					//data = addClassProperties(rng.as(OntClass.class), data, parentPublicUri);
-				}
+			}
+			}catch(Exception e){
+				e.printStackTrace(System.err);
 			}
 		}
 		return data;
 	}
 	
 	
+	private List<OntClass> getUnionClasses(OntResource rng) {
+		List<OntClass> classList = new ArrayList<OntClass>();
+		ExtendedIterator<? extends OntClass> eunitr = ((OntClass)rng).asUnionClass().listOperands();
+		while(eunitr.hasNext()){
+			OntClass newcls = eunitr.next();
+			if(newcls.canAs(OntClass.class) && ((OntClass)newcls).isUnionClass()){
+				classList = getUnionClasses(newcls);
+			}else{
+				classList.add(newcls);
+			}
+		}
+		return classList;
+	}
+
 	private String getCurrentFileLink(String parentUri) throws Exception{
 		String[] splitFile = parentUri.split("/");
 		String filename = splitFile[splitFile.length-1];
