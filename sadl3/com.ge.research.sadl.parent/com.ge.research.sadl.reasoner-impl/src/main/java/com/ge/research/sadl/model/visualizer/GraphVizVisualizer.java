@@ -262,7 +262,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			else {
 				s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
-				if(headAttributes != null && headAttributes.get("duplicate").equals(true)){
+				if(headAttributes != null && 
+						headAttributes.get("duplicate") != null && 
+						headAttributes.get("duplicate").equals(true)){
 					//don't check to see if this node is in nodes
 					nodes.add(s.toString());
 					slbl = "n" + nodes.size();
@@ -287,7 +289,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			else {
 				o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
-				if(tailAttributes != null && tailAttributes.get("duplicate").equals(true)){
+				if(tailAttributes != null && 
+						tailAttributes.get("duplicate") != null && 
+						tailAttributes.get("duplicate").equals(true)){
 					//don't check to see if this node is in nodes
 					nodes.add(s.toString());
 					olbl = "n" + nodes.size();
