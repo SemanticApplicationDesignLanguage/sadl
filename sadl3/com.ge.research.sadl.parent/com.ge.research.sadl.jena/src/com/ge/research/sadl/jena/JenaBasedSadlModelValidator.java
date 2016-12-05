@@ -1156,58 +1156,51 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject) throws CircularDefinitionException{
 		if(metricsProcessor != null){
-			if (subject instanceof Name) {
-				String className = declarationExtensions.getConceptUri(((Name) subject).getName());
-				SadlResource cls = ((Name) subject).getName();
-				if (!declarationExtensions.getOntConceptType(cls).equals(OntConceptType.CLASS)) {
-					// need to convert this to the Class representing the type; use existing type checking functionality
-					try {
+			try {
+				if (subject instanceof Name) {
+					String className = declarationExtensions.getConceptUri(((Name) subject).getName());
+					SadlResource cls = ((Name) subject).getName();
+					if (!declarationExtensions.getOntConceptType(cls).equals(OntConceptType.CLASS)) {
+						// need to convert this to the Class representing the type; use existing type checking functionality
 						TypeCheckInfo subjTCI = getType(cls);
 						addEffectiveRangeByTypeCheckInfo(predicateType, subjTCI);
-					} catch (DontTypeCheckException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				else {
-//					cls = ((Name)subject).getName();
-					addEffectiveRangeUnit(className, predicateType);
-				}
-			}
-			else {
-				try {
-					if (subject instanceof ElementInList) {
-						try {
-							TypeCheckInfo tci = getType(((ElementInList)subject));
-							addEffectiveRangeByTypeCheckInfo(predicateType, tci);
-						} catch (TranslationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (URISyntaxException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (ConfigurationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (DontTypeCheckException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} 
 					}
 					else {
-						throw new InvalidNameException("addEffectiveRange given a subject which isn't a Name (" + subject.getClass().getCanonicalName() + "), not handled.");
+	//					cls = ((Name)subject).getName();
+						addEffectiveRangeUnit(className, predicateType);
 					}
-				} catch (InvalidNameException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-			}
+				}
+				else if (subject instanceof ElementInList) {
+					TypeCheckInfo tci = getType(((ElementInList)subject));
+					addEffectiveRangeByTypeCheckInfo(predicateType, tci);
+				}
+				else if (subject instanceof SubjHasProp) {
+					TypeCheckInfo tci;
+					tci = getType(((SubjHasProp)subject).getLeft());
+					addEffectiveRangeByTypeCheckInfo(predicateType, tci);
+				}
+				else {
+					throw new InvalidNameException("addEffectiveRange given a subject of type '" + subject.getClass().getCanonicalName() + "', not yet handled.");
+				}
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DontTypeCheckException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 		}
 	}
 
