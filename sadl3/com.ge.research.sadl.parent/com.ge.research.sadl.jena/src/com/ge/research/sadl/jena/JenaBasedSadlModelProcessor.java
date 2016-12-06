@@ -1934,6 +1934,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), expr);
 					}
 				}
+				else if (robj instanceof VariableNode) {
+					if (((TripleElement)lobj).getObject() == null) {
+						((TripleElement)lobj).setObject((VariableNode) robj);
+						return lobj;
+					}
+				}
 				else if (robj instanceof BuiltinElement) {
 					if (isModifiedTriple(((BuiltinElement)robj).getFuncType())) {
 						assignedNode = ((BuiltinElement)robj).getArguments().get(0);
