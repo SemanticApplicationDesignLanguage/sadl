@@ -50,6 +50,11 @@ import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import com.ge.research.sadl.jena.OntModelProvider
+import com.hp.hpl.jena.vocabulary.RDFS
+import com.hp.hpl.jena.rdf.model.RDFNode
+import com.hp.hpl.jena.ontology.OntClass
+import com.hp.hpl.jena.ontology.OntResource
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -447,6 +452,33 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		}
 	}
 	
+	/**
+	 * Method to determine if a particular SadlResource (OntConceptType.INSTANCE, OntConceptType.CLASS, or OntConceptType.VARIABLE)
+	 * is in the domain of the given property
+	 */
+	def boolean isSadlResourceInDomainOfProperty(SadlResource propsr, SadlResource sr) {
+			val om = OntModelProvider.find(propsr.eResource)
+			if (om != null) {
+				val p = om.getProperty(declarationExtensions.getConceptUri(propsr))
+				if (p != null) {
+					val srtype = declarationExtensions.getOntConceptType(sr)
+					var OntResource ontrsrc
+					if (srtype.equals(OntConceptType.CLASS)) {
+						ontrsrc = om.getOntClass(declarationExtensions.getConceptUri(sr))
+					}
+					else if (srtype.equals(OntConceptType.INSTANCE)) {
+						ontrsrc = om.getIndividual(declarationExtensions.getConceptUri(sr))
+					}
+					else if (srtype.equals(OntConceptType.VARIABLE)) {
+						//TBD
+					}
+//					return JenaBasedSadlModelValidator.checkPropertyDomain(om, p, ontrsrc, propsr.eContainer, false)
+				}
+			}
+		
+		return false
+	}
+	
 	def restrictTypeToAllPropertyTypes() {
 				val typeList = new ArrayList<OntConceptType>
 				typeList.add(OntConceptType.ANNOTATION_PROPERTY)
@@ -454,6 +486,13 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				typeList.add(OntConceptType.DATATYPE_PROPERTY)
 				typeList.add(OntConceptType.RDF_PROPERTY)
 				typeRestrictions = typeList
+	}
+	
+	def addRestrictionType(OntConceptType type) {
+		if (typeRestrictions == null) {
+			typeRestrictions = new ArrayList<OntConceptType>
+		}
+		typeRestrictions.add(type)
 	}
 	
 	def getFilteredCrossReferenceList(CrossReference crossReference, ContentAssistContext context) {

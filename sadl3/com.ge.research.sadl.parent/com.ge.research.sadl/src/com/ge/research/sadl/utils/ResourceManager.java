@@ -183,4 +183,34 @@ public class ResourceManager {
 		return false;
 	}
     
+	/**
+	 * This method finds a file in a folder structure
+	 * @param folder
+	 * @param file
+	 * @param excludeFolders
+	 * @return
+	 */
+	public static String findFile(String folder, String file, List<File> excludeFolders) {
+		String ffn = folder + File.separator + file;
+		File fl = new File(ffn);
+		if (fl.exists()) {
+			return ffn;
+		}
+		File fldfile = new File(folder);
+		if (fldfile.exists() && fldfile.isDirectory()) {
+			File[] files = fldfile.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				File felement = files[i];
+				// don't look for if directory is excluded
+				if (felement.isDirectory() && (excludeFolders == null || !excludeFolders.contains(felement))) {
+					String nextlvlfile = findFile(felement.getAbsolutePath(), file, excludeFolders);
+					if (nextlvlfile != null) {
+						return nextlvlfile;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 }

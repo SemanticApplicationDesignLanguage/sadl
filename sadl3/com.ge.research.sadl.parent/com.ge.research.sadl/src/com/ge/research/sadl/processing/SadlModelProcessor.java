@@ -927,6 +927,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
 			return NodeType.InstanceNode;
 		}
+		else if (octype.equals(OntConceptType.DATATYPE)) {
+			return NodeType.DataTypeNode;
+		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
 	}
 
@@ -946,7 +949,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		this.encapsulatingTarget = encapsulatingTarget;
 	}
 
-	protected RulePart getRulePart() {
+	public RulePart getRulePart() {
 		return rulePart;
 	}
 

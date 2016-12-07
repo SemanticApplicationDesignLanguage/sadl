@@ -52,17 +52,24 @@ import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
+
+
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -308,7 +315,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return null;
 	}
 
-	protected static String convertProjectRelativePathToAbsolutePath(String relPath) {
+	public static String convertProjectRelativePathToAbsolutePath(String relPath) {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IPath path = root.getFile(new Path(relPath)).getLocation();
@@ -393,4 +400,32 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			}
 		}
 	}
+	
+	protected void createGraphFromResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
+			String description, ResultSet rs) throws IOException {
+		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		File tmpDirFile = new File(tempDir);
+		tmpDirFile.mkdirs();
+		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
+		iGraphVisualizer.graphResultSetData(rs);
+	}
+	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName)
+			throws ConfigurationException, IOException {
+				if (rs.getColumnCount() >= 3) {
+					String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+					final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+					IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
+			
+					IGraphVisualizer visualizer = getVisualizer(configMgr);
+					if (visualizer != null) {
+						graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs);
+					}
+					else {
+						SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
+					}
+				}
+				else {
+					SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query; ResultSet has less than 3 columns.\n");
+				}
+			}
 }

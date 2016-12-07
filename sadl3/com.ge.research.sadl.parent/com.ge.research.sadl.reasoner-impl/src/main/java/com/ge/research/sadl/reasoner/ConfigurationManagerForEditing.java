@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
@@ -772,6 +773,19 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		return renderers;
 	}
 
+	@Override
+	public List<ITabularDataImporter> getAvailableTabularImporters() {
+		List<ITabularDataImporter> renderers = new ArrayList<ITabularDataImporter>();
+		ServiceLoader<ITabularDataImporter> serviceLoader = getTabularDataImportersFromServiceLoader(ITabularDataImporter.class);
+		if (serviceLoader != null) {
+			for (Iterator<ITabularDataImporter> itr = serviceLoader.iterator(); itr
+					.hasNext();) {
+				renderers.add(itr.next());
+			}
+		}
+		return renderers;
+	}
+
 	/**
 	 * Method to get a list of all the available translator plugins using a
 	 * {@link ServiceLoader}
@@ -836,6 +850,11 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 
 	protected static ServiceLoader<IGraphVisualizer> getGraphRenderersFromServiceLoader(
 			Class<IGraphVisualizer> cls) {
+		return ServiceLoader.load(cls);
+	}
+
+	protected static ServiceLoader<ITabularDataImporter> getTabularDataImportersFromServiceLoader(
+			Class<ITabularDataImporter> cls) {
 		return ServiceLoader.load(cls);
 	}
 

@@ -75,7 +75,9 @@ import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
+import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
@@ -88,8 +90,10 @@ import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
+import com.ge.research.sadl.model.gp.Read;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.model.gp.StartWrite;
 import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
@@ -111,6 +115,7 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
+import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.ConstructExpression;
 import com.ge.research.sadl.sADL.Declaration;
@@ -275,6 +280,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private List<Rule> rules = null;
 	private List<Equation> equations = null;
 	private List<SadlCommand> sadlCommands = null;
+	private SadlCommand targetCommand = null;
 	
 	int modelErrorCount = 0;
 	int modelWarningCount = 0;
@@ -967,12 +973,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
 		if (policyFilename != null) {
 			File projectFolder = new File(policyFilename).getParentFile().getParentFile();
+			if(projectFolder == null){
+				return null;
+			}
 			String relPath = SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" + SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
 			String platformPath = projectFolder.getName() + "/" + relPath;
 			String implicitSadlModelFN = projectFolder + "/" + relPath;
 			File implicitModelFile = new File(implicitSadlModelFN);
 			if (!implicitModelFile.exists()) {
-				createBuiltinFunctionImplicitModel(implicitSadlModelFN);
+				createBuiltinFunctionImplicitModel(projectFolder.getAbsolutePath());
 				try {
 					Resource newRsrc = resource.getResourceSet().createResource(URI.createPlatformResourceURI(platformPath, false)); 
 					newRsrc.load(resource.getResourceSet().getLoadOptions());
@@ -1143,10 +1152,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private void processStatement(SadlResource element) throws TranslationException {
 		Object srobj = processExpression(element);
 		int i = 0;
-	}
-	
-	private void processStatement(StartWriteStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
 	}
 	
 	public Test[] processStatement(TestStatement element) throws JenaProcessorException {
@@ -1434,16 +1439,41 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return numErrors;
 	}
     
-	private void processStatement(ExplainStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+	private void processStatement(ExplainStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+		String ruleName = element.getRulename();
+		if (ruleName != null) {
+			Explain cmd = new Explain(ruleName);
+			addSadlCommand(cmd);
+		}
+		else {
+			Object result = translate(element.getExpr());
+			if (result instanceof GraphPatternElement) {
+				Explain cmd = new Explain((GraphPatternElement)result);
+				addSadlCommand(cmd);
+			}
+			else {
+				throw new TranslationException("Unhandled ExplainStatement: " + result.toString());
+			}
+		}
+	}
+	
+	private void processStatement(StartWriteStatement element) throws JenaProcessorException {
+		String dataOnly = element.getDataOnly();
+		StartWrite cmd = new StartWrite(dataOnly != null);
+		addSadlCommand(cmd);
 	}
 	
 	private void processStatement(EndWriteStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+		String outputFN = element.getFilename();
+		EndWrite cmd = new EndWrite(outputFN);
+		addSadlCommand(cmd);
 	}
 	
 	private void processStatement(ReadStatement element) throws JenaProcessorException {
-		throw new JenaProcessorException("Processing for " + element.getClass().getCanonicalName() + " not yet implemented");		
+		String filename = element.getFilename();
+		String templateFilename = element.getTemplateFilename();
+		Read readCmd = new Read(filename, templateFilename);
+		addSadlCommand(readCmd);
 	}
 	
 	private void processStatement(PrintStatement element) throws JenaProcessorException {
@@ -1760,6 +1790,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private void processStatement(RuleStatement element) throws InvalidNameException, InvalidTypeException, TranslationException {
 		String ruleName = element.getName();
 		Rule rule = new Rule(ruleName);
+		setTarget(rule);
 		EList<Expression> ifs = element.getIfs();
 		EList<Expression> thens = element.getThens();
 		setRulePart(RulePart.PREMISE);
@@ -1790,6 +1821,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			rules = new ArrayList<Rule>();
 		}
 		rules.add(rule);
+		setTarget(null);
 	}
 	
 	protected void addSadlCommand(SadlCommand sadlCommand) {
@@ -1842,6 +1874,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		else if (expr instanceof SubjHasProp) {
 			return processExpression((SubjHasProp)expr);
+		}
+		else if (expr instanceof CommaSeparatedAbreviatedExpression) {
+			return processExpression((CommaSeparatedAbreviatedExpression)expr);
 		}
 		else if (expr instanceof SadlResource) {
 			return processExpression((SadlResource)expr);
@@ -1954,6 +1989,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 					else {
 						addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), expr);
+					}
+				}
+				else if (robj instanceof VariableNode) {
+					if (((TripleElement)lobj).getObject() == null) {
+						((TripleElement)lobj).setObject((VariableNode) robj);
+						return lobj;
 					}
 				}
 				else if (robj instanceof BuiltinElement) {
@@ -2626,7 +2667,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			NamedNode n = new NamedNode(nm, ontConceptTypeToNodeType(type));
 			n.setNamespace(ns);
 			n.setPrefix(prfx);
-			n.setNodeType(ontConceptTypeToNodeType(type));
 			return n;
 		}
 	}
@@ -2636,8 +2676,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		Expression subj = expr.getLeft();
 		SadlResource pred = expr.getProp();
 		Expression obj = expr.getRight();
+		return processSubjHasProp(subj, pred, obj);
+	}
+	
+	public Object processExpression(CommaSeparatedAbreviatedExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Expression subj = expr.getLeft();
+		SadlResource pred = expr.getProp();
+		Expression obj = expr.getRight();
+		return processSubjHasProp(subj, pred, obj);
+	}
+	
+	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
+			throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (modelValidator != null) {
-			modelValidator.checkPropertyDomain(getTheJenaModel(), subj, pred);
+			modelValidator.checkPropertyDomain(getTheJenaModel(), subj, pred, false);
 		}
 		Object sobj = null;
 		Object pobj = null;
@@ -5905,6 +5957,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return true;
 		}
 		return false;
+	}
+	public SadlCommand getTargetCommand() {
+		return targetCommand;
+	}
+	private void setTargetCommand(SadlCommand targetCommand) {
+		this.targetCommand = targetCommand;
 	}
 	
 }

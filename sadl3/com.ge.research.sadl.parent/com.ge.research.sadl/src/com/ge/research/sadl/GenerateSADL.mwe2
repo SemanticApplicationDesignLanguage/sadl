@@ -65,7 +65,7 @@ Workflow {
 			}
 		}
 		//TODO fix for bug in beta. Remove me after 2.9
-		language = StandardLanguage {
+		language = xtextgenerator.SerializerDisablingStandardLanguage {
 			name = "com.ge.research.sadl.SADL"
 			fileExtensions = "sadl"
 
@@ -74,6 +74,7 @@ Workflow {
 				combinedGrammar = false
 			}
 			serializer = {
+				
 				generateStub = false
 			}
 			validator = {

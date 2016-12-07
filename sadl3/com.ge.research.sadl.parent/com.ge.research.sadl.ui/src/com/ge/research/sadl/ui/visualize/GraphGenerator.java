@@ -2,7 +2,6 @@ package com.ge.research.sadl.ui.visualize;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,29 +12,19 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.processing.SadlConstants;
-import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
-import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
-import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.IntersectionClass;
-import com.hp.hpl.jena.ontology.MaxCardinalityRestriction;
-import com.hp.hpl.jena.ontology.MinCardinalityRestriction;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.ontology.Restriction;
-import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
-import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -43,7 +32,6 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
-import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
@@ -57,378 +45,10 @@ public class GraphGenerator {
 
 	private OntModel model = null;
 	private ConceptName anchor = null;
-	private IConfigurationManagerForIDE configMgr;
+	protected IConfigurationManagerForIDE configMgr;
 	
 	public enum Orientation {TD, LR}
-	
-	public class GraphSegment {
-		Object subject;
-		Object predicate;
-		Object object;
-		private Map<String,String> headAttributes;
-		private Map<String,String> edgeAttributes;
-		private Map<String,String> tailAttributes;
-		
-		private boolean objectIsList = false;
-		
-		public GraphSegment(Object s, Object p, Object o) {
-			subject = s;
-			predicate = p;
-			object = o;
-		}
-		
-		public GraphSegment(Object s, Object p, Object o, boolean objIsList) {
-			subject = s;
-			predicate = p;
-			object = o;
-			setObjectIsList(objIsList);
-		}
 
-		public boolean equals(Object otherSeg) {
-			if (otherSeg instanceof GraphSegment) {
-				if (otherSeg != null) {
-					if (subject != null && ((GraphSegment)otherSeg).subject != null && 
-							predicate != null && ((GraphSegment)otherSeg).predicate != null && 
-							object != null && ((GraphSegment)otherSeg).object != null) {
-						if (subject.equals(((GraphSegment)otherSeg).subject) && predicate.equals(((GraphSegment)otherSeg).predicate) && 
-								object.equals(((GraphSegment)otherSeg).object) && ((GraphSegment)otherSeg).isObjectIsList() == isObjectIsList()) {
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-		
-		String subjectToString() {
-			return stringForm(subject);
-		}
-		
-		String predicateToString() {
-			return stringForm(predicate);
-		}
-		
-		String objectToString() {
-			if (!isObjectIsList()) {
-				return stringForm(object);
-			}
-			else {
-				return stringForm(object) + " List";
-			}
-		}
-		
-		String stringForm(Object obj) {
-			if (obj instanceof OntClass) {
-				OntClass ontcls = (OntClass) obj;
-				if (ontcls.isUnionClass()) {
-					UnionClass ucls = ontcls.as(UnionClass.class);
-					try {
-						StringBuilder sb = new StringBuilder();
-						boolean first = true;
-						ExtendedIterator<? extends OntClass> eitr = ucls.listOperands();
-						while (eitr.hasNext()) {
-							OntClass uclsmember = eitr.next();
-							if (!first) {
-								sb.append(" or ");
-							}
-							sb.append(stringForm(uclsmember));
-							first = false;
-						}
-						return sb.toString();
-					}
-					catch (Exception e) {
-						logger.error("Unexpected error; apparent Union Class does not return operands: " + e.getMessage());
-						e.printStackTrace();
-					}
-				}
-				else if (ontcls.isIntersectionClass()) {
-					IntersectionClass ucls = ontcls.as(IntersectionClass.class);
-					try {
-						StringBuilder sb = new StringBuilder();
-						boolean first = true;
-						ExtendedIterator<? extends OntClass> eitr = ucls.listOperands();
-						while (eitr.hasNext()) {
-							OntClass uclsmember = eitr.next();
-							if (!first) {
-								sb.append(" and ");
-							}
-							sb.append(stringForm(uclsmember));
-							first = false;
-						}
-						return sb.toString();
-					}
-					catch (Exception e) {
-						logger.error("Unexpected error; apparent Interection Class does not return operands: " + e.getMessage());
-						e.printStackTrace();
-					}
-				}
-				else if (ontcls.isURIResource()) {
-					return uriResourceToString(ontcls);
-//					return ontcls.getLocalName();
-				}
-				else if (ontcls.isRestriction()) {
-					return restrictionToString(ontcls);
-				}
-				else {
-					return ontcls.toString();
-				}
-			}
-			else if (obj instanceof Resource) {
-				if (((Resource)obj).isURIResource()) {
-					return uriResourceToString((Resource) obj);
-				}
-				else {
-					return obj.toString();
-				}
-			}
-			else if (obj instanceof Literal) {
-				Object objVal = ((Literal)obj).getValue();
-				if (objVal instanceof Integer || objVal instanceof Long) {
-					return objVal.toString() + " ";
-				}
-				else if (objVal instanceof Number) {
-					return objVal.toString();
-				}
-				else  {
-					String val = objVal.toString().trim();
-					if (val.startsWith("\"") && val.endsWith("\"")) {
-						// string is already quoted
-						return objVal.toString();
-					}
-					else {
-						return "\"" + objVal.toString() + "\"";
-					}
-				}
-			}
-			else if (obj instanceof ConceptName) {
-				return conceptNameToString((ConceptName)obj);
-			}
-			else {
-				return obj.toString();
-			}
-			return null;
-		}
-
-		private String conceptNameToString(ConceptName obj) {
-			// get the prefix and if there is one generate qname
-			if (obj.getPrefix() != null) {
-				return obj.getPrefix() + ":" + obj.getName();
-			}
-			return obj.getName();
-		}
-
-		private String uriResourceToString(Resource rsrc) {
-			if (!rsrc.isURIResource()) {
-				return rsrc.toString();
-			}
-			String ns = rsrc.getNameSpace();
-			if (ns.endsWith("#")) {
-				ns = ns.substring(0, ns.length() - 1);
-			}
-			// get the prefix and if there is one generate qname
-			String prefix = configMgr.getGlobalPrefix(ns);
-			if (prefix != null) {
-				return prefix + ":" + rsrc.getLocalName();
-			}
-			return rsrc.getLocalName();
-		}
-		
-		private String restrictionToString(OntClass ontcls) {
-			if (ontcls.as(Restriction.class).isSomeValuesFromRestriction()) {
-				StringBuilder sb = new StringBuilder("some values of ");
-				SomeValuesFromRestriction svfr = ontcls.as(SomeValuesFromRestriction.class);
-				OntProperty ontprop = svfr.getOnProperty();
-				sb.append(ontprop.getLocalName());
-				sb.append(" from ");
-				Resource svfcls = svfr.getSomeValuesFrom();
-				if (svfcls.isURIResource()) {
-					sb.append(svfcls.getLocalName());
-				}
-				else {
-					sb.append("(");
-					sb.append(stringForm(svfcls));
-					sb.append(")");
-				}
-				return sb.toString();
-			}
-			else if (ontcls.as(Restriction.class).isAllValuesFromRestriction()) {
-				StringBuilder sb = new StringBuilder("all values of ");
-				AllValuesFromRestriction svfr = ontcls.as(AllValuesFromRestriction.class);
-				OntProperty ontprop = svfr.getOnProperty();
-				sb.append(ontprop.getLocalName());
-				sb.append(" from ");
-				Resource svfcls = svfr.getAllValuesFrom();
-				if (svfcls.isURIResource()) {
-					sb.append(svfcls.getLocalName());
-				}
-				else {
-					sb.append("(");
-					sb.append(stringForm(svfcls));
-					sb.append(")");
-				}
-				return sb.toString();
-			}
-			else if (ontcls.as(Restriction.class).isHasValueRestriction()) {
-				StringBuilder sb = new StringBuilder("value of ");
-				SomeValuesFromRestriction svfr = ontcls.as(SomeValuesFromRestriction.class);
-				OntProperty ontprop = svfr.getOnProperty();
-				sb.append(ontprop.getLocalName());
-				sb.append(" is ");
-				Resource svfcls = svfr.getSomeValuesFrom();
-				if (svfcls.isURIResource()) {
-					sb.append(svfcls.getLocalName());
-				}
-				else {
-					sb.append("(");
-					sb.append(stringForm(svfcls));
-					sb.append(")");
-				}
-				return sb.toString();
-			}
-			else if (ontcls.as(Restriction.class).isMinCardinalityRestriction()) {
-				StringBuilder sb = new StringBuilder();
-				MinCardinalityRestriction svfr = ontcls.as(MinCardinalityRestriction.class);
-				OntProperty ontprop = svfr.getOnProperty();
-				sb.append(ontprop.getLocalName());
-				sb.append(" has at least ");
-				int card = svfr.getMinCardinality();
-				sb.append(card);
-				if (card > 1) {
-					sb.append(" values");
-				}
-				else {
-					sb.append(" value");
-				}
-				return sb.toString();
-			}
-			else if (ontcls.as(Restriction.class).isMaxCardinalityRestriction()) {
-				StringBuilder sb = new StringBuilder();
-				MaxCardinalityRestriction svfr = ontcls.as(MaxCardinalityRestriction.class);
-				OntProperty ontprop = svfr.getOnProperty();
-				sb.append(ontprop.getLocalName());
-				sb.append(" has at most ");
-				int card = svfr.getMaxCardinality();
-				sb.append(card);
-				if (card > 1) {
-					sb.append(" values");
-				}
-				else {
-					sb.append(" value");
-				}
-				return sb.toString();
-			}
-			else if (ontcls.as(Restriction.class).isCardinalityRestriction()) {
-				StringBuilder sb = new StringBuilder();
-				CardinalityRestriction svfr = ontcls.as(CardinalityRestriction.class);
-				OntProperty ontprop = svfr.getOnProperty();
-				sb.append(ontprop.getLocalName());
-				sb.append(" has exactly ");
-				int card = svfr.getCardinality();
-				sb.append(card);
-				if (card > 1) {
-					sb.append(" values");
-				}
-				else {
-					sb.append(" value");
-				}
-				return sb.toString();
-			}
-			else if (ontcls.isRestriction()) {
-				if (ontcls.hasProperty(OWL2.onClass)) {
-					OntClass oncls = ontcls.getPropertyValue(OWL2.onClass).as(OntClass.class);
-					OntProperty onprop = ontcls.getPropertyValue(OWL.onProperty).as(OntProperty.class);
-					if (ontcls.hasProperty(OWL2.maxQualifiedCardinality)) {
-						StringBuilder sb = new StringBuilder(onprop.getLocalName());
-						sb.append(" has at most ");
-						int card = ontcls.getPropertyValue(OWL2.maxQualifiedCardinality).asLiteral().getInt();
-						sb.append(card);
-						if (card > 1) {
-							sb.append(" values");
-						}
-						else {
-							sb.append(" value");
-						}
-						sb.append(" of type ");
-						sb.append(stringForm(oncls));
-						return sb.toString();
-					}
-					else if (ontcls.hasProperty(OWL2.minQualifiedCardinality)) {
-						StringBuilder sb = new StringBuilder(onprop.getLocalName());
-						sb.append(" has at least ");
-						int card = ontcls.getPropertyValue(OWL2.minQualifiedCardinality).asLiteral().getInt();
-						sb.append(card);
-						if (card > 1) {
-							sb.append(" values");
-						}
-						else {
-							sb.append(" value");
-						}
-						sb.append(" of type ");
-						sb.append(stringForm(oncls));
-						return sb.toString();
-					}
-					else if (ontcls.hasProperty(OWL2.qualifiedCardinality)) {
-						StringBuilder sb = new StringBuilder(onprop.getLocalName());
-						sb.append(" has exactly ");
-						int card = ontcls.getPropertyValue(OWL2.qualifiedCardinality).asLiteral().getInt();
-						sb.append(card);
-						if (card > 1) {
-							sb.append(" values");
-						}
-						else {
-							sb.append(" value");
-						}
-						sb.append(" of type ");
-						sb.append(stringForm(oncls));
-						return sb.toString();
-					}
-				}
-				System.out.println(ontcls.as(Restriction.class).toString() + " is an unidentified restriction with properties:");
-				StmtIterator sitr = ontcls.listProperties();
-				while (sitr.hasNext()) {
-					Statement stmt = sitr.nextStatement();
-					System.out.println("   " + stmt.getPredicate().toString() + " " + stmt.getObject().toString());
-				}
-			}
-			return "Untranslated Restriction: " + ontcls.toString();
-		}
-
-		boolean isObjectIsList() {
-			return objectIsList;
-		}
-
-		void setObjectIsList(boolean objectIsList) {
-			this.objectIsList = objectIsList;
-		}
-
-		Map<String,String> getHeadAttributes() {
-			return headAttributes;
-		}
-
-		public void addHeadAttribute(String key, String value) {
-			if (headAttributes == null) headAttributes = new HashMap<String,String>();
-			headAttributes.put(key, value);
-		}
-
-		public Map<String,String> getEdgeAttributes() {
-			return edgeAttributes;
-		}
-
-		public void addEdgeAttribute(String key, String value) {
-			if (edgeAttributes == null) edgeAttributes = new HashMap<String,String>();
-			edgeAttributes.put(key, value);
-		}
-
-		public Map<String,String> getTailAttributes() {
-			return tailAttributes;
-		}
-
-		public void addTailAttribute(String key, String value) {
-			if (tailAttributes == null) tailAttributes = new HashMap<String,String>();
-			tailAttributes.put(key,value);
-		}
-	}
-	
 	public GraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, ConceptName startNode) throws ConfigurationException, IOException {
 		this.configMgr = configMgr;
 		setModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
@@ -510,7 +130,7 @@ public class GraphGenerator {
 		while (itr.hasNext()) {
 			OntResource or = itr.next();
 			if (or.canAs(Individual.class)){
-				GraphSegment gs = new GraphSegment(cls, "instance", or.as(Individual.class));
+				GraphSegment gs = new GraphSegment(cls, "instance", or.as(Individual.class), configMgr);
 				if (!instData.contains(gs)) {
 					instData.add(gs);
 				}
@@ -532,7 +152,7 @@ public class GraphGenerator {
 				continue;
 			}
 			Resource subj = stmt.getSubject();
-			GraphSegment sg = new GraphSegment(subj, prop, stmt.getObject());
+			GraphSegment sg = new GraphSegment(subj, prop, stmt.getObject(), configMgr);
 			if (!stmt.getPredicate().getNameSpace().equals(RDF.getURI()) && !data.contains(sg)) {
 				data.add(sg);
 				if (subj.canAs(Individual.class)) {
@@ -546,7 +166,7 @@ public class GraphGenerator {
 			Statement stmt = sitr.nextStatement();
 			Property prop = stmt.getPredicate();
 			RDFNode obj = stmt.getObject();
-			GraphSegment sg = new GraphSegment(stmt.getSubject(), prop, obj);
+			GraphSegment sg = new GraphSegment(stmt.getSubject(), prop, obj, configMgr);
 			if (!data.contains(sg)) {
 				sg.addHeadAttribute(COLOR, BLUE);
 				data.add(sg);
@@ -573,7 +193,7 @@ public class GraphGenerator {
 				ExtendedIterator<? extends OntResource> eitr = ontprop.listDomain();
 				while (eitr.hasNext()) {
 					OntResource dmn = eitr.next();
-					GraphSegment sg = new GraphSegment(dmn, prop, cls);
+					GraphSegment sg = new GraphSegment(dmn, prop, cls, configMgr);
 					if (!data.contains(sg)) {
 						data.add(sg);
 						data = generateClassPropertiesWithRange(dmn.as(OntClass.class), graphRadius - 1, data);
@@ -626,17 +246,25 @@ public class GraphGenerator {
 		}
 		ExtendedIterator<? extends OntResource> eitr = prop.as(OntProperty.class).listRange();
 		while (eitr.hasNext()) {
+			//get range of prop
 			OntResource rng = eitr.next();
+			//if it's a list and range class
 			if (isList && rng.canAs(OntClass.class)) {
+				//get list class
+				//Check for an all values from restriction
 				Resource listClass = getModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+				//if list class exists or the range has a superclass that is a list
 				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
+					//iterate across all of the statements that are subclasses of range?
 					StmtIterator stmtitr = getModel().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
 					while (stmtitr.hasNext()) {
 //					ExtendedIterator<OntClass> scitr = rng.as(OntClass.class).listSuperClasses(true);
 //					while (scitr.hasNext()) {
 						Statement supclsstmt = stmtitr.nextStatement();
 						RDFNode supclsnode = supclsstmt.getObject();
-						if (supclsnode.canAs(OntClass.class)){ 
+						//if the superclass is a class
+						if (supclsnode.canAs(OntClass.class)){
+							//get the subclass
 							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
 							if (subcls.hasProperty(OWL.onProperty, getModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
 								Statement avf = subcls.getProperty(OWL.allValuesFrom);
@@ -653,7 +281,7 @@ public class GraphGenerator {
 					}
 				}
 			}
-			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList) : new GraphSegment(cls, prop, rng);
+			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
 			if (!data.contains(sg)) {
 				data.add(sg);
 				if (prop.as(OntProperty.class).isObjectProperty()) {
@@ -679,12 +307,12 @@ public class GraphGenerator {
 					OntClass supercls = scr.as(OntClass.class);
 					GraphSegment sg;
 					if (supercls.isRestriction()) {
-						sg = new GraphSegment(supercls, "restricts", cls);
+						sg = new GraphSegment(supercls, "restricts", cls, configMgr);
 						sg.addHeadAttribute(COLOR, RED);
 						sg.addEdgeAttribute(COLOR, RED);
 					}
 					else {
-						sg = new GraphSegment(supercls, "subClass", cls);
+						sg = new GraphSegment(supercls, "subClass", cls, configMgr);
 					}
 					if (!data.contains(sg)) {
 						data.add(sg);
@@ -729,7 +357,7 @@ public class GraphGenerator {
 			if (commonSupers.size() > 0) {
 				for (int i = 0; i < commonSupers.size(); i++) {
 					OntClass cscls = commonSupers.get(i);
-					GraphSegment sg = new GraphSegment(cscls, "subClass", cls);
+					GraphSegment sg = new GraphSegment(cscls, "subClass", cls, configMgr);
 					if (!data.contains(sg)) {
 						data.add(sg);
 					}
@@ -742,7 +370,7 @@ public class GraphGenerator {
 			ExtendedIterator<? extends OntClass> einteritr = cls.asIntersectionClass().listOperands();
 			while (einteritr.hasNext()) {
 				OntClass member  = einteritr.next();
-				GraphSegment sg = new GraphSegment(member, "subClass", cls);
+				GraphSegment sg = new GraphSegment(member, "subClass", cls, configMgr);
 				if (!data.contains(sg)) {
 					data.add(sg);
 					data = generateClassSuperclasses(member, size - 1, data);
@@ -758,12 +386,12 @@ public class GraphGenerator {
 			OntClass subcls = eitr.next();
 			GraphSegment sg;
 			if (subcls.isRestriction()) {
-				sg = new GraphSegment(cls, "restricts", subcls);
+				sg = new GraphSegment(cls, "restricts", subcls, configMgr);
 				sg.addHeadAttribute(COLOR, RED);
 				sg.addEdgeAttribute(COLOR, RED);
 			}
 			else {
-				sg = new GraphSegment(cls, "subClass", subcls);
+				sg = new GraphSegment(cls, "subClass", subcls, configMgr);
 			}
 			if (!data.contains(sg)) {
 				data.add(sg);
@@ -783,7 +411,7 @@ public class GraphGenerator {
 				RDFNode sub = soln.get("?subclass");
 				if (sub.canAs(OntClass.class)) {
 					OntClass subcls = sub.as(OntClass.class);
-					GraphSegment sg = new GraphSegment(cls, "subClass", subcls);
+					GraphSegment sg = new GraphSegment(cls, "subClass", subcls, configMgr);
 					if (!data.contains(sg)) {
 						data.add(sg);
 						data = generateClassSubclasses(subcls, size - 1, data);
@@ -807,7 +435,7 @@ public class GraphGenerator {
 		return data;
 	}
 
-	protected ResultSet convertDataToResultSet(List<GraphSegment> data) {
+	public ResultSet convertDataToResultSet(List<GraphSegment> data) {
 		List<String> columnList = new ArrayList<String>();
 		columnList.add("head");
 		columnList.add("edge");

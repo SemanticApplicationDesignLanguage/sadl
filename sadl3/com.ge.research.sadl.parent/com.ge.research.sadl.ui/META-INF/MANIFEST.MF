@@ -43,5 +43,6 @@ Import-Package: com.ge.research.sadl.errorgenerator.generator,
  com.ge.research.sadl.reasoner,
  com.ge.research.sadl.reasoner.utils,
  org.apache.log4j,
+ org.eclipse.jdt.internal.ui.packageview,
  org.pojava.datetime
 Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator

@@ -20,6 +20,15 @@ package com.ge.research.sadl.tests
 
 import org.junit.Test
 import org.junit.Ignore
+import com.ge.research.sadl.sADL.SadlModel
+import org.junit.Assert
+import com.ge.research.sadl.sADL.RuleStatement
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.emf.common.EMFPlugin
+import org.eclipse.xtext.util.EmfFormatter
+import com.ge.research.sadl.sADL.TestStatement
+import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.SelectExpression
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
@@ -158,7 +167,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test
 	def void testTestWithCommas() {
 		'''
@@ -184,4 +192,73 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			Test: MyThingy has intVal 1, has flVal 1.0, has dblVal 1.0 .
 		'''.assertNoErrors
 	}
+	
+	@Test
+	def void testNewlineSeparation() {
+		val model = '''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Thingy is a class described by connectedTo with values of type Thingy, described by color with values of type string.
+			
+			Rule TwoThingiesNotEqual:
+			given x1 is a Thingy
+			x2 is a Thingy
+			if x1 != x2
+			then print(x1, " != ", x2).
+		'''.sadl.contents.head as SadlModel
+		
+		Assert.assertEquals(2, model.elements.size)
+		val rule = model.elements.get(1) as RuleStatement
+		println(EmfFormatter.listToStr(rule.ifs))
+	}
+	
+	@Test
+	def void testQueryAsExpression() {
+		val model = '''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Thingy is a class described by connectedTo with values of type Thingy, described by color with values of type string.
+			
+			Test: (select x where x is a Thingy) is 2.
+		'''.sadl.contents.head as SadlModel
+		
+		Assert.assertEquals(2, model.elements.size)
+		val test = model.elements.get(1) as TestStatement
+		Assert.assertTrue((test.tests.head as BinaryOperation).left instanceof SelectExpression)
+	}
+	
+	@Test
+	def void testRdfAndOwlNamespace() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			x has comment "set by Rule1".
+			Test: select x,y where x has owl:equivalentClass y.
+			Rule testrule
+			if x is a Thingy
+			then print(x, rdf:^type, "This works!").
+		'''.assertNoErrors
+	}
+	
+	@Ignore	// this grammar change was backed out because it changed precedence and broke things of the form "p1 of s1 is not p2 of s2"
+	@Test
+	def void testNegationOfObjectTriple() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Test: x has color not Red.
+			Test: color of x is not Red.
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testConstantKnown() {
+		'''
+			uri "http://com.ge.research.sadl/NotEqualRule2". 
+			
+			Test: dps of MyThingy2 is known.
+			Test: dpf of MyThingy1 is not known.
+		'''.assertNoErrors
+	}
+	
 }

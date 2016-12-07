@@ -910,4 +910,23 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return sb.toString();
 	}
 
+	public File resolveFilename(String fn) {
+		File f = new File(fn);
+		if (f.exists() && !f.isDirectory()) {
+			// must be an absolute path
+			return f;
+		}
+		// must be a project-relative path
+		File modelFolder = getModelFolderPath();
+		File prjFolder = modelFolder.getParentFile();
+		String fullpath = ResourceManager.findFile(prjFolder.getAbsolutePath(), fn, null);
+		if (fullpath != null) {
+			f = new File(fullpath);
+			if (f.exists() && !f.isDirectory()) {
+				return f;
+			}
+		}
+		return null;
+	}
+
 }

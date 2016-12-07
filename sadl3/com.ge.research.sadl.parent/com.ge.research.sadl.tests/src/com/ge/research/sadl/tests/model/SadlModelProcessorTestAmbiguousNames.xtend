@@ -19,6 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.scoping.TestScopeProvider
 
 @RunWith(XtextRunner)
 class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
@@ -107,6 +108,7 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 			 
 
 		'''.sadl
+		TestScopeProvider.registerResource(sadlModel3, true)
 		val issues3 = validationTestHelper.validate(sadlModel3)
 		assertNotNull(issues3)
 		assertTrue(issues3.size() > 0)
@@ -482,6 +484,7 @@ class SadlModelProcessorTestAmbiguousNames extends AbstractProcessorTest {
 		'''.sadl
 		sadlModel1.assertNoErrors
 		sadlModel2.assertNoErrors
+		TestScopeProvider.registerResource(sadlModel4, true)
 		val issues3 = validationTestHelper.validate(sadlModel3)
 		assertNotNull(issues3)
 		assertTrue(issues3.size() > 0)
