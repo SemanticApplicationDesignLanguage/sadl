@@ -156,8 +156,8 @@ class DeclarationExtensions {
 				else if (resource.function) {
 					return OntConceptType.FUNCTION_DEFN
 				}
-				else if ((resource as Name).name != null) {
-					return getOntConceptType((resource as Name).name)
+				else if (resource.name !== null && (resource !== resource.name)) {
+					return getOntConceptType(resource.name)
 				}
 				return OntConceptType.VARIABLE
 			}
