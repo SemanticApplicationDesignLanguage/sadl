@@ -230,7 +230,7 @@ public class GraphGenerator {
 		return data;
 	}
 
-	private List<GraphSegment> generatePropertyRange(OntClass cls,
+	protected List<GraphSegment> generatePropertyRange(OntClass cls,
 			Resource prop, int graphRadius, List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		boolean isList = false;

@@ -263,9 +263,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
 				if(headAttributes != null && 
-						headAttributes.get("duplicate") != null && 
-						headAttributes.get("duplicate").equals(true)){
+						hasDuplicateAttribute(headAttributes, row)){
 					//don't check to see if this node is in nodes
+					//instead add add this 
 					nodes.add(s.toString());
 					slbl = "n" + nodes.size();
 					repeatSubjNode = false;
@@ -290,8 +290,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
 				if(tailAttributes != null && 
-						tailAttributes.get("duplicate") != null && 
-						tailAttributes.get("duplicate").equals(true)){
+						hasDuplicateAttribute(tailAttributes, row)){
 					//don't check to see if this node is in nodes
 					nodes.add(s.toString());
 					olbl = "n" + nodes.size();
@@ -423,6 +422,28 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				((bfn != null ? bfn : "") + "Graph.dot"));
 		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
 		return dotFile;
+	}
+	private boolean hasDuplicateAttribute(Map<Integer, String> headAttributes, Object[] row) {
+		int i = duplicateAttributeKey(headAttributes);
+		if(i == -1){
+			return false;
+		}else if(row[i] == "true"){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	
+	private Integer duplicateAttributeKey(Map<Integer, String> attributes) {
+		Iterator<Integer> keyIter = attributes.keySet().iterator();
+		while(keyIter.hasNext()){
+			Integer attr_key = keyIter.next();
+			if(attributes.get(attr_key).equals("duplicate")){
+				return attr_key;
+			}
+		}
+		return -1;
 	}
 	
 	private Map<Integer, String> addAttribute(Map<Integer, String> attrMap, String headName, int columnNumber, String attrHeader) {

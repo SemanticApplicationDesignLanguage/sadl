@@ -541,9 +541,6 @@ public class OntologyGraphGenerator {
 							if(getImportUrl(cls) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(cls));
 						}
 					}
-					
-					
-					
 				}	
 			}else{
 				GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
