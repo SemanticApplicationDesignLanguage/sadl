@@ -996,7 +996,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private TypeCheckInfo getType(SadlTypeReference expression) throws DontTypeCheckException, CircularDefinitionException {
+	private TypeCheckInfo getType(SadlTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
 		if (expression instanceof SadlIntersectionType) {
 			return getType((SadlIntersectionType)expression);
 		}
@@ -1043,7 +1043,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);		
 	}
 	
-	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException {
+	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
 		TypeCheckInfo tci = getType(expression.getType());
 		if (expression.isList()) {
 			tci.setRangeValueType(RangeValueType.LIST);
@@ -1515,7 +1515,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		throw new DontTypeCheckException();
 	}
 	
-	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException, CircularDefinitionException{
+	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
 		EObject expression = qnm.eContainer();
 		if (conceptUri == null) {
@@ -1887,7 +1887,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //		return false;
 //	}
 
-	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException {
+	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
 		//Needs filled in for Requirements extension
 		if (conceptUri == null) {
 			return null;
@@ -1900,6 +1900,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			SadlResource psr = ((SubjHasProp)expression).getProp();
 			TypeCheckInfo ptci = getType(psr);
 			return ptci;
+		}
+		else if (expression instanceof BinaryOperation) {
+			if (((BinaryOperation)expression).getLeft() instanceof Name) {
+				TypeCheckInfo ptci = getType(((BinaryOperation)expression).getRight());
+				return ptci;
+			}
 		}
 		ConceptName declarationConceptName = new ConceptName(conceptUri);
 		declarationConceptName.setType(ConceptType.VARIABLE);
@@ -2428,31 +2434,62 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean propOfSubjectCheck) {
 		if (subject instanceof SadlResource) {
-			OntConceptType stype;
-			try {
-				stype = declarationExtensions.getOntConceptType((SadlResource)subject);
-				if (stype.equals(OntConceptType.VARIABLE)) {
-					// for now don't do any checking--may be able to do so later with variable definitions
-					return;
-				}
-				org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
-				if (rsrc != null) {
-					if (ontModel != null) {
-						OntResource subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
-						Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-						if (subj != null && prop != null) {
-							checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck);
+			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
+			if (rsrc != null) {
+				if (ontModel != null) {
+					OntConceptType stype;
+					try {
+						stype = declarationExtensions.getOntConceptType((SadlResource)subject);
+						OntResource subj = null;
+						String varName = null;
+						if (stype.equals(OntConceptType.VARIABLE)) {
+							TypeCheckInfo stci;
+							// for now don't do any checking--may be able to do so later with variable definitions
+							try {
+								stci = getType(subject);
+								if (stci != null && stci.getTypeCheckType() != null) {
+									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
+									varName = declarationExtensions.getConcreteName((SadlResource)subject);
+								}
+							} catch (InvalidNameException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (TranslationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (URISyntaxException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (ConfigurationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (DontTypeCheckException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
+						else {
+							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
+						}
+						if (subj != null) {
+							Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+							if (subj != null && prop != null) {
+								checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+							}
+						}
+					} catch (CircularDefinitionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
-			} catch (CircularDefinitionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}
 
-	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject, boolean propOfSubjectCheck) {
+	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject, boolean propOfSubjectCheck, String varName) {
 		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
 		boolean matchFound = false;
 		while (stmtitr.hasNext()) {
@@ -2466,10 +2503,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		stmtitr.close();
 		if (subj != null && !matchFound) {
-			if(propOfSubjectCheck){
-				issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
-			}else{
-				issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+			if (varName != null) {
+				if(propOfSubjectCheck){
+					issueAcceptor.addError(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), subject);
+				}else{
+					issueAcceptor.addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), subject);
+				}
+			}
+			else {
+				if(propOfSubjectCheck){
+					issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+				}else{
+					issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+				}
 			}
 		}
 	}
