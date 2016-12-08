@@ -17,6 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
+import com.ge.research.sadl.external.ExternalEmfResource
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
@@ -25,21 +27,19 @@ import java.util.List
 import java.util.regex.Pattern
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtend.lib.annotations.ToString
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
-import com.ge.research.sadl.sADL.SadlPropertyCondition
-import com.ge.research.sadl.external.ExternalEmfResource
-import org.eclipse.emf.ecore.resource.Resource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -116,7 +116,7 @@ abstract class AbstractLinkingTest {
 			var result = parseableContents
 			var addedChars = 0
 			for (decl : actualNames.sortBy[region.offset]) {
-				val brackets = if (decl.isDeclaration == null) "?"->"?" else if (decl.isDeclaration) "["->"]" else "<"->">"
+				val brackets = if (decl.isDeclaration === null) "?"->"?" else if (decl.isDeclaration) "["->"]" else "<"->">"
 				result = result.substring(0,decl.region.offset + addedChars) + brackets.key+ decl.value + brackets.value + result.substring(decl.region.offset + decl.region.length + addedChars)
 				addedChars += 2
 			}

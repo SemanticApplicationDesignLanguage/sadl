@@ -18,17 +18,15 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
-import org.junit.Test
-import org.junit.Ignore
-import com.ge.research.sadl.sADL.SadlModel
-import org.junit.Assert
-import com.ge.research.sadl.sADL.RuleStatement
-import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.emf.common.EMFPlugin
-import org.eclipse.xtext.util.EmfFormatter
-import com.ge.research.sadl.sADL.TestStatement
 import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.RuleStatement
+import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SelectExpression
+import com.ge.research.sadl.sADL.TestStatement
+import org.eclipse.xtext.util.EmfFormatter
+import org.junit.Assert
+import org.junit.Ignore
+import org.junit.Test
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 

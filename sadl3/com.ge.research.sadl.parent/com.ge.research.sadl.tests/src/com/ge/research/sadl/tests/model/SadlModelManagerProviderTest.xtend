@@ -373,7 +373,7 @@ class SadlModelManagerProviderTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt != null && nxt.isURIResource) {
+				if (nxt !== null && nxt.isURIResource) {
 					if (nxt.localName.equals("Refreshment")) {
 						found = true;
 						var sciter = nxt.listSuperClasses(true);
@@ -409,7 +409,7 @@ class SadlModelManagerProviderTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt != null && nxt.isURIResource) {
+				if (nxt !== null && nxt.isURIResource) {
 					if (nxt.localName.equals("Parent")) {
 						found = true;
 						var sciter = nxt.listSuperClasses(true);
@@ -449,7 +449,7 @@ class SadlModelManagerProviderTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt != null && nxt.isURIResource) {
+				if (nxt !== null && nxt.isURIResource) {
 					if (nxt.localName.equals("PotableLiquid")) {
 						found = true;
 						var sciter = nxt.listSuperClasses(true);
@@ -493,13 +493,13 @@ class SadlModelManagerProviderTest {
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 			var prop = jenaModel.getDatatypeProperty("http://sadl.org/model1#ident")
-			if (prop != null) {
+			if (prop !== null) {
 				var rng = prop.range;
 				System.out.println("Range: " + rng.toString())
 			}
 			else {
 				var prop2 = jenaModel.getObjectProperty("http://sadl.org/model1#ident")
-				if (prop2 != null) {
+				if (prop2 !== null) {
 					var rng = prop2.range;
 					System.out.println("Range: " + rng.toString())
 				}	
@@ -523,7 +523,7 @@ class SadlModelManagerProviderTest {
 			// look for something specific to the model; if found set found true
 // TODO use datatype facets to check validity?			
 			var stmtitr = jenaModel.listStatements(null, jenaModel.getProperty("http://www.w3.org/2001/XMLSchema#maxLength"), null as RDFNode).toIterable().iterator
-			if (stmtitr != null && stmtitr.hasNext) {
+			if (stmtitr !== null && stmtitr.hasNext) {
 				found = true;
 			}
 //			if (!found) {
@@ -545,7 +545,7 @@ class SadlModelManagerProviderTest {
 			// look for something specific to the model; if found set found true
 // TODO use datatype facets to check validity?			
 			var stmtitr = jenaModel.listStatements(null, OWL.unionOf, null as RDFNode).toIterable().iterator
-			if (stmtitr != null && stmtitr.hasNext) {
+			if (stmtitr !== null && stmtitr.hasNext) {
 				var obj = stmtitr.next.object as RDFNode;
 				if (obj.canAs(RDFList)) {
 					var lst = obj.^as(RDFList)
@@ -570,7 +570,7 @@ class SadlModelManagerProviderTest {
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 			var p = jenaModel.getProperty("http://sadl.org/model1#prop");
-			assertTrue(p != null);
+			assertTrue(p !== null);
 		]
 	}
 	
@@ -592,7 +592,7 @@ class SadlModelManagerProviderTest {
 			assertTrue(issues.size == 0)
 			var ns = "http://com.ge.research.sadl/proptypeonly#"
 			var p = jenaModel.getProperty(ns+"prop")
-			assertTrue(p != null);
+			assertTrue(p !== null);
 			var op = jenaModel.getObjectProperty(ns+"objprop")
 			assertNotNull(op)
 			var opwr = jenaModel.getObjectProperty(ns+"objpropwithrng")
@@ -1012,7 +1012,6 @@ class SadlModelManagerProviderTest {
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
-			var found = false
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
@@ -1039,7 +1038,6 @@ class SadlModelManagerProviderTest {
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
-			var found = false
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 			var q1 = "prefix owl: <http://www.w3.org/2002/07/owl#> " +
@@ -1154,7 +1152,7 @@ class SadlModelManagerProviderTest {
 	}
 	
 	@Test def void RuleTest1() {
-		val model = '''
+			'''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
 			
 			Thingy is a class described by connectedTo with values of type Thingy, described by color with values of type string.
@@ -1171,7 +1169,7 @@ class SadlModelManagerProviderTest {
 	}
 
 	@Test def void EquationTest1() {
-		val model = '''
+			'''
 			uri "http://com.ge.research.sadl/equations". 
 			
 			Thingy is a class 
