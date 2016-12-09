@@ -255,6 +255,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage INVALID_NAME = new SadlErrorMessage("invalid_name");
 /**
+* Translator class '{0}' not found"
+**/
+    public static final SadlErrorMessage TYPE_CHECK_TRANSLATOR_CLASS_NOT_FOUND = new SadlErrorMessage("type_check_translator_class_not_found");
+/**
 * Variable {0} is of type {1} which is not in domain of property {2}
 **/
     public static final SadlErrorMessage VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("variable_not_in_domain_of_property");
