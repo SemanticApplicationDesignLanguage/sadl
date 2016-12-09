@@ -448,21 +448,26 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws ConfigurationException 
 	 */
 	public String getTranslatorClassName() throws ConfigurationException {
-		IReasoner reasonerInst = getReasonerInstance();
-		Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
- 		StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
-				getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
-        if (sitr.hasNext()) { 
-        	RDFNode clsnmnode = sitr.nextStatement().getObject();
-        	if (clsnmnode instanceof Literal) {
-        		return ((Literal)clsnmnode).getValue().toString();
-        	}
-        }
-        ITranslator translator = getTranslator();
-		if (translator != null) {
-			return translator.getClass().getCanonicalName();
+		try {
+			IReasoner reasonerInst = getReasonerInstance();
+			Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
+	 		StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
+					getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
+	        if (sitr.hasNext()) { 
+	        	RDFNode clsnmnode = sitr.nextStatement().getObject();
+	        	if (clsnmnode instanceof Literal) {
+	        		return ((Literal)clsnmnode).getValue().toString();
+	        	}
+	        }
+	        ITranslator translator = getTranslator();
+			if (translator != null) {
+				return translator.getClass().getCanonicalName();
+			}
+			throw new ConfigurationException("Unable to get current translator for unknown reason.");
 		}
-		throw new ConfigurationException("Unable to get current translator for unknown reason.");
+		catch (Throwable t) {
+			return ConfigurationManager.DEFAULT_TRANSLATOR;
+		}
 	}
 
     /**
@@ -501,14 +506,16 @@ public class ConfigurationManager implements IConfigurationManager {
 	
 	private void initializeTranslator() throws ConfigurationException {
 		translator = getTranslatorInstance();
-		translator.setConfigurationManager(this);
-		if (getConfigModel() != null) {
-			// first apply configuration for the reasoner family
-			Resource family = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getReasonerFamily());
-			applyConfigurationToTranslator(family);
-			// then apply configuration for the specified translator specifically
-			Resource category = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getConfigurationCategory());
-			applyConfigurationToTranslator(category);
+		if (translator != null) {
+			translator.setConfigurationManager(this);
+			if (getConfigModel() != null) {
+				// first apply configuration for the reasoner family
+				Resource family = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getReasonerFamily());
+				applyConfigurationToTranslator(family);
+				// then apply configuration for the specified translator specifically
+				Resource category = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getConfigurationCategory());
+				applyConfigurationToTranslator(category);
+			}
 		}
 	}
 
