@@ -29,7 +29,7 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
 	@Test
-	def void testRequirement_Model() {
+	def void testRuleVariableAsDomain() {
 		val sadlImplicit = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
 			Event is a class.
@@ -69,4 +69,81 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 		Assert.assertEquals(issues1.get(1).message, "Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
 	}
 	
+	@Test
+	def void testUserDefinedEquation() {
+		val sadlImplicit = '''
+			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			Event is a class.
+			impliedProperty is a type of annotation.
+			UnittedQuantity is a class,
+			 	described by ^value with values of type decimal,
+			 	described by unit with values of type string.
+		 '''.sadl
+		val sadlModel = '''
+			 uri "http://sadl.org/Test1.sadl" alias Test1.
+			 
+			 PhysicalThing is a class,
+			 	described by weight with values of type UnittedQuantity,
+			 	described by density with values of type float.
+			 	
+			 LivingThing is a type of PhysicalThing,
+			 	described by dateOfBirth with values of type dateTime,
+			 	described by age with values of type float.
+			 	
+			 Mammal is a type of LivingThing,
+			 	described by child with values of type Mammal.
+			 	
+			 Person is a type of Mammal.
+			 child of Person only has values of type Person.
+			 
+			 Pet is a class, described by caredFor with a single value of type boolean.
+			 owns describes Person with values of type Pet.
+			 
+			 External subtractDates(dateTime t1, dateTime t2, string u) returns float : "http://sadl.org/builtins/subtractDates".
+			 
+			 Rule AgeRule: if p is a LivingThing then age of p is subtractDates(now(), dateOfBirth of p, "y"). 		
+		'''.sadl
+		sadlModel.assertNoErrors
+	}
+	
+	@Test
+	def void testUndefinedEquation() {
+		val sadlImplicit = '''
+			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			Event is a class.
+			impliedProperty is a type of annotation.
+			UnittedQuantity is a class,
+			 	described by ^value with values of type decimal,
+			 	described by unit with values of type string.
+		 '''.sadl
+		val sadlModel = '''
+			 uri "http://sadl.org/Test1.sadl" alias Test1.
+			 
+			 PhysicalThing is a class,
+			 	described by weight with values of type UnittedQuantity,
+			 	described by density with values of type float.
+			 	
+			 LivingThing is a type of PhysicalThing,
+			 	described by dateOfBirth with values of type dateTime,
+			 	described by age with values of type float.
+			 	
+			 Mammal is a type of LivingThing,
+			 	described by child with values of type Mammal.
+			 	
+			 Person is a type of Mammal.
+			 child of Person only has values of type Person.
+			 
+			 Pet is a class, described by caredFor with a single value of type boolean.
+			 owns describes Person with values of type Pet.
+			 		 
+			 Rule AgeRule: if p is a LivingThing then age of p is subtractDates(now(), dateOfBirth of p, "y"). 		
+		'''.sadl
+		sadlModel.assertOnlyWarningsOrInfo
+		val issues1 = validationTestHelper.validate(sadlModel)
+//		val List<Issue> issues1= newArrayList
+//		sprocessor1.onValidate(sadlModel1, new ValidationAcceptor([issues1 += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel1)))
+		Assert.assertNotNull(issues1)
+		Assert.assertTrue(issues1.size == 1)
+		Assert.assertEquals(issues1.get(0).message, "Variable p2 is of type http://sadl.org/Test1.sadl#Pet which is not in domain of property http://sadl.org/Test1.sadl#owns")
+	}
 }
