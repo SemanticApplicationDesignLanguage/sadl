@@ -1668,6 +1668,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI);
 		Literal literal = getTheJenaModel().createTypedLiteral(uri);
 		eqinst.addProperty(dtp,literal);
+		if (location != null && location.length() > 0) {
+			DatatypeProperty dtp2 = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN);
+			Literal literal2 = getTheJenaModel().createTypedLiteral(location);
+			eqinst.addProperty(dtp2, literal2);
+		}
 	}
 	
 	private Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
@@ -5696,8 +5701,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
 		sb.append("	  </owl:DatatypeProperty>\n");
 		sb.append("	  <owl:DatatypeProperty rdf:ID=\"externalURI\">\n");
-		sb.append("	    <rdfs:domain rdf:resource=\"#Equation\"/>\n");
+		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
 		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n");
+		sb.append("	  </owl:DatatypeProperty>\n");
+		sb.append("	  <owl:DatatypeProperty rdf:ID=\"location\">\n");
+		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
+		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
 		sb.append("	  </owl:DatatypeProperty>\n");
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();
