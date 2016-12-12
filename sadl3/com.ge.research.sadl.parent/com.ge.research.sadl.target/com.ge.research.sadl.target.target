@@ -30,7 +30,7 @@
          <unit id="org.eclipse.xtext.sdk.feature.group" version="0.0.0" />
          <unit id="org.eclipse.lsp4j.sdk.feature.group" version="0.0.0" />
          <unit id="org.eclipse.xtend.sdk.feature.group" version="0.0.0" />
-         <repository location="http://services.typefox.io/open-source/jenkins/job/xtext-umbrella/job/msp_p2repo/lastSuccessfulBuild/artifact/build/p2-repository/" />
+         <repository location="http://services.typefox.io/open-source/jenkins/job/xtext-umbrella/job/master/lastSuccessfulBuild/artifact/build/p2-repository/" />
       </location>
    </locations>
 </target>

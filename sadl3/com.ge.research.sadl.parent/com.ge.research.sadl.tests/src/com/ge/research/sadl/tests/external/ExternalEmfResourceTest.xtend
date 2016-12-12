@@ -7,7 +7,6 @@ import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
 
 class ExternalEmfResourceTest extends AbstractLinkingTest {
@@ -16,7 +15,6 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 	@Inject IResourceDescription.Manager mnr
 	@Inject IQualifiedNameConverter converter
 	
-	@Ignore
 	@Test def void testOwl() {
 		val owl = '''
 			<rdf:RDF
@@ -37,15 +35,14 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		'''.sadl
 		
 		validator.assertNoErrors(sadlFile)
-		
-		val desc = mnr.getResourceDescription(owl)
-		val exported = desc.exportedObjects.toList
-		Assert.assertEquals("http://assert/Properties", converter.toString(exported.get(0).name))
-		Assert.assertEquals("http://assert/Properties:Foo", converter.toString(exported.get(1).name))
-		Assert.assertEquals("http://assert/Properties:myProperty", converter.toString(exported.get(2).name))
+		val expectedExportedNames = #{
+			'http://assert/Properties',
+			'http://assert/Properties:Foo',
+			'http://assert/Properties:myProperty'};
+		val actualExportedNames = mnr.getResourceDescription(owl).exportedObjects.map[converter.toString(name)].toSet;
+		Assert.assertEquals(expectedExportedNames, actualExportedNames);
 	}
 	
-	@Ignore
 	@Test def void testNtFormat() {
 		'''
 			<http://sadl.org/test.sadl#relation1> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.org/test.sadl#Thingy> .
@@ -65,7 +62,6 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		'''.nt.assertContents
 	}
 	
-	@Ignore
 	@Test def void testOwlFormat() {
 		'''
 			<rdf:RDF
@@ -99,7 +95,6 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		'''.owl.assertContents
 	}
 	
-	@Ignore
 	@Test def void testN3Format() {
 		'''
 			@base          <http://sadl.org/test.sadl> .

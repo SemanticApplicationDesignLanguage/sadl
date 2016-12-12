@@ -55,6 +55,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * This class contains custom scoping description.
@@ -335,7 +336,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	def private IEObjectDescription checkDuplicate(IEObjectDescription first, IEObjectDescription second) {
-		if (!ambiguousNameDetection || first === null || second === null || first.EObjectURI == second.EObjectURI) {
+		if (!ambiguousNameDetection || first === null || second === null
+			|| EcoreUtil.getURI(first.EObjectOrProxy) == EcoreUtil.getURI(second.EObjectOrProxy)) {
 			return null
 		}
 		val imports = #[first, second].map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
