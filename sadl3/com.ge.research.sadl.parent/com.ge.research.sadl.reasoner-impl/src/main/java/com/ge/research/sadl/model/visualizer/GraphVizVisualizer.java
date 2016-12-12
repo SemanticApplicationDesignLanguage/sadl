@@ -264,8 +264,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
 				if(headAttributes != null && 
 						hasDuplicateAttribute(headAttributes, row)){
-					//don't check to see if this node is in nodes
-					//instead add add this 
+					//Check to see if the head already exists in the graph, 
+					//if so, add this edge for every instance of that node 
 					nodes.add(s.toString());
 					slbl = "n" + nodes.size();
 					repeatSubjNode = false;

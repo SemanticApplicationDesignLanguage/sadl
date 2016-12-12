@@ -410,22 +410,22 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		iGraphVisualizer.graphResultSetData(rs);
 	}
 	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName)
-			throws ConfigurationException, IOException {
-				if (rs.getColumnCount() >= 3) {
-					String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-					final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-					IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
-			
-					IGraphVisualizer visualizer = getVisualizer(configMgr);
-					if (visualizer != null) {
-						graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs);
-					}
-					else {
-						SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
-					}
-				}
-				else {
-					SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query; ResultSet has less than 3 columns.\n");
-				}
+		throws ConfigurationException, IOException {
+		if (rs.getColumnCount() >= 3) {
+			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
+	
+			IGraphVisualizer visualizer = getVisualizer(configMgr);
+			if (visualizer != null) {
+				graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs);
 			}
+			else {
+				SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
+			}
+		}
+		else {
+			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query; ResultSet has less than 3 columns.\n");
+		}
+	}
 }
