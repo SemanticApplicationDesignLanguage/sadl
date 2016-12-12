@@ -18,6 +18,8 @@
 package com.ge.research.sadl.tests.lsp
 
 import org.eclipse.xtext.testing.AbstractLanguageServerTest
+import org.junit.Assume
+import org.eclipse.core.runtime.Platform
 
 /**
  * Base class for all language server tests for the {@code SADL} language.
@@ -30,6 +32,12 @@ class AbstractSadlLanguageServerTest extends AbstractLanguageServerTest {
 	 * The desired file extension for the {@code SADL} language. 
 	 */
 	protected static val FILE_EXTENSION = 'sadl';
+	
+	@Override
+	override setup() {
+		Assume.assumeFalse(Platform.running);
+		super.setup()
+	}
 	
 	/**
 	 * Sole constructor. Defines the proper file extension.
