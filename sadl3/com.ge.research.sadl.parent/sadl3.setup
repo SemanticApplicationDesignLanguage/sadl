@@ -18,7 +18,7 @@
     label="Sadl3">
   <setupTask
       xsi:type="jdt:JRETask"
-      version="J2SE-1.7"
+      version="J2SE-1.8"
       location="${jre.location-1.7}"/>
   <setupTask
       xsi:type="setup:EclipseIniTask"
