@@ -7,7 +7,7 @@ docker run -p 8080:8080 -p 8888:8888 typefox/websadl
 ```
 ### Open SADL in the browser
 
-Open a browser and go to "http://docker-image-ip:8080/sadl"
+Open a browser and go to "http://docker-image-ip:8888/sadl"
 
 
 ## Prepare image payload
@@ -47,7 +47,12 @@ docker build --rm=true -t typefox/websadl .
 docker run -p 8080:8080 -p 8888:8888 typefox/websadl
 ```
 
-### sh to container 
-`sudo docker exec -i -t <name> /bin/bash`
+
+## If everything works fine push the image to docker hub (deploy image)
+
+```
+docker login --username=<name> 
+docker push typefox/websadl
+```
 
 
