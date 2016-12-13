@@ -31,6 +31,8 @@ RUN mkdir -p $HOME/sadl $HOME/work $HOME/supervisor $HOME/logs/supervisor
 
 COPY sadl_web-0.0.1.tar.gz $HOME/sadl/
 ADD tomcat.tar.gz $HOME/sadl/sadl-lsp-server/
+ADD ws-content.tar.gz $HOME/work
+
 
 RUN sudo chown -R $NB_USER:users $HOME
 
