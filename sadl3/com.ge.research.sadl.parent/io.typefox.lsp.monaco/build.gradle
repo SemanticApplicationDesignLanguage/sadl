@@ -55,7 +55,7 @@ jar {
 }
 
 task buildStandaloneTomcat(type:Tar, dependsOn: "buildProduct") {
-    from ("${buildDir}/output/sadlmonaco/")
+    from ("${buildDir}/output/io.typefox.lsp.monaco/")
     archiveName "tomcat.tar.gz"
     include "**/*"
     destinationDir file("${buildDir}/")
