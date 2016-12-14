@@ -18,7 +18,7 @@
 package com.ge.research.sadl.ide.lsp.inference
 
 import org.eclipse.lsp4j.Range
-import org.eclipse.lsp4j.generator.LanguageServerAPI
+import org.eclipse.lsp4j.generator.JsonRpcData
 import org.eclipse.lsp4j.jsonrpc.validation.NonNull
 
 /**
@@ -26,7 +26,7 @@ import org.eclipse.lsp4j.jsonrpc.validation.NonNull
  * 
  * @author akos.kitta
  */
-@LanguageServerAPI
+@JsonRpcData
 class InferenceResult {
 
 	/**

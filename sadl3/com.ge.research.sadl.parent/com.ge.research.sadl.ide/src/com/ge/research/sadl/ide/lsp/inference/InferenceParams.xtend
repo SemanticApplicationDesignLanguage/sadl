@@ -18,13 +18,13 @@
 package com.ge.research.sadl.ide.lsp.inference
 
 import java.util.Map
-import org.eclipse.lsp4j.generator.LanguageServerAPI
+import org.eclipse.lsp4j.generator.JsonRpcData
 import org.eclipse.lsp4j.jsonrpc.validation.NonNull
 
 /**
  * Parameter used for invoking the {@code SADL} inferencer.
  */
-@LanguageServerAPI
+@JsonRpcData
 class InferenceParams {
 	
 	/**

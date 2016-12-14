@@ -17,12 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide.lsp.inference
 
-import org.eclipse.lsp4j.generator.LanguageServerAPI
+import org.eclipse.lsp4j.generator.JsonRpcData
 
 /**
  * {@code SADL} inference result status.
  */
-@LanguageServerAPI
+@JsonRpcData
 class InferenceStatus {
 	
 	/**

@@ -17,9 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.lsp
 
+import org.eclipse.emf.common.EMFPlugin
 import org.eclipse.xtext.testing.AbstractLanguageServerTest
 import org.junit.Assume
-import org.eclipse.core.runtime.Platform
 
 /**
  * Base class for all language server tests for the {@code SADL} language.
@@ -35,7 +35,7 @@ class AbstractSadlLanguageServerTest extends AbstractLanguageServerTest {
 	
 	@Override
 	override setup() {
-		Assume.assumeFalse(Platform.running);
+		Assume.assumeTrue(!EMFPlugin.IS_ECLIPSE_RUNNING);
 		super.setup()
 	}
 	
