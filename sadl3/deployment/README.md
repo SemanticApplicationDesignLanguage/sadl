@@ -29,6 +29,8 @@ In git/sadl-jupyterlab/sadl-client
 run
 
 ```
+cd ~/git/sadl-jupyterlab/sadl-client
+
 npm install
 npm run clean
 npm run build:all
