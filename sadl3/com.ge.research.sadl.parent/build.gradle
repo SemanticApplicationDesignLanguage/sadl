@@ -8,11 +8,18 @@ buildscript {
 }
 
 subprojects {
-	repositories {
-        maven { 
-			url "https://oss.sonatype.org/content/repositories/snapshots/"
-    	}
-		jcenter()
+	if (project.hasProperty("useLocalMaven")) {
+		System.println("Using local Maven repository to build source.")
+		repositories {
+			mavenLocal()
+	        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+			jcenter()
+		}
+	} else {
+		repositories {
+	        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+			jcenter()
+		}
 	}
 	
 	apply plugin: "java"
