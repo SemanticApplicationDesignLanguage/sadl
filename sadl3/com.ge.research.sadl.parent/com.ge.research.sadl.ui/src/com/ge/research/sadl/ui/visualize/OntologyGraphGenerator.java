@@ -26,6 +26,8 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -61,8 +63,8 @@ public class OntologyGraphGenerator {
 	protected static String LINK_URL = "href";
 	
 
-	private OntModel withImportModel = null; //model with imports
-	private OntModel localModel = null;   //model without imports
+	private OntModel theJenaModel = null; //model with imports
+	private OntModel baseModel = null;
 	private IConfigurationManagerForIDE configMgr;
 	private IProject project = null;
 	
@@ -78,9 +80,9 @@ public class OntologyGraphGenerator {
 	 * @throws IOException
 	 */
 	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, IProject project) throws ConfigurationException, IOException {
-		this.configMgr = configMgr;
+		this.setConfigMgr(configMgr);
 		this.project  = project;
-		setModels(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS), configMgr.getOntModel(publicUri, Scope.LOCALONLY));
+		setTheJenaModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
 	}
 	
 	/**
@@ -95,7 +97,7 @@ public class OntologyGraphGenerator {
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		boolean isImport = false;
 		
-		ExtendedIterator<OntClass> classIter = getLocalModel().listClasses();
+		ExtendedIterator<OntClass> classIter = getTheJenaModel().listClasses();
 		try{
 			//Add all of the class triples
 			while(classIter.hasNext()){
@@ -164,7 +166,7 @@ public class OntologyGraphGenerator {
 			Individual inst = individualIter.next();
 			if(!isInImports(inst, publicUri)){
 				OntClass parent = inst.getOntClass();
-				GraphSegment gs = new GraphSegment((Resource)inst, "is a",parent , configMgr);
+				GraphSegment gs = new GraphSegment((Resource)inst, "is a",parent , getConfigMgr());
 				gs.addHeadAttribute(SHAPE, DIAMOND);
 				if(isInImports(parent, publicUri)){
 					if(getImportUrl(parent) != null) gs.addTailAttribute(LINK_URL, getImportUrl(parent));
@@ -211,7 +213,7 @@ public class OntologyGraphGenerator {
 							continue;	
 						}
 						
-						GraphSegment gs = new GraphSegment(classInst, null, null, configMgr);
+						GraphSegment gs = new GraphSegment(classInst, null, null, getConfigMgr());
 						if (!hasClassNode(data, classInst)) {
 							data.add(gs);
 							gs.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
@@ -240,7 +242,7 @@ public class OntologyGraphGenerator {
 			ns = ns.substring(0, ns.length() - 1);
 		}
 		// get the prefix and if there is one generate qname
-		String prefix = configMgr.getGlobalPrefix(ns);
+		String prefix = getConfigMgr().getGlobalPrefix(ns);
 		//get the graph folder file path
 		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
 		
@@ -492,7 +494,7 @@ public class OntologyGraphGenerator {
 				Iterator<OntClass> clsiter = unionclasses.iterator();
 				while(clsiter.hasNext()){
 					OntClass newcls = clsiter.next();
-					GraphSegment sg = isList ? new GraphSegment(cls, prop, newcls, isList, configMgr) : new GraphSegment(cls, prop, newcls, configMgr);
+					GraphSegment sg = isList ? new GraphSegment(cls, prop, newcls, isList, getConfigMgr()) : new GraphSegment(cls, prop, newcls, getConfigMgr());
 					
 					if (!data.contains(sg)) {	
 						
@@ -546,7 +548,7 @@ public class OntologyGraphGenerator {
 					
 				}	
 			}else{
-				GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
+				GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, getConfigMgr()) : new GraphSegment(cls, prop, rng, getConfigMgr());
 				if (!data.contains(sg)) {	
 					
 					data.add(sg);
@@ -741,7 +743,7 @@ public class OntologyGraphGenerator {
 			while (itr.hasNext()) {
 				OntResource or = itr.next();
 				if (or.canAs(Individual.class)){
-					GraphSegment gs = new GraphSegment(or.as(Individual.class), "is a", classInst, configMgr);
+					GraphSegment gs = new GraphSegment(or.as(Individual.class), "is a", classInst, getConfigMgr());
 					if (!data.contains(gs)) {
 						data.add(gs);
 					}
@@ -791,7 +793,7 @@ public class OntologyGraphGenerator {
 //						sg.addEdgeAttribute(COLOR, RED);
 					}
 					else {
-						sg = new GraphSegment(supercls, "subClass", classInst, configMgr);
+						sg = new GraphSegment(supercls, "subClass", classInst, getConfigMgr());
 						sg.addEdgeAttribute(COLOR, BLUE);
 						sg.addEdgeAttribute(STYLE, "dashed");
 						if (!data.contains(sg)) {
@@ -856,7 +858,7 @@ public class OntologyGraphGenerator {
 //				sg.addEdgeAttribute(COLOR, RED);
 			}
 			else {
-				sg = new GraphSegment(cls, "subClass", subcls, configMgr);
+				sg = new GraphSegment(cls, "subClass", subcls, getConfigMgr());
 				sg.addEdgeAttribute(COLOR, BLUE);
 				sg.addEdgeAttribute(STYLE, "dashed");
 				
@@ -890,14 +892,14 @@ public class OntologyGraphGenerator {
 			String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 	//		qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? ?superclass}";
 			qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? <" + cls.getURI() + ">}";
-			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getModelWithImports());;		
+			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getTheJenaModel());;		
 			com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
 			while (results.hasNext()) {
 				QuerySolution soln = results.next();
 				RDFNode sub = soln.get("?subclass");
 				if (sub.canAs(OntClass.class)) {
 					OntClass subcls = sub.as(OntClass.class);
-					GraphSegment sg = new GraphSegment(cls, "subClass", subcls, configMgr);
+					GraphSegment sg = new GraphSegment(cls, "subClass", subcls, getConfigMgr());
 					sg.addEdgeAttribute(COLOR, BLUE);
 					sg.addEdgeAttribute(STYLE, "dashed");
 					
@@ -1012,7 +1014,7 @@ public class OntologyGraphGenerator {
 		ExtendedIterator<? extends OntClass> einteritr = classInst.asIntersectionClass().listOperands();
 		while (einteritr.hasNext()) {
 			OntClass member  = einteritr.next();
-			GraphSegment sg = new GraphSegment(member, "subClass", classInst, configMgr);
+			GraphSegment sg = new GraphSegment(member, "subClass", classInst, getConfigMgr());
 			if (!data.contains(sg)) {
 				data.add(sg);
 				//data = addParentClasses(member, data);
@@ -1061,7 +1063,7 @@ public class OntologyGraphGenerator {
 		if (commonSupers.size() > 0) {
 			for (int i = 0; i < commonSupers.size(); i++) {
 				OntClass cscls = commonSupers.get(i);
-				GraphSegment sg = new GraphSegment(cscls, "subClass", classInst, configMgr);
+				GraphSegment sg = new GraphSegment(cscls, "subClass", classInst, getConfigMgr());
 				if (!data.contains(sg)) {
 					data.add(sg);
 				}
@@ -1075,23 +1077,11 @@ public class OntologyGraphGenerator {
 	 * @return
 	 */
 	protected OntModel getLocalModel() {
-		return localModel;
-	}
-	
-	/**
-	 * @return
-	 */
-	protected OntModel getModelWithImports() {
-		return withImportModel;
-	}
-
-	/**
-	 * @param imports
-	 * @param local
-	 */
-	protected void setModels(OntModel imports, OntModel local) {
-		this.withImportModel = imports;
-		this.localModel = local;
+		if (baseModel == null) {
+			Model m = getTheJenaModel().getBaseModel();
+			baseModel = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+		}
+		return baseModel;
 	}
 	
 	/**
@@ -1209,6 +1199,22 @@ public class OntologyGraphGenerator {
 		}else{
 			return false;
 		}
+	}
+
+	private OntModel getTheJenaModel() {
+		return theJenaModel;
+	}
+
+	private void setTheJenaModel(OntModel theJenaModel) {
+		this.theJenaModel = theJenaModel;
+	}
+
+	private IConfigurationManagerForIDE getConfigMgr() {
+		return configMgr;
+	}
+
+	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
+		this.configMgr = configMgr;
 	}
 	
 	

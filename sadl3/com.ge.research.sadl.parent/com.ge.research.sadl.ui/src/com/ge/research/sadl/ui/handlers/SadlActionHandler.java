@@ -403,7 +403,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	
 	protected void createGraphFromResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
 			String description, ResultSet rs) throws IOException {
-		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Graphs").toPortableString()); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();
 		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
