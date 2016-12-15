@@ -1489,8 +1489,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	protected void handleUndefinedFunctions(Name expression) throws ConfigurationException, DontTypeCheckException{
 		String expressionName = declarationExtensions.getConcreteName(expression);
-		ITranslator translator = sadlModelProcessor.configMgr.getTranslator();
-		//If only names for built-in functions are avialable, check the name matches a built-in functions. If not, error.
+		ITranslator translator = sadlModelProcessor.getTranslator();
+		//If only names for built-in functions are available, check the name matches a built-in functions. If not, error.
 		if (translator == null) {
 			issueAcceptor.addWarning(SadlErrorMessages.TYPE_CHECK_TRANSLATOR_CLASS_NOT_FOUND.get(sadlModelProcessor.configMgr.getTranslatorClassName()), expression);
 			if (metricsProcessor != null) {
