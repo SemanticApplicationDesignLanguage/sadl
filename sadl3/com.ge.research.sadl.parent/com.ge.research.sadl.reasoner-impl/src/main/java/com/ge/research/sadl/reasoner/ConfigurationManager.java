@@ -128,6 +128,10 @@ public class ConfigurationManager implements IConfigurationManager {
 
 	private ISadlJenaModelGetter modelGetter;
 
+	private String reasonerClassName = null;
+
+	private String translatorClassName = null;
+
 	/**
 	 * Required constructor for subclass call
 	 */
@@ -450,15 +454,17 @@ public class ConfigurationManager implements IConfigurationManager {
 	public String getTranslatorClassName() throws ConfigurationException {
 		try {
 			IReasoner reasonerInst = getReasonerInstance();
-			Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
-	 		StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
-					getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
-	        if (sitr.hasNext()) { 
-	        	RDFNode clsnmnode = sitr.nextStatement().getObject();
-	        	if (clsnmnode instanceof Literal) {
-	        		return ((Literal)clsnmnode).getValue().toString();
-	        	}
-	        }
+			if (getConfigModel() != null) {
+				Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
+		 		StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
+						getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
+		        if (sitr.hasNext()) { 
+		        	RDFNode clsnmnode = sitr.nextStatement().getObject();
+		        	if (clsnmnode instanceof Literal) {
+		        		return ((Literal)clsnmnode).getValue().toString();
+		        	}
+		        }
+			}
 	        ITranslator translator = getTranslator();
 			if (translator != null) {
 				return translator.getClass().getCanonicalName();
@@ -520,20 +526,21 @@ public class ConfigurationManager implements IConfigurationManager {
 	}
 
 	private ITranslator getTranslatorInstance() throws ConfigurationException {
-		String translatorClassName = null;
-		if (getConfigModel() != null) {
-			IReasoner reasonerInst = getReasonerInstance();
-			Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
-			StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
-					getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
-			if (sitr.hasNext()) {
-				RDFNode cnobj = sitr.next().getObject();
-				if (cnobj instanceof Literal) {
-					translatorClassName = ((Literal)cnobj).getLexicalForm();
+		if (translatorClassName == null) {
+			if (getConfigModel() != null) {
+				IReasoner reasonerInst = getReasonerInstance();
+				Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
+				StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
+						getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
+				if (sitr.hasNext()) {
+					RDFNode cnobj = sitr.next().getObject();
+					if (cnobj instanceof Literal) {
+						translatorClassName = ((Literal)cnobj).getLexicalForm();
+					}
 				}
-			}
-			if (translatorClassName == null) {
-				translatorClassName = reasonerInst.getDefaultTranslatorClassName();
+				if (translatorClassName == null) {
+					translatorClassName = reasonerInst.getDefaultTranslatorClassName();
+				}
 			}
 		}
 		if (translatorClassName == null) {
@@ -581,16 +588,16 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (reasoner != null) {
 			return reasoner;
 		}
-		String reasonerClassName = null;
-//		IReasoner reasonerClass = null;
-		if (getConfigModel() != null) {
-			 StmtIterator sitr = getConfigModel().listStatements(getReasonerSpecResource(), getConfigModel().getProperty(pREASONER_CLASSNAME), (RDFNode)null);
-			 if (sitr.hasNext()) {
-				 RDFNode cnobj = sitr.next().getObject();
-				 if (cnobj instanceof Literal) {
-					 reasonerClassName = ((Literal)cnobj).getLexicalForm();
+		if (reasonerClassName == null) {
+			if (getConfigModel() != null) {
+				 StmtIterator sitr = getConfigModel().listStatements(getReasonerSpecResource(), getConfigModel().getProperty(pREASONER_CLASSNAME), (RDFNode)null);
+				 if (sitr.hasNext()) {
+					 RDFNode cnobj = sitr.next().getObject();
+					 if (cnobj instanceof Literal) {
+						 reasonerClassName = ((Literal)cnobj).getLexicalForm();
+					 }
 				 }
-			 }
+			}
 		}
 		if (reasonerClassName == null) {
 			reasonerClassName = DEFAULT_REASONER;
@@ -1551,10 +1558,12 @@ public class ConfigurationManager implements IConfigurationManager {
 	
 	public boolean setTranslatorClassName(String translatorClassName)
 			throws ConfigurationException {
+		this.translatorClassName = translatorClassName;
 		return true;
 	}
 	
 	public boolean setReasonerClassName(String reasonerClassName) {
+		this.reasonerClassName = reasonerClassName;
 		return true;
 	}
 
