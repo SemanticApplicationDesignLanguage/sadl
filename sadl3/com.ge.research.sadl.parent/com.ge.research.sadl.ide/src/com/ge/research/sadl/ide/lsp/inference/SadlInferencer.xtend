@@ -17,9 +17,13 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide.lsp.inference
 
+import com.ge.research.sadl.model.gp.Query
+import com.ge.research.sadl.model.gp.SadlCommand
 import com.ge.research.sadl.model.gp.Test
 import com.ge.research.sadl.model.gp.TestResult
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
+import com.ge.research.sadl.reasoner.ResultSet
+import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.google.common.base.Preconditions
 import com.google.common.collect.ImmutableList
 import com.google.inject.Inject
@@ -36,15 +40,14 @@ import org.eclipse.xtext.resource.XtextResource
 import static com.ge.research.sadl.ide.SadlProjectStructureInitializer.*
 import static com.ge.research.sadl.ide.lsp.inference.InferenceStatus.*
 import static com.ge.research.sadl.jena.UtilsForJena.*
-import com.ge.research.sadl.model.gp.Query
-import com.ge.research.sadl.reasoner.ResultSet
-import com.ge.research.sadl.model.gp.SadlCommand
+import org.eclipse.xtext.util.internal.Log
 
 /**
  * Headless implementation of the {@code SADL} inferencer.
  * 
  * @author akos.kitta
  */
+@Log
 @Singleton
 class SadlInferencer {
 
@@ -61,33 +64,18 @@ class SadlInferencer {
 		val modelFolderPath = projectPath.resolve(OWL_MODELS_FOLDER_NAME);
 		val modelPath = modelFolderPath.resolve('''«resource.URI.trimFileExtension.lastSegment».owl''');
 		val processor = processorProvider.getProcessor(resource);
-		val result = processor.runInference(resource, modelPath.toString, modelFolderPath.toString, preferences);
-		val commands = result.get(0);
-		val testResults = result.get(1);
+		val results = processor.runInference(resource, modelPath.toString, modelFolderPath.toString, preferences).filter(SadlCommandResult);
 
 		val builder = ImmutableList.builder;
-		if (commands instanceof List<?>) {
-			Preconditions.checkState(
-				testResults instanceof List<?>, '''Expected a list of inference results. Was: «testResults».''');
-			for (var i = 0; i < commands.length; i++) {
-				val command = commands.get(i);
-				if (command instanceof Test) {
-					val testResult = (testResults as List<?>).get(i);
-					Preconditions.checkState(
-						testResult instanceof TestResult, '''Expected a test result. Was: «testResult».''');
-
-					builder.add(doc.createInferenceResult(command, testResult as TestResult));
-				} else if (command instanceof Query) {
-					// TODO handle graphs
-					val resultSet = (testResults as List<?>).get(i);
-					Preconditions.checkState(
-						resultSet instanceof ResultSet, '''Expected a result set. Was: «resultSet».''');
-
-					builder.add(doc.createInferenceResult(command, resultSet as ResultSet));
-						
-				}
+		results.forEach[r | 
+			if (r.results instanceof TestResult) {
+				builder.add(doc.createInferenceResult(r.cmd as Test, r.results as TestResult));
+			} else if (r.results instanceof ResultSet) {
+				builder.add(doc.createInferenceResult(r.cmd as Query, r.results as ResultSet));
+			} else {
+				LOG.warn('''Unhandled inference result: «r.results». SADL Command was: «r.cmd».''');
 			}
-		}
+		];
 
 		return builder.build;
 	}
