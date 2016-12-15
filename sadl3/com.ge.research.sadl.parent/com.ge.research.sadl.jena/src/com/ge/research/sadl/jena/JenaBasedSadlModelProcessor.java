@@ -218,6 +218,7 @@ import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.sparql.JenaTransactionException;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
@@ -711,11 +712,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				    		addError(SadlErrorMessages.NULL_ONT_MODEL.toString(), simport);
 						}
 						else {
-							addImportToJenaModel(modelName, importUri, importedOntModel);							
+							addImportToJenaModel(modelName, importUri, importPrefix, importedOntModel);							
 				    	}
 					} else if (eResource instanceof ExternalEmfResource) {
 						ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
-						addImportToJenaModel(modelName, importUri, emfResource.getJenaModel());
+						addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getJenaModel());
 					}
 					else {
 						addError(SadlErrorMessages.NULL_IMPORT.get("XtextResource"), simport);
@@ -916,7 +917,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 				if (sadlBuiltinFunctionModel != null) {
-					addImportToJenaModel(getModelName(), SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, sadlBuiltinFunctionModel);
+					addImportToJenaModel(getModelName(), SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS, sadlBuiltinFunctionModel);
 				}
 			}
 		}
@@ -979,7 +980,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 				if (sadlImplicitModel != null) {
-					addImportToJenaModel(getModelName(), SadlConstants.SADL_IMPLICIT_MODEL_URI, sadlImplicitModel);
+					addImportToJenaModel(getModelName(), SadlConstants.SADL_IMPLICIT_MODEL_URI, SadlConstants.SADL_IMPLICIT_MODEL_PREFIX, sadlImplicitModel);
 				}
 			}
 		}
@@ -987,8 +988,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private void addSadlBaseModelImportToJenaModel(Resource resource) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
 		OntModelProvider.setSadlBaseModel(sadlBaseModel);
-		addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, sadlBaseModel);
+		addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, SadlConstants.SADL_BASE_MODEL_PREFIX, sadlBaseModel);
 	}
+	
 	private void addAnnotationsToResource(OntResource modelOntology, EList<SadlAnnotation> anns) {
 		Iterator<SadlAnnotation> iter = anns.iterator();
 		while (iter.hasNext()) {
@@ -1049,11 +1051,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return "" + count + " " + label;
 	}
 
-	private void addImportToJenaModel(String modelName, String importUri, Model importedOntModel) {
+	private void addImportToJenaModel(String modelName, String importUri, String importPrefix, Model importedOntModel)  {
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
+		if (importPrefix == null) {
+			try {
+				importPrefix = getConfigMgr(getCurrentResource(), getOwlModelFormat(getProcessorContext())).getGlobalPrefix(importUri);
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if (importPrefix != null) {
+			getTheJenaModel().setNsPrefix(importPrefix, importUri);
+		}
 		com.hp.hpl.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
-		getTheJenaModel().addSubModel(importedOntModel);
 		modelOntology.addImport(importedOntology);
+		getTheJenaModel().addSubModel(importedOntModel);
+		getTheJenaModel().addLoadedImport(importUri);
+//		getTheJenaModel().loadImports();
+//		IConfigurationManagerForIDE cm;
+//		try {
+//			cm = getConfigMgr(getCurrentResource(), getOwlModelFormat(getProcessorContext()));
+//			cm.loadImportedModel(modelOntology, getTheJenaModel(), importUri, cm.getAltUrlFromPublicUri(importUri));
+//		} catch (ConfigurationException e) {
+//			throw new JenaTransactionException("Unable to load imported model '" + importUri + "'", e);
+//		}
 		addOrderedImport(importUri);
 	}
 
@@ -4078,7 +4100,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			isList = ((SadlPrimitiveDataType)type).isList();
 		}
 		if (isList) {
-			importSadlListModel(type.eResource());			
+			try {
+				importSadlListModel(type.eResource());
+			} catch (ConfigurationException e) {
+				throw new JenaProcessorException("Unable to load List model", e);
+			}			
 		}
 		return isList;
 	}
@@ -5810,7 +5836,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return listModel;
 	}
 	
-	private boolean importSadlListModel(Resource resource) throws JenaProcessorException {
+	private boolean importSadlListModel(Resource resource) throws JenaProcessorException, ConfigurationException {
 		if (sadlListModel == null) {
 			try {
 				sadlListModel = getOntModelFromString(resource, getSadlListModel());
@@ -5818,13 +5844,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} catch (Exception e) {
 				throw new JenaProcessorException(e.getMessage(), e);
 			}
-			addImportToJenaModel(getModelName(), SadlConstants.SADL_LIST_MODEL_URI, sadlListModel);
+			addImportToJenaModel(getModelName(), SadlConstants.SADL_LIST_MODEL_URI, SadlConstants.SADL_LIST_MODEL_PREFIX, sadlListModel);
 			return true;
 		}
 		return false;
 	}
 	
-	private boolean importSadlDefaultsModel(Resource resource) throws JenaProcessorException {
+	private boolean importSadlDefaultsModel(Resource resource) throws JenaProcessorException, ConfigurationException {
 		if (sadlDefaultsModel == null) {
 			try {
 				sadlDefaultsModel = getOntModelFromString(resource, getSadlDefaultsModel());
@@ -5832,7 +5858,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} catch (Exception e) {
 				throw new JenaProcessorException(e.getMessage(), e);
 			}
-			addImportToJenaModel(getModelName(), SadlConstants.SADL_DEFAULTS_MODEL_URI, sadlDefaultsModel);
+			addImportToJenaModel(getModelName(), SadlConstants.SADL_DEFAULTS_MODEL_URI, SadlConstants.SADL_DEFAULTS_MODEL_PREFIX, sadlDefaultsModel);
 			return true;
 		}
 		return false;
