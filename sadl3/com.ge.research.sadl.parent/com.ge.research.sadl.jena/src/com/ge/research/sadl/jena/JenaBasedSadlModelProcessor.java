@@ -585,6 +585,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private ProcessorContext processorContext;
 
+	private String reasonerClassName = null;
+	private String translatorClassName = null;
+
     public static void refreshResource(Resource newRsrc) {
     	try {
     		URI uri = newRsrc.getURI();
@@ -657,17 +660,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		addAnnotationsToResource(modelOntology, anns);
 		
 		try {
-			//Add SadlBaseModel to Builtin Functions Implicit Model
+			//Add SadlBaseModel to everything except the SadlImplicitModel
 			if(!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)){
-					addSadlBaseModelImportToJenaModel(resource);
+				addSadlBaseModelImportToJenaModel(resource);
 			}
-			
+			// Add the SadlImplicitModel to everything except itself and the SadlBuilinFunc
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME) &&
-				!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-					OntModelProvider.registerResource(resource);
-					addImplicitSadlModelImportToJenaModel(resource, context);
-					addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
-	
+					!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
+				OntModelProvider.registerResource(resource);
+				addImplicitSadlModelImportToJenaModel(resource, context);
+				addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
+
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -1052,6 +1055,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private void addImportToJenaModel(String modelName, String importUri, String importPrefix, Model importedOntModel)  {
+		getTheJenaModel().getDocumentManager().addModel(importUri, importedOntModel, true);
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
 		if (importPrefix == null) {
 			try {
@@ -5939,8 +5943,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public SadlCommand getTargetCommand() {
 		return targetCommand;
 	}
-	private void setTargetCommand(SadlCommand targetCommand) {
-		this.targetCommand = targetCommand;
+	public ITranslator getTranslator() throws ConfigurationException {
+		IConfigurationManagerForIDE cm = getConfigMgr(getCurrentResource(), getOwlModelFormat(getProcessorContext()));
+		if (cm.getTranslatorClassName() == null) {
+			cm.setTranslatorClassName(translatorClassName );
+			cm.setReasonerClassName(reasonerClassName);
+		}
+		return cm.getTranslator();
 	}
 	
 }
