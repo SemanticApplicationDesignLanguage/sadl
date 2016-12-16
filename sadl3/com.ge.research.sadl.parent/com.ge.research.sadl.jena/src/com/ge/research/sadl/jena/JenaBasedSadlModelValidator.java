@@ -2558,7 +2558,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					ExtendedIterator<Resource> itr = inst.listRDFTypes(false);
 					while (itr.hasNext()) {
 						Resource cls = itr.next();
-						boolean match = checkForPropertyDomainMatch(subj, prop, cls);
+						boolean match = checkForPropertyDomainMatch(cls, prop, obj);
 						if (match) {
 							itr.close();
 							return true;
