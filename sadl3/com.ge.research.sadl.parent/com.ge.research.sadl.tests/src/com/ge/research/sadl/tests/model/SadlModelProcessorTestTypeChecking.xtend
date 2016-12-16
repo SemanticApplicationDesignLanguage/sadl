@@ -30,17 +30,8 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 	
 	@Test
 	def void testRuleVariableAsDomain() {
-		val sadlImplicit = '''
-			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-			Event is a class.
-			impliedProperty is a type of annotation.
-			UnittedQuantity is a class,
-			 	described by ^value with values of type decimal,
-			 	described by unit with values of type string.
-		 '''.sadl
 		val sadlModel = '''
 			 uri "http://sadl.org/Test1.sadl" alias Test1.
-			 import "http://sadl.org/sadlimplicitmodel".		// this shouldn't be needed because it's implicit...	 
 			 PhysicalThing is a class,
 			 	described by weight with values of type UnittedQuantity,
 			 	described by density with values of type float.
@@ -71,14 +62,6 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 	
 	@Test
 	def void testUserDefinedEquation() {
-		val sadlImplicit = '''
-			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-			Event is a class.
-			impliedProperty is a type of annotation.
-			UnittedQuantity is a class,
-			 	described by ^value with values of type decimal,
-			 	described by unit with values of type string.
-		 '''.sadl
 		val sadlModel = '''
 			 uri "http://sadl.org/Test1.sadl" alias Test1.
 			 
@@ -108,14 +91,6 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 	
 	@Test
 	def void testUndefinedEquation() {
-		val sadlImplicit = '''
-			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-			Event is a class.
-			impliedProperty is a type of annotation.
-			UnittedQuantity is a class,
-			 	described by ^value with values of type decimal,
-			 	described by unit with values of type string.
-		 '''.sadl
 		val sadlModel = '''
 			 uri "http://sadl.org/Test1.sadl" alias Test1.
 			 
