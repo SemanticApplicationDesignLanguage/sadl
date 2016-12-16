@@ -299,7 +299,12 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			if (anchorNode.endsWith(".owl")) {
 				anchorNode = anchorNode.substring(0, anchorNode.length() - 4);
 			}
-			graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
+			if (anchorNode.indexOf('.') > 0) {
+				graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
+			}
+			else {
+				graphName = anchorNode;
+			}
 		}
 		String description = "Graph of Ontology File";
 		createGraphFromResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
