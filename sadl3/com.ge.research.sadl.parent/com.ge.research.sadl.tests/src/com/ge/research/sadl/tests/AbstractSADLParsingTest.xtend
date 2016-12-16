@@ -172,4 +172,28 @@ abstract class AbstractSADLParsingTest{
 		Assert.assertEquals(text, errorText)
 	}
 	
+	protected def void assertError(Resource resource, String error) {
+		val issues = validate(resource).toList.sortBy[-(offset?:0)]
+		val text = (resource as XtextResource).parseResult.rootNode.text
+		var errorText = text
+		if (text === null) {
+			issues.head.data
+			Assert.fail(issues.join(',')[message])
+		}
+		var errorFound = false
+		for (issue : issues) {
+			if (!errorFound && issue.severity == Severity.ERROR) {
+				if (issue.offset === null || issue.length === null) {
+					errorText = errorText+"\n!["+issue.message+"] ATTENTION : The produced issue doesn't have an offset or length attached!"
+				}
+				else if (issue.message.startsWith(error)) {
+					errorFound = true
+				} else {
+					errorText = errorText.substring(0, issue.offset)+"!"+errorText.substring(issue.offset, issue.offset + issue.length)+"!["+issue.message+"]"+errorText.substring(issue.offset+issue.length)
+				}
+			}
+		}
+		Assert.assertEquals(text, errorText)
+	}
+	
 }

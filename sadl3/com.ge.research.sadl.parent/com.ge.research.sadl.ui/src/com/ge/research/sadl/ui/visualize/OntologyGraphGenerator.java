@@ -19,6 +19,7 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.ontology.QualifiedRestriction;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.impl.OntClassImpl;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -421,6 +422,15 @@ public class OntologyGraphGenerator {
 				data = generatePropertyRange(cls, prop.as(OntProperty.class), data, parentPublicUri);
 			}
 		}
+		// now look for restrictions on class
+		ExtendedIterator<OntClass> ritr = cls.listSuperClasses(true);
+		while (ritr.hasNext()) {
+			OntClass nxtr = ritr.next();
+			if (nxtr.isRestriction()) {
+				OntProperty onProp = nxtr.asRestriction().getOnProperty();
+				data = generatePropertyRange(cls, onProp, data, parentPublicUri);
+			}
+		}
 		return data;
 	}
 
@@ -521,6 +531,7 @@ public class OntologyGraphGenerator {
 								if(restrictionProperty.equals(prop)){
 									if(prop.canAs(Property.class)){
 										rstrString.append(getRestrictionString(superClass.asRestriction(),prop.as(Property.class),newcls, isList));
+										rstrString.append("&#13;&#10;");
 									}else{
 										throw new Exception("prop is not a property");
 									}
@@ -574,6 +585,7 @@ public class OntologyGraphGenerator {
 							if(restrictionProperty.equals(prop)){
 								if(prop.canAs(Property.class)){
 									rstrString.append(getRestrictionString(superClass.asRestriction(),prop.as(Property.class),rng, isList));
+									rstrString.append("&#13;&#10;");
 								}else{
 									throw new Exception("prop is not a property");
 								}
@@ -719,6 +731,35 @@ public class OntologyGraphGenerator {
 			//TODO may need to change this toString
 			sb.append(node.toString());
 			sb.append(isList ? " list" : "");
+			sb.append(". ");
+		} else if (rstr.hasProperty(OWL2.onClass)) {
+			RDFNode onClass = rstr.getPropertyValue(OWL2.onClass);
+			RDFNode qc = rstr.getPropertyValue(OWL2.qualifiedCardinality);
+			if (qc != null) {
+				sb.append("Must have exactly "); 
+			}
+			else {
+				qc = rstr.getPropertyValue(OWL2.minQualifiedCardinality);
+				if (qc != null) { 
+					sb.append("Must have at least ");
+				}
+				else {
+					qc = rstr.getPropertyValue(OWL2.maxQualifiedCardinality);
+					if (qc != null) {
+						sb.append("Can have at most ");
+					}
+					else {
+						StmtIterator sitr = rstr.listProperties();
+						while (sitr.hasNext()) {
+							System.out.println(sitr.nextStatement().toString());
+						}
+						throw new Exception("Qualified restriction with no cardinality??");
+					}
+				}
+			}
+			sb.append(qc.asLiteral().getValue().toString());
+			sb.append(" values of type ");
+			sb.append(onClass.toString());
 			sb.append(". ");
 			
 		}else{
@@ -1096,7 +1137,8 @@ public class OntologyGraphGenerator {
 		List<String> headKeyList = null;
 		List<String> edgeKeyList = null;
 		List<String> tailKeyList = null;
-		
+		int arraySize = data.size();
+		int listCount = 0;
 		for (int i = 0; i < data.size(); i++) {
 			GraphSegment gs = data.get(i);
 			if (gs.getHeadAttributes() != null) {
@@ -1132,26 +1174,34 @@ public class OntologyGraphGenerator {
 					}
 				}
 			}
+			if (gs.isObjectIsList()) {
+				listCount++;		// add row for List node to type edge
+				int asdf = 0;
+			}
 		}
 		int maxColumns = 3 + 
 				(headKeyList != null ? headKeyList.size() : 0) + 
 				(edgeKeyList != null ? edgeKeyList.size() : 0) + 
 				(tailKeyList != null ? tailKeyList.size() : 0); 
-		Object array[][] = new Object[data.size()][maxColumns]; 
+		Object array[][] = new Object[arraySize+listCount][maxColumns]; 
 		
 		boolean dataFound = false;
-		for(int i = 0; i < data.size(); i++) {
+		listCount = 0;	// restart counter
+		for(int i = 0; i < arraySize; i++) {
 			GraphSegment gs = data.get(i);
 			String s = isAnImport(gs, true) ? gs.subjectToString() : gs.subjectToStringNoPrefix();
 			String p = gs.predicateToStringNoPrefix();
 			String o = isAnImport(gs, false) ? gs.objectToString() : gs.objectToStringNoPrefix();
-			array[i][0] = s;
-			array[i][1] = p;
-			array[i][2] = o;
+			array[i+listCount][0] = s;
+			array[i+listCount][1] = p;
+			array[i+listCount][2] = o;
 			dataFound = true;
 			array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
 			array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
 			array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
+			if (gs.isObjectIsList()) {
+				array = addListTypeEdge(gs, columnList, array, i + ++listCount);
+			}
 		}
 		if (dataFound) {
 			String[] headers = columnList.toArray(new String[0]);
@@ -1159,6 +1209,28 @@ public class OntologyGraphGenerator {
 			return rs;
 		}
 		return null;
+	}
+
+	private Object[][] addListTypeEdge(GraphSegment gs, List<String> columnList, Object[][] array, int i) {
+		String s = isAnImport(gs,false) ? gs.objectToString() : gs.objectToStringNoPrefix();
+		String p = "list\ntype";
+		gs.setObjectIsList(false);
+		String o = isAnImport(gs, false) ? gs.objectToString() : gs.objectToStringNoPrefix();
+		gs.setObjectIsList(true);
+		array[i][0] = s;
+		array[i][1] = p;
+		array[i][2] = o;
+		int cidx = columnList.indexOf("edge_color");
+		if (cidx > 0) {
+			array[i][cidx] = "cyan4";
+		}
+		else {
+			cidx = columnList.indexOf("style");
+			if (cidx > 0) {
+				array[i][cidx] = "dashed";
+			}
+		}
+		return array;
 	}
 
 	/**

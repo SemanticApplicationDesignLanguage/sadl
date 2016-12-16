@@ -1827,10 +1827,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 			categories[0] = configurationMgr.getReasoner().getReasonerFamily();
 			categories[1] = IConfigurationManager.BuiltinCategory;
 			List<ConfigurationItem> knownBuiltins = configurationMgr.getConfiguration(categories, false);
-			for (ConfigurationItem item : knownBuiltins) {
-				Object itemName = item.getNamedValue("name");
-				if (itemName != null && itemName instanceof String && ((String)itemName).equals(builtinName)) {
-					return true;
+			if (knownBuiltins != null) {
+				for (ConfigurationItem item : knownBuiltins) {
+					Object itemName = item.getNamedValue("name");
+					if (itemName != null && itemName instanceof String && ((String)itemName).equals(builtinName)) {
+						return true;
+					}
 				}
 			}
 		} catch (ConfigurationException e) {

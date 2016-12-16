@@ -56,6 +56,12 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 			}
 			project = ResourcesPlugin.getWorkspace().getRoot().getProject(curProject);
 			modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+			if (getConfigMgr() != null && getConfigMgr().getModelFolder() != null) {
+				String configModelFolder = getConfigMgr().getModelFolderPath().getCanonicalPath().replace("\\", "/");
+				if (!configModelFolder.equals(modelFolderUri)) {
+					configMgr = null;		// this is an obsolete ConfigurationManager
+				}
+			}
 			
 			graphFolder(project);
 			// now graph the base model and the list model

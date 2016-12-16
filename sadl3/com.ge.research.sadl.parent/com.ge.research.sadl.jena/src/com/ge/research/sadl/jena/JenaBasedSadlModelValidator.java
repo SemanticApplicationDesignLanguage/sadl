@@ -1489,8 +1489,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	protected void handleUndefinedFunctions(Name expression) throws ConfigurationException, DontTypeCheckException{
 		String expressionName = declarationExtensions.getConcreteName(expression);
-		ITranslator translator = sadlModelProcessor.configMgr.getTranslator();
-		//If only names for built-in functions are avialable, check the name matches a built-in functions. If not, error.
+		ITranslator translator = sadlModelProcessor.getTranslator();
+		//If only names for built-in functions are available, check the name matches a built-in functions. If not, error.
 		if (translator == null) {
 			issueAcceptor.addWarning(SadlErrorMessages.TYPE_CHECK_TRANSLATOR_CLASS_NOT_FOUND.get(sadlModelProcessor.configMgr.getTranslatorClassName()), expression);
 			if (metricsProcessor != null) {
@@ -2529,15 +2529,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) {
 		if (obj.isResource()) {
 			if (obj.canAs(UnionClass.class)){
-				ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = obj.as(UnionClass.class).listOperands();
-				while (itr.hasNext()) {
-					com.hp.hpl.jena.rdf.model.Resource cls = itr.next();
-					if (cls.isURIResource() && cls.asResource().getURI().equals(subj.getURI())) {
-						itr.close();
-						return true;
+				List<OntResource> uclsMembers = sadlModelProcessor.getOntResourcesInUnionClass(theJenaModel, obj.as(UnionClass.class));
+				if (uclsMembers.contains(subj)) {
+					return true;
+				}
+				if (subj.canAs(OntClass.class)){ 
+					for (int i = 0; i < uclsMembers.size(); i++) {
+						OntResource member = uclsMembers.get(i);
+						try {
+							if (SadlUtils.classIsSubclassOf(subj.as(OntClass.class), member, true, null)) {
+								return true;
+							}
+						} catch (CircularDependencyException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
-				itr.close();
 			}
 			else if (subj != null && obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
 				return true;	

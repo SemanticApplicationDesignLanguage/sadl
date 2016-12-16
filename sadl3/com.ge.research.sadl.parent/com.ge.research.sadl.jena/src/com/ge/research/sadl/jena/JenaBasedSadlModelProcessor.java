@@ -585,6 +585,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private ProcessorContext processorContext;
 
+	private String reasonerClassName = null;
+	private String translatorClassName = null;
+
     public static void refreshResource(Resource newRsrc) {
     	try {
     		URI uri = newRsrc.getURI();
@@ -657,17 +660,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		addAnnotationsToResource(modelOntology, anns);
 		
 		try {
-			//Add SadlBaseModel to Builtin Functions Implicit Model
+			//Add SadlBaseModel to everything except the SadlImplicitModel
 			if(!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)){
-					addSadlBaseModelImportToJenaModel(resource);
+				addSadlBaseModelImportToJenaModel(resource);
 			}
-			
+			// Add the SadlImplicitModel to everything except itself and the SadlBuilinFunc
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME) &&
-				!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-					OntModelProvider.registerResource(resource);
-					addImplicitSadlModelImportToJenaModel(resource, context);
-					addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
-	
+					!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
+				OntModelProvider.registerResource(resource);
+				addImplicitSadlModelImportToJenaModel(resource, context);
+				addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
+
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -1052,6 +1055,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private void addImportToJenaModel(String modelName, String importUri, String importPrefix, Model importedOntModel)  {
+		getTheJenaModel().getDocumentManager().addModel(importUri, importedOntModel, true);
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
 		if (importPrefix == null) {
 			try {
@@ -4430,19 +4434,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null);
 			if (inModelStmtItr.hasNext()) {
 				existingDomainThisModel = true;
-			}
-			ExtendedIterator<? extends OntResource> ditr = prop.as(OntProperty.class).listDomain();
-			if (existingDomainThisModel && ditr.hasNext()) {
-				// domain is already specified in this model
-				OntResource newCls = createUnionOfClasses(cls, ditr);
-				ditr.close();
-				if (newCls != null) {
-					if (newCls.equals(cls)) {
-						return;		// do nothing--the cls is already in domain
+				List<OntResource> inModelDomainClasses = new ArrayList<OntResource>();
+				while (inModelStmtItr.hasNext()) {
+					RDFNode dmn = inModelStmtItr.nextStatement().getObject();
+					if (dmn.isResource()) {	// should always be a Resource
+						if (dmn.canAs(OntResource.class)){
+							inModelDomainClasses.add(dmn.as(OntResource.class));
+						}
+						else {
+							throw new JenaProcessorException("Encountered non-OntResource in domain of '" + prop.getURI() + "'");
+						}
 					}
-					cls = newCls;
-					getTheJenaModel().remove(getTheJenaModel().listStatements(prop, RDFS.domain, (RDFNode)null));
 				}
+				cls = createUnionOfClasses(cls, inModelDomainClasses);
+				getTheJenaModel().remove(getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null));
 			}
 			else {
 				// check to see if this is something new
@@ -4457,8 +4462,51 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		getTheJenaModel().add(prop, RDFS.domain, cls);
 		logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
+		logger.debug("Domain of '" + prop.toString() + "' is now: " + nodeToString(cls));
 	}
 
+	private OntResource createUnionOfClasses(OntResource cls, List<OntResource> existingClasses) throws JenaProcessorException {
+		OntResource unionClass = null;
+		RDFList classes = null;
+		Iterator<OntResource> ecitr = existingClasses.iterator();
+		boolean allEqual = true;
+		while (ecitr.hasNext()) {
+			OntResource existingCls = ecitr.next();
+			if (!existingCls.canAs(OntResource.class)){
+				throw new JenaProcessorException("Unable to '" + existingCls.toString() + "' to OntResource to put into union of classes");
+			}
+			if (existingCls.equals(cls)) {
+				continue;
+			}
+			else {
+				allEqual = false;
+			}
+			if (existingCls.as(OntResource.class).canAs(UnionClass.class)) {
+				List<OntResource> uclist = getOntResourcesInUnionClass(getTheJenaModel(), existingCls.as(UnionClass.class));
+				if (classes == null) {
+					classes = getTheJenaModel().createList();
+					classes = classes.with(cls);
+				}
+				for (int i = 0; i < uclist.size(); i++) {
+					classes = classes.with(uclist.get(i));
+				}
+			} else {
+				if (classes == null) {
+					classes = getTheJenaModel().createList();
+					classes = classes.with(cls);
+				}
+				classes = classes.with(existingCls.as(OntResource.class));
+			}
+		}
+		if (allEqual) {
+			return cls;
+		}
+		if (classes != null) {
+			unionClass = getTheJenaModel().createUnionClass(null, classes);
+		}
+		return unionClass;
+	}
+	
 	private OntResource createUnionOfClasses(OntResource cls, ExtendedIterator<? extends OntResource> ditr) throws JenaProcessorException {
 		OntResource unionClass = null;
 		RDFList classes = null;
@@ -4475,13 +4523,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				allEqual = false;
 			}
 			if (existingCls.as(OntResource.class).canAs(UnionClass.class)) {
-				try {
-					existingCls.as(UnionClass.class).addOperand(cls);
-					return existingCls.as(UnionClass.class);
-				} catch (Exception e) {
-					// don't know why this is happening
-					logger.error("Union class error that hasn't been resolved or understood.");					
-					return cls;
+				if (classes != null) {
+					classes.append(existingCls.as(UnionClass.class).getOperands());
+				}
+				else {
+					try {
+						existingCls.as(UnionClass.class).addOperand(cls);
+						unionClass = existingCls.as(UnionClass.class);
+					} catch (Exception e) {
+						// don't know why this is happening
+						logger.error("Union class error that hasn't been resolved or understood.");					
+						return cls;
+					}
 				}
 			} else {
 				if (classes == null) {
@@ -4489,11 +4542,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				classes = classes.with(existingCls.as(OntResource.class));
 				classes = classes.with(cls);
-				unionClass = getTheJenaModel().createUnionClass(null, classes);
 			}
 		}
 		if (allEqual) {
 			return cls;
+		}
+		if (classes != null) {
+			unionClass = getTheJenaModel().createUnionClass(null, classes);
 		}
 		return unionClass;
 	}
@@ -5473,7 +5528,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		for (int i = 0; i < clses.size(); i++) {
 			RDFNode mcls = clses.get(i);
 			if (mcls.canAs(OntResource.class)) {
-				results.add(mcls.as(OntResource.class));
+				if (mcls.canAs(UnionClass.class)){
+					List<OntResource> innerList = getOntResourcesInUnionClass(m, mcls.as(UnionClass.class));
+					for (int j = 0; j < innerList.size(); j++) {
+						OntResource innerRsrc = innerList.get(j);
+						if (!results.contains(innerRsrc)) {
+							results.add(innerRsrc);
+						}
+					}
+				}
+				else {
+					results.add(mcls.as(OntResource.class));
+				}
 			}
 		}
 		return results;
@@ -5939,8 +6005,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public SadlCommand getTargetCommand() {
 		return targetCommand;
 	}
-	private void setTargetCommand(SadlCommand targetCommand) {
-		this.targetCommand = targetCommand;
+	public ITranslator getTranslator() throws ConfigurationException {
+		IConfigurationManagerForIDE cm = getConfigMgr(getCurrentResource(), getOwlModelFormat(getProcessorContext()));
+		if (cm.getTranslatorClassName() == null) {
+			cm.setTranslatorClassName(translatorClassName );
+			cm.setReasonerClassName(reasonerClassName);
+		}
+		return cm.getTranslator();
 	}
 	
 }
