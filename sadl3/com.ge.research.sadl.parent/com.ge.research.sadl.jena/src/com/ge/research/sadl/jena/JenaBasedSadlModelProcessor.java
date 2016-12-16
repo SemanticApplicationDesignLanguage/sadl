@@ -288,10 +288,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	protected boolean generationInProgress = false;
 
-	
+	public static String[] reservedFolderNames = {"Graphs", "OwlModels", "Temp", SadlConstants.SADL_IMPLICIT_MODEL_FOLDER};
 	public static String[] reservedFileNames = {"SadlBaseModel.sadl", "SadlListModel.sadl", 
 			"RulePatterns.sadl", "RulePatternsData.sadl", "SadlServicesConfigurationConcepts.sadl", 
-			"ServicesConfig.sadl", "defaults.sadl"};
+			"ServicesConfig.sadl", "defaults.sadl", "SadlImplicitModel.sadl", "SadlBuiltinFunctions.sadl"};
 	public static String[] reservedModelURIs = {SadlConstants.SADL_BASE_MODEL_URI,SadlConstants.SADL_LIST_MODEL_URI,
 			SadlConstants.SADL_RULE_PATTERN_URI, SadlConstants.SADL_RULE_PATTERN_DATA_URI,
 			SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI, SadlConstants.SADL_SERIVCES_CONFIGURATION_URI,
@@ -519,6 +519,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return modelFolderPathname;
 	}
 	
+	static String findProjectPath(URI uri) {
+		String modelFolder = findModelFolderPath(uri);
+		if (modelFolder != null) {
+			return new File(modelFolder).getParent();
+		}
+		return null;
+    }
+	
     static String findModelFolderPath(URI uri){
     	File file = new File(uri.path());
     	if(file != null){
@@ -625,10 +633,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		SadlModel model = (SadlModel) resource.getContents().get(0);
 		String modelActualUrl =resource.getURI().lastSegment();
-		if (isReservedName(resource)) {
-			addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
-			addError("'" + modelActualUrl + "' is a reserved name. Please choose a different name", model);
-		}
+		validateResourcePathAndName(resource, model, modelActualUrl);
 		String modelName = model.getBaseUri();
 		setModelName(modelName);
 		setModelNamespace(assureNamespaceEndsWithHash(modelName));
@@ -889,6 +894,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 	}
+	protected void validateResourcePathAndName(Resource resource, SadlModel model, String modelActualUrl) {
+		isReservedFolder(resource, model);
+		if (isReservedName(resource)) {
+			addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+		}
+	}
     
 	private void addImplicitBuiltinFunctionModelImportToJenaModel(Resource resource, ProcessorContext context) throws ConfigurationException, IOException, URISyntaxException, JenaProcessorException {
 		String implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
@@ -1117,6 +1128,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //		}
 //		return null;
 //	}
+	
+	private boolean isReservedFolder(Resource resource, SadlModel model) {
+		URI prjuri = ResourceManager.getProjectUri(resource);
+		URI rsrcuri = resource.getURI();
+		String[] rsrcsegs = rsrcuri.segments();
+		String[] prjsegs = prjuri.segments();
+		if (rsrcsegs.length > prjsegs.length) {
+			String topPrjFolder = rsrcsegs[prjsegs.length];
+			for (String fnm:reservedFolderNames) {
+				if (topPrjFolder.equals(fnm)) {
+					if (fnm.equals(SadlConstants.SADL_IMPLICIT_MODEL_FOLDER)) {
+						if (!isReservedName(resource)) {
+							// only reserved names allowed here
+							addError(SadlErrorMessages.RESERVED_FOLDER.get(fnm), model);
+							return true;
+						}
+					}
+					else {
+						addError(SadlErrorMessages.RESERVED_FOLDER.get(fnm), model);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	private boolean isReservedName(Resource resource) {
 		String nm = resource.getURI().lastSegment();

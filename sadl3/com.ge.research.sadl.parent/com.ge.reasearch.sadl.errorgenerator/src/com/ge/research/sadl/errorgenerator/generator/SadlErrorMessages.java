@@ -279,6 +279,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
 /**
+* {0} is a reserved folder name that can only contain system-generated content. Please place this model in a different folder.
+**/
+    public static final SadlErrorMessage RESERVED_FOLDER = new SadlErrorMessage("reserved_folder");
+/**
 * Range failed to resolve to a class or datatype
 **/
     public static final SadlErrorMessage RANGE_RESOLVE = new SadlErrorMessage("range_resolve");
