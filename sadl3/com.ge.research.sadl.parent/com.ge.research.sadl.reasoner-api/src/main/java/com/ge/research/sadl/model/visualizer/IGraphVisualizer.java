@@ -95,4 +95,6 @@ public interface IGraphVisualizer {
 	 * @return
 	 */
 	public String getGraphFileToOpen();
+
+	public String getGraphFilenameExtension();
 }

@@ -216,7 +216,7 @@ public class GraphGenerator {
 		return data;
 	}
 
-	private List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, int graphRadius,
+	protected List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, int graphRadius,
 			List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		StmtIterator sitr = getModel().listStatements(null, RDFS.domain, cls);

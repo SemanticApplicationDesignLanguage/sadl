@@ -245,10 +245,10 @@ public class OntologyGraphGenerator {
 		// get the prefix and if there is one generate qname
 		String prefix = getConfigMgr().getGlobalPrefix(ns);
 		//get the graph folder file path
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(project)); 
 		
 		if(prefix!=null){
-			return "\"file:///" + tempDir + "/" + prefix + "_ONT" + "Graph.dot.svg\"";
+			return "\"file:///" + tempDir + "/" + prefix + SadlActionHandler.getGraphFileNameExtension() + "\"";
 		}
 		return null;
 	}
@@ -640,10 +640,10 @@ public class OntologyGraphGenerator {
 		String filename = splitFile[splitFile.length-1];
 		
 		// get the prefix and if there is one generate qname
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(project)); 
 		
 		if(filename!=null){
-			return "\"file:///" + tempDir + "/" + filename + "_ONTGraph.dot.svg\"";
+			return "\"file:///" + tempDir + "/" + filename + SadlActionHandler.getGraphFileNameExtension() + "\"";
 		}
 		throw new Exception("Cannot find graph file in getCurrentFileLink()");
 	}
