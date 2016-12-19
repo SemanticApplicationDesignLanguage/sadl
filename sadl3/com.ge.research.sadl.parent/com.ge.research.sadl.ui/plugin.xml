@@ -35,7 +35,7 @@
 			</reference>
 		</activeWhen>
 		</handler>
-		<!-- copy qualified name -->
+		<!-- copy URI -->
 		<handler
 			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName">
@@ -142,18 +142,18 @@
 			id="com.ge.research.sadl.SADL.validate"
 			name="Validate">
 	</command>
-	<!-- copy qualified name -->
+	<!-- copy URI -->
 	<command
 			id="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 			categoryId="org.eclipse.ui.category.edit"
-			description="Copy the qualified name for the selected element"
-			name="Copy Qualified Name">
+			description="Copy the URI for the selected element"
+			name="Copy URI">
 	</command>
 	<command
 			id="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName"
 			categoryId="org.eclipse.ui.category.edit"
-			description="Copy the qualified name for the selected element"
-			name="Copy Qualified Name">
+			description="Copy the URI for the selected element"
+			name="Copy URI">
 	</command>
 	</extension>
 	<extension point="org.eclipse.ui.menus">
@@ -170,26 +170,35 @@
 			</visibleWhen>
 		</command>  
 		</menuContribution>
-		!-- copy qualified name -->
+		!-- copy URI -->
 		<menuContribution locationURI="popup:#TextEditorContext?after=copy">
-			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName" 
-				style="push" tooltip="Copy Qualified Name">
+			<command
+         commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
+         label="Copy URI"
+         style="push"
+         tooltip="Copy URI">
 				<visibleWhen checkEnabled="false">
 					<reference definitionId="com.ge.research.sadl.SADL.Editor.opened" />
 				</visibleWhen>
 			</command>  
 		</menuContribution>
 		<menuContribution locationURI="menu:edit?after=copy">
-			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
-				style="push" tooltip="Copy Qualified Name">
+			<command
+         commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
+         label="Copy URI"
+         style="push"
+         tooltip="Copy URI">
 				<visibleWhen checkEnabled="false">
 					<reference definitionId="com.ge.research.sadl.SADL.Editor.opened" />
 				</visibleWhen>
 			</command>  
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.xtext.ui.outline?after=additions">
-			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName" 
-				style="push" tooltip="Copy Qualified Name">
+			<command
+         commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName"
+         label="Copy URI"
+         style="push"
+         tooltip="Copy URI">
 				<visibleWhen checkEnabled="false">
 					<and>
 						<reference definitionId="com.ge.research.sadl.SADL.XtextEditor.opened" />
