@@ -343,10 +343,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		if (fsa !=null) {
-			if (isReservedName(resource)) {
-				addError(SadlErrorMessages.RESERVED_NAME.get(resource.getURI().lastSegment()), resource.getContents().get(0));
-				return;
-			}
 			String format = getOwlModelFormat(context);
 
 //			// Output the OWL file for the ontology model
@@ -455,6 +451,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				List<ModelError> results = translateAndSaveModel(resource, owlFN, format, newMappings);
 				if (results != null) {
+					generationInProgress = false;	// we need these errors to show up
 					modelErrorsToOutput(resource, results);
 				}
 			}
@@ -894,10 +891,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 	}
+    
 	protected void validateResourcePathAndName(Resource resource, SadlModel model, String modelActualUrl) {
-		isReservedFolder(resource, model);
-		if (isReservedName(resource)) {
-			addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+		if (!isReservedFolder(resource, model)) {
+			if (isReservedName(resource)) {
+				addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+			}
 		}
 	}
     
@@ -1129,8 +1128,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //		return null;
 //	}
 	
+	/**
+	 * Method to check for erroneous use of a reserved folder name
+	 * @param resource
+	 * @param model
+	 * @return
+	 */
 	private boolean isReservedFolder(Resource resource, SadlModel model) {
 		URI prjuri = ResourceManager.getProjectUri(resource);
+		if (prjuri == null) {
+			return false;	// this is the path that JUnit tests will follow
+		}
 		URI rsrcuri = resource.getURI();
 		String[] rsrcsegs = rsrcuri.segments();
 		String[] prjsegs = prjuri.segments();
@@ -1142,8 +1150,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						if (!isReservedName(resource)) {
 							// only reserved names allowed here
 							addError(SadlErrorMessages.RESERVED_FOLDER.get(fnm), model);
-							return true;
 						}
+						return true;
 					}
 					else {
 						addError(SadlErrorMessages.RESERVED_FOLDER.get(fnm), model);
@@ -1667,7 +1675,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		SadlTypeReference rtype = element.getReturnType();
 		Expression bdy = element.getBody();
 		Equation eq = createEquation(nm, rtype, params, bdy);
-		addEquation(element.eResource(), eq);
+		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(declarationExtensions.getConceptUri(nm), 
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EQUATION_URI));
 		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EQ_EXPRESSION_URI);
@@ -1725,7 +1733,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		SadlTypeReference rtype = element.getReturnType();
 		String location = element.getLocation();
 		Equation eq = createExternalEquation(nm, uri, rtype, params, location);
-		addEquation(element.eResource(), eq);
+		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(declarationExtensions.getConceptUri(nm), 
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EXTERNAL_URI));
 		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI);
@@ -1785,10 +1793,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	protected void addEquation(Resource resource, Equation eq) {
+	protected void addEquation(Resource resource, Equation eq, EObject nm) {
 		if (getEquations() == null) {
 			setEquations(new ArrayList<Equation>());
 			OntModelProvider.addOtherContent(resource, getEquations());
+		}
+		String newEqName = eq.getName();
+		List<Equation> eqlist = getEquations();
+		for (int i = 0; i < eqlist.size(); i++) {
+			if (eqlist.get(i).getName().equals(newEqName)) {
+				getIssueAcceptor().addError("Name '" + newEqName + "' is already used. Please provide a unique name.", nm);
+			}
 		}
 		getEquations().add(eq);
 	}
