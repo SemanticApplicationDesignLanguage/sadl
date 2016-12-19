@@ -879,13 +879,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
 					leftTypeCheckInfo, rightTypeCheckInfo);
-			if (binopreturn != null) {
-				return binopreturn;
-			}
 			if (isNumericOperator(((BinaryOperation) expression).getOp())) {
+				if (!isNumeric(leftTypeCheckInfo)) {
+					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
+				}
+				if (!isNumeric(rightTypeCheckInfo)) {
+					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
+				}
 				ConceptName decimalLiteralConceptName = new ConceptName(XSD.decimal.getURI());
 				decimalLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 				return new TypeCheckInfo(decimalLiteralConceptName, decimalLiteralConceptName, this, expression);
+			}
+			if (binopreturn != null) {
+				return binopreturn;
 			}
 			else {
 				// by default assume boolean binary operation
@@ -934,6 +940,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 	
+	private boolean isNumeric(TypeCheckInfo tci) {
+		ConceptIdentifier ci;
+		if (tci.getTypeCheckType() != null) {
+			ci = tci.getTypeCheckType();
+			if (ci instanceof ConceptName) {
+				return isNumericType((ConceptName) ci);
+			}
+		}
+		else if (tci.getExplicitValueType() != null) {
+//TODO this is incomplete; more examples needed AWC 12/19/2016				
+			ExplicitValueType evt = tci.getExplicitValueType();
+			if (evt.equals(ExplicitValueType.RESTRICTION)) {
+				
+			}
+			else if (tci.getExpressionType() instanceof ConceptName){
+				return isNumericType((ConceptName) tci.getExpressionType());
+			}
+		}
+		return false;
+	}
+
 	private TypeCheckInfo convertListTypeToElementOfListType(TypeCheckInfo listtype) {
 		listtype.setRangeValueType((listtype.getTypeCheckType() != null && listtype.getTypeCheckType() instanceof ConceptName) ? ((ConceptName)listtype.getTypeCheckType()).getRangeValueType() : RangeValueType.CLASS_OR_DT);
 		
@@ -1195,8 +1222,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (DontTypeCheckException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
 			} catch (InvalidNameException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -2473,8 +2499,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (DontTypeCheckException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								
 							}
 						}
 						else {
