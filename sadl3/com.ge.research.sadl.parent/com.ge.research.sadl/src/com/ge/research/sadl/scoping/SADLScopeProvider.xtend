@@ -24,6 +24,7 @@ import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.Expression
+import com.ge.research.sadl.sADL.ExternalEquationStatement
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
@@ -33,6 +34,7 @@ import com.ge.research.sadl.sADL.SadlImport
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
+import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
@@ -363,6 +365,17 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
+		
+		// Do not put parameters of external equation statements into the scope.
+		if (obj instanceof SadlResource) {
+			if (obj.eContainer instanceof SadlParameterDeclaration) {
+				val declaration = obj.eContainer as SadlParameterDeclaration;
+				if (declaration.eContainer instanceof ExternalEquationStatement) {
+					return;
+				}
+			}
+		}
+		
 		if (!scope.containsKey(qn)) {
 			scope.put(qn, new EObjectDescription(qn, obj, emptyMap))
 		}

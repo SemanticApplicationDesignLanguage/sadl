@@ -51,10 +51,12 @@ import com.hp.hpl.jena.vocabulary.OWL
 import com.hp.hpl.jena.rdf.model.RDFList
 import com.hp.hpl.jena.vocabulary.XSD
 import com.ge.research.sadl.reasoner.ConfigurationManager
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
+import org.eclipse.xtext.resource.XtextResource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelManagerProviderTest {
+class SadlModelManagerProviderTest extends AbstractSADLParsingTest {
 	
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper
@@ -1253,25 +1255,32 @@ class SadlModelManagerProviderTest {
 		]
 	}
 
-	@Ignore
+	/**
+	 * Issue: https://github.com/crapo/sadlos2/issues/136
+	 */
 	@Test
 	def void testEquationScope() {
-		val sadlModel1 = '''
-			 uri "http://sadl.org/eq.sadl" alias eq.
-			 External sum(decimal X, decimal X) returns decimal:
-			 "http://sadl.org/builtinfunctions#sum".
-		'''.assertValidatesTo [ jenaModel1, issues1 |
-			assertNotNull(jenaModel1)
-			assertTrue(issues1.size == 0)
-		]
-		val sadlModel2 = '''
-			 uri "http://sadl.org/prop.sadl" alias prop.
-			 import "http://sadl.org/eq.sadl".
-			 Class1 is a class described by X with values of type float.
-		'''.assertValidatesTo [ jenaModel2, issues2 |
-		assertNotNull(jenaModel2)
-		assertTrue(issues2.size == 0)		// shouldn't be an error
-		]
+		val eq = '''
+			uri "http://sadl.org/eq.sadl" alias eq.
+			External sum(decimal X, decimal X) returns decimal:
+			"http://sadl.org/builtinfunctions#sum".
+		'''.sadl as XtextResource;
+
+		val prop = '''
+			uri "http://sadl.org/prop.sadl" alias prop.
+			import "http://sadl.org/eq.sadl".
+			Class1 is a class described by X with values of type float.
+		'''.sadl as XtextResource;
+
+		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+
+		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
 	}
 
 //	@Test def void my<younameit>Case() {
@@ -1325,7 +1334,10 @@ class SadlModelManagerProviderTest {
 	}
 	
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		val model = parser.parse(code)
+		return parser.parse(code).assertValidatesTo(assertions);
+	}
+	
+	protected def Resource assertValidatesTo(SadlModel model, (OntModel, List<Issue>)=>void assertions) {
 		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
