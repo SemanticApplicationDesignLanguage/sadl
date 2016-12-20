@@ -1254,16 +1254,117 @@ class SadlModelManagerProviderTest extends AbstractSADLParsingTest {
 			assertTrue(issues.size == 0)
 		]
 	}
-
-	/**
-	 * Issue: https://github.com/crapo/sadlos2/issues/136
-	 */
+	
 	@Test
-	def void testEquationScope() {
+	def void testScope_ExternalEquation_UsedLocally_GH_136() {
+		val eq = '''
+			uri "http://sadl.org/eq.sadl" alias eq.
+			
+			External sum(decimal X, decimal Y) returns decimal: "http://sadl.org/builtinfunctions#sum".
+			Equation circleArea(decimal r) returns decimal: PI * r^2.
+			
+			Shape is a class described by area with values of type float,
+				described by peremiter with values of type float.
+			Rectangle is a type of Shape described by height with values of type float,
+				described by width with values of type float.
+			
+			Rule RectPeremiter if x is a Rectangle then peremiter of x is 2 * sum(height of x, width of x).
+		'''.sadl as XtextResource;
+
+		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+	}
+
+	@Test
+	def void testScope_ExternalEquation_ImportedNotUsed_GH_136() {
 		val eq = '''
 			uri "http://sadl.org/eq.sadl" alias eq.
 			External sum(decimal X, decimal X) returns decimal:
 			"http://sadl.org/builtinfunctions#sum".
+		'''.sadl as XtextResource;
+
+		val prop = '''
+			uri "http://sadl.org/prop.sadl" alias prop.
+			import "http://sadl.org/eq.sadl".
+			Class1 is a class described by X with values of type float.
+		'''.sadl as XtextResource;
+
+		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+
+		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+	}
+
+	@Test
+	def void testScope_ExternalEquation_ImportedUsed_GH_136() {
+		val eq = '''
+			uri "http://sadl.org/eq.sadl" alias eq.
+			
+			External sum(decimal X, decimal Y) returns decimal: "http://sadl.org/builtinfunctions#sum".
+			Equation circleArea(decimal r) returns decimal: PI * r^2.
+			
+			Shape is a class described by area with values of type float,
+				described by peremiter with values of type float.
+		'''.sadl as XtextResource;
+
+		val prop = '''
+			uri "http://sadl.org/prop.sadl" alias prop.
+			import "http://sadl.org/eq.sadl".
+			
+			Circle is a type of Shape 
+				described by radius with values of type float.
+			
+			Rule CircleArea if x is a Circle then area of x is circleArea(radius of x).
+		'''.sadl as XtextResource;
+
+		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+
+		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+	}
+
+	@Test
+	def void testScope_Equation_InBodyExpression_GH_136() {
+		val eq = '''
+			uri "http://sadl.org/eq.sadl" alias eq.
+			Equation sum(decimal X, decimal X) returns decimal: X + X.
+		'''.sadl as XtextResource;
+
+		val prop = '''
+			uri "http://sadl.org/prop.sadl" alias prop.
+			import "http://sadl.org/eq.sadl".
+			Class1 is a class described by X with values of type float.
+		'''.sadl as XtextResource;
+
+		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+
+		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
+			assertNotNull(ontModel)
+			assertTrue(issues.nullOrEmpty)
+		];
+	}
+	
+	@Test
+	def void testScope_Equation_InBodyExpressionNested_GH_136() {
+		val eq = '''
+			uri "http://sadl.org/eq.sadl" alias eq.
+			Equation sqr(decimal X) returns decimal: X^2.
+			Equation sum(decimal X , decimal X) returns decimal: sqr(X) + sqr(X).
 		'''.sadl as XtextResource;
 
 		val prop = '''

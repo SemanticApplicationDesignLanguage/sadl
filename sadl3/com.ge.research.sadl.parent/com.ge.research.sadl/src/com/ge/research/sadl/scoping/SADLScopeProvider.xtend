@@ -365,17 +365,21 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
-		
-		// Do not put parameters of external equation statements into the scope.
+
+		// Do not put parameters of external and local equation statements into the scope.
 		if (obj instanceof SadlResource) {
 			if (obj.eContainer instanceof SadlParameterDeclaration) {
 				val declaration = obj.eContainer as SadlParameterDeclaration;
-				if (declaration.eContainer instanceof ExternalEquationStatement) {
+				val container = declaration.eContainer;
+				if (container instanceof ExternalEquationStatement || container instanceof EquationStatement) {
 					return;
 				}
+			} else if (EcoreUtil2.getContainerOfType(obj, BinaryOperation) !== null) {
+				// Also filter out resources from the expression of any equations.
+				return;
 			}
 		}
-		
+
 		if (!scope.containsKey(qn)) {
 			scope.put(qn, new EObjectDescription(qn, obj, emptyMap))
 		}
