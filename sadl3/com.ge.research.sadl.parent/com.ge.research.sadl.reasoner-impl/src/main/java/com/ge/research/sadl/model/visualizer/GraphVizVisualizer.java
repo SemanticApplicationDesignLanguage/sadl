@@ -295,7 +295,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				boolean duplicateNode = getDuplicateAttribute(tailAttributes, row);
 				if(duplicateNode){
 					//don't check to see if this node is in nodes
-					nodes.add(s.toString());
+					nodes.add(o.toString());
 					olbl = "n" + nodes.size();
 					repeatObjNode = false;
 				}else if (!nodes.contains(o.toString())) {
