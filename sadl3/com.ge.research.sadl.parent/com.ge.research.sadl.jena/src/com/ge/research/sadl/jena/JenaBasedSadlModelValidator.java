@@ -1741,7 +1741,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			StmtIterator sitr2 = theJenaModel.listStatements(property, RDFS.subPropertyOf, (RDFNode)null);
 			while (sitr2.hasNext()) {
 				RDFNode psuper = sitr2.next().getObject();
-				if (psuper.isLiteral()) {
+				if (psuper.isResource()) {
 					TypeCheckInfo superTCInfo = getNameProperty(propertyType, psuper.asResource().getURI(), expression);
 					if (superTCInfo != null) {
 						sitr2.close();
