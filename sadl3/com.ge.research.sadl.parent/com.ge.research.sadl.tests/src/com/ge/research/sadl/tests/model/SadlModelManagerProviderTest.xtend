@@ -51,12 +51,10 @@ import com.hp.hpl.jena.vocabulary.OWL
 import com.hp.hpl.jena.rdf.model.RDFList
 import com.hp.hpl.jena.vocabulary.XSD
 import com.ge.research.sadl.reasoner.ConfigurationManager
-import com.ge.research.sadl.tests.AbstractSADLParsingTest
-import org.eclipse.xtext.resource.XtextResource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelManagerProviderTest extends AbstractSADLParsingTest {
+class SadlModelManagerProviderTest {
 	
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper
@@ -1254,134 +1252,54 @@ class SadlModelManagerProviderTest extends AbstractSADLParsingTest {
 			assertTrue(issues.size == 0)
 		]
 	}
-	
+
+	@Ignore
 	@Test
-	def void testScope_ExternalEquation_UsedLocally_GH_136() {
-		val eq = '''
+	def void testEquationScope() {
+		'''
+			 uri "http://sadl.org/eq.sadl" alias eq.
+			 External sum(decimal X, decimal X) returns decimal:
+			 "http://sadl.org/builtinfunctions#sum".
+		'''.assertValidatesTo [ jenaModel1, issues1 |
+			assertNotNull(jenaModel1)
+			assertTrue(issues1.size == 0)
+		]
+		'''
+			 uri "http://sadl.org/prop.sadl" alias prop.
+			 import "http://sadl.org/eq.sadl".
+			 Class1 is a class described by X with values of type float.
+		'''.assertValidatesTo [ jenaModel2, issues2 |
+		assertNotNull(jenaModel2)
+		assertTrue(issues2.size == 0)		// shouldn't be an error
+		]
+	}
+
+	@Ignore
+	@Test
+	def void testEquationScope2() {
+		'''
 			uri "http://sadl.org/eq.sadl" alias eq.
-			
-			External sum(decimal X, decimal Y) returns decimal: "http://sadl.org/builtinfunctions#sum".
-			Equation circleArea(decimal r) returns decimal: PI * r^2.
-			
+			External sum(decimal X, decimal Y) returns decimal:
+						 "http://sadl.org/builtinfunctions#sum".
+			Equation circleArea(decimal r) returns decimal: PI*r^2.  
 			Shape is a class described by area with values of type float,
 				described by peremiter with values of type float.
 			Rectangle is a type of Shape described by height with values of type float,
 				described by width with values of type float.
-			
-			Rule RectPeremiter if x is a Rectangle then peremiter of x is 2 * sum(height of x, width of x).
-		'''.sadl as XtextResource;
-
-		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-	}
-
-	@Test
-	def void testScope_ExternalEquation_ImportedNotUsed_GH_136() {
-		val eq = '''
-			uri "http://sadl.org/eq.sadl" alias eq.
-			External sum(decimal X, decimal X) returns decimal:
-			"http://sadl.org/builtinfunctions#sum".
-		'''.sadl as XtextResource;
-
-		val prop = '''
-			uri "http://sadl.org/prop.sadl" alias prop.
-			import "http://sadl.org/eq.sadl".
-			Class1 is a class described by X with values of type float.
-		'''.sadl as XtextResource;
-
-		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-
-		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-	}
-
-	@Test
-	def void testScope_ExternalEquation_ImportedUsed_GH_136() {
-		val eq = '''
-			uri "http://sadl.org/eq.sadl" alias eq.
-			
-			External sum(decimal X, decimal Y) returns decimal: "http://sadl.org/builtinfunctions#sum".
-			Equation circleArea(decimal r) returns decimal: PI * r^2.
-			
-			Shape is a class described by area with values of type float,
-				described by peremiter with values of type float.
-		'''.sadl as XtextResource;
-
-		val prop = '''
-			uri "http://sadl.org/prop.sadl" alias prop.
-			import "http://sadl.org/eq.sadl".
-			
-			Circle is a type of Shape 
-				described by radius with values of type float.
-			
-			Rule CircleArea if x is a Circle then area of x is circleArea(radius of x).
-		'''.sadl as XtextResource;
-
-		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-
-		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-	}
-
-	@Test
-	def void testScope_Equation_InBodyExpression_GH_136() {
-		val eq = '''
-			uri "http://sadl.org/eq.sadl" alias eq.
-			Equation sum(decimal X, decimal X) returns decimal: X + X.
-		'''.sadl as XtextResource;
-
-		val prop = '''
-			uri "http://sadl.org/prop.sadl" alias prop.
-			import "http://sadl.org/eq.sadl".
-			Class1 is a class described by X with values of type float.
-		'''.sadl as XtextResource;
-
-		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-
-		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-	}
-	
-	@Test
-	def void testScope_Equation_InBodyExpressionNested_GH_136() {
-		val eq = '''
-			uri "http://sadl.org/eq.sadl" alias eq.
-			Equation sqr(decimal X) returns decimal: X^2.
-			Equation sum(decimal X , decimal X) returns decimal: sqr(X) + sqr(X).
-		'''.sadl as XtextResource;
-
-		val prop = '''
-			uri "http://sadl.org/prop.sadl" alias prop.
-			import "http://sadl.org/eq.sadl".
-			Class1 is a class described by X with values of type float.
-		'''.sadl as XtextResource;
-
-		(eq.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
-
-		(prop.contents.head as SadlModel).assertValidatesTo [ ontModel, issues |
-			assertNotNull(ontModel)
-			assertTrue(issues.nullOrEmpty)
-		];
+			Rule RectPeremiter if x is a Rectangle then peremiter of x is 2*sum(height of x, width of x).
+		'''.assertValidatesTo [ jenaModel1, issues1 |
+			assertNotNull(jenaModel1)
+			assertTrue(issues1.size == 0)
+		]
+		'''
+			  uri "http://sadl.org/prop.sadl" alias prop.
+			  import "http://sadl.org/eq.sadl".
+			  Circle is a type of Shape described by radius with values of type float.
+			  Rule CircleArea if x is a Circle then area of x is circleArea(radius of x).
+		'''.assertValidatesTo [ jenaModel2, issues2 |
+		assertNotNull(jenaModel2)
+		assertTrue(issues2.size == 0)		// shouldn't be an error
+		]
 	}
 
 //	@Test def void my<younameit>Case() {
@@ -1435,10 +1353,7 @@ class SadlModelManagerProviderTest extends AbstractSADLParsingTest {
 	}
 	
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		return parser.parse(code).assertValidatesTo(assertions);
-	}
-	
-	protected def Resource assertValidatesTo(SadlModel model, (OntModel, List<Issue>)=>void assertions) {
+		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList

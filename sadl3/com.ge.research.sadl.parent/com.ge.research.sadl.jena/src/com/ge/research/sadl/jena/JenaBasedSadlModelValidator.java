@@ -880,10 +880,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
 					leftTypeCheckInfo, rightTypeCheckInfo);
 			if (isNumericOperator(((BinaryOperation) expression).getOp())) {
-				if (!isNumeric(leftTypeCheckInfo)) {
+				if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo)) {
 					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
 				}
-				if (!isNumeric(rightTypeCheckInfo)) {
+				if (rightTypeCheckInfo != null && !isNumeric(rightTypeCheckInfo)) {
 					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
 				}
 				ConceptName decimalLiteralConceptName = new ConceptName(XSD.decimal.getURI());
