@@ -4244,14 +4244,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				if (val instanceof SadlInstance) {
 					Individual instval = processSadlInstance((SadlInstance) val);
-					inst.addProperty(oprop, instval);
-					logger.debug("added value '" + instval.toString() + "' to property '" + propuri + "' for instance '" + inst.toString() + "'");
+					addInstancePropertyValue(inst, oprop, instval);
 				}
 				else if (val instanceof SadlResource) {
 					String uri = declarationExtensions.getConceptUri((SadlResource) val);
 					com.hp.hpl.jena.rdf.model.Resource rsrc = getTheJenaModel().getResource(uri);
 					if (rsrc.canAs(Individual.class)){
-						inst.addProperty(oprop, rsrc.as(Individual.class));
+						addInstancePropertyValue(inst, oprop, rsrc.as(Individual.class));
 					}
 					else {
 						throw new JenaProcessorException("unhandled value type SadlResource that isn't an instance (URI is '" + uri + "')");
@@ -4279,7 +4278,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						if (rng == null) {
 							// this isn't really an ObjectProperty--should probably be an rdf:Property
 							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, null);
-							inst.addProperty(oprop, lval);
+							addInstancePropertyValue(inst, oprop, lval);
 						}
 						else {
 							addError("A SadlExplicitValue is given to an an ObjectProperty", val);
@@ -4309,8 +4308,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, dprop.getRange());
 					if (lval != null) {
-						inst.addProperty(dprop, lval);
-						logger.debug("added value '" + lval.toString() + "' to property '" + propuri + "' for instance '" + inst.toString() + "'");
+						addInstancePropertyValue(inst, dprop, lval);
 					}
 				}
 				else {
@@ -4338,7 +4336,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else {
 					throw new JenaProcessorException(SadlErrorMessages.UNHANDLED.get(val.getClass().getCanonicalName(), "unable to handle annotation value"));
 				}
-				inst.addProperty(annprop, rsrcval);
+				addInstancePropertyValue(inst, annprop, rsrcval);
 			}
 		}
 		else if (type.equals(OntConceptType.RDF_PROPERTY)) {
@@ -4360,7 +4358,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				throw new JenaProcessorException("unable to handle rdf property value of type '" + val.getClass().getCanonicalName() + "')");
 			}
-			inst.addProperty(rdfprop, rsrcval);
+			addInstancePropertyValue(inst, rdfprop, rsrcval);
 		}
 		else if (type.equals(OntConceptType.VARIABLE)) {
 			// a variable for a property type is only valid in a rule or query.
@@ -4368,6 +4366,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else {
 			throw new JenaProcessorException("unhandled property type");
 		}
+	}
+	
+	private void addInstancePropertyValue(Individual inst, Property prop, RDFNode value) {
+		// TODO need to add validation call here 
+		inst.addProperty(prop, value);
+		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '" + inst.toString() + "'");
 	}
 
 	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, ObjectProperty oprop, OntResource rng, String literalNumber, String unit) {
