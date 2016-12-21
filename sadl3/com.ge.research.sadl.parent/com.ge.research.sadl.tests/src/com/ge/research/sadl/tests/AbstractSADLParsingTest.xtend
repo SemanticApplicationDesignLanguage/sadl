@@ -21,20 +21,23 @@
 package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.sADL.SadlModel
+import com.google.common.base.Supplier
+import com.google.common.base.Suppliers
 import com.google.inject.Inject
+import com.google.inject.Provider
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.junit.Assert
-import org.junit.runner.RunWith
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.resource.XtextResourceSet
-import org.eclipse.emf.common.util.URI
-import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.resource.XtextResourceSet
+import org.eclipse.xtext.util.StringInputStream
+import org.junit.Assert
 import org.junit.Before
-import com.google.inject.Provider
+import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
@@ -45,6 +48,22 @@ abstract class AbstractSADLParsingTest{
 	@Inject protected ValidationTestHelper validationTestHelper
 	@Inject Provider<XtextResourceSet> resourceSetProvider
 	XtextResourceSet resourceSet
+
+	static val IMPLICIT_MODEL = '''uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+	Event is a class.
+		impliedProperty is a type of annotation.
+		UnittedQuantity is a class,
+	 	described by ^value with values of type decimal,
+	 	described by unit with values of type string.
+	'''
+
+	private final Supplier<Void> implicitModelSupplier = Suppliers.memoize[
+		val uri = URI.createURI('synthetic://test/SadlImplicitModel.sadl');
+		if (!resourceSet.resources.map[uri.lastSegment].exists[it == 'SadlImplicitModel.sadl']) {
+			resource(IMPLICIT_MODEL, uri);
+		}
+		return null;
+	]
 	
 	@Before
 	def void initialize() {
@@ -80,13 +99,20 @@ abstract class AbstractSADLParsingTest{
 	}
 	
 	protected def Resource sadl(CharSequence seq) {
+		// This will create one single implicit model instance into the resource set
+		// per test method no matter how many times it is invoked.
+		implicitModelSupplier.get;
 		return resource(seq, 'sadl');
 	}
 	
 	protected def Resource resource(CharSequence seq, String fileExtension) {
-		val name = "Resource"+resourceSet.resources.size+"."+fileExtension
-		val resource = resourceSet.createResource(URI.createURI("synthetic://test/"+name))
-		resource.load(new StringInputStream(seq.toString), null)
+		val name = "Resource" + resourceSet.resources.size + "." + fileExtension;
+		return resource(seq, URI.createURI("synthetic://test/" + name));
+	}
+	
+	protected def Resource resource(CharSequence seq, URI uri) {
+		val resource = resourceSet.createResource(uri);
+		resource.load(new StringInputStream(seq.toString), null);
 		return resource;
 	}
 
@@ -125,4 +151,49 @@ abstract class AbstractSADLParsingTest{
 		}
 		Assert.assertEquals(text, errorText)
 	}
+	
+	protected def void assertOnlyWarningsOrInfo(Resource resource) {
+		val issues = validate(resource).toList.sortBy[-(offset?:0)]
+		val text = (resource as XtextResource).parseResult.rootNode.text
+		var errorText = text
+		if (text === null) {
+			issues.head.data
+			Assert.fail(issues.join(',')[message])
+		}
+		for (issue : issues) {
+			if (issue.severity == Severity.ERROR) {
+				if (issue.offset === null || issue.length === null) {
+					errorText = errorText+"\n!["+issue.message+"] ATTENTION : The produced issue doesn't have an offset or length attached!"
+				} else {
+					errorText = errorText.substring(0, issue.offset)+"!"+errorText.substring(issue.offset, issue.offset + issue.length)+"!["+issue.message+"]"+errorText.substring(issue.offset+issue.length)
+				}
+			}
+		}
+		Assert.assertEquals(text, errorText)
+	}
+	
+	protected def void assertError(Resource resource, String error) {
+		val issues = validate(resource).toList.sortBy[-(offset?:0)]
+		val text = (resource as XtextResource).parseResult.rootNode.text
+		var errorText = text
+		if (text === null) {
+			issues.head.data
+			Assert.fail(issues.join(',')[message])
+		}
+		var errorFound = false
+		for (issue : issues) {
+			if (!errorFound && issue.severity == Severity.ERROR) {
+				if (issue.offset === null || issue.length === null) {
+					errorText = errorText+"\n!["+issue.message+"] ATTENTION : The produced issue doesn't have an offset or length attached!"
+				}
+				else if (issue.message.startsWith(error)) {
+					errorFound = true
+				} else {
+					errorText = errorText.substring(0, issue.offset)+"!"+errorText.substring(issue.offset, issue.offset + issue.length)+"!["+issue.message+"]"+errorText.substring(issue.offset+issue.length)
+				}
+			}
+		}
+		Assert.assertEquals(text, errorText)
+	}
+	
 }

@@ -88,6 +88,18 @@ public class GraphGenerator {
 	}
 
 	public ResultSet generateClassNeighborhood(int size) throws ConfigurationException {
+		ExtendedIterator<OntClass> classIter = getModel().listClasses();
+		try{
+			//Add all of the class triples
+			while(classIter.hasNext()){
+				Object obj = classIter.next();	
+				String uri = obj.toString();
+				int i = 0;
+			}
+		}
+		catch (Throwable t) {
+			
+		}
 		OntClass cls = getModel().getOntClass(getAnchor().toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		data = generateClassPropertiesWithDomain(cls, size, data);
@@ -204,7 +216,7 @@ public class GraphGenerator {
 		return data;
 	}
 
-	private List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, int graphRadius,
+	protected List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, int graphRadius,
 			List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		StmtIterator sitr = getModel().listStatements(null, RDFS.domain, cls);

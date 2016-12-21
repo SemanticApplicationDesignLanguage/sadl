@@ -21,3 +21,4 @@ sadl3/com.ge.research.sadl.parent/com.ge.research.jena/lib/reasoner-api.jar
 sadl3/com.ge.research.sadl.parent/com.ge.research.jena/lib/reasoner-impl.jar
 *.jar
 sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-impl/tmp/graphviztest/testGraphVizVisualizerGraph.dot.svg
+*.svg

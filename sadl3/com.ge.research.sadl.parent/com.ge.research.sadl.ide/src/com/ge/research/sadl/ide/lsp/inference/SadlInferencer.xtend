@@ -40,14 +40,12 @@ import org.eclipse.xtext.resource.XtextResource
 import static com.ge.research.sadl.ide.SadlProjectStructureInitializer.*
 import static com.ge.research.sadl.ide.lsp.inference.InferenceStatus.*
 import static com.ge.research.sadl.jena.UtilsForJena.*
-import org.eclipse.xtext.util.internal.Log
 
 /**
  * Headless implementation of the {@code SADL} inferencer.
  * 
  * @author akos.kitta
  */
-@Log
 @Singleton
 class SadlInferencer {
 
@@ -73,7 +71,7 @@ class SadlInferencer {
 			} else if (r.results instanceof ResultSet) {
 				builder.add(doc.createInferenceResult(r.cmd as Query, r.results as ResultSet));
 			} else {
-				LOG.warn('''Unhandled inference result: «r.results». SADL Command was: «r.cmd».''');
+				new UnsupportedOperationException('''Unhandled inference result: «r.results». SADL Command was: «r.cmd».''').printStackTrace
 			}
 		];
 

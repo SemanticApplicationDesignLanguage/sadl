@@ -291,7 +291,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	
 	
 	protected void graphOntologyResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
-		String baseFileName = trgtFile.getFullPath().removeFileExtension().lastSegment().toString() + "_ONT";
+		String baseFileName = trgtFile.getFullPath().removeFileExtension().lastSegment().toString();// + "_ONT";
 		String graphName = prefix;
 		String anchorNode = nodeText(publicUri, prefix);
 		if (prefix == null) {
@@ -299,7 +299,12 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			if (anchorNode.endsWith(".owl")) {
 				anchorNode = anchorNode.substring(0, anchorNode.length() - 4);
 			}
-			graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
+			if (anchorNode.indexOf('.') > 0) {
+				graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
+			}
+			else {
+				graphName = anchorNode;
+			}
 		}
 		String description = "Graph of Ontology File";
 		createGraphFromResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);

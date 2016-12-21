@@ -15,9 +15,7 @@ public class TestGraphVizVisualizer {
 	@Test
 	public void test() throws IOException {
 		String exec = System.getenv("GraphVizPath");
-		if (exec == null) {
-			return;
-		}
+		assertNotNull(exec);
 		String[] header = {"Head","Edge","Tail","Head_color", "Edge_color", "Tail_color"};
 		String[][] data = {
 				{"N1","p1","N2","blue","blue","yellow"},
@@ -35,6 +33,31 @@ public class TestGraphVizVisualizer {
 		String baseFileName = "testGraphVizVisualizer";
 		String graphName = "test";
 		String anchorNode = "N3";
+		Orientation orientation = null;
+		String description = "this is a test graph";
+		gv.initialize(tempDir, baseFileName, graphName, anchorNode, orientation , description);
+		gv.graphResultSetData(rs);
+	}
+	
+	@Test
+	public void testDuplicates() throws IOException {
+		String exec = System.getenv("GraphVizPath");
+		assertNotNull(exec);
+		String[] header = {"head","edge","tail","tail_duplicate"};
+		String[][] data = {
+				{"LatticeToTree:Person","LatticeToTree:uses","LatticeToTree:Resource","true"},
+				{"LatticeToTree:Resource","value","float","true"},
+				{"LatticeToTree:Resource","LatticeToTree:uses","LatticeToTree:Resource","true"}
+		};
+		ResultSet rs = new ResultSet(header, data);
+		IGraphVisualizer gv = new GraphVizVisualizer();
+		File cd = new File(".");
+		String tempDir = cd.getCanonicalPath() + "/tmp/graphviztest";
+		File tdf = new File(tempDir);
+		tdf.mkdirs();
+		String baseFileName = "testGraphVizVisualizerDuplicates";
+		String graphName = "test2";
+		String anchorNode = "LatticeToTree:Person";
 		Orientation orientation = null;
 		String description = "this is a test graph";
 		gv.initialize(tempDir, baseFileName, graphName, anchorNode, orientation , description);

@@ -377,7 +377,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 
 	protected void graphResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
 			String description, ResultSet rs) throws IOException {
-		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();
 		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
@@ -400,15 +400,20 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			}
 		}
 	}
+
+	public static String getGraphDir(IProject project) {
+		return project.getFullPath().append("Graphs").toPortableString();
+	}
 	
 	protected void createGraphFromResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
 			String description, ResultSet rs) throws IOException {
-		String tempDir = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").append("Graphs").toPortableString()); 
+		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();
 		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
 		iGraphVisualizer.graphResultSetData(rs);
 	}
+	
 	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName)
 			throws ConfigurationException, IOException {
 				if (rs.getColumnCount() >= 3) {
@@ -428,4 +433,8 @@ public abstract class SadlActionHandler extends AbstractHandler {
 					SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query; ResultSet has less than 3 columns.\n");
 				}
 			}
+
+	public static String getGraphFileNameExtension() {
+		return ".svg";
+	}
 }

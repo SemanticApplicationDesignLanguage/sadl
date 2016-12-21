@@ -73,19 +73,23 @@ public class GraphVizVisualizer implements IGraphVisualizer {
     	}
 		if (dotexec != null) {
 			// dot -Tps filename.dot -o outfile.ps
-			String fn = dotfilepath + ".svg";
-			File f = new File(fn);
+			String svgfilepath = dotfilepath;
+			if (dotfilepath.endsWith(".dot")) {
+				svgfilepath = dotfilepath.substring(0, dotfilepath.length() - 4);
+			}
+			String svgfn = svgfilepath + getGraphFilenameExtension();
+			File f = new File(svgfn);
 			if (f.exists()) {
 				boolean status = f.delete();
 				if (!status) {
-					throw new IOException("Unable to delete existing file '" + fn + "'.");
+					throw new IOException("Unable to delete existing file '" + svgfn + "'.");
 				}
 			}
-			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tsvg", dotfilepath,"-o", dotfilepath + ".svg");
+			ProcessBuilder bppng = new ProcessBuilder(dotexec, "-Tsvg", dotfilepath,"-o", svgfn);
 			try {
 				bppng.start();
 				Thread.sleep(100);
-				graphFileToOpen = dotfilepath + ".svg";
+				graphFileToOpen = svgfn;
 			} catch (IOException e) {
 				throw new IOException("Unable to run GraphViz dot to generate PNG file; is GraphViz path set properly? (" + e.getMessage() + ")");
 			} catch (InterruptedException e) {
@@ -262,9 +266,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			else {
 				s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
-				if(headAttributes != null && 
-						headAttributes.get("duplicate") != null && 
-						headAttributes.get("duplicate").equals(true)){
+				boolean duplicateNode = getDuplicateAttribute(headAttributes, row);
+				if (duplicateNode) {
 					//don't check to see if this node is in nodes
 					nodes.add(s.toString());
 					slbl = "n" + nodes.size();
@@ -289,11 +292,10 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			else {
 				o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
-				if(tailAttributes != null && 
-						tailAttributes.get("duplicate") != null && 
-						tailAttributes.get("duplicate").equals(true)){
+				boolean duplicateNode = getDuplicateAttribute(tailAttributes, row);
+				if(duplicateNode){
 					//don't check to see if this node is in nodes
-					nodes.add(s.toString());
+					nodes.add(o.toString());
 					olbl = "n" + nodes.size();
 					repeatObjNode = false;
 				}else if (!nodes.contains(o.toString())) {
@@ -420,11 +422,28 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb.append("}\n");
 //		System.out.println(sb.toString());
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
-				((bfn != null ? bfn : "") + "Graph.dot"));
+				((bfn != null ? bfn : "") + ".dot"));
 		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
 		return dotFile;
 	}
 	
+	private boolean getDuplicateAttribute(Map<Integer, String> attributes, Object[] row) {
+		if(attributes != null && 
+				attributes.containsValue("duplicate")) {
+			Iterator<Integer> keyitr = attributes.keySet().iterator();
+			while (keyitr.hasNext()) {
+				Integer key = keyitr.next();
+				String val = attributes.get(key);
+				if (val.equals("duplicate")) {
+					if(Boolean.parseBoolean((String) row[key.intValue()])) {
+						return true;
+					}
+				}
+			}
+		}
+		// TODO Auto-generated method stub
+		return false;
+	}
 	private Map<Integer, String> addAttribute(Map<Integer, String> attrMap, String headName, int columnNumber, String attrHeader) {
 		String attrName = attrHeader.substring(headName.length() + 1);
 		char c = attrHeader.charAt(headName.length());
@@ -489,4 +508,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		return graphFileToOpen;
 	}
 
+	@Override
+	public String getGraphFilenameExtension() {
+		return ".svg";
+	}
 }

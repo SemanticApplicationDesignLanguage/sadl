@@ -8,13 +8,16 @@ import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.ISelectionService;
@@ -38,43 +41,37 @@ import com.ge.research.sadl.utils.ResourceManager;
 public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 
+	private IConfigurationManagerForIDE configMgr;
+	private IProject project;
+	private String modelFolderUri;
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
 			SadlConsole.writeToConsole(MessageType.INFO, "-----------------Ontology Graphing Started-------------------\n\n");
-			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(getCurrentProject());;
-			IPath projectPath = project.getLocation();
-			if(projectPath != null){
-				IFolder ontFolder = project.getFolder("/Data_Model/");
-				IResource[] ontFiles = ontFolder.members();
-
-				if(ontFiles != null){
-					for (int i = 0; i < ontFiles.length; i++) {
-						boolean worked = GenerateOntologyFileGraph(ontFiles[i], project);
-						if(!worked){
-							SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFiles[i].getName() + "' does not exist, or does not contain valid data for graphing.\n");	
-						}else{
-							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontFiles[i].getName() + "' Generated Successfully.\n\n");
-						}
-					}
+			String curProject = getCurrentProject();
+			if (curProject == null) {
+				SadlConsole.writeToConsole(MessageType.ERROR, "An open project must be selected before graphing can occur.\n");
+				return event;
+			}
+			project = ResourcesPlugin.getWorkspace().getRoot().getProject(curProject);
+			modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+			if (getConfigMgr() != null && getConfigMgr().getModelFolder() != null) {
+				String configModelFolder = getConfigMgr().getModelFolderPath().getCanonicalPath().replace("\\", "/");
+				if (!configModelFolder.equals(modelFolderUri)) {
+					configMgr = null;		// this is an obsolete ConfigurationManager
 				}
-				//graph implicit model
-				IFolder ontImplFolder = project.getFolder("/ImplicitModel/");
-				IResource[] ontImplFiles = ontImplFolder.members();
-
-				if(ontImplFiles != null){
-					for (int i = 0; i < ontImplFiles.length; i++) {
-						//the builtin functions ontology file does not contain valid data for graphing (type externalEquation) at this point. 
-						if(!ontImplFiles[i].getName().equals("SadlBuiltinFunctions.sadl")){
-							boolean worked = GenerateOntologyFileGraph(ontImplFiles[i], project);
-							if(!worked){
-								SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontImplFiles[i].getName() + "' does not exist, or does not contain valid data for graphing.\n");	
-							}else{
-								SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontImplFiles[i].getName() + "' Generated Successfully.\n\n");
-							}
-						}
-					}
-				}   
+			}
+			
+			graphFolder(project);
+			// now graph the base model and the list model
+			IResource sbmr = project.findMember("OwlModels/SadlBaseModel.owl");
+			if (sbmr != null) {
+				GenerateOntologyFileGraph(sbmr, false);
+			}
+			IResource slmr = project.findMember("OwlModels/SadlListModel.owl");
+			if (slmr != null) {
+				GenerateOntologyFileGraph(slmr, false);
 			}
 		} catch( ClassCastException e){
 			SadlConsole.writeToConsole(MessageType.ERROR, "Make sure a folder or file is selected in the desired project\n");
@@ -85,10 +82,55 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		finally {
 			SadlConsole.writeToConsole(MessageType.INFO, "-----------------Ontology Graphing Ended-------------------\n\n");
 		}
+		try {
+			project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return event;
 	}
+
+	private void graphFolder(IResource thisFolder)
+			throws CoreException, IOException, ConfigurationException, URISyntaxException {
+		if(thisFolder != null && thisFolder instanceof IContainer){
+			IResource[] ontFiles = ((IContainer) thisFolder).members();
+
+			if(ontFiles != null){
+				for (int i = 0; i < ontFiles.length; i++) {
+					if (ontFiles[i].getType() == IResource.FILE && 
+							(ontFiles[i].getFullPath().getFileExtension().equals("sadl") || 
+									ontFiles[i].getFullPath().getFileExtension().equals("owl") ||
+									ontFiles[i].getFullPath().getFileExtension().equals("nt") ||
+									ontFiles[i].getFullPath().getFileExtension().equals("n3"))) {
+						boolean worked = GenerateOntologyFileGraph(ontFiles[i], true);
+						if(!worked){
+							SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFiles[i].getName() + "' does not exist, or does not contain valid data for graphing.\n");	
+						}else{
+							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontFiles[i].getName() + "' Generated Successfully.\n\n");
+						}
+					}
+					else if (ontFiles[i].getType() == IResource.FOLDER) {
+						if (!isReservedFolder(ontFiles[i])) {
+							graphFolder(ontFiles[i]);
+						}
+					}
+				}
+			}
+		}
+	}
 	
-	public boolean GenerateOntologyFileGraph(IResource ontFile, IProject project) throws IOException, ConfigurationException, URISyntaxException {
+	private boolean isReservedFolder(IResource iResource) {
+		String name = iResource.getName();
+		if (
+				name.equals("OwlModels") || 
+				name.equals("Graphs") || name.equals("Temp")) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean GenerateOntologyFileGraph(IResource ontFile, boolean checkForDerivedFile) throws IOException, ConfigurationException, URISyntaxException {
 		if(ontFile instanceof IFile){
 			String owlFileName = null;
 			
@@ -96,6 +138,9 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		
 			//Get the associated .owl file for this sadl file
 			if (ontFile.getName().endsWith("owl")) {
+				if (checkForDerivedFile && isOwlFileOfSadlModel(ontFile)) {
+					return false;
+				}
 				owlFileName = ontFile.getFullPath().lastSegment();
 			}
 			else {
@@ -114,25 +159,21 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				}
 			}
 			
-			//get the configuration manager
-			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
-			
 			//get the visualizer interface
-			IGraphVisualizer visualizer = getVisualizer(configMgr);
+			IGraphVisualizer visualizer = getVisualizer(getConfigMgr());
 			if (visualizer != null) {
+				String fullFileName = modelFolderUri + "/" + owlFileName;
 				String publicUri;
 				String prefix = null;
 				try {
-					publicUri = configMgr.getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName));
-					prefix = configMgr.getGlobalPrefix(publicUri);
+					publicUri = getConfigMgr().getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(fullFileName));
+					prefix = getConfigMgr().getGlobalPrefix(publicUri);
 				}
 				catch (Exception e) {
 					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
 				}
 				
-				OntologyGraphGenerator ogg = new OntologyGraphGenerator(configMgr, publicUri, project);
+				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), publicUri, project);
 				ResultSet oggResults = ogg.generateOntologyResultSet(null, publicUri);
 				
 				if (oggResults != null) {
@@ -140,7 +181,12 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					return true;
 				}
 				else {
-					SadlConsole.writeToConsole(MessageType.ERROR, "file not found. Close and Open project if error persists.\n");
+					if (!(new File(fullFileName).exists())) {
+						SadlConsole.writeToConsole(MessageType.ERROR, "file not found. Close and Open project if error persists.\n");
+					}
+					else {
+						SadlConsole.writeToConsole(MessageType.WARN, "file '" + fullFileName + "' appears to have no content to graph.\n");
+					}
 					return false;
 				}
 			}
@@ -148,6 +194,20 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		return false;
 	}
 
+
+	private boolean isOwlFileOfSadlModel(IResource ontFile) {
+		String path = ontFile.getLocation().toOSString();
+		try {
+			String publicUri = getConfigMgr().getPublicUriFromActualUrl(path);
+			if (publicUri != null) {
+				return true;
+			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	protected String[] getValidTargetFileTypes(){
 		String[] types = {"owl", "sadl"};
@@ -158,17 +218,36 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	    if (window != null)
 	    {
-	        IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
-	        Object firstElement = selection.getFirstElement();
-	        if (firstElement instanceof IAdaptable)
-	        {
-	            
-	        	String[] projName = firstElement.toString().split("/");
-	        	
-	            return projName[1];
+	        ISelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+	        if (selection instanceof IStructuredSelection) {
+		        Object firstElement = ((IStructuredSelection) selection).getFirstElement();
+		        if (firstElement instanceof IAdaptable)
+		        {
+		            
+		        	String[] projName = firstElement.toString().split("/");
+		        	
+		            return projName[1];
+		        }
+	        }
+	        else {
+	        	return null;
 	        }
 	    }
 	    return null;
+	}
+
+	private IConfigurationManagerForIDE getConfigMgr() throws ConfigurationException {
+		if (configMgr == null) {
+			//create the configuration manager
+			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			setConfigMgr(ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format));
+		}
+		return configMgr;
+	}
+
+	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
+		this.configMgr = configMgr;
 	}
 
 }

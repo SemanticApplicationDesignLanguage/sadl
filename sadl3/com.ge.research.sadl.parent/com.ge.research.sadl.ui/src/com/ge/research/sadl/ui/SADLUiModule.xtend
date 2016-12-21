@@ -20,28 +20,30 @@
  */
 package com.ge.research.sadl.ui
 
+import com.ge.research.sadl.builder.MessageManager.MessageType
 import com.ge.research.sadl.processing.SadlImportProcessorProvider
+import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
+import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
+import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlInferenceProcessorProvider
 import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorProvider
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
-import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
-import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
-import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
-import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
-import org.eclipse.ui.plugin.AbstractUIPlugin
-import com.ge.research.sadl.builder.MessageManager.MessageType
-import java.io.PrintStream
-import org.eclipse.ui.console.IOConsoleOutputStream
-import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlInferenceProcessorProvider
-import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import com.google.inject.Binder
 import com.google.inject.name.Names
-import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
+import java.io.PrintStream
+import org.eclipse.ui.console.IOConsoleOutputStream
+import org.eclipse.ui.plugin.AbstractUIPlugin
+import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
+import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
+import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
+import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
+import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
+import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 
 /**
@@ -102,5 +104,9 @@ class SADLUiModule extends AbstractSADLUiModule {
 	override bindIXtextEditorCallback() {
 		AlwaysAddXtextNatureCallback
 	}
+	
+	override Class<? extends CopyQualifiedNameService> bindCopyQualifiedNameService() {
+		return SadlCopyQualifiedNameService;
+	}	
 	
 }
