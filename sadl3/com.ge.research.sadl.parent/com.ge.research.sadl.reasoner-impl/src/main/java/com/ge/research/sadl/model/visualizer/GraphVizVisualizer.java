@@ -25,6 +25,13 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	private String description = null;
 	
 	private String graphFileToOpen = null;
+	private int nothingCount;
+	private HashMap<String,String> graphedSubjectMap;
+	private HashMap<String,String> duplicateObjectMap;
+	private StringBuilder sb;
+	private boolean repeatObjNode;
+	private boolean repeatSubjNode;
+	private List<String> nodes;
 
 	@Override
 	public void initialize(String tempDir, String bfn, String graphName, String anchorNode, Orientation orientation, String description) {
@@ -162,13 +169,13 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 			
 		}
-		StringBuilder sb = new StringBuilder("digraph g");
+		sb = new StringBuilder("digraph g");
 		sb.append(anchorNodeName);
 		sb.append(" {\n");
 		if (orientation != Orientation.TD){
 			sb.append("   rankdir=LR\n");
 		}
-		List<String> nodes = new ArrayList<String>();
+		nodes = new ArrayList<String>();
 		sb.append("    label=\"");
 		if (description != null) {
 			sb.append(description);
@@ -179,11 +186,11 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		}
 		sb.append("\";\n    labelloc=top;\n    labeljust=left;\n");
 		
-		int nothingCount = 0;
+		nothingCount = 0;
+		graphedSubjectMap = null;
+		duplicateObjectMap = null;
 		
 		while (rs.hasNext()) {
-			boolean repeatObjNode; // end of directed edge
-			boolean repeatSubjNode;	// start of directed edge
 			Object[] row = rs.next();
 			String slbl;			// name of start of directed edge
 			String olbl;			// name of end of directed edge
@@ -257,6 +264,46 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				continue;
 			}
 			
+			s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
+			String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
+			Object o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
+
+			createGraphTriple(s, edgeLbl, o, headAttributes, edgeAttributes, tailAttributes, row, anchorNodeLabel, null);
+		}
+		if (duplicateObjectMap != null) {
+			Iterator<String> objitr = duplicateObjectMap.keySet().iterator();
+			while (objitr.hasNext()) {
+				String key = objitr.next();
+				String objnm = duplicateObjectMap.get(key);
+				if (graphedSubjectMap != null && graphedSubjectMap.containsValue(objnm) && !graphedSubjectMap.containsKey(key)) {
+					// we need to fill out missing branches
+					System.out.println("need to fill out branch of '" + objnm + "' from specific object node '" + key + "'");
+					rs.first();
+					while (rs.hasNext()) {
+						Object[] row = rs.next();
+						if (row[0].equals(objnm)) {
+							Object s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
+							String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
+							Object o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
+							createGraphTriple(s, edgeLbl, o, headAttributes, edgeAttributes, tailAttributes, row, anchorNodeLabel, key);
+						}
+					}
+				}
+			}
+		}
+		sb.append("}\n");
+//		System.out.println(sb.toString());
+		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
+				((bfn != null ? bfn : "") + ".dot"));
+		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
+		return dotFile;
+	}
+	
+	private void createGraphTriple(Object s, String edgeLbl, Object o, Map<Integer, String> headAttributes, Map<Integer, String> edgeAttributes, Map<Integer, 
+			String> tailAttributes, Object[] row, String anchorNodeLabel, String subjectNode) {
+		String slbl = subjectNode;
+		String olbl;
+		if (slbl == null) {
 			if (row[0].equals(OWL.Nothing.getURI())) {
 				s = OWL.Nothing;
 				slbl = OWL.Nothing.getLocalName() + nothingCount;
@@ -264,7 +311,6 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				repeatSubjNode = false;
 			}
 			else {
-				s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
 				boolean duplicateNode = getDuplicateAttribute(headAttributes, row);
 				if (duplicateNode) {
@@ -281,150 +327,155 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 					slbl = "n" + (nodes.indexOf(s.toString()) + 1);
 					repeatSubjNode = true;
 				}
+				if (graphedSubjectMap == null) {
+					graphedSubjectMap = new HashMap<String,String>();
+				}
+				graphedSubjectMap.put(slbl, s.toString());
 			}
-			Object o;
-			if (row[2].equals(OWL.Nothing.getURI())) {
-				o = OWL.Nothing;
-				olbl = OWL.Nothing.getLocalName() + nothingCount;
-				nothingCount++;
+		}
+		else {
+			repeatSubjNode = true;
+		}
+		if (row[2].equals(OWL.Nothing.getURI())) {
+			o = OWL.Nothing;
+			olbl = OWL.Nothing.getLocalName() + nothingCount;
+			nothingCount++;
+			repeatObjNode = false;
+		}
+		else {
+			//check if this node should be duplicated: Used in graphing context AATIM-1389
+			boolean duplicateNode = getDuplicateAttribute(tailAttributes, row);
+			if(duplicateNode){
+				//don't check to see if this node is in nodes
+				nodes.add(o.toString());
+				olbl = "n" + nodes.size();
+				repeatObjNode = false;
+				if (subjectNode == null) {
+					// now we want to expand out any children that this duplicate should have so it continues what's in the data...
+					if (duplicateObjectMap == null) {
+						duplicateObjectMap = new HashMap<String,String>();
+					}
+					duplicateObjectMap.put(olbl, o.toString());
+				}
+			}else if (!nodes.contains(o.toString())) {
+				nodes.add(o.toString());
+				olbl = "n" + nodes.size();
 				repeatObjNode = false;
 			}
 			else {
-				o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
-				//check if this node should be duplicated: Used in graphing context AATIM-1389
-				boolean duplicateNode = getDuplicateAttribute(tailAttributes, row);
-				if(duplicateNode){
-					//don't check to see if this node is in nodes
-					nodes.add(o.toString());
-					olbl = "n" + nodes.size();
-					repeatObjNode = false;
-				}else if (!nodes.contains(o.toString())) {
-					nodes.add(o.toString());
-					olbl = "n" + nodes.size();
-					repeatObjNode = false;
-				}
-				else {
-					olbl = "n" + (nodes.indexOf(o.toString()) + 1);
-					repeatObjNode = true;
-				}
+				olbl = "n" + (nodes.indexOf(o.toString()) + 1);
+				repeatObjNode = true;
 			}
-			sb.append("     ");
-			if (!repeatSubjNode) {
-				sb.append(slbl);
-				if(s.equals(OWL.Nothing)) {
-					sb.append("[shape=point label=\"");
-				}
-				else {
-					sb.append("[shape=box label=\"");
-				}
-				sb.append(s.toString());
-				sb.append("\"");
-				boolean anchored = false;
-				if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
-					anchored = true;
-					// color the "anchor" node
-					sb.append(" color=lightblue");
-//					if (headAttributes == null || !headAttributes.containsValue("color")) {
-						sb.append(" style=filled");
-//					}
-//					else {
-//						sb.append(" style=bold");
-//					}
-					sb.append(" fontcolor=navyblue");
-				}
-				if (headAttributes != null) {
-					Iterator<Integer> itr = headAttributes.keySet().iterator();
-					while (itr.hasNext()) {
-						Integer key = itr.next();
-						String value = headAttributes.get(key);
-						if (!anchored || !value.equals("color")) {
-							if (row[key.intValue()] != null) {
-								sb.append(" ");
-								sb.append(value);
-								sb.append("=");
-								sb.append(row[key.intValue()]);
-							}
-						}
-					}
-				}
-				sb.append("];\n");
-			}
-			if (!repeatObjNode) {
-				sb.append("     ");
-				sb.append(olbl);
-				if (o.equals(OWL.Nothing)) {
-					sb.append("[shape=point label=\"");
-				}
-				else {
-					sb.append("[shape=box label=\"");
-				}
-				sb.append(o.toString());
-				sb.append("\"");
-				boolean anchored = false;
-				if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
-					// color the "anchor" node
-					sb.append(" color=lightblue");
-//					if (tailAttributes == null || !tailAttributes.containsValue("color")) {
-						sb.append(" style=filled");
-//					}
-//					else {
-//						sb.append(" style=bold");
-//					}
-					sb.append(" fontcolor=navyblue");
-				}
-				if (tailAttributes != null) {
-					Iterator<Integer> itr = tailAttributes.keySet().iterator();
-					while (itr.hasNext()) {
-						Integer key = itr.next();
-						String value = tailAttributes.get(key);
-						if (!anchored || !value.equals("color")) {
-							if (row[key.intValue()] != null) {
-								sb.append(" ");
-								sb.append(value);
-								sb.append("=");
-								sb.append(row[key.intValue()]);
-							}
-						}
-					}
-				}
-				sb.append("];\n");
-			}
-			sb.append("     ");
+		}
+		sb.append("     ");
+		if (!repeatSubjNode) {
 			sb.append(slbl);
-			sb.append("->");
-			sb.append(olbl);
-			sb.append("[");
-			if (row[1] != null && row[1].toString().length() > 0) {
-				sb.append("label=\"");
-				String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
-				sb.append(edgeLbl);
-				sb.append("\"");
-				// color the "anchor" edge
-				if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
-					sb.append(" color=red");
-				}
+			if(s.equals(OWL.Nothing)) {
+				sb.append("[shape=point label=\"");
 			}
-			if (edgeAttributes != null) {
-				Iterator<Integer> itr = edgeAttributes.keySet().iterator();
+			else {
+				sb.append("[shape=box label=\"");
+			}
+			sb.append(s.toString());
+			sb.append("\"");
+			boolean anchored = false;
+			if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
+				anchored = true;
+				// color the "anchor" node
+				sb.append(" color=lightblue");
+				//				if (headAttributes == null || !headAttributes.containsValue("color")) {
+				sb.append(" style=filled");
+				//				}
+				//				else {
+				//					sb.append(" style=bold");
+				//				}
+				sb.append(" fontcolor=navyblue");
+			}
+			if (headAttributes != null) {
+				Iterator<Integer> itr = headAttributes.keySet().iterator();
 				while (itr.hasNext()) {
 					Integer key = itr.next();
-					String value = edgeAttributes.get(key);
-					if (row[key.intValue()] != null) {
-						sb.append(" ");
-						sb.append(value);
-						sb.append("=");
-						sb.append(row[key.intValue()]);
+					String value = headAttributes.get(key);
+					if (!anchored || !value.equals("color")) {
+						if (row[key.intValue()] != null) {
+							sb.append(" ");
+							sb.append(value);
+							sb.append("=");
+							sb.append(row[key.intValue()]);
+						}
 					}
 				}
 			}
 			sb.append("];\n");
 		}
-		sb.append("}\n");
-//		System.out.println(sb.toString());
-		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
-				((bfn != null ? bfn : "") + ".dot"));
-		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
-		return dotFile;
+		if (!repeatObjNode) {
+			sb.append("     ");
+			sb.append(olbl);
+			if (o.equals(OWL.Nothing)) {
+				sb.append("[shape=point label=\"");
+			}
+			else {
+				sb.append("[shape=box label=\"");
+			}
+			sb.append(o.toString());
+			sb.append("\"");
+			boolean anchored = false;
+			if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
+				// color the "anchor" node
+				sb.append(" color=lightblue");
+				//				if (tailAttributes == null || !tailAttributes.containsValue("color")) {
+				sb.append(" style=filled");
+				//				}
+				//				else {
+				//					sb.append(" style=bold");
+				//				}
+				sb.append(" fontcolor=navyblue");
+			}
+			if (tailAttributes != null) {
+				Iterator<Integer> itr = tailAttributes.keySet().iterator();
+				while (itr.hasNext()) {
+					Integer key = itr.next();
+					String value = tailAttributes.get(key);
+					if (!anchored || !value.equals("color")) {
+						if (row[key.intValue()] != null) {
+							sb.append(" ");
+							sb.append(value);
+							sb.append("=");
+							sb.append(row[key.intValue()]);
+						}
+					}
+				}
+			}
+			sb.append("];\n");
+		}
+		sb.append("     ");
+		sb.append(slbl);
+		sb.append("->");
+		sb.append(olbl);
+		sb.append("[");
+		if (row[1] != null && row[1].toString().length() > 0) {
+			sb.append("label=\"");
+			sb.append(edgeLbl);
+			sb.append("\"");
+			// color the "anchor" edge
+			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
+				sb.append(" color=red");
+			}
+		}
+		if (edgeAttributes != null) {
+			Iterator<Integer> itr = edgeAttributes.keySet().iterator();
+			while (itr.hasNext()) {
+				Integer key = itr.next();
+				String value = edgeAttributes.get(key);
+				if (row[key.intValue()] != null) {
+					sb.append(" ");
+					sb.append(value);
+					sb.append("=");
+					sb.append(row[key.intValue()]);
+				}
+			}
+		}
+		sb.append("];\n");
 	}
 	
 	private boolean getDuplicateAttribute(Map<Integer, String> attributes, Object[] row) {
