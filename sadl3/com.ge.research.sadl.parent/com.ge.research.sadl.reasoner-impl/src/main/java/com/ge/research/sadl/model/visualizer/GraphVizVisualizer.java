@@ -12,7 +12,6 @@ import javax.activation.DataSource;
 
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.hp.hpl.jena.sparql.graph.GraphFactory;
 import com.hp.hpl.jena.vocabulary.OWL;
 
 public class GraphVizVisualizer implements IGraphVisualizer {

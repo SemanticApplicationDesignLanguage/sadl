@@ -72,7 +72,20 @@ public class OntologyGraphGenerator {
 	public enum Orientation {TD, LR}
 	
 	/**
-	 * Contructor for the OntologyGraphGenerator class
+	 * Constructor for the OntologyGraphGenerator class for use without a particular input model
+	 * 
+	 * @param configMgr
+	 * @param publicUri
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IProject project) throws ConfigurationException, IOException {
+		this.setConfigMgr(configMgr);
+		this.project  = project;
+	}
+	
+	/**
+	 * Constructor for the OntologyGraphGenerator class for use with a particular input model identified by publicUri
 	 * 
 	 * @param configMgr
 	 * @param publicUri
@@ -85,7 +98,7 @@ public class OntologyGraphGenerator {
 		this.project  = project;
 		setTheJenaModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
 	}
-	
+
 	/**
 	 * Method that generates the ontology graph RestultSet, which is fed in to the handler to turn into a 
 	 * graphviz graph.
@@ -635,7 +648,7 @@ public class OntologyGraphGenerator {
 		return classList;
 	}
 
-	private String getCurrentFileLink(String parentUri) throws Exception{
+	public String getCurrentFileLink(String parentUri) throws Exception{
 		String[] splitFile = parentUri.split("/");
 		String filename = splitFile[splitFile.length-1];
 		
@@ -1289,9 +1302,68 @@ public class OntologyGraphGenerator {
 		this.configMgr = configMgr;
 	}
 
-	public List<String[]> getImports(IConfigurationManagerForIDE iConfigurationManagerForIDE, String publicUri) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<GraphSegment> getImports(IConfigurationManagerForIDE configMgr, String publicUri) {
+		List<GraphSegment> importList = null;
+		try {
+			String prefix = configMgr.getGlobalPrefix(publicUri);
+			Map<String, String> imports = configMgr.getImports(publicUri, Scope.LOCALONLY);
+			if (imports != null) {
+				importList = new ArrayList<GraphSegment>();
+				Iterator<String> keyitr = imports.keySet().iterator();
+				while (keyitr.hasNext()) {
+					// head: node ID is prefix, tooltip is publicUri, URL is graph file for publicUri
+					// tail: node ID is value, tooltip is key, URL is graph file for key
+					String key = keyitr.next();
+					String pred = null;
+					String value = null;
+					String headUrl = null;
+					String headTooltip = null;
+					if (!isUbiquitousImport(key)) {
+						pred = "imported by";
+						value = imports.get(key);
+						headUrl = getCurrentFileLink(key);
+						headTooltip = "\"" + key + "\"";
+						System.out.println("found import for '" + publicUri + "': key = '" + key + "', value = '" + value + "'");
+						GraphSegment gs = new GraphSegment(value, pred, prefix, configMgr);
+						gs.addTailAttribute("URL", getCurrentFileLink(publicUri));
+						String str = "\"" + publicUri + "\"";
+						gs.addTailAttribute("headtooltip", str);
+						if (headUrl != null) {
+							gs.addHeadAttribute("URL", headUrl);
+						}
+						if (headTooltip != null) {
+							gs.addHeadAttribute("tailtooltip", headTooltip);
+						}
+						importList.add(gs);
+					}
+				}
+			}
+			else {
+				System.out.println("no imports for '" + publicUri + "'");
+			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return importList;
+	}
+
+	private boolean isUbiquitousImport(String key) {
+		if (key != null) {
+			if (key.equals(SadlConstants.SADL_BASE_MODEL_URI) ||
+					key.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) ||
+					key.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI) ||
+					key.equals(SadlConstants.SADL_LIST_MODEL_URI)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	
