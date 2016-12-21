@@ -7,5 +7,9 @@ dependencies {
 	testCompile "org.eclipse.xtext:org.eclipse.xtext.xbase.junit:$versions.xtext"
 }
 
+test {
+	exclude "com/ge/research/sadl/tests/model/SadlModelProcessorTestTypeChecking.class"
+}
+
 eclipseClasspath.enabled=false
 cleanEclipseClasspath.enabled=false

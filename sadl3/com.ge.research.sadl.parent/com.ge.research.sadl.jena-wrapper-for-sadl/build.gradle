@@ -2,6 +2,11 @@ dependencies {
 	compile project(":com.ge.research.jena")
 	compile project(":com.ge.research.sadl")
 	compile project(":com.ge.research.sadl.jena")
+	testCompile "junit:junit:4.11"
+}
+
+test {
+	exclude "com/ge/research/sadl/jena/inference/TestGetModelImports.class"
 }
 
 eclipseClasspath.enabled=false
