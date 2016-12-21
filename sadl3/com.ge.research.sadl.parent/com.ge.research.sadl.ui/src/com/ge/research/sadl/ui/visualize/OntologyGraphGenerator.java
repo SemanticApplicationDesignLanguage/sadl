@@ -1288,6 +1288,11 @@ public class OntologyGraphGenerator {
 	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
 		this.configMgr = configMgr;
 	}
+
+	public List<String[]> getImports(IConfigurationManagerForIDE iConfigurationManagerForIDE, String publicUri) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 }
