@@ -7,7 +7,6 @@ Bundle-SymbolicName: com.ge.research.sadl.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.antlr.runtime,
  org.eclipse.lsp4j,
- org.eclipse.lsp4j.generator,
  org.eclipse.lsp4j.jsonrpc,
  org.eclipse.xtext.ide,
  org.eclipse.xtext.xbase.ide,
