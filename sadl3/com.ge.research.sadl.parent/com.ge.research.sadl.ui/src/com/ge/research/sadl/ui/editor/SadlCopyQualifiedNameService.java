@@ -21,8 +21,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.ui.editor.copyqualifiedname.DefaultCopyQualifiedNameService;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
+import com.ge.research.sadl.utils.SadlQualifiedNameToStringService;
+import com.google.inject.Inject;
 
 /**
  * Qualified name copy service that produces unique OWL2 URIs of knowledge
@@ -41,17 +41,12 @@ import com.google.common.collect.Iterables;
 @SuppressWarnings("restriction")
 public class SadlCopyQualifiedNameService extends DefaultCopyQualifiedNameService {
 
+	@Inject
+	private SadlQualifiedNameToStringService qualifiedNameToStringService;
+	
 	@Override
 	protected String toString(EObject it, QualifiedName fullyQualifiedName) {
-		if (fullyQualifiedName != null) {
-			final int segmentCount = fullyQualifiedName.getSegmentCount();
-			if (segmentCount > 1) {
-				return new StringBuilder(
-						Joiner.on(":").join(Iterables.limit(fullyQualifiedName.getSegments(), segmentCount - 1)))
-								.append("#").append(fullyQualifiedName.getLastSegment()).toString();
-			}
-		}
-		return super.toString(it, fullyQualifiedName);
+		return qualifiedNameToStringService.toString(fullyQualifiedName);
 	}
 
 }
