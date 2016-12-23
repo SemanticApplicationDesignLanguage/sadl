@@ -1,8 +1,11 @@
 ## Preconditions
 
+Java 8:
+ - Get and install a Java 8 JDK.
+
 Git SCM on Windows:
  - Use cygwin with additional git packages from here: http://redmine.jamoma.org/projects/1/wiki/Installing_and_setting_up_GIT.
- - Or alternatively use the git fir Windows: https://git-for-windows.github.io. Select `Use Git for the Windows Command Promt`.
+ - Or alternatively use the git fir Windows: https://git-for-windows.github.io. Select the`Use Git for the Windows Command Promt` when installing the executable.
  - Verification: `git --version`.
 
 Install Docker toolbox:
@@ -23,7 +26,7 @@ Installing Node.Js (6+) and npm:
    * Install nvm: `brew install nvm`.
    * Install Node.js 6+: `nvm install 6.0.0`.
    * Use Node.js 6+: `nvm use 6.0.0`.
- -Linux
+ - Linux
    * Install Node.Js via package manager: https://nodejs.org/en/download/package-manager/.
  - Verification: `node --version && npm --version`.
 
@@ -33,28 +36,28 @@ Installing python (3+):
  - OS X:
    * Install from Homebrew: `brew install python3`.
  - Verification: `python --version`.
- _ Linux:
+ - Linux:
    * INstallation guide is available at: https://www.python.org/downloads/release/python-352/.
 
 ## All in one script to get the sources and build it locally
 
+It is required to check out `sadlos2`, `sadl-jupyterlab`, and `xtext-core` into the same folder.
+
 ```
-mkdir build_sadl_docker \
+docker ps \
+&& mkdir build_sadl_docker \
 && cd build_sadl_docker/ \
 && git clone https://github.com/crapo/sadlos2.git \
 && cd sadlos2/ \
 && git checkout origin/xtext_web_prototype -b xtext_web_prototype \
 && cd .. \
 && git clone https://github.com/TypeFox/sadl-jupyterlab.git \
-&& git clone https://github.com/eclipse/xtext-core.git \
 && git clone https://github.com/R-Brain/jupyterlab.git \
 && cd jupyterlab/ \
 && git fetch --all --tags --prune \
 && git checkout tags/sadl_web -b sadl_web \
-&& cd ../xtext-core/ \
-&& ./gradlew install \
 && cd ../sadlos2/sadl3/com.ge.research.sadl.parent/ \
-&& ./gradlew buildStandaloneTomcat -PuseLocalMaven \
+&& ./gradlew buildStandaloneTomcat \
 && cp ./io.typefox.lsp.monaco/build/tomcat.tar.gz ../deployment/ \
 && cd ../../../jupyterlab/ \
 && npm install \
@@ -72,6 +75,29 @@ mkdir build_sadl_docker \
 && docker build --rm=true -t typefox/websadl . \
 && docker run -p 8080:8080 -p 8888:8888 typefox/websadl
 ```
+
+## Some useful Docker commands
+
+List the running Docker processes:
+```
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                                            NAMES
+02676cbeb016        typefox/websadl     "tini -- /bin/sh -c '"   About a minute ago   Up About a minute   0.0.0.0:8080->8080/tcp, 0.0.0.0:8888->8888/tcp   cocky_jones
+```
+
+Closing a Docker process:
+```
+$ docker stop 02676cbeb016
+02676cbeb016
+```
+
+When opening the web SADL, sometimes based on the Docker image, the host use other than `localhost`, so `http://localhost:8888/sadl` cannot be used. To get the IP of the docker image one can get the process IDs of the running images and then inspect the IP of a particular image.
+```
+$ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 02676cbeb016
+172.17.0.2
+```
+
+
 ## Pull and start image
 
 ```
