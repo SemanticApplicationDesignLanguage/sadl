@@ -41,7 +41,7 @@ Installing python (3+):
 
 ## All in one script to get the sources and build it locally
 
-It is required to check out `sadlos2`, `sadl-jupyterlab`, and `xtext-core` into the same folder.
+It is required to check out `sadlos2` and `sadl-jupyterlab` git repositories to the same folder if one would like to use below script.
 
 ```
 docker ps \
