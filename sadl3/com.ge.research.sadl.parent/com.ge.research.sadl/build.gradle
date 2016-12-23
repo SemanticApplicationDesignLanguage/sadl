@@ -16,9 +16,9 @@ configurations {
 dependencies {
 	mwe2 "de.jflex:jflex:$versions.jflex"
 	mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:$versions.mwe2"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:$versions.xtext"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext:$versions.xtext"
 	mwe2 "org.eclipse.xtext:org.eclipse.xtext.generator:$versions.xtext"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext:$versions.xtext"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:$versions.xtext"
 }
 
 task generateXtextLanguage(type: JavaExec) {

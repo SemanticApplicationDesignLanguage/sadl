@@ -6,7 +6,6 @@ Bundle-Version: 3.0.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl,
- org.eclipse.xtext.junit4,
  org.eclipse.xtext.xbase.junit,
  org.eclipse.xtext.xbase.lib,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,

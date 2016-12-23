@@ -1,10 +1,10 @@
 dependencies {
 	compile project(":com.ge.research.sadl")
 	compile project(":com.ge.research.jena")
-	testCompile project(":com.ge.research.sadl.jena")
-	testCompile project(":com.ge.research.sadl.ide")
-	testCompile "org.eclipse.xtext:org.eclipse.xtext.testing:$versions.xtext"
-	testCompile "org.eclipse.xtext:org.eclipse.xtext.xbase.junit:$versions.xtext"
+	compile project(":com.ge.research.sadl.jena")
+	compile project(":com.ge.research.sadl.ide")
+	compile "org.eclipse.xtext:org.eclipse.xtext.testing:$versions.xtext"
+	compile "junit:junit:$versions.junit"
 }
 
 test {
