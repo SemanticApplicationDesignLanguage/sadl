@@ -5,7 +5,7 @@ Java 8:
 
 Git SCM on Windows:
  - Use cygwin with additional git packages from here: http://redmine.jamoma.org/projects/1/wiki/Installing_and_setting_up_GIT.
- - Or alternatively use the git fir Windows: https://git-for-windows.github.io. Select the`Use Git for the Windows Command Promt` when installing the executable.
+ - Or use the git fir Windows: https://git-for-windows.github.io. Select the`Use Git for the Windows Command Promt` when installing the executable.
  - Verification: `git --version`.
 
 Install Docker toolbox:
@@ -30,7 +30,7 @@ Installing Node.Js (6+) and npm:
    * Install Node.Js via package manager: https://nodejs.org/en/download/package-manager/.
  - Verification: `node --version && npm --version`.
 
-Installing python (3+):
+Installing Python (3+):
  - Windows
    * Installation guide for Windows: https://www.python.org/downloads/release/python-352/.
  - OS X:
@@ -91,7 +91,7 @@ $ docker stop 02676cbeb016
 02676cbeb016
 ```
 
-When opening the web SADL, sometimes based on the Docker image, the host use other than `localhost`, so `http://localhost:8888/sadl` cannot be used. To get the IP of the docker image one can get the process IDs of the running images and then inspect the IP of a particular image.
+When opening the web SADL, sometimes based on the Docker image, the host uses other than `localhost`, so `http://localhost:8888/sadl` cannot be used. To get the IP of the docker image one can get the process IDs of the running images and then inspect the IP of a particular image.
 ```
 $ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 02676cbeb016
 172.17.0.2
