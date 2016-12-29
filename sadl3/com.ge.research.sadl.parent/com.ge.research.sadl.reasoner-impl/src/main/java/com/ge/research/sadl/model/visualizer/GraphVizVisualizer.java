@@ -171,8 +171,10 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb = new StringBuilder("digraph g");
 		sb.append(anchorNodeName);
 		sb.append(" {\n");
-		if (orientation != Orientation.TD){
-			sb.append("   rankdir=LR\n");
+		if (orientation != null && orientation != Orientation.TD){
+			sb.append("   rankdir=");
+			sb.append(orientation.toString());
+			sb.append("\n");
 		}
 		nodes = new ArrayList<String>();
 		sb.append("    label=\"");
@@ -276,7 +278,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				String objnm = duplicateObjectMap.get(key);
 				if (graphedSubjectMap != null && graphedSubjectMap.containsValue(objnm) && !graphedSubjectMap.containsKey(key)) {
 					// we need to fill out missing branches
-					System.out.println("need to fill out branch of '" + objnm + "' from specific object node '" + key + "'");
+//					System.out.println("need to fill out branch of '" + objnm + "' from specific object node '" + key + "'");
 					rs.first();
 					while (rs.hasNext()) {
 						Object[] row = rs.next();

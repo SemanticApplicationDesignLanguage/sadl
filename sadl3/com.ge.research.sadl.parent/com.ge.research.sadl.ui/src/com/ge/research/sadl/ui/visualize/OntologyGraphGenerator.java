@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
+import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -69,7 +70,7 @@ public class OntologyGraphGenerator {
 	private IConfigurationManagerForIDE configMgr;
 	private IProject project = null;
 	
-	public enum Orientation {TD, LR}
+//	public enum Orientation {TD, LR, BD, RL}
 	
 	/**
 	 * Constructor for the OntologyGraphGenerator class for use without a particular input model
@@ -107,7 +108,7 @@ public class OntologyGraphGenerator {
 	 * @param publicUri 		- The uri of the file being graphed
 	 * @return 					- The ResultSet containing all the classes, instances, and properties.  
 	 */
-	public ResultSet generateOntologyResultSet(List<String[]> ontologyResults, String publicUri){
+	public ResultSet generateOntologyResultSet(List<String[]> ontologyResults, String publicUri, UriStrategy uriStrategy){
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		boolean isImport = false;
 		
@@ -158,7 +159,7 @@ public class OntologyGraphGenerator {
 			System.err.println(e.getMessage());
 		}
 		
-		ResultSet rs = convertDataToResultSet(data);
+		ResultSet rs = convertDataToResultSet(data, uriStrategy);
 
 		return rs;
 	}
@@ -395,7 +396,7 @@ public class OntologyGraphGenerator {
 		Iterator<GraphSegment> itr = gsList.iterator();
 		while(itr.hasNext()){
 			GraphSegment gs = itr.next();
-			if(gs.subject == oclass || gs.object == oclass){
+			if(gs.getSubject() == oclass || gs.getObject() == oclass){
 				return true;
 			}
 		}
@@ -1142,7 +1143,22 @@ public class OntologyGraphGenerator {
 	 * @param data
 	 * @return
 	 */
-	public ResultSet convertDataToResultSet(List<GraphSegment> data) {
+	public ResultSet convertDataToResultSet(List<GraphSegment> data, UriStrategy uriStrategy) {
+		List<GraphSegment> listTypeSegments = null;
+		Iterator<GraphSegment> dataitr = data.iterator();
+		while (dataitr.hasNext()) {
+			GraphSegment gs = dataitr.next();
+			if (gs.isObjectIsList()) {
+				GraphSegment listGs = addListTypeEdge(gs, uriStrategy);
+				if (listTypeSegments == null) {
+					listTypeSegments = new ArrayList<GraphSegment>();
+				}
+				listTypeSegments.add(listGs);
+			}
+		}
+		if (listTypeSegments != null) {
+			data.addAll(listTypeSegments);
+		}
 		List<String> columnList = new ArrayList<String>();
 		columnList.add("head");
 		columnList.add("edge");
@@ -1187,34 +1203,25 @@ public class OntologyGraphGenerator {
 					}
 				}
 			}
-			if (gs.isObjectIsList()) {
-				listCount++;		// add row for List node to type edge
-				int asdf = 0;
-			}
 		}
 		int maxColumns = 3 + 
 				(headKeyList != null ? headKeyList.size() : 0) + 
 				(edgeKeyList != null ? edgeKeyList.size() : 0) + 
 				(tailKeyList != null ? tailKeyList.size() : 0); 
-		Object array[][] = new Object[arraySize+listCount][maxColumns]; 
+		Object array[][] = new Object[data.size()][maxColumns]; 
 		
 		boolean dataFound = false;
 		listCount = 0;	// restart counter
 		for(int i = 0; i < arraySize; i++) {
 			GraphSegment gs = data.get(i);
-			String s = isAnImport(gs, true) ? gs.subjectToString() : gs.subjectToStringNoPrefix();
-			String p = gs.predicateToStringNoPrefix();
-			String o = isAnImport(gs, false) ? gs.objectToString() : gs.objectToStringNoPrefix();
-			array[i+listCount][0] = s;
-			array[i+listCount][1] = p;
-			array[i+listCount][2] = o;
+			gs.implementUriStrategy(uriStrategy);
+			array[i+listCount][0] = gs.getSubject().toString();
+			array[i+listCount][1] = gs.getPredicate().toString();
+			array[i+listCount][2] = gs.getObject().toString();
 			dataFound = true;
 			array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
 			array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
 			array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
-			if (gs.isObjectIsList()) {
-				array = addListTypeEdge(gs, columnList, array, i + ++listCount);
-			}
 		}
 		if (dataFound) {
 			String[] headers = columnList.toArray(new String[0]);
@@ -1224,26 +1231,12 @@ public class OntologyGraphGenerator {
 		return null;
 	}
 
-	private Object[][] addListTypeEdge(GraphSegment gs, List<String> columnList, Object[][] array, int i) {
-		String s = isAnImport(gs,false) ? gs.objectToString() : gs.objectToStringNoPrefix();
-		String p = "list\ntype";
-		gs.setObjectIsList(false);
-		String o = isAnImport(gs, false) ? gs.objectToString() : gs.objectToStringNoPrefix();
-		gs.setObjectIsList(true);
-		array[i][0] = s;
-		array[i][1] = p;
-		array[i][2] = o;
-		int cidx = columnList.indexOf("edge_color");
-		if (cidx > 0) {
-			array[i][cidx] = "cyan4";
-		}
-		else {
-			cidx = columnList.indexOf("style");
-			if (cidx > 0) {
-				array[i][cidx] = "dashed";
-			}
-		}
-		return array;
+	private GraphSegment addListTypeEdge(GraphSegment gs, UriStrategy uriStrategy) {
+		GraphSegment listTypeSegment = new GraphSegment(gs.getObject(), "list\ntype", gs.getObject(), getConfigMgr());
+		listTypeSegment.setSubjectIsList(true);
+		listTypeSegment.addEdgeAttribute(COLOR, "cyan4");
+		listTypeSegment.addEdgeAttribute(STYLE, "dashed");
+		return listTypeSegment;
 	}
 
 	/**

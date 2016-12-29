@@ -289,7 +289,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected boolean generationInProgress = false;
 
 	public static String[] reservedFolderNames = {"Graphs", "OwlModels", "Temp", SadlConstants.SADL_IMPLICIT_MODEL_FOLDER};
-	public static String[] reservedFileNames = {"SadlBaseModel.sadl", "SadlListModel.sadl", 
+	public static String[] reservedFileNames = {"Project.sadl","SadlBaseModel.sadl", "SadlListModel.sadl", 
 			"RulePatterns.sadl", "RulePatternsData.sadl", "SadlServicesConfigurationConcepts.sadl", 
 			"ServicesConfig.sadl", "defaults.sadl", "SadlImplicitModel.sadl", "SadlBuiltinFunctions.sadl"};
 	public static String[] reservedModelURIs = {SadlConstants.SADL_BASE_MODEL_URI,SadlConstants.SADL_LIST_MODEL_URI,

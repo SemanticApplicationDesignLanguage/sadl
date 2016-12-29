@@ -36,6 +36,7 @@ import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.ui.SadlConsole;
+import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.ui.visualize.GraphSegment;
 import com.ge.research.sadl.ui.visualize.OntologyGraphGenerator;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -104,14 +105,14 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				imports.add(sbfgs);
 
 				IFile trgtFile = null;
-				String baseFileName = project.getName();
+				String baseFileName = "Project";
 				String graphName = baseFileName;
-				String description = "Project " + baseFileName + " import map";
+				String description = "Project " + project.getName() + " import map";
 //				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, null);
-				ResultSet importsRS = ogg.convertDataToResultSet(imports);
+				ResultSet importsRS = ogg.convertDataToResultSet(imports, UriStrategy.LOCALNAME_WITH_URI_TOOLTIP);
 				IGraphVisualizer visualizer = getVisualizer(configMgr);
 				if (visualizer != null) {
-					graphResultSet(visualizer, project, trgtFile, baseFileName, graphName, null, description, importsRS);					
+					graphResultSet(visualizer, project, trgtFile, baseFileName, graphName, null, description, importsRS, null);					
 				}
 				else {
 					SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
@@ -221,7 +222,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				}
 				
 				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), publicUri, project);
-				ResultSet oggResults = ogg.generateOntologyResultSet(null, publicUri);
+				ResultSet oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_ONLY);
 				List<GraphSegment> newImports = ogg.getImports(getConfigMgr(), publicUri);
 				if (newImports != null) {
 					imports.addAll(newImports);

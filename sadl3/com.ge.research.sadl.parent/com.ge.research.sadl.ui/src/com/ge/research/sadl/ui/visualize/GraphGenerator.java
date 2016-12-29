@@ -16,6 +16,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
@@ -42,6 +43,18 @@ public class GraphGenerator {
 	protected static final String SHAPE = "shape";
 	protected static final String OCTAGON = "octagon";
 	protected static final String RED = "red";
+	protected static final String STYLE = "style";
+	protected static final String FILLED = "filled";
+	protected static final String FONTCOLOR = "fontcolor";
+	protected static final String FILL_COLOR = "fillcolor";
+	protected static final String CLASS_BLUE = "blue4";
+	protected static final String INSTANCE_BLUE = "blue";
+	protected static final String WHITE = "white";
+	protected static final String PROPERTY_GREEN = "green3";
+	
+	public enum UriStrategy {URI_ONLY, QNAME_ONLY, LOCALNAME_ONLY, QNAME_WITH_URI_TOOLTIP, LOCALNAME_WITH_QNAME_TOOLTIP, LOCALNAME_WITH_URI_TOOLTIP}
+	
+	private UriStrategy uriStrategy = UriStrategy.QNAME_ONLY;
 
 	private OntModel model = null;
 	private ConceptName anchor = null;
@@ -76,11 +89,11 @@ public class GraphGenerator {
 		instData = classInstances(cls, instData);
 		for (int i = 0; i < data.size(); i++) {
 			GraphSegment gs = data.get(i);
-			if (gs.subject instanceof OntClass) {
-				instData = classInstances((OntClass)gs.subject, instData);
+			if (gs.getSubject() instanceof OntClass) {
+				instData = classInstances((OntClass)gs.getSubject(), instData);
 			}
-			if (gs.object instanceof OntClass) {
-				instData = classInstances((OntClass)gs.object, instData);
+			if (gs.getObject() instanceof OntClass) {
+				instData = classInstances((OntClass)gs.getObject(), instData);
 			}
 		}
 		data.addAll(instData);
@@ -295,6 +308,18 @@ public class GraphGenerator {
 			}
 			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
 			if (!data.contains(sg)) {
+				sg.addHeadAttribute(STYLE, FILLED);
+				sg.addHeadAttribute(FILL_COLOR,CLASS_BLUE);
+				sg.addHeadAttribute(FONTCOLOR, WHITE);
+				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+				if (prop.canAs(ObjectProperty.class)){
+					sg.addTailAttribute(STYLE, FILLED);
+					sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
+					sg.addTailAttribute(FONTCOLOR, WHITE);
+				}
+				else {
+					// what for XSD and user-defined types?
+				}
 				data.add(sg);
 				if (prop.as(OntProperty.class).isObjectProperty()) {
 					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), graphRadius - 1, data);
@@ -501,9 +526,10 @@ public class GraphGenerator {
 		boolean dataFound = false;
 		for(int i = 0; i < data.size(); i++) {
 			GraphSegment gs = data.get(i);
-			String s = gs.subjectToString();
-			String p = gs.predicateToString();
-			String o = gs.objectToString();
+			gs.implementUriStrategy(getUriStrategy());
+			String s = gs.getSubject().toString();
+			String p = gs.getPredicate().toString();
+			String o = gs.getObject().toString();
 			array[i][0] = s;
 			array[i][1] = p;
 			array[i][2] = o;
@@ -563,6 +589,14 @@ public class GraphGenerator {
 
 	protected void setAnchor(ConceptName anchor) {
 		this.anchor = anchor;
+	}
+
+	protected UriStrategy getUriStrategy() {
+		return uriStrategy;
+	}
+
+	public void setUriStrategy(UriStrategy uriStrategy) {
+		this.uriStrategy = uriStrategy;
 	}
 
 }

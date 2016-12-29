@@ -46,7 +46,7 @@ import com.ge.research.sadl.reasoner.ResultSet;
  *  how to color the edge, how to color or shape the node.
  */
 public interface IGraphVisualizer {
-	public enum Orientation {TD, LR}
+	public enum Orientation {TD, LR, BT, RL}	//"TB", "LR", "BT", "RL"
 	
 	/**
 	 * Method to initialize the graph renderer

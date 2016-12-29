@@ -59,6 +59,7 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider;
@@ -376,11 +377,14 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	}
 
 	protected void graphResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
-			String description, ResultSet rs) throws IOException {
+			String description, ResultSet rs, IGraphVisualizer.Orientation orientation) throws IOException {
+		if (orientation == null) {
+			orientation = IGraphVisualizer.Orientation.TD;
+		}
 		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();
-		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, IGraphVisualizer.Orientation.TD, description);
+		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, orientation, description);
 		iGraphVisualizer.graphResultSetData(rs);
 		String fileToOpen = iGraphVisualizer.getGraphFileToOpen();
 		if (fileToOpen != null) {
@@ -414,7 +418,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		iGraphVisualizer.graphResultSetData(rs);
 	}
 	
-	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName)
+	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName, Orientation orientation)
 			throws ConfigurationException, IOException {
 				if (rs.getColumnCount() >= 3) {
 					String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
@@ -423,7 +427,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			
 					IGraphVisualizer visualizer = getVisualizer(configMgr);
 					if (visualizer != null) {
-						graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs);
+						graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs, orientation);
 					}
 					else {
 						SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");

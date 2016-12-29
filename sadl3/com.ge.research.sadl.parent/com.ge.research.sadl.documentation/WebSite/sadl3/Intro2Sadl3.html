@@ -157,9 +157,22 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
     <li>Internal equations are completely defined with a body</li>
     <li>External equations are identified with a complete signature but no body 
     and may have an external reference URL</li>
-    <li>&quot;Built-in&quot; functions are specific to reasoner/translator pairs and using 
-    the reasoner-specific information a set of built-in function definitions are 
-    provided so that references are linked to the definitions</li>
+    <li>&quot;Built-in&quot; functions are specific to reasoner/translator pairs and, using 
+    the reasoner-specific information, a set of built-in function definitions 
+    (in external equation syntax) are 
+    created automatically so that references are linked to the definitions. The 
+    auto-generated built-in function definitions are in the model 
+    SadlBuiltinFunctions.sadl in the ImplicitModel folder. This model is 
+    implicitly included in all models in the project. Note that the built-in 
+    function definitions provided by the selected translator support type 
+    checking of built-in function usage. The level of type checking possible 
+    depends upon the reasoner/translator pair selected and can be at three 
+    levels:<ol>
+      <li>Full type-checking information (paremeters, return type)</li>
+      <li>Name Only</li>
+      <li>None</li>
+    </ol>
+    </li>
   </ul>
   </li>
   <li>Implied properties in type checking and translation</li>
@@ -224,6 +237,7 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
   </ul>
   </li>
   <li>Project metrics</li>
+  <li>Reserved Folder and File Names</li>
 </ol>
 <p>&nbsp;</p>
 <h2><br>
