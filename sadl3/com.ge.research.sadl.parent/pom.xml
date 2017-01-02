@@ -36,16 +36,36 @@
 	<build>
 		<plugins>
 			<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-enforcer-plugin</artifactId>
+			<version>1.4.1</version>
+			<executions>
+				<execution>
+					<id>enforce-maven</id>
+					<goals>
+						<goal>enforce</goal>
+					</goals>
+					<configuration>
+						<rules>
+							<requireMavenVersion>
+								<version>[3.3.9,)</version>
+							</requireMavenVersion>
+						</rules>
+					</configuration>
+				</execution>
+			</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
-	        <plugin>
-	          <groupId>org.eclipse.tycho</groupId>
-	          <artifactId>tycho-surefire-plugin</artifactId>
-	          <version>${tycho-version}</version>
-	        </plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
@@ -126,15 +146,15 @@
 			</snapshots>
 		</repository>
 		<repository>
-        	<id>snapshots-repo</id>
-         	<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-         	<releases>
-         		<enabled>false</enabled>
-         	</releases>
-         	<snapshots>
-         		<enabled>true</enabled>
-         	</snapshots>
-       </repository>
+			<id>snapshots-repo</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+	</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -150,13 +170,13 @@
 		</pluginRepository>		
 		<pluginRepository>
 			<id>snapshots-repo</id>
-         	<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-         	<releases>
-         		<enabled>false</enabled>
-         	</releases>
-         	<snapshots>
-         		<enabled>true</enabled>
-         	</snapshots>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
 </project>
