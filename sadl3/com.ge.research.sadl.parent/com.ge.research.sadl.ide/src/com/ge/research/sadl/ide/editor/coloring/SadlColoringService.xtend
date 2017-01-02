@@ -38,7 +38,6 @@ import org.eclipse.xtext.ide.server.Document
 import org.eclipse.xtext.ide.server.coloring.IColoringService
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.ide.editor.coloring.SadlColoringStyle.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
@@ -51,8 +50,6 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
  * @see ISemanticHighlightService
  */
 class SadlColoringService implements IColoringService {
-
-	static val LOGGER = LoggerFactory.getLogger(SadlColoringService);
 
 	@Inject
 	extension DeclarationExtensions;
@@ -154,9 +151,8 @@ class SadlColoringService implements IColoringService {
 		val type = try {
 			ontConceptType;
 		} catch (CircularDefinitionException e) {
-			if (LOGGER.debugEnabled) {
-				LOGGER.warn('''Error while getting ontology concept type for resource: «it».''', e);
-			}
+			val message = '''Error while getting ontology concept type for resource: «it».''';
+			new IllegalStateException(message, e).printStackTrace;
 			e.definitionType;
 		}
 		switch (type) {
