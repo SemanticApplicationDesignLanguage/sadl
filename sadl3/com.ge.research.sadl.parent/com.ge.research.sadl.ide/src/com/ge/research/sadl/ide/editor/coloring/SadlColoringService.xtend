@@ -41,13 +41,14 @@ import org.eclipse.xtext.resource.XtextResource
 
 import static com.ge.research.sadl.ide.editor.coloring.SadlColoringStyle.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * Generic highlighting and coloring service for the {@code SADL} language.
  * 
  * @author akos.kitta
  * 
- * @see ISemanticHighlightService
+ * @see IColoringService
  */
 class SadlColoringService implements IColoringService {
 
@@ -151,7 +152,8 @@ class SadlColoringService implements IColoringService {
 		val type = try {
 			ontConceptType;
 		} catch (CircularDefinitionException e) {
-			val message = '''Error while getting ontology concept type for resource: «it».''';
+			val uri = EcoreUtil.getURI(it);
+			val message = '''Error while getting ontology concept type for SADL resource: «it». [URI: «uri»]''';
 			new IllegalStateException(message, e).printStackTrace;
 			e.definitionType;
 		}
