@@ -1,8 +1,11 @@
 package io.typefox.lsp.endpoint.nio.file
 
+import com.google.common.base.StandardSystemProperty
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import org.eclipse.xtext.util.Wrapper
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,15 +42,15 @@ class FileIndexTest {
 
         assertIndex('''
             Baz.txt
-            bar/Bar.txt
-            foo/Foo.txt
+            bar«File.separatorChar»Bar.txt
+            foo«File.separatorChar»Foo.txt
         ''', fileIndex)
 
         assertEvent('''
             created {
                 Baz.txt
-                bar/Bar.txt
-                foo/Foo.txt
+                bar«File.separatorChar»Bar.txt
+                foo«File.separatorChar»Foo.txt
             }
         ''', event)
     }
@@ -92,12 +95,12 @@ class FileIndexTest {
         fileIndex.remove(fooPath)
 
         assertIndex('''
-            bar/Bar.txt
+            bar«File.separatorChar»Bar.txt
         ''', fileIndex)
 
         assertEvent('''
             deleted {
-                foo/Foo.txt
+                foo«File.separatorChar»Foo.txt
             }
         ''', event)
     }
@@ -127,6 +130,8 @@ class FileIndexTest {
 
     @Test
     def void testFailedAddFile_01() {
+    	assumeUnixOS;
+    	
         val fileIndex = new FileIndex
 
         val filePath = Files.createFile(rootPath.resolve('Foo.txt'))
@@ -193,6 +198,8 @@ class FileIndexTest {
 
     @Test
     def void testFailedAddFile_03() {
+    	assumeUnixOS;
+    	
         val fileIndex = new FileIndex
 
         Files.createDirectory(rootPath.resolve('foo'))
@@ -259,5 +266,15 @@ class FileIndexTest {
             }
         ''', event)
     }
+    
+    /**
+     * Windows handles differently deleted files and folders than UNIX. Instead of silently 
+     * handling the no such file exception in the file visitor (just like we do in the file
+     * indexer) an access denied exception is thrown on Windows which cannot be just ignored
+     * as it is ignored on UNIX.
+     */
+    private def void assumeUnixOS() {
+		Assume.assumeTrue('Assumed UNIX OS.', StandardSystemProperty.OS_NAME.value.indexOf('win') < 0);
+	}
 
 }
