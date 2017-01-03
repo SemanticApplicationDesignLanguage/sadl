@@ -272,9 +272,13 @@ class FileIndexTest {
      * handling the no such file exception in the file visitor (just like we do in the file
      * indexer) an access denied exception is thrown on Windows which cannot be just ignored
      * as it is ignored on UNIX.
+     * 
+     * For more details on Windows based file handlers and file deletions one can reference
+     * this thread: http://stackoverflow.com/questions/31606978/odd-behaviour-when-deleting-files-with-files-delete
+     * 
      */
     private def void assumeUnixOS() {
-		Assume.assumeTrue('Assumed UNIX OS.', StandardSystemProperty.OS_NAME.value.indexOf('win') < 0);
+		Assume.assumeTrue('Assumed UNIX OS.', StandardSystemProperty.OS_NAME.value.toLowerCase.indexOf('win') < 0);
 	}
 
 }
