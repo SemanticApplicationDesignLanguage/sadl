@@ -38,6 +38,7 @@ import org.eclipse.xtext.util.StringInputStream
 import org.junit.Assert
 import org.junit.Before
 import org.junit.runner.RunWith
+import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
@@ -112,7 +113,7 @@ abstract class AbstractSADLParsingTest{
 	
 	protected def Resource resource(CharSequence seq, URI uri) {
 		val resource = resourceSet.createResource(uri);
-		resource.load(new StringInputStream(seq.toString), null);
+		resource.load(new StringInputStream(XtendTemplateHelper.unifyEOL(seq)), null);
 		return resource;
 	}
 
