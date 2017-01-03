@@ -7,8 +7,6 @@ buildscript {
 	}
 }
 
-[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
-
 subprojects {
 	if (project.hasProperty("useLocalMaven")) {
 		System.println("Using local Maven repository to build source.")
