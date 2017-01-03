@@ -13,6 +13,8 @@ configurations {
 	}
 }
 
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+
 dependencies {
 	mwe2 "de.jflex:jflex:$versions.jflex"
 	mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:$versions.mwe2"

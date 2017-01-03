@@ -11,5 +11,7 @@ test {
 	exclude "com/ge/research/sadl/tests/model/SadlModelProcessorTestTypeChecking.class"
 }
 
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+
 eclipseClasspath.enabled=false
 cleanEclipseClasspath.enabled=false

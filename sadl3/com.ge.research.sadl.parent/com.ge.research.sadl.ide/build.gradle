@@ -8,5 +8,7 @@ dependencies {
 	compile "org.slf4j:slf4j-api:$versions.slf4j"
 }
 
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+
 eclipseClasspath.enabled=false
 cleanEclipseClasspath.enabled=false

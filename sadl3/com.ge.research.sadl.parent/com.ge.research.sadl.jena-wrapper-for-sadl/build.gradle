@@ -9,5 +9,7 @@ test {
 	exclude "com/ge/research/sadl/jena/inference/TestGetModelImports.class"
 }
 
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+
 eclipseClasspath.enabled=false
 cleanEclipseClasspath.enabled=false

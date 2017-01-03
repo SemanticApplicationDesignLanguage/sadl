@@ -62,3 +62,5 @@ task buildStandaloneTomcat(type:Tar, dependsOn: "buildProduct") {
     extension = "tgz"
     compression = Compression.GZIP
 }
+
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"

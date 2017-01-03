@@ -12,3 +12,5 @@ dependencies {
     compile "javax.websocket:javax.websocket-api:$versions.javaxWebsocket"
     testCompile "junit:junit:$versions.junit"
 }
+
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
