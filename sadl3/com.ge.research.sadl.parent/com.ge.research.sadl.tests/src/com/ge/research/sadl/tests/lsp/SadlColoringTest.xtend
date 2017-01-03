@@ -22,6 +22,8 @@ import com.ge.research.sadl.utils.PathToFileUriConverter
 import com.google.inject.Inject
 import org.junit.Test
 
+import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.unifyEOL
+
 /**
  * Test for checking the {@link ISemanticHighlightService semantic highlight
  * service} for the {@code SADL} language.
@@ -40,6 +42,11 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 	override setup() {
 		super.setup();
 		initialize();
+	}
+	
+	@Override
+	override assertEquals(String expected, String actual) {
+		super.assertEquals(expected.unifyEOL, actual.unifyEOL)
 	}
 
 	@Test
