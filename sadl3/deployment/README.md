@@ -8,6 +8,40 @@ Git SCM on Windows:
  - Or use the git fir Windows: https://git-for-windows.github.io. Select the`Use Git for the Windows Command Promt` when installing the executable.
  - Verification: `git --version`.
 
+Maven 3.3.9:
+ - Download [Maven 3.3.9].
+ - Extract the archive into `/your/path/to/the/maven/home`.
+ - Set Maven environment variable and add Maven `bin` directory to the system path.
+ - Verify the Maven version:
+ 
+```
+$ mvn --version
+Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-10T17:41:47+01:00)
+Maven home: /usr/local/Cellar/maven/3.3.9/libexec
+Java version: 1.8.0_102, vendor: Oracle Corporation
+Java home: /Library/Java/JavaVirtualMachines/jdk1.8.0_102.jdk/Contents/Home/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "mac os x", version: "10.11.6", arch: "x86_64", family: "mac"
+```
+
+Configuring Maven 3.3.9 in Eclipse IDE:
+ - One has to configure Eclipse IDE to use the 3.3.9 version of Maven instead of the embedded one.
+ - Open preference page at: `Preferences` > `Maven` > `Installations` and click on `Add...`.
+ 
+ ![Add external Maven](/sadl3/deployment/media/add_external_mvn_01.png?raw=true "Add external Maven")
+ 
+ - Point to the folder where you have extracted the Maven binaries: `/your/path/to/the/maven/home`.
+ - Make sure, the installation name is `apache-maven-3.3.9`. Press `Finish` to save changes.
+ 
+  ![Configure external Maven path](/sadl3/deployment/media/add_external_mvn_02.png?raw=true "Configure external Maven path")
+ 
+ - Make the `apache-maven-3.3.9` installation as the default one by selecting the checkbox on the left. Do not forget to press `Apply` before selecting `OK` on the preference page.
+ 
+   ![Apply external Maven configuration changes](/sadl3/deployment/media/add_external_mvn_03.png?raw=true "Apply external Maven configuration changes")
+
+
+[Maven 3.3.9]: http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip
+
 Install Docker toolbox:
  - Windows or OS X
    * Use binary installer: https://www.docker.com/products/docker-toolbox.
