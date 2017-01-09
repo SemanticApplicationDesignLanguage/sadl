@@ -11,13 +11,160 @@
 <body>
 
 <h1>SADL Version 3 Build Instructions</h1>
+
+<p>For SADL 3, github.com/crapo/sadlos2/sadl3, xtext_web_prototype branch.</p>
+<ol>
+  <li>If not already on host machine, install a Java 8 JDK, which can be 
+  downloaded from
+  <a href="http://www.java.com">http://www.java.com</a>.</li>
+  <li>Install Apache Maven 3.3.9, which can be downloaded from
+  <a href="https://maven.apache.org/">https://maven.apache.org/</a>.</li>
+  <li>Clone the SADL 3 github repository using a git command line client such as 
+  GitBash, which can be downloaded from <a href="https://git-scm.com/downloads">
+  https://git-scm.com/downloads</a>. Do the following::<ul>
+    <li>Start the git client</li>
+    <li>Change directory to the local git repository root, e.g., &quot;c:/users/&lt;userid&gt;/sadl3/git&quot;</li>
+    <li>&quot;git clone <a href="https://github.com/crapo/sadlos2.git">
+    https://github.com/crapo/sadlos2.git</a>&quot;</li>
+    <li>&quot;cd sadlos2&quot;</li>
+    <li>&quot;git checkout origin/xtext_web_prototype -b xtext_web_prototype&quot;</li>
+    <li>&quot;cd sadl3/com.ge.research.sadl.parent&quot;</li>
+    <li>&quot;mvn clean verify&quot;&nbsp; <span style="background-color: #FFFF00">(this 
+    will probably fail due to missing dependencies)</span></li>
+    <li>&quot;./gradlew build&quot;&nbsp;&nbsp;&nbsp; (configure proxy servers per 
+    instructions at
+    <a href="https://docs.gradle.org/current/userguide/build_environment.html">
+    https://docs.gradle.org/current/userguide/build_environment.html</a>)<br>
+    This will take some time and may have a number of errors:<ul>
+      <li>Error on character in Java file headers: <br>
+      <span style="background-color: #FFFF00">C:\Users\200005201\sadl3-master5\</span><span style="background-color: #FFFF00">git</span><span style="background-color: #FFFF00">\sadlos2\sadl3\</span><span style="background-color: #FFFF00">com.ge.research.sadl.parent</span><span style="background-color: #FFFF00">\c<br>
+      </span><span style="background-color: #FFFF00">om.ge.research.sadl.tests</span><span style="background-color: #FFFF00">\</span><span style="background-color: #FFFF00">xtend-gen</span><span style="background-color: #FFFF00">\com\</span><span style="background-color: #FFFF00">ge</span><span style="background-color: #FFFF00">\research\</span><span style="background-color: #FFFF00">sadl</span><span style="background-color: #FFFF00">\tests\model\</span><span style="background-color: #FFFF00">SadlModelPr</span><span style="background-color: #FFFF00"><br>
+      ocessorTestAmbiguousNames.java:5: error: </span>
+      <span style="background-color: #FFFF00">unmappable</span><span style="background-color: #FFFF00"> 
+      character for encoding Cp125<br>
+      2<br>
+      * INFORMATION of the General Electric Company (</span><span style="background-color: #FFFF00">&#915;Ç</span><span style="background-color: #FFFF00">£</span><span style="background-color: #FFFF00">GE&#915;Ç</span><span style="background-color: #FFFF00">?) 
+      and may contain trade<br>
+      secrets</span></li>
+      <li>Many complaints of the form:<br>
+      <span style="background-color: #FFFF00">Cannot install debug information 
+      into </span><span style="background-color: #FFFF00">bytecode</span><span style="background-color: #FFFF00">, 
+      because '</span><span style="background-color: #FFFF00">org.eclipse.xtext.smap</span><span style="background-color: #FFFF00">'<br>
+      is missing on the </span><span style="background-color: #FFFF00">classpath</span><span style="background-color: #FFFF00">. 
+      Please add '</span><span style="background-color: #FFFF00">org.eclipse.xtext.smap</span><span style="background-color: #FFFF00">' 
+      to your </span><span style="background-color: #FFFF00">plugin</span><span style="background-color: #FFFF00"><br>
+      </span><span style="background-color: #FFFF00">classpath</span><span style="background-color: #FFFF00">.</span></li>
+      <li>Failed tests</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+  <li>Install tooling features of Xtext 1.11.beta2 into the IDE from update site
+  <a href="http://download.eclipse.org/modeling/tmf/xtext/updates/milestones/head/S201612190948/">
+  http://download.eclipse.org/modeling/tmf/xtext/updates/milestones/head/S201612190948/</a>. 
+  Select Xtext, LSP4J, and Uncategorized to install.</li>
+  <li>After Eclipse IDE restarts, import the nested projects, with root project 
+  &quot;sadl3/com.ge.research.sadl.parent&quot;, downloaded in step 3 above into the 
+  Eclipse IDE workspace.</li>
+  <li>Install the Buildship tooling support for Gradle into the Eclipse IDE from 
+  update site
+  <a href="http://download.eclipse.org/buildship/updates/e45/milestones/2.x/">
+  http://download.eclipse.org/buildship/updates/e45/milestones/2.x/</a>, choose 
+  version 2.0.0.v20161108-1534-m or later.</li>
+  <li>Open target platform file under com.ge.research.sadl.target, wait until 
+  the target definition gets resolved (watch status bar), then set the resolved 
+  definition as the target platform. This may take some time.</li>
+  <li>Clean all projects if errors persist in some projects.</li>
+</ol>
+
+<p>There were some project errors at this point so I did a clean all projects, 
+after which com.ge.research.sadl and com.ge.research.sadl.ide had errors. </p>
+<ul>
+  <li>com.ge.research.sadl/src-gen/com.ge.research.sadl.parser.antlr.lexer/InternalSADLLexer.java 
+  had error on lines 30 &amp; 31 because, according to the message, this line cannot 
+  be repeated:<font SIZE="2" COLOR="#646464"><u><br>
+  @SuppressWarnings</u></font><font SIZE="2">(</font><font SIZE="2" COLOR="#2a00ff">&quot;all&quot;</font><font SIZE="2">)</font><font SIZE="2" COLOR="#646464"><u><br>
+  @SuppressWarnings</u></font><font SIZE="2">(</font><font SIZE="2" COLOR="#2a00ff">&quot;all&quot;</font><font SIZE="2">)</font></li>
+  <li>com.ge.research.sadl.ide/src-gen/com.ge.research.sadl.ide.contentassitst.antl.internal/InternalSADLParser.java 
+  had the same error except that when I opened the file it got rebuilt and that 
+  error went away but then there were many errors about undefined method names, 
+  e.g., rule__ReadStatement__Group__0.This file kept getting rebuilt everytime I 
+  made it the focus and tried to see the error message.</li>
+  <li>com.ge.research.sadl.ide/src-gen/com.ge.research.sadl.ide.contentassist.antlr.lexer/InternalSADLLexer.java 
+  has the same errors on lines 30 &amp; 31.</li>
+</ul>
 <h2>Introduction</h2>
 <p>SADL Version 3 uses GitHub as a source code repository. These instructions 
 cover setting up an Eclipse environment, obtaining the requisite Eclipse plug-in 
 projects from GitHub, and configuring the environment so as to be able to build 
 from source code a working set of SADL plug-ins for Eclipse. </p>
 <h2>Setting Up The Eclipse Development Environment</h2>
-<p>&nbsp;</p>
+<p>The easiest way to set up the SADL 3 development environment is to use the 
+Oomph-based Eclipse Installer.</p>
+<ol>
+  <li>Download the appropriate version of the Eclipse Installer for your 
+  operating system from <a href="https://wiki.eclipse.org/Eclipse_Installer">
+  https://wiki.eclipse.org/Eclipse_Installer</a> .</li>
+  <li>Start the installer and switch to &quot;ADVANCED MODE...&quot; by clicking on the 
+  menu icon in the upper-right corner of the window.<br>
+  <img border="0" src="Images/EclipseInstaller1.png" width="589" height="345"><br>
+  Note that you may be prompted to save the installer in a permanent location, 
+  which you may do if you wish but is not necessary.</li>
+  <li>Choose the Eclipse product &quot;Eclipse Platform&quot;. Select the Product Version, 
+  Java VM, make sure Bundle Pool is checked, then click next.</li>
+  <li>Browse Projects down the &quot;Github Projects&quot; path to &quot;Sadl3&quot;. Check &quot;Sadl3&quot;, 
+  then click Next.</li>
+  <li>Check settings in the &quot;Variables page&quot;, click Next, then Finish&quot;.</li>
+</ol>
+<h3>Possible Problems and Potential Solutions</h3>
+<p>There are several problems which have sometimes been encountered in the setup 
+process described above.</p>
+<ol>
+  <li>
+  <p class="MsoNormal"><font color="#800000">[ERROR] Failed to execute goal 
+  org.eclipse.xtend:xtend-maven-plugin:2.11.0.beta2:compile (default) on project 
+  com.ge.research.sadl.xtextgenerator: Execution default of goal 
+  org.eclipse.xtend:xtend-maven-plugin:2.11.0.beta2:compile failed: Plugin 
+  org.eclipse.xtend:xtend-maven-plugin:2.11.0.beta2 or one of its dependencies 
+  could not be resolved: Failed to collect dependencies at 
+  org.eclipse.xtend:xtend-maven-plugin:jar:2.11.0.beta2 -&gt; 
+  com.google.guava:guava:jar:19.0-SNAPSHOT: Failed to read artifact descriptor 
+  for com.google.guava:guava:jar:19.0-SNAPSHOT: Could not transfer artifact 
+  com.google.guava:guava:pom:19.0-SNAPSHOT from/to snapshots-repo (https://oss.sonatype.org/content/repositories/snapshots): 
+  sun.security.validator.ValidatorException: PKIX path building failed: 
+  sun.security.provider.certpath.SunCertPathBuilderException: unable to find 
+  valid certification path to requested target -&gt; [Help 1]</font><br>
+  This problem appears to be caused when the Java certificate store does not 
+  contain a required certificate. If you can go to the artifact that failed to 
+  download in Chrome then you can identify and add the missing certificate(s) as 
+  described here:
+  <span style="font-size: 11.0pt; font-family: Calibri,sans-serif; color: #1F497D">
+  <a href="http://www.java-samples.com/showtutorial.php?tutorialid=210" style="color: blue; text-decoration: underline; text-underline: single">
+  http://www.java-samples.com/showtutorial.php?tutorialid=210</a>. </span>Export 
+  the necessary certificates to .cer files, then use keytool to import them into 
+  the Java certificate store, e.g, at a command prompt with current folder &quot;&lt;JavaRoot&gt;/jre/lib/security&quot;:<br>
+  <span style="background-color: #FFFF00">keytool</span><span style="background-color: #FFFF00"> 
+  -import -alias GEExternalRootCA1 -</span><span style="background-color: #FFFF00">keystore</span><span style="background-color: #FFFF00">
+  </span><span style="background-color: #FFFF00">cacerts</span><span style="background-color: #FFFF00"> 
+  -file GEExternalRootCA1.cer</span></li>
+  <li><font color="#800000">
+  <span style="font-size: 10.0pt; font-family: Consolas">[ERROR] Failed to 
+  execute goal org.codehaus.mojo:exec-maven-plugin:1.2.1:java (mwe2Launcher) on 
+  project com.ge.research.sadl: An exception occured while executing the Java 
+  class. org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher -&gt; [Help 1]</span></font><span style="font-size:10.0pt;font-family:Consolas;color:black"><br>
+  </span>This problem is caused by...</li>
+  <li>Java projects not using a JDK.<br>
+  Make sure that the workspace preferences have a JDK as the default JRE (Window 
+  -&gt; Preferences -&gt; Java -&gt; Installed JREs, check mark on desired JDK. Then make 
+  sure that each Java project has that JDK's System Library&nbsp; on the Java 
+  Build path (right-click on project in Package Explorer, Properties -&gt; Java 
+  Build Path -&gt; Libraries). If the JRE System Library isn't the correct one, 
+  remove it, then Add Library -&gt; JRE System Library.</li>
+  <li>If Maven builds fail, try running Maven from a command line with switches 
+  to turn on additional logging/debug output.<p>&nbsp;</p>
+  <p class="MsoNormal">&nbsp;</p>
+<p>&nbsp;</li>
+</ol>
 <p>SADL Version 3 currently is built in and for Eclipse Kepler.</p>
 <ol>
   <li>If not already installed, install Java 1.7 JDK from
