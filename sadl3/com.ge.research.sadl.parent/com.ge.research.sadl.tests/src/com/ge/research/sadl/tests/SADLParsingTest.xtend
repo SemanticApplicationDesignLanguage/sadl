@@ -29,6 +29,8 @@ import org.eclipse.xtext.util.EmfFormatter
 import com.ge.research.sadl.sADL.TestStatement
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.SelectExpression
+import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
+import com.ge.research.sadl.sADL.SadlProperty
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
@@ -261,4 +263,23 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Ignore
+	@Test
+	def void testQNameWithEscape() {
+		val model = '''
+		 uri "http://sadl.org/LatticeToTree.sadl" alias LatticeToTree.
+		 
+		 Resource is a class described by LatticeToTree:^value with values of type float.
+		 Person is a class.
+		 ^uses describes {Person or Resource} with values of type Resource.
+		'''.sadl.contents.head as SadlModel
+		
+		Assert.assertEquals(3, model.elements.size)
+		val test = model.elements.get(0) as SadlClassOrPropertyDeclaration
+		val psr = test.describedBy.get(0) as SadlProperty
+		val sr = psr.nameDeclarations.get(0)
+		System.out.println(sr.toString)
+		Assert.assertTrue(psr.primaryDeclaration)
+	}
+
 }

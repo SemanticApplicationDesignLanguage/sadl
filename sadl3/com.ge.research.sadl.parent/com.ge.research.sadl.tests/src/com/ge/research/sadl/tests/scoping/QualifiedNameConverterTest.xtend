@@ -27,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -40,4 +41,11 @@ class QualifiedNameConverterTest {
 		assertEquals(QualifiedName.create('foo'), converter.toQualifiedName('foo'))
 		assertEquals(QualifiedName.create('http://foo/bar'), converter.toQualifiedName('http://foo/bar'))
 	}
+	
+	@Ignore
+	@Test def void testConverter_02() {
+		assertEquals(QualifiedName.create('^value'), converter.toQualifiedName('^value'))
+		assertEquals(QualifiedName.create('http://foo/bar','^value'), converter.toQualifiedName('http://foo/bar:^value'))
+	}
+	
 }
