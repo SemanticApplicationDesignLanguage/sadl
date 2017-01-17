@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
@@ -45,6 +46,7 @@ public class GraphGenerator {
 	protected static final String RED = "red";
 	protected static final String STYLE = "style";
 	protected static final String FILLED = "filled";
+	protected static final String BOLD = "bold";
 	protected static final String FONTCOLOR = "fontcolor";
 	protected static final String FILL_COLOR = "fillcolor";
 	protected static final String CLASS_BLUE = "blue4";
@@ -59,6 +61,9 @@ public class GraphGenerator {
 	private OntModel model = null;
 	private ConceptName anchor = null;
 	protected IConfigurationManagerForIDE configMgr;
+	private boolean includeDuplicates = false;
+	private long lastSequenceNumber = 0;		// When includeDuplicates is true, nodes with the same URI must be distinguished from one another. This is done with a sequenceNumber set in the GraphSegment class.
+	private Property impliedProperty;
 	
 	public enum Orientation {TD, LR}
 
@@ -114,10 +119,13 @@ public class GraphGenerator {
 			
 		}
 		OntClass cls = getModel().getOntClass(getAnchor().toFQString());
-		List<GraphSegment> data = new ArrayList<GraphSegment>();
-		data = generateClassPropertiesWithDomain(cls, size, data);
-		data = generateClassPropertiesWithRange(cls, size, data);
-		return convertDataToResultSet(data);
+		if (cls != null) {
+			List<GraphSegment> data = new ArrayList<GraphSegment>();
+			data = generateClassPropertiesWithDomain(cls, -1, size, data);
+			data = generateClassPropertiesWithRange(cls, size, data);
+			return convertDataToResultSet(data);
+		}
+		return null;
 	}
 
 	public ResultSet generatePropertyNeighborhood(int size) throws ConfigurationException {
@@ -128,7 +136,7 @@ public class GraphGenerator {
 		while (eitr.hasNext()) {
 			OntResource dmn = eitr.next();
 			if (dmn.canAs(OntClass.class)){
-				data = generatePropertyRange(dmn.as(OntClass.class), ontprop, size - 1, data);
+				data = generatePropertyRange(dmn.as(OntClass.class), -1, ontprop, size - 1, data);
 			}
 			data = generateClassPropertiesWithRange(dmn.as(OntClass.class), size - 1, data);
 		}
@@ -229,15 +237,20 @@ public class GraphGenerator {
 		return data;
 	}
 
-	protected List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, int graphRadius,
+	protected List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, long subjSeqNumber, int graphRadius,
 			List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
+		if (isIncludeDuplicates() && subjSeqNumber < 0) {
+			subjSeqNumber = getNewSequenceNumber();
+		}
+		List<Resource> handledProperties = new ArrayList<Resource>();
 		StmtIterator sitr = getModel().listStatements(null, RDFS.domain, cls);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Resource prop = stmt.getSubject();
-			if (prop.canAs(OntProperty.class)) {
-				data = generatePropertyRange(cls, prop, graphRadius - 1, data);
+			if (displayPropertyOfClass(cls, prop)) {
+				data = generatePropertyRange(cls, subjSeqNumber, prop, graphRadius - 1, data);
+				handledProperties.add(prop);
 			}
 		}
 		// now look for unions? or intersections containing the cls
@@ -248,15 +261,26 @@ public class GraphGenerator {
 		while (results.hasNext()) {
 			QuerySolution soln = results.next();
 			RDFNode prop = soln.get("?prop");
-			if (prop.canAs(OntProperty.class)) {
-				data = generatePropertyRange(cls, prop.as(OntProperty.class), graphRadius - 1, data);
+			if (!handledProperties.contains(prop.asResource()) && displayPropertyOfClass(cls, prop.asResource())) {
+				data = generatePropertyRange(cls, subjSeqNumber, prop.as(OntProperty.class), graphRadius - 1, data);
+				handledProperties.add(prop.asResource());
 			}
 		}
 		return data;
 	}
+	
+	protected boolean displayPropertyOfClass(OntClass cls, Resource prop) {
+		if (prop.canAs(OntProperty.class) && !isImpliedPropertyOfClass(cls, prop)) {
+			return true;
+		}
+		return false;
+	}
 
-	private List<GraphSegment> generatePropertyRange(OntClass cls,
-			Resource prop, int graphRadius, List<GraphSegment> data) {
+	private boolean isImpliedPropertyOfClass(Resource cls, Resource prop) {
+		return getModel().contains(cls, getImpliedProperty(), prop);
+	}
+
+	private List<GraphSegment> generatePropertyRange(OntClass cls, long subjSeqNumber, Resource prop, int graphRadius, List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		boolean isList = false;
 		Statement stmt = prop.getProperty(getModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
@@ -307,7 +331,13 @@ public class GraphGenerator {
 				}
 			}
 			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
-			if (!data.contains(sg)) {
+			long objSeqNumber = -1L;
+			if (isIncludeDuplicates()) {
+				objSeqNumber = getNewSequenceNumber();
+				sg.setSubjectNodeDuplicateSequenceNumber(subjSeqNumber);
+				sg.setObjectNodeDuplicateSequenceNumber(objSeqNumber);
+			}
+			if (isIncludeDuplicates() || !data.contains(sg)) {
 				sg.addHeadAttribute(STYLE, FILLED);
 				sg.addHeadAttribute(FILL_COLOR,CLASS_BLUE);
 				sg.addHeadAttribute(FONTCOLOR, WHITE);
@@ -321,9 +351,12 @@ public class GraphGenerator {
 					// what for XSD and user-defined types?
 				}
 				data.add(sg);
-				if (prop.as(OntProperty.class).isObjectProperty()) {
-					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), graphRadius - 1, data);
+				if (prop.as(OntProperty.class).isObjectProperty() && !cls.equals(rng)) {
+					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), objSeqNumber, graphRadius - 1, data);
 				}
+			}
+			else {
+				logger.debug("Ignoring duplicate graph segment '" + sg.toString());
 			}
 		}
 		return data;
@@ -521,6 +554,9 @@ public class GraphGenerator {
 				(headKeyList != null ? headKeyList.size() : 0) + 
 				(edgeKeyList != null ? edgeKeyList.size() : 0) +
 				(tailKeyList != null ? tailKeyList.size() : 0);
+		if (isIncludeDuplicates()) {
+			maxColumns = maxColumns + 2;
+		}
 		Object array[][] = new Object[data.size()][maxColumns];
 		
 		boolean dataFound = false;
@@ -537,8 +573,16 @@ public class GraphGenerator {
 			array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
 			array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
 			array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
+			if (isIncludeDuplicates()) {
+				array[i][maxColumns - 2] = gs.getSubjectNodeDuplicateSequenceNumber();
+				array[i][maxColumns - 1] = gs.getObjectNodeDuplicateSequenceNumber();
+			}
 		}
 		if (dataFound) {
+			if (isIncludeDuplicates()) {
+				columnList.add("head_sequence_number");
+				columnList.add("tail_sequence_number");
+			}
 			String[] headers = columnList.toArray(new String[0]);
 			ResultSet rs = new ResultSet(headers, array);
 			return rs;
@@ -597,6 +641,43 @@ public class GraphGenerator {
 
 	public void setUriStrategy(UriStrategy uriStrategy) {
 		this.uriStrategy = uriStrategy;
+	}
+
+	public boolean isIncludeDuplicates() {
+		return includeDuplicates;
+	}
+
+	public void setIncludeDuplicates(boolean includeDuplicates) {
+		this.includeDuplicates = includeDuplicates;
+	}
+
+	private Property getImpliedProperty() {
+		if (impliedProperty == null && getModel() != null) {
+			setImpliedProperty(getModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI));
+		}
+		return impliedProperty;
+	}
+
+	private void setImpliedProperty(Property impliedProperty) {
+		this.impliedProperty = impliedProperty;
+	}
+
+	protected long getLastSequenceNumber() {
+		return lastSequenceNumber;
+	}
+
+	protected long getNewSequenceNumber() {
+		return ++lastSequenceNumber;
+	}
+
+	public static boolean isProperty(OntConceptType srType) {
+		if (srType.equals(OntConceptType.ANNOTATION_PROPERTY) || 
+				srType.equals(OntConceptType.CLASS_PROPERTY) ||
+				srType.equals(OntConceptType.DATATYPE_PROPERTY) ||
+				srType.equals(OntConceptType.RDF_PROPERTY)) {
+			return true;
+		}
+		return false;
 	}
 
 }

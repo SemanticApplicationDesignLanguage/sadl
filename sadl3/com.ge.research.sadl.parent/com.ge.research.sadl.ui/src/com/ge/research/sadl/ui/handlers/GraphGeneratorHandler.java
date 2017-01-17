@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
@@ -154,6 +156,9 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				"" + defaultSize,
 				null);
 		dlg.open();
+		if (dlg.getReturnCode() == Window.CANCEL) {
+			throw new CancellationException();
+		}
 		if (dlg.getReturnCode() != Window.OK) {
 			return defaultSize;
 		}
@@ -192,7 +197,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs, null);
 			}
 			else {
-				SadlConsole.writeToConsole(MessageType.INFO, "No properties found for this class.\n");
+				SadlConsole.writeToConsole(MessageType.INFO, "No graph generated for this class.\n");
 			}
 			rs = gg.generateClassHierarchy(graphRadius); //sadlResourceToClassHierarchy(configMgr, publicUri, sr);
 			if (rs != null) {

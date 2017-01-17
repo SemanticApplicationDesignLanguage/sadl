@@ -45,7 +45,7 @@ class QualifiedNameConverterTest {
 	@Ignore
 	@Test def void testConverter_02() {
 		assertEquals(QualifiedName.create('^value'), converter.toQualifiedName('^value'))
-		assertEquals(QualifiedName.create('http://foo/bar','^value'), converter.toQualifiedName('http://foo/bar:^value'))
+		assertEquals(QualifiedName.create('http://foo/bar','^value'), converter.toQualifiedName('http://foo/bar:value'))
 	}
 	
 }

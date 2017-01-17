@@ -235,12 +235,17 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		        	}
 		        }
 	        }
-     		Object[] results = new Object[4];
-    		results[0] = project;
-   			results[1] = trgtFolder;
-     		results[2] = trgtFile;
-     		results[3] = selectedConcept;
-    		return results;
+	        if (project != null || trgtFolder != null || trgtFile != null) {
+	     		Object[] results = new Object[4];
+	    		results[0] = project;
+	   			results[1] = trgtFolder;
+	     		results[2] = trgtFile;
+	     		results[3] = selectedConcept;
+	    		return results;
+	        }
+	        else {
+	        	return null;
+	        }
 	    }
 	    throw new TranslationException("Nothing selected, unable to process command");
 	}

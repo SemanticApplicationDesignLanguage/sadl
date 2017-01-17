@@ -270,7 +270,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	    if (window != null)
 	    {
-	        ISelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+	        ISelection selection = window.getSelectionService().getSelection();
 	        if (selection instanceof IStructuredSelection) {
 		        Object firstElement = ((IStructuredSelection) selection).getFirstElement();
 		        if (firstElement instanceof IAdaptable)

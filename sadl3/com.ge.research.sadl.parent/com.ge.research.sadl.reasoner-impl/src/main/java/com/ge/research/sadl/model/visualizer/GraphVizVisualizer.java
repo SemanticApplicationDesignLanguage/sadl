@@ -41,6 +41,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		setOrientation(orientation);
 		setDescription(description);
 	}
+	
 	@Override
 	public List<String> graphCsvData(String csvFilepath) throws IOException {
 		throw new IOException("Method graphCsvData(String filepath) not yet implemented");
@@ -314,10 +315,16 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			else {
 				//check if this node should be duplicated: Used in graphing context AATIM-1389
 				boolean duplicateNode = getDuplicateAttribute(headAttributes, row);
-				if (duplicateNode) {
+				long headSequenceNum = getSequenceNumber(headAttributes, row);
+				if (duplicateNode || headSequenceNum > 0) {
 					//don't check to see if this node is in nodes
 					nodes.add(s.toString());
-					slbl = "n" + nodes.size();
+					if (headSequenceNum > 0) {
+						slbl = "n" + headSequenceNum;
+					}
+					else {
+						slbl = "n" + nodes.size();
+					}
 					repeatSubjNode = false;
 				}else if (!nodes.contains(s.toString())) {
 					nodes.add(s.toString());
@@ -346,10 +353,16 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		else {
 			//check if this node should be duplicated: Used in graphing context AATIM-1389
 			boolean duplicateNode = getDuplicateAttribute(tailAttributes, row);
-			if(duplicateNode){
+			long tailSequenceNum = getSequenceNumber(tailAttributes, row);
+			if(duplicateNode || tailSequenceNum > 0){
 				//don't check to see if this node is in nodes
 				nodes.add(o.toString());
-				olbl = "n" + nodes.size();
+				if (tailSequenceNum > 0) {
+					olbl = "n" + tailSequenceNum;
+				}
+				else {
+					olbl = "n" + nodes.size();
+				}
 				repeatObjNode = false;
 				if (subjectNode == null) {
 					// now we want to expand out any children that this duplicate should have so it continues what's in the data...
@@ -479,6 +492,24 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb.append("];\n");
 	}
 	
+	private long getSequenceNumber(Map<Integer, String> attributes, Object[] row) {
+		if (attributes != null && attributes.containsValue("sequence_number")) {
+			Iterator<Integer> keyitr = attributes.keySet().iterator();
+			while (keyitr.hasNext()) {
+				Integer key = keyitr.next();
+				String val = attributes.get(key);
+				if (val.equals("sequence_number")) {
+					Object rowval = row[key.intValue()];
+					if (rowval instanceof Long) {
+						return (long) rowval;
+					}
+					return Long.parseLong(rowval.toString());
+				}
+			}
+		}
+		return -1;
+	}
+	
 	private boolean getDuplicateAttribute(Map<Integer, String> attributes, Object[] row) {
 		if(attributes != null && 
 				attributes.containsValue("duplicate")) {
@@ -493,9 +524,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				}
 			}
 		}
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
 	private Map<Integer, String> addAttribute(Map<Integer, String> attrMap, String headName, int columnNumber, String attrHeader) {
 		String attrName = attrHeader.substring(headName.length() + 1);
 		char c = attrHeader.charAt(headName.length());
@@ -555,6 +586,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	private void setGraphName(String graphName) {
 		this.graphName = graphName;
 	}
+	
 	@Override
 	public String getGraphFileToOpen() {
 		return graphFileToOpen;

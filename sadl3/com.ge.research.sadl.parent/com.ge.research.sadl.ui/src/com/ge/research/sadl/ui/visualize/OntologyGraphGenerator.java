@@ -1215,13 +1215,19 @@ public class OntologyGraphGenerator {
 		for(int i = 0; i < arraySize; i++) {
 			GraphSegment gs = data.get(i);
 			gs.implementUriStrategy(uriStrategy);
-			array[i+listCount][0] = gs.getSubject().toString();
-			array[i+listCount][1] = gs.getPredicate().toString();
-			array[i+listCount][2] = gs.getObject().toString();
+			array[i+listCount][0] = gs.getSubject() != null ? gs.getSubject().toString() : null;
+			array[i+listCount][1] = gs.getPredicate() != null ? gs.getPredicate().toString() : null;
+			array[i+listCount][2] = gs.getObject() != null ? gs.getObject().toString() : null;
 			dataFound = true;
-			array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
-			array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
-			array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
+			if (gs.getHeadAttributes() != null) {
+				array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
+			}
+			if (gs.getEdgeAttributes() != null) {
+				array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
+			}
+			if (gs.getTailAttributes() != null) {
+				array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
+			}
 		}
 		if (dataFound) {
 			String[] headers = columnList.toArray(new String[0]);

@@ -269,7 +269,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		val model = '''
 		 uri "http://sadl.org/LatticeToTree.sadl" alias LatticeToTree.
 		 
-		 Resource is a class described by LatticeToTree:^value with values of type float.
+		 Resource is a class described by LatticeToTree:value with values of type float.
 		 Person is a class.
 		 ^uses describes {Person or Resource} with values of type Resource.
 		'''.sadl.contents.head as SadlModel

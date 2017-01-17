@@ -1,6 +1,7 @@
 package com.ge.research.sadl.ui.visualize;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -30,8 +31,10 @@ import com.hp.hpl.jena.vocabulary.OWL2;
 public class GraphSegment {
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
 	private Object subject;
+	private long subjectNodeDuplicateSequenceNumber = 0;
 	private Object predicate;
 	private Object object;
+	private long objectNodeDuplicateSequenceNumber = 0;
 	private Map<String,String> headAttributes;
 	private Map<String,String> edgeAttributes;
 	private Map<String,String> tailAttributes;
@@ -369,20 +372,79 @@ public class GraphSegment {
 	}
 	
 	String subjectToStringNoPrefix() {
-		return stringFormNoPrefix(getSubject());
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getSubject()));
+		if (getSubjectNodeDuplicateSequenceNumber() >= 0) {
+			sb.append("[");
+			sb.append(getSubjectNodeDuplicateSequenceNumber());
+			sb.append("]");
+		}
+		if (getHeadAttributes() != null) {
+			sb.append("(");
+			Iterator<String> sitr = getHeadAttributes().keySet().iterator();
+			int cntr = 0;
+			while (sitr.hasNext()) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				String key = sitr.next();
+				String val = getHeadAttributes().get(key);
+				sb.append(key);
+				sb.append("=");
+				sb.append(val);
+			}
+			sb.append(")");
+		}
+		return sb.toString();
 	}
 	
 	String predicateToStringNoPrefix() {
-		return stringFormNoPrefix(getPredicate());
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getPredicate()));
+		if (getEdgeAttributes() != null) {
+			sb.append("(");
+			Iterator<String> sitr = getEdgeAttributes().keySet().iterator();
+			int cntr = 0;
+			while (sitr.hasNext()) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				String key = sitr.next();
+				String val = getEdgeAttributes().get(key);
+				sb.append(key);
+				sb.append("=");
+				sb.append(val);
+			}
+			sb.append(")");
+		}
+		return sb.toString();
 	}
 	
 	String objectToStringNoPrefix() {
-		if (!isObjectIsList()) {
-			return stringFormNoPrefix(getObject());
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getObject()));
+		if (getObjectNodeDuplicateSequenceNumber() >= 0) {
+			sb.append("[");
+			sb.append(getObjectNodeDuplicateSequenceNumber());
+			sb.append("]");
 		}
-		else {
-			return stringFormNoPrefix(getObject()) + " List";
+		if (getTailAttributes() != null) {
+			sb.append("(");
+			Iterator<String> sitr = getTailAttributes().keySet().iterator();
+			int cntr = 0;
+			while (sitr.hasNext()) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				String key = sitr.next();
+				String val = getTailAttributes().get(key);
+				sb.append(key);
+				sb.append("=");
+				sb.append(val);
+			}
+			sb.append(")");
+		}	
+		if (isObjectIsList()) {
+			sb.append(" List");
 		}
+		return sb.toString();
 	}
 	
 	String stringFormNoPrefix(Object obj) {
@@ -591,6 +653,32 @@ public class GraphSegment {
 
 	private void setObject(Object object) {
 		this.object = object;
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(subjectToStringNoPrefix());
+		sb.append(" -> ");
+		sb.append(predicateToStringNoPrefix());
+		sb.append(" -> ");
+		sb.append(objectToStringNoPrefix());
+		return sb.toString();
+	}
+
+	public long getSubjectNodeDuplicateSequenceNumber() {
+		return subjectNodeDuplicateSequenceNumber;
+	}
+
+	public void setSubjectNodeDuplicateSequenceNumber(long subjectNodeDuplicateSequenceNumber) {
+		this.subjectNodeDuplicateSequenceNumber = subjectNodeDuplicateSequenceNumber;
+	}
+
+	public long getObjectNodeDuplicateSequenceNumber() {
+		return objectNodeDuplicateSequenceNumber;
+	}
+
+	public void setObjectNodeDuplicateSequenceNumber(long objectNodeDuplicateSequenceNumber) {
+		this.objectNodeDuplicateSequenceNumber = objectNodeDuplicateSequenceNumber;
 	}
 
 }
