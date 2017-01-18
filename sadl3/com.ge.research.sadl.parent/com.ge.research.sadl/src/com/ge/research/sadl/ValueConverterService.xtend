@@ -68,10 +68,6 @@ class ValueConverterService extends AbstractDeclarativeValueConverterService {
 			return null
 		}
 
-		override protected mustEscape(String value) {
-			super.mustEscape(value)
-		}
-
 	}
 
 	static class QNameConverter implements IValueConverter<String> {
