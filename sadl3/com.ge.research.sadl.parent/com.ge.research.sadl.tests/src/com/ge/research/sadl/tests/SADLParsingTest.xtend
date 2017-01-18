@@ -18,19 +18,19 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
-import org.junit.Test
-import org.junit.Ignore
-import com.ge.research.sadl.sADL.SadlModel
-import org.junit.Assert
-import com.ge.research.sadl.sADL.RuleStatement
-import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.emf.common.EMFPlugin
-import org.eclipse.xtext.util.EmfFormatter
-import com.ge.research.sadl.sADL.TestStatement
 import com.ge.research.sadl.sADL.BinaryOperation
-import com.ge.research.sadl.sADL.SelectExpression
+import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
+import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.sADL.SelectExpression
+import com.ge.research.sadl.sADL.TestStatement
+import org.eclipse.xtext.util.EmfFormatter
+import org.junit.Assert
+import org.junit.Ignore
+import org.junit.Test
+import com.google.inject.Inject
+import com.ge.research.sadl.model.DeclarationExtensions
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
@@ -263,7 +263,8 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
+	@Inject extension DeclarationExtensions
+	
 	@Test
 	def void testQNameWithEscape() {
 		val model = '''
@@ -277,9 +278,8 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		Assert.assertEquals(3, model.elements.size)
 		val test = model.elements.get(0) as SadlClassOrPropertyDeclaration
 		val psr = test.describedBy.get(0) as SadlProperty
-		val sr = psr.nameDeclarations.get(0)
-		System.out.println(sr.toString)
-		Assert.assertTrue(psr.primaryDeclaration)
+		Assert.assertEquals("LatticeToTree:value", psr.nameDeclarations.head.concreteName)
+		Assert.assertEquals("LatticeToTree:value", psr.nameDeclarations.head.conceptQualifiedName)
 	}
 
 }
