@@ -13,7 +13,7 @@ Require-Bundle: com.ge.research.sadl,
  com.ge.research.sadl.jena,
  com.ge.research.jena;bundle-version="3.0.0",
  com.ge.research.sadl.jena-wrapper-for-sadl;bundle-version="3.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.tests
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",

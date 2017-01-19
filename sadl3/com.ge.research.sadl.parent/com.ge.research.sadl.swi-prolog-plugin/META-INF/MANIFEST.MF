@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.ge.research.jena,
  org.junit;bundle-version="4.11.0";resolution:=optional
 Eclipse-RegisterBuddy: com.ge.research.sadl
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
  com.ge.research.sadl.swi_prolog.plinterface;uses:="org.slf4j",

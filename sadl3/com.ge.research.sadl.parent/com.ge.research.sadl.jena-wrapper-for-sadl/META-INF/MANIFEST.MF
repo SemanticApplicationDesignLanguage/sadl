@@ -14,7 +14,7 @@ Require-Bundle: com.ge.research.jena;bundle-version="3.0.0",
  org.apache.xerces;bundle-version="2.9.0",
  org.junit;bundle-version="4.11.0";resolution:=optional
 Eclipse-RegisterBuddy: com.ge.research.sadl
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.jena.multithreaded,
  com.ge.research.sadl.jena.reasoner;version="3.0.0";
