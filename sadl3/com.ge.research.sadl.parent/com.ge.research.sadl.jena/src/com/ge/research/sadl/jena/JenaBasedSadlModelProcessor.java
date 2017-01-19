@@ -593,6 +593,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private String reasonerClassName = null;
 	private String translatorClassName = null;
 
+	private boolean ignoreUnittedQuantities;
+
     public static void refreshResource(Resource newRsrc) {
     	try {
     		URI uri = newRsrc.getURI();
@@ -755,6 +757,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (typechecking != null) {
 			disableTypeChecking = Boolean.parseBoolean(typechecking);
 		}
+		ignoreUnittedQuantities = true;
+		String ignoreUnits = context.getPreferenceValues().getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
+		if (ignoreUnits != null) {
+			ignoreUnittedQuantities = Boolean.parseBoolean(ignoreUnits);
+		}
+
 		// create validator for expressions
 		if (!disableTypeChecking) {
 			modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions, this, metricsProcessor);
@@ -4259,19 +4267,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else if (val instanceof SadlExplicitValue) {
 					OntResource rng = oprop.getRange();
 					if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral)val).getUnit() != null) {
-						String unit = ((SadlNumberLiteral)val).getUnit();
-						if (rng != null) {
-							if (rng.canAs(OntClass.class) 
-									&& checkForSubclassing(rng.as(OntClass.class), 
-											getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI), val)) {
-								addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, ((SadlNumberLiteral)val).getLiteralNumber(), unit);
+						if (!ignoreUnittedQuantities) {
+							String unit = ((SadlNumberLiteral)val).getUnit();
+							if (rng != null) {
+								if (rng.canAs(OntClass.class) 
+										&& checkForSubclassing(rng.as(OntClass.class), 
+												getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI), val)) {
+									addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, ((SadlNumberLiteral)val).getLiteralNumber(), unit);
+								}
+								else {
+									addError(SadlErrorMessages.UNITTED_QUANTITY_ERROR.toString(), val);
+								}
 							}
 							else {
-								addError(SadlErrorMessages.UNITTED_QUANTITY_ERROR.toString(), val);
+								addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, ((SadlNumberLiteral)val).getLiteralNumber(), unit);
 							}
 						}
 						else {
-							addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, ((SadlNumberLiteral)val).getLiteralNumber(), unit);
+							throw new JenaProcessorException("Ignore UnittedQuantities not yet implemented");
 						}
 					}
 					else {
