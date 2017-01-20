@@ -30,7 +30,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.exactLength
 
 /**
  * Test for the SADL specific qualified name to string converter service.
@@ -76,7 +75,7 @@ class CopyQualifiedNameServiceTest extends AbstractSADLParsingTest {
 			import "http://sadl.org/Shapes.sadl".
 			
 			Circle is a type of Sh
-		'''.exactLength;
+		'''.length;
 		val selectedElement = objectAtOffsetHelper.resolveElementAt(resourceSupplier.get, offset);
 		val qn = qualifiedNameProvider.getFullyQualifiedName(selectedElement);
 		assertEquals('http://sadl.org/Shapes.sadl#Shape', qualifiedNameToStringService.toString(qn));
@@ -90,7 +89,7 @@ class CopyQualifiedNameServiceTest extends AbstractSADLParsingTest {
 			import "http://sadl.org/Shapes.sadl".
 			
 			Circl
-		'''.exactLength;
+		'''.length;
 		val selectedElement = objectAtOffsetHelper.resolveElementAt(resourceSupplier.get, offset);
 		val qn = qualifiedNameProvider.getFullyQualifiedName(selectedElement);
 		assertEquals('http://sadl.org/Circle.sadl#Circle', qualifiedNameToStringService.toString(qn));
@@ -105,7 +104,7 @@ class CopyQualifiedNameServiceTest extends AbstractSADLParsingTest {
 			
 			Circle is a type of Shape described by radius with values of type float.
 			AnotherCir
-		'''.exactLength;
+		'''.length;
 		val selectedElement = objectAtOffsetHelper.resolveElementAt(resourceSupplier.get, offset);
 		val qn = qualifiedNameProvider.getFullyQualifiedName(selectedElement);
 		assertEquals('http://sadl.org/Circle.sadl#AnotherCircle', qualifiedNameToStringService.toString(qn));
@@ -119,7 +118,7 @@ class CopyQualifiedNameServiceTest extends AbstractSADLParsingTest {
 			import "http://sadl.org/Shapes.sadl".
 
 			Circle is a type of Shape described by rad
-		'''.exactLength;
+		'''.length;
 		val selectedElement = objectAtOffsetHelper.resolveElementAt(resourceSupplier.get, offset);
 		val qn = qualifiedNameProvider.getFullyQualifiedName(selectedElement);
 		assertEquals('http://sadl.org/Circle.sadl#radius', qualifiedNameToStringService.toString(qn));

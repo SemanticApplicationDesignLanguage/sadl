@@ -21,4 +21,3 @@ Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr.lexer,
  com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex
 Import-Package: org.slf4j
-

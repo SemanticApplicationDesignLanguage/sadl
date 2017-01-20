@@ -1,6 +1,7 @@
 package com.ge.research.sadl.ui.visualize;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.IntersectionClass;
@@ -27,28 +29,31 @@ import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
 
 public class GraphSegment {
-	Object subject;
-	Object predicate;
-	Object object;
-	IConfigurationManagerForIDE configMgr;
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
+	private Object subject;
+	private long subjectNodeDuplicateSequenceNumber = 0;
+	private Object predicate;
+	private Object object;
+	private long objectNodeDuplicateSequenceNumber = 0;
 	private Map<String,String> headAttributes;
 	private Map<String,String> edgeAttributes;
 	private Map<String,String> tailAttributes;
 	
+	IConfigurationManagerForIDE configMgr;
+	private boolean subjectIsList = false;
 	private boolean objectIsList = false;
 	
 	public GraphSegment(Object s, Object p, Object o, Object cm) {
-		subject = s;
-		predicate = p;
-		object = o;
+		setSubject(s);
+		setPredicate(p);
+		setObject(o);
 		configMgr = (IConfigurationManagerForIDE) cm;
 	}
 	
 	public GraphSegment(Object s, Object p, Object o, boolean objIsList, Object cm) {
-		subject = s;
-		predicate = p;
-		object = o;
+		setSubject(s);
+		setPredicate(p);
+		setObject(o);
 		configMgr = (IConfigurationManagerForIDE) cm;
 		setObjectIsList(objIsList);
 	}
@@ -56,11 +61,11 @@ public class GraphSegment {
 	public boolean equals(Object otherSeg) {
 		if (otherSeg instanceof GraphSegment) {
 			if (otherSeg != null) {
-				if (subject != null && ((GraphSegment)otherSeg).subject != null && 
-						predicate != null && ((GraphSegment)otherSeg).predicate != null && 
-						object != null && ((GraphSegment)otherSeg).object != null) {
-					if (subject.equals(((GraphSegment)otherSeg).subject) && predicate.equals(((GraphSegment)otherSeg).predicate) && 
-							object.equals(((GraphSegment)otherSeg).object) && ((GraphSegment)otherSeg).isObjectIsList() == isObjectIsList()) {
+				if (getSubject() != null && ((GraphSegment)otherSeg).getSubject() != null && 
+						getPredicate() != null && ((GraphSegment)otherSeg).getPredicate() != null && 
+						getObject() != null && ((GraphSegment)otherSeg).getObject() != null) {
+					if (getSubject().equals(((GraphSegment)otherSeg).getSubject()) && getPredicate().equals(((GraphSegment)otherSeg).getPredicate()) && 
+							getObject().equals(((GraphSegment)otherSeg).getObject()) && ((GraphSegment)otherSeg).isObjectIsList() == isObjectIsList()) {
 						return true;
 					}
 				}
@@ -69,22 +74,22 @@ public class GraphSegment {
 		return false;
 	}
 	
-	String subjectToString() {
-		return stringForm(subject);
-	}
-	
-	String predicateToString() {
-		return stringForm(predicate);
-	}
-	
-	String objectToString() {
-		if (!isObjectIsList()) {
-			return stringForm(object);
-		}
-		else {
-			return stringForm(object) + " List";
-		}
-	}
+//	String subjectToString(UriStrategy uriStrategy) {
+//		return stringForm(getSubject());
+//	}
+//	
+//	String predicateToString(UriStrategy uriStrategy) {
+//		return stringForm(getPredicate());
+//	}
+//	
+//	String objectToString(UriStrategy uriStrategy) {
+//		if (!isObjectIsList()) {
+//			return stringForm(getObject());
+//		}
+//		else {
+//			return stringForm(getObject()) + " List";
+//		}
+//	}
 	
 	String stringForm(Object obj) {
 		if(obj == null){
@@ -367,20 +372,79 @@ public class GraphSegment {
 	}
 	
 	String subjectToStringNoPrefix() {
-		return stringFormNoPrefix(subject);
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getSubject()));
+		if (getSubjectNodeDuplicateSequenceNumber() >= 0) {
+			sb.append("[");
+			sb.append(getSubjectNodeDuplicateSequenceNumber());
+			sb.append("]");
+		}
+		if (getHeadAttributes() != null) {
+			sb.append("(");
+			Iterator<String> sitr = getHeadAttributes().keySet().iterator();
+			int cntr = 0;
+			while (sitr.hasNext()) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				String key = sitr.next();
+				String val = getHeadAttributes().get(key);
+				sb.append(key);
+				sb.append("=");
+				sb.append(val);
+			}
+			sb.append(")");
+		}
+		return sb.toString();
 	}
 	
 	String predicateToStringNoPrefix() {
-		return stringFormNoPrefix(predicate);
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getPredicate()));
+		if (getEdgeAttributes() != null) {
+			sb.append("(");
+			Iterator<String> sitr = getEdgeAttributes().keySet().iterator();
+			int cntr = 0;
+			while (sitr.hasNext()) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				String key = sitr.next();
+				String val = getEdgeAttributes().get(key);
+				sb.append(key);
+				sb.append("=");
+				sb.append(val);
+			}
+			sb.append(")");
+		}
+		return sb.toString();
 	}
 	
 	String objectToStringNoPrefix() {
-		if (!isObjectIsList()) {
-			return stringFormNoPrefix(object);
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getObject()));
+		if (getObjectNodeDuplicateSequenceNumber() >= 0) {
+			sb.append("[");
+			sb.append(getObjectNodeDuplicateSequenceNumber());
+			sb.append("]");
 		}
-		else {
-			return stringFormNoPrefix(object) + " List";
+		if (getTailAttributes() != null) {
+			sb.append("(");
+			Iterator<String> sitr = getTailAttributes().keySet().iterator();
+			int cntr = 0;
+			while (sitr.hasNext()) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				String key = sitr.next();
+				String val = getTailAttributes().get(key);
+				sb.append(key);
+				sb.append("=");
+				sb.append(val);
+			}
+			sb.append(")");
+		}	
+		if (isObjectIsList()) {
+			sb.append(" List");
 		}
+		return sb.toString();
 	}
 	
 	String stringFormNoPrefix(Object obj) {
@@ -494,17 +558,23 @@ public class GraphSegment {
 		return rsrc.getLocalName();
 	}
 	
-	
+	public boolean isSubjectIsList() {
+		return subjectIsList;
+	}
 
-	boolean isObjectIsList() {
+	public void setSubjectIsList(boolean subjectIsList) {
+		this.subjectIsList = subjectIsList;
+	}	
+
+	public boolean isObjectIsList() {
 		return objectIsList;
 	}
 
-	void setObjectIsList(boolean objectIsList) {
+	public void setObjectIsList(boolean objectIsList) {
 		this.objectIsList = objectIsList;
 	}
 
-	Map<String,String> getHeadAttributes() {
+	public Map<String,String> getHeadAttributes() {
 		return headAttributes;
 	}
 
@@ -530,4 +600,85 @@ public class GraphSegment {
 		if (tailAttributes == null) tailAttributes = new HashMap<String,String>();
 		tailAttributes.put(key,value);
 	}
+
+	public void implementUriStrategy(UriStrategy uriStrategy) {
+		String newHead = null;
+		String headTooltip = null;
+		String newEdge = null;
+		String edgeTooltip = null;
+		String newTail = null;
+		String tailTooltip = null;
+		if (uriStrategy == null) {
+			uriStrategy = UriStrategy.QNAME_ONLY; // default
+		}
+		if (uriStrategy.equals(UriStrategy.LOCALNAME_ONLY)) {
+//			newHead = 
+		}
+		else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP)) {
+			
+		}
+		else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+			
+		}
+		else if (uriStrategy.equals(UriStrategy.QNAME_ONLY)) {
+			
+		}
+		else if (uriStrategy.equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
+			
+		}
+		else if (uriStrategy.equals(UriStrategy.URI_ONLY)) {
+			
+		}
+	}
+
+	public Object getSubject() {
+		return subject;
+	}
+
+	private void setSubject(Object subject) {
+		this.subject = subject;
+	}
+
+	public Object getPredicate() {
+		return predicate;
+	}
+
+	private void setPredicate(Object predicate) {
+		this.predicate = predicate;
+	}
+
+	public Object getObject() {
+		return object;
+	}
+
+	private void setObject(Object object) {
+		this.object = object;
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(subjectToStringNoPrefix());
+		sb.append(" -> ");
+		sb.append(predicateToStringNoPrefix());
+		sb.append(" -> ");
+		sb.append(objectToStringNoPrefix());
+		return sb.toString();
+	}
+
+	public long getSubjectNodeDuplicateSequenceNumber() {
+		return subjectNodeDuplicateSequenceNumber;
+	}
+
+	public void setSubjectNodeDuplicateSequenceNumber(long subjectNodeDuplicateSequenceNumber) {
+		this.subjectNodeDuplicateSequenceNumber = subjectNodeDuplicateSequenceNumber;
+	}
+
+	public long getObjectNodeDuplicateSequenceNumber() {
+		return objectNodeDuplicateSequenceNumber;
+	}
+
+	public void setObjectNodeDuplicateSequenceNumber(long objectNodeDuplicateSequenceNumber) {
+		this.objectNodeDuplicateSequenceNumber = objectNodeDuplicateSequenceNumber;
+	}
+
 }
