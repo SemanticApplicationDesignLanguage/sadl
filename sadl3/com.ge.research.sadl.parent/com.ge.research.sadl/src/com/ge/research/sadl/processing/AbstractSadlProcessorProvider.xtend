@@ -17,7 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.google.common.base.Optional
 import com.google.common.base.Preconditions
+import com.google.common.base.Suppliers
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Maps
@@ -25,26 +27,28 @@ import com.google.inject.Injector
 import com.google.inject.Provider
 import java.util.Map
 import java.util.ServiceLoader
+import org.eclipse.core.runtime.RegistryFactory
+import org.eclipse.emf.common.EMFPlugin
 import org.eclipse.emf.ecore.resource.Resource
 import org.slf4j.LoggerFactory
 
 /**
  * Abstract base class for all processor provider service classes. This
- * processor provider class should be used when no Eclipse platform is running,
- * hence extension-point based service discovery is not available at all. This
- * class uses the Java SPI discovery approach instead to load 3rd party
- * processor implementations.
+ * processor provider class could be used when the Eclipse platform is running,
+ * hence extension-point based service discovery available. Besides that, when 
+ * the Eclipse platform is not running, it uses the the Java SPI discovery 
+ * approach instead to load 3rd party processor implementations.
  * 
  * @author akos.kitta
  */
 abstract class AbstractSadlProcessorProvider<P> {
 
 	static val LOGGER = LoggerFactory.getLogger(AbstractSadlProcessorProvider);
+	static val CONFIGURATION_ELEMENT_NAME = 'class';
 
 	val Injector injector;
 	val Class<P> processorClass;
 	val Map<Class<? extends P>, Provider<P>> manuallyAddedProcessors;
-	
 
 	/**
 	 * Creates a new provider instance with the class of the processors this
@@ -66,19 +70,12 @@ abstract class AbstractSadlProcessorProvider<P> {
 	 * Returns with a view of all available processor instances.
 	 */
 	def Iterable<P> getAllProcessors() {
-		val builder = ImmutableMap.<Class<? extends P>, Provider<P>>builder;
-		val services = ServiceLoader.load(processorClass).iterator;
-		
-		services.forEach [ instance |
-			injector.injectMembers(instance);
-			val Provider<P> provider = [instance];
-			val key = instance.class as Class<? extends P>;
-			if (!manuallyAddedProcessors.containsKey(key)) {
-				builder.put(key, provider);
+		val builder = if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+				loadFromExtensionPoints(processorClass)
+			} else {
+				loadFromSpi(processorClass);
 			}
-		];
 		builder.putAll(manuallyAddedProcessors);
-
 		ImmutableSet.copyOf(builder.build.values.map[get]);
 	}
 
@@ -90,17 +87,91 @@ abstract class AbstractSadlProcessorProvider<P> {
 	 * @param processorProvider
 	 *            the provider that provides the new processor instances. Cannot be {@code null}.
 	 */
-	def registerProcessor(Provider<P> processorProvider) {
+	def registerProcessor(Provider<?> processorProvider) {
 		Preconditions.checkNotNull(processorProvider, 'processorProvider');
 		val newProcessor = processorProvider.get;
 		val key = newProcessor.class;
-		val oldProcessor = manuallyAddedProcessors.put(key as Class<? extends P>, processorProvider);
+		val oldProcessor = manuallyAddedProcessors.put(key as Class<? extends P>, processorProvider as Provider<P>);
 		if (oldProcessor === null) {
 			LOGGER.info('''Processor has been successfully registered into the cache with class: '«key»'.''');
 		} else {
 			LOGGER.
 				info('''Processor has been updated for class: '«key»'. New implementation is '«newProcessor»'. Old implementation was '«oldProcessor»'.''')
 		}
+	}
+
+	/**
+	 * Loads the processors from the Eclipse-based extension points and returns with a builder of processors 
+	 * class and processor provider pair.
+	 */
+	protected def ImmutableMap.Builder<Class<? extends P>, Provider<P>> loadFromExtensionPoints(Class<P> clazz) {
+		val builder = ImmutableMap.<Class<? extends P>, Provider<P>>builder;
+		if (extensionPointId.present) {
+			val registry = RegistryFactory.getRegistry();
+			val processors = Suppliers.memoize [
+				registry.getConfigurationElementsFor(extensionPointId.get).map [ element |
+					val Provider<P> provider = [
+						val instance = element.createExecutableExtension(classPropertyName);
+						val processor = processorClass.cast(instance);
+						// XXX: why not use AbstractGuiceAwareExecutableExtensionFactory instead?
+						injector.injectMembers(processor);
+						return processor;
+					];
+					return provider;
+				]
+			];
+			processors.get.forEach [ provider |
+				val key = provider.get.class as Class<? extends P>;
+				if (!manuallyAddedProcessors.containsKey(key)) {
+					builder.put(key, provider);
+				}
+			];
+		}
+		return builder;
+	}
+
+	/**
+	 * Loads the processors using the SPI service discovery approach.
+	 */
+	protected def ImmutableMap.Builder<Class<? extends P>, Provider<P>> loadFromSpi(Class<P> clazz) {
+		val builder = ImmutableMap.<Class<? extends P>, Provider<P>>builder;
+		val services = ServiceLoader.load(processorClass).iterator.toList;
+
+		services.forEach [ instance |
+			injector.injectMembers(instance);
+			val Provider<P> provider = [instance];
+			val key = instance.class as Class<? extends P>;
+			if (!manuallyAddedProcessors.containsKey(key)) {
+				builder.put(key, provider);
+			}
+		];
+		return builder;
+	}
+
+	/**
+	 * Returns with the underlying injector.
+	 */
+	def protected getInjector() {
+		return injector;
+	}
+
+	/**
+	 * Returns with the unique Eclipse-based extension point identifier of the processor.
+	 * If absent no extension point based discovery will be performed.
+	 */
+	def protected getExtensionPointId() {
+		return Optional.<String>absent;
+	}
+
+	/**
+	 * Returns with the property name that has to be sued to create the executable
+	 * extension from the configuration element of the extension point.
+	 * 
+	 * <p>
+	 * By default it returns with the {@code class} string. Clients may change it.
+	 */
+	protected def String getClassPropertyName() {
+		return CONFIGURATION_ELEMENT_NAME;
 	}
 
 }

@@ -21,15 +21,10 @@
 package com.ge.research.sadl.ui
 
 import com.ge.research.sadl.builder.MessageManager.MessageType
-import com.ge.research.sadl.processing.SadlImportProcessorProvider
-import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
-import com.ge.research.sadl.processing.SadlModelProcessorProvider
+import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlInferenceProcessorProvider
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorProvider
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
@@ -44,7 +39,6 @@ import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
-import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -58,19 +52,6 @@ class SADLUiModule extends AbstractSADLUiModule {
 		val iocos = SadlConsole.getOutputStream(MessageType.INFO) as IOConsoleOutputStream
 		System.setOut(new PrintStream(iocos))
 		System.setErr(new PrintStream(SadlConsole.getOutputStream(MessageType.ERROR)))
-		
-	}
-	
-	def Class<? extends SadlModelProcessorProvider> bindSadlModelProcessorProvider() {
-		return ExtensionPointBasedSadlModelProcessorProvider
-	}
-
-	def Class<? extends SadlImportProcessorProvider> bindSadlImportProcessorProvider() {
-		return ExtensionPointBasedSadlImportProcessorProvider
-	}
-
-	def Class<? extends SadlInferenceProcessorProvider> bindSadlInferenceProcessorProvider() {
-		return ExtensionPointBasedSadlInferenceProcessorProvider
 	}
 
 	// Registers our own syntax coloring styles.

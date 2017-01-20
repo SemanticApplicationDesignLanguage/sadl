@@ -68,7 +68,7 @@ public abstract class ErrorGeneratorBase {
 	private String errorListHtmlFileContent = "";
 	
 	/**
-	 * This method is used for Java 1.7 compatibility
+	 * This method is used for Java 1.7 and 1.8 compatibility
 	 * @param aSep
 	 * @param aArray
 	 * @return

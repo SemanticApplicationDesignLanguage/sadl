@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
-	
-	
+	<extension-point id="sadl_model_processor" name="SADL Model Processor" schema="schema/sadl_model_processor.exsd"/>
+    <extension-point id="sadl_import_processor" name="SADL Import Processor" schema="schema/sadl_import_processor.exsd"/>
+    <extension-point id="sadl_inference_processor" name="SADL Inference Processor" schema="schema/sadl_inference_processor.exsd"/>
 	<extension point="org.eclipse.emf.ecore.generated_package">
-	
-	<package 
-	   uri = "http://www.ge.com/research/sadl/SADL" 
-	   class = "com.ge.research.sadl.sADL.SADLPackage"
-	   genModel = "model/generated/SADL.genmodel" /> 
-	
+		<package 
+	   		uri = "http://www.ge.com/research/sadl/SADL" 
+	   		class = "com.ge.research.sadl.sADL.SADLPackage"
+	   		genModel = "model/generated/SADL.genmodel"/> 	
 	</extension>
-	
 </plugin>

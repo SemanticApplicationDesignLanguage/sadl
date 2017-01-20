@@ -17,22 +17,21 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.google.common.base.Optional
 import com.google.common.collect.ImmutableList
-import org.eclipse.emf.ecore.resource.Resource
-
-import static java.util.Collections.singletonList
 import com.google.inject.Inject
 import com.google.inject.Injector
+import org.eclipse.emf.ecore.resource.Resource
 
 /**
  * Provides {@code SADL} inferences in a headless case.
  */
 class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadlInferenceProcessor> {
 
+	static val EXTENSION_ID = 'com.ge.research.sadl.sadl_inference_processor';
+
 	static val ISadlInferenceProcessor NOOP_INFERENCER = [
-		val result = newArrayOfSize(3);
-		result.set(2, singletonList('No registered SADL inferencer were found.'));
-		return result;
+		return newArrayOfSize(0);
 	];
 
 	@Inject
@@ -43,6 +42,11 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 	@Override
 	override ISadlInferenceProcessor getProcessor(Resource resource) {
 		return doCreateProcessor(resource);
+	}
+
+	@Override
+	override protected getExtensionPointId() {
+		return Optional.of(EXTENSION_ID);
 	}
 
 	protected def doCreateProcessor(Resource resource) {

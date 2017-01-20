@@ -34,7 +34,7 @@ class SADLNoopModelProcessorsInjectorProvider extends SADLInjectorProvider {
 	/**
 	 * Shared NOOP model processor provider instance.
 	 */
-	static val NOOP_PROCESSOR_PROVIDER = new IModelProcessorProvider() {
+	public static val NOOP_PROCESSOR_PROVIDER = new IModelProcessorProvider() {
 
 		@Override
 		override getProcessor(Resource resource) {

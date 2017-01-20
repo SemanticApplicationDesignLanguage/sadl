@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.ge.research.sadl.ui" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="com.ge.research.sadl" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="com.ge.research.sadl.ui" id="sadl_import_processor" name="SADL Import Processor"/>
+         <meta.schema plugin="com.ge.research.sadl" id="sadl_inference_processor" name="SADL Inference Processor"/>
       </appInfo>
       <documentation>
          [Enter description of this extension point.]
@@ -17,6 +17,9 @@
          </appInfo>
       </annotation>
       <complexType>
+         <choice>
+            <element ref="sadlInferenceProcessor" minOccurs="1" maxOccurs="unbounded"/>
+         </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -44,7 +47,7 @@
       </complexType>
    </element>
 
-   <element name="sadlImportProcessor">
+   <element name="sadlInferenceProcessor">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -52,7 +55,7 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":com.ge.research.sadl.processing.ISadlImportProcessor"/>
+                  <meta.attribute kind="java" basedOn=":com.ge.research.sadl.processing.ISadlInferenceProcessor"/>
                </appInfo>
             </annotation>
          </attribute>
