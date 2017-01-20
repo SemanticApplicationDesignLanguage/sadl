@@ -86,13 +86,10 @@ docker ps \
 && git checkout origin/xtext_web_prototype -b xtext_web_prototype \
 && cd .. \
 && git clone https://github.com/TypeFox/sadl-jupyterlab.git \
-&& git clone https://github.com/eclipse/xtext-core.git \
 && git clone https://github.com/R-Brain/jupyterlab.git \
 && cd jupyterlab/ \
 && git fetch --all --tags --prune \
 && git checkout tags/sadl_web -b sadl_web \
-&& cd ../xtext-core/ \
-&& ./gradlew install \
 && cd ../sadlos2/sadl3/com.ge.research.sadl.parent/ \
 && ./gradlew buildStandaloneTomcat \
 && cp ./io.typefox.lsp.monaco/build/tomcat.tar.gz ../deployment/ \
