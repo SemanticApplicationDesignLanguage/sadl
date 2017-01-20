@@ -3,6 +3,7 @@ dependencies {
 	compile project(":com.ge.research.jena")
 	compile project(":com.ge.research.sadl.jena")
 	compile project(":com.ge.research.sadl.ide")
+	compile "org.eclipse.core:org.eclipse.core.runtime:$versions.eclipseCoreRuntime"
 	compile "org.eclipse.xtext:org.eclipse.xtext.testing:$versions.xtext"
 	compile "junit:junit:$versions.junit"
 }

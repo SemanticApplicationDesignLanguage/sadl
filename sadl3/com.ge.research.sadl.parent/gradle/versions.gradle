@@ -9,7 +9,7 @@ ext.versions = [
     "guice": "4.1.0",
     "slf4j": "1.7.21",
     "junit": "4.12",
-    "mwe2": "2.8.3",
+    "mwe2": "2.9.0.201605261059",
     "javaxAnnotation": "1.2",
     "javaxInject": "1",
     "javaxValidation": "1.1.0.Final",
