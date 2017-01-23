@@ -27,6 +27,9 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 public class GraphSegment {
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
@@ -42,6 +45,7 @@ public class GraphSegment {
 	IConfigurationManagerForIDE configMgr;
 	private boolean subjectIsList = false;
 	private boolean objectIsList = false;
+	private UriStrategy uriStrategy;
 	
 	public GraphSegment(Object s, Object p, Object o, Object cm) {
 		setSubject(s);
@@ -601,36 +605,6 @@ public class GraphSegment {
 		tailAttributes.put(key,value);
 	}
 
-	public void implementUriStrategy(UriStrategy uriStrategy) {
-		String newHead = null;
-		String headTooltip = null;
-		String newEdge = null;
-		String edgeTooltip = null;
-		String newTail = null;
-		String tailTooltip = null;
-		if (uriStrategy == null) {
-			uriStrategy = UriStrategy.QNAME_ONLY; // default
-		}
-		if (uriStrategy.equals(UriStrategy.LOCALNAME_ONLY)) {
-//			newHead = 
-		}
-		else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP)) {
-			
-		}
-		else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
-			
-		}
-		else if (uriStrategy.equals(UriStrategy.QNAME_ONLY)) {
-			
-		}
-		else if (uriStrategy.equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
-			
-		}
-		else if (uriStrategy.equals(UriStrategy.URI_ONLY)) {
-			
-		}
-	}
-
 	public Object getSubject() {
 		return subject;
 	}
@@ -679,6 +653,93 @@ public class GraphSegment {
 
 	public void setObjectNodeDuplicateSequenceNumber(long objectNodeDuplicateSequenceNumber) {
 		this.objectNodeDuplicateSequenceNumber = objectNodeDuplicateSequenceNumber;
+	}
+
+	public String resourceToString(Resource rsrc) {
+		if (getUriStrategy().equals(UriStrategy.LOCALNAME_ONLY)) {
+			if (rsrc.isURIResource()) {
+				return ((Resource)getSubject()).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		else if (getUriStrategy().equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP)) {
+			if (rsrc.isURIResource()) {
+				return ((Resource)rsrc).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		else if (getUriStrategy().equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+			if (rsrc.isURIResource()) {
+				return ((Resource)rsrc).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		else if (getUriStrategy().equals(UriStrategy.QNAME_ONLY)) {
+			if (rsrc.isURIResource()) {
+				String ns = ((Resource)rsrc).getNameSpace();
+				String prefix = getPrefix(ns);
+				return  prefix + ":" + ((Resource)rsrc).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		else if (getUriStrategy().equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
+			if (rsrc.isURIResource()) {
+				String ns = ((Resource)rsrc).getNameSpace();
+				String prefix = getPrefix(ns);
+				return  prefix + ":" + ((Resource)rsrc).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		else if (getUriStrategy().equals(UriStrategy.URI_ONLY)) {
+			if (rsrc.isURIResource()) {
+				String ns = ((Resource)rsrc).getNameSpace();
+				return configMgr.getGlobalPrefix(ns)  + ((Resource)rsrc).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		return rsrc.toString();
+	}
+
+	private String getPrefix(String ns) {
+		String prefix;
+		if (ns.equals(XSD.getURI())) prefix = "xsd";
+		else if (ns.equals(RDF.getURI())) prefix = "rdf:";
+		else if (ns.equals(RDFS.getURI())) prefix = "rdfs:";
+		else if (ns.equals(OWL.getURI())) prefix = "owl:";
+		else {
+			if (ns.endsWith("#")) ns = ns.substring(0, ns.length() - 1);
+			prefix = configMgr.getGlobalPrefix(ns); 
+		}
+		return prefix;
+	}
+
+	public String subjectToString() {
+		if (getSubject() instanceof Resource) {
+			return resourceToString((Resource)getSubject());
+		}
+		return getSubject().toString();
+	}
+
+	public String predicateToString() {
+		if (getPredicate() instanceof Resource) {
+			return resourceToString((Resource)getPredicate());
+		}
+		return getPredicate().toString();
+	}
+
+	public String objectToString() {
+		if (getObject() instanceof Resource) {
+			return resourceToString((Resource)getObject());
+		}
+		return getObject().toString();
+	}
+
+	public UriStrategy getUriStrategy() {
+		return uriStrategy;
+	}
+
+	public void setUriStrategy(UriStrategy uriStrategy) {
+		this.uriStrategy = uriStrategy;
 	}
 
 }

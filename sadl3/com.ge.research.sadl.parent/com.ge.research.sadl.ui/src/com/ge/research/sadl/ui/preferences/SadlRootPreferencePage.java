@@ -62,7 +62,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
-	    addField(new BooleanFieldEditor(SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities during build", getFieldEditorParent()));
+	    addField(new BooleanFieldEditor(SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities (treat as numeric only) during translation", getFieldEditorParent()));
 		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ", getFieldEditorParent()));
     }
 	
