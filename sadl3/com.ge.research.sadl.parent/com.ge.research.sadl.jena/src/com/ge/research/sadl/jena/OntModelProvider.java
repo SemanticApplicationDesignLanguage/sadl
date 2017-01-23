@@ -1,6 +1,7 @@
 package com.ge.research.sadl.jena;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Property;
 
@@ -25,7 +27,7 @@ public class OntModelProvider {
 		OntModel model;
 		List<Object> otherContent;
 		List<SadlCommand> sadlCommands = null;
-		Map<EObject, Property> impliedPropertiesUsed = null;
+		Map<EObject, List<Property>> impliedPropertiesUsed = null;
 		boolean isLoading = false;
 		boolean hasCircularImport = false;
 		
@@ -118,22 +120,46 @@ public class OntModelProvider {
 		return null;
 	}
 	
-	public static void addImpliedProperties(Resource resource, Map<EObject, Property> impliedProperties) {
-		if (resource != null && impliedProperties != null) {
+	public static void addImpliedProperty(Resource resource, EObject eobj, Property impliedProperty) {
+		if (resource != null && impliedProperty != null) {
 			OntModelAdapter a = findAdapter(resource);
 			if (a == null) {
 				a = new OntModelAdapter();
 				a.isLoading = true;
 				resource.eAdapters().add(a);
 			}
-			a.impliedPropertiesUsed = impliedProperties;
+			if (a.impliedPropertiesUsed == null) {
+				a.impliedPropertiesUsed = new HashMap<EObject, List<Property>>();
+			}
+			List<Property> plist;
+			if (!a.impliedPropertiesUsed.containsKey(eobj)) {
+				plist = new ArrayList<Property>();
+				a.impliedPropertiesUsed.put(eobj, plist);
+			}
+			else {
+				plist = a.impliedPropertiesUsed.get(eobj);
+			}
+			plist.add(impliedProperty);
 		}
 	}
 	
-	public static Property getImpliedProperty(Resource resource, EObject context) {
+	public static List<Property> getImpliedProperties(Resource resource, EObject context) {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null && a.impliedPropertiesUsed != null) {
 			return a.impliedPropertiesUsed.get(context);
+		}
+		return null;
+	}
+	
+	public static Property getImpliedProperty(Resource resource, EObject context) throws TranslationException {
+		List<Property> properties = getImpliedProperties(resource, context);
+		if (properties != null) {
+			if (properties.size() > 1) {
+				throw new TranslationException("More than one implied property for given context; use getImpliedProperties");
+			}
+			else {
+				return properties.get(0);
+			}
 		}
 		return null;
 	}

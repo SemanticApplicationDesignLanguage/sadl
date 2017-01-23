@@ -562,10 +562,10 @@ public class GraphGenerator {
 		boolean dataFound = false;
 		for(int i = 0; i < data.size(); i++) {
 			GraphSegment gs = data.get(i);
-			gs.implementUriStrategy(getUriStrategy());
-			String s = gs.getSubject().toString();
-			String p = gs.getPredicate().toString();
-			String o = gs.getObject().toString();
+			gs.setUriStrategy(getUriStrategy());
+			String s = gs.subjectToString();
+			String p = gs.predicateToString();
+			String o = gs.objectToString();
 			array[i][0] = s;
 			array[i][1] = p;
 			array[i][2] = o;
