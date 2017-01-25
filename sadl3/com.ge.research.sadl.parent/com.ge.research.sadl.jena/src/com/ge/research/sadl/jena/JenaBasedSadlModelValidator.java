@@ -2484,13 +2484,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								
 							}
 						}
+						else if (stype.equals(OntConceptType.CLASS_PROPERTY)) {
+							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)subject));
+							if (propsubj != null) {
+								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+								if (propsubj != null && prop != null) {
+									checkPropertyDomain(ontModel, propsubj, prop, subject, propOfSubjectCheck, varName);
+								}
+							}
+						}
 						else {
 							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
-						}
-						if (subj != null) {
-							Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-							if (subj != null && prop != null) {
-								checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+							if (subj != null) {
+								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+								if (subj != null && prop != null) {
+									checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+								}
 							}
 						}
 					} catch (CircularDefinitionException e) {
@@ -2524,10 +2533,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			else {
+				String msg;
+				if (subj instanceof OntProperty) {
+					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(subj.getURI(),prop.getURI());
+				}
+				else {
+					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI());
+				}
 				if(propOfSubjectCheck){
-					issueAcceptor.addError(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+					issueAcceptor.addError(msg, subject);
 				}else{
-					issueAcceptor.addWarning(SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI()), subject);
+					issueAcceptor.addWarning(msg, subject);
 				}
 			}
 		}
@@ -2568,7 +2584,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						e.printStackTrace();
 					}
 				}
-				else if (subj instanceof Property) {
+				else if (subj instanceof Property || subj.canAs(OntProperty.class)) {
 					// this is a property chain missing an intermediate class or instance: get the range of the property
 					StmtIterator stmtitr = sadlModelProcessor.getTheJenaModel().listStatements(subj, RDFS.range, (RDFNode)null);
 					boolean matchFound = false;
