@@ -3762,6 +3762,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				rngNode.asResource().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 			com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
 			rngNode = effectiveRng;
+			getTheJenaModel().remove(prop,RDF.type, OWL.ObjectProperty);
+			getTheJenaModel().add(prop, RDF.type, OWL.DatatypeProperty);
 		}
 		RDFNode propOwlType = null;
 		boolean existingRangeAnywhere = false;
@@ -4259,7 +4261,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		String propuri = declarationExtensions.getConceptUri(prop);
 		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
-			ObjectProperty oprop = getTheJenaModel().getObjectProperty(propuri);
+			OntProperty oprop = getTheJenaModel().getOntProperty(propuri);
 			if (oprop == null) {
 				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			}
@@ -4412,7 +4414,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '" + inst.toString() + "'");
 	}
 
-	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, ObjectProperty oprop, OntResource rng, String literalNumber, String unit) {
+	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, OntProperty oprop, OntResource rng, String literalNumber, String unit) {
 		Individual unittedVal;
 		if (rng != null && rng.canAs(OntClass.class)) {
 			unittedVal = getTheJenaModel().createIndividual(rng.as(OntClass.class));
