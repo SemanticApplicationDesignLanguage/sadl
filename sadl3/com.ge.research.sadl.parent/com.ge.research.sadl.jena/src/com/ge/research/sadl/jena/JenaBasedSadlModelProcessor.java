@@ -5102,7 +5102,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return anon;
 	}
 
-	private OntClass processSadlPropertyCondition(SadlPropertyCondition sadlPropCond) throws JenaProcessorException {
+	protected OntClass processSadlPropertyCondition(SadlPropertyCondition sadlPropCond) throws JenaProcessorException {
 		OntClass retval = null;
 		SadlResource sr = ((SadlPropertyCondition)sadlPropCond).getProperty();
 		String propUri = declarationExtensions.getConceptUri(sr);
@@ -5142,7 +5142,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return retval;
 	}
 
-	private OntClass sadlConditionToOntClass(SadlCondition cond, Property prop, OntConceptType propType) throws JenaProcessorException {
+	protected OntClass sadlConditionToOntClass(SadlCondition cond, Property prop, OntConceptType propType) throws JenaProcessorException {
 		OntClass retval = null;
 		if (prop == null) {
 			addError(SadlErrorMessages.CANNOT_CREATE.get("restriction", "unresolvable property"), cond);

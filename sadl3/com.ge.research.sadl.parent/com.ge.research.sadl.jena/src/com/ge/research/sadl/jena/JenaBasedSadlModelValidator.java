@@ -420,8 +420,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				// this condition happens when a file is loaded in the editor and clean/build is invoked
 				return true;
 			}
-			setBinaryLeftTypeCheckInfo(leftTypeCheckInfo.getImplicitProperties());
-			setBinaryRightTypeCheckInfo(rightTypeCheckInfo.getImplicitProperties());
+			setBinaryLeftTypeCheckInfo(leftTypeCheckInfo != null ? leftTypeCheckInfo.getImplicitProperties() : null);
+			setBinaryRightTypeCheckInfo(rightTypeCheckInfo != null ? rightTypeCheckInfo.getImplicitProperties() : null);
 			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				if (expression.eContainer() instanceof TestStatement && isQuery(leftExpression)) {
 					// you can't tell what type a query will return
