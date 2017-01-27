@@ -5213,7 +5213,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
 				Individual valInst = val.as(Individual.class);
-				if (prop instanceof OntProperty && valueInObjectTypePropertyRange((OntProperty)prop, valInst)) {
+				if (prop.canAs(OntProperty.class) && valueInObjectTypePropertyRange(prop.as(OntProperty.class), valInst)) {
 					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, valInst);
 					logger.debug("New has value restriction on '" + prop.getURI() + "' to value '" + valInst.toString() + "'");
 					retval =  hvr;
