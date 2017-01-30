@@ -1412,7 +1412,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
-	private List<OntClass> getTypeCheckTypeClasses(TypeCheckInfo tci) {
+	protected List<OntClass> getTypeCheckTypeClasses(TypeCheckInfo tci) {
 		List<OntClass> results = null;
 		if (tci.compoundTypes != null) {
 			for (int i = 0; i < tci.compoundTypes.size(); i++) {
