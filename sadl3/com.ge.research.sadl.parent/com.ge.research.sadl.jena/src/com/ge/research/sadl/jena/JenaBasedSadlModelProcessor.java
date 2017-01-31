@@ -5204,8 +5204,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 			else {
-				if (prop instanceof OntProperty) {
-					val = sadlExplicitValueToLiteral(value, ((OntProperty)prop).getRange());
+				if (prop.canAs(OntProperty.class)) {
+					val = sadlExplicitValueToLiteral(value, prop.as(OntProperty.class).getRange());
 				}
 				else {
 					val = sadlExplicitValueToLiteral(value, null);
@@ -5223,7 +5223,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 			else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-				if (prop instanceof OntProperty && val.isLiteral() && valueInDatatypePropertyRange((OntProperty)prop, val.asLiteral())) {
+				if (prop.canAs(OntProperty.class) && val.isLiteral() && valueInDatatypePropertyRange(prop.as(OntProperty.class), val.asLiteral())) {
 					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, val);
 					logger.debug("New has value restriction on '" + prop.getURI() + "' to value '" + val.toString() + "'");
 					retval =  hvr;
