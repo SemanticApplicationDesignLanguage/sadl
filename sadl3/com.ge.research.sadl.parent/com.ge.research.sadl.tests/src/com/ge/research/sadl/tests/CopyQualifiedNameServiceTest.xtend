@@ -30,6 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.junit.Ignore
 
 /**
  * Test for the SADL specific qualified name to string converter service.
@@ -81,6 +82,7 @@ class CopyQualifiedNameServiceTest extends AbstractSADLParsingTest {
 		assertEquals('http://sadl.org/Shapes.sadl#Shape', qualifiedNameToStringService.toString(qn));
 	}
 
+	@Ignore
 	@Test
 	def void testCircle() {
 		val offset = '''
