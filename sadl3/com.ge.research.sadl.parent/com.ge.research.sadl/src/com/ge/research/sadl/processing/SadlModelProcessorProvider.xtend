@@ -26,6 +26,7 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.util.OnChangeEvictingCache
 import org.eclipse.xtext.validation.CheckMode
+import org.eclipse.xtend.lib.annotations.Accessors
 
 class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
@@ -46,6 +47,7 @@ class SadlModelProcessorProvider implements IModelProcessorProvider {
 	
 	@Data static class CompositeModelProcessor implements IModelProcessor {
 		
+		@Accessors(PUBLIC_GETTER)
 		val Iterable<? extends IModelProcessor> processors
 		
 		override onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {

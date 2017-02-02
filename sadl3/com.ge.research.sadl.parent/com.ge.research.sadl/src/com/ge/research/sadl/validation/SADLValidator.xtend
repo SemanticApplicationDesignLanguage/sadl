@@ -40,6 +40,7 @@ import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import com.ge.research.sadl.sADL.SubjHasProp
+import com.ge.research.sadl.resource.UserDataHelper
 
 /**
  * This class contains custom validation rules. 
@@ -48,10 +49,6 @@ import com.ge.research.sadl.sADL.SubjHasProp
  */
 class SADLValidator extends AbstractSADLValidator {
 	
-	@Inject DeclarationExtensions declarationExtensions
-	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
-	@Inject IResourceDescription.Manager resourceDescriptionManager
-
 	public static final String INVALID_MODEL_URI = "INVALID_MODEL_URI"
 	public static final String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
 	public static final String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
@@ -60,6 +57,12 @@ class SADLValidator extends AbstractSADLValidator {
 	public static final String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
 	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
 	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
+	 
+	@Inject DeclarationExtensions declarationExtensions
+	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
+	@Inject IResourceDescription.Manager resourceDescriptionManager
+	@Inject UserDataHelper userDataHelper
+
 		
 	protected var List<String> otherNames = new ArrayList
 	
@@ -91,7 +94,7 @@ class SADLValidator extends AbstractSADLValidator {
 			if (modelDescription.name.toString == thisUri) {
 				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 			}
-			if (model.alias !== null && modelDescription.getUserData(ResourceDescriptionStrategy.USER_DATA_ALIAS) == model.alias) {
+			if (model.alias !== null && userDataHelper.getAlias(modelDescription).orNull == model.alias) {
 				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
 			}
 			if (modelDescription.EObjectURI.trimFragment.lastSegment == simpleFileName) {
