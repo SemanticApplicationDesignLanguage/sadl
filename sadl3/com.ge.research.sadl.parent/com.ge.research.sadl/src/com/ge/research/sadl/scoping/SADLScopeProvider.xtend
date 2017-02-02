@@ -296,7 +296,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
 			val externalResource = imp.importedResource
-			if (!externalResource.eIsProxy) {
+			if (externalResource !== null && !externalResource.eIsProxy) {
 				createResourceScope(externalResource.eResource, imp.alias, importedResources).allElements.forEach[
 					val existing = importedSymbols.put(name, it)
 					val duplicateProblem = checkDuplicate(existing, it)
