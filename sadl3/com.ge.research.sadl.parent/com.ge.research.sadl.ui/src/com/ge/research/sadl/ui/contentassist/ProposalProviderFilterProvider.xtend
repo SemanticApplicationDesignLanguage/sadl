@@ -102,7 +102,7 @@ class ProposalProviderFilterProvider {
 				println('''Unhandled case with class: «clazz» and key: «key»''');
 			}
 		}
-		return Predicates.or(predicates);
+		return if (predicates.nullOrEmpty) Predicates.alwaysFalse else Predicates.or(predicates);
 	}
 
 	private def createPropertyInitializerFilter(EObject currentModel) {
@@ -122,7 +122,7 @@ class ProposalProviderFilterProvider {
 				return predicate;
 			}
 		}
-		return Predicates.alwaysTrue;
+		return Predicates.alwaysFalse;
 	}
 
 	private def boolean isSadlResourceInDomainOfProperty2(SadlResource currentModel, SadlResource candidate) {
@@ -169,7 +169,7 @@ class ProposalProviderFilterProvider {
 			];
 			return predicate;
 		}
-		return Predicates.alwaysTrue;
+		return Predicates.alwaysFalse;
 	}
 
 	private def createValidator(Resource resource) {
