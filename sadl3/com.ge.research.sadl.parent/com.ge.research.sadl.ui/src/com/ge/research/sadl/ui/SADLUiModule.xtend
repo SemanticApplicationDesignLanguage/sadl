@@ -24,6 +24,7 @@ import com.ge.research.sadl.builder.MessageManager.MessageType
 import com.ge.research.sadl.processing.SadlImportProcessorProvider
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
+import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
@@ -40,6 +41,7 @@ import org.eclipse.ui.console.IOConsoleOutputStream
 import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
+import org.eclipse.xtext.ui.editor.contentassist.AbstractJavaBasedContentProposalProvider.ReferenceProposalCreator
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
@@ -99,6 +101,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	override Class<? extends CopyQualifiedNameService> bindCopyQualifiedNameService() {
 		return SadlCopyQualifiedNameService;
+	}
+	
+	def Class<? extends ReferenceProposalCreator> bindReferenceProposalCreator() {
+		return SadlReferenceProposalCreator;
 	}
 	
 }

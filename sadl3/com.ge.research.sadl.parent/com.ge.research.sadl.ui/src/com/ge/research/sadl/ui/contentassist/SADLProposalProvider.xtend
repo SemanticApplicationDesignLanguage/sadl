@@ -305,7 +305,9 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				}
 			}
 			else if (pm instanceof SadlSimpleTypeReference) {
-				return
+				// TODO: akitta why do we return here?
+				// This does not work then: uri "myUri". Foo is a class. myFoo is a F<|>
+				// return
 			}
 			else if (pm instanceof SadlPropertyInitializer) {
 				if ((pm as SadlPropertyInitializer).property === null) {
