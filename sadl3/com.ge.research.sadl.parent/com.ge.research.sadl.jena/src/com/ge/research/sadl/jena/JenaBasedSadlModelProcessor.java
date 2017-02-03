@@ -61,6 +61,7 @@ import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
+import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.RangeValueType;
 import com.ge.research.sadl.model.DeclarationExtensions;
@@ -270,7 +271,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private OntModel sadlImplicitModel = null;
 	private OntModel sadlBuiltinFunctionModel = null;
 
-	private JenaBasedSadlModelValidator modelValidator = null;
+	protected JenaBasedSadlModelValidator modelValidator = null;
 	protected ValidationAcceptor issueAcceptor = null;
 	protected CancelIndicator cancelIndicator = null;
 
@@ -279,6 +280,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected List<String> importsInOrderOfAppearance = null;	// an ordered set of import URIs, ordered by appearance in file.
 	private List<Rule> rules = null;
 	private List<Equation> equations = null;
+	private Equation currentEquation = null;
 	private List<SadlCommand> sadlCommands = null;
 	private SadlCommand targetCommand = null;
 	
@@ -744,7 +746,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		try {
 			if (enableMetricsCollection) {
-				metricsProcessor = new MetricsProcessor(modelName, resource, getConfigMgr(resource, getOwlModelFormat(context)), this);
+				setMetricsProcessor(new MetricsProcessor(modelName, resource, getConfigMgr(resource, getOwlModelFormat(context)), this));
 			}
 		} catch (JenaProcessorException e1) {
 			// TODO Auto-generated catch block
@@ -767,7 +769,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 		// create validator for expressions
 		if (!disableTypeChecking) {
-			modelValidator = new JenaBasedSadlModelValidator(issueAcceptor, theJenaModel, declarationExtensions, this, metricsProcessor);
+			// Note that the call to set the metricsProcessor needs to happen before this call
+			initializeModelValidator();
 		}
 		
 		// process rest of parse tree
@@ -886,8 +889,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //					else {
 //						System.out.println(msg);
 //					}
-					if (metricsProcessor != null) {
-						metricsProcessor.saveMetrics(ConfigurationManager.RDF_XML_ABBREV_FORMAT);
+					if (getMetricsProcessor() != null) {
+						getMetricsProcessor().saveMetrics(ConfigurationManager.RDF_XML_ABBREV_FORMAT);
 					}
 				}
 			} catch (IOException e) {
@@ -1715,6 +1718,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			eq.setArguments(args);
 			eq.setArgumentTypes(argtypes);
 		}
+		// put equation in context for sub-processing
+		setCurrentEquation(eq);
 		Object bdyobj = processExpression(bdy);
 		if (bdyobj instanceof List<?>) {
 			eq.setBody((List<GraphPatternElement>) bdyobj);
@@ -1722,13 +1727,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (bdyobj instanceof GraphPatternElement) {
 			eq.addBodyElement((GraphPatternElement)bdyobj);
 		}
-		if (modelValidator != null) {
+		if (getModelValidator() != null) {
 			// check return type against body expression
 			StringBuilder errorMessageBuilder = new StringBuilder();
-			if (!modelValidator.validate(rtype, bdy, "function return", errorMessageBuilder)) {
+			if (!getModelValidator().validate(rtype, bdy, "function return", errorMessageBuilder)) {
 				issueAcceptor.addError(errorMessageBuilder.toString(), bdy);
 			}
 		}
+		setCurrentEquation(null);	// clear
 		logger.debug("Equation: " + eq.toFullyQualifiedString());
 		return eq;
 	}
@@ -1791,7 +1797,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private NamedNode sadlTypeReferenceToNode(SadlTypeReference rtype) throws JenaProcessorException {
 		com.hp.hpl.jena.rdf.model.Resource rtobj = sadlTypeReferenceToResource(rtype);
 		if (rtobj == null) {
-			throw new JenaProcessorException("SadlTypeReference was not resolved to a model resource.");
+//			throw new JenaProcessorException("SadlTypeReference was not resolved to a model resource.");
+			return null;
 		}
 		if (rtobj.isURIResource()) {
 			NamedNode rtnn = new NamedNode(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getLocalName());
@@ -1957,15 +1964,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		//Validate BinaryOperation expression
 		StringBuilder errorMessage = new StringBuilder();
-		if(modelValidator != null) {
-			if (!modelValidator.validate(expr, errorMessage)) {
+		if(getModelValidator() != null) {
+			if (!getModelValidator().validate(expr, errorMessage)) {
 				issueAcceptor.addError(errorMessage.toString(), expr);
-				if (metricsProcessor != null) {
-					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+				if (getMetricsProcessor() != null) {
+					getMetricsProcessor().addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
 				}
 			}
 			else {
-				Map<EObject, Property> ip = modelValidator.getImpliedPropertiesUsed();
+				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
 				if (ip != null) {
 					Iterator<EObject> ipitr = ip.keySet().iterator();
 					while (ipitr.hasNext()) {
@@ -2731,8 +2738,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
-		if (modelValidator != null) {
-			modelValidator.checkPropertyDomain(getTheJenaModel(), subj, pred, false);
+		if (getModelValidator() != null) {
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, false);
 		}
 		Object sobj = null;
 		Object pobj = null;
@@ -3951,8 +3958,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private void addError(String msg, EObject context) {
 		if (getIssueAcceptor() != null) {
 			getIssueAcceptor().addError(msg, context);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			if (getMetricsProcessor() != null) {
+				getMetricsProcessor().addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
 		}
 		else  if (!generationInProgress){
@@ -3963,8 +3970,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private void addWarning(String msg, EObject context) {
 		if (getIssueAcceptor() != null) {
 			getIssueAcceptor().addWarning(msg, context);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			if (getMetricsProcessor() != null) {
+				getMetricsProcessor().addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
 		}
 		else if (!generationInProgress) {
@@ -6027,11 +6034,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	protected IConfigurationManagerForIDE getConfigMgr(Resource resource, String format) throws ConfigurationException {
-		if (format == null) {
-			format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
-		}
 		if (configMgr == null) {
 			String modelFolderPathname = getModelFolderPath(resource);
+			if (format == null) {
+				format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+			}
 			if ((modelFolderPathname == null && 
 					resource.getURI().toString().startsWith("synthetic")) ||
 							resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST)) {
@@ -6042,6 +6049,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname , format);
 			}
 		}
+		return configMgr;
+	}
+	
+	protected IConfigurationManagerForIDE getConfigMgr() {
 		return configMgr;
 	}
 	
@@ -6154,5 +6165,61 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected void setLookingForFirstProperty(boolean lookingForFirstProperty) {
 		this.lookingForFirstProperty = lookingForFirstProperty;
 	}
+	
+	public Equation getCurrentEquation() {
+		return currentEquation;
+	}
+	
+	protected void setCurrentEquation(Equation currentEquation) {
+		this.currentEquation = currentEquation;
+	}
+	protected JenaBasedSadlModelValidator getModelValidator() throws InvalidTypeException {
+		return modelValidator;
+	}
+	protected void setModelValidator(JenaBasedSadlModelValidator modelValidator) {
+		this.modelValidator = modelValidator;
+	}
+
+	protected void initializeModelValidator(){
+		setModelValidator(new JenaBasedSadlModelValidator(issueAcceptor, getTheJenaModel(), declarationExtensions, this, getMetricsProcessor()));
+	}
+	protected IMetricsProcessor getMetricsProcessor() {
+		return metricsProcessor;
+	}
+	protected void setMetricsProcessor(IMetricsProcessor metricsProcessor) {
+		this.metricsProcessor = metricsProcessor;
+	}
+
+	protected String rdfNodeToString(RDFNode node) {
+		if (node.isLiteral()) {
+			return node.asLiteral().getValue().toString();
+		}
+		else if (node.isURIResource() && getConfigMgr() != null) {
+			String prefix = getConfigMgr().getGlobalPrefix(node.asResource().getNameSpace());
+			if (prefix != null) {
+				return prefix + ":" + node.asResource().getLocalName();
+			}
+		}
+		return node.toString();
+	}
+
+	protected String conceptIdentifierToString(ConceptIdentifier ci) {
+		if (ci instanceof ConceptName) {
+			if (getConfigMgr() != null && ((ConceptName)ci).getPrefix() == null && ((ConceptName)ci).getNamespace() != null) {
+				String ns = ((ConceptName)ci).getNamespace();
+				if (ns.endsWith("#")) {
+					ns = ns.substring(0, ns.length() - 1);
+				}
+				String prefix = getConfigMgr().getGlobalPrefix(ns);
+				if (prefix == null) {
+					return ((ConceptName)ci).getName();
+				}
+				((ConceptName)ci).setPrefix(prefix);
+			}
+			return ((ConceptName)ci).toString();
+		}
+		return ci.toString();
+	}
+
 
 }
