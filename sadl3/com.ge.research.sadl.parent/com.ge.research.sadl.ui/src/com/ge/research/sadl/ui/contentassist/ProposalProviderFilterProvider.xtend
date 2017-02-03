@@ -52,6 +52,7 @@ import org.eclipse.xtext.validation.Issue
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * Provides filter for removing items from the content proposal.
@@ -98,11 +99,21 @@ class ProposalProviderFilterProvider {
 				predicates.add(currentModel.createPropertyInitializerFilter)
 			} else if (clazz === SADL_CLASS_OR_PROPERTY_DECLARATION && key == 'SADLPRIMARYTYPEREFERENCE_TYPE') {
 				// 'x is a type of' => all classes and properties.
+			} else if (clazz === SADL_CLASS_OR_PROPERTY_DECLARATION && key == 'SADLSTATEMENT_SUPERELEMENT') {
+				// 'Person is a class. {Man, Woman} are types of'
+				// => for super elements, imported types should be there except the defined types: Man, Woman.
+				val predicate = Predicates.and(currentModel.createPrimaryTypeRefFilter, // First get the available types.
+				currentModel.createSelfClassOrPropertyFilter); // Then filter out those which we are defining right now.
+				predicates.add(predicate);
+			} else if (clazz == SADL_RANGE_RESTRICTION) {
+				// 'Person is a class described by birth with a single value of type '
+				// => allow all primitive and complex, visible types.
+				predicates.add(Predicates.alwaysTrue);
 			} else {
 				println('''Unhandled case with class: «clazz» and key: «key»''');
 			}
 		}
-		return if (predicates.nullOrEmpty) Predicates.alwaysFalse else Predicates.or(predicates);
+		return if(predicates.nullOrEmpty) Predicates.alwaysFalse else Predicates.or(predicates);
 	}
 
 	private def createPropertyInitializerFilter(EObject currentModel) {
@@ -152,6 +163,21 @@ class ProposalProviderFilterProvider {
 			}
 		}
 		return false
+	}
+
+	private def createSelfClassOrPropertyFilter(EObject currentModel) {
+		if (currentModel instanceof SadlClassOrPropertyDeclaration) {
+			val filteredUris = currentModel.classOrProperty.map[EcoreUtil.getURI(it)];
+			val Predicate<IEObjectDescription> predicate = [
+				if (EClass === SADL_RESOURCE) {
+					return !filteredUris.contains(EObjectURI);
+				}
+				return false;
+			]
+			return predicate;
+
+		}
+		return Predicates.alwaysFalse;
 	}
 
 	private def createPrimaryTypeRefFilter(EObject currentModel) {
