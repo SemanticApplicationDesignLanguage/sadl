@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 
 import com.ge.research.sadl.errorgenerator.generator.*;
 import com.ge.research.sadl.model.CircularDefinitionException;
@@ -897,10 +899,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
 					leftTypeCheckInfo, rightTypeCheckInfo);
 			if (isNumericOperator(((BinaryOperation) expression).getOp())) {
-				if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo)) {
+				if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo) && !isNumericWithImpliedProperty(leftTypeCheckInfo, ((BinaryOperation)expression).getLeft())) {
 					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
 				}
-				if (rightTypeCheckInfo != null && !isNumeric(rightTypeCheckInfo)) {
+				if (rightTypeCheckInfo != null && !isNumeric(rightTypeCheckInfo) && !isNumericWithImpliedProperty(rightTypeCheckInfo, ((BinaryOperation)expression).getRight())) {
 					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
 				}
 				ConceptName decimalLiteralConceptName = new ConceptName(XSD.decimal.getURI());
@@ -957,6 +959,30 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 	
+	private boolean isNumericWithImpliedProperty(TypeCheckInfo tci, Expression expr) throws DontTypeCheckException, InvalidNameException, InvalidTypeException {
+		if (tci.getImplicitProperties() != null) {
+			Iterator<ConceptName> litr = tci.getImplicitProperties().iterator();
+			while (litr.hasNext()) {
+				ConceptName cn = litr.next();
+				Property prop = theJenaModel.getProperty(cn.getUri());
+				if (prop.canAs(ObjectProperty.class)) {
+					cn.setType(ConceptType.OBJECTPROPERTY);
+				}
+				else if (prop.canAs(DatatypeProperty.class)) {
+					cn.setType(ConceptType.DATATYPEPROPERTY);
+				}
+				else {
+					cn.setType(ConceptType.RDFPROPERTY);
+				}
+				TypeCheckInfo newtci = getTypeInfoFromRange(cn, prop, expr);
+				if (isNumeric(newtci)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean isNumeric(TypeCheckInfo tci) {
 		ConceptIdentifier ci;
 		if (tci.getTypeCheckType() != null) {
