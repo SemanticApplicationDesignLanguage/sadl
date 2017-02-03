@@ -51,25 +51,24 @@ import java.util.Map
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.Assignment
+import org.eclipse.xtext.CompoundElement
 import org.eclipse.xtext.CrossReference
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.EnumLiteralDeclaration
+import org.eclipse.xtext.EnumRule
 import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.Keyword
 import org.eclipse.xtext.RuleCall
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.naming.QualifiedName
-import org.eclipse.xtext.resource.EObjectAtOffsetHelper
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.impl.FilteringScope
+import org.eclipse.xtext.ui.editor.contentassist.AbstractContentProposalProvider
+import org.eclipse.xtext.ui.editor.contentassist.CompletionProposalComputer
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 import org.eclipse.xtext.util.IAcceptor
 import org.eclipse.xtext.validation.Issue
-import org.eclipse.xtext.AbstractRule
-import org.eclipse.xtext.ui.editor.contentassist.CompletionProposalComputer
-import org.eclipse.xtext.ui.editor.contentassist.AbstractContentProposalProvider.NullSafeCompletionProposalAcceptor
-import org.eclipse.xtext.AbstractElement
-import org.eclipse.xtext.ui.editor.contentassist.IFollowElementAcceptor
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -187,6 +186,26 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		println(field.get(c))
 		println();
 		
+	}
+	
+	override void complete_SadlDataType(EObject model, RuleCall ruleCall, ContentAssistContext context,
+		ICompletionProposalAcceptor acceptor) {
+
+		// This is required to make sure data types are available for properties.
+		if (model?.eContainer instanceof SadlProperty) {
+			val rule = ruleCall.rule;
+			if (rule instanceof EnumRule) {
+				val alternatives = rule.alternatives;
+				if (alternatives instanceof CompoundElement) {
+					alternatives.elements.filter(EnumLiteralDeclaration).forEach [
+						val proposal = literal?.value;
+						if (!proposal.nullOrEmpty) {
+							acceptor.accept(createCompletionProposal(proposal, proposal, image, context));
+						}
+					];
+				}
+			}
+		}
 	}
 
 	override void createProposals(ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
