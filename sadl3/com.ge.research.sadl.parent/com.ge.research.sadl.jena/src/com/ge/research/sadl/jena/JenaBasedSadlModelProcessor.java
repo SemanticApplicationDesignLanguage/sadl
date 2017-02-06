@@ -63,6 +63,7 @@ import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.ConceptName.RangeValueType;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ModelError;
@@ -1764,7 +1765,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
 			EList<SadlParameterDeclaration> params, String location)
-			throws JenaProcessorException, TranslationException {
+			throws JenaProcessorException, TranslationException, InvalidNameException {
 		Equation eq = new Equation(declarationExtensions.getConcreteName(nm));
 		eq.setNamespace(declarationExtensions.getConceptNamespace(nm));
 		eq.setExternal(true);
@@ -1794,20 +1795,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return eq;
 	}
 	
-	private NamedNode sadlTypeReferenceToNode(SadlTypeReference rtype) throws JenaProcessorException {
-		com.hp.hpl.jena.rdf.model.Resource rtobj = sadlTypeReferenceToResource(rtype);
-		if (rtobj == null) {
-//			throw new JenaProcessorException("SadlTypeReference was not resolved to a model resource.");
-			return null;
-		}
-		if (rtobj.isURIResource()) {
-			NamedNode rtnn = new NamedNode(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getLocalName());
-			rtnn.setNamespace(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getNameSpace());
-			return rtnn;
-		}
-		else {
-			throw new JenaProcessorException("SadlTypeReference is not a URI resource");
-		}
+	private NamedNode sadlTypeReferenceToNode(SadlTypeReference rtype) throws JenaProcessorException, InvalidNameException, TranslationException {
+		ConceptName cn = sadlSimpleTypeReferenceToConceptName(rtype);
+		NamedNode rtnn = new NamedNode(cn.getUri());
+		rtnn.setNodeType(conceptTypeToNodeType(cn.getType()));
+		return rtnn;
+//		com.hp.hpl.jena.rdf.model.Resource rtobj = sadlTypeReferenceToResource(rtype);
+//		if (rtobj == null) {
+////			throw new JenaProcessorException("SadlTypeReference was not resolved to a model resource.");
+//			return null;
+//		}
+//		if (rtobj.isURIResource()) {
+//			NamedNode rtnn = new NamedNode(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getLocalName());
+//			rtnn.setNamespace(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getNameSpace());
+//			return rtnn;
+//		}
 	}
 	
 	protected void addEquation(Resource resource, Equation eq, EObject nm) {
@@ -4821,6 +4823,78 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		throw new JenaProcessorException("Unable to convert SadlTypeReference '" + sadlTypeRef + "' to OntResource");
 	}
 	
+	private ConceptName sadlSimpleTypeReferenceToConceptName(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
+		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
+			SadlResource strSR = ((SadlSimpleTypeReference)sadlTypeRef).getType();
+			OntConceptType ctype;
+			try {
+				ctype = declarationExtensions.getOntConceptType(strSR);
+			} catch (CircularDefinitionException e) {
+				ctype = e.getDefinitionType();
+				addError(e.getMessage(), sadlTypeRef);
+			}
+			String strSRUri = declarationExtensions.getConceptUri(strSR);	
+			if (strSRUri == null) {
+				if (ctype.equals(OntConceptType.VARIABLE)) {
+					//throw new JenaProcessorException("Failed to get variable URI of SadlResource in sadlSimpleTypeReferenceToConceptName");
+					// be silent? during clean these URIs won't be found
+				}
+//				throw new JenaProcessorException("Failed to get concept URI of SadlResource in sadlSimpleTypeReferenceToConceptName");
+				// be silent? during clean these URIs won't be found
+				return null;
+			}
+			if (ctype.equals(OntConceptType.CLASS)) {
+				ConceptName cn = new ConceptName(strSRUri);
+				cn.setType(ConceptType.ONTCLASS);
+				return cn;
+			}
+			else if (ctype.equals(OntConceptType.CLASS_LIST)) {
+				ConceptName cn = new ConceptName(strSRUri);
+				cn.setType(ConceptType.ONTCLASS);
+				cn.setRangeValueType(RangeValueType.LIST);
+				return cn;
+			}
+			else if (ctype.equals(OntConceptType.DATATYPE_LIST)) {
+				ConceptName cn = new ConceptName(strSRUri);
+				cn.setType(ConceptType.RDFDATATYPE);
+				cn.setRangeValueType(RangeValueType.LIST);
+				return cn;
+			}
+			else if (ctype.equals(OntConceptType.INSTANCE)) {
+				ConceptName cn = new ConceptName(strSRUri);
+				cn.setType(ConceptType.INDIVIDUAL);
+				return cn;
+			}
+			else if (ctype.equals(OntConceptType.DATATYPE)) {				
+				ConceptName cn = new ConceptName(strSRUri);
+				cn.setType(ConceptType.RDFDATATYPE);
+				return cn;
+			}
+			else if (ctype.equals(OntConceptType.CLASS_PROPERTY)) {
+				ConceptName cn = new ConceptName(strSRUri);
+				cn.setType(ConceptType.OBJECTPROPERTY);
+				return cn;
+			}
+			else if (ctype.equals(OntConceptType.DATATYPE_PROPERTY)) {
+				ConceptName cn = new ConceptName(strSRUri);
+				cn.setType(ConceptType.DATATYPEPROPERTY);
+				return cn;
+			}
+			else {
+				throw new JenaProcessorException("SadlSimpleTypeReference '" + strSRUri + "' was of a type not yet handled: " + ctype.toString());
+			}
+		}
+		else if (sadlTypeRef instanceof SadlPrimitiveDataType) {
+			com.hp.hpl.jena.rdf.model.Resource trr = getSadlPrimitiveDataTypeResource((SadlPrimitiveDataType) sadlTypeRef);
+			ConceptName cn = new ConceptName(trr.getURI());
+			cn.setType(ConceptType.RDFDATATYPE);
+			return cn;
+		}
+		else {
+			throw new JenaProcessorException("SadlTypeReference is not a URI resource");
+		}
+	}
+	
 	private Object sadlTypeReferenceToObject(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
 		OntResource rsrc = null;
 		// TODO How do we tell if this is a union versus an intersection?						
@@ -5018,6 +5092,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private com.hp.hpl.jena.rdf.model.Resource processSadlPrimitiveDataType(SadlClassOrPropertyDeclaration element, SadlPrimitiveDataType sadlTypeRef, String newDatatypeUri) throws JenaProcessorException {
+		com.hp.hpl.jena.rdf.model.Resource onDatatype = getSadlPrimitiveDataTypeResource(sadlTypeRef);
+		if (newDatatypeUri == null) {
+			return onDatatype;
+		}
+		SadlDataTypeFacet facet = element.getFacet();
+		OntClass datatype = createRdfsDatatype(newDatatypeUri, null, onDatatype, facet);
+		return datatype;
+	}
+	
+	private com.hp.hpl.jena.rdf.model.Resource getSadlPrimitiveDataTypeResource(SadlPrimitiveDataType sadlTypeRef)
+			throws JenaProcessorException {
 		SadlDataType pt = sadlTypeRef.getPrimitiveType();
 		String typeStr = pt.getLiteral();
 		com.hp.hpl.jena.rdf.model.Resource onDatatype;
@@ -5046,12 +5131,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else {
 			throw new JenaProcessorException("Unexpected primitive data type: " + typeStr);
 		}
-		if (newDatatypeUri == null) {
-			return onDatatype;
-		}
-		SadlDataTypeFacet facet = element.getFacet();
-		OntClass datatype = createRdfsDatatype(newDatatypeUri, null, onDatatype, facet);
-		return datatype;
+		return onDatatype;
 	}
 	private OntClass createRdfsDatatype(String newDatatypeUri, List<RDFNode> unionOfTypes, com.hp.hpl.jena.rdf.model.Resource onDatatype,
 			SadlDataTypeFacet facet) throws JenaProcessorException {
