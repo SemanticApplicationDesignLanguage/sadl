@@ -61,7 +61,6 @@ import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
-import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.RangeValueType;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ModelError;
@@ -268,8 +267,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private JenaBasedSadlModelValidator modelValidator = null;
 	protected ValidationAcceptor issueAcceptor = null;
 	protected CancelIndicator cancelIndicator = null;
-
-	private boolean lookingForFirstProperty = false;	// in rules and other constructs, the first property may be significant (the binding, for example)
 
 	protected List<String> importsInOrderOfAppearance = null;	// an ordered set of import URIs, ordered by appearance in file.
 	private List<Rule> rules = null;
@@ -600,7 +597,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private String reasonerClassName = null;
 	private String translatorClassName = null;
 
-	protected boolean ignoreUnittedQuantities;
+	private boolean ignoreUnittedQuantities;
 
     public static void refreshResource(Resource newRsrc) {
     	try {
@@ -1985,15 +1982,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 			else {
-				Map<EObject, Property> ip = modelValidator.getImpliedPropertiesUsed();
-				if (ip != null) {
-					Iterator<EObject> ipitr = ip.keySet().iterator();
-					while (ipitr.hasNext()) {
-						EObject eobj = ipitr.next();
-						OntModelProvider.addImpliedProperty(expr.eResource(), eobj, ip.get(eobj));
-					}
-					// TODO must add implied properties to rules, tests, etc.
-				}
+				OntModelProvider.addImpliedProperties(expr.eResource(), modelValidator.getImpliedPropertiesUsed());
+				// TODO must add implied properties to rules, tests, etc.
 			}
 		}
 		
@@ -3778,13 +3768,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (context instanceof SadlPrimitiveDataType && ((SadlPrimitiveDataType)context).isList()) {
 			rngValueType = RangeValueType.LIST;
 		}
-		if (ignoreUnittedQuantities && rngNode.isURIResource() && rngNode.canAs(OntClass.class) && 
-				rngNode.asResource().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-			com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
-			rngNode = effectiveRng;
-			getTheJenaModel().remove(prop,RDF.type, OWL.ObjectProperty);
-			getTheJenaModel().add(prop, RDF.type, OWL.DatatypeProperty);
-		}
 		RDFNode propOwlType = null;
 		boolean existingRangeAnywhere = false;
 		boolean existingRangeThisModel = false;
@@ -4281,7 +4264,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		String propuri = declarationExtensions.getConceptUri(prop);
 		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
-			OntProperty oprop = getTheJenaModel().getOntProperty(propuri);
+			ObjectProperty oprop = getTheJenaModel().getObjectProperty(propuri);
 			if (oprop == null) {
 				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			}
@@ -4320,11 +4303,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							}
 						}
 						else {
-							com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
-							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, effectiveRng);
-							if (lval != null) {
-								addInstancePropertyValue(inst, oprop, lval);
-							}
+							throw new JenaProcessorException("Ignore UnittedQuantities not yet implemented");
 						}
 					}
 					else {
@@ -4420,13 +4399,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			throw new JenaProcessorException("unhandled property type");
 		}
 	}
-	private com.hp.hpl.jena.rdf.model.Resource getUnittedQuantityValueRange() {
-		com.hp.hpl.jena.rdf.model.Resource effectiveRng = getTheJenaModel().getOntProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI).getRange();
-		if (effectiveRng == null) {
-			effectiveRng = XSD.decimal;
-		}
-		return effectiveRng;
-	}
 	
 	private void addInstancePropertyValue(Individual inst, Property prop, RDFNode value) {
 		// TODO need to add validation call here 
@@ -4434,7 +4406,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '" + inst.toString() + "'");
 	}
 
-	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, OntProperty oprop, OntResource rng, String literalNumber, String unit) {
+	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, ObjectProperty oprop, OntResource rng, String literalNumber, String unit) {
 		Individual unittedVal;
 		if (rng != null && rng.canAs(OntClass.class)) {
 			unittedVal = getTheJenaModel().createIndividual(rng.as(OntClass.class));
@@ -5122,7 +5094,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return anon;
 	}
 
-	protected OntClass processSadlPropertyCondition(SadlPropertyCondition sadlPropCond) throws JenaProcessorException {
+	private OntClass processSadlPropertyCondition(SadlPropertyCondition sadlPropCond) throws JenaProcessorException {
 		OntClass retval = null;
 		SadlResource sr = ((SadlPropertyCondition)sadlPropCond).getProperty();
 		String propUri = declarationExtensions.getConceptUri(sr);
@@ -5162,7 +5134,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return retval;
 	}
 
-	protected OntClass sadlConditionToOntClass(SadlCondition cond, Property prop, OntConceptType propType) throws JenaProcessorException {
+	private OntClass sadlConditionToOntClass(SadlCondition cond, Property prop, OntConceptType propType) throws JenaProcessorException {
 		OntClass retval = null;
 		if (prop == null) {
 			addError(SadlErrorMessages.CANNOT_CREATE.get("restriction", "unresolvable property"), cond);
@@ -6083,7 +6055,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //		}
 //		return false;
 //	}
-	protected Object translateAndApplyImpliedProperty(Expression expr, Property impliedPropertyWrapper) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object translateAndApplyImpliedProperties(Expression expr, Property impliedPropertyWrapper) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
 			serialize.append("impliedProperty('");
 			serialize.append(impliedPropertyWrapper.toString());
@@ -6130,47 +6102,4 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return cm.getTranslator();
 	}
 	
-	public List<ConceptName> getImpliedProperties(com.hp.hpl.jena.rdf.model.Resource first) {
-		List<ConceptName> retlst = null;
-		// check superclasses
-		if (first.canAs(OntClass.class)) {
-			OntClass ontcls = first.as(OntClass.class);
-			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
-			while (eitr.hasNext()) {
-				OntClass supercls = eitr.next();
-				List<ConceptName> scips = getImpliedProperties(supercls);
-				if (scips != null) {
-					if (retlst == null) {
-						retlst = scips;
-					}
-					else {
-						retlst.addAll(scips);
-					}
-				}
-			}
-		}
-		StmtIterator sitr = getTheJenaModel().listStatements(first, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
-		if (sitr.hasNext()) {
-			if (retlst == null) {
-				retlst = new ArrayList<ConceptName>();
-			}
-			while (sitr.hasNext()) {
-				RDFNode obj = sitr.nextStatement().getObject();
-				if (obj.isURIResource()) {
-					retlst.add(new ConceptName(obj.asResource().getURI()));
-				}
-			}
-			return retlst;
-		}
-		return retlst;
-	}
-	
-	protected boolean isLookingForFirstProperty() {
-		return lookingForFirstProperty;
-	}
-
-	protected void setLookingForFirstProperty(boolean lookingForFirstProperty) {
-		this.lookingForFirstProperty = lookingForFirstProperty;
-	}
-
 }
