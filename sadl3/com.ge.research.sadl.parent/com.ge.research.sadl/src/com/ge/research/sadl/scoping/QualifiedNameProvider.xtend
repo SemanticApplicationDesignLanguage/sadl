@@ -21,12 +21,12 @@ import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.google.inject.Inject
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.naming.QualifiedName
-import org.eclipse.xtext.naming.IQualifiedNameConverter
-import org.eclipse.emf.common.util.URI
 
 class QualifiedNameProvider implements IQualifiedNameProvider {
 
@@ -46,11 +46,14 @@ class QualifiedNameProvider implements IQualifiedNameProvider {
 					return QualifiedName.create(uri.trimFragment.toString, uri.fragment)
 				}
 			}
-			val model = EcoreUtil2.getContainerOfType(obj, SadlModel)
 			val concreteName = obj.concreteName
+			if (concreteName === null) {
+				return null;
+			}
 			if (concreteName.indexOf(':') != -1) {
 				return nameConverter.toQualifiedName(concreteName)
 			}
+			val model = EcoreUtil2.getContainerOfType(obj, SadlModel)
 			return model.fullyQualifiedName.append(concreteName)
 		}
 		return null
