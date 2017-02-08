@@ -1214,10 +1214,10 @@ public class OntologyGraphGenerator {
 		listCount = 0;	// restart counter
 		for(int i = 0; i < arraySize; i++) {
 			GraphSegment gs = data.get(i);
-			gs.implementUriStrategy(uriStrategy);
-			array[i+listCount][0] = gs.getSubject() != null ? gs.getSubject().toString() : null;
-			array[i+listCount][1] = gs.getPredicate() != null ? gs.getPredicate().toString() : null;
-			array[i+listCount][2] = gs.getObject() != null ? gs.getObject().toString() : null;
+			gs.setUriStrategy(uriStrategy);
+			array[i+listCount][0] = gs.getSubject() != null ? gs.subjectToString() : null;
+			array[i+listCount][1] = gs.getPredicate() != null ? gs.predicateToString() : null;
+			array[i+listCount][2] = gs.getObject() != null ? gs.objectToString() : null;
 			dataFound = true;
 			if (gs.getHeadAttributes() != null) {
 				array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);

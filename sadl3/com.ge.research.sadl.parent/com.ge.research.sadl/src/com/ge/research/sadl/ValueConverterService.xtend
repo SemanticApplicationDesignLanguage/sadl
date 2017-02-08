@@ -80,7 +80,7 @@ class ValueConverterService extends AbstractDeclarativeValueConverterService {
 
 		override toString(String value) throws ValueConverterException {
 			val qn = converter.toQualifiedName(value);
-			val converted = QualifiedName.create(qn.segments.map[nameConverter.toString])
+			val converted = QualifiedName.create(qn.segments.map[nameConverter.toString(it)])
 			return converter.toString(converted)
 		}
 
