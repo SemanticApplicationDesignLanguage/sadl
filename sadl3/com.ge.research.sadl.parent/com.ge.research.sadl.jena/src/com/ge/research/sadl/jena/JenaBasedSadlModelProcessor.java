@@ -1719,7 +1719,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EQUATION_URI));
 		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EQ_EXPRESSION_URI);
 		Literal literal = getTheJenaModel().createTypedLiteral(eq.toString());
-		eqinst.addProperty(dtp, literal);
+		if (eqinst != null && dtp != null) {
+			// these can be null during clean/build with resource open in editor
+			eqinst.addProperty(dtp, literal);
+		}
 	}
 	
 	protected Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
@@ -1780,11 +1783,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EXTERNAL_URI));
 		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI);
 		Literal literal = getTheJenaModel().createTypedLiteral(uri);
-		eqinst.addProperty(dtp,literal);
-		if (location != null && location.length() > 0) {
-			DatatypeProperty dtp2 = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN);
-			Literal literal2 = getTheJenaModel().createTypedLiteral(location);
-			eqinst.addProperty(dtp2, literal2);
+		if (eqinst != null && dtp != null) {
+			// these can be null if a resource is open in the editor and a clean/build is performed
+			eqinst.addProperty(dtp,literal);
+			if (location != null && location.length() > 0) {
+				DatatypeProperty dtp2 = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN);
+				Literal literal2 = getTheJenaModel().createTypedLiteral(location);
+				eqinst.addProperty(dtp2, literal2);
+			}
 		}
 	}
 	
