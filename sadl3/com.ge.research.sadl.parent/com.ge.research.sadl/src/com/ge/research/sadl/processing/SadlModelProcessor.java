@@ -738,7 +738,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return node;
 	}
 
-	private ConceptType nodeTypeToConceptType(NodeType nt) throws TranslationException {
+	public ConceptType nodeTypeToConceptType(NodeType nt) throws TranslationException {
 		if (nt.equals(NodeType.ClassNode)) {
 			return ConceptType.ONTCLASS;
 		}
@@ -754,8 +754,35 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		else if (nt.equals(NodeType.VariableNode)) {
 			return ConceptType.VARIABLE;
 		}
+		else if (nt.equals(NodeType.DataTypeNode)) {
+			return ConceptType.RDFDATATYPE;
+		}
 		else {
 			throw new TranslationException("NodeType '" + nt.toString() + "' cannot be converted to a ConceptType");
+		}
+	}
+
+	protected NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
+		if (ct.equals(ConceptType.ONTCLASS)) {
+			return NodeType.ClassNode;
+		}
+		else if (ct.equals(ConceptType.INDIVIDUAL)) {
+			return NodeType.InstanceNode;
+		}
+		else if (ct.equals(ConceptType.DATATYPEPROPERTY)) {
+			return NodeType.DataTypeProperty;
+		}
+		else if (ct.equals(ConceptType.OBJECTPROPERTY)) {
+			return NodeType.ObjectProperty;
+		}
+		else if (ct.equals(ConceptType.VARIABLE)) {
+			return NodeType.VariableNode;
+		}
+		else if (ct.equals(ConceptType.RDFDATATYPE)) {
+			return NodeType.DataTypeNode;
+		}
+		else {
+			throw new TranslationException("ConceptType '" + ct.toString() + "' cannot be converted to a NodeType");
 		}
 	}
 
