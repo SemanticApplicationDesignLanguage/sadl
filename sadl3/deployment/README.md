@@ -83,7 +83,7 @@ docker ps \
 && cd build_sadl_docker/ \
 && git clone https://github.com/crapo/sadlos2.git \
 && cd sadlos2/ \
-&& git checkout origin/xtext_web_prototype -b xtext_web_prototype \
+&& git checkout origin/web_sadl -b web_sadl \
 && cd .. \
 && git clone https://github.com/TypeFox/sadl-jupyterlab.git \
 && git clone https://github.com/R-Brain/jupyterlab.git \
