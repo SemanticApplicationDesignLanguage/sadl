@@ -1,22 +1,26 @@
 package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
-import com.ge.research.sadl.processing.CompositeModelProcessor
 import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
-import com.ge.research.sadl.tests.AbstractSADLParsingTest
 import com.google.inject.Inject
-import org.eclipse.emf.ecore.resource.Resource
 import com.google.inject.Provider
-import com.ge.research.sadl.processing.IModelProcessor
+import org.junit.After
+import org.eclipse.emf.ecore.resource.Resource
+import com.ge.research.sadl.processing.SadlModelProcessorProvider.CompositeModelProcessor
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
 
 abstract class AbstractProcessorTest extends AbstractSADLParsingTest {
 	
 	@Inject IModelProcessorProvider processorProvider
 	
-	@Inject def void registerProcessors(SadlModelProcessorProvider processorProvider, JenaBasedSadlModelProcessor instance) {
-		val Provider<IModelProcessor> provider = [instance];
-		processorProvider.registerProcessor(provider);
+	@After
+	def void tearDown() {
+		SadlModelProcessorProvider.SADL_PROCESSOR_Registry.clear
+	}
+	
+	@Inject def void registerProcessors(Provider<JenaBasedSadlModelProcessor> sadlProcessorProvider) {
+		SadlModelProcessorProvider.SADL_PROCESSOR_Registry.add([sadlProcessorProvider.get])
 	}
 	
 	def JenaBasedSadlModelProcessor getReqProcessor(Resource resource) {

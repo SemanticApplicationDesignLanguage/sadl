@@ -47,7 +47,7 @@ SADL also includes POJava licensed under Apache License V2.0.
 
    <includes
          id="org.eclipse.xtext.redist"
-         version="0.0.0"/>
+         version="2.9.2.v201603040440"/>
 
    <includes
          id="org.eclipse.emf.common"
@@ -161,7 +161,7 @@ SADL also includes POJava licensed under Apache License V2.0.
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.xtext.testing"
+         id="org.eclipse.xtext.junit4"
          download-size="0"
          install-size="0"
          version="0.0.0"

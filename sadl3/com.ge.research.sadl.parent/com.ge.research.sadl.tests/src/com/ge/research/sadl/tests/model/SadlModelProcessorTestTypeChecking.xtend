@@ -8,20 +8,25 @@
  */
 package com.ge.research.sadl.tests.model
 
-import com.ge.research.sadl.tests.SADLInjectorProvider
+import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Inject
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
-import org.junit.Assert
+import com.google.inject.Provider
+import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.junit4.util.ParseHelper
+import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Assert
 
 @RunWith(XtextRunner)
-@InjectWith(SADLInjectorProvider)
+//@InjectWith(RequirementsInjectorProvider)
 class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
+	@Inject Provider<JenaBasedSadlModelProcessor> sadlProcessorProvider
+	@Inject IPreferenceValuesProvider preferenceProvider
 	
 	@Test
 	def void testRuleVariableAsDomain() {
@@ -46,11 +51,13 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 			 Rule R1: if p1 is a Person and p2 is a Pet and p2 has owns p1 then p1 has caredFor true.
  		'''.sadl
 		sadlModel.assertOnlyWarningsOrInfo
-		val issues = validationTestHelper.validate(sadlModel)
-		Assert.assertNotNull(issues)
-		Assert.assertEquals(2, issues.size)
-		Assert.assertEquals(issues.get(0).message, "Variable p2 is of type http://sadl.org/Test1.sadl#Pet which is not in domain of property http://sadl.org/Test1.sadl#owns")
-		Assert.assertEquals(issues.get(1).message, "Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
+		val issues1 = validationTestHelper.validate(sadlModel)
+//		val List<Issue> issues1= newArrayList
+//		sprocessor1.onValidate(sadlModel1, new ValidationAcceptor([issues1 += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel1)))
+		Assert.assertNotNull(issues1)
+		Assert.assertTrue(issues1.size == 2)
+		Assert.assertEquals(issues1.get(0).message, "Variable p2 is of type http://sadl.org/Test1.sadl#Pet which is not in domain of property http://sadl.org/Test1.sadl#owns")
+		Assert.assertEquals(issues1.get(1).message, "Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
 	}
 	
 	@Test

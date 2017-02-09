@@ -2,19 +2,18 @@
 <?eclipse version="3.4"?>
 <plugin>
 	<extension
-	      point="com.ge.research.sadl.sadl_model_processor">
+	      point="com.ge.research.sadl.ui.sadl_model_processor">
 	    <sadlProcessor
 	          class="com.ge.research.sadl.jena.JenaBasedSadlModelProcessor"/>
 	</extension>
 	<extension
-	      point="com.ge.research.sadl.sadl_import_processor">
+	      point="com.ge.research.sadl.ui.sadl_import_processor">
 	    <sadlImportProcessor
 	          class="com.ge.research.sadl.jena.JenaBasedSadlImportProcessor"/>
 	</extension>
 	<extension
-	      point="com.ge.research.sadl.sadl_inference_processor">
+	      point="com.ge.research.sadl.ui.sadl_inference_processor">
 	    <sadlImportProcessor
-           class="com.ge.research.sadl.jena.JenaBasedSadlInferenceProcessor">
-     </sadlImportProcessor>
+	          class="com.ge.research.sadl.jena.JenaBasedSadlInferenceProcessor"/>
 	</extension>
 </plugin>

@@ -2595,9 +2595,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else if (uri.equals(XSD.xint.getURI())) {
 				return true;
 			}
-			else if (uri.equals(XSD.xlong.getURI())) {
-				return true;
-			}
 		}
 		return false;
 	}

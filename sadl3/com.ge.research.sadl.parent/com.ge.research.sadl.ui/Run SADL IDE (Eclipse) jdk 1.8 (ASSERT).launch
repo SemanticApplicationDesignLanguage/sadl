@@ -12,7 +12,7 @@
 <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Run SADL IDE (Eclipse) jdk 1.8 (ASSERT)"/>
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="includeOptional" value="true"/>
-<stringAttribute key="location" value="C:\Users\200005201\sadl3-master2\runtime-New_configuration"/>
+<stringAttribute key="location" value="${workspace_loc}/runtime-configuration"/>
 <mapAttribute key="org.eclipse.debug.core.preferred_launchers">
 <mapEntry key="[debug]" value="org.eclipse.pde.ui.RuntimeWorkbench"/>
 </mapAttribute>

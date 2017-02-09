@@ -27,7 +27,8 @@ import com.ge.research.sadl.scoping.QualifiedNameConverter
 import com.ge.research.sadl.scoping.QualifiedNameProvider
 import com.ge.research.sadl.validation.ResourceValidator
 import com.ge.research.sadl.validation.SoftLinkingMessageProvider
-import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
+import com.google.inject.Binder
+import com.google.inject.Singleton
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.linking.impl.DefaultLinkingService
 import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
@@ -44,43 +45,42 @@ import java.io.IOException
  */
 class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	
-	
-	@Override
-	override bindIValueConverterService() {
-		return ValueConverterService;
-	}
-	
-	@Override
 	override bindIQualifiedNameProvider() {
-		return QualifiedNameProvider;
+		QualifiedNameProvider
 	}
 	
-	def Class<? extends IOutputConfigurationProvider> bindIOutputConfigurationProvider() {
-		return SADLOutputConfigurationProvider;	
-	}
-	
-	def Class<? extends IContextualOutputConfigurationProvider> bindIContextualOutputConfigurationProvider() {
-		return SADLOutputConfigurationProvider;
+	override configure (Binder binder)
+	{
+		super.configure(binder);
+		binder.bind(IOutputConfigurationProvider).to(SADLOutputConfigurationProvider).in(Singleton);
 	}
 	
 	def Class<? extends IQualifiedNameConverter> bindIQualifiedNameCoverter() {
-		return QualifiedNameConverter;
+		QualifiedNameConverter
 	}
 	
 	def Class<? extends LinkingDiagnosticMessageProvider> bindILinkingDiagnosticMessageProvider() {
-		return SoftLinkingMessageProvider;
+		SoftLinkingMessageProvider
+	}
+	
+	override bindIValueConverterService() {
+		ValueConverterService
 	}
 	
 	def Class<? extends ResourceValidatorImpl> bindResourceValidatorImpl() {
-		return ResourceValidator;
+		return ResourceValidator
 	}
 	
 	def Class<? extends DefaultResourceDescriptionStrategy> bindResourceDescritpionStrategy() {
-		return ResourceDescriptionStrategy;
+		return ResourceDescriptionStrategy
+	}
+	
+	override bindIGenerator2() {
+		super.bindIGenerator2()
 	}
 	
 	def Class<? extends DefaultLinkingService> bindDefaultLinkingService() {
-		return ErrorAddingLinkingService;
+		ErrorAddingLinkingService
 	}
 	
 	def Class<? extends IParseTreeConstructor> bindIParseTreeConstructor() {
