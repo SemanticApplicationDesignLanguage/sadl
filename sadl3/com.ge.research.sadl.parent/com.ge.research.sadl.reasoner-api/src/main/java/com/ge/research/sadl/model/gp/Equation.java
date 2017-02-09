@@ -132,7 +132,7 @@ public class Equation {
 		sb.append("(");
 		List<Node> args = getArguments();
 		List<Node> argtypes = getArgumentTypes();
-		if ((args == null && argtypes != null) || (args != null && argtypes == null) || (args != null && argtypes != null && !(args.size() == argtypes.size()))) {
+		if (!(args.size() == argtypes.size())) {
 			System.err.println("Error: equation arguments and argument types are not the same size");
 		}
 		else {

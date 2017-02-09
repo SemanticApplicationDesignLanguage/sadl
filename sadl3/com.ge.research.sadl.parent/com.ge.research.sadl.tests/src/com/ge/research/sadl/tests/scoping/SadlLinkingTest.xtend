@@ -22,8 +22,8 @@ import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.common.base.Stopwatch
 import java.util.concurrent.TimeUnit
 import org.eclipse.emf.ecore.util.EcoreUtil
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.junit4.InjectWith
+import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 

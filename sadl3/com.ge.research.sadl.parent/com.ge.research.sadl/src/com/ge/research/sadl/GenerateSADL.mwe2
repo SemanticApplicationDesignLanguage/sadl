@@ -44,8 +44,8 @@ Workflow {
 			}
 			code = {
 				encoding = "UTF-8"
-				fileHeader = 
-'/************************************************************************
+				fileHeader = '
+/************************************************************************
  * Copyright 2007-2016- General Electric Company, All Rights Reserved
  *
  * Project: SADL
@@ -61,7 +61,8 @@ Workflow {
  * and licensed under the Eclipse Public License - v 1.0
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
- ***********************************************************************/'
+ ***********************************************************************/
+'
 			}
 		}
 		//TODO fix for bug in beta. Remove me after 2.9

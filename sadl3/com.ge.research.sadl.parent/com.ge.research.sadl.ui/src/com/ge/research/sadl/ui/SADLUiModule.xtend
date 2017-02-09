@@ -21,10 +21,15 @@
 package com.ge.research.sadl.ui
 
 import com.ge.research.sadl.builder.MessageManager.MessageType
-import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
+import com.ge.research.sadl.processing.SadlImportProcessorProvider
+import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
+import com.ge.research.sadl.processing.SadlModelProcessorProvider
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlInferenceProcessorProvider
+import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorProvider
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
@@ -52,6 +57,19 @@ class SADLUiModule extends AbstractSADLUiModule {
 		val iocos = SadlConsole.getOutputStream(MessageType.INFO) as IOConsoleOutputStream
 		System.setOut(new PrintStream(iocos))
 		System.setErr(new PrintStream(SadlConsole.getOutputStream(MessageType.ERROR)))
+		
+	}
+	
+	def Class<? extends SadlModelProcessorProvider> bindSadlModelProcessorProvider() {
+		return ExtensionPointBasedSadlModelProcessorProvider
+	}
+
+	def Class<? extends SadlImportProcessorProvider> bindSadlImportProcessorProvider() {
+		return ExtensionPointBasedSadlImportProcessorProvider
+	}
+
+	def Class<? extends SadlInferenceProcessorProvider> bindSadlInferenceProcessorProvider() {
+		return ExtensionPointBasedSadlInferenceProcessorProvider
 	}
 
 	// Registers our own syntax coloring styles.
@@ -79,15 +97,8 @@ class SADLUiModule extends AbstractSADLUiModule {
     	return SadlRootPreferencePage
 	}
 	
-	/**
-	 * Bind a callback that always adds the Xtext nature to the SADL project silently.
-	 */
-	override bindIXtextEditorCallback() {
-		AlwaysAddXtextNatureCallback
-	}
-	
 	override Class<? extends CopyQualifiedNameService> bindCopyQualifiedNameService() {
 		return SadlCopyQualifiedNameService;
-	}	
+	}
 	
 }

@@ -19,21 +19,16 @@
  ***********************************************************************/
 package com.ge.research.sadl.generator
 
-import com.google.inject.Singleton
+import static com.google.common.collect.Sets.newHashSet
 import java.util.Set
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.OutputConfiguration
 import org.eclipse.xtext.generator.OutputConfigurationProvider
 
-import static com.google.common.collect.Sets.newHashSet
-
 /** 
  * @author 210060824
  */
-@Singleton
 class SADLOutputConfigurationProvider extends OutputConfigurationProvider {
-	
-	@Override
 	override Set<OutputConfiguration> getOutputConfigurations() {
 		var OutputConfiguration defaultOutput = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT)
 		defaultOutput.setDescription("Output Folder")

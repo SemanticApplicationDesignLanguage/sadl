@@ -21,13 +21,13 @@ import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
 import org.eclipse.xtext.conversion.IValueConverter
 import org.eclipse.xtext.conversion.IValueConverterService
+import org.eclipse.xtext.junit4.InjectWith
+import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.testing.InjectWith
 
 /**
  * Test for checking the human readable output of the value converter service.

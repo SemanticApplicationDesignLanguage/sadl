@@ -1,16 +1,20 @@
 package com.ge.research.sadl.tests.external
 
 import com.ge.research.sadl.tests.AbstractLinkingTest
-import com.google.inject.Inject
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.naming.IQualifiedNameConverter
-import org.eclipse.xtext.resource.IResourceDescription
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.junit.Assert
 import org.junit.Test
+import org.junit.Assert
+import com.google.inject.Inject
+import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.SadlResource
+import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import com.ge.research.sadl.resource.ResourceDescriptionStrategy
+import org.eclipse.xtext.resource.IResourceDescription
+import org.eclipse.xtext.naming.IQualifiedNameConverter
+import org.eclipse.emf.ecore.resource.Resource
 
 class ExternalEmfResourceTest extends AbstractLinkingTest {
 	
+	@Inject extension DeclarationExtensions
 	@Inject ValidationTestHelper validator
 	@Inject IResourceDescription.Manager mnr
 	@Inject IQualifiedNameConverter converter
@@ -35,12 +39,12 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		'''.sadl
 		
 		validator.assertNoErrors(sadlFile)
-		val expectedExportedNames = #{
-			'http://assert/Properties',
-			'http://assert/Properties:Foo',
-			'http://assert/Properties:myProperty'};
-		val actualExportedNames = mnr.getResourceDescription(owl).exportedObjects.map[converter.toString(name)].toSet;
-		Assert.assertEquals(expectedExportedNames, actualExportedNames);
+		
+		val desc = mnr.getResourceDescription(owl)
+		val exported = desc.exportedObjects.toList
+		Assert.assertEquals("http://assert/Properties", converter.toString(exported.get(0).name))
+		Assert.assertEquals("http://assert/Properties:Foo", converter.toString(exported.get(1).name))
+		Assert.assertEquals("http://assert/Properties:myProperty", converter.toString(exported.get(2).name))
 	}
 	
 	@Test def void testNtFormat() {

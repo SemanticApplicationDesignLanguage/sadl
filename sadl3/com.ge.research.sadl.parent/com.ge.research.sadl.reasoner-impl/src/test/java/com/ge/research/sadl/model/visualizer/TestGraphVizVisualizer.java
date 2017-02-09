@@ -1,11 +1,10 @@
 package com.ge.research.sadl.model.visualizer;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
@@ -13,7 +12,6 @@ import com.ge.research.sadl.reasoner.ResultSet;
 
 public class TestGraphVizVisualizer {
 
-	@Ignore("https://github.com/crapo/sadlos2/issues/139")
 	@Test
 	public void test() throws IOException {
 		String exec = System.getenv("GraphVizPath");
@@ -41,8 +39,7 @@ public class TestGraphVizVisualizer {
 		gv.initialize(tempDir, baseFileName, graphName, anchorNode, orientation , description);
 		gv.graphResultSetData(rs);
 	}
-
-	@Ignore("https://github.com/crapo/sadlos2/issues/139")
+	
 	@Test
 	public void testDuplicates() throws IOException {
 		String exec = System.getenv("GraphVizPath");

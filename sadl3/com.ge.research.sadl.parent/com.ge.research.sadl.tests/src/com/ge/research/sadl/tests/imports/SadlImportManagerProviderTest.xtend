@@ -35,10 +35,10 @@ import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.testing.util.ParseHelper
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.eclipse.xtext.junit4.InjectWith
+import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.junit4.util.ParseHelper
+import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.Issue
@@ -62,7 +62,7 @@ class SadlImportManagerProviderTest {
 /* Tests that should generate validation errors */	
 	@Ignore
 	@Test def void testDatatypeImports1() {
-		'''
+		val model = '''
 			<rdf:RDF
 			    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 			    xmlns:owl="http://www.w3.org/2002/07/owl#"
@@ -201,7 +201,7 @@ class SadlImportManagerProviderTest {
 	  val StringBuilder out = new StringBuilder();
 	  val BufferedReader br = new BufferedReader(new InputStreamReader(in));
 	  var String line = br.readLine()
-	  while (line !== null) {
+	  while (line != null) {
 	  	out.append(line)
 	  	out.append("\n")
 	  	line = br.readLine()

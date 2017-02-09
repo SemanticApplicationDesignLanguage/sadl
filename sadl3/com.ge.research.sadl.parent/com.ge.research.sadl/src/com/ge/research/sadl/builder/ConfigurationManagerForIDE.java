@@ -24,7 +24,9 @@
 package com.ge.research.sadl.builder;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.URI;
@@ -63,11 +66,13 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.util.FileUtils;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
@@ -556,26 +561,21 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 		return null;
 	}
-	
+
 	@Override
-	public <T> T getClassInstance(String name, Class<? extends T> clazz)
+	public Object getClassInstance(String reasonerClassName)
 			throws InstantiationException, IllegalAccessException,
 			ClassNotFoundException {
-
-		if (name == null) {
-			throw new NullPointerException("Service class name cannot be null.");
-		}
-		
-		if (clazz == null) {
-			throw new NullPointerException("Service class API (inertface / abstract class) cannot be null.");
-		}
-		
 		if (Platform.isRunning()) {
-			final Object instance = Platform.getBundle("com.ge.research.sadl").loadClass(name).newInstance();
-			return clazz.cast(instance);
+			return Platform.getBundle("com.ge.research.sadl").loadClass(reasonerClassName).newInstance();
 		}
-		
-		return super.getClassInstance(name, clazz);
+		try {
+		   Class c = Class.forName(reasonerClassName);
+		   return c.newInstance();
+		} catch (Exception e) {
+		   e.printStackTrace();
+		}
+		return null;
 	}
 
 	protected static ServiceLoader<ITranslator> getTranslatorsFromServiceLoader(Class<ITranslator> cls) {
