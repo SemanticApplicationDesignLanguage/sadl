@@ -1,11 +1,11 @@
 #### Verify Xtext tooling features in Eclipse IDE
  - Check the current Xtext version under Eclipse About Dialog > Installation Details > Installed Software tab.
- - Both Xtext Complete SDK and Xtend IDE should have a version 2.11.0.v20170118-0206.
- - If you have an older version installed in Eclipse, install the Xtext 2.11.RC1 from [Xtext p2 update site]. 
+ - Both Xtext Complete SDK and Xtend IDE should have a version 2.11.0.v20170127-0250.
+ - If you have an older version installed in Eclipse, install the Xtext 2.11 from [Xtext p2 update site]. 
  - The updates can be installed via Help > Install New Software...
  - When prompted, restart the Eclipse IDE.
 
-[Xtext p2 update site]: http://download.eclipse.org/modeling/tmf/xtext/updates/milestones/head/S201701180206/
+[Xtext p2 update site]: http://download.eclipse.org/modeling/tmf/xtext/updates/milestones/head/S201701270250/
 
 #### Verify Buildship tooling features in Eclipse IDE
  - The current version can be verified under the Eclipse About Dialog > Installation Details > Installed Software tab.
@@ -22,7 +22,7 @@
  ```
  git clone https://github.com/crapo/sadlos2.git \
 && cd sadlos2 \
-&& git checkout origin/xtext_web_prototype -b xtext_web_prototype
+&& git checkout origin/web_sadl -b web_sadl
  ```
  
 #### Import the projects into the Eclipse workspace
