@@ -2,7 +2,7 @@
 <feature
       id="com.ge.research.sadl.feature"
       label="SADL Feature"
-      version="3.0.0.qualifier"
+      version="3.1.0.qualifier"
       provider-name="GE">
 
    <description url="http://www.example.com/description">

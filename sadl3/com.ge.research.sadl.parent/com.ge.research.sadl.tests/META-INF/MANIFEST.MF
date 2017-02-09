@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.tests
 Bundle-Vendor: My Company
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl,
@@ -16,13 +16,14 @@ Require-Bundle: com.ge.research.sadl,
  org.eclipse.lsp4j,
  org.eclipse.lsp4j.jsonrpc,
  com.ge.research.sadl.jena-wrapper-for-sadl,
- org.eclipse.xtext.xbase.testing
+ org.eclipse.xtext.xbase.testing,
+ org.junit;bundle-version="4.12.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.tests;x-internal=true
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",
+ org.junit.runners.model;version="4.5.0",
  org.junit.runner;version="4.5.0",
- org.junit.runner.manipulation;version="4.5.0",
- org.junit.runner.notification;version="4.5.0",
  org.junit.runners;version="4.5.0",
- org.junit.runners.model;version="4.5.0"
+ org.junit.runner.manipulation;version="4.5.0",
+ org.junit.runner.notification;version="4.5.0"
