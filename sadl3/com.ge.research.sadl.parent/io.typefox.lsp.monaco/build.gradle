@@ -4,7 +4,7 @@ buildscript {
         jcenter()
 	}
 	dependencies {
-		classpath "org.akhikhl.gretty:gretty:+"
+		classpath "org.akhikhl.gretty:gretty:1.4.0"
 	}
 }
 
@@ -18,7 +18,7 @@ apply plugin: "org.akhikhl.gretty"
 
 gretty {
 	servletContainer = "tomcat7"
-	port = 8080
+	httpPort = 8080
 	contextPath = "/sadlmonaco"
 	loggingLevel = "INFO"
 }
