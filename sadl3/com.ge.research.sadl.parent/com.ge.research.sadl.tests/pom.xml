@@ -21,8 +21,6 @@
 				<version>${tycho-version}</version>
 				<configuration>
 					<failIfNoTests>false</failIfNoTests>
-					<!-- disable when tests are green -->
-					<testFailureIgnore>true</testFailureIgnore>
 				</configuration>
 			</plugin>
 			<plugin>

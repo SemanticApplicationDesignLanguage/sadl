@@ -14,7 +14,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
+				<version>1.4.0</version>
 				<executions>
 					<execution>
 						<id>mwe2Launcher</id>
@@ -25,6 +25,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<cleanupDaemonThreads>false</cleanupDaemonThreads>
 					<mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
 					<arguments>
 						<argument>/${project.basedir}/src/com/ge/research/sadl/GenerateSADL.mwe2</argument>

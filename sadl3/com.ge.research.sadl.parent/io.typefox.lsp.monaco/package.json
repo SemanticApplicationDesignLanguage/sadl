@@ -1,0 +1,40 @@
+{
+  "name": "lsp-monaco",
+  "version": "1.0.0",
+  "scripts": {
+    "update": "rimraf node_modules && npm install",
+    "compile": "tsc --project src/main/ts",
+    "clean": "rimraf lib",
+    "watch": "watch 'npm run compile' src/main/ts --wait 10",
+    "build": "webpack --config webpack.config.js",
+    "watch:build": "webpack --config webpack.config.js --watch"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.7.0",
+    "monaco-editor-core": "^0.7.3",
+    "monaco-languages": "^0.6.1",
+    "react": "^15.3.2",
+    "react-contextmenu": "^2.0.0-alpha.2",
+    "react-dom": "^15.3.2",
+    "react-split-pane": "^0.1.54",
+    "react-treebeard": "^1.1.4",
+    "reconnecting-websocket": "^3.0.2",
+    "vscode-jsonrpc": "^3.0.0-alpha",
+    "vscode-languageclient": "^3.0.0-alpha"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.46",
+    "@types/react": "^0.14.47",
+    "@types/react-dom": "^0.14.18",
+    "@types/react-split-pane": "^0.1.4",
+    "copy-webpack-plugin": "^3.0.1",
+    "css-loader": "^0.25.0",
+    "rimraf": "^2.5.4",
+    "source-map-loader": "^0.1.5",
+    "style-loader": "^0.13.1",
+    "ts-loader": "^1.2.0",
+    "typescript": "^2.0.10",
+    "watch": "^1.0.1",
+    "webpack": "^1.13.3"
+  }
+}

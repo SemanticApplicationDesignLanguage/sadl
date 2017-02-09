@@ -23,6 +23,8 @@ import com.ge.research.sadl.processing.ValidationAcceptor
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.service.OperationCanceledError
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.IAcceptor
 import org.eclipse.xtext.validation.CheckMode
@@ -34,12 +36,20 @@ class ResourceValidator extends ResourceValidatorImpl {
 	@Inject IModelProcessorProvider processorProvider 
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
+	override validate(Resource resource, CheckMode mode, CancelIndicator mon) throws OperationCanceledError {
+		if (resource instanceof XtextResource) {
+			return resource.cache.get('issues', resource) [
+				super.validate(resource, mode, mon)
+			];
+		} else {
+			return emptyList;
+		}
+	}
 	
 	override protected validate(Resource resource, CheckMode mode, CancelIndicator monitor, IAcceptor<Issue> acceptor) {
 		super.validate(resource, mode, monitor, acceptor)
 		val processor = processorProvider.getProcessor(resource)
 		processor.onValidate(resource, new ValidationAcceptor(acceptor), mode, new ProcessorContext(monitor,  preferenceProvider.getPreferenceValues(resource)))
 	}
-	
 	
 }
