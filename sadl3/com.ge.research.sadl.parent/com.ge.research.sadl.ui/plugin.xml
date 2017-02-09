@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
-   <extension-point id="sadl_model_processor" name="SADL Model Processor" schema="schema/sadl_model_processor.exsd"/>
-   <extension-point id="sadl_import_processor" name="SADL Import Processor" schema="schema/sadl_import_processor.exsd"/>
-   <extension-point id="sadl_inference_processor" name="SADL Inference Processor" schema="schema/sadl_inference_processor.exsd"/>
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor

@@ -28,19 +28,20 @@ import com.google.inject.Provider
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.diagnostics.Severity
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
-import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.util.ParseHelper
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.util.StringInputStream
 import org.junit.Assert
 import org.junit.Before
 import org.junit.runner.RunWith
+import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 
 @RunWith(XtextRunner)
-@InjectWith(SADLInjectorProvider)
+@InjectWith(SADLNoopModelProcessorsInjectorProvider)
 abstract class AbstractSADLParsingTest{
 	@Inject extension ValidationTestHelper
 
@@ -112,7 +113,7 @@ abstract class AbstractSADLParsingTest{
 	
 	protected def Resource resource(CharSequence seq, URI uri) {
 		val resource = resourceSet.createResource(uri);
-		resource.load(new StringInputStream(seq.toString), null);
+		resource.load(new StringInputStream(XtendTemplateHelper.unifyEOL(seq)), null);
 		return resource;
 	}
 
