@@ -28,10 +28,5 @@
 <unit id="org.eclipse.xtext.sdk.feature.group" version="2.11.0.v20170127-0250"/>
 <repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/milestones/head/S201701270250/"/>
 </location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.xtend.sdk.feature.group" version="2.11.0.v20170127-0250"/>
-<unit id="org.eclipse.xtext.sdk.feature.group" version="2.11.0.v20170127-0250"/>
-<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/milestones/"/>
-</location>
 </locations>
 </target>
