@@ -678,7 +678,12 @@ public class GraphSegment {
 			if (rsrc.isURIResource()) {
 				String ns = ((Resource)rsrc).getNameSpace();
 				String prefix = getPrefix(ns);
-				return  prefix + ":" + ((Resource)rsrc).getLocalName();
+				if (prefix != null) {
+					return  prefix + ":" + ((Resource)rsrc).getLocalName();
+				}
+				else {
+					return ((Resource)rsrc).getLocalName();
+				}
 			}
 			return rsrc.toString();
 		}
