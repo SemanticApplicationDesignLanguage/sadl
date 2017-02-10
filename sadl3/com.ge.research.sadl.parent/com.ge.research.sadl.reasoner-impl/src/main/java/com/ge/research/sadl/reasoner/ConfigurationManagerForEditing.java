@@ -243,6 +243,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		} else {
 			// create entry from scratch
 			getConfigModel().add(reasonerSpec, reasonerClassNameProperty, rcn);
+			setReasoner(null);
+			setTranslator(null);
 			bChanged = true;
 		}
 		if (bChanged) {
