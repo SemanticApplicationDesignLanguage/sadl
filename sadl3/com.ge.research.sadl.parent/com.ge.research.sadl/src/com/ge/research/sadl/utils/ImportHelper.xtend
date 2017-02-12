@@ -20,6 +20,8 @@ package com.ge.research.sadl.utils
 import com.ge.research.sadl.sADL.SadlModel
 import com.google.common.collect.ImmutableCollection.Builder
 import com.google.inject.Singleton
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_URI
 import static com.google.common.collect.ImmutableSet.builder
@@ -37,8 +39,8 @@ class ImportHelper {
 	 * and all explicitly declared imported resource URIs including the 
 	 * transitive ones. Also contains the implicit SADL model URI.
 	 */
-	def Iterable<String> getAllImportedResourceUris(SadlModel resource) {
-		return builder.addAll(resource.getImportedModels(builder).build.map[baseUri]).add(SADL_IMPLICIT_MODEL_URI).
+	def Iterable<String> getAllImportedResourceUris(SadlModel model) {
+		return builder.addAll(model.getImportedModels(builder).build.map[baseUri]).add(SADL_IMPLICIT_MODEL_URI).
 			build;
 	}
 

@@ -88,7 +88,7 @@ class ProposalProviderFilterProvider {
 			val currentModel = context.currentModel;
 			val clazz = currentModel?.eClass;
 			val key = '''«ruleName»_«featureName»'''.toString.toUpperCase;
-			if (clazz === SADL_INSTANCE && key == 'SADLPRIMARYTYPEREFERENCE_TYPE') {
+			if (key == 'SADLPRIMARYTYPEREFERENCE_TYPE') {
 				// 'x is a' => for all declared types from current model and the imported (including the transitive) ones.
 				predicates.add(currentModel.createPrimaryTypeRefFilter);
 			} else if (clazz === SADL_INSTANCE && key == 'SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE') {
