@@ -20,7 +20,6 @@
  */
 package com.ge.research.sadl.ui
 
-import com.ge.research.sadl.builder.MessageManager.MessageType
 import com.ge.research.sadl.processing.SadlImportProcessorProvider
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
 import com.ge.research.sadl.processing.SadlModelProcessorProvider
@@ -36,8 +35,6 @@ import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
 import com.google.inject.Binder
 import com.google.inject.name.Names
-import java.io.PrintStream
-import org.eclipse.ui.console.IOConsoleOutputStream
 import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
@@ -55,11 +52,8 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 class SADLUiModule extends AbstractSADLUiModule {
 
 	new(AbstractUIPlugin plugin) {
-		super(plugin)
-		val iocos = SadlConsole.getOutputStream(MessageType.INFO) as IOConsoleOutputStream
-		System.setOut(new PrintStream(iocos))
-		System.setErr(new PrintStream(SadlConsole.getOutputStream(MessageType.ERROR)))
-		
+		super(plugin);
+		OutputStreamStrategy.SADL.use;
 	}
 	
 	def Class<? extends SadlModelProcessorProvider> bindSadlModelProcessorProvider() {

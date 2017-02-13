@@ -20,8 +20,6 @@ package com.ge.research.sadl.utils
 import com.ge.research.sadl.sADL.SadlModel
 import com.google.common.collect.ImmutableCollection.Builder
 import com.google.inject.Singleton
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.util.EcoreUtil
 
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_URI
 import static com.google.common.collect.ImmutableSet.builder

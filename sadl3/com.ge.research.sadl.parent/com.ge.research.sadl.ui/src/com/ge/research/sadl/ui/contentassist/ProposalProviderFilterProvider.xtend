@@ -125,7 +125,7 @@ class ProposalProviderFilterProvider {
 					if (EClass === SADL_RESOURCE) {
 						val candidate = EObjectOrProxy as SadlResource;
 						if (candidate.eContainer instanceof SadlProperty) {
-							return isSadlResourceInDomainOfProperty2(type.type, candidate);
+							return isSadlResourceInDomainOfProperty(type.type, candidate);
 						}
 					}
 					return false;
@@ -136,7 +136,7 @@ class ProposalProviderFilterProvider {
 		return Predicates.alwaysFalse;
 	}
 
-	private def boolean isSadlResourceInDomainOfProperty2(SadlResource currentModel, SadlResource candidate) {
+	private def boolean isSadlResourceInDomainOfProperty(SadlResource currentModel, SadlResource candidate) {
 		// TODO: akitta the setup for the current model should be moved outside of this block.
 		val ontologyModel = OntModelProvider.find(currentModel.eResource)
 		if (ontologyModel !== null && candidate !== null) {
@@ -204,7 +204,7 @@ class ProposalProviderFilterProvider {
 		val model = OntModelProvider.find(resource);
 		val ^extension = extensionProvider.get;
 		val processor = resource.processor;
-		new JenaBasedSadlModelValidator(acceptor, model, ^extension, processor, null) -> issues;
+		return new JenaBasedSadlModelValidator(acceptor, model, ^extension, processor, null) -> issues;
 	}
 
 	private def getProcessor(Resource resource) {
