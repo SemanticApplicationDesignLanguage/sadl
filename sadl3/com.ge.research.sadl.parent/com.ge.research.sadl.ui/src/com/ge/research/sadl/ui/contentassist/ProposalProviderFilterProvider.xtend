@@ -56,6 +56,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.SadlHasValueCondition
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 
 /**
  * Provides filter for removing items from the content proposal.
@@ -133,13 +134,13 @@ class ProposalProviderFilterProvider {
 	}
 	
 	def Predicate<IEObjectDescription> createExplicitValueFilter(EObject currentModel) {
-		if (currentModel instanceof SadlHasValueCondition) {
-			val restriction = currentModel.restriction;
-			if (restriction instanceof SadlResource) {
+		if (currentModel instanceof SadlHasValueCondition && currentModel.eContainer instanceof SadlPropertyCondition) {
+			val property = (currentModel.eContainer as SadlPropertyCondition).property
+			if (property instanceof SadlResource) {
 				val Predicate<IEObjectDescription> predicate = [
 						if (EClass === SADL_RESOURCE) {
 							val candidate = EObjectOrProxy as SadlResource;
-							return isSadlResourceInDomainOfProperty(restriction, candidate);
+							return isSadlResourceInDomainOfProperty(property, candidate);
 						}
 						return false;
 					];
