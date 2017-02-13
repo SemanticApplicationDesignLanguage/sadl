@@ -19,7 +19,7 @@ import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 
 public final class SadlErrorMessages {
 /**
-* Property '{0}' does not exist in the model.
+* Property ''{0}'' does not exist in the model.
 **/
     public static final SadlErrorMessage PROPERTY_NOT_EXIST = new SadlErrorMessage("property_not_exist");
 /**
@@ -30,6 +30,10 @@ public final class SadlErrorMessages {
 * Unidentified expression.
 **/
     public static final SadlErrorMessage UNIDENTIFIED = new SadlErrorMessage("unidentified");
+/**
+* range of property {0} does not match domain of property {1}
+**/
+    public static final SadlErrorMessage RANGE_OF_NOT_IN_DOMAIN_OF = new SadlErrorMessage("range_of_not_in_domain_of");
 /**
 * Must select folder (not file) for running Batch ATPT
 **/
@@ -51,7 +55,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage FILE_TYPE_ERROR = new SadlErrorMessage("file_type_error");
 /**
-* Import of '{0}' is part of a circular set of imports.
+* Import of ''{0}'' is part of a circular set of imports.
 **/
     public static final SadlErrorMessage CIRCULAR_IMPORT = new SadlErrorMessage("circular_import");
 /**
@@ -63,7 +67,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage ATPT_NO_XML_SELECTED = new SadlErrorMessage("atpt_no_xml_selected");
 /**
-* Cannot assign {0}: property '{1}' already has {0} assigned to '{2}'.
+* Cannot assign {0}: property ''{1}'' already has {0} assigned to ''{2}''.
 **/
     public static final SadlErrorMessage CANNOT_ASSIGN_EXISTING = new SadlErrorMessage("cannot_assign_existing");
 /**
@@ -91,7 +95,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage CANNOT_CONVERT = new SadlErrorMessage("cannot_convert");
 /**
-* It is unusual to have a variable ('{0}') rather than a defined property as rule predicate.
+* It is unusual to have a variable (''{0}'') rather than a defined property as rule predicate.
 **/
     public static final SadlErrorMessage VARIABLE_INSTEAD_OF_PROP = new SadlErrorMessage("variable_instead_of_prop");
 /**
@@ -107,7 +111,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNKNOWN_VALUE = new SadlErrorMessage("unknown_value");
 /**
-* {0} could not be found, expected to be in '{1}'.
+* {0} could not be found, expected to be in ''{1}''.
 **/
     public static final SadlErrorMessage NOT_FOUND = new SadlErrorMessage("not_found");
 /**
@@ -131,6 +135,14 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage DECOMPOSITION_ERROR = new SadlErrorMessage("decomposition_error");
 /**
+* Function has no reference.
+**/
+    public static final SadlErrorMessage TYPE_CHECK_UNDEFINED_EXCEPTION = new SadlErrorMessage("type_check_undefined_exception");
+/**
+* Built-in function, {0}, was found, but the reasoner and translator pair does not provide further type-checking information
+**/
+    public static final SadlErrorMessage TYPE_CHECK_BUILTIN_EXCEPTION = new SadlErrorMessage("type_check_builtin_exception");
+/**
 * expected a {0}
 **/
     public static final SadlErrorMessage EXPECTED_A = new SadlErrorMessage("expected_a");
@@ -147,7 +159,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNABLE_TO_CREATE = new SadlErrorMessage("unable_to_create");
 /**
-* Subject '{0}' did not translate to node
+* Subject ''{0}'' did not translate to node
 **/
     public static final SadlErrorMessage TRANSLATE_TO_NODE = new SadlErrorMessage("translate_to_node");
 /**
@@ -159,7 +171,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage IS_NOT_A = new SadlErrorMessage("is_not_a");
 /**
-* Value of '{0}' is not in range of property '{1}'.
+* Value of ''{0}'' is not in range of property ''{1}''.
 **/
     public static final SadlErrorMessage NOT_IN_RANGE = new SadlErrorMessage("not_in_range");
 /**
@@ -183,7 +195,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage INVALID_NULL = new SadlErrorMessage("invalid_null");
 /**
-* A {0} with name '{1}' already exists in the set of {0}s. {0} names must be unique.
+* A {0} with name ''{1}'' already exists in the set of {0}s. {0} names must be unique.
 **/
     public static final SadlErrorMessage UNIQUE_NAME = new SadlErrorMessage("unique_name");
 /**
@@ -207,9 +219,21 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage NULL_ONT_MODEL = new SadlErrorMessage("null_ont_model");
 /**
-* Unhandled {0}: '{1}'
+* Variable {0} is of type {1} which is not in domain of property {2}
+**/
+    public static final SadlErrorMessage VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("variable_not_in_domain_of_property");
+/**
+* Unhandled {0}: ''{1}''
 **/
     public static final SadlErrorMessage UNHANDLED = new SadlErrorMessage("unhandled");
+/**
+* {0} is not in domain of property {1} 
+**/
+    public static final SadlErrorMessage SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("subject_not_in_domain_of_property");
+/**
+* {0} is not in domain of property {1}
+**/
+    public static final SadlErrorMessage PROPERTY_NOT_IN_DOMAIN = new SadlErrorMessage("property_not_in_domain");
 /**
 * A(n) {0} requires a {1} but it is missing.
 **/
@@ -218,6 +242,10 @@ public final class SadlErrorMessages {
 * Import resolved to a null {0}
 **/
     public static final SadlErrorMessage NULL_IMPORT = new SadlErrorMessage("null_import");
+/**
+* Translator class ''{0}'' not found"
+**/
+    public static final SadlErrorMessage TYPE_CHECK_TRANSLATOR_CLASS_NOT_FOUND = new SadlErrorMessage("type_check_translator_class_not_found");
 /**
 * Unexpected null type error
 **/
@@ -247,7 +275,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNEXPECTED_TYPE_CHECK_ERROR = new SadlErrorMessage("unexpected_type_check_error");
 /**
-* '{0}' isn't a variable as expected in query select names.
+* ''{0}'' isn't a variable as expected in query select names.
 **/
     public static final SadlErrorMessage QUERY_ISNT_VARIABLE = new SadlErrorMessage("query_isnt_variable");
 /**
@@ -258,5 +286,9 @@ public final class SadlErrorMessages {
 * Import failed to provide an imported resource
 **/
     public static final SadlErrorMessage IMPORT_FAIL = new SadlErrorMessage("import_fail");
+/**
+* {0} is a reserved folder name that can only contain system-generated content. Please place this model in a different folder.
+**/
+    public static final SadlErrorMessage RESERVED_FOLDER = new SadlErrorMessage("reserved_folder");
 
 }

@@ -24,6 +24,7 @@ import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.Expression
+import com.ge.research.sadl.sADL.ExternalEquationStatement
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
@@ -33,6 +34,7 @@ import com.ge.research.sadl.sADL.SadlImport
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
+import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
@@ -102,11 +104,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				equation.parameter.map[EObjectDescription.create(name.concreteName, it.name)])
 		}
 		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
-		if (ask !== null) {
+		if (ask !== null && ask.expr != null) {
 			return getLocalVariableScope(ask.expr, parent)
 		}
 		val test = EcoreUtil2.getContainerOfType(context, TestStatement)
-		if (test !== null) {
+		if (test !== null && test.tests != null) {
 			return getLocalVariableScope(test.tests, parent)
 		}
 		return parent
@@ -294,7 +296,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
 			val externalResource = imp.importedResource
-			if (!externalResource.eIsProxy) {
+			if (externalResource !== null && !externalResource.eIsProxy) {
 				createResourceScope(externalResource.eResource, imp.alias, importedResources).allElements.forEach[
 					val existing = importedSymbols.put(name, it)
 					val duplicateProblem = checkDuplicate(existing, it)
@@ -318,6 +320,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				}
 			}
 		}
+		
+		if (!resource.URI.toString.endsWith("SadlBuiltinFunctions.sadl")) {
+			val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
+			if (element !== null) {
+				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+				if (eobject !== null) {
+					createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
+						importedSymbols.put(name, it)
+					]
+				}
+			}
+		}
+		
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
 	}
 	
@@ -350,6 +365,21 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
+
+		// Do not put parameters of external and local equation statements into the scope.
+		if (obj instanceof SadlResource) {
+			if (obj.eContainer instanceof SadlParameterDeclaration) {
+				val declaration = obj.eContainer as SadlParameterDeclaration;
+				val container = declaration.eContainer;
+				if (container instanceof ExternalEquationStatement || container instanceof EquationStatement) {
+					return;
+				}
+			} else if (EcoreUtil2.getContainerOfType(obj, BinaryOperation) !== null) {
+				// Also filter out resources from the expression of any equations.
+				return;
+			}
+		}
+
 		if (!scope.containsKey(qn)) {
 			scope.put(qn, new EObjectDescription(qn, obj, emptyMap))
 		}

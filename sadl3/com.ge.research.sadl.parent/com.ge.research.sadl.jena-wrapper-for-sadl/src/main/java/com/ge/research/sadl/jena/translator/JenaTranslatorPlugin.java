@@ -37,6 +37,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
@@ -54,6 +55,7 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -1804,19 +1806,62 @@ public class JenaTranslatorPlugin implements ITranslator {
 	public String translateEquation(OntModel model, Equation equation) throws TranslationException {
 		throw new TranslationException("Equation translation not yet implemented in " + this.getClass().getCanonicalName());
 	}
-
-
+	
 	@Override
-	public String[] getBuiltinFunctionSignature(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getBuiltinFunctionModel(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("uri \"");
+		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI);
+		sb.append("\" alias ");
+		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+		sb.append(".\n\n");
+		
+		return sb.toString();
 	}
-
-
+	
 	@Override
-	public boolean isBuiltinFunction(String arg0) {
-		// TODO Auto-generated method stub
+	public boolean isBuiltinFunction(String builtinName){
+		// is it known to the ConfigurationManager?
+		String[] categories = new String[2];
+		try {
+			categories[0] = configurationMgr.getReasoner().getReasonerFamily();
+			categories[1] = IConfigurationManager.BuiltinCategory;
+			List<ConfigurationItem> knownBuiltins = configurationMgr.getConfiguration(categories, false);
+			if (knownBuiltins != null) {
+				for (ConfigurationItem item : knownBuiltins) {
+					Object itemName = item.getNamedValue("name");
+					if (itemName != null && itemName instanceof String && ((String)itemName).equals(builtinName)) {
+						return true;
+					}
+				}
+			}
+		} catch (ConfigurationException e) {
+			// this is ok--one more check to go.
+		}
+
+		// Use ServiceLoader to find an implementation of Builtin that has this name
+		ServiceLoader<Builtin> serviceLoader = ServiceLoader.load(Builtin.class);
+		if( serviceLoader != null ){
+			for( Iterator<Builtin> itr = serviceLoader.iterator(); itr.hasNext() ; ){
+				try {
+					Builtin bltin = itr.next();
+					if (bltin.getName().equals(builtinName)) {
+						return true;
+					}
+				}
+				catch (Throwable t) {
+					t.printStackTrace();
+					logger.error(t.getLocalizedMessage());
+				}
+			}
+		}
+		
 		return false;
 	}
-
+	
+	@Override
+	public Enum isBuiltinFunctionTypeCheckingAvailable(){
+		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
+	}
+	
 }

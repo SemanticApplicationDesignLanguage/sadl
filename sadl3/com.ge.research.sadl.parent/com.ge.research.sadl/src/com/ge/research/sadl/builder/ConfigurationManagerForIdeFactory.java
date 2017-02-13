@@ -21,6 +21,7 @@ public class ConfigurationManagerForIdeFactory {
 		if (configManagers == null) {
 			configManagers = new HashMap<String, ConfigurationManagerForIDE>();
 		}
+		modelFolder = modelFolder != null ? formatModelFolder(modelFolder) : null;
 		if (!configManagers.containsKey(modelFolder)) {
 			ConfigurationManagerForIDE newCM = new ConfigurationManagerForIDE(modelFolder, format);
 			configManagers.put(modelFolder, newCM);
@@ -32,8 +33,7 @@ public class ConfigurationManagerForIdeFactory {
 			return configManagers.get(modelFolder);
 		}
 	}
-	
-	
+
 	public static ConfigurationManagerForIDE getConfigurationManagerForIDE(String modelFolder, String format, boolean noModelFolderNeeded) throws ConfigurationException {
 		if (configManagers == null) {
 			configManagers = new HashMap<String, ConfigurationManagerForIDE>();
@@ -48,6 +48,14 @@ public class ConfigurationManagerForIdeFactory {
 			logger.debug("ConfigurationManagerForIdeFactory returning existing config mgr for '" + modelFolder + "'");
 			return configManagers.get(modelFolder);
 		}
+	}
+	
+	private static String formatModelFolder(String modelFolder) {
+		if(modelFolder == null){
+			return null;
+		}
+		
+		return modelFolder.replace("\\", "/");
 	}
 
 }

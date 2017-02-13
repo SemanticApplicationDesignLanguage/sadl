@@ -4,7 +4,7 @@ Bundle-Name: Jena 4 OSGi
 Bundle-SymbolicName: com.ge.research.jena
 Bundle-Version: 3.0.0.qualifier
 Bundle-Vendor: GE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: au.com.bytecode.opencsv,
  com.ctc.wstx.api,
  com.ctc.wstx.cfg,

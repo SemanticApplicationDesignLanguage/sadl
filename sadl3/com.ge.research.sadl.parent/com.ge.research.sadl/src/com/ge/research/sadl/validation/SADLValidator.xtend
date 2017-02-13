@@ -39,6 +39,7 @@ import java.util.ArrayList
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import org.eclipse.emf.ecore.EStructuralFeature
+import com.ge.research.sadl.sADL.SubjHasProp
 
 /**
  * This class contains custom validation rules. 
@@ -133,13 +134,23 @@ class SADLValidator extends AbstractSADLValidator {
 			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
 		}
 		otherNames.add(rule.name)
-		// make sure all variables used in the head are bound in the bod
+		// make sure all variables used in the head are bound in the body
 		val itr = EcoreUtil2.getAllContents(rule.thens).filter(Name).toList.iterator
 		while (itr.hasNext) {
 			var name = itr.next
 			if (!name.function && name.name.equals(name)) {
-				var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + "' which is not bound in the rule premises."
-				error(errMsg, SADLPackage.Literals.RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+				val bodyitr = EcoreUtil2.getAllContents(rule.ifs).filter(Name).toList.iterator
+				var foundInBody = false;
+				while (bodyitr.hasNext) {
+					var bName = bodyitr.next
+					if (bName.name.equals(name)) {
+						foundInBody = true
+					}
+				}
+				if (!foundInBody) {
+					var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + "' which is not bound in the rule premises."
+					error(errMsg, SADLPackage.Literals.RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+				}
 			}
 		}
 	}
@@ -169,6 +180,7 @@ class SADLValidator extends AbstractSADLValidator {
 //			error("", SADLPackage.Literals.SADL_RESOURCE__NAME, <constant>)
 //		}
 //	}
+
 	@Check
 	def checkSadlResource(SadlResource sr) {
 		var nm = null as String
@@ -187,24 +199,24 @@ class SADLValidator extends AbstractSADLValidator {
 					if (!isFunc) {	
 						error("Is this an undeclared variable?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
 					}
-					else {
-						// this might be a built-in so get the text and check the name
-						val srNode = NodeModelUtils.getNode(sr)
-						var boolean isBuiltin = false
-						if (srNode.hasChildren) {
-							val itr = srNode.children
-							for (c:itr) {
-								val txt = NodeModelUtils.getTokenText(c)
-	//							val b = RequirementsConstants.isFunctionConsideredBuiltin(null, txt)
-	//							if (b) {
-	//								isBuiltin = b
-	//							}
-							}
-						}
-						if (!isBuiltin) {
-							error("Is this an undeclared function?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
-						}
-					}
+//					else {
+//						// this might be a built-in so get the text and check the name
+//						val srNode = NodeModelUtils.getNode(sr)
+//						var boolean isBuiltin = false
+//						if (srNode.hasChildren) {
+//							val itr = srNode.children
+//							for (c:itr) {
+//								val txt = NodeModelUtils.getTokenText(c)
+//	//							val b = RequirementsConstants.isFunctionConsideredBuiltin(null, txt)
+//	//							if (b) {
+//	//								isBuiltin = b
+//	//							}
+//							}
+//						}
+//						if (!isBuiltin) {
+//							error("Is this an undeclared function?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
+//						}
+//					}
 				}
 			}
 			catch (Throwable t) {

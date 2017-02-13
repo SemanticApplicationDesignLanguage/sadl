@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-csv.jar"/>
@@ -21,7 +21,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/log4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/opencsv.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pojava.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/reasoner-api.jar" sourcepath="/com.ge.research.sadl.reasoner-api/src/main/java"/>
+	<classpathentry exported="true" kind="lib" path="lib/reasoner-api.jar" sourcepath="/reasoner-api"/>
 	<classpathentry exported="true" kind="lib" path="lib/reasoner-impl.jar" sourcepath="/reasoner-impl"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12.jar"/>

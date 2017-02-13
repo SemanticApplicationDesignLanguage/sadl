@@ -11,10 +11,10 @@
 <body>
 <h1>Introduction to SADL 3</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/01/2016<!--webbot bot="Timestamp" endspan i-checksum="12508" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/07/2016<!--webbot bot="Timestamp" endspan i-checksum="12606" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 <p>SADL 3 is a reimplementation of the Semantic Application Design Language 
-using Xtext 2.9. The grammar is a complete reimplementation but is largely 
+using Xtext 2.9+. The grammar is a complete reimplementation but is largely 
 backward compatible with SADL 2. For non-backward compatibilities, see What's 
 Changed in the Grammar. </p>
 <p>The purpose of the reimplementation is to have a cleaner grammar that does 
@@ -51,7 +51,8 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
   </blockquote>
   </font></b>
   <ul>
-    <li>What's happening behind the scenes</li>
+    <li>What's happening behind the scenes-- here is the SADL typed list 
+    meta-model in SADL syntax:</li>
   </ul>
   <blockquote>
     <font SIZE="2" COLOR="#000080"><b>
@@ -98,7 +99,9 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
     <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
     <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
     <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-    <font SIZE="2" COLOR="#800080">int</font><font SIZE="2">.</p>
+    <font SIZE="2" COLOR="#800080">int</font><font SIZE="2">.<br>
+    <br>
+    Here is part of the corresponding OWL model for the example above:</p>
     <p ALIGN="LEFT"><span style="background-color: #FFFFCC">&lt;owl:ObjectProperty 
     rdf:ID=&quot;children&quot;&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;rdfs:domain rdf:resource=&quot;#Person&quot;/&gt;<br>
@@ -154,9 +157,22 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
     <li>Internal equations are completely defined with a body</li>
     <li>External equations are identified with a complete signature but no body 
     and may have an external reference URL</li>
-    <li>&quot;Built-in&quot; functions are specific to reasoner/translator pairs and using 
-    the reasoner-specific information a set of built-in function definitions are 
-    provided so that references are linked to the definitions</li>
+    <li>&quot;Built-in&quot; functions are specific to reasoner/translator pairs and, using 
+    the reasoner-specific information, a set of built-in function definitions 
+    (in external equation syntax) are 
+    created automatically so that references are linked to the definitions. The 
+    auto-generated built-in function definitions are in the model 
+    SadlBuiltinFunctions.sadl in the ImplicitModel folder. This model is 
+    implicitly included in all models in the project. Note that the built-in 
+    function definitions provided by the selected translator support type 
+    checking of built-in function usage. The level of type checking possible 
+    depends upon the reasoner/translator pair selected and can be at three 
+    levels:<ol>
+      <li>Full type-checking information (paremeters, return type)</li>
+      <li>Name Only</li>
+      <li>None</li>
+    </ol>
+    </li>
   </ul>
   </li>
   <li>Implied properties in type checking and translation</li>
@@ -165,8 +181,8 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
 </ol>
 <h2>What's Changed in the Grammar</h2>
 <ol>
-  <li>Numbers can have units <font SIZE="2" COLOR="#000080"><b>
-  <blockquote>
+  <li>Numbers can have units--here's the SADL unitted quantity meta-model in 
+  SADL syntax:<font SIZE="2" COLOR="#000080"><b><blockquote>
     <p ALIGN="LEFT">UnittedQuantity</b></font><font SIZE="2"> </font>
     <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
     <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
@@ -204,7 +220,7 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
 </ol>
 <h2>Miscellaneous</h2>
 <ol>
-  <li>There are some new implicit models provided (besides the &quot;default values&quot; 
+  <li>There are some new implicit OWL models provided (besides the &quot;default values&quot; 
   model defaults.owl).<ul>
     <li>The SADL base model supporting Equations, Named Queries</li>
     <li>The SADL list model supports lists (as illustrated
@@ -213,14 +229,15 @@ changes see <a href="#WhatsNewIDE">What's New in the IDE</a>.</p>
   <blockquote>
   </blockquote>
   </li>
-  <li>The SADL implicit model<ul>
+  <li>The SADL implicit model includes the following: <ul>
     <li>Concept definitions to support unitted numbers</li>
-    <li>Concpet definitions to support implied properties</li>
-    <li>The model is extensible so that projects can add their own implicit 
+    <li>Concept definitions to support implied properties</li>
+    <li>The model is a SADL model so that it is extensible; projects can add their own implicit 
     concepts</li>
   </ul>
   </li>
   <li>Project metrics</li>
+  <li>Reserved Folder and File Names</li>
 </ol>
 <p>&nbsp;</p>
 <h2><br>

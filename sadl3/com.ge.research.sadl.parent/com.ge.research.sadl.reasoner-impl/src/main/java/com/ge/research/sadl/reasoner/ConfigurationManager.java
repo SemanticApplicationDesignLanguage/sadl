@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ImportMapping;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
+import com.hp.hpl.jena.ontology.OntDocumentManager.ReadFailureHandler;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntResource;
@@ -126,6 +127,10 @@ public class ConfigurationManager implements IConfigurationManager {
 	private boolean inferenceCanceled = false;
 
 	private ISadlJenaModelGetter modelGetter;
+
+	private String reasonerClassName = null;
+
+	private String translatorClassName = null;
 
 	/**
 	 * Required constructor for subclass call
@@ -447,21 +452,28 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws ConfigurationException 
 	 */
 	public String getTranslatorClassName() throws ConfigurationException {
-		IReasoner reasonerInst = getReasonerInstance();
-		Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
- 		StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
-				getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
-        if (sitr.hasNext()) { 
-        	RDFNode clsnmnode = sitr.nextStatement().getObject();
-        	if (clsnmnode instanceof Literal) {
-        		return ((Literal)clsnmnode).getValue().toString();
-        	}
-        }
-        ITranslator translator = getTranslator();
-		if (translator != null) {
-			return translator.getClass().getCanonicalName();
+		try {
+			IReasoner reasonerInst = getReasonerInstance();
+			if (getConfigModel() != null) {
+				Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
+		 		StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
+						getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
+		        if (sitr.hasNext()) { 
+		        	RDFNode clsnmnode = sitr.nextStatement().getObject();
+		        	if (clsnmnode instanceof Literal) {
+		        		return ((Literal)clsnmnode).getValue().toString();
+		        	}
+		        }
+			}
+	        ITranslator translator = getTranslator();
+			if (translator != null) {
+				return translator.getClass().getCanonicalName();
+			}
+			throw new ConfigurationException("Unable to get current translator for unknown reason.");
 		}
-		throw new ConfigurationException("Unable to get current translator for unknown reason.");
+		catch (Throwable t) {
+			return ConfigurationManager.DEFAULT_TRANSLATOR;
+		}
 	}
 
     /**
@@ -500,32 +512,35 @@ public class ConfigurationManager implements IConfigurationManager {
 	
 	private void initializeTranslator() throws ConfigurationException {
 		translator = getTranslatorInstance();
-		translator.setConfigurationManager(this);
-		if (getConfigModel() != null) {
-			// first apply configuration for the reasoner family
-			Resource family = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getReasonerFamily());
-			applyConfigurationToTranslator(family);
-			// then apply configuration for the specified translator specifically
-			Resource category = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getConfigurationCategory());
-			applyConfigurationToTranslator(category);
+		if (translator != null) {
+			translator.setConfigurationManager(this);
+			if (getConfigModel() != null) {
+				// first apply configuration for the reasoner family
+				Resource family = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getReasonerFamily());
+				applyConfigurationToTranslator(family);
+				// then apply configuration for the specified translator specifically
+				Resource category = getConfigModel().getResource(CONFIG_NAMESPACE + translator.getConfigurationCategory());
+				applyConfigurationToTranslator(category);
+			}
 		}
 	}
 
 	private ITranslator getTranslatorInstance() throws ConfigurationException {
-		String translatorClassName = null;
-		if (getConfigModel() != null) {
-			IReasoner reasonerInst = getReasonerInstance();
-			Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
-			StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
-					getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
-			if (sitr.hasNext()) {
-				RDFNode cnobj = sitr.next().getObject();
-				if (cnobj instanceof Literal) {
-					translatorClassName = ((Literal)cnobj).getLexicalForm();
+		if (translatorClassName == null) {
+			if (getConfigModel() != null) {
+				IReasoner reasonerInst = getReasonerInstance();
+				Resource reasonerCategory = getConfigModel().getResource(CONFIG_NAMESPACE + reasonerInst.getConfigurationCategory());
+				StmtIterator sitr = getConfigModel().listStatements(reasonerCategory, 
+						getConfigModel().getProperty(pTRANSLATOR_CLASSNAME), (RDFNode)null);
+				if (sitr.hasNext()) {
+					RDFNode cnobj = sitr.next().getObject();
+					if (cnobj instanceof Literal) {
+						translatorClassName = ((Literal)cnobj).getLexicalForm();
+					}
 				}
-			}
-			if (translatorClassName == null) {
-				translatorClassName = reasonerInst.getDefaultTranslatorClassName();
+				if (translatorClassName == null) {
+					translatorClassName = reasonerInst.getDefaultTranslatorClassName();
+				}
 			}
 		}
 		if (translatorClassName == null) {
@@ -573,16 +588,16 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (reasoner != null) {
 			return reasoner;
 		}
-		String reasonerClassName = null;
-//		IReasoner reasonerClass = null;
-		if (getConfigModel() != null) {
-			 StmtIterator sitr = getConfigModel().listStatements(getReasonerSpecResource(), getConfigModel().getProperty(pREASONER_CLASSNAME), (RDFNode)null);
-			 if (sitr.hasNext()) {
-				 RDFNode cnobj = sitr.next().getObject();
-				 if (cnobj instanceof Literal) {
-					 reasonerClassName = ((Literal)cnobj).getLexicalForm();
+		if (reasonerClassName == null) {
+			if (getConfigModel() != null) {
+				 StmtIterator sitr = getConfigModel().listStatements(getReasonerSpecResource(), getConfigModel().getProperty(pREASONER_CLASSNAME), (RDFNode)null);
+				 if (sitr.hasNext()) {
+					 RDFNode cnobj = sitr.next().getObject();
+					 if (cnobj instanceof Literal) {
+						 reasonerClassName = ((Literal)cnobj).getLexicalForm();
+					 }
 				 }
-			 }
+			}
 		}
 		if (reasonerClassName == null) {
 			reasonerClassName = DEFAULT_REASONER;
@@ -979,7 +994,11 @@ public class ConfigurationManager implements IConfigurationManager {
 	 */
 	public String getGlobalPrefix(String uri) {
 		if (globalPrefixes != null) {
-			return globalPrefixes.get(uri);
+			String prefix = globalPrefixes.get(uri);
+			if (prefix == null && uri.endsWith("#")) {
+				prefix = globalPrefixes.get(uri.substring(0, uri.length() - 1));
+			}
+			return prefix;
 		}
 		return null;
 	}
@@ -1543,10 +1562,12 @@ public class ConfigurationManager implements IConfigurationManager {
 	
 	public boolean setTranslatorClassName(String translatorClassName)
 			throws ConfigurationException {
+		this.translatorClassName = translatorClassName;
 		return true;
 	}
 	
 	public boolean setReasonerClassName(String reasonerClassName) {
+		this.reasonerClassName = reasonerClassName;
 		return true;
 	}
 
@@ -1639,8 +1660,80 @@ public class ConfigurationManager implements IConfigurationManager {
 	@Override
 	public List<ImportMapping> loadImportedModel(Ontology importingOntology, OntModel importingModel,
 			String publicImportUri, String altImportUrl) throws ConfigurationException {
-		// TODO Auto-generated method stub
-		return null;
+    	// if not given the publicImportUri, then we must have the altImportUrl so find the publicImportUri in mapping
+    	if (publicImportUri == null) {
+    		if (altImportUrl == null) {
+    			throw new ConfigurationException("Must have either a public URI or an actual URL to import a model.");
+    		}
+    		publicImportUri = getPublicUriFromActualUrl(altImportUrl);
+    	}
+    	
+    	if (importingOntology == null) {
+    		throw new ConfigurationException("Importing ontology is null!");
+    	}
+    	    	    	
+    	// if not given altImportUrl, then we must have the publicImportUri so find the altImportUrl in mapping
+    	if (altImportUrl == null) {
+    		altImportUrl = getAltUrlFromPublicUri(publicImportUri);
+    	}
+    	
+    	String importingOntologyUri = importingOntology.getURI();
+    	if (importingOntologyUri == null) {
+    		throw new ConfigurationException("Importing ontology '" + importingOntology.toString() + "' does not have an ontology declaration.");
+    	}
+    	if (!importingOntologyUri.equals(publicImportUri)) {	// don't import to self
+	    	// Now load import model (with setCachedModels true so it loads any indirect imports)
+	       	// and add all import OntModels to importing mappings
+	    	Resource importedOntology = importingModel.createResource(publicImportUri);
+	    	importingOntology.addImport(importedOntology);
+    	}
+//    	this.getJenaDocumentMgr().setCacheModels(true);
+   		this.getJenaDocumentMgr().setProcessImports(true);
+   		ReadFailureHandler rfh = this.getJenaDocumentMgr().getReadFailureHandler();
+   		if (rfh instanceof SadlReadFailureHandler) {
+   			((SadlReadFailureHandler)rfh).setSadlConfigMgr(this);
+   		}
+   		getModelGetter().configureToModel(importingModel);
+		importingModel.loadImports();
+		if (readError != null) {
+			String err = readError;
+			readError = null;
+			if (importingModel.hasLoadedImport(publicImportUri)) {
+				// this must be removed or it will prevent correct loading from another project
+				importingModel.removeLoadedImport(publicImportUri);
+			}
+	   		this.getJenaDocumentMgr().setProcessImports(false);
+			throw new ConfigurationException(err);
+		}
+   		this.getJenaDocumentMgr().setProcessImports(false);
+    	
+    	List<ImportMapping> map = new ArrayList<ImportMapping>();
+		Iterator<String> itr = importingModel.listImportedOntologyURIs(true).iterator();
+		while (itr.hasNext()) {
+			String impUri = itr.next();
+			if (impUri.equals(importingOntology.getURI())) {
+				// don't count ourselves as an import
+				importingModel.setNsPrefix("", ConfigurationManager.addHashToNonTerminatedNamespace(impUri));
+				continue;
+			}
+			String prefix = importingModel.getNsURIPrefix(ConfigurationManager.addHashToNonTerminatedNamespace(impUri));
+			if (prefix == null) {
+				prefix = getGlobalPrefix(impUri);
+				if (prefix != null) {
+					importingModel.setNsPrefix(prefix, ConfigurationManager.addHashToNonTerminatedNamespace(impUri));
+				}
+			}
+			OntModel impModel = importingModel.getImportedModel(impUri);
+			String actImpUrl = getAltUrlFromPublicUri(impUri);
+			logger.debug("processing importingModel, url = "+actImpUrl);
+			ImportMapping im = new ImportMapping(impUri, actImpUrl, null);
+			im.setModel(impModel);
+			im.setPrefix(prefix);
+			map.add(im);
+		}	
+		this.getJenaDocumentMgr().setProcessImports(false);
+//		this.getJenaDocumentMgr().setCacheModels(false);
+    	return map;
 	}
 
 }

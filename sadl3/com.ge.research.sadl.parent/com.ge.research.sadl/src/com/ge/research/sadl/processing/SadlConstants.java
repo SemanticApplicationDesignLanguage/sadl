@@ -5,9 +5,10 @@ public class SadlConstants {
 	public static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
 	public static final String SADL_BASE_MODEL_PREFIX = "sadlbasemodel";
 	public static final String SADL_BASE_MODEL_EQUATION_URI = SADL_BASE_MODEL_URI + "#Equation";
-	public static final String SADL_BASE_MODEL_EXTERNAL_URI = SADL_BASE_MODEL_URI + "#ExternalEquation";
 	public static final String SADL_BASE_MODEL_EQ_EXPRESSION_URI = SADL_BASE_MODEL_URI + "#expression";
+	public static final String SADL_BASE_MODEL_EXTERNAL_URI = SADL_BASE_MODEL_URI + "#ExternalEquation";
 	public static final String SADL_BASE_MODEL_EXTERNALURI_URI = SADL_BASE_MODEL_URI + "#externalURI";
+	public static final String SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN = SADL_BASE_MODEL_URI + "#location";
 	
 	public static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
 	public static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
@@ -40,6 +41,14 @@ public class SadlConstants {
 	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX = "";
 	public static final String SADL_SERIVCES_CONFIGURATION_URI = "http://com.ge.research.sadl/sadlserver/ServicesConfig";
 	public static final String SADL_SERIVCES_CONFIGURATION_PREFIX = "";
+	
+	public static final String SADL_DEFAULTS_MODEL_FILENAME = "defaults";
+	public static final String SADL_DEFAULTS_MODEL_PREFIX = "defs";
+	public static final String SADL_DEFAULTS_MODEL_URI = "http://research.ge.com/Acuity/defaults.owl";
 
-
+	public static final String SADL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.sadl";
+	public static final String OWL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.owl";
+	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
+	public static final String SADL_BUILTIN_FUNCTIONS_ALIAS = "builtinfunctions";
+	public static enum SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY{FULL,NAME_ONLY,NONE};
 }

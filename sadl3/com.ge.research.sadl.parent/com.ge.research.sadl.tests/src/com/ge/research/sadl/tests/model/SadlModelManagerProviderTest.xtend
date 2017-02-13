@@ -1253,6 +1253,55 @@ class SadlModelManagerProviderTest {
 		]
 	}
 
+	@Ignore
+	@Test
+	def void testEquationScope() {
+		'''
+			 uri "http://sadl.org/eq.sadl" alias eq.
+			 External sum(decimal X, decimal X) returns decimal:
+			 "http://sadl.org/builtinfunctions#sum".
+		'''.assertValidatesTo [ jenaModel1, issues1 |
+			assertNotNull(jenaModel1)
+			assertTrue(issues1.size == 0)
+		]
+		'''
+			 uri "http://sadl.org/prop.sadl" alias prop.
+			 import "http://sadl.org/eq.sadl".
+			 Class1 is a class described by X with values of type float.
+		'''.assertValidatesTo [ jenaModel2, issues2 |
+		assertNotNull(jenaModel2)
+		assertTrue(issues2.size == 0)		// shouldn't be an error
+		]
+	}
+
+	@Ignore
+	@Test
+	def void testEquationScope2() {
+		'''
+			uri "http://sadl.org/eq.sadl" alias eq.
+			External sum(decimal X, decimal Y) returns decimal:
+						 "http://sadl.org/builtinfunctions#sum".
+			Equation circleArea(decimal r) returns decimal: PI*r^2.  
+			Shape is a class described by area with values of type float,
+				described by peremiter with values of type float.
+			Rectangle is a type of Shape described by height with values of type float,
+				described by width with values of type float.
+			Rule RectPeremiter if x is a Rectangle then peremiter of x is 2*sum(height of x, width of x).
+		'''.assertValidatesTo [ jenaModel1, issues1 |
+			assertNotNull(jenaModel1)
+			assertTrue(issues1.size == 0)
+		]
+		'''
+			  uri "http://sadl.org/prop.sadl" alias prop.
+			  import "http://sadl.org/eq.sadl".
+			  Circle is a type of Shape described by radius with values of type float.
+			  Rule CircleArea if x is a Circle then area of x is circleArea(radius of x).
+		'''.assertValidatesTo [ jenaModel2, issues2 |
+		assertNotNull(jenaModel2)
+		assertTrue(issues2.size == 0)		// shouldn't be an error
+		]
+	}
+
 //	@Test def void my<younameit>Case() {
 //		'''
 //			// model goes here

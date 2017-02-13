@@ -17,11 +17,13 @@
  ***********************************************************************/
 package com.ge.research.sadl.model
 
+import com.ge.research.sadl.ValueConverterService
 import com.ge.research.sadl.external.ExternalEmfResource
 import com.ge.research.sadl.external.ExternalResourceAdapter
 import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.ExternalEquationStatement
 import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -40,14 +42,16 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
+import com.google.inject.Inject
 import java.util.HashSet
 import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import com.ge.research.sadl.sADL.QueryStatement
 
 class DeclarationExtensions {
+	
+	@Inject ValueConverterService.QNameConverter converter
 	
 	def String getConcreteName(SadlResource it) {
 		if (isExternal) {
@@ -56,16 +60,16 @@ class DeclarationExtensions {
 		val resource = it.eResource as XtextResource
 		val ()=>String nameSupplyer = [
 			val nodes = NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME)
-			val name = nodes.join('')[NodeModelUtils.getTokenText(it)].trim
+			val name = nodes.join('') [
+				NodeModelUtils.getTokenText(it)
+			].trim
 			if (name.isNullOrEmpty)
 				return null
-			if (name.startsWith('^'))
-				return name.substring(1)
-			return name
+			return converter.toValue(name, null)
 		]
 		if (resource === null)
 			return nameSupplyer.apply
-		return resource.cache.get(it->'concreteName', eResource, nameSupplyer)
+		return resource.cache.get(it -> 'concreteName', eResource, nameSupplyer)
 	}
 	
 	def String getConceptUri(SadlResource it) {
@@ -87,12 +91,16 @@ class DeclarationExtensions {
 	
 	def String getConceptQualifiedName(SadlResource it) {
 		val declaration = declaration
-		if (declaration != null) {	
+		if (declaration !== null) {	
+			val concreteName = declaration.concreteName
+			if (concreteName.indexOf(':') > 0) {
+				return concreteName
+			}
 			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
-			if (part1 != null) {
+			if (part1 !== null) {
 				val part2 = part1.alias
-				if (part2 != null) {
-					return part2 +":"+declaration.concreteName
+				if (part2 !== null) {
+					return part2 +":"+concreteName
 				}
 			}
 		}
@@ -155,6 +163,9 @@ class DeclarationExtensions {
 				}
 				else if (resource.function) {
 					return OntConceptType.FUNCTION_DEFN
+				}
+				else if (resource.name !== null && (resource !== resource.name)) {
+					return getOntConceptType(resource.name)
 				}
 				return OntConceptType.VARIABLE
 			}

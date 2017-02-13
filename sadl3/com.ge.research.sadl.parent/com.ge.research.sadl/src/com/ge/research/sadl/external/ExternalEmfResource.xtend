@@ -8,7 +8,6 @@ import com.hp.hpl.jena.ontology.DatatypeProperty
 import com.hp.hpl.jena.ontology.Individual
 import com.hp.hpl.jena.ontology.ObjectProperty
 import com.hp.hpl.jena.ontology.OntClass
-import com.hp.hpl.jena.rdf.model.Model
 import com.hp.hpl.jena.rdf.model.ModelFactory
 import com.hp.hpl.jena.rdf.model.Resource
 import com.hp.hpl.jena.util.iterator.ExtendedIterator
@@ -29,6 +28,7 @@ import org.eclipse.xtext.util.internal.EmfAdaptable
 import org.eclipse.xtext.validation.IResourceValidator
 import com.hp.hpl.jena.ontology.OntModelSpec
 import com.hp.hpl.jena.ontology.OntModel
+import com.ge.research.sadl.sADL.SadlResource
 
 class ExternalEmfResource extends ResourceImpl {
 	@Accessors OntModel jenaModel

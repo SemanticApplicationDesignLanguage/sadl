@@ -1,42 +1,16 @@
 package com.ge.research.sadl.ui.handlers;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.URIUtil;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -49,24 +23,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.xtext.preferences.*;
-import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.IAcceptor;
-import org.eclipse.xtext.validation.Issue;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
-import com.ge.research.sadl.external.ExternalEmfResource;
-import com.ge.research.sadl.processing.ValidationAcceptor;
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -77,11 +36,7 @@ import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.ui.SadlConsole;
-import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.hp.hpl.jena.assembler.exceptions.TransactionAbortedException;
 
 public class RunQuery extends SadlActionHandler {
 
@@ -216,7 +171,14 @@ public class RunQuery extends SadlActionHandler {
 								String currentQuery = reasoner.prepareQuery(query);
 								ResultSet rs = reasoner.ask(currentQuery);
 								if (rs != null) {
-									SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
+									if (currentQuery.toLowerCase().startsWith("construct")) {
+										String desc = "Adhoc query Graph";
+	        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + System.currentTimeMillis(); 							
+		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
+									}
+									else {
+										SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
+									}
 								}
 								else {
 									SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + currentQuery + "' returned no results\n");

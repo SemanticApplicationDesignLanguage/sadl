@@ -43,8 +43,10 @@ public class SadlPreferences {
 	public static final PreferenceKey DMY_ORDER_MDY = new PreferenceKey("mdy", "");
 	public static final PreferenceKey DEEP_VALIDATION_OFF = new PreferenceKey("deepValidationOff", "");
 	public static final PreferenceKey GRAPH_RENDERER_CLASS= new PreferenceKey("graphrendererclass", "");
+	public static final PreferenceKey TABULAR_DATA_IMPORTER_CLASS= new PreferenceKey("tabulardataimporterclass", "");
 	public static final PreferenceKey CHECK_FOR_AMBIGUOUS_NAMES = new PreferenceKey("ambiguousNameCheckOn", String.valueOf(false));
 	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));
+	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
 	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
 	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
 	
@@ -71,6 +73,7 @@ public class SadlPreferences {
 			GRAPH_RENDERER_CLASS,
 			CHECK_FOR_AMBIGUOUS_NAMES,
 			DISABLE_TYPE_CHECKING,
+			IGNORE_UNITTEDQUANTITIES,
 			ENABLE_METRICS_COLLECTION,
 			METRICS_QUERY_FILENAME
 	};

@@ -28,7 +28,12 @@ class QualifiedNameConverter implements IQualifiedNameConverter {
 			return QualifiedName.create(qualifiedNameAsText)
 		}
 		val lastSegment = qualifiedNameAsText.substring(idx+1)
-		if (lastSegment.toCharArray.exists[!Character.isJavaIdentifierPart(it)]) {
+		val chars = if (lastSegment.startsWith("^")) {
+			lastSegment.toCharArray.tail.toList
+		} else {
+			lastSegment.toCharArray.toList
+		}
+		if (chars.exists[!Character.isJavaIdentifierPart(it)]) {
 			return QualifiedName.create(qualifiedNameAsText)
 		} else {
 			return QualifiedName.create(qualifiedNameAsText.substring(0, idx), lastSegment)

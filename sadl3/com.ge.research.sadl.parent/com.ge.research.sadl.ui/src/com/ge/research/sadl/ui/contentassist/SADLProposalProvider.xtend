@@ -21,43 +21,40 @@
 package com.ge.research.sadl.ui.contentassist
 
 import com.ge.research.sadl.model.DeclarationExtensions
-import com.google.inject.Inject
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.Assignment
-import org.eclipse.xtext.Keyword
-import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
-import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
-import org.eclipse.xtext.RuleCall
-import org.eclipse.swt.graphics.Image
-import org.eclipse.jface.text.contentassist.ICompletionProposal
-import org.eclipse.xtext.CrossReference
-import org.eclipse.xtext.resource.IEObjectDescription
-import com.google.common.base.Predicates
-import org.eclipse.xtext.scoping.IScope
-import com.google.common.base.Predicate
-import org.eclipse.emf.ecore.EReference
-import com.google.common.base.Function
-import org.eclipse.xtext.ParserRule
-import org.eclipse.xtext.GrammarUtil
-import java.util.ArrayList
-import java.util.HashMap
-import org.eclipse.xtext.naming.QualifiedName
-import org.eclipse.xtext.EcoreUtil2
-import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.sADL.SadlImport
-import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.model.OntConceptType
-import com.ge.research.sadl.sADL.SadlResource
-import com.ge.research.sadl.sADL.SubjHasProp
-import java.util.List
-import com.ge.research.sadl.sADL.Declaration
-import com.ge.research.sadl.sADL.PropOfSubject
-import com.ge.research.sadl.sADL.Name
-import org.eclipse.xtext.AbstractElement
-import org.eclipse.xtext.ui.editor.contentassist.IFollowElementAcceptor
-import org.eclipse.xtext.ui.editor.contentassist.AbstractContentProposalProvider.NullSafeCompletionProposalAcceptor
 import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.Declaration
+import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.PropOfSubject
+import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.sADL.SadlPropertyInitializer
+import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference
+import com.ge.research.sadl.sADL.SubjHasProp
+import com.google.common.base.Predicate
+import com.google.inject.Inject
+import java.util.ArrayList
+import java.util.HashMap
+import java.util.List
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.Assignment
+import org.eclipse.xtext.CrossReference
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.GrammarUtil
+import org.eclipse.xtext.Keyword
+import org.eclipse.xtext.RuleCall
+import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.resource.IEObjectDescription
+import org.eclipse.xtext.scoping.IScope
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import com.ge.research.sadl.jena.OntModelProvider
+import com.hp.hpl.jena.vocabulary.RDFS
+import com.hp.hpl.jena.rdf.model.RDFNode
+import com.hp.hpl.jena.ontology.OntClass
+import com.hp.hpl.jena.ontology.OntResource
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -156,84 +153,17 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		acceptor.accept(proposal);
 	}
 	
-	def boolean includeKeyword(Keyword keyword, ContentAssistContext context) {
-		var model = context.currentModel
-		if (model == null) {
-			model = context.previousModel
-		}
-		if (model != null) {
-			if (model instanceof Declaration) { return false}
-			val container = model.eContainer
-			val kval = keyword.value
-			if (container instanceof SadlProperty) {
-				return false
-			}
-			else if (container instanceof Declaration) {
-				if (kval.equals("with") ||
-					kval.equals("only") ||
-					kval.equals("when") ||
-					kval.equals("where")
-				) {
-					return true
-				}
-				else {
-					return false
-				}
-			}
-			else if (container instanceof SubjHasProp) {
-				if ((container as SubjHasProp).prop != null) {
-					if ((container as SubjHasProp).right == null) {
-						// this is ready for a value but doesn't have one yet
-						if (kval.equals("(") ||
-							kval.equals("[") ||
-							kval.equals("{")
-						) {
-							return true;
-						}
-						else {
-							return false;
-						}
-					} else if ((container as SubjHasProp).right instanceof Name) {
-						val valnm =((container as SubjHasProp).right as Name)
-						if (declarationExtensions.isProperty(valnm)) {
-							if (!kval.equals("of")) {
-								return false
-							}
-							return true
-						}
-					}
-				}
-			}
-			if (model instanceof Name) {
-				if (declarationExtensions.isProperty(model as Name)) {
-					if (!kval.equals("of")) {
-						return false
-					}
-				}
-			}
-			else if (model instanceof PropOfSubject) {
-				val lcn = context.lastCompleteNode
-				val lcnText = lcn.text
-				if (lcnText.equals("a")) {
-					return false
-				}
-				if (kval.equals("(")
-				) {
-					return true
-				}
-				return false
-			}
-			
-		}
-		return true
-	}
-	
+
 	override void createProposals(ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		if (excludedNamespaces != null) excludedNamespaces.clear
 		if (typeRestrictions != null) typeRestrictions.clear
 		super.createProposals(context, acceptor)
 	}
-
+	
+	override void completeSadlPropertyInitializer_Value(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		System.out.println("completeSadlPropertyInitializer_Value called")
+	}
+	
 //	// this is without filtering out duplicates
 //	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
 //			ICompletionProposalAcceptor acceptor) {
@@ -310,6 +240,19 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 							excludeNamespace(SadlConstants.SADL_BASE_MODEL_URI)
 						}
 					}
+				}
+			}
+			else if (pm instanceof SadlSimpleTypeReference) {
+				return
+			}
+			else if (pm instanceof SadlPropertyInitializer) {
+				if ((pm as SadlPropertyInitializer).property == null) {
+					excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
+					restrictTypeToAllPropertyTypes
+				}
+				else {
+					// values of the property
+					
 				}
 			}
 			else {
@@ -392,6 +335,78 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			})
 	}
 	
+	def boolean includeKeyword(Keyword keyword, ContentAssistContext context) {
+		var model = context.currentModel
+		if (model == null) {
+			model = context.previousModel
+		}
+		if (model != null) {
+			if (model instanceof Declaration) { return false}
+			val container = model.eContainer
+			val kval = keyword.value
+			if (container instanceof SadlProperty) {
+				return false
+			}
+			else if (container instanceof Declaration) {
+				if (kval.equals("with") ||
+					kval.equals("only") ||
+					kval.equals("when") ||
+					kval.equals("where")
+				) {
+					return true
+				}
+				else {
+					return false
+				}
+			}
+			else if (container instanceof SubjHasProp) {
+				if ((container as SubjHasProp).prop != null) {
+					if ((container as SubjHasProp).right == null) {
+						// this is ready for a value but doesn't have one yet
+						if (kval.equals("(") ||
+							kval.equals("[") ||
+							kval.equals("{")
+						) {
+							return true;
+						}
+						else {
+							return false;
+						}
+					} else if ((container as SubjHasProp).right instanceof Name) {
+						val valnm =((container as SubjHasProp).right as Name)
+						if (declarationExtensions.isProperty(valnm)) {
+							if (!kval.equals("of")) {
+								return false
+							}
+							return true
+						}
+					}
+				}
+			}
+			if (model instanceof Name) {
+				if (declarationExtensions.isProperty(model as Name)) {
+					if (!kval.equals("of")) {
+						return false
+					}
+				}
+			}
+			else if (model instanceof PropOfSubject) {
+				val lcn = context.lastCompleteNode
+				val lcnText = lcn.text
+				if (lcnText.equals("a")) {
+					return false
+				}
+				if (kval.equals("(")
+				) {
+					return true
+				}
+				return false
+			}
+			
+		}
+		return true
+	}
+	
 	def void displayModel(EObject object, String label) {
 		System.out.println(label + ": " + object.class.canonicalName)
 		if (object instanceof SadlResource) {
@@ -437,6 +452,33 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		}
 	}
 	
+	/**
+	 * Method to determine if a particular SadlResource (OntConceptType.INSTANCE, OntConceptType.CLASS, or OntConceptType.VARIABLE)
+	 * is in the domain of the given property
+	 */
+	def boolean isSadlResourceInDomainOfProperty(SadlResource propsr, SadlResource sr) {
+			val om = OntModelProvider.find(propsr.eResource)
+			if (om != null) {
+				val p = om.getProperty(declarationExtensions.getConceptUri(propsr))
+				if (p != null) {
+					val srtype = declarationExtensions.getOntConceptType(sr)
+					var OntResource ontrsrc
+					if (srtype.equals(OntConceptType.CLASS)) {
+						ontrsrc = om.getOntClass(declarationExtensions.getConceptUri(sr))
+					}
+					else if (srtype.equals(OntConceptType.INSTANCE)) {
+						ontrsrc = om.getIndividual(declarationExtensions.getConceptUri(sr))
+					}
+					else if (srtype.equals(OntConceptType.VARIABLE)) {
+						//TBD
+					}
+//					return JenaBasedSadlModelValidator.checkPropertyDomain(om, p, ontrsrc, propsr.eContainer, false)
+				}
+			}
+		
+		return false
+	}
+	
 	def restrictTypeToAllPropertyTypes() {
 				val typeList = new ArrayList<OntConceptType>
 				typeList.add(OntConceptType.ANNOTATION_PROPERTY)
@@ -444,6 +486,13 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				typeList.add(OntConceptType.DATATYPE_PROPERTY)
 				typeList.add(OntConceptType.RDF_PROPERTY)
 				typeRestrictions = typeList
+	}
+	
+	def addRestrictionType(OntConceptType type) {
+		if (typeRestrictions == null) {
+			typeRestrictions = new ArrayList<OntConceptType>
+		}
+		typeRestrictions.add(type)
 	}
 	
 	def getFilteredCrossReferenceList(CrossReference crossReference, ContentAssistContext context) {
@@ -458,6 +507,9 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					return scope.allElements
 				}
 			} else {
+				if (context.currentModel instanceof SadlSimpleTypeReference) {
+					return emptyList;
+				}
 				val ref = GrammarUtil.getReference(crossReference);
 				if (ref != null) {
 					val scope = getScopeProvider().getScope(context.currentModel, ref) as IScope;	//IScope

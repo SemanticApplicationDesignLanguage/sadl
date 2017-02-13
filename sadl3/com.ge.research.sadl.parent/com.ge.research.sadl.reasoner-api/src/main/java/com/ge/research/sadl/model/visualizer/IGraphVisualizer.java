@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright \u00a9 2007-2016 - General Electric Company, All Rights Reserved
+ * Copyright (c) 2007-2017 - General Electric Company, All Rights Reserved
  * 
  * Project: SADL
  * 
@@ -46,7 +46,7 @@ import com.ge.research.sadl.reasoner.ResultSet;
  *  how to color the edge, how to color or shape the node.
  */
 public interface IGraphVisualizer {
-	public enum Orientation {TD, LR}
+	public enum Orientation {TD, LR, BT, RL}	//"TB", "LR", "BT", "RL"
 	
 	/**
 	 * Method to initialize the graph renderer
@@ -95,4 +95,6 @@ public interface IGraphVisualizer {
 	 * @return
 	 */
 	public String getGraphFileToOpen();
+
+	public String getGraphFilenameExtension();
 }
