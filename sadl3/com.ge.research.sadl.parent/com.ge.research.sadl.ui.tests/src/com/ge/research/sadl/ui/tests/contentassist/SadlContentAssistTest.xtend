@@ -149,6 +149,46 @@ class SadlContentAssistTest extends AbstractLinkingTest implements ResourceLoadH
 		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". C is a Circle with ''').
 			assertProposalIsNot('width');
 	}
+	
+	/** Super type element. */
+	@Test
+	def void checkCA_08_SuperElment_Positive() {
+		newBuilder('''uri "http://myUri". Person is a class. {Man, Woman} are types of ''').assertProposal('Person');
+	}
+	
+	/** Super type element. */
+	@Test
+	def void checkCA_09_SuperElment_Negative() {
+		newBuilder('''uri "http://myUri". Person is a class. {Man, Woman} are types of ''').assertProposal('Man');
+	}
+	
+	/** Subject of property in test statement. */
+	@Test
+	def void checkCA_10_SubjectOfProperty_Positive() {
+		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". Test: width of ''')
+			.assertProposal('Rectangle');
+	}
+	
+	/** Subject of property in test statement. */
+	@Test
+	def void checkCA_11_SubjectOfProperty_Negative() {
+		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". Test: width of ''')
+			.assertProposalIsNot('Circle');
+	}
+	
+	/** Subject of property in test statement. */
+	@Test
+	def void checkCA_12_PropertyInTestStatement_Positive() {
+		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". Test: ''')
+			.assertProposal('width');
+	}
+	
+	/** Subject of property in test statement. */
+	@Test
+	def void checkCA_13_PropertyInTestStatement_Negative() {
+		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". Test: ''')
+			.assertProposalIsNot('Circle');
+	}
 
 	@Override
 	override getResourceFor(InputStream stream) {

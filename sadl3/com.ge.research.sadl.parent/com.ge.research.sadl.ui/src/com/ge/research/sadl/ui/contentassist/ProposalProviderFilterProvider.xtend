@@ -53,6 +53,8 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import org.eclipse.emf.ecore.util.EcoreUtil
+import com.ge.research.sadl.sADL.PropOfSubject
+import com.ge.research.sadl.sADL.Name
 
 /**
  * Provides filter for removing items from the content proposal.
@@ -105,15 +107,52 @@ class ProposalProviderFilterProvider {
 				val predicate = Predicates.and(currentModel.createPrimaryTypeRefFilter, // First get the available types.
 				currentModel.createSelfClassOrPropertyFilter); // Then filter out those which we are defining right now.
 				predicates.add(predicate);
-			} else if (clazz == SADL_RANGE_RESTRICTION) {
+			} else if (clazz === SADL_RANGE_RESTRICTION) {
 				// 'Person is a class described by birth with a single value of type '
 				// => allow all primitive and complex, visible types.
 				predicates.add(Predicates.alwaysTrue);
+			} else if (clazz === TEST_STATEMENT && key == 'PRIMARYEXPRESSION_VALUE') {
+				// Test: => properties are allowed
+				predicates.add(currentModel.createPropertyFilter);
+			} else if (clazz == PROP_OF_SUBJECT && key == 'PRIMARYEXPRESSION_VALUE') {
+				predicates.add(currentModel.createSubjectOfPropertyFilter);
 			} else {
 				println('''Unhandled case with class: «clazz» and key: «key»''');
 			}
 		}
 		return if(predicates.nullOrEmpty) Predicates.alwaysFalse else Predicates.or(predicates);
+	}
+	
+	private def Predicate<IEObjectDescription> createSubjectOfPropertyFilter(EObject currentModel) {
+		if (currentModel instanceof PropOfSubject) {
+			val left = currentModel.left;
+			if (left instanceof Name) {
+				val resource = left.name;
+				if (resource !== null) {
+					val Predicate<IEObjectDescription> predicate = [
+						if (EClass === SADL_RESOURCE) {
+							val candidate = EObjectOrProxy as SadlResource;
+							return isSadlResourceInDomainOfProperty(candidate, resource);
+						}
+						return false;
+					];
+					return predicate;
+				}
+			}
+
+		}
+		return Predicates.alwaysFalse;
+	}
+	
+	private def createPropertyFilter(EObject currentModel) {
+		val Predicate<IEObjectDescription> predicate = [
+			if (EClass === SADL_RESOURCE) {
+				val candidate = EObjectOrProxy as SadlResource;
+				return candidate.eContainer instanceof SadlProperty;
+			}
+			return false;
+		];
+		return predicate;
 	}
 
 	private def createPropertyInitializerFilter(EObject currentModel) {
