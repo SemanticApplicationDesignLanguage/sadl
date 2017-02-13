@@ -117,7 +117,7 @@ class ProposalProviderFilterProvider {
 			} else if (clazz == PROP_OF_SUBJECT && key == 'PRIMARYEXPRESSION_VALUE') {
 				predicates.add(currentModel.createSubjectOfPropertyFilter);
 			} else {
-				println('''Unhandled case with class: «clazz» and key: «key»''');
+				// println('''Unhandled case with class: «clazz» and key: «key»''');
 			}
 		}
 		return if(predicates.nullOrEmpty) Predicates.alwaysFalse else Predicates.or(predicates);
