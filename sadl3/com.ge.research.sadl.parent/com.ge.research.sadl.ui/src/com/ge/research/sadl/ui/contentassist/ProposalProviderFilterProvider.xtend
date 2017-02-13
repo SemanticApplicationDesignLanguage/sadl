@@ -55,6 +55,7 @@ import static extension org.eclipse.xtext.EcoreUtil2.*
 import org.eclipse.emf.ecore.util.EcoreUtil
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.SadlHasValueCondition
 
 /**
  * Provides filter for removing items from the content proposal.
@@ -114,13 +115,39 @@ class ProposalProviderFilterProvider {
 			} else if (clazz === TEST_STATEMENT && key == 'PRIMARYEXPRESSION_VALUE') {
 				// Test: => properties are allowed
 				predicates.add(currentModel.createPropertyFilter);
-			} else if (clazz == PROP_OF_SUBJECT && key == 'PRIMARYEXPRESSION_VALUE') {
+			} else if (clazz === PROP_OF_SUBJECT && key == 'PRIMARYEXPRESSION_VALUE') {
+				// Test: width of => Only types which have property width is allowed here.				
 				predicates.add(currentModel.createSubjectOfPropertyFilter);
+			} else if (clazz === SADL_NECESSARY_AND_SUFFICIENT && key == 'SADLPROPERTYCONDITION_PROPERTY') {
+				// A Person is a Man only if => only properties are available.
+				predicates.add(currentModel.createPropertyFilter);
+			} else if (clazz === SADL_HAS_VALUE_CONDITION && key == 'SADLRESOURCE_NAME') {
+				// A Person is a Man only if gender always has value => instances of Gender type.
+				// XXX: filter CA properly based on the OWL model.
+				predicates.add(currentModel.createExplicitValueFilter); 
 			} else {
 				// println('''Unhandled case with class: «clazz» and key: «key»''');
 			}
 		}
 		return if(predicates.nullOrEmpty) Predicates.alwaysFalse else Predicates.or(predicates);
+	}
+	
+	def Predicate<IEObjectDescription> createExplicitValueFilter(EObject currentModel) {
+		if (currentModel instanceof SadlHasValueCondition) {
+			val restriction = currentModel.restriction;
+			if (restriction instanceof SadlResource) {
+				val Predicate<IEObjectDescription> predicate = [
+						if (EClass === SADL_RESOURCE) {
+							val candidate = EObjectOrProxy as SadlResource;
+							return isSadlResourceInDomainOfProperty(restriction, candidate);
+						}
+						return false;
+					];
+					return predicate;
+			}
+			
+		}
+		return Predicates.alwaysFalse;
 	}
 	
 	private def Predicate<IEObjectDescription> createSubjectOfPropertyFilter(EObject currentModel) {
