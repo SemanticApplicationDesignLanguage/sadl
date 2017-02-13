@@ -1546,6 +1546,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (subj != null && subj.canAs(OntClass.class)){ 
 				Property prop = theJenaModel.getProperty(propuri);
+				if (isListAnnotatedProperty(prop)) {
+					return null;
+				}
 				// now look for restrictions on "range"
 				StmtIterator sitr = theJenaModel.listStatements(null, OWL.onProperty, prop);
 				while (sitr.hasNext()) {
@@ -1956,7 +1959,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
 						eitr.close();
 						if (avf.isURIResource()) {
-							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+//							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+							List<ConceptName> impliedProperties = null;		// don't impute implied properties when the range is a List
 							ConceptName rangeConceptName = new ConceptName(avf.getURI());
 							if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 								rangeConceptName.setType(ConceptType.RDFDATATYPE);
