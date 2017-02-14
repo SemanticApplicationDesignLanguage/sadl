@@ -2735,10 +2735,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				String msg;
 				if (subj instanceof OntProperty) {
-					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(subj.getURI(),prop.getURI());
+					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				else {
-					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI());
+					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				if(propOfSubjectCheck){
 					issueAcceptor.addError(msg, subject);
