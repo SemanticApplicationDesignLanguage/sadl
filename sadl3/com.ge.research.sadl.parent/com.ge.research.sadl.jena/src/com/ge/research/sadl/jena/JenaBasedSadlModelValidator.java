@@ -963,7 +963,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	private TypeCheckInfo unifyCompoundTypeCheckInfos(TypeCheckInfo tci) throws CircularDependencyException, InvalidNameException {
 		// if this is a compound TypeCheckInfo, look to make sure that one isn't a subclass of another and eliminate lower classes
-		if (tci.getCompoundTypes() != null) {
+		if (tci != null && tci.getCompoundTypes() != null) {
 			int size = tci.getCompoundTypes().size();
 			if (size == 1) {
 				return tci.getCompoundTypes().get(0);

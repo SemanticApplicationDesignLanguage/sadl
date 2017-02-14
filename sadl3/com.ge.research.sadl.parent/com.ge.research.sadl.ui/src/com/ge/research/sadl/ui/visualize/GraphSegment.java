@@ -704,7 +704,7 @@ public class GraphSegment {
 		}
 		return rsrc.toString();
 	}
-
+	
 	private String getPrefix(String ns) {
 		String prefix;
 		if (ns.equals(XSD.getURI())) prefix = "xsd";
