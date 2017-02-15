@@ -1012,8 +1012,11 @@ public class ConfigurationManager implements IConfigurationManager {
 	public String getGlobalPrefix(String uri) {
 		if (globalPrefixes != null) {
 			String prefix = globalPrefixes.get(uri);
-			if (prefix == null && uri.endsWith("#")) {
+			if ((prefix == null || prefix.length() == 0) && uri.endsWith("#")) {
 				prefix = globalPrefixes.get(uri.substring(0, uri.length() - 1));
+			}
+			if (prefix != null && prefix.length() == 0) {
+				return null;
 			}
 			return prefix;
 		}
