@@ -19,22 +19,22 @@ package com.ge.research.sadl.tests.validation
 
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.tests.SADLInjectorProvider
+import com.ge.research.sadl.scoping.TestScopeProvider
+import com.ge.research.sadl.tests.SADLNoopModelProcessorsInjectorProvider
 import com.ge.research.sadl.validation.SADLValidator
 import com.google.inject.Inject
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
-import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.util.ParseHelper
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import com.ge.research.sadl.scoping.TestScopeProvider
 
 @RunWith(XtextRunner)
-@InjectWith(SADLInjectorProvider)
+@InjectWith(SADLNoopModelProcessorsInjectorProvider)
 class ValidationTest {
 	
 	@Test def void testDuplicateAlias() {

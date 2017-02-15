@@ -2,28 +2,28 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Swi-Prolog-Plugin
 Bundle-SymbolicName: com.ge.research.sadl.swi-prolog-plugin;singleton:=true
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-Activator: com.ge.research.sadl.swi_prolog.plugin.Activator
 Bundle-Vendor: GE Global Research
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.osgi,
- com.ge.research.sadl;bundle-version="3.0.0",
+ com.ge.research.sadl,
  org.apache.log4j,
  com.ge.research.jena,
- org.junit;bundle-version="4.11.0";resolution:=optional
+ org.junit;bundle-version="4.12.0";resolution:=optional
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
  com.ge.research.sadl.swi_prolog.plinterface;uses:="org.slf4j",
  com.ge.research.sadl.swi_prolog.plugin;uses:="org.osgi.framework",
- com.ge.research.sadl.swi_prolog.reasoner;version="2.4.2";
+ com.ge.research.sadl.swi_prolog.reasoner;
   uses:="org.slf4j,
    com.ge.research.sadl.swi_prolog.plinterface,
    com.ge.research.sadl.reasoner,
    com.hp.hpl.jena.rdf.model,
    com.hp.hpl.jena.ontology,
    javax.activation",
- com.ge.research.sadl.swi_prolog.translator;version="2.4.2"
+ com.ge.research.sadl.swi_prolog.translator
 Bundle-ClassPath: .,
  target/classes/com/ge/research/sadl/swi-prolog/plinterface/

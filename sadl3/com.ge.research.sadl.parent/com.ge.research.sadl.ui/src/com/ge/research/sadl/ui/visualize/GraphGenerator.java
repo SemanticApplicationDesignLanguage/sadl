@@ -16,6 +16,7 @@ import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -36,6 +37,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 public class GraphGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
@@ -342,7 +344,7 @@ public class GraphGenerator {
 				sg.addHeadAttribute(FILL_COLOR,CLASS_BLUE);
 				sg.addHeadAttribute(FONTCOLOR, WHITE);
 				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
-				if (prop.canAs(ObjectProperty.class)){
+				if (prop.canAs(ObjectProperty.class) && !(rng.isURIResource() && rng.getNameSpace().equals(XSD.getURI()))) {
 					sg.addTailAttribute(STYLE, FILLED);
 					sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
 					sg.addTailAttribute(FONTCOLOR, WHITE);
@@ -635,7 +637,7 @@ public class GraphGenerator {
 		this.anchor = anchor;
 	}
 
-	protected UriStrategy getUriStrategy() {
+	public UriStrategy getUriStrategy() {
 		return uriStrategy;
 	}
 
@@ -678,6 +680,70 @@ public class GraphGenerator {
 			return true;
 		}
 		return false;
+	}
+
+	public String uriToString(String uri) {
+		if (getUriStrategy().equals(UriStrategy.LOCALNAME_ONLY)) {
+			if (uri.contains("#")) {
+				return uri.substring(uri.indexOf("#") + 1);
+			}
+			return uri;
+		}
+		else if (getUriStrategy().equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP)) {
+			if (uri.contains("#")) {
+				return uri.substring(uri.indexOf("#") + 1);
+			}
+			return uri;
+		}
+		else if (getUriStrategy().equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+			if (uri.contains("#")) {
+				return uri.substring(uri.indexOf("#") + 1);
+			}
+			return uri;
+		}
+		else if (getUriStrategy().equals(UriStrategy.QNAME_ONLY)) {
+			if (uri.contains("#")) {
+				String ns = uri.substring(0, uri.indexOf("#"));
+				String prefix = getPrefix(ns);
+				if (prefix != null) {
+					return  prefix + ":" + uri.substring(uri.indexOf("#") + 1);
+				}
+				else {
+					return uri.substring(uri.indexOf("#") + 1);
+				}
+			}
+			return uri;
+		}
+		else if (getUriStrategy().equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
+			if (uri.contains("#")) {
+				String ns = uri.substring(0, uri.indexOf("#"));
+				String prefix = getPrefix(ns);
+				if (prefix != null) {
+					return  prefix + ":" + uri.substring(uri.indexOf("#") + 1);
+				}
+				else {
+					return uri.substring(uri.indexOf("#") + 1);
+				}
+			}
+			return uri;
+		}
+		else if (getUriStrategy().equals(UriStrategy.URI_ONLY)) {
+			return uri;
+		}
+		return uri;
+	}
+
+	private String getPrefix(String ns) {
+		String prefix;
+		if (ns.equals(XSD.getURI())) prefix = "xsd";
+		else if (ns.equals(RDF.getURI())) prefix = "rdf:";
+		else if (ns.equals(RDFS.getURI())) prefix = "rdfs:";
+		else if (ns.equals(OWL.getURI())) prefix = "owl:";
+		else {
+			if (ns.endsWith("#")) ns = ns.substring(0, ns.length() - 1);
+			prefix = configMgr.getGlobalPrefix(ns); 
+		}
+		return prefix;
 	}
 
 }

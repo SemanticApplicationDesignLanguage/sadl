@@ -1,0 +1,9 @@
+.gradle/
+build/
+gradle.prefs
+*.class
+DS_Store
+.DS_Store?
+.*._trace
+*.xtendbin
+xtend-gen/

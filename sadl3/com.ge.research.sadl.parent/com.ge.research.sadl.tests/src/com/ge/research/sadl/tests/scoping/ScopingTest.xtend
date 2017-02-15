@@ -19,25 +19,24 @@ package com.ge.research.sadl.tests.scoping
 
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.tests.SADLInjectorProvider
+import com.ge.research.sadl.tests.SADLNoopModelProcessorsInjectorProvider
 import com.google.inject.Inject
 import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
-import org.eclipse.xtext.junit4.validation.ValidationTestHelper
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.util.ParseHelper
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.sADL.TestStatement
-import com.ge.research.sadl.sADL.QueryStatement
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
-@InjectWith(SADLInjectorProvider)
+@InjectWith(SADLNoopModelProcessorsInjectorProvider)
 class ScopingTest {
 	@Inject extension ParseHelper<SadlModel>
 	@Inject extension DeclarationExtensions

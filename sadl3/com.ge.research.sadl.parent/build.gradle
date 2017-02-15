@@ -1,0 +1,40 @@
+buildscript {
+	repositories {
+    	jcenter()
+	}
+	dependencies {
+		classpath "org.xtext:xtext-gradle-plugin:1.0.17"
+	}
+}
+
+subprojects {
+	if (project.hasProperty("useLocalMaven")) {
+		System.println("Using local Maven repository to build source.")
+		repositories {
+			mavenLocal()
+	        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+			jcenter()
+		}
+	} else {
+		repositories {
+	        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+			jcenter()
+		}
+	}
+	
+	apply plugin: "java"
+	apply plugin: "eclipse"
+	apply from: "${rootDir}/gradle/versions.gradle"
+	apply from: "${rootDir}/gradle/source-layout.gradle"
+	apply from: "${rootDir}/gradle/maven-deployment.gradle"
+	
+	group = "com.ge.research.sadl"
+	version = "3.1.0-SNAPSHOT"
+	
+	sourceCompatibility = "1.8"
+	targetCompatibility = "1.8"
+	
+	configurations.all {
+		exclude group: "asm"
+	}
+}
