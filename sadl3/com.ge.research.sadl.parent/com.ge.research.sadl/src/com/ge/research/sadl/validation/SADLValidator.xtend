@@ -20,6 +20,7 @@
  */
 package com.ge.research.sadl.validation
 
+import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.resource.ResourceDescriptionStrategy
 import com.ge.research.sadl.sADL.Name
@@ -38,8 +39,6 @@ import java.util.List
 import java.util.ArrayList
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
-import org.eclipse.emf.ecore.EStructuralFeature
-import com.ge.research.sadl.sADL.SubjHasProp
 
 /**
  * This class contains custom validation rules. 
@@ -92,7 +91,7 @@ class SADLValidator extends AbstractSADLValidator {
 				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 			}
 			if (model.alias !== null && modelDescription.getUserData(ResourceDescriptionStrategy.USER_DATA_ALIAS) == model.alias) {
-				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+				error(SadlErrorMessages.ALIAS_ALREADY_USED.get(model.alias,modelDescription.EObjectURI.trimFragment.toString), SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
 			}
 			if (modelDescription.EObjectURI.trimFragment.lastSegment == simpleFileName) {
 				error("The simple filename (" + simpleFileName + ") is already used by model '" + modelDescription.EObjectURI.trimFragment + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)

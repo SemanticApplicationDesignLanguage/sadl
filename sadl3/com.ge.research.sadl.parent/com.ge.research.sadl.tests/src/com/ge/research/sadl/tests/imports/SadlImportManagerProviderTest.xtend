@@ -60,7 +60,7 @@ class SadlImportManagerProviderTest {
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
 /* Tests that should generate validation errors */	
-	@Ignore
+
 	@Test def void testDatatypeImports1() {
 		val model = '''
 			<rdf:RDF

@@ -115,10 +115,13 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
+
 	@Test def void testMultipleInstances() {
 		'''
-			{John, James, Susan} are instances of Actor.
+			uri "http://com.ge.research.sadltestMultipleInstances".
+			
+			Actor is a class.
+			{John, James, Susan} are types of Actor.
 		'''.assertNoErrors
 	}
 	

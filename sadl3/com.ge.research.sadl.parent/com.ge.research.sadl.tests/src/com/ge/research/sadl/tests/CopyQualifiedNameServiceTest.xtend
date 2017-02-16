@@ -82,7 +82,6 @@ class CopyQualifiedNameServiceTest extends AbstractSADLParsingTest {
 		assertEquals('http://sadl.org/Shapes.sadl#Shape', qualifiedNameToStringService.toString(qn));
 	}
 
-	@Ignore
 	@Test
 	def void testCircle() {
 		val offset = '''

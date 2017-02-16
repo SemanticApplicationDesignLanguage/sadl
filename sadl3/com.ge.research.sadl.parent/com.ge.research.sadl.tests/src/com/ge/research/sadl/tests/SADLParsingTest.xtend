@@ -242,7 +242,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore	// this grammar change was backed out because it changed precedence and broke things of the form "p1 of s1 is not p2 of s2"
+	@Ignore// this grammar change was backed out because it changed precedence and broke things of the form "p1 of s1 is not p2 of s2"
 	@Test
 	def void testNegationOfObjectTriple() {
 		'''

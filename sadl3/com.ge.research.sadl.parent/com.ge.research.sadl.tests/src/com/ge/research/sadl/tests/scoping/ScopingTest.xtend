@@ -130,7 +130,7 @@ class ScopingTest {
 		
 	}
 		
-	@Ignore
+
 	@Test def void testLocalVariable_04() {
 		val model = '''
 			uri "http://com.ge.research.sadl/Bug3434542" alias Bug3434542. 
@@ -183,8 +183,8 @@ class ScopingTest {
 				
 			Rule OpeningEvent:
 				if 	c is a Circus
-					eventList is list(c, event, e, e, when)
-					oet is min(eventList)
+					eventList is list(c, event, e, e, when) and
+					oet is min(eventList) and
 					oe has when oet
 				then c has openingEvent oe.
 		'''.parse

@@ -133,8 +133,7 @@ class SadlModelManagerProviderTest {
 	}
 	
 // TODO How should this self-import be tested? This doesn't work because the SADLValidator doesn't get the URI for the import	
-// Also, should this check for import loops that have a larger number of participants?
-	@Ignore	
+// Also, should this check for import loops that have a larger number of participants?	
 	@Test def void testImportSelfError() {
 		'''
 			uri "http://sadl.org/Tests/Import" alias imp.
@@ -509,7 +508,6 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
-//	@Ignore
 	@Test def void myUserDefinedDatatypeUseCase1() {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
@@ -1253,7 +1251,6 @@ class SadlModelManagerProviderTest {
 		]
 	}
 
-	@Ignore
 	@Test
 	def void testEquationScope() {
 		'''
@@ -1274,7 +1271,6 @@ class SadlModelManagerProviderTest {
 		]
 	}
 
-	@Ignore
 	@Test
 	def void testEquationScope2() {
 		'''

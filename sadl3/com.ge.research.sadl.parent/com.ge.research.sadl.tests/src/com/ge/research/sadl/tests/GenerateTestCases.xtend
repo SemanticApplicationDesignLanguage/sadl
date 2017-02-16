@@ -41,7 +41,7 @@ class GenerateTestCases {
 	@Inject ValidationTestHelper validationHelper
 	@Inject FileExtensionProvider extensionProvider 
 	
-	@Ignore @Test def void generateTestCasesFromExamples() {
+	@Test def void generateTestCasesFromExamples() {
 		val root = new File("../../../..")
 		println(root.canonicalFile.absolutePath)
 		testParseRecursive(root)

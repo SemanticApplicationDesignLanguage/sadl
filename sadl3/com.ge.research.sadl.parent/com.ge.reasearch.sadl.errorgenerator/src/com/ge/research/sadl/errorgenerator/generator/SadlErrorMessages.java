@@ -19,6 +19,10 @@ import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 
 public final class SadlErrorMessages {
 /**
+* The alias ''{0}'' is already used in ''{1}''
+**/
+    public static final SadlErrorMessage ALIAS_ALREADY_USED = new SadlErrorMessage("alias_already_used");
+/**
 * Property ''{0}'' does not exist in the model.
 **/
     public static final SadlErrorMessage PROPERTY_NOT_EXIST = new SadlErrorMessage("property_not_exist");
