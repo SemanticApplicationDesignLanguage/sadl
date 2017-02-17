@@ -3955,6 +3955,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return sb.toString();
 	}
 	
+	public String uriStringToString(String uri) {
+		int sep = uri.lastIndexOf('#');
+		if (sep > 0) {
+			String ns = uri.substring(0, sep);
+			String ln = uri.substring(sep + 1);
+			// get the prefix and if there is one generate qname
+			String prefix = configMgr.getGlobalPrefix(ns);
+			if (prefix != null && prefix.length() > 0) {
+				return prefix + ":" + ln;
+			}
+			return ln;
+		}
+		return uri;
+	}
+
+
+	
 	private boolean checkForSubclassing(OntClass rangeCls, OntResource existingRange, EObject context) throws JenaProcessorException {
 		// this is changing the range of a property defined in a different model
 		try {
