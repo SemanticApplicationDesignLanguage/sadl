@@ -246,13 +246,17 @@ public class GraphGenerator {
 			subjSeqNumber = getNewSequenceNumber();
 		}
 		List<Resource> handledProperties = new ArrayList<Resource>();
-		StmtIterator sitr = getModel().listStatements(null, RDFS.domain, cls);
-		while (sitr.hasNext()) {
-			Statement stmt = sitr.nextStatement();
-			Resource prop = stmt.getSubject();
-			if (displayPropertyOfClass(cls, prop)) {
-				data = generatePropertyRange(cls, subjSeqNumber, prop, graphRadius - 1, data);
-				handledProperties.add(prop);
+		ExtendedIterator<OntClass> superitr = cls.listSuperClasses();
+		while (superitr.hasNext()) {
+			OntClass superCls = superitr.next();
+			StmtIterator sitr = getModel().listStatements(null, RDFS.domain, superCls);
+			while (sitr.hasNext()) {
+				Statement stmt = sitr.nextStatement();
+				Resource prop = stmt.getSubject();
+				if (displayPropertyOfClass(cls, prop)) {
+					data = generatePropertyRange(cls, subjSeqNumber, prop, graphRadius - 1, data);
+					handledProperties.add(prop);
+				}
 			}
 		}
 		// now look for unions? or intersections containing the cls
@@ -609,11 +613,11 @@ public class GraphGenerator {
 	public String uriStringToString(String uri) {
 		int sep = uri.lastIndexOf('#');
 		if (sep > 0) {
-			String ns = uri.substring(0, sep - 1);
-			String ln = uri.substring(sep);
+			String ns = uri.substring(0, sep);
+			String ln = uri.substring(sep + 1);
 			// get the prefix and if there is one generate qname
 			String prefix = configMgr.getGlobalPrefix(ns);
-			if (prefix != null) {
+			if (prefix != null && prefix.length() > 0) {
 				return prefix + ":" + ln;
 			}
 			return ln;
