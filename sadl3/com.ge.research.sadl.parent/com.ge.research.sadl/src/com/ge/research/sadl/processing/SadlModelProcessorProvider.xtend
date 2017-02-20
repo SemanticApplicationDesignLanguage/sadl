@@ -17,15 +17,15 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.google.common.base.Optional
 import com.google.inject.Inject
 import com.google.inject.Injector
 import com.google.inject.Singleton
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.google.common.base.Optional
 
 @Singleton
-class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelProcessor> implements IModelProcessorProvider {
+class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelProcessor, Resource> implements IModelProcessorProvider {
 
 	static val MODEL_PROCESSOR_CACHE_KEY = 'modelprocessor';
 	static val EXTENSION_ID = 'com.ge.research.sadl.sadl_model_processor';
@@ -44,7 +44,7 @@ class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelPro
 			doCreateProcessor(resource);
 		];
 	}
-	
+
 	@Override
 	override protected getExtensionPointId() {
 		return Optional.of(EXTENSION_ID);

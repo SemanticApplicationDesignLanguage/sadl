@@ -24,9 +24,9 @@ import com.google.inject.Injector
 import org.eclipse.emf.ecore.resource.Resource
 
 /**
- * Provides {@code SADL} inferences in a headless case.
+ * Provides {@code SADL} inferences.
  */
-class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadlInferenceProcessor> {
+class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadlInferenceProcessor, Resource> {
 
 	static val EXTENSION_ID = 'com.ge.research.sadl.sadl_inference_processor';
 
@@ -40,7 +40,7 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 	}
 
 	@Override
-	override ISadlInferenceProcessor getProcessor(Resource resource) {
+	override getProcessor(Resource resource) {
 		return doCreateProcessor(resource);
 	}
 
