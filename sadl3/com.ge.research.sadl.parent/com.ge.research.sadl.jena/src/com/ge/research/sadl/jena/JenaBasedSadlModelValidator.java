@@ -48,6 +48,7 @@ import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.SadlDataType;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
+import com.ge.research.sadl.sADL.SadlModelElement;
 import com.ge.research.sadl.sADL.SadlParameterDeclaration;
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
@@ -314,7 +315,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < iprops.size(); i++) {
 				if (i > 0) sb.append(", ");
-				sb.append(getImplicitProperties().get(0).toFQString());
+				sb.append(getImplicitProperties().get(i).toFQString());
 			}
 			return sb.toString();
 		}
@@ -1528,9 +1529,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return results;
 	}
 
-	protected TypeCheckInfo getTypeFromRestriction(Expression subject, Expression predicate) throws CircularDefinitionException, InvalidTypeException {
+	protected TypeCheckInfo getTypeFromRestriction(Expression subject, Expression predicate) throws CircularDefinitionException, InvalidTypeException, DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, CircularDependencyException {
 		if (subject instanceof Name && predicate instanceof Name) {
 			String subjuri = declarationExtensions.getConceptUri(((Name)subject).getName());
+			OntConceptType subjtype = declarationExtensions.getOntConceptType(((Name)subject).getName());
+			if (subjtype.equals(OntConceptType.VARIABLE)) {
+				TypeCheckInfo varTci = getType(((Name)subject).getName());
+				if (varTci != null && varTci.getTypeCheckType() != null) {
+					ConceptIdentifier varci = varTci.getTypeCheckType();
+					if (varci instanceof ConceptName) {
+						subjuri = ((ConceptName)varci).getUri();
+					}
+				}
+			}
 			String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 			OntConceptType proptype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
 			return getTypeFromRestriction(subjuri, propuri, proptype, predicate);
@@ -2266,6 +2277,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean compareTypesUsingImpliedProperties(List<String> operations, EObject leftExpression,
 			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
+		
+		String opstr = (operations != null && operations.size() > 0) ? operations.get(0) : null;
 		if (leftTypeCheckInfo.getImplicitProperties() != null) {
 			Iterator<ConceptName> litr = leftTypeCheckInfo.getImplicitProperties().iterator();
 			while (litr.hasNext()) {
@@ -2282,7 +2295,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, leftExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, newltci, rightTypeCheckInfo)) {
-					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (left side) to pass type check", leftExpression);
+					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (left side" + (opstr != null ? (" of '" + opstr + "'") : "") + ") to pass type check", leftExpression);
 					addImpliedPropertiesUsed(leftExpression, prop);
 					return true;
 				}
@@ -2304,7 +2317,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newrtci = getTypeInfoFromRange(cn, prop, rightExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, newrtci)) {
-					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side) to pass type check", rightExpression);
+					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side" + (opstr != null ? (" of '" + opstr + "'") : "") + ") to pass type check", rightExpression);
 					addImpliedPropertiesUsed(rightExpression, prop);
 					return true;
 				}
@@ -2843,6 +2856,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	protected void setModelProcessor(JenaBasedSadlModelProcessor modelProcessor) {
 		this.modelProcessor = modelProcessor;
+	}
+
+	public void resetValidatorState(SadlModelElement element) {
+		if (impliedPropertiesUsed != null) {
+			impliedPropertiesUsed.clear();
+		}
+		if (binaryLeftTypeCheckInfo != null) {
+			binaryLeftTypeCheckInfo.clear();
+		}
+		if (binaryRightTypeCheckInfo != null) {
+			binaryRightTypeCheckInfo.clear();
+		}
 	}
 
 }

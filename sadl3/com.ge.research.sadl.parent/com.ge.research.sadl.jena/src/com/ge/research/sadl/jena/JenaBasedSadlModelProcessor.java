@@ -6203,6 +6203,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //		return false;
 //	}
 	protected Object translateAndApplyImpliedProperty(Expression expr, Property impliedPropertyWrapper) throws InvalidNameException, InvalidTypeException, TranslationException {
+		int start = serialize.length();
 		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
 			serialize.append("impliedProperty('");
 			serialize.append(impliedPropertyWrapper.toString());
@@ -6212,11 +6213,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
 			serialize.append(")");
 		}
-		return obj;
+		if (!(obj instanceof String)) {
+			return obj;
+		}
+		return getExpressionTranslationString(start);
 	}
+	
+	protected void resetProcessorState(SadlModelElement element) throws InvalidTypeException {
+		if (getModelValidator() != null) {
+			getModelValidator().resetValidatorState(element);
+		}
+	}
+
 	public List<Equation> getEquations() {
 		return equations;
 	}
+	
 	public void setEquations(List<Equation> equations) {
 		this.equations = equations;
 	}
@@ -6265,7 +6277,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						retlst = scips;
 					}
 					else {
-						retlst.addAll(scips);
+						for (int i = 0; i < scips.size(); i++) {
+							ConceptName cn = scips.get(i);
+							if (!scips.contains(cn)) {
+								retlst.add(scips.get(i));
+							}
+						}
 					}
 				}
 			}
@@ -6278,7 +6295,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			while (sitr.hasNext()) {
 				RDFNode obj = sitr.nextStatement().getObject();
 				if (obj.isURIResource()) {
-					retlst.add(new ConceptName(obj.asResource().getURI()));
+					ConceptName cn = new ConceptName(obj.asResource().getURI());
+					if (!retlst.contains(cn)) {
+						retlst.add(cn);
+					}
 				}
 			}
 			return retlst;
@@ -6347,6 +6367,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return ((ConceptName)ci).toString();
 		}
 		return ci.toString();
+	}
+	/********************************* End translate methods *****************************************/
+	protected String getExpressionTranslationString(int start) {
+		if (start > serialize.length()) {
+			start = serialize.length();
+		}
+		return serialize.substring(start);
 	}
 
 
