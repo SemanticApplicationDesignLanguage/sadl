@@ -46,6 +46,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.nodemodel.ICompositeNode;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
@@ -183,6 +185,7 @@ import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.ISadlServer;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
@@ -252,9 +255,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private int vNum = 0;	// used to create unique variables
 	private List<String> userDefinedVariables = new ArrayList<String>();
 	
-	@Inject
-	public DeclarationExtensions declarationExtensions;
-	
 	protected String modelName;
 	protected String modelAlias;
 	protected String modelNamespace;
@@ -307,9 +307,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	//members needed by child processors
 	protected StringBuilder serialize = null;
 	protected boolean includeImpliedPropertiesInDirectWrite = false;	// should implied properties be included in Direct Write Prolog output? default false
+
+	protected DeclarationExtensions declarationExtensions;
 	
 	public JenaBasedSadlModelProcessor() {
 		logger.debug("New " + this.getClass().getCanonicalName() + "' created");
+		declarationExtensions = new DeclarationExtensions();
 	}
 	/**
 	 * For TESTING
@@ -376,7 +379,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				String modelFolder = getModelFolderPath(resource);
 				SadlUtils su = new SadlUtils();
 				String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fsa.isFile(fn)) {
+				if (!fileExists(fsa, fn)) {
 					sadlBaseModel = OntModelProvider.getSadlBaseModel();
 					if(sadlBaseModel != null) {
 						RDFWriter w2 = sadlBaseModel.getWriter(format);
@@ -393,7 +396,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 				fn = SadlConstants.SADL_LIST_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fsa.isFile(fn)) {
+				if (!fileExists(fsa, fn)) {
 					sadlListModel = OntModelProvider.getSadlListModel();
 					if(sadlListModel != null) {
 						RDFWriter w2 = sadlListModel.getWriter(format);
@@ -410,7 +413,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 				fn = SadlConstants.SADL_DEFAULTS_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fsa.isFile(fn)) {
+				if (!fileExists(fsa, fn)) {
 					sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
 					if(sadlDefaultsModel != null) {
 						RDFWriter w2 = sadlDefaultsModel.getWriter(format);
@@ -468,6 +471,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	   	logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
 	}
 	
+	// akitta: get rid of this hack once https://github.com/eclipse/xtext-core/issues/180 is fixed
+	private boolean fileExists(IFileSystemAccess2 fsa, String fileName) {
+		try {
+			return fsa.isFile(fileName);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType, List<String[]> newMappings) {
 		String modelFolderPathname = getModelFolderPath(resource);
 		try {
@@ -505,20 +517,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private String getModelFolderPath(Resource resource) {
-		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
-		v = v.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
-		String modelFolderPathname;
-		if (v.isPlatform()) {
-			 IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(v.toPlatformString(true)));
-			 modelFolderPathname = file.getRawLocation().toPortableString();
+		final URI resourceUri = resource.getURI();
+		final URI modelFolderUri = resourceUri
+				.trimSegments(resourceUri.isFile() ? 1 : resourceUri.segmentCount() - 2)
+				.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
+		
+		if (resourceUri.isPlatformResource()) {
+			 final IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(modelFolderUri.toPlatformString(true)));
+			 return file.getRawLocation().toPortableString();
+		} else {
+			final String modelFolderPathname = findModelFolderPath(resource.getURI());
+			return modelFolderPathname == null ? modelFolderUri.toFileString() : modelFolderPathname;
 		}
-		else {
-			modelFolderPathname = findModelFolderPath(resource.getURI());
-			if(modelFolderPathname == null) {
-				modelFolderPathname = v.toFileString();
-			}
-		}
-		return modelFolderPathname;
 	}
 	
 	static String findProjectPath(URI uri) {
@@ -905,6 +915,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 	}
+	private PathToFileUriConverter getUriConverter(Resource resource) {
+		return ((XtextResource) resource).getResourceServiceProvider().get(PathToFileUriConverter.class);
+	}
     
 	protected void validateResourcePathAndName(Resource resource, SadlModel model, String modelActualUrl) {
 		if (!isReservedFolder(resource, model)) {
@@ -978,9 +991,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private void addImplicitSadlModelImportToJenaModel(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-		String implfn = checkImplicitSadlModelExistence(resource, context);
+		java.nio.file.Path implfn = checkImplicitSadlModelExistence(resource, context);
 		if (implfn != null) {
-			Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
+			final PathToFileUriConverter uriConverter = getUriConverter(resource);
+			final URI uri = uriConverter.createFileUri(implfn);
+			Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 			if (sadlImplicitModel == null) {
 				if (imrsrc instanceof XtextResource) {
 					sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
@@ -1202,6 +1217,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				Expression expr = tests.get(tidx);
 				// we know it's a Test so create one and set as translation target
 				Test test = new Test();
+				final ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
+				if (node != null) {
+					test.setOffset(node.getOffset() - 1);
+					test.setLength(node.getLength());
+				}
 				setTarget(test);
 	
 				// now translate the test expression
@@ -1536,6 +1556,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (element.getStart().equals("Graph")) {
 				query.setGraph(true);
 			}
+			final ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
+			if (node != null) {
+				query.setOffset(node.getOffset() - 1);
+				query.setLength(node.getLength());
+			}
 			addSadlCommand(query);
 			return query;
 		}
@@ -1694,7 +1719,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EQUATION_URI));
 		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EQ_EXPRESSION_URI);
 		Literal literal = getTheJenaModel().createTypedLiteral(eq.toString());
-		eqinst.addProperty(dtp, literal);
+		if (eqinst != null && dtp != null) {
+			// these can be null during clean/build with resource open in editor
+			eqinst.addProperty(dtp, literal);
+		}
 	}
 	
 	protected Equation createEquation(SadlResource nm, SadlTypeReference rtype, EList<SadlParameterDeclaration> params,
@@ -1755,11 +1783,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EXTERNAL_URI));
 		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI);
 		Literal literal = getTheJenaModel().createTypedLiteral(uri);
-		eqinst.addProperty(dtp,literal);
-		if (location != null && location.length() > 0) {
-			DatatypeProperty dtp2 = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN);
-			Literal literal2 = getTheJenaModel().createTypedLiteral(location);
-			eqinst.addProperty(dtp2, literal2);
+		if (eqinst != null && dtp != null) {
+			// these can be null if a resource is open in the editor and a clean/build is performed
+			eqinst.addProperty(dtp,literal);
+			if (location != null && location.length() > 0) {
+				DatatypeProperty dtp2 = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN);
+				Literal literal2 = getTheJenaModel().createTypedLiteral(location);
+				eqinst.addProperty(dtp2, literal2);
+			}
 		}
 	}
 	
@@ -3924,6 +3955,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return sb.toString();
 	}
 	
+	public String uriStringToString(String uri) {
+		int sep = uri.lastIndexOf('#');
+		if (sep > 0) {
+			String ns = uri.substring(0, sep);
+			String ln = uri.substring(sep + 1);
+			// get the prefix and if there is one generate qname
+			String prefix = configMgr.getGlobalPrefix(ns);
+			if (prefix != null && prefix.length() > 0) {
+				return prefix + ":" + ln;
+			}
+			return ln;
+		}
+		return uri;
+	}
+
+
+	
 	private boolean checkForSubclassing(OntClass rangeCls, OntResource existingRange, EObject context) throws JenaProcessorException {
 		// this is changing the range of a property defined in a different model
 		try {
@@ -5885,7 +5933,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return rules;
 	}
 		
-	private String checkImplicitSadlModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+	private java.nio.file.Path checkImplicitSadlModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		UtilsForJena ufj = new UtilsForJena();
 		String policyFileUrl = ufj.getPolicyFilename(resource);
 		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
@@ -5905,7 +5953,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				catch (Throwable t) {}
 			}
-			return implicitModelFile.getAbsolutePath();
+			return implicitModelFile.getAbsoluteFile().toPath();
 		}
 		return null;
 	}

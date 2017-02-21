@@ -963,7 +963,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	private TypeCheckInfo unifyCompoundTypeCheckInfos(TypeCheckInfo tci) throws CircularDependencyException, InvalidNameException {
 		// if this is a compound TypeCheckInfo, look to make sure that one isn't a subclass of another and eliminate lower classes
-		if (tci.getCompoundTypes() != null) {
+		if (tci != null && tci.getCompoundTypes() != null) {
 			int size = tci.getCompoundTypes().size();
 			if (size == 1) {
 				return tci.getCompoundTypes().get(0);
@@ -1546,6 +1546,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (subj != null && subj.canAs(OntClass.class)){ 
 				Property prop = theJenaModel.getProperty(propuri);
+				if (isListAnnotatedProperty(prop)) {
+					return null;
+				}
 				// now look for restrictions on "range"
 				StmtIterator sitr = theJenaModel.listStatements(null, OWL.onProperty, prop);
 				while (sitr.hasNext()) {
@@ -1956,7 +1959,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
 						eitr.close();
 						if (avf.isURIResource()) {
-							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+//							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+							List<ConceptName> impliedProperties = null;		// don't impute implied properties when the range is a List
 							ConceptName rangeConceptName = new ConceptName(avf.getURI());
 							if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 								rangeConceptName.setType(ConceptType.RDFDATATYPE);
@@ -2595,6 +2599,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else if (uri.equals(XSD.xint.getURI())) {
 				return true;
 			}
+			else if (uri.equals(XSD.xlong.getURI())) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -2728,10 +2735,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				String msg;
 				if (subj instanceof OntProperty) {
-					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(subj.getURI(),prop.getURI());
+					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				else {
-					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI());
+					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				if(propOfSubjectCheck){
 					issueAcceptor.addError(msg, subject);

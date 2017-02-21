@@ -1,0 +1,66 @@
+buildscript {
+	repositories {
+		maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        jcenter()
+	}
+	dependencies {
+		classpath "org.akhikhl.gretty:gretty:1.4.0"
+	}
+}
+
+plugins {
+	id "war"
+}
+
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "org.akhikhl.gretty"
+
+gretty {
+	servletContainer = "tomcat7"
+	httpPort = 8080
+	contextPath = "/sadlmonaco"
+	loggingLevel = "INFO"
+}
+
+war {
+	baseName = "sadlmonaco"
+	version = ""
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    jcenter()
+}
+
+dependencies {
+	compile project(":io.typefox.lsp.endpoint")
+	compile project(":com.ge.research.sadl")
+	compile project(":com.ge.research.jena")
+	compile project(":com.ge.research.sadl.jena")
+	compile project(":com.ge.research.sadl.ide")
+	compile project(":com.ge.research.sadl.jena-wrapper-for-sadl")
+	compile "org.slf4j:slf4j-api:$versions.slf4j"
+	compile "org.glassfish.jersey.core:jersey-server:$versions.jerseyServer"
+	compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$versions.jerseyServletContainerCore"
+	compile "javax.ws.rs:javax.ws.rs-api:$versions.jaxRs"
+	testCompile "junit:junit:$versions.junit"
+}
+
+jar {
+    from sourceSets.main.allJava
+}
+
+task buildStandaloneTomcat(type:Tar, dependsOn: "buildProduct") {
+    from ("${buildDir}/output/io.typefox.lsp.monaco/")
+    archiveName "tomcat.tar.gz"
+    include "**/*"
+    destinationDir file("${buildDir}/")
+    extension = "tgz"
+    compression = Compression.GZIP
+}
+
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"

@@ -20,25 +20,24 @@
  */
 package com.ge.research.sadl.validation
 
-import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.resource.ResourceDescriptionStrategy
 import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.google.inject.Inject
+import java.util.ArrayList
+import java.util.List
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
-import com.ge.research.sadl.reasoner.utils.SadlUtils
-import com.ge.research.sadl.sADL.SadlResource
-import java.util.List
-import java.util.ArrayList
-import com.ge.research.sadl.sADL.QueryStatement
-import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 
 /**
  * This class contains custom validation rules. 
@@ -75,7 +74,7 @@ class SADLValidator extends AbstractSADLValidator {
 		initializeValidator()	// this class instance appears to be used repeatedly--need to clear this list for this resource usage this time
 		val thisUri = model.baseUri
 		val errMsg = SadlUtils.validateUri(thisUri);
-		if (errMsg != null) {
+		if (errMsg !== null) {
 			error(errMsg, SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
 		}
 		val thisRsrc = model.eResource
@@ -91,7 +90,7 @@ class SADLValidator extends AbstractSADLValidator {
 				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 			}
 			if (model.alias !== null && modelDescription.getUserData(ResourceDescriptionStrategy.USER_DATA_ALIAS) == model.alias) {
-				error(SadlErrorMessages.ALIAS_ALREADY_USED.get(model.alias,modelDescription.EObjectURI.trimFragment.toString), SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
 			}
 			if (modelDescription.EObjectURI.trimFragment.lastSegment == simpleFileName) {
 				error("The simple filename (" + simpleFileName + ") is already used by model '" + modelDescription.EObjectURI.trimFragment + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
@@ -100,13 +99,13 @@ class SADLValidator extends AbstractSADLValidator {
 		
 		var imports = model.imports
 		// does an import need any validation?
-		if (imports != null) {
+		if (imports !== null) {
 			var itr = imports.iterator
 			while (itr.hasNext) {
 				var imp = itr.next;
 				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).map[text].join().trimQuotes
 				val errorMsg = SadlUtils.validateUri(importedURI);
-				if (errorMsg != null) {
+				if (errorMsg !== null) {
 					error(errorMsg, imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
 				}
 				if (importedURI == thisUri) {
@@ -157,17 +156,15 @@ class SADLValidator extends AbstractSADLValidator {
 	@Check
 	def checkQueryStatement(QueryStatement query) {
 		// make sure rule name is unique
-		if (query.name != null && otherNames.contains(query.name)) {
+		if (query.name !== null && otherNames.contains(query.name)) {
 			var errMsg = "The name '" + query.name + "' in this namespace is already used."
 			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
 		}
 	}
 	
 	@Check
-	def checkSadlSimpleTypeReference(SadlSimpleTypeReference sstr) {
-		val type = sstr.type
-		val nm = type.name
-		if (nm == null) {
+	def checkSadlSimpleTypeReference(SadlSimpleTypeReference ref) {
+		if (ref.type.name === null) {
 			error("Undefined type", SADLPackage.Literals.SADL_SIMPLE_TYPE_REFERENCE__TYPE, UNRESOLVED_SADL_RESOURCE)
 		}
 	}
@@ -183,15 +180,14 @@ class SADLValidator extends AbstractSADLValidator {
 	@Check
 	def checkSadlResource(SadlResource sr) {
 		var nm = null as String
-		var isProxy = sr.eIsProxy
 		val nm1 = sr.name
-		if (nm1 != null) {
+		if (nm1 !== null) {
 			nm = declarationExtensions.getConcreteName(nm1) 
 		}
 		else {
 			nm = declarationExtensions.getConcreteName(sr)
 		}
-		if (nm == null) {
+		if (nm === null) {
 			try {
 				if (sr instanceof Name) {
 					val isFunc = (sr as Name).function

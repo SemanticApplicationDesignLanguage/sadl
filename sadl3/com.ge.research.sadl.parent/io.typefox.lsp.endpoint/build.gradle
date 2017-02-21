@@ -1,0 +1,16 @@
+dependencies {
+    compile "org.eclipse.lsp4j:org.eclipse.lsp4j:$versions.lsp4j"
+    compile "com.google.guava:guava:$versions.guava"
+    compile "com.google.inject:guice:$versions.guice"
+    compile "org.eclipse.xtext:org.eclipse.xtext.ide:$versions.xtext"
+    compile "org.eclipse.xtend:org.eclipse.xtend.lib:$versions.xtext"
+    compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$versions.xtext"
+    compile "org.slf4j:slf4j-api:$versions.slf4j"
+    compile "com.squarespace.jersey2-guice:jersey2-guice:$versions.guiceJersey"
+    compile "com.google.inject.extensions:guice-servlet:$versions.guice"
+    compile "javax.servlet:javax.servlet-api:$versions.servlet"
+    compile "javax.websocket:javax.websocket-api:$versions.javaxWebsocket"
+    testCompile "junit:junit:$versions.junit"
+}
+
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"

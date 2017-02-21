@@ -58,20 +58,20 @@
 			<and>
 				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
 				<with variable="activeEditor">
-					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
-						value="com.ge.research.sadl.SADL" 
+					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+						value="com.ge.research.sadl.SADL"
 						forcePluginActivation="true"/>
-				</with>		
+				</with>
 			</and>
 		</definition>
 		<definition id="com.ge.research.sadl.SADL.XtextEditor.opened">
 			<and>
 				<reference definitionId="isXtextEditorActive"/>
 				<with variable="activeEditor">
-					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
-						value="com.ge.research.sadl.SADL" 
+					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
+						value="com.ge.research.sadl.SADL"
 						forcePluginActivation="true"/>
-				</with>		
+				</with>
 			</and>
 		</definition>
 	</extension>
@@ -150,16 +150,16 @@
 					definitionId="com.ge.research.sadl.SADL.Editor.opened">
 				</reference>
 			</visibleWhen>
-		</command>  
+		</command>
 		</menuContribution>
 		<!-- copy qualified name -->
 		<menuContribution locationURI="popup:#TextEditorContext?after=copy">
-			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName" 
+			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
 					<reference definitionId="com.ge.research.sadl.SADL.Editor.opened" />
 				</visibleWhen>
-			</command>  
+			</command>
 		</menuContribution>
 		<menuContribution locationURI="menu:edit?after=copy">
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
@@ -167,10 +167,10 @@
 				<visibleWhen checkEnabled="false">
 					<reference definitionId="com.ge.research.sadl.SADL.Editor.opened" />
 				</visibleWhen>
-			</command>  
+			</command>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.xtext.ui.outline?after=additions">
-			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName" 
+			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
 					<and>
@@ -213,10 +213,10 @@
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
-	    <resourceServiceProvider
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-	        uriExtension="sadl">
-	    </resourceServiceProvider>
+		<resourceServiceProvider
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+			uriExtension="sadl">
+		</resourceServiceProvider>
 	</extension>
 	<!-- marker definitions for com.ge.research.sadl.SADL -->
 	<extension
@@ -323,31 +323,31 @@
 	</extension>
 	<!-- quickfix marker resolution generator for com.ge.research.sadl.SADL -->
 	<extension
-	        point="org.eclipse.ui.ide.markerResolution">
-	    <markerResolutionGenerator
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-	        markerType="com.ge.research.sadl.ui.sadl.check.fast">
-	        <attribute
-	            name="FIXABLE_KEY"
-	            value="true">
-	        </attribute>
-	    </markerResolutionGenerator>
-	    <markerResolutionGenerator
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-	        markerType="com.ge.research.sadl.ui.sadl.check.normal">
-	        <attribute
-	            name="FIXABLE_KEY"
-	            value="true">
-	        </attribute>
-	    </markerResolutionGenerator>
-	    <markerResolutionGenerator
-	        class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-	        markerType="com.ge.research.sadl.ui.sadl.check.expensive">
-	        <attribute
-	            name="FIXABLE_KEY"
-	            value="true">
-	        </attribute>
-	    </markerResolutionGenerator>
+			point="org.eclipse.ui.ide.markerResolution">
+		<markerResolutionGenerator
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			markerType="com.ge.research.sadl.ui.sadl.check.fast">
+			<attribute
+				name="FIXABLE_KEY"
+				value="true">
+			</attribute>
+		</markerResolutionGenerator>
+		<markerResolutionGenerator
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			markerType="com.ge.research.sadl.ui.sadl.check.normal">
+			<attribute
+				name="FIXABLE_KEY"
+				value="true">
+			</attribute>
+		</markerResolutionGenerator>
+		<markerResolutionGenerator
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			markerType="com.ge.research.sadl.ui.sadl.check.expensive">
+			<attribute
+				name="FIXABLE_KEY"
+				value="true">
+			</attribute>
+		</markerResolutionGenerator>
 	</extension>
 	<!-- Rename Refactoring -->
 	<extension point="org.eclipse.ui.handlers">

@@ -42,7 +42,6 @@ import org.eclipse.xtext.xtext.generator.parser.antlr.KeywordHelper
 
 import static extension org.eclipse.xtext.GrammarUtil.*
 import static extension org.eclipse.xtext.xtext.generator.model.TypeReference.*
-import org.eclipse.xtext.parser.antlr.Lexer
 
 class JFlexFragment extends AbstractXtextGeneratorFragment {
 	
