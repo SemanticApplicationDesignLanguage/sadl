@@ -94,9 +94,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected ValidationAcceptor issueAcceptor = null;
 	protected OntModel theJenaModel = null;
 	protected DeclarationExtensions declarationExtensions = null;
-	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
-	private List<String> numericOperators = Arrays.asList("*","+","/","-","%","^");
-	private List<String> canBeNumericOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=");
 	private EObject defaultContext;
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
@@ -605,7 +602,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
-		if (comparisonOperators.contains(operation)) {
+		if (getModelProcessor().isComparisonOperator(operation)) {
 			op = "be compared (" + operation + ")";
 		}
 		else {
@@ -901,7 +898,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
 					leftTypeCheckInfo, rightTypeCheckInfo);
-			if (isNumericOperator(((BinaryOperation) expression).getOp())) {
+			if (getModelProcessor().isNumericOperator(((BinaryOperation) expression).getOp())) {
 				if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo) && !isNumericWithImpliedProperty(leftTypeCheckInfo, ((BinaryOperation)expression).getLeft())) {
 					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
 				}
@@ -1042,12 +1039,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private boolean isNumeric(TypeCheckInfo tci) {
+	private boolean isNumeric(TypeCheckInfo tci) throws InvalidTypeException {
 		ConceptIdentifier ci;
 		if (tci.getTypeCheckType() != null) {
 			ci = tci.getTypeCheckType();
 			if (ci instanceof ConceptName) {
-				return isNumericType((ConceptName) ci);
+				return getModelProcessor().isNumericType((ConceptName) ci);
 			}
 		}
 		else if (tci.getExplicitValueType() != null) {
@@ -1057,7 +1054,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
 			}
 			else if (tci.getExpressionType() instanceof ConceptName){
-				return isNumericType((ConceptName) tci.getExpressionType());
+				return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
 			}
 		}
 		return false;
@@ -2087,12 +2084,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 			return null;
 		}
-		if (isBooleanComparison(operations)) {
+		if (getModelProcessor().isBooleanComparison(operations)) {
 			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
 			booleanLiteralConceptName.setType(ConceptType.DATATYPEPROPERTY);
 			return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, leftExpression.eContainer());
 		}
-		else if (isNumericOperator(operations)) {
+		else if (getModelProcessor().isNumericOperator(operations)) {
 			ConceptName lcn = getTypeCheckInfoType(leftTypeCheckInfo);
 			ConceptName rcn = getTypeCheckInfoType(rightTypeCheckInfo);
 			if (lcn == null || lcn.getNamespace() == null) {
@@ -2164,13 +2161,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return null;
 		}
 		throw new InvalidNameException("Failed to get TypeCheckInfoType");
-	}
-
-	protected boolean isBooleanComparison(List<String> operations) {
-		if(comparisonOperators.containsAll(operations)){
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -2346,14 +2336,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName leftConceptName = (ConceptName) leftConceptIdentifier;
 			ConceptName rightConceptName = (ConceptName) rightConceptIdentifier;
 			
-			if (isNumericOperator(operations) && (!isNumeric(leftTypeCheckInfo) || !isNumeric(rightTypeCheckInfo))) {
+			if (getModelProcessor().isNumericOperator(operations) && (!isNumeric(leftTypeCheckInfo) || !isNumeric(rightTypeCheckInfo))) {
 				return false;
 			}
 			if (leftConceptName.equals(rightConceptName)) {
 				return true;
 			}
-			else if ((isNumericOperator(operations) || canBeNumericOperator(operations)) && 
-				(isNumericType(leftConceptName) && isNumericType(rightConceptName))) {
+			else if ((getModelProcessor().isNumericOperator(operations) || getModelProcessor().canBeNumericOperator(operations)) && 
+				(getModelProcessor().isNumericType(leftConceptName) && getModelProcessor().isNumericType(rightConceptName))) {
 				return true;
 			}
 			else if (leftConceptName.getType() == null || rightConceptName.getType() == null) {
@@ -2515,48 +2505,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return true;
 		}
 		return checkForContainer(expr.eContainer(), t);
-	}
-
-	private boolean canBeNumericOperator(List<String> operations) {
-		Iterator<String> itr = operations.iterator();
-		while (itr.hasNext()) {
-			if (canBeNumericOperator(itr.next())) return true;
-		}
-		return false;
-	}
-	
-	private boolean canBeNumericOperator(String op) {
-		if (canBeNumericOperators.contains(op)) return true;
-		return false;
-	}
-
-	private boolean isNumericOperator(String op) {
-		if (numericOperators.contains(op)) return true;
-		return false;
-	}
-
-	private boolean isNumericOperator(List<String> operations) {
-		Iterator<String> itr = operations.iterator();
-		while (itr.hasNext()) {
-			if (isNumericOperator(itr.next())) return true;
-		}
-		return false;
-	}
-
-	private boolean isNumericType(ConceptName conceptName) {
-		try {
-			if (conceptName.getUri().equals(XSD.decimal.getURI()) ||
-					conceptName.getUri().equals(XSD.integer.getURI()) ||
-					conceptName.getUri().equals(XSD.xdouble.getURI()) ||
-					conceptName.getUri().equals(XSD.xfloat.getURI()) ||
-					conceptName.getUri().equals(XSD.xint.getURI()) ||
-					conceptName.getUri().equals(XSD.xlong.getURI())) {
-				return true;
-			}
-		} catch (InvalidNameException e) {
-			e.printStackTrace();
-		}
-		return false;
 	}
 
 	protected boolean isQualifyingListOperation(List<String> operations, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
