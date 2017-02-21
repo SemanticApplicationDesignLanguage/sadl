@@ -13,8 +13,7 @@
 	</extension>
 	<extension
 	      point="com.ge.research.sadl.sadl_inference_processor">
-	    <sadlImportProcessor
-           class="com.ge.research.sadl.jena.JenaBasedSadlInferenceProcessor">
-     </sadlImportProcessor>
+	    <sadlInferenceProcessor
+           class="com.ge.research.sadl.jena.JenaBasedSadlInferenceProcessor"/>
 	</extension>
 </plugin>

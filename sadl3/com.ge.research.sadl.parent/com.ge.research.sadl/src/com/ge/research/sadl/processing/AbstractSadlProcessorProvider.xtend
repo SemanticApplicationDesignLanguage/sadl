@@ -29,7 +29,6 @@ import java.util.Map
 import java.util.ServiceLoader
 import org.eclipse.core.runtime.RegistryFactory
 import org.eclipse.emf.common.EMFPlugin
-import org.eclipse.emf.ecore.resource.Resource
 import org.slf4j.LoggerFactory
 
 /**
@@ -39,9 +38,14 @@ import org.slf4j.LoggerFactory
  * the Eclipse platform is not running, it uses the the Java SPI discovery 
  * approach instead to load 3rd party processor implementations.
  * 
+ * @param 
+ * 	<P> Type of the provided processor.
+ * @param 
+ * 	<R> Type of the subject object which is used to provide the processor.
+ * 
  * @author akos.kitta
  */
-abstract class AbstractSadlProcessorProvider<P> {
+abstract class AbstractSadlProcessorProvider<P, R> {
 
 	static val LOGGER = LoggerFactory.getLogger(AbstractSadlProcessorProvider);
 	static val CONFIGURATION_ELEMENT_NAME = 'class';
@@ -62,9 +66,9 @@ abstract class AbstractSadlProcessorProvider<P> {
 	}
 
 	/**
-	 * Returns with the processor for the given resource argument.
+	 * Returns with the processor for the given subject argument.
 	 */
-	protected def P getProcessor(Resource resource);
+	def P getProcessor(R subject);
 
 	/**
 	 * Returns with a view of all available processor instances.

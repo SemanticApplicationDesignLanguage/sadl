@@ -14,7 +14,6 @@ package com.ge.research.sadl.ui.imports;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -22,8 +21,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
-
-import javax.activation.DataSource;
 
 //import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IContainer;
@@ -38,7 +35,6 @@ import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -65,8 +61,6 @@ import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
 import com.ge.research.sadl.processing.ISadlImportProcessor;
 import com.ge.research.sadl.processing.SadlImportProcessorProvider;
 import com.ge.research.sadl.ui.internal.SadlActivator;
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider;
-import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
