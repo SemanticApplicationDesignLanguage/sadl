@@ -44,6 +44,7 @@ import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -132,6 +133,7 @@ public class OwlToSadl {
 	public class ModelConcepts {
 		private List<Ontology> ontologies = new ArrayList<Ontology>();
 		private List<OntClass> classes = new ArrayList<OntClass>();
+		private List<OntClass> anonClasses = new ArrayList<OntClass>();
 		private List<ObjectProperty> objProperties = new ArrayList<ObjectProperty>();
 		private List<DatatypeProperty> dtProperties = new ArrayList<DatatypeProperty>();
 		private List<Property> rdfProperties = new ArrayList<Property>();
@@ -347,6 +349,14 @@ public class OwlToSadl {
 				errorMessages.add(errorMessage);
 			}
 		}
+
+		private List<OntClass> getAnonClasses() {
+			return anonClasses;
+		}
+
+		private void addAnonClass(OntClass anonClass) {
+			this.anonClasses.add(anonClass);
+		}
 	}
 
     /**
@@ -561,7 +571,7 @@ public class OwlToSadl {
 				alias = qNamePrefixes.get(baseUri + "#");
 			}
 		}
-		if (alias != null) {
+		if (alias != null && alias.length() > 0) {
 			sadlModel.append(" alias ");
 			sadlModel.append(alias);
 		}
@@ -641,6 +651,9 @@ public class OwlToSadl {
 				String impUri;
 				try {
 					impUri = imp.asOntology().getURI(); //getNameSpace();
+					if (isImplicitUri(impUri)) {
+						continue;
+					}
 				}
 				catch (Exception e) {
 					impUri = imp.toString();
@@ -867,6 +880,22 @@ public class OwlToSadl {
 				addEndOfStatement(sadlModel, 1);
 			}
 		}
+	}
+
+	private boolean isImplicitUri(String impUri) {
+		if (impUri.equals(SadlConstants.SADL_BASE_MODEL_URI)) {
+			return true;
+		}
+		else if (impUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)) {
+			return true;
+		}
+		else if (impUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
+			return true;
+		}
+		else if (impUri.equals(SadlConstants.SADL_LIST_MODEL_URI)) {
+			return true;
+		}
+		return false;
 	}
 
 	private void addEndOfStatement(StringBuilder sb, int numLineFeeds) {
@@ -1232,8 +1261,8 @@ public class OwlToSadl {
 		}
 		return trLst;
 	}
-
-	private String individualToSadl(ModelConcepts concepts, Individual inst) {
+	
+	private String individualNameAndAnnotations(ModelConcepts concepts, Individual inst) {
 		StringBuilder sb = new StringBuilder();
 		if (!inst.getNameSpace().equals(baseUri+'#')) {
 			if (qNamePrefixes.containsKey(inst.getNameSpace())) {
@@ -1254,6 +1283,12 @@ public class OwlToSadl {
 			sb.append(uriToSadlString(concepts, inst));
 		}
 		addNotesAndAliases(sb, inst);
+		return sb.toString();
+	}
+
+	private String individualToSadl(ModelConcepts concepts, Individual inst) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(individualNameAndAnnotations(concepts, inst));
 		if (isNewLineAtEndOfBuffer(sb)) {
 			sb.append("    ");
 		}
@@ -1282,7 +1317,7 @@ public class OwlToSadl {
 		StmtIterator insitr = inst.listProperties();
 		while (insitr.hasNext()) {
 			Statement s = insitr.next();
-			if (s.getPredicate().equals(RDF.type)) {
+			if (s.getPredicate().equals(RDF.type) || s.getPredicate().equals(RDFS.label) || s.getPredicate().equals(RDFS.comment)) {
 				continue;
 			}
 			sb.append("\n    has ");
@@ -1390,6 +1425,15 @@ public class OwlToSadl {
 		else {
 			sb.append(" is a class");
 		}
+		OntClass eqcls = cls.getEquivalentClass();
+		if (eqcls != null) {
+			if (concepts.getAnonClasses().contains(eqcls)) {
+				concepts.getAnonClasses().remove(eqcls);
+				String str = uriToSadlString(concepts, eqcls);
+				sb.append(" must be ");
+				sb.append(str);
+			}
+		}
 		// add properties with this class in the domain
 		ExtendedIterator<OntProperty> eitr2 = cls.listDeclaredProperties(true);
 		while (eitr2.hasNext()) {
@@ -1443,8 +1487,8 @@ public class OwlToSadl {
 	private void addNotesAndAliases(StringBuilder sb, Resource rsrc) {
 		StmtIterator sitr = rsrc.listProperties(RDFS.label);
 		if (sitr.hasNext()) {
-			addNewLineIfNotAtEndOfBuffer(sb);
-			sb.append("    (alias ");
+//			addNewLineIfNotAtEndOfBuffer(sb);
+			sb.append(" (alias ");
 			int cntr = 0; 
 			while (sitr.hasNext()) {
 				RDFNode alias = sitr.nextStatement().getObject();
@@ -1643,11 +1687,13 @@ public class OwlToSadl {
 		}
 		else if (object.isLiteral()) {
 			String dturi = object.asLiteral().getDatatypeURI();
-			forceQuotes = forceQuotes ? true : isRDFDatatypeString(dturi, object);
+			forceQuotes = forceQuotes ? true : (dturi != null ? isRDFDatatypeString(dturi, object) : true);
 			if (object.asLiteral().getDatatypeURI() == null) {
 				String lf = object.asLiteral().getLexicalForm();
-				if (forceQuotes || lf.contains(" ")) {
-					return "\"" + object.asLiteral().getLexicalForm() + "\""; 
+				if (forceQuotes || lf.contains(" ") || lf.contains("\"")) {
+					String s = object.asLiteral().getLexicalForm();
+					s = s.replace("\"", "\\\"");
+					return "\"" + s + "\""; 
 				}
 				return object.asLiteral().getLexicalForm();
 			}
@@ -1672,10 +1718,17 @@ public class OwlToSadl {
 				if (rsrc.getNameSpace().equals(XSD.getURI())) {
 					return rsrc.getLocalName();
 				}
-				if (qNamePrefixes.containsKey(rsrc.getNameSpace())) {
-					return qNamePrefixes.get(rsrc.getNameSpace()) + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
+				String ns = rsrc.getNameSpace();
+				String trimmedNs = ns.endsWith("#") ? ns.substring(0, ns.length() - 1) : null;
+				if (qNamePrefixes.containsKey(ns)) {
+					return qNamePrefixes.get(ns) + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
 				}
 				else {
+					if (trimmedNs != null) {
+						if (qNamePrefixes.containsKey(trimmedNs)) {
+							return qNamePrefixes.get(trimmedNs) + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
+						}
+					}
 					return rsrc.getURI();
 				}
 			}
@@ -1686,6 +1739,47 @@ public class OwlToSadl {
 			}
 			else if (rsrc.canAs(Restriction.class)) {
 				return restrictionToString(concepts, null, rsrc.as(Restriction.class));
+			}
+			else if (rsrc instanceof OntClass) {
+//				OntClass eqcls = ((OntClass)rsrc).getEquivalentClass();
+//				if (eqcls != null) {
+//					return uriToSadlString(concepts, eqcls);
+//				}
+				EnumeratedClass enumcls = ((OntClass)rsrc).asEnumeratedClass();
+				if (enumcls != null) {
+					ExtendedIterator<? extends OntResource> eitr = enumcls.listInstances();
+					while (eitr.hasNext()) {
+						OntResource en = eitr.next();
+						en.toString();
+					}
+					ExtendedIterator<RDFNode> eitr2 = enumcls.listIsDefinedBy();
+					while (eitr2.hasNext()) {
+						RDFNode en = eitr2.next();
+						en.toString();
+					}
+					RDFList oneoflst = enumcls.getOneOf();
+					List<RDFNode> nodeLst = oneoflst.asJavaList();
+					if (nodeLst != null && nodeLst.size() > 0) {
+						StringBuilder sb = new StringBuilder();
+						sb.append("one of {");
+						int cntr = 0;
+						for (int i = 0; i < nodeLst.size(); i++) {
+							RDFNode n = nodeLst.get(i);
+							if (cntr > 0) sb.append(", ");
+							sb.append("\n    ");
+							if (n.canAs(Individual.class)&& concepts.getInstances().contains(n)) {
+								sb.append(individualNameAndAnnotations(concepts, n.as(Individual.class)));
+								concepts.getInstances().remove(n);
+							}
+							else {
+								sb.append(rdfNodeToSadlString(concepts, n, false));
+							}
+							cntr++;
+						}
+						sb.append("}");
+						return sb.toString();
+					}
+				}
 			}
 		}
 		return rsrc.toString();
@@ -1702,8 +1796,14 @@ public class OwlToSadl {
 	private boolean addResourceToList(ModelConcepts concepts, OntResource ontRsrc) {
 		Resource type = ontRsrc.getRDFType();
 		if (type.equals(OWL.Class)) {
-			concepts.addClass(ontRsrc.as(OntClass.class));
-			return true;
+			if (ontRsrc.isAnon() && ontRsrc.canAs(OntClass.class)) {
+				concepts.addAnonClass(ontRsrc.as(OntClass.class));
+				return true;
+			}
+			else {
+				concepts.addClass(ontRsrc.as(OntClass.class));
+				return true;
+			}
 		}
 		else if (type.equals(OWL.ObjectProperty)) {
 			concepts.addObjProperty(ontRsrc.asObjectProperty());
@@ -1734,8 +1834,13 @@ public class OwlToSadl {
 			return true;
 		}
 		else if (type.equals(OWL.Ontology)) {
-			concepts.addOntology(ontRsrc.asOntology());
-			return true;
+			if (!isImplicitUri(ontRsrc.getURI())) {
+				concepts.addOntology(ontRsrc.asOntology());
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		else if (type.equals(RDFS.Datatype)) {
 			if (ontRsrc.isAnon()) {

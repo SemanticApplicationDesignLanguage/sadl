@@ -1115,6 +1115,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean isVariable(TypeCheckInfo tci) {
+		if (tci == null) return false;
 		ConceptIdentifier ci = tci.getTypeCheckType();
 		if (ci instanceof ConceptName && ((ConceptName)ci).getType() != null && ((ConceptName)ci).getType().equals(ConceptType.VARIABLE)) {
 			return true;
