@@ -13,7 +13,8 @@ Require-Bundle: com.ge.research.sadl.ui,
  org.eclipse.xtext.testing,
  org.eclipse.xtext.junit4,
  org.eclipse.xtext.xbase.testing,
- org.junit;bundle-version="4.12.0"
+ org.junit;bundle-version="4.12.0",
+ com.ge.research.sadl.jena;bundle-version="3.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.ui.tests;x-internal=true
 Import-Package: org.hamcrest.core,
