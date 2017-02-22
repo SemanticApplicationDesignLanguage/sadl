@@ -2708,9 +2708,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (subj != null && !matchFound) {
 			if (varName != null) {
 				if(propOfSubjectCheck){
-					issueAcceptor.addError(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), subject);
+					issueAcceptor.addError(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop)), subject);
 				}else{
-					issueAcceptor.addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), subject);
+					issueAcceptor.addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop)), subject);
 				}
 			}
 			else {
@@ -2747,6 +2747,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						} catch (CircularDependencyException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
+						}
+					}
+				}
+				else if (subj.canAs(Individual.class)){
+					ExtendedIterator<Resource> eitr = ((Individual)subj.as(Individual.class)).listRDFTypes(false);
+					while (eitr.hasNext()) {
+						Resource typ = eitr.next();
+						if (checkForPropertyDomainMatch(typ, prop, obj)) {
+							eitr.close();
+							return true;
 						}
 					}
 				}
