@@ -1749,7 +1749,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (rdfpropcheckinfo != null) {
 				return rdfpropcheckinfo;
 			}
-			throw new DontTypeCheckException();
+			issueAcceptor.addWarning("Unable to get type of RDF property '" + declarationExtensions.getConcreteName(qnm) + "'", qnm);
+			return null;
+//			throw new DontTypeCheckException();
 		}
 		else if(conceptType.equals(OntConceptType.INSTANCE)){
 			//Direct type to which the instance belongs
