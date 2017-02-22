@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.Workbench;
@@ -112,7 +113,15 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				ResultSet importsRS = ogg.convertDataToResultSet(imports, UriStrategy.LOCALNAME_WITH_URI_TOOLTIP);
 				IGraphVisualizer visualizer = getVisualizer(configMgr);
 				if (visualizer != null) {
-					graphResultSet(visualizer, project, trgtFile, baseFileName, graphName, null, description, importsRS, null);					
+					IWorkbenchPage page = null;
+					IWorkbenchWindow wndow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+					if (wndow != null) {
+						page = wndow.getActivePage();
+					}
+					else {
+						SadlConsole.writeToConsole(MessageType.INFO, "Unable to open graph automatically but graphics files will be placed in the 'Graphs' project folder.");
+					}
+					graphResultSet(visualizer, project, trgtFile, baseFileName, graphName, null, description, importsRS, null, page);					
 				}
 				else {
 					SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");

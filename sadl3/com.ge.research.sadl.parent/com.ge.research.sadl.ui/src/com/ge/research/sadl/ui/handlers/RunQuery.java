@@ -23,6 +23,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
@@ -174,7 +178,15 @@ public class RunQuery extends SadlActionHandler {
 									if (currentQuery.toLowerCase().startsWith("construct")) {
 										String desc = "Adhoc query Graph";
 	        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + System.currentTimeMillis(); 							
-		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
+	        							IWorkbenchPage page = null;
+	        							IWorkbenchWindow wndow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+	        							if (wndow != null) {
+	        								page = wndow.getActivePage();
+	        							}
+	        							else {
+	        								SadlConsole.writeToConsole(MessageType.INFO, "Unable to open graph automatically but graphics files will be placed in the 'Graphs' project folder.");
+	        							}
+		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null, page);
 									}
 									else {
 										SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));

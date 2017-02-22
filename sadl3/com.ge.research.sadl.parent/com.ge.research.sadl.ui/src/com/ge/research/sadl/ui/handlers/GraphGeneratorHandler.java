@@ -2,6 +2,7 @@ package com.ge.research.sadl.ui.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,12 +15,20 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.findReferences.IReferenceFinder;
 import org.eclipse.xtext.findReferences.TargetURIs;
 import org.eclipse.xtext.resource.IEObjectDescription;
@@ -109,6 +118,14 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 			IGraphVisualizer visualizer = getVisualizer(configMgr);
 			if (visualizer != null) {
+				IWorkbenchPage page = null;
+				IWorkbenchWindow wndow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				if (wndow != null) {
+					page = wndow.getActivePage();
+				}
+				else {
+					SadlConsole.writeToConsole(MessageType.INFO, "Unable to open graph automatically but graphics files will be placed in the 'Graphs' project folder.");
+				}
 				String publicUri;
 				String prefix = null;
 				try {
@@ -123,7 +140,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 					SadlResource sr = getSadlResource(target[3]);
 					if (sr != null) {
 						int graphRadius = getGraphingRadius(5);		
-						graphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius);
+						graphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius, page);
 					}
 					else {
 						SadlConsole.writeToConsole(MessageType.INFO, "Selected concept for graphing ('" + target[3].toString() + "') is not a SadlResource as expected.\n");
@@ -131,7 +148,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				}
 				else {
 					int graphRadius = getGraphingRadius(10);		
-					graphSelectedResourceImports(project, trgtFile, derivedFN, configMgr, visualizer, publicUri, prefix, graphRadius);
+					graphSelectedResourceImports(project, trgtFile, derivedFN, configMgr, visualizer, publicUri, prefix, graphRadius, page);
 				}
 			}
 			else {
@@ -145,6 +162,39 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			
 		}
 		return event;
+	}
+	
+	protected void generateGraph(Method graphingMethod, Object[] parameters) {
+		Job runTestJob = new Job("Generating Metrics") {
+			
+			@Override
+			protected void canceling() {
+				setCanceled(true);
+			};
+	
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					Object[] expandedParams = new Object[parameters.length + 1];
+					for (int i = 0; i < parameters.length; i++) {
+						expandedParams[i] = parameters[i];
+					}
+					expandedParams[parameters.length] = monitor;
+					graphingMethod.invoke(this, expandedParams);
+					if (isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
+					else {
+						return Status.OK_STATUS;
+					}
+				} catch(Exception e) {
+					e.printStackTrace();
+					return Status.CANCEL_STATUS;
+				}
+			}
+		};
+		runTestJob.schedule();
+		
 	}
 
 	protected int getGraphingRadius(int defaultSize) {
@@ -174,11 +224,11 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 
 	protected void graphSelectedResourceImports(IProject project, IFile trgtFile, boolean derivedFN,
-			IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, String publicUri, String prefix, int graphRadius)
+			IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, String publicUri, String prefix, int graphRadius, IWorkbenchPage page)
 			throws ConfigurationException, IOException {
 		ResultSet rs = importsToResultSet(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
 		if (rs != null) {
-			graphImportResultSet(visualizer, project, trgtFile, publicUri, prefix, rs);
+			graphImportResultSet(visualizer, project, trgtFile, publicUri, prefix, rs, page);
 		}
 		else {
 			SadlConsole.writeToConsole(MessageType.ERROR, "No imports found.\n");
@@ -186,22 +236,62 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 	
 	protected void graphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
-			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius)
+			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius, IWorkbenchPage page)
 			throws CircularDefinitionException, ConfigurationException, IOException {
+		Job runTestJob = new Job("Graph SADL Resource") {
+			
+			@Override
+			protected void canceling() {
+				setCanceled(true);
+			};
+	
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					int work = 10;
+					SubMonitor subMonitor = SubMonitor.convert(monitor, work);
+					doGraphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius, subMonitor, page);
+					if (isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
+					else {
+						return Status.OK_STATUS;
+					}
+				} catch(Exception e) {
+					e.printStackTrace();
+					return Status.CANCEL_STATUS;
+				}
+			}
+		};
+		runTestJob.schedule();
+	}
+
+	protected String getSadlResourceAnchor(SadlResource sr) {
+		String anchorNode = nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
+		return anchorNode;
+	}
+
+	protected void doGraphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
+			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius, SubMonitor monitor, IWorkbenchPage page) 
+					throws CircularDefinitionException, ConfigurationException, IOException {
 		String srnm = getSadlResourceConcreteName(sr);
 		OntConceptType srType = getSadlResourceOntConceptType(sr);
 		if (srType.equals(OntConceptType.CLASS)) {
 			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generateClassNeighborhood(graphRadius); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
+			monitor.worked(3);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs, null);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs, null, page);
+				monitor.worked(2);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No graph generated for this class.\n");
 			}
 			rs = gg.generateClassHierarchy(graphRadius); //sadlResourceToClassHierarchy(configMgr, publicUri, sr);
+			monitor.worked(3);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"ch", "ch", getSadlResourceAnchor(sr), "Class hierarchy", rs, null);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"ch", "ch", getSadlResourceAnchor(sr), "Class hierarchy", rs, null, page);
+				monitor.worked(2);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No class hierarchy found for this class.\n");
@@ -212,8 +302,10 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				srType.equals(OntConceptType.RDF_PROPERTY)) {
 			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generatePropertyNeighborhood(graphRadius);
+			monitor.worked(4);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs, null);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs, null, page);
+				monitor.worked(6);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No information found for this property.\n");
@@ -222,8 +314,10 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		else if (srType.equals(OntConceptType.INSTANCE)) {
 			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generateIndividualNeighborhood(graphRadius);
+			monitor.worked(4);
 			if (rs != null) {
-				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Instance", rs, null);
+				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Instance", rs, null, page);
+				monitor.worked(6);
 			}
 			else {
 				SadlConsole.writeToConsole(MessageType.INFO, "No information found for this instance.\n");
@@ -233,12 +327,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			SadlConsole.writeToConsole(MessageType.INFO, "Graphing of concepts of type '" + srType.toString() + "' not yet supported.\n");
 		}
 	}
-
-	protected String getSadlResourceAnchor(SadlResource sr) {
-		String anchorNode = nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
-		return anchorNode;
-	}
-
+	
 	private String getSadlResourcePrefix(SadlResource sr) {
 		return declarationExtensions.getConceptPrefix(sr);
 	}
@@ -278,7 +367,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return types;
 	}
 	
-	protected void graphImportResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
+	protected void graphImportResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs, IWorkbenchPage page) throws IOException {
 		String baseFileName = trgtFile.getFullPath().removeFileExtension().lastSegment().toString();
 		String graphName = prefix;
 		String anchorNode = nodeText(publicUri, prefix);
@@ -290,7 +379,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
 		}
 		String description = "Graph of Imports";
-		graphResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs, null);
+		graphResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs, null, page);
 	}
 	
 	
