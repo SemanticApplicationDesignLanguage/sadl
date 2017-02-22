@@ -428,7 +428,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return true;
 				}
 				if (!rulePremiseVariableAssignment(operations, leftTypeCheckInfo,rightTypeCheckInfo)) {
-					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, op);
+					String effectiveOp = op;
+					if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("value")) {
+						effectiveOp = "matching value";
+//						leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
+					}
+					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, effectiveOp);
 				}
 				return false;
 			}
@@ -2178,66 +2183,78 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	 */
 	protected boolean compareTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
-		List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
-		if (ltciCompound != null) {
-			for (int i = 0; i < ltciCompound.size(); i++) {
-				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
-				if (thisResult) {
-					return true;
+		boolean listTemporarilyDisabled = false;
+		try {
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("value")) {
+				listTemporarilyDisabled = true;
+				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
+			}
+			List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
+			if (ltciCompound != null) {
+				for (int i = 0; i < ltciCompound.size(); i++) {
+					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+					if (thisResult) {
+						return true;
+					}
 				}
+				return false;
 			}
-			return false;
-		}
-		List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
-		if (rtciCompound != null) {
-			for (int i = 0; i < rtciCompound.size(); i++) {
-				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
-				if (thisResult) {
-					return true;
+			List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
+			if (rtciCompound != null) {
+				for (int i = 0; i < rtciCompound.size(); i++) {
+					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
+					if (thisResult) {
+						return true;
+					}
 				}
+				return false;
 			}
-			return false;
-		}
-//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
-//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
-//			if (rExprType instanceof ConceptName) {
-//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
-//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
-//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
-//						// no chance of implied properties fixing the problem
-//						return false;
-//					}
-//				}
-//			}
-//		}
-		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
-		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
-		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
-				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
-			// Can't type-check on "None" as it represents that it doesn't exist.
-			return true;
-		}
-		else if (leftConceptIdentifier == null) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+	//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
+	//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
+	//			if (rExprType instanceof ConceptName) {
+	//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+	//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
+	//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
+	//						// no chance of implied properties fixing the problem
+	//						return false;
+	//					}
+	//				}
+	//			}
+	//		}
+			ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
+			ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
+			if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
+					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
+					(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
+					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
+				// Can't type-check on "None" as it represents that it doesn't exist.
+				return true;
 			}
-			return false;
-		}
-		else if(rightConceptIdentifier == null){
-			issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			else if (leftConceptIdentifier == null) {
+				issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				return false;
 			}
-			return false;
-		}
-		else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
-			if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
-				return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
+			else if(rightConceptIdentifier == null){
+				issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				return false;
 			}
-			return false;
+			else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
+					return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
+				}
+				return false;
+			}
+		}
+		finally {
+			if (listTemporarilyDisabled) {
+				leftTypeCheckInfo.setRangeValueType(RangeValueType.LIST);
+			}
 		}
 		return true;
 	}

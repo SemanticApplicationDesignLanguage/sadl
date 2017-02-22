@@ -251,6 +251,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
 	private List<String> numericOperators = Arrays.asList("*","+","/","-","%","^");
+	private List<String> numericComparisonOperators = Arrays.asList(">=", ">", "<=", "<");
+	private List<String> equalityInequalityComparisonOperators = Arrays.asList("==", "!=", "is", "=");
 	private List<String> canBeNumericOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=");
 	public enum OPERATORS_RETURNING_BOOLEAN {contains, unique, is, gt, ge, lt, le, and, or, not, was, hasBeen}
 	
@@ -6379,6 +6381,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			start = serialize.length();
 		}
 		return serialize.substring(start);
+	}
+	
+	public boolean isNumericComparisonOperator(String operation) {
+		if (numericComparisonOperators.contains(operation)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isEqualityInequalityComparisonOperator(String operation) {
+		if (equalityInequalityComparisonOperators.contains(operation)) {
+			return true;
+		}
+		return false;
 	}
 	
 	public boolean isComparisonOperator(String operation) {
