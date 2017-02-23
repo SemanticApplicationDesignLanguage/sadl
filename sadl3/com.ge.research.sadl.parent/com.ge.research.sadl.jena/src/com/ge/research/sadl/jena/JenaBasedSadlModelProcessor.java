@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -248,6 +249,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	protected enum AnnType {ALIAS, NOTE}	
 
+	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
+	private List<String> numericOperators = Arrays.asList("*","+","/","-","%","^");
+	private List<String> numericComparisonOperators = Arrays.asList(">=", ">", "<=", "<");
+	private List<String> equalityInequalityComparisonOperators = Arrays.asList("==", "!=", "is", "=");
+	private List<String> canBeNumericOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=");
 	public enum OPERATORS_RETURNING_BOOLEAN {contains, unique, is, gt, ge, lt, le, and, or, not, was, hasBeen}
 	
 	public enum BOOLEAN_LITERAL_TEST {BOOLEAN_TRUE, BOOLEAN_FALSE, NOT_BOOLEAN, NOT_BOOLEAN_NEGATED}
@@ -6203,6 +6209,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //		return false;
 //	}
 	protected Object translateAndApplyImpliedProperty(Expression expr, Property impliedPropertyWrapper) throws InvalidNameException, InvalidTypeException, TranslationException {
+		int start = serialize.length();
 		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
 			serialize.append("impliedProperty('");
 			serialize.append(impliedPropertyWrapper.toString());
@@ -6212,11 +6219,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
 			serialize.append(")");
 		}
-		return obj;
+		if (!(obj instanceof String)) {
+			return obj;
+		}
+		return getExpressionTranslationString(start);
 	}
+	
+	protected void resetProcessorState(SadlModelElement element) throws InvalidTypeException {
+		if (getModelValidator() != null) {
+			getModelValidator().resetValidatorState(element);
+		}
+	}
+
 	public List<Equation> getEquations() {
 		return equations;
 	}
+	
 	public void setEquations(List<Equation> equations) {
 		this.equations = equations;
 	}
@@ -6265,7 +6283,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						retlst = scips;
 					}
 					else {
-						retlst.addAll(scips);
+						for (int i = 0; i < scips.size(); i++) {
+							ConceptName cn = scips.get(i);
+							if (!scips.contains(cn)) {
+								retlst.add(scips.get(i));
+							}
+						}
 					}
 				}
 			}
@@ -6278,7 +6301,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			while (sitr.hasNext()) {
 				RDFNode obj = sitr.nextStatement().getObject();
 				if (obj.isURIResource()) {
-					retlst.add(new ConceptName(obj.asResource().getURI()));
+					ConceptName cn = new ConceptName(obj.asResource().getURI());
+					if (!retlst.contains(cn)) {
+						retlst.add(cn);
+					}
 				}
 			}
 			return retlst;
@@ -6348,6 +6374,95 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return ci.toString();
 	}
+	
+	/********************************* End translate methods *****************************************/
+	protected String getExpressionTranslationString(int start) {
+		if (start > serialize.length()) {
+			start = serialize.length();
+		}
+		return serialize.substring(start);
+	}
+	
+	public boolean isNumericComparisonOperator(String operation) {
+		if (numericComparisonOperators.contains(operation)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isEqualityInequalityComparisonOperator(String operation) {
+		if (equalityInequalityComparisonOperators.contains(operation)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isComparisonOperator(String operation) {
+		if (comparisonOperators.contains(operation)) {
+			return true;
+		}
+		return false;
+	}
 
+	public boolean isBooleanComparison(List<String> operations) {
+		if(comparisonOperators.containsAll(operations)){
+			return true;
+		}
+		return false;
+	}
 
+	public boolean canBeNumericOperator(String op) {
+		if (canBeNumericOperators.contains(op)) return true;
+		return false;
+	}
+
+	public boolean isNumericOperator(String op) {
+		if (numericOperators.contains(op)) return true;
+		return false;
+	}
+
+	public boolean isNumericOperator(List<String> operations) {
+		Iterator<String> itr = operations.iterator();
+		while (itr.hasNext()) {
+			if (isNumericOperator(itr.next())) return true;
+		}
+		return false;
+	}
+
+	public boolean canBeNumericOperator(List<String> operations) {
+		Iterator<String> itr = operations.iterator();
+		while (itr.hasNext()) {
+			if (canBeNumericOperator(itr.next())) return true;
+		}
+		return false;
+	}
+	
+	public boolean isNumericType(ConceptName conceptName) {
+		try {
+			String uri = conceptName.getUri();
+			return isNumericType(uri);
+		} catch (InvalidNameException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean isNumericType(String uri) {
+		if (uri.equals(XSD.decimal.getURI()) ||
+				uri.equals(XSD.integer.getURI()) ||
+				uri.equals(XSD.xdouble.getURI()) ||
+				uri.equals(XSD.xfloat.getURI()) ||
+				uri.equals(XSD.xint.getURI()) ||
+				uri.equals(XSD.xlong.getURI())) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isBooleanType(String uri) {
+		if (uri.equals(XSD.xboolean.getURI())) {
+			return true;
+		}
+		return false;
+	}
 }
