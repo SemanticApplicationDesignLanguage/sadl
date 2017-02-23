@@ -2640,6 +2640,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								if (stci != null && stci.getTypeCheckType() != null) {
 									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
 									varName = declarationExtensions.getConcreteName((SadlResource)subject);
+									if (subj != null) {
+										Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+										if (prop != null) {
+											checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+										}
+									}
 								}
 							} catch (InvalidNameException e) {
 								// TODO Auto-generated catch block
@@ -2667,7 +2673,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (propsubj != null && prop != null) {
+								if (prop != null) {
 									checkPropertyDomain(ontModel, propsubj, prop, subject, propOfSubjectCheck, varName);
 								}
 							}
@@ -2676,7 +2682,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (subj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (subj != null && prop != null) {
+								if (prop != null) {
 									checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
 								}
 							}
