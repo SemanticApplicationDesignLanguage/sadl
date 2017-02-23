@@ -50,8 +50,9 @@ abstract class AbstractSADLParsingTest{
 	@Inject Provider<XtextResourceSet> resourceSetProvider
 	XtextResourceSet resourceSet
 
-	static val IMPLICIT_MODEL = '''uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-	Event is a class.
+	static val IMPLICIT_MODEL = '''
+		uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+		Event is a class.
 		impliedProperty is a type of annotation.
 		UnittedQuantity is a class,
 	 	described by ^value with values of type decimal,
