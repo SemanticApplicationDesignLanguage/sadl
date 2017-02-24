@@ -52,6 +52,8 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
+			if (imports != null) imports.clear();
+			
 			SadlConsole.writeToConsole(MessageType.INFO, "-----------------Ontology Graphing Started-------------------\n\n");
 			String curProject = getCurrentProject();
 			if (curProject == null) {

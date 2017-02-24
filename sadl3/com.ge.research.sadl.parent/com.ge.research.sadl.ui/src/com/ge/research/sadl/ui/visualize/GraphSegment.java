@@ -656,6 +656,9 @@ public class GraphSegment {
 	}
 
 	public String resourceToString(Resource rsrc) {
+		if (!rsrc.isURIResource()) {
+			return stringForm(rsrc);
+		}
 		if (getUriStrategy().equals(UriStrategy.LOCALNAME_ONLY)) {
 			if (rsrc.isURIResource()) {
 				return ((Resource)getSubject()).getLocalName();

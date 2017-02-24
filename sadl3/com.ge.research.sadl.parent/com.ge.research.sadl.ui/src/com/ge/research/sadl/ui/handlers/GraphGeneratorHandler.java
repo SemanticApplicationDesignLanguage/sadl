@@ -77,6 +77,10 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				if (target.length > 2) trgtFile = (IFile) target[2];
 			}
 			String owlFileName = null;
+			if (project == null || trgtFile == null) {
+				SadlConsole.writeToConsole(MessageType.ERROR, "Nothing is selected for graphing. Please select at least a project or click in open editor to select file or concept.\n");
+				return event;
+			}
 
 			SadlConsole.writeToConsole(MessageType.INFO, "Generating graph of '" + trgtFile.getName() + "' requested.\n");
 
@@ -87,9 +91,9 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			else {
 				owlFileName = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment()).toPortableString());
 				if (!(new File(owlFileName).exists())) {
-					owlFileName = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().addFileExtension("owl").lastSegment()).toPortableString());
-					if (!(new File(owlFileName).exists())) {
-						SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing\n");
+					String owlFileName2 = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().addFileExtension("owl").lastSegment()).toPortableString());
+					if (!(new File(owlFileName2).exists())) {
+						SadlConsole.writeToConsole(MessageType.ERROR, "Selected file is '" + trgtFile.getName() + "' but corresponding OWL file (" + owlFileName + ") not found.\n");
 						return event;
 					}
 					else {
