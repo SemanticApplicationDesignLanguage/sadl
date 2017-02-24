@@ -195,7 +195,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		String srnm = getSadlResourceConcreteName(sr);
 		OntConceptType srType = getSadlResourceOntConceptType(sr);
 		if (srType.equals(OntConceptType.CLASS)) {
-			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
+			GraphGenerator gg = new GraphGenerator(configMgr, project, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generateClassNeighborhood(graphRadius); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
 			if (rs != null) {
 				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs, null);
@@ -214,7 +214,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		else if (srType.equals(OntConceptType.CLASS_PROPERTY) ||
 				srType.equals(OntConceptType.DATATYPE_PROPERTY) ||
 				srType.equals(OntConceptType.RDF_PROPERTY)) {
-			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
+			GraphGenerator gg = new GraphGenerator(configMgr, project, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generatePropertyNeighborhood(graphRadius);
 			if (rs != null) {
 				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Domains and ranges", rs, null);
@@ -224,7 +224,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			}
 		}
 		else if (srType.equals(OntConceptType.INSTANCE)) {
-			GraphGenerator gg = new GraphGenerator(configMgr, publicUri, new ConceptName(getSadlResourceUri(sr)));
+			GraphGenerator gg = new GraphGenerator(configMgr, project, publicUri, new ConceptName(getSadlResourceUri(sr)));
 			ResultSet rs = gg.generateIndividualNeighborhood(graphRadius);
 			if (rs != null) {
 				graphResultSet(visualizer, project, trgtFile, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr), "Instance", rs, null);

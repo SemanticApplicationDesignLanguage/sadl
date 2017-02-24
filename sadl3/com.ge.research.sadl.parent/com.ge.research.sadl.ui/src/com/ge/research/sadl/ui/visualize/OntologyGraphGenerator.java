@@ -44,31 +44,9 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author Tyler Dicks
  *
  */
-public class OntologyGraphGenerator {
+public class OntologyGraphGenerator extends GraphGenerator {
 
-	protected static String COLOR = "color";
-	protected static String SHAPE = "shape";
-	protected static String STYLE = "style";
-	protected static String FILLED = "filled";
-	protected static String FONTCOLOR = "fontcolor";
-	protected static String FILL_COLOR = "fillcolor";
-	protected static String BLUE = "blue";
-	protected static String CLASS_BLUE = "blue4";
-	protected static String INSTANCE_BLUE = "blue";
-	protected static String WHITE = "white";
-	protected static String BLACK = "black";
-	protected static String OCTAGON = "octagon";
-	protected static String DIAMOND = "diamond";
-	protected static String RED = "red";
-	protected static String PROPERTY_GREEN = "green3";
-	protected static String IS_IMPORT = "isImport";
-	protected static String LINK_URL = "href";
-	
-
-	private OntModel theJenaModel = null; //model with imports
 	private OntModel baseModel = null;
-	private IConfigurationManagerForIDE configMgr;
-	private IProject project = null;
 	
 //	public enum Orientation {TD, LR, BD, RL}
 	
@@ -81,8 +59,7 @@ public class OntologyGraphGenerator {
 	 * @throws IOException
 	 */
 	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IProject project) throws ConfigurationException, IOException {
-		this.setConfigMgr(configMgr);
-		this.project  = project;
+		super(configMgr, project, null, null);
 	}
 	
 	/**
@@ -94,14 +71,13 @@ public class OntologyGraphGenerator {
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, IProject project) throws ConfigurationException, IOException {
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IProject project, String publicUri) throws ConfigurationException, IOException {
+		super(configMgr, project, publicUri, null);
 		this.setConfigMgr(configMgr);
-		this.project  = project;
-		setTheJenaModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
 	}
 
 	/**
-	 * Method that generates the ontology graph RestultSet, which is fed in to the handler to turn into a 
+	 * Method that generates the ontology graph ResultSet, which is fed in to the handler to turn into a 
 	 * graphviz graph.
 	 * 
 	 * @param ontologyResults 	- List of data gathered from the ontology imports, (no longer used)
@@ -259,7 +235,7 @@ public class OntologyGraphGenerator {
 		// get the prefix and if there is one generate qname
 		String prefix = getConfigMgr().getGlobalPrefix(ns);
 		//get the graph folder file path
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(project)); 
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
 		
 		if(prefix!=null){
 			return "\"file:///" + tempDir + "/" + prefix + SadlActionHandler.getGraphFileNameExtension() + "\"";
@@ -654,7 +630,7 @@ public class OntologyGraphGenerator {
 		String filename = splitFile[splitFile.length-1];
 		
 		// get the prefix and if there is one generate qname
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(project)); 
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
 		
 		if(filename!=null){
 			return "\"file:///" + tempDir + "/" + filename + SadlActionHandler.getGraphFileNameExtension() + "\"";
@@ -1283,22 +1259,6 @@ public class OntologyGraphGenerator {
 		}else{
 			return false;
 		}
-	}
-
-	private OntModel getTheJenaModel() {
-		return theJenaModel;
-	}
-
-	private void setTheJenaModel(OntModel theJenaModel) {
-		this.theJenaModel = theJenaModel;
-	}
-
-	private IConfigurationManagerForIDE getConfigMgr() {
-		return configMgr;
-	}
-
-	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
-		this.configMgr = configMgr;
 	}
 
 	public List<GraphSegment> getImports(IConfigurationManagerForIDE configMgr, String publicUri) {

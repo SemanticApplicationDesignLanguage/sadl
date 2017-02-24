@@ -223,7 +223,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
 				}
 				
-				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), publicUri, project);
+				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), project, publicUri);
 				ResultSet oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_ONLY);
 				List<GraphSegment> newImports = ogg.getImports(getConfigMgr(), publicUri);
 				if (newImports != null) {
