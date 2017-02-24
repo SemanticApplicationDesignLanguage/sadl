@@ -133,11 +133,10 @@ class SadlModelManagerProviderTest {
 	
 // TODO How should this self-import be tested? This doesn't work because the SADLValidator doesn't get the URI for the import	
 // Also, should this check for import loops that have a larger number of participants?
-	@Ignore	
 	@Test def void testImportSelfError() {
 		'''
 			uri "http://sadl.org/Tests/Import" alias imp.
-			import "http://sadl.org.Tests/ModelName".
+			import "http://sadl.org/Tests/Import".
 		'''.assertValidatesTo[jenaModel, issues |
 			assertTrue(issues.size == 1)
 			assertTrue(issues.get(0).toString().contains("cannot import self"))
@@ -1350,13 +1349,13 @@ class SadlModelManagerProviderTest {
 	}
 	
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		val model = parser.parse(code)
-		validationTestHelper.assertNoErrors(model)
-		val processor = processorProvider.get
-		val List<Issue> issues= newArrayList
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
-		assertions.apply(processor.theJenaModel, issues)
-		return model.eResource
+		val List<Issue> issues = newArrayList;
+		val model = parser.parse(code);
+		issues.addAll(validationTestHelper.validate(model));
+		val processor = processorProvider.get;
+		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)));
+		assertions.apply(processor.theJenaModel, issues);
+		return model.eResource;
 	}
 
 	protected def Resource assertValidatesTo(ResourceSet resourceSet, CharSequence code, (OntModel, List<Issue>)=>void assertions) {

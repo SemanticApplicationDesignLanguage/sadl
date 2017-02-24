@@ -17,18 +17,32 @@
  ***********************************************************************/
 package com.ge.research.sadl.validation
 
-import com.ge.research.sadl.sADL.SADLPackage
-import org.eclipse.xtext.linking.ILinkingDiagnosticMessageProvider.ILinkingDiagnosticContext
+import com.ge.research.sadl.sADL.SadlImport
+import com.ge.research.sadl.sADL.SadlModel
 import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
+
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 class SoftLinkingMessageProvider extends LinkingDiagnosticMessageProvider {
 
-	override getUnresolvedProxyMessage(ILinkingDiagnosticContext context) {
-		if (context.reference.EReferenceType === SADLPackage.Literals.SADL_RESOURCE) {
+	@Override
+	override getUnresolvedProxyMessage(ILinkingDiagnosticContext it) {
+		if (reference.EReferenceType === SADL_RESOURCE) {
 			// treated as declaration. 
 			return null
+		} else if (reference === SADL_IMPORT__IMPORTED_RESOURCE && context instanceof SadlImport) {
+			// Importing self causes linker error but that is handles already in SADL validator.
+			val container = (context as SadlImport).eContainer;
+			if (container instanceof SadlModel) {
+				val baseUri = container.baseUri;
+				println(baseUri)
+				println(linkText)
+				if (baseUri == linkText) {
+					return null;
+				}
+			}
 		}
-		super.getUnresolvedProxyMessage(context)
+		super.getUnresolvedProxyMessage(it);
 	}
 
 }
