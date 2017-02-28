@@ -11,9 +11,11 @@ import org.eclipse.core.resources.IProject;
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -58,8 +60,8 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IProject project) throws ConfigurationException, IOException {
-		super(configMgr, project, null, null);
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project) throws ConfigurationException, IOException {
+		super(configMgr, visualizer, project, null, null);
 	}
 	
 	/**
@@ -71,8 +73,8 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IProject project, String publicUri) throws ConfigurationException, IOException {
-		super(configMgr, project, publicUri, null);
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri) throws ConfigurationException, IOException {
+		super(configMgr, visualizer, project, publicUri, null);
 		this.setConfigMgr(configMgr);
 	}
 
@@ -83,8 +85,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @param ontologyResults 	- List of data gathered from the ontology imports, (no longer used)
 	 * @param publicUri 		- The uri of the file being graphed
 	 * @return 					- The ResultSet containing all the classes, instances, and properties.  
+	 * @throws InvalidNameException 
 	 */
-	public ResultSet generateOntologyResultSet(List<String[]> ontologyResults, String publicUri, UriStrategy uriStrategy){
+	public ResultSet generateOntologyResultSet(List<String[]> ontologyResults, String publicUri, UriStrategy uriStrategy) throws InvalidNameException{
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		boolean isImport = false;
 		
@@ -146,11 +149,10 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * 
 	 * @param publicUri	- The uri of the ontology file being graphed
 	 * @param data		- The GraphSegment list containing all the ontology graph data up to this point
-	 * @throws ConfigurationException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	private void addInstancesWithImportParent(String publicUri, List<GraphSegment> data)
-			throws ConfigurationException, IOException {
+			throws Exception {
 		ExtendedIterator<Individual> individualIter = getLocalModel().listIndividuals();
 		//Add all instances that have an imported parent:
 		while(individualIter.hasNext()){
@@ -222,8 +224,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * 
 	 * @param	- Imported class or concept
 	 * @return	- File URL to be added to node hyperlink
+	 * @throws Exception 
 	 */
-	private String getImportUrl(OntResource rsrc) {
+	private String getImportUrl(OntResource rsrc) throws Exception {
 		if (!rsrc.isURIResource()) {
 			//int i = 0;
 			return rsrc.toString();
@@ -234,11 +237,12 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		}
 		// get the prefix and if there is one generate qname
 		String prefix = getConfigMgr().getGlobalPrefix(ns);
+		String baseFilename = getBaseFilenameFromPublicUri(ns);
 		//get the graph folder file path
 		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
 		
-		if(prefix!=null){
-			return "\"file:///" + tempDir + "/" + prefix + SadlActionHandler.getGraphFileNameExtension() + "\"";
+		if(baseFilename != null){
+			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
 		}
 		return null;
 	}
@@ -626,30 +630,16 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	}
 
 	public String getCurrentFileLink(String parentUri) throws Exception{
-		String[] splitFile = parentUri.split("/");
-		String filename = splitFile[splitFile.length-1];
+		String baseFilename = getBaseFilenameFromPublicUri(parentUri);
 		
 		// get the prefix and if there is one generate qname
 		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
 		
-		if(filename!=null){
-			return "\"file:///" + tempDir + "/" + filename + SadlActionHandler.getGraphFileNameExtension() + "\"";
+		if(baseFilename!=null){
+			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
 		}
 		throw new Exception("Cannot find graph file in getCurrentFileLink()");
 	}
-//	if(superClass.asRestriction().isCardinalityRestriction() && (superClass.asRestriction().getProperty(OWL2.onClass) != null)){
-//		Statement var = superClass.asRestriction().getProperty(OWL2.onClass);
-//		RDFNode obj = var.getObject();
-//		if(obj.equals(rng)){
-//			if(prop.canAs(Property.class)){
-//				String rst = getRestrictionString(superClass.asRestriction(),prop.as(Property.class));
-//				
-//				//rstrString.append();
-//			}else{
-//				throw new Exception("prop is not a property");
-//			}
-//		}
-//	}
 	
 	private String getRestrictionString(Restriction rstr, Property prop, OntResource rng, boolean isList) throws Exception{
 		
@@ -875,10 +865,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @param data		- List of GraphSegments containing current graph data
 	 * @param publicUri	- URI of ontology file being graphed
 	 * @return
-	 * @throws ConfigurationException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	private List<GraphSegment> generateClassSubclasses(OntClass cls, List<GraphSegment> data, String publicUri) throws ConfigurationException, IOException {
+	private List<GraphSegment> generateClassSubclasses(OntClass cls, List<GraphSegment> data, String publicUri) throws Exception {
 		ExtendedIterator<OntClass> eitr = cls.listSubClasses(true);
 		while (eitr.hasNext()) {
 			OntClass subcls = eitr.next();
@@ -1118,8 +1107,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	/**
 	 * @param data
 	 * @return
+	 * @throws InvalidNameException 
 	 */
-	public ResultSet convertDataToResultSet(List<GraphSegment> data, UriStrategy uriStrategy) {
+	public ResultSet convertDataToResultSet(List<GraphSegment> data, UriStrategy uriStrategy) throws InvalidNameException {
 		List<GraphSegment> listTypeSegments = null;
 		Iterator<GraphSegment> dataitr = data.iterator();
 		while (dataitr.hasNext()) {

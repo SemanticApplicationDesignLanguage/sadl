@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -95,7 +96,7 @@ public class GraphSegment {
 //		}
 //	}
 	
-	String stringForm(Object obj) {
+	String stringForm(Object obj) throws InvalidNameException {
 		if(obj == null){
 			return null;
 		}
@@ -190,13 +191,13 @@ public class GraphSegment {
 		return null;
 	}
 
-	private String conceptNameToString(ConceptName obj) {
-		// get the prefix and if there is one generate qname
-		if (obj.getPrefix() != null) {
-			return obj.getPrefix() + ":" + obj.getName();
-		}
-		return obj.getName();
-	}
+//	private String conceptNameToString(ConceptName obj) {
+//		// get the prefix and if there is one generate qname
+//		if (obj.getPrefix() != null) {
+//			return obj.getPrefix() + ":" + obj.getName();
+//		}
+//		return obj.getName();
+//	}
 	
 
 	private String uriResourceToString(Resource rsrc) {
@@ -215,7 +216,7 @@ public class GraphSegment {
 		return rsrc.getLocalName();
 	}
 	
-	public String restrictionToString(OntClass ontcls) {
+	public String restrictionToString(OntClass ontcls) throws InvalidNameException {
 		if (ontcls.as(Restriction.class).isSomeValuesFromRestriction()) {
 			StringBuilder sb = new StringBuilder("some values of ");
 			SomeValuesFromRestriction svfr = ontcls.as(SomeValuesFromRestriction.class);
@@ -375,7 +376,7 @@ public class GraphSegment {
 		return "Untranslated Restriction: " + ontcls.toString();
 	}
 	
-	String subjectToStringNoPrefix() {
+	String subjectToStringNoPrefix() throws InvalidNameException {
 		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getSubject()));
 		if (getSubjectNodeDuplicateSequenceNumber() >= 0) {
 			sb.append("[");
@@ -401,7 +402,7 @@ public class GraphSegment {
 		return sb.toString();
 	}
 	
-	String predicateToStringNoPrefix() {
+	String predicateToStringNoPrefix() throws InvalidNameException {
 		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getPredicate()));
 		if (getEdgeAttributes() != null) {
 			sb.append("(");
@@ -422,7 +423,7 @@ public class GraphSegment {
 		return sb.toString();
 	}
 	
-	String objectToStringNoPrefix() {
+	String objectToStringNoPrefix() throws InvalidNameException {
 		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getObject()));
 		if (getObjectNodeDuplicateSequenceNumber() >= 0) {
 			sb.append("[");
@@ -451,7 +452,7 @@ public class GraphSegment {
 		return sb.toString();
 	}
 	
-	String stringFormNoPrefix(Object obj) {
+	String stringFormNoPrefix(Object obj) throws InvalidNameException {
 		if(obj == null){
 			return null;
 		}
@@ -631,12 +632,18 @@ public class GraphSegment {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(subjectToStringNoPrefix());
-		sb.append(" -> ");
-		sb.append(predicateToStringNoPrefix());
-		sb.append(" -> ");
-		sb.append(objectToStringNoPrefix());
-		return sb.toString();
+		try {
+			sb.append(subjectToStringNoPrefix());
+			sb.append(" -> ");
+			sb.append(predicateToStringNoPrefix());
+			sb.append(" -> ");
+			sb.append(objectToStringNoPrefix());
+			return sb.toString();
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public long getSubjectNodeDuplicateSequenceNumber() {
@@ -654,30 +661,66 @@ public class GraphSegment {
 	public void setObjectNodeDuplicateSequenceNumber(long objectNodeDuplicateSequenceNumber) {
 		this.objectNodeDuplicateSequenceNumber = objectNodeDuplicateSequenceNumber;
 	}
+	
+	private String uriToString(String uri) {
+		if (uriStrategy == null) {
+			return uri;
+		}
+		String ns = uri;
+		String localName = null;
+		int hashLoc = uri.lastIndexOf('#');
+		if (hashLoc > 0) {
+			ns = uri.substring(0, hashLoc);
+			localName = uri.substring(hashLoc + 1);
+		}
+		String prefix = getPrefix(ns);
+		if (uriStrategy.equals(UriStrategy.LOCALNAME_ONLY) || uriStrategy.equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP) || uriStrategy.equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+			if (localName != null) {
+				return localName; 
+			}
+			else if (prefix != null) {
+				return prefix;
+			}
+		}
+		else if (uriStrategy.equals(UriStrategy.QNAME_ONLY) || uriStrategy.equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
+			if (localName != null) {
+				return  prefix + ":" + localName;
+			}
+			else if (prefix != null) {
+				return prefix;
+			}
+		}
+		else if (uriStrategy.equals(UriStrategy.URI_ONLY)) {
+			return uri;
+		}
+		
+		return uri;
+	}
 
-	public String resourceToString(Resource rsrc) {
-		if (!rsrc.isURIResource()) {
+
+	public String resourceToString(Resource rsrc) throws InvalidNameException {
+		if (!rsrc.isURIResource() || uriStrategy == null) {
 			return stringForm(rsrc);
 		}
-		if (getUriStrategy().equals(UriStrategy.LOCALNAME_ONLY)) {
-			if (rsrc.isURIResource()) {
-				return ((Resource)getSubject()).getLocalName();
-			}
-			return rsrc.toString();
-		}
-		else if (getUriStrategy().equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP)) {
+		if (uriStrategy.equals(UriStrategy.LOCALNAME_ONLY)) {
 			if (rsrc.isURIResource()) {
 				return ((Resource)rsrc).getLocalName();
 			}
 			return rsrc.toString();
 		}
-		else if (getUriStrategy().equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+		else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP)) {
 			if (rsrc.isURIResource()) {
 				return ((Resource)rsrc).getLocalName();
 			}
 			return rsrc.toString();
 		}
-		else if (getUriStrategy().equals(UriStrategy.QNAME_ONLY)) {
+		else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+			if (rsrc.isURIResource()) {
+				return ((Resource)rsrc).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		else if (uriStrategy.equals(UriStrategy.QNAME_ONLY)) {
 			if (rsrc.isURIResource()) {
 				String ns = ((Resource)rsrc).getNameSpace();
 				String prefix = getPrefix(ns);
@@ -690,7 +733,7 @@ public class GraphSegment {
 			}
 			return rsrc.toString();
 		}
-		else if (getUriStrategy().equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
+		else if (uriStrategy.equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
 			if (rsrc.isURIResource()) {
 				String ns = ((Resource)rsrc).getNameSpace();
 				String prefix = getPrefix(ns);
@@ -698,7 +741,7 @@ public class GraphSegment {
 			}
 			return rsrc.toString();
 		}
-		else if (getUriStrategy().equals(UriStrategy.URI_ONLY)) {
+		else if (uriStrategy.equals(UriStrategy.URI_ONLY)) {
 			if (rsrc.isURIResource()) {
 				String ns = ((Resource)rsrc).getNameSpace();
 				return configMgr.getGlobalPrefix(ns)  + ((Resource)rsrc).getLocalName();
@@ -706,6 +749,38 @@ public class GraphSegment {
 			return rsrc.toString();
 		}
 		return rsrc.toString();
+	}
+	
+	public String conceptNameToString(ConceptName cn) throws InvalidNameException {
+		if (uriStrategy != null) {
+			if (uriStrategy.equals(UriStrategy.LOCALNAME_ONLY)) {
+				return cn.getName();
+			}
+			else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_QNAME_TOOLTIP)) {
+				return cn.getName();
+			}
+			else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+				return cn.getName();
+			}
+			else if (uriStrategy.equals(UriStrategy.QNAME_ONLY)) {
+				String prefix = cn.getPrefix();
+				if (prefix != null) {
+					return  prefix + ":" + cn.getName();
+				}
+				return cn.getName();
+			}
+			else if (uriStrategy.equals(UriStrategy.QNAME_WITH_URI_TOOLTIP)) {
+				String prefix = cn.getPrefix();
+				if (prefix != null) {
+					return  prefix + ":" + cn.getName();
+				}
+				return cn.getName();
+			}
+			else if (uriStrategy.equals(UriStrategy.URI_ONLY)) {
+				return cn.getUri();
+			}
+		}
+		return cn.toString();
 	}
 	
 	private String getPrefix(String ns) {
@@ -721,23 +796,32 @@ public class GraphSegment {
 		return prefix;
 	}
 
-	public String subjectToString() {
+	public String subjectToString() throws InvalidNameException {
 		if (getSubject() instanceof Resource) {
 			return resourceToString((Resource)getSubject());
+		}
+		else if (getSubject().toString().startsWith("http://")) {
+			return uriToString(getSubject().toString());
 		}
 		return getSubject().toString();
 	}
 
-	public String predicateToString() {
+	public String predicateToString() throws InvalidNameException {
 		if (getPredicate() instanceof Resource) {
 			return resourceToString((Resource)getPredicate());
+		}
+		else if (getPredicate().toString().startsWith("http://")) {
+			return uriToString(getPredicate().toString());
 		}
 		return getPredicate().toString();
 	}
 
-	public String objectToString() {
+	public String objectToString() throws InvalidNameException {
 		if (getObject() instanceof Resource) {
 			return resourceToString((Resource)getObject());
+		}
+		else if (getObject().toString().startsWith("http://")) {
+			return uriToString(getObject().toString());
 		}
 		return getObject().toString();
 	}

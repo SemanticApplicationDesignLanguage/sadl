@@ -87,6 +87,8 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	
 	protected ISadlInferenceProcessor processor;
 	
+	private IGraphVisualizer visualizer = null;
+	
 	protected abstract String[] getValidTargetFileTypes();
 
 	protected Object[] getCommandTarget(String[] validTargetTypes) throws TranslationException {
@@ -369,20 +371,21 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	}
 
 	protected IGraphVisualizer getVisualizer(IConfigurationManagerForEditing configMgr) {
-		Map<String,String> prefMap = getPreferences();
-		String renderClass = prefMap.get(SadlPreferences.GRAPH_RENDERER_CLASS.getId());
+		if (visualizer == null) {
+			Map<String,String> prefMap = getPreferences();
+			String renderClass = prefMap.get(SadlPreferences.GRAPH_RENDERER_CLASS.getId());
+			
+			List<IGraphVisualizer> visualizers = configMgr.getAvailableGraphRenderers();
 		
-		List<IGraphVisualizer> visualizers = configMgr.getAvailableGraphRenderers();
-	
-		if (visualizers != null && visualizers.size() > 0) {
-			IGraphVisualizer visualizer = visualizers.get(0);		// replace this by selection and setting preference
-			return visualizer;
+			if (visualizers != null && visualizers.size() > 0) {
+				visualizer = visualizers.get(0);		// replace this by selection and setting preference
+			}
 		}
-		return null;
+		return visualizer;	
 	}
 
-	protected void graphResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
-			String description, ResultSet rs, IGraphVisualizer.Orientation orientation) throws IOException {
+	protected void graphResultSet(IGraphVisualizer iGraphVisualizer, IProject project, String baseFileName, String graphName, String anchorNode,
+			String description, ResultSet rs, IGraphVisualizer.Orientation orientation, boolean openGraph) throws IOException {
 		if (orientation == null) {
 			orientation = IGraphVisualizer.Orientation.TD;
 		}
@@ -391,21 +394,23 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		tmpDirFile.mkdirs();
 		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, orientation, description);
 		iGraphVisualizer.graphResultSetData(rs);
-		String fileToOpen = iGraphVisualizer.getGraphFileToOpen();
-		if (fileToOpen != null) {
-			File fto = new File(fileToOpen);
-			if (fto.isFile()) {
-				IFileStore fileStore = EFS.getLocalFileSystem().getStore(fto.toURI());
-				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				try {
-					IDE.openEditorOnFileStore(page, fileStore);
+		if (openGraph) {
+			String fileToOpen = iGraphVisualizer.getGraphFileToOpen();
+			if (fileToOpen != null) {
+				File fto = new File(fileToOpen);
+				if (fto.isFile()) {
+					IFileStore fileStore = EFS.getLocalFileSystem().getStore(fto.toURI());
+					IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+					try {
+						IDE.openEditorOnFileStore(page, fileStore);
+					}
+					catch (Throwable t) {
+						SadlConsole.writeToConsole(MessageType.ERROR, "Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
+					}
 				}
-				catch (Throwable t) {
-					SadlConsole.writeToConsole(MessageType.ERROR, "Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
+				else if (fileToOpen != null) {
+					SadlConsole.writeToConsole(MessageType.ERROR, "Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
 				}
-			}
-			else if (fileToOpen != null) {
-				SadlConsole.writeToConsole(MessageType.ERROR, "Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
 			}
 		}
 	}
@@ -425,25 +430,22 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	
 	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName, Orientation orientation)
 			throws ConfigurationException, IOException {
-				if (rs.getColumnCount() >= 3) {
-					String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-					final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-					IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
-			
-					IGraphVisualizer visualizer = getVisualizer(configMgr);
-					if (visualizer != null) {
-						graphResultSet(visualizer, project, trgtFile, baseFileName, baseFileName, null, desc, rs, orientation);
-					}
-					else {
-						SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
-					}
-				}
-				else {
-					SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query; ResultSet has less than 3 columns.\n");
-				}
+		if (rs.getColumnCount() >= 3) {
+			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
+	
+			IGraphVisualizer visualizer = getVisualizer(configMgr);
+			if (visualizer != null) {
+				graphResultSet(visualizer, project, baseFileName, baseFileName, null, desc, rs, orientation, true);
 			}
-
-	public static String getGraphFileNameExtension() {
-		return ".svg";
+			else {
+				SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
+			}
+		}
+		else {
+			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query; ResultSet has less than 3 columns.\n");
+		}
 	}
+
 }
