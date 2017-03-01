@@ -58,7 +58,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	static val PROJECT_NAME = 'testProject';
 
-	val modifiedProperties = <String>newHashSet();
+	val modifiedPreferences = <String>newHashSet();
 
 	@Inject
 	IResourceSetProvider resourceSetProvider;
@@ -81,7 +81,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	@Before
 	def void before() {
-		modifiedProperties.clear();
+		modifiedPreferences.clear();
 		beforeProjectCreation();
 		createProject();
 		afterProjectCreation();
@@ -103,12 +103,19 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		addNature(project, XtextProjectHelper.NATURE_ID);
 		addBuilder(project, XtextProjectHelper.BUILDER_ID);
 		waitForBuild;
+		configurePreferences();
 		// This is used to trigger the implicit model creation before the tests. 
 		val file = createFile('Dummy.sadl', 'uri "http://sadl.org/Dummy.sadl."');
 		fullBuild();
 		file.delete(true, monitor);
 		fullBuild();
 		assertTrue('Dummy file should not exist.', !file.exists);
+	}
+	
+	/**
+	 * Hook to modify preferences before running the actual test case.
+	 */
+	protected def void configurePreferences() {
 	}
 
 	/**
@@ -153,7 +160,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 */
 	protected def void resetPreferences() {
 		val store = access.getWritablePreferenceStore(project);
-		modifiedProperties.forEach [
+		modifiedPreferences.forEach [
 			store.setToDefault(it);
 		];
 	}
@@ -212,7 +219,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 			val store = access.getWritablePreferenceStore(project);
 			keys.forEach [
 				store.setValue(id, defaultValue);
-				modifiedProperties.add((id));
+				modifiedPreferences.add((id));
 			];
 		}
 	}
