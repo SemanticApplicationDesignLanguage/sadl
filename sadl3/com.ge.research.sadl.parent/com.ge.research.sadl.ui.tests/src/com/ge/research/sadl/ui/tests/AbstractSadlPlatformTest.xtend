@@ -34,6 +34,7 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
+import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
 import org.junit.After
@@ -44,7 +45,6 @@ import org.junit.runner.RunWith
 
 import static org.eclipse.core.runtime.IPath.SEPARATOR
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
-import static org.eclipse.xtext.util.CancelIndicator.NullImpl
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -62,7 +62,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	@Inject
 	IResourceSetProvider resourceSetProvider;
-
+	
 	@Inject
 	IPreferenceStoreAccess access;
 
@@ -72,7 +72,6 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	@BeforeClass
 	static def void assertRunningPlatform() {
-		OutputStreamStrategy.STD.use; // To redirect error to the Eclipse console.
 		assertTrue('These tests require a running Eclipse platform.
 			Execute them as a JUnit Plug-in Test.
 			If you see this error from Maven, then please configure your POM to use Tycho Surefire correctly for test execution.',
@@ -81,6 +80,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	@Before
 	def void before() {
+		OutputStreamStrategy.STD.use; // To redirect error to the Eclipse console.
 		modifiedPreferences.clear();
 		beforeProjectCreation();
 		createProject();
@@ -111,7 +111,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		fullBuild();
 		assertTrue('Dummy file should not exist.', !file.exists);
 	}
-	
+
 	/**
 	 * Hook to modify preferences before running the actual test case.
 	 */
@@ -159,9 +159,8 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 * Resets any modified preferences to the default.
 	 */
 	protected def void resetPreferences() {
-		val store = access.getWritablePreferenceStore(project);
 		modifiedPreferences.forEach [
-			store.setToDefault(it);
+			access.getWritablePreferenceStore(project).setToDefault(it);
 		];
 	}
 
@@ -219,7 +218,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 			val store = access.getWritablePreferenceStore(project);
 			keys.forEach [
 				store.setValue(id, defaultValue);
-				modifiedPreferences.add((id));
+				modifiedPreferences.add(id);
 			];
 		}
 	}
@@ -229,10 +228,17 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 */
 	protected def validate(Resource it) {
 		if (it instanceof XtextResource) {
-			return resourceServiceProvider.get(IResourceValidator).validate(it, CheckMode.FAST_ONLY, NullImpl);
+			return resourceServiceProvider.get(IResourceValidator).validate(it, CheckMode.FAST_ONLY, cancelIndicator);
 		} else {
 			return emptyList;
 		}
+	}
+
+	/**
+	 * Returns with the cancel indicator.
+	 */
+	protected def cancelIndicator() {
+		return CancelIndicator.NullImpl;
 	}
 
 }

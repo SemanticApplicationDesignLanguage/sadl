@@ -31,8 +31,6 @@ import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
 import org.junit.Test
 
-import static org.eclipse.xtext.util.CancelIndicator.NullImpl
-
 /**
  * Mock test case that shows how to use customized preference values in JUnit Plug-in tests.
  * 
@@ -75,7 +73,7 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 		val processor = processorProvider.get
 		val acceptor = new ValidationAcceptor([issues += it]);
 		val preferenceValues = preferenceValuesProvider.getPreferenceValues(resource);
-		val context = new ProcessorContext(NullImpl, preferenceValues);
+		val context = new ProcessorContext(cancelIndicator, preferenceValues);
 		processor.onValidate(resource, acceptor, CheckMode.FAST_ONLY, context);
 		assertions.apply(processor.theJenaModel, issues);
 		return resource;

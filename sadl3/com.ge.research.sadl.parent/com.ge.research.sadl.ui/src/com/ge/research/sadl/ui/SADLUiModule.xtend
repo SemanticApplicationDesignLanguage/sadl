@@ -21,6 +21,7 @@
 package com.ge.research.sadl.ui
 
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
+import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
@@ -32,9 +33,12 @@ import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
+import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+
+import static com.google.inject.Scopes.SINGLETON
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -75,6 +79,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	override Class<? extends CopyQualifiedNameService> bindCopyQualifiedNameService() {
 		return SadlCopyQualifiedNameService;
+	}
+	
+	def void configureIPreferenceStoreAccess(Binder binder) {
+		binder.bind(IPreferenceStoreAccess).to(SadlPreferenceStoreAccess).in(SINGLETON);
 	}
 	
 }
