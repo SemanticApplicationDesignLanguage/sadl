@@ -45,6 +45,7 @@ import org.junit.runner.RunWith
 @InjectWith(SADLInjectorProvider)
 abstract class AbstractLinkingTest {
 	
+	@Accessors(PROTECTED_GETTER)
 	@Inject XtextResourceSet currentResourceSet
 	
 	protected def XtextResource sadl(CharSequence contents) {

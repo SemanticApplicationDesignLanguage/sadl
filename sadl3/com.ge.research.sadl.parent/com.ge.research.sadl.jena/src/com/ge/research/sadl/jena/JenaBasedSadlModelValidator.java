@@ -428,7 +428,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return true;
 				}
 				if (!rulePremiseVariableAssignment(operations, leftTypeCheckInfo,rightTypeCheckInfo)) {
-					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, op);
+					String effectiveOp = op;
+					if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("value")) {
+						effectiveOp = "matching value";
+//						leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
+					}
+					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, effectiveOp);
 				}
 				return false;
 			}
@@ -1237,6 +1242,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				e.printStackTrace();
 			}
 		}
+		boolean validSubject = true;
 		if (subject instanceof Name) {
 			// check for applicable local restriction first
 			TypeCheckInfo predicateType;
@@ -1270,15 +1276,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return predicateType;
 			}
 		}
-		TypeCheckInfo predicateType = getType(predicate);
-		if (subject instanceof PropOfSubject) {
-			checkEmbeddedPropOfSubject(subject, predicate);	
-			//TODO figure out how to add effective range for propOfSubj		
-		}else if(predicateType != null && predicateType.getTypeCheckType() != null){
-			//add interface range
-			addEffectiveRange(predicateType, subject);
+		else {
+//			issueAcceptor.addError("Property of subject has unexpected subject type '" + subject.getClass().getCanonicalName() + "'", expression);
+			// we don't care about any other types?
+			validSubject = false;
 		}
-		return predicateType;
+		if (predicate != null) {
+			TypeCheckInfo predicateType = getType(predicate);
+			if (subject instanceof PropOfSubject) {
+				checkEmbeddedPropOfSubject(subject, predicate);	
+				//TODO figure out how to add effective range for propOfSubj		
+			}else if(validSubject && predicateType != null && predicateType.getTypeCheckType() != null){
+				//add interface range
+				addEffectiveRange(predicateType, subject);
+			}
+			return predicateType;
+		}
+		return null;
 	}
 	
 	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject) throws CircularDefinitionException, InvalidTypeException, CircularDependencyException{
@@ -1536,13 +1550,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (varTci != null && varTci.getTypeCheckType() != null) {
 					ConceptIdentifier varci = varTci.getTypeCheckType();
 					if (varci instanceof ConceptName) {
+						if (((ConceptName) varci).toString().equals("TODO")) {
+							return null;
+						}
 						subjuri = ((ConceptName)varci).getUri();
 					}
 				}
 			}
 			String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
-			OntConceptType proptype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
-			return getTypeFromRestriction(subjuri, propuri, proptype, predicate);
+			if (propuri == null) {
+				issueAcceptor.addError("Predicate name could not be resolved", predicate);
+			}
+			else {
+				OntConceptType proptype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
+				return getTypeFromRestriction(subjuri, propuri, proptype, predicate);
+			}
 		}
 		return null;
 	}
@@ -2178,66 +2200,78 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	 */
 	protected boolean compareTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
-		List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
-		if (ltciCompound != null) {
-			for (int i = 0; i < ltciCompound.size(); i++) {
-				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
-				if (thisResult) {
-					return true;
+		boolean listTemporarilyDisabled = false;
+		try {
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("value")) {
+				listTemporarilyDisabled = true;
+				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
+			}
+			List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
+			if (ltciCompound != null) {
+				for (int i = 0; i < ltciCompound.size(); i++) {
+					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+					if (thisResult) {
+						return true;
+					}
 				}
+				return false;
 			}
-			return false;
-		}
-		List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
-		if (rtciCompound != null) {
-			for (int i = 0; i < rtciCompound.size(); i++) {
-				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
-				if (thisResult) {
-					return true;
+			List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
+			if (rtciCompound != null) {
+				for (int i = 0; i < rtciCompound.size(); i++) {
+					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
+					if (thisResult) {
+						return true;
+					}
 				}
+				return false;
 			}
-			return false;
-		}
-//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
-//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
-//			if (rExprType instanceof ConceptName) {
-//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
-//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
-//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
-//						// no chance of implied properties fixing the problem
-//						return false;
-//					}
-//				}
-//			}
-//		}
-		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
-		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
-		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
-				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
-			// Can't type-check on "None" as it represents that it doesn't exist.
-			return true;
-		}
-		else if (leftConceptIdentifier == null) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+	//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
+	//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
+	//			if (rExprType instanceof ConceptName) {
+	//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+	//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
+	//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
+	//						// no chance of implied properties fixing the problem
+	//						return false;
+	//					}
+	//				}
+	//			}
+	//		}
+			ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
+			ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
+			if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
+					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
+					(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
+					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
+				// Can't type-check on "None" as it represents that it doesn't exist.
+				return true;
 			}
-			return false;
-		}
-		else if(rightConceptIdentifier == null){
-			issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			else if (leftConceptIdentifier == null) {
+				issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				return false;
 			}
-			return false;
-		}
-		else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
-			if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
-				return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
+			else if(rightConceptIdentifier == null){
+				issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				return false;
 			}
-			return false;
+			else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
+					return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
+				}
+				return false;
+			}
+		}
+		finally {
+			if (listTemporarilyDisabled) {
+				leftTypeCheckInfo.setRangeValueType(RangeValueType.LIST);
+			}
 		}
 		return true;
 	}
@@ -2623,6 +2657,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								if (stci != null && stci.getTypeCheckType() != null) {
 									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
 									varName = declarationExtensions.getConcreteName((SadlResource)subject);
+									if (subj != null) {
+										Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+										if (prop != null) {
+											checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+										}
+									}
 								}
 							} catch (InvalidNameException e) {
 								// TODO Auto-generated catch block
@@ -2650,7 +2690,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (propsubj != null && prop != null) {
+								if (prop != null) {
 									checkPropertyDomain(ontModel, propsubj, prop, subject, propOfSubjectCheck, varName);
 								}
 							}
@@ -2658,9 +2698,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						else {
 							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (subj != null) {
-								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (subj != null && prop != null) {
-									checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+								String preduri = declarationExtensions.getConceptUri(predicate);
+								if (preduri == null) {
+									issueAcceptor.addError("Unable to resolve name", predicate);
+								}
+								else {
+									Property prop = ontModel.getProperty(preduri);
+									if (prop != null) {
+										checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+									}
 								}
 							}
 						}

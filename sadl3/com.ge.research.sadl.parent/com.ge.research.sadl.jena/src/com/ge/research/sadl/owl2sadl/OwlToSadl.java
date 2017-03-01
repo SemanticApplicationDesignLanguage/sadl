@@ -517,6 +517,9 @@ public class OwlToSadl {
 			while (pitr.hasNext()) {
 				String prefix = pitr.next();
 				String uri = modelPrefixMap.get(prefix);
+				if (prefix.equals("owl") && (uri.equals("http://www.w3.org/2002/07/owl") || uri.equals("http://www.w3.org/2002/07/owl#"))) {
+					System.err.println("It appears that this file uses OWL 2. Some OWL 2 constructs are not supported in SADL so this import may not succeed.");
+				}
 				qNamePrefixes.put(uri, prefix);
 			}
 		}
@@ -854,7 +857,7 @@ public class OwlToSadl {
 		List<Individual> instances = concepts.getInstances();
 		for (int i = 0; i < instances.size(); i++) {
 			Individual inst = instances.get(i);
-			sadlModel.append(individualToSadl(concepts, inst));
+			sadlModel.append(individualToSadl(concepts, inst, false));
 		}
 		sadlModel.append("\n\n// Other restrictions:\n");
 		List<Restriction> ress = concepts.getUnMappedRestrictions();
@@ -1278,6 +1281,18 @@ public class OwlToSadl {
 				}
 				sb.append(" but creating an instance in another namespace is not currently supported in SADL; creating in this namespace */\n");
 			}
+			else {
+				String ln = inst.getLocalName();
+				if (ln != null && ln.length() > 0) {
+					sb.append(checkLocalnameForKeyword(inst.getLocalName()));
+				}
+				else if (inst.isURIResource()){
+					sb.append(inst.getURI());
+				}
+				else {
+					sb.append(inst.toString());
+				}
+			}
 		}
 		else {
 			sb.append(uriToSadlString(concepts, inst));
@@ -1286,30 +1301,42 @@ public class OwlToSadl {
 		return sb.toString();
 	}
 
-	private String individualToSadl(ModelConcepts concepts, Individual inst) {
+	private String individualToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(individualNameAndAnnotations(concepts, inst));
-		if (isNewLineAtEndOfBuffer(sb)) {
-			sb.append("    ");
+		boolean bnode = false;
+		if (inst.isURIResource()) {
+			sb.append(individualNameAndAnnotations(concepts, inst));
+			if (isNewLineAtEndOfBuffer(sb)) {
+				sb.append("    ");
+			}
+			sb.append(" is a ");
 		}
-		sb.append(" is a ");
+		else {
+			sb.append("(a ");
+			bnode = true;
+		}
 		ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
 		int itercnt = 0;
 		boolean intersectionClass = false;
 		while (eitr.hasNext()) {
-			OntClass cls = eitr.next();
-			if (itercnt == 0) {
-				if (eitr.hasNext()) {
-					intersectionClass = true;
+			try {
+				OntClass cls = eitr.next();
+				if (itercnt == 0) {
+					if (eitr.hasNext()) {
+						intersectionClass = true;
+					}
+					if (intersectionClass) {
+						sb.append("{");
+					}
 				}
-				if (intersectionClass) {
-					sb.append("{");
+				if (itercnt++ > 0 && eitr.hasNext()) {
+					sb.append(" or ");
 				}
+				sb.append(uriToSadlString(concepts, cls));
 			}
-			if (itercnt++ > 0 && eitr.hasNext()) {
-				sb.append(" and ");
+			catch (Exception e){
+				System.err.println(e.getMessage());
 			}
-			sb.append(uriToSadlString(concepts, cls));
 		}
 		if (intersectionClass) {
 			sb.append("}");
@@ -1320,12 +1347,22 @@ public class OwlToSadl {
 			if (s.getPredicate().equals(RDF.type) || s.getPredicate().equals(RDFS.label) || s.getPredicate().equals(RDFS.comment)) {
 				continue;
 			}
-			sb.append("\n    has ");
+			if (embeddedBNode) {
+				sb.append("\n    with ");
+			}
+			else {
+				sb.append("\n    has ");
+			}
 			sb.append(uriToSadlString(concepts, s.getPredicate()));
 			sb.append(" ");
 			sb.append(rdfNodeToSadlString(concepts, s.getObject(), false));
 		}
-		addEndOfStatement(sb, 1);
+		if (bnode) {
+			sb.append(")");
+		}
+		else {
+			addEndOfStatement(sb, 1);
+		}
 		return sb.toString();
 	}
 
@@ -1698,11 +1735,23 @@ public class OwlToSadl {
 				return object.asLiteral().getLexicalForm();
 			}
 			if (forceQuotes || object.asLiteral().getDatatypeURI().equals(XSD.xstring.getURI())) {
-				return "\"" + object.asLiteral().getLexicalForm() + "\"";
+				String s = object.asLiteral().getLexicalForm();
+				if (s.startsWith("\"") && s.endsWith("\"")) {
+					s = s.substring(1, s.length() - 2);
+				}
+				s = s.replace("\"", "\\\"");
+				return "\"" + s + "\""; 
 			}
 			else {
 				return object.asLiteral().getLexicalForm();
 			}
+		}
+		else if (object.canAs(Individual.class)){
+			// a bnode
+			if (concepts.getInstances().contains(object)) {
+				concepts.getInstances().remove(object);
+			}
+			return individualToSadl(concepts, object.as(Individual.class), true);
 		}
 		else {
 			return object.toString();
@@ -1721,12 +1770,24 @@ public class OwlToSadl {
 				String ns = rsrc.getNameSpace();
 				String trimmedNs = ns.endsWith("#") ? ns.substring(0, ns.length() - 1) : null;
 				if (qNamePrefixes.containsKey(ns)) {
-					return qNamePrefixes.get(ns) + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
+					String prefix = qNamePrefixes.get(ns).trim();
+					if (prefix.length() > 0) {
+						return prefix + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
+					}
+					else {
+						return checkLocalnameForKeyword(rsrc.getLocalName());
+					}
 				}
 				else {
 					if (trimmedNs != null) {
 						if (qNamePrefixes.containsKey(trimmedNs)) {
-							return qNamePrefixes.get(trimmedNs) + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
+							String prefix = qNamePrefixes.get(trimmedNs).trim();
+							if (prefix.length() > 0) {
+								return prefix + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
+							}
+							else {
+								return checkLocalnameForKeyword(rsrc.getLocalName());
+							}
 						}
 					}
 					return rsrc.getURI();
@@ -1745,40 +1806,47 @@ public class OwlToSadl {
 //				if (eqcls != null) {
 //					return uriToSadlString(concepts, eqcls);
 //				}
-				EnumeratedClass enumcls = ((OntClass)rsrc).asEnumeratedClass();
-				if (enumcls != null) {
-					ExtendedIterator<? extends OntResource> eitr = enumcls.listInstances();
-					while (eitr.hasNext()) {
-						OntResource en = eitr.next();
-						en.toString();
-					}
-					ExtendedIterator<RDFNode> eitr2 = enumcls.listIsDefinedBy();
-					while (eitr2.hasNext()) {
-						RDFNode en = eitr2.next();
-						en.toString();
-					}
-					RDFList oneoflst = enumcls.getOneOf();
-					List<RDFNode> nodeLst = oneoflst.asJavaList();
-					if (nodeLst != null && nodeLst.size() > 0) {
-						StringBuilder sb = new StringBuilder();
-						sb.append("one of {");
-						int cntr = 0;
-						for (int i = 0; i < nodeLst.size(); i++) {
-							RDFNode n = nodeLst.get(i);
-							if (cntr > 0) sb.append(", ");
-							sb.append("\n    ");
-							if (n.canAs(Individual.class)&& concepts.getInstances().contains(n)) {
-								sb.append(individualNameAndAnnotations(concepts, n.as(Individual.class)));
-								concepts.getInstances().remove(n);
-							}
-							else {
-								sb.append(rdfNodeToSadlString(concepts, n, false));
-							}
-							cntr++;
-						}
-						sb.append("}");
-						return sb.toString();
-					}
+				if (((OntClass)rsrc).isEnumeratedClass()) {
+					EnumeratedClass enumcls = ((OntClass)rsrc).asEnumeratedClass();
+					return enumeratedClassToString(enumcls);
+//					if (enumcls != null) {
+//						ExtendedIterator<? extends OntResource> eitr = enumcls.listInstances();
+//						while (eitr.hasNext()) {
+//							OntResource en = eitr.next();
+//							en.toString();
+//						}
+//						ExtendedIterator<RDFNode> eitr2 = enumcls.listIsDefinedBy();
+//						while (eitr2.hasNext()) {
+//							RDFNode en = eitr2.next();
+//							en.toString();
+//						}
+//						RDFList oneoflst = enumcls.getOneOf();
+//						List<RDFNode> nodeLst = oneoflst.asJavaList();
+//						if (nodeLst != null && nodeLst.size() > 0) {
+//							StringBuilder sb = new StringBuilder();
+//							sb.append("one of {");
+//							int cntr = 0;
+//							for (int i = 0; i < nodeLst.size(); i++) {
+//								RDFNode n = nodeLst.get(i);
+//								if (cntr > 0) sb.append(", ");
+//								sb.append("\n    ");
+//								if (n.canAs(Individual.class)&& concepts.getInstances().contains(n)) {
+//									sb.append(individualNameAndAnnotations(concepts, n.as(Individual.class)));
+//									concepts.getInstances().remove(n);
+//								}
+//								else {
+//									sb.append(rdfNodeToSadlString(concepts, n, false));
+//								}
+//								cntr++;
+//							}
+//							sb.append("}");
+//							return sb.toString();
+//						}
+//					}
+				}
+				else {
+					return ontClassToString((OntClass)rsrc, null);
+//					System.err.println("Blank node OntClass is not of handled type: " + rsrc.getClass().getCanonicalName());
 				}
 			}
 		}
@@ -2010,8 +2078,11 @@ public class OwlToSadl {
 		}
 		else if (ontRsrc.canAs(Individual.class)) {
 			Individual inst = ontRsrc.asIndividual();
-			concepts.addInstance(inst);
-			return true;
+			// only named instances can stand alone
+			if (inst.isURIResource()) {
+				concepts.addInstance(inst);
+				return true;
+			}
 		}
 		return false;
 	}
