@@ -11,9 +11,11 @@ import org.eclipse.core.resources.IProject;
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -44,31 +46,9 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author Tyler Dicks
  *
  */
-public class OntologyGraphGenerator {
+public class OntologyGraphGenerator extends GraphGenerator {
 
-	protected static String COLOR = "color";
-	protected static String SHAPE = "shape";
-	protected static String STYLE = "style";
-	protected static String FILLED = "filled";
-	protected static String FONTCOLOR = "fontcolor";
-	protected static String FILL_COLOR = "fillcolor";
-	protected static String BLUE = "blue";
-	protected static String CLASS_BLUE = "blue4";
-	protected static String INSTANCE_BLUE = "blue";
-	protected static String WHITE = "white";
-	protected static String BLACK = "black";
-	protected static String OCTAGON = "octagon";
-	protected static String DIAMOND = "diamond";
-	protected static String RED = "red";
-	protected static String PROPERTY_GREEN = "green3";
-	protected static String IS_IMPORT = "isImport";
-	protected static String LINK_URL = "href";
-	
-
-	private OntModel theJenaModel = null; //model with imports
 	private OntModel baseModel = null;
-	private IConfigurationManagerForIDE configMgr;
-	private IProject project = null;
 	
 //	public enum Orientation {TD, LR, BD, RL}
 	
@@ -80,9 +60,8 @@ public class OntologyGraphGenerator {
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IProject project) throws ConfigurationException, IOException {
-		this.setConfigMgr(configMgr);
-		this.project  = project;
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project) throws ConfigurationException, IOException {
+		super(configMgr, visualizer, project, null, null);
 	}
 	
 	/**
@@ -94,21 +73,21 @@ public class OntologyGraphGenerator {
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, String publicUri, IProject project) throws ConfigurationException, IOException {
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri) throws ConfigurationException, IOException {
+		super(configMgr, visualizer, project, publicUri, null);
 		this.setConfigMgr(configMgr);
-		this.project  = project;
-		setTheJenaModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
 	}
 
 	/**
-	 * Method that generates the ontology graph RestultSet, which is fed in to the handler to turn into a 
+	 * Method that generates the ontology graph ResultSet, which is fed in to the handler to turn into a 
 	 * graphviz graph.
 	 * 
 	 * @param ontologyResults 	- List of data gathered from the ontology imports, (no longer used)
 	 * @param publicUri 		- The uri of the file being graphed
 	 * @return 					- The ResultSet containing all the classes, instances, and properties.  
+	 * @throws InvalidNameException 
 	 */
-	public ResultSet generateOntologyResultSet(List<String[]> ontologyResults, String publicUri, UriStrategy uriStrategy){
+	public ResultSet generateOntologyResultSet(List<String[]> ontologyResults, String publicUri, UriStrategy uriStrategy) throws InvalidNameException{
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		boolean isImport = false;
 		
@@ -170,11 +149,10 @@ public class OntologyGraphGenerator {
 	 * 
 	 * @param publicUri	- The uri of the ontology file being graphed
 	 * @param data		- The GraphSegment list containing all the ontology graph data up to this point
-	 * @throws ConfigurationException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	private void addInstancesWithImportParent(String publicUri, List<GraphSegment> data)
-			throws ConfigurationException, IOException {
+			throws Exception {
 		ExtendedIterator<Individual> individualIter = getLocalModel().listIndividuals();
 		//Add all instances that have an imported parent:
 		while(individualIter.hasNext()){
@@ -246,8 +224,9 @@ public class OntologyGraphGenerator {
 	 * 
 	 * @param	- Imported class or concept
 	 * @return	- File URL to be added to node hyperlink
+	 * @throws Exception 
 	 */
-	private String getImportUrl(OntResource rsrc) {
+	private String getImportUrl(OntResource rsrc) throws Exception {
 		if (!rsrc.isURIResource()) {
 			//int i = 0;
 			return rsrc.toString();
@@ -258,11 +237,12 @@ public class OntologyGraphGenerator {
 		}
 		// get the prefix and if there is one generate qname
 		String prefix = getConfigMgr().getGlobalPrefix(ns);
+		String baseFilename = getBaseFilenameFromPublicUri(ns);
 		//get the graph folder file path
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(project)); 
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
 		
-		if(prefix!=null){
-			return "\"file:///" + tempDir + "/" + prefix + SadlActionHandler.getGraphFileNameExtension() + "\"";
+		if(baseFilename != null){
+			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
 		}
 		return null;
 	}
@@ -650,30 +630,16 @@ public class OntologyGraphGenerator {
 	}
 
 	public String getCurrentFileLink(String parentUri) throws Exception{
-		String[] splitFile = parentUri.split("/");
-		String filename = splitFile[splitFile.length-1];
+		String baseFilename = getBaseFilenameFromPublicUri(parentUri);
 		
 		// get the prefix and if there is one generate qname
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(project)); 
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
 		
-		if(filename!=null){
-			return "\"file:///" + tempDir + "/" + filename + SadlActionHandler.getGraphFileNameExtension() + "\"";
+		if(baseFilename!=null){
+			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
 		}
 		throw new Exception("Cannot find graph file in getCurrentFileLink()");
 	}
-//	if(superClass.asRestriction().isCardinalityRestriction() && (superClass.asRestriction().getProperty(OWL2.onClass) != null)){
-//		Statement var = superClass.asRestriction().getProperty(OWL2.onClass);
-//		RDFNode obj = var.getObject();
-//		if(obj.equals(rng)){
-//			if(prop.canAs(Property.class)){
-//				String rst = getRestrictionString(superClass.asRestriction(),prop.as(Property.class));
-//				
-//				//rstrString.append();
-//			}else{
-//				throw new Exception("prop is not a property");
-//			}
-//		}
-//	}
 	
 	private String getRestrictionString(Restriction rstr, Property prop, OntResource rng, boolean isList) throws Exception{
 		
@@ -899,10 +865,9 @@ public class OntologyGraphGenerator {
 	 * @param data		- List of GraphSegments containing current graph data
 	 * @param publicUri	- URI of ontology file being graphed
 	 * @return
-	 * @throws ConfigurationException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	private List<GraphSegment> generateClassSubclasses(OntClass cls, List<GraphSegment> data, String publicUri) throws ConfigurationException, IOException {
+	private List<GraphSegment> generateClassSubclasses(OntClass cls, List<GraphSegment> data, String publicUri) throws Exception {
 		ExtendedIterator<OntClass> eitr = cls.listSubClasses(true);
 		while (eitr.hasNext()) {
 			OntClass subcls = eitr.next();
@@ -1142,8 +1107,9 @@ public class OntologyGraphGenerator {
 	/**
 	 * @param data
 	 * @return
+	 * @throws InvalidNameException 
 	 */
-	public ResultSet convertDataToResultSet(List<GraphSegment> data, UriStrategy uriStrategy) {
+	public ResultSet convertDataToResultSet(List<GraphSegment> data, UriStrategy uriStrategy) throws InvalidNameException {
 		List<GraphSegment> listTypeSegments = null;
 		Iterator<GraphSegment> dataitr = data.iterator();
 		while (dataitr.hasNext()) {
@@ -1285,22 +1251,6 @@ public class OntologyGraphGenerator {
 		}
 	}
 
-	private OntModel getTheJenaModel() {
-		return theJenaModel;
-	}
-
-	private void setTheJenaModel(OntModel theJenaModel) {
-		this.theJenaModel = theJenaModel;
-	}
-
-	private IConfigurationManagerForIDE getConfigMgr() {
-		return configMgr;
-	}
-
-	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
-		this.configMgr = configMgr;
-	}
-
 	public List<GraphSegment> getImports(IConfigurationManagerForIDE configMgr, String publicUri) {
 		List<GraphSegment> importList = null;
 		try {
@@ -1322,7 +1272,7 @@ public class OntologyGraphGenerator {
 						value = imports.get(key);
 						headUrl = getCurrentFileLink(key);
 						headTooltip = "\"" + key + "\"";
-						System.out.println("found import for '" + publicUri + "': key = '" + key + "', value = '" + value + "'");
+//						System.out.println("found import for '" + publicUri + "': key = '" + key + "', value = '" + value + "'");
 						GraphSegment gs = new GraphSegment(value, pred, prefix, configMgr);
 						gs.addTailAttribute("URL", getCurrentFileLink(publicUri));
 						String str = "\"" + publicUri + "\"";
@@ -1338,7 +1288,7 @@ public class OntologyGraphGenerator {
 				}
 			}
 			else {
-				System.out.println("no imports for '" + publicUri + "'");
+//				System.out.println("no imports for '" + publicUri + "'");
 			}
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block

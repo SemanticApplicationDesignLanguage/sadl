@@ -15,23 +15,17 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.ISelectionService;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.Workbench;
 
-import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -44,14 +38,14 @@ import com.ge.research.sadl.utils.ResourceManager;
 public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 
-	private IConfigurationManagerForIDE configMgr;
-	private IProject project;
-	private String modelFolderUri;
 	private List<GraphSegment> imports;
+	private IGraphVisualizer visualizer;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
+			if (imports != null) imports.clear();
+			
 			SadlConsole.writeToConsole(MessageType.INFO, "-----------------Ontology Graphing Started-------------------\n\n");
 			String curProject = getCurrentProject();
 			if (curProject == null) {
@@ -78,7 +72,8 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				generateOntologyFileGraph(slmr, false);
 			}
 			if (imports.size() > 0) {
-				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), project);
+				IGraphVisualizer visualizer = getVisualizer(getConfigMgr());
+				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project);
 //				if (sbmr != null) {
 //					GraphSegment sbmgs = new GraphSegment(SadlConstants.SADL_BASE_MODEL_PREFIX, null, null, getConfigMgr());
 //					sbmgs.addHeadAttribute("headtooltip", "\"" + SadlConstants.SADL_BASE_MODEL_URI + "\"");
@@ -91,18 +86,18 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 //					slmgs.addHeadAttribute("URL", ogg.getCurrentFileLink(SadlConstants.SADL_LIST_MODEL_URI));
 //					imports.add(slmgs);
 //				}
-				GraphSegment simgs = new GraphSegment(SadlConstants.SADL_IMPLICIT_MODEL_PREFIX, null, null, getConfigMgr());
-				simgs.addHeadAttribute("headtooltip", "\"" + SadlConstants.SADL_IMPLICIT_MODEL_URI + "\"");
-				String simfn = SadlConstants.SADL_IMPLICIT_MODEL_FILENAME;
-				simfn = simfn.substring(0, simfn.lastIndexOf("."));
-				simgs.addHeadAttribute("URL", ogg.getCurrentFileLink(simfn));
-				imports.add(simgs);
-				GraphSegment sbfgs = new GraphSegment(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS, null, null, getConfigMgr());
-				sbfgs.addHeadAttribute("headtooltip", "\"" + SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "\"");
-				String sbffn = SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
-				sbffn = sbffn.substring(0, sbffn.lastIndexOf("."));
-				sbfgs.addHeadAttribute("URL", ogg.getCurrentFileLink(sbffn));
-				imports.add(sbfgs);
+//				GraphSegment simgs = new GraphSegment(SadlConstants.SADL_IMPLICIT_MODEL_PREFIX, null, null, getConfigMgr());
+//				simgs.addHeadAttribute("headtooltip", "\"" + SadlConstants.SADL_IMPLICIT_MODEL_URI + "\"");
+//				String simfn = SadlConstants.SADL_IMPLICIT_MODEL_FILENAME;
+//				simfn = simfn.substring(0, simfn.lastIndexOf("."));
+//				simgs.addHeadAttribute("URL", ogg.getCurrentFileLink(simfn));
+//				imports.add(simgs);
+//				GraphSegment sbfgs = new GraphSegment(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS, null, null, getConfigMgr());
+//				sbfgs.addHeadAttribute("headtooltip", "\"" + SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "\"");
+//				String sbffn = SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
+//				sbffn = sbffn.substring(0, sbffn.lastIndexOf("."));
+//				sbfgs.addHeadAttribute("URL", ogg.getCurrentFileLink(sbffn));
+//				imports.add(sbfgs);
 
 				IFile trgtFile = null;
 				String baseFileName = "Project";
@@ -110,9 +105,8 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				String description = "Project " + project.getName() + " import map";
 //				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, null);
 				ResultSet importsRS = ogg.convertDataToResultSet(imports, UriStrategy.LOCALNAME_WITH_URI_TOOLTIP);
-				IGraphVisualizer visualizer = getVisualizer(configMgr);
 				if (visualizer != null) {
-					graphResultSet(visualizer, project, trgtFile, baseFileName, graphName, null, description, importsRS, null);					
+					graphResultSet(visualizer, project, baseFileName, graphName, null, description, importsRS, null, true);					
 				}
 				else {
 					SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
@@ -137,7 +131,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 	}
 
 	private void graphFolder(IResource thisFolder)
-			throws CoreException, IOException, ConfigurationException, URISyntaxException {
+			throws Exception {
 		if(thisFolder != null && thisFolder instanceof IContainer){
 			IResource[] ontFiles = ((IContainer) thisFolder).members();
 
@@ -155,7 +149,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 						if(!worked){
 							SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFiles[i].getName() + "' does not exist, or does not contain valid data for graphing.\n");	
 						}else{
-							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontFiles[i].getName() + "' Generated Successfully.\n\n");
+//							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontFiles[i].getName() + "' Generated Successfully.\n\n");
 						}
 					}
 					else if (ontFiles[i].getType() == IResource.FOLDER) {
@@ -178,7 +172,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		return false;
 	}
 
-	public boolean generateOntologyFileGraph(IResource ontFile, boolean checkForDerivedFile) throws IOException, ConfigurationException, URISyntaxException {
+	public boolean generateOntologyFileGraph(IResource ontFile, boolean checkForDerivedFile) throws Exception {
 		if(ontFile instanceof IFile){
 			String owlFileName = null;
 			
@@ -207,8 +201,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				}
 			}
 			
-			//get the visualizer interface
-			IGraphVisualizer visualizer = getVisualizer(getConfigMgr());
+			visualizer = getVisualizer(getConfigMgr());
 			if (visualizer != null) {
 				String fullFileName = modelFolderUri + "/" + owlFileName;
 				String publicUri;
@@ -221,15 +214,39 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
 				}
 				
-				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), publicUri, project);
-				ResultSet oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_ONLY);
+				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri);
+				ResultSet oggResults = null;
+				try {
+					oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_ONLY);
+				} catch (InvalidNameException e) {
+					SadlConsole.writeToConsole(MessageType.ERROR, e.getMessage());
+				}
 				List<GraphSegment> newImports = ogg.getImports(getConfigMgr(), publicUri);
-				if (newImports != null) {
+				if (newImports != null && newImports.size() > 0) {
 					imports.addAll(newImports);
+				}
+				else if (oggResults != null){
+					GraphSegment simgs = new GraphSegment((prefix != null ? prefix : publicUri), null, null, getConfigMgr());
+					simgs.addHeadAttribute("headtooltip", "\"" + publicUri + "\"");
+					String simfn = getConfigMgr().getAltUrlFromPublicUri(publicUri);
+					simfn = simfn.substring(0, simfn.lastIndexOf("."));
+					try {
+						simgs.addHeadAttribute("URL", ogg.getCurrentFileLink(simfn));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					imports.add(simgs);
 				}
 				
 				if (oggResults != null) {
-					graphOntologyResultSet(visualizer, project, (IFile)ontFile, publicUri, prefix, oggResults);
+					String baseFileName = ogg.getBaseFilenameFromPublicUri(publicUri);
+					String graphName = prefix;
+					String anchorNode = null;
+					String descripition = "Graph of Ontology File";
+					Orientation orientation = null;
+//										graphOntologyResultSet(visualizer, project, (IFile)ontFile, publicUri, prefix, oggResults);
+					graphResultSet(visualizer, project, baseFileName, graphName, anchorNode, descripition, oggResults, orientation, false);
 					return true;
 				}
 				else {
@@ -246,6 +263,25 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		return false;
 	}
 
+//	protected void graphOntologyResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
+//		String baseFileName = trgtFile.getFullPath().lastSegment().toString();// + "_ONT";
+//		String graphName = prefix;
+//		String anchorNode = nodeText(publicUri, prefix);
+//		if (prefix == null) {
+//			anchorNode = publicUri.substring(publicUri.lastIndexOf('/') + 1);
+//			if (anchorNode.endsWith(".owl")) {
+//				anchorNode = anchorNode.substring(0, anchorNode.length() - 4);
+//			}
+//			if (anchorNode.indexOf('.') > 0) {
+//				graphName = anchorNode.substring(0, anchorNode.indexOf('.'));
+//			}
+//			else {
+//				graphName = anchorNode;
+//			}
+//		}
+//		String description = "Graph of Ontology File";
+//		createGraphFromResultSet(iGraphVisualizer, project, trgtFile, baseFileName, graphName, anchorNode, description, rs);
+//	}
 
 	private boolean isOwlFileOfSadlModel(IResource ontFile) {
 		String path = ontFile.getLocation().toOSString();
@@ -257,6 +293,9 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -264,42 +303,6 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 	protected String[] getValidTargetFileTypes(){
 		String[] types = {"owl", "sadl"};
 		return types;
-	}
-	
-	private	String getCurrentProject(){
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-	    if (window != null)
-	    {
-	        ISelection selection = window.getSelectionService().getSelection();
-	        if (selection instanceof IStructuredSelection) {
-		        Object firstElement = ((IStructuredSelection) selection).getFirstElement();
-		        if (firstElement instanceof IAdaptable)
-		        {
-		            
-		        	String[] projName = firstElement.toString().split("/");
-		        	
-		            return projName[1];
-		        }
-	        }
-	        else {
-	        	return null;
-	        }
-	    }
-	    return null;
-	}
-
-	private IConfigurationManagerForIDE getConfigMgr() throws ConfigurationException {
-		if (configMgr == null) {
-			//create the configuration manager
-			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-			setConfigMgr(ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format));
-		}
-		return configMgr;
-	}
-
-	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
-		this.configMgr = configMgr;
 	}
 
 }

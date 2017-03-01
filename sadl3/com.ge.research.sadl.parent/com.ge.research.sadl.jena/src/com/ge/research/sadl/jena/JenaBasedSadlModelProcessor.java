@@ -101,6 +101,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
@@ -245,6 +246,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private Resource currentResource;
 	protected OntModel theJenaModel;
 	protected OntModelSpec spec;
+	private OWL_FLAVOR owlFlavor = OWL_FLAVOR.OWL_DL;
 //	protected ISadlServer kServer = null;
 	
 	protected enum AnnType {ALIAS, NOTE}	
@@ -869,6 +871,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				} catch (InvalidTypeException e) {
 					e.printStackTrace();
 				} catch (TranslationException e) {
+					e.printStackTrace();
+				} catch (CircularDefinitionException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -4160,7 +4165,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		logger.debug("New all different from created");
 	}
 
-	private Individual processSadlInstance(SadlInstance element) throws JenaProcessorException {
+	private Individual processSadlInstance(SadlInstance element) throws JenaProcessorException, CircularDefinitionException {
 		// this has two forms:
 		//	1) <name> is a <type> ...
 		//	2) a <type> <name> ....
@@ -4172,6 +4177,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			instUri = declarationExtensions.getConceptUri(sr);
 			if (instUri == null) {
 				throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlInstance");
+			}
+			OntConceptType subjType = declarationExtensions.getOntConceptType(sr);
+			if (subjType.equals(OntConceptType.CLASS) && !getOwlFlavor().equals(SadlConstants.OWL_FLAVOR.OWL_FULL)) {
+				addWarning(SadlErrorMessages.CLASS_PROPERTY_VALUE_OWL_FULL.get(), element);
 			}
 		}
 		OntClass cls = null;
@@ -4234,6 +4243,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return inst;
 	}
 
+	private OWL_FLAVOR getOwlFlavor() {
+		return owlFlavor;
+	}
+	
 	private boolean typeRefIsList(SadlTypeReference type) throws JenaProcessorException {
 		boolean isList = false;
 		if (type instanceof SadlSimpleTypeReference) {
@@ -4314,7 +4327,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return inst;
 	}
 	
-	private void assignInstancePropertyValue(Individual inst, OntClass cls, SadlResource prop, EObject val) throws JenaProcessorException {
+	private void assignInstancePropertyValue(Individual inst, OntClass cls, SadlResource prop, EObject val) throws JenaProcessorException, CircularDefinitionException {
 		OntConceptType type;
 		try {
 			type = declarationExtensions.getOntConceptType(prop);
@@ -6271,6 +6284,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	public List<ConceptName> getImpliedProperties(com.hp.hpl.jena.rdf.model.Resource first) {
 		List<ConceptName> retlst = null;
+		if (first == null) return null;
 		// check superclasses
 		if (first.canAs(OntClass.class)) {
 			OntClass ontcls = first.as(OntClass.class);
@@ -6464,5 +6478,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return true;
 		}
 		return false;
+	}
+	protected void setOwlFlavor(OWL_FLAVOR owlFlavor) {
+		this.owlFlavor = owlFlavor;
 	}
 }

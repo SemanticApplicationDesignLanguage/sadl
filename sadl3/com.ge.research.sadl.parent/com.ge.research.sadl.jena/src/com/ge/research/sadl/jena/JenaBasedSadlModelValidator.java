@@ -1242,6 +1242,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				e.printStackTrace();
 			}
 		}
+		boolean validSubject = true;
 		if (subject instanceof Name) {
 			// check for applicable local restriction first
 			TypeCheckInfo predicateType;
@@ -1275,15 +1276,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return predicateType;
 			}
 		}
-		TypeCheckInfo predicateType = getType(predicate);
-		if (subject instanceof PropOfSubject) {
-			checkEmbeddedPropOfSubject(subject, predicate);	
-			//TODO figure out how to add effective range for propOfSubj		
-		}else if(predicateType != null && predicateType.getTypeCheckType() != null){
-			//add interface range
-			addEffectiveRange(predicateType, subject);
+		else {
+			issueAcceptor.addError("Property of subject has unexpected subject type '" + subject.getClass().getCanonicalName() + "'", expression);
+			validSubject = false;
 		}
-		return predicateType;
+		if (predicate != null) {
+			TypeCheckInfo predicateType = getType(predicate);
+			if (subject instanceof PropOfSubject) {
+				checkEmbeddedPropOfSubject(subject, predicate);	
+				//TODO figure out how to add effective range for propOfSubj		
+			}else if(validSubject && predicateType != null && predicateType.getTypeCheckType() != null){
+				//add interface range
+				addEffectiveRange(predicateType, subject);
+			}
+			return predicateType;
+		}
+		return null;
 	}
 	
 	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject) throws CircularDefinitionException, InvalidTypeException, CircularDependencyException{
@@ -1541,13 +1549,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (varTci != null && varTci.getTypeCheckType() != null) {
 					ConceptIdentifier varci = varTci.getTypeCheckType();
 					if (varci instanceof ConceptName) {
+						if (((ConceptName) varci).toString().equals("TODO")) {
+							return null;
+						}
 						subjuri = ((ConceptName)varci).getUri();
 					}
 				}
 			}
 			String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
-			OntConceptType proptype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
-			return getTypeFromRestriction(subjuri, propuri, proptype, predicate);
+			if (propuri == null) {
+				issueAcceptor.addError("Predicate name could not be resolved", predicate);
+			}
+			else {
+				OntConceptType proptype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
+				return getTypeFromRestriction(subjuri, propuri, proptype, predicate);
+			}
 		}
 		return null;
 	}
@@ -2640,6 +2656,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								if (stci != null && stci.getTypeCheckType() != null) {
 									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
 									varName = declarationExtensions.getConcreteName((SadlResource)subject);
+									if (subj != null) {
+										Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+										if (prop != null) {
+											checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+										}
+									}
 								}
 							} catch (InvalidNameException e) {
 								// TODO Auto-generated catch block
@@ -2667,7 +2689,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (propsubj != null && prop != null) {
+								if (prop != null) {
 									checkPropertyDomain(ontModel, propsubj, prop, subject, propOfSubjectCheck, varName);
 								}
 							}
@@ -2675,9 +2697,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						else {
 							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (subj != null) {
-								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (subj != null && prop != null) {
-									checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+								String preduri = declarationExtensions.getConceptUri(predicate);
+								if (preduri == null) {
+									issueAcceptor.addError("Unable to resolve name", predicate);
+								}
+								else {
+									Property prop = ontModel.getProperty(preduri);
+									if (prop != null) {
+										checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+									}
 								}
 							}
 						}
