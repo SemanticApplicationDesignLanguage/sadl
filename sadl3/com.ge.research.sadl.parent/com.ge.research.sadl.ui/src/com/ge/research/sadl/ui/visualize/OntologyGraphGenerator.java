@@ -1272,7 +1272,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 						value = imports.get(key);
 						headUrl = getCurrentFileLink(key);
 						headTooltip = "\"" + key + "\"";
-						System.out.println("found import for '" + publicUri + "': key = '" + key + "', value = '" + value + "'");
+//						System.out.println("found import for '" + publicUri + "': key = '" + key + "', value = '" + value + "'");
 						GraphSegment gs = new GraphSegment(value, pred, prefix, configMgr);
 						gs.addTailAttribute("URL", getCurrentFileLink(publicUri));
 						String str = "\"" + publicUri + "\"";
@@ -1288,7 +1288,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 				}
 			}
 			else {
-				System.out.println("no imports for '" + publicUri + "'");
+//				System.out.println("no imports for '" + publicUri + "'");
 			}
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block

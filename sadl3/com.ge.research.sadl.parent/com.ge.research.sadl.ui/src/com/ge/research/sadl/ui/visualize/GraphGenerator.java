@@ -249,6 +249,7 @@ public class GraphGenerator {
 						sg.addTailAttribute(COLOR, INSTANCE_BLUE);
 					}
 				}
+				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
 				data.add(sg);
 				if (subj.canAs(Individual.class)) {
 					sg.addHeadAttribute(COLOR, INSTANCE_BLUE);
@@ -274,6 +275,7 @@ public class GraphGenerator {
 				else if (obj.canAs(Individual.class)){
 					sg.addTailAttribute(COLOR, INSTANCE_BLUE);
 				}
+				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
 				data.add(sg);
 				if (!stmt.getPredicate().equals(RDF.type) && obj.canAs(Individual.class)) {
 					data = generateIndividualNeighborhood(obj.as(Individual.class), graphRadius - 1, data);
@@ -305,6 +307,7 @@ public class GraphGenerator {
 					else if (dmn.isIndividual()) {
 						sg.addHeadAttribute(COLOR, INSTANCE_BLUE);
 					}
+					sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
 					sg.addTailAttribute(COLOR, CLASS_BLUE);
 					if (!data.contains(sg)) {
 						data.add(sg);

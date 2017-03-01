@@ -149,7 +149,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 						if(!worked){
 							SadlConsole.writeToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFiles[i].getName() + "' does not exist, or does not contain valid data for graphing.\n");	
 						}else{
-							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontFiles[i].getName() + "' Generated Successfully.\n\n");
+//							SadlConsole.writeToConsole(MessageType.INFO, "Graph of '" + ontFiles[i].getName() + "' Generated Successfully.\n\n");
 						}
 					}
 					else if (ontFiles[i].getType() == IResource.FOLDER) {

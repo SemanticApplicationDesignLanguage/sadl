@@ -417,12 +417,12 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				String obj = sourceUri; //nodeText(sourceUri, sourceAlias);
 				GraphSegment gs;
 				try {
-					if (!(targetUri.equals(sourceUri))) {
-						gs = new GraphSegment(subj, pred, obj, getConfigMgr());
-						if (!importList.contains(gs)) {
-							importList.add(gs);
-							URI sobjuri = sourceDesc.getEObjectURI();
-							if (graphRadius > 0) {
+					if (graphRadius > 0) {
+						if (!(targetUri.equals(sourceUri))) {
+							gs = new GraphSegment(subj, pred, obj, getConfigMgr());
+							if (!importList.contains(gs)) {
+								importList.add(gs);
+								URI sobjuri = sourceDesc.getEObjectURI();
 								findIncomingImportsByUri(importList, sobjuri, graphRadius - 1);
 							}
 						}
