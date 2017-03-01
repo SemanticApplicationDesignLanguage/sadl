@@ -174,7 +174,7 @@ public class GraphGenerator {
 		OntClass cls = getTheJenaModel().getOntClass(getAnchor().toFQString());
 		if (cls != null) {
 			List<GraphSegment> data = new ArrayList<GraphSegment>();
-			data = generateClassPropertiesWithDomain(cls, -1, size, data);
+			data = generateClassPropertiesWithDomain(cls, -1, size, false, data);
 			data = generateClassPropertiesWithRange(cls, size, data);
 			return convertDataToResultSet(data);
 		}
@@ -189,7 +189,7 @@ public class GraphGenerator {
 		while (eitr.hasNext()) {
 			OntResource dmn = eitr.next();
 			if (dmn.canAs(OntClass.class)){
-				data = generatePropertyRange(dmn.as(OntClass.class), -1, ontprop, size, data);
+				data = generatePropertyRange(dmn.as(OntClass.class), -1, ontprop, size, false, data);
 			}
 			data = generateClassPropertiesWithRange(dmn.as(OntClass.class), size - 1, data);
 		}
@@ -319,7 +319,7 @@ public class GraphGenerator {
 		return data;
 	}
 
-	protected List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, long subjSeqNumber, int graphRadius,
+	protected List<GraphSegment> generateClassPropertiesWithDomain(OntClass cls, long subjSeqNumber, int graphRadius, boolean fillNodes,
 			List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		if (isIncludeDuplicates() && subjSeqNumber < 0) {
@@ -334,7 +334,7 @@ public class GraphGenerator {
 				Statement stmt = sitr.nextStatement();
 				Resource prop = stmt.getSubject();
 				if (displayPropertyOfClass(cls, prop)) {
-					data = generatePropertyRange(cls, subjSeqNumber, prop, graphRadius - 1, data);
+					data = generatePropertyRange(cls, subjSeqNumber, prop, graphRadius - 1, fillNodes, data);
 					handledProperties.add(prop);
 				}
 			}
@@ -349,7 +349,7 @@ public class GraphGenerator {
 			QuerySolution soln = results.next();
 			RDFNode prop = soln.get("?prop");
 			if (!handledProperties.contains(prop.asResource()) && displayPropertyOfClass(cls, prop.asResource())) {
-				data = generatePropertyRange(cls, subjSeqNumber, prop.as(OntProperty.class), graphRadius, data);
+				data = generatePropertyRange(cls, subjSeqNumber, prop.as(OntProperty.class), graphRadius, fillNodes, data);
 				handledProperties.add(prop.asResource());
 			}
 		}
@@ -367,7 +367,7 @@ public class GraphGenerator {
 		return getTheJenaModel().contains(cls, getImpliedProperty(), prop);
 	}
 
-	private List<GraphSegment> generatePropertyRange(OntClass cls, long subjSeqNumber, Resource prop, int graphRadius, List<GraphSegment> data) {
+	private List<GraphSegment> generatePropertyRange(OntClass cls, long subjSeqNumber, Resource prop, int graphRadius, boolean fillNodes, List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		boolean isList = false;
 		Statement stmt = prop.getProperty(getTheJenaModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
@@ -425,23 +425,31 @@ public class GraphGenerator {
 				sg.setObjectNodeDuplicateSequenceNumber(objSeqNumber);
 			}
 			if (isIncludeDuplicates() || !data.contains(sg)) {
-//				sg.addHeadAttribute(STYLE, FILLED);
-//				sg.addHeadAttribute(FILL_COLOR,CLASS_BLUE);
-//				sg.addHeadAttribute(FONTCOLOR, WHITE);
-				sg.addHeadAttribute(COLOR, CLASS_BLUE);
+				if (fillNodes) {
+					sg.addHeadAttribute(STYLE, FILLED);
+					sg.addHeadAttribute(FILL_COLOR,CLASS_BLUE);
+					sg.addHeadAttribute(FONTCOLOR, WHITE);
+				}
+				else {
+					sg.addHeadAttribute(COLOR, CLASS_BLUE);
+				}
 				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
 				if (prop.canAs(ObjectProperty.class) && !(rng.isURIResource() && rng.getNameSpace().equals(XSD.getURI()))) {
-//					sg.addTailAttribute(STYLE, FILLED);
-//					sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
-//					sg.addTailAttribute(FONTCOLOR, WHITE);
-					sg.addTailAttribute(COLOR, CLASS_BLUE);
+					if (fillNodes) {
+						sg.addTailAttribute(STYLE, FILLED);
+						sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
+						sg.addTailAttribute(FONTCOLOR, WHITE);
+					}
+					else {
+						sg.addTailAttribute(COLOR, CLASS_BLUE);
+					}
 				}
 				else {
 					// what for XSD and user-defined types?
 				}
 				data.add(sg);
 				if (prop.as(OntProperty.class).isObjectProperty() && !cls.equals(rng)) {
-					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), objSeqNumber, graphRadius - 1, data);
+					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), objSeqNumber, graphRadius - 1, fillNodes, data);
 				}
 			}
 			else {

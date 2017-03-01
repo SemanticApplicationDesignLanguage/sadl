@@ -138,18 +138,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				}
 				else {
 					int graphRadius = getGraphingRadius(10);	
-					GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri));
-					gg.setUriStrategy(UriStrategy.QNAME_WITH_URI_TOOLTIP);
-					List<GraphSegment> imports = getAnchoredImports(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
-					ResultSet rs = gg.convertDataToResultSet(imports);
-					String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
-					File tmpDirFile = new File(tempDir);
-					tmpDirFile.mkdirs();
-					String baseFileName = "imports_of_" + gg.getBaseFilenameFromPublicUri(publicUri);
-					String graphName = prefix;
-					String anchorNode = prefix;
-					String description = "Imports";
-					graphResultSet(visualizer, project, baseFileName, graphName, anchorNode, description, rs, null, true);					
+					graphAnchoredImports(visualizer, configMgr, trgtFile, publicUri, prefix, graphRadius, derivedFN);					
 				}
 			}
 			else {
@@ -163,6 +152,23 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			
 		}
 		return event;
+	}
+
+	protected void graphAnchoredImports(IGraphVisualizer visualizer, IConfigurationManagerForIDE configMgr,
+			IFile trgtFile, String publicUri, String prefix, int graphRadius, boolean derivedFN)
+			throws ConfigurationException, IOException, InvalidNameException, Exception {
+		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri));
+		gg.setUriStrategy(UriStrategy.QNAME_WITH_URI_TOOLTIP);
+		List<GraphSegment> imports = getAnchoredImports(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
+		ResultSet rs = gg.convertDataToResultSet(imports);
+		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
+		File tmpDirFile = new File(tempDir);
+		tmpDirFile.mkdirs();
+		String baseFileName = "imports_of_" + gg.getBaseFilenameFromPublicUri(publicUri);
+		String graphName = prefix;
+		String anchorNode = prefix;
+		String description = "Imports";
+		graphResultSet(visualizer, project, baseFileName, graphName, anchorNode, description, rs, null, true);
 	}
 
 	protected int getGraphingRadius(int defaultSize) {
