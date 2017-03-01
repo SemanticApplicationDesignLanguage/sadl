@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -389,30 +390,44 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		if (orientation == null) {
 			orientation = IGraphVisualizer.Orientation.TD;
 		}
+		final IGraphVisualizer.Orientation innerOrientation = orientation;
 		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();
-		iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, orientation, description);
-		iGraphVisualizer.graphResultSetData(rs);
-		if (openGraph) {
-			String fileToOpen = iGraphVisualizer.getGraphFileToOpen();
-			if (fileToOpen != null) {
-				File fto = new File(fileToOpen);
-				if (fto.isFile()) {
-					IFileStore fileStore = EFS.getLocalFileSystem().getStore(fto.toURI());
-					IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-					try {
-						IDE.openEditorOnFileStore(page, fileStore);
+		
+		//Perform UI operations from background thread
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run(){
+				try {
+					iGraphVisualizer.initialize(tempDir, baseFileName, graphName, anchorNode, innerOrientation, description);
+					iGraphVisualizer.graphResultSetData(rs);
+					if (openGraph) {
+						String fileToOpen = iGraphVisualizer.getGraphFileToOpen();
+						if (fileToOpen != null) {
+							File fto = new File(fileToOpen);
+							if (fto.isFile()) {
+								IFileStore fileStore = EFS.getLocalFileSystem().getStore(fto.toURI());
+								IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+								try {
+									IDE.openEditorOnFileStore(page, fileStore);
+								}
+								catch (Throwable t) {
+									SadlConsole.writeToConsole(MessageType.ERROR, "Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
+								}
+							}
+							else if (fileToOpen != null) {
+								SadlConsole.writeToConsole(MessageType.ERROR, "Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+							}
+						}
 					}
-					catch (Throwable t) {
-						SadlConsole.writeToConsole(MessageType.ERROR, "Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
-					}
-				}
-				else if (fileToOpen != null) {
-					SadlConsole.writeToConsole(MessageType.ERROR, "Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
-		}
+		});
+		
 	}
 
 	public static String getGraphDir(IProject project) {

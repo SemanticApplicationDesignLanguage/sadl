@@ -2,6 +2,8 @@ package com.ge.research.sadl.ui.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +18,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -154,7 +160,38 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return event;
 	}
 
-	protected void graphAnchoredImports(IGraphVisualizer visualizer, IConfigurationManagerForIDE configMgr,
+	protected void generateGraphJob(Method graphingMethod, Object[] args){
+		Job graphJob = new Job("Generating Graph"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					graphingMethod.invoke(this, args);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return Status.CANCEL_STATUS;
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		graphJob.schedule();
+	}
+	
+	protected void executeGraphingMethod(Class<?> c, String methodName, Object[] args){
+		Class<?>[] argTypes = new Class[args.length];
+		for(int i = 0; i < args.length; i++){
+			argTypes[i] = args[i].getClass();
+		}
+		
+		try {
+			Method graphingMethod = c.getMethod(methodName, argTypes);
+			generateGraphJob(graphingMethod, args);
+		} catch (NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void graphAnchoredImports(IGraphVisualizer visualizer, IConfigurationManagerForIDE configMgr,
 			IFile trgtFile, String publicUri, String prefix, int graphRadius, boolean derivedFN)
 			throws ConfigurationException, IOException, InvalidNameException, Exception {
 		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri));
