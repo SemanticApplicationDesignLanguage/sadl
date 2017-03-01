@@ -23,15 +23,18 @@ import java.util.Arrays
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.preferences.PreferenceKey
+import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
+import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
 import org.junit.After
 import org.junit.Assert
@@ -41,6 +44,7 @@ import org.junit.runner.RunWith
 
 import static org.eclipse.core.runtime.IPath.SEPARATOR
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import static org.eclipse.xtext.util.CancelIndicator.NullImpl
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -61,10 +65,6 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	@Inject
 	IPreferenceStoreAccess access;
-
-	@Inject
-	@Accessors(PROTECTED_GETTER)
-	IResourceValidator validator;
 
 	@Inject
 	@Accessors(PROTECTED_GETTER)
@@ -214,6 +214,17 @@ abstract class AbstractSadlPlatformTest extends Assert {
 				store.setValue(id, defaultValue);
 				modifiedProperties.add((id));
 			];
+		}
+	}
+
+	/**
+	 * Validates the resource argument.
+	 */
+	protected def validate(Resource it) {
+		if (it instanceof XtextResource) {
+			return resourceServiceProvider.get(IResourceValidator).validate(it, CheckMode.FAST_ONLY, NullImpl);
+		} else {
+			return emptyList;
 		}
 	}
 
