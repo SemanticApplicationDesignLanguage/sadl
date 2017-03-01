@@ -1277,7 +1277,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		else {
-			issueAcceptor.addError("Property of subject has unexpected subject type '" + subject.getClass().getCanonicalName() + "'", expression);
+//			issueAcceptor.addError("Property of subject has unexpected subject type '" + subject.getClass().getCanonicalName() + "'", expression);
+			// we don't care about any other types?
 			validSubject = false;
 		}
 		if (predicate != null) {

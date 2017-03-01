@@ -20,9 +20,8 @@
  */
 package com.ge.research.sadl.ui
 
-import com.ge.research.sadl.builder.MessageManager.MessageType
-import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
+import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
@@ -30,15 +29,16 @@ import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
 import com.google.inject.Binder
 import com.google.inject.name.Names
-import java.io.PrintStream
-import org.eclipse.ui.console.IOConsoleOutputStream
 import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
+import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+
+import static com.google.inject.Scopes.SINGLETON
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -48,10 +48,8 @@ import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 class SADLUiModule extends AbstractSADLUiModule {
 
 	new(AbstractUIPlugin plugin) {
-		super(plugin)
-		val iocos = SadlConsole.getOutputStream(MessageType.INFO) as IOConsoleOutputStream
-		System.setOut(new PrintStream(iocos))
-		System.setErr(new PrintStream(SadlConsole.getOutputStream(MessageType.ERROR)))
+		super(plugin);
+		OutputStreamStrategy.SADL.use;
 	}
 
 	// Registers our own syntax coloring styles.
@@ -79,15 +77,12 @@ class SADLUiModule extends AbstractSADLUiModule {
     	return SadlRootPreferencePage
 	}
 	
-	/**
-	 * Bind a callback that always adds the Xtext nature to the SADL project silently.
-	 */
-	override bindIXtextEditorCallback() {
-		AlwaysAddXtextNatureCallback
-	}
-	
 	override Class<? extends CopyQualifiedNameService> bindCopyQualifiedNameService() {
 		return SadlCopyQualifiedNameService;
-	}	
+	}
+	
+	def void configureIPreferenceStoreAccess(Binder binder) {
+		binder.bind(IPreferenceStoreAccess).to(SadlPreferenceStoreAccess).in(SINGLETON);
+	}
 	
 }
