@@ -51,4 +51,6 @@ public class SadlConstants {
 	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
 	public static final String SADL_BUILTIN_FUNCTIONS_ALIAS = "builtinfunctions";
 	public static enum SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY{FULL,NAME_ONLY,NONE};
+	
+	public static enum OWL_FLAVOR {OWL_FULL, OWL_DL, OWL_LITE};
 }

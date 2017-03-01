@@ -11,9 +11,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.validation.Issue;
 
 import com.ge.research.sadl.ui.SadlConsole;
@@ -89,16 +86,8 @@ public class RunInference extends SadlActionHandler {
 		        						SadlConsole.writeToConsole(MessageType.INFO, msg);
 	        							String desc = query.getName();
 	        							if (desc == null) desc = "Cmd " + (idx + 1) + "  (Graph)";
-	        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + idx; 							
-	        							IWorkbenchPage page = null;
-	        							IWorkbenchWindow wndow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-	        							if (wndow != null) {
-	        								page = wndow.getActivePage();
-	        							}
-	        							else {
-	        								SadlConsole.writeToConsole(MessageType.INFO, "Unable to open graph automatically but graphics files will be placed in the 'Graphs' project folder.");
-	        							}
-		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null, page);
+	        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + idx; 							
+		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
 	        						}
 	        						else {
 		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
