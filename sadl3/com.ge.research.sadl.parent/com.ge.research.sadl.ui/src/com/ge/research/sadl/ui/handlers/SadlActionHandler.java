@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionException;
@@ -297,8 +298,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		}
 
 	protected Map<String,String> getPreferences() {
-		Injector reqInjector = SadlActivator.getInstance()
-				.getInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
+		Injector reqInjector = safeGetInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
 		IPreferenceValuesProvider pvp = reqInjector.getInstance(IPreferenceValuesProvider.class);
 		org.eclipse.emf.ecore.resource.Resource resource = new ResourceImpl();
 		resource.setURI(org.eclipse.emf.common.util.URI.createFileURI("/"));
@@ -322,6 +322,18 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			}			return map;
 		}
 		return null;
+	}
+	
+	protected final Injector safeGetInjector(String name){
+		final AtomicReference<Injector> i = new AtomicReference<Injector>();
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				i.set(SadlActivator.getInstance().getInjector(name));
+			}
+		});
+		
+		return i.get();
 	}
 
 	public static String convertProjectRelativePathToAbsolutePath(String relPath) {

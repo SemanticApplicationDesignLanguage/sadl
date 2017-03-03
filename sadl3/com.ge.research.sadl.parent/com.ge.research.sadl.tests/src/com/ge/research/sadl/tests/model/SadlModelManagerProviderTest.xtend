@@ -817,7 +817,7 @@ class SadlModelManagerProviderTest {
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)
-			assertTrue(issues.size == 0)
+			assertTrue(issues.filter[severity.name != "WARNING" ].size == 0)
 			var itr = jenaModel.listAllDifferent()
 			var error = false
 			while (itr.hasNext) {
