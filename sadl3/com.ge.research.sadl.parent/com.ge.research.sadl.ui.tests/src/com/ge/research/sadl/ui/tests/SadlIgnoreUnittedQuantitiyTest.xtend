@@ -66,6 +66,32 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 			assertNotNull(ageProperty);
 		]
 	}
+	
+	@Test
+	def void testIgnoreUnitsInSadl2() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString));
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+			uri "http://sadl.org/OntologyWithUnittedQuantity.sadl" alias OntologyWithUnittedQuantity.
+			
+			Person is a class described by gender with a single value of type Gender,
+				described by age with values of type UnittedQuantity,
+				described by height with values of type UnittedQuantity,
+				described by heightPercentile with values of type UnittedQuantity,
+				described by weight with values of type UnittedQuantity.
+			Gender is a class, can only be one of {Male, Female}.
+			Obese is a type of Person.
+			
+			George is a Person with age 23 years, with weight 165 lbs.
+			George has height 70 inches, has heightPercentile 50 "%" .
+		''').resource.assertValidatesTo [ jenaModel, issues |
+			assertNotNull(jenaModel)
+			assertTrue(issues.empty)
+			val ageProperty = jenaModel.getObjectProperty("http://sadl.org/OntologyWithUnittedQuantity.sadl#age")
+			assertNotNull(ageProperty);
+		]
+	}
 
 	protected def Resource assertValidatesTo(Resource resource, (OntModel, List<Issue>)=>void assertions) {
 		val issues = newArrayList;
