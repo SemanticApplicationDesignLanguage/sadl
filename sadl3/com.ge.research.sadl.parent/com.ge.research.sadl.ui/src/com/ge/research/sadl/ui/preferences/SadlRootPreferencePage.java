@@ -25,6 +25,7 @@ import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
+
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
@@ -61,8 +62,9 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         addField(new StringFieldEditor(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), "Graph renderer package and class", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
-	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities (treat as numeric only) during translation", getFieldEditorParent()));
+	    addField(new BooleanFieldEditor(SadlPreferences.USE_IMPLIED_PROPERTIES_IN_TRANSLATION.getId(), "Include implied properties in translation", getFieldEditorParent()));
+	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
 		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ", getFieldEditorParent()));
     }
 	

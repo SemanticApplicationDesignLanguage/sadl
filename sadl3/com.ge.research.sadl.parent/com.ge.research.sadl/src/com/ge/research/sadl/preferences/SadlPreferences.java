@@ -47,6 +47,7 @@ public class SadlPreferences {
 	public static final PreferenceKey CHECK_FOR_AMBIGUOUS_NAMES = new PreferenceKey("ambiguousNameCheckOn", String.valueOf(false));
 	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
+	public static final PreferenceKey USE_IMPLIED_PROPERTIES_IN_TRANSLATION = new PreferenceKey("impliedPropertiesInTranslation", String.valueOf(true));;
 	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
 	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
 	
@@ -74,6 +75,7 @@ public class SadlPreferences {
 			CHECK_FOR_AMBIGUOUS_NAMES,
 			DISABLE_TYPE_CHECKING,
 			IGNORE_UNITTEDQUANTITIES,
+			USE_IMPLIED_PROPERTIES_IN_TRANSLATION,
 			ENABLE_METRICS_COLLECTION,
 			METRICS_QUERY_FILENAME
 	};
