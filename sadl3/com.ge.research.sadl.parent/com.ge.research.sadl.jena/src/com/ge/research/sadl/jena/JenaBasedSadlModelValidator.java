@@ -102,7 +102,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private IMetricsProcessor metricsProcessor = null;
 	protected JenaBasedSadlModelProcessor modelProcessor = null;
 	private List<ConceptName> binaryLeftTypeCheckInfo;
-	private List<ConceptName> binaryRightTypeCheckInfo; 
+	private List<ConceptName> binaryRightTypeCheckInfo;
+	protected Object lastSuperCallExpression = null; 
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
 
@@ -1127,6 +1128,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else {
 			// let any subclass validators do their thing
+			lastSuperCallExpression = expression;
 			return getType((Constant)expression);
 		}
 
