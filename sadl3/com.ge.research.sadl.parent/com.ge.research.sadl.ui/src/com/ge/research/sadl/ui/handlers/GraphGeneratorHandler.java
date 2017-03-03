@@ -2,6 +2,8 @@ package com.ge.research.sadl.ui.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +18,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -23,6 +29,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -65,6 +72,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 	@Inject
 	public DeclarationExtensions declarationExtensions;
+	
+	public static final String GRAPH_JOB = "GraphJob";
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -129,8 +138,9 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				if (target.length > 3 && target[3] != null) {
 					SadlResource sr = getSadlResource(target[3]);
 					if (sr != null) {
-						int graphRadius = getGraphingRadius(5);		
-						graphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius);
+						int graphRadius = getGraphingRadius(5);	
+						executeGraphingMethod(this, "graphSadlResource", new Object[]{configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius});
+						//graphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius);
 					}
 					else {
 						SadlConsole.writeToConsole(MessageType.INFO, "Selected concept for graphing ('" + target[3].toString() + "') is not a SadlResource as expected.\n");
@@ -138,7 +148,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				}
 				else {
 					int graphRadius = getGraphingRadius(10);	
-					graphAnchoredImports(visualizer, configMgr, trgtFile, publicUri, prefix, graphRadius, derivedFN);					
+					executeGraphingMethod(this, "graphAnchoredImports", new Object[]{visualizer, configMgr, trgtFile, publicUri, prefix, graphRadius, derivedFN});
+					//graphAnchoredImports(visualizer, configMgr, trgtFile, publicUri, prefix, graphRadius, derivedFN);					
 				}
 			}
 			else {
@@ -154,7 +165,56 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return event;
 	}
 
-	protected void graphAnchoredImports(IGraphVisualizer visualizer, IConfigurationManagerForIDE configMgr,
+	protected void generateGraphJob(Object c, Method graphingMethod, Object[] args){
+		Job graphJob = new Job("Generating Graph"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					graphingMethod.invoke(c, args);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return Status.CANCEL_STATUS;
+				}
+				return Status.OK_STATUS;
+			}
+			
+			@Override 
+			public boolean belongsTo(Object family){
+				return family.toString().equals(GRAPH_JOB) ? true : false;
+			}
+		};
+		graphJob.schedule();
+	}
+	
+	protected void executeGraphingMethod(Object classInstance, String methodName, Object[] args){
+		try {
+			Method graphingMethod = null;
+			for(Method m :  classInstance.getClass().getMethods()){
+				if(m.getName().equals(methodName)){
+					graphingMethod = m;
+				}
+			}
+			if(graphingMethod != null){
+				 generateGraphJob(classInstance, graphingMethod, args);
+			}else{
+				throw new NoSuchMethodException();
+			}
+		} catch (NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void safeWriteToConsole(MessageType mType, String message){
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				SadlConsole.writeToConsole(mType, message);
+			}
+		});
+	}
+	
+	public void graphAnchoredImports(IGraphVisualizer visualizer, IConfigurationManagerForIDE configMgr,
 			IFile trgtFile, String publicUri, String prefix, int graphRadius, boolean derivedFN)
 			throws ConfigurationException, IOException, InvalidNameException, Exception {
 		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri));
@@ -197,7 +257,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return defaultSize;
 	}
 
-	protected void graphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
+	public void graphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
 			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius)
 			throws CircularDefinitionException, ConfigurationException, IOException, InvalidNameException, URISyntaxException {
 		String srnm = getSadlResourceConcreteName(sr);
@@ -296,7 +356,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return types;
 	}
 	
-	protected void graphImportResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
+	public void graphImportResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
 		String baseFileName = trgtFile.getFullPath().lastSegment().toString();
 		String graphName = prefix;
 		String anchorNode = nodeText(publicUri, prefix);
@@ -531,26 +591,28 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return prefix + " (" + publicUri + ")";
 	}
 
-	protected String getCurrentProject() {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-	    if (window != null)
-	    {
-	        ISelection selection = window.getSelectionService().getSelection();
-	        if (selection instanceof IStructuredSelection) {
-		        Object firstElement = ((IStructuredSelection) selection).getFirstElement();
-		        if (firstElement instanceof IAdaptable)
-		        {
-		            
-		        	String[] projName = firstElement.toString().split("/");
-		        	
-		            return projName[1];
-		        }
-	        }
-	        else {
-	        	return null;
-	        }
-	    }
-	    return null;
+	protected String safeGetCurrentProject() {
+		StringBuilder returnStringBuilder = new StringBuilder();
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			    if (window != null)
+			    {
+			        ISelection selection = window.getSelectionService().getSelection();
+			        if (selection instanceof IStructuredSelection) {
+				        Object firstElement = ((IStructuredSelection) selection).getFirstElement();
+				        if (firstElement instanceof IAdaptable)
+				        {
+				            
+				        	String[] projName = firstElement.toString().split("/");
+				        	returnStringBuilder.append(projName[1]);
+				        }
+			        }
+			    }
+			}
+		});
+		return returnStringBuilder.length() == 0 ? null : returnStringBuilder.toString();
 	}
 
 	protected IConfigurationManagerForIDE getConfigMgr() throws ConfigurationException, URISyntaxException {
