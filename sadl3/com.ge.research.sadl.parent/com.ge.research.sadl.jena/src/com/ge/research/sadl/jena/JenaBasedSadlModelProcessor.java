@@ -312,9 +312,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public static String[] reservedPrefixes = {SadlConstants.SADL_BASE_MODEL_PREFIX,SadlConstants.SADL_LIST_MODEL_PREFIX,
 			SadlConstants.SADL_DEFAULTS_MODEL_PREFIX};
 
-	//members needed by child processors
-	protected StringBuilder serialize = null;
-	protected boolean includeImpliedPropertiesInDirectWrite = false;	// should implied properties be included in Direct Write Prolog output? default false
+	protected boolean includeImpliedPropertiesInTranslation = false;	// should implied properties be included in translator output? default false
 
 	protected DeclarationExtensions declarationExtensions;
 	
@@ -4173,15 +4171,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		boolean isList = typeRefIsList(type);
 		SadlResource sr = sadlResourceFromSadlInstance(element);
 		String instUri = null;
+		OntConceptType subjType = null;
 		if (sr != null) {
 			instUri = declarationExtensions.getConceptUri(sr);
 			if (instUri == null) {
 				throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlInstance");
 			}
-			OntConceptType subjType = declarationExtensions.getOntConceptType(sr);
-			if (subjType.equals(OntConceptType.CLASS) && !getOwlFlavor().equals(SadlConstants.OWL_FLAVOR.OWL_FULL)) {
-				addWarning(SadlErrorMessages.CLASS_PROPERTY_VALUE_OWL_FULL.get(), element);
-			}
+			subjType = declarationExtensions.getOntConceptType(sr);
 		}
 		OntClass cls = null;
 		if (type != null) {
@@ -4229,6 +4225,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		while (itr.hasNext()) {
 			SadlPropertyInitializer propinit = itr.next();
 			SadlResource prop = propinit.getProperty();
+			OntConceptType propType = declarationExtensions.getOntConceptType(prop);
+			if (subjType != null && subjType.equals(OntConceptType.CLASS) && 
+					!(propType.equals(OntConceptType.ANNOTATION_PROPERTY)) && 	// only a problem if not an annotation property
+					!getOwlFlavor().equals(SadlConstants.OWL_FLAVOR.OWL_FULL)) {
+				addWarning(SadlErrorMessages.CLASS_PROPERTY_VALUE_OWL_FULL.get(), element);
+			}
 			EObject val = propinit.getValue();
 			if (val != null) {
 				assignInstancePropertyValue(inst, cls, prop, val);
@@ -6213,32 +6215,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 	
-//	private boolean importSadlBaseModel(Resource resource) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-//		if (sadlBaseModel == null) {
-//			sadlBaseModel  = getOntModelFromString(resource, getSadlBaseModel());
-//			getTheJenaModel().addSubModel(sadlBaseModel);
-//			return true;
-//		}
-//		return false;
-//	}
-	protected Object translateAndApplyImpliedProperty(Expression expr, Property impliedPropertyWrapper) throws InvalidNameException, InvalidTypeException, TranslationException {
-		int start = serialize.length();
-		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
-			serialize.append("impliedProperty('");
-			serialize.append(impliedPropertyWrapper.toString());
-			serialize.append("',");
-		}
-		Object obj = translate(expr);
-		if (includeImpliedPropertiesInDirectWrite && impliedPropertyWrapper != null) {
-			serialize.append(")");
-		}
-		if (!(obj instanceof String)) {
-			return obj;
-		}
-		return getExpressionTranslationString(start);
-	}
-	
-	protected void resetProcessorState(SadlModelElement element) throws InvalidTypeException {
+protected void resetProcessorState(SadlModelElement element) throws InvalidTypeException {
 		if (getModelValidator() != null) {
 			getModelValidator().resetValidatorState(element);
 		}
@@ -6387,14 +6364,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return ((ConceptName)ci).toString();
 		}
 		return ci.toString();
-	}
-	
-	/********************************* End translate methods *****************************************/
-	protected String getExpressionTranslationString(int start) {
-		if (start > serialize.length()) {
-			start = serialize.length();
-		}
-		return serialize.substring(start);
 	}
 	
 	public boolean isNumericComparisonOperator(String operation) {

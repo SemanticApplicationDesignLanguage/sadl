@@ -102,7 +102,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private IMetricsProcessor metricsProcessor = null;
 	protected JenaBasedSadlModelProcessor modelProcessor = null;
 	private List<ConceptName> binaryLeftTypeCheckInfo;
-	private List<ConceptName> binaryRightTypeCheckInfo; 
+	private List<ConceptName> binaryRightTypeCheckInfo;
+	protected Object lastSuperCallExpression = null; 
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
 
@@ -414,15 +415,28 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return true;
 		}
 		try {	
-			TypeCheckInfo leftTypeCheckInfo = getType(leftExpression);
-			TypeCheckInfo rightTypeCheckInfo = getType(rightExpression);
+			boolean dontTypeCheck = false;
+			TypeCheckInfo leftTypeCheckInfo = null;
+			try {
+				leftTypeCheckInfo = getType(leftExpression);
+			} catch (DontTypeCheckException e) {
+				dontTypeCheck = true;
+			}
+			setBinaryLeftTypeCheckInfo(leftTypeCheckInfo != null ? leftTypeCheckInfo.getImplicitProperties() : null);
+			
+			TypeCheckInfo rightTypeCheckInfo = null;
+			try {
+				rightTypeCheckInfo = getType(rightExpression);
+			} catch (DontTypeCheckException e) {
+				dontTypeCheck = true;
+			}
+			setBinaryRightTypeCheckInfo(rightTypeCheckInfo != null ? rightTypeCheckInfo.getImplicitProperties() : null);
+			
 			if (leftTypeCheckInfo == null && rightTypeCheckInfo == null) {
 				// this condition happens when a file is loaded in the editor and clean/build is invoked
 				return true;
 			}
-			setBinaryLeftTypeCheckInfo(leftTypeCheckInfo != null ? leftTypeCheckInfo.getImplicitProperties() : null);
-			setBinaryRightTypeCheckInfo(rightTypeCheckInfo != null ? rightTypeCheckInfo.getImplicitProperties() : null);
-			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+			if(!dontTypeCheck && !compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				if (expression.eContainer() instanceof TestStatement && isQuery(leftExpression)) {
 					// you can't tell what type a query will return
 					return true;
@@ -1114,6 +1128,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else {
 			// let any subclass validators do their thing
+			lastSuperCallExpression = expression;
 			return getType((Constant)expression);
 		}
 
@@ -1756,16 +1771,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else if(conceptType.equals(OntConceptType.DATATYPE_PROPERTY)){
-			return getNameProperty(ConceptType.DATATYPEPROPERTY, conceptUri, expression);
+			TypeCheckInfo propcheckinfo = getNameProperty(ConceptType.DATATYPEPROPERTY, conceptUri, expression);
+			if (propcheckinfo != null) {
+				return propcheckinfo;
+			}
+			issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(qnm)), qnm);
+			throw new DontTypeCheckException();
 		}
 		else if(conceptType.equals(OntConceptType.CLASS_PROPERTY)){
-			return getNameProperty(ConceptType.OBJECTPROPERTY, conceptUri, expression);
+			TypeCheckInfo propcheckinfo =  getNameProperty(ConceptType.OBJECTPROPERTY, conceptUri, expression);
+			if (propcheckinfo != null) {
+				return propcheckinfo;
+			}
+			issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(qnm)), qnm);
+			throw new DontTypeCheckException();
 		}
 		else if (conceptType.equals(OntConceptType.RDF_PROPERTY)) {
 			TypeCheckInfo rdfpropcheckinfo = getNameProperty(ConceptType.RDFPROPERTY, conceptUri, expression);
 			if (rdfpropcheckinfo != null) {
 				return rdfpropcheckinfo;
 			}
+			issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(qnm)), qnm);
 			throw new DontTypeCheckException();
 		}
 		else if(conceptType.equals(OntConceptType.INSTANCE)){
