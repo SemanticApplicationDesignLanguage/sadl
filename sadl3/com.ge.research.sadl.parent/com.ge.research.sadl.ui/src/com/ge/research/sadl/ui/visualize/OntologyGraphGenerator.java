@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
@@ -65,6 +66,19 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	}
 	
 	/**
+	 * Constructor for the OntologyGraphGenerator class with ProgressMonitor for use without a particular input model
+	 * @param configMgr
+	 * @param visualizer
+	 * @param project
+	 * @param monitor
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, IProgressMonitor monitor) throws ConfigurationException, IOException {
+		super(configMgr, visualizer, project, null, null, monitor);
+	}
+	
+	/**
 	 * Constructor for the OntologyGraphGenerator class for use with a particular input model identified by publicUri
 	 * 
 	 * @param configMgr
@@ -75,6 +89,20 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 */
 	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri) throws ConfigurationException, IOException {
 		super(configMgr, visualizer, project, publicUri, null);
+		this.setConfigMgr(configMgr);
+	}
+	
+	/**
+	 * Constructor for the OntologyGraphGenerator class with ProgressMonitor for use with a particular input model identified by publicUri
+	 * @param configMgr
+	 * @param visualizer
+	 * @param project
+	 * @param monitor
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, IProgressMonitor monitor) throws ConfigurationException, IOException {
+		super(configMgr, visualizer, project, publicUri, null, monitor);
 		this.setConfigMgr(configMgr);
 	}
 
@@ -95,6 +123,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		try{
 			//Add all of the class triples
 			while(classIter.hasNext()){
+				isCanceled();
 				Object obj = classIter.next();			
 				if(obj instanceof OntClass || obj instanceof OntClassImpl){
 					OntClass classInst = obj instanceof OntClass ? (OntClass)obj : (OntClassImpl)obj;
@@ -1113,6 +1142,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		List<GraphSegment> listTypeSegments = null;
 		Iterator<GraphSegment> dataitr = data.iterator();
 		while (dataitr.hasNext()) {
+			isCanceled();
 			GraphSegment gs = dataitr.next();
 			if (gs.isObjectIsList()) {
 				GraphSegment listGs = addListTypeEdge(gs, uriStrategy);
@@ -1135,6 +1165,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		int arraySize = data.size();
 		int listCount = 0;
 		for (int i = 0; i < data.size(); i++) {
+			isCanceled();
 			GraphSegment gs = data.get(i);
 			if (gs.getHeadAttributes() != null) {
 				if (headKeyList == null) headKeyList = new ArrayList<String>();
@@ -1179,6 +1210,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		boolean dataFound = false;
 		listCount = 0;	// restart counter
 		for(int i = 0; i < arraySize; i++) {
+			isCanceled();
 			GraphSegment gs = data.get(i);
 			gs.setUriStrategy(uriStrategy);
 			array[i+listCount][0] = gs.getSubject() != null ? gs.subjectToString() : null;
