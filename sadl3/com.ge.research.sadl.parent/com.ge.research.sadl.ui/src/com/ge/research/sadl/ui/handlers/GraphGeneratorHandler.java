@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
@@ -171,9 +172,14 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					graphingMethod.invoke(c, args);
-				} catch (Exception e) {
-					e.printStackTrace();
+					Object[] argsPlus = new Object[args.length+1];
+					for(int i = 0; i < args.length; i++){
+						argsPlus[i] = args[i];
+					}
+					argsPlus[args.length] = monitor;
+					graphingMethod.invoke(c, argsPlus);
+				}catch (Exception e) {
+					//e.printStackTrace();
 					return Status.CANCEL_STATUS;
 				}
 				return Status.OK_STATUS;
@@ -196,7 +202,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				}
 			}
 			if(graphingMethod != null){
-				 generateGraphJob(classInstance, graphingMethod, args);
+				generateGraphJob(classInstance, graphingMethod, args);
 			}else{
 				throw new NoSuchMethodException();
 			}
@@ -215,9 +221,9 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 	
 	public void graphAnchoredImports(IGraphVisualizer visualizer, IConfigurationManagerForIDE configMgr,
-			IFile trgtFile, String publicUri, String prefix, int graphRadius, boolean derivedFN)
+			IFile trgtFile, String publicUri, String prefix, int graphRadius, boolean derivedFN, IProgressMonitor monitor)
 			throws ConfigurationException, IOException, InvalidNameException, Exception {
-		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri));
+		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri), monitor);
 		gg.setUriStrategy(UriStrategy.QNAME_WITH_URI_TOOLTIP);
 		List<GraphSegment> imports = getAnchoredImports(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
 		ResultSet rs = gg.convertDataToResultSet(imports);
@@ -258,51 +264,51 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 
 	public void graphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
-			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius)
+			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius, IProgressMonitor monitor)
 			throws CircularDefinitionException, ConfigurationException, IOException, InvalidNameException, URISyntaxException {
 		String srnm = getSadlResourceConcreteName(sr);
 		OntConceptType srType = getSadlResourceOntConceptType(sr);
 		if (srType.equals(OntConceptType.CLASS)) {
-			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)));
+			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)), monitor);
 			ResultSet rs = gg.generateClassNeighborhood(graphRadius); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
 			if (rs != null) {
 				graphResultSet(visualizer, project, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr, gg.getUriStrategy()), "Domains and ranges", rs, null, true);
 			}
 			else {
-				SadlConsole.writeToConsole(MessageType.INFO, "No neighborhood graph generated for this class.\n");
+				safeWriteToConsole(MessageType.INFO, "No neighborhood graph generated for this class.\n");
 			}
 			rs = gg.generateClassHierarchy(graphRadius); //sadlResourceToClassHierarchy(configMgr, publicUri, sr);
 			if (rs != null) {
 				graphResultSet(visualizer, project, owlFileName+srnm+"ch", "ch", getSadlResourceAnchor(sr, gg.getUriStrategy()), "Class hierarchy", rs, null, true);
 			}
 			else {
-				SadlConsole.writeToConsole(MessageType.INFO, "No class hierarchy found for this class.\n");
+				safeWriteToConsole(MessageType.INFO, "No class hierarchy found for this class.\n");
 			}
 		}
 		else if (srType.equals(OntConceptType.CLASS_PROPERTY) ||
 				srType.equals(OntConceptType.DATATYPE_PROPERTY) ||
 				srType.equals(OntConceptType.RDF_PROPERTY)) {
-			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)));
+			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)), monitor);
 			ResultSet rs = gg.generatePropertyNeighborhood(graphRadius);
 			if (rs != null) {
 				graphResultSet(visualizer, project, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr, gg.getUriStrategy()), "Domains and ranges", rs, null, true);
 			}
 			else {
-				SadlConsole.writeToConsole(MessageType.INFO, "No information found for this property.\n");
+				safeWriteToConsole(MessageType.INFO, "No information found for this property.\n");
 			}
 		}
 		else if (srType.equals(OntConceptType.INSTANCE)) {
-			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)));
+			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)), monitor);
 			ResultSet rs = gg.generateIndividualNeighborhood(graphRadius);
 			if (rs != null) {
 				graphResultSet(visualizer, project, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr, gg.getUriStrategy()), "Instance", rs, null, true);
 			}
 			else {
-				SadlConsole.writeToConsole(MessageType.INFO, "No information found for this instance.\n");
+				safeWriteToConsole(MessageType.INFO, "No information found for this instance.\n");
 			}
 		}
 		else {
-			SadlConsole.writeToConsole(MessageType.INFO, "Graphing of concepts of type '" + srType.toString() + "' not yet supported.\n");
+			safeWriteToConsole(MessageType.INFO, "Graphing of concepts of type '" + srType.toString() + "' not yet supported.\n");
 		}
 	}
 

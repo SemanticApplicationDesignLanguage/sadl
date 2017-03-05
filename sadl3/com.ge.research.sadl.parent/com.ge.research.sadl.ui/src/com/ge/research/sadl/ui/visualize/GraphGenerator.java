@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,6 +115,7 @@ public class GraphGenerator {
 	private long lastSequenceNumber = 0;		// When includeDuplicates is true, nodes with the same URI must be distinguished from one another. This is done with a sequenceNumber set in the GraphSegment class.
 	private Property impliedProperty;
 	private IGraphVisualizer visualizer = null;
+	private IProgressMonitor monitor = null;
 	
 	public enum Orientation {TD, LR}
 
@@ -125,8 +128,20 @@ public class GraphGenerator {
 		}
 		setAnchor(startNode);
 	}
+	
+	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode, IProgressMonitor monitor) throws ConfigurationException, IOException {
+		setConfigMgr(configMgr);
+		setVisualizer(visualizer);
+		setProject(project);
+		if (publicUri != null) {
+			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
+		}
+		setAnchor(startNode);
+		setProgressMonitor(monitor);
+	}
 
 	public ResultSet generateClassHierarchy(int size) throws ConfigurationException, InvalidNameException {
+		isCanceled();
 		OntClass cls = getTheJenaModel().getOntClass(getAnchor().toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		data = generateClassHierarchy(cls, size, data);
@@ -159,6 +174,7 @@ public class GraphGenerator {
 	}
 
 	public ResultSet generateClassNeighborhood(int size) throws ConfigurationException, InvalidNameException {
+		isCanceled();
 		ExtendedIterator<OntClass> classIter = getTheJenaModel().listClasses();
 		try{
 			//Add all of the class triples
@@ -187,6 +203,7 @@ public class GraphGenerator {
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		ExtendedIterator<? extends OntResource> eitr = ontprop.listDomain();
 		while (eitr.hasNext()) {
+			isCanceled();
 			OntResource dmn = eitr.next();
 			if (dmn.canAs(OntClass.class)){
 				data = generatePropertyRange(dmn.as(OntClass.class), -1, ontprop, size, false, data);
@@ -204,6 +221,7 @@ public class GraphGenerator {
 	}
 
 	public ResultSet generateIndividualNeighborhood(int size) throws ConfigurationException, InvalidNameException {
+		isCanceled();
 		Individual inst = getTheJenaModel().getIndividual(getAnchor().toFQString());
 
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
@@ -368,6 +386,7 @@ public class GraphGenerator {
 	}
 
 	private List<GraphSegment> generatePropertyRange(OntClass cls, long subjSeqNumber, Resource prop, int graphRadius, boolean fillNodes, List<GraphSegment> data) {
+		isCanceled();
 		if (graphRadius <= 0) return data;
 		boolean isList = false;
 		Statement stmt = prop.getProperty(getTheJenaModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
@@ -622,6 +641,7 @@ public class GraphGenerator {
 		List<String> tailKeyList = null;
 		
 		for (int i = 0; i < data.size(); i++) {
+			isCanceled();
 			GraphSegment gs = data.get(i);
 			if (gs.getHeadAttributes() != null) {
 				if (headKeyList == null) headKeyList = new ArrayList<String>();
@@ -668,6 +688,7 @@ public class GraphGenerator {
 		
 		boolean dataFound = false;
 		for(int i = 0; i < data.size(); i++) {
+			isCanceled();
 			GraphSegment gs = data.get(i);
 			gs.setUriStrategy(getUriStrategy());
 			String s = gs.subjectToString();
@@ -733,7 +754,17 @@ public class GraphGenerator {
 	protected void setTheJenaModel(OntModel model) {
 		this.theJenaModel = model;
 	}
-
+	
+	protected void isCanceled(){
+		if(monitor != null && monitor.isCanceled()){
+			throw new OperationCanceledException();
+		}
+	}
+	
+	protected void setProgressMonitor(IProgressMonitor monitor){
+		this.monitor = monitor;
+	}
+	
 	protected ConceptName getAnchor() {
 		return anchor;
 	}

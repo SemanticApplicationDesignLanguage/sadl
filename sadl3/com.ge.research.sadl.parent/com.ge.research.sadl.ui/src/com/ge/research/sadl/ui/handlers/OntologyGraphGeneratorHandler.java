@@ -170,7 +170,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		return false;
 	}
 
-	public void generateOntologyFileGraph(IResource ontFile, boolean checkForDerivedFile) throws Exception{
+	public void generateOntologyFileGraph(IResource ontFile, boolean checkForDerivedFile, IProgressMonitor monitor) throws Exception{
 		if(ontFile instanceof IFile){
 			String owlFileName = null;
 			
@@ -214,7 +214,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
 				}
 				
-				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri);
+				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri, monitor);
 				ResultSet oggResults = null;
 				try {
 					oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_ONLY);
