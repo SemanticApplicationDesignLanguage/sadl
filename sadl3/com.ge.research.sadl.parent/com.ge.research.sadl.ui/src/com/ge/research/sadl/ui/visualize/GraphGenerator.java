@@ -20,6 +20,7 @@ package com.ge.research.sadl.ui.visualize;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +117,7 @@ public class GraphGenerator {
 	private Property impliedProperty;
 	private IGraphVisualizer visualizer = null;
 	private IProgressMonitor monitor = null;
+	private HashMap<String, List<String>> classToPropertyMap = null;
 	
 	public enum Orientation {TD, LR}
 
@@ -375,7 +377,9 @@ public class GraphGenerator {
 	}
 	
 	protected boolean displayPropertyOfClass(OntClass cls, Resource prop) {
-		if (prop.canAs(OntProperty.class) && !isImpliedPropertyOfClass(cls, prop)) {
+		if (prop.canAs(OntProperty.class) && 
+		    !isImpliedPropertyOfClass(cls, prop) &&
+		    !classToPropertyMapContains(cls.getURI(), prop.getURI())) {
 			return true;
 		}
 		return false;
@@ -771,6 +775,32 @@ public class GraphGenerator {
 
 	protected void setAnchor(ConceptName anchor) {
 		this.anchor = anchor;
+	}
+	
+	protected boolean classToPropertyMapContains(String c, String p){
+		if(this.classToPropertyMap == null){
+			this.classToPropertyMap = new HashMap<String,List<String>>();
+			addClassToPropertyMap(c,p);
+			return false;
+		}
+		
+		if(this.classToPropertyMap.containsKey(c) &&
+		   this.classToPropertyMap.get(c).contains(p)){
+			return true;
+		}
+		
+		addClassToPropertyMap(c,p);
+		
+		return false;
+	}
+	
+	protected void addClassToPropertyMap(String c, String p){
+		if(this.classToPropertyMap.containsKey(c)){
+			this.classToPropertyMap.get(c).add(p);
+		}else{
+			this.classToPropertyMap.put(c, new ArrayList<String>());
+			addClassToPropertyMap(c,p);
+		}
 	}
 
 	public UriStrategy getUriStrategy() {
