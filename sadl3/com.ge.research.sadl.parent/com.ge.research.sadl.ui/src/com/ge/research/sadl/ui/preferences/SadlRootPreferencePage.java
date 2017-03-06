@@ -21,8 +21,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FileFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
 
@@ -61,12 +63,46 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
         addField(new BooleanFieldEditor(SadlPreferences.DEEP_VALIDATION_OFF.getId(), "Disable Deep Validation of Model", getFieldEditorParent()));
         addField(new StringFieldEditor(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), "Graph renderer package and class", getFieldEditorParent()));
         addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names", getFieldEditorParent()));
-        addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
+//        addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(), "Type checking issues as warning only", getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities (treat as numeric only) during translation", getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(SadlPreferences.USE_IMPLIED_PROPERTIES_IN_TRANSLATION.getId(), "Include implied properties in translation", getFieldEditorParent()));
-	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
+//	    addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
+	    addField(new BooleanFieldEditor(SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(), "Generate metrics report during project clean/build", getFieldEditorParent()));
 		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ", getFieldEditorParent()));
     }
+	
+	@Override
+	protected void performDefaults() {
+		initializeDefaultPreferences();
+		super.performDefaults();
+	}
+	
+	private void initializeDefaultPreferences() {
+		IPreferenceStore store = this.getPreferenceStore();
+
+		//General Settings
+		store.setDefault(SadlPreferences.USE_IMPLIED_PROPERTIES_IN_TRANSLATION.getId(), true);
+//		store.setDefault(RAEConstants.ANALYSIS_TIMEOUT,"600");
+//		store.setDefault(RAEConstants.RUN_PARTIAL_ANALYSIS,false);
+//		store.setDefault(RAEConstants.ENABLE_PREPROCESSING,true);
+//		store.setDefault(RAEConstants.STOP_ON_ERROR,true);
+//		store.setDefault(RAEConstants.PERFORM_SELECTIVE_ANALYSIS,false);
+//		
+//		//Types of Analyses
+//		store.setDefault(RAEConstants.INNER_CONTINGENCY, true);
+//		store.setDefault(RAEConstants.CONTINGENCY,true);
+//		store.setDefault(RAEConstants.SELF_CONFLICT,true);
+//		store.setDefault(RAEConstants.CONFLICT_PAIR,true);
+//		store.setDefault(RAEConstants.HYPOTHESES_CONFLICT,true);
+//		store.setDefault(RAEConstants.INDEPENDENCE,true);
+//		store.setDefault(RAEConstants.COMPLETENESS,true);
+//		store.setDefault(RAEConstants.HYPOTHESES_COMPLETENESS,true);
+//		store.setDefault(RAEConstants.SURJECTIVITY,true);
+//		store.setDefault(RAEConstants.GLOBAL_CONTINGENCY,true);
+		
+		setPreferenceStore(store);
+	}
 	
 	@Override
 	public boolean performOk() {
@@ -149,4 +185,5 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		return retVal;
 	}
 
+	
 }
