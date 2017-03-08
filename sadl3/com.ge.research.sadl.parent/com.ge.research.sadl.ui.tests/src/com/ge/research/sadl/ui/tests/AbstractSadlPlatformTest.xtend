@@ -45,6 +45,8 @@ import org.junit.runner.RunWith
 
 import static org.eclipse.core.runtime.IPath.SEPARATOR
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import org.junit.Rule
+import org.junit.rules.TestName
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -59,6 +61,9 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	static val PROJECT_NAME = 'testProject';
 
 	val modifiedPreferences = <String>newHashSet();
+
+	@Rule
+	public TestName testName = new TestName;
 
 	@Inject
 	IResourceSetProvider resourceSetProvider;
@@ -81,10 +86,10 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	@Before
 	def void before() {
 		OutputStreamStrategy.STD.use; // To redirect error to the Eclipse console.
+		deleteProjects();
 		modifiedPreferences.clear();
 		beforeProjectCreation();
 		createProject();
-		afterProjectCreation();
 	}
 
 	@After
@@ -99,7 +104,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 * Creates the test project.
 	 */
 	protected def void createProject() {
-		createProject(PROJECT_NAME);
+		createProject(projectName);
 		addNature(project, XtextProjectHelper.NATURE_ID);
 		addBuilder(project, XtextProjectHelper.BUILDER_ID);
 		waitForBuild;
@@ -168,9 +173,10 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 * Returns with the test project. Makes sure, that the project exists and accessible.
 	 */
 	protected def getProject() {
-		val project = root.projects.findFirst[name == PROJECT_NAME];
-		assertNotNull('''Cannot find '«PROJECT_NAME»' project in the workspace.''', project);
-		assertTrue('''Cannot access '«PROJECT_NAME»' project in the workspace.''', project.accessible);
+		val projectName = projectName;
+		val project = root.projects.findFirst[name == projectName];
+		assertNotNull('''Cannot find '<<projectName>>' project in the workspace.''', project);
+		assertTrue('''Coonnot access '<<projectName>>' project in the workspace.''', project.accessible);
 		return project;
 	}
 
@@ -185,7 +191,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 * Creates a file with the given file name and content. 
 	 */
 	protected def createFile(String fileName, String content) {
-		val file = IResourcesSetupUtil.createFile('''«PROJECT_NAME»«SEPARATOR»«fileName»''', content);
+		val file = IResourcesSetupUtil.createFile('''«projectName»«SEPARATOR»«fileName»''', content);
 		assertNotNull('''Cannot create '«fileName»' file in the workspace.''', file);
 		assertTrue('''Cannot access '«fileName»' file project in the workspace.''', file.accessible);
 		waitForBuild();
@@ -240,5 +246,11 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	protected def cancelIndicator() {
 		return CancelIndicator.NullImpl;
 	}
-
+	
+	/**
+	 * Returns with the name of the project being tested. This differs per test case.
+	 */
+	protected def getProjectName() {
+		return '''«class.simpleName»_«testName.methodName»''';
+	}
 }
