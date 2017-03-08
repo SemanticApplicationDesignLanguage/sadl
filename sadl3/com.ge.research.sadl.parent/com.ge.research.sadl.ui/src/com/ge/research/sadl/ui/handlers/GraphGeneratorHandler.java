@@ -95,7 +95,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				return event;
 			}
 
-			SadlConsole.writeToConsole(MessageType.INFO, "Generating graph of '" + trgtFile.getName() + "' requested.\n");
+//			SadlConsole.writeToConsole(MessageType.INFO, "Generating graph of '" + trgtFile.getName() + "' requested.\n");
 
 			boolean derivedFN = false;
 			if (trgtFile.getName().endsWith("owl")) {

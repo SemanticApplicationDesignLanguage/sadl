@@ -5485,7 +5485,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		try {
 			if (value instanceof SadlNumberLiteral) {
 				String val = ((SadlNumberLiteral)value).getLiteralNumber();
-				if (rng != null) {
+				if (rng != null && rng.getURI() != null) {
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
 				else {
@@ -6461,4 +6461,12 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	protected void setTypeCheckingWarningsOnly(boolean typeCheckingWarningsOnly) {
 		this.typeCheckingWarningsOnly = typeCheckingWarningsOnly;
 	}
+
+	protected boolean isBinaryListOperator(String op) {
+		if (op.equals("contain") || op.equals("contains") || op.equals("unique")) {
+			return true;
+		}
+		return false;
+	}
+
 }
