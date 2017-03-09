@@ -2796,6 +2796,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject, boolean propOfSubjectCheck, String varName) throws InvalidTypeException {
+		if(prop.canAs(AnnotationProperty.class)){
+			return;
+		}
 		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
 		boolean matchFound = false;
 		while (stmtitr.hasNext()) {
