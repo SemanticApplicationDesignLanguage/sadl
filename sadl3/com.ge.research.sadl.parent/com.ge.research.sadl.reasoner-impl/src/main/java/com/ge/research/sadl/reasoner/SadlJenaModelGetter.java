@@ -220,7 +220,6 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 	            	TDB.sync(ds);
 	            }
             }
-            loadUserDefinedDataTypes(uri, altUrl);
         }
 
         return m;
@@ -322,29 +321,6 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 
 	public void setFormat(String format) {
 		this.format = format;
-	}
-
-    private void loadUserDefinedDataTypes(String uri, String altUrl) {
-		String uddtFolder;
-		try {
-			uddtFolder = getModelXsdFolder(uri, altUrl);
-			if (uddtFolder != null) {
-				File uddtFolderFile = new File(uddtFolder);
-				if (uddtFolderFile.exists() && uddtFolderFile.isDirectory()) {
-					File[] xsdFiles = uddtFolderFile.listFiles();
-					for (int i = 0; i < xsdFiles.length; i++) {
-						FileReader fr = new FileReader(xsdFiles[i]);
-				        XSDDatatype.loadUserDefined(uri, fr, null, TypeMapper.getInstance());				
-					}
-				}
-			}
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	private String getModelXsdFolder(String uri, String altUrl) throws MalformedURLException {
