@@ -228,10 +228,8 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				else if (oggResults != null){
 					GraphSegment simgs = new GraphSegment((prefix != null ? prefix : publicUri), null, null, getConfigMgr());
 					simgs.addHeadAttribute("headtooltip", "\"" + publicUri + "\"");
-					String simfn = getConfigMgr().getAltUrlFromPublicUri(publicUri);
-					simfn = simfn.substring(0, simfn.lastIndexOf("."));
 					try {
-						simgs.addHeadAttribute("URL", ogg.getCurrentFileLink(simfn));
+						simgs.addHeadAttribute("URL", ogg.getCurrentFileLink(publicUri));
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

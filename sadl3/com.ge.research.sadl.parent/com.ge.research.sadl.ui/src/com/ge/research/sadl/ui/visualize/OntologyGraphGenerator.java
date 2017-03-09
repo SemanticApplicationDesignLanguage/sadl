@@ -1,6 +1,7 @@
 package com.ge.research.sadl.ui.visualize;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -18,6 +20,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -218,8 +221,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
  	 * @param data		- GraphSegment list containing all graph data up to this point
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws URISyntaxException 
 	 */
-	private void addSingleNodes(String publicUri, List<GraphSegment> data) throws ConfigurationException, IOException {
+	private void addSingleNodes(String publicUri, List<GraphSegment> data) throws ConfigurationException, IOException, URISyntaxException {
 		ExtendedIterator<OntClass> classIter2 = getLocalModel().listClasses();
 		while(classIter2.hasNext()){
 			Object obj2 = classIter2.next();			
@@ -1001,15 +1005,23 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @return
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws URISyntaxException 
 	 */
-	private boolean isInImports(RDFNode classInst, String parentPublicUri) throws ConfigurationException, IOException{
+	private boolean isInImports(RDFNode classInst, String parentPublicUri) throws ConfigurationException, IOException, URISyntaxException{
 		try{
+
 			if(classInst.isURIResource()){
 				String[] uri = classInst.asResource().getURI().split("#");
 				if(uri != null && uri[0].equals(parentPublicUri)){
 					return false;
-				}else{
-					return true;
+				}
+				else {
+					SadlUtils su = new SadlUtils();
+					if (uri != null && su.fileNameToFileUrl(su.fileUrlToFileName(uri[0])).equals(getConfigMgr().getAltUrlFromPublicUri(parentPublicUri))) {
+						return false;
+					}else{
+						return true;
+					}
 				}
 			}else{
 				if(getLocalModel().getBaseModel().containsResource(classInst)){

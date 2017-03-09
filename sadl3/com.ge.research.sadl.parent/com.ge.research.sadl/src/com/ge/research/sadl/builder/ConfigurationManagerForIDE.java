@@ -46,6 +46,7 @@ import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
@@ -929,4 +930,22 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return null;
 	}
 
+	@Override
+	public boolean setTranslatorClassName(String translatorClassName)
+			throws ConfigurationException {
+		if (translatorClassName != null) {
+			// delete the ImplicitModels/SadlBuiltinFunctions.sadl file (it will be rebuilt elsewhere)
+			try {
+				String sbffn = getModelFolderPath().getParentFile().getCanonicalPath() + "/" + SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" + SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
+				File sbff = new File(sbffn);
+				if (sbff.exists()) {
+					sbff.delete();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return super.setTranslatorClassName(translatorClassName);
+	}
 }
