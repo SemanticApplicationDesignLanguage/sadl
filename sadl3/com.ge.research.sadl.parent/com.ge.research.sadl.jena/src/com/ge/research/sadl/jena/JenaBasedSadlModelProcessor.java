@@ -691,7 +691,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if(!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)){
 				addSadlBaseModelImportToJenaModel(resource);
 			}
-			// Add the SadlImplicitModel to everything except itself and the SadlBuilinFunc
+			// Add the SadlImplicitModel to everything except itself and the SadlBuilinFunctions
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME) &&
 					!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
 				OntModelProvider.registerResource(resource);
@@ -1032,8 +1032,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	private void addSadlBaseModelImportToJenaModel(Resource resource) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-		sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
-		OntModelProvider.setSadlBaseModel(sadlBaseModel);
+		if (sadlBaseModel == null) {
+			sadlBaseModel = OntModelProvider.getSadlBaseModel();
+			if (sadlBaseModel == null) {
+				sadlBaseModel = getOntModelFromString(resource, getSadlBaseModel());
+				OntModelProvider.setSadlBaseModel(sadlBaseModel);
+			}
+		}
 		addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, SadlConstants.SADL_BASE_MODEL_PREFIX, sadlBaseModel);
 	}
 	
@@ -1064,6 +1069,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			setSpec(spec);
 			String modelFolderPathname = getModelFolderPath(resource);
 			if (modelFolderPathname != null && !modelFolderPathname.startsWith(SYNTHETIC_FROM_TEST)) {
+				File mff = new File(modelFolderPathname);
+				mff.mkdirs();
 				spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
 			}
 			if (owlDocMgr != null) {
