@@ -216,6 +216,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	        			prjFolder = ((IFolder)firstElement).getProject().getFullPath();
 		        	}
 		        	else if (firstElement instanceof IProject) {
+		        		project = (IProject) firstElement;
 		        		prjFolder = ((IProject)firstElement).getFullPath();
 		        		trgtFolder = prjFolder;
 		        	}

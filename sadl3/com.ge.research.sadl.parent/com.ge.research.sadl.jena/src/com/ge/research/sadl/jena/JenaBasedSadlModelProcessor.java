@@ -616,6 +616,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	protected boolean ignoreUnittedQuantities;
 
+	private boolean typeCheckingWarningsOnly;
+
     public static void refreshResource(Resource newRsrc) {
     	try {
     		URI uri = newRsrc.getURI();
@@ -756,11 +758,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 
-		boolean enableMetricsCollection = false;
-		String enableMetrics = context.getPreferenceValues().getPreference(SadlPreferences.ENABLE_METRICS_COLLECTION);
-		if (enableMetrics != null && enableMetrics.length() > 0) {
-			enableMetricsCollection = Boolean.parseBoolean(enableMetrics);
-		}
+		boolean enableMetricsCollection = true;	// no longer a preference
 		try {
 			if (enableMetricsCollection) {
 				setMetricsProcessor(new MetricsProcessor(modelName, resource, getConfigMgr(resource, getOwlModelFormat(context)), this));
@@ -773,10 +771,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			e.printStackTrace();
 		}
 
-		boolean disableTypeChecking = true;
-		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.DISABLE_TYPE_CHECKING);
+		setTypeCheckingWarningsOnly(true);
+		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.TYPE_CHECKING_WARNING_ONLY);
 		if (typechecking != null) {
-			disableTypeChecking = Boolean.parseBoolean(typechecking);
+			setTypeCheckingWarningsOnly(Boolean.parseBoolean(typechecking));
 		}
 		ignoreUnittedQuantities = true;
 		String ignoreUnits = context.getPreferenceValues().getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
@@ -785,10 +783,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 
 		// create validator for expressions
-		if (!disableTypeChecking) {
-			// Note that the call to set the metricsProcessor needs to happen before this call
-			initializeModelValidator();
-		}
+		initializeModelValidator();
 		
 		// process rest of parse tree
 		List<SadlModelElement> elements = model.getElements();
@@ -1769,12 +1764,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// check return type against body expression
 			StringBuilder errorMessageBuilder = new StringBuilder();
 			if (!getModelValidator().validate(rtype, bdy, "function return", errorMessageBuilder)) {
-				issueAcceptor.addError(errorMessageBuilder.toString(), bdy);
+				addIssueToAcceptor(errorMessageBuilder.toString(), bdy);
 			}
 		}
 		setCurrentEquation(null);	// clear
 		logger.debug("Equation: " + eq.toFullyQualifiedString());
 		return eq;
+	}
+	
+	public void addIssueToAcceptor(String message, EObject expr) {
+		if (isTypeCheckingWarningsOnly()) {
+			issueAcceptor.addWarning(message, expr);
+		}
+		else {
+			issueAcceptor.addError(message, expr);
+		}
 	}
 	
 	protected void processStatement(ExternalEquationStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
@@ -2008,7 +2012,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		StringBuilder errorMessage = new StringBuilder();
 		if(getModelValidator() != null) {
 			if (!getModelValidator().validate(expr, errorMessage)) {
-				issueAcceptor.addError(errorMessage.toString(), expr);
+				addIssueToAcceptor(errorMessage.toString(), expr);
 				if (getMetricsProcessor() != null) {
 					getMetricsProcessor().addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
 				}
@@ -5481,7 +5485,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		try {
 			if (value instanceof SadlNumberLiteral) {
 				String val = ((SadlNumberLiteral)value).getLiteralNumber();
-				if (rng != null) {
+				if (rng != null && rng.getURI() != null) {
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
 				else {
@@ -6451,4 +6455,18 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	protected void setOwlFlavor(OWL_FLAVOR owlFlavor) {
 		this.owlFlavor = owlFlavor;
 	}
+	protected boolean isTypeCheckingWarningsOnly() {
+		return typeCheckingWarningsOnly;
+	}
+	protected void setTypeCheckingWarningsOnly(boolean typeCheckingWarningsOnly) {
+		this.typeCheckingWarningsOnly = typeCheckingWarningsOnly;
+	}
+
+	protected boolean isBinaryListOperator(String op) {
+		if (op.equals("contain") || op.equals("contains") || op.equals("unique")) {
+			return true;
+		}
+		return false;
+	}
+
 }

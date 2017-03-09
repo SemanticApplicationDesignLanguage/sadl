@@ -45,9 +45,12 @@ public class SadlPreferences {
 	public static final PreferenceKey GRAPH_RENDERER_CLASS= new PreferenceKey("graphrendererclass", "");
 	public static final PreferenceKey TABULAR_DATA_IMPORTER_CLASS= new PreferenceKey("tabulardataimporterclass", "");
 	public static final PreferenceKey CHECK_FOR_AMBIGUOUS_NAMES = new PreferenceKey("ambiguousNameCheckOn", String.valueOf(false));
-	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));
+//	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));
+	public static final PreferenceKey TYPE_CHECKING_WARNING_ONLY = new PreferenceKey("typeCheckingWarningOnly", String.valueOf(false));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
-	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
+	public static final PreferenceKey USE_IMPLIED_PROPERTIES_IN_TRANSLATION = new PreferenceKey("impliedPropertiesInTranslation", String.valueOf(true));;
+//	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
+	public static final PreferenceKey GENERATE_METRICS_REPORT_ON_CLEAN_BUILD = new PreferenceKey("generateMetricsReport", String.valueOf(false));
 	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
 	
 	// Don't forget to add new property to the list below
@@ -72,9 +75,12 @@ public class SadlPreferences {
 			DEEP_VALIDATION_OFF,
 			GRAPH_RENDERER_CLASS,
 			CHECK_FOR_AMBIGUOUS_NAMES,
-			DISABLE_TYPE_CHECKING,
+//			DISABLE_TYPE_CHECKING,
+			TYPE_CHECKING_WARNING_ONLY,
 			IGNORE_UNITTEDQUANTITIES,
-			ENABLE_METRICS_COLLECTION,
+			USE_IMPLIED_PROPERTIES_IN_TRANSLATION,
+//			ENABLE_METRICS_COLLECTION,
+			GENERATE_METRICS_REPORT_ON_CLEAN_BUILD,
 			METRICS_QUERY_FILENAME
 	};
 	
