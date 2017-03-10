@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright 2007-2011 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2015 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -29,13 +29,11 @@ Model :
 // The baseUri is the namespace of the model and should be of the form
 // "http://..."; the version is optional.
 ModelName :
-    'uri' baseUri=STRING ('alias' alias=NAME)? ('version' version=STRING)? 
-    	('(' annType+=('alias'|'note') annContent+=ContentList ')')* EOS;
+    'uri' baseUri=STRING ('alias' alias=NAME)? ('(' annType+=('alias'|'note') annContent+=ContentList ')')* 
+    ('version' version=STRING)? EOS;
 
-// Every import is by either by actual relative URL (other SADL models only) 
-//	or by URI (SADL models and external OWL files); 
-//	an import may have a unique alias (which becomes the "prefix" in compound names)
-//	but this is discouraged in favor of global aliases given with ModelName.
+// Every import is by actual relative URL (other SADL models) or by URI
+// (OWL files); every import has a unique alias (which becomes the "prefix" in compound names).
 Import :
     'import' importURI=STRING ('as' alias=NAME)? EOS;
 
@@ -48,6 +46,9 @@ ModelElement :
     |   Expr        // temp for testing only
 	| 	Display     // used to generate display statements in the output of Tests, etc., used by SADL only
     |	Explanation // used to generate explanations of particular triples (if an explanation found), used by SADL only
+    |	StartWrite
+    |	EndWrite
+    | 	Read
     ;
 
 // These are the things that translate directly to OWL.
@@ -93,11 +94,11 @@ ResourceList :
 LiteralList :
 	'{' literals+=LiteralValue (',' literals+=LiteralValue)* '}';
 
-// References to imported SADL names are qualified by namespaces.
+// References to imported SADL names may be qualified by namespaces.
 ResourceByName :
     name=[ResourceName|NAME];
     
-//RecursivePropertyByName :
+//RecursivePropertyByName :		// this was an attempt to support recursive properties in SPARQL queries but it did not work well-undesired side effects
 //	name=[ResourceName|NAME] (recurse=('*' | '+'))?
 //;    
 
@@ -125,7 +126,7 @@ UnionResource :
 IntersectionResource :
     '{' names+=ResourceIdentifier (op+='and' names+=ResourceIdentifier)+ '}';
 
-// Classes may be declared in many ways.
+// Classes may be declared in multiple ways.
 ClassDeclaration :
         className=ResourceName 'is' 'a' 'top-level'? 'class'
         (mustBeOneOf=EnumeratedInstances)? (describedBy+=AddlClassInfo)* EOS
@@ -144,7 +145,7 @@ ClassDeclaration :
 EnumeratedInstances :
     ','? 'must' 'be' 'one' 'of' instanceList=ResourceList;
 
-// Class declarations may also describe the class's properties.
+// Class declarations may also describe the class's properties (properties with the class in the domain) and range or restrictions.
 AddlClassInfo :
     	','? 'described' 'by' (propertyByName=ResourceByName | propertyName=ResourceName range=Range)
     | 	','? 'described' 'by' propertyByName=ResourceByName restriction=Condition;
@@ -160,9 +161,9 @@ Range :
 RangeType :
         classIdentifier=ResourceIdentifier
     |   dataType=DataType
-//	  | dataType=ResourceName
     ;
 
+// User-defined datatypes 
 UserDefinedDataType :
 	'data' 'type' userDefinedDataType=ResourceName 'is' restriction=DataTypeRestriction EOS
 ;
@@ -172,6 +173,7 @@ DataTypeRestriction :
 	|	'{' basetypes += DataType ((','|'or') basetypes+=DataType)+ '}'
 	;
 	
+// [,] is inclusive, (,) is exclusive	
 Facets :	
 		minexin=('(' | '[') min=NUMBER? ',' max=NUMBER? maxexin=(']' | ')')
 	|	regex=STRING
@@ -179,8 +181,10 @@ Facets :
 	|	'{' values+=(STRING|NUMBER) ((',')? values+=(STRING|NUMBER))* '}'
 ;
  
+// Built-in primitive data types
 enum DataType :
-    string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
+    string | boolean | decimal | int | integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger | long | float | double | duration | 
+    dateTime | time | date | unsignedByte | unsignedInt | anySimpleType |
     gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
 
 // These articles can appear before the property name and are indicative of the functionality of the property or
@@ -297,7 +301,8 @@ Condition :
 // e.g., parent describes Person with values of type Person.
 // e.g., child describes Person with values of type Person.
 PropertyDeclaration :
-		propertyName=ResourceName ('is' 'a' 'type' 'of' superPropName=ResourceByName)? (addlPropInfo+=AdditionalPropertyInfo)+ EOS
+		noDomainPropName=ResourceName 'is' 'a' 'property' (range=Range)? EOS
+	|	propertyName=ResourceName ('is' 'a' 'type' 'of' superPropName=ResourceByName)? (addlPropInfo+=AdditionalPropertyInfo)+ EOS
     |   article=AnArticle? 'relationship' 'of' domain=ResourceIdentifier 'to' rangeResource=ResourceIdentifier 'is' propertyName=ResourceName EOS
 	|	annotationProperty=ResourceName 'is' 'a' 'type' 'of' 'annotation' EOS
 	;
@@ -402,7 +407,7 @@ PropValPartialTriple :
     // | objectInstanceList=ResourceList  // this would allow a list of object values
 
 /*********************************************************************************************************************/
-/*      The rest of the rules in this file are for defining patterns in Tests, Queries, and Rules                    */
+/*      The rest of the rules in this file are for defining patterns in Tests, Queries, Rules, etc.                  */
 /*********************************************************************************************************************/
 
 // This phrase identifies a graph pattern pinned to a point (the subject, at the end of the phrase) and identified by edges (properties)
@@ -452,7 +457,7 @@ VariableList :
 // The Rule statement
 Rule :
 //	('Rule' name=ID)|(name=ID 'Rule') (':')? ('given' givens=ElementSet)? ('if' ifs=ElementSet)? 'then' thens=ElementSet;
-	'Rule' name=NAME (':')? ('given' (givens=ElementSet)?)? ('if' (ifs=ElementSet)?)? 'then' thens=ElementSet EOS;
+	'Rule' name=NAME ('('annProps+=NAME annValues+=STRING ')')* (':')? ('given' (givens=ElementSet)?)? ('if' (ifs=ElementSet)?)? 'then' thens=ElementSet EOS;
 //// e.g., Rule AreaOfCircle: given x is a Circle then area of x is radius of x ^ 2 * PI.
 //// 		 Rule UncleRule: if w is brother of x and x is parent of y then w is uncle of y.
 ////		 Rule UncleRule: if x has brother y and x has child z then y is uncle of z.
@@ -483,6 +488,18 @@ Explanation :
 		|	expr=Expression EOS
 		| 	'Rule' rulename=NAME EOS)
 			;
+			
+StartWrite :
+	write='Write:' (dataOnly='data')? '{' 
+;
+
+EndWrite :
+	'}' 'to' filename=STRING EOS
+;
+			
+Read :
+	'Read:' 'data' 'from' filename=STRING ('using' templateFilename=STRING)? EOS
+;
 
 //// The set of elements used in a Rule block
 ElementSet :
@@ -521,7 +538,7 @@ AndExpression returns Expression :
 		
 RelationalExpression returns Expression :
 	AdditiveExpression (
-		{BinaryOpExpression.left=current} op=('=' | '==' | 'is' | '!=' | '<' | '<=' | '>' | '>=') right=AdditiveExpression)*;
+		{BinaryOpExpression.left=current} op=('=' | '==' | 'is' | 'to' | '!=' | '<' | '<=' | '>' | '>=') right=AdditiveExpression)*;
 
 AdditiveExpression returns Expression :
 	MultiplicativeExpression (

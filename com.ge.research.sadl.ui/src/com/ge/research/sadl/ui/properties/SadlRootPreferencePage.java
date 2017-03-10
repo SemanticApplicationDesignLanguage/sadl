@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.5 $ Last modified on   $Date: 2014/10/16 17:14:25 $
+ * $Revision: 1.6 $ Last modified on   $Date: 2015/09/22 14:50:16 $
  ***********************************************************************/
 
 package com.ge.research.sadl.ui.properties;
@@ -32,18 +32,13 @@ import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
 import org.pojava.datetime.DateTimeConfig;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
@@ -58,7 +53,7 @@ import com.google.inject.Inject;
 public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 	
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
+    private SadlModelManager visitor;
 
     @Override
     protected void createFieldEditors() {
@@ -89,9 +84,6 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 	@Override
 	public boolean performOk() {
 		boolean retVal = super.performOk();
-
-		SadlModelManager visitor = null;
-		
 		if (retVal && isPropertyPage()) {
 			// the changes apply only to the current project
 			IPreferencesService service = Platform.getPreferencesService();
@@ -120,7 +112,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 						NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 						ci.addNameValuePair(nvp);
 						((ConfigurationManagerForEditing)cmgr).addConfiguration(ci);
-						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
+						((ConfigurationManagerForIDE)cmgr).saveConfiguration();
 					}
 				} catch (ConfigurationException e) {
 					// TODO Auto-generated catch block
@@ -144,9 +136,9 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 			ConfigurationItem ci = new ConfigurationItem(itemContent);
 			NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.dmyOrder, dmyOrder);
 			ci.addNameValuePair(nvp);
-			Enumeration<IConfigurationManagerForIDE> cmgrs = visitor.getConfigurationManagers();
+			Enumeration<ConfigurationManagerForIDE> cmgrs = visitor.getConfigurationManagers();
 			while (cmgrs.hasMoreElements()) {
-				IConfigurationManagerForIDE cmgr = cmgrs.nextElement();
+				ConfigurationManagerForIDE cmgr = cmgrs.nextElement();
 				cmgr.getModelGetter().setFormat(format);
 				if (dmyOrder.equals(IConfigurationManager.dmyOrderDMY)) {
 					DateTimeConfig.getGlobalDefault().setDmyOrder(true);
@@ -154,11 +146,11 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage  {
 				else {
 					DateTimeConfig.getGlobalDefault().setDmyOrder(false);
 				}
-				if (cmgr != null && cmgr instanceof IConfigurationManagerForIDE) {
+				if (cmgr != null && cmgr instanceof ConfigurationManagerForIDE) {
 					// put date format in configuration
 					try {
-						((IConfigurationManagerForIDE)cmgr).addConfiguration(ci);
-						((IConfigurationManagerForIDE)cmgr).saveConfiguration();
+						((ConfigurationManagerForIDE)cmgr).addConfiguration(ci);
+						((ConfigurationManagerForIDE)cmgr).saveConfiguration();
 					} catch (ConfigurationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

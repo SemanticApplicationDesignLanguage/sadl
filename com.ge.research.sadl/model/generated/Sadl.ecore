@@ -12,11 +12,11 @@
   <eClassifiers xsi:type="ecore:EClass" name="ModelName">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="baseUri" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="alias" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="annType" unique="false"
         upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="annContent" upperBound="-1"
         eType="#//ContentList" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Import">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="importURI" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -141,22 +141,30 @@
     <eLiterals name="boolean" value="1" literal="boolean"/>
     <eLiterals name="decimal" value="2" literal="decimal"/>
     <eLiterals name="int" value="3" literal="int"/>
-    <eLiterals name="long" value="4" literal="long"/>
-    <eLiterals name="float" value="5" literal="float"/>
-    <eLiterals name="double" value="6" literal="double"/>
-    <eLiterals name="duration" value="7" literal="duration"/>
-    <eLiterals name="dateTime" value="8" literal="dateTime"/>
-    <eLiterals name="time" value="9" literal="time"/>
-    <eLiterals name="date" value="10" literal="date"/>
-    <eLiterals name="gYearMonth" value="11" literal="gYearMonth"/>
-    <eLiterals name="gYear" value="12" literal="gYear"/>
-    <eLiterals name="gMonthDay" value="13" literal="gMonthDay"/>
-    <eLiterals name="gDay" value="14" literal="gDay"/>
-    <eLiterals name="gMonth" value="15" literal="gMonth"/>
-    <eLiterals name="hexBinary" value="16" literal="hexBinary"/>
-    <eLiterals name="base64Binary" value="17" literal="base64Binary"/>
-    <eLiterals name="anyURI" value="18" literal="anyURI"/>
-    <eLiterals name="data" value="19" literal="data"/>
+    <eLiterals name="integer" value="4" literal="integer"/>
+    <eLiterals name="negativeInteger" value="5" literal="negativeInteger"/>
+    <eLiterals name="nonNegativeInteger" value="6" literal="nonNegativeInteger"/>
+    <eLiterals name="positiveInteger" value="7" literal="positiveInteger"/>
+    <eLiterals name="nonPositiveInteger" value="8" literal="nonPositiveInteger"/>
+    <eLiterals name="long" value="9" literal="long"/>
+    <eLiterals name="float" value="10" literal="float"/>
+    <eLiterals name="double" value="11" literal="double"/>
+    <eLiterals name="duration" value="12" literal="duration"/>
+    <eLiterals name="dateTime" value="13" literal="dateTime"/>
+    <eLiterals name="time" value="14" literal="time"/>
+    <eLiterals name="date" value="15" literal="date"/>
+    <eLiterals name="unsignedByte" value="16" literal="unsignedByte"/>
+    <eLiterals name="unsignedInt" value="17" literal="unsignedInt"/>
+    <eLiterals name="anySimpleType" value="18" literal="anySimpleType"/>
+    <eLiterals name="gYearMonth" value="19" literal="gYearMonth"/>
+    <eLiterals name="gYear" value="20" literal="gYear"/>
+    <eLiterals name="gMonthDay" value="21" literal="gMonthDay"/>
+    <eLiterals name="gDay" value="22" literal="gDay"/>
+    <eLiterals name="gMonth" value="23" literal="gMonth"/>
+    <eLiterals name="hexBinary" value="24" literal="hexBinary"/>
+    <eLiterals name="base64Binary" value="25" literal="base64Binary"/>
+    <eLiterals name="anyURI" value="26" literal="anyURI"/>
+    <eLiterals name="data" value="27" literal="data"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EquivalentConcepts" eSuperTypes="#//Statement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="class1" eType="#//ResourceByName"
@@ -303,6 +311,10 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Condition"/>
   <eClassifiers xsi:type="ecore:EClass" name="PropertyDeclaration" eSuperTypes="#//Statement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="noDomainPropName" eType="#//ResourceName"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="range" eType="#//Range"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="propertyName" eType="#//ResourceName"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="superPropName" eType="#//ResourceByName"
@@ -450,6 +462,10 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Rule" eSuperTypes="#//ModelElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annProps" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annValues" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="givens" eType="#//ElementSet"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ifs" eType="#//ElementSet"
@@ -477,6 +493,17 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="expr" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="rulename" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StartWrite" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="write" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dataOnly" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EndWrite" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filename" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Read" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filename" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="templateFilename" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ElementSet">
     <eStructuralFeatures xsi:type="ecore:EReference" name="elements" upperBound="-1"

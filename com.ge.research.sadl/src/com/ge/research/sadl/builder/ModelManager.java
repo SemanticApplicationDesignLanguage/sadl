@@ -18,32 +18,34 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.8 $ Last modified on   $Date: 2014/11/11 14:31:33 $
+ * $Revision: 1.30 $ Last modified on   $Date: 2016/04/01 20:44:04 $
  ***********************************************************************/
 
 package com.ge.research.sadl.builder;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.activation.DataSource;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
@@ -53,10 +55,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.MessageManager.HyperlinkInfo;
+import com.ge.research.sadl.importer.CsvImporter;
 import com.ge.research.sadl.model.ClassRestrictionCondition;
 import com.ge.research.sadl.model.ClassRestrictionCondition.RestrictionType;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.ConceptName.RangeValueType;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.ModelError;
@@ -69,24 +73,29 @@ import com.ge.research.sadl.model.SadlIntersectionClass;
 import com.ge.research.sadl.model.SadlResourceByRestriction;
 import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
+import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
+import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
+import com.ge.research.sadl.model.gp.Read;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.model.gp.StartWrite;
 import com.ge.research.sadl.model.gp.Test;
-import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TestResult;
-import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
-import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.gp.Test.ComparisonType;
+import com.ge.research.sadl.model.gp.TripleElement;
+import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -98,6 +107,7 @@ import com.ge.research.sadl.reasoner.InferenceCanceledException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
@@ -141,14 +151,20 @@ import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
 import com.hp.hpl.jena.ontology.UnionClass;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelGetter;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
@@ -199,15 +215,17 @@ public class ModelManager {
 	private static final Logger logger = LoggerFactory
 			.getLogger(ModelManager.class);
 	private static final String XSD_NS = "http://www.w3.org/2001/XMLSchema#";
+	private static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
 
-	private org.eclipse.emf.ecore.resource.Resource resource = null;
+    @Inject
+    private SadlConfigurationManagerProvider configMgrProvider;
 
-	private String owlModelsFolderPath = null;
+    private String owlModelsFolderPath = null;
 
 	public enum ImportListType {
 		NAME_AS_URI, NAME_AS_SADL_FILENAME
 	}
-
+	
 	private ImportListType importListType = ImportListType.NAME_AS_URI; // default
 
 	private OntModel jenaModel;
@@ -219,12 +237,8 @@ public class ModelManager {
 	private String modelBaseUri;
 	private String modelVersion;
 	private Object otherKnowledgeStructure = null;
-	private SadlUtils sadlUtils = new SadlUtils();
 //    private final Lock lock = new ReentrantLock();
 	
-	@Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
-
 	public class ValidationStatement {
 		private Object modelEObject;
 		private OntResource subject;
@@ -254,6 +268,16 @@ public class ModelManager {
 		}
 		public void setModelEObject(Object modelEObject) {
 			this.modelEObject = modelEObject;
+		}
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(subject.toString());
+			sb.append(" ");
+			sb.append(property.toString());
+			sb.append(" ");
+			sb.append(object.toString());
+			return sb.toString();
 		}
 	}
 	
@@ -302,7 +326,7 @@ public class ModelManager {
 	
 	private Map<String, String> userDefinedDataTypes = null;
 
-	private IConfigurationManagerForIDE configurationMgr = null;
+	private ConfigurationManagerForIDE configurationMgr = null;
 
 	private HashMap<String, ConceptName> conceptNamesCache = new HashMap<String, ConceptName>();
 	private HashMap<String, ConceptName> variableNamesCache = new HashMap<String, ConceptName>();
@@ -310,7 +334,7 @@ public class ModelManager {
 	private boolean deepValidationOff = false;
 	private long deepValidationStartTime;
 	
-	private int cachingLevel = 2;	// 0 = no caching, 1 = cache variable names, 2 = cache vars and concepts
+	private int cachingLevel = 0;	// 0 = no caching, 1 = cache variable names, 2 = cache vars and concepts
 	
 	private boolean hasBeenCancelled = false;
 
@@ -345,15 +369,12 @@ public class ModelManager {
 	 * 
 	 * @param resourceURI -- the Eclipse Resource URI--an actual URL, not a public URI
 	 */
-	public void init(IConfigurationManagerForIDE configMgr, SadlModelManagerProvider _sadlModelManagerProvider, org.eclipse.emf.ecore.resource.Resource resource) {
-		sadlModelManagerProvider = _sadlModelManagerProvider;
-		this.resource = resource;
-		URI resourceURI = resource.getURI();
+	public void init(ConfigurationManagerForIDE configMgr, URI resourceURI) {
 		try {
 			URI actualUrl = ResourceManager
 					.convertPlatformUriToAbsoluteUri(resourceURI);
-			setModelActualUrl(actualUrl);
 			setConfigurationMgr(configMgr);
+			setModelActualUrl(actualUrl);
 			if (getJenaModel() == null || alwaysCreateNew) {
 				if (getJenaModel() != null) {
 					// This seems to be the only way to get the enhanced node cache to not have instances left over from last creation of this model.
@@ -386,7 +407,7 @@ public class ModelManager {
 			// Workspace is closed when we're running the JUnit tests.
 			setModelActualUrl(resourceURI);
 		}
-		logger.info("Initializing model '{}'", getModelActualUrl());
+		logger.debug("Initializing model '{}'", getModelActualUrl());
 
 		modelName = null;
 		modelBaseUri = null;
@@ -471,7 +492,7 @@ public class ModelManager {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Names in model '{}', this model only",
 						modelNamespace);
-				List<ConceptName> testConcepts = getNamedConceptsInNamedModel(getModelName(), null, Scope.LOCALONLY);
+				List<ConceptName> testConcepts = getNamedConceptsInNamedModel(getModelName(), null);
 				if (testConcepts != null) {
 					for (int i = 0; i < testConcepts.size(); i++) {
 						logger.trace("  {}", testConcepts.get(i));
@@ -571,10 +592,10 @@ public class ModelManager {
 			addError(2, "Alias '" + alias
 					+ "' is reserved for the defaults namespace.");
 		} else {
-			globalPrefix = alias; // the model has been given a [global] prefix
+			setGlobalPrefix(alias); // the model has been given a [global] prefix
 									// to be used everywhere
 		}
-		IConfigurationManagerForIDE configMgr = null;
+		ConfigurationManagerForIDE configMgr = null;
 		try {
 			configMgr = getConfigurationMgr();
 		} catch (Exception e) {
@@ -595,13 +616,9 @@ public class ModelManager {
 				// 2/5/2014, awc: behavior has changed here so that the line above returns the modelName so check not equal
 				if (existingAltUrl != null && getModelActualUrl() != null && !existingAltUrl.equals(modelName)) {
 					String sadlFilename = ResourceManager
-							.sadlFileNameOfOwlAltUrl(existingAltUrl, false);
-					String sadlFileSameUri = ResourceManager
-							.findSadlFileInProject(
-									new File(
-											ResourceManager
-													.getOwlModelsFolder(getModelActualUrl()))
-											.getParent(), sadlFilename);
+							.sadlFileNameOfOwlAltUrl(existingAltUrl);
+					String prjDir = new File(ResourceManager.getOwlModelsFolder(getModelActualUrl())).getParent();
+					String sadlFileSameUri = ResourceManager.findSadlFileInProject(prjDir, sadlFilename, ResourceManager.sadlExclusionFolders(prjDir));
 					if (sadlFileSameUri != null
 							&& !sadlFile.equals("<unknown>")
 							&& !sadlFilename.equals(sadlFile)) {
@@ -611,17 +628,17 @@ public class ModelManager {
 				}
 			} catch (ConfigurationException e) {
 				// It's ok if there is no existingAltUrl with this model name.
-			} catch (IOException e) {
+			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
-				getConfigurationMgr().addGlobalPrefix(modelName, globalPrefix);
+				getConfigurationMgr().addGlobalPrefix(modelName, getGlobalPrefix());
 				getConfigurationMgr().loadGlobalPrefixes(getJenaModel());
 			} catch (ConfigurationException e) {
-				addError(2, "Error setting global prefix '" + globalPrefix + "': " + e.getMessage());
+				addError(2, "Error setting global prefix '" + getGlobalPrefix() + "': " + e.getMessage());
 			} catch (Throwable t) {
-				addError(2, "Error setting global prefix '" + globalPrefix + "': " + t.getMessage());
+				addError(2, "Error setting global prefix '" + getGlobalPrefix() + "': " + t.getMessage());
 			}
 		}
 		getJenaModel().setNsPrefix("", getModelNamespace());
@@ -717,14 +734,12 @@ public class ModelManager {
 				if (ResourceManager.SADLEXT.equalsIgnoreCase(uri
 						.fileExtension())) {
 					try {
-						uri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(uri);
+						uri = ResourceManager
+								.validateAndReturnOwlUrlOfSadlUri(uri);
 					} catch (CoreException e) {
 						e.printStackTrace();
 						addError(0, "Error resolvling import name ("
 								+ importUri + "): " + e.getLocalizedMessage());
-					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
 				}
 				// Validate that the import URI exists.
@@ -758,24 +773,23 @@ public class ModelManager {
 			} else {
 				// this is an import by publicURI; find the actual URL (altURL)
 				String actualUrl = null;
-				if (importUri.equals(ResourceManager.ServicesConfigurationURI)) {
+				if (importUri.equals(IConfigurationManager.ServicesConfigurationURI)) {
 					try {
 						String sfn = getOwlModelsFolderPath() + File.separator
 								+ "SadlServicesConfigurationConcepts.owl";
-						actualUrl = sadlUtils.fileNameToFileUrl(sfn);
+						actualUrl = getConfigurationMgr().getSadlUtils().fileNameToFileUrl(sfn);
 						boolean copied = ResourceManager
 								.copyServicesConfigurationFileToOwlModelsDirectory(sfn);
 						if (copied) {
-							String gp = "SadlServicesConfigurationConcepts";
 							getConfigurationMgr().addMapping(actualUrl,
-									ResourceManager.ServicesConfigurationURI,
-									gp, false, IConfigurationManager.SADL);
+									IConfigurationManager.ServicesConfigurationURI,
+									IConfigurationManager.ServicesConfigurationPrefix, false, IConfigurationManager.SADL);
 							getConfigurationMgr().addJenaMapping(
-									ResourceManager.ServicesConfigurationURI,
+									IConfigurationManager.ServicesConfigurationURI,
 									actualUrl);
 							getConfigurationMgr().addGlobalPrefix(
-									ResourceManager.ServicesConfigurationURI,
-									gp);
+									IConfigurationManager.ServicesConfigurationURI,
+									IConfigurationManager.ServicesConfigurationPrefix);
 						}
 					} catch (Exception e) {
 						addError(0,
@@ -837,55 +851,9 @@ public class ModelManager {
 				}
 			}
 			
-			List<ImportMapping> impMappings = null;
-			try {
-				IConfigurationManagerForIDE confMgr = getConfigurationMgr();
-				if (!confMgr.containsMappingForURI(publicUri)) {
-					IConfigurationManagerForIDE otherConfMgr = ResourceManager.findConfigurationManagerInOtherProject(sadlModelManagerProvider, 
-							getModelActualUrl(), publicUri);
-					if (otherConfMgr != null) {
-						confMgr = otherConfMgr;
-						actualUrl = confMgr.getAltUrlFromPublicUri(publicUri);
-					}
-				}
-				impMappings = confMgr.loadImportedModel(getJenaModel().getOntology(modelName), getJenaModel(),
+			List<ImportMapping> impMappings = getConfigurationMgr().loadImportedModel(
+					getJenaModel().getOntology(modelName), getJenaModel(),
 					publicUri, actualUrl);
-			}
-			catch (Exception e) {
-				// This load failed--perhaps the import is of a model defined in another Eclipse project on which this depends;
-				// 	the SadlGlobalScopeProvider knows about those inter-project dependencies
-//				if (e.getMessage() != null && (e.getMessage().contains("org.apache.http.conn.HttpHostConnectException") ||
-//						e.getMessage().contains("org.apache.http.client.ClientProtocolException"))) {
-//					IProject prj = ResourceManager.getProject(resource.getURI());
-//					try {
-//						IProject[] referencedProjects = prj.getReferencedProjects();
-//						for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
-//							IProject refedPrg = referencedProjects[i];
-//							IFile modelFolder = refedPrg.getFile(ResourceManager.OWLDIR);
-//							SadlModelManager sadlModelMgr = sadlModelManagerProvider.get(URI.createURI(modelFolder.getLocationURI().toString()));
-//							IConfigurationManagerForIDE otherProjectConfigMgr = sadlModelMgr.getConfigurationMgr(modelFolder.getLocation().toOSString());
-//							actualUrl = otherProjectConfigMgr.getAltUrlFromPublicUri(publicUri);
-//							impMappings = otherProjectConfigMgr.loadImportedModel(getJenaModel().getOntology(modelName), getJenaModel(),
-//										publicUri, actualUrl);
-//							if (impMappings != null && !impMappings.isEmpty()) {
-//								break;
-//							}
-//						}
-//					} catch (CoreException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					} catch (URISyntaxException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					} catch (IOException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-					if (impMappings == null || impMappings.isEmpty()) {
-						addError(0, "Failed to find imported model (" + actualUrl + "); is it in another project? (" + e.getMessage() + ")");	
-					}
-//				}
-			}
 			logger.debug("Adding import '" + publicUri + "' to model: found " + (impMappings == null ? 0 : impMappings.size()) + " imports to add to mappings.");
 			for (int i = 0; impMappings != null && i < impMappings.size(); i++) {
 				ImportMapping im = impMappings.get(i);
@@ -962,12 +930,23 @@ public class ModelManager {
 						addWarning(0, "The class '" + newClassName + "' is already defined in imported model '" + ncr.getNameSpace() + 
 								"' and a new class is NOT being created. If you want to create a new class in this namespace, please use this model's prefix.");
 					}
+					else {
+						if (superClsName != null && superClsName instanceof ConceptName && ((ConceptName)superClsName).getName().equals(ncr.getLocalName())) {
+							addWarning(0, "Defining the class '" + newClassName + "' as a subclass of itself seems a vacuous definition.");
+						}
+//						else if (getPendingError(ncr.toString()) == null) {
+//							// only warn if it wasn't previously missing
+//							addWarning(0, "The class '" + newClassName + "' is already defined in this namespace; this seems redundant.");
+//						}
+					}
 					ConceptName ncn = new ConceptName(newClassName);
 					ncn.setNamespace(ncr.getNameSpace());
 					ncn.setType(ConceptType.ONTCLASS);
 					removePendingError(ncn, ConceptType.ONTCLASS);
 					if (superCls != null) {
-						ncr.as(OntClass.class).addSuperClass(superCls);
+						OntClass inModelClass = getJenaModel().createClass(ncr.getURI());
+						inModelClass.addSuperClass(superCls);
+//						ncr.as(OntClass.class).addSuperClass(superCls);
 					}
 				}
 			}
@@ -1115,7 +1094,7 @@ public class ModelManager {
 	 */
 	public List<ModelError> addInstance(String instName,
 			ConceptIdentifier clsName) {
-		Resource ir;
+		Resource ir = null;
 		try {
 			boolean instNameOK = true;
 			ConceptName nin = new ConceptName(instName);
@@ -1139,8 +1118,12 @@ public class ModelManager {
 				if (instNameOK) {
 					Individual inst;
 					try {
-						inst = getJenaModel().createIndividual(getUri(instName),
-								cls);
+						if (ir == null) {
+							inst = getJenaModel().createIndividual(getUri(instName), cls);
+						}
+						else {
+							inst = getJenaModel().createIndividual(ir.getURI(), cls);
+						}
 						setLastInstanceCreated(inst);
 						if (inst == null) {
 							addError(0, ExistingNamePart.NAME,
@@ -1198,11 +1181,17 @@ public class ModelManager {
 							ConceptName objName = (ConceptName) inputVal;
 							obj = getOrCreateIndividual(3, 0, objName);
 						}
-						ObjectProperty prop = getOrCreateObjectProperty(1, 0,
-								propName);
-						if (subj != null && prop != null && obj != null) {
-							addPendingValidationStatement(subj, prop, obj);
-							getJenaModel().add(subj, prop, obj);
+						OntProperty ontProp = getOntProperty(propName);
+						if (ontProp != null) {
+							getJenaModel().add(subj, ontProp, obj);
+						}
+						else {
+							ObjectProperty prop = getOrCreateObjectProperty(1, 0,
+									propName);
+							if (subj != null && prop != null && obj != null) {
+								addPendingValidationStatement(subj, prop, obj);
+								getJenaModel().add(subj, prop, obj);
+							}
 						}
 					} else {
 						OntProperty prop = null;
@@ -1233,8 +1222,8 @@ public class ModelManager {
 								} else {
 									addError(1, ExistingNamePart.BOTH, "'"
 											+ propName.toString()
-											+ "' is not a property (but is a '"
-											+ propType.toString() + "'");
+											+ "' is not a datatype property as suggested by the value to be assigned (but is a '"
+											+ propType.toString() + "')");
 								}
 							}
 							if (errors() < 1) {
@@ -1465,16 +1454,18 @@ public class ModelManager {
 				sb.append("{");
 				try {
 					UnionClass ucls = cls.as(UnionClass.class);
-					int cnt = 0;
-					ExtendedIterator<? extends OntClass> eitr = ucls
-							.listOperands();
-					while (eitr.hasNext()) {
-						Object uclsObj = eitr.next();
-						OntClass uclsmember = (OntClass) uclsObj;
-						if (cnt++ > 0) {
-							sb.append(" or ");
+					List<OntResource> opList = getOntResourcesInUnionClass(getJenaModel(), ucls);
+					if (opList != null) {
+						int cnt = 0;
+						Iterator<OntResource> opitr = opList.iterator();
+						while (opitr.hasNext()) {
+							OntResource or = opitr.next();
+							String clsstr = classToString(or);
+							if (cnt++ > 0) {
+								sb.append(" or ");
+							}
+							sb.append(clsstr);
 						}
-						sb.append(classToString(uclsmember));
 					}
 					sb.append("}");
 				} catch (Exception e) {
@@ -1486,16 +1477,15 @@ public class ModelManager {
 				sb.append("{");
 				try {
 					IntersectionClass icls = cls.as(IntersectionClass.class);
+					List<OntResource> opList = getOntResourcesInIntersectionClass(getJenaModel(), icls);
 					int cnt = 0;
-					ExtendedIterator<? extends OntClass> eitr = icls
-							.listOperands();
-					while (eitr.hasNext()) {
-						OntClass iclsmember = eitr.next();
-						if (cnt > 0) {
+					Iterator<OntResource> opitr = opList.iterator();
+					while (opitr.hasNext()) {
+						OntResource iclsmember = opitr.next();
+						if (cnt++ > 0) {
 							sb.append(" and ");
 						}
 						sb.append(classToString(iclsmember)); //.getLocalName());
-						cnt++;
 					}
 					sb.append("}");
 				} catch (Exception e) {
@@ -1505,7 +1495,12 @@ public class ModelManager {
 			} else if (cls.canAs(Restriction.class)) {
 				sb.append("(");
 				Restriction rest = cls.as(Restriction.class);
-				sb.append("Restriction on property '" + rest.getOnProperty().getLocalName() + "'");
+				if (rest != null && rest.getOnProperty() != null) {
+					sb.append("Restriction on property '" + rest.getOnProperty().getLocalName() + "'");
+				}
+				else {
+					sb.append("<onProperty value not found>");
+				}
 				sb.append(")");
 			} else {
 				logger.error("Class is neither URI nor Union nor Intersection: "
@@ -1529,14 +1524,14 @@ public class ModelManager {
 	 * @param cls
 	 * @return
 	 */
-	public static boolean instanceBelongsToClass(OntModel m, OntResource inst, OntResource cls) {
+	public boolean instanceBelongsToClass(OntModel m, OntResource inst, OntResource cls) {
 		// The following cases must be considered:
 		// 1) The class is a union of other classes. Check to see if the instance is a member of any of
 		//		the union classes and if so return true.
 		// 2) The class is an intersection of other classes. Check to see if the instance is 
 		//		a member of each class in the intersection and if so return true.
 		// 3) The class is neither a union nor an intersection. If the instance belongs to the class return true. Otherwise
-		//		check to see if the instance belongs to a subclass of the classlse
+		//		check to see if the instance belongs to a subclass of the class else
 		//		return false. (Superclasses do not need to be considered because even if the instance belongs to a super
 		//		class that does not tell us that it belongs to the class.)
 		
@@ -1546,12 +1541,10 @@ public class ModelManager {
 		 * 			Subsystem is type of System.
 		 */
 		if (cls.isURIResource()) {
-			String uri = cls.getURI();
-			cls = m.getOntClass(uri);
-			if (cls == null) {
-				logger.warn("Failed to retrieve ontology class for uri '"+uri+"'.");
-				return false;
-			}
+			cls = m.getOntClass(cls.getURI());
+		}
+		if (cls == null) {
+			return false;
 		}
 		if (cls.canAs(UnionClass.class)) {
 			List<OntResource> uclses = getOntResourcesInUnionClass(m, cls.as(UnionClass.class));	
@@ -1666,7 +1659,7 @@ public class ModelManager {
 	 * @param cls
 	 * @return
 	 */
-	public static boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) {
+	public boolean classIsSubclassOf(OntClass subcls, OntResource cls, boolean rootCall) {
 		if (subcls == null || cls == null) {
 			return false;
 		}
@@ -1700,13 +1693,13 @@ public class ModelManager {
 			if (cls.canAs(OntClass.class)) {
 				ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSubClasses();
 				while (eitr.hasNext()) {
-					OntClass subCls = eitr.next();
-					if (subCls.equals(subcls)) {
+					OntClass subClsOfCls = eitr.next();
+					if (subClsOfCls.equals(subcls)) {
 						eitr.close();
 						return true;
 					}
 					else {
-						if (classIsSubclassOf(subcls, subCls, false)) {
+						if (classIsSubclassOf(subcls, subClsOfCls, false)) {
 							eitr.close();
 							return true;
 						}
@@ -1735,8 +1728,32 @@ public class ModelManager {
 					}
 				}
 			}
+// TODO We need to look for equivalent classes that provide a definition for a subclass, 
+//			e.g. Component is equivalent to System is class, (System and connectedTo someValueFrom Network) => Component subclass of System.
+			if (cls.canAs(OntClass.class)) {
+//				SELECT ?eqClass 
+//						WHERE {?class owl:equivalentClass ?eqClass}
+				ExtendedIterator<OntClass> eqitr = cls.as(OntClass.class).listEquivalentClasses();
+				while (eqitr.hasNext()) {
+					OntClass eqcls = eqitr.next();
+					if (classIsSubclassOf(subcls, eqcls, false)) {
+						return true;
+					}
+				}
+			}
 //			if (subcls.hasSuperClass(cls, false)) {  // this doesn't work, don't know why awc 6/8/2012
 //				return true;
+//			}
+//			else {
+//				if (subcls.canAs(OntClass.class)) {
+//					ExtendedIterator<OntClass> eitr = subcls.as(OntClass.class).listSuperClasses(false);
+//					while (eitr.hasNext()) {
+//						OntClass sprcls = eitr.next();
+//						if (sprcls.equals(cls)) {
+//							return true;
+//						}
+//					}
+//				}
 //			}
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -1744,7 +1761,7 @@ public class ModelManager {
 		return false;
 	}
 
-	private static boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
+	private boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
 		ExtendedIterator<OntClass> eitr = subcls.listSuperClasses();
 		try {
 			while (eitr.hasNext()) {
@@ -1800,6 +1817,10 @@ public class ModelManager {
 	
 	public Object getDomain(ConceptName prop) {
 		OntProperty pr = getOntProperty(prop);
+		if (pr == null) {
+			addError(new ModelError("No property with name '" + prop.toFQString() + "' found in model.", ErrorType.ERROR));
+			return null;
+		}
 		OntResource rr = getDomain(pr);
 		if (rr != null) {
 			if (rr.isURIResource()) {
@@ -1833,6 +1854,22 @@ public class ModelManager {
 				titr.close();
 			}
 		}
+		if (domain == null) {
+			StmtIterator itr = getJenaModel().listStatements(prop, RDFS.domain, (RDFNode)null);
+			List<OntResource> domainUnion = null;
+			while (itr.hasNext()) {
+				if (domain == null) {
+					domain = itr.next().getObject().as(OntResource.class);
+				}
+				else {
+					// domain is union
+				}
+			}
+			itr = getJenaModel().listStatements(null, RDFS.domain, (RDFNode)null);
+			while (itr.hasNext()) {
+				System.out.println(itr.next().toString());
+			}
+		}
 		return domain;
 	}
 	
@@ -1855,6 +1892,9 @@ public class ModelManager {
 	}
 
 	private OntResource getRange(OntProperty prop) {
+		if (prop == null) {
+			return null;
+		}
 		OntResource range = prop.getRange();
 		if (range == null) {
 			ExtendedIterator<? extends OntProperty> titr = null;
@@ -2181,7 +2221,6 @@ public class ModelManager {
 			OntProperty p1 = getOrCreateObjectProperty(0, 0, cl1);
 			OntProperty p2 = getOrCreateObjectProperty(1, 0, cl2);
 			if (p1 != null && p2 != null) {
-				// TODO check for same range?
 				p1.addEquivalentProperty(p2);
 			}
 		} else if (ct1.equals(ConceptType.DATATYPEPROPERTY)) {
@@ -2270,12 +2309,11 @@ public class ModelManager {
 	 *            -- identifier of the DataypeProperty range
 	 * @param functional
 	 *            -- true if the property is to be functional
+	 * @param rngType 
 	 * @return -- errors encountered or null if none
-	 * @throws InvalidNameException 
-	 * @throws MalformedURLException 
 	 */
 	public List<ModelError> addDatatypeProperty(String propName,
-			ConceptName superPropName, String xsdRange, boolean functional) {
+			ConceptName superPropName, String xsdRange, boolean functional, RangeValueType rngType) {
 		Resource dpr;
 		try {
 			ConceptName pcn = new ConceptName(propName);
@@ -2339,8 +2377,9 @@ public class ModelManager {
 													+ "; can't add second range ("
 													+ r.toString()
 													+ ") to data property.");
-								} else {
+								} else if (!xsdRange.equals("data")) {		// "data" simply means in SADL grammar that this is a datatype property, does not imply range
 									prop.addRange(r);
+									addRangeListAnnotationToProperty(prop, rngType);
 								}
 							}
 						}
@@ -2371,6 +2410,33 @@ public class ModelManager {
 		return getErrorsFinal();
 	}
 
+	private void addRangeListAnnotationToProperty(OntProperty prop,
+			RangeValueType rngType) throws PrefixNotFoundException {
+		if (rngType.equals(RangeValueType.LIST)) {
+			AnnotationProperty annprop = getJenaModel().createAnnotationProperty(LIST_RANGE_ANNOTATION_PROPERTY);
+			prop.addProperty(annprop, RangeValueType.LIST.toString());
+		}
+		else if (rngType.equals(RangeValueType.LISTS)) {
+			AnnotationProperty annprop = getJenaModel().createAnnotationProperty(LIST_RANGE_ANNOTATION_PROPERTY);
+			prop.addProperty(annprop, RangeValueType.LISTS.toString());
+		}
+		
+	}
+	
+	private RangeValueType getRangeListAnnotationOfProperty(OntProperty prop) {
+		RDFNode annProp = prop.getPropertyValue(getJenaModel().getAnnotationProperty(LIST_RANGE_ANNOTATION_PROPERTY));
+		if (annProp != null && annProp.isLiteral()) {
+			String annPropVal = annProp.asLiteral().getString();
+			if (annPropVal.equals(RangeValueType.LIST.toString())) {
+				return RangeValueType.LIST;
+			}
+			else if (annPropVal.equals(RangeValueType.LISTS.toString())) {
+				return RangeValueType.LISTS;
+			}
+		}
+		return RangeValueType.CLASS_OR_DT;
+	}
+
 	/**
 	 * Call this method to add a ObjectProperty to the model.
 	 * 
@@ -2382,11 +2448,12 @@ public class ModelManager {
 	 *            -- descriptor of the range
 	 * @param functional
 	 *            -- true if the property is to be functional
+	 * @param rngType 
 	 * @return -- errors encountered or null if none
 	 */
 	public List<ModelError> addObjectProperty(String propName,
 			ConceptName superPropName, ConceptIdentifier range,
-			boolean functional) {
+			boolean functional, RangeValueType rngType) {
 		Resource opr;
 		try {
 			ConceptName pcn = new ConceptName(propName);
@@ -2399,7 +2466,7 @@ public class ModelManager {
 				else {
 					OntProperty prop = opr.as(OntProperty.class);
 					if (range != null) {
-						updateObjectPropertyRange(2, opr.as(ObjectProperty.class), range);
+						updateObjectPropertyRange(2, opr.as(ObjectProperty.class), range, rngType);
 					}
 					pcn.setNamespace(opr.getNameSpace());
 					if (superPropName != null) {
@@ -2438,7 +2505,7 @@ public class ModelManager {
 							}
 						}
 						if (range != null) {
-							updateObjectPropertyRange(2, prop, range);
+							updateObjectPropertyRange(2, prop, range, rngType);
 						}
 						pcn.setNamespace(prop.getNameSpace());
 						removePendingError(pcn, ConceptType.OBJECTPROPERTY);
@@ -2453,6 +2520,9 @@ public class ModelManager {
 			}
 		} catch (ConfigurationException e1) {
 			addError(0, "Unexpected error creating object property '" + propName + "': " + e1.getMessage());
+		} catch (PrefixNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return getErrorsFinal();
 	}
@@ -3243,10 +3313,11 @@ public class ModelManager {
 	 *            -- the domain information (may be null if defining a
 	 *            subproperty)
 	 * @param objIdentifier 
+	 * @param rngType 
 	 * @return -- errors encountered of null if none
 	 */
 	public List<ModelError> addPropertyDomain(ConceptName propName,
-			ConceptIdentifier domain, boolean isSingleValuedOnClass, Object objIdentifier) {
+			ConceptIdentifier domain, boolean isSingleValuedOnClass, Object objIdentifier, RangeValueType rngType) {
 		OntProperty prop = getOntProperty(propName);
 		if (prop == null) {
 			try {
@@ -3332,13 +3403,18 @@ public class ModelManager {
 	 * @return -- errors encountered or null if none
 	 */
 	public List<ModelError> addObjectPropertyRange(ConceptName propName,
-			ConceptIdentifier range) {
+			ConceptIdentifier range, RangeValueType rngType) {
 		OntProperty prop = getOntProperty(propName);
 		if (prop == null) {
 			addError(0, "Property '" + propName.toString() + "' not found. "
 					+ getModelReference());
 		} else {
-			updateObjectPropertyRange(1, prop, range);
+			try {
+				updateObjectPropertyRange(1, prop, range, rngType);
+			} catch (PrefixNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return getErrorsFinal();
 	}
@@ -3351,8 +3427,10 @@ public class ModelManager {
 	 */
 	public List<ModelError> addSymmetricalProperty(ConceptName prop) {
 		OntProperty symmProp = getOrCreateObjectProperty(0, 0, prop);
-		symmProp.convertToSymmetricProperty();
-		getJenaModel().createSymmetricProperty(symmProp.getURI());
+		if (symmProp != null) {
+			symmProp.convertToSymmetricProperty();
+			getJenaModel().createSymmetricProperty(symmProp.getURI());
+		}
 		return getErrorsFinal();
 	}
 
@@ -3420,13 +3498,13 @@ public class ModelManager {
 			Resource or = getOntResourceInExistingModel(objName);
 			if (or != null) {
 				ConceptType ot = getOntResourceConceptType(or);
-				if (!ot.equals(ConceptType.INDIVIDUAL)) {
+				if (!propName.getType().equals(ConceptType.ANNOTATIONPROPERTY) && !ot.equals(ConceptType.INDIVIDUAL)) {
 					addError(part, "'" + objName.toString() + "' already exists and is not an instance (type is " + ot.toString() + ")");
 				}
 				else {
 					obj = or.as(Individual.class);
-					objName.setType(ot);
 				}
+				objName.setType(ot);
 			}
 			else {
 				obj = getOrCreateIndividual(part,0, objName);
@@ -3654,11 +3732,6 @@ public class ModelManager {
 						}
 					}
 				}
-
-				if (subj != null && prop != null && val != null) {
-					addPendingValidationStatement(subj, prop, val);
-					getJenaModel().add(subj, prop, val);
-				}
 			}
 		}
 		catch (ConfigurationException e) {
@@ -3745,9 +3818,6 @@ public class ModelManager {
 			if (r != null) {
 				return getOntResourceConceptType(r);
 			}
-			if (isRDFDataType(cn)) {
-				return ConceptType.RDFDATATYPE;
-			}
 		} catch (ConfigurationException e) {
 			logger.error("Unexpected error getting concept type of '" + name + "': " + e.getMessage());
 			e.printStackTrace();
@@ -3802,8 +3872,19 @@ public class ModelManager {
 		if (r != null) {
 			name.setType(getOntResourceConceptType(r));
 			name.setNamespace(r.getNameSpace());
-		}
-		else {
+			if (r.canAs(OntProperty.class)) {
+				name.setRangeValueType(getRangeListAnnotationOfProperty(r.as(OntProperty.class)));
+			}
+		} else
+			try {
+				if (name.getNamespace() != null && getUserDefinedDataType(name.getUri()) != null) {
+					name.setType(ConceptType.RDFDATATYPE);
+				}
+			} catch (InvalidNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		if (name.getType() == null) {
 			name.setType(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL);
 		}
 		if (cachingLevel > 1 && !name.getType().equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
@@ -3839,11 +3920,8 @@ public class ModelManager {
 //				return RDF.Property;
 //			}
 			String base = getUriXmlBase(uri);
-			OntResource rsrc = null;
-			if (base.equals(getModelName())) {
-				rsrc = getJenaModel().getOntResource(uri);
-			}
-			else {
+			OntResource rsrc = getJenaModel().getOntResource(uri);
+			if (rsrc == null) {
 				rsrc = getOntResourceInNamedModel(name, base);
 			}
 			if (rsrc != null) {
@@ -3877,11 +3955,7 @@ public class ModelManager {
 				}
 			}
 			else {
-				if (getModelActualUrl()!=null) {
-					logger.error("MM failed to retrieve an OntModel for the current Resource: " + getModelActualUrl().toString());
-				} else {
-					logger.error("MM failed to retrieve an OntModel - no current Resource set");
-				}
+				logger.error("MM failed to retrieve an OntModel for the current Resource: " + getModelActualUrl().toString());
 			}
 
 			// must look in imported models
@@ -3968,6 +4042,12 @@ public class ModelManager {
 			}
 			else if (r.canAs(OntClass.class)) {
 				ctype = ConceptType.ONTCLASS;
+				ExtendedIterator<Resource> itr = r.as(OntClass.class).listRDFTypes(true);
+				while (itr.hasNext()) {
+					if (itr.next().equals(RDFS.Datatype)) {
+						ctype = ConceptType.RDFDATATYPE;
+					}
+				}
 			}
 			else if (r.canAs(AnnotationProperty.class)) {
 				ctype = ConceptType.ANNOTATIONPROPERTY;
@@ -4037,7 +4117,7 @@ public class ModelManager {
 				return getModelNamespace() + name;
 			}
 			String namespace = name.substring(0, Util.splitNamespace(name));
-			if (namespace != null && namespace.length() < name.length()) {
+			if (namespace != null && namespace.length() < name.length() && !namespace.startsWith("http:")) {
 				// check the namespace to see if it is a prefix and needs to be
 				// mapped to a namespace
 				int colonLoc = name.indexOf(":");
@@ -4145,25 +4225,14 @@ public class ModelManager {
 	 * @throws MalformedURLException 
 	 */
 	public List<ConceptName> getNamedConceptsInNamedModel(String modelname,
-			ConceptType ctype, Scope scope) throws InvalidNameException,
+			ConceptType ctype) throws InvalidNameException,
 			ConfigurationException, MalformedURLException {
 		if (modelname == null) {
 			// get the matching concept names in all imported namespaces
 			return getNamedConceptsOfType(ctype, Scope.INCLUDEIMPORTS);
 		}
-		
-		if (this.modelName == null && getModelActualUrl() != null && 
-				getModelActualUrl().lastSegment().endsWith(".owl")) { 
-			// this is for an OWL file loading Jena resources
-			try {
-				return getConfigurationMgr().getNamedConceptsInModel(modelname, ctype, scope != null ? scope : Scope.INCLUDEIMPORTS);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 
-		if (modelname.equals(this.modelName)) {
+		if (modelname.equals(modelName)) {
 			// we're getting the concept names in this ModelManager's namespace
 			// only
 			return getNamedConceptsOfType(ctype, Scope.LOCALONLY);
@@ -4206,7 +4275,7 @@ public class ModelManager {
 		if (cType != null && cType.equals(ConceptType.MODELNAME)) {
 			// this is to get the modelname only
 			return getNamedConceptsInModel(null, this.modelName, cType, scope);
-		} else {
+		} else if (getModelName() != null) {
 			// get concepts in current model
 			List<ConceptName> names = getConfigurationMgr().getNamedConceptsInModel(getJenaModel(), getModelName(), cType, scope);
 
@@ -4230,6 +4299,7 @@ public class ModelManager {
 			}
 			return names;
 		}
+		return null;
 	}
 
 	/**
@@ -4492,7 +4562,7 @@ public class ModelManager {
 									.getAltUrlFromPublicUri(mname);
 							if (altUrl != null) {
 								File owlFile = new File(
-										getConfigurationMgr().fileUrlToFileName(altUrl));
+										getConfigurationMgr().getSadlUtils().fileUrlToFileName(altUrl));
 								if (owlFile.exists()) {
 									mname = owlFile.getName();
 									if (mname
@@ -4607,14 +4677,14 @@ public class ModelManager {
 		} else {
 			addError(0, "No Jena OntModel exists; cannot save OWL model.");
 		}
-		try {
-			getConfigurationMgr().clearReasoner();
-		} catch (ConfigurationException e) {
-			addError(0, "Unexpected erorr: " + e.getMessage());
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			getConfigurationMgr().clearReasoner();
+//		} catch (ConfigurationException e) {
+//			addError(0, "Unexpected erorr: " + e.getMessage());
+//		} catch (MalformedURLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		// clear and save any User-Defined Datatypes
 		String uddtFolder = null;
@@ -4723,7 +4793,7 @@ public class ModelManager {
 		}
 	}
 
-	private List<ModelError> saveJenaModelForSadlIde(File owlFile)
+	public List<ModelError> saveJenaModelForSadlIde(File owlFile)
 			throws IOException, URISyntaxException, ConfigurationException {
 		List<ModelError> errors = null;
 		if (getJenaModel() == null) {
@@ -4775,7 +4845,7 @@ public class ModelManager {
 				getConfigurationMgr()
 						.addMapping(
 								getConfigurationMgr().getSadlUtils().fileNameToFileUrl(fullyQualifiedOwlFilename),
-								modelName, globalPrefix, false, IConfigurationManager.SADL);
+								modelName, getGlobalPrefix(), false, IConfigurationManager.SADL);
 			} catch (Exception e) {
 				return addError(errors, new ModelError(
 						"Failed to save mapping for model file '" + owlFile
@@ -5026,7 +5096,7 @@ public class ModelManager {
 		return quotedString;
 	}
 
-	private void setJenaModel(OntModel jenaModel) {
+	public void setJenaModel(OntModel jenaModel) {
 		this.jenaModel = jenaModel;
 		if (configurationMgr.getModelGetter() != null) {
 			jenaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
@@ -5316,125 +5386,110 @@ public class ModelManager {
 		return ExistingNamePart.NAME;
 	}
 
-	private boolean updatePropertyDomain(int argIdx, OntProperty prop,
-			ConceptIdentifier domain) {
+	private boolean updatePropertyDomain(int argIdx, OntProperty prop, ConceptIdentifier domain) {
 		boolean retval = false;
 		OntResource domainCls = conceptIdentifierToOntClass(argIdx, 0, domain);
 		OntResource existingDomain = prop.getDomain();
+		OntProperty testProp = getJenaModel().getOntProperty(prop.getURI());
+		if (testProp != null) {
+			OntResource testDomain = testProp.getDomain();
+			if (testDomain != null) {
+				existingDomain = testDomain;
+			}
+		}
 		if (domainCls != null) {
-			domainCls = addClassToUnionClass(existingDomain,
-					(OntClass) domainCls);
-			if (existingDomain != null) {
-				if (!existingDomain.equals(domainCls)) {
-					if (prop.getNameSpace().equals(getModelNamespace())) {
-						prop.removeDomain(existingDomain);
-						prop.addDomain(domainCls);
+			if (existingDomain != null && !existingDomain.equals(domainCls)) {
+				// there's already a domain specified
+				if (!prop.getNameSpace().equals(getModelNamespace())) {
+					// this is changing the domain of a property defined in a different model
+					if (classIsSubclassOf((OntClass) domainCls, existingDomain, true)) {
+						addWarning(argIdx, "The domain is a subclass of the domain of property '" + prop.getURI() + "' which is defined in an imported model; perhaps you mean an 'only has values of type' restricion?");						
 					}
 					else {
-						// this is changing the domain of a property defined in a different model
-						getJenaModel().add(prop, RDFS.domain, domainCls);
+						addWarning(argIdx, "This changes the domain of property '" + prop.getURI() + "' which is defined in an imported model; are you sure that is what you want to do?");
 					}
 				}
-				retval = true; // return true if it was already the domain
-			} else {
-				if (prop.getNameSpace().equals(getModelNamespace())) {
-					prop.addDomain(domainCls);
+				domainCls = addClassToUnionClass(existingDomain, (OntClass) domainCls);
+				if (!prop.getNameSpace().equals(getModelNamespace())) {
+					prop = createOntPropertyInCurrentModel(prop);
 				}
 				else {
-					getJenaModel().add(prop, RDFS.domain, domainCls);
+					prop.removeDomain(existingDomain);
 				}
+				prop.addDomain(domainCls);
+				retval = true; // return true if it was already the domain
+			} else {
+				// this is the first domain class given
+				if (!prop.getNameSpace().equals(getModelNamespace())) {
+					prop = createOntPropertyInCurrentModel(prop);
+				}
+				prop.addDomain(domainCls);
 				retval = true;
 			}
 		} else {
-			addError(argIdx, ExistingNamePart.NOTAPPLICABLE,
-					"Unable to convert domain identifier (" + domain
-							+ ") to a class.");
+			addError(argIdx, ExistingNamePart.NOTAPPLICABLE, "Unable to convert domain identifier (" + domain + ") to a class.");
 		}
 		return retval;
 	}
 
-	private boolean updateObjectPropertyRange(int argIdx, OntProperty prop,
-			ConceptIdentifier range) {
+	private boolean updateObjectPropertyRange(int argIdx, OntProperty prop, ConceptIdentifier range, RangeValueType rngType) throws PrefixNotFoundException {
 		boolean retval = false;
-		OntResource rangeCls = null;
+		OntResource rangeCls = conceptIdentifierToOntClass(argIdx, 0, range);
 		OntResource existingRange = prop.getRange();
-		if (range instanceof ConceptName) {
-			rangeCls = getOntClass((ConceptName) range);
-			if (rangeCls == null) {
-				rangeCls = getOrCreateOntClass(argIdx, 0, (ConceptName) range);
-				if (rangeCls != null) {
-					rangeCls = addClassToUnionClass(existingRange,
-							(OntClass) rangeCls);
-				}
+		OntProperty testProp = getJenaModel().getOntProperty(prop.getURI());
+		if (testProp != null) {
+			OntResource testRange = testProp.getRange();
+			if (testRange != null) {
+				existingRange = testRange;
 			}
-			if (existingRange != null) {
-				if (rangeCls != null && !existingRange.equals(rangeCls)) {
-					if (prop.getNameSpace().equals(getModelNamespace())) {
-						prop.removeRange(existingRange);
-						prop.addRange(addClassToUnionClass(existingRange, rangeCls)); // prop.addRange(rangeCls);
+		}
+		if (rangeCls != null) {
+			if (existingRange != null && !existingRange.equals(rangeCls)) {
+				// there's already a range class specified
+				if (!prop.getNameSpace().equals(getModelNamespace())) {
+					// this is changing the range of a property defined in a different model
+					if (classIsSubclassOf((OntClass) rangeCls, existingRange, true)) {
+						addWarning(argIdx, "The range is a subclass of the range of property '" + prop.getURI() + "' which is defined in an imported model; perhaps you mean an 'only has values of type' restricion?");						
 					}
 					else {
-						// this is changing the range of a property defined in a different model
-						getJenaModel().add(prop, RDFS.range, rangeCls);
+						addWarning(argIdx, "This changes the range of property '" + prop.getURI() + "' which is defined in an imported model; are you sure that's what you want to do?");
 					}
-					retval = true;
 				}
-			} else {
-				if (rangeCls != null) {
-					if (prop.getNameSpace().equals(getModelNamespace())) {
-						prop.addRange(rangeCls);
-					}
-					else {
-						// this is changing the range of a property defined in a different model
-						getJenaModel().add(prop, RDFS.range, rangeCls);						
-					}
-					retval = true;
-				} else {
-					addError(argIdx, ExistingNamePart.NOTAPPLICABLE,
-							"Range not found.");
-				}
-			}
-		} else if (range instanceof SadlIntersectionClass) {
-			IntersectionClass rngcls = createIntersectionClass(2,
-					(SadlIntersectionClass) range);
-			if (rngcls != null) {
-				if (prop.getNameSpace().equals(getModelNamespace())) {
-					prop.addRange(rngcls);
+				OntResource newRange = addClassToUnionClass(existingRange, rangeCls);
+				if (!prop.getNameSpace().equals(getModelNamespace())) {
+					prop = createOntPropertyInCurrentModel(prop);
 				}
 				else {
-					// this is changing the range of a property defined in a different model
-					getJenaModel().add(prop, RDFS.range, rngcls);
+					prop.removeRange(existingRange);
 				}
-				retval = true;
-			}
-			else {
-				addError(argIdx, ExistingNamePart.NOTAPPLICABLE, 
-						"Range identifier (" + range.toString()
-						+ ") failed to convert to Intersection.");
-
-			}
-		} else if (range instanceof SadlUnionClass) {
-			UnionClass rngcls = createUnionClass(2, (SadlUnionClass) range);
-			if (rngcls != null) {
-				if (prop.getNameSpace().equals(getModelNamespace())) {
-					prop.addRange(rngcls);
-				}
-				else {
-					// this is changing the range of a property defined in a different model
-					getJenaModel().add(prop, RDFS.range, rangeCls);
-				}
+				prop.addRange(newRange); 
+				addRangeListAnnotationToProperty(prop, rngType);
 				retval = true;
 			} else {
-				addError(argIdx, ExistingNamePart.NOTAPPLICABLE,
-						"Range identifier (" + range.toString()
-								+ ") failed to convert to Union.");
+				// this is the first range class given
+				if (!prop.getNameSpace().equals(getModelNamespace())) {
+					prop = createOntPropertyInCurrentModel(prop);
+				}
+				prop.addRange(rangeCls);
+				addRangeListAnnotationToProperty(prop, rngType);
+				retval = true;
 			}
 		} else {
-			addError(argIdx, ExistingNamePart.NOTAPPLICABLE,
-					"Range identifier (" + range.toString()
-							+ ") not of expected type.");
+			addError(argIdx, ExistingNamePart.NOTAPPLICABLE, "Range not found.");
 		}
 		return retval;
+	}
+
+	private OntProperty createOntPropertyInCurrentModel(OntProperty prop) {
+		if (!prop.getNameSpace().equals(getModelNamespace())) {
+			if (prop.isDatatypeProperty()) {
+				prop = getJenaModel().createDatatypeProperty(prop.getURI());
+			}
+			else {
+				prop = getJenaModel().createObjectProperty(prop.getURI());
+			}
+		}
+		return prop;
 	}
 
 	private OntResource addClassToUnionClass(OntResource existingCls,
@@ -5463,7 +5518,16 @@ public class ModelManager {
 						return existingCls;
 					}
 					classes = getJenaModel().createList();
-					classes = classes.with(existingCls);
+					OntResource inCurrentModel = null;
+					if (existingCls.isURIResource()) {
+						inCurrentModel = getJenaModel().getOntResource(existingCls.getURI());
+					}
+					if (inCurrentModel != null) {
+						classes = classes.with(inCurrentModel);
+					}
+					else {
+						classes = classes.with(existingCls);
+					}
 					classes = classes.with(cls);
 				}
 				OntResource unionClass = getJenaModel().createUnionClass(null,
@@ -5609,9 +5673,8 @@ public class ModelManager {
 	 * 
 	 * @param u
 	 * @return
-	 * @throws MalformedURLException 
 	 */
-	public URI equivalentSadlModelInProject(URI u) throws MalformedURLException {
+	public URI equivalentSadlModelInProject(URI u) {
 		return ResourceManager.validateAndReturnSadlFileEquivalentOfOwlUrl(u);
 	}
 	
@@ -5778,27 +5841,32 @@ public class ModelManager {
 	 * Call this method to convert a ConceptIdentifier to an OntClass.
 	 * 
 	 * @param argIdx
-	 * @param superClsName
+	 * @param identifier
 	 * @return
 	 */
 	private OntClass conceptIdentifierToOntClass(int argIdx, int lstIdx,
-			ConceptIdentifier superClsName) {
-		OntClass superCls = null;
-		if (superClsName instanceof ConceptName) {
-			superCls = getOrCreateOntClass(argIdx, lstIdx,
-					(ConceptName) superClsName);
-		} else if (superClsName instanceof SadlUnionClass) {
-			superCls = createUnionClass(argIdx, ((SadlUnionClass) superClsName));
-		} else if (superClsName instanceof SadlIntersectionClass) {
-			superCls = createIntersectionClass(argIdx,
-					((SadlIntersectionClass) superClsName));
+			ConceptIdentifier identifier) {
+		OntClass ontCls = null;
+		if (identifier instanceof ConceptName) {
+			ontCls = getOrCreateOntClass(argIdx, lstIdx,
+					(ConceptName) identifier);
+		} else if (identifier instanceof SadlUnionClass) {
+			ontCls = createUnionClass(argIdx, ((SadlUnionClass) identifier));
+		} else if (identifier instanceof SadlIntersectionClass) {
+			ontCls = createIntersectionClass(argIdx,
+					((SadlIntersectionClass) identifier));
 		}
-		else if (superClsName instanceof SadlResourceByRestriction) {
-			ConceptName pname = ((SadlResourceByRestriction)superClsName).getOnProperty();
-			ClassRestrictionCondition crc = ((SadlResourceByRestriction)superClsName).getRestrictCondition();
-			superCls = getRestriction(crc, pname);
+		else if (identifier instanceof SadlResourceByRestriction) {
+			ConceptName pname = ((SadlResourceByRestriction)identifier).getOnProperty();
+			ClassRestrictionCondition crc = ((SadlResourceByRestriction)identifier).getRestrictCondition();
+			ontCls = getRestriction(crc, pname);
 		}
-		return superCls;
+		else if (identifier != null){
+			addError(argIdx, ExistingNamePart.NOTAPPLICABLE,
+					"Concept identifier (" + identifier.toString()
+							+ ") not of expected type.");
+		}
+		return ontCls;
 	}
 	
 	private Restriction getRestriction(ClassRestrictionCondition crc, ConceptName prop) {
@@ -5810,6 +5878,11 @@ public class ModelManager {
 			pr = getOntResourceInExistingModel(prop);
 			if (pr != null) {
 				pType = getOntResourceConceptType(pr);
+				if (!(pType.equals(ConceptType.OBJECTPROPERTY) || pType.equals(ConceptType.DATATYPEPROPERTY))) {
+					// this is not a valid statement
+					addError(2, "'" + prop.toFQString() + "' is not a property but is being used as one in the Restriction '" + crc.toString() + "'");
+					return null;
+				}
 				prop.setType(pType);
 				prop.setNamespace(pr.getNameSpace());
 				p = pr.as(OntProperty.class);
@@ -6070,7 +6143,7 @@ public class ModelManager {
 		return lastInstanceCreated;
 	}
 
-	private void addSadlCommand(SadlCommand sadlCommand) {
+	protected void addSadlCommand(SadlCommand sadlCommand) {
 		if (sadlCommands == null) {
 			sadlCommands = new ArrayList<SadlCommand>();
 		}
@@ -6247,16 +6320,69 @@ public class ModelManager {
 			queryStr = getConfigurationMgr().getTranslator().translateQuery(
 				jenaModel, (Query) cmd);
 		}
-		logger.info("Translated query: " + queryStr);
+		if (queryContainsQName(queryStr)) {
+			logger.debug("Translated query: " + queryStr);
+			queryStr = reasoner.prepareQuery(queryStr);
+		}
 		ResultSet rs = reasoner.ask(queryStr);
-		if (rs == null) {
-			String newQueryStr = reasoner.prepareQuery(queryStr);
-			if (!newQueryStr.equals(queryStr)) {
-				logger.info("Prepared translated query: " + newQueryStr);
-				rs = reasoner.ask(newQueryStr);
+		handleErrors(reasoner, cmd);
+//		if (rs == null) {
+//			String newQueryStr = reasoner.prepareQuery(queryStr);
+//			if (!newQueryStr.equals(queryStr)) {
+//				logger.info("Prepared translated query: " + newQueryStr);
+//				rs = reasoner.ask(newQueryStr);
+//			}
+//		}
+		return rs;
+	}
+	
+	private boolean queryContainsQName(String q) {
+		int start = 0;
+		int openBracket = q.indexOf('<');
+		while (openBracket > start) {
+			int closeBracket = q.indexOf('>', openBracket);
+			if (closeBracket <= openBracket) {
+				// this could be a comparison in a FILTER...
+				start = openBracket + 1;
+				continue;
+			}
+			String url = q.substring(openBracket, closeBracket);
+			start = closeBracket + 1;
+			openBracket = q.indexOf('<', start);
+			if (url.indexOf('#') > 0) {
+				// a full URI
+				continue;
+			}
+			else if (url.indexOf(':') > 0) {
+				// a QName
+				return true;
+			}
+			else {
+				// a local fragment only
+				return true;
 			}
 		}
-		return rs;
+		return false;
+
+	}
+
+	private void handleErrors(IReasoner reasoner, SadlCommand cmd) {
+		List<com.ge.research.sadl.reasoner.ModelError> errors = reasoner.getErrors();
+		if (errors != null) {
+			for (int i = 0; i < errors.size(); i++) {
+				com.ge.research.sadl.reasoner.ModelError error = errors.get(i);
+				if (error.getErrorType().equals(ErrorType.ERROR)) {
+					getMessageManager().error(error.getErrorMsg());
+				}
+				else if (error.getErrorType().equals(ErrorType.INFO)) {
+					getMessageManager().warn(error.getErrorMsg());
+				}
+				else {
+					getMessageManager().info(error.getErrorMsg());
+				}
+//				addError(new ModelError(error.getErrorMsg(), error.getErrorType()));
+			}
+		}
 	}
 
 	/**
@@ -6274,9 +6400,9 @@ public class ModelManager {
 		int testsPassed = 0;
 		int cancelled = 0 ;
 		
-		logger.info("Running tests");
+		logger.debug("Running tests");
 
-		IConfigurationManagerForIDE configMgr = null;
+		ConfigurationManagerForIDE configMgr = null;
 		IReasoner reasoner = null;
 		try {
 			configMgr = getConfigurationMgr();
@@ -6290,12 +6416,13 @@ public class ModelManager {
 				if (actualUrl.startsWith(ResourceManager.FILE_SHORT_PREFIX)) {
 					// check to make sure that the OWL file has been built
 					if (!configMgr.getModelGetter().getFormat().equals(IConfigurationManager.JENA_TDB)) {
-						File mf = new File(getConfigurationMgr().fileUrlToFileName(actualUrl));
+						File mf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(actualUrl));
 						if (mf.exists()) {
 							long owlTS = mf.lastModified();
-							String sadlFN = ResourceManager.sadlFileNameOfOwlAltUrl(actualUrl, true);
-							sadlFN = ResourceManager.findSadlFileInProject(getConfigurationMgr().fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString()), sadlFN);
-							File sf = new File(getConfigurationMgr().fileUrlToFileName(sadlFN));
+							String sadlFN = ResourceManager.sadlFileNameOfOwlAltUrl(actualUrl);
+							String prjDir = getConfigurationMgr().getSadlUtils().fileUrlToFileName(ResourceManager.getProjectUri(URI.createURI(actualUrl)).toString());
+							sadlFN = ResourceManager.findSadlFileInProject(prjDir, sadlFN, ResourceManager.sadlExclusionFolders(prjDir));
+							File sf = new File(getConfigurationMgr().getSadlUtils().fileUrlToFileName(sadlFN));
 							if (sf.exists()) {
 								long sadlTS = sf.lastModified();
 								if (sadlTS > owlTS) {
@@ -6337,10 +6464,95 @@ public class ModelManager {
 					break;
 				}
 			}
+			StartWrite writeInEffect = null;
+			StringBuilder writeAccumulator = null;
 			for (int i = 0; i < sadlCommands.size(); i++) {
 				SadlCommand cmd = sadlCommands.get(i);
 				try {
-					if (cmd instanceof Print) {
+					if (cmd instanceof StartWrite) {
+						writeInEffect = (StartWrite) cmd;
+						if (writeAccumulator == null) {
+							writeAccumulator = new StringBuilder();
+						}
+						else if (writeAccumulator.length() > 0){
+							writeAccumulator.delete(0, writeAccumulator.length());
+						}
+					}
+					else if (cmd instanceof EndWrite) {
+						String ofn = ((EndWrite)cmd).getOutputFilename(); 
+						File of = new File(ofn); 
+						if (of.getParentFile() != null && of.getParentFile().exists()
+								&& of.getParentFile().isDirectory()) {
+							// this must be an absolute path
+						}
+						else {
+							// assume a relative path
+							String prjDir = ResourceManager.getProjectUri(getModelActualUrl()).toString();
+							String filepath = prjDir + File.separator + ofn;
+						}
+						getConfigurationMgr().getSadlUtils().stringToFile(of, writeAccumulator.toString(), false);
+						writeInEffect = null;
+					}
+					else if (cmd instanceof Read) {
+						String ifn = ((Read)cmd).getInputFilename();
+						String tfn = ((Read)cmd).getTemplateFilename();
+						File inFile = getConfigurationMgr().resolveFilename(ifn);
+						if (inFile == null) {
+							String msg = "Failed to find Read file '" + ifn + ".\n";
+							getMessageManager().error(msg, getMessageManager().new HyperlinkInfo(getModelActualUrl().toFileString(),
+													cmd.getLineNo(), cmd.getOffset(), cmd.getLength()));
+						}
+						if (tfn != null) {		// this is a mapped read with template
+							File tf = getConfigurationMgr().resolveFilename(tfn);
+							if (tf == null) {
+								String msg = "Failed to find Template file '" + tfn + "'.\n";
+								getMessageManager().error(msg, getMessageManager().new HyperlinkInfo(getModelActualUrl().toFileString(),
+														cmd.getLineNo(), cmd.getOffset(), cmd.getLength()));
+							}
+							else {
+								CsvImporter importer = new CsvImporter(getConfigurationMgr());
+								importer.setCsvFilename(inFile.getAbsolutePath(), true);
+								importer.setModelFolder(getConfigurationMgr().getModelFolder());
+//								importer.setImportModelNamespace(defaultInstanceDataNS);		
+//								Object[] o = scanTemplateForImports(csvTemplateString);
+//								int numImports = 0;
+//								if (o != null && o.length > 0) {
+//									if (o[1] != null && o[1] instanceof List && ((List)o[1]).size() > 0) {
+//										List<String> templateImports = (List<String>) o[1];
+//										importer.setImports(templateImports);
+//										numImports = templateImports.size();
+//									}
+//									else {
+//										importer.setImports(getModelName());
+//										numImports = 1;
+//									}
+//									String processedTemplate = (String) o[0];
+//									importer.setTemplates(processedTemplate);
+//									logger.info("Scanned template statistics: Original size = "+csvTemplateString.length()+
+//											"  Processed size = "+processedTemplate.length()+
+//											"  Number of imports = "+numImports);
+//								}
+								importer.setTemplates(getConfigurationMgr().getSadlUtils().fileNameToFileUrl(tf.getAbsolutePath()));
+								OntModel om;
+								try {
+									om = importer.getOwlModel();
+									if (logger.isDebugEnabled()) {
+										ByteArrayOutputStream baos = new ByteArrayOutputStream();
+										om.write(baos, "N3");
+										logger.debug(baos.toString());
+									}
+									reasoner.loadInstanceData(om);
+								} catch (ReasonerNotFoundException e) {
+									throw new ConfigurationException(e.getMessage(), e);
+								}
+								
+							}
+						}
+						else {	// this is a straight read of an input file
+							reasoner.loadInstanceData(inFile.getAbsolutePath());						
+						}
+					}
+					else if (cmd instanceof Print) {
 						long tp1 = System.currentTimeMillis();
 						String msg = null;
 						if (((Print) cmd).getDisplayString() != null) {
@@ -6351,6 +6563,9 @@ public class ModelManager {
 											getModelActualUrl().toFileString(),
 											cmd.getLineNo(), cmd.getOffset(),
 											cmd.getLength()));
+							if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+								writeAccumulator.append(msg);
+							}
 						} else {
 							try {
 								File tmpdir = getProjectTempDir();
@@ -6426,14 +6641,16 @@ public class ModelManager {
 						String qstr;
 						if (((Query)cmd).isToBeEvaluated()) {
 							Object evalstr = rs.getResultAt(0, 0);
-							logger.info("Evaluation of query: " + evalstr.toString());
+							logger.debug("Evaluation of query: " + evalstr.toString());
 							qstr = reasoner.prepareQuery(evalstr.toString());
 							rs = reasoner.ask(qstr);
 						}
 						else {
 							qstr = ((Query)cmd).toString();
 						}
+						boolean isConstructQuery = false;
 						if (qstr != null && qstr.length() > 9 && qstr.substring(0, 9).compareToIgnoreCase("construct") == 0) {
+							isConstructQuery = true;
 							try {
 								File tmpdir = getProjectTempDir();
 								if (tmpdir != null) {
@@ -6455,6 +6672,28 @@ public class ModelManager {
 							}
 						}
 						consoleOutput((Query) cmd, rs);
+						if (writeInEffect != null) {
+							if (rs != null) {
+								if (isConstructQuery && writeInEffect.isDataOnly()) {
+									// in this case we will get a graph model and output to accumulator
+									qstr = reasoner.prepareQuery(qstr);
+									DataSource src = reasoner.construct(qstr);
+									InputStream is = src.getInputStream();
+									BufferedReader br = new BufferedReader(new InputStreamReader(is));
+									for(String line = br.readLine(); line != null; line = br.readLine()) {
+										writeAccumulator.append(line);
+										writeAccumulator.append("\n");
+									}
+									br.close();
+								}
+								else {
+									writeAccumulator.append(rs.toString());
+								}
+							}
+							else {
+								getMessageManager().error("Unable to write query result to file; no results.");
+							}
+						}
 						queryCnt++;
 					} else if (cmd instanceof Test) {
 						testCnt++;
@@ -6555,6 +6794,9 @@ public class ModelManager {
 											getModelActualUrl().toFileString(),
 											cmd.getLineNo(), cmd.getOffset(),
 											cmd.getLength(), 13, -1));
+							if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+								writeAccumulator.append(msg);
+							}
 						} else if (testResult.isPassed()) {
 							testsPassed++;
 							String msg = "Test passed: " + cmd.toString()
@@ -6565,6 +6807,9 @@ public class ModelManager {
 											getModelActualUrl().toFileString(),
 											cmd.getLineNo(), cmd.getOffset(),
 											cmd.getLength(), 13, -1));
+							if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+								writeAccumulator.append(msg);
+							}
 						} else {
 							String msg = "Test failed: " + cmd.toString()
 									+ "\n";
@@ -6580,6 +6825,9 @@ public class ModelManager {
 							getMessageManager().error(
 									"    " + testResult.toString((Test) cmd)
 											+ "\n");
+							if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+								writeAccumulator.append(msg);
+							}
 						}
 					}
 				} catch (TranslationException e) {
@@ -6927,7 +7175,7 @@ public class ModelManager {
 	 */
 	public int validateModel(String modelName, IReasoner reasoner) {
 		if (reasoner == null) {
-			IConfigurationManagerForIDE configMgr;
+			ConfigurationManagerForIDE configMgr;
 			try {
 				configMgr = getConfigurationMgr();
 				configMgr.clearReasoner();
@@ -7025,7 +7273,7 @@ public class ModelManager {
 			setVariablesFromPatterns(newQuery);
 			String queryStr = getConfigurationMgr().getTranslator()
 					.translateQuery(jenaModel, newQuery);
-			logger.info("Translated query: " + queryStr);
+			logger.debug("Translated query: " + queryStr);
 			ResultSet lhResultSet = reasoner.ask(queryStr);
 			if (lhResultSet != null) {
 				return new TestResult(true);
@@ -7063,7 +7311,7 @@ public class ModelManager {
 		if (subject != null && predicate != null) {
 			ResultSet rs = reasoner.ask(subject, predicate, object);
 			if (logger.isInfoEnabled())
-				logger.info("ResultSet: "
+				logger.debug("ResultSet: "
 						+ (rs != null ? rs.toString() : "null"));
 			if (on instanceof NamedNode) { // object != null) {
 				if (triple.getModifierType().equals(TripleModifierType.None)) {
@@ -7273,7 +7521,7 @@ public class ModelManager {
 					try {
 						String queryStr = getConfigurationMgr().getTranslator()
 								.translateQuery(getJenaModel(), tmpQuery);
-						logger.info("Found SPARQL query as literal: "
+						logger.debug("Found SPARQL query as literal: "
 								+ queryStr);
 						obj = reasoner.ask(queryStr);
 					} catch (InvalidNameException e) {
@@ -7302,7 +7550,7 @@ public class ModelManager {
 				try {
 					queryStr = getConfigurationMgr().getTranslator()
 							.translateQuery(jenaModel, (Query) obj);
-					logger.info("Translated query: " + queryStr);
+					logger.debug("Translated query: " + queryStr);
 					ResultSet lhResultSet = reasoner.ask(queryStr);
 					obj = lhResultSet;
 				} catch (InvalidNameException e) {
@@ -7443,14 +7691,14 @@ public class ModelManager {
 				}
 			}
 			if (type.equals(ComparisonType.IsOnly)) {
-//				if (ResultSet.valuesMatchExactly(lhval, rhval)) {
-//					return new TestResult(true);
-//				}
+				if (ResultSet.valuesMatchExactly(lhval, rhval)) {
+					return new TestResult(true);
+				}
 			}
 			if (type.equals(ComparisonType.IsNotOnly)) {
-//				if (!ResultSet.valuesMatchExactly(lhval, rhval)) {
-//					return new TestResult(true);
-//				}
+				if (!ResultSet.valuesMatchExactly(lhval, rhval)) {
+					return new TestResult(true);
+				}
 			}
 		}
 		if ((type.equals(ComparisonType.IsNot) || type
@@ -7622,7 +7870,7 @@ public class ModelManager {
 		return messageManager;
 	}
 
-	private void setConfigurationMgr(IConfigurationManagerForIDE configurationMgr) {
+	private void setConfigurationMgr(ConfigurationManagerForIDE configurationMgr) {
 		this.configurationMgr = configurationMgr;
 	}
 
@@ -7635,12 +7883,22 @@ public class ModelManager {
 	 * @throws ConfigurationException
 	 * @throws MalformedURLException 
 	 */
-	public IConfigurationManagerForIDE getConfigurationMgr()
+	public ConfigurationManagerForIDE getConfigurationMgr()
 			throws ConfigurationException, MalformedURLException {
-		String knowledgeBaseIdentifier = getOwlModelsFolderPath();
-		if (knowledgeBaseIdentifier != null) {
-			if (configurationMgr == null) {
-				setConfigurationMgr(new ConfigurationManagerForIDE(knowledgeBaseIdentifier, ConfigurationManagerForIDE.getOWLFormat()));
+		if (configurationMgr == null) {
+			String knowledgeBaseIdentifier = getOwlModelsFolderPath();
+			if (knowledgeBaseIdentifier != null) {
+				if (configMgrProvider != null) {
+					try {
+						setConfigurationMgr((ConfigurationManagerForIDE) configMgrProvider.getConfigurationManager(knowledgeBaseIdentifier));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if (configurationMgr == null) {
+					setConfigurationMgr(new ConfigurationManagerForIDE(knowledgeBaseIdentifier, ConfigurationManagerForIDE.getOWLFormat()));
+				}
 //				throw new ConfigurationException("ModelManager doesn't have a ConfigurationManager; this shouldn't happen");
 			} 
 		}
@@ -8043,6 +8301,15 @@ public class ModelManager {
 						+ e.getLocalizedMessage());
 			}
 		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("trying to findAllUriResourcesInAnon(" + rr.toString() + "); not union and not intersection");
+				ExtendedIterator<OntModel> eitr = rr.getOntModel().listSubModels(true);
+				while (eitr.hasNext()) {
+					logger.debug("This model imports '" + eitr.next().toString() + "'");
+				}
+			}
+		}
 		return null;
 	}
 
@@ -8122,6 +8389,12 @@ public class ModelManager {
 		if (name instanceof SadlIntersectionClass || name instanceof SadlUnionClass) {
 			return false;
 		}
+		if (name instanceof ConceptName) {
+			name = validateConceptName((ConceptName) name);
+			if (((ConceptName) name).getType().equals(ConceptType.RDFDATATYPE)) {
+				return true;
+			}
+		}
 		if (name instanceof ConceptName && (((ConceptName)name).hasPrefix() || ((ConceptName)name).getNamespace() != null)) {
 			try {
 				uri = ((ConceptName)name).getUri(getConfigurationMgr());
@@ -8129,8 +8402,44 @@ public class ModelManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvalidNameException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				if (((ConceptName) name).getPrefix() != null && ((ConceptName) name).getNamespace() == null && namespacesAndPrefixes != null &&
+						namespacesAndPrefixes.containsValue(((ConceptName) name).getPrefix())) {
+					Iterator<String> keyitr = namespacesAndPrefixes.keySet().iterator();
+					while (keyitr.hasNext()) {
+						String key = keyitr.next();
+						String value = namespacesAndPrefixes.get(key);
+						if (value.equals(((ConceptName)name).getPrefix())) {
+							((ConceptName)name).setNamespace(key + "#");
+							try {
+								uri = ((ConceptName)name).getUri(getConfigurationMgr());
+								break;
+							} catch (MalformedURLException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (InvalidNameException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (ConfigurationException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+					}
+				}
+				if (uri == null) {
+					try {
+						uri = findPrefixInModel((ConceptName) name);
+						if (uri != null) {
+							((ConceptName)name).setNamespace(uri);
+						}
+					} catch (PrefixNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				if (uri == null) {
+					e.printStackTrace();
+				}
 			} catch (ConfigurationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -8159,90 +8468,215 @@ public class ModelManager {
 	public List<ModelError> addUserDefinedDataType(String name,
 			EList<DataType> unionOfTypes, String baseType, String minexin, String min, String maxexin,
 			String max, String regex, String len, String minlen, String maxlen, EList<String> values) {
-		String uri = getModelName();
+	
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append("<xsd:schema\n  xmlns:xsd =\"http://www.w3.org/2001/XMLSchema\"\n  xml:base=\"");
-		sb.append(getModelName());
-		sb.append( "\">\n");
-		sb.append("  <xsd:simpleType name=\"");
-		sb.append(name);
-		sb.append("\">\n");
-		if (unionOfTypes != null && unionOfTypes.size() > 0) {
-			sb.append("    <xsd:union>\n");
-			for (int i = 0; i < unionOfTypes.size(); i++) {
-				sb.append("      <xsd:simpleType>\n        <xsd:restriction base=\"xsd:");
-				sb.append(unionOfTypes.get(i));
-				sb.append("\"/>\n");
-				sb.append("      </xsd:simpleType>\n");
-			}
-			sb.append("    </xsd:union>\n");			
-		}
-		else {
-			sb.append("   <xsd:restriction base=\"xsd:");
-			sb.append(baseType);
-			sb.append("\">\n");
-			if (min != null) {
-				if (minexin.equals("[")) {
-					sb.append("<xsd:minInclusive value=\"");
-				}
-				else {
-					sb.append("<xsd:minExclusive value=\"");
-				}
-				sb.append(min);
-				sb.append("\"/>\n");
-			}
-			if (max != null) {
-				if (minexin.equals("]")) {
-					sb.append("<xsd:maxInclusive value=\"");
-				}
-				else {
-					sb.append("<xsd:maxExclusive value=\"");
-				}
-				sb.append(max);
-				sb.append("\"/>\n");
-			}
-			
-			if (len != null) {
-				if (baseType.equals("string")) {
-					sb.append("<xsd:length value=\"");
-				}
-				else {
-					sb.append("<xsd:totalDigits value=\"");
-				}
-				sb.append(len);
-				sb.append("\"/>\n");
+		String datatypeuri = getModelNamespace() + name;
+		OntClass datatype = getJenaModel().createOntResource(OntClass.class, RDFS.Datatype, datatypeuri);
+		OntClass equivClass = getJenaModel().createOntResource(OntClass.class, RDFS.Datatype, null);
+		
+		if (baseType != null) {
+			Resource baseRsrc = getXSDResource(baseType);
+			equivClass.addProperty(OWL2.onDatatype, baseRsrc);
+			RDFList collection = getJenaModel().createList();			
+			if (maxlen != null) {
+				Resource facet = getJenaModel().createResource();
+				Property ml = getJenaModel().getProperty(XSD.getURI() + "maxLength");
+				facet.addProperty(ml, maxlen);
+				collection.with(facet);
 			}
 			if (minlen != null) {
-				sb.append("<xsd:minLength value=\"");
-				sb.append(minlen);
-				sb.append("\"/>\n");
+				Resource facet = getJenaModel().createResource();
+				Property ml = getJenaModel().getProperty(XSD.getURI() + "minLength");
+				facet.addProperty(ml, maxlen);
+				collection.with(facet);
 			}
-			if (maxlen != null) {
-				sb.append("<xsd:maxLength value=\"");
-				sb.append(maxlen);
-				sb.append("\"/>\n");
-			}
-				
-			if (regex != null) {
-				sb.append("<xsd:pattern value=\"");
-				sb.append(regex);
-				sb.append("\"/>\n");
-			}
-			sb.append("    </xsd:restriction>\n");
+			equivClass.addProperty(OWL2.withRestrictions, collection);
 		}
-		sb.append("  </xsd:simpleType>\n</xsd:schema>\n");
+		else if (unionOfTypes != null) {
+			Iterator<DataType> iter = unionOfTypes.iterator();
+			RDFList collection = getJenaModel().createList();
+			while (iter.hasNext()) {
+				DataType dt = iter.next();
+				Resource dtr = getXSDResource(dt.getName());
+				collection.with(dtr);
+			}
+			equivClass.addProperty(OWL.unionOf, collection);
+		}
+		else {
+			addError(0, "User-defined data type '" + name + "' must have base type or be a union.");
+		}
 		
-		try {
-			addUserDefinedDataType(name, sb.toString());
-			StringReader sr = new StringReader(sb.toString());
-	        XSDDatatype.loadUserDefined(uri, sr, null, TypeMapper.getInstance());
-		} catch (InvalidNameException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			addError(0, "Unexpected error creating user-defined data type '" + name + "': " + e.getMessage());
-		}
+		datatype.addEquivalentClass(equivClass);
+		
+		
+//		String uri = getModelName();
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("<xsd:schema\n  xmlns:xsd =\"http://www.w3.org/2001/XMLSchema\"\n  xml:base=\"");
+//		sb.append(getModelName());
+//		sb.append( "\">\n");
+//		sb.append("  <xsd:simpleType name=\"");
+//		sb.append(name);
+//		sb.append("\">\n");
+//		if (unionOfTypes != null && unionOfTypes.size() > 0) {
+//			sb.append("    <xsd:union>\n");
+//			for (int i = 0; i < unionOfTypes.size(); i++) {
+//				sb.append("      <xsd:simpleType>\n        <xsd:restriction base=\"xsd:");
+//				sb.append(unionOfTypes.get(i));
+//				sb.append("\"/>\n");
+//				sb.append("      </xsd:simpleType>\n");
+//			}
+//			sb.append("    </xsd:union>\n");			
+//		}
+//		else {
+//			sb.append("   <xsd:restriction base=\"xsd:");
+//			sb.append(baseType);
+//			sb.append("\">\n");
+//			if (min != null) {
+//				if (minexin.equals("[")) {
+//					sb.append("<xsd:minInclusive value=\"");
+//				}
+//				else {
+//					sb.append("<xsd:minExclusive value=\"");
+//				}
+//				sb.append(min);
+//				sb.append("\"/>\n");
+//			}
+//			if (max != null) {
+//				if (minexin.equals("]")) {
+//					sb.append("<xsd:maxInclusive value=\"");
+//				}
+//				else {
+//					sb.append("<xsd:maxExclusive value=\"");
+//				}
+//				sb.append(max);
+//				sb.append("\"/>\n");
+//			}
+//			
+//			if (len != null) {
+//				if (baseType.equals("string")) {
+//					sb.append("<xsd:length value=\"");
+//				}
+//				else {
+//					sb.append("<xsd:totalDigits value=\"");
+//				}
+//				sb.append(len);
+//				sb.append("\"/>\n");
+//			}
+//			if (minlen != null) {
+//				sb.append("<xsd:minLength value=\"");
+//				sb.append(minlen);
+//				sb.append("\"/>\n");
+//			}
+//			if (maxlen != null) {
+//				sb.append("<xsd:maxLength value=\"");
+//				sb.append(maxlen);
+//				sb.append("\"/>\n");
+//			}
+//				
+//			if (regex != null) {
+//				sb.append("<xsd:pattern value=\"");
+//				sb.append(regex);
+//				sb.append("\"/>\n");
+//			}
+//			sb.append("    </xsd:restriction>\n");
+//		}
+//		sb.append("  </xsd:simpleType>\n</xsd:schema>\n");
+//		
+//		try {
+//			addUserDefinedDataType(name, sb.toString());
+//			StringReader sr = new StringReader(sb.toString());
+//	        XSDDatatype.loadUserDefined(uri, sr, null, TypeMapper.getInstance());
+//		} catch (InvalidNameException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			addError(0, "Unexpected error creating user-defined data type '" + name + "': " + e.getMessage());
+//		}
 		return getErrorsFinal();
+	}
+
+	private Resource getXSDResource(String baseType) {
+		if (baseType.equals("string")) {
+			return XSD.xstring;
+		}
+		else if (baseType.equals("booelan")) {
+			return XSD.xboolean;
+		}
+		else if (baseType.equals("decimal")) {
+			return XSD.decimal;
+		}
+		else if (baseType.equals("int")) {
+			return XSD.xint;
+		}
+		else if (baseType.equals("integer")) {
+			return XSD.integer;
+		}
+		else if (baseType.equals("negativeInteger")) {
+			return XSD.negativeInteger;
+		}
+		else if (baseType.equals("nonNegativeInteger")) {
+			return XSD.nonNegativeInteger;
+		}
+		else if (baseType.equals("positiveInteger")) {
+			return XSD.positiveInteger;
+		}
+		else if (baseType.equals("nonPositiveInteger")) {
+			return XSD.nonPositiveInteger;
+		}
+		else if (baseType.equals("long")) {
+			return XSD.xlong;
+		}
+		else if (baseType.equals("float")) {
+			return XSD.xfloat;
+		}
+		else if (baseType.equals("double")) {
+			return XSD.xdouble;
+		}
+		else if (baseType.equals("duration")) {
+			return XSD.duration;
+		}
+		else if (baseType.equals("dateTime")) {
+			return XSD.dateTime;
+		}
+		else if (baseType.equals("time")) {
+			return XSD.time;
+		}
+		else if (baseType.equals("date")) {
+			return XSD.date;
+		}
+		else if (baseType.equals("unsignedByte")) {
+			return XSD.unsignedByte;
+		}
+		else if (baseType.equals("unsignedInt")) {
+			return XSD.unsignedInt;
+		}
+//		else if (baseType.equals("anySimpleType")) {
+//			return XSD.?;
+//		}
+		else if (baseType.equals("gYearMonth")) {
+			return XSD.gYearMonth;
+		}
+		else if (baseType.equals("gYear")) {
+			return XSD.gYear;
+		}
+		else if (baseType.equals("gMonthDay")) {
+			return XSD.gMonthDay;
+		}
+		else if (baseType.equals("gDay")) {
+			return XSD.gDay;
+		}
+		else if (baseType.equals("gMonth")) {
+			return XSD.gMonth;
+		}
+		else if (baseType.equals("hexBinary")) {
+			return XSD.hexBinary;
+		}
+		else if (baseType.equals("base64Binary")) {
+			return XSD.base64Binary;
+		}
+		else if (baseType.equals("anyURI")) {
+			return XSD.anyURI;
+		}
+		return null;
 	}
 
 	public Object getOtherKnowledgeStructure() {
@@ -8292,5 +8726,260 @@ public class ModelManager {
 		}
 		userDefinedDataTypes.put(name,  xsdDefinition);
 	}
+	
+	public String getUserDefinedDataType(String name) {
+		if (userDefinedDataTypes != null) {
+			return userDefinedDataTypes.get(name);
+		}
+		return null;
+	}
 
+	public boolean instanceBelongsToClass(ConceptName inst, ConceptIdentifier cls) {
+		return instanceBelongsToClass(getJenaModel(), getIndividual(inst), conceptIdentifierToOntClass(0, 0, cls));
+	}
+	
+	public boolean classIsSubclassOf(ConceptIdentifier subclass, ConceptIdentifier cls) {
+		return classIsSubclassOf(conceptIdentifierToOntClass(0,  0,  subclass), conceptIdentifierToOntClass(0,  0, cls), true);
+	}
+
+	public boolean classIsSuperclassOf(ConceptIdentifier superclass, ConceptIdentifier cls) {
+		return classIsSuperClassOf(conceptIdentifierToOntClass(0,  0, superclass), conceptIdentifierToOntClass(0,  0,  cls));
+	}
+
+	public String getGlobalPrefix() {
+		return globalPrefix;
+	}
+
+	private void setGlobalPrefix(String globalPrefix) {
+		this.globalPrefix = globalPrefix;
+	}
+
+	private String rulePatternNS = "http://sadl.org/rule/patterns#";
+	private String rulePatternDataNS = "http://sadl.org/rule/patterns/data#";
+	private String rulePatternDataFN = null;
+
+	public void saveAllRulePatterns(List<Rule> allRules, IConfigurationManagerForIDE configMgr) {
+		try {
+			String modelFolder = configMgr.getModelFolder();
+			String targetFN = modelFolder + "/RulePatterns.owl";
+			try {
+				ResourceManager.copyModelFileToTarget(targetFN, false);
+			}
+			catch (Throwable t2) {
+				// this is OK--although it shouldn't happen...
+			}
+			File metamodel = new File(targetFN);
+			if (metamodel.exists()) {
+				SadlUtils su = new SadlUtils();
+				configMgr.addMapping(su.fileNameToFileUrl(targetFN), rulePatternNS.substring(0, rulePatternNS.length() - 1), "srpns", false, "Rule Pattern Capture");
+				Model mmodel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM).read(su.fileNameToFileUrl(targetFN));
+				OntModel ruleModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+				ruleModel.setNsPrefix("srpns", rulePatternNS);
+//				ruleModel.getImportedModel(rulePatternUri);
+				ruleModel.add(mmodel);
+				Iterator<Rule> ritr = allRules.iterator();
+				while (ritr.hasNext()) {
+					Rule rule = ritr.next();
+					Individual ruleInst = addRuleToAllRulePatterns(rule, ruleModel, rule);
+					int sequenceNumber = 0;
+					Iterator<GraphPatternElement> gpitr;
+					if (rule.getGivens() != null) {
+						gpitr = rule.getGivens().iterator();
+						while (gpitr.hasNext()) {
+							sequenceNumber = addPatternToAllRulePatterns(rule, ruleModel, ruleInst, gpitr.next(), true, sequenceNumber);
+						}
+					}
+					if (rule.getIfs() != null) {
+						gpitr = rule.getIfs().iterator();
+						while (gpitr.hasNext()) {
+							sequenceNumber = addPatternToAllRulePatterns(rule, ruleModel, ruleInst, gpitr.next(), true, sequenceNumber);
+						}
+					}
+					sequenceNumber = 0;
+					if (rule.getThens() != null) {
+						gpitr = rule.getThens().iterator();
+						while (gpitr.hasNext()) {
+							sequenceNumber = addPatternToAllRulePatterns(rule, ruleModel, ruleInst, gpitr.next(), false, sequenceNumber);
+						}
+					}
+				}
+				// save model
+				rulePatternDataFN = su.fileUrlToFileName(su.fileNameToFileUrl(modelFolder + "/RulePatternData.owl"));
+				FileOutputStream fps = new FileOutputStream(rulePatternDataFN);
+				String format = "RDF/XML";
+				RDFWriter rdfw = ruleModel.getWriter(format);
+				// NTripleWriter.setProperty always throws UnknownPropertyException;
+				// ditto for N3.
+				String rulePatternDataUri = rulePatternDataNS.substring(0, rulePatternDataNS.length() - 1);
+				if (format.startsWith("RDF/XML")) {
+					rdfw.setProperty("xmlbase", rulePatternDataUri);
+					rdfw.setProperty("relativeURIs", "");
+					rdfw.setProperty("minimalPrefixes", true);
+				}
+
+				ruleModel.setNsPrefix("", rulePatternDataNS);
+				rdfw.write(((OntModel)ruleModel).getBaseModel(), fps, rulePatternDataUri);
+				fps.close();
+				configMgr.addMapping(su.fileNameToFileUrl(rulePatternDataFN), rulePatternDataUri, "srpdns", false, "Rule Pattern Capture");
+				configMgr.saveOntPolicyFile();				
+			}
+			else {
+				getMessageManager().equals("Unable to save rule pattern data, RulePatterns.owl not found.");
+			}
+		}
+		catch(Throwable t) {
+			getMessageManager().equals("Unable to save rule pattern data: " + t.getMessage());
+	
+		}
+	}
+
+	private OntClass ruleCls = null;
+	private OntClass builtinCls = null;
+	private OntClass tripleCls = null;
+	private OntClass argumentCls = null;
+	private OntClass resourceCls = null;
+	private OntClass variableCls = null;
+	private OntClass literalCls = null;
+	private OntClass freeNodeCls = null;
+	private ObjectProperty conditionProp = null;
+	private ObjectProperty conclusionProp = null;
+	private ObjectProperty argListProp = null;
+	private ObjectProperty argProp = null;
+	private ObjectProperty nextProp = null;
+	private ObjectProperty subjProp = null;
+	private ObjectProperty predProp = null;
+	private ObjectProperty objProp = null;
+	private DatatypeProperty editorLine = null;
+	private DatatypeProperty editorLength = null;
+	private DatatypeProperty editorOffset = null;
+	private DatatypeProperty litValueProp = null;
+	private DatatypeProperty sequenceNumber = null;
+	
+	private Individual addRuleToAllRulePatterns(Rule rule2, OntModel ruleModel, Rule rule) {
+		if (ruleCls == null) {
+			ruleCls = ruleModel.getOntClass(rulePatternNS + "Rule");
+			builtinCls = ruleModel.getOntClass(rulePatternNS + "Builtin");
+			tripleCls = ruleModel.getOntClass(rulePatternNS + "Triple");
+			argumentCls = ruleModel.getOntClass(rulePatternNS + "Argument");
+			resourceCls = ruleModel.getOntClass(rulePatternNS + "Resource");
+			variableCls = ruleModel.getOntClass(rulePatternNS + "Variable");
+			literalCls = ruleModel.getOntClass(rulePatternNS + "Literal");
+			freeNodeCls = ruleModel.getOntClass(rulePatternNS + "Node");
+			conditionProp = ruleModel.getObjectProperty(rulePatternNS + "condition");
+			conclusionProp = ruleModel.getObjectProperty(rulePatternNS + "conclusion");
+			argListProp = ruleModel.getObjectProperty(rulePatternNS + "argumentList");
+			argProp = ruleModel.getObjectProperty(rulePatternNS + "argument");
+			nextProp = ruleModel.getObjectProperty(rulePatternNS + "next");
+			subjProp = ruleModel.getObjectProperty(rulePatternNS + "subject");
+			predProp = ruleModel.getObjectProperty(rulePatternNS + "predicate");
+			objProp = ruleModel.getObjectProperty(rulePatternNS + "object");
+			editorLine = ruleModel.getDatatypeProperty(rulePatternNS + "editorLine");
+			editorLength = ruleModel.getDatatypeProperty(rulePatternNS + "editorLength");
+			editorOffset = ruleModel.getDatatypeProperty(rulePatternNS + "editorOffset");
+			litValueProp = ruleModel.getDatatypeProperty(rulePatternNS + "value");
+			sequenceNumber = ruleModel.getDatatypeProperty(rulePatternNS + "sequenceNumber");
+			
+		}
+		Individual ruleInst = ruleModel.createIndividual(rule.getRuleNamespace() + rule.getRuleName(), ruleCls);
+		ruleInst.setPropertyValue(editorLine, ruleModel.createTypedLiteral(rule.getEditorLine()));
+		ruleInst.setPropertyValue(editorLength, ruleModel.createTypedLiteral(rule.getEditorLength()));		
+		ruleInst.setPropertyValue(editorOffset, ruleModel.createTypedLiteral(rule.getEditorOffset()));
+		return ruleInst;
+	}
+
+	private int addPatternToAllRulePatterns(Rule rule, OntModel ruleModel, Individual ruleInst, GraphPatternElement gpe, boolean isCondition, int sequenceNumber) {
+		if (gpe instanceof BuiltinElement) {
+			Individual bi = ruleModel.createIndividual(builtinCls);
+			bi.addLabel(((BuiltinElement)gpe).getFuncName(), null);
+			sequenceNumber = assignSequence(ruleModel, bi, sequenceNumber);
+			if (isCondition) {
+				ruleInst.addProperty(conditionProp, bi);
+			}
+			else {
+				ruleInst.addProperty(conclusionProp, bi);
+			}
+			bi.addLabel(((BuiltinElement)gpe).getFuncName(), "en");
+			Iterator<Node> argitr = ((BuiltinElement)gpe).getArguments().iterator();
+			Individual lastArg = null;
+			while (argitr.hasNext()) {
+				Individual argument = ruleModel.createIndividual(argumentCls);
+				Node arg = argitr.next();
+				if (arg instanceof ProxyNode) {
+					Object proxyFor = ((ProxyNode)arg).getProxyFor();
+					if (proxyFor instanceof GraphPatternElement) {
+						sequenceNumber = addPatternToAllRulePatterns(rule, ruleModel, ruleInst, (GraphPatternElement)proxyFor, isCondition, sequenceNumber);
+					}
+				}
+				else {
+					Individual argInst = nodeToIndividual(rule, ruleModel, arg);
+					if (argInst != null) {
+						argument.addProperty(argProp, nodeToIndividual(rule, ruleModel, arg));
+					}
+					else {
+						argument.addProperty(argProp, ruleModel.createTypedLiteral(arg.toString()));
+					}
+					if (lastArg != null) {
+						lastArg.addProperty(nextProp, argument);
+					}
+					else {
+						bi.addProperty(argListProp, argument);
+					}
+					lastArg = argument;
+				}
+			}
+		}
+		else if (gpe instanceof TripleElement) {
+			Individual trpl = ruleModel.createIndividual(tripleCls);
+			sequenceNumber = assignSequence(ruleModel, trpl, sequenceNumber);
+			if (isCondition) {
+				ruleInst.addProperty(conditionProp, trpl);
+			}
+			else {
+				ruleInst.addProperty(conclusionProp, trpl);
+			}
+			trpl.addProperty(subjProp, nodeToIndividual(rule, ruleModel, ((TripleElement)gpe).getSubject()));
+			trpl.addProperty(predProp, nodeToIndividual(rule, ruleModel, ((TripleElement)gpe).getPredicate()));
+			trpl.addProperty(objProp, nodeToIndividual(rule, ruleModel, ((TripleElement)gpe).getObject()));
+		}
+		else if (gpe instanceof Junction) {
+			if (!((Junction)gpe).getJunctionType().equals(JunctionType.Conj)) {
+				getMessageManager().error("Junction type " +  ((Junction)gpe).getJunctionType().toString() + " not supported, rule patterns not captured.");
+			}
+			sequenceNumber = addPatternToAllRulePatterns(rule, ruleModel, ruleInst, (GraphPatternElement) ((Junction)gpe).getLhs(), isCondition, sequenceNumber);
+			sequenceNumber = addPatternToAllRulePatterns(rule, ruleModel, ruleInst, (GraphPatternElement) ((Junction)gpe).getRhs(), isCondition, sequenceNumber);
+		}
+		return sequenceNumber;
+	}
+	
+	private int assignSequence(OntModel ruleModel, Individual bi, int sequenceNumber) {
+		if (bi != null) {
+			Literal lv = ruleModel.createTypedLiteral(sequenceNumber);
+			bi.addProperty(this.sequenceNumber, lv);
+			return sequenceNumber + 1;
+		}
+		return sequenceNumber;
+	}
+
+	private Individual nodeToIndividual(Rule rule, OntModel ruleModel, Node node) {
+		Individual inst = null;
+		if (node instanceof NamedNode) {
+			if (node instanceof VariableNode) {
+				inst = ruleModel.createIndividual(rule.getRuleNamespace() + ((VariableNode)node).getName(), variableCls);
+			}
+			else {
+				inst = ruleModel.createIndividual(((NamedNode)node).toFullyQualifiedString(), resourceCls);
+			}
+		}
+		else if (node instanceof com.ge.research.sadl.model.gp.Literal) {
+			inst = ruleModel.createIndividual(literalCls);
+			Object litVal = ((com.ge.research.sadl.model.gp.Literal)node).getValue();
+			Literal lit = ruleModel.createTypedLiteral(litVal);
+			inst.setPropertyValue(litValueProp, lit);
+		}
+		else {
+			getMessageManager().error("Node encountered in generating rule pattern data is not of expected type but is '" + node.getClass().getCanonicalName() + "'");
+		}
+		return inst;
+	}
+	
 }

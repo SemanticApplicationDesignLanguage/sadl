@@ -66,29 +66,29 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Assignment cAliasAssignment_2_1 = (Assignment)cGroup_2.eContents().get(1);
 		private final RuleCall cAliasNAMEParserRuleCall_2_1_0 = (RuleCall)cAliasAssignment_2_1.eContents().get(0);
 		private final Group cGroup_3 = (Group)cGroup.eContents().get(3);
-		private final Keyword cVersionKeyword_3_0 = (Keyword)cGroup_3.eContents().get(0);
-		private final Assignment cVersionAssignment_3_1 = (Assignment)cGroup_3.eContents().get(1);
-		private final RuleCall cVersionSTRINGTerminalRuleCall_3_1_0 = (RuleCall)cVersionAssignment_3_1.eContents().get(0);
+		private final Keyword cLeftParenthesisKeyword_3_0 = (Keyword)cGroup_3.eContents().get(0);
+		private final Assignment cAnnTypeAssignment_3_1 = (Assignment)cGroup_3.eContents().get(1);
+		private final Alternatives cAnnTypeAlternatives_3_1_0 = (Alternatives)cAnnTypeAssignment_3_1.eContents().get(0);
+		private final Keyword cAnnTypeAliasKeyword_3_1_0_0 = (Keyword)cAnnTypeAlternatives_3_1_0.eContents().get(0);
+		private final Keyword cAnnTypeNoteKeyword_3_1_0_1 = (Keyword)cAnnTypeAlternatives_3_1_0.eContents().get(1);
+		private final Assignment cAnnContentAssignment_3_2 = (Assignment)cGroup_3.eContents().get(2);
+		private final RuleCall cAnnContentContentListParserRuleCall_3_2_0 = (RuleCall)cAnnContentAssignment_3_2.eContents().get(0);
+		private final Keyword cRightParenthesisKeyword_3_3 = (Keyword)cGroup_3.eContents().get(3);
 		private final Group cGroup_4 = (Group)cGroup.eContents().get(4);
-		private final Keyword cLeftParenthesisKeyword_4_0 = (Keyword)cGroup_4.eContents().get(0);
-		private final Assignment cAnnTypeAssignment_4_1 = (Assignment)cGroup_4.eContents().get(1);
-		private final Alternatives cAnnTypeAlternatives_4_1_0 = (Alternatives)cAnnTypeAssignment_4_1.eContents().get(0);
-		private final Keyword cAnnTypeAliasKeyword_4_1_0_0 = (Keyword)cAnnTypeAlternatives_4_1_0.eContents().get(0);
-		private final Keyword cAnnTypeNoteKeyword_4_1_0_1 = (Keyword)cAnnTypeAlternatives_4_1_0.eContents().get(1);
-		private final Assignment cAnnContentAssignment_4_2 = (Assignment)cGroup_4.eContents().get(2);
-		private final RuleCall cAnnContentContentListParserRuleCall_4_2_0 = (RuleCall)cAnnContentAssignment_4_2.eContents().get(0);
-		private final Keyword cRightParenthesisKeyword_4_3 = (Keyword)cGroup_4.eContents().get(3);
+		private final Keyword cVersionKeyword_4_0 = (Keyword)cGroup_4.eContents().get(0);
+		private final Assignment cVersionAssignment_4_1 = (Assignment)cGroup_4.eContents().get(1);
+		private final RuleCall cVersionSTRINGTerminalRuleCall_4_1_0 = (RuleCall)cVersionAssignment_4_1.eContents().get(0);
 		private final RuleCall cEOSTerminalRuleCall_5 = (RuleCall)cGroup.eContents().get(5);
 		
 		//// The baseUri is the namespace of the model and should be of the form
 		//// "http://..."; the version is optional.
 		//ModelName:
-		//	"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? ("(" annType+=("alias" | "note")
-		//	annContent+=ContentList ")")* EOS;
+		//	"uri" baseUri=STRING ("alias" alias=NAME)? ("(" annType+=("alias" | "note") annContent+=ContentList ")")* ("version"
+		//	version=STRING)? EOS;
 		public ParserRule getRule() { return rule; }
 
-		//"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? ("(" annType+=("alias" | "note")
-		//annContent+=ContentList ")")* EOS
+		//"uri" baseUri=STRING ("alias" alias=NAME)? ("(" annType+=("alias" | "note") annContent+=ContentList ")")* ("version"
+		//version=STRING)? EOS
 		public Group getGroup() { return cGroup; }
 
 		//"uri"
@@ -112,44 +112,44 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//NAME
 		public RuleCall getAliasNAMEParserRuleCall_2_1_0() { return cAliasNAMEParserRuleCall_2_1_0; }
 
-		//("version" version=STRING)?
+		//("(" annType+=("alias" | "note") annContent+=ContentList ")")*
 		public Group getGroup_3() { return cGroup_3; }
 
-		//"version"
-		public Keyword getVersionKeyword_3_0() { return cVersionKeyword_3_0; }
-
-		//version=STRING
-		public Assignment getVersionAssignment_3_1() { return cVersionAssignment_3_1; }
-
-		//STRING
-		public RuleCall getVersionSTRINGTerminalRuleCall_3_1_0() { return cVersionSTRINGTerminalRuleCall_3_1_0; }
-
-		//("(" annType+=("alias" | "note") annContent+=ContentList ")")*
-		public Group getGroup_4() { return cGroup_4; }
-
 		//"("
-		public Keyword getLeftParenthesisKeyword_4_0() { return cLeftParenthesisKeyword_4_0; }
+		public Keyword getLeftParenthesisKeyword_3_0() { return cLeftParenthesisKeyword_3_0; }
 
 		//annType+=("alias" | "note")
-		public Assignment getAnnTypeAssignment_4_1() { return cAnnTypeAssignment_4_1; }
+		public Assignment getAnnTypeAssignment_3_1() { return cAnnTypeAssignment_3_1; }
 
 		//"alias" | "note"
-		public Alternatives getAnnTypeAlternatives_4_1_0() { return cAnnTypeAlternatives_4_1_0; }
+		public Alternatives getAnnTypeAlternatives_3_1_0() { return cAnnTypeAlternatives_3_1_0; }
 
 		//"alias"
-		public Keyword getAnnTypeAliasKeyword_4_1_0_0() { return cAnnTypeAliasKeyword_4_1_0_0; }
+		public Keyword getAnnTypeAliasKeyword_3_1_0_0() { return cAnnTypeAliasKeyword_3_1_0_0; }
 
 		//"note"
-		public Keyword getAnnTypeNoteKeyword_4_1_0_1() { return cAnnTypeNoteKeyword_4_1_0_1; }
+		public Keyword getAnnTypeNoteKeyword_3_1_0_1() { return cAnnTypeNoteKeyword_3_1_0_1; }
 
 		//annContent+=ContentList
-		public Assignment getAnnContentAssignment_4_2() { return cAnnContentAssignment_4_2; }
+		public Assignment getAnnContentAssignment_3_2() { return cAnnContentAssignment_3_2; }
 
 		//ContentList
-		public RuleCall getAnnContentContentListParserRuleCall_4_2_0() { return cAnnContentContentListParserRuleCall_4_2_0; }
+		public RuleCall getAnnContentContentListParserRuleCall_3_2_0() { return cAnnContentContentListParserRuleCall_3_2_0; }
 
 		//")"
-		public Keyword getRightParenthesisKeyword_4_3() { return cRightParenthesisKeyword_4_3; }
+		public Keyword getRightParenthesisKeyword_3_3() { return cRightParenthesisKeyword_3_3; }
+
+		//("version" version=STRING)?
+		public Group getGroup_4() { return cGroup_4; }
+
+		//"version"
+		public Keyword getVersionKeyword_4_0() { return cVersionKeyword_4_0; }
+
+		//version=STRING
+		public Assignment getVersionAssignment_4_1() { return cVersionAssignment_4_1; }
+
+		//STRING
+		public RuleCall getVersionSTRINGTerminalRuleCall_4_1_0() { return cVersionSTRINGTerminalRuleCall_4_1_0; }
 
 		//EOS
 		public RuleCall getEOSTerminalRuleCall_5() { return cEOSTerminalRuleCall_5; }
@@ -167,10 +167,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cAliasNAMEParserRuleCall_2_1_0 = (RuleCall)cAliasAssignment_2_1.eContents().get(0);
 		private final RuleCall cEOSTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
 		
-		//// Every import is by either by actual relative URL (other SADL models only) 
-		////	or by URI (SADL models and external OWL files); 
-		////	an import may have a unique alias (which becomes the "prefix" in compound names)
-		////	but this is discouraged in favor of global aliases given with ModelName.
+		//// Every import is by actual relative URL (other SADL models) or by URI
+		//// (OWL files); every import has a unique alias (which becomes the "prefix" in compound names).
 		//Import:
 		//	"import" importURI=STRING ("as" alias=NAME)? EOS;
 		public ParserRule getRule() { return rule; }
@@ -213,6 +211,9 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cExprParserRuleCall_4 = (RuleCall)cAlternatives.eContents().get(4);
 		private final RuleCall cDisplayParserRuleCall_5 = (RuleCall)cAlternatives.eContents().get(5);
 		private final RuleCall cExplanationParserRuleCall_6 = (RuleCall)cAlternatives.eContents().get(6);
+		private final RuleCall cStartWriteParserRuleCall_7 = (RuleCall)cAlternatives.eContents().get(7);
+		private final RuleCall cEndWriteParserRuleCall_8 = (RuleCall)cAlternatives.eContents().get(8);
+		private final RuleCall cReadParserRuleCall_9 = (RuleCall)cAlternatives.eContents().get(9);
 		
 		//// The various kinds of elements that make up the body of a model.
 		//ModelElement: // used to generate the OWL model
@@ -222,7 +223,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//	Test | // temp for testing only
 		//	Expr | // used to generate display statements in the output of Tests, etc., used by SADL only
 		//	Display | // used to generate explanations of particular triples (if an explanation found), used by SADL only
-		//	Explanation;
+		//	Explanation | StartWrite | EndWrite | Read;
 		public ParserRule getRule() { return rule; }
 
 		//// used to generate the OWL model
@@ -232,7 +233,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//Test | // temp for testing only
 		//Expr | // used to generate display statements in the output of Tests, etc., used by SADL only
 		//Display | // used to generate explanations of particular triples (if an explanation found), used by SADL only
-		//Explanation
+		//Explanation | StartWrite | EndWrite | Read
 		public Alternatives getAlternatives() { return cAlternatives; }
 
 		//// used to generate the OWL model
@@ -262,6 +263,15 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//// used to generate explanations of particular triples (if an explanation found), used by SADL only
 		//Explanation
 		public RuleCall getExplanationParserRuleCall_6() { return cExplanationParserRuleCall_6; }
+
+		//StartWrite
+		public RuleCall getStartWriteParserRuleCall_7() { return cStartWriteParserRuleCall_7; }
+
+		//EndWrite
+		public RuleCall getEndWriteParserRuleCall_8() { return cEndWriteParserRuleCall_8; }
+
+		//Read
+		public RuleCall getReadParserRuleCall_9() { return cReadParserRuleCall_9; }
 	}
 
 	public class StatementElements extends AbstractParserRuleElementFinder {
@@ -573,7 +583,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final CrossReference cNameResourceNameCrossReference_0 = (CrossReference)cNameAssignment.eContents().get(0);
 		private final RuleCall cNameResourceNameNAMEParserRuleCall_0_1 = (RuleCall)cNameResourceNameCrossReference_0.eContents().get(1);
 		
-		//// References to imported SADL names are qualified by namespaces.
+		//// References to imported SADL names may be qualified by namespaces.
 		//ResourceByName:
 		//	name=[ResourceName|NAME];
 		public ParserRule getRule() { return rule; }
@@ -604,7 +614,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cNamesResourceBySetOpParserRuleCall_2_1_0_1 = (RuleCall)cNamesAlternatives_2_1_0.eContents().get(1);
 		private final Keyword cRightCurlyBracketKeyword_3 = (Keyword)cGroup.eContents().get(3);
 		
-		////RecursivePropertyByName :
+		////RecursivePropertyByName :		// this was an attempt to support recursive properties in SPARQL queries but it did not work well-undesired side effects
 		////	name=[ResourceName|NAME] (recurse=('*' | '+'))?
 		////;    
 		//// This is for classes that have already been defined.
@@ -969,7 +979,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cDescribedByAddlClassInfoParserRuleCall_3_5_0 = (RuleCall)cDescribedByAssignment_3_5.eContents().get(0);
 		private final RuleCall cEOSTerminalRuleCall_3_6 = (RuleCall)cGroup_3.eContents().get(6);
 		
-		//// Classes may be declared in many ways.
+		//// Classes may be declared in multiple ways.
 		//ClassDeclaration:
 		//	className=ResourceName "is" "a" "top-level"? "class" mustBeOneOf=EnumeratedInstances? describedBy+=AddlClassInfo* EOS
 		//	| classList=ResourceList "are" "top-level"? "classes" describedBy+=AddlClassInfo* EOS | className=ResourceName "is"
@@ -1188,7 +1198,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Assignment cRestrictionAssignment_1_4 = (Assignment)cGroup_1.eContents().get(4);
 		private final RuleCall cRestrictionConditionParserRuleCall_1_4_0 = (RuleCall)cRestrictionAssignment_1_4.eContents().get(0);
 		
-		//// Class declarations may also describe the class's properties.
+		//// Class declarations may also describe the class's properties (properties with the class in the domain) and range or restrictions.
 		//AddlClassInfo:
 		//	","? "described" "by" (propertyByName=ResourceByName | propertyName=ResourceName range=Range) | ","? "described" "by"
 		//	propertyByName=ResourceByName restriction=Condition;
@@ -1384,7 +1394,6 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Assignment cDataTypeAssignment_1 = (Assignment)cAlternatives.eContents().get(1);
 		private final RuleCall cDataTypeDataTypeEnumRuleCall_1_0 = (RuleCall)cDataTypeAssignment_1.eContents().get(0);
 		
-		////	  | dataType=ResourceName
 		//RangeType:
 		//	classIdentifier=ResourceIdentifier | dataType=DataType;
 		public ParserRule getRule() { return rule; }
@@ -1417,6 +1426,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cRestrictionDataTypeRestrictionParserRuleCall_4_0 = (RuleCall)cRestrictionAssignment_4.eContents().get(0);
 		private final RuleCall cEOSTerminalRuleCall_5 = (RuleCall)cGroup.eContents().get(5);
 		
+		//// User-defined datatypes 
 		//UserDefinedDataType:
 		//	"data" "type" userDefinedDataType=ResourceName "is" restriction=DataTypeRestriction EOS;
 		public ParserRule getRule() { return rule; }
@@ -1581,6 +1591,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cValuesNUMBERParserRuleCall_3_2_1_0_1 = (RuleCall)cValuesAlternatives_3_2_1_0.eContents().get(1);
 		private final Keyword cRightCurlyBracketKeyword_3_3 = (Keyword)cGroup_3.eContents().get(3);
 		
+		//// [,] is inclusive, (,) is exclusive	
 		//Facets:
 		//	minexin=("(" | "[") min=NUMBER? "," max=NUMBER? maxexin=("]" | ")") | regex=STRING | "length" (len=NUMBER |
 		//	minlen=NUMBER "-" maxlen=NUMBER) | "{" values+=(STRING | NUMBER) (","? values+=(STRING | NUMBER))* "}";
@@ -3115,165 +3126,203 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "PropertyDeclaration");
 		private final Alternatives cAlternatives = (Alternatives)rule.eContents().get(1);
 		private final Group cGroup_0 = (Group)cAlternatives.eContents().get(0);
-		private final Assignment cPropertyNameAssignment_0_0 = (Assignment)cGroup_0.eContents().get(0);
-		private final RuleCall cPropertyNameResourceNameParserRuleCall_0_0_0 = (RuleCall)cPropertyNameAssignment_0_0.eContents().get(0);
-		private final Group cGroup_0_1 = (Group)cGroup_0.eContents().get(1);
-		private final Keyword cIsKeyword_0_1_0 = (Keyword)cGroup_0_1.eContents().get(0);
-		private final Keyword cAKeyword_0_1_1 = (Keyword)cGroup_0_1.eContents().get(1);
-		private final Keyword cTypeKeyword_0_1_2 = (Keyword)cGroup_0_1.eContents().get(2);
-		private final Keyword cOfKeyword_0_1_3 = (Keyword)cGroup_0_1.eContents().get(3);
-		private final Assignment cSuperPropNameAssignment_0_1_4 = (Assignment)cGroup_0_1.eContents().get(4);
-		private final RuleCall cSuperPropNameResourceByNameParserRuleCall_0_1_4_0 = (RuleCall)cSuperPropNameAssignment_0_1_4.eContents().get(0);
-		private final Assignment cAddlPropInfoAssignment_0_2 = (Assignment)cGroup_0.eContents().get(2);
-		private final RuleCall cAddlPropInfoAdditionalPropertyInfoParserRuleCall_0_2_0 = (RuleCall)cAddlPropInfoAssignment_0_2.eContents().get(0);
-		private final RuleCall cEOSTerminalRuleCall_0_3 = (RuleCall)cGroup_0.eContents().get(3);
+		private final Assignment cNoDomainPropNameAssignment_0_0 = (Assignment)cGroup_0.eContents().get(0);
+		private final RuleCall cNoDomainPropNameResourceNameParserRuleCall_0_0_0 = (RuleCall)cNoDomainPropNameAssignment_0_0.eContents().get(0);
+		private final Keyword cIsKeyword_0_1 = (Keyword)cGroup_0.eContents().get(1);
+		private final Keyword cAKeyword_0_2 = (Keyword)cGroup_0.eContents().get(2);
+		private final Keyword cPropertyKeyword_0_3 = (Keyword)cGroup_0.eContents().get(3);
+		private final Assignment cRangeAssignment_0_4 = (Assignment)cGroup_0.eContents().get(4);
+		private final RuleCall cRangeRangeParserRuleCall_0_4_0 = (RuleCall)cRangeAssignment_0_4.eContents().get(0);
+		private final RuleCall cEOSTerminalRuleCall_0_5 = (RuleCall)cGroup_0.eContents().get(5);
 		private final Group cGroup_1 = (Group)cAlternatives.eContents().get(1);
-		private final Assignment cArticleAssignment_1_0 = (Assignment)cGroup_1.eContents().get(0);
-		private final RuleCall cArticleAnArticleParserRuleCall_1_0_0 = (RuleCall)cArticleAssignment_1_0.eContents().get(0);
-		private final Keyword cRelationshipKeyword_1_1 = (Keyword)cGroup_1.eContents().get(1);
-		private final Keyword cOfKeyword_1_2 = (Keyword)cGroup_1.eContents().get(2);
-		private final Assignment cDomainAssignment_1_3 = (Assignment)cGroup_1.eContents().get(3);
-		private final RuleCall cDomainResourceIdentifierParserRuleCall_1_3_0 = (RuleCall)cDomainAssignment_1_3.eContents().get(0);
-		private final Keyword cToKeyword_1_4 = (Keyword)cGroup_1.eContents().get(4);
-		private final Assignment cRangeResourceAssignment_1_5 = (Assignment)cGroup_1.eContents().get(5);
-		private final RuleCall cRangeResourceResourceIdentifierParserRuleCall_1_5_0 = (RuleCall)cRangeResourceAssignment_1_5.eContents().get(0);
-		private final Keyword cIsKeyword_1_6 = (Keyword)cGroup_1.eContents().get(6);
-		private final Assignment cPropertyNameAssignment_1_7 = (Assignment)cGroup_1.eContents().get(7);
-		private final RuleCall cPropertyNameResourceNameParserRuleCall_1_7_0 = (RuleCall)cPropertyNameAssignment_1_7.eContents().get(0);
-		private final RuleCall cEOSTerminalRuleCall_1_8 = (RuleCall)cGroup_1.eContents().get(8);
+		private final Assignment cPropertyNameAssignment_1_0 = (Assignment)cGroup_1.eContents().get(0);
+		private final RuleCall cPropertyNameResourceNameParserRuleCall_1_0_0 = (RuleCall)cPropertyNameAssignment_1_0.eContents().get(0);
+		private final Group cGroup_1_1 = (Group)cGroup_1.eContents().get(1);
+		private final Keyword cIsKeyword_1_1_0 = (Keyword)cGroup_1_1.eContents().get(0);
+		private final Keyword cAKeyword_1_1_1 = (Keyword)cGroup_1_1.eContents().get(1);
+		private final Keyword cTypeKeyword_1_1_2 = (Keyword)cGroup_1_1.eContents().get(2);
+		private final Keyword cOfKeyword_1_1_3 = (Keyword)cGroup_1_1.eContents().get(3);
+		private final Assignment cSuperPropNameAssignment_1_1_4 = (Assignment)cGroup_1_1.eContents().get(4);
+		private final RuleCall cSuperPropNameResourceByNameParserRuleCall_1_1_4_0 = (RuleCall)cSuperPropNameAssignment_1_1_4.eContents().get(0);
+		private final Assignment cAddlPropInfoAssignment_1_2 = (Assignment)cGroup_1.eContents().get(2);
+		private final RuleCall cAddlPropInfoAdditionalPropertyInfoParserRuleCall_1_2_0 = (RuleCall)cAddlPropInfoAssignment_1_2.eContents().get(0);
+		private final RuleCall cEOSTerminalRuleCall_1_3 = (RuleCall)cGroup_1.eContents().get(3);
 		private final Group cGroup_2 = (Group)cAlternatives.eContents().get(2);
-		private final Assignment cAnnotationPropertyAssignment_2_0 = (Assignment)cGroup_2.eContents().get(0);
-		private final RuleCall cAnnotationPropertyResourceNameParserRuleCall_2_0_0 = (RuleCall)cAnnotationPropertyAssignment_2_0.eContents().get(0);
-		private final Keyword cIsKeyword_2_1 = (Keyword)cGroup_2.eContents().get(1);
-		private final Keyword cAKeyword_2_2 = (Keyword)cGroup_2.eContents().get(2);
-		private final Keyword cTypeKeyword_2_3 = (Keyword)cGroup_2.eContents().get(3);
-		private final Keyword cOfKeyword_2_4 = (Keyword)cGroup_2.eContents().get(4);
-		private final Keyword cAnnotationKeyword_2_5 = (Keyword)cGroup_2.eContents().get(5);
-		private final RuleCall cEOSTerminalRuleCall_2_6 = (RuleCall)cGroup_2.eContents().get(6);
+		private final Assignment cArticleAssignment_2_0 = (Assignment)cGroup_2.eContents().get(0);
+		private final RuleCall cArticleAnArticleParserRuleCall_2_0_0 = (RuleCall)cArticleAssignment_2_0.eContents().get(0);
+		private final Keyword cRelationshipKeyword_2_1 = (Keyword)cGroup_2.eContents().get(1);
+		private final Keyword cOfKeyword_2_2 = (Keyword)cGroup_2.eContents().get(2);
+		private final Assignment cDomainAssignment_2_3 = (Assignment)cGroup_2.eContents().get(3);
+		private final RuleCall cDomainResourceIdentifierParserRuleCall_2_3_0 = (RuleCall)cDomainAssignment_2_3.eContents().get(0);
+		private final Keyword cToKeyword_2_4 = (Keyword)cGroup_2.eContents().get(4);
+		private final Assignment cRangeResourceAssignment_2_5 = (Assignment)cGroup_2.eContents().get(5);
+		private final RuleCall cRangeResourceResourceIdentifierParserRuleCall_2_5_0 = (RuleCall)cRangeResourceAssignment_2_5.eContents().get(0);
+		private final Keyword cIsKeyword_2_6 = (Keyword)cGroup_2.eContents().get(6);
+		private final Assignment cPropertyNameAssignment_2_7 = (Assignment)cGroup_2.eContents().get(7);
+		private final RuleCall cPropertyNameResourceNameParserRuleCall_2_7_0 = (RuleCall)cPropertyNameAssignment_2_7.eContents().get(0);
+		private final RuleCall cEOSTerminalRuleCall_2_8 = (RuleCall)cGroup_2.eContents().get(8);
+		private final Group cGroup_3 = (Group)cAlternatives.eContents().get(3);
+		private final Assignment cAnnotationPropertyAssignment_3_0 = (Assignment)cGroup_3.eContents().get(0);
+		private final RuleCall cAnnotationPropertyResourceNameParserRuleCall_3_0_0 = (RuleCall)cAnnotationPropertyAssignment_3_0.eContents().get(0);
+		private final Keyword cIsKeyword_3_1 = (Keyword)cGroup_3.eContents().get(1);
+		private final Keyword cAKeyword_3_2 = (Keyword)cGroup_3.eContents().get(2);
+		private final Keyword cTypeKeyword_3_3 = (Keyword)cGroup_3.eContents().get(3);
+		private final Keyword cOfKeyword_3_4 = (Keyword)cGroup_3.eContents().get(4);
+		private final Keyword cAnnotationKeyword_3_5 = (Keyword)cGroup_3.eContents().get(5);
+		private final RuleCall cEOSTerminalRuleCall_3_6 = (RuleCall)cGroup_3.eContents().get(6);
 		
 		//// Properties may be declared in several ways too.
 		//// e.g., age describes Person with a single value of type decimal.
 		//// e.g., parent describes Person with values of type Person.
 		//// e.g., child describes Person with values of type Person.
 		//PropertyDeclaration:
-		//	propertyName=ResourceName ("is" "a" "type" "of" superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+
-		//	EOS | article=AnArticle? "relationship" "of" domain=ResourceIdentifier "to" rangeResource=ResourceIdentifier "is"
-		//	propertyName=ResourceName EOS | annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS;
+		//	noDomainPropName=ResourceName "is" "a" "property" range=Range? EOS | propertyName=ResourceName ("is" "a" "type" "of"
+		//	superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+ EOS | article=AnArticle? "relationship" "of"
+		//	domain=ResourceIdentifier "to" rangeResource=ResourceIdentifier "is" propertyName=ResourceName EOS |
+		//	annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS;
 		public ParserRule getRule() { return rule; }
 
-		//propertyName=ResourceName ("is" "a" "type" "of" superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+ EOS
-		//| article=AnArticle? "relationship" "of" domain=ResourceIdentifier "to" rangeResource=ResourceIdentifier "is"
-		//propertyName=ResourceName EOS | annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS
+		//noDomainPropName=ResourceName "is" "a" "property" range=Range? EOS | propertyName=ResourceName ("is" "a" "type" "of"
+		//superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+ EOS | article=AnArticle? "relationship" "of"
+		//domain=ResourceIdentifier "to" rangeResource=ResourceIdentifier "is" propertyName=ResourceName EOS |
+		//annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS
 		public Alternatives getAlternatives() { return cAlternatives; }
 
-		//propertyName=ResourceName ("is" "a" "type" "of" superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+ EOS
+		//noDomainPropName=ResourceName "is" "a" "property" range=Range? EOS
 		public Group getGroup_0() { return cGroup_0; }
 
-		//propertyName=ResourceName
-		public Assignment getPropertyNameAssignment_0_0() { return cPropertyNameAssignment_0_0; }
+		//noDomainPropName=ResourceName
+		public Assignment getNoDomainPropNameAssignment_0_0() { return cNoDomainPropNameAssignment_0_0; }
 
 		//ResourceName
-		public RuleCall getPropertyNameResourceNameParserRuleCall_0_0_0() { return cPropertyNameResourceNameParserRuleCall_0_0_0; }
-
-		//("is" "a" "type" "of" superPropName=ResourceByName)?
-		public Group getGroup_0_1() { return cGroup_0_1; }
+		public RuleCall getNoDomainPropNameResourceNameParserRuleCall_0_0_0() { return cNoDomainPropNameResourceNameParserRuleCall_0_0_0; }
 
 		//"is"
-		public Keyword getIsKeyword_0_1_0() { return cIsKeyword_0_1_0; }
+		public Keyword getIsKeyword_0_1() { return cIsKeyword_0_1; }
 
 		//"a"
-		public Keyword getAKeyword_0_1_1() { return cAKeyword_0_1_1; }
+		public Keyword getAKeyword_0_2() { return cAKeyword_0_2; }
 
-		//"type"
-		public Keyword getTypeKeyword_0_1_2() { return cTypeKeyword_0_1_2; }
+		//"property"
+		public Keyword getPropertyKeyword_0_3() { return cPropertyKeyword_0_3; }
 
-		//"of"
-		public Keyword getOfKeyword_0_1_3() { return cOfKeyword_0_1_3; }
+		//range=Range?
+		public Assignment getRangeAssignment_0_4() { return cRangeAssignment_0_4; }
 
-		//superPropName=ResourceByName
-		public Assignment getSuperPropNameAssignment_0_1_4() { return cSuperPropNameAssignment_0_1_4; }
-
-		//ResourceByName
-		public RuleCall getSuperPropNameResourceByNameParserRuleCall_0_1_4_0() { return cSuperPropNameResourceByNameParserRuleCall_0_1_4_0; }
-
-		//addlPropInfo+=AdditionalPropertyInfo+
-		public Assignment getAddlPropInfoAssignment_0_2() { return cAddlPropInfoAssignment_0_2; }
-
-		//AdditionalPropertyInfo
-		public RuleCall getAddlPropInfoAdditionalPropertyInfoParserRuleCall_0_2_0() { return cAddlPropInfoAdditionalPropertyInfoParserRuleCall_0_2_0; }
+		//Range
+		public RuleCall getRangeRangeParserRuleCall_0_4_0() { return cRangeRangeParserRuleCall_0_4_0; }
 
 		//EOS
-		public RuleCall getEOSTerminalRuleCall_0_3() { return cEOSTerminalRuleCall_0_3; }
+		public RuleCall getEOSTerminalRuleCall_0_5() { return cEOSTerminalRuleCall_0_5; }
+
+		//propertyName=ResourceName ("is" "a" "type" "of" superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+ EOS
+		public Group getGroup_1() { return cGroup_1; }
+
+		//propertyName=ResourceName
+		public Assignment getPropertyNameAssignment_1_0() { return cPropertyNameAssignment_1_0; }
+
+		//ResourceName
+		public RuleCall getPropertyNameResourceNameParserRuleCall_1_0_0() { return cPropertyNameResourceNameParserRuleCall_1_0_0; }
+
+		//("is" "a" "type" "of" superPropName=ResourceByName)?
+		public Group getGroup_1_1() { return cGroup_1_1; }
+
+		//"is"
+		public Keyword getIsKeyword_1_1_0() { return cIsKeyword_1_1_0; }
+
+		//"a"
+		public Keyword getAKeyword_1_1_1() { return cAKeyword_1_1_1; }
+
+		//"type"
+		public Keyword getTypeKeyword_1_1_2() { return cTypeKeyword_1_1_2; }
+
+		//"of"
+		public Keyword getOfKeyword_1_1_3() { return cOfKeyword_1_1_3; }
+
+		//superPropName=ResourceByName
+		public Assignment getSuperPropNameAssignment_1_1_4() { return cSuperPropNameAssignment_1_1_4; }
+
+		//ResourceByName
+		public RuleCall getSuperPropNameResourceByNameParserRuleCall_1_1_4_0() { return cSuperPropNameResourceByNameParserRuleCall_1_1_4_0; }
+
+		//addlPropInfo+=AdditionalPropertyInfo+
+		public Assignment getAddlPropInfoAssignment_1_2() { return cAddlPropInfoAssignment_1_2; }
+
+		//AdditionalPropertyInfo
+		public RuleCall getAddlPropInfoAdditionalPropertyInfoParserRuleCall_1_2_0() { return cAddlPropInfoAdditionalPropertyInfoParserRuleCall_1_2_0; }
+
+		//EOS
+		public RuleCall getEOSTerminalRuleCall_1_3() { return cEOSTerminalRuleCall_1_3; }
 
 		//article=AnArticle? "relationship" "of" domain=ResourceIdentifier "to" rangeResource=ResourceIdentifier "is"
 		//propertyName=ResourceName EOS
-		public Group getGroup_1() { return cGroup_1; }
-
-		//article=AnArticle?
-		public Assignment getArticleAssignment_1_0() { return cArticleAssignment_1_0; }
-
-		//AnArticle
-		public RuleCall getArticleAnArticleParserRuleCall_1_0_0() { return cArticleAnArticleParserRuleCall_1_0_0; }
-
-		//"relationship"
-		public Keyword getRelationshipKeyword_1_1() { return cRelationshipKeyword_1_1; }
-
-		//"of"
-		public Keyword getOfKeyword_1_2() { return cOfKeyword_1_2; }
-
-		//domain=ResourceIdentifier
-		public Assignment getDomainAssignment_1_3() { return cDomainAssignment_1_3; }
-
-		//ResourceIdentifier
-		public RuleCall getDomainResourceIdentifierParserRuleCall_1_3_0() { return cDomainResourceIdentifierParserRuleCall_1_3_0; }
-
-		//"to"
-		public Keyword getToKeyword_1_4() { return cToKeyword_1_4; }
-
-		//rangeResource=ResourceIdentifier
-		public Assignment getRangeResourceAssignment_1_5() { return cRangeResourceAssignment_1_5; }
-
-		//ResourceIdentifier
-		public RuleCall getRangeResourceResourceIdentifierParserRuleCall_1_5_0() { return cRangeResourceResourceIdentifierParserRuleCall_1_5_0; }
-
-		//"is"
-		public Keyword getIsKeyword_1_6() { return cIsKeyword_1_6; }
-
-		//propertyName=ResourceName
-		public Assignment getPropertyNameAssignment_1_7() { return cPropertyNameAssignment_1_7; }
-
-		//ResourceName
-		public RuleCall getPropertyNameResourceNameParserRuleCall_1_7_0() { return cPropertyNameResourceNameParserRuleCall_1_7_0; }
-
-		//EOS
-		public RuleCall getEOSTerminalRuleCall_1_8() { return cEOSTerminalRuleCall_1_8; }
-
-		//annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS
 		public Group getGroup_2() { return cGroup_2; }
 
-		//annotationProperty=ResourceName
-		public Assignment getAnnotationPropertyAssignment_2_0() { return cAnnotationPropertyAssignment_2_0; }
+		//article=AnArticle?
+		public Assignment getArticleAssignment_2_0() { return cArticleAssignment_2_0; }
 
-		//ResourceName
-		public RuleCall getAnnotationPropertyResourceNameParserRuleCall_2_0_0() { return cAnnotationPropertyResourceNameParserRuleCall_2_0_0; }
+		//AnArticle
+		public RuleCall getArticleAnArticleParserRuleCall_2_0_0() { return cArticleAnArticleParserRuleCall_2_0_0; }
 
-		//"is"
-		public Keyword getIsKeyword_2_1() { return cIsKeyword_2_1; }
-
-		//"a"
-		public Keyword getAKeyword_2_2() { return cAKeyword_2_2; }
-
-		//"type"
-		public Keyword getTypeKeyword_2_3() { return cTypeKeyword_2_3; }
+		//"relationship"
+		public Keyword getRelationshipKeyword_2_1() { return cRelationshipKeyword_2_1; }
 
 		//"of"
-		public Keyword getOfKeyword_2_4() { return cOfKeyword_2_4; }
+		public Keyword getOfKeyword_2_2() { return cOfKeyword_2_2; }
 
-		//"annotation"
-		public Keyword getAnnotationKeyword_2_5() { return cAnnotationKeyword_2_5; }
+		//domain=ResourceIdentifier
+		public Assignment getDomainAssignment_2_3() { return cDomainAssignment_2_3; }
+
+		//ResourceIdentifier
+		public RuleCall getDomainResourceIdentifierParserRuleCall_2_3_0() { return cDomainResourceIdentifierParserRuleCall_2_3_0; }
+
+		//"to"
+		public Keyword getToKeyword_2_4() { return cToKeyword_2_4; }
+
+		//rangeResource=ResourceIdentifier
+		public Assignment getRangeResourceAssignment_2_5() { return cRangeResourceAssignment_2_5; }
+
+		//ResourceIdentifier
+		public RuleCall getRangeResourceResourceIdentifierParserRuleCall_2_5_0() { return cRangeResourceResourceIdentifierParserRuleCall_2_5_0; }
+
+		//"is"
+		public Keyword getIsKeyword_2_6() { return cIsKeyword_2_6; }
+
+		//propertyName=ResourceName
+		public Assignment getPropertyNameAssignment_2_7() { return cPropertyNameAssignment_2_7; }
+
+		//ResourceName
+		public RuleCall getPropertyNameResourceNameParserRuleCall_2_7_0() { return cPropertyNameResourceNameParserRuleCall_2_7_0; }
 
 		//EOS
-		public RuleCall getEOSTerminalRuleCall_2_6() { return cEOSTerminalRuleCall_2_6; }
+		public RuleCall getEOSTerminalRuleCall_2_8() { return cEOSTerminalRuleCall_2_8; }
+
+		//annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS
+		public Group getGroup_3() { return cGroup_3; }
+
+		//annotationProperty=ResourceName
+		public Assignment getAnnotationPropertyAssignment_3_0() { return cAnnotationPropertyAssignment_3_0; }
+
+		//ResourceName
+		public RuleCall getAnnotationPropertyResourceNameParserRuleCall_3_0_0() { return cAnnotationPropertyResourceNameParserRuleCall_3_0_0; }
+
+		//"is"
+		public Keyword getIsKeyword_3_1() { return cIsKeyword_3_1; }
+
+		//"a"
+		public Keyword getAKeyword_3_2() { return cAKeyword_3_2; }
+
+		//"type"
+		public Keyword getTypeKeyword_3_3() { return cTypeKeyword_3_3; }
+
+		//"of"
+		public Keyword getOfKeyword_3_4() { return cOfKeyword_3_4; }
+
+		//"annotation"
+		public Keyword getAnnotationKeyword_3_5() { return cAnnotationKeyword_3_5; }
+
+		//EOS
+		public RuleCall getEOSTerminalRuleCall_3_6() { return cEOSTerminalRuleCall_3_6; }
 	}
 
 	public class AdditionalPropertyInfoElements extends AbstractParserRuleElementFinder {
@@ -4200,7 +4249,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		
 		//// | objectInstanceList=ResourceList  // this would allow a list of object values
 		/// ********************************************************************************************************************* /
-		/// *      The rest of the rules in this file are for defining patterns in Tests, Queries, and Rules                    * /
+		/// *      The rest of the rules in this file are for defining patterns in Tests, Queries, Rules, etc.                  * /
 		/// ********************************************************************************************************************* / // This phrase identifies a graph pattern pinned to a point (the subject, at the end of the phrase) and identified by edges (properties)
 		////	The whole phrase can be thought of as as expression selecting all nodes in the graph from which once can trace "backwards" along
 		////	the specified edges to arrive at the subject node. All properties except the first in the phrase must be ObjectProperty names. If
@@ -4572,27 +4621,36 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Keyword cRuleKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Assignment cNameAssignment_1 = (Assignment)cGroup.eContents().get(1);
 		private final RuleCall cNameNAMEParserRuleCall_1_0 = (RuleCall)cNameAssignment_1.eContents().get(0);
-		private final Keyword cColonKeyword_2 = (Keyword)cGroup.eContents().get(2);
-		private final Group cGroup_3 = (Group)cGroup.eContents().get(3);
-		private final Keyword cGivenKeyword_3_0 = (Keyword)cGroup_3.eContents().get(0);
-		private final Assignment cGivensAssignment_3_1 = (Assignment)cGroup_3.eContents().get(1);
-		private final RuleCall cGivensElementSetParserRuleCall_3_1_0 = (RuleCall)cGivensAssignment_3_1.eContents().get(0);
+		private final Group cGroup_2 = (Group)cGroup.eContents().get(2);
+		private final Keyword cLeftParenthesisKeyword_2_0 = (Keyword)cGroup_2.eContents().get(0);
+		private final Assignment cAnnPropsAssignment_2_1 = (Assignment)cGroup_2.eContents().get(1);
+		private final RuleCall cAnnPropsNAMEParserRuleCall_2_1_0 = (RuleCall)cAnnPropsAssignment_2_1.eContents().get(0);
+		private final Assignment cAnnValuesAssignment_2_2 = (Assignment)cGroup_2.eContents().get(2);
+		private final RuleCall cAnnValuesSTRINGTerminalRuleCall_2_2_0 = (RuleCall)cAnnValuesAssignment_2_2.eContents().get(0);
+		private final Keyword cRightParenthesisKeyword_2_3 = (Keyword)cGroup_2.eContents().get(3);
+		private final Keyword cColonKeyword_3 = (Keyword)cGroup.eContents().get(3);
 		private final Group cGroup_4 = (Group)cGroup.eContents().get(4);
-		private final Keyword cIfKeyword_4_0 = (Keyword)cGroup_4.eContents().get(0);
-		private final Assignment cIfsAssignment_4_1 = (Assignment)cGroup_4.eContents().get(1);
-		private final RuleCall cIfsElementSetParserRuleCall_4_1_0 = (RuleCall)cIfsAssignment_4_1.eContents().get(0);
-		private final Keyword cThenKeyword_5 = (Keyword)cGroup.eContents().get(5);
-		private final Assignment cThensAssignment_6 = (Assignment)cGroup.eContents().get(6);
-		private final RuleCall cThensElementSetParserRuleCall_6_0 = (RuleCall)cThensAssignment_6.eContents().get(0);
-		private final RuleCall cEOSTerminalRuleCall_7 = (RuleCall)cGroup.eContents().get(7);
+		private final Keyword cGivenKeyword_4_0 = (Keyword)cGroup_4.eContents().get(0);
+		private final Assignment cGivensAssignment_4_1 = (Assignment)cGroup_4.eContents().get(1);
+		private final RuleCall cGivensElementSetParserRuleCall_4_1_0 = (RuleCall)cGivensAssignment_4_1.eContents().get(0);
+		private final Group cGroup_5 = (Group)cGroup.eContents().get(5);
+		private final Keyword cIfKeyword_5_0 = (Keyword)cGroup_5.eContents().get(0);
+		private final Assignment cIfsAssignment_5_1 = (Assignment)cGroup_5.eContents().get(1);
+		private final RuleCall cIfsElementSetParserRuleCall_5_1_0 = (RuleCall)cIfsAssignment_5_1.eContents().get(0);
+		private final Keyword cThenKeyword_6 = (Keyword)cGroup.eContents().get(6);
+		private final Assignment cThensAssignment_7 = (Assignment)cGroup.eContents().get(7);
+		private final RuleCall cThensElementSetParserRuleCall_7_0 = (RuleCall)cThensAssignment_7.eContents().get(0);
+		private final RuleCall cEOSTerminalRuleCall_8 = (RuleCall)cGroup.eContents().get(8);
 		
 		//// The Rule statement
 		//Rule: //	('Rule' name=ID)|(name=ID 'Rule') (':')? ('given' givens=ElementSet)? ('if' ifs=ElementSet)? 'then' thens=ElementSet;
-		//	"Rule" name=NAME ":"? ("given" givens=ElementSet?)? ("if" ifs=ElementSet?)? "then" thens=ElementSet EOS;
+		//	"Rule" name=NAME ("(" annProps+=NAME annValues+=STRING ")")* ":"? ("given" givens=ElementSet?)? ("if" ifs=ElementSet?)?
+		//	"then" thens=ElementSet EOS;
 		public ParserRule getRule() { return rule; }
 
 		////	('Rule' name=ID)|(name=ID 'Rule') (':')? ('given' givens=ElementSet)? ('if' ifs=ElementSet)? 'then' thens=ElementSet;
-		//"Rule" name=NAME ":"? ("given" givens=ElementSet?)? ("if" ifs=ElementSet?)? "then" thens=ElementSet EOS
+		//"Rule" name=NAME ("(" annProps+=NAME annValues+=STRING ")")* ":"? ("given" givens=ElementSet?)? ("if" ifs=ElementSet?)?
+		//"then" thens=ElementSet EOS
 		public Group getGroup() { return cGroup; }
 
 		////	('Rule' name=ID)|(name=ID 'Rule') (':')? ('given' givens=ElementSet)? ('if' ifs=ElementSet)? 'then' thens=ElementSet;
@@ -4605,44 +4663,65 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//NAME
 		public RuleCall getNameNAMEParserRuleCall_1_0() { return cNameNAMEParserRuleCall_1_0; }
 
+		//("(" annProps+=NAME annValues+=STRING ")")*
+		public Group getGroup_2() { return cGroup_2; }
+
+		//"("
+		public Keyword getLeftParenthesisKeyword_2_0() { return cLeftParenthesisKeyword_2_0; }
+
+		//annProps+=NAME
+		public Assignment getAnnPropsAssignment_2_1() { return cAnnPropsAssignment_2_1; }
+
+		//NAME
+		public RuleCall getAnnPropsNAMEParserRuleCall_2_1_0() { return cAnnPropsNAMEParserRuleCall_2_1_0; }
+
+		//annValues+=STRING
+		public Assignment getAnnValuesAssignment_2_2() { return cAnnValuesAssignment_2_2; }
+
+		//STRING
+		public RuleCall getAnnValuesSTRINGTerminalRuleCall_2_2_0() { return cAnnValuesSTRINGTerminalRuleCall_2_2_0; }
+
+		//")"
+		public Keyword getRightParenthesisKeyword_2_3() { return cRightParenthesisKeyword_2_3; }
+
 		//":"?
-		public Keyword getColonKeyword_2() { return cColonKeyword_2; }
+		public Keyword getColonKeyword_3() { return cColonKeyword_3; }
 
 		//("given" givens=ElementSet?)?
-		public Group getGroup_3() { return cGroup_3; }
-
-		//"given"
-		public Keyword getGivenKeyword_3_0() { return cGivenKeyword_3_0; }
-
-		//givens=ElementSet?
-		public Assignment getGivensAssignment_3_1() { return cGivensAssignment_3_1; }
-
-		//ElementSet
-		public RuleCall getGivensElementSetParserRuleCall_3_1_0() { return cGivensElementSetParserRuleCall_3_1_0; }
-
-		//("if" ifs=ElementSet?)?
 		public Group getGroup_4() { return cGroup_4; }
 
+		//"given"
+		public Keyword getGivenKeyword_4_0() { return cGivenKeyword_4_0; }
+
+		//givens=ElementSet?
+		public Assignment getGivensAssignment_4_1() { return cGivensAssignment_4_1; }
+
+		//ElementSet
+		public RuleCall getGivensElementSetParserRuleCall_4_1_0() { return cGivensElementSetParserRuleCall_4_1_0; }
+
+		//("if" ifs=ElementSet?)?
+		public Group getGroup_5() { return cGroup_5; }
+
 		//"if"
-		public Keyword getIfKeyword_4_0() { return cIfKeyword_4_0; }
+		public Keyword getIfKeyword_5_0() { return cIfKeyword_5_0; }
 
 		//ifs=ElementSet?
-		public Assignment getIfsAssignment_4_1() { return cIfsAssignment_4_1; }
+		public Assignment getIfsAssignment_5_1() { return cIfsAssignment_5_1; }
 
 		//ElementSet
-		public RuleCall getIfsElementSetParserRuleCall_4_1_0() { return cIfsElementSetParserRuleCall_4_1_0; }
+		public RuleCall getIfsElementSetParserRuleCall_5_1_0() { return cIfsElementSetParserRuleCall_5_1_0; }
 
 		//"then"
-		public Keyword getThenKeyword_5() { return cThenKeyword_5; }
+		public Keyword getThenKeyword_6() { return cThenKeyword_6; }
 
 		//thens=ElementSet
-		public Assignment getThensAssignment_6() { return cThensAssignment_6; }
+		public Assignment getThensAssignment_7() { return cThensAssignment_7; }
 
 		//ElementSet
-		public RuleCall getThensElementSetParserRuleCall_6_0() { return cThensElementSetParserRuleCall_6_0; }
+		public RuleCall getThensElementSetParserRuleCall_7_0() { return cThensElementSetParserRuleCall_7_0; }
 
 		//EOS
-		public RuleCall getEOSTerminalRuleCall_7() { return cEOSTerminalRuleCall_7; }
+		public RuleCall getEOSTerminalRuleCall_8() { return cEOSTerminalRuleCall_8; }
 	}
 
 	public class QueryElements extends AbstractParserRuleElementFinder {
@@ -4884,6 +4963,122 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 
 		//EOS
 		public RuleCall getEOSTerminalRuleCall_1_3_2() { return cEOSTerminalRuleCall_1_3_2; }
+	}
+
+	public class StartWriteElements extends AbstractParserRuleElementFinder {
+		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "StartWrite");
+		private final Group cGroup = (Group)rule.eContents().get(1);
+		private final Assignment cWriteAssignment_0 = (Assignment)cGroup.eContents().get(0);
+		private final Keyword cWriteWriteKeyword_0_0 = (Keyword)cWriteAssignment_0.eContents().get(0);
+		private final Assignment cDataOnlyAssignment_1 = (Assignment)cGroup.eContents().get(1);
+		private final Keyword cDataOnlyDataKeyword_1_0 = (Keyword)cDataOnlyAssignment_1.eContents().get(0);
+		private final Keyword cLeftCurlyBracketKeyword_2 = (Keyword)cGroup.eContents().get(2);
+		
+		//StartWrite:
+		//	write="Write:" dataOnly="data"? "{";
+		public ParserRule getRule() { return rule; }
+
+		//write="Write:" dataOnly="data"? "{"
+		public Group getGroup() { return cGroup; }
+
+		//write="Write:"
+		public Assignment getWriteAssignment_0() { return cWriteAssignment_0; }
+
+		//"Write:"
+		public Keyword getWriteWriteKeyword_0_0() { return cWriteWriteKeyword_0_0; }
+
+		//dataOnly="data"?
+		public Assignment getDataOnlyAssignment_1() { return cDataOnlyAssignment_1; }
+
+		//"data"
+		public Keyword getDataOnlyDataKeyword_1_0() { return cDataOnlyDataKeyword_1_0; }
+
+		//"{"
+		public Keyword getLeftCurlyBracketKeyword_2() { return cLeftCurlyBracketKeyword_2; }
+	}
+
+	public class EndWriteElements extends AbstractParserRuleElementFinder {
+		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "EndWrite");
+		private final Group cGroup = (Group)rule.eContents().get(1);
+		private final Keyword cRightCurlyBracketKeyword_0 = (Keyword)cGroup.eContents().get(0);
+		private final Keyword cToKeyword_1 = (Keyword)cGroup.eContents().get(1);
+		private final Assignment cFilenameAssignment_2 = (Assignment)cGroup.eContents().get(2);
+		private final RuleCall cFilenameSTRINGTerminalRuleCall_2_0 = (RuleCall)cFilenameAssignment_2.eContents().get(0);
+		private final RuleCall cEOSTerminalRuleCall_3 = (RuleCall)cGroup.eContents().get(3);
+		
+		//EndWrite:
+		//	"}" "to" filename=STRING EOS;
+		public ParserRule getRule() { return rule; }
+
+		//"}" "to" filename=STRING EOS
+		public Group getGroup() { return cGroup; }
+
+		//"}"
+		public Keyword getRightCurlyBracketKeyword_0() { return cRightCurlyBracketKeyword_0; }
+
+		//"to"
+		public Keyword getToKeyword_1() { return cToKeyword_1; }
+
+		//filename=STRING
+		public Assignment getFilenameAssignment_2() { return cFilenameAssignment_2; }
+
+		//STRING
+		public RuleCall getFilenameSTRINGTerminalRuleCall_2_0() { return cFilenameSTRINGTerminalRuleCall_2_0; }
+
+		//EOS
+		public RuleCall getEOSTerminalRuleCall_3() { return cEOSTerminalRuleCall_3; }
+	}
+
+	public class ReadElements extends AbstractParserRuleElementFinder {
+		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "Read");
+		private final Group cGroup = (Group)rule.eContents().get(1);
+		private final Keyword cReadKeyword_0 = (Keyword)cGroup.eContents().get(0);
+		private final Keyword cDataKeyword_1 = (Keyword)cGroup.eContents().get(1);
+		private final Keyword cFromKeyword_2 = (Keyword)cGroup.eContents().get(2);
+		private final Assignment cFilenameAssignment_3 = (Assignment)cGroup.eContents().get(3);
+		private final RuleCall cFilenameSTRINGTerminalRuleCall_3_0 = (RuleCall)cFilenameAssignment_3.eContents().get(0);
+		private final Group cGroup_4 = (Group)cGroup.eContents().get(4);
+		private final Keyword cUsingKeyword_4_0 = (Keyword)cGroup_4.eContents().get(0);
+		private final Assignment cTemplateFilenameAssignment_4_1 = (Assignment)cGroup_4.eContents().get(1);
+		private final RuleCall cTemplateFilenameSTRINGTerminalRuleCall_4_1_0 = (RuleCall)cTemplateFilenameAssignment_4_1.eContents().get(0);
+		private final RuleCall cEOSTerminalRuleCall_5 = (RuleCall)cGroup.eContents().get(5);
+		
+		//Read:
+		//	"Read:" "data" "from" filename=STRING ("using" templateFilename=STRING)? EOS;
+		public ParserRule getRule() { return rule; }
+
+		//"Read:" "data" "from" filename=STRING ("using" templateFilename=STRING)? EOS
+		public Group getGroup() { return cGroup; }
+
+		//"Read:"
+		public Keyword getReadKeyword_0() { return cReadKeyword_0; }
+
+		//"data"
+		public Keyword getDataKeyword_1() { return cDataKeyword_1; }
+
+		//"from"
+		public Keyword getFromKeyword_2() { return cFromKeyword_2; }
+
+		//filename=STRING
+		public Assignment getFilenameAssignment_3() { return cFilenameAssignment_3; }
+
+		//STRING
+		public RuleCall getFilenameSTRINGTerminalRuleCall_3_0() { return cFilenameSTRINGTerminalRuleCall_3_0; }
+
+		//("using" templateFilename=STRING)?
+		public Group getGroup_4() { return cGroup_4; }
+
+		//"using"
+		public Keyword getUsingKeyword_4_0() { return cUsingKeyword_4_0; }
+
+		//templateFilename=STRING
+		public Assignment getTemplateFilenameAssignment_4_1() { return cTemplateFilenameAssignment_4_1; }
+
+		//STRING
+		public RuleCall getTemplateFilenameSTRINGTerminalRuleCall_4_1_0() { return cTemplateFilenameSTRINGTerminalRuleCall_4_1_0; }
+
+		//EOS
+		public RuleCall getEOSTerminalRuleCall_5() { return cEOSTerminalRuleCall_5; }
 	}
 
 	public class ElementSetElements extends AbstractParserRuleElementFinder {
@@ -5288,36 +5483,38 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Keyword cOpEqualsSignKeyword_1_1_0_0 = (Keyword)cOpAlternatives_1_1_0.eContents().get(0);
 		private final Keyword cOpEqualsSignEqualsSignKeyword_1_1_0_1 = (Keyword)cOpAlternatives_1_1_0.eContents().get(1);
 		private final Keyword cOpIsKeyword_1_1_0_2 = (Keyword)cOpAlternatives_1_1_0.eContents().get(2);
-		private final Keyword cOpExclamationMarkEqualsSignKeyword_1_1_0_3 = (Keyword)cOpAlternatives_1_1_0.eContents().get(3);
-		private final Keyword cOpLessThanSignKeyword_1_1_0_4 = (Keyword)cOpAlternatives_1_1_0.eContents().get(4);
-		private final Keyword cOpLessThanSignEqualsSignKeyword_1_1_0_5 = (Keyword)cOpAlternatives_1_1_0.eContents().get(5);
-		private final Keyword cOpGreaterThanSignKeyword_1_1_0_6 = (Keyword)cOpAlternatives_1_1_0.eContents().get(6);
-		private final Keyword cOpGreaterThanSignEqualsSignKeyword_1_1_0_7 = (Keyword)cOpAlternatives_1_1_0.eContents().get(7);
+		private final Keyword cOpToKeyword_1_1_0_3 = (Keyword)cOpAlternatives_1_1_0.eContents().get(3);
+		private final Keyword cOpExclamationMarkEqualsSignKeyword_1_1_0_4 = (Keyword)cOpAlternatives_1_1_0.eContents().get(4);
+		private final Keyword cOpLessThanSignKeyword_1_1_0_5 = (Keyword)cOpAlternatives_1_1_0.eContents().get(5);
+		private final Keyword cOpLessThanSignEqualsSignKeyword_1_1_0_6 = (Keyword)cOpAlternatives_1_1_0.eContents().get(6);
+		private final Keyword cOpGreaterThanSignKeyword_1_1_0_7 = (Keyword)cOpAlternatives_1_1_0.eContents().get(7);
+		private final Keyword cOpGreaterThanSignEqualsSignKeyword_1_1_0_8 = (Keyword)cOpAlternatives_1_1_0.eContents().get(8);
 		private final Assignment cRightAssignment_1_2 = (Assignment)cGroup_1.eContents().get(2);
 		private final RuleCall cRightAdditiveExpressionParserRuleCall_1_2_0 = (RuleCall)cRightAssignment_1_2.eContents().get(0);
 		
 		//RelationalExpression returns Expression:
-		//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
+		//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "to" | "!=" | "<" | "<=" | ">" | ">=")
 		//	right=AdditiveExpression)*;
 		public ParserRule getRule() { return rule; }
 
-		//AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
+		//AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "to" | "!=" | "<" | "<=" | ">" | ">=")
 		//right=AdditiveExpression)*
 		public Group getGroup() { return cGroup; }
 
 		//AdditiveExpression
 		public RuleCall getAdditiveExpressionParserRuleCall_0() { return cAdditiveExpressionParserRuleCall_0; }
 
-		//({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=") right=AdditiveExpression)*
+		//({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "to" | "!=" | "<" | "<=" | ">" | ">=")
+		//right=AdditiveExpression)*
 		public Group getGroup_1() { return cGroup_1; }
 
 		//{BinaryOpExpression.left=current}
 		public Action getBinaryOpExpressionLeftAction_1_0() { return cBinaryOpExpressionLeftAction_1_0; }
 
-		//op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
+		//op=("=" | "==" | "is" | "to" | "!=" | "<" | "<=" | ">" | ">=")
 		public Assignment getOpAssignment_1_1() { return cOpAssignment_1_1; }
 
-		//"=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">="
+		//"=" | "==" | "is" | "to" | "!=" | "<" | "<=" | ">" | ">="
 		public Alternatives getOpAlternatives_1_1_0() { return cOpAlternatives_1_1_0; }
 
 		//"="
@@ -5329,20 +5526,23 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//"is"
 		public Keyword getOpIsKeyword_1_1_0_2() { return cOpIsKeyword_1_1_0_2; }
 
+		//"to"
+		public Keyword getOpToKeyword_1_1_0_3() { return cOpToKeyword_1_1_0_3; }
+
 		//"!="
-		public Keyword getOpExclamationMarkEqualsSignKeyword_1_1_0_3() { return cOpExclamationMarkEqualsSignKeyword_1_1_0_3; }
+		public Keyword getOpExclamationMarkEqualsSignKeyword_1_1_0_4() { return cOpExclamationMarkEqualsSignKeyword_1_1_0_4; }
 
 		//"<"
-		public Keyword getOpLessThanSignKeyword_1_1_0_4() { return cOpLessThanSignKeyword_1_1_0_4; }
+		public Keyword getOpLessThanSignKeyword_1_1_0_5() { return cOpLessThanSignKeyword_1_1_0_5; }
 
 		//"<="
-		public Keyword getOpLessThanSignEqualsSignKeyword_1_1_0_5() { return cOpLessThanSignEqualsSignKeyword_1_1_0_5; }
+		public Keyword getOpLessThanSignEqualsSignKeyword_1_1_0_6() { return cOpLessThanSignEqualsSignKeyword_1_1_0_6; }
 
 		//">"
-		public Keyword getOpGreaterThanSignKeyword_1_1_0_6() { return cOpGreaterThanSignKeyword_1_1_0_6; }
+		public Keyword getOpGreaterThanSignKeyword_1_1_0_7() { return cOpGreaterThanSignKeyword_1_1_0_7; }
 
 		//">="
-		public Keyword getOpGreaterThanSignEqualsSignKeyword_1_1_0_7() { return cOpGreaterThanSignEqualsSignKeyword_1_1_0_7; }
+		public Keyword getOpGreaterThanSignEqualsSignKeyword_1_1_0_8() { return cOpGreaterThanSignEqualsSignKeyword_1_1_0_8; }
 
 		//right=AdditiveExpression
 		public Assignment getRightAssignment_1_2() { return cRightAssignment_1_2; }
@@ -6890,46 +7090,65 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		private final Keyword cDecimalDecimalKeyword_2_0 = (Keyword)cDecimalEnumLiteralDeclaration_2.eContents().get(0);
 		private final EnumLiteralDeclaration cIntEnumLiteralDeclaration_3 = (EnumLiteralDeclaration)cAlternatives.eContents().get(3);
 		private final Keyword cIntIntKeyword_3_0 = (Keyword)cIntEnumLiteralDeclaration_3.eContents().get(0);
-		private final EnumLiteralDeclaration cLongEnumLiteralDeclaration_4 = (EnumLiteralDeclaration)cAlternatives.eContents().get(4);
-		private final Keyword cLongLongKeyword_4_0 = (Keyword)cLongEnumLiteralDeclaration_4.eContents().get(0);
-		private final EnumLiteralDeclaration cFloatEnumLiteralDeclaration_5 = (EnumLiteralDeclaration)cAlternatives.eContents().get(5);
-		private final Keyword cFloatFloatKeyword_5_0 = (Keyword)cFloatEnumLiteralDeclaration_5.eContents().get(0);
-		private final EnumLiteralDeclaration cDoubleEnumLiteralDeclaration_6 = (EnumLiteralDeclaration)cAlternatives.eContents().get(6);
-		private final Keyword cDoubleDoubleKeyword_6_0 = (Keyword)cDoubleEnumLiteralDeclaration_6.eContents().get(0);
-		private final EnumLiteralDeclaration cDurationEnumLiteralDeclaration_7 = (EnumLiteralDeclaration)cAlternatives.eContents().get(7);
-		private final Keyword cDurationDurationKeyword_7_0 = (Keyword)cDurationEnumLiteralDeclaration_7.eContents().get(0);
-		private final EnumLiteralDeclaration cDateTimeEnumLiteralDeclaration_8 = (EnumLiteralDeclaration)cAlternatives.eContents().get(8);
-		private final Keyword cDateTimeDateTimeKeyword_8_0 = (Keyword)cDateTimeEnumLiteralDeclaration_8.eContents().get(0);
-		private final EnumLiteralDeclaration cTimeEnumLiteralDeclaration_9 = (EnumLiteralDeclaration)cAlternatives.eContents().get(9);
-		private final Keyword cTimeTimeKeyword_9_0 = (Keyword)cTimeEnumLiteralDeclaration_9.eContents().get(0);
-		private final EnumLiteralDeclaration cDateEnumLiteralDeclaration_10 = (EnumLiteralDeclaration)cAlternatives.eContents().get(10);
-		private final Keyword cDateDateKeyword_10_0 = (Keyword)cDateEnumLiteralDeclaration_10.eContents().get(0);
-		private final EnumLiteralDeclaration cGYearMonthEnumLiteralDeclaration_11 = (EnumLiteralDeclaration)cAlternatives.eContents().get(11);
-		private final Keyword cGYearMonthGYearMonthKeyword_11_0 = (Keyword)cGYearMonthEnumLiteralDeclaration_11.eContents().get(0);
-		private final EnumLiteralDeclaration cGYearEnumLiteralDeclaration_12 = (EnumLiteralDeclaration)cAlternatives.eContents().get(12);
-		private final Keyword cGYearGYearKeyword_12_0 = (Keyword)cGYearEnumLiteralDeclaration_12.eContents().get(0);
-		private final EnumLiteralDeclaration cGMonthDayEnumLiteralDeclaration_13 = (EnumLiteralDeclaration)cAlternatives.eContents().get(13);
-		private final Keyword cGMonthDayGMonthDayKeyword_13_0 = (Keyword)cGMonthDayEnumLiteralDeclaration_13.eContents().get(0);
-		private final EnumLiteralDeclaration cGDayEnumLiteralDeclaration_14 = (EnumLiteralDeclaration)cAlternatives.eContents().get(14);
-		private final Keyword cGDayGDayKeyword_14_0 = (Keyword)cGDayEnumLiteralDeclaration_14.eContents().get(0);
-		private final EnumLiteralDeclaration cGMonthEnumLiteralDeclaration_15 = (EnumLiteralDeclaration)cAlternatives.eContents().get(15);
-		private final Keyword cGMonthGMonthKeyword_15_0 = (Keyword)cGMonthEnumLiteralDeclaration_15.eContents().get(0);
-		private final EnumLiteralDeclaration cHexBinaryEnumLiteralDeclaration_16 = (EnumLiteralDeclaration)cAlternatives.eContents().get(16);
-		private final Keyword cHexBinaryHexBinaryKeyword_16_0 = (Keyword)cHexBinaryEnumLiteralDeclaration_16.eContents().get(0);
-		private final EnumLiteralDeclaration cBase64BinaryEnumLiteralDeclaration_17 = (EnumLiteralDeclaration)cAlternatives.eContents().get(17);
-		private final Keyword cBase64BinaryBase64BinaryKeyword_17_0 = (Keyword)cBase64BinaryEnumLiteralDeclaration_17.eContents().get(0);
-		private final EnumLiteralDeclaration cAnyURIEnumLiteralDeclaration_18 = (EnumLiteralDeclaration)cAlternatives.eContents().get(18);
-		private final Keyword cAnyURIAnyURIKeyword_18_0 = (Keyword)cAnyURIEnumLiteralDeclaration_18.eContents().get(0);
-		private final EnumLiteralDeclaration cDataEnumLiteralDeclaration_19 = (EnumLiteralDeclaration)cAlternatives.eContents().get(19);
-		private final Keyword cDataDataKeyword_19_0 = (Keyword)cDataEnumLiteralDeclaration_19.eContents().get(0);
+		private final EnumLiteralDeclaration cIntegerEnumLiteralDeclaration_4 = (EnumLiteralDeclaration)cAlternatives.eContents().get(4);
+		private final Keyword cIntegerIntegerKeyword_4_0 = (Keyword)cIntegerEnumLiteralDeclaration_4.eContents().get(0);
+		private final EnumLiteralDeclaration cNegativeIntegerEnumLiteralDeclaration_5 = (EnumLiteralDeclaration)cAlternatives.eContents().get(5);
+		private final Keyword cNegativeIntegerNegativeIntegerKeyword_5_0 = (Keyword)cNegativeIntegerEnumLiteralDeclaration_5.eContents().get(0);
+		private final EnumLiteralDeclaration cNonNegativeIntegerEnumLiteralDeclaration_6 = (EnumLiteralDeclaration)cAlternatives.eContents().get(6);
+		private final Keyword cNonNegativeIntegerNonNegativeIntegerKeyword_6_0 = (Keyword)cNonNegativeIntegerEnumLiteralDeclaration_6.eContents().get(0);
+		private final EnumLiteralDeclaration cPositiveIntegerEnumLiteralDeclaration_7 = (EnumLiteralDeclaration)cAlternatives.eContents().get(7);
+		private final Keyword cPositiveIntegerPositiveIntegerKeyword_7_0 = (Keyword)cPositiveIntegerEnumLiteralDeclaration_7.eContents().get(0);
+		private final EnumLiteralDeclaration cNonPositiveIntegerEnumLiteralDeclaration_8 = (EnumLiteralDeclaration)cAlternatives.eContents().get(8);
+		private final Keyword cNonPositiveIntegerNonPositiveIntegerKeyword_8_0 = (Keyword)cNonPositiveIntegerEnumLiteralDeclaration_8.eContents().get(0);
+		private final EnumLiteralDeclaration cLongEnumLiteralDeclaration_9 = (EnumLiteralDeclaration)cAlternatives.eContents().get(9);
+		private final Keyword cLongLongKeyword_9_0 = (Keyword)cLongEnumLiteralDeclaration_9.eContents().get(0);
+		private final EnumLiteralDeclaration cFloatEnumLiteralDeclaration_10 = (EnumLiteralDeclaration)cAlternatives.eContents().get(10);
+		private final Keyword cFloatFloatKeyword_10_0 = (Keyword)cFloatEnumLiteralDeclaration_10.eContents().get(0);
+		private final EnumLiteralDeclaration cDoubleEnumLiteralDeclaration_11 = (EnumLiteralDeclaration)cAlternatives.eContents().get(11);
+		private final Keyword cDoubleDoubleKeyword_11_0 = (Keyword)cDoubleEnumLiteralDeclaration_11.eContents().get(0);
+		private final EnumLiteralDeclaration cDurationEnumLiteralDeclaration_12 = (EnumLiteralDeclaration)cAlternatives.eContents().get(12);
+		private final Keyword cDurationDurationKeyword_12_0 = (Keyword)cDurationEnumLiteralDeclaration_12.eContents().get(0);
+		private final EnumLiteralDeclaration cDateTimeEnumLiteralDeclaration_13 = (EnumLiteralDeclaration)cAlternatives.eContents().get(13);
+		private final Keyword cDateTimeDateTimeKeyword_13_0 = (Keyword)cDateTimeEnumLiteralDeclaration_13.eContents().get(0);
+		private final EnumLiteralDeclaration cTimeEnumLiteralDeclaration_14 = (EnumLiteralDeclaration)cAlternatives.eContents().get(14);
+		private final Keyword cTimeTimeKeyword_14_0 = (Keyword)cTimeEnumLiteralDeclaration_14.eContents().get(0);
+		private final EnumLiteralDeclaration cDateEnumLiteralDeclaration_15 = (EnumLiteralDeclaration)cAlternatives.eContents().get(15);
+		private final Keyword cDateDateKeyword_15_0 = (Keyword)cDateEnumLiteralDeclaration_15.eContents().get(0);
+		private final EnumLiteralDeclaration cUnsignedByteEnumLiteralDeclaration_16 = (EnumLiteralDeclaration)cAlternatives.eContents().get(16);
+		private final Keyword cUnsignedByteUnsignedByteKeyword_16_0 = (Keyword)cUnsignedByteEnumLiteralDeclaration_16.eContents().get(0);
+		private final EnumLiteralDeclaration cUnsignedIntEnumLiteralDeclaration_17 = (EnumLiteralDeclaration)cAlternatives.eContents().get(17);
+		private final Keyword cUnsignedIntUnsignedIntKeyword_17_0 = (Keyword)cUnsignedIntEnumLiteralDeclaration_17.eContents().get(0);
+		private final EnumLiteralDeclaration cAnySimpleTypeEnumLiteralDeclaration_18 = (EnumLiteralDeclaration)cAlternatives.eContents().get(18);
+		private final Keyword cAnySimpleTypeAnySimpleTypeKeyword_18_0 = (Keyword)cAnySimpleTypeEnumLiteralDeclaration_18.eContents().get(0);
+		private final EnumLiteralDeclaration cGYearMonthEnumLiteralDeclaration_19 = (EnumLiteralDeclaration)cAlternatives.eContents().get(19);
+		private final Keyword cGYearMonthGYearMonthKeyword_19_0 = (Keyword)cGYearMonthEnumLiteralDeclaration_19.eContents().get(0);
+		private final EnumLiteralDeclaration cGYearEnumLiteralDeclaration_20 = (EnumLiteralDeclaration)cAlternatives.eContents().get(20);
+		private final Keyword cGYearGYearKeyword_20_0 = (Keyword)cGYearEnumLiteralDeclaration_20.eContents().get(0);
+		private final EnumLiteralDeclaration cGMonthDayEnumLiteralDeclaration_21 = (EnumLiteralDeclaration)cAlternatives.eContents().get(21);
+		private final Keyword cGMonthDayGMonthDayKeyword_21_0 = (Keyword)cGMonthDayEnumLiteralDeclaration_21.eContents().get(0);
+		private final EnumLiteralDeclaration cGDayEnumLiteralDeclaration_22 = (EnumLiteralDeclaration)cAlternatives.eContents().get(22);
+		private final Keyword cGDayGDayKeyword_22_0 = (Keyword)cGDayEnumLiteralDeclaration_22.eContents().get(0);
+		private final EnumLiteralDeclaration cGMonthEnumLiteralDeclaration_23 = (EnumLiteralDeclaration)cAlternatives.eContents().get(23);
+		private final Keyword cGMonthGMonthKeyword_23_0 = (Keyword)cGMonthEnumLiteralDeclaration_23.eContents().get(0);
+		private final EnumLiteralDeclaration cHexBinaryEnumLiteralDeclaration_24 = (EnumLiteralDeclaration)cAlternatives.eContents().get(24);
+		private final Keyword cHexBinaryHexBinaryKeyword_24_0 = (Keyword)cHexBinaryEnumLiteralDeclaration_24.eContents().get(0);
+		private final EnumLiteralDeclaration cBase64BinaryEnumLiteralDeclaration_25 = (EnumLiteralDeclaration)cAlternatives.eContents().get(25);
+		private final Keyword cBase64BinaryBase64BinaryKeyword_25_0 = (Keyword)cBase64BinaryEnumLiteralDeclaration_25.eContents().get(0);
+		private final EnumLiteralDeclaration cAnyURIEnumLiteralDeclaration_26 = (EnumLiteralDeclaration)cAlternatives.eContents().get(26);
+		private final Keyword cAnyURIAnyURIKeyword_26_0 = (Keyword)cAnyURIEnumLiteralDeclaration_26.eContents().get(0);
+		private final EnumLiteralDeclaration cDataEnumLiteralDeclaration_27 = (EnumLiteralDeclaration)cAlternatives.eContents().get(27);
+		private final Keyword cDataDataKeyword_27_0 = (Keyword)cDataEnumLiteralDeclaration_27.eContents().get(0);
 		
+		//// Built-in primitive data types
 		//enum DataType:
-		//	string | boolean | decimal | int | long | float | double | duration | dateTime | time | date | gYearMonth | gYear |
-		//	gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
+		//	string | boolean | decimal | int | integer | negativeInteger | nonNegativeInteger | positiveInteger |
+		//	nonPositiveInteger | long | float | double | duration | dateTime | time | date | unsignedByte | unsignedInt |
+		//	anySimpleType | gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
 		public EnumRule getRule() { return rule; }
 
-		//string | boolean | decimal | int | long | float | double | duration | dateTime | time | date | gYearMonth | gYear |
-		//gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data
+		//string | boolean | decimal | int | integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger
+		//| long | float | double | duration | dateTime | time | date | unsignedByte | unsignedInt | anySimpleType | gYearMonth
+		//| gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data
 		public Alternatives getAlternatives() { return cAlternatives; }
 
 		//string
@@ -6956,101 +7175,149 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//"int"
 		public Keyword getIntIntKeyword_3_0() { return cIntIntKeyword_3_0; }
 
+		//integer
+		public EnumLiteralDeclaration getIntegerEnumLiteralDeclaration_4() { return cIntegerEnumLiteralDeclaration_4; }
+
+		//"integer"
+		public Keyword getIntegerIntegerKeyword_4_0() { return cIntegerIntegerKeyword_4_0; }
+
+		//negativeInteger
+		public EnumLiteralDeclaration getNegativeIntegerEnumLiteralDeclaration_5() { return cNegativeIntegerEnumLiteralDeclaration_5; }
+
+		//"negativeInteger"
+		public Keyword getNegativeIntegerNegativeIntegerKeyword_5_0() { return cNegativeIntegerNegativeIntegerKeyword_5_0; }
+
+		//nonNegativeInteger
+		public EnumLiteralDeclaration getNonNegativeIntegerEnumLiteralDeclaration_6() { return cNonNegativeIntegerEnumLiteralDeclaration_6; }
+
+		//"nonNegativeInteger"
+		public Keyword getNonNegativeIntegerNonNegativeIntegerKeyword_6_0() { return cNonNegativeIntegerNonNegativeIntegerKeyword_6_0; }
+
+		//positiveInteger
+		public EnumLiteralDeclaration getPositiveIntegerEnumLiteralDeclaration_7() { return cPositiveIntegerEnumLiteralDeclaration_7; }
+
+		//"positiveInteger"
+		public Keyword getPositiveIntegerPositiveIntegerKeyword_7_0() { return cPositiveIntegerPositiveIntegerKeyword_7_0; }
+
+		//nonPositiveInteger
+		public EnumLiteralDeclaration getNonPositiveIntegerEnumLiteralDeclaration_8() { return cNonPositiveIntegerEnumLiteralDeclaration_8; }
+
+		//"nonPositiveInteger"
+		public Keyword getNonPositiveIntegerNonPositiveIntegerKeyword_8_0() { return cNonPositiveIntegerNonPositiveIntegerKeyword_8_0; }
+
 		//long
-		public EnumLiteralDeclaration getLongEnumLiteralDeclaration_4() { return cLongEnumLiteralDeclaration_4; }
+		public EnumLiteralDeclaration getLongEnumLiteralDeclaration_9() { return cLongEnumLiteralDeclaration_9; }
 
 		//"long"
-		public Keyword getLongLongKeyword_4_0() { return cLongLongKeyword_4_0; }
+		public Keyword getLongLongKeyword_9_0() { return cLongLongKeyword_9_0; }
 
 		//float
-		public EnumLiteralDeclaration getFloatEnumLiteralDeclaration_5() { return cFloatEnumLiteralDeclaration_5; }
+		public EnumLiteralDeclaration getFloatEnumLiteralDeclaration_10() { return cFloatEnumLiteralDeclaration_10; }
 
 		//"float"
-		public Keyword getFloatFloatKeyword_5_0() { return cFloatFloatKeyword_5_0; }
+		public Keyword getFloatFloatKeyword_10_0() { return cFloatFloatKeyword_10_0; }
 
 		//double
-		public EnumLiteralDeclaration getDoubleEnumLiteralDeclaration_6() { return cDoubleEnumLiteralDeclaration_6; }
+		public EnumLiteralDeclaration getDoubleEnumLiteralDeclaration_11() { return cDoubleEnumLiteralDeclaration_11; }
 
 		//"double"
-		public Keyword getDoubleDoubleKeyword_6_0() { return cDoubleDoubleKeyword_6_0; }
+		public Keyword getDoubleDoubleKeyword_11_0() { return cDoubleDoubleKeyword_11_0; }
 
 		//duration
-		public EnumLiteralDeclaration getDurationEnumLiteralDeclaration_7() { return cDurationEnumLiteralDeclaration_7; }
+		public EnumLiteralDeclaration getDurationEnumLiteralDeclaration_12() { return cDurationEnumLiteralDeclaration_12; }
 
 		//"duration"
-		public Keyword getDurationDurationKeyword_7_0() { return cDurationDurationKeyword_7_0; }
+		public Keyword getDurationDurationKeyword_12_0() { return cDurationDurationKeyword_12_0; }
 
 		//dateTime
-		public EnumLiteralDeclaration getDateTimeEnumLiteralDeclaration_8() { return cDateTimeEnumLiteralDeclaration_8; }
+		public EnumLiteralDeclaration getDateTimeEnumLiteralDeclaration_13() { return cDateTimeEnumLiteralDeclaration_13; }
 
 		//"dateTime"
-		public Keyword getDateTimeDateTimeKeyword_8_0() { return cDateTimeDateTimeKeyword_8_0; }
+		public Keyword getDateTimeDateTimeKeyword_13_0() { return cDateTimeDateTimeKeyword_13_0; }
 
 		//time
-		public EnumLiteralDeclaration getTimeEnumLiteralDeclaration_9() { return cTimeEnumLiteralDeclaration_9; }
+		public EnumLiteralDeclaration getTimeEnumLiteralDeclaration_14() { return cTimeEnumLiteralDeclaration_14; }
 
 		//"time"
-		public Keyword getTimeTimeKeyword_9_0() { return cTimeTimeKeyword_9_0; }
+		public Keyword getTimeTimeKeyword_14_0() { return cTimeTimeKeyword_14_0; }
 
 		//date
-		public EnumLiteralDeclaration getDateEnumLiteralDeclaration_10() { return cDateEnumLiteralDeclaration_10; }
+		public EnumLiteralDeclaration getDateEnumLiteralDeclaration_15() { return cDateEnumLiteralDeclaration_15; }
 
 		//"date"
-		public Keyword getDateDateKeyword_10_0() { return cDateDateKeyword_10_0; }
+		public Keyword getDateDateKeyword_15_0() { return cDateDateKeyword_15_0; }
+
+		//unsignedByte
+		public EnumLiteralDeclaration getUnsignedByteEnumLiteralDeclaration_16() { return cUnsignedByteEnumLiteralDeclaration_16; }
+
+		//"unsignedByte"
+		public Keyword getUnsignedByteUnsignedByteKeyword_16_0() { return cUnsignedByteUnsignedByteKeyword_16_0; }
+
+		//unsignedInt
+		public EnumLiteralDeclaration getUnsignedIntEnumLiteralDeclaration_17() { return cUnsignedIntEnumLiteralDeclaration_17; }
+
+		//"unsignedInt"
+		public Keyword getUnsignedIntUnsignedIntKeyword_17_0() { return cUnsignedIntUnsignedIntKeyword_17_0; }
+
+		//anySimpleType
+		public EnumLiteralDeclaration getAnySimpleTypeEnumLiteralDeclaration_18() { return cAnySimpleTypeEnumLiteralDeclaration_18; }
+
+		//"anySimpleType"
+		public Keyword getAnySimpleTypeAnySimpleTypeKeyword_18_0() { return cAnySimpleTypeAnySimpleTypeKeyword_18_0; }
 
 		//gYearMonth
-		public EnumLiteralDeclaration getGYearMonthEnumLiteralDeclaration_11() { return cGYearMonthEnumLiteralDeclaration_11; }
+		public EnumLiteralDeclaration getGYearMonthEnumLiteralDeclaration_19() { return cGYearMonthEnumLiteralDeclaration_19; }
 
 		//"gYearMonth"
-		public Keyword getGYearMonthGYearMonthKeyword_11_0() { return cGYearMonthGYearMonthKeyword_11_0; }
+		public Keyword getGYearMonthGYearMonthKeyword_19_0() { return cGYearMonthGYearMonthKeyword_19_0; }
 
 		//gYear
-		public EnumLiteralDeclaration getGYearEnumLiteralDeclaration_12() { return cGYearEnumLiteralDeclaration_12; }
+		public EnumLiteralDeclaration getGYearEnumLiteralDeclaration_20() { return cGYearEnumLiteralDeclaration_20; }
 
 		//"gYear"
-		public Keyword getGYearGYearKeyword_12_0() { return cGYearGYearKeyword_12_0; }
+		public Keyword getGYearGYearKeyword_20_0() { return cGYearGYearKeyword_20_0; }
 
 		//gMonthDay
-		public EnumLiteralDeclaration getGMonthDayEnumLiteralDeclaration_13() { return cGMonthDayEnumLiteralDeclaration_13; }
+		public EnumLiteralDeclaration getGMonthDayEnumLiteralDeclaration_21() { return cGMonthDayEnumLiteralDeclaration_21; }
 
 		//"gMonthDay"
-		public Keyword getGMonthDayGMonthDayKeyword_13_0() { return cGMonthDayGMonthDayKeyword_13_0; }
+		public Keyword getGMonthDayGMonthDayKeyword_21_0() { return cGMonthDayGMonthDayKeyword_21_0; }
 
 		//gDay
-		public EnumLiteralDeclaration getGDayEnumLiteralDeclaration_14() { return cGDayEnumLiteralDeclaration_14; }
+		public EnumLiteralDeclaration getGDayEnumLiteralDeclaration_22() { return cGDayEnumLiteralDeclaration_22; }
 
 		//"gDay"
-		public Keyword getGDayGDayKeyword_14_0() { return cGDayGDayKeyword_14_0; }
+		public Keyword getGDayGDayKeyword_22_0() { return cGDayGDayKeyword_22_0; }
 
 		//gMonth
-		public EnumLiteralDeclaration getGMonthEnumLiteralDeclaration_15() { return cGMonthEnumLiteralDeclaration_15; }
+		public EnumLiteralDeclaration getGMonthEnumLiteralDeclaration_23() { return cGMonthEnumLiteralDeclaration_23; }
 
 		//"gMonth"
-		public Keyword getGMonthGMonthKeyword_15_0() { return cGMonthGMonthKeyword_15_0; }
+		public Keyword getGMonthGMonthKeyword_23_0() { return cGMonthGMonthKeyword_23_0; }
 
 		//hexBinary
-		public EnumLiteralDeclaration getHexBinaryEnumLiteralDeclaration_16() { return cHexBinaryEnumLiteralDeclaration_16; }
+		public EnumLiteralDeclaration getHexBinaryEnumLiteralDeclaration_24() { return cHexBinaryEnumLiteralDeclaration_24; }
 
 		//"hexBinary"
-		public Keyword getHexBinaryHexBinaryKeyword_16_0() { return cHexBinaryHexBinaryKeyword_16_0; }
+		public Keyword getHexBinaryHexBinaryKeyword_24_0() { return cHexBinaryHexBinaryKeyword_24_0; }
 
 		//base64Binary
-		public EnumLiteralDeclaration getBase64BinaryEnumLiteralDeclaration_17() { return cBase64BinaryEnumLiteralDeclaration_17; }
+		public EnumLiteralDeclaration getBase64BinaryEnumLiteralDeclaration_25() { return cBase64BinaryEnumLiteralDeclaration_25; }
 
 		//"base64Binary"
-		public Keyword getBase64BinaryBase64BinaryKeyword_17_0() { return cBase64BinaryBase64BinaryKeyword_17_0; }
+		public Keyword getBase64BinaryBase64BinaryKeyword_25_0() { return cBase64BinaryBase64BinaryKeyword_25_0; }
 
 		//anyURI
-		public EnumLiteralDeclaration getAnyURIEnumLiteralDeclaration_18() { return cAnyURIEnumLiteralDeclaration_18; }
+		public EnumLiteralDeclaration getAnyURIEnumLiteralDeclaration_26() { return cAnyURIEnumLiteralDeclaration_26; }
 
 		//"anyURI"
-		public Keyword getAnyURIAnyURIKeyword_18_0() { return cAnyURIAnyURIKeyword_18_0; }
+		public Keyword getAnyURIAnyURIKeyword_26_0() { return cAnyURIAnyURIKeyword_26_0; }
 
 		//data
-		public EnumLiteralDeclaration getDataEnumLiteralDeclaration_19() { return cDataEnumLiteralDeclaration_19; }
+		public EnumLiteralDeclaration getDataEnumLiteralDeclaration_27() { return cDataEnumLiteralDeclaration_27; }
 
 		//"data"
-		public Keyword getDataDataKeyword_19_0() { return cDataDataKeyword_19_0; }
+		public Keyword getDataDataKeyword_27_0() { return cDataDataKeyword_27_0; }
 	}
 	
 	private ModelElements pModel;
@@ -7136,6 +7403,9 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	private ExprElements pExpr;
 	private DisplayElements pDisplay;
 	private ExplanationElements pExplanation;
+	private StartWriteElements pStartWrite;
+	private EndWriteElements pEndWrite;
+	private ReadElements pRead;
 	private ElementSetElements pElementSet;
 	private SelectExpressionElements pSelectExpression;
 	private ConstructExpressionElements pConstructExpression;
@@ -7231,8 +7501,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	//// The baseUri is the namespace of the model and should be of the form
 	//// "http://..."; the version is optional.
 	//ModelName:
-	//	"uri" baseUri=STRING ("alias" alias=NAME)? ("version" version=STRING)? ("(" annType+=("alias" | "note")
-	//	annContent+=ContentList ")")* EOS;
+	//	"uri" baseUri=STRING ("alias" alias=NAME)? ("(" annType+=("alias" | "note") annContent+=ContentList ")")* ("version"
+	//	version=STRING)? EOS;
 	public ModelNameElements getModelNameAccess() {
 		return (pModelName != null) ? pModelName : (pModelName = new ModelNameElements());
 	}
@@ -7241,10 +7511,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getModelNameAccess().getRule();
 	}
 
-	//// Every import is by either by actual relative URL (other SADL models only) 
-	////	or by URI (SADL models and external OWL files); 
-	////	an import may have a unique alias (which becomes the "prefix" in compound names)
-	////	but this is discouraged in favor of global aliases given with ModelName.
+	//// Every import is by actual relative URL (other SADL models) or by URI
+	//// (OWL files); every import has a unique alias (which becomes the "prefix" in compound names).
 	//Import:
 	//	"import" importURI=STRING ("as" alias=NAME)? EOS;
 	public ImportElements getImportAccess() {
@@ -7263,7 +7531,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	//	Test | // temp for testing only
 	//	Expr | // used to generate display statements in the output of Tests, etc., used by SADL only
 	//	Display | // used to generate explanations of particular triples (if an explanation found), used by SADL only
-	//	Explanation;
+	//	Explanation | StartWrite | EndWrite | Read;
 	public ModelElementElements getModelElementAccess() {
 		return (pModelElement != null) ? pModelElement : (pModelElement = new ModelElementElements());
 	}
@@ -7329,7 +7597,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getLiteralListAccess().getRule();
 	}
 
-	//// References to imported SADL names are qualified by namespaces.
+	//// References to imported SADL names may be qualified by namespaces.
 	//ResourceByName:
 	//	name=[ResourceName|NAME];
 	public ResourceByNameElements getResourceByNameAccess() {
@@ -7340,7 +7608,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getResourceByNameAccess().getRule();
 	}
 
-	////RecursivePropertyByName :
+	////RecursivePropertyByName :		// this was an attempt to support recursive properties in SPARQL queries but it did not work well-undesired side effects
 	////	name=[ResourceName|NAME] (recurse=('*' | '+'))?
 	////;    
 	//// This is for classes that have already been defined.
@@ -7406,7 +7674,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getIntersectionResourceAccess().getRule();
 	}
 
-	//// Classes may be declared in many ways.
+	//// Classes may be declared in multiple ways.
 	//ClassDeclaration:
 	//	className=ResourceName "is" "a" "top-level"? "class" mustBeOneOf=EnumeratedInstances? describedBy+=AddlClassInfo* EOS
 	//	| classList=ResourceList "are" "top-level"? "classes" describedBy+=AddlClassInfo* EOS | className=ResourceName "is"
@@ -7431,7 +7699,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getEnumeratedInstancesAccess().getRule();
 	}
 
-	//// Class declarations may also describe the class's properties.
+	//// Class declarations may also describe the class's properties (properties with the class in the domain) and range or restrictions.
 	//AddlClassInfo:
 	//	","? "described" "by" (propertyByName=ResourceByName | propertyName=ResourceName range=Range) | ","? "described" "by"
 	//	propertyByName=ResourceByName restriction=Condition;
@@ -7459,7 +7727,6 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getRangeAccess().getRule();
 	}
 
-	////	  | dataType=ResourceName
 	//RangeType:
 	//	classIdentifier=ResourceIdentifier | dataType=DataType;
 	public RangeTypeElements getRangeTypeAccess() {
@@ -7470,6 +7737,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getRangeTypeAccess().getRule();
 	}
 
+	//// User-defined datatypes 
 	//UserDefinedDataType:
 	//	"data" "type" userDefinedDataType=ResourceName "is" restriction=DataTypeRestriction EOS;
 	public UserDefinedDataTypeElements getUserDefinedDataTypeAccess() {
@@ -7490,6 +7758,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getDataTypeRestrictionAccess().getRule();
 	}
 
+	//// [,] is inclusive, (,) is exclusive	
 	//Facets:
 	//	minexin=("(" | "[") min=NUMBER? "," max=NUMBER? maxexin=("]" | ")") | regex=STRING | "length" (len=NUMBER |
 	//	minlen=NUMBER "-" maxlen=NUMBER) | "{" values+=(STRING | NUMBER) (","? values+=(STRING | NUMBER))* "}";
@@ -7501,9 +7770,11 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		return getFacetsAccess().getRule();
 	}
 
+	//// Built-in primitive data types
 	//enum DataType:
-	//	string | boolean | decimal | int | long | float | double | duration | dateTime | time | date | gYearMonth | gYear |
-	//	gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
+	//	string | boolean | decimal | int | integer | negativeInteger | nonNegativeInteger | positiveInteger |
+	//	nonPositiveInteger | long | float | double | duration | dateTime | time | date | unsignedByte | unsignedInt |
+	//	anySimpleType | gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data;
 	public DataTypeElements getDataTypeAccess() {
 		return (unknownRuleDataType != null) ? unknownRuleDataType : (unknownRuleDataType = new DataTypeElements());
 	}
@@ -7780,9 +8051,10 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	//// e.g., parent describes Person with values of type Person.
 	//// e.g., child describes Person with values of type Person.
 	//PropertyDeclaration:
-	//	propertyName=ResourceName ("is" "a" "type" "of" superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+
-	//	EOS | article=AnArticle? "relationship" "of" domain=ResourceIdentifier "to" rangeResource=ResourceIdentifier "is"
-	//	propertyName=ResourceName EOS | annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS;
+	//	noDomainPropName=ResourceName "is" "a" "property" range=Range? EOS | propertyName=ResourceName ("is" "a" "type" "of"
+	//	superPropName=ResourceByName)? addlPropInfo+=AdditionalPropertyInfo+ EOS | article=AnArticle? "relationship" "of"
+	//	domain=ResourceIdentifier "to" rangeResource=ResourceIdentifier "is" propertyName=ResourceName EOS |
+	//	annotationProperty=ResourceName "is" "a" "type" "of" "annotation" EOS;
 	public PropertyDeclarationElements getPropertyDeclarationAccess() {
 		return (pPropertyDeclaration != null) ? pPropertyDeclaration : (pPropertyDeclaration = new PropertyDeclarationElements());
 	}
@@ -8024,7 +8296,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 
 	//// | objectInstanceList=ResourceList  // this would allow a list of object values
 	/// ********************************************************************************************************************* /
-	/// *      The rest of the rules in this file are for defining patterns in Tests, Queries, and Rules                    * /
+	/// *      The rest of the rules in this file are for defining patterns in Tests, Queries, Rules, etc.                  * /
 	/// ********************************************************************************************************************* / // This phrase identifies a graph pattern pinned to a point (the subject, at the end of the phrase) and identified by edges (properties)
 	////	The whole phrase can be thought of as as expression selecting all nodes in the graph from which once can trace "backwards" along
 	////	the specified edges to arrive at the subject node. All properties except the first in the phrase must be ObjectProperty names. If
@@ -8114,7 +8386,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 
 	//// The Rule statement
 	//Rule: //	('Rule' name=ID)|(name=ID 'Rule') (':')? ('given' givens=ElementSet)? ('if' ifs=ElementSet)? 'then' thens=ElementSet;
-	//	"Rule" name=NAME ":"? ("given" givens=ElementSet?)? ("if" ifs=ElementSet?)? "then" thens=ElementSet EOS;
+	//	"Rule" name=NAME ("(" annProps+=NAME annValues+=STRING ")")* ":"? ("given" givens=ElementSet?)? ("if" ifs=ElementSet?)?
+	//	"then" thens=ElementSet EOS;
 	public RuleElements getRuleAccess() {
 		return (pRule != null) ? pRule : (pRule = new RuleElements());
 	}
@@ -8179,6 +8452,36 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	
 	public ParserRule getExplanationRule() {
 		return getExplanationAccess().getRule();
+	}
+
+	//StartWrite:
+	//	write="Write:" dataOnly="data"? "{";
+	public StartWriteElements getStartWriteAccess() {
+		return (pStartWrite != null) ? pStartWrite : (pStartWrite = new StartWriteElements());
+	}
+	
+	public ParserRule getStartWriteRule() {
+		return getStartWriteAccess().getRule();
+	}
+
+	//EndWrite:
+	//	"}" "to" filename=STRING EOS;
+	public EndWriteElements getEndWriteAccess() {
+		return (pEndWrite != null) ? pEndWrite : (pEndWrite = new EndWriteElements());
+	}
+	
+	public ParserRule getEndWriteRule() {
+		return getEndWriteAccess().getRule();
+	}
+
+	//Read:
+	//	"Read:" "data" "from" filename=STRING ("using" templateFilename=STRING)? EOS;
+	public ReadElements getReadAccess() {
+		return (pRead != null) ? pRead : (pRead = new ReadElements());
+	}
+	
+	public ParserRule getReadRule() {
+		return getReadAccess().getRule();
 	}
 
 	////// The set of elements used in a Rule block
@@ -8274,7 +8577,7 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 	}
 
 	//RelationalExpression returns Expression:
-	//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "!=" | "<" | "<=" | ">" | ">=")
+	//	AdditiveExpression ({BinaryOpExpression.left=current} op=("=" | "==" | "is" | "to" | "!=" | "<" | "<=" | ">" | ">=")
 	//	right=AdditiveExpression)*;
 	public RelationalExpressionElements getRelationalExpressionAccess() {
 		return (pRelationalExpression != null) ? pRelationalExpression : (pRelationalExpression = new RelationalExpressionElements());

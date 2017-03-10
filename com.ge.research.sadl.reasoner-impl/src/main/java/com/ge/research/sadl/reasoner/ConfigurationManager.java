@@ -206,14 +206,6 @@ public class ConfigurationManager implements IConfigurationManager {
 					t.printStackTrace();
 					logger.error("Failed to read mapping file in folder '" + modelFolderPathname + "': " + t.getLocalizedMessage());
 				}
-				finally {
-					try {
-						in.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
 			}
 			else {
 				logger.warn("Model folder '" + modelFolderPathname + "' has no ont-policy.rdf file.");
@@ -254,7 +246,6 @@ public class ConfigurationManager implements IConfigurationManager {
 		            		DateTimeConfig.getGlobalDefault().setDmyOrder(false);
 		            	}
 		            }
-		            in.close();
 				}
 				else {
 					logger.warn("Model folder '" + modelFolderPathname + "' has no configuration file.");
@@ -467,12 +458,6 @@ public class ConfigurationManager implements IConfigurationManager {
         Object[] ret = new Object[2];
         ret[0] = in;
         ret[1] = uri;
-        try {
-			in.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
         return ret;
     }
 
@@ -885,18 +870,15 @@ public class ConfigurationManager implements IConfigurationManager {
 				 					if (!siblingFound) {
 				 						if (getModelFolderPath() != null) {
 								 			String folderPath = fileNameToFileUrl(getModelFolderPath().getAbsolutePath());
-								 			File folderFile = new File(fileUrlToFileName(folderPath));
-								 			if (folderFile.exists()) {
-								 				try {
-													testName = fileNameToFileUrl(folderFile.getParentFile().getCanonicalPath() + "/" + fileName);
-								 					testFile = new File(fileUrlToFileName(testName));
-								 					if (testFile.exists()) {
-								 						// folder above??
-								 						actualFilePath = testName;
-								 					}
-												} catch (IOException e) {
-												}
-								 			}
+						 					testName = folderPath.substring(0, folderPath.length() - (1 + lastToken.length())) + "/" + fileName;
+						 					testFile = new File(fileUrlToFileName(testName));
+						 					if (testFile.exists()) {
+						 						// folder above??
+						 						actualFilePath = testName;
+						 					}
+						 					else {
+						 						logger.warn("Mapping file has actual URL '" + testName + "' but it does not appear to exist and could not be found in adjacent folders.");
+						 					}
 				 						}
 				 						else {
 				 							actualFilePath = testName;

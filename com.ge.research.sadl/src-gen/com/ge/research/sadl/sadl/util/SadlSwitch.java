@@ -21,6 +21,7 @@ import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
 import com.ge.research.sadl.sadl.ElementSet;
 import com.ge.research.sadl.sadl.EmbeddedInstanceDeclaration;
+import com.ge.research.sadl.sadl.EndWrite;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
@@ -72,6 +73,7 @@ import com.ge.research.sadl.sadl.PropertyOfClass;
 import com.ge.research.sadl.sadl.Query;
 import com.ge.research.sadl.sadl.Range;
 import com.ge.research.sadl.sadl.RangeType;
+import com.ge.research.sadl.sadl.Read;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceByRestriction;
 import com.ge.research.sadl.sadl.ResourceBySetOp;
@@ -83,6 +85,7 @@ import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.sadl.SelectExpression;
 import com.ge.research.sadl.sadl.SomeValuesCondition;
 import com.ge.research.sadl.sadl.SomeValuesFrom;
+import com.ge.research.sadl.sadl.StartWrite;
 import com.ge.research.sadl.sadl.Statement;
 import com.ge.research.sadl.sadl.SubTypeOf;
 import com.ge.research.sadl.sadl.SubjProp;
@@ -765,6 +768,30 @@ public class SadlSwitch<T> extends Switch<T>
         Explanation explanation = (Explanation)theEObject;
         T result = caseExplanation(explanation);
         if (result == null) result = caseModelElement(explanation);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case SadlPackage.START_WRITE:
+      {
+        StartWrite startWrite = (StartWrite)theEObject;
+        T result = caseStartWrite(startWrite);
+        if (result == null) result = caseModelElement(startWrite);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case SadlPackage.END_WRITE:
+      {
+        EndWrite endWrite = (EndWrite)theEObject;
+        T result = caseEndWrite(endWrite);
+        if (result == null) result = caseModelElement(endWrite);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case SadlPackage.READ:
+      {
+        Read read = (Read)theEObject;
+        T result = caseRead(read);
+        if (result == null) result = caseModelElement(read);
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
@@ -2134,6 +2161,54 @@ public class SadlSwitch<T> extends Switch<T>
    * @generated
    */
   public T caseExplanation(Explanation object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Start Write</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Start Write</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseStartWrite(StartWrite object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>End Write</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>End Write</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseEndWrite(EndWrite object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Read</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Read</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseRead(Read object)
   {
     return null;
   }

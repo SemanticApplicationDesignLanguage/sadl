@@ -18,10 +18,7 @@
 
 package com.ge.research.sadl.builder;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,6 +39,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.builder.IXtextBuilderParticipant;
+import org.eclipse.xtext.builder.IXtextBuilderParticipant.IBuildContext;
 import org.eclipse.xtext.resource.IResourceDescription.Delta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +51,7 @@ import com.google.inject.Inject;
 public class SadlBuilder implements IXtextBuilderParticipant {
 	private static final Logger logger = LoggerFactory.getLogger(SadlBuilder.class);
 
-    private SadlModelManager visitor;
+    private final SadlModelManager visitor;
     
     private int totalErrors = 0;
     private int totalWarnings = 0;
@@ -61,17 +59,10 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     
     private boolean showTimingInformation = false;
 
-	@Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
-
-//    @Inject
-//    public SadlBuilder(SadlModelManager visitor) {
-//        this.visitor = visitor;
-//    }
-    
-   public SadlBuilder() {
-	   
-   }
+    @Inject
+    public SadlBuilder(SadlModelManager visitor) {
+        this.visitor = visitor;
+    }
 
     /**
      * Allows us to perform additional steps in the build process such as 
@@ -86,7 +77,8 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     @Override
     public void build(IBuildContext context, IProgressMonitor monitor)
             throws CoreException {
-    	logger.debug("SadlBuilder.build called with type " + context.getBuildType().toString());
+    	org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.DEBUG);
+       	logger.debug("SadlBuilder.build called with type " + context.getBuildType().toString());
     	// Lists of Resources that have changed and need action: new, updated, and deleted
     	//	New: create mapping?
     	//	Updated: ??
@@ -101,9 +93,11 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     				// we're only going to build/rebuild SADL files
 	    			if (delta.getOld() != null) {
 	    				updatedResources.add(context.getResourceSet().getResource(delta.getUri(), true));
+	    				logger.debug("Adding '" + delta.getUri() + "' to resources to update.");
 	    			}
 	    			else {
 	    				newResources.add(context.getResourceSet().getResource(delta.getUri(), true));
+	    				logger.debug("Adding '" + delta.getUri() + "' to new resources.");
 	    			}
     			}
     		}
@@ -112,6 +106,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     				deletedResources = new ArrayList<URI>();
     			}
 				deletedResources.add(delta.getUri());
+				logger.debug("Adding '" + delta.getUri() + "' to resources to delete.");
     		}
     		
 //    		// Use file extension from injected language name
@@ -119,101 +114,52 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 //    			context.getResourceSet().getResource(delta.getUri(), true);
 //    		}
     	}
-    	
+
+        // Create and save each resource's Jena model.
+//        List<Resource> resources = context.getResourceSet().getResources();
+//    	for (Delta delta: context.getDeltas()) {
+//    		// Use file extension from injected language name
+//    		if ((delta.getNew()!=null || context.getBuildType() == BuildType.CLEAN) && delta.getUri().lastSegment().endsWith(".sadl")) {
+//    			context.getResourceSet().getResource(delta.getUri(), true);
+//    		}
+//    	}
+//        List<Resource> resources = context.getResourceSet().getResources();
+    	List<Resource> resources = new ArrayList<Resource>();
+    	if (newResources != null && newResources.size() > 0) {
+    		resources.addAll(newResources);
+    	}
+    	if (updatedResources != null && updatedResources.size() > 0) {
+    		resources.addAll(updatedResources);
+    	}
+    	if (deletedResources != null && deletedResources.size() > 0) {
+    		for (int i = 0; i < deletedResources.size(); i++) {
+    			resources.add(context.getResourceSet().getResource(deletedResources.get(i), true));
+    		}
+    	}
+
         // Ensure that the OWL models folder exists.
         IProject project = context.getBuiltProject();
         IFolder folder = project.getFolder(ResourceManager.OWLDIR);
-        String prjPath = folder.getParent().getFullPath().toString();
         if (!folder.exists()) {
             folder.create(IResource.NONE, true, monitor);
             logger.debug("OwlModels folder created: " + folder.toString());
         }
 
-        // Get a ConfigurationManager for the build
-    	IConfigurationManagerForIDE configMgr = null;
-		String modelFolder = ResourceManager.convertProjectRelativePathToAbsolutePath(folder.getFullPath().toPortableString());
-       	try {
-            URI prjUri = ResourceManager.getProjectUri(URI.createURI(modelFolder));
-       		configMgr = getVisitor(prjUri).getConfigurationMgr(modelFolder);
-    	}
-    	catch (Exception e) {
-    		logger.error("Exception while getting a ConfigurationManagerForIDE: " + e.getMessage());
-    		throw new CoreException(new Status(0, this.getClass().getPackage().toString(), 0, 
-    				"Unable to get a ConfigurationManager: ", e));
-    	}
-   		if (configMgr == null) {
-   			logger.error("Failed to get a ConfigurationManagerForIDE");
-   			throw new CoreException(new Status(0, this.getClass().getPackage().toString(), 0, 
-				"Unable to get a ConfigurationManager: ", null));
-   		}
-   
-   		if (logger.isDebugEnabled()) {
-	    	StringBuilder sb = new StringBuilder();
-	    	for (int i = 0; i < newResources.size(); i++) {
-	    		if (i > 0) {
-	    			sb.append(", ");
-	    		}
-	    		sb.append(newResources.get(i).getURI());
-	    	}
-	    	logger.debug("New (" + newResources.size() + "): " + sb.toString());
-	    	
-	    	sb = new StringBuilder();
-	    	if (updatedResources != null) {
-	        	for (int i = 0; i < updatedResources.size(); i++) {
-	        		if (i > 0) {
-	        			sb.append(", ");
-	        		}
-	        		sb.append(updatedResources.get(i).getURI());
-	        	}
-	    	}
-	    	logger.debug("Updated (" + updatedResources.size() + "): " + sb.toString());
-	
-	        sb = new StringBuilder();
-	    	int numDeleted = 0;
-	    	if (deletedResources != null) {
-	        	for (int i = 0; i < deletedResources.size(); i++) {
-	        		if (i > 0) {
-	        			sb.append(", ");
-	        		}
-	        		sb.append(deletedResources.get(i));
-	        	}
-	        	numDeleted = deletedResources.size();
-	    	}
-	    	logger.debug("Deleted (" + numDeleted + "): " + sb.toString());
-   		}
-        	
-   		// For deleted SADL resources, remove the mapping and delete the generated OWL file
-   		for (int i = 0; deletedResources != null && i < deletedResources.size(); i++) {
-        	URI deletedUri = deletedResources.get(i);
-        	if (isSadlFile(deletedUri)) {
-    			try {
-            		File owlFile = ResourceManager.getOwlFileForSadlUri(deletedUri);
-            		if (owlFile.exists()) {
-						configMgr.removeMappingByActualUrl(owlFile.getCanonicalPath());
-            			boolean bStat = owlFile.delete();
-            			if (!bStat) {
-            				logger.debug("Unable to delete OWL file '" + deletedUri.toString() + "' corresponding to deleted SADL file.");
-            			}
-            		}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-        	}
-    	}
-    	
-//   		List<Resource> resources = context.getResourceSet().getResources();
-   		List<Resource> resources = new ArrayList<Resource>();
-   		if (updatedResources != null) {
-   			resources.addAll(updatedResources);
-   		}
-   		if (newResources != null) {
-   			resources.addAll(newResources);
-   		}
-
+//    	ConfigurationManagerForIDE configMgr = null;
+//		String modelFolder = ResourceManager.convertProjectRelativePathToAbsolutePath(folder.getFullPath().toPortableString());
+//       	try {
+//       		configMgr = visitor.getConfigurationMgr(modelFolder);
+//    	}
+//    	catch (Exception e) {
+//    		logger.error("Exception while getting a ConfigurationManagerForIDE: " + e.getMessage());
+//    		throw new CoreException(new Status(0, this.getClass().getPackage().toString(), 0, 
+//    				"Unable to get a ConfigurationManager: ", e));
+//    	}
+//   		if (configMgr == null) {
+//   			logger.error("Failed to get a ConfigurationManagerForIDE");
+//   			throw new CoreException(new Status(0, this.getClass().getPackage().toString(), 0, 
+//				"Unable to get a ConfigurationManager: ", null));
+//   		}
         if (context.getBuildType() == BuildType.CLEAN) {
         	// Clean up the ont-policy.rdf file if doing a clean.
         	try {
@@ -222,7 +168,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     	            URI sadlFile = resource.getURI();
     	            String fext = sadlFile.fileExtension();
     	            if (ResourceManager.SADLEXT.equals(fext)) {
-    	            	getVisitor(resource.getURI()).deleteMarkers(resource, true);
+    	            	visitor.deleteMarkers(resource, true);
     	            }
     	        }
         	}
@@ -264,6 +210,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        }
 	        
 	        int numSadlResources = sadlResources.size();
+	        visitor.setBuilding(true, context.getBuildType());
 	        SubMonitor progress = SubMonitor.convert(monitor, numSadlResources + 2);	// assume determine dependencies is 2 ticks
 	        long t1 = System.currentTimeMillis();
 	        for (Resource resource : sadlResources) {
@@ -282,7 +229,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 		    				String impUri = ((Import) eObject).getImportURI();
 		    				if (impUri.startsWith("http:")){
 		    					try {
-									impUri = getVisitor(resource.getURI()).getAltUrl(impUri, resource.getURI());
+									impUri = visitor.getAltUrl(impUri, resource.getURI());
 								} catch (MalformedURLException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
@@ -333,40 +280,29 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        }
 	        if (showTimingInformation && fullBuild) {
 		        long t3 = System.currentTimeMillis();
-		        System.out.println("Total build time for " + processedResources.size() + " models in project " + project.getName() + ": " + (t3 - t1) + " ms");
+		        System.out.println("Total build time for " + processedResources.size() + " SADL models in project " + project.getName() + ": " + (t3 - t1) + " ms");
 		        someOutput = true;
 	        }
 	        if (totalErrors > 0) {
-	        	System.err.println("   A total of " + totalErrors + " errors occurred in " + modsWithErrors + " models in project '" + project.getName() + "'.");
+	        	System.err.println("   A total of " + totalErrors + " errors occurred in " + modsWithErrors + " models.");
 	        	someOutput = true;
 	        }
 	        if (totalWarnings > 0) {
 	        	if (totalWarnings > 1) {
-	        		System.out.println("   There were " + totalWarnings + " warnings in project '" + project.getName() + "'.");
+	        		System.out.println("   There were " + totalWarnings + " warnings.");
 	        		someOutput = true;
 	        	}
 	        	else {
-	        		System.out.println("   There was 1 warning in project '" + project.getName() + "'.");
+	        		System.out.println("   There was 1 warning.");
 	        		someOutput = true;
 	        	}
 	        }
 	        if (someOutput) {
 	        	System.out.println("\n");
 	        }
-	        if (configMgr != null) {
-	        	// if building then the editor close event will not trigger saving changes to configuration/mapping
-				configMgr.saveConfiguration();
-				configMgr.saveOntPolicyFile();
-	        }
+	        visitor.setBuilding(false,  context.getBuildType());
 	    }
     }
-
-	private boolean isSadlFile(URI uri) {
-		if (uri.lastSegment().endsWith(ResourceManager.SADLEXTWITHPREFIX)) {
-			return true;
-		}
-		return false;
-	}
 
 	private int buildResource(
 			HashMap<Resource, List<Resource>> sadlDependencyList,
@@ -401,19 +337,19 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        URI sadlFile = resource.getURI();
 	        String fext = sadlFile.fileExtension();
 	        if (ResourceManager.SADLEXT.equals(fext)) {
-	        	synchronized(getVisitor(resource.getURI())) {
+	        	synchronized(visitor) {
 		        	try {
 		        		logger.debug("Ready to build '" + resource.getURI().toString() + "': calling SMM.processModel with save true.");
 		        		long t1 = System.currentTimeMillis();
-		        		getVisitor(resource.getURI()).processModel(resource, true, false, progress);
-		        		thisModErrCnt = getVisitor(resource.getURI()).errors(true);
-		        		thisModErrCnt += getVisitor(resource.getURI()).countErrorMarkers(resource);
-		        		thisModErrCnt += getVisitor(resource.getURI()).getNumTranslationErrors();
+		        		visitor.processModel(resource, true, false, progress);
+		        		thisModErrCnt = visitor.errors(true);
+		        		thisModErrCnt += visitor.countErrorMarkers(resource);
+		        		thisModErrCnt += visitor.getNumTranslationErrors();
 		        		if (thisModErrCnt > 0) {
 		        			modsWithErrors++;
 		        		}
 		        		totalErrors += thisModErrCnt;
-		        		thisModWarnCnt = getVisitor(resource.getURI()).warnings();
+		        		thisModWarnCnt = visitor.warnings();
 		        		totalWarnings += thisModWarnCnt;
 		        		if (showTimingInformation) {
 		        			long t2 = System.currentTimeMillis();
@@ -433,7 +369,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 			    				System.out.println(msg);
 			    			}
 		        		}
-		        		getVisitor(resource.getURI()).removeResourceModel(resource);
+		        		visitor.removeResourceModel(resource);
 		        	}
 		        	catch (Throwable t) {
 		        		String msg = "Failed to build model for '" + sadlFile.lastSegment() + "': " + t.getLocalizedMessage();
@@ -467,16 +403,11 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 		}
 		return null;
 	}
-
-	private SadlModelManager getVisitor(URI uri) {
-		if (visitor == null) {
-			setVisitor(sadlModelManagerProvider.get(uri));
-		}
-		return visitor;
-	}
-
-	private void setVisitor(SadlModelManager visitor) {
-		this.visitor = visitor;
-	}
     
+	public static boolean isSadlFile(URI uri) {
+		if (uri.lastSegment().endsWith(ResourceManager.SADLEXTWITHPREFIX)) {
+			return true;
+		}
+		return false;
+	}
 }

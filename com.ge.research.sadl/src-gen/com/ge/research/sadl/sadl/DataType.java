@@ -60,6 +60,56 @@ public enum DataType implements Enumerator
   INT(3, "int", "int"),
 
   /**
+   * The '<em><b>Integer</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #INTEGER_VALUE
+   * @generated
+   * @ordered
+   */
+  INTEGER(4, "integer", "integer"),
+
+  /**
+   * The '<em><b>Negative Integer</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #NEGATIVE_INTEGER_VALUE
+   * @generated
+   * @ordered
+   */
+  NEGATIVE_INTEGER(5, "negativeInteger", "negativeInteger"),
+
+  /**
+   * The '<em><b>Non Negative Integer</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #NON_NEGATIVE_INTEGER_VALUE
+   * @generated
+   * @ordered
+   */
+  NON_NEGATIVE_INTEGER(6, "nonNegativeInteger", "nonNegativeInteger"),
+
+  /**
+   * The '<em><b>Positive Integer</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #POSITIVE_INTEGER_VALUE
+   * @generated
+   * @ordered
+   */
+  POSITIVE_INTEGER(7, "positiveInteger", "positiveInteger"),
+
+  /**
+   * The '<em><b>Non Positive Integer</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #NON_POSITIVE_INTEGER_VALUE
+   * @generated
+   * @ordered
+   */
+  NON_POSITIVE_INTEGER(8, "nonPositiveInteger", "nonPositiveInteger"),
+
+  /**
    * The '<em><b>Long</b></em>' literal object.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -67,7 +117,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  LONG(4, "long", "long"),
+  LONG(9, "long", "long"),
 
   /**
    * The '<em><b>Float</b></em>' literal object.
@@ -77,7 +127,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  FLOAT(5, "float", "float"),
+  FLOAT(10, "float", "float"),
 
   /**
    * The '<em><b>Double</b></em>' literal object.
@@ -87,7 +137,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  DOUBLE(6, "double", "double"),
+  DOUBLE(11, "double", "double"),
 
   /**
    * The '<em><b>Duration</b></em>' literal object.
@@ -97,7 +147,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  DURATION(7, "duration", "duration"),
+  DURATION(12, "duration", "duration"),
 
   /**
    * The '<em><b>Date Time</b></em>' literal object.
@@ -107,7 +157,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  DATE_TIME(8, "dateTime", "dateTime"),
+  DATE_TIME(13, "dateTime", "dateTime"),
 
   /**
    * The '<em><b>Time</b></em>' literal object.
@@ -117,7 +167,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  TIME(9, "time", "time"),
+  TIME(14, "time", "time"),
 
   /**
    * The '<em><b>Date</b></em>' literal object.
@@ -127,7 +177,37 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  DATE(10, "date", "date"),
+  DATE(15, "date", "date"),
+
+  /**
+   * The '<em><b>Unsigned Byte</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #UNSIGNED_BYTE_VALUE
+   * @generated
+   * @ordered
+   */
+  UNSIGNED_BYTE(16, "unsignedByte", "unsignedByte"),
+
+  /**
+   * The '<em><b>Unsigned Int</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #UNSIGNED_INT_VALUE
+   * @generated
+   * @ordered
+   */
+  UNSIGNED_INT(17, "unsignedInt", "unsignedInt"),
+
+  /**
+   * The '<em><b>Any Simple Type</b></em>' literal object.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #ANY_SIMPLE_TYPE_VALUE
+   * @generated
+   * @ordered
+   */
+  ANY_SIMPLE_TYPE(18, "anySimpleType", "anySimpleType"),
 
   /**
    * The '<em><b>GYear Month</b></em>' literal object.
@@ -137,7 +217,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  GYEAR_MONTH(11, "gYearMonth", "gYearMonth"),
+  GYEAR_MONTH(19, "gYearMonth", "gYearMonth"),
 
   /**
    * The '<em><b>GYear</b></em>' literal object.
@@ -147,7 +227,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  GYEAR(12, "gYear", "gYear"),
+  GYEAR(20, "gYear", "gYear"),
 
   /**
    * The '<em><b>GMonth Day</b></em>' literal object.
@@ -157,7 +237,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  GMONTH_DAY(13, "gMonthDay", "gMonthDay"),
+  GMONTH_DAY(21, "gMonthDay", "gMonthDay"),
 
   /**
    * The '<em><b>GDay</b></em>' literal object.
@@ -167,7 +247,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  GDAY(14, "gDay", "gDay"),
+  GDAY(22, "gDay", "gDay"),
 
   /**
    * The '<em><b>GMonth</b></em>' literal object.
@@ -177,7 +257,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  GMONTH(15, "gMonth", "gMonth"),
+  GMONTH(23, "gMonth", "gMonth"),
 
   /**
    * The '<em><b>Hex Binary</b></em>' literal object.
@@ -187,7 +267,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  HEX_BINARY(16, "hexBinary", "hexBinary"),
+  HEX_BINARY(24, "hexBinary", "hexBinary"),
 
   /**
    * The '<em><b>Base64 Binary</b></em>' literal object.
@@ -197,7 +277,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  BASE64_BINARY(17, "base64Binary", "base64Binary"),
+  BASE64_BINARY(25, "base64Binary", "base64Binary"),
 
   /**
    * The '<em><b>Any URI</b></em>' literal object.
@@ -207,7 +287,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  ANY_URI(18, "anyURI", "anyURI"),
+  ANY_URI(26, "anyURI", "anyURI"),
 
   /**
    * The '<em><b>Data</b></em>' literal object.
@@ -217,7 +297,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  DATA(19, "data", "data");
+  DATA(27, "data", "data");
 
   /**
    * The '<em><b>String</b></em>' literal value.
@@ -280,6 +360,81 @@ public enum DataType implements Enumerator
   public static final int INT_VALUE = 3;
 
   /**
+   * The '<em><b>Integer</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Integer</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #INTEGER
+   * @model name="integer"
+   * @generated
+   * @ordered
+   */
+  public static final int INTEGER_VALUE = 4;
+
+  /**
+   * The '<em><b>Negative Integer</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Negative Integer</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #NEGATIVE_INTEGER
+   * @model name="negativeInteger"
+   * @generated
+   * @ordered
+   */
+  public static final int NEGATIVE_INTEGER_VALUE = 5;
+
+  /**
+   * The '<em><b>Non Negative Integer</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Non Negative Integer</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #NON_NEGATIVE_INTEGER
+   * @model name="nonNegativeInteger"
+   * @generated
+   * @ordered
+   */
+  public static final int NON_NEGATIVE_INTEGER_VALUE = 6;
+
+  /**
+   * The '<em><b>Positive Integer</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Positive Integer</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #POSITIVE_INTEGER
+   * @model name="positiveInteger"
+   * @generated
+   * @ordered
+   */
+  public static final int POSITIVE_INTEGER_VALUE = 7;
+
+  /**
+   * The '<em><b>Non Positive Integer</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Non Positive Integer</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #NON_POSITIVE_INTEGER
+   * @model name="nonPositiveInteger"
+   * @generated
+   * @ordered
+   */
+  public static final int NON_POSITIVE_INTEGER_VALUE = 8;
+
+  /**
    * The '<em><b>Long</b></em>' literal value.
    * <!-- begin-user-doc -->
    * <p>
@@ -292,7 +447,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int LONG_VALUE = 4;
+  public static final int LONG_VALUE = 9;
 
   /**
    * The '<em><b>Float</b></em>' literal value.
@@ -307,7 +462,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int FLOAT_VALUE = 5;
+  public static final int FLOAT_VALUE = 10;
 
   /**
    * The '<em><b>Double</b></em>' literal value.
@@ -322,7 +477,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int DOUBLE_VALUE = 6;
+  public static final int DOUBLE_VALUE = 11;
 
   /**
    * The '<em><b>Duration</b></em>' literal value.
@@ -337,7 +492,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int DURATION_VALUE = 7;
+  public static final int DURATION_VALUE = 12;
 
   /**
    * The '<em><b>Date Time</b></em>' literal value.
@@ -352,7 +507,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int DATE_TIME_VALUE = 8;
+  public static final int DATE_TIME_VALUE = 13;
 
   /**
    * The '<em><b>Time</b></em>' literal value.
@@ -367,7 +522,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int TIME_VALUE = 9;
+  public static final int TIME_VALUE = 14;
 
   /**
    * The '<em><b>Date</b></em>' literal value.
@@ -382,7 +537,52 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int DATE_VALUE = 10;
+  public static final int DATE_VALUE = 15;
+
+  /**
+   * The '<em><b>Unsigned Byte</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Unsigned Byte</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #UNSIGNED_BYTE
+   * @model name="unsignedByte"
+   * @generated
+   * @ordered
+   */
+  public static final int UNSIGNED_BYTE_VALUE = 16;
+
+  /**
+   * The '<em><b>Unsigned Int</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Unsigned Int</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #UNSIGNED_INT
+   * @model name="unsignedInt"
+   * @generated
+   * @ordered
+   */
+  public static final int UNSIGNED_INT_VALUE = 17;
+
+  /**
+   * The '<em><b>Any Simple Type</b></em>' literal value.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of '<em><b>Any Simple Type</b></em>' literal object isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @see #ANY_SIMPLE_TYPE
+   * @model name="anySimpleType"
+   * @generated
+   * @ordered
+   */
+  public static final int ANY_SIMPLE_TYPE_VALUE = 18;
 
   /**
    * The '<em><b>GYear Month</b></em>' literal value.
@@ -397,7 +597,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int GYEAR_MONTH_VALUE = 11;
+  public static final int GYEAR_MONTH_VALUE = 19;
 
   /**
    * The '<em><b>GYear</b></em>' literal value.
@@ -412,7 +612,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int GYEAR_VALUE = 12;
+  public static final int GYEAR_VALUE = 20;
 
   /**
    * The '<em><b>GMonth Day</b></em>' literal value.
@@ -427,7 +627,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int GMONTH_DAY_VALUE = 13;
+  public static final int GMONTH_DAY_VALUE = 21;
 
   /**
    * The '<em><b>GDay</b></em>' literal value.
@@ -442,7 +642,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int GDAY_VALUE = 14;
+  public static final int GDAY_VALUE = 22;
 
   /**
    * The '<em><b>GMonth</b></em>' literal value.
@@ -457,7 +657,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int GMONTH_VALUE = 15;
+  public static final int GMONTH_VALUE = 23;
 
   /**
    * The '<em><b>Hex Binary</b></em>' literal value.
@@ -472,7 +672,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int HEX_BINARY_VALUE = 16;
+  public static final int HEX_BINARY_VALUE = 24;
 
   /**
    * The '<em><b>Base64 Binary</b></em>' literal value.
@@ -487,7 +687,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int BASE64_BINARY_VALUE = 17;
+  public static final int BASE64_BINARY_VALUE = 25;
 
   /**
    * The '<em><b>Any URI</b></em>' literal value.
@@ -502,7 +702,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int ANY_URI_VALUE = 18;
+  public static final int ANY_URI_VALUE = 26;
 
   /**
    * The '<em><b>Data</b></em>' literal value.
@@ -517,7 +717,7 @@ public enum DataType implements Enumerator
    * @generated
    * @ordered
    */
-  public static final int DATA_VALUE = 19;
+  public static final int DATA_VALUE = 27;
 
   /**
    * An array of all the '<em><b>Data Type</b></em>' enumerators.
@@ -532,6 +732,11 @@ public enum DataType implements Enumerator
       BOOLEAN,
       DECIMAL,
       INT,
+      INTEGER,
+      NEGATIVE_INTEGER,
+      NON_NEGATIVE_INTEGER,
+      POSITIVE_INTEGER,
+      NON_POSITIVE_INTEGER,
       LONG,
       FLOAT,
       DOUBLE,
@@ -539,6 +744,9 @@ public enum DataType implements Enumerator
       DATE_TIME,
       TIME,
       DATE,
+      UNSIGNED_BYTE,
+      UNSIGNED_INT,
+      ANY_SIMPLE_TYPE,
       GYEAR_MONTH,
       GYEAR,
       GMONTH_DAY,
@@ -610,6 +818,11 @@ public enum DataType implements Enumerator
       case BOOLEAN_VALUE: return BOOLEAN;
       case DECIMAL_VALUE: return DECIMAL;
       case INT_VALUE: return INT;
+      case INTEGER_VALUE: return INTEGER;
+      case NEGATIVE_INTEGER_VALUE: return NEGATIVE_INTEGER;
+      case NON_NEGATIVE_INTEGER_VALUE: return NON_NEGATIVE_INTEGER;
+      case POSITIVE_INTEGER_VALUE: return POSITIVE_INTEGER;
+      case NON_POSITIVE_INTEGER_VALUE: return NON_POSITIVE_INTEGER;
       case LONG_VALUE: return LONG;
       case FLOAT_VALUE: return FLOAT;
       case DOUBLE_VALUE: return DOUBLE;
@@ -617,6 +830,9 @@ public enum DataType implements Enumerator
       case DATE_TIME_VALUE: return DATE_TIME;
       case TIME_VALUE: return TIME;
       case DATE_VALUE: return DATE;
+      case UNSIGNED_BYTE_VALUE: return UNSIGNED_BYTE;
+      case UNSIGNED_INT_VALUE: return UNSIGNED_INT;
+      case ANY_SIMPLE_TYPE_VALUE: return ANY_SIMPLE_TYPE;
       case GYEAR_MONTH_VALUE: return GYEAR_MONTH;
       case GYEAR_VALUE: return GYEAR;
       case GMONTH_DAY_VALUE: return GMONTH_DAY;

@@ -44,7 +44,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -63,9 +62,7 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
     private XtextResourceSet resourceSet;
     
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
-    
-    private SadlModelManager visitor = null;
+    private SadlModelManager visitor;
     
     private int errorCnt = 0;		// keep track of errors for reporting
 
@@ -81,81 +78,66 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
 		if (editorPart != null && editorPart.isDirty()) {
 		    SadlConsole.writeToConsole(MessageType.ERROR, "Model has unsaved changes. Please save before running tests.\n");
 		}
+		
 		errorCnt = 0;
     	IPreferencesService service = Platform.getPreferencesService();
 		final boolean validateBeforeTesting = service.getBoolean("com.ge.research.sadl.Sadl", "validateBeforeTest", false, null);
 		final boolean showReasonerTimingInformation = service.getBoolean("com.ge.research.sadl.Sadl", "showTimingInformation", false, null);
-	    IPath absolutePath = testFilePath.makeAbsolute();
-		URI uri = URI.createPlatformResourceURI(absolutePath.toString(), true);
-	    URI absoluteUri = ResourceManager.convertPlatformUriToAbsoluteUri(uri);
-		try {
-			String prjdir = ResourceManager.getProjectUri(uri).toFileString();
-			String prjuri = null;
-			prjuri = new SadlUtils().fileNameToFileUrl(prjdir);
-			if (prjuri.trim().endsWith("/")) {
-				prjuri = prjuri.substring(0, prjuri.length() - 1);
-			}
-			sadlModelManagerProvider.setUri(URI.createURI(prjuri));
-			visitor = sadlModelManagerProvider.get();
-			if (visitor == null) {
-				SadlConsole.writeToConsole(MessageType.ERROR, "Unable to run test suite until a SADL model file has been opened to initialize system.\n");
-				return;
-			}
 
-			final List<String> testFiles = getSadlTestFiles(absolutePath);
-	  		Job runTestJob = new Job("Run Tests") {
-  			
-	  			@Override
-	  			protected void canceling() {
-	  				try {
-	  					visitor.getConfigurationMgr((String)null).setInferenceCanceled(true);
-	  				} catch (MalformedURLException | ConfigurationException e) {
-	  					// TODO Auto-generated catch block
-	  					e.printStackTrace();
-	  				} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-	  			};
-	
-	  			@Override
-	  			protected IStatus run(IProgressMonitor monitor) {
-	  				Iterator<String> itr = testFiles.iterator();
-	  				int total = 0;
-	  				int passed = 0;
-					while (itr.hasNext()) {
-						String sadlFile = itr.next();
-						IPath sadlPath = testFilePath.uptoSegment(1).append(sadlFile);
-						prepareModel(visitor, sadlPath, resourceSet);
-						String modelName = visitor.getModelName();
-					    SadlConsole.writeToConsole(MessageType.INFO, "\nRunning tests: " + testFilePath.lastSegment() + "(" + modelName + ")\n");
-						int[] results = visitor.runAllTests(modelName, validateBeforeTesting, showReasonerTimingInformation);
-						passed += results[0];
-						total += results[1];
-						SadlConsole.displayMessages(visitor);
-					}
-					SadlConsole.writeToConsole(MessageType.INFO, "Test Suite Totals: passed " + passed + " of " + total + " tests.\n");
-					if (errorCnt > 0) {
-						SadlConsole.writeToConsole(MessageType.ERROR, "Encountered " + errorCnt + (errorCnt == 1 ? " error.\n" : " errors.\n"));
-					}
-					SadlConsole.displayMessages(visitor);
-					return Status.OK_STATUS;
-	  			}
-	  			
-	  		};
-			runTestJob.schedule();
-		} catch (URISyntaxException e1) {
-			SadlConsole.writeToConsole(MessageType.ERROR, "Unexpected error running test suite '" + testFilePath.lastSegment() + ": " + e1.getMessage() + ".\n");
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (visitor == null) {
+			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to run test suite until a SADL model file has been opened to initialize system.\n");
+			return;
 		}
+
+	    IPath absolutePath = testFilePath.makeAbsolute();
+		final List<String> testFiles = getSadlTestFiles(absolutePath);
+  		Job runTestJob = new Job("Run Tests") {
+  			
+  			@Override
+  			protected void canceling() {
+  				try {
+  					visitor.getConfigurationMgr(null).setInferenceCanceled(true);
+  				} catch (MalformedURLException | ConfigurationException e) {
+  					// TODO Auto-generated catch block
+  					e.printStackTrace();
+  				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+  			};
+
+  			@Override
+  			protected IStatus run(IProgressMonitor monitor) {
+  				Iterator<String> itr = testFiles.iterator();
+  				int total = 0;
+  				int passed = 0;
+				while (itr.hasNext()) {
+					String sadlFile = itr.next();
+					IPath sadlPath = testFilePath.uptoSegment(1).append(sadlFile);
+					prepareModel(visitor, sadlPath, resourceSet);
+					String modelName = visitor.getModelName();
+				    SadlConsole.writeToConsole(MessageType.INFO, "\nRunning tests: " + testFilePath.lastSegment() + "(" + modelName + ")\n");
+					int[] results = visitor.runAllTests(modelName, validateBeforeTesting, showReasonerTimingInformation);
+					passed += results[0];
+					total += results[1];
+					SadlConsole.displayMessages(visitor.getMessageManager());
+				}
+				SadlConsole.writeToConsole(MessageType.INFO, "Test Suite Totals: passed " + passed + " of " + total + " tests.\n");
+				if (errorCnt > 0) {
+					SadlConsole.writeToConsole(MessageType.ERROR, "Encountered " + errorCnt + (errorCnt == 1 ? " error.\n" : " errors.\n"));
+				}
+				SadlConsole.displayMessages(visitor.getMessageManager());
+				return Status.OK_STATUS;
+  			}
+  			
+  		};
+		runTestJob.schedule();
 	}
 
-	private List<String> getSadlTestFiles(IPath absolutePlatformPath) throws MalformedURLException {
+	private List<String> getSadlTestFiles(IPath absolutePlatformPath) {
 	    URI uri = URI.createPlatformResourceURI(absolutePlatformPath.toString(), true);
 	    URI absoluteUri = ResourceManager.convertPlatformUriToAbsoluteUri(uri);
 		String prjdir = ResourceManager.getProjectUri(uri).toFileString();
@@ -186,7 +168,7 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
                 String sadlFileName = line.substring(firstQuote + 1, lastQuote);
         		String absfn = null;
         		if (sadlFileName.startsWith("file:") || sadlFileName.indexOf(':') < 0) {
-        			absfn = ResourceManager.findSadlFileInProject(prjdir, sadlFileName);
+        			absfn = ResourceManager.findSadlFileInProject(prjdir, sadlFileName, ResourceManager.sadlExclusionFolders(prjdir));
         		}
         		else if (sadlFileName.startsWith("http:")) {
         			try {
@@ -202,7 +184,7 @@ public class TestSuite extends SadlActionDelegate implements IObjectActionDelega
         				SadlUtils su = new SadlUtils();
         				URI actualUri = URI.createFileURI(su.fileUrlToFileName(absfn));
 						String sadlfn = actualUri.trimFileExtension().appendFileExtension(ResourceManager.SADLEXT).segment(actualUri.segmentCount() - 1);
-						absfn = ResourceManager.findSadlFileInProject(prjdir, sadlfn);
+						absfn = ResourceManager.findSadlFileInProject(prjdir, sadlfn, ResourceManager.sadlExclusionFolders(prjdir));
 					} catch (ConfigurationException e) {
 	    				SadlConsole.writeToConsole(MessageType.ERROR, "Error converting test file (" + sadlFileName + ") to an actual URL: " + e.getLocalizedMessage() + ".\n");
 						e.printStackTrace();

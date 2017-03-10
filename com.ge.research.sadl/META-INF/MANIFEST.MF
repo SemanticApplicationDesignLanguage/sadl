@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl
 Bundle-Vendor: GE Research
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext;bundle-version="2.4.3";visibility:=reexport,
@@ -20,13 +20,13 @@ Require-Bundle: org.eclipse.xtext;bundle-version="2.4.3";visibility:=reexport,
  org.eclipse.core.jobs
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
+ com.ge.research.sadl.utils,
  org.apache.log4j,
- org.eclipse.ui,
- org.slf4j,
- org.slf4j.spi;version="1.7.2"
+ org.eclipse.ui
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.service,com.google.inject",
+Export-Package: au.com.bytecode.opencsv,
+ com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.service,com.google.inject",
  com.ge.research.sadl.builder;
   uses:="com.ge.research.sadl.sadl.util,
    org.eclipse.emf.ecore.resource,
@@ -43,7 +43,6 @@ Export-Package: com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.
    com.ge.research.sadl.sadl,
    org.eclipse.xtext.builder,
    com.ge.research.sadl.model.gp",
- com.ge.research.sadl.conversion,
  com.ge.research.sadl.formatting;uses:="org.eclipse.xtext.formatting.impl",
  com.ge.research.sadl.jena;
   uses:="org.eclipse.emf.ecore.resource,
@@ -119,6 +118,7 @@ Export-Package: com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.
    com.hp.hpl.jena.rdf.model,
    com.ge.research.sadl.model",
  com.ge.research.sadl.validation;uses:="org.eclipse.xtext.validation",
+ com.ge.research.sadl.visualize,
  com.hp.hpl.jena.datatypes,
  com.hp.hpl.jena.datatypes.xsd;
   uses:="com.hp.hpl.jena.graph.impl,
@@ -256,11 +256,10 @@ Export-Package: com.ge.research.sadl;uses:="org.eclipse.xtext,org.eclipse.xtext.
  com.hp.hpl.jena.util.iterator,
  com.hp.hpl.jena.vocabulary;uses:="com.hp.hpl.jena.ontology,com.hp.hpl.jena.graph,com.hp.hpl.jena.rdf.model",
  org.apache.jena.atlas.web,
- org.openjena.riot,
  org.pojava.datetime,
  org.slf4j;uses:="org.slf4j.spi,org.slf4j.helpers"
-Bundle-ClassPath: lib/opencsv-2.3.jar,
- .,
+Bundle-ClassPath: .,
+ lib/opencsv-2.3.jar,
  lib/activation-1.0.2.jar,
  lib/com.springsource.org.apache.commons.logging-1.1.1.jar,
  lib/commons-codec-1.6.jar,
@@ -279,7 +278,7 @@ Bundle-ClassPath: lib/opencsv-2.3.jar,
  lib/wstx-asl-3.2.9.jar,
  lib/xercesImpl-2.11.0.jar,
  lib/xml-apis-1.4.01.jar,
+ lib/slf4j-api-1.6.4.jar,
+ lib/slf4j-log4j12-1.6.4.jar,
  lib/reasoner-api-2.4.0.jar,
- lib/reasoner-impl-2.4.0.jar,
- lib/slf4j-api-1.7.12.jar,
- lib/slf4j-log4j12-1.7.12.jar
+ lib/reasoner-impl-2.4.0.jar

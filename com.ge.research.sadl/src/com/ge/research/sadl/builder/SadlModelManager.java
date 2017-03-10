@@ -22,10 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -37,27 +35,31 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-//import org.eclipse.ui.IPartListener2;	//*
-//import org.eclipse.ui.IWorkbenchPartReference;
-//import org.eclipse.ui.IWorkbenchWindow;
-//import org.eclipse.ui.PlatformUI;			//*
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.xtext.builder.IXtextBuilderParticipant.BuildType;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.resource.XtextResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +69,7 @@ import com.ge.research.sadl.model.ClassRestrictionCondition;
 import com.ge.research.sadl.model.ClassRestrictionCondition.RestrictionType;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.ConceptName.RangeValueType;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.PendingModelError;
@@ -86,16 +89,15 @@ import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
-import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -119,6 +121,7 @@ import com.ge.research.sadl.sadl.DataTypeRestriction;
 import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
+import com.ge.research.sadl.sadl.EndWrite;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EquivalentConcepts;
@@ -153,6 +156,8 @@ import com.ge.research.sadl.sadl.OfPhrase;
 import com.ge.research.sadl.sadl.PropValPartialTriple;
 import com.ge.research.sadl.sadl.PropertyDeclaration;
 import com.ge.research.sadl.sadl.Range;
+import com.ge.research.sadl.sadl.RangeType;
+import com.ge.research.sadl.sadl.Read;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceByRestriction;
 import com.ge.research.sadl.sadl.ResourceIdentifier;
@@ -161,6 +166,7 @@ import com.ge.research.sadl.sadl.Rule;
 import com.ge.research.sadl.sadl.SelectExpression;
 import com.ge.research.sadl.sadl.SomeValuesCondition;
 import com.ge.research.sadl.sadl.SomeValuesFrom;
+import com.ge.research.sadl.sadl.StartWrite;
 import com.ge.research.sadl.sadl.SymmetricalProperty;
 import com.ge.research.sadl.sadl.TransitiveProperty;
 import com.ge.research.sadl.sadl.UnionResource;
@@ -169,11 +175,8 @@ import com.ge.research.sadl.sadl.VariableList;
 import com.ge.research.sadl.sadl.util.SadlSwitch;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.google.inject.Inject;
 import com.hp.hpl.jena.vocabulary.OWL;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.RDFS;
 
 
 /**
@@ -181,14 +184,20 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * to turn it into a Jena model.
  * 
  * $Author: crapo $ 
- * $Revision: 1.4 $ Last modified on   $Date: 2014/11/03 19:20:22 $
+ * $Revision: 1.18 $ Last modified on   $Date: 2016/04/01 20:44:04 $
  */
-public class SadlModelManager extends SadlSwitch<EObject> {
+public class SadlModelManager extends SadlSwitch<EObject> implements IPartListener2{
 
     private static final Logger logger = LoggerFactory.getLogger(SadlModelManager.class);
     
     // additions for Context and Requirements:
     
+//    private List<Context> contextList = null;
+//    private Context currentContext = null;
+    
+    @Inject
+    private SadlConfigurationManagerProvider configMgrProvider;
+ 
     private int errorCount = 0;
     private boolean markErrors = true;
     private int maxWarnings = 100;
@@ -197,8 +206,8 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     private boolean deepValidationOff = false;
     
     // there is one ConfigurationManager per project
-    private Hashtable<URI, IConfigurationManagerForIDE> configurationMgrMap = new Hashtable<URI, IConfigurationManagerForIDE>();
-    private IConfigurationManagerForIDE lastConfigMgr = null;
+    private Hashtable<URI, ConfigurationManagerForIDE> configurationMgrMap = new Hashtable<URI, ConfigurationManagerForIDE>();
+    private ConfigurationManagerForIDE lastConfigMgr = null;
     
     private boolean savingModel = false;	// true if this is part of build (or save)
     private boolean editorOpen = false;
@@ -226,21 +235,20 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 //    static ThreadLocal<ModelInfo> mData = new ThreadLocal<ModelInfo>();
     private Resource currentResource = null;
     
-    private SadlModelManagerProvider sadlModelManagerProvider = null;	// every SadlModelManager know how to find others for projects on which this depends
-    
     private Hashtable<URI, ModelInfo> modelMgrs = new Hashtable<URI, ModelInfo>();
 
 	private int translationErrors = 0;
+
+	private boolean building = false;
+
+	private boolean captureRulePatterns = true;
+	private List<com.ge.research.sadl.model.gp.Rule> allRules = null;
     
     /**
      * Constructs the Ecore model visitor.
      */
-	public SadlModelManager() {
-		
-	}
-	
-    public SadlModelManager(SadlModelManagerProvider sMMP) {
-    	setSadlModelManagerProvider(sMMP);
+    public SadlModelManager() {
+//    	OntDocumentManager.getInstance().setCacheModels(false);
     }
     
     public synchronized boolean processModel(Resource resource, boolean persistModel, boolean editorOpen, SubMonitor progress) throws CoreException {
@@ -293,49 +301,48 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     	if (persistModel) {
 	        // Save the Jena model.  The file won't exist the first time 
 	        // so we have to create it before we can save the model.
+	        File file = ResourceManager.getOwlFileForSadlResource(resource);
+	        if (!file.exists()) {
 //	            byte[] bytes = new byte[0];
 //	            InputStream source = new ByteArrayInputStream(bytes);
-            try {
+	            try {
 //					file.create(source, IResource.NONE, null);
-    	        File file = ResourceManager.getOwlFileForSadlResource(resource);
-    	        if (!file.exists()) {
-    	        	file.createNewFile();
-    	        }
-    	        String path = file.getAbsolutePath();
-    	        List<ModelError> errors = save(path);
-    	        if (errors != null) {
-    	        	for (int i = 0; i < errors.size(); i++) {
-    	        		ModelError error = errors.get(i);
-    	        		if (error.getErrorType().equals(ErrorType.ERROR)) {
-    	        			System.err.println(error.toString());
-    	        		}
-    	        		else {
-    	        			logger.error(error.toString());
-    	        			System.err.println(error.toString());
-    	        		}
-    	        	}
-    	        }
-    	        else {
-    	        	// Save was successful--update each ModelManager with the modified model so that any models using 
-    	        	//	this one will be updated.
-    	        	ModelManager savingMM = getModel();
-    	        	Iterator<URI> mmitr = modelMgrs.keySet().iterator();
-    	        	while (mmitr.hasNext()) {
-    	        		URI key = mmitr.next();
-    	        		ModelInfo minfo = modelMgrs.get(key);
-    	        		if (minfo.getModel().updateImport(savingMM)) {
-    	        			logger.debug("Updated model '" + savingMM.getModelName() + "' in imports of model '" + 
-    	        					minfo.getModel().getModelName() + "' after successful save.");
-    	        		}
-    	        	}
-    	        }
+	            	file.createNewFile();
+		        }
+	            catch (Throwable t) {
+	        		String msg = "Unexpected error: file '" + file.getAbsolutePath() + "' doesn't exist but can't be created: " + t.getLocalizedMessage();
+	        		logger.error(msg);
+	        		System.err.println(msg);
+	            }
 	        }
-            catch (Throwable t) {
-        		String msg = "Unexpected error: OWL file for '" + resource.toString() + "' doesn't exist but can't be created: " + t.getLocalizedMessage();
-        		logger.error(msg);
-        		System.err.println(msg);
-            }
-
+	        String path = file.getAbsolutePath();
+	        List<ModelError> errors = save(path);
+	        if (errors != null) {
+	        	for (int i = 0; i < errors.size(); i++) {
+	        		ModelError error = errors.get(i);
+	        		if (error.getErrorType().equals(ErrorType.ERROR)) {
+	        			System.err.println(resource.getURI().lastSegment() + ": " + error.toString());
+	        		}
+	        		else {
+	        			logger.error(error.toString());
+	        			System.err.println(resource.getURI().lastSegment() + ": " + error.toString());
+	        		}
+	        	}
+	        }
+	        else {
+	        	// Save was successful--update each ModelManager with the modified model so that any models using 
+	        	//	this one will be updated.
+	        	ModelManager savingMM = getModel();
+	        	Iterator<URI> mmitr = modelMgrs.keySet().iterator();
+	        	while (mmitr.hasNext()) {
+	        		URI key = mmitr.next();
+	        		ModelInfo minfo = modelMgrs.get(key);
+	        		if (minfo.getModel().updateImport(savingMM)) {
+	        			logger.debug("Updated model '" + savingMM.getModelName() + "' in imports of model '" + 
+	        					minfo.getModel().getModelName() + "' after successful save.");
+	        		}
+	        	}
+	        }
         }
         return true;
     }
@@ -355,66 +362,51 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     	// remember the Resource of the SADL model
     	this.setResource(resource);
     	
-    	if (!resource.getURI().isPlatformPlugin()) {
-	    	IPreferencesService service = Platform.getPreferencesService();
-	    	if (service != null) {
-	    		deepValidationOff = service.getBoolean("com.ge.research.sadl.Sadl", "deepValidationOff", false, null);
-	    	}
-	    	
-	    	try {
-	            // What project is this? There should be one ConfigurationManager per project.
-	    		URI projectUri = sadlModelManagerProvider.getProject(this);
-	//            URI projectUri = ResourceManager.getProjectUri(resource.getURI());
-	    		if (projectUri != null) {
-	    			logger.info("SMM called for project " + projectUri.toFileString());
-	    		}
-	    		else {
-	    			projectUri = getProjectFromResourceSet(resource.getResourceSet());
-	    		}
-	
-	            IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
-	        	// Get a ModelManager instance associated with this thread and pass it the model Resource
-	            getModel().init(configurationMgr, getSadlModelManagerProvider(), resource);
-	            getModel().setDeepValidationOff(deepValidationOff);
-	            
-			} catch (ConfigurationException e) {
-				e.printStackTrace();
-			}
-	    	catch (Throwable t) {
-	    		t.printStackTrace();
-	    	}
-	    	
-	        // delete all markers for this Resource (they will be regenerated
-	        //	if the causation still exists)
-    		deleteMarkers(resource, false);
+    	IPreferencesService service = Platform.getPreferencesService();
+    	if (service != null) {
+    		deepValidationOff = service.getBoolean("com.ge.research.sadl.Sadl", "deepValidationOff", false, null);
     	}
+    	
+    	try {
+            // What project is this? There should be one ConfigurationManager per project.
+            URI projectUri = ResourceManager.getProjectUri(resource.getURI());
+            logger.debug("SMM called for project " + projectUri.toFileString());
+
+            ConfigurationManagerForIDE configurationMgr = null;
+            if (configMgrProvider != null) {
+            	configurationMgr = (ConfigurationManagerForIDE) configMgrProvider.getConfigurationManager(projectUri);
+            }
+            else {
+            	configurationMgr = getConfigurationMgr(projectUri.toString() + "/" + ResourceManager.OWLDIR);
+            }
+        	// Get a ModelManager instance associated with this thread and pass it the model Resource
+            getModel().init(configurationMgr, resource.getURI());
+            getModel().setDeepValidationOff(deepValidationOff);
+            
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+		}
+    	catch (Throwable t) {
+    		t.printStackTrace();
+    	}
+    	
+        // delete all markers for this Resource (they will be regenerated
+        //	if the causation still exists)
+        deleteMarkers(resource, false);
         setTranslationErrors(0);
         
+//        // added for Context and Requirements:
+//        if (contextList != null) {
+//        	Iterator<Context> itr = contextList.iterator();
+//        	while (itr.hasNext()) {
+//        		itr.next().clear();
+//        	}
+//        	contextList.clear();
+//        	currentContext = null;
+//        }
     }
     
     /**
-     * This method looks at a ResourceSet and determines the project having this set. This is necessary when the current
-     * Resource is an external Resource so that it isn't found in the project. However, there must be at least one internal
-     * project Resource in the set in order to make the current one external (by import), so it is used to determine the project.
-     * @param resourceSet
-     * @return
-     */
-    public static URI getProjectFromResourceSet(ResourceSet resourceSet) {
-		for (Resource rsrc: resourceSet.getResources()) {
-			try {
-				URI prjUri = ResourceManager.getProjectUri(rsrc.getURI());
-				if (prjUri != null) {
-					return prjUri;
-				}
-			}
-			catch (Exception e) {
-				
-			}
-		}
-		return null;
-	}
-
-	/**
      * Call this method to begin a new translation to Intermediate Form.
      * 
      * @param target - the Rule, Test, Query, or null if none of these
@@ -534,93 +526,36 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * @throws IOException 
      */
     public List<ConceptName> getNamedConceptsInNamedModel(URI uri) throws InvalidNameException, IOException {
-    	return getNamedConceptsInNamedModel(uri, Scope.INCLUDEIMPORTS);
-    }
-    
-    public List<ConceptName> getNamedConceptsInNamedModel(URI uri, Scope scope) throws InvalidNameException, IOException {
     	String publicUri = null;
 		try {
-	   		if (uri.isPlatformResource()) {
-	   			IPath testpath = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(uri.toPlatformString(false))).getLocation();
-	   			uri = URI.createFileURI(testpath.toOSString());
-	   		}
-	   		IConfigurationManagerForIDE cmgr = null;
-			if (uri.toString().endsWith("rdf-syntax-ns.rdf")) {
-				publicUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-				cmgr = lastConfigMgr;
-				return getRdfExposedNames(publicUri);
-			}
-			else if (uri.toString().endsWith("rdf-schema.rdf")) {
-				publicUri = "http://www.w3.org/2000/01/rdf-schema#";
-				cmgr = lastConfigMgr;
-				return getRdfsExposedNames(publicUri);
-			}
-			else {
-				cmgr = getConfigurationMgr(uri);
+	   		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+	   		IPath workspaceDirectory = workspace.getRoot().getLocation().makeAbsolute();
+	   		String modelFolderName = null;
+			ConfigurationManagerForIDE cmgr = getConfigurationMgr(modelFolderName);
+			if (cmgr != null) {
 				publicUri = cmgr.getPublicUriFromActualUrl(uri.toString());
 			}
-			if (cmgr == null) {
-				throw new InvalidNameException("Unable to find a ConfigurationManager for model with URL '" + uri + "'");
-			}
-			if (cmgr.isSadlDerivedAltUrl(uri)) {
-				return getModel().getNamedConceptsInNamedModel(publicUri, null, scope);
-			}
 			else {
-				return cmgr.getNamedConceptsInModel(cmgr.getModelGetter().getOntModel(publicUri, uri.toString(), null), publicUri, null, scope);
+				throw new InvalidNameException("Unable to find a model with URL '" + uri + "'");
 			}
+	   		if (uri.toString().startsWith(cmgr.getSadlUtils().fileNameToFileUrl(workspaceDirectory.toString()))) {
+	   			modelFolderName = ResourceManager.getOwlModelsFolder(uri);
+	   		} 
+			return getModel().getNamedConceptsInNamedModel(publicUri, null);
 		} catch (ConfigurationException e) {
-			return Collections.emptyList();
+			e.printStackTrace();
+			throw new InvalidNameException("Error finding a model with actual URL '" + uri + "': " + e.getLocalizedMessage());
 		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
     }
 
-    private List<ConceptName> getRdfsExposedNames(String ns) {
-		List<ConceptName> names = new ArrayList<ConceptName>();
-		ConceptName cn = new ConceptName(RDFS.comment.getURI());
-		cn.setPrefix("rdfs");
-		cn.setType(ConceptType.ANNOTATIONPROPERTY);
-		names.add(cn);
-		cn = new ConceptName(RDFS.label.getURI());
-		cn.setPrefix("rdfs");
-		cn.setType(ConceptType.ANNOTATIONPROPERTY );
-		names.add(cn);
-		cn = new ConceptName(RDFS.seeAlso.getURI());
-		cn.setPrefix("rdfs");
-		cn.setType(ConceptType.ANNOTATIONPROPERTY);
-		names.add(cn);
-		cn = new ConceptName(RDFS.domain.getURI());
-		cn.setPrefix("rdfs");
-		cn.setType(ConceptType.OBJECTPROPERTY);
-		names.add(cn);
-		cn = new ConceptName(RDFS.range.getURI());
-		cn.setPrefix("rdfs");
-		cn.setType(ConceptType.OBJECTPROPERTY);
-		names.add(cn);
-		cn = new ConceptName(RDFS.subClassOf.getURI());
-		cn.setPrefix("rdfs");
-		cn.setType(ConceptType.OBJECTPROPERTY);
-		names.add(cn);
-		cn = new ConceptName(RDFS.subPropertyOf.getURI());
-		cn.setPrefix("rdfs");
-		cn.setType(ConceptType.OBJECTPROPERTY);
-		names.add(cn);
-		return names;
-	}
-
-	private List<ConceptName> getRdfExposedNames(String ns) {
-		List<ConceptName> names = new ArrayList<ConceptName>();
-		ConceptName cn = new ConceptName(RDF.type.getURI());
-		cn.setType(ConceptType.OBJECTPROPERTY);
-		cn.setPrefix("rdf");
-		names.add(cn);
-		return names;
-	}
-
-	/**
+    /**
      * Call this method to get a List of ExistingNames which match the 
      * conditions specified by the arguments.
      * 
@@ -747,17 +682,17 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     		}
     	}
         annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, labels, comments));   
-//        if (!addedAsListener) {
-//        	IWorkbenchWindow wndw = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-//        	if (wndw != null) {
-//        		wndw.getPartService().addPartListener(this);
-//        		addedAsListener = true;
-////        		System.out.println("Added part listener");
+        if (!addedAsListener) {
+        	IWorkbenchWindow wndw = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        	if (wndw != null) {
+        		wndw.getPartService().addPartListener(this);
+        		addedAsListener = true;
+//        		System.out.println("Added part listener");
+        	}
+//        	else {
+//        		System.out.println("Failed to add part listener");
 //        	}
-////        	else {
-////        		System.out.println("Failed to add part listener");
-////        	}
-//        }
+        }
         return object;
     }
     
@@ -799,8 +734,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * of the class and any properties describing the class.
      */
     @Override
-    public EObject caseClassDeclaration(ClassDeclaration object) {
-
+    public EObject caseClassDeclaration(ClassDeclaration object) {    	
         List<String> newClassNames = new ArrayList<String>(3);
         ConceptIdentifier superClsName = createConceptIdentifier(object.getClassIdentifier());
         
@@ -819,10 +753,10 @@ public class SadlModelManager extends SadlSwitch<EObject> {
         		if (object.getClassName() != null) {
                     String newPropName = object.getClassName().getName();
                     if (isObjectProperty) {
-                    	annotateErrors(object, getModel().addObjectProperty(newPropName, (ConceptName)superClsName, null, false));
+                    	annotateErrors(object, getModel().addObjectProperty(newPropName, (ConceptName)superClsName, null, false, RangeValueType.CLASS_OR_DT));
                     }
                     else {
-	                    annotateErrors(object, getModel().addDatatypeProperty(newPropName, (ConceptName)superClsName, null, false));                    	
+	                    annotateErrors(object, getModel().addDatatypeProperty(newPropName, (ConceptName)superClsName, null, false, RangeValueType.CLASS_OR_DT));                    	
                     }
                     addAnnotations(object.getClassName());
                     return object;
@@ -831,10 +765,10 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	                for (ResourceName className : object.getClassList().getNames()) {
 	                    String newPropName = className.getName();
 	                    if (isObjectProperty) {
-	                    	annotateErrors(object, getModel().addObjectProperty(newPropName, (ConceptName)superClsName, null, false));	                    	
+	                    	annotateErrors(object, getModel().addObjectProperty(newPropName, (ConceptName)superClsName, null, false, RangeValueType.CLASS_OR_DT));	                    	
 	                    }
 	                    else {
-	                    	annotateErrors(object, getModel().addDatatypeProperty(newPropName, (ConceptName)superClsName, null, false));
+	                    	annotateErrors(object, getModel().addDatatypeProperty(newPropName, (ConceptName)superClsName, null, false, RangeValueType.CLASS_OR_DT));
 	                    }
                        	addAnnotations(className);
 	                }
@@ -924,7 +858,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	            			rangeClass = ((MaxCardCondition)cond).getClassQualifier();
 	            		}
             			
-             			addProperty(object, newClassNames, propStrName, false, rangeClass);
+             			addProperty(object, newClassNames, propStrName, false, rangeClass, RangeValueType.CLASS_OR_DT);
             		}
                     for (String newClassName : newClassNames) {
                         ConceptName newClsName = new ConceptName(newClassName);
@@ -937,7 +871,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
                     ConceptName propName = new ConceptName(describedBy.getPropertyByName().getName().getName());
                     for (String newClassName : newClassNames) {
                         ConceptName newClsName = new ConceptName(newClassName);
-                        annotateErrors(object, getModel().addPropertyDomain(propName, newClsName, false, null));
+                        annotateErrors(object, getModel().addPropertyDomain(propName, newClsName, false, null, RangeValueType.CLASS_OR_DT));
                     }
                 }
                 else {
@@ -952,22 +886,25 @@ public class SadlModelManager extends SadlSwitch<EObject> {
             		Range range = describedBy.getRange();
             		Object objRange = null;
             		boolean singleValuedOnClass = (range != null && range.getSingle() != null);
+            		RangeValueType rngType = getRangeValueType(range);
             		if (range != null && range.getType() != null) {
             		    if (range.getType().getClassIdentifier() != null) {
             		        // An object property was declared.
             		    	objRange = createConceptIdentifier(range.getType().getClassIdentifier());
             		    }
             		    else {
-////            		        // A datatype property was declared.
-	           		        objRange = range.getType().getDataType().getLiteral();
-////            		    	String rng = range.getType().getClassIdentifier()
-////            		    	RDFDatatype dt = TypeMapper.getInstance().getTypeByName(rng);
-////            		    	if (dt != null) {
-////            		    		objRange = dt;
-////            		    	}
+//            		        // A datatype property was declared.
+            		        objRange = range.getType().getDataType().getLiteral();
+//            		    	ResourceIdentifier rng = range.getType().getClassIdentifier();
+//            		    	if (rng != null) {
+//	            		    	RDFDatatype dt = TypeMapper.getInstance().getTypeByName(rng.toString());
+//	            		    	if (dt != null) {
+//	            		    		objRange = dt;
+//	            		    	}
+//            		    	}
             		    }
             		}
-                    addProperty(object, newClassNames, propName, singleValuedOnClass, objRange);
+                    addProperty(object, newClassNames, propName, singleValuedOnClass, objRange, rngType);
         		    addAnnotations(describedBy.getPropertyName());
                 }
             }
@@ -999,7 +936,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	}
 
 	private void addProperty(ClassDeclaration object, List<String> newClassNames, 
-			String propName, boolean singleValuedOnClass , Object range) {
+			String propName, boolean singleValuedOnClass , Object range, RangeValueType rngType) {
 		boolean isRDFDataType = getModel().isRDFDataType(range);
 		if (isRDFDataType) {
 			range = range.toString();
@@ -1007,27 +944,27 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	    if (!isRDFDataType && range instanceof ResourceIdentifier) {
 	    	range = createConceptIdentifier((ResourceIdentifier)range);
 	    }
-	    if (!isRDFDataType && range instanceof ConceptIdentifier) {
-	        // An object property was declared.
-	        for (String newClassName : newClassNames) {
-	            ConceptName superPropName = null;
-	            annotateErrors(object, getModel().addObjectProperty(propName, superPropName, (ConceptIdentifier) range, false));
-	            ConceptName pName = new ConceptName(propName);
-	            ConceptName newClsName = new ConceptName(newClassName);
-	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, range));
-	        }
-	    }
-	    if (range instanceof ResourceIdentifier) {
-	    	range = createConceptIdentifier((ResourceIdentifier)range);
-	    }
+//	    if (!isRDFDataType && range instanceof ConceptIdentifier) {
+//	        // An object property was declared.
+//	        for (String newClassName : newClassNames) {
+//	            ConceptName superPropName = null;
+//	            annotateErrors(object, getModel().addObjectProperty(propName, superPropName, (ConceptIdentifier) range, false));
+//	            ConceptName pName = new ConceptName(propName);
+//	            ConceptName newClsName = new ConceptName(newClassName);
+//	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, range));
+//	        }
+//	    }
+//	    if (range instanceof ResourceIdentifier) {
+//	    	range = createConceptIdentifier((ResourceIdentifier)range);
+//	    }
 	    if (range instanceof ConceptIdentifier) {
 	        // An object property was declared.
 	        for (String newClassName : newClassNames) {
 	            ConceptName superPropName = null;
-	            annotateErrors(object, getModel().addObjectProperty(propName, superPropName, (ConceptIdentifier) range, false));
+	            annotateErrors(object, getModel().addObjectProperty(propName, superPropName, (ConceptIdentifier) range, false, rngType));
 	            ConceptName pName = new ConceptName(propName);
 	            ConceptName newClsName = new ConceptName(newClassName);
-	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, range));
+	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, range, rngType));
 	        }
 	    }
 	    else if (range instanceof String){
@@ -1035,10 +972,10 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	        String xsdRange = (String) range;
 	        for (String newClassName : newClassNames) {
 	            ConceptName superPropName = null; // I don't think this construct allows super property declaration, awc, 5/21/2010 // new ConceptName(newClassName);
-	            annotateErrors(object, getModel().addDatatypeProperty(propName, superPropName, xsdRange, false));
+	            annotateErrors(object, getModel().addDatatypeProperty(propName, superPropName, xsdRange, false, rngType));
 	            ConceptName pName = new ConceptName(propName);
 	            ConceptName newClsName = new ConceptName(newClassName);
-	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, xsdRange));
+	            annotateErrors(object, getModel().addPropertyDomain(pName, newClsName, singleValuedOnClass, xsdRange, rngType));
 	        }
 	    }
 	}
@@ -1048,7 +985,15 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      */
     @Override
     public EObject casePropertyDeclaration(PropertyDeclaration object) {
-    	ResourceName resourceName = object.getPropertyName();
+    	boolean isNoDomainDeclaration;
+    	ResourceName resourceName = object.getNoDomainPropName();
+    	if (resourceName != null) {
+    		isNoDomainDeclaration = true;
+    	}
+    	else {
+    		 resourceName = object.getPropertyName();
+    		 isNoDomainDeclaration = false;
+    	}
     	if (resourceName == null) {
     		resourceName = object.getAnnotationProperty();
     		if (resourceName != null) {
@@ -1068,6 +1013,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
             String xsdRange = null;
             Condition cond = null;
             boolean isObjProp = false;
+            RangeValueType rngValType = RangeValueType.CLASS_OR_DT;	// default
             ConceptName inversePropertyName = null;
             boolean isSingleValuedOnClass = false;
             boolean isFunctional = false;
@@ -1080,6 +1026,21 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     		}
      		if (object.getDomain() != null) {
      			domainCls = createConceptIdentifier(object.getDomain());
+     		}
+     		if (isNoDomainDeclaration) {
+     			Range range = object.getRange();
+     			rngValType = getRangeValueType(range);
+ 				if (range != null && range.getType().getClassIdentifier() != null) {
+ 	                isObjProp = true;
+                    // An object property range was declared.
+                    rangeCls = createConceptIdentifier(range.getType().getClassIdentifier());
+                }
+ 				else if (range != null && range.getType().getDataType() != null) {
+                	xsdRange = range.getType().getDataType().getLiteral();
+     			}
+     			else {
+                    isObjProp = true;
+     			}
      		}
      		if (object.getRangeResource() != null) {
      			isObjProp = true;
@@ -1096,6 +1057,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
             		}
             		else if (api.getRange() != null) {
             			Range range = api.getRange();
+            			rngValType = getRangeValueType(range);
                         if (range.getSingle() != null) {
                         	isSingleValuedOnClass = true;
                         }
@@ -1149,8 +1111,8 @@ public class SadlModelManager extends SadlSwitch<EObject> {
             		}
             	}
             }
-			if (isObjProp && rangeCls != null) {
-				annotateErrors(object, getModel().addObjectProperty(propName, superPropName, rangeCls, isFunctional));
+			if (isObjProp) { // && rangeCls != null) {
+				annotateErrors(object, getModel().addObjectProperty(propName, superPropName, rangeCls, isFunctional, rngValType));
 			}
 			else if (cond != null) {
 				addClassRestriction(object, domainCls, new ConceptName(propName), cond);
@@ -1158,23 +1120,24 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			}
 			else if (xsdRange != null){
 				// A datatype property was declared.
-				annotateErrors(object, getModel().addDatatypeProperty(propName, superPropName, xsdRange, isFunctional));
+				annotateErrors(object, getModel().addDatatypeProperty(propName, superPropName, xsdRange, isFunctional, rngValType));
 			}
 			else if (superPropName != null) {
 				superPropName = getModel().validateConceptName(superPropName);
 				ConceptType propType = superPropName.getType();
 				if (propType.equals(ConceptType.OBJECTPROPERTY)) {
-					annotateErrors(object, getModel().addObjectProperty(propName, superPropName, rangeCls, isFunctional));
+					annotateErrors(object, getModel().addObjectProperty(propName, superPropName, rangeCls, isFunctional, rngValType));
 				}
 				else if (propType.equals(ConceptType.DATATYPEPROPERTY)) {
-					annotateErrors(object, getModel().addDatatypeProperty(propName, superPropName, xsdRange, isFunctional));
+					annotateErrors(object, getModel().addDatatypeProperty(propName, superPropName, xsdRange, isFunctional, rngValType));
 				}
 				else {
 					logger.error("Property '" + propName + "' super property '" + superPropName.toString() + "' not of expected type: please fix");
 				}
 			}
-
-			annotateErrors(object, getModel().addPropertyDomain(new ConceptName(propName), domainCls, isSingleValuedOnClass, rangeCls));
+			if (domainCls != null) {
+				annotateErrors(object, getModel().addPropertyDomain(new ConceptName(propName), domainCls, isSingleValuedOnClass, rangeCls, rngValType));
+			}
 			if (isFunctional) {
 				annotateErrors(object, getModel().addFunctionalProperty(new ConceptName(propName)));
 			}
@@ -1197,7 +1160,20 @@ public class SadlModelManager extends SadlSwitch<EObject> {
         return object;
     }
 
-    private void addAnnotations(ResourceName resourceName) {
+    private RangeValueType getRangeValueType(Range range) {
+    	RangeValueType rngType =  RangeValueType.CLASS_OR_DT;
+		if (range != null) {
+		    if (range.getList() != null) {
+		    	rngType = RangeValueType.LIST;
+		    }
+		    else if (range.getLists() != null) {
+		    	rngType = RangeValueType.LISTS;
+		    }
+		}
+		return rngType;
+	}
+
+	private void addAnnotations(ResourceName resourceName) {
 //    	if (errors == null || errors.size() == 0) {
 		if (resourceName != null && resourceName.getName() != null && resourceName.getAnnType() != null) {
 			EList<ContentList> contents = resourceName.getAnnContent();
@@ -2072,7 +2048,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * @param value
      * @return
      */
-    protected static Object literalValueToObject(LiteralValue value) {
+    public static Object literalValueToObject(LiteralValue value) {
     	Object propValue = null;
     	if (value.getLiteralBoolean() != null) {
             propValue = Boolean.valueOf(value.getLiteralBoolean());
@@ -2200,9 +2176,8 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * This method will return a relative URI for a corresponding SADL model if one exists in the project
      * @param u
      * @return
-     * @throws MalformedURLException 
      */
-	public URI equivalentSadlModelInProject(URI u) throws MalformedURLException {
+	public URI equivalentSadlModelInProject(URI u) {
 		return getModel().equivalentSadlModelInProject(u);
 	}
 
@@ -2257,6 +2232,36 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	 */
 	@SuppressWarnings("unused")
     private void reportWarning(EObject object, String warningMsg) {
+		ICompositeNode node = NodeModelUtils.findActualNodeFor(object);
+		if (node != null) {
+			int lnnum = node.getStartLine();
+			int lnlen = node.getLength();
+			int offset = node.getOffset();
+			if (lnnum >= 0 && lnlen > 0 && offset >= 0) {
+	        	String fileStr = getModel().getModelActualUrl().toFileString();
+	        	// create error or warning marker, based on error.getErrorType().
+	    		IPath location = Path.fromOSString(fileStr);
+	    		IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+	    		IFile file = myWorkspaceRoot.getFileForLocation(location);
+	    		if (file != null) {
+	    			ModelError error = new ModelError(warningMsg, ModelError.ErrorType.WARNING);
+	    			error.setLineLength(lnlen);
+	    			error.setLineNumber(lnnum);
+	    			error.setOffset(offset);
+		            createMarker(file, error);
+	            }
+	    		else {
+	    			getModel().getMessageManager().warn(warningMsg + "\n",
+	    					getModel().getMessageManager().new HyperlinkInfo(getModel().getModelActualUrl().toFileString(), lnnum, offset, lnlen));
+	    		}
+			}
+			else {
+				getModel().getMessageManager().warn(warningMsg + "\n");
+			}
+		}
+		else {
+			getModel().getMessageManager().warn(warningMsg + "\n");
+		}
 		logger.warn(warningMsg + "(in model " + getModel().getModelName() + ")");
 	}
 
@@ -2397,7 +2402,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			// this must be a SPARQL query
 			query.setSparqlQueryString(((Literal)pattern).getValue().toString());
 		}
-		logger.info("Ask translation: {}", query);
+		logger.debug("Ask translation: {}", query);
 		return query;
 	}
 
@@ -2497,7 +2502,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			else if (expr instanceof Expression) {
 				setTranslationTarget(null);
 				Object pattern = translate((Expression)expr);
-				logger.info("Explanation translation: {}", pattern);
+				logger.debug("Explanation translation: {}", pattern);
 				List<GraphPatternElement> patterns = new ArrayList<GraphPatternElement>();
 				while (pattern instanceof GraphPatternElement) {
 					GraphPatternElement element = (GraphPatternElement) pattern;
@@ -2516,7 +2521,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 				}
 			}
 			else {
-				logger.info("Explanation type (" + expr.getClass().getCanonicalName() + ") not supported.");
+				logger.error("Explanation type (" + expr.getClass().getCanonicalName() + ") not supported.");
 			}
 		}
 		else {
@@ -2577,11 +2582,12 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 		Expression expr = object.getExpr();
 		setTranslationTarget(null);
 		Object pattern = translate(expr); 
+		String txt = getEObjectText(object);
 		if (pattern != null) {
-			logger.info("Expr translation: {}", pattern);
-			getModel().getMessageManager().info("Expr '" + expr.toString() + "' translates to '" + pattern.toString() + "'");
+			logger.debug("Expr translation: {}", pattern);
+			getModel().getMessageManager().info("Expr '" + txt + "' translates to '" + pattern.toString() + "'");
 		}
-		else {
+		else if (expr != null) {
 			logger.error("Expr translation failed: " + expr.toString());
 			getModel().getMessageManager().error("Expr translation failed: " + expr.toString());
 		}
@@ -2614,7 +2620,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 				reportError((EObject)object, err.getLocalizedMessage());
 			}
 		}
-		logger.info("Rule postprocessed to: " + rule.toString());
+		logger.debug("Rule postprocessed to: " + rule.toString());
 		annotateErrors(object, getModel().addRule(rule));
 		return object;
 	}
@@ -2647,10 +2653,17 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			}
 			if (((TripleElement) gpe).getPredicate() instanceof NamedNode &&
 					!((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.PropertyNode)) {
-				reportError(object, "Expected a property as triple pattern predicate rather than " + 
-						((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().toString() + " " + 
-						((NamedNode)((TripleElement)gpe).getPredicate()).getName());
-				numErrors++;
+				if (((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.VariableNode)) {
+					reportWarning(object, "It is unusual to have a variable (" + 
+							((NamedNode)((TripleElement)gpe).getPredicate()).getName() + 
+							") rather than a defined property as rule predicate.");
+				}
+				else {
+					reportError(object, "Expected a property as triple pattern predicate rather than " + 
+							((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().toString() + " " + 
+							((NamedNode)((TripleElement)gpe).getPredicate()).getName());
+					numErrors++;
+				}
 			}
 		}
 		else if (gpe instanceof BuiltinElement) {
@@ -2778,7 +2791,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 						test.setOffset(node.getOffset());
 				}
 		
-				logger.info("Test translation: {}", test);
+				logger.debug("Test translation: {}", test);
 				List<IFTranslationError> transErrors = getIfTranslator().getErrors();
 				for (int j = 0; transErrors != null && j < transErrors.size(); j++) {
 					IFTranslationError err = transErrors.get(j);
@@ -2877,6 +2890,35 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			thens = object.getThens().getElements();
 		}
 		com.ge.research.sadl.model.gp.Rule rule = new com.ge.research.sadl.model.gp.Rule(ruleName);
+		rule.setRuleNamespace(getModelName() + "#");
+		ICompositeNode node = NodeModelUtils.findActualNodeFor(object);
+		rule.setEditorLine(node.getStartLine());
+		rule.setEditorLength(node.getLength());
+		rule.setEditorOffset(node.getOffset());
+		// annotations?
+		EList<String> annProps = object.getAnnProps();
+		EList<String> annValues = object.getAnnValues();
+		if (annProps != null) {
+			if (annValues == null) {
+				reportError(object, "Rule annotations values missing.");
+			}
+			if (annProps.size() != annValues.size()) {
+				reportError(object, "Rule annotation properties and annotation values not of same size.");
+			}
+			List<String[]> annotations = new ArrayList<String[]>();
+			Iterator<String> annPropItr = annProps.iterator();
+			int index = 0;
+			while (annPropItr.hasNext()) {
+				String annProp = annPropItr.next();
+				String annVal = annValues.get(index++);
+				String[] pair = new String[2];
+				pair[0] = annProp;
+				pair[1] = annVal;
+				annotations.add(pair);
+			}
+			rule.setAnnotations(annotations);
+		}
+		
 		setTranslationTarget(rule);
 		if (givens != null) {
 			for (int i = 0; i < givens.size(); i++) {
@@ -2920,6 +2962,9 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 			}
 		}
 		rule = getIfTranslator().postProcessRule(rule, object);
+		if (allRules != null) {
+			allRules.add(rule);
+		}
 		return rule;
     }
 	
@@ -3269,84 +3314,55 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 		getModel().updateConfiguration(newItem);
 	}
 
-	public synchronized IConfigurationManagerForIDE getConfigurationMgr(String modelFolderName) throws ConfigurationException, URISyntaxException, IOException {
+	public synchronized ConfigurationManagerForIDE getConfigurationMgr(String modelFolderName) throws ConfigurationException, URISyntaxException, IOException {
 		if (modelFolderName != null) {
             // What project is this? There should be one ConfigurationManager per project.
 			SadlUtils su = new SadlUtils();
 			URI mfuri = URI.createURI(su.fileNameToFileUrl(modelFolderName));
-            IConfigurationManagerForIDE configurationMgr = getConfigurationMgr(mfuri);
-//    		lastConfigMgr = configurationMgr;	// this is for when Xtext springs a call on us without a project identifier
+            URI projectUri = ResourceManager.getProjectUri(mfuri);
+            ConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
+            // See if we already have a ConfigurationManager for this project and if so use it.
+            String owlModelsFolder = ResourceManager.getOwlModelsFolder(mfuri);
+    		if (configurationMgr == null) {
+    			ResourceManager.validateOwlModelsFolder(owlModelsFolder);
+    			if (configMgrProvider != null) {
+    				configurationMgr = (ConfigurationManagerForIDE) configMgrProvider.getConfigurationManager(owlModelsFolder);
+    			}
+    			else {
+    				configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+        			configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
+    			}
+    			configurationMgrMap.put(projectUri, configurationMgr);
+    	    	String format = ConfigurationManagerForIDE.getOWLFormat();	
+    	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
+    	    	configurationMgr.setModelGetter(modelGetter);
+    		}
+    		else if (configurationMgr.isConfigurationStale()) {
+				configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+				configurationMgrMap.put(projectUri, configurationMgr);
+    	    	IPreferencesService service = Platform.getPreferencesService();
+    	    	String format = ConfigurationManagerForIDE.getOWLFormat();	
+    	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
+    	    	configurationMgr.setModelGetter(modelGetter);
+				configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
+			} else if (!configurationMgr.getModelFolderPath().equals(new File(owlModelsFolder))) {
+				if (configurationMgr.isConfigChanged()) {
+					configurationMgr.saveConfiguration();
+				}
+	   			if (configMgrProvider != null) {
+    				configurationMgr = (ConfigurationManagerForIDE) configMgrProvider.getConfigurationManager(owlModelsFolder);
+    			}
+    			else {
+    				configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
+    			}
+				configurationMgrMap.put(projectUri, configurationMgr);
+				configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
+			}
+    		lastConfigMgr = configurationMgr;	// this is for when Xtext springs a call on us without a project identifier
     		return configurationMgr;
 		}
 		return lastConfigMgr;
 	}
-
-	public IConfigurationManagerForIDE getConfigurationMgr(URI modelFolderUri) throws ConfigurationException, URISyntaxException, IOException {
-		if (lastConfigMgr != null) {
-			return lastConfigMgr;
-		}
-		
-//        URI projectUri;
-//        try {
-//        	projectUri = ResourceManager.getProjectUri(modelFolderUri);
-//        }
-//        catch (IllegalSelectorException e) {
-//        	if (lastConfigMgr != null) {
-//        		return lastConfigMgr;
-//        	}
-//        	else {
-//        		throw new URISyntaxException(modelFolderUri.toString(), "could not find ConfigurationManager for resource URI '" + modelFolderUri + "'");
-//        	}
-//        }
-//        IConfigurationManagerForIDE configurationMgr = configurationMgrMap.get(projectUri);
-//        // See if we already have a ConfigurationManager for this project and if so use it.
-//        String owlModelsFolder = ResourceManager.getOwlModelsFolder(modelFolderUri);
-//		if (configurationMgr == null) {
-//			configurationMgr = getConfigurationMgrFromOwlModelsFolder(owlModelsFolder);
-//		}
-//		else if (configurationMgr.isConfigurationStale()) {
-		String owlModelsFolder = modelFolderUri.toString();
-		owlModelsFolder = new SadlUtils().fileUrlToFileName(owlModelsFolder.toString());
-			IConfigurationManagerForIDE configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-//			configurationMgrMap.put(projectUri, configurationMgr);
-			String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-			if (Platform.isRunning()) {
-		    	IPreferencesService service = Platform.getPreferencesService();
-		    	format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null);	
-			}
-	    	SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
-	    	configurationMgr.setModelGetter(modelGetter);
-			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
-//		} else if (!configurationMgr.getModelFolderPath().equals(new File(owlModelsFolder))) {
-//			if (configurationMgr.isConfigChanged()) {
-//				configurationMgr.saveConfiguration();
-//			}
-//			configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-//			configurationMgrMap.put(projectUri, configurationMgr);
-//			configurationMgr.getModelGetter().setTdbFolder(configurationMgr.getTdbFolder());
-//		}
-			lastConfigMgr = configurationMgr;
-		return configurationMgr;
-	}
-
-//	public IConfigurationManagerForIDE getConfigurationMgrFromOwlModelsFolder(String owlModelsFolder) throws IOException,
-//			URISyntaxException, ConfigurationException {
-//		URI projectUri = URI.createURI(owlModelsFolder).trimSegments(1);
-//		IConfigurationManagerForIDE configurationMgr;
-//		owlModelsFolder = ResourceManager.validateOwlModelsFolder(owlModelsFolder);
-//		configurationMgr = new ConfigurationManagerForIDE(owlModelsFolder, ConfigurationManagerForIDE.getOWLFormat());
-//		configurationMgr.setProjectFolderPath(projectUri.toString(), owlModelsFolder);   
-//		configurationMgrMap.put(projectUri, configurationMgr);
-//		IPreferencesService service = Platform.getPreferencesService();
-//		String format = Platform.isRunning() ? service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManagerForIDE.getOWLFormat(), null) : "owl";	
-//		SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configurationMgr, configurationMgr.getTdbFolder(), format);
-//		configurationMgr.setModelGetter(modelGetter);
-//		
-//		// Temp testing call **********************************		
-//		List<URI> externalImports = configurationMgr.getExternalModelURIs();
-//		// End temp testing call ********************************
-//		return configurationMgr;
-//	}
 	
 	private ModelManager getModel(Resource resource) {
 		ModelInfo minfo = getModelInfo(resource);
@@ -3482,12 +3498,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 		        IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 		
 		        //create an new IPath from the URI
-		        String platformStr = uri.toPlatformString(false);
-		        if (platformStr == null) {
-		        	// will this happen only for OWL files not created from SADL?
-		        	return;
-		        }
-		        IPath path = new Path(platformStr);
+		        IPath path = new Path(uri.toPlatformString(false));
 		
 		        //finally resolve the file with the workspace
 		        IFile file = myWorkspaceRoot.getFile(path);
@@ -3627,16 +3638,16 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	
 	public boolean removeResourceModel(Resource resource) {
 		ModelInfo mi = modelMgrs.get(resource.getURI());
-		try {
-			if (mi != null && mi.getModel() != null && mi.getModel().getConfigurationMgr() != null) {
+		if (mi != null && mi.getModel() != null) {
+			try {
 				mi.getModel().getConfigurationMgr().resetJena();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
     	return (modelMgrs.remove(resource.getURI()) == null);
 	}
@@ -3689,7 +3700,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 		
 	}
 	
-	public Enumeration<IConfigurationManagerForIDE> getConfigurationManagers() {
+	public Enumeration<ConfigurationManagerForIDE> getConfigurationManagers() {
 		if (configurationMgrMap != null) {
 			return configurationMgrMap.elements();
 		}
@@ -3704,46 +3715,57 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 		this.currentResource = currentResource;
 	}
 
-//	@Override
-//	public EObject caseUserDefinedDataType(UserDefinedDataType object) {
-//		String name = object.getUdt();
-//		DataTypeRestriction dtr = object.getRestriction();
-//		if (dtr != null) {
-//			String baseType = dtr.getBasetype();
-//			EList<String> unionOfTypes = dtr.getBasetypes();
-//			Facets fcts = dtr.getFacets();
-//			String minexin = null;
-//			String min = null;
-//			String maxexin = null;
-//			String max = null;
-//			String regex = null;
-//			EList<String> values = null;
-//			if (fcts != null) {
-//				minexin = fcts.getMinexin();
-//				min = fcts.getMin();
-//				maxexin = fcts.getMaxexin();
-//				max = fcts.getMax();
-//				regex = fcts.getRegex();
-//				values = fcts.getValues();
-//			}
-//			annotateErrors(object, getModel().addUserDefinedDataType(name, unionOfTypes, baseType, minexin, min, maxexin, max, regex, values));
-//			return super.caseUserDefinedDataType(object);
-//		}
-//		return null;
-//	}
-
-
-	public SadlModelManagerProvider getSadlModelManagerProvider() {
-		return sadlModelManagerProvider;
+	@Override
+	public void partActivated(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	public void setSadlModelManagerProvider(SadlModelManagerProvider sadlModelManagerProvider) {
-		this.sadlModelManagerProvider = sadlModelManagerProvider;
+	@Override
+	public void partBroughtToTop(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
 	}
+
+	@Override
+	public void partClosed(IWorkbenchPartReference partRef) {
+		// TODO
+	}
+
+	@Override
+	public void partDeactivated(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partOpened(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partHidden(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partVisible(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void partInputChanged(IWorkbenchPartReference partRef) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
 	public EObject caseUserDefinedDataType(UserDefinedDataType object) {
     	if (object.getUserDefinedDataType() != null) {
-    		ResourceName name = object.getUserDefinedDataType();
+    		String name = object.getUserDefinedDataType().getName();
     		DataTypeRestriction dtr = object.getRestriction();
     		if (dtr != null) {
     			DataType baseType = dtr.getBasetype();
@@ -3769,10 +3791,91 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     				maxlen = fcts.getMaxlen();
     				minlen = fcts.getMinlen();
     			}
-    			annotateErrors(object, getModel().addUserDefinedDataType(name.getName(), unionOfTypes, baseType.getName(), minexin, min, maxexin, max, regex, len, minlen, maxlen, values));
+    			annotateErrors(object, getModel().addUserDefinedDataType(name, unionOfTypes, baseType.getName(), minexin, min, maxexin, max, regex, len, minlen, maxlen, values));
     		}
     	}
     	
 		return super.caseUserDefinedDataType(object);
 	}
+
+	public boolean isBuilding() {
+		return building;
+	}
+
+	public void setBuilding(boolean building, BuildType buildType) {
+		if (captureRulePatterns ) {
+			if(buildType.equals(BuildType.FULL)) {
+				if (building) {
+					if (allRules == null) {
+						allRules = new ArrayList<com.ge.research.sadl.model.gp.Rule>();
+					}
+					else {
+						allRules.clear();
+					}
+				}
+				else {
+					getModel().saveAllRulePatterns(allRules, lastConfigMgr);
+					allRules.clear();
+				}	
+			}
+		}
+		
+		this.building = building;
+	}
+
+	@Override
+	public EObject caseStartWrite(StartWrite object) {
+		String dataOnly = object.getDataOnly();
+		com.ge.research.sadl.model.gp.StartWrite startWriteCmd = new com.ge.research.sadl.model.gp.StartWrite(dataOnly != null);
+		getModel().addSadlCommand(startWriteCmd);
+		return super.caseStartWrite(object);
+	}
+
+	@Override
+	public EObject caseEndWrite(EndWrite object) {
+		String outputFN = object.getFilename();
+		com.ge.research.sadl.model.gp.EndWrite endWriteCmd = new com.ge.research.sadl.model.gp.EndWrite(outputFN);
+		getModel().addSadlCommand(endWriteCmd);
+		return super.caseEndWrite(object);
+	}
+
+	@Override
+	public EObject caseRead(Read object) {
+		String inputFN = object.getFilename();
+		String tmpltFN = object.getTemplateFilename();
+		com.ge.research.sadl.model.gp.Read readCmd = new com.ge.research.sadl.model.gp.Read(inputFN, tmpltFN);
+		getModel().addSadlCommand(readCmd);
+		return super.caseRead(object);
+	}
+
+	public String getEObjectText(EObject po) {
+		if (po != null) {
+			Object r = po.eResource();
+			if (r instanceof XtextResource) {
+				INode root = ((XtextResource) r).getParseResult().getRootNode();
+		        for(INode node : root.getAsTreeIterable()) {   
+		        	if (node instanceof CompositeNodeWithSemanticElement) {
+		        		EObject semElt = ((CompositeNodeWithSemanticElement)node).getSemanticElement();
+		        		if (semElt.equals(po)) {
+		        			// this is the one!
+		        			String txt = NodeModelUtils.getTokenText(node);
+	       					return txt.trim();
+		        		}
+		        	}
+		        }
+			}
+			org.eclipse.emf.common.util.TreeIterator<EObject> titr = po.eAllContents();
+			while (titr.hasNext()) {
+				EObject el = titr.next();
+// TODO what's supposed to happen here?
+				int i = 0;
+			}
+		}
+		return null;
+	}
+	
+	public SadlConfigurationManagerProvider getConfigurationManagerProvider() {
+		return configMgrProvider;
+	}
+
 }

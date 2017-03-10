@@ -17,6 +17,7 @@ import com.ge.research.sadl.sadl.DefaultValue;
 import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
 import com.ge.research.sadl.sadl.ElementSet;
+import com.ge.research.sadl.sadl.EndWrite;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
@@ -65,6 +66,7 @@ import com.ge.research.sadl.sadl.PropertyOfClass;
 import com.ge.research.sadl.sadl.Query;
 import com.ge.research.sadl.sadl.Range;
 import com.ge.research.sadl.sadl.RangeType;
+import com.ge.research.sadl.sadl.Read;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceByRestriction;
 import com.ge.research.sadl.sadl.ResourceList;
@@ -74,6 +76,7 @@ import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.sadl.SelectExpression;
 import com.ge.research.sadl.sadl.SomeValuesCondition;
 import com.ge.research.sadl.sadl.SomeValuesFrom;
+import com.ge.research.sadl.sadl.StartWrite;
 import com.ge.research.sadl.sadl.SubTypeOf;
 import com.ge.research.sadl.sadl.SubjProp;
 import com.ge.research.sadl.sadl.SymmetricalProperty;
@@ -264,6 +267,13 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 			case SadlPackage.ELEMENT_SET:
 				if(context == grammarAccess.getElementSetRule()) {
 					sequence_ElementSet(context, (ElementSet) semanticObject); 
+					return; 
+				}
+				else break;
+			case SadlPackage.END_WRITE:
+				if(context == grammarAccess.getEndWriteRule() ||
+				   context == grammarAccess.getModelElementRule()) {
+					sequence_EndWrite(context, (EndWrite) semanticObject); 
 					return; 
 				}
 				else break;
@@ -655,6 +665,13 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 					return; 
 				}
 				else break;
+			case SadlPackage.READ:
+				if(context == grammarAccess.getModelElementRule() ||
+				   context == grammarAccess.getReadRule()) {
+					sequence_Read(context, (Read) semanticObject); 
+					return; 
+				}
+				else break;
 			case SadlPackage.RESOURCE_BY_NAME:
 				if(context == grammarAccess.getResourceByNameRule() ||
 				   context == grammarAccess.getResourceIdentifierRule()) {
@@ -710,6 +727,13 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 				   context == grammarAccess.getSomeValuesFromRule() ||
 				   context == grammarAccess.getStatementRule()) {
 					sequence_SomeValuesFrom(context, (SomeValuesFrom) semanticObject); 
+					return; 
+				}
+				else break;
+			case SadlPackage.START_WRITE:
+				if(context == grammarAccess.getModelElementRule() ||
+				   context == grammarAccess.getStartWriteRule()) {
+					sequence_StartWrite(context, (StartWrite) semanticObject); 
 					return; 
 				}
 				else break;
@@ -888,6 +912,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	 *                 op='=' | 
 	 *                 op='==' | 
 	 *                 op='is' | 
+	 *                 op='to' | 
 	 *                 op='!=' | 
 	 *                 op='<' | 
 	 *                 op='<=' | 
@@ -1078,6 +1103,22 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	 */
 	protected void sequence_ElementSet(EObject context, ElementSet semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     filename=STRING
+	 */
+	protected void sequence_EndWrite(EObject context, EndWrite semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, SadlPackage.Literals.END_WRITE__FILENAME) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, SadlPackage.Literals.END_WRITE__FILENAME));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getEndWriteAccess().getFilenameSTRINGTerminalRuleCall_2_0(), semanticObject.getFilename());
+		feeder.finish();
 	}
 	
 	
@@ -1578,7 +1619,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (baseUri=STRING alias=NAME? version=STRING? ((annType+='alias' | annType+='note') annContent+=ContentList)*)
+	 *     (baseUri=STRING alias=NAME? ((annType+='alias' | annType+='note') annContent+=ContentList)* version=STRING?)
 	 */
 	protected void sequence_ModelName(EObject context, ModelName semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1701,6 +1742,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	/**
 	 * Constraint:
 	 *     (
+	 *         (noDomainPropName=ResourceName range=Range?) | 
 	 *         (propertyName=ResourceName superPropName=ResourceByName? addlPropInfo+=AdditionalPropertyInfo+) | 
 	 *         (article=AnArticle? domain=ResourceIdentifier rangeResource=ResourceIdentifier propertyName=ResourceName) | 
 	 *         annotationProperty=ResourceName
@@ -1760,6 +1802,15 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	 *     ((single='single' | list='List' | lists='Lists')? type=RangeType)
 	 */
 	protected void sequence_Range(EObject context, Range semanticObject) {
+		genericSequencer.createSequence(context, semanticObject);
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (filename=STRING templateFilename=STRING?)
+	 */
+	protected void sequence_Read(EObject context, Read semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
 	}
 	
@@ -1827,7 +1878,7 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	
 	/**
 	 * Constraint:
-	 *     (name=NAME givens=ElementSet? ifs=ElementSet? thens=ElementSet)
+	 *     (name=NAME (annProps+=NAME annValues+=STRING)* givens=ElementSet? ifs=ElementSet? thens=ElementSet)
 	 */
 	protected void sequence_Rule(EObject context, Rule semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -1857,6 +1908,15 @@ public abstract class AbstractSadlSemanticSequencer extends AbstractDelegatingSe
 	 *     ((restricted=PropertyOfClass cond=SomeValuesCondition) | (className=ResourceIdentifier propertyName=ResourceByName cond=SomeValuesCondition))
 	 */
 	protected void sequence_SomeValuesFrom(EObject context, SomeValuesFrom semanticObject) {
+		genericSequencer.createSequence(context, semanticObject);
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (write='Write:' dataOnly='data'?)
+	 */
+	protected void sequence_StartWrite(EObject context, StartWrite semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
 	}
 	

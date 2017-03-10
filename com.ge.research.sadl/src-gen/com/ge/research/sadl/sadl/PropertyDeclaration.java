@@ -12,6 +12,8 @@ import org.eclipse.emf.common.util.EList;
  * <p>
  * The following features are supported:
  * <ul>
+ *   <li>{@link com.ge.research.sadl.sadl.PropertyDeclaration#getNoDomainPropName <em>No Domain Prop Name</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.PropertyDeclaration#getRange <em>Range</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.PropertyDeclaration#getPropertyName <em>Property Name</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.PropertyDeclaration#getSuperPropName <em>Super Prop Name</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.PropertyDeclaration#getAddlPropInfo <em>Addl Prop Info</em>}</li>
@@ -28,6 +30,58 @@ import org.eclipse.emf.common.util.EList;
  */
 public interface PropertyDeclaration extends Statement
 {
+  /**
+   * Returns the value of the '<em><b>No Domain Prop Name</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>No Domain Prop Name</em>' containment reference isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>No Domain Prop Name</em>' containment reference.
+   * @see #setNoDomainPropName(ResourceName)
+   * @see com.ge.research.sadl.sadl.SadlPackage#getPropertyDeclaration_NoDomainPropName()
+   * @model containment="true"
+   * @generated
+   */
+  ResourceName getNoDomainPropName();
+
+  /**
+   * Sets the value of the '{@link com.ge.research.sadl.sadl.PropertyDeclaration#getNoDomainPropName <em>No Domain Prop Name</em>}' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @param value the new value of the '<em>No Domain Prop Name</em>' containment reference.
+   * @see #getNoDomainPropName()
+   * @generated
+   */
+  void setNoDomainPropName(ResourceName value);
+
+  /**
+   * Returns the value of the '<em><b>Range</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>Range</em>' containment reference isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>Range</em>' containment reference.
+   * @see #setRange(Range)
+   * @see com.ge.research.sadl.sadl.SadlPackage#getPropertyDeclaration_Range()
+   * @model containment="true"
+   * @generated
+   */
+  Range getRange();
+
+  /**
+   * Sets the value of the '{@link com.ge.research.sadl.sadl.PropertyDeclaration#getRange <em>Range</em>}' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @param value the new value of the '<em>Range</em>' containment reference.
+   * @see #getRange()
+   * @generated
+   */
+  void setRange(Range value);
+
   /**
    * Returns the value of the '<em><b>Property Name</b></em>' containment reference.
    * <!-- begin-user-doc -->

@@ -1,9 +1,7 @@
 package com.ge.research.sadl.ui.quickfix;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.io.StringReader;
-import java.net.MalformedURLException;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -11,8 +9,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
-import org.eclipse.xtext.naming.IQualifiedNameProvider;
-import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.parser.IParseResult;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.editor.model.XtextDocument;
@@ -21,12 +17,10 @@ import org.eclipse.xtext.ui.editor.model.edit.IModificationContext;
 import org.eclipse.xtext.ui.editor.model.edit.ISemanticModification;
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider;
 import org.eclipse.xtext.ui.editor.quickfix.Fix;
-import org.eclipse.xtext.ui.editor.quickfix.IssueResolution;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
 import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.parser.antlr.SadlParser;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -37,7 +31,6 @@ import com.ge.research.sadl.ui.contentassist.SadlProposalProvider;
 import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.validation.SadlJavaValidator;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -50,13 +43,10 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
     private final SadlProposalProvider proposalProvider;
 
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
+    private SadlModelManager visitor;
     
     @Inject
     private SadlParser parser;
-
-    @Inject
-    private IQualifiedNameProvider qnProvider;
 
     @Inject
     public SadlQuickfixProvider(SadlProposalProvider proposalProvider) {
@@ -218,10 +208,11 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 		    			}
 		    			uri = uri.substring(idx);
     				}
-    				SadlModelManager visitor = sadlModelManagerProvider.get(element.eResource());
+    				
 					URI projectUri = ResourceManager.getProjectUri(visitor.getModelResource().getURI());
 					SadlUtils su = new SadlUtils();
-					URI sadlUri = URI.createURI(su.fileNameToFileUrl(ResourceManager.findSadlFileInProject(projectUri.toFileString(), uri)));
+					String prjDir = projectUri.toFileString();
+					URI sadlUri = URI.createURI(su.fileNameToFileUrl(ResourceManager.findSadlFileInProject(prjDir, uri, ResourceManager.sadlExclusionFolders(prjDir))));
 					URI owlUri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(sadlUri);
 					uri = visitor.getConfigurationMgr(ResourceManager.getOwlModelsFolder(sadlUri)).findPublicUriOfOwlFile(owlUri.toString());
 					((com.ge.research.sadl.sadl.Import)element).setImportURI(uri);
@@ -311,60 +302,7 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 
 		});
 	}
-	
-	@Fix(SadlJavaValidator.AMBIGUOUS_NAME)
-	public void addNSQualifier(final Issue issue, final IssueResolutionAcceptor acceptor) {
-		String[] fixes = issue.getData();
-		Iterator<String> itr = Splitter.on(",").split(fixes[0]).iterator();
-		while (itr.hasNext()) {
-			// loop over prefixes
-			final String prefix = itr.next();	
-			acceptor.accept(issue, prefix, "Add the namespace prefix '" + prefix + "' to disambiguate name", null, new ISemanticModification() {
-				public void apply(EObject element, IModificationContext context)
-						throws Exception {
-					if (element instanceof ResourceByName) {
-				    	IXtextDocument xtextDocument = context.getXtextDocument();
-				    	if (xtextDocument instanceof XtextDocument) {
-				    		int insertAt = issue.getOffset();
-				    		xtextDocument.replace(insertAt, issue.getLength(), prefix);
-				    	}
-					}
-				}
-			});
-		}
-	}
-	
-//	@Fix(EcoreValidator.DIAGNOSTIC_SOURCE + '.' + EcoreValidator.CONSISTENT_TYPE_CLASS_NOT_PERMITTED) 
-//	public void convertToReference(final Issue issue,final IssueResolutionAcceptor acceptor){
-//		  IModificationContext modificationContext=getModificationContextFactory().createModificationContext(issue);
-//		  final IXtextDocument xtextDocument=modificationContext.getXtextDocument();
-//		  xtextDocument.readOnly(new IUnitOfWork.Void<XtextResource>(){
-//		    @Override public void process(    XtextResource xtextResource) throws Exception {
-//		      EObject cause=xtextResource.getResourceSet().getEObject(issue.getUriToProblem(),false);
-//		      if (cause instanceof XGenericType) {
-//		        XGenericType xGenericType=(XGenericType)cause;
-//		        if (xGenericType.eContainer() instanceof XAttribute && xGenericType.getType() instanceof GenClass) {
-//		          ICompositeNode node=NodeModelUtils.getNode(xGenericType.eContainer());
-//		          String range=node == null ? xtextDocument.get(issue.getOffset(),issue.getLength()) : xtextDocument.get(node.getOffset(),node.getLength());
-//		          quickFix(issue,"Convert to cross reference","refers ",acceptor,range);
-//		          quickFix(issue,"Convert to containment reference","contains ",acceptor,range);
-//		          quickFix(issue,"Convert to container reference","container ",acceptor,range);
-//		        }
-//		      }
-//		    }
-//		    private void quickFix(    final Issue issue,    String description,    final String replacement,    final IssueResolutionAcceptor acceptor,    String range){
-//		      acceptor.accept(issue,description,replacement + range,"full/obj16/correction_change.gif",new IModification(){
-//		        public void apply(        IModificationContext context) throws BadLocationException {
-//		          IXtextDocument xtextDocument=context.getXtextDocument();
-//		          xtextDocument.replace(issue.getOffset(),0,replacement);
-//		        }
-//		      }
-//		);
-//		    }
-//		  }
-//		);
-//		}
-//
+
 	private Object[] prepareMissingConceptFix(IXtextDocument xtextDocument, EObject conceptEobject, Issue issue) throws BadLocationException {
 		String nameAt0 = null;
 		String propName = null;
@@ -379,13 +317,6 @@ public class SadlQuickfixProvider extends DefaultQuickfixProvider {
 			}
 		}
 		if (issue.getCode().equals(SadlJavaValidator.INSTANCE_NOT_DEFINED)) {
-			SadlModelManager visitor = null;
-			try {
-				visitor = sadlModelManagerProvider.get(conceptEobject.eResource());
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 			if (visitor != null) {
 				ConceptName rcn = null;
 				try {

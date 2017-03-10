@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.3 $ Last modified on   $Date: 2014/10/16 17:11:49 $
+ * $Revision: 1.5 $ Last modified on   $Date: 2015/09/22 14:50:17 $
  ***********************************************************************/
 
 package com.ge.research.sadl.ui.editor;
@@ -66,7 +66,6 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.util.StringInputStream;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -93,9 +92,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
     private SadlGrammarAccess grammar;
    
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
-    
-    private SadlModelManager visitor = null;
+    private SadlModelManager visitor;
     
     /**
      * Class to capture the user's input in the dialog
@@ -147,8 +144,6 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 		}
 		
 		XtextResourceSet resourceSet = new XtextResourceSet();
-		// TODO: [KTH] How should this work? There is no resource in the ResourceSet yet
-		visitor = sadlModelManagerProvider.get();
 		prepareModel(visitor, testFilePath, resourceSet);
 		final String modelName = visitor.getModelName();
 		
@@ -356,7 +351,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 		  			@Override
 		  			protected void canceling() {
 		  				try {
-		  					visitor.getConfigurationMgr((String)null).setInferenceCanceled(true);
+		  					visitor.getConfigurationMgr(null).setInferenceCanceled(true);
 		  				} catch (MalformedURLException | ConfigurationException e) {
 		  					// TODO Auto-generated catch block
 		  					e.printStackTrace();
@@ -372,7 +367,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 		  			@Override
 		  			protected IStatus run(IProgressMonitor monitor) {
 		  				visitor.runQuery(modelName, qif);
-		  				SadlConsole.displayMessages(visitor);
+		  				SadlConsole.displayMessages(visitor.getMessageManager());
 						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(testFilePath);
 						if (file == null) {
 							file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(testFilePath.toPortableString()));
@@ -388,7 +383,7 @@ public class RunQuery extends SadlActionDelegate implements IObjectActionDelegat
 								ci.addNameValuePair(nvp);
 								visitor.addConfiguration(ci);
 								IConfigurationManagerForIDE cm = null;
-								cm = visitor.getConfigurationMgr((String)null);
+								cm = visitor.getConfigurationMgr(null);
 								if (cm != null) {
 									//TODO this should be done with a listener but I'm having trouble for plugin close awc 1/10/2011
 									cm.saveConfiguration();

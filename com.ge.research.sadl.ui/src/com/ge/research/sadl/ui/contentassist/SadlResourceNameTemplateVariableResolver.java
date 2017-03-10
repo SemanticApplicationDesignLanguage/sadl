@@ -23,39 +23,30 @@
 
 package com.ge.research.sadl.ui.contentassist;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
-import org.eclipse.xtext.ui.editor.model.XtextDocument;
 import org.eclipse.xtext.ui.editor.templates.AbstractTemplateVariableResolver;
 import org.eclipse.xtext.ui.editor.templates.XtextTemplateContext;
 
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.ResourceManager;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ModelManager.ImportListType;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
 import com.google.inject.Inject;
 
@@ -67,7 +58,7 @@ public class SadlResourceNameTemplateVariableResolver extends
         AbstractTemplateVariableResolver {
 
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
+    private SadlModelManager visitor;
     
     @Inject
     private SadlProposalProvider proposalProvider;
@@ -91,40 +82,7 @@ public class SadlResourceNameTemplateVariableResolver extends
     @Override
     public List<String> resolveValues(TemplateVariable variable,
             XtextTemplateContext xtextTemplateContext) {
-    	
-		Resource currentResource = xtextTemplateContext.getContentAssistContext().getCurrentModel().eResource();
-		SadlModelManager visitor = null;
-		if (currentResource == null) {
-			Iterator<EObject> itr = xtextTemplateContext.getContentAssistContext().getCurrentModel().eContents().iterator();
-			while (itr.hasNext()) {
-				EObject obj = itr.next();
-				if (obj instanceof ModelName) {
-					String modelUri = ((ModelName)obj).getBaseUri();
-					visitor = sadlModelManagerProvider.get();
-					break;
-				}
-			}
-			IDocument doc = xtextTemplateContext.getDocument();
-			if (doc instanceof XtextDocument) {
-				URI resourceUri = ((XtextDocument)doc).getResourceURI();
-				URI prjUri;
-				try {
-					prjUri = ResourceManager.getProjectUri(resourceUri);
-					visitor = sadlModelManagerProvider.get(prjUri);
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		else {
-			try {
-				visitor = sadlModelManagerProvider.get(currentResource);
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+
 		String conceptualType = (String) variable.getVariableType()
 				.getParams().iterator().next();
 		if (conceptualType.equals("VERSION")) {
@@ -148,48 +106,50 @@ public class SadlResourceNameTemplateVariableResolver extends
 			List<String> values = new ArrayList<String>();
 			String modelFolderName = null;
 			try {
-				IConfigurationManagerForIDE configMgr = visitor.getConfigurationMgr(modelFolderName);
-				List<BuiltinInfo> builtins = ((IConfigurationManagerForIDE)configMgr).getAvailableBuiltinsForCurrentReasoner();
-				if (builtins != null) {
-					for (int i = 0; i < builtins.size(); i++) {
-						String withArgs = builtins.get(i).getName() + "(";
-						int argCnt = builtins.get(i).getNumArgs();
-						int effectiveArgCount = argCnt;
-						// this should include determination of whether this is in the premise (given, if)
-						//	or in the conclusion. Conclusion rules do not assign values to output variables so all arguments
-						//	should be retained. For a premise built-in, the number of output variables should be dropped
-						//  from the syntax constructed for the content assist.
-						if (argCnt > 1) {
-							effectiveArgCount--;
-						}
-						if (argCnt <= 0) {
-							withArgs += "v1,...";
-						}
-						else {
-							for (int j = 0; j < effectiveArgCount; j++) {
-								if (j > 0) {
-									withArgs += ", ";
-								}
-								withArgs += "v" + (j + 1);
+				ConfigurationManager configMgr = visitor.getConfigurationMgr(modelFolderName);
+				if (configMgr instanceof ConfigurationManagerForIDE) {
+					List<BuiltinInfo> builtins = ((ConfigurationManagerForIDE)configMgr).getAvailableBuiltinsForCurrentReasoner();
+					if (builtins != null) {
+						for (int i = 0; i < builtins.size(); i++) {
+							String withArgs = builtins.get(i).getName() + "(";
+							int argCnt = builtins.get(i).getNumArgs();
+							int effectiveArgCount = argCnt;
+							// this should include determination of whether this is in the premise (given, if)
+							//	or in the conclusion. Conclusion rules do not assign values to output variables so all arguments
+							//	should be retained. For a premise built-in, the number of output variables should be dropped
+							//  from the syntax constructed for the content assist.
+							if (argCnt > 1) {
+								effectiveArgCount--;
 							}
-						}
-						withArgs += ")";
-						if (values.size() > 0) {
-							boolean added = false;
-							for (int j = 0; j < values.size(); j++) {
-								String nextele = values.get(j);
-								if (nextele.compareToIgnoreCase(withArgs) > 0) {
-									values.add(j, withArgs);
-									added = true;
-									break;
+							if (argCnt <= 0) {
+								withArgs += "v1,...";
+							}
+							else {
+								for (int j = 0; j < effectiveArgCount; j++) {
+									if (j > 0) {
+										withArgs += ", ";
+									}
+									withArgs += "v" + (j + 1);
 								}
 							}
-							if (!added) {
+							withArgs += ")";
+							if (values.size() > 0) {
+								boolean added = false;
+								for (int j = 0; j < values.size(); j++) {
+									String nextele = values.get(j);
+									if (nextele.compareToIgnoreCase(withArgs) > 0) {
+										values.add(j, withArgs);
+										added = true;
+										break;
+									}
+								}
+								if (!added) {
+									values.add(withArgs);
+								}
+							}
+							else {
 								values.add(withArgs);
 							}
-						}
-						else {
-							values.add(withArgs);
 						}
 					}
 				}
@@ -241,32 +201,17 @@ public class SadlResourceNameTemplateVariableResolver extends
 
 		List<String> values = new ArrayList<String>();
 		try {
-			boolean modelEmpty = true;
+			if (visitor.getModelBaseUri() == null) {
+				// set the model baseUri (from preferences) if it hasn't been set so that we can generate
+				//	a default model name if needed
+				visitor.setModelBaseUri(proposalProvider.generateBaseUri(visitor.getModelResource().getURI()));
+			}
 	        for (TreeIterator<EObject> iter = EcoreUtil.getAllContents(visitor.getModelResource(), true); visitor.getModelName() == null && iter.hasNext();) { 
 	            EObject eObject = iter.next();
 	            if (visitor.doSwitch(eObject) != null) {
 	                iter.prune();
 	            }
-	            modelEmpty = false;
 	        }
-	        if (modelEmpty) {
-	        	try {
-					visitor.getModel().init(visitor.getConfigurationMgr((String)null), sadlModelManagerProvider, currentResource);
-				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	        }
-	        
-	        if (visitor.getModelBaseUri() == null) {
-				// set the model baseUri (from preferences) if it hasn't been set so that we can generate
-				//	a default model name if needed
-				visitor.setModelBaseUri(proposalProvider.generateBaseUri(visitor.getModelResource().getURI()));
-			}
-
 	        List<ConceptName> names = null;
 	        if (constraint != null) {
 	        	names = visitor.getNamedConceptsOfType(cType, Scope.INCLUDEIMPORTS, new ConceptName(constraint));

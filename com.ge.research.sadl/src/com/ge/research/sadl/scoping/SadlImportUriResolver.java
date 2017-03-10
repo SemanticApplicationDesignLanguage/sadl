@@ -23,24 +23,18 @@
 
 package com.ge.research.sadl.scoping;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.scoping.impl.ImportUriResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.sadl.Import;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.builder.ResourceManager;
 import com.google.inject.Inject;
 
 /**
@@ -52,7 +46,7 @@ public class SadlImportUriResolver extends ImportUriResolver {
     private static final Logger logger = LoggerFactory.getLogger(ImportUriResolver.class);
 
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
+    private SadlModelManager visitor;
 	
     /**
      * When we resolve an import URI, transform the URI to the absolute
@@ -64,67 +58,54 @@ public class SadlImportUriResolver extends ImportUriResolver {
      * @return Import URI resolved to file URI of OWL file.
      */
     public String resolve(EObject object) {
-    	if (!(object instanceof Import)) {
-    		return null;
-    	}
-    	String importUriStr = super.resolve(object);
-    	URI importedURI = URI.createURI(importUriStr);
-    	if (importedURI.scheme()==null) {
-    		importedURI = importedURI.resolve(object.eResource().getURI());
-    	}
+        String importUri = super.resolve(object);
+        String owlUri = importUri;
 
-    	Resource importingResource = object.eResource();
+        if (importUri != null) {
+            URI resourceURI = object.eResource().getURI();
+            URI uri = URI.createURI(importUri);
 
-    	if (importedURI.isPlatformResource()) {
-    		String rawSadlFilename = importedURI.toString();
-    		if (rawSadlFilename.startsWith(ResourceManager.FILE_URL_PREFIX) &&
-    				rawSadlFilename.endsWith(ResourceManager.SADLEXT)) {
-    			rawSadlFilename = rawSadlFilename.substring(ResourceManager.FILE_URL_PREFIX.length());
-    			int lastSegmentDivider = rawSadlFilename.lastIndexOf("/");
-    			if (lastSegmentDivider > 0) {
-    				rawSadlFilename = rawSadlFilename.substring(lastSegmentDivider + 1);
-    			}
-    			importedURI = URI.createFileURI(rawSadlFilename);
-    		}
-    		importedURI = ResourceManager.convertPlatformUriToAbsoluteUri(importedURI);
-    		// Convert any SADL URI to an OWL URI.
-    		try {
-    			if (ResourceManager.SADLEXT.equalsIgnoreCase(importedURI.fileExtension())) {
-    				importedURI = ResourceManager.validateAndReturnOwlUrlOfSadlUri(importedURI);
-    			}
-    			if (ResourceManager.OWLFILEEXT.equals(importedURI.fileExtension())) {
-    				SadlModelManager smMgr = sadlModelManagerProvider.get(importingResource);
-    				IConfigurationManagerForIDE configMgr = smMgr.getConfigurationMgr(importingResource.getURI());
-    				importedURI = URI.createURI(configMgr.getPublicUriFromActualUrl(importedURI.toString()));
-    			}
-    		}
-    		catch (CoreException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (Exception e) {
-    			SadlModelManager smMgr;
-				try {
-					smMgr = sadlModelManagerProvider.get(importingResource);
-	    			smMgr.getMessageManager().error(e.getMessage());
-				} catch (MalformedURLException e1) {
+            // check for a V1 compatibility issue
+            if (uri.isFile()) {
+            	String rawSadlFilename = uri.toString();
+            	if (rawSadlFilename.startsWith(ResourceManager.FILE_URL_PREFIX) &&
+            			rawSadlFilename.endsWith(ResourceManager.SADLEXT)) {
+            		rawSadlFilename = rawSadlFilename.substring(ResourceManager.FILE_URL_PREFIX.length());
+            		int lastSegmentDivider = rawSadlFilename.lastIndexOf("/");
+            		if (lastSegmentDivider > 0) {
+            			rawSadlFilename = rawSadlFilename.substring(lastSegmentDivider + 1);
+            		}
+            		uri = URI.createFileURI(rawSadlFilename);
+            	}
+                // Convert the file URI to a platform URI.
+                uri = uri.resolve(resourceURI);
+                // Convert the platform URI to an absolute URI.
+                uri = ResourceManager.convertPlatformUriToAbsoluteUri(uri);
+                // Convert any SADL URI to an OWL URI.
+        	    if (ResourceManager.SADLEXT.equalsIgnoreCase(uri.fileExtension())) {
+        	        try {
+                        uri = ResourceManager.validateAndReturnOwlUrlOfSadlUri(uri);
+                    }
+        	        catch (CoreException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+        	    }
+                // Convert the OWL URI back to a string.
+                owlUri = uri.toString();
+            }
+            else {
+                // Look up the public URI in the policy file and get the OWL URI.
+            	try {
+					owlUri = visitor.getAltUrl(importUri, resourceURI);
+				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					e.printStackTrace();
 				}
-    		} 
-    	}
-    	else {
-    		// Look up the public URI in the policy file and get the OWL URI.
-    		try {
-    			SadlModelManager visitor = sadlModelManagerProvider.get(importingResource);
-    			importedURI = URI.createURI(visitor.getAltUrl(importedURI.toString(), importingResource.getURI()));
-    		} catch (MalformedURLException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-    	}
-    	logger.debug("Resolved import '{}' to '{}'", importUriStr, importedURI);
+            }
+            logger.debug("Resolved import '{}' to '{}'", importUri, owlUri);
+        }
 
-
-    	return importedURI.toString();
+        return owlUri;
     }
 }

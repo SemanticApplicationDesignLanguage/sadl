@@ -312,7 +312,6 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 					getConfigModel().read(in, null, syntax);
 					timeConfigFileLastModifiedAtInitialization = configFile
 							.lastModified();
-					in.close();
 				} else {
 					throw new ConfigurationException("Configuration file '"
 							+ configFilename + "' not found.");

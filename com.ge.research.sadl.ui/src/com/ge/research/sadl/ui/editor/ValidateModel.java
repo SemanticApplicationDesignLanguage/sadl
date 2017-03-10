@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright (c) 2007-2010 - General Electric Company, All Rights Reserved
+ * Copyright � 2007-2010 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -19,13 +19,12 @@
 package com.ge.research.sadl.ui.editor;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
+
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.google.inject.Inject;
@@ -37,7 +36,7 @@ public class ValidateModel extends SadlActionDelegate implements IObjectActionDe
     private XtextResourceSet resourceSet;
     
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
+    private SadlModelManager visitor;
 
 	public ValidateModel () {
 		Injector injector = SadlActivator.getInstance().getInjector("com.ge.research.sadl.Sadl");//new SadlStandaloneSetup().createInjectorAndDoEMFRegistration();
@@ -46,13 +45,12 @@ public class ValidateModel extends SadlActionDelegate implements IObjectActionDe
 
 	@Override
 	protected void run(IPath testFilePath) {
-		SadlModelManager visitor = sadlModelManagerProvider.get();
 		prepareModel(visitor, testFilePath, resourceSet);
 		String modelName = visitor.getModelName();
 
 	    SadlConsole.writeToConsole(MessageType.INFO, "Validating model: " + testFilePath.lastSegment() + "(" + modelName + ")\n");
 		int errorCnt = visitor.validateModel(modelName, null);
-		SadlConsole.displayMessages(visitor);
+		SadlConsole.displayMessages(visitor.getMessageManager());
 	}
 
 }

@@ -37,7 +37,7 @@ public class SadlParser extends AbstractContentAssistParser {
 			nameMappings = new HashMap<AbstractElement, String>() {
 				private static final long serialVersionUID = 1L;
 				{
-					put(grammarAccess.getModelNameAccess().getAnnTypeAlternatives_4_1_0(), "rule__ModelName__AnnTypeAlternatives_4_1_0");
+					put(grammarAccess.getModelNameAccess().getAnnTypeAlternatives_3_1_0(), "rule__ModelName__AnnTypeAlternatives_3_1_0");
 					put(grammarAccess.getModelElementAccess().getAlternatives(), "rule__ModelElement__Alternatives");
 					put(grammarAccess.getStatementAccess().getAlternatives(), "rule__Statement__Alternatives");
 					put(grammarAccess.getResourceNameAccess().getAnnTypeAlternatives_1_1_0(), "rule__ResourceName__AnnTypeAlternatives_1_1_0");
@@ -216,9 +216,10 @@ public class SadlParser extends AbstractContentAssistParser {
 					put(grammarAccess.getNecessaryAndSufficientAccess().getGroup(), "rule__NecessaryAndSufficient__Group__0");
 					put(grammarAccess.getNecessaryAndSufficientAccess().getGroup_8(), "rule__NecessaryAndSufficient__Group_8__0");
 					put(grammarAccess.getPropertyDeclarationAccess().getGroup_0(), "rule__PropertyDeclaration__Group_0__0");
-					put(grammarAccess.getPropertyDeclarationAccess().getGroup_0_1(), "rule__PropertyDeclaration__Group_0_1__0");
 					put(grammarAccess.getPropertyDeclarationAccess().getGroup_1(), "rule__PropertyDeclaration__Group_1__0");
+					put(grammarAccess.getPropertyDeclarationAccess().getGroup_1_1(), "rule__PropertyDeclaration__Group_1_1__0");
 					put(grammarAccess.getPropertyDeclarationAccess().getGroup_2(), "rule__PropertyDeclaration__Group_2__0");
+					put(grammarAccess.getPropertyDeclarationAccess().getGroup_3(), "rule__PropertyDeclaration__Group_3__0");
 					put(grammarAccess.getAdditionalPropertyInfoAccess().getGroup_0(), "rule__AdditionalPropertyInfo__Group_0__0");
 					put(grammarAccess.getAdditionalPropertyInfoAccess().getGroup_1(), "rule__AdditionalPropertyInfo__Group_1__0");
 					put(grammarAccess.getAdditionalPropertyInfoAccess().getGroup_2(), "rule__AdditionalPropertyInfo__Group_2__0");
@@ -261,8 +262,9 @@ public class SadlParser extends AbstractContentAssistParser {
 					put(grammarAccess.getVariableListAccess().getGroup(), "rule__VariableList__Group__0");
 					put(grammarAccess.getVariableListAccess().getGroup_1(), "rule__VariableList__Group_1__0");
 					put(grammarAccess.getRuleAccess().getGroup(), "rule__Rule__Group__0");
-					put(grammarAccess.getRuleAccess().getGroup_3(), "rule__Rule__Group_3__0");
+					put(grammarAccess.getRuleAccess().getGroup_2(), "rule__Rule__Group_2__0");
 					put(grammarAccess.getRuleAccess().getGroup_4(), "rule__Rule__Group_4__0");
+					put(grammarAccess.getRuleAccess().getGroup_5(), "rule__Rule__Group_5__0");
 					put(grammarAccess.getQueryAccess().getGroup(), "rule__Query__Group__0");
 					put(grammarAccess.getTestAccess().getGroup(), "rule__Test__Group__0");
 					put(grammarAccess.getExprAccess().getGroup(), "rule__Expr__Group__0");
@@ -274,6 +276,10 @@ public class SadlParser extends AbstractContentAssistParser {
 					put(grammarAccess.getExplanationAccess().getGroup_1_0(), "rule__Explanation__Group_1_0__0");
 					put(grammarAccess.getExplanationAccess().getGroup_1_2(), "rule__Explanation__Group_1_2__0");
 					put(grammarAccess.getExplanationAccess().getGroup_1_3(), "rule__Explanation__Group_1_3__0");
+					put(grammarAccess.getStartWriteAccess().getGroup(), "rule__StartWrite__Group__0");
+					put(grammarAccess.getEndWriteAccess().getGroup(), "rule__EndWrite__Group__0");
+					put(grammarAccess.getReadAccess().getGroup(), "rule__Read__Group__0");
+					put(grammarAccess.getReadAccess().getGroup_4(), "rule__Read__Group_4__0");
 					put(grammarAccess.getElementSetAccess().getGroup(), "rule__ElementSet__Group__0");
 					put(grammarAccess.getElementSetAccess().getGroup_1(), "rule__ElementSet__Group_1__0");
 					put(grammarAccess.getSelectExpressionAccess().getGroup(), "rule__SelectExpression__Group__0");
@@ -338,9 +344,9 @@ public class SadlParser extends AbstractContentAssistParser {
 					put(grammarAccess.getModelAccess().getElementsAssignment_2(), "rule__Model__ElementsAssignment_2");
 					put(grammarAccess.getModelNameAccess().getBaseUriAssignment_1(), "rule__ModelName__BaseUriAssignment_1");
 					put(grammarAccess.getModelNameAccess().getAliasAssignment_2_1(), "rule__ModelName__AliasAssignment_2_1");
-					put(grammarAccess.getModelNameAccess().getVersionAssignment_3_1(), "rule__ModelName__VersionAssignment_3_1");
-					put(grammarAccess.getModelNameAccess().getAnnTypeAssignment_4_1(), "rule__ModelName__AnnTypeAssignment_4_1");
-					put(grammarAccess.getModelNameAccess().getAnnContentAssignment_4_2(), "rule__ModelName__AnnContentAssignment_4_2");
+					put(grammarAccess.getModelNameAccess().getAnnTypeAssignment_3_1(), "rule__ModelName__AnnTypeAssignment_3_1");
+					put(grammarAccess.getModelNameAccess().getAnnContentAssignment_3_2(), "rule__ModelName__AnnContentAssignment_3_2");
+					put(grammarAccess.getModelNameAccess().getVersionAssignment_4_1(), "rule__ModelName__VersionAssignment_4_1");
 					put(grammarAccess.getImportAccess().getImportURIAssignment_1(), "rule__Import__ImportURIAssignment_1");
 					put(grammarAccess.getImportAccess().getAliasAssignment_2_1(), "rule__Import__AliasAssignment_2_1");
 					put(grammarAccess.getResourceNameAccess().getNameAssignment_0(), "rule__ResourceName__NameAssignment_0");
@@ -472,14 +478,16 @@ public class SadlParser extends AbstractContentAssistParser {
 					put(grammarAccess.getNecessaryAndSufficientAccess().getCondAssignment_7(), "rule__NecessaryAndSufficient__CondAssignment_7");
 					put(grammarAccess.getNecessaryAndSufficientAccess().getPropertyNameAssignment_8_1(), "rule__NecessaryAndSufficient__PropertyNameAssignment_8_1");
 					put(grammarAccess.getNecessaryAndSufficientAccess().getCondAssignment_8_2(), "rule__NecessaryAndSufficient__CondAssignment_8_2");
-					put(grammarAccess.getPropertyDeclarationAccess().getPropertyNameAssignment_0_0(), "rule__PropertyDeclaration__PropertyNameAssignment_0_0");
-					put(grammarAccess.getPropertyDeclarationAccess().getSuperPropNameAssignment_0_1_4(), "rule__PropertyDeclaration__SuperPropNameAssignment_0_1_4");
-					put(grammarAccess.getPropertyDeclarationAccess().getAddlPropInfoAssignment_0_2(), "rule__PropertyDeclaration__AddlPropInfoAssignment_0_2");
-					put(grammarAccess.getPropertyDeclarationAccess().getArticleAssignment_1_0(), "rule__PropertyDeclaration__ArticleAssignment_1_0");
-					put(grammarAccess.getPropertyDeclarationAccess().getDomainAssignment_1_3(), "rule__PropertyDeclaration__DomainAssignment_1_3");
-					put(grammarAccess.getPropertyDeclarationAccess().getRangeResourceAssignment_1_5(), "rule__PropertyDeclaration__RangeResourceAssignment_1_5");
-					put(grammarAccess.getPropertyDeclarationAccess().getPropertyNameAssignment_1_7(), "rule__PropertyDeclaration__PropertyNameAssignment_1_7");
-					put(grammarAccess.getPropertyDeclarationAccess().getAnnotationPropertyAssignment_2_0(), "rule__PropertyDeclaration__AnnotationPropertyAssignment_2_0");
+					put(grammarAccess.getPropertyDeclarationAccess().getNoDomainPropNameAssignment_0_0(), "rule__PropertyDeclaration__NoDomainPropNameAssignment_0_0");
+					put(grammarAccess.getPropertyDeclarationAccess().getRangeAssignment_0_4(), "rule__PropertyDeclaration__RangeAssignment_0_4");
+					put(grammarAccess.getPropertyDeclarationAccess().getPropertyNameAssignment_1_0(), "rule__PropertyDeclaration__PropertyNameAssignment_1_0");
+					put(grammarAccess.getPropertyDeclarationAccess().getSuperPropNameAssignment_1_1_4(), "rule__PropertyDeclaration__SuperPropNameAssignment_1_1_4");
+					put(grammarAccess.getPropertyDeclarationAccess().getAddlPropInfoAssignment_1_2(), "rule__PropertyDeclaration__AddlPropInfoAssignment_1_2");
+					put(grammarAccess.getPropertyDeclarationAccess().getArticleAssignment_2_0(), "rule__PropertyDeclaration__ArticleAssignment_2_0");
+					put(grammarAccess.getPropertyDeclarationAccess().getDomainAssignment_2_3(), "rule__PropertyDeclaration__DomainAssignment_2_3");
+					put(grammarAccess.getPropertyDeclarationAccess().getRangeResourceAssignment_2_5(), "rule__PropertyDeclaration__RangeResourceAssignment_2_5");
+					put(grammarAccess.getPropertyDeclarationAccess().getPropertyNameAssignment_2_7(), "rule__PropertyDeclaration__PropertyNameAssignment_2_7");
+					put(grammarAccess.getPropertyDeclarationAccess().getAnnotationPropertyAssignment_3_0(), "rule__PropertyDeclaration__AnnotationPropertyAssignment_3_0");
 					put(grammarAccess.getAdditionalPropertyInfoAccess().getDomainAssignment_0_2(), "rule__AdditionalPropertyInfo__DomainAssignment_0_2");
 					put(grammarAccess.getAdditionalPropertyInfoAccess().getCondAssignment_1_1(), "rule__AdditionalPropertyInfo__CondAssignment_1_1");
 					put(grammarAccess.getAdditionalPropertyInfoAccess().getRangeAssignment_2_1(), "rule__AdditionalPropertyInfo__RangeAssignment_2_1");
@@ -539,9 +547,11 @@ public class SadlParser extends AbstractContentAssistParser {
 					put(grammarAccess.getVariableListAccess().getNamesAssignment_0(), "rule__VariableList__NamesAssignment_0");
 					put(grammarAccess.getVariableListAccess().getNamesAssignment_1_1(), "rule__VariableList__NamesAssignment_1_1");
 					put(grammarAccess.getRuleAccess().getNameAssignment_1(), "rule__Rule__NameAssignment_1");
-					put(grammarAccess.getRuleAccess().getGivensAssignment_3_1(), "rule__Rule__GivensAssignment_3_1");
-					put(grammarAccess.getRuleAccess().getIfsAssignment_4_1(), "rule__Rule__IfsAssignment_4_1");
-					put(grammarAccess.getRuleAccess().getThensAssignment_6(), "rule__Rule__ThensAssignment_6");
+					put(grammarAccess.getRuleAccess().getAnnPropsAssignment_2_1(), "rule__Rule__AnnPropsAssignment_2_1");
+					put(grammarAccess.getRuleAccess().getAnnValuesAssignment_2_2(), "rule__Rule__AnnValuesAssignment_2_2");
+					put(grammarAccess.getRuleAccess().getGivensAssignment_4_1(), "rule__Rule__GivensAssignment_4_1");
+					put(grammarAccess.getRuleAccess().getIfsAssignment_5_1(), "rule__Rule__IfsAssignment_5_1");
+					put(grammarAccess.getRuleAccess().getThensAssignment_7(), "rule__Rule__ThensAssignment_7");
 					put(grammarAccess.getQueryAccess().getExprAssignment_1(), "rule__Query__ExprAssignment_1");
 					put(grammarAccess.getTestAccess().getExprAssignment_1(), "rule__Test__ExprAssignment_1");
 					put(grammarAccess.getExprAccess().getExprAssignment_1(), "rule__Expr__ExprAssignment_1");
@@ -552,6 +562,11 @@ public class SadlParser extends AbstractContentAssistParser {
 					put(grammarAccess.getExplanationAccess().getExprAssignment_1_1(), "rule__Explanation__ExprAssignment_1_1");
 					put(grammarAccess.getExplanationAccess().getExprAssignment_1_2_0(), "rule__Explanation__ExprAssignment_1_2_0");
 					put(grammarAccess.getExplanationAccess().getRulenameAssignment_1_3_1(), "rule__Explanation__RulenameAssignment_1_3_1");
+					put(grammarAccess.getStartWriteAccess().getWriteAssignment_0(), "rule__StartWrite__WriteAssignment_0");
+					put(grammarAccess.getStartWriteAccess().getDataOnlyAssignment_1(), "rule__StartWrite__DataOnlyAssignment_1");
+					put(grammarAccess.getEndWriteAccess().getFilenameAssignment_2(), "rule__EndWrite__FilenameAssignment_2");
+					put(grammarAccess.getReadAccess().getFilenameAssignment_3(), "rule__Read__FilenameAssignment_3");
+					put(grammarAccess.getReadAccess().getTemplateFilenameAssignment_4_1(), "rule__Read__TemplateFilenameAssignment_4_1");
 					put(grammarAccess.getElementSetAccess().getElementsAssignment_0(), "rule__ElementSet__ElementsAssignment_0");
 					put(grammarAccess.getElementSetAccess().getElementsAssignment_1_1(), "rule__ElementSet__ElementsAssignment_1_1");
 					put(grammarAccess.getSelectExpressionAccess().getDistinctAssignment_1(), "rule__SelectExpression__DistinctAssignment_1");

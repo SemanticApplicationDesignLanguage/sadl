@@ -21,21 +21,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.eclipse.xtext.resource.DerivedStateAwareResource;
+import org.eclipse.xtext.linking.lazy.LazyLinkingResource;
 
 /**
  * Appends an artificial whitespace when reading a file to work around the problem that
  * a dot at EOF is not detected as End Of Statement.
  */
-public class SadlResource extends DerivedStateAwareResource {
+public class SadlResource extends LazyLinkingResource {
 	class SadlInputStream extends InputStream {
 		private InputStream delegate;
 		private boolean eof;
-
+		
 		public SadlInputStream (InputStream delegate) {
 			this.delegate = delegate;
 		}
-
+		
 		/**
 		 * {@inheritDoc}
 		 */
@@ -51,7 +51,7 @@ public class SadlResource extends DerivedStateAwareResource {
 				return Character.valueOf(' ').charValue();
 			}
 		}
-
+		
 	}
 	@Override
 	protected void doLoad(InputStream inputStream, Map<?, ?> options)

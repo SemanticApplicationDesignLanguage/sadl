@@ -22,6 +22,7 @@ import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
 import com.ge.research.sadl.sadl.ElementSet;
 import com.ge.research.sadl.sadl.EmbeddedInstanceDeclaration;
+import com.ge.research.sadl.sadl.EndWrite;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
@@ -73,6 +74,7 @@ import com.ge.research.sadl.sadl.PropertyOfClass;
 import com.ge.research.sadl.sadl.Query;
 import com.ge.research.sadl.sadl.Range;
 import com.ge.research.sadl.sadl.RangeType;
+import com.ge.research.sadl.sadl.Read;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceByRestriction;
 import com.ge.research.sadl.sadl.ResourceBySetOp;
@@ -85,6 +87,7 @@ import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.sadl.SelectExpression;
 import com.ge.research.sadl.sadl.SomeValuesCondition;
 import com.ge.research.sadl.sadl.SomeValuesFrom;
+import com.ge.research.sadl.sadl.StartWrite;
 import com.ge.research.sadl.sadl.Statement;
 import com.ge.research.sadl.sadl.SubTypeOf;
 import com.ge.research.sadl.sadl.SubjProp;
@@ -648,6 +651,27 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  private EClass startWriteEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass endWriteEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass readEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   private EClass elementSetEClass = null;
 
   /**
@@ -942,7 +966,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getModelName_Version()
+  public EAttribute getModelName_AnnType()
   {
     return (EAttribute)modelNameEClass.getEStructuralFeatures().get(2);
   }
@@ -952,9 +976,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getModelName_AnnType()
+  public EReference getModelName_AnnContent()
   {
-    return (EAttribute)modelNameEClass.getEStructuralFeatures().get(3);
+    return (EReference)modelNameEClass.getEStructuralFeatures().get(3);
   }
 
   /**
@@ -962,9 +986,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getModelName_AnnContent()
+  public EAttribute getModelName_Version()
   {
-    return (EReference)modelNameEClass.getEStructuralFeatures().get(4);
+    return (EAttribute)modelNameEClass.getEStructuralFeatures().get(4);
   }
 
   /**
@@ -2432,7 +2456,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getPropertyDeclaration_PropertyName()
+  public EReference getPropertyDeclaration_NoDomainPropName()
   {
     return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(0);
   }
@@ -2442,7 +2466,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getPropertyDeclaration_SuperPropName()
+  public EReference getPropertyDeclaration_Range()
   {
     return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(1);
   }
@@ -2452,7 +2476,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getPropertyDeclaration_AddlPropInfo()
+  public EReference getPropertyDeclaration_PropertyName()
   {
     return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(2);
   }
@@ -2462,9 +2486,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getPropertyDeclaration_Article()
+  public EReference getPropertyDeclaration_SuperPropName()
   {
-    return (EAttribute)propertyDeclarationEClass.getEStructuralFeatures().get(3);
+    return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(3);
   }
 
   /**
@@ -2472,7 +2496,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getPropertyDeclaration_Domain()
+  public EReference getPropertyDeclaration_AddlPropInfo()
   {
     return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(4);
   }
@@ -2482,9 +2506,29 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  public EAttribute getPropertyDeclaration_Article()
+  {
+    return (EAttribute)propertyDeclarationEClass.getEStructuralFeatures().get(5);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getPropertyDeclaration_Domain()
+  {
+    return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(6);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public EReference getPropertyDeclaration_RangeResource()
   {
-    return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(5);
+    return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(7);
   }
 
   /**
@@ -2494,7 +2538,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    */
   public EReference getPropertyDeclaration_AnnotationProperty()
   {
-    return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(6);
+    return (EReference)propertyDeclarationEClass.getEStructuralFeatures().get(8);
   }
 
   /**
@@ -3222,9 +3266,29 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  public EAttribute getRule_AnnProps()
+  {
+    return (EAttribute)ruleEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getRule_AnnValues()
+  {
+    return (EAttribute)ruleEClass.getEStructuralFeatures().get(2);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public EReference getRule_Givens()
   {
-    return (EReference)ruleEClass.getEStructuralFeatures().get(1);
+    return (EReference)ruleEClass.getEStructuralFeatures().get(3);
   }
 
   /**
@@ -3234,7 +3298,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    */
   public EReference getRule_Ifs()
   {
-    return (EReference)ruleEClass.getEStructuralFeatures().get(2);
+    return (EReference)ruleEClass.getEStructuralFeatures().get(4);
   }
 
   /**
@@ -3244,7 +3308,7 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
    */
   public EReference getRule_Thens()
   {
-    return (EReference)ruleEClass.getEStructuralFeatures().get(3);
+    return (EReference)ruleEClass.getEStructuralFeatures().get(5);
   }
 
   /**
@@ -3365,6 +3429,86 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
   public EAttribute getExplanation_Rulename()
   {
     return (EAttribute)explanationEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getStartWrite()
+  {
+    return startWriteEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getStartWrite_Write()
+  {
+    return (EAttribute)startWriteEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getStartWrite_DataOnly()
+  {
+    return (EAttribute)startWriteEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getEndWrite()
+  {
+    return endWriteEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getEndWrite_Filename()
+  {
+    return (EAttribute)endWriteEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getRead()
+  {
+    return readEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getRead_Filename()
+  {
+    return (EAttribute)readEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getRead_TemplateFilename()
+  {
+    return (EAttribute)readEClass.getEStructuralFeatures().get(1);
   }
 
   /**
@@ -4145,9 +4289,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     modelNameEClass = createEClass(MODEL_NAME);
     createEAttribute(modelNameEClass, MODEL_NAME__BASE_URI);
     createEAttribute(modelNameEClass, MODEL_NAME__ALIAS);
-    createEAttribute(modelNameEClass, MODEL_NAME__VERSION);
     createEAttribute(modelNameEClass, MODEL_NAME__ANN_TYPE);
     createEReference(modelNameEClass, MODEL_NAME__ANN_CONTENT);
+    createEAttribute(modelNameEClass, MODEL_NAME__VERSION);
 
     importEClass = createEClass(IMPORT);
     createEAttribute(importEClass, IMPORT__IMPORT_URI);
@@ -4338,6 +4482,8 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     conditionEClass = createEClass(CONDITION);
 
     propertyDeclarationEClass = createEClass(PROPERTY_DECLARATION);
+    createEReference(propertyDeclarationEClass, PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME);
+    createEReference(propertyDeclarationEClass, PROPERTY_DECLARATION__RANGE);
     createEReference(propertyDeclarationEClass, PROPERTY_DECLARATION__PROPERTY_NAME);
     createEReference(propertyDeclarationEClass, PROPERTY_DECLARATION__SUPER_PROP_NAME);
     createEReference(propertyDeclarationEClass, PROPERTY_DECLARATION__ADDL_PROP_INFO);
@@ -4441,6 +4587,8 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
 
     ruleEClass = createEClass(RULE);
     createEAttribute(ruleEClass, RULE__NAME);
+    createEAttribute(ruleEClass, RULE__ANN_PROPS);
+    createEAttribute(ruleEClass, RULE__ANN_VALUES);
     createEReference(ruleEClass, RULE__GIVENS);
     createEReference(ruleEClass, RULE__IFS);
     createEReference(ruleEClass, RULE__THENS);
@@ -4461,6 +4609,17 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     explanationEClass = createEClass(EXPLANATION);
     createEReference(explanationEClass, EXPLANATION__EXPR);
     createEAttribute(explanationEClass, EXPLANATION__RULENAME);
+
+    startWriteEClass = createEClass(START_WRITE);
+    createEAttribute(startWriteEClass, START_WRITE__WRITE);
+    createEAttribute(startWriteEClass, START_WRITE__DATA_ONLY);
+
+    endWriteEClass = createEClass(END_WRITE);
+    createEAttribute(endWriteEClass, END_WRITE__FILENAME);
+
+    readEClass = createEClass(READ);
+    createEAttribute(readEClass, READ__FILENAME);
+    createEAttribute(readEClass, READ__TEMPLATE_FILENAME);
 
     elementSetEClass = createEClass(ELEMENT_SET);
     createEReference(elementSetEClass, ELEMENT_SET__ELEMENTS);
@@ -4636,6 +4795,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     exprEClass.getESuperTypes().add(this.getModelElement());
     displayEClass.getESuperTypes().add(this.getModelElement());
     explanationEClass.getESuperTypes().add(this.getModelElement());
+    startWriteEClass.getESuperTypes().add(this.getModelElement());
+    endWriteEClass.getESuperTypes().add(this.getModelElement());
+    readEClass.getESuperTypes().add(this.getModelElement());
     selectExpressionEClass.getESuperTypes().add(this.getExpression());
     constructExpressionEClass.getESuperTypes().add(this.getExpression());
     askQueryExpressionEClass.getESuperTypes().add(this.getExpression());
@@ -4658,9 +4820,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEClass(modelNameEClass, ModelName.class, "ModelName", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getModelName_BaseUri(), ecorePackage.getEString(), "baseUri", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getModelName_Alias(), ecorePackage.getEString(), "alias", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getModelName_Version(), ecorePackage.getEString(), "version", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getModelName_AnnType(), ecorePackage.getEString(), "annType", null, 0, -1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getModelName_AnnContent(), this.getContentList(), null, "annContent", null, 0, -1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getModelName_Version(), ecorePackage.getEString(), "version", null, 0, 1, ModelName.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(importEClass, Import.class, "Import", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getImport_ImportURI(), ecorePackage.getEString(), "importURI", null, 0, 1, Import.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -4851,6 +5013,8 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEClass(conditionEClass, Condition.class, "Condition", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 
     initEClass(propertyDeclarationEClass, PropertyDeclaration.class, "PropertyDeclaration", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getPropertyDeclaration_NoDomainPropName(), this.getResourceName(), null, "noDomainPropName", null, 0, 1, PropertyDeclaration.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getPropertyDeclaration_Range(), this.getRange(), null, "range", null, 0, 1, PropertyDeclaration.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getPropertyDeclaration_PropertyName(), this.getResourceName(), null, "propertyName", null, 0, 1, PropertyDeclaration.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getPropertyDeclaration_SuperPropName(), this.getResourceByName(), null, "superPropName", null, 0, 1, PropertyDeclaration.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getPropertyDeclaration_AddlPropInfo(), this.getAdditionalPropertyInfo(), null, "addlPropInfo", null, 0, -1, PropertyDeclaration.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -4954,6 +5118,8 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
 
     initEClass(ruleEClass, Rule.class, "Rule", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getRule_Name(), ecorePackage.getEString(), "name", null, 0, 1, Rule.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getRule_AnnProps(), ecorePackage.getEString(), "annProps", null, 0, -1, Rule.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getRule_AnnValues(), ecorePackage.getEString(), "annValues", null, 0, -1, Rule.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getRule_Givens(), this.getElementSet(), null, "givens", null, 0, 1, Rule.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getRule_Ifs(), this.getElementSet(), null, "ifs", null, 0, 1, Rule.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getRule_Thens(), this.getElementSet(), null, "thens", null, 0, 1, Rule.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -4974,6 +5140,17 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     initEClass(explanationEClass, Explanation.class, "Explanation", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getExplanation_Expr(), ecorePackage.getEObject(), null, "expr", null, 0, 1, Explanation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getExplanation_Rulename(), ecorePackage.getEString(), "rulename", null, 0, 1, Explanation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(startWriteEClass, StartWrite.class, "StartWrite", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getStartWrite_Write(), ecorePackage.getEString(), "write", null, 0, 1, StartWrite.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getStartWrite_DataOnly(), ecorePackage.getEString(), "dataOnly", null, 0, 1, StartWrite.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(endWriteEClass, EndWrite.class, "EndWrite", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getEndWrite_Filename(), ecorePackage.getEString(), "filename", null, 0, 1, EndWrite.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(readEClass, Read.class, "Read", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getRead_Filename(), ecorePackage.getEString(), "filename", null, 0, 1, Read.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getRead_TemplateFilename(), ecorePackage.getEString(), "templateFilename", null, 0, 1, Read.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(elementSetEClass, ElementSet.class, "ElementSet", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getElementSet_Elements(), this.getExpression(), null, "elements", null, 0, -1, ElementSet.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -5076,6 +5253,11 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     addEEnumLiteral(dataTypeEEnum, DataType.BOOLEAN);
     addEEnumLiteral(dataTypeEEnum, DataType.DECIMAL);
     addEEnumLiteral(dataTypeEEnum, DataType.INT);
+    addEEnumLiteral(dataTypeEEnum, DataType.INTEGER);
+    addEEnumLiteral(dataTypeEEnum, DataType.NEGATIVE_INTEGER);
+    addEEnumLiteral(dataTypeEEnum, DataType.NON_NEGATIVE_INTEGER);
+    addEEnumLiteral(dataTypeEEnum, DataType.POSITIVE_INTEGER);
+    addEEnumLiteral(dataTypeEEnum, DataType.NON_POSITIVE_INTEGER);
     addEEnumLiteral(dataTypeEEnum, DataType.LONG);
     addEEnumLiteral(dataTypeEEnum, DataType.FLOAT);
     addEEnumLiteral(dataTypeEEnum, DataType.DOUBLE);
@@ -5083,6 +5265,9 @@ public class SadlPackageImpl extends EPackageImpl implements SadlPackage
     addEEnumLiteral(dataTypeEEnum, DataType.DATE_TIME);
     addEEnumLiteral(dataTypeEEnum, DataType.TIME);
     addEEnumLiteral(dataTypeEEnum, DataType.DATE);
+    addEEnumLiteral(dataTypeEEnum, DataType.UNSIGNED_BYTE);
+    addEEnumLiteral(dataTypeEEnum, DataType.UNSIGNED_INT);
+    addEEnumLiteral(dataTypeEEnum, DataType.ANY_SIMPLE_TYPE);
     addEEnumLiteral(dataTypeEEnum, DataType.GYEAR_MONTH);
     addEEnumLiteral(dataTypeEEnum, DataType.GYEAR);
     addEEnumLiteral(dataTypeEEnum, DataType.GMONTH_DAY);

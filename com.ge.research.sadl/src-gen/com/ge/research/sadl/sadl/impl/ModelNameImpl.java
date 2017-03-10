@@ -32,9 +32,9 @@ import org.eclipse.emf.ecore.util.InternalEList;
  * <ul>
  *   <li>{@link com.ge.research.sadl.sadl.impl.ModelNameImpl#getBaseUri <em>Base Uri</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.ModelNameImpl#getAlias <em>Alias</em>}</li>
- *   <li>{@link com.ge.research.sadl.sadl.impl.ModelNameImpl#getVersion <em>Version</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.ModelNameImpl#getAnnType <em>Ann Type</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.ModelNameImpl#getAnnContent <em>Ann Content</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.impl.ModelNameImpl#getVersion <em>Version</em>}</li>
  * </ul>
  * </p>
  *
@@ -83,26 +83,6 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
   protected String alias = ALIAS_EDEFAULT;
 
   /**
-   * The default value of the '{@link #getVersion() <em>Version</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getVersion()
-   * @generated
-   * @ordered
-   */
-  protected static final String VERSION_EDEFAULT = null;
-
-  /**
-   * The cached value of the '{@link #getVersion() <em>Version</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getVersion()
-   * @generated
-   * @ordered
-   */
-  protected String version = VERSION_EDEFAULT;
-
-  /**
    * The cached value of the '{@link #getAnnType() <em>Ann Type</em>}' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -121,6 +101,26 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
    * @ordered
    */
   protected EList<ContentList> annContent;
+
+  /**
+   * The default value of the '{@link #getVersion() <em>Version</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getVersion()
+   * @generated
+   * @ordered
+   */
+  protected static final String VERSION_EDEFAULT = null;
+
+  /**
+   * The cached value of the '{@link #getVersion() <em>Version</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getVersion()
+   * @generated
+   * @ordered
+   */
+  protected String version = VERSION_EDEFAULT;
 
   /**
    * <!-- begin-user-doc -->
@@ -194,29 +194,6 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
    * <!-- end-user-doc -->
    * @generated
    */
-  public String getVersion()
-  {
-    return version;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public void setVersion(String newVersion)
-  {
-    String oldVersion = version;
-    version = newVersion;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.MODEL_NAME__VERSION, oldVersion, version));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
   public EList<String> getAnnType()
   {
     if (annType == null)
@@ -238,6 +215,29 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
       annContent = new EObjectContainmentEList<ContentList>(ContentList.class, this, SadlPackage.MODEL_NAME__ANN_CONTENT);
     }
     return annContent;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public String getVersion()
+  {
+    return version;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public void setVersion(String newVersion)
+  {
+    String oldVersion = version;
+    version = newVersion;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.MODEL_NAME__VERSION, oldVersion, version));
   }
 
   /**
@@ -270,12 +270,12 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
         return getBaseUri();
       case SadlPackage.MODEL_NAME__ALIAS:
         return getAlias();
-      case SadlPackage.MODEL_NAME__VERSION:
-        return getVersion();
       case SadlPackage.MODEL_NAME__ANN_TYPE:
         return getAnnType();
       case SadlPackage.MODEL_NAME__ANN_CONTENT:
         return getAnnContent();
+      case SadlPackage.MODEL_NAME__VERSION:
+        return getVersion();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -297,9 +297,6 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
       case SadlPackage.MODEL_NAME__ALIAS:
         setAlias((String)newValue);
         return;
-      case SadlPackage.MODEL_NAME__VERSION:
-        setVersion((String)newValue);
-        return;
       case SadlPackage.MODEL_NAME__ANN_TYPE:
         getAnnType().clear();
         getAnnType().addAll((Collection<? extends String>)newValue);
@@ -307,6 +304,9 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
       case SadlPackage.MODEL_NAME__ANN_CONTENT:
         getAnnContent().clear();
         getAnnContent().addAll((Collection<? extends ContentList>)newValue);
+        return;
+      case SadlPackage.MODEL_NAME__VERSION:
+        setVersion((String)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -328,14 +328,14 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
       case SadlPackage.MODEL_NAME__ALIAS:
         setAlias(ALIAS_EDEFAULT);
         return;
-      case SadlPackage.MODEL_NAME__VERSION:
-        setVersion(VERSION_EDEFAULT);
-        return;
       case SadlPackage.MODEL_NAME__ANN_TYPE:
         getAnnType().clear();
         return;
       case SadlPackage.MODEL_NAME__ANN_CONTENT:
         getAnnContent().clear();
+        return;
+      case SadlPackage.MODEL_NAME__VERSION:
+        setVersion(VERSION_EDEFAULT);
         return;
     }
     super.eUnset(featureID);
@@ -355,12 +355,12 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
         return BASE_URI_EDEFAULT == null ? baseUri != null : !BASE_URI_EDEFAULT.equals(baseUri);
       case SadlPackage.MODEL_NAME__ALIAS:
         return ALIAS_EDEFAULT == null ? alias != null : !ALIAS_EDEFAULT.equals(alias);
-      case SadlPackage.MODEL_NAME__VERSION:
-        return VERSION_EDEFAULT == null ? version != null : !VERSION_EDEFAULT.equals(version);
       case SadlPackage.MODEL_NAME__ANN_TYPE:
         return annType != null && !annType.isEmpty();
       case SadlPackage.MODEL_NAME__ANN_CONTENT:
         return annContent != null && !annContent.isEmpty();
+      case SadlPackage.MODEL_NAME__VERSION:
+        return VERSION_EDEFAULT == null ? version != null : !VERSION_EDEFAULT.equals(version);
     }
     return super.eIsSet(featureID);
   }
@@ -380,10 +380,10 @@ public class ModelNameImpl extends MinimalEObjectImpl.Container implements Model
     result.append(baseUri);
     result.append(", alias: ");
     result.append(alias);
-    result.append(", version: ");
-    result.append(version);
     result.append(", annType: ");
     result.append(annType);
+    result.append(", version: ");
+    result.append(version);
     result.append(')');
     return result.toString();
   }

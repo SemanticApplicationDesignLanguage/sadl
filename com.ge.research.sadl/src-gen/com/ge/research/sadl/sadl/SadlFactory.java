@@ -698,6 +698,33 @@ public interface SadlFactory extends EFactory
   Explanation createExplanation();
 
   /**
+   * Returns a new object of class '<em>Start Write</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Start Write</em>'.
+   * @generated
+   */
+  StartWrite createStartWrite();
+
+  /**
+   * Returns a new object of class '<em>End Write</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>End Write</em>'.
+   * @generated
+   */
+  EndWrite createEndWrite();
+
+  /**
+   * Returns a new object of class '<em>Read</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Read</em>'.
+   * @generated
+   */
+  Read createRead();
+
+  /**
    * Returns a new object of class '<em>Element Set</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->

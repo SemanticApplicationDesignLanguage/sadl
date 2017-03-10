@@ -21,6 +21,7 @@ import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
 import com.ge.research.sadl.sadl.ElementSet;
 import com.ge.research.sadl.sadl.EmbeddedInstanceDeclaration;
+import com.ge.research.sadl.sadl.EndWrite;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
@@ -72,6 +73,7 @@ import com.ge.research.sadl.sadl.PropertyOfClass;
 import com.ge.research.sadl.sadl.Query;
 import com.ge.research.sadl.sadl.Range;
 import com.ge.research.sadl.sadl.RangeType;
+import com.ge.research.sadl.sadl.Read;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceByRestriction;
 import com.ge.research.sadl.sadl.ResourceBySetOp;
@@ -83,6 +85,7 @@ import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.sadl.SelectExpression;
 import com.ge.research.sadl.sadl.SomeValuesCondition;
 import com.ge.research.sadl.sadl.SomeValuesFrom;
+import com.ge.research.sadl.sadl.StartWrite;
 import com.ge.research.sadl.sadl.Statement;
 import com.ge.research.sadl.sadl.SubTypeOf;
 import com.ge.research.sadl.sadl.SubjProp;
@@ -544,6 +547,21 @@ public class SadlAdapterFactory extends AdapterFactoryImpl
       public Adapter caseExplanation(Explanation object)
       {
         return createExplanationAdapter();
+      }
+      @Override
+      public Adapter caseStartWrite(StartWrite object)
+      {
+        return createStartWriteAdapter();
+      }
+      @Override
+      public Adapter caseEndWrite(EndWrite object)
+      {
+        return createEndWriteAdapter();
+      }
+      @Override
+      public Adapter caseRead(Read object)
+      {
+        return createReadAdapter();
       }
       @Override
       public Adapter caseElementSet(ElementSet object)
@@ -1798,6 +1816,51 @@ public class SadlAdapterFactory extends AdapterFactoryImpl
    * @generated
    */
   public Adapter createExplanationAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link com.ge.research.sadl.sadl.StartWrite <em>Start Write</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see com.ge.research.sadl.sadl.StartWrite
+   * @generated
+   */
+  public Adapter createStartWriteAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link com.ge.research.sadl.sadl.EndWrite <em>End Write</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see com.ge.research.sadl.sadl.EndWrite
+   * @generated
+   */
+  public Adapter createEndWriteAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link com.ge.research.sadl.sadl.Read <em>Read</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see com.ge.research.sadl.sadl.Read
+   * @generated
+   */
+  public Adapter createReadAdapter()
   {
     return null;
   }

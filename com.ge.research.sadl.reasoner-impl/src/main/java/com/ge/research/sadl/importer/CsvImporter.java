@@ -583,56 +583,51 @@ public class CsvImporter {
 			if (replacementText != null && replacementText.length() > 1) {
 				InputStream is = new ByteArrayInputStream(replacementText.getBytes()); 
 				//    public CSVReader(Reader reader, char separator, char quotechar, char escape, int line, boolean strictQuotes, boolean ignoreLeadingWhiteSpace) {
-				CSVReader reader = null;
-				try {
-					reader = new CSVReader(new InputStreamReader(is), 
+				CSVReader reader = new CSVReader(new InputStreamReader(is), 
 						CSVParser.DEFAULT_SEPARATOR,					// comma
 						CSVParser.DEFAULT_QUOTE_CHARACTER, 				// double quote
 						//    		    		CSVParser.DEFAULT_ESCAPE_CHARACTER, 0, 			// back slash
 						'\'', 0,
 						false, 											// strict quotes
 						false);											// ignore leading whitespace
-					String [] tokens = reader.readNext();
-					int numReplacements = (tokens != null ? tokens.length : 0);
-					if (numReplacements > 0) {
-						boolean parserUnbalancedQuotes = false;
-						for (int i = 0; i < numReplacements; i++) {
-							String repl = tokens[i];
-							String[] parts = repl.split(":");
-							if (parts != null && parts.length == 2) {
-								if (replacements == null) {
-									replacements = new HashMap<String, String>();
-								}
-								if (i == 0 && replacementText.startsWith("\"") && !parts[0].startsWith("\"") && parts[0].endsWith("\"")) {
-									parserUnbalancedQuotes = true;
-								}
-								if (parserUnbalancedQuotes) {
-									parts[0] = "\"" + parts[0];
-									parts[1] = "\"" + parts[1];
-								}
-								replacements.put(getSadlUtils().stripQuotes(parts[0].trim()).trim(), getSadlUtils().stripQuotes(parts[1].trim()).trim());
+				String [] tokens = reader.readNext();
+				int numReplacements = (tokens != null ? tokens.length : 0);
+				if (numReplacements > 0) {
+					boolean parserUnbalancedQuotes = false;
+					for (int i = 0; i < numReplacements; i++) {
+						String repl = tokens[i];
+						String[] parts = repl.split(":");
+						if (parts != null && parts.length == 2) {
+							if (replacements == null) {
+								replacements = new HashMap<String, String>();
 							}
-							else if (repl.endsWith(":")) {
-								if (replacements == null) {
-									replacements = new HashMap<String, String>();
-								}
-								replacements.put(getSadlUtils().stripQuotes(parts[0]), "");
-	
+							if (i == 0 && replacementText.startsWith("\"") && !parts[0].startsWith("\"") && parts[0].endsWith("\"")) {
+								parserUnbalancedQuotes = true;
 							}
-							else {
-								throw new IOException("Failed to parse '" + replacementText + "' into a set of colon-separated pairs of replace-replacewith tokens in row " + rowNum + ".");
+							if (parserUnbalancedQuotes) {
+								parts[0] = "\"" + parts[0];
+								parts[1] = "\"" + parts[1];
 							}
+							replacements.put(getSadlUtils().stripQuotes(parts[0].trim()).trim(), getSadlUtils().stripQuotes(parts[1].trim()).trim());
+						}
+						else if (repl.endsWith(":")) {
+							if (replacements == null) {
+								replacements = new HashMap<String, String>();
+							}
+							replacements.put(getSadlUtils().stripQuotes(parts[0]), "");
+
+						}
+						else {
+							throw new IOException("Failed to parse '" + replacementText + "' into a set of colon-separated pairs of replace-replacewith tokens in row " + rowNum + ".");
 						}
 					}
-					else if (urlEncode) {
-						// can't have an Encode with no urlEncoding (a "replace") and no replacement
-						throw new IOException("Can't have a 'replace' with no replacement text");
-					}
 				}
-				finally {
-					if (reader != null) {
-						reader.close();
-					}
+				else if (urlEncode) {
+					// can't have an Encode with no urlEncoding (a "replace") and no replacement
+					throw new IOException("Can't have a 'replace' with no replacement text");
+				}
+				if (reader != null) {
+					reader.close();
 				}
 			}
 		}
@@ -1935,58 +1930,53 @@ public class CsvImporter {
 					throw new ConfigurationException("Unable to create output file '" + fullyQualifiedOwlFilename + "': " + e.getMessage());
 				}
 			}
-			FileOutputStream fps = null;
+			FileOutputStream fps;
 			try {
 				fps = new FileOutputStream(fullyQualifiedOwlFilename);
-				if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".owl")){
-					format = "RDF/XML-ABBREV";
-				}
-				else if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".n-triple")) {
-					format = "N-TRIPLE";
-				}
-				else if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".n3")) {
-					format = "N3";
-				}
-
-				try {
-					RDFWriter rdfw = getOwlModel().getWriter(format);
-					// NTripleWriter.setProperty always throws UnknownPropertyException; ditto for N3.
-					if (format.startsWith("RDF/XML")) {
-						rdfw.setProperty("xmlbase", importModelNS); 
-						rdfw.setProperty("relativeURIs", "");
-						//			            rdfw.setProperty("minimalPrefixes", true);
-					}
-					OntModel om =  getOwlModel();
-					om.setNsPrefix("", getModelNamespace());
-					rdfw.write(om.getBaseModel(), fps, importModelNS);
-					fps.close();
-					IConfigurationManager cmgr = getConfigMgr();
-					// TODO--fix this reduction of code
-					//					if (cmgr instanceof ConfigurationManagerForIDE) {
-					//				        try {
-					//				        	((ConfigurationManagerForIDE)cmgr).addMapping(ResourceManager.fileNameToFileUrl(fullyQualifiedOwlFilename), importModelNS, null);
-					//				        }
-					//				        catch (Exception e) {
-					//				        	throw new ConfigurationException("Failed to save mapping for model file '" + getSaveAsFileName() + "': " + e.getLocalizedMessage());
-					//				        }
-					//				        ((ConfigurationManagerForIDE)cmgr).replaceJenaModelCache(getModel(), importModelNS);
-					//					}
-				}
-				catch (ConfigurationException e) {
-					throw e;
-				}
-				catch (Throwable t) {
-					t.printStackTrace();
-					throw new ConfigurationException("Fatal error saving model file '" + importModelNS + "' to '" + getSaveAsFileName() + "': " + t.getLocalizedMessage());
-				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				throw new ConfigurationException("Unable to open output file '" + fullyQualifiedOwlFilename + "': " + e.getMessage());
 			}
-			finally {
-				if (fps != null) {
-					fps.close();
+			if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".owl")){
+				format = "RDF/XML-ABBREV";
+			}
+			else if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".n-triple")) {
+				format = "N-TRIPLE";
+			}
+			else if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".n3")) {
+				format = "N3";
+			}
+
+			try {
+				RDFWriter rdfw = getOwlModel().getWriter(format);
+				// NTripleWriter.setProperty always throws UnknownPropertyException; ditto for N3.
+				if (format.startsWith("RDF/XML")) {
+					rdfw.setProperty("xmlbase", importModelNS); 
+					rdfw.setProperty("relativeURIs", "");
+					//			            rdfw.setProperty("minimalPrefixes", true);
 				}
+				OntModel om =  getOwlModel();
+				om.setNsPrefix("", getModelNamespace());
+				rdfw.write(om.getBaseModel(), fps, importModelNS);
+				fps.close();
+				IConfigurationManager cmgr = getConfigMgr();
+				// TODO--fix this reduction of code
+				//					if (cmgr instanceof ConfigurationManagerForIDE) {
+				//				        try {
+				//				        	((ConfigurationManagerForIDE)cmgr).addMapping(ResourceManager.fileNameToFileUrl(fullyQualifiedOwlFilename), importModelNS, null);
+				//				        }
+				//				        catch (Exception e) {
+				//				        	throw new ConfigurationException("Failed to save mapping for model file '" + getSaveAsFileName() + "': " + e.getLocalizedMessage());
+				//				        }
+				//				        ((ConfigurationManagerForIDE)cmgr).replaceJenaModelCache(getModel(), importModelNS);
+				//					}
+			}
+			catch (ConfigurationException e) {
+				throw e;
+			}
+			catch (Throwable t) {
+				t.printStackTrace();
+				throw new ConfigurationException("Fatal error saving model file '" + importModelNS + "' to '" + getSaveAsFileName() + "': " + t.getLocalizedMessage());
 			}
 		}
 		return status;
@@ -2115,146 +2105,137 @@ public class CsvImporter {
 			}
 			// do the import
 			//	open the CSV file with a CSV parser
-			CSVReader reader = null;
-			try {
-				reader = new CSVReader(isReader);
-	
-				//	assume that the first row is the variable names (column headers)
-				//	(if the variables used in the templates don't resolve and all
-				//	 variable names are convertable to column designations by letter,
-				// 	 reverse this assumption)
-	
-				int currentModel = 0;
-	
-				String [] nextLine;
-				rowNum = 0;
-				while ((nextLine = reader.readNext()) != null) {
-					if (nextLine.length == 1 && nextLine[0].trim().length() == 0) {
-						// an empty line in the data file
-						continue;
-					}
-					// nextLine[] is an array of values from the line
-					if (generatedValues != null) {
-						generatedValues.clear();
-					}
-					if (transformedValues != null) {
-						transformedValues.clear();
-					}
-					logger.debug("Processing CSV row " + rowNum);
-					if (rowNum == 0 ) {
-						int numMatching = 0;
-						Iterator<String> varItr = varMap.keySet().iterator();
-						while (varItr.hasNext()) {
-							String key = varItr.next();
-							if (varMap.get(key) instanceof Variable) {
-								Variable var = (Variable) varMap.get(key);
-								String varNm = var.name;
-								if (varNm != null) {
-									// this is NOT a bnode variable
-									boolean found = false;
-									if (varNm.equals("row()")) {
-										continue;
+			CSVReader reader = new CSVReader(isReader);
+
+			//	assume that the first row is the variable names (column headers)
+			//	(if the variables used in the templates don't resolve and all
+			//	 variable names are convertable to column designations by letter,
+			// 	 reverse this assumption)
+
+			int currentModel = 0;
+
+			String [] nextLine;
+			rowNum = 0;
+			while ((nextLine = reader.readNext()) != null) {
+				if (nextLine.length == 1 && nextLine[0].trim().length() == 0) {
+					// an empty line in the data file
+					continue;
+				}
+				// nextLine[] is an array of values from the line
+				if (generatedValues != null) {
+					generatedValues.clear();
+				}
+				if (transformedValues != null) {
+					transformedValues.clear();
+				}
+				logger.debug("Processing CSV row " + rowNum);
+				if (rowNum == 0 ) {
+					int numMatching = 0;
+					Iterator<String> varItr = varMap.keySet().iterator();
+					while (varItr.hasNext()) {
+						String key = varItr.next();
+						if (varMap.get(key) instanceof Variable) {
+							Variable var = (Variable) varMap.get(key);
+							String varNm = var.name;
+							if (varNm != null) {
+								// this is NOT a bnode variable
+								boolean found = false;
+								if (varNm.equals("row()")) {
+									continue;
+								}
+								boolean transformed;
+								do {
+									transformed = false;
+									String baseName = getBaseName(varNm);
+									if (transforms != null && transforms.containsKey(baseName)) {
+										varNm = transforms.get(baseName).getInputIdentifier();
+										transformed = true;
 									}
-									boolean transformed;
-									do {
-										transformed = false;
-										String baseName = getBaseName(varNm);
-										if (transforms != null && transforms.containsKey(baseName)) {
-											varNm = transforms.get(baseName).getInputIdentifier();
-											transformed = true;
-										}
-									} while (transformed);
-									if (includesHeader()) {
-										for (int i = 0; i < nextLine.length; i++) {
-											if (varNm.equals(nextLine[i])) {
-												((Variable)var).setColumn(i);
-												found = true;
-												numMatching++;
-												break;
-											}
+								} while (transformed);
+								if (includesHeader()) {
+									for (int i = 0; i < nextLine.length; i++) {
+										if (varNm.equals(nextLine[i])) {
+											((Variable)var).setColumn(i);
+											found = true;
+											numMatching++;
+											break;
 										}
 									}
-									if (!found || !includesHeader()) {
-										int colNum = convertCharSeqToColumnNumber(varNm);
-										if (colNum >= nextLine.length) {
-											throw new InvalidNameException("Variable name '" + varNm + "' was not found in header and as a column designation (" + colNum + ") is larger than the number of columns in the input.");
-										}
-										var.setColumn(colNum);
+								}
+								if (!found || !includesHeader()) {
+									int colNum = convertCharSeqToColumnNumber(varNm);
+									if (colNum >= nextLine.length) {
+										throw new InvalidNameException("Variable name '" + varNm + "' was not found in header and as a column designation (" + colNum + ") is larger than the number of columns in the input.");
 									}
+									var.setColumn(colNum);
 								}
 							}
 						}
 					}
-					if (!includesHeader() || rowNum > 0) {
-						if (doTripleValidation(nextLine, rowNum, currentModel)) {
-							// for the data rows (0- or 1-), apply the template to the values in 
-							//	the row and add the triples to the model
-							GroupOfTriples detectedGroup = null;
-							if (groups != null && groups.containsKey(0) && groups.get(0).getEndingTriple() == templates.size() - 1) {
-								// we have a group for this range of template triples; make sure it's active
-								detectedGroup = groups.get(0);
-								initializeGroupIndices(detectedGroup);
-							}
-							try {
-								processGroup(detectedGroup, rowNum, nextLine, 0, templates.size() - 1, currentModel);
-							} catch (SkipGroupException e) {
-								rowNum++;
-								continue;
-							} catch (SkipTripleException e) {
-								// this shouldn't happen
-								e.printStackTrace();
-								rowNum++;
-								continue;
-							}
-						}
-					}
-					// if we are at the chunk size boundary, process the generated triples
-					if (rowNum > 0 && chunkSize > 0 && rowNum%chunkSize == 0) {
-						logger.debug("Ready to process chunk with model " + currentModel + " for rows " + (rowNum - chunkSize) + " to " + rowNum);
-						processChunk(currentModel);
-						currentModel += 1;
-						// update the position in the array count when the rownum%chunksize == 0 and rownum > 0.
-						// also, be sure to process the loop, so that the model number does not exceed the model count.
-						if(currentModel >= numThreads){
-							currentModel = 0;
-						}
-	
-					}
-					rowNum++;
 				}
-				if (rowNum > 0 && (chunkSize < 1 || (rowNum - 1)%chunkSize != 0)) {
-					logger.debug("Ready to process final chunk with model " + currentModel + " for rows " + (rowNum - chunkSize) + " to " + rowNum);
+				if (!includesHeader() || rowNum > 0) {
+					if (doTripleValidation(nextLine, rowNum, currentModel)) {
+						// for the data rows (0- or 1-), apply the template to the values in 
+						//	the row and add the triples to the model
+						GroupOfTriples detectedGroup = null;
+						if (groups != null && groups.containsKey(0) && groups.get(0).getEndingTriple() == templates.size() - 1) {
+							// we have a group for this range of template triples; make sure it's active
+							detectedGroup = groups.get(0);
+							initializeGroupIndices(detectedGroup);
+						}
+						try {
+							processGroup(detectedGroup, rowNum, nextLine, 0, templates.size() - 1, currentModel);
+						} catch (SkipGroupException e) {
+							rowNum++;
+							continue;
+						} catch (SkipTripleException e) {
+							// this shouldn't happen
+							e.printStackTrace();
+							rowNum++;
+							continue;
+						}
+					}
+				}
+				// if we are at the chunk size boundary, process the generated triples
+				if (rowNum > 0 && chunkSize > 0 && rowNum%chunkSize == 0) {
+					logger.debug("Ready to process chunk with model " + currentModel + " for rows " + (rowNum - chunkSize) + " to " + rowNum);
 					processChunk(currentModel);
-				}
-			}
-			catch (Throwable t) {
-				System.out.println("Throwable in doImport: " + t.getMessage());
-				t.printStackTrace();
-			}
-			finally {
-				try {
-					executor.shutdown();
-					while (!executor.awaitTermination(24, TimeUnit.HOURS)) {
-						logger.debug("Waiting for all threads to complete before closing TDB Repo");
+					currentModel += 1;
+					// update the position in the array count when the rownum%chunksize == 0 and rownum > 0.
+					// also, be sure to process the loop, so that the model number does not exceed the model count.
+					if(currentModel >= numThreads){
+						currentModel = 0;
 					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
 				}
-				if (triplesLoggerOut != null) {
-					triplesLoggerOut.flush();
-					triplesLoggerOut.close();
-				}
-				if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
-					closeTdbDS();
-				}
-				if (reader != null) {
-					reader.close();
-				}
+				rowNum++;
+			}
+			if (rowNum > 0 && (chunkSize < 1 || (rowNum - 1)%chunkSize != 0)) {
+				logger.debug("Ready to process final chunk with model " + currentModel + " for rows " + (rowNum - chunkSize) + " to " + rowNum);
+				processChunk(currentModel);
 			}
 		}
+		catch (Throwable t) {
+			System.out.println("Throwable in doImport: " + t.getMessage());
+			t.printStackTrace();
+		}
 		finally {
-			
+			try {
+				executor.shutdown();
+				while (!executor.awaitTermination(24, TimeUnit.HOURS)) {
+					logger.debug("Waiting for all threads to complete before closing TDB Repo");
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (triplesLoggerOut != null) {
+				triplesLoggerOut.flush();
+				triplesLoggerOut.close();
+			}
+			if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
+				closeTdbDS();
+			}
 		}
 		return true;
 	}
@@ -3257,8 +3238,7 @@ public class CsvImporter {
 		boolean usesCR = false;
 		List<String> templateImports = new ArrayList<String>();
 		try {
-			Scanner s = new Scanner(rawTemplate);
-			s.useDelimiter("\\n");
+			Scanner s = new Scanner(rawTemplate).useDelimiter("\\n");
 			while (s.hasNext()) {
 				String templateLine = s.next();
 				if (templateLine.endsWith("\r")) {
@@ -3436,13 +3416,9 @@ public class CsvImporter {
 	 */
 	protected Model getModelFromTdbDS() {
 		logger.debug("Retrieving TDB Repo default model from Dataset " + tdbDS);
-		Dataset ds = getTdbDS(false);
-		getTdbDS(true).begin(ReadWrite.READ);
+		getTdbDS(false).begin(ReadWrite.READ);
 		Model m = tdbDS.getDefaultModel();
 		tdbDS.end();
-		if (ds == null) {
-			closeTdbDS();
-		}
 		return m;
 	}
 	

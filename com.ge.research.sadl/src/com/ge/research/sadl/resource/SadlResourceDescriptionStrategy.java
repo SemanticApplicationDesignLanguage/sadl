@@ -28,9 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SadlResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
+	
 	private final static Logger LOG = LoggerFactory.getLogger(SadlResourceDescriptionStrategy.class);
 
-	@Override
+	
 	public boolean createEObjectDescriptions(EObject eObject, IAcceptor<IEObjectDescription> acceptor) {
 		if (getQualifiedNameProvider() == null)
 			return false;

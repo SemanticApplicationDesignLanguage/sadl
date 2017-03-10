@@ -25,15 +25,16 @@
                 </reference>
             </activeWhen>
         </handler>
-        <handler
+<!--        <handler
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.GraphCommand"
-            commandId="com.ge.research.sadl.ui.GraphCommand">
+            commandId="com.ge.research.sadl.ui.actions.GraphCommand">
             <activeWhen>
                 <reference
                     definitionId="com.ge.research.sadl.Sadl.Editor.opened">
                 </reference>
             </activeWhen>
         </handler>
+-->        
         <handler
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
             commandId="com.ge.research.sadl.Sadl.validate">
@@ -97,20 +98,20 @@
             <and>
                 <reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
                 <with variable="activeEditor">
-                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-                        value="com.ge.research.sadl.Sadl"
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
+                        value="com.ge.research.sadl.Sadl" 
                         forcePluginActivation="true"/>
-                </with>
+                </with>        
             </and>
         </definition>
         <definition id="com.ge.research.sadl.Sadl.XtextEditor.opened">
             <and>
                 <reference definitionId="isXtextEditorActive"/>
                 <with variable="activeEditor">
-                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-                        value="com.ge.research.sadl.Sadl"
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
+                        value="com.ge.research.sadl.Sadl" 
                         forcePluginActivation="true"/>
-                </with>
+                </with>        
             </and>
         </definition>
     </extension>
@@ -189,16 +190,16 @@
                     definitionId="com.ge.research.sadl.Sadl.Editor.opened">
                 </reference>
             </visibleWhen>
-         </command>
+         </command>  
          </menuContribution>
          <!-- copy qualified name -->
          <menuContribution locationURI="popup:#TextEditorContext?after=copy">
-         	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
+         	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName" 
          		style="push" tooltip="Copy Qualified Name">
             	<visibleWhen checkEnabled="false">
                 	<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened" />
             	</visibleWhen>
-         	</command>
+         	</command>  
          </menuContribution>
          <menuContribution locationURI="menu:edit?after=copy">
          	<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
@@ -206,10 +207,10 @@
             	<visibleWhen checkEnabled="false">
                 	<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened" />
             	</visibleWhen>
-         	</command>
+         	</command>  
          </menuContribution>
          <menuContribution locationURI="popup:org.eclipse.xtext.ui.outline?after=additions">
-			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName"
+			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName" 
 				style="push" tooltip="Copy Qualified Name">
          		<visibleWhen checkEnabled="false">
 	            	<and>
@@ -242,7 +243,7 @@
                 </reference>
             </activeWhen>
         </handler>
-    </extension>
+    </extension>   
 
 <!-- adding resource factories -->
 
@@ -253,53 +254,25 @@
 			type="sadl">
 		</parser>
 	</extension>
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="owl">
-		</parser>
-	</extension>
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="nt">
-		</parser>
-	</extension>
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="n3">
-		</parser>
-	</extension>
-	<extension
-		point="org.eclipse.emf.ecore.extension_parser">
-		<parser
-			class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="rdf">
-		</parser>
-	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
         <resourceServiceProvider
             class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
             uriExtension="sadl">
         </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
 	          uriExtension="owl">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
 	          uriExtension="nt">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
 	          uriExtension="n3">
 	    </resourceServiceProvider>
 	    <resourceServiceProvider
-	          class="com.ge.research.sadl.ui.jena.JenaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+	          class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.jena.JenaResourceUIServiceProvider"
 	          uriExtension="rdf">
 	    </resourceServiceProvider>
     </extension>
@@ -331,9 +304,9 @@
     <!-- Graph Neighborhood -->
 	<extension
 		point="org.eclipse.ui.handlers">
-		<handler
+		<handler 
 			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.editor.GraphCommand"
-			commandId="com.ge.research.sadl.ui.GraphCommand">
+			commandId="com.ge.research.sadl.ui.actions.GraphCommand">
 			<activeWhen>
 				<reference
 					definitionId="com.ge.research.sadl.Sadl.Editor.opened">
@@ -345,14 +318,14 @@
 		point="org.eclipse.ui.commands">
 		<command
 			description="Graph the local neighborhood of the selected concept."
-			id="com.ge.research.sadl.ui.GraphCommand"
+			id="com.ge.research.sadl.ui.actions.GraphCommand"
 			name="Graph Neighborhood">
 		</command>
 	</extension>
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution
 			locationURI="popup:#TextEditorContext?after=group.open">
-			<command commandId="com.ge.research.sadl.ui.GraphCommand"
+			<command commandId="com.ge.research.sadl.ui.actions.GraphCommand"
 				style="push"
 				tooltip="Graph Neighborhood">
 				<visibleWhen checkEnabled="false">
@@ -365,7 +338,7 @@
 	<!-- Quick Outline -->
 	<extension
 		point="org.eclipse.ui.handlers">
-		<handler
+		<handler 
 			class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
 			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
 			<activeWhen>
@@ -445,7 +418,7 @@
         </page>
         <page
               category="com.ge.research.sadl.Sadl"
-              class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.properties.SadlReasonerPreferencePage"
+              class="com.ge.research.sadl.ui.SadlExecutableExtensionFactory:com.ge.research.sadl.ui.properties.SadlReasonerPrefrencePage"
               id="com.ge.research.sadl.Sadl.reasoner"
               name="Reasoner Preferences">
            <enabledWhen>
@@ -467,6 +440,29 @@
             objectClass="org.eclipse.core.resources.IFile"
             adaptable="false"
             nameFilter="*.sadl"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Run Query"
+               tooltip="Run a query against the inferred model"
+               class="com.ge.research.sadl.ui.editor.RunQuery"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.RunQuery"
+               id="SADL.ui.editor.runQuery">
+         </action>
+       </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.owl"
             id="com.ge.research.sadl.ui.projectContextMenuSadl">
          <menu
                label="SADL Actions"
@@ -558,7 +554,7 @@
    </extension>
    <extension point="org.eclipse.ui.menus">
    	  <menuContribution locationURI="popup:#TextEditorContet?after=additions">
-   	  	  <command commandId="com.ge.research.sadl.ui.GraphCommand"
+   	  	  <command commandId="com.ge.research.sadl.ui.actions.GraphCommand"
    	  	  		style="push">
    	  	  		<visibleWhen checkEnabled="false">
    	  	  			<reference definitionId="com.ge.research.sadl.Sadl.Editor.opened">
@@ -611,7 +607,7 @@
            name="Graph Neighborhood"
            description="Draw a graph of the local neighborhood of the selected concept"
            categoryId="com.ge.research.sadl.ui.category.SadlEditor"
-           id="com.ge.research.sadl.ui.GraphCommand">
+           id="com.ge.research.sadl.ui.actions.GraphCommand">
      </command>
      <command
            name="Run Query"
@@ -742,6 +738,29 @@
                id="SADL.ui.editor.importOwl">
          </action>
        </objectContribution>
+       <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            adaptable="false"
+            nameFilter="*.sadl"
+            id="com.ge.research.sadl.ui.projectContextMenuSadl">
+         <menu
+               label="SADL Actions"
+               path="additions"
+               id="SADL.menuSadl">
+            <separator
+                  name="groupSadl">
+            </separator>
+         </menu>
+         <action
+               label="Graph Imports"
+               tooltip="Show all imports, direct and indirect, as a graph"
+               class="com.ge.research.sadl.ui.actions.GraphImports"
+               menubarPath="SADL.menuSadl/groupSadl"
+               enablesFor="1"
+               definitionId="com.ge.research.sadl.ui.GraphImports"
+               id="SADL.ui.editor.graphImports">
+         </action>
+       </objectContribution>
    </extension>
   <extension
         point="org.eclipse.ui.commands">
@@ -755,7 +774,7 @@
            name="Graph Neighborhood"
            description="Graph local neighborhood of selected concept"
            categoryId="com.ge.research.sadl.ui.category.SadlEditor"
-           id="com.ge.research.sadl.ui.GraphCommand">
+           id="com.ge.research.sadl.ui.actions.GraphCommand">
      </command>
      <command
            name="Export OWL to Java"
@@ -769,66 +788,47 @@
            categoryId="com.ge.research.sadl.ui.category.SadlEditor"
            id="com.ge.research.sadl.ui.ExcelToRules">
      </command>
+     <command
+           name="Graph Imports"
+           description="Show all imports, direct and indirect, as a graph"
+           categoryId="com.ge.research.sadl.ui.category.SadlEditor"
+           id="com.ge.research.sadl.ui.GraphImports">
+     </command>
      <category
            name="Source"
            description="SADL Editing Commands"
            id="com.ge.research.sadl.ui.category.SadlEditor">
      </category>
   </extension>
-  <extension point="org.eclipse.ui.importWizards">
+  <extension point="org.eclipse.ui.importWizards"> 
 		<category id="com.ge.research.sadl" name="SADL"/>
-		<wizard
-			id="com.ge.research.sadl.geonly.ImportCSVToSadl"
-			name="CSV Files"
+		<wizard 
+			id="com.ge.research.sadl.geonly.ImportCSVToSadl" 
+			name="CSV Files" 
 			class="com.ge.research.sadl.geonly.ui.imports.SadlCSVImportWizard"
-			icon="icons/import_folder.gif"
+			icon="icons/import_folder.gif" 
 			category="com.ge.research.sadl">
-			<description>Import CSV files to a SADL project</description>
-			<selection class="org.eclipse.core.resources.IFile" name="*.csv"/>
-		</wizard>
-<!--		<wizard
-			id="com.ge.research.sadl.geonly.ImportXLSToSadl"
-			name="Excel Files"
-			class="com.ge.research.sadl.geonly.ui.imports.SadlXLSImportWizard"
-			icon="icons/import_folder.gif"
+			<description>Import CSV files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.csv"/> 
+		</wizard> 
+<!--		<wizard 
+			id="com.ge.research.sadl.geonly.ImportXLSToSadl" 
+			name="Excel Files" 
+			class="com.ge.research.sadl.geonly.ui.imports.SadlXLSImportWizard" 
+			icon="icons/import_folder.gif" 
 			category="com.ge.research.sadl">
-			<description>Import Excel files to a SADL project</description>
-			<selection class="org.eclipse.core.resources.IFile" name="*.xls"/>
+			<description>Import Excel files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.xls"/> 
 		</wizard> -->
-		<wizard
-			id="com.ge.research.sadl.geonly.ImportOwlToSadl"
-			name="Owl Files"
-			class="com.ge.research.sadl.geonly.ui.imports.OwlFileImportWizard"
-			icon="icons/import_folder.gif"
+		<wizard 
+			id="com.ge.research.sadl.geonly.ImportOwlToSadl" 
+			name="Owl Files" 
+			class="com.ge.research.sadl.geonly.ui.imports.OwlFileImportWizard" 
+			icon="icons/import_folder.gif" 
 			category="com.ge.research.sadl">
-			<description>Import Owl files to a SADL project</description>
-			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/>
-		</wizard>
-   </extension>
-   <!-- Jena editor -->
-   <extension point="org.eclipse.ui.editors">
-      <editor
-            id="com.ge.research.sadl.Jena"
-            name="%_UI_EcoreEditor_label"
-            icon="icons/full/obj16/EcoreModelFile.gif"
-            class="org.eclipse.emf.ecore.presentation.EcoreEditor"
-            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor">
-         <contentTypeBinding contentTypeId="org.eclipse.emf.ecore"/>
-      </editor>
-   </extension>
-  <extension
-        point="org.eclipse.core.contenttype.contentTypes">
-     <file-association
-           content-type="org.eclipse.emf.ecore"
-           file-extensions="owl,n3,nt,rdf">
-     </file-association>
-  </extension>
-  <!--
-  <extension
-        point="org.eclipse.xtext.ui.shared.overridingGuiceModule">
-     <module
-           class="com.ge.research.sadl.ui.SadlSharedModule">
-     </module>
-  </extension>
--->
+			<description>Import Owl files to a SADL project</description> 
+			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
+		</wizard> 
+   </extension> 
+
 </plugin>

@@ -15,11 +15,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.AbstractRule;
@@ -28,18 +24,13 @@ import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.GrammarUtil;
 import org.eclipse.xtext.Keyword;
 import org.eclipse.xtext.RuleCall;
-import org.eclipse.xtext.naming.QualifiedName;
-import org.eclipse.xtext.resource.IEObjectDescription;
-import org.eclipse.xtext.resource.impl.AliasedEObjectDescription;
 import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
-import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 import com.ge.research.sadl.builder.ResourceManager;
 import com.ge.research.sadl.builder.SadlModelManager;
-import com.ge.research.sadl.builder.SadlModelManagerProvider;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -48,13 +39,9 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.ModelName;
 import com.ge.research.sadl.sadl.PropOfSubj;
-import com.ge.research.sadl.sadl.ResourceName;
-import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.sadl.TypedBNode;
 import com.ge.research.sadl.services.SadlGrammarAccess;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -64,26 +51,18 @@ import com.google.inject.Inject;
 public class SadlProposalProvider extends AbstractSadlProposalProvider {
     
     @Inject
-	private SadlModelManagerProvider sadlModelManagerProvider;
-    
+    private SadlModelManager visitor;
     private SadlGrammarAccess g;
-    private IPreferenceStoreAccess preferencesAccess;
     
     /** Collection of keywords which require a space before */
     private Set<Keyword> keywordsWithSpaceBefore = Sets.newHashSet();
     /** Collection of keywords which require a space after */
     private Set<Keyword> keywordsWithSpaceAfter = Sets.newHashSet();
     
-    private boolean bRemoveUnnecessaryPrefixes;
     @Inject
-    public SadlProposalProvider(SadlGrammarAccess g, IPreferenceStoreAccess preferencesAccess) {
+    public SadlProposalProvider(SadlGrammarAccess g) {
     	this.g = g;
-		this.preferencesAccess = preferencesAccess;
-    	
     	initKeywordRules();
-    	IPreferenceStore preferenceStore = preferencesAccess.getPreferenceStore();
-
-    	bRemoveUnnecessaryPrefixes = preferenceStore.getBoolean("prefixesOnlyAsNeeded");
 	}
 
     /**
@@ -151,7 +130,6 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 				if ("importURI".equals(feature)) {
 			        List<ConceptName> names;
 					try {
-						SadlModelManager visitor = sadlModelManagerProvider.get(model.eResource());
 						names = visitor.getNamedConceptsOfType(ConceptType.MODELNAME, Scope.INCLUDEIMPORTS);
 				        if (names != null) {
 				        	Collection<ImportMapping> impmappings = visitor.getModelImportMappings();
@@ -193,23 +171,17 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 	        ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 
 	    URI modelURI = model.eResource().getURI();
-	    String baseUri;
-		try {
-			baseUri = generateBaseUri(modelURI);
-		    String proposalText = getValueConverter().toString(baseUri, "STRING");
-		    String displayText = proposalText + " - Uri of Model";
-			Image image = getImage(model);
-			// no space after 'uri' keyword would be syntactically incorrect, so insert one
-			// check: last node was 'uri' keyword and content assist is invoked directly after the keyword
-			if (context.getLastCompleteNode().getText().equals(g.getModelNameAccess().getUriKeyword_0().getValue()) && context.getLastCompleteNode().getTotalEndOffset()==context.getOffset()) {
-				proposalText = " " + proposalText;
-			}
-			ICompletionProposal proposal = createCompletionProposal(proposalText, displayText, image, context);
-			acceptor.accept(proposal);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	    String baseUri = generateBaseUri(modelURI);
+	    String proposalText = getValueConverter().toString(baseUri, "STRING");
+	    String displayText = proposalText + " - Uri of Model";
+		Image image = getImage(model);
+		// no space after 'uri' keyword would be syntactically incorrect, so insert one
+		// check: last node was 'uri' keyword and content assist is invoked directly after the keyword
+		if (context.getLastCompleteNode().getText().equals(g.getModelNameAccess().getUriKeyword_0().getValue()) && context.getLastCompleteNode().getTotalEndOffset()==context.getOffset()) {
+			proposalText = " " + proposalText;
 		}
+		ICompletionProposal proposal = createCompletionProposal(proposalText, displayText, image, context);
+		acceptor.accept(proposal);
 	}
 
 	
@@ -278,7 +250,7 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 //
 	// Generates a plausible baseUri for a model name using the model file's URI, 
 	// the project's name, and the preferences or project-specific properties.
-	public String generateBaseUri(URI modelURI) throws MalformedURLException {
+	public String generateBaseUri(URI modelURI) {
 	    String prefix = "http://sadl.org/" + ResourceManager.getProjectUri(modelURI).lastSegment() + "/";
 
     	IPreferencesService service = Platform.getPreferencesService();
@@ -315,15 +287,56 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 	// for the names by calling visitor.getNamedConceptsOfType(cType) and create
 	// our own proposals from that list of names.
 	public void completeResourceByName_Name(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-    	final boolean bRemoveUnnecessaryPrefixes = preferencesAccess.getPreferenceStore().getBoolean("prefixesOnlyAsNeeded");
-		Predicate<IEObjectDescription> filter = new Predicate<IEObjectDescription>() {
-			@Override
-			public boolean apply(IEObjectDescription input) {
-				boolean result = bRemoveUnnecessaryPrefixes ^ !(input instanceof AliasedEObjectDescription);
-				return result;
-			}
-		};
-		lookupCrossReference(model, SadlPackage.Literals.RESOURCE_BY_NAME__NAME, acceptor, filter, getProposalFactory(null, context));
+
+	    // Which type of names do we need?  Check which kind of model object
+	    // wants the name.
+	    ConceptType cType = null;
+//	    System.out.println("model wanting resourcename is a " + model);
+	    // TODO need to add more types of model objects and need to make
+	    // cType an array since we may need both datatype and object properties
+	    // for PropValPartialTriple, etc.
+	    if (model instanceof TypedBNode) {
+	        // We know that TypedBNode wants a class name.
+	        cType = ConceptType.ONTCLASS;
+	    }
+	    else if (model instanceof PropOfSubj) {
+	    	
+	    }
+
+	    // Get the desired type(s) of names (if cType is null, we'll get all types).
+	    List<ConceptName> names = Collections.emptyList();
+        try {
+            names = visitor.getNamedConceptsOfType(cType, Scope.INCLUDEIMPORTS);
+        } 
+        catch (InvalidNameException e) {
+            e.printStackTrace();
+        } catch (ConfigurationException e) {
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+    	IPreferencesService service = Platform.getPreferencesService();
+    	boolean bRemoveUnnecessaryPrefixes = service.getBoolean("com.ge.research.sadl.Sadl", "prefixesOnlyAsNeeded", false, null);
+
+    	if (bRemoveUnnecessaryPrefixes) {
+	    	removeUnnecessaryPrefixes(names);
+	    }
+	    
+        // Create proposals for each name, filtering by the prefix if there is one. 
+        String prefix = context.getPrefix();
+        for (ConceptName name : names) {
+    	    String proposalText = name.toString();
+    	    String displayText = proposalText;
+    		Image image = getImage(model);
+    		ICompletionProposal proposal = createCompletionProposal(proposalText, displayText, image, context);
+    		if (proposal == null && name.getName().startsWith(prefix)) {
+    			proposalText = displayText = name.getName();
+    			proposal = createCompletionProposal(proposalText, displayText, image, "", context);
+    		}
+    		acceptor.accept(proposal);
+	    }
 	}
 	
     static public void removeUnnecessaryPrefixes(List<ConceptName> names) {
@@ -422,24 +435,6 @@ public class SadlProposalProvider extends AbstractSadlProposalProvider {
 		//TODO: Detect space after invocation offset
 		return false;
 	}
+	
 
-	@Override
-	protected String getDisplayString(EObject element,
-			String qualifiedNameAsString, String shortName) {
-		if (element instanceof ResourceName) {
-			final boolean bRemoveUnnecessaryPrefixes = preferencesAccess.getPreferenceStore().getBoolean("prefixesOnlyAsNeeded");
-			if (!bRemoveUnnecessaryPrefixes) {
-				return qualifiedNameAsString;
-			}
-		}
-		return super.getDisplayString(element, qualifiedNameAsString, shortName);
-	}	
-
-	@Override
-	protected Function<IEObjectDescription, ICompletionProposal> getProposalFactory(
-			String ruleName, ContentAssistContext contentAssistContext) {
-		return new DefaultProposalCreator(contentAssistContext, ruleName, getQualifiedNameConverter()) {
-			
-		};
-	}
 }

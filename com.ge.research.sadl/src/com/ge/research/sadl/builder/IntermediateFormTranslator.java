@@ -29,6 +29,10 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.resource.XtextResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,9 +94,6 @@ import com.ge.research.sadl.sadl.VariableList;
 import com.ge.research.sadl.sadl.WithChain;
 import com.ge.research.sadl.sadl.WithPhrase;
 import com.ge.research.sadl.utils.SadlUtils.ConceptType;
-import com.hp.hpl.jena.graph.GraphEventManager;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -1355,13 +1356,13 @@ public class IntermediateFormTranslator {
 		else if (value.getLitValue() != null) {
 			Literal litValue = new Literal();
 			litValue.setValue(SadlModelManager.literalValueToObject(value.getLitValue()));
+			litValue.setOriginalText(getSourceGrammarText(value));
 			return litValue;
 		}
 		else if (value.getValueList() != null) {
 			ValueRow singleRow = value.getRow();
 			List<List<Node>> rows = new ArrayList<List<Node>>(1);
 			List<Node> row = translate(singleRow);
-			rows.add(row);
 			rows.add(row);
 			ValueTableNode valueTableNode = new ValueTableNode();
 			valueTableNode.setRows(rows);
@@ -1386,6 +1387,31 @@ public class IntermediateFormTranslator {
 			}
 		}
 	}
+	
+	public String getSourceGrammarText(EObject po) {
+		Object r = po.eResource();
+		if (r instanceof XtextResource) {
+			INode root = ((XtextResource) r).getParseResult().getRootNode();
+	        for(INode node : root.getAsTreeIterable()) {   
+	        	if (node instanceof CompositeNodeWithSemanticElement) {
+	        		EObject semElt = ((CompositeNodeWithSemanticElement)node).getSemanticElement();
+	        		if (semElt.equals(po)) {
+	        			// this is the one!
+	        			String txt = NodeModelUtils.getTokenText(node);
+	   					return txt.trim();
+	        		}
+	        	}
+	        }
+			org.eclipse.emf.common.util.TreeIterator<EObject> titr = po.eAllContents();
+			while (titr.hasNext()) {
+				EObject el = titr.next();
+// TODO what's supposed to happen here?
+				int i = 0;
+			}
+		}
+		return null;
+	}
+
 
 	/**
 	 * Translate an IntervalValue
@@ -1466,12 +1492,7 @@ public class IntermediateFormTranslator {
 				return  validateNode(node);
 			}
 			else {
-				if (modelManager != null) {
-					throw new InvalidNameException("conceptIdentifierToNode called with a ResourceByName with null name in model '" + modelManager.getModelActualUrl() + "'.");
-				}
-				else {
-					throw new InvalidNameException("conceptIdentifierToNode called with a ResourceByName with null name.");
-				}
+				throw new InvalidNameException("conceptIdentifierToNode called with a ResourceByName with null name.");
 			}
 		}
 		else if (classId != null) {	// ok if it's null when editing
@@ -1605,6 +1626,7 @@ public class IntermediateFormTranslator {
 				theVal = ((Double)theVal) * -1;
 			}
 			((Literal)sobj).setValue(theVal);
+			((Literal)sobj).setOriginalText("-" + ((Literal)sobj).getOriginalText());
 			return sobj;
 		}
 		if (sobj instanceof Junction) {
@@ -2024,6 +2046,9 @@ public class IntermediateFormTranslator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
+		}
+		else {
+			retiredProxyNodes.clear();
 		}
 		
 		// convert ifs linked list to array; expand conjunctions
@@ -2539,13 +2564,27 @@ public class IntermediateFormTranslator {
 					Object realArg = ((ProxyNode)arg).getProxyFor();
 					Object argNode = expandProxyNodes(patterns, realArg, isRuleThen);
 					if (argNode == null && realArg instanceof BuiltinElement) {
-						Node newNode = getVariableNode((BuiltinElement)realArg);
-						((BuiltinElement)realArg).addArgument(newNode);
-						argNode = newNode;
+						if (be.getFuncType().equals(BuiltinType.Not)) {
+							// don't put in an intermediate variable for negation of a builtin--if needed the language-specific translator will need to do that
+							// the call above to expandProxyNodes might have put the argNode into the patterns; if so remove it
+							if (patterns.get(patterns.size() - 1).equals(realArg)) {
+								patterns.remove(patterns.size() - 1);
+							}
+						}
+						else {
+							Node newNode = getVariableNode((BuiltinElement)realArg);
+							((BuiltinElement)realArg).addArgument(newNode);
+							argNode = newNode;
+							((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
+							retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
+							args.set(i, nodeCheck(argNode));
+						}
 					}
-					((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
-					retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
-					args.set(i, nodeCheck(argNode));
+					else {
+						((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
+						retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
+						args.set(i, nodeCheck(argNode));
+					}
 				}
 			}
 		}

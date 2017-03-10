@@ -17,37 +17,19 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena;
 
-import java.util.HashMap;
-
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IReferenceDescription;
-import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy;
 import org.eclipse.xtext.util.IAcceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.resource.SadlEObjectDescription;
-
-public class JenaResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
-	private final static Logger LOG = LoggerFactory.getLogger(JenaResourceDescriptionStrategy.class);
-
+public class JenaResourceDescriptionStrategy implements IDefaultResourceDescriptionStrategy {
+	
 	@Override
 	public boolean createEObjectDescriptions(EObject eObject,
 			IAcceptor<IEObjectDescription> acceptor) {
-		if (getQualifiedNameProvider() == null)
-			return false;
-		try {
-			QualifiedName qualifiedName = getQualifiedNameProvider().getFullyQualifiedName(eObject);
-			if (qualifiedName != null) {
-				acceptor.accept(new SadlEObjectDescription(qualifiedName, eObject, new HashMap<String, String>()));
-			}
-		} catch (Exception exc) {
-			LOG.error(exc.getMessage());
-		}
-		return true;
+		return false;
 	}
 
 	@Override

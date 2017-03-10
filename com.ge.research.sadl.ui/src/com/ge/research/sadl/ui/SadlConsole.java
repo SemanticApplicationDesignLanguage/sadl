@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.1 $ Last modified on   $Date: 2014/01/22 20:32:57 $
+ * $Revision: 1.2 $ Last modified on   $Date: 2015/01/09 22:01:04 $
  ***********************************************************************/
 
 package com.ge.research.sadl.ui;
@@ -43,6 +43,7 @@ import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 
+import com.ge.research.sadl.builder.MessageManager;
 import com.ge.research.sadl.builder.MessageManager.HyperlinkInfo;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
@@ -290,7 +291,10 @@ public final class SadlConsole {
 			}
 	}
 
-	public static void displayMessages(SadlModelManager manager) {
+	public static void displayMessages(MessageManager manager) {
+		if (manager == null) {
+			return;
+		}
 		MessageConsole mc = findOrCreateConsole();
 		IDocument doc = mc.getDocument();
 		int startingOffset = doc.getLength();

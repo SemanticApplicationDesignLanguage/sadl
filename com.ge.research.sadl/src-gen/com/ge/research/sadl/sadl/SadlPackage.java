@@ -132,22 +132,13 @@ public interface SadlPackage extends EPackage
   int MODEL_NAME__ALIAS = 1;
 
   /**
-   * The feature id for the '<em><b>Version</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int MODEL_NAME__VERSION = 2;
-
-  /**
    * The feature id for the '<em><b>Ann Type</b></em>' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int MODEL_NAME__ANN_TYPE = 3;
+  int MODEL_NAME__ANN_TYPE = 2;
 
   /**
    * The feature id for the '<em><b>Ann Content</b></em>' containment reference list.
@@ -156,7 +147,16 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int MODEL_NAME__ANN_CONTENT = 4;
+  int MODEL_NAME__ANN_CONTENT = 3;
+
+  /**
+   * The feature id for the '<em><b>Version</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MODEL_NAME__VERSION = 4;
 
   /**
    * The number of structural features of the '<em>Model Name</em>' class.
@@ -1985,13 +1985,31 @@ public interface SadlPackage extends EPackage
   int PROPERTY_DECLARATION = 45;
 
   /**
+   * The feature id for the '<em><b>No Domain Prop Name</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME = STATEMENT_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Range</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int PROPERTY_DECLARATION__RANGE = STATEMENT_FEATURE_COUNT + 1;
+
+  /**
    * The feature id for the '<em><b>Property Name</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION__PROPERTY_NAME = STATEMENT_FEATURE_COUNT + 0;
+  int PROPERTY_DECLARATION__PROPERTY_NAME = STATEMENT_FEATURE_COUNT + 2;
 
   /**
    * The feature id for the '<em><b>Super Prop Name</b></em>' containment reference.
@@ -2000,7 +2018,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION__SUPER_PROP_NAME = STATEMENT_FEATURE_COUNT + 1;
+  int PROPERTY_DECLARATION__SUPER_PROP_NAME = STATEMENT_FEATURE_COUNT + 3;
 
   /**
    * The feature id for the '<em><b>Addl Prop Info</b></em>' containment reference list.
@@ -2009,7 +2027,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION__ADDL_PROP_INFO = STATEMENT_FEATURE_COUNT + 2;
+  int PROPERTY_DECLARATION__ADDL_PROP_INFO = STATEMENT_FEATURE_COUNT + 4;
 
   /**
    * The feature id for the '<em><b>Article</b></em>' attribute.
@@ -2018,7 +2036,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION__ARTICLE = STATEMENT_FEATURE_COUNT + 3;
+  int PROPERTY_DECLARATION__ARTICLE = STATEMENT_FEATURE_COUNT + 5;
 
   /**
    * The feature id for the '<em><b>Domain</b></em>' containment reference.
@@ -2027,7 +2045,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION__DOMAIN = STATEMENT_FEATURE_COUNT + 4;
+  int PROPERTY_DECLARATION__DOMAIN = STATEMENT_FEATURE_COUNT + 6;
 
   /**
    * The feature id for the '<em><b>Range Resource</b></em>' containment reference.
@@ -2036,7 +2054,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION__RANGE_RESOURCE = STATEMENT_FEATURE_COUNT + 5;
+  int PROPERTY_DECLARATION__RANGE_RESOURCE = STATEMENT_FEATURE_COUNT + 7;
 
   /**
    * The feature id for the '<em><b>Annotation Property</b></em>' containment reference.
@@ -2045,7 +2063,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION__ANNOTATION_PROPERTY = STATEMENT_FEATURE_COUNT + 6;
+  int PROPERTY_DECLARATION__ANNOTATION_PROPERTY = STATEMENT_FEATURE_COUNT + 8;
 
   /**
    * The number of structural features of the '<em>Property Declaration</em>' class.
@@ -2054,7 +2072,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROPERTY_DECLARATION_FEATURE_COUNT = STATEMENT_FEATURE_COUNT + 7;
+  int PROPERTY_DECLARATION_FEATURE_COUNT = STATEMENT_FEATURE_COUNT + 9;
 
   /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.AdditionalPropertyInfoImpl <em>Additional Property Info</em>}' class.
@@ -2813,7 +2831,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getGraphPattern()
    * @generated
    */
-  int GRAPH_PATTERN = 82;
+  int GRAPH_PATTERN = 85;
 
   /**
    * The number of structural features of the '<em>Graph Pattern</em>' class.
@@ -2955,13 +2973,31 @@ public interface SadlPackage extends EPackage
   int RULE__NAME = MODEL_ELEMENT_FEATURE_COUNT + 0;
 
   /**
+   * The feature id for the '<em><b>Ann Props</b></em>' attribute list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int RULE__ANN_PROPS = MODEL_ELEMENT_FEATURE_COUNT + 1;
+
+  /**
+   * The feature id for the '<em><b>Ann Values</b></em>' attribute list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int RULE__ANN_VALUES = MODEL_ELEMENT_FEATURE_COUNT + 2;
+
+  /**
    * The feature id for the '<em><b>Givens</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int RULE__GIVENS = MODEL_ELEMENT_FEATURE_COUNT + 1;
+  int RULE__GIVENS = MODEL_ELEMENT_FEATURE_COUNT + 3;
 
   /**
    * The feature id for the '<em><b>Ifs</b></em>' containment reference.
@@ -2970,7 +3006,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int RULE__IFS = MODEL_ELEMENT_FEATURE_COUNT + 2;
+  int RULE__IFS = MODEL_ELEMENT_FEATURE_COUNT + 4;
 
   /**
    * The feature id for the '<em><b>Thens</b></em>' containment reference.
@@ -2979,7 +3015,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int RULE__THENS = MODEL_ELEMENT_FEATURE_COUNT + 3;
+  int RULE__THENS = MODEL_ELEMENT_FEATURE_COUNT + 5;
 
   /**
    * The number of structural features of the '<em>Rule</em>' class.
@@ -2988,7 +3024,7 @@ public interface SadlPackage extends EPackage
    * @generated
    * @ordered
    */
-  int RULE_FEATURE_COUNT = MODEL_ELEMENT_FEATURE_COUNT + 4;
+  int RULE_FEATURE_COUNT = MODEL_ELEMENT_FEATURE_COUNT + 6;
 
   /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.QueryImpl <em>Query</em>}' class.
@@ -3149,6 +3185,108 @@ public interface SadlPackage extends EPackage
   int EXPLANATION_FEATURE_COUNT = MODEL_ELEMENT_FEATURE_COUNT + 2;
 
   /**
+   * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.StartWriteImpl <em>Start Write</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see com.ge.research.sadl.sadl.impl.StartWriteImpl
+   * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getStartWrite()
+   * @generated
+   */
+  int START_WRITE = 75;
+
+  /**
+   * The feature id for the '<em><b>Write</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int START_WRITE__WRITE = MODEL_ELEMENT_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Data Only</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int START_WRITE__DATA_ONLY = MODEL_ELEMENT_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Start Write</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int START_WRITE_FEATURE_COUNT = MODEL_ELEMENT_FEATURE_COUNT + 2;
+
+  /**
+   * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.EndWriteImpl <em>End Write</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see com.ge.research.sadl.sadl.impl.EndWriteImpl
+   * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getEndWrite()
+   * @generated
+   */
+  int END_WRITE = 76;
+
+  /**
+   * The feature id for the '<em><b>Filename</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int END_WRITE__FILENAME = MODEL_ELEMENT_FEATURE_COUNT + 0;
+
+  /**
+   * The number of structural features of the '<em>End Write</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int END_WRITE_FEATURE_COUNT = MODEL_ELEMENT_FEATURE_COUNT + 1;
+
+  /**
+   * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.ReadImpl <em>Read</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see com.ge.research.sadl.sadl.impl.ReadImpl
+   * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getRead()
+   * @generated
+   */
+  int READ = 77;
+
+  /**
+   * The feature id for the '<em><b>Filename</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int READ__FILENAME = MODEL_ELEMENT_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Template Filename</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int READ__TEMPLATE_FILENAME = MODEL_ELEMENT_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Read</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int READ_FEATURE_COUNT = MODEL_ELEMENT_FEATURE_COUNT + 2;
+
+  /**
    * The meta object id for the '{@link com.ge.research.sadl.sadl.impl.ElementSetImpl <em>Element Set</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -3156,7 +3294,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getElementSet()
    * @generated
    */
-  int ELEMENT_SET = 75;
+  int ELEMENT_SET = 78;
 
   /**
    * The feature id for the '<em><b>Elements</b></em>' containment reference list.
@@ -3184,7 +3322,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExpression()
    * @generated
    */
-  int EXPRESSION = 81;
+  int EXPRESSION = 84;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3266,7 +3404,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSelectExpression()
    * @generated
    */
-  int SELECT_EXPRESSION = 76;
+  int SELECT_EXPRESSION = 79;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3393,7 +3531,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getConstructExpression()
    * @generated
    */
-  int CONSTRUCT_EXPRESSION = 77;
+  int CONSTRUCT_EXPRESSION = 80;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3502,7 +3640,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getAskQueryExpression()
    * @generated
    */
-  int ASK_QUERY_EXPRESSION = 78;
+  int ASK_QUERY_EXPRESSION = 81;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -3584,7 +3722,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getOrderList()
    * @generated
    */
-  int ORDER_LIST = 79;
+  int ORDER_LIST = 82;
 
   /**
    * The feature id for the '<em><b>Order List</b></em>' containment reference list.
@@ -3612,7 +3750,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getOrderElement()
    * @generated
    */
-  int ORDER_ELEMENT = 80;
+  int ORDER_ELEMENT = 83;
 
   /**
    * The feature id for the '<em><b>Order</b></em>' attribute.
@@ -3649,7 +3787,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getPropOfSubj()
    * @generated
    */
-  int PROP_OF_SUBJ = 83;
+  int PROP_OF_SUBJ = 86;
 
   /**
    * The feature id for the '<em><b>Of Phr</b></em>' containment reference list.
@@ -3686,7 +3824,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSubjProp()
    * @generated
    */
-  int SUBJ_PROP = 84;
+  int SUBJ_PROP = 87;
 
   /**
    * The feature id for the '<em><b>Subj</b></em>' containment reference.
@@ -3723,7 +3861,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstAttrSPV()
    * @generated
    */
-  int INST_ATTR_SPV = 85;
+  int INST_ATTR_SPV = 88;
 
   /**
    * The feature id for the '<em><b>Subj</b></em>' containment reference.
@@ -3769,7 +3907,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getInstAttrPSV()
    * @generated
    */
-  int INST_ATTR_PSV = 86;
+  int INST_ATTR_PSV = 89;
 
   /**
    * The feature id for the '<em><b>Prop</b></em>' containment reference.
@@ -3806,7 +3944,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getSubTypeOf()
    * @generated
    */
-  int SUB_TYPE_OF = 87;
+  int SUB_TYPE_OF = 90;
 
   /**
    * The feature id for the '<em><b>Subclass</b></em>' containment reference.
@@ -3843,7 +3981,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExistentialNegation()
    * @generated
    */
-  int EXISTENTIAL_NEGATION = 88;
+  int EXISTENTIAL_NEGATION = 91;
 
   /**
    * The feature id for the '<em><b>Var List</b></em>' containment reference.
@@ -3880,7 +4018,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getIntervalValue()
    * @generated
    */
-  int INTERVAL_VALUE = 89;
+  int INTERVAL_VALUE = 92;
 
   /**
    * The feature id for the '<em><b>Op</b></em>' attribute.
@@ -3917,7 +4055,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getExplicitValue()
    * @generated
    */
-  int EXPLICIT_VALUE = 90;
+  int EXPLICIT_VALUE = 93;
 
   /**
    * The feature id for the '<em><b>Inst Name</b></em>' containment reference.
@@ -3981,7 +4119,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getValueTable()
    * @generated
    */
-  int VALUE_TABLE = 91;
+  int VALUE_TABLE = 94;
 
   /**
    * The feature id for the '<em><b>Rows</b></em>' containment reference list.
@@ -4009,7 +4147,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getLiteralValue()
    * @generated
    */
-  int LITERAL_VALUE = 92;
+  int LITERAL_VALUE = 95;
 
   /**
    * The feature id for the '<em><b>Literal Number</b></em>' attribute.
@@ -4055,7 +4193,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getValueRow()
    * @generated
    */
-  int VALUE_ROW = 93;
+  int VALUE_ROW = 96;
 
   /**
    * The feature id for the '<em><b>Explicit Values</b></em>' containment reference list.
@@ -4083,7 +4221,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getJunctionExpression()
    * @generated
    */
-  int JUNCTION_EXPRESSION = 94;
+  int JUNCTION_EXPRESSION = 97;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -4192,7 +4330,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getBinaryOpExpression()
    * @generated
    */
-  int BINARY_OP_EXPRESSION = 95;
+  int BINARY_OP_EXPRESSION = 98;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -4301,7 +4439,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getUnaryOpExpression()
    * @generated
    */
-  int UNARY_OP_EXPRESSION = 96;
+  int UNARY_OP_EXPRESSION = 99;
 
   /**
    * The feature id for the '<em><b>Expr</b></em>' containment reference.
@@ -4392,7 +4530,7 @@ public interface SadlPackage extends EPackage
    * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getDataType()
    * @generated
    */
-  int DATA_TYPE = 97;
+  int DATA_TYPE = 100;
 
 
   /**
@@ -4471,17 +4609,6 @@ public interface SadlPackage extends EPackage
   EAttribute getModelName_Alias();
 
   /**
-   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ModelName#getVersion <em>Version</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Version</em>'.
-   * @see com.ge.research.sadl.sadl.ModelName#getVersion()
-   * @see #getModelName()
-   * @generated
-   */
-  EAttribute getModelName_Version();
-
-  /**
    * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.ModelName#getAnnType <em>Ann Type</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -4502,6 +4629,17 @@ public interface SadlPackage extends EPackage
    * @generated
    */
   EReference getModelName_AnnContent();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.ModelName#getVersion <em>Version</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Version</em>'.
+   * @see com.ge.research.sadl.sadl.ModelName#getVersion()
+   * @see #getModelName()
+   * @generated
+   */
+  EAttribute getModelName_Version();
 
   /**
    * Returns the meta object for class '{@link com.ge.research.sadl.sadl.Import <em>Import</em>}'.
@@ -6066,6 +6204,28 @@ public interface SadlPackage extends EPackage
   EClass getPropertyDeclaration();
 
   /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.PropertyDeclaration#getNoDomainPropName <em>No Domain Prop Name</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>No Domain Prop Name</em>'.
+   * @see com.ge.research.sadl.sadl.PropertyDeclaration#getNoDomainPropName()
+   * @see #getPropertyDeclaration()
+   * @generated
+   */
+  EReference getPropertyDeclaration_NoDomainPropName();
+
+  /**
+   * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.PropertyDeclaration#getRange <em>Range</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Range</em>'.
+   * @see com.ge.research.sadl.sadl.PropertyDeclaration#getRange()
+   * @see #getPropertyDeclaration()
+   * @generated
+   */
+  EReference getPropertyDeclaration_Range();
+
+  /**
    * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.PropertyDeclaration#getPropertyName <em>Property Name</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -6911,6 +7071,28 @@ public interface SadlPackage extends EPackage
   EAttribute getRule_Name();
 
   /**
+   * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.Rule#getAnnProps <em>Ann Props</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute list '<em>Ann Props</em>'.
+   * @see com.ge.research.sadl.sadl.Rule#getAnnProps()
+   * @see #getRule()
+   * @generated
+   */
+  EAttribute getRule_AnnProps();
+
+  /**
+   * Returns the meta object for the attribute list '{@link com.ge.research.sadl.sadl.Rule#getAnnValues <em>Ann Values</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute list '<em>Ann Values</em>'.
+   * @see com.ge.research.sadl.sadl.Rule#getAnnValues()
+   * @see #getRule()
+   * @generated
+   */
+  EAttribute getRule_AnnValues();
+
+  /**
    * Returns the meta object for the containment reference '{@link com.ge.research.sadl.sadl.Rule#getGivens <em>Givens</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -7069,6 +7251,91 @@ public interface SadlPackage extends EPackage
    * @generated
    */
   EAttribute getExplanation_Rulename();
+
+  /**
+   * Returns the meta object for class '{@link com.ge.research.sadl.sadl.StartWrite <em>Start Write</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Start Write</em>'.
+   * @see com.ge.research.sadl.sadl.StartWrite
+   * @generated
+   */
+  EClass getStartWrite();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.StartWrite#getWrite <em>Write</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Write</em>'.
+   * @see com.ge.research.sadl.sadl.StartWrite#getWrite()
+   * @see #getStartWrite()
+   * @generated
+   */
+  EAttribute getStartWrite_Write();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.StartWrite#getDataOnly <em>Data Only</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Data Only</em>'.
+   * @see com.ge.research.sadl.sadl.StartWrite#getDataOnly()
+   * @see #getStartWrite()
+   * @generated
+   */
+  EAttribute getStartWrite_DataOnly();
+
+  /**
+   * Returns the meta object for class '{@link com.ge.research.sadl.sadl.EndWrite <em>End Write</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>End Write</em>'.
+   * @see com.ge.research.sadl.sadl.EndWrite
+   * @generated
+   */
+  EClass getEndWrite();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.EndWrite#getFilename <em>Filename</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Filename</em>'.
+   * @see com.ge.research.sadl.sadl.EndWrite#getFilename()
+   * @see #getEndWrite()
+   * @generated
+   */
+  EAttribute getEndWrite_Filename();
+
+  /**
+   * Returns the meta object for class '{@link com.ge.research.sadl.sadl.Read <em>Read</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Read</em>'.
+   * @see com.ge.research.sadl.sadl.Read
+   * @generated
+   */
+  EClass getRead();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Read#getFilename <em>Filename</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Filename</em>'.
+   * @see com.ge.research.sadl.sadl.Read#getFilename()
+   * @see #getRead()
+   * @generated
+   */
+  EAttribute getRead_Filename();
+
+  /**
+   * Returns the meta object for the attribute '{@link com.ge.research.sadl.sadl.Read#getTemplateFilename <em>Template Filename</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Template Filename</em>'.
+   * @see com.ge.research.sadl.sadl.Read#getTemplateFilename()
+   * @see #getRead()
+   * @generated
+   */
+  EAttribute getRead_TemplateFilename();
 
   /**
    * Returns the meta object for class '{@link com.ge.research.sadl.sadl.ElementSet <em>Element Set</em>}'.
@@ -7945,14 +8212,6 @@ public interface SadlPackage extends EPackage
     EAttribute MODEL_NAME__ALIAS = eINSTANCE.getModelName_Alias();
 
     /**
-     * The meta object literal for the '<em><b>Version</b></em>' attribute feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EAttribute MODEL_NAME__VERSION = eINSTANCE.getModelName_Version();
-
-    /**
      * The meta object literal for the '<em><b>Ann Type</b></em>' attribute list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -7967,6 +8226,14 @@ public interface SadlPackage extends EPackage
      * @generated
      */
     EReference MODEL_NAME__ANN_CONTENT = eINSTANCE.getModelName_AnnContent();
+
+    /**
+     * The meta object literal for the '<em><b>Version</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute MODEL_NAME__VERSION = eINSTANCE.getModelName_Version();
 
     /**
      * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.ImportImpl <em>Import</em>}' class.
@@ -9225,6 +9492,22 @@ public interface SadlPackage extends EPackage
     EClass PROPERTY_DECLARATION = eINSTANCE.getPropertyDeclaration();
 
     /**
+     * The meta object literal for the '<em><b>No Domain Prop Name</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME = eINSTANCE.getPropertyDeclaration_NoDomainPropName();
+
+    /**
+     * The meta object literal for the '<em><b>Range</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference PROPERTY_DECLARATION__RANGE = eINSTANCE.getPropertyDeclaration_Range();
+
+    /**
      * The meta object literal for the '<em><b>Property Name</b></em>' containment reference feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -9905,6 +10188,22 @@ public interface SadlPackage extends EPackage
     EAttribute RULE__NAME = eINSTANCE.getRule_Name();
 
     /**
+     * The meta object literal for the '<em><b>Ann Props</b></em>' attribute list feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute RULE__ANN_PROPS = eINSTANCE.getRule_AnnProps();
+
+    /**
+     * The meta object literal for the '<em><b>Ann Values</b></em>' attribute list feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute RULE__ANN_VALUES = eINSTANCE.getRule_AnnValues();
+
+    /**
      * The meta object literal for the '<em><b>Givens</b></em>' containment reference feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -10033,6 +10332,76 @@ public interface SadlPackage extends EPackage
      * @generated
      */
     EAttribute EXPLANATION__RULENAME = eINSTANCE.getExplanation_Rulename();
+
+    /**
+     * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.StartWriteImpl <em>Start Write</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see com.ge.research.sadl.sadl.impl.StartWriteImpl
+     * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getStartWrite()
+     * @generated
+     */
+    EClass START_WRITE = eINSTANCE.getStartWrite();
+
+    /**
+     * The meta object literal for the '<em><b>Write</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute START_WRITE__WRITE = eINSTANCE.getStartWrite_Write();
+
+    /**
+     * The meta object literal for the '<em><b>Data Only</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute START_WRITE__DATA_ONLY = eINSTANCE.getStartWrite_DataOnly();
+
+    /**
+     * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.EndWriteImpl <em>End Write</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see com.ge.research.sadl.sadl.impl.EndWriteImpl
+     * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getEndWrite()
+     * @generated
+     */
+    EClass END_WRITE = eINSTANCE.getEndWrite();
+
+    /**
+     * The meta object literal for the '<em><b>Filename</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute END_WRITE__FILENAME = eINSTANCE.getEndWrite_Filename();
+
+    /**
+     * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.ReadImpl <em>Read</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see com.ge.research.sadl.sadl.impl.ReadImpl
+     * @see com.ge.research.sadl.sadl.impl.SadlPackageImpl#getRead()
+     * @generated
+     */
+    EClass READ = eINSTANCE.getRead();
+
+    /**
+     * The meta object literal for the '<em><b>Filename</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute READ__FILENAME = eINSTANCE.getRead_Filename();
+
+    /**
+     * The meta object literal for the '<em><b>Template Filename</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute READ__TEMPLATE_FILENAME = eINSTANCE.getRead_TemplateFilename();
 
     /**
      * The meta object literal for the '{@link com.ge.research.sadl.sadl.impl.ElementSetImpl <em>Element Set</em>}' class.

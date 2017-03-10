@@ -6,13 +6,19 @@ import com.ge.research.sadl.sadl.ElementSet;
 import com.ge.research.sadl.sadl.Rule;
 import com.ge.research.sadl.sadl.SadlPackage;
 
+import java.util.Collection;
+
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
+
+import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
+
+import org.eclipse.emf.ecore.util.EDataTypeEList;
 
 /**
  * <!-- begin-user-doc -->
@@ -22,6 +28,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * The following features are implemented:
  * <ul>
  *   <li>{@link com.ge.research.sadl.sadl.impl.RuleImpl#getName <em>Name</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.impl.RuleImpl#getAnnProps <em>Ann Props</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.impl.RuleImpl#getAnnValues <em>Ann Values</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.RuleImpl#getGivens <em>Givens</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.RuleImpl#getIfs <em>Ifs</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.RuleImpl#getThens <em>Thens</em>}</li>
@@ -51,6 +59,26 @@ public class RuleImpl extends ModelElementImpl implements Rule
    * @ordered
    */
   protected String name = NAME_EDEFAULT;
+
+  /**
+   * The cached value of the '{@link #getAnnProps() <em>Ann Props</em>}' attribute list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getAnnProps()
+   * @generated
+   * @ordered
+   */
+  protected EList<String> annProps;
+
+  /**
+   * The cached value of the '{@link #getAnnValues() <em>Ann Values</em>}' attribute list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getAnnValues()
+   * @generated
+   * @ordered
+   */
+  protected EList<String> annValues;
 
   /**
    * The cached value of the '{@link #getGivens() <em>Givens</em>}' containment reference.
@@ -124,6 +152,34 @@ public class RuleImpl extends ModelElementImpl implements Rule
     name = newName;
     if (eNotificationRequired())
       eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.RULE__NAME, oldName, name));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EList<String> getAnnProps()
+  {
+    if (annProps == null)
+    {
+      annProps = new EDataTypeEList<String>(String.class, this, SadlPackage.RULE__ANN_PROPS);
+    }
+    return annProps;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EList<String> getAnnValues()
+  {
+    if (annValues == null)
+    {
+      annValues = new EDataTypeEList<String>(String.class, this, SadlPackage.RULE__ANN_VALUES);
+    }
+    return annValues;
   }
 
   /**
@@ -302,6 +358,10 @@ public class RuleImpl extends ModelElementImpl implements Rule
     {
       case SadlPackage.RULE__NAME:
         return getName();
+      case SadlPackage.RULE__ANN_PROPS:
+        return getAnnProps();
+      case SadlPackage.RULE__ANN_VALUES:
+        return getAnnValues();
       case SadlPackage.RULE__GIVENS:
         return getGivens();
       case SadlPackage.RULE__IFS:
@@ -317,6 +377,7 @@ public class RuleImpl extends ModelElementImpl implements Rule
    * <!-- end-user-doc -->
    * @generated
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void eSet(int featureID, Object newValue)
   {
@@ -324,6 +385,14 @@ public class RuleImpl extends ModelElementImpl implements Rule
     {
       case SadlPackage.RULE__NAME:
         setName((String)newValue);
+        return;
+      case SadlPackage.RULE__ANN_PROPS:
+        getAnnProps().clear();
+        getAnnProps().addAll((Collection<? extends String>)newValue);
+        return;
+      case SadlPackage.RULE__ANN_VALUES:
+        getAnnValues().clear();
+        getAnnValues().addAll((Collection<? extends String>)newValue);
         return;
       case SadlPackage.RULE__GIVENS:
         setGivens((ElementSet)newValue);
@@ -351,6 +420,12 @@ public class RuleImpl extends ModelElementImpl implements Rule
       case SadlPackage.RULE__NAME:
         setName(NAME_EDEFAULT);
         return;
+      case SadlPackage.RULE__ANN_PROPS:
+        getAnnProps().clear();
+        return;
+      case SadlPackage.RULE__ANN_VALUES:
+        getAnnValues().clear();
+        return;
       case SadlPackage.RULE__GIVENS:
         setGivens((ElementSet)null);
         return;
@@ -376,6 +451,10 @@ public class RuleImpl extends ModelElementImpl implements Rule
     {
       case SadlPackage.RULE__NAME:
         return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
+      case SadlPackage.RULE__ANN_PROPS:
+        return annProps != null && !annProps.isEmpty();
+      case SadlPackage.RULE__ANN_VALUES:
+        return annValues != null && !annValues.isEmpty();
       case SadlPackage.RULE__GIVENS:
         return givens != null;
       case SadlPackage.RULE__IFS:
@@ -399,6 +478,10 @@ public class RuleImpl extends ModelElementImpl implements Rule
     StringBuffer result = new StringBuffer(super.toString());
     result.append(" (name: ");
     result.append(name);
+    result.append(", annProps: ");
+    result.append(annProps);
+    result.append(", annValues: ");
+    result.append(annValues);
     result.append(')');
     return result.toString();
   }

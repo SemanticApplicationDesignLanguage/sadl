@@ -305,27 +305,12 @@ public class UtilsForJena {
 	 * @return -- the unique URI string
 	 */
 	public static synchronized String getUniqueOntUri(OntModel ontModel, String baseUri) {
-		Object[] split = splitUriIntoBaseAndCounter(baseUri);
-		baseUri = (String) split[0];
-		long cntr = (long) split[1];
-		String uri = baseUri + cntr;
-		while (ontModel.getOntResource(uri) != null) {
-			uri = baseUri + ++cntr;
-		}
-		return uri;
-	}
-	
-	/**
-	 * Method to take a URI that may end in an integer and split it into the base (before the integer) and the counter (the integer)
-	 * @param uri
-	 * @return-- Object array containing 0) base URI, 1) counter
-	 */
-	public static Object[] splitUriIntoBaseAndCounter(String uri) {
 		long cntr = 0;
 		int numDigitsAtEnd = 0;
-		for (int i = uri.length() - 1; i >= 0; i--) {
-			int exp = uri.length() - (i + 1);
-			char c = uri.charAt(i);
+		String cntrStr = "";
+		for (int i = baseUri.length() - 1; i >= 0; i--) {
+			int exp = baseUri.length() - (i + 1);
+			char c = baseUri.charAt(i);
 			if (Character.isDigit(c)) {
 				int cint = c - 48;
 				long mplier = (long) Math.pow(10, exp);
@@ -337,15 +322,16 @@ public class UtilsForJena {
 			}
 		}
 		if (numDigitsAtEnd > 0) {
-			uri = uri.substring(0, uri.length() - numDigitsAtEnd);
+			baseUri = baseUri.substring(0, baseUri.length() - numDigitsAtEnd);
 		}
 		else {
 			cntr = 1;
 		}
-		Object[] retval = new Object[2];
-		retval[0] = uri;
-		retval[1] = cntr;
-		return retval;
+		String uri = baseUri + cntr;
+		while (ontModel.getOntResource(uri) != null) {
+			uri = baseUri + ++cntr;
+		}
+		return uri;
 	}
 
 	public static synchronized boolean isSingleValued(OntClass cls, OntProperty prop, String rngString) {

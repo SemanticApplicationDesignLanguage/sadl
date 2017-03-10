@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $
- * $Revision: 1.4 $ Last modified on   $Date: 2014/11/03 19:20:22 $
+ * $Revision: 1.9 $ Last modified on   $Date: 2015/12/02 13:52:37 $
  ***********************************************************************/
 
 package com.ge.research.sadl.builder;
@@ -28,7 +28,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -37,7 +36,6 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -81,7 +79,7 @@ public class ResourceManager {
     public static final String HTTP_URL_PREFIX = "http://";
     public static final String OWLDIR = "OwlModels";
     public static final String TEMPDIR = "Temp";
-    public static final String OWLFILEEXT = "owl";
+//    public static final String OWLFILEEXT = "owl";
 //    public static final String OWLFILEEXTWITHPREFIX = ".owl";
     public static final String SADLEXT = "sadl";
     public static final String SADLEXTWITHPREFIX = ".sadl";
@@ -91,13 +89,14 @@ public class ResourceManager {
 //	public static final String ACUITY_DEFAULTS_PREFIX = "defs";
 	public static final String ACUITY_DEFAULTS_OWL_FN = "defaults.owl";
 
-	public static final String ServicesConfigurationURI = "http://com.ge.research.sadl/sadlserver/Services";
-	public static final String ServicesConfigurationConcepts_FN = "SadlServicesConfigurationConcepts.owl";
-	public static final String ServicesConf_FN = "ServicesConfig.owl";
-	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
+	private static SadlUtils sadlUtils = null;
 
-	public static final String PLATFORM_RESOURCE_MODELS_RDF_SCHEMA_RDF = "platform:/plugin/com.ge.research.sadl.ui/Models/rdf-schema.rdf";
-	public static final String PLATFORM_RESOURCE_MODELS_RDF_SYNTAX_NS_RDF = "platform:/plugin/com.ge.research.sadl.ui/Models/rdf-syntax-ns.rdf";
+//	public static final String ServicesConfigurationURI = "http://com.ge.research.sadl/sadlserver/Services";
+//	public static final String ServicesConfigurationConcepts_FN = "SadlServicesConfigurationConcepts.owl";
+//	public static final String ServicesConf_FN = "ServicesConfig.owl";
+//	public static final String ServicesConf_SFN = "ServicesConfig.sadl";
+
+
 
     /**
      * Returns the OWL model file for a given SADL file.
@@ -105,28 +104,15 @@ public class ResourceManager {
      * @param resource A Resource containing the SADL file.
      * @return The OWL model file's path.
      * @throws CoreException If the OWL models directory doesn't exist.
-     * @throws MalformedURLException 
      */
-    public static File getOwlFileForSadlResource(Resource resource) throws CoreException, MalformedURLException {
-        // Get the SADL file's corresponding OWL file.
-        URI sadlFile = resource.getURI();
-//
-//        URI owlFile = validateAndReturnOwlUrlOfResource(resource);
-        return getOwlFileForSadlUri(sadlFile);
-    }
+    public static File getOwlFileForSadlResource(Resource resource) throws CoreException {
 
-    /**
-     * Returns the OWL model file for a given SADL file URI
-     * @param owlFile
-     * @return
-     * @throws CoreException 
-     * @throws MalformedURLException 
-     */
-	public static File getOwlFileForSadlUri(URI sadlFile) throws CoreException, MalformedURLException {
-		URI uri = validateAndReturnOwlUrlOfSadlUri(sadlFile);
-        File retFile = new File(new SadlUtils().fileUrlToFileName(uri.toString()));
+        // Get the SADL file's corresponding OWL file.
+        URI owlFile = validateAndReturnOwlUrlOfResource(resource);
+        String s1 = owlFile.toFileString();
+        File retFile = new File(s1);
         return retFile;
-	}
+    }
 
     /**
      * Given a project Resource [corresponding to a SADL file in this project], find and
@@ -135,9 +121,9 @@ public class ResourceManager {
      * @param resource
      * @return
      * @throws CoreException
-     * @throws MalformedURLException 
      */
-    public static URI validateAndReturnOwlUrlOfResource(Resource resource) throws CoreException, MalformedURLException {
+    public static URI validateAndReturnOwlUrlOfResource(Resource resource) throws CoreException {
+
         URI sadlFile = resource.getURI();
         return validateAndReturnOwlUrlOfSadlUri(sadlFile);
     }
@@ -149,15 +135,14 @@ public class ResourceManager {
      * @param sadlFile
      * @return
      * @throws CoreException
-     * @throws MalformedURLException 
      */
-    public static URI validateAndReturnOwlUrlOfSadlUri(URI sadlFile) throws CoreException, MalformedURLException {
-    	logger.info("validateAndReturnOwlUrlOfSadlUri: sadlFile = "+sadlFile.toString());
-        if (!SADLEXT.equalsIgnoreCase(sadlFile.fileExtension())) {
-            String message = "SADL URI '" + sadlFile + "' must be a SADL file (ending in ." + SADLEXT + ")";
-            IStatus status = new Status(IStatus.ERROR, pluginId, message);
-            throw new CoreException(status);
-        }
+    public static URI validateAndReturnOwlUrlOfSadlUri(URI sadlFile) throws CoreException {
+    	logger.debug("validateAndReturnOwlUrlOfSadlUri: sadlFile = "+sadlFile.toString());
+//        if (!SADLEXT.equalsIgnoreCase(sadlFile.fileExtension())) {
+//            String message = "SADL URI '" + sadlFile + "' must be a SADL file (ending in ." + SADLEXT + ")";
+//            IStatus status = new Status(IStatus.ERROR, pluginId, message);
+//            throw new CoreException(status);
+//        }
 
         // Get the path of the OWL models directory and check that it exists.
         URI prjDir = null;
@@ -257,9 +242,8 @@ public class ResourceManager {
      *
      * @param owlFile
      * @return
-     * @throws MalformedURLException 
      */
-    public static URI validateAndReturnSadlFileEquivalentOfOwlUrl(URI owlFile) throws MalformedURLException {
+    public static URI validateAndReturnSadlFileEquivalentOfOwlUrl(URI owlFile) {
     	if (uriInOwlModelsDirectory(owlFile)) {
     		if (getOwlFileExtension().equalsIgnoreCase(owlFile.fileExtension())) {
     			// this is a file ending in .owl
@@ -309,17 +293,12 @@ public class ResourceManager {
      * Method to convert an altUrl to an OWL file into the corresponding name of a SADL file (without path)
      *
      * @param owlAltUrl
-     * @param errorIfNotExists TODO
      * @return
      * @throws MalformedURLException
      */
-    public static String sadlFileNameOfOwlAltUrl(String owlAltUrl, boolean errorIfNotExists) throws IOException {
+    public static String sadlFileNameOfOwlAltUrl(String owlAltUrl) throws MalformedURLException {
     	SadlUtils su = new SadlUtils();
     	File owlfile = new File(su.fileUrlToFileName(owlAltUrl));
-    	if (errorIfNotExists && !owlfile.exists()) {
-    		throw new FileNotFoundException(owlfile.getPath());
-    	}
-    	// TODO: Check that the URI is actually SADL derived
 		String fn = owlfile.getName();
 		int extLength = (fn.length() - fn.indexOf('.')) - 1;
     	return owlfile.getName().substring(0, fn.length() - extLength) + "sadl";
@@ -547,11 +526,8 @@ public class ResourceManager {
      * @throws IOException
      * @throws ConfigurationException
      */
-    public static String validateOwlModelsFolder(String owlModelsFolder) throws IOException, URISyntaxException, ConfigurationException {
-		if (owlModelsFolder.startsWith(IConfigurationManager.FILE_SHORT_PREFIX)) {
-			owlModelsFolder = new SadlUtils().fileUrlToFileName(owlModelsFolder);
-		}
-    	File mfpnf = new File(owlModelsFolder);
+    public static boolean validateOwlModelsFolder(String owlModelsFolder) throws IOException, URISyntaxException, ConfigurationException {
+		File mfpnf = new File(owlModelsFolder);
 		if (!mfpnf.exists()) {
 			boolean stat = mfpnf.mkdir();
 			if (!stat) {
@@ -566,8 +542,9 @@ public class ResourceManager {
 		if (!mappingFile.exists()) {
 			// new mapping model--initialize content
 			ResourceManager.copyMinimalPolicyFileToOwlModelsDirectory(owlModelsFolder);
+			return true;
 		}
-		return owlModelsFolder;
+		return false;
     }
 
     public static void refreshResource(String uri) {
@@ -728,122 +705,67 @@ public class ResourceManager {
 		}
 		return list;
 	}
-    
-    public static IProject getProject(URI someFileInProject) {
-   		// Get absolute location of workspace.
-   		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-   		// IPath workspaceDirectory = workspace.getRoot().getLocation().makeAbsolute();
-   		// int wsSegCnt = workspaceDirectory.segmentCount();
-   		// Get location of project from file URI; it's one more segment than workspace.
-   		// someFileInProject = convertPlatformUriToAbsoluteUri(someFileInProject);
-   		// int prjUrlSegCnt = someFileInProject.segmentCount();
-   		// URI prjDir = someFileInProject.trimSegments(prjUrlSegCnt - (wsSegCnt + 1));
-   		// new code
-   		if (someFileInProject.isPlatform()) {
-	   		String prjName = someFileInProject.segment(1);
-	   		IProject prj = workspace.getRoot().getProject(prjName);
-	   		return prj;
-   		} else if (someFileInProject.isFile()) {
-   			String s = someFileInProject.toFileString();
-   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
-   			if (file == null) {
-   		   		String prjName = someFileInProject.segment(someFileInProject.segmentCount() - 2);
-   		   		IProject prj = workspace.getRoot().getProject(prjName);
-   		   		if (prj != null) {
-   		   			return prj;
-   		   		}
-   			}
-	   		String prjName = file.getFullPath().segment(0);
-	   		IProject prj = workspace.getRoot().getProject(prjName);
-	   		return prj;
-   		} else {
-   			String s = someFileInProject.toString();
-   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
-   			if (file == null) {
-   				return null;
-   			}
-	   		String prjName = file.getFullPath().segment(0);
-	   		IProject prj = workspace.getRoot().getProject(prjName);
-	   		return prj;
-   		}
-    }
 
     /**
      * This method takes any actual file URI in the project as input and
      * returns the URI of the project's directory to use as a base part
      * for other file URIs or just to get the name of the project itself.
-     * @throws MalformedURLException 
      */
-    public static URI getProjectUri(URI someFileInProject) throws MalformedURLException {
-    	if (someFileInProject == null) {
-    		throw new IllegalStateException("Method called with null value for argument 'someFileInProject'");
+    public static URI getProjectUri(URI someFileInProject) {
+   		// Get absolute location of workspace.
+    	try {
+	   		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+	   		// IPath workspaceDirectory = workspace.getRoot().getLocation().makeAbsolute();
+	   		// int wsSegCnt = workspaceDirectory.segmentCount();
+	   		// Get location of project from file URI; it's one more segment than workspace.
+	   		// someFileInProject = convertPlatformUriToAbsoluteUri(someFileInProject);
+	   		// int prjUrlSegCnt = someFileInProject.segmentCount();
+	   		// URI prjDir = someFileInProject.trimSegments(prjUrlSegCnt - (wsSegCnt + 1));
+	   		// new code
+	   		if (someFileInProject.isPlatform()) {
+		   		String prjName = someFileInProject.segment(1);
+		   		IProject prj = workspace.getRoot().getProject(prjName);
+		   		URI prjDir = URI.createFileURI(prj.getLocation().toString());
+		   		return prjDir;
+	   		} else if (someFileInProject.isFile()) {
+	   			String s = someFileInProject.toFileString();
+	   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
+		   		String prjName = file.getFullPath().segment(0);
+		   		IProject prj = workspace.getRoot().getProject(prjName);
+		   		URI prjDir = URI.createFileURI(prj.getLocation().toString());
+		   		return prjDir;
+	   		} else {
+	   			String s = someFileInProject.toString();
+	   			IFile file = workspace.getRoot().getFileForLocation(new Path(s));
+		   		String prjName = file.getFullPath().segment(0);
+		   		IProject prj = workspace.getRoot().getProject(prjName);
+		   		URI prjDir = URI.createFileURI(prj.getLocation().toString());
+		   		return prjDir;
+	   		}
     	}
-    	else if (Platform.isRunning()) {
-	   		// Get absolute location of workspace.
-	    	try {
-	    		IProject prj = getProject(someFileInProject);
-	    		if (prj != null) {
-	    			URI prjDir = URI.createFileURI(prj.getLocation().toString());
-			   		return prjDir;
-	    		}
-	    		throw new IllegalStateException("Unable to find Project from in-project resource with URI '" + someFileInProject.toString() + "'");
-	    	}
-	    	catch (IllegalStateException e) {
-	    		// this is presumably a standalone (testing) situation--take a different approach
-	    		// get current directory--this should be the project dir if direct testing,
-	    		//	the ...\target\test-classes\ if Maven install tests
-	    		File curdir = new File(".");
-	    		String curdirStr = curdir.getAbsolutePath();
-	    		if (curdirStr.endsWith("target\\test-classes\\.")) {		// Maven test
-	    			curdirStr = curdirStr.substring(0, curdirStr.length() - 22);
-	    		}
-	    		else if (curdirStr.endsWith(".")) {							// plain JUnit test
-	    			curdirStr = curdirStr.substring(0, curdirStr.length() - 2);
-	    		}
-	    		curdir = new File(curdirStr);
-	    		if (curdir.exists() && curdir.isDirectory()) {
-	    			URI prjUri = URI.createFileURI(curdir.getAbsolutePath());
-	//    			File wkspcdir = curdir.getParentFile();
-	//    			String prjdirStr = wkspcdir.getAbsolutePath() + File.separator + someFileInProject.segment(1);
-	//        		URI prjUri = URI.createFileURI(prjdirStr);
-	        		return prjUri;
-	    		}
-	    		throw e;
-	    	}
-    	}
-    	else {
-    		// this is outside of Eclipse
-			File theFile = new File(new SadlUtils().fileUrlToFileName(someFileInProject.toString()));
-			File owlModelsFolder = fileParentContainsOwlModelsFolder(theFile);
-			if (owlModelsFolder != null) {
-				return URI.createFileURI(owlModelsFolder.getParent());
-			}
-    		return null;	// can only do this with an OWL file
+    	catch (IllegalStateException e) {
+    		// this is presumably a standalone (testing) situation--take a different approach
+    		// get current directory--this should be the project dir if direct testing,
+    		//	the ...\target\test-classes\ if Maven install tests
+    		File curdir = new File(".");
+    		String curdirStr = curdir.getAbsolutePath();
+    		if (curdirStr.endsWith("target\\test-classes\\.")) {		// Maven test
+    			curdirStr = curdirStr.substring(0, curdirStr.length() - 22);
+    		}
+    		else if (curdirStr.endsWith(".")) {							// plain JUnit test
+    			curdirStr = curdirStr.substring(0, curdirStr.length() - 2);
+    		}
+    		curdir = new File(curdirStr);
+    		if (curdir.exists() && curdir.isDirectory()) {
+    			URI prjUri = URI.createFileURI(curdir.getAbsolutePath());
+//    			File wkspcdir = curdir.getParentFile();
+//    			String prjdirStr = wkspcdir.getAbsolutePath() + File.separator + someFileInProject.segment(1);
+//        		URI prjUri = URI.createFileURI(prjdirStr);
+        		return prjUri;
+    		}
+    		throw e;
     	}
     }
-
-	private static File fileParentContainsOwlModelsFolder(File theFile) {
-		if (theFile.exists()) {
-			if (theFile.getParentFile().getName().equals(IConfigurationManager.OWLDIR)) {
-				// this appears to be in the OwlModels folder, so assume part of a project
-				return  theFile.getParentFile();
-			}
-			File[] siblings = theFile.getParentFile().listFiles();
-			for (int i = 0; i < siblings.length; i++) {
-				File f = siblings[i];
-				if (!f.equals(theFile)) {
-					if (f.getName().equals(IConfigurationManager.OWLDIR)) {
-						return f;
-					}
-					File hit = fileParentContainsOwlModelsFolder(f);
-					if (hit != null) {
-						return hit;
-					}
-				}
-			}
-		}
-		return null;
-	}
 
     /**
      * This method takes any actual file URL in the project as input and returns the String representation of
@@ -867,7 +789,7 @@ public class ResourceManager {
     	return null;
     }
 
-	public static URI getPolicyFileUrlForProject(URI someProjectUrl) throws MalformedURLException {
+	public static URI getPolicyFileUrlForProject(URI someProjectUrl) {
 		URI prjDir = getProjectUri(someProjectUrl);
      	URI owlDir = prjDir.appendSegment(getOwlDirName());
     	URI policyFileUrl = owlDir.appendSegment(IConfigurationManager.ONT_POLICY_RDF);
@@ -948,22 +870,17 @@ public class ResourceManager {
         return namedFile.getParent() + File.separator + siblingFilename;
     }
 
-    private static boolean copyModelFileToTarget(String targetFN, boolean bOverwriteOK) throws IOException, URISyntaxException {
+    protected static boolean copyModelFileToTarget(String targetFN, boolean bOverwriteOK) throws IOException, URISyntaxException {
         File target = new File(targetFN);
         if (target.exists() && !bOverwriteOK) {
             throw new IOException("File '" + targetFN + "' already exists and overwrite not authorized.");
         }
-        File source = getBundleModelFile(target.getName());
+        File source = getAbsoluteBundlePath("Models", target.getName());
         if (source != null) {
             copyFile(source, target);
             return true;
         }
         throw new IOException("Unable to find model file '" + target.getName() + "' in bundle.");
-    }
-    
-    public static File getBundleModelFile(String bundleFileName) throws IOException, URISyntaxException {
-        File source = getAbsoluteBundlePath("Models", bundleFileName);
-        return source;
     }
 
     /**
@@ -1170,7 +1087,7 @@ public class ResourceManager {
 	 * @param fileString
 	 * @return
 	 */
-	public static String findSadlFileInProject(String prjDir, String fileString) {
+	public static String findSadlFileInProject(String prjDir, String fileString, List<File> exclusionFolders) {
 		if (fileString.startsWith(ResourceManager.FILE_SHORT_PREFIX)) {
 			fileString = fileString.substring(ResourceManager.FILE_SHORT_PREFIX.length());
 		}
@@ -1180,11 +1097,18 @@ public class ResourceManager {
 		else if (fileString.startsWith(ResourceManager.FILE_ABS_URL_PREFIX)) {
 			fileString = fileString.substring(ResourceManager.FILE_ABS_URL_PREFIX.length());
 		}
-		String foundFile = findFile(prjDir, fileString);
+		String foundFile = findFile(prjDir, fileString, exclusionFolders);
 		return foundFile;
 	}
 
-	private static String findFile(String folder, String file) {
+	/**
+	 * This method finds a file in a folder structure
+	 * @param folder
+	 * @param file
+	 * @param excludeFolders
+	 * @return
+	 */
+	public static String findFile(String folder, String file, List<File> excludeFolders) {
 		String ffn = folder + File.separator + file;
 		File fl = new File(ffn);
 		if (fl.exists()) {
@@ -1195,8 +1119,9 @@ public class ResourceManager {
 			File[] files = fldfile.listFiles();
 			for (int i = 0; i < files.length; i++) {
 				File felement = files[i];
-				if (felement.isDirectory()) {
-					String nextlvlfile = findFile(felement.getAbsolutePath(), file);
+				// don't look for if directory is excluded
+				if (felement.isDirectory() && (excludeFolders == null || !excludeFolders.contains(felement))) {
+					String nextlvlfile = findFile(felement.getAbsolutePath(), file, excludeFolders);
 					if (nextlvlfile != null) {
 						return nextlvlfile;
 					}
@@ -1280,9 +1205,6 @@ public class ResourceManager {
      * @return -- the file extension specified by the format selected in preferences
      */
     public static String getOwlFileExtension() {
-    	if (!Platform.isRunning()) {
-    		return "owl";
-    	}
     	IPreferencesService service = Platform.getPreferencesService();
     	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", IConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
     	if (format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) || format.equals(IConfigurationManager.RDF_XML_FORMAT)) {
@@ -1323,42 +1245,32 @@ public class ResourceManager {
 		}
 		return tmpdir;
     }
-    
-    /**
-     * Method to find a ConfigurationManager with a mapping for a URI in another project (upon which this project depends)
-     * @param sadlModelManagerProvider
-     * @param thisProjectURI
-     * @param otherProjectURI
-     * @return
-     */
-    public static IConfigurationManagerForIDE findConfigurationManagerInOtherProject(SadlModelManagerProvider sadlModelManagerProvider, 
-    		URI thisProjectURI, String otherProjectURI) {
-		IProject prj = ResourceManager.getProject(thisProjectURI);
-		try {
-			IProject[] referencedProjects = prj.getReferencedProjects();
-			for (int i = 0; referencedProjects != null && i < referencedProjects.length; i++) {
-				IProject refedPrg = referencedProjects[i];
-				IFile modelFolder = refedPrg.getFile(ResourceManager.OWLDIR);
-				URI prjUri = ResourceManager.getProjectUri(URI.createURI(modelFolder.getLocationURI().toString()));
-				SadlModelManager sadlModelMgr = sadlModelManagerProvider.get(prjUri);
-				IConfigurationManagerForIDE otherProjectConfigMgr = sadlModelMgr.getConfigurationMgr(modelFolder.getLocation().toOSString());
-				if (otherProjectConfigMgr.containsMappingForURI(otherProjectURI)) {
-					return otherProjectConfigMgr;
-				}
-			}
-		} catch (CoreException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+	public static List<File> sadlExclusionFolders(String prjDir) {
+		List<File> exclusions = new ArrayList<File>();
+		exclusions.add(new File(prjDir + File.separator + OWLDIR));
+		exclusions.add(new File(prjDir + File.separator + TEMPDIR));
+		return exclusions;
+	}
+	
+    public static synchronized URI normalizeProjectUri(URI projectUri) throws IOException {
+		String pfstr = projectUri.toString();
+		if (pfstr == null) {
+			return projectUri;
 		}
-		return null;
-    }
+		pfstr = getSadlUtils().fileUrlToFileName(pfstr);
+		File prjFile = new File(pfstr);
+		pfstr = prjFile.getCanonicalPath();
+		pfstr = pfstr.replace('\\', '/');
+		return URI.createURI(pfstr);
+	}
+
+	public static SadlUtils getSadlUtils() {
+		if (sadlUtils  == null) {
+			sadlUtils = new SadlUtils();
+		}
+		return sadlUtils;
+	}
+
+
 }

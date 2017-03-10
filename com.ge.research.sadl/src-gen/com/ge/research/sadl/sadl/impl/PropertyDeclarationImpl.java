@@ -4,6 +4,7 @@ package com.ge.research.sadl.sadl.impl;
 
 import com.ge.research.sadl.sadl.AdditionalPropertyInfo;
 import com.ge.research.sadl.sadl.PropertyDeclaration;
+import com.ge.research.sadl.sadl.Range;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceIdentifier;
 import com.ge.research.sadl.sadl.ResourceName;
@@ -31,6 +32,8 @@ import org.eclipse.emf.ecore.util.InternalEList;
  * <p>
  * The following features are implemented:
  * <ul>
+ *   <li>{@link com.ge.research.sadl.sadl.impl.PropertyDeclarationImpl#getNoDomainPropName <em>No Domain Prop Name</em>}</li>
+ *   <li>{@link com.ge.research.sadl.sadl.impl.PropertyDeclarationImpl#getRange <em>Range</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.PropertyDeclarationImpl#getPropertyName <em>Property Name</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.PropertyDeclarationImpl#getSuperPropName <em>Super Prop Name</em>}</li>
  *   <li>{@link com.ge.research.sadl.sadl.impl.PropertyDeclarationImpl#getAddlPropInfo <em>Addl Prop Info</em>}</li>
@@ -45,6 +48,26 @@ import org.eclipse.emf.ecore.util.InternalEList;
  */
 public class PropertyDeclarationImpl extends StatementImpl implements PropertyDeclaration
 {
+  /**
+   * The cached value of the '{@link #getNoDomainPropName() <em>No Domain Prop Name</em>}' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getNoDomainPropName()
+   * @generated
+   * @ordered
+   */
+  protected ResourceName noDomainPropName;
+
+  /**
+   * The cached value of the '{@link #getRange() <em>Range</em>}' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getRange()
+   * @generated
+   * @ordered
+   */
+  protected Range range;
+
   /**
    * The cached value of the '{@link #getPropertyName() <em>Property Name</em>}' containment reference.
    * <!-- begin-user-doc -->
@@ -144,6 +167,102 @@ public class PropertyDeclarationImpl extends StatementImpl implements PropertyDe
   protected EClass eStaticClass()
   {
     return SadlPackage.Literals.PROPERTY_DECLARATION;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public ResourceName getNoDomainPropName()
+  {
+    return noDomainPropName;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public NotificationChain basicSetNoDomainPropName(ResourceName newNoDomainPropName, NotificationChain msgs)
+  {
+    ResourceName oldNoDomainPropName = noDomainPropName;
+    noDomainPropName = newNoDomainPropName;
+    if (eNotificationRequired())
+    {
+      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME, oldNoDomainPropName, newNoDomainPropName);
+      if (msgs == null) msgs = notification; else msgs.add(notification);
+    }
+    return msgs;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public void setNoDomainPropName(ResourceName newNoDomainPropName)
+  {
+    if (newNoDomainPropName != noDomainPropName)
+    {
+      NotificationChain msgs = null;
+      if (noDomainPropName != null)
+        msgs = ((InternalEObject)noDomainPropName).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME, null, msgs);
+      if (newNoDomainPropName != null)
+        msgs = ((InternalEObject)newNoDomainPropName).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME, null, msgs);
+      msgs = basicSetNoDomainPropName(newNoDomainPropName, msgs);
+      if (msgs != null) msgs.dispatch();
+    }
+    else if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME, newNoDomainPropName, newNoDomainPropName));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Range getRange()
+  {
+    return range;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public NotificationChain basicSetRange(Range newRange, NotificationChain msgs)
+  {
+    Range oldRange = range;
+    range = newRange;
+    if (eNotificationRequired())
+    {
+      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, SadlPackage.PROPERTY_DECLARATION__RANGE, oldRange, newRange);
+      if (msgs == null) msgs = notification; else msgs.add(notification);
+    }
+    return msgs;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public void setRange(Range newRange)
+  {
+    if (newRange != range)
+    {
+      NotificationChain msgs = null;
+      if (range != null)
+        msgs = ((InternalEObject)range).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - SadlPackage.PROPERTY_DECLARATION__RANGE, null, msgs);
+      if (newRange != null)
+        msgs = ((InternalEObject)newRange).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - SadlPackage.PROPERTY_DECLARATION__RANGE, null, msgs);
+      msgs = basicSetRange(newRange, msgs);
+      if (msgs != null) msgs.dispatch();
+    }
+    else if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, SadlPackage.PROPERTY_DECLARATION__RANGE, newRange, newRange));
   }
 
   /**
@@ -433,6 +552,10 @@ public class PropertyDeclarationImpl extends StatementImpl implements PropertyDe
   {
     switch (featureID)
     {
+      case SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME:
+        return basicSetNoDomainPropName(null, msgs);
+      case SadlPackage.PROPERTY_DECLARATION__RANGE:
+        return basicSetRange(null, msgs);
       case SadlPackage.PROPERTY_DECLARATION__PROPERTY_NAME:
         return basicSetPropertyName(null, msgs);
       case SadlPackage.PROPERTY_DECLARATION__SUPER_PROP_NAME:
@@ -459,6 +582,10 @@ public class PropertyDeclarationImpl extends StatementImpl implements PropertyDe
   {
     switch (featureID)
     {
+      case SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME:
+        return getNoDomainPropName();
+      case SadlPackage.PROPERTY_DECLARATION__RANGE:
+        return getRange();
       case SadlPackage.PROPERTY_DECLARATION__PROPERTY_NAME:
         return getPropertyName();
       case SadlPackage.PROPERTY_DECLARATION__SUPER_PROP_NAME:
@@ -488,6 +615,12 @@ public class PropertyDeclarationImpl extends StatementImpl implements PropertyDe
   {
     switch (featureID)
     {
+      case SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME:
+        setNoDomainPropName((ResourceName)newValue);
+        return;
+      case SadlPackage.PROPERTY_DECLARATION__RANGE:
+        setRange((Range)newValue);
+        return;
       case SadlPackage.PROPERTY_DECLARATION__PROPERTY_NAME:
         setPropertyName((ResourceName)newValue);
         return;
@@ -524,6 +657,12 @@ public class PropertyDeclarationImpl extends StatementImpl implements PropertyDe
   {
     switch (featureID)
     {
+      case SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME:
+        setNoDomainPropName((ResourceName)null);
+        return;
+      case SadlPackage.PROPERTY_DECLARATION__RANGE:
+        setRange((Range)null);
+        return;
       case SadlPackage.PROPERTY_DECLARATION__PROPERTY_NAME:
         setPropertyName((ResourceName)null);
         return;
@@ -559,6 +698,10 @@ public class PropertyDeclarationImpl extends StatementImpl implements PropertyDe
   {
     switch (featureID)
     {
+      case SadlPackage.PROPERTY_DECLARATION__NO_DOMAIN_PROP_NAME:
+        return noDomainPropName != null;
+      case SadlPackage.PROPERTY_DECLARATION__RANGE:
+        return range != null;
       case SadlPackage.PROPERTY_DECLARATION__PROPERTY_NAME:
         return propertyName != null;
       case SadlPackage.PROPERTY_DECLARATION__SUPER_PROP_NAME:

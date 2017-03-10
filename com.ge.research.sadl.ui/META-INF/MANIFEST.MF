@@ -2,13 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ui
 Bundle-Vendor: GE Research
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.ge.research.sadl;bundle-version="2.4.0";visibility:=reexport,
+Require-Bundle: com.ge.research.sadl;bundle-version="2.2.0";visibility:=reexport,
  org.eclipse.jface,
  org.eclipse.xtext.ui;bundle-version="2.4.3",
- org.eclipse.xtext.ui.ecore;bundle-version="2.4.3",
  org.eclipse.ui.console;bundle-version="3.5.200",
  org.eclipse.ui.editors;bundle-version="3.5.0",
  org.eclipse.ui.ide;bundle-version="3.5.0",
@@ -19,9 +18,9 @@ Require-Bundle: com.ge.research.sadl;bundle-version="2.4.0";visibility:=reexport
  org.eclipse.xtext.builder;bundle-version="2.4.3",
  org.eclipse.xtext.util,
  org.eclipse.ui.workbench,
- org.eclipse.core.resources,
- org.eclipse.emf.ecore.editor
+ org.eclipse.core.resources
 Import-Package: org.apache.log4j
+Eclipse-RegisterBuddy: com.ge.research.sadl.lib
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.ge.research.sadl.ui;
   uses:="org.eclipse.ui.plugin,
@@ -29,6 +28,7 @@ Export-Package: com.ge.research.sadl.ui;
    org.eclipse.xtext.ui,
    org.eclipse.xtext.ui.guice,
    com.google.inject",
+ com.ge.research.sadl.ui.actions;uses:="org.eclipse.core.runtime,org.eclipse.ui,com.ge.research.sadl.ui.editor",
  com.ge.research.sadl.ui.contentassist;
   uses:="org.eclipse.xtext,
    org.eclipse.emf.ecore,
@@ -86,7 +86,8 @@ Export-Package: com.ge.research.sadl.ui;
    org.eclipse.xtext.ui.editor.contentassist,
    org.eclipse.jface.text.quickassist",
  com.ge.research.sadl.ui.syntaxcoloring;
-  uses:="org.eclipse.ui,
+  uses:="org.eclipse.xtext.ui.editor,
+   org.eclipse.ui,
    com.ge.research.sadl.builder,
    com.ge.research.sadl.services,
    org.eclipse.core.resources,
@@ -144,6 +145,6 @@ Export-Package: com.ge.research.sadl.ui;
    org.apache.poi.poifs.dev",
  org.apache.poi.poifs.storage;uses:="org.apache.poi.poifs.property,org.apache.poi.poifs.filesystem",
  org.apache.poi.util;uses:="new org.apache.poi.util"
-Bundle-Activator: com.ge.research.sadl.ui.SadlActivatorExt
+Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
 Bundle-ClassPath: lib/poi-3.0.2-FINAL-20080204.jar,
  .

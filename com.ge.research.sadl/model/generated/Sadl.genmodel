@@ -12,6 +12,11 @@
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/boolean"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/decimal"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/int"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/integer"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/negativeInteger"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/nonNegativeInteger"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/positiveInteger"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/nonPositiveInteger"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/long"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/float"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/double"/>
@@ -19,6 +24,9 @@
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/dateTime"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/time"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/date"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/unsignedByte"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/unsignedInt"/>
+      <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/anySimpleType"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/gYearMonth"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/gYear"/>
       <genEnumLiterals ecoreEnumLiteral="Sadl.ecore#//DataType/gMonthDay"/>
@@ -37,9 +45,9 @@
     <genClasses ecoreClass="Sadl.ecore#//ModelName">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/baseUri"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/alias"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/version"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/annType"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//ModelName/annContent"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//ModelName/version"/>
     </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//Import">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Import/importURI"/>
@@ -234,6 +242,8 @@
     </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//Condition"/>
     <genClasses ecoreClass="Sadl.ecore#//PropertyDeclaration">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//PropertyDeclaration/noDomainPropName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//PropertyDeclaration/range"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//PropertyDeclaration/propertyName"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//PropertyDeclaration/superPropName"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//PropertyDeclaration/addlPropInfo"/>
@@ -335,6 +345,8 @@
     </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//Rule">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Rule/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Rule/annProps"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Rule/annValues"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//Rule/givens"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//Rule/ifs"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//Rule/thens"/>
@@ -355,6 +367,17 @@
     <genClasses ecoreClass="Sadl.ecore#//Explanation">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//Explanation/expr"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Explanation/rulename"/>
+    </genClasses>
+    <genClasses ecoreClass="Sadl.ecore#//StartWrite">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//StartWrite/write"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//StartWrite/dataOnly"/>
+    </genClasses>
+    <genClasses ecoreClass="Sadl.ecore#//EndWrite">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//EndWrite/filename"/>
+    </genClasses>
+    <genClasses ecoreClass="Sadl.ecore#//Read">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Read/filename"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Sadl.ecore#//Read/templateFilename"/>
     </genClasses>
     <genClasses ecoreClass="Sadl.ecore#//ElementSet">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Sadl.ecore#//ElementSet/elements"/>

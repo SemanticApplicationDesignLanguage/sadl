@@ -20,48 +20,51 @@
  */
 package com.ge.research.sadl;
 
-import org.eclipse.xtext.naming.IQualifiedNameConverter;
+import org.eclipse.xtext.linking.ILinkingService;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
-import org.eclipse.xtext.resource.IDerivedStateComputer;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IGlobalScopeProvider;
-import org.eclipse.xtext.scoping.IScopeProvider;
-import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider;
 import org.eclipse.xtext.scoping.impl.ImportUriResolver;
 import org.eclipse.xtext.service.SingletonBinding;
 
+import com.ge.research.sadl.builder.SadlConfigurationManagerProvider;
 import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.conversion.SadlTerminalConverters;
-import com.ge.research.sadl.naming.SadlQualifiedNameConverter;
-import com.ge.research.sadl.naming.SadlSimpleNameProvider;
-import com.ge.research.sadl.resource.SadlDerivedStateComputer;
-import com.ge.research.sadl.resource.SadlResource;
 import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy;
 import com.ge.research.sadl.scoping.SadlGlobalScopeProvider;
 import com.ge.research.sadl.scoping.SadlImportUriResolver;
-import com.ge.research.sadl.scoping.SadlLocalScopeProvider;
-import com.google.inject.Binder;
-import com.google.inject.name.Names;
+import com.ge.research.sadl.scoping.SadlLinkingService;
+import com.ge.research.sadl.resource.SadlResource;
+import com.ge.research.sadl.naming.SadlSimpleNameProvider;
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeModule {
-//    // Registers our SADL model manager.
-//    @SingletonBinding
-//    public Class<? extends SadlModelManager> bindSadlModelManager() {
-//        return SadlModelManager.class;
-//    }
+    // Registers our SADL model manager.
+    @SingletonBinding
+    public Class<? extends SadlModelManager> bindSadlModelManager() {
+        return SadlModelManager.class;
+    }
+    @SingletonBinding
+    public Class<? extends SadlConfigurationManagerProvider> bindSadlConfigurationManagerProvider() {
+    	return SadlConfigurationManagerProvider.class;
+    }
 
     // Registers our own URI resolver to handle file:// and http://.
     public Class<? extends ImportUriResolver> bindImportUriResolver() {
         return SadlImportUriResolver.class;
     }
 
-	@Override
+    @Override
     public Class<? extends IGlobalScopeProvider> bindIGlobalScopeProvider() {
         return SadlGlobalScopeProvider.class;
+    }
+
+    @Override
+    public Class<? extends ILinkingService> bindILinkingService() {
+        return SadlLinkingService.class;
     }
 
 	public Class<? extends org.eclipse.xtext.conversion.IValueConverterService> bindIValueConverterService() {
@@ -81,18 +84,5 @@ public class SadlRuntimeModule extends com.ge.research.sadl.AbstractSadlRuntimeM
 		return SadlSimpleNameProvider.class;
 	}
 
-	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
-		return SadlQualifiedNameConverter.class;
-	}
-
-	/** Map qualified names to simple names */
-	public void configureIScopeProviderDelegate(Binder binder) {
-		binder.bind(IScopeProvider.class).annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE)).to(SadlLocalScopeProvider.class);
-	}
-	
-	/** Creates ResourceNames for undeclared variables. */
-	public Class<? extends IDerivedStateComputer> bindIDerivedStateComputer () {
-		return SadlDerivedStateComputer.class;
-	}
 
 }

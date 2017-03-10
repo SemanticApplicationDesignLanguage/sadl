@@ -334,8 +334,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 					File[] xsdFiles = uddtFolderFile.listFiles();
 					for (int i = 0; i < xsdFiles.length; i++) {
 						FileReader fr = new FileReader(xsdFiles[i]);
-				        XSDDatatype.loadUserDefined(uri, fr, null, TypeMapper.getInstance());	
-				        fr.close();
+				        XSDDatatype.loadUserDefined(uri, fr, null, TypeMapper.getInstance());				
 					}
 				}
 			}
@@ -343,9 +342,6 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

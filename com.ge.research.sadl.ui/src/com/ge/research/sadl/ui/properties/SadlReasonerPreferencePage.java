@@ -18,7 +18,7 @@
 
 /***********************************************************************
  * $Last revised by: crapo $ 
- * $Revision: 1.3 $ Last modified on   $Date: 2014/11/03 20:13:28 $
+ * $Revision: 1.5 $ Last modified on   $Date: 2015/07/25 16:09:30 $
  ***********************************************************************/
 
 package com.ge.research.sadl.ui.properties;
@@ -26,14 +26,16 @@ package com.ge.research.sadl.ui.properties;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.ITranslator;
-
 import com.ge.research.sadl.reasoner.IReasoner;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -75,6 +77,8 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.SadlConfigurationManagerProvider;
+import com.ge.research.sadl.builder.SadlModelManager;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.ResourceManager;
 import com.google.inject.Inject;
@@ -107,7 +111,10 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	protected ITranslator checkedTranslator;
 	protected List<ITranslator> translators = null;
 
-	class ReasonerContentProvider implements IStructuredContentProvider {
+    @Inject
+    private SadlConfigurationManagerProvider configMgrProvider;
+
+    class ReasonerContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object inputElement) {
 			return reasoners.toArray();
 		}
@@ -208,8 +215,13 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	 */
 	public SadlReasonerPreferencePage() {
 		super();
-		allTranslators = ConfigurationManagerForIDE.getAvailableTranslators();
-		translators = allTranslators;
+		try {
+			allTranslators = ConfigurationManagerForIDE.getAvailableTranslators();
+			translators = allTranslators;
+		}
+		catch (Throwable t) {
+			System.err.println("Error getting availalble translators: " + t.getMessage());
+		}
 	}
 
 	/**
@@ -289,7 +301,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		// reasoner is not yet persisted.
 		String reasonerName = null;
 		try {
-			reasonerName = configurationManager.getReasonerClassName();
+			reasonerName = getConfigurationManager().getReasonerClassName();
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -333,7 +345,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 					String rc = r.getConfigurationCategory();
 					Map<String, ConfigurationOption> config = r.getReasonerConfigurationOptions();
 					ReasonerConfigurationDialog dialog = new ReasonerConfigurationDialog(
-							getShell(), rc, config, configurationManager);
+							getShell(), rc, config, getConfigurationManager());
 					int dialogReturnButton = dialog.open();
 				}
 			}
@@ -360,7 +372,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 				Map<String, ConfigurationOption> config = r.getReasonerConfigurationOptions();
 				// addTestingOptions(config);
 				ReasonerConfigurationDialog dialog = new ReasonerConfigurationDialog(
-						getShell(), rc, config, configurationManager);
+						getShell(), rc, config, getConfigurationManager());
 				int dialogReturnButton = dialog.open();
 			}
 		});
@@ -426,7 +438,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		// reasoner is not yet persisted.
 		String translatorName = null;
 		try {
-			translatorName = configurationManager.getTranslatorClassName();
+			translatorName = getConfigurationManager().getTranslatorClassName();
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -469,7 +481,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 					String tc = t.getConfigurationCategory();
 					Map<String, ConfigurationOption> config = t.getTranslatorConfigurationOptions();
 					TranslatorConfigurationDialog dialog = new TranslatorConfigurationDialog(
-							getShell(), t, configurationManager);
+							getShell(), t, getConfigurationManager());
 					int dialogReturnButton = dialog.open();
 				}
 			}
@@ -496,7 +508,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 				Map<String, ConfigurationOption> config = t.getTranslatorConfigurationOptions();
 				// addTestingOptions(config);
 				TranslatorConfigurationDialog dialog = new TranslatorConfigurationDialog(
-						getShell(), t, configurationManager);
+						getShell(), t, getConfigurationManager());
 				int dialogReturnButton = dialog.open();
 			}
 		});
@@ -528,8 +540,8 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		this.workbench = workbench;
 		String configDir = project.getLocation().append(ResourceManager.OWLDIR).toPortableString(); 
 		try {
-			if (configurationManager == null) {
-				configurationManager = new ConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
+			if (getConfigurationManager() == null) {
+				setConfigurationManager(new ConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat()));
 			}
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -578,7 +590,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	protected void performDefaults() {
 		String reasonerName = null;
 		try {
-			reasonerName = configurationManager.getReasonerClassName();
+			reasonerName = getConfigurationManager().getReasonerClassName();
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -680,8 +692,8 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		this.project = (IProject) element.getAdapter(IProject.class); 
 		String configDir = project.getLocation().append(ResourceManager.OWLDIR).toPortableString(); 
 		try {
-			if (configurationManager == null) {
-				configurationManager = new ConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
+			if (getConfigurationManager() == null) {
+				setConfigurationManager(new ConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat()));
 			}
 			reasoners = ConfigurationManagerForIDE.getAvailableReasoners();
 			logger.debug("Number of reasoners: "+reasoners.size());
@@ -723,14 +735,14 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	private void saveReasonerSpec() {
-		this.configurationManager.clearReasoner();	// need to remove any residual reasoner so it won't "stick"
-		this.configurationManager.setReasonerClassName(checkedReasoner != null ? checkedReasoner.getClass().getName() : null);
-		this.configurationManager.saveConfiguration();
+		this.getConfigurationManager().clearReasoner();	// need to remove any residual reasoner so it won't "stick"
+		this.getConfigurationManager().setReasonerClassName(checkedReasoner != null ? checkedReasoner.getClass().getName() : null);
+		this.getConfigurationManager().saveConfiguration();
 	}
 	
 	private void saveTranslatorSpec() throws ConfigurationException {
-		this.configurationManager.setTranslatorClassName(checkedTranslator != null ? checkedTranslator.getClass().getName() : null);
-		this.configurationManager.saveConfiguration();
+		this.getConfigurationManager().setTranslatorClassName(checkedTranslator != null ? checkedTranslator.getClass().getName() : null);
+		this.getConfigurationManager().saveConfiguration();
 	}
 
 
@@ -742,14 +754,19 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	public List<ITranslator> getAvailableTranslatorsForReasoner(IReasoner reasoner) {
 		List<ITranslator> rval = new ArrayList<ITranslator>();
 		for (ITranslator translator : allTranslators) {
-			String family = translator.getReasonerFamily();
-			if (family != null && family.equals(reasoner.getReasonerFamily())) {
-//				if (reasoner.getConfigurationCategory().equalsIgnoreCase("jena") &&
-//					translator.getConfigurationCategory().contains("Opt")) {
-//					 continue;
-//				}
-				rval.add(translator);
-			}			
+			try {
+				String family = translator.getReasonerFamily();
+				if (family != null && family.equals(reasoner.getReasonerFamily())) {
+	//				if (reasoner.getConfigurationCategory().equalsIgnoreCase("jena") &&
+	//					translator.getConfigurationCategory().contains("Opt")) {
+	//					 continue;
+	//				}
+					rval.add(translator);
+				}
+			}
+			catch (Throwable t) {
+				System.out.println("Error encountered finding translators for reasoner '" + reasoner.getClass() + "': " + t.getMessage());
+			}
 		}
 		return rval;
 	}
@@ -764,6 +781,32 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		config.put("integerOption", integerOption);
 		ConfigurationOption doubleOption = new ConfigurationOption(category, "doubleOption", "Double option", new Double(123.45));
 		config.put("doubleOption", doubleOption);
+	}
+
+	private IConfigurationManagerForIDE getConfigurationManager() {
+		if (configurationManager != null) {
+			return configurationManager;
+		}
+		if (configMgrProvider != null) {
+			String prjDir = project.getLocation().toPortableString(); 
+			URI projectUri = URI.createURI(prjDir);
+			try {
+				IConfigurationManagerForIDE cm = configMgrProvider.getConfigurationManager(projectUri);
+				setConfigurationManager(cm);
+				return cm;
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	private void setConfigurationManager(IConfigurationManagerForIDE configurationManager) {
+		this.configurationManager = configurationManager;
 	}
 
 }

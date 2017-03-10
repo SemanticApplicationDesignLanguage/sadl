@@ -22,6 +22,7 @@ import com.ge.research.sadl.sadl.DisjointClasses;
 import com.ge.research.sadl.sadl.Display;
 import com.ge.research.sadl.sadl.ElementSet;
 import com.ge.research.sadl.sadl.EmbeddedInstanceDeclaration;
+import com.ge.research.sadl.sadl.EndWrite;
 import com.ge.research.sadl.sadl.EnumeratedAllAndSomeValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedAllValuesFrom;
 import com.ge.research.sadl.sadl.EnumeratedInstances;
@@ -73,6 +74,7 @@ import com.ge.research.sadl.sadl.PropertyOfClass;
 import com.ge.research.sadl.sadl.Query;
 import com.ge.research.sadl.sadl.Range;
 import com.ge.research.sadl.sadl.RangeType;
+import com.ge.research.sadl.sadl.Read;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceByRestriction;
 import com.ge.research.sadl.sadl.ResourceBySetOp;
@@ -85,6 +87,7 @@ import com.ge.research.sadl.sadl.SadlPackage;
 import com.ge.research.sadl.sadl.SelectExpression;
 import com.ge.research.sadl.sadl.SomeValuesCondition;
 import com.ge.research.sadl.sadl.SomeValuesFrom;
+import com.ge.research.sadl.sadl.StartWrite;
 import com.ge.research.sadl.sadl.Statement;
 import com.ge.research.sadl.sadl.SubTypeOf;
 import com.ge.research.sadl.sadl.SubjProp;
@@ -238,6 +241,9 @@ public class SadlFactoryImpl extends EFactoryImpl implements SadlFactory
       case SadlPackage.EXPR: return createExpr();
       case SadlPackage.DISPLAY: return createDisplay();
       case SadlPackage.EXPLANATION: return createExplanation();
+      case SadlPackage.START_WRITE: return createStartWrite();
+      case SadlPackage.END_WRITE: return createEndWrite();
+      case SadlPackage.READ: return createRead();
       case SadlPackage.ELEMENT_SET: return createElementSet();
       case SadlPackage.SELECT_EXPRESSION: return createSelectExpression();
       case SadlPackage.CONSTRUCT_EXPRESSION: return createConstructExpression();
@@ -1122,6 +1128,39 @@ public class SadlFactoryImpl extends EFactoryImpl implements SadlFactory
   {
     ExplanationImpl explanation = new ExplanationImpl();
     return explanation;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public StartWrite createStartWrite()
+  {
+    StartWriteImpl startWrite = new StartWriteImpl();
+    return startWrite;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EndWrite createEndWrite()
+  {
+    EndWriteImpl endWrite = new EndWriteImpl();
+    return endWrite;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Read createRead()
+  {
+    ReadImpl read = new ReadImpl();
+    return read;
   }
 
   /**
