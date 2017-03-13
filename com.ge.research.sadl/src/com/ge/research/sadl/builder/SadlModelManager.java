@@ -41,8 +41,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -50,10 +50,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.builder.IXtextBuilderParticipant.BuildType;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.INode;
@@ -89,12 +85,12 @@ import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
-import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
@@ -156,7 +152,6 @@ import com.ge.research.sadl.sadl.OfPhrase;
 import com.ge.research.sadl.sadl.PropValPartialTriple;
 import com.ge.research.sadl.sadl.PropertyDeclaration;
 import com.ge.research.sadl.sadl.Range;
-import com.ge.research.sadl.sadl.RangeType;
 import com.ge.research.sadl.sadl.Read;
 import com.ge.research.sadl.sadl.ResourceByName;
 import com.ge.research.sadl.sadl.ResourceByRestriction;
@@ -186,7 +181,7 @@ import com.hp.hpl.jena.vocabulary.OWL;
  * $Author: crapo $ 
  * $Revision: 1.18 $ Last modified on   $Date: 2016/04/01 20:44:04 $
  */
-public class SadlModelManager extends SadlSwitch<EObject> implements IPartListener2{
+public class SadlModelManager extends SadlSwitch<EObject> {
 
     private static final Logger logger = LoggerFactory.getLogger(SadlModelManager.class);
     
@@ -211,7 +206,6 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     
     private boolean savingModel = false;	// true if this is part of build (or save)
     private boolean editorOpen = false;
-    private boolean addedAsListener = false;
 
     class ModelInfo {
     	private ModelManager model;
@@ -682,17 +676,6 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
     		}
     	}
         annotateErrors(object, addModelName(object.getBaseUri(), object.getVersion(), alias, labels, comments));   
-        if (!addedAsListener) {
-        	IWorkbenchWindow wndw = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        	if (wndw != null) {
-        		wndw.getPartService().addPartListener(this);
-        		addedAsListener = true;
-//        		System.out.println("Added part listener");
-        	}
-//        	else {
-//        		System.out.println("Failed to add part listener");
-//        	}
-        }
         return object;
     }
     
@@ -3713,53 +3696,6 @@ public class SadlModelManager extends SadlSwitch<EObject> implements IPartListen
 
 	public void setCurrentResource(Resource currentResource) {
 		this.currentResource = currentResource;
-	}
-
-	@Override
-	public void partActivated(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partClosed(IWorkbenchPartReference partRef) {
-		// TODO
-	}
-
-	@Override
-	public void partDeactivated(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partOpened(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partHidden(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partVisible(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void partInputChanged(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

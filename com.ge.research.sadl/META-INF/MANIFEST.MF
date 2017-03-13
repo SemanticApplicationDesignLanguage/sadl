@@ -21,8 +21,7 @@ Require-Bundle: org.eclipse.xtext;bundle-version="2.4.3";visibility:=reexport,
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.utils,
- org.apache.log4j,
- org.eclipse.ui
+ org.apache.log4j
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: au.com.bytecode.opencsv,
