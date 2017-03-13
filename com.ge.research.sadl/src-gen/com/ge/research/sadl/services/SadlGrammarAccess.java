@@ -305,8 +305,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		
 		//// These are the things that translate directly to OWL.
 		//Statement:
-		//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue
-		//	| MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
+		//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
+		//	MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 		//	DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
 		//	InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
 		//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType;
@@ -315,8 +315,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		//ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
 		//MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 		//DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
-		//InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
-		//ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType
+		//InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement | ExistingInstanceAttribution
+		//| InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType
 		public Alternatives getAlternatives() { return cAlternatives; }
 
 		//ClassDeclaration
@@ -7147,8 +7147,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 		public EnumRule getRule() { return rule; }
 
 		//string | boolean | decimal | int | integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger
-		//| long | float | double | duration | dateTime | time | date | unsignedByte | unsignedInt | anySimpleType | gYearMonth
-		//| gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data
+		//| long | float | double | duration | dateTime | time | date | unsignedByte | unsignedInt | anySimpleType | gYearMonth |
+		//gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | data
 		public Alternatives getAlternatives() { return cAlternatives; }
 
 		//string
@@ -7542,8 +7542,8 @@ public class SadlGrammarAccess extends AbstractGrammarElementFinder {
 
 	//// These are the things that translate directly to OWL.
 	//Statement:
-	//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue
-	//	| MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
+	//	ClassDeclaration | ComplementOfClass | DisjointClasses | EquivalentConcepts | AllValuesFrom | Cardinality | HasValue |
+	//	MaxCardinality | MinCardinality | SomeValuesFrom | EnumeratedAllAndSomeValuesFrom | EnumeratedAllValuesFrom |
 	//	DefaultValue | NecessaryAndSufficient | PropertyDeclaration | FunctionalProperty | InverseFunctionalProperty |
 	//	InverseProperty | SymmetricalProperty | TransitiveProperty | InstanceDeclarationStatement |
 	//	ExistingInstanceAttribution | InstanceDifferentFrom | InstancesAllDifferent | UserDefinedDataType;

@@ -5383,8 +5383,8 @@ public class InternalSadlLexer extends Lexer {
         "\1\145\2\uffff\2\145\2\162\2\147\2\60\2\145\2\uffff\2\162\2\60\2"+
         "\uffff";
     static final String DFA26_maxS =
-        "\1\uffff\1\163\1\172\1\uffff\1\157\1\uffff\1\145\1\163\3\uffff"+
-        "\1\162\1\171\1\157\1\165\1\171\1\165\1\145\1\151\1\171\1\151\2\uffff"+
+        "\1\uffff\1\163\1\172\1\uffff\1\157\1\uffff\1\145\1\163\3\uffff\1"+
+        "\162\1\171\1\157\1\165\1\171\1\165\1\145\1\151\1\171\1\151\2\uffff"+
         "\1\157\1\uffff\1\172\1\150\1\170\1\162\1\145\1\165\1\uffff\1\151"+
         "\1\170\1\162\1\145\1\157\2\162\1\uffff\1\174\1\46\4\75\1\uffff\1"+
         "\57\1\172\1\uffff\1\156\1\71\3\uffff\2\uffff\2\uffff\2\151\1\163"+
@@ -5477,8 +5477,8 @@ public class InternalSadlLexer extends Lexer {
             "\1\27\1\16\1\4\1\13\1\34\1\66\1\35\1\23\1\14\1\1\1\6\1\22\3"+
             "\66\1\11\1\50\1\12\1\64\uff81\72",
             "\1\75\3\uffff\1\73\1\74",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\13\76\1\77\1\76"+
-            "\1\101\3\76\1\102\1\100\1\103\6\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\13\76\1\77\1\76\1"+
+            "\101\3\76\1\102\1\100\1\103\6\76",
             "",
             "\1\107\11\uffff\1\106",
             "",
@@ -5496,8 +5496,8 @@ public class InternalSadlLexer extends Lexer {
             "\147",
             "\1\150\3\uffff\1\151",
             "\1\153\1\152",
-            "\1\155\3\uffff\1\160\3\uffff\1\154\12\uffff\1\161\1\156\3"+
-            "\uffff\1\157",
+            "\1\155\3\uffff\1\160\3\uffff\1\154\12\uffff\1\161\1\156\3\uffff"+
+            "\1\157",
             "\1\162",
             "",
             "",
@@ -5545,14 +5545,14 @@ public class InternalSadlLexer extends Lexer {
             "\1\u00ad\15\uffff\1\u00ae",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\2\76\1\u00b0\7\76"+
             "\1\u00af\17\76",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\3\76\1\u00b2\11"+
-            "\76\1\u00b3\12\76\1\u00b4\1\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\3\76\1\u00b2\11\76"+
+            "\1\u00b3\12\76\1\u00b4\1\76",
             "\1\u00b6",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\32\76",
             "",
             "",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\15\76\1\u00b9\5"+
-            "\76\1\u00b8\6\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\15\76\1\u00b9\5\76"+
+            "\1\u00b8\6\76",
             "\1\u00bb",
             "",
             "\1\u00bc",
@@ -5564,8 +5564,7 @@ public class InternalSadlLexer extends Lexer {
             "",
             "",
             "",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\3\76\1\u00c3\26"+
-            "\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\3\76\1\u00c3\26\76",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\32\76",
             "\1\u00c6\6\uffff\1\u00c7",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\17\76\1\u00c8\12"+
@@ -5669,8 +5668,7 @@ public class InternalSadlLexer extends Lexer {
             "",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\32\76",
             "",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\4\76\1\u0117\25"+
-            "\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\4\76\1\u0117\25\76",
             "\1\u0119\1\uffff\1\u011a",
             "",
             "\1\u011b",
@@ -5680,8 +5678,7 @@ public class InternalSadlLexer extends Lexer {
             "",
             "",
             "\1\u011f",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\4\76\1\u0120\25"+
-            "\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\4\76\1\u0120\25\76",
             "\1\u0122",
             "",
             "",
@@ -5690,8 +5687,8 @@ public class InternalSadlLexer extends Lexer {
             "\1\u0125",
             "",
             "\1\u0126",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\15\76\1\u0127\3"+
-            "\76\1\u0128\10\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\15\76\1\u0127\3\76"+
+            "\1\u0128\10\76",
             "\1\u012a",
             "\1\u012b",
             "\1\u012c",
@@ -5782,8 +5779,7 @@ public class InternalSadlLexer extends Lexer {
             "",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\32\76",
             "",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\22\76\1\u0179\7"+
-            "\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\22\76\1\u0179\7\76",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\32\76",
             "\1\u017c",
             "",
@@ -5804,8 +5800,7 @@ public class InternalSadlLexer extends Lexer {
             "\1\u018a",
             "\1\u018b",
             "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\32\76",
-            "\12\76\7\uffff\23\76\1\u018d\6\76\4\uffff\1\76\1\uffff\32"+
-            "\76",
+            "\12\76\7\uffff\23\76\1\u018d\6\76\4\uffff\1\76\1\uffff\32\76",
             "\1\u018f",
             "\1\u0190",
             "\1\u0191",
@@ -5821,8 +5816,7 @@ public class InternalSadlLexer extends Lexer {
             "\1\u019a",
             "\1\u019b",
             "\1\u019c",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\22\76\1\u019d\7"+
-            "\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\22\76\1\u019d\7\76",
             "\1\u019f",
             "\1\u01a0",
             "\1\u01a1",
@@ -5863,8 +5857,7 @@ public class InternalSadlLexer extends Lexer {
             "\1\u01c1",
             "\1\u01c2",
             "\1\u01c3",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\22\76\1\u01c4\7"+
-            "\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\22\76\1\u01c4\7\76",
             "\1\u01c6",
             "\1\u01c7",
             "\1\u01c8",
@@ -5879,8 +5872,7 @@ public class InternalSadlLexer extends Lexer {
             "\1\u01cc",
             "",
             "",
-            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\4\76\1\u01cd\25"+
-            "\76",
+            "\12\76\7\uffff\32\76\4\uffff\1\76\1\uffff\4\76\1\u01cd\25\76",
             "\1\u01cf",
             "",
             "",
@@ -5987,8 +5979,7 @@ public class InternalSadlLexer extends Lexer {
             "",
             "\1\u021a",
             "",
-            "\12\76\7\uffff\3\76\1\u021b\26\76\4\uffff\1\76\1\uffff\32"+
-            "\76",
+            "\12\76\7\uffff\3\76\1\u021b\26\76\4\uffff\1\76\1\uffff\32\76",
             "\1\u021d",
             "",
             "\1\u021e",
