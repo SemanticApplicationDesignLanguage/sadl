@@ -935,6 +935,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (leftTypeCheckInfo != null && isVariable(leftTypeCheckInfo) && ((BinaryOperation)expression).getRight() instanceof Declaration) {
 				return rightTypeCheckInfo;
 			}
+			if (((BinaryOperation) expression).getLeft() instanceof PropOfSubject && ((BinaryOperation)expression).getRight() instanceof Declaration) {
+				TypeCheckInfo subjtype = getType(((PropOfSubject)((BinaryOperation) expression).getLeft()).getRight());
+				ConceptIdentifier subject = subjtype.getTypeCheckType();
+				if (subject != null) {
+					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
+				}
+			}
+
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
 					leftTypeCheckInfo, rightTypeCheckInfo);
 			if (getModelProcessor().isNumericOperator(((BinaryOperation) expression).getOp())) {
@@ -2338,6 +2346,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return false;
 			}
 			else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				if (isConjunctiveLocalRestriction(leftExpression, rightExpression)) {
+					return true;
+				}
 				if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
 					return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
 				}
@@ -2350,6 +2361,34 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return true;
+	}
+	
+	private boolean isConjunctiveLocalRestriction(EObject leftExpression, EObject rightExpression) {
+		if (rightExpression instanceof Declaration && rightExpression.eContainer() instanceof BinaryOperation && 
+		((BinaryOperation)rightExpression.eContainer()).getOp().equals("is") && rightExpression.eContainer().eContainer() instanceof BinaryOperation &&
+		((BinaryOperation)rightExpression.eContainer().eContainer()).getOp().equals("or") && contains(rightExpression.eContainer().eContainer(), leftExpression)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if eobj1 contains eobj2 else false
+	 * 
+	 * @param eobj1
+	 * @param eobj2
+	 * @return
+	 */
+	protected boolean contains(EObject eobj1, EObject eobj2) {
+		if (eobj2.eContainer() != null) {
+			if (eobj2.eContainer().equals(eobj1)) {
+				return true;
+			}
+			else {
+				return contains(eobj1, eobj2.eContainer());
+			}
+		}
+		return false;
 	}
 	
 	private ConceptIdentifier getConceptIdentifierFromTypeCheckInfo(TypeCheckInfo tci) {
