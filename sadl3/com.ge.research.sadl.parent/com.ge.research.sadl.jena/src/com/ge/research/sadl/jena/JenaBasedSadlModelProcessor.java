@@ -3297,33 +3297,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 			else if (spr1 instanceof SadlCondition) {
-				if (subject.canAs(OntClass.class)){ 
-					OntClass cls = subject.as(OntClass.class);
-					OntProperty prop = getTheJenaModel().getOntProperty(propUri);
-					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
-						OntClass condCls = sadlConditionToOntClass((SadlCondition) spr1, prop, propType);
-						cls.addSuperClass(condCls);
-						retProp = null;
-					}
-					else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-						OntClass condCls = sadlConditionToOntClass((SadlCondition) spr1, prop, propType);
-						cls.addSuperClass(condCls);
-						retProp = null;
-					}
-					else if (propType.equals(OntConceptType.RDF_PROPERTY)) {
-						if (prop == null) {
-							prop = getOrCreateRdfProperty(propUri);
-						}
-						OntClass condCls = sadlConditionToOntClass((SadlCondition) spr1, prop, propType);
+				OntProperty prop = getTheJenaModel().getOntProperty(propUri);
+				if (prop == null) {
+					prop = getOrCreateRdfProperty(propUri);
+				}
+				OntClass condCls = sadlConditionToOntClass((SadlCondition) spr1, prop, propType);
+				OntClass cls = null;
+				if (subject != null) {
+					if (subject.canAs(OntClass.class)){
+						cls = subject.as(OntClass.class);
 						cls.addSuperClass(condCls);
 						retProp = null;
 					}
 					else {
-						throw new JenaProcessorException("Invalid property type: " + propType.toString());
+						throw new JenaProcessorException("Unable to convert concept being restricted (" + subject.toString() + ") to an OntClass.");
 					}
 				}
 				else {
-					throw new JenaProcessorException("Unable to convert concept being restricted (" + subject.toString() + ") to an OntClass.");
+					// I think this is OK... AWC 3/13/2017
 				}
 			}
 			else if (spitr.hasNext()) {
