@@ -844,7 +844,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing
 	public Object getClassInstance(String reasonerClassName)
 			throws InstantiationException, IllegalAccessException,
 			ClassNotFoundException {
-		return Platform.getBundle("com.ge.research.sadl").loadClass(reasonerClassName).newInstance();
+		if (Platform.isRunning()) {
+			return Platform.getBundle("com.ge.research.sadl").loadClass(reasonerClassName).newInstance();
+		} else {
+			return Class.forName(reasonerClassName).newInstance();
+		}
 
 	}
 

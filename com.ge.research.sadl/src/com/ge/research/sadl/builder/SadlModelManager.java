@@ -1867,7 +1867,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
      * Logs errors on the console.  Needs to be revamped later to insert error markers.
      */
     private void reportErrors(List<ModelError> errors) {
-        if (errors != null && errors.size() > 0) {
+        if (errors != null && errors.size() > 0 && Platform.isRunning()) {
         	int newErrorCount = errors.size();
         	int totalErrors = augmentErrorCount(newErrorCount);
         	if (markErrors) {
@@ -2173,7 +2173,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	public void reportError(EObject object, String errorMsg) {
 		setTranslationErrors(getNumTranslationErrors() + 1);
 		ICompositeNode node = NodeModelUtils.findActualNodeFor(object);
-		if (node != null) {
+		if (node != null && Platform.isRunning()) {
 			int lnnum = node.getStartLine();
 			int lnlen = node.getLength();
 			int offset = node.getOffset();
@@ -2216,7 +2216,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 	@SuppressWarnings("unused")
     private void reportWarning(EObject object, String warningMsg) {
 		ICompositeNode node = NodeModelUtils.findActualNodeFor(object);
-		if (node != null) {
+		if (node != null && Platform.isRunning()) {
 			int lnnum = node.getStartLine();
 			int lnlen = node.getLength();
 			int offset = node.getOffset();

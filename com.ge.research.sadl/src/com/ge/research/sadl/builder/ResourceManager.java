@@ -62,6 +62,7 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.cli.SadlCli;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.utils.SadlUtils;
@@ -744,6 +745,11 @@ public class ResourceManager {
 	   		}
     	}
     	catch (IllegalStateException e) {
+    		
+    		if (SadlCli.projectRootUri.isPresent()) {
+    			return SadlCli.projectRootUri.get(); 
+    		}
+    		
     		// this is presumably a standalone (testing) situation--take a different approach
     		// get current directory--this should be the project dir if direct testing,
     		//	the ...\target\test-classes\ if Maven install tests
@@ -909,6 +915,17 @@ public class ResourceManager {
             }
         }
         else {
+        	
+        	if (!Platform.isRunning()) {
+        		final URL resourceUrl = ResourceManager.class.getClassLoader().getResource(relPath + "/" + file);
+        		if (resourceUrl != null) {
+        			final File resource = new File(resourceUrl.toURI());
+        			if (resource.exists()) {
+        				return resource;
+        			}
+        		}
+        	}
+        	
             try {
                 throw new IOException("SADL bundle not found! Unable to get absolute path from relative path '" + relPath + "'");
             }
@@ -1205,21 +1222,24 @@ public class ResourceManager {
      * @return -- the file extension specified by the format selected in preferences
      */
     public static String getOwlFileExtension() {
-    	IPreferencesService service = Platform.getPreferencesService();
-    	String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", IConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
-    	if (format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) || format.equals(IConfigurationManager.RDF_XML_FORMAT)) {
-    		return "owl";
+    	if (Platform.isRunning()) {
+    		IPreferencesService service = Platform.getPreferencesService();
+    		String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", IConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
+    		if (format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) || format.equals(IConfigurationManager.RDF_XML_FORMAT)) {
+    			return "owl";
+    		}
+    		else if (format.equals(IConfigurationManager.N3_FORMAT))	{
+    			return "n3";
+    		}
+    		else if (format.equals(IConfigurationManager.N_TRIPLE_FORMAT)) {
+    			return "nt";
+    		}
+    		else {
+    			return "owl";	// reasonable default?
+    		}
     	}
-    	else if (format.equals(IConfigurationManager.N3_FORMAT))	{
-    		return "n3";
-    	}
-    	else if (format.equals(IConfigurationManager.N_TRIPLE_FORMAT)) {
-    		return "nt";
-    	}
-    	else {
-    		return "owl";	// reasonable default?
-    	}
-    }
+    	return "owl";
+	}
 
     /**
      * Method to determine, from preferences, the OWL file format to use

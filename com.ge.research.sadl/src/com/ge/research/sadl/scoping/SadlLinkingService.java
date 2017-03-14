@@ -7,6 +7,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.Resource.Factory;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.linking.impl.DefaultLinkingService;
 import org.eclipse.xtext.linking.impl.IllegalNodeException;
 import org.eclipse.xtext.nodemodel.INode;
@@ -29,6 +31,12 @@ public class SadlLinkingService extends DefaultLinkingService {
     			Resource resource = context.eResource().getResourceSet().getResource(SADL_URI, false);
     			if (resource == null) {
     				resource = context.eResource().getResourceSet().createResource(SADL_URI);
+    				// In headless case the default XMI resource factory is missing.
+    				if (resource == null) {
+    					final Factory factory = new XMIResourceFactoryImpl();
+    					resource = factory.createResource(SADL_URI);
+    					context.eResource().getResourceSet().getResources().add(resource);
+    				}
     			}
     			ResourceName resourceName = SadlFactory.eINSTANCE.createResourceName();
     			resourceName.setName(name);
