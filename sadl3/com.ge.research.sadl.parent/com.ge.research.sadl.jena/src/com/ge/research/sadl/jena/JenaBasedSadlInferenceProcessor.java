@@ -1200,7 +1200,11 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	
 	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString = translator.translateQuery(getTheJenaModel(), q);
+		if (queryString == null && q.getSparqlQueryString() != null) {
+			queryString = q.getSparqlQueryString();
+		}
 		IReasoner reasoner = getInitializedReasoner();
+		queryString = reasoner.prepareQuery(queryString);
 		ResultSet results =  reasoner.ask(queryString);
 		return results;
 	}
