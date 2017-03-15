@@ -1,12 +1,13 @@
 package com.ge.research.sadl.cli;
 
 import static com.ge.research.sadl.builder.ResourceManager.SADLEXTWITHPREFIX;
+import static com.ge.research.sadl.cli.SadlCli.error;
+import static com.ge.research.sadl.cli.SadlCli.info;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,6 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.ibm.icu.text.SimpleDateFormat;
 
 public class SadlCliHelper {
 
@@ -240,22 +240,10 @@ public class SadlCliHelper {
 		return IResourceValidator.NULL;
 	}
 
-	private void info(Object it) {
-		System.out.println(getTimestamp() + " INFO  [SADL-CLI]: " + it);
-	}
-
-	private void error(Object it) {
-		System.err.println(getTimestamp() + " ERROR [SADL-CLI]: " + it);
-	}
-
 	private URI deresolve(URI it) {
 		return it.deresolve(SadlCli.projectRootUri.get());
 	}
 	
-	private String getTimestamp() {
-		return new SimpleDateFormat("yyyy-mm-dd hh:MM:ss").format(new Date());
-	}
-
 	private static Injector createInjector() {
 		SadlPackage.eINSTANCE.getNsURI();
 		SadlStandaloneSetup.doSetup();
