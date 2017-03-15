@@ -5,53 +5,61 @@ import static com.ge.research.sadl.builder.ResourceManager.SADLEXTWITHPREFIX;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.xtext.builder.IXtextBuilderParticipant.BuildType;
 import org.eclipse.xtext.diagnostics.Severity;
+import org.eclipse.xtext.resource.IResourceDescription;
+import org.eclipse.xtext.resource.IResourceDescription.Delta;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
+import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.Files;
 import org.eclipse.xtext.util.StringInputStream;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 import org.eclipse.xtext.validation.Issue;
-import org.eclipse.xtext.validation.Issue.IssueImpl;
 
 import com.ge.research.sadl.SadlRuntimeModule;
 import com.ge.research.sadl.SadlStandaloneSetup;
-import com.ge.research.sadl.builder.SadlModelManager;
+import com.ge.research.sadl.builder.SadlBuilder;
 import com.ge.research.sadl.sadl.SadlPackage;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.base.Throwables;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.ibm.icu.text.SimpleDateFormat;
 
 public class SadlCliHelper {
 
 	@Inject
 	XtextResourceSet resourceSet;
+	
+	@Inject
+	SadlBuilder builder;
 
 	@Inject
-	SadlModelManager modelManager;
-
+	ResourceDescriptionsProvider resourceDescriptionsProvider;
+	
 	SadlCliHelper() {
 		createInjector().injectMembers(this);
 	}
@@ -96,17 +104,51 @@ public class SadlCliHelper {
 					.<Resource, Issue> create();
 			
 			
-			Map<Resource, List<Issue>> mapping = Maps.newHashMap();
+			final Map<Resource, List<Issue>> mapping = Maps.newHashMap();
 			while (resources.hasNext()) {
 				Resource resource = resources.next();
-				mapping.put(resource, validate(resource));
+				mapping.put(resource, Collections.<Issue>emptyList());
 			}
 					
-			for (Entry<Resource, List<Issue>> entry : mapping.entrySet()) {
-				Resource resource = entry.getKey();
-				List<Issue> issues = entry.getValue();
+			builder.build(new org.eclipse.xtext.builder.IXtextBuilderParticipant.IBuildContext() {
+
+				@Override
+				public IProject getBuiltProject() {
+					return null;
+				}
+
+				@Override
+				public List<Delta> getDeltas() {
+					return Lists.newArrayList(Iterables.transform(mapping.keySet(), new Function<Resource, Delta>() {
+
+						@Override
+						public Delta apply(Resource input) {
+							return toDelta(input);
+						}
+					}));
+				}
+
+				@Override
+				public ResourceSet getResourceSet() {
+					return resourceSet;
+				}
+
+				@Override
+				public BuildType getBuildType() {
+					return BuildType.FULL;
+				}
+
+				@Override
+				public void needRebuild() {
+				}
+				
+			}, new NullProgressMonitor());
+			
+			for (Resource resource : mapping.keySet()) {
+				info("Validating resource: " + deresolve(resource.getURI()));
+				List<Issue> issues = validate(resource);
+				mapping.put(resource, issues);
 				if (!issues.isEmpty()) {
-					info("Resource: " + deresolve(resource.getURI()));
 					for (Issue issue : issues) {
 						info(" - " + issue);
 						if (issue.getSeverity() == Severity.ERROR) {
@@ -115,29 +157,7 @@ public class SadlCliHelper {
 					}
 				}
 			}
-
-			for (Resource resource : mapping.keySet()) {
-				info("Processing " + deresolve(resource.getURI()) + "...");
-				Collection<Issue> issues = errors.get(resource);
-				if (!issues.isEmpty()) {
-					error("Cannot process resource as it has errors. Resource URI: "
-							+ deresolve(resource.getURI()));
-					for (Issue issue : issues) {
-						error(issue);
-					}
-				} else {
-					try {
-						modelManager.processModel(resource, true, false,
-								SubMonitor.convert(new NullProgressMonitor()));
-					} catch (CoreException e) {
-						error(Throwables.getStackTraceAsString(e));
-						final IssueImpl issue = new Issue.IssueImpl();
-						issue.setMessage(e.getMessage());
-						errors.put(resource, issue);
-					}
-				}
-			}
-
+			
 			if (!errors.asMap().keySet().isEmpty()) {
 				error("_______________________________________ GENERATION ERRORS _______________________________________");
 				for (Resource resource : errors.asMap().keySet()) {
@@ -159,9 +179,38 @@ public class SadlCliHelper {
 		return it != null && it.isFile()
 				&& it.getName().endsWith(SADLEXTWITHPREFIX);
 	}
+	
+	private Delta toDelta(final Resource resource) {
+		return new Delta() {
+			
+			@Override
+			public boolean haveEObjectDescriptionsChanged() {
+				return true;
+			}
+			
+			@Override
+			public URI getUri() {
+				return resource.getURI();
+			}
+			
+			@Override
+			public IResourceDescription getOld() {
+				return null;
+			}
+			
+			@Override
+			public IResourceDescription getNew() {
+				return resourceDescriptionsProvider.getResourceDescriptions(resource).getResourceDescription(getUri());
+			}
+		};
+	}
 
 	private URI toFileUri(File it) {
-		return URI.createFileURI(it.getAbsolutePath());
+		try {
+			return URI.createFileURI(it.getCanonicalPath());
+		} catch (IOException e) {
+			throw new RuntimeException("Error while trying to get canonical path for: " + it);
+		}
 	}
 
 	private Resource toResource(URI it) {
@@ -192,15 +241,19 @@ public class SadlCliHelper {
 	}
 
 	private void info(Object it) {
-		System.out.println("INFO  [SADL-CLI]: " + it);
+		System.out.println(getTimestamp() + " INFO  [SADL-CLI]: " + it);
 	}
 
 	private void error(Object it) {
-		System.err.println("ERROR [SADL-CLI]: " + it);
+		System.err.println(getTimestamp() + " ERROR [SADL-CLI]: " + it);
 	}
 
 	private URI deresolve(URI it) {
 		return it.deresolve(SadlCli.projectRootUri.get());
+	}
+	
+	private String getTimestamp() {
+		return new SimpleDateFormat("yyyy-mm-dd hh:MM:ss").format(new Date());
 	}
 
 	private static Injector createInjector() {

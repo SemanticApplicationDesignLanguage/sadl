@@ -29,9 +29,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
@@ -39,7 +39,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.builder.IXtextBuilderParticipant;
-import org.eclipse.xtext.builder.IXtextBuilderParticipant.IBuildContext;
 import org.eclipse.xtext.resource.IResourceDescription.Delta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,12 +137,18 @@ public class SadlBuilder implements IXtextBuilderParticipant {
     	}
 
         // Ensure that the OWL models folder exists.
-        IProject project = context.getBuiltProject();
-        IFolder folder = project.getFolder(ResourceManager.OWLDIR);
-        if (!folder.exists()) {
-            folder.create(IResource.NONE, true, monitor);
-            logger.debug("OwlModels folder created: " + folder.toString());
-        }
+    	final String projectName;
+    	if (Platform.isRunning()) {
+    		IProject project = context.getBuiltProject();
+    		projectName = project.getName();
+    		IFolder folder = project.getFolder(ResourceManager.OWLDIR);
+    		if (!folder.exists()) {
+    			folder.create(IResource.NONE, true, monitor);
+    			logger.debug("OwlModels folder created: " + folder.toString());
+    		}    		
+    	} else {
+    		projectName = "";
+    	}
 
 //    	ConfigurationManagerForIDE configMgr = null;
 //		String modelFolder = ResourceManager.convertProjectRelativePathToAbsolutePath(folder.getFullPath().toPortableString());
@@ -180,8 +185,11 @@ public class SadlBuilder implements IXtextBuilderParticipant {
         }
         else if (resources != null && resources.size() > 0) {
         	boolean fullBuild = false;
-        	IPreferencesService service = Platform.getPreferencesService();
-        	showTimingInformation = service.getBoolean("com.ge.research.sadl.Sadl", "showTimingInformation", false, null);
+        	showTimingInformation = true;
+        	if (Platform.isRunning()) {
+        		IPreferencesService service = Platform.getPreferencesService();
+        		showTimingInformation = service.getBoolean("com.ge.research.sadl.Sadl", "showTimingInformation", false, null);        		
+        	}
 
         	if (context.getBuildType() == BuildType.FULL) {
         		logger.debug("Starting FULL build.");
@@ -260,7 +268,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        
 	        if (showTimingInformation && fullBuild) {
 	        	t2 = System.currentTimeMillis();
-		        System.out.println("Build dependencies for project " + project.getName() + " determined in " + (t2 - t1) + " ms");
+		        System.out.println("Build dependencies for project " + projectName + " determined in " + (t2 - t1) + " ms");
 		        someOutput = true;
 	        }
 	        
@@ -280,7 +288,7 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        }
 	        if (showTimingInformation && fullBuild) {
 		        long t3 = System.currentTimeMillis();
-		        System.out.println("Total build time for " + processedResources.size() + " SADL models in project " + project.getName() + ": " + (t3 - t1) + " ms");
+		        System.out.println("Total build time for " + processedResources.size() + " SADL models in project " + projectName + ": " + (t3 - t1) + " ms");
 		        someOutput = true;
 	        }
 	        if (totalErrors > 0) {

@@ -1280,7 +1280,7 @@ public class ResourceManager {
 		}
 		pfstr = getSadlUtils().fileUrlToFileName(pfstr);
 		File prjFile = new File(pfstr);
-		pfstr = prjFile.getAbsolutePath();
+		pfstr = prjFile.getCanonicalPath();
 		pfstr = pfstr.replace('\\', '/');
 		return URI.createURI(pfstr);
 	}

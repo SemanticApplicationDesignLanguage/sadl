@@ -3512,6 +3512,11 @@ public class SadlModelManager extends SadlSwitch<EObject> {
     }
     
     public int countErrorMarkers(Resource resource) {
+    	
+    	if (!Platform.isRunning()) {
+    		return 0; 
+    	}
+    	
         //this gives the relative path in the workspace
         URI uri = resource.getURI();
 

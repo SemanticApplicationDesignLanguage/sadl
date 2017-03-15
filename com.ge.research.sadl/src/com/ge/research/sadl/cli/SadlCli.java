@@ -87,7 +87,7 @@ public class SadlCli {
 		Files.createDirectories(tmpDir);
 
 		Files.walkFileTree(projectRoot, new CopyFileVisitor(tmpDir));
-		return tmpDir;
+		return tmpDir.toFile().getCanonicalFile().toPath();
 
 	}
 
