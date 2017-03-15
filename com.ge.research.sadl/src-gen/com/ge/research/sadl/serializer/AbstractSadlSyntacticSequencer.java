@@ -349,7 +349,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'with' | 'has'
+	 *     'has' | 'with'
 	 */
 	protected void emit_CardCondition_HasKeyword_0_0_or_WithKeyword_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -381,7 +381,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'or' | ','
+	 *     ',' | 'or'
 	 */
 	protected void emit_DataTypeRestriction_CommaKeyword_1_2_0_0_or_OrKeyword_1_2_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -421,7 +421,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'has' | 'with'
+	 *     'with' | 'has'
 	 */
 	protected void emit_HasValueCondition_HasKeyword_1_0_or_WithKeyword_1_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -437,7 +437,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'with' | 'has'
+	 *     'has' | 'with'
 	 */
 	protected void emit_InstAttrSPV_HasKeyword_4_1_0_or_WithKeyword_4_1_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -461,7 +461,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'value' | 'values'
+	 *     'values' | 'value'
 	 */
 	protected void emit_MaxCardCondition_ValueKeyword_4_0_or_ValuesKeyword_4_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -469,7 +469,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'with' | 'has'
+	 *     'has' | 'with'
 	 */
 	protected void emit_MinCardCondition_HasKeyword_0_0_or_WithKeyword_0_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -477,7 +477,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     'value' | 'values'
+	 *     'values' | 'value'
 	 */
 	protected void emit_MinCardCondition_ValueKeyword_4_0_or_ValuesKeyword_4_1(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);
@@ -501,7 +501,7 @@ public abstract class AbstractSadlSyntacticSequencer extends AbstractSyntacticSe
 	
 	/**
 	 * Syntax:
-	 *     ('with' | 'has')?
+	 *     ('has' | 'with')?
 	 */
 	protected void emit_PropValPartialTriple___HasKeyword_1_0_or_WithKeyword_1_1__q(EObject semanticObject, ISynNavigable transition, List<INode> nodes) {
 		acceptNodes(transition, nodes);

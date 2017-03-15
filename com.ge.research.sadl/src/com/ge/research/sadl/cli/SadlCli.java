@@ -17,6 +17,7 @@ public class SadlCli {
 			final Path file = getProjectRootPath(new String[] { "/Users/akos.kitta/Downloads/TestSadlIde" });
 			// val file =
 			// getProjectRootPath(newArrayList("/Users/akos.kitta/dev/wss/sadl_jar/runtime-New_configuration/Test"));
+//			final Path file = getProjectRootPath(args);
 			projectRootUri = Optional.fromNullable(URI.createFileURI(file
 					.toFile().getAbsolutePath()));
 			new SadlCliHelper().transform(file);

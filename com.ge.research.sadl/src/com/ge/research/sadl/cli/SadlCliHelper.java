@@ -94,15 +94,14 @@ public class SadlCliHelper {
 
 			Multimap<Resource, Issue> errors = HashMultimap
 					.<Resource, Issue> create();
-			Map<Resource, List<Issue>> mapping = Maps.toMap(resources,
-					new Function<Resource, List<Issue>>() {
-
-						@Override
-						public List<Issue> apply(Resource resource) {
-							return validate(resource);
-						}
-					});
-
+			
+			
+			Map<Resource, List<Issue>> mapping = Maps.newHashMap();
+			while (resources.hasNext()) {
+				Resource resource = resources.next();
+				mapping.put(resource, validate(resource));
+			}
+					
 			for (Entry<Resource, List<Issue>> entry : mapping.entrySet()) {
 				Resource resource = entry.getKey();
 				List<Issue> issues = entry.getValue();

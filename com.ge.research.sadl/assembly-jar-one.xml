@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+	<id>jar-with-dependencies</id>
+	<formats>
+		<format>jar</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>/</outputDirectory>
+			<useProjectArtifact>true</useProjectArtifact>
+			<unpack>true</unpack>
+			<unpackOptions>
+				<excludes>
+					<exclude>plugin.xml</exclude>
+					<exclude>plugin.properties</exclude>
+					<exclude>META-INF/MANIFEST.MF</exclude>
+					<exclude>META-INF/LICENSE</exclude>
+					<exclude>META-INF/NOTICE</exclude>
+					<exclude>META-INF/eclipse.inf</exclude>
+					<exclude>about.html</exclude>
+					<exclude>about.ini</exclude>
+					<exclude>about.mappings</exclude>
+					<exclude>about.properties</exclude>
+					<exclude>modeling32.png</exclude>
+					<exclude>**/*._trace</exclude>
+					<exclude>**/*.mwe2</exclude>
+					<exclude>**/*.xtend</exclude>
+					<exclude>**/*.xtext</exclude>
+					<exclude>**/*.map</exclude>
+					<exclude>**/pom.xml</exclude>
+					<exclude>**/pom.properties</exclude>
+					<exclude>**/README</exclude>
+					<exclude>**/LICENSE*</exclude>
+					<exclude>about_*</exclude>
+					<exclude>*.profile</exclude>
+				</excludes>
+			</unpackOptions>
+			<scope>runtime</scope>
+		</dependencySet>
+	</dependencySets>
+</assembly>

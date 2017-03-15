@@ -47,6 +47,11 @@
 			<artifactId>reasoner-impl</artifactId>
 		</dependency>
 		<dependency>
+		  <groupId>com.ge.research.sadl</groupId>
+  <artifactId>jena-wrapper-for-sadl</artifactId>
+  <version>2.4.3</version>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
 			<artifactId>org.eclipse.xtext.standalone</artifactId>
 			<version>2.4.3</version>
@@ -75,7 +80,34 @@
 
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
+
+<resources>
+        
+        <resource>
+            <directory>src-gen/com/ge/research/sadl</directory>
+            <includes>
+                <include>Sadl.xtextbin</include>
+            </includes>
+            <targetPath>./com/ge/research/sadl</targetPath>
+        </resource>
+        <resource>
+            <directory>src-gen/com/ge/research/sadl/parser/antlr/internal/</directory>
+            <includes>
+                <include>InternalSadl.g</include>
+                <include>InternalSadl.tokens</include>
+            </includes>
+            <targetPath>./com/ge/research/sadl/parser/antlr/internal/</targetPath>
+        </resource>
+        <resource>
+            <directory>resources/org/eclipse/emf/ecore/plugin/</directory>
+            <includes>
+                <include>plugin.properties</include>
+            </includes>
+            <targetPath>./org/eclipse/emf/ecore/plugin/</targetPath>
+        </resource>
+
+    </resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -90,9 +122,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
+				<descriptors>
+						<descriptor>assembly-jar-one.xml</descriptor>
+					</descriptors>
+					
 					<archive>
 						<manifest>
 							<mainClass>com.ge.research.sadl.cli.SadlCli</mainClass>
@@ -124,6 +157,7 @@
 								<source>src-gen</source>
 								<source>resources</source>
 							</sources>
+							
 						</configuration>
 					</execution>
 				</executions>
