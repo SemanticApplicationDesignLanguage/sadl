@@ -1,8 +1,12 @@
 package com.ge.research.sadl.cli;
 
+import static org.eclipse.xtext.util.Files.readStreamIntoString;
+import static org.eclipse.xtext.util.Files.writeStringIntoFile;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,13 +37,13 @@ public class SadlCli {
 					+ "_transformed_"
 					+ new SimpleDateFormat("yyyy-mm-dd_hhMMss")
 							.format(new Date()));
-			info("Copying generated output to " + outputPath);
+			info("Copying generated output to " + outputPath + ".");
 			Files.walkFileTree(file, new CopyFileVisitor(outputPath));
-
+			info("Project with the generated output is available under" + outputPath + ".");
 		} finally {
 			URI uri = projectRootUri.orNull();
 			if (uri != null) {
-				info("Cleaning up temporary resources.");
+				info("Cleaning up temporary resources from " + uri.toFileString() + ".");
 				delete(new File(uri.toFileString()));
 			}
 			projectRootUri = Optional.absent();
@@ -121,11 +125,10 @@ public class SadlCli {
 				final URL resourceUrl = SadlCli.class.getClassLoader()
 						.getResource("Models/" + fileName);
 				if (resourceUrl != null) {
-					final File resource = new File(resourceUrl.toURI());
-					if (resource.exists()) {
+					try (InputStream is = resourceUrl.openStream()) {
 						final File target = new File(owlDir, fileName);
 						Files.createFile(target.toPath());
-						ResourceManager.copyFile(resource, target);
+						writeStringIntoFile(target.getAbsolutePath(), readStreamIntoString(is));
 						info("The " + fileName
 								+ "resource has been successfully copied.");
 					}
@@ -144,18 +147,21 @@ public class SadlCli {
 				delete(c);
 			}
 		}
-		info("Deleting " + f + "...");
 		if (!f.delete()) {
 			throw new FileNotFoundException("Failed to delete file: " + f);
 		}
 	}
 
-	static void info(Object it) {
-		System.out.println(getTimestamp() + " INFO  [SADL-CLI]: " + it);
+	static String info(Object it) {
+		String msg = getTimestamp() + " INFO  [SADL-CLI]: " + it;
+		System.out.println(msg);
+		return msg;
 	}
 
-	static void error(Object it) {
-		System.err.println(getTimestamp() + " ERROR [SADL-CLI]: " + it);
+	static String error(Object it) {
+		String msg = getTimestamp() + " ERROR [SADL-CLI]: " + it;
+		System.err.println(msg);
+		return msg;
 	}
 
 	static private String getTimestamp() {

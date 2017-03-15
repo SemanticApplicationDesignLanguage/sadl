@@ -32,8 +32,10 @@ public class CopyFileVisitor extends SimpleFileVisitor<Path> {
 	@Override
 	public FileVisitResult visitFile(final Path file,
 			final BasicFileAttributes attrs) throws IOException {
-
-		Files.copy(file, targetPath.resolve(sourcePath.relativize(file)));
+		
+		if (!".DS_Store".equals(file.getFileName().toString()) && !".project".equals(file.getFileName().toString())) {
+			Files.copy(file, targetPath.resolve(sourcePath.relativize(file)));
+		}
 		return FileVisitResult.CONTINUE;
 	}
 

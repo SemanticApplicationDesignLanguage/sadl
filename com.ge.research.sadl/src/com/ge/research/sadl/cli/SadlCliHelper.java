@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.builder.IXtextBuilderParticipant.BuildType;
+import org.eclipse.xtext.builder.IXtextBuilderParticipant.IBuildContext;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.IResourceDescription.Delta;
@@ -110,7 +111,7 @@ public class SadlCliHelper {
 				mapping.put(resource, Collections.<Issue>emptyList());
 			}
 					
-			builder.build(new org.eclipse.xtext.builder.IXtextBuilderParticipant.IBuildContext() {
+			builder.build(new IBuildContext() {
 
 				@Override
 				public IProject getBuiltProject() {
@@ -140,6 +141,11 @@ public class SadlCliHelper {
 
 				@Override
 				public void needRebuild() {
+				}
+				
+				//@Override Required for 2.9 builder from Maven
+				public boolean isSourceLevelURI(URI uri) {
+					return true;
 				}
 				
 			}, new NullProgressMonitor());
