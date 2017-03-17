@@ -1720,7 +1720,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean isListAnnotatedProperty(Property prop) {
-		AnnotationProperty annprop = theJenaModel.getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY);
+		AnnotationProperty annprop = theJenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
 		if (annprop != null) {
 			if (prop.hasProperty(annprop)) {
 				return true;
