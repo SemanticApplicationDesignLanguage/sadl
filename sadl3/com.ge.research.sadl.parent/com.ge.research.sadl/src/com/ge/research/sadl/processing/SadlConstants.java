@@ -12,8 +12,8 @@ public class SadlConstants {
 	
 	public static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
 	public static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
-	public static final String LIST_RANGE_ANNOTATION_PROPERTY = "http://sadl.org/range/annotation/listtype";
 	public static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
+	public static final String SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY = SADL_LIST_MODEL_URI + "#listtype";
 	public static final String SADL_LIST_MODEL_LIST_URI = SADL_LIST_MODEL_URI + "#List";
 	public static final String SADL_LIST_MODEL_FIRST_URI = SADL_LIST_MODEL_URI + "#first";
 	public static final String SADL_LIST_MODEL_REST_URI = SADL_LIST_MODEL_URI + "#rest";
