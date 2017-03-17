@@ -96,7 +96,7 @@ public class GraphSegment {
 //		}
 //	}
 	
-	String stringForm(Object obj) throws InvalidNameException {
+	String stringForm(Object obj, boolean isImport) throws InvalidNameException {
 		if(obj == null){
 			return null;
 		}
@@ -113,7 +113,7 @@ public class GraphSegment {
 						if (!first) {
 							sb.append(" or ");
 						}
-						sb.append(stringForm(uclsmember));
+						sb.append(stringForm(uclsmember, isImport));
 						first = false;
 					}
 					return sb.toString();
@@ -134,7 +134,7 @@ public class GraphSegment {
 						if (!first) {
 							sb.append(" and ");
 						}
-						sb.append(stringForm(uclsmember));
+						sb.append(stringForm(uclsmember, isImport));
 						first = false;
 					}
 					return sb.toString();
@@ -149,7 +149,7 @@ public class GraphSegment {
 //				return ontcls.getLocalName();
 			}
 			else if (ontcls.isRestriction()) {
-				return restrictionToString(ontcls);
+				return restrictionToString(ontcls, isImport);
 			}
 			else {
 				return ontcls.toString();
@@ -183,7 +183,7 @@ public class GraphSegment {
 			}
 		}
 		else if (obj instanceof ConceptName) {
-			return conceptNameToString((ConceptName)obj);
+			return conceptNameToString((ConceptName)obj, isImport);
 		}
 		else {
 			return obj.toString();
@@ -216,7 +216,7 @@ public class GraphSegment {
 		return rsrc.getLocalName();
 	}
 	
-	public String restrictionToString(OntClass ontcls) throws InvalidNameException {
+	public String restrictionToString(OntClass ontcls, boolean isImport) throws InvalidNameException {
 		if (ontcls.as(Restriction.class).isSomeValuesFromRestriction()) {
 			StringBuilder sb = new StringBuilder("some values of ");
 			SomeValuesFromRestriction svfr = ontcls.as(SomeValuesFromRestriction.class);
@@ -229,7 +229,7 @@ public class GraphSegment {
 			}
 			else {
 				sb.append("(");
-				sb.append(stringForm(svfcls));
+				sb.append(stringForm(svfcls, isImport));
 				sb.append(")");
 			}
 			return sb.toString();
@@ -246,7 +246,7 @@ public class GraphSegment {
 			}
 			else {
 				sb.append("(");
-				sb.append(stringForm(svfcls));
+				sb.append(stringForm(svfcls, isImport));
 				sb.append(")");
 			}
 			return sb.toString();
@@ -263,7 +263,7 @@ public class GraphSegment {
 			}
 			else {
 				sb.append("(");
-				sb.append(stringForm(svfcls));
+				sb.append(stringForm(svfcls, isImport));
 				sb.append(")");
 			}
 			return sb.toString();
@@ -332,7 +332,7 @@ public class GraphSegment {
 						sb.append(" value");
 					}
 					sb.append(" of type ");
-					sb.append(stringForm(oncls));
+					sb.append(stringForm(oncls, isImport));
 					return sb.toString();
 				}
 				else if (ontcls.hasProperty(OWL2.minQualifiedCardinality)) {
@@ -347,7 +347,7 @@ public class GraphSegment {
 						sb.append(" value");
 					}
 					sb.append(" of type ");
-					sb.append(stringForm(oncls));
+					sb.append(stringForm(oncls, isImport));
 					return sb.toString();
 				}
 				else if (ontcls.hasProperty(OWL2.qualifiedCardinality)) {
@@ -362,7 +362,7 @@ public class GraphSegment {
 						sb.append(" value");
 					}
 					sb.append(" of type ");
-					sb.append(stringForm(oncls));
+					sb.append(stringForm(oncls, isImport));
 					return sb.toString();
 				}
 			}
@@ -377,7 +377,7 @@ public class GraphSegment {
 	}
 	
 	String subjectToStringNoPrefix() throws InvalidNameException {
-		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getSubject()));
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getSubject(), isSubjectImport()));
 		if (getSubjectNodeDuplicateSequenceNumber() >= 0) {
 			sb.append("[");
 			sb.append(getSubjectNodeDuplicateSequenceNumber());
@@ -399,11 +399,21 @@ public class GraphSegment {
 			}
 			sb.append(")");
 		}
+		if (isObjectIsList()) {
+			sb.append(" List");
+		}
 		return sb.toString();
 	}
 	
+	private boolean isSubjectImport() {
+		if (getHeadAttributes() != null && getHeadAttributes().containsKey(GraphGenerator.LINK_URL)) {
+			return true;
+		}
+		return false;
+	}
+
 	String predicateToStringNoPrefix() throws InvalidNameException {
-		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getPredicate()));
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getPredicate(), isPredicateImport()));
 		if (getEdgeAttributes() != null) {
 			sb.append("(");
 			Iterator<String> sitr = getEdgeAttributes().keySet().iterator();
@@ -423,8 +433,15 @@ public class GraphSegment {
 		return sb.toString();
 	}
 	
+	private boolean isPredicateImport() {
+		if (getEdgeAttributes() != null && getEdgeAttributes().containsKey(GraphGenerator.LINK_URL)) {
+			return true;
+		}
+		return false;
+	}
+
 	String objectToStringNoPrefix() throws InvalidNameException {
-		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getObject()));
+		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getObject(), isObjectImport()));
 		if (getObjectNodeDuplicateSequenceNumber() >= 0) {
 			sb.append("[");
 			sb.append(getObjectNodeDuplicateSequenceNumber());
@@ -452,7 +469,14 @@ public class GraphSegment {
 		return sb.toString();
 	}
 	
-	String stringFormNoPrefix(Object obj) throws InvalidNameException {
+	private boolean isObjectImport() {
+		if (getTailAttributes() != null && getTailAttributes().containsKey(GraphGenerator.LINK_URL)) {
+			return true;
+		}
+		return false;
+	}
+
+	String stringFormNoPrefix(Object obj, boolean isImport) throws InvalidNameException {
 		if(obj == null){
 			return null;
 		}
@@ -469,7 +493,7 @@ public class GraphSegment {
 						if (!first) {
 							sb.append(" or ");
 						}
-						sb.append(stringFormNoPrefix(uclsmember));
+						sb.append(stringFormNoPrefix(uclsmember, isImport));
 						first = false;
 					}
 					return sb.toString();
@@ -490,7 +514,7 @@ public class GraphSegment {
 						if (!first) {
 							sb.append(" and ");
 						}
-						sb.append(stringFormNoPrefix(uclsmember));
+						sb.append(stringFormNoPrefix(uclsmember, isImport));
 						first = false;
 					}
 					return sb.toString();
@@ -505,7 +529,7 @@ public class GraphSegment {
 //				return ontcls.getLocalName();
 			}
 			else if (ontcls.isRestriction()) {
-				return restrictionToString(ontcls);
+				return restrictionToString(ontcls, isImport);
 			}
 			else {
 				return ontcls.toString();
@@ -698,9 +722,9 @@ public class GraphSegment {
 	}
 
 
-	public String resourceToString(Resource rsrc) throws InvalidNameException {
+	public String resourceToString(Resource rsrc, boolean isImport) throws InvalidNameException {
 		if (!rsrc.isURIResource() || uriStrategy == null) {
-			return stringForm(rsrc);
+			return stringForm(rsrc, isImport);
 		}
 		if (uriStrategy.equals(UriStrategy.LOCALNAME_ONLY)) {
 			if (rsrc.isURIResource()) {
@@ -717,6 +741,19 @@ public class GraphSegment {
 		else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
 			if (rsrc.isURIResource()) {
 				return ((Resource)rsrc).getLocalName();
+			}
+			return rsrc.toString();
+		}
+		else if (uriStrategy.equals(UriStrategy.QNAME_IF_IMPORT)) {
+			if (rsrc.isURIResource()) {
+				String ns = ((Resource)rsrc).getNameSpace();
+				String prefix = getPrefix(ns);
+				if (isImport) {
+					return  prefix + ":" + ((Resource)rsrc).getLocalName();
+				}
+				else {
+					return ((Resource)rsrc).getLocalName();
+				}
 			}
 			return rsrc.toString();
 		}
@@ -751,7 +788,7 @@ public class GraphSegment {
 		return rsrc.toString();
 	}
 	
-	public String conceptNameToString(ConceptName cn) throws InvalidNameException {
+	public String conceptNameToString(ConceptName cn, boolean isImport) throws InvalidNameException {
 		if (uriStrategy != null) {
 			if (uriStrategy.equals(UriStrategy.LOCALNAME_ONLY)) {
 				return cn.getName();
@@ -760,6 +797,12 @@ public class GraphSegment {
 				return cn.getName();
 			}
 			else if (uriStrategy.equals(UriStrategy.LOCALNAME_WITH_URI_TOOLTIP)) {
+				return cn.getName();
+			}
+			else if (uriStrategy.equals(UriStrategy.QNAME_IF_IMPORT)) {
+				if (isImport && cn.getPrefix() != null) {
+					return  cn.getPrefix() + ":" + cn.getName();
+				}
 				return cn.getName();
 			}
 			else if (uriStrategy.equals(UriStrategy.QNAME_ONLY)) {
@@ -797,18 +840,25 @@ public class GraphSegment {
 	}
 
 	public String subjectToString() throws InvalidNameException {
+		String subjStr;
 		if (getSubject() instanceof Resource) {
-			return resourceToString((Resource)getSubject());
+			subjStr = resourceToString((Resource)getSubject(), isSubjectImport());
 		}
 		else if (getSubject().toString().startsWith("http://")) {
-			return uriToString(getSubject().toString());
+			subjStr = uriToString(getSubject().toString());
 		}
-		return getSubject().toString();
+		else {
+			subjStr = getSubject().toString();
+		}
+		if (isSubjectIsList()) {
+			subjStr += " List";
+		}
+		return subjStr;
 	}
 
 	public String predicateToString() throws InvalidNameException {
 		if (getPredicate() instanceof Resource) {
-			return resourceToString((Resource)getPredicate());
+			return resourceToString((Resource)getPredicate(), isPredicateImport());
 		}
 		else if (getPredicate().toString().startsWith("http://")) {
 			return uriToString(getPredicate().toString());
@@ -817,13 +867,23 @@ public class GraphSegment {
 	}
 
 	public String objectToString() throws InvalidNameException {
+		String objStr;
 		if (getObject() instanceof Resource) {
-			return resourceToString((Resource)getObject());
+			objStr = resourceToString((Resource)getObject(), isObjectImport());
 		}
 		else if (getObject().toString().startsWith("http://")) {
-			return uriToString(getObject().toString());
+			objStr = uriToString(getObject().toString());
 		}
-		return getObject().toString();
+		else if (getObject() instanceof Literal) {
+			objStr = ((Literal)getObject()).getValue().toString();
+		}
+		else {
+			objStr = getObject().toString();
+		}
+		if (isObjectIsList()) {
+			objStr += " List";
+		}
+		return objStr;
 	}
 
 	public UriStrategy getUriStrategy() {

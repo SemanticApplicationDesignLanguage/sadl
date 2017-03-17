@@ -89,6 +89,7 @@ public class GraphGenerator {
 	protected static final String WHITE = "white";
 	protected static final String PROPERTY_GREEN = "green3";
 	protected static final String BLACK = "black";
+	protected static final String LIST_TYPE_COLOR = "cyan4";
 	
 	protected static final String SHAPE = "shape";
 	protected static final String OCTAGON = "octagon";
@@ -100,11 +101,13 @@ public class GraphGenerator {
 	protected static final String FONTCOLOR = "fontcolor";
 	protected static final String FILL_COLOR = "fillcolor";
 	
+	protected static final String DASHED = "dashed";
+
 	protected static final String IS_IMPORT = "isImport";
 	protected static final String LINK_URL = "href";
 
 	
-	public enum UriStrategy {URI_ONLY, QNAME_ONLY, LOCALNAME_ONLY, QNAME_WITH_URI_TOOLTIP, LOCALNAME_WITH_QNAME_TOOLTIP, LOCALNAME_WITH_URI_TOOLTIP}
+	public enum UriStrategy {URI_ONLY, QNAME_ONLY, QNAME_IF_IMPORT, LOCALNAME_ONLY, QNAME_WITH_URI_TOOLTIP, LOCALNAME_WITH_QNAME_TOOLTIP, LOCALNAME_WITH_URI_TOOLTIP}
 	
 	private UriStrategy uriStrategy = UriStrategy.QNAME_ONLY;
 
@@ -126,7 +129,7 @@ public class GraphGenerator {
 		setVisualizer(visualizer);
 		setProject(project);
 		if (publicUri != null) {
-			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
+			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.LOCALONLY)); //Scope.INCLUDEIMPORTS));
 		}
 		setAnchor(startNode);
 	}
@@ -136,7 +139,7 @@ public class GraphGenerator {
 		setVisualizer(visualizer);
 		setProject(project);
 		if (publicUri != null) {
-			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
+			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.LOCALONLY)); // Scope.INCLUDEIMPORTS));
 		}
 		setAnchor(startNode);
 		setProgressMonitor(monitor);
@@ -392,17 +395,7 @@ public class GraphGenerator {
 	private List<GraphSegment> generatePropertyRange(OntClass cls, long subjSeqNumber, Resource prop, int graphRadius, boolean fillNodes, List<GraphSegment> data) {
 		isCanceled();
 		if (graphRadius <= 0) return data;
-		boolean isList = false;
-		Statement stmt = prop.getProperty(getTheJenaModel().getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY));
-		if (stmt != null) {
-			RDFNode obj = stmt.getObject();
-			if (obj.isLiteral()) {
-				Object lit = obj.asLiteral().getValue();
-				if (lit != null && lit.toString().equals("LIST")) {
-					isList = true;
-				}
-			}
-		}
+		boolean isList = isPropertyAnnotatedAsListRange(prop);
 		ExtendedIterator<? extends OntResource> eitr = prop.as(OntProperty.class).listRange();
 		while (eitr.hasNext()) {
 			//get range of prop
@@ -480,6 +473,21 @@ public class GraphGenerator {
 			}
 		}
 		return data;
+	}
+
+	protected boolean isPropertyAnnotatedAsListRange(Resource prop) {
+		boolean isList = false;
+		Statement stmt = prop.getProperty(getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY));
+		if (stmt != null) {
+			RDFNode obj = stmt.getObject();
+			if (obj.isLiteral()) {
+				Object lit = obj.asLiteral().getValue();
+				if (lit != null && lit.toString().equals("LIST")) {
+					isList = true;
+				}
+			}
+		}
+		return isList;
 	}
 
 	private List<GraphSegment> generateClassSuperclasses(OntClass cls, int size, List<GraphSegment> data) {
@@ -867,6 +875,19 @@ public class GraphGenerator {
 			}
 			return uri;
 		}
+		else if (getUriStrategy().equals(UriStrategy.QNAME_IF_IMPORT)) {
+			if (uri.contains("#")) {
+				String ns = uri.substring(0, uri.indexOf("#"));
+				if (isImport(uri)) {
+					String prefix = getPrefix(ns);
+					return  prefix + ":" + uri.substring(uri.indexOf("#") + 1);
+				}
+				else {
+					return uri.substring(uri.indexOf("#") + 1);
+				}
+			}
+			return uri;
+		}
 		else if (getUriStrategy().equals(UriStrategy.QNAME_ONLY)) {
 			if (uri.contains("#")) {
 				String ns = uri.substring(0, uri.indexOf("#"));
@@ -897,6 +918,11 @@ public class GraphGenerator {
 			return uri;
 		}
 		return uri;
+	}
+
+	private boolean isImport(String uri) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	private String getPrefix(String ns) {

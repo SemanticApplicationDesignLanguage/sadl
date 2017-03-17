@@ -319,7 +319,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		String sruri = declarationExtensions.getConceptUri(sr);
 		ConceptName cn = new ConceptName(sruri);
 		cn.setPrefix(getConfigMgr().getGlobalPrefix(cn.getNamespace()));
-		String anchorNode = gsDummy.conceptNameToString(cn);  // nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
+		String anchorNode = gsDummy.conceptNameToString(cn, false);  // nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
 		return anchorNode;
 	}
 
@@ -597,8 +597,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return prefix + " (" + publicUri + ")";
 	}
 
-	protected String safeGetCurrentProject() {
-		StringBuilder returnStringBuilder = new StringBuilder();
+	protected List<String> safeGetCurrentProject() {
+		List<String> returnStrings = new ArrayList<String>();
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
@@ -609,16 +609,19 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			        if (selection instanceof IStructuredSelection) {
 				        Object firstElement = ((IStructuredSelection) selection).getFirstElement();
 				        if (firstElement instanceof IAdaptable)
-				        {
-				            
-				        	String[] projName = firstElement.toString().split("/");
-				        	returnStringBuilder.append(projName[1]);
+				        { 
+				        	String[] selarray = firstElement.toString().split("/");
+				        	if (selarray != null) {
+				        		for (int i = 0; i < selarray.length; i++) {
+				        			returnStrings.add(selarray[i]);
+				        		}
+				        	}
 				        }
 			        }
 			    }
 			}
 		});
-		return returnStringBuilder.length() == 0 ? null : returnStringBuilder.toString();
+		return returnStrings;
 	}
 
 	protected IConfigurationManagerForIDE getConfigMgr() throws ConfigurationException, URISyntaxException {

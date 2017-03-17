@@ -55,11 +55,13 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					if (imports != null) imports.clear();
 					
 					safeWriteToConsole(MessageType.INFO, "-----------------Ontology Graphing Started-------------------\n\n");
-					String curProject = safeGetCurrentProject();
-					if (curProject == null) {
-						safeWriteToConsole(MessageType.ERROR, "An open project must be selected before graphing can occur.\n");
+					List<String> selection = safeGetCurrentProject();
+					if (selection == null || selection.size() < 2) {
+						safeWriteToConsole(MessageType.ERROR, "An open project or an ontology file in a project must be selected before graphing can occur.\n");
 						return Status.CANCEL_STATUS;
+						
 					}
+					String curProject = selection.get(1);
 					project = ResourcesPlugin.getWorkspace().getRoot().getProject(curProject);
 					modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
 					if (getConfigMgr() != null && getConfigMgr().getModelFolder() != null) {
@@ -68,35 +70,59 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 							configMgr = null;		// this is an obsolete ConfigurationManager
 						}
 					}
-					
-					graphFolder(project);
-					// now graph the base model and the list model
-					IResource sbmr = project.findMember("OwlModels/SadlBaseModel.owl");
-					if (sbmr != null) {
-						graphSpecificModels(sbmr);
-					}
-					IResource slmr = project.findMember("OwlModels/SadlListModel.owl");
-					if (slmr != null) {
-						graphSpecificModels(slmr);
-					}
-					
-					//Join all graphing jobs together before visualizing
-					Job.getJobManager().join(GRAPH_JOB,monitor);
-					
-					if (imports.size() > 0) {
-						IGraphVisualizer visualizer = getVisualizer(getConfigMgr());
-						OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project);
-						IFile trgtFile = null;
-						String baseFileName = "Project";
-						String graphName = baseFileName;
-						String description = "Project " + project.getName() + " import map";
-		//				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, null);
-						ResultSet importsRS = ogg.convertDataToResultSet(imports, UriStrategy.LOCALNAME_WITH_URI_TOOLTIP);
-						if (visualizer != null) {
-							graphResultSet(visualizer, project, baseFileName, graphName, null, description, importsRS, null, true);					
+					String sadlFile = null;
+					String owlFile = null;
+					if (selection.size() > 2) {
+						// something else was selected--is it a .sadl file?
+						String sf = selection.get(selection.size() - 1);
+						if (sf != null && sf.endsWith(".sadl")) {
+							owlFile = sf.substring(0, sf.length() - 4) + "owl";
+							StringBuilder sb = new StringBuilder(project.getName());
+							sb.append("/");
+							for (int i = 2; i < selection.size(); i++) {
+								if (i > 0) sb.append("/");
+								sb.append(selection.get(i));
+							}
+							sadlFile = sb.toString();
 						}
-						else {
-							safeWriteToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
+						else if (sf != null && (sf.endsWith(".owl") || sf.endsWith(".nt") || sf.endsWith(".n3"))) {
+							owlFile = sf;
+						}
+					}
+					if (sadlFile != null) {
+						//graph just this file
+						generateOntologyFileGraph(sadlFile, owlFile, monitor, false, true);
+					}
+					else {
+						graphFolder(project);
+						// now graph the base model and the list model
+						IResource sbmr = project.findMember("OwlModels/SadlBaseModel.owl");
+						if (sbmr != null) {
+							graphSpecificModels(sbmr);
+						}
+						IResource slmr = project.findMember("OwlModels/SadlListModel.owl");
+						if (slmr != null) {
+							graphSpecificModels(slmr);
+						}
+						
+						//Join all graphing jobs together before visualizing
+						Job.getJobManager().join(GRAPH_JOB,monitor);
+						
+						if (imports.size() > 0) {
+							IGraphVisualizer visualizer = getVisualizer(getConfigMgr());
+							OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project);
+							IFile trgtFile = null;
+							String baseFileName = "Project";
+							String graphName = baseFileName;
+							String description = "Project " + project.getName() + " import map";
+			//				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, null);
+							ResultSet importsRS = ogg.convertDataToResultSet(imports, UriStrategy.LOCALNAME_WITH_URI_TOOLTIP);
+							if (visualizer != null) {
+								graphResultSet(visualizer, project, baseFileName, graphName, null, description, importsRS, null, true);					
+							}
+							else {
+								safeWriteToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
+							}
 						}
 					}
 				} catch( ClassCastException e){
@@ -104,6 +130,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					safeWriteToConsole(MessageType.ERROR, "Error Message: " + e.getMessage() + "\n");
 					return Status.CANCEL_STATUS;
 				}catch (Exception e) {
+					e.printStackTrace();
 					safeWriteToConsole(MessageType.ERROR, e.getMessage() + "\n");
 					return Status.CANCEL_STATUS;
 				}
@@ -172,6 +199,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 	public void generateOntologyFileGraph(IResource ontFile, boolean checkForDerivedFile, IProgressMonitor monitor) throws Exception{
 		if(ontFile instanceof IFile){
+			String ontfilename = ontFile.getName();
 			String owlFileName = null;
 			
 			safeWriteToConsole(MessageType.INFO, "Generate graph of '" + ontFile.getName() + "' requested.\n");
@@ -200,34 +228,42 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					owlFileName = ontFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment();
 				}
 			}
+			generateOntologyFileGraph(ontfilename, owlFileName, monitor, true, false);
+			return;
+		}
+		safeWriteToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFile.getName() + "' does not exist, or does not contain valid data for graphing.\n");
+	}
+
+	private void generateOntologyFileGraph(String ontfilename, String owlFileName, IProgressMonitor monitor, boolean graphImports, boolean openGraph)
+			throws ConfigurationException, URISyntaxException, IOException, Exception {
+		visualizer = getVisualizer(getConfigMgr());
+		if (visualizer != null) {
+			String fullFileName = modelFolderUri + "/" + owlFileName;
+			String publicUri;
+			String prefix = null;
+			try {
+				publicUri = getConfigMgr().getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(fullFileName));
+				prefix = getConfigMgr().getGlobalPrefix(publicUri);
+			}
+			catch (Exception e) {
+				publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
+			}
 			
-			visualizer = getVisualizer(getConfigMgr());
-			if (visualizer != null) {
-				String fullFileName = modelFolderUri + "/" + owlFileName;
-				String publicUri;
-				String prefix = null;
-				try {
-					publicUri = getConfigMgr().getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(fullFileName));
-					prefix = getConfigMgr().getGlobalPrefix(publicUri);
-				}
-				catch (Exception e) {
-					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
-				}
-				
-				OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri, monitor);
-				ResultSet oggResults = null;
-				try {
-					oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_ONLY);
-				} catch (InvalidNameException e) {
-					safeWriteToConsole(MessageType.ERROR, e.getMessage());
-				}
+			OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri, monitor);
+			ResultSet oggResults = null;
+			try {
+				oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_IF_IMPORT);
+			} catch (InvalidNameException e) {
+				safeWriteToConsole(MessageType.ERROR, e.getMessage());
+			}
+			if (graphImports) {
 				List<GraphSegment> newImports = ogg.getImports(getConfigMgr(), publicUri);
 				if (newImports != null && newImports.size() > 0) {
 					imports.addAll(newImports);
 				}
 				else if (oggResults != null){
 					GraphSegment simgs = new GraphSegment((prefix != null ? prefix : publicUri), null, null, getConfigMgr());
-					simgs.addHeadAttribute("headtooltip", "\"" + publicUri + "\"");
+					simgs.addHeadAttribute("tooltip", "\"" + publicUri + "\"");
 					try {
 						simgs.addHeadAttribute("URL", ogg.getCurrentFileLink(publicUri));
 					} catch (Exception e) {
@@ -236,30 +272,29 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					}
 					imports.add(simgs);
 				}
-				
-				if (oggResults != null) {
-					String baseFileName = ogg.getBaseFilenameFromPublicUri(publicUri);
-					String graphName = prefix;
-					String anchorNode = null;
-					String descripition = "Graph of Ontology File";
-					Orientation orientation = null;
-//										graphOntologyResultSet(visualizer, project, (IFile)ontFile, publicUri, prefix, oggResults);
-					graphResultSet(visualizer, project, baseFileName, graphName, anchorNode, descripition, oggResults, orientation, false);
-					return;
+			}
+			
+			if (oggResults != null) {
+				String baseFileName = ogg.getBaseFilenameFromPublicUri(publicUri);
+				String graphName = prefix;
+				String anchorNode = null;
+				String descripition = "Graph of Ontology File: " + graphName;
+				Orientation orientation = null;
+				graphResultSet(visualizer, project, baseFileName, graphName, anchorNode, descripition, oggResults, orientation, openGraph);
+			}
+			else {
+				if (!(new File(fullFileName).exists())) {
+					safeWriteToConsole(MessageType.ERROR, "file not found. Close and Open project if error persists.\n");
 				}
 				else {
-					if (!(new File(fullFileName).exists())) {
-						safeWriteToConsole(MessageType.ERROR, "file not found. Close and Open project if error persists.\n");
-					}
-					else {
-						safeWriteToConsole(MessageType.WARN, "file '" + fullFileName + "' appears to have no content to graph.\n");
-					}
-					safeWriteToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFile.getName() + "' does not exist, or does not contain valid data for graphing.\n");
-					return;
+					safeWriteToConsole(MessageType.WARN, "file '" + fullFileName + "' appears to have no content to graph.\n");
 				}
+				safeWriteToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontfilename + "' does not exist, or does not contain valid data for graphing.\n");
 			}
 		}
-		safeWriteToConsole(MessageType.ERROR, "Invalid selection for graphing: '" + ontFile.getName() + "' does not exist, or does not contain valid data for graphing.\n");
+		else {
+			safeWriteToConsole(MessageType.ERROR, "Failed to get a visualizer for graphing task.\n");
+		}
 	}
 
 //	protected void graphOntologyResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String publicUri, String prefix, ResultSet rs) throws IOException {
