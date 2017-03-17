@@ -7,7 +7,6 @@ Bundle-Activator: com.ge.research.sadl.jena_plugin.Activator
 Bundle-Vendor: GE Global Research
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.osgi,
- com.ge.research.sadl;bundle-version="2.2.0",
  org.apache.log4j
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

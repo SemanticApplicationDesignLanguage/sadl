@@ -1,5 +1,8 @@
 eclipse.preferences.version=1
 encoding//src-gen/com/ge/research/sadl=UTF-8
+encoding//src-gen/com/ge/research/sadl/parser/antlr/internal=UTF-8
+encoding//src/Models=UTF-8
+encoding//src/org/eclipse/emf/ecore/plugin=UTF-8
 encoding/<project>=UTF-8
 encoding/src=UTF-8
 encoding/src-gen=UTF-8

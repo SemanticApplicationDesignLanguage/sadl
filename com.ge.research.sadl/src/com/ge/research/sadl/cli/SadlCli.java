@@ -50,6 +50,37 @@ public class SadlCli {
 		}
 
 	}
+	
+	public String processProject(String projectPath) throws IOException, Exception {
+		try {
+			String[] input = new String[1];
+			input[0] = projectPath;
+			Path originalPath = getProjectRootPath(input);
+			Path file = copyProjectContentToTmp(originalPath);
+			projectRootUri = Optional.fromNullable(URI.createFileURI(file
+					.toFile().getAbsolutePath()));
+			new SadlCliHelper().transform(file);
+
+			Path outputPath = Paths.get(originalPath.toString()
+					+ "_transformed_"
+					+ new SimpleDateFormat("yyyy-mm-dd_hhMMss")
+							.format(new Date()));
+			info("Copying generated output to " + outputPath + ".");
+			Files.walkFileTree(file, new CopyFileVisitor(outputPath));
+			info("Project with the generated output is available under" + outputPath + ".");
+			return outputPath.toFile().getCanonicalPath();
+		}
+		catch (Throwable t) {
+			return null;
+		} finally {
+			URI uri = projectRootUri.orNull();
+			if (uri != null) {
+				info("Cleaning up temporary resources from " + uri.toFileString() + ".");
+				delete(new File(uri.toFileString()));
+			}
+			projectRootUri = Optional.absent();
+		}
+	}
 
 	private static Path getProjectRootPath(final String[] args) {
 		if (args == null || args.length == 0) {

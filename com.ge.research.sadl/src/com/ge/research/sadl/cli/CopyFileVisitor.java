@@ -34,7 +34,15 @@ public class CopyFileVisitor extends SimpleFileVisitor<Path> {
 			final BasicFileAttributes attrs) throws IOException {
 		
 		if (!".DS_Store".equals(file.getFileName().toString()) && !".project".equals(file.getFileName().toString())) {
-			Files.copy(file, targetPath.resolve(sourcePath.relativize(file)));
+			try {
+				Path tp = targetPath.resolve(sourcePath.relativize(file));
+				tp.getParent().toFile().mkdirs();
+				Files.copy(file, tp);
+			}
+			catch (Throwable t) {
+				System.err.println(t.getMessage());
+				t.printStackTrace();
+			}
 		}
 		return FileVisitResult.CONTINUE;
 	}
