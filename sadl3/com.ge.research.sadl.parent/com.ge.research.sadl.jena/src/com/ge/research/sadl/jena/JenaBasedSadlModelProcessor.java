@@ -3864,7 +3864,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					if (rngValueType.equals(RangeValueType.LIST)) {
 						newRngCls = createListSubclass(null, rngNode.toString(), context.eResource());
 						// TODO this should be removed as soon as translators are updated to new List ontology representation
-						AnnotationProperty annprop = getTheJenaModel().createAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY);
+						AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
 						prop.addProperty(annprop, RangeValueType.LIST.toString());
 					}
 					else {
@@ -3887,7 +3887,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// range is a List
 				prop.addRange(createListSubclass(null, rngNode.toString(), context.eResource()));
 				// TODO this should be removed as soon as translators are updated to new List ontology representation
-				AnnotationProperty annprop = getTheJenaModel().createAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY);
+				AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
 				prop.addProperty(annprop, RangeValueType.LIST.toString());
 				propOwlType = OWL.ObjectProperty;
 			}
@@ -6098,6 +6098,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n");
 		sb.append("    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#DatatypeProperty\"/>\n");
 		sb.append("  </rdf:Description>\n");
+		sb.append("  <owl:AnnotationProperty rdf:about=\"http://sadl.org/sadllistmodel#listtype\"/>\n");
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();
 	}
