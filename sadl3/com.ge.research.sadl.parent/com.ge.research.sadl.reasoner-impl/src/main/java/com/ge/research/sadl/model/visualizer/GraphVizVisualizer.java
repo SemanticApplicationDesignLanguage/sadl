@@ -474,7 +474,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append("\"");
 			// color the "anchor" edge
 			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
-				sb.append(" color=red");
+				sb.append(" style=bold");
 			}
 		}
 		if (edgeAttributes != null) {

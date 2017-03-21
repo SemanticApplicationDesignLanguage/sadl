@@ -226,7 +226,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri), monitor);
 		gg.setUriStrategy(UriStrategy.QNAME_WITH_URI_TOOLTIP);
 		List<GraphSegment> imports = getAnchoredImports(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
-		ResultSet rs = gg.convertDataToResultSet(imports);
+		ResultSet rs = gg.convertDataToResultSet(imports, UriStrategy.QNAME_IF_IMPORT, prefix);
 		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();
@@ -313,7 +313,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 
 	protected String getSadlResourceAnchor(SadlResource sr, UriStrategy uriStrategy) throws ConfigurationException, CircularDefinitionException, InvalidNameException, URISyntaxException {
-		GraphSegment gsDummy = new GraphSegment(null, null, null, getConfigMgr());
+		GraphSegment gsDummy = new GraphSegment(null, null, null, null, getConfigMgr());
 		gsDummy.setUriStrategy(uriStrategy);
 //		OntConceptType ct = declarationExtensions.getOntConceptType(sr);
 		String sruri = declarationExtensions.getConceptUri(sr);
@@ -491,7 +491,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				try {
 					if (graphRadius > 0) {
 						if (!(targetUri.equals(sourceUri))) {
-							gs = new GraphSegment(subj, pred, obj, getConfigMgr());
+							gs = new GraphSegment(null, subj, pred, obj, getConfigMgr());
 							if (!importList.contains(gs)) {
 								importList.add(gs);
 								URI sobjuri = sourceDesc.getEObjectURI();
@@ -576,7 +576,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //					else {
 //						subj = nodeText(key, val);
 //					}
-					GraphSegment gs = new GraphSegment(subj, pred, obj, configMgr);
+					GraphSegment gs = new GraphSegment(null, subj, pred, obj, configMgr);
 					if (!importList.contains(gs) && graphRadius > 0) {
 						importList.add(gs);
 						importList = findImports(importList, configMgr, key, val, graphRadius - 1);
@@ -597,8 +597,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		return prefix + " (" + publicUri + ")";
 	}
 
-	protected String safeGetCurrentProject() {
-		StringBuilder returnStringBuilder = new StringBuilder();
+	protected List<String> safeGetCurrentProject() {
+		List<String> returnStrings = new ArrayList<String>();
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
@@ -609,16 +609,19 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			        if (selection instanceof IStructuredSelection) {
 				        Object firstElement = ((IStructuredSelection) selection).getFirstElement();
 				        if (firstElement instanceof IAdaptable)
-				        {
-				            
-				        	String[] projName = firstElement.toString().split("/");
-				        	returnStringBuilder.append(projName[1]);
+				        { 
+				        	String[] selarray = firstElement.toString().split("/");
+				        	if (selarray != null) {
+				        		for (int i = 0; i < selarray.length; i++) {
+				        			returnStrings.add(selarray[i]);
+				        		}
+				        	}
 				        }
 			        }
 			    }
 			}
 		});
-		return returnStringBuilder.length() == 0 ? null : returnStringBuilder.toString();
+		return returnStrings;
 	}
 
 	protected IConfigurationManagerForIDE getConfigMgr() throws ConfigurationException, URISyntaxException {
