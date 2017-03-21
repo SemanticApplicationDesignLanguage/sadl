@@ -94,6 +94,7 @@ public class GraphGenerator {
 	protected static final String SHAPE = "shape";
 	protected static final String OCTAGON = "octagon";
 	protected static final String DIAMOND = "diamond";
+	protected static final String ELLIPSE = "ellipse";
 	
 	protected static final String STYLE = "style";
 	protected static final String FILLED = "filled";
@@ -109,10 +110,15 @@ public class GraphGenerator {
 	
 	public enum UriStrategy {URI_ONLY, QNAME_ONLY, QNAME_IF_IMPORT, LOCALNAME_ONLY, QNAME_WITH_URI_TOOLTIP, LOCALNAME_WITH_QNAME_TOOLTIP, LOCALNAME_WITH_URI_TOOLTIP}
 	
-	private UriStrategy uriStrategy = UriStrategy.QNAME_ONLY;
+	protected UriStrategy uriStrategy = UriStrategy.QNAME_ONLY;
 
 	private IProject project = null;
+	// We need two different instances of the model of this ontology to generate a proper graph.
+	//	1) An instance without imports so that we can determine accurately what is actually in this graph
+	//	2) An instance with imports so that we can determine accurately the type (property, class, instance) of an imported concept
+	protected String modelUri;
 	private OntModel theJenaModel = null;
+	private OntModel theJenaModelWithImports = null;
 	private ConceptName anchor = null;
 	protected IConfigurationManagerForIDE configMgr;
 	private boolean includeDuplicates = false;
@@ -121,10 +127,12 @@ public class GraphGenerator {
 	private IGraphVisualizer visualizer = null;
 	private IProgressMonitor monitor = null;
 	private HashMap<String, List<String>> classToPropertyMap = null;
+	private Map<Object, String> objectDisplayStrings;
 	
 	public enum Orientation {TD, LR}
 
 	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode) throws ConfigurationException, IOException {
+		setModelUri(publicUri);
 		setConfigMgr(configMgr);
 		setVisualizer(visualizer);
 		setProject(project);
@@ -135,11 +143,13 @@ public class GraphGenerator {
 	}
 	
 	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode, IProgressMonitor monitor) throws ConfigurationException, IOException {
+		setModelUri(publicUri);
 		setConfigMgr(configMgr);
 		setVisualizer(visualizer);
 		setProject(project);
 		if (publicUri != null) {
-			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.LOCALONLY)); // Scope.INCLUDEIMPORTS));
+			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.LOCALONLY));
+			setTheJenaModelWithImports(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
 		}
 		setAnchor(startNode);
 		setProgressMonitor(monitor);
@@ -147,10 +157,10 @@ public class GraphGenerator {
 
 	public ResultSet generateClassHierarchy(int size) throws ConfigurationException, InvalidNameException {
 		isCanceled();
-		OntClass cls = getTheJenaModel().getOntClass(getAnchor().toFQString());
+		OntClass cls = getTheJenaModelWithImports().getOntClass(getAnchor().toFQString());
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		data = generateClassHierarchy(cls, size, data);
-		ResultSet rs = convertDataToResultSet(data);
+		ResultSet rs = convertDataToResultSet(data, uriStrategy, modelUri);
 		return rs;
 	}
 
@@ -180,7 +190,7 @@ public class GraphGenerator {
 
 	public ResultSet generateClassNeighborhood(int size) throws ConfigurationException, InvalidNameException {
 		isCanceled();
-		ExtendedIterator<OntClass> classIter = getTheJenaModel().listClasses();
+		ExtendedIterator<OntClass> classIter = getTheJenaModelWithImports().listClasses();
 		try{
 			//Add all of the class triples
 			while(classIter.hasNext()){
@@ -192,18 +202,18 @@ public class GraphGenerator {
 		catch (Throwable t) {
 			
 		}
-		OntClass cls = getTheJenaModel().getOntClass(getAnchor().toFQString());
+		OntClass cls = getTheJenaModelWithImports().getOntClass(getAnchor().toFQString());
 		if (cls != null) {
 			List<GraphSegment> data = new ArrayList<GraphSegment>();
-			data = generateClassPropertiesWithDomain(cls, -1, size, false, data);
+			data = generateClassPropertiesWithDomain(cls, -1, size, true, data);
 			data = generateClassPropertiesWithRange(cls, size, data);
-			return convertDataToResultSet(data);
+			return convertDataToResultSet(data, uriStrategy, modelUri);
 		}
 		return null;
 	}
 
 	public ResultSet generatePropertyNeighborhood(int size) throws ConfigurationException, InvalidNameException {
-		OntProperty ontprop = getTheJenaModel().getOntProperty(getAnchor().toFQString());
+		OntProperty ontprop = getTheJenaModelWithImports().getOntProperty(getAnchor().toFQString());
 
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		ExtendedIterator<? extends OntResource> eitr = ontprop.listDomain();
@@ -211,7 +221,7 @@ public class GraphGenerator {
 			isCanceled();
 			OntResource dmn = eitr.next();
 			if (dmn.canAs(OntClass.class)){
-				data = generatePropertyRange(dmn.as(OntClass.class), -1, ontprop, size, false, data);
+				data = generatePropertyRange(dmn.as(OntClass.class), -1, ontprop, size, true, data);
 			}
 			data = generateClassPropertiesWithRange(dmn.as(OntClass.class), size - 1, data);
 		}
@@ -222,16 +232,16 @@ public class GraphGenerator {
 //				data = generateClassPropertiesWithDomain(rng.as(OntClass.class), data);
 //			}
 //		}
-		return convertDataToResultSet(data);
+		return convertDataToResultSet(data, uriStrategy, modelUri);
 	}
 
 	public ResultSet generateIndividualNeighborhood(int size) throws ConfigurationException, InvalidNameException {
 		isCanceled();
-		Individual inst = getTheJenaModel().getIndividual(getAnchor().toFQString());
+		Individual inst = getTheJenaModelWithImports().getIndividual(getAnchor().toFQString());
 
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		data = generateIndividualNeighborhood(inst, size, data);
-		return convertDataToResultSet(data);
+		return convertDataToResultSet(data, uriStrategy, modelUri);
 	}
 
 	private List<GraphSegment> classInstances(OntClass cls, List<GraphSegment> instData) {
@@ -239,10 +249,10 @@ public class GraphGenerator {
 		while (itr.hasNext()) {
 			OntResource or = itr.next();
 			if (or.canAs(Individual.class)){
-				GraphSegment gs = new GraphSegment(cls, "instance", or.as(Individual.class), configMgr);
-				gs.addHeadAttribute(COLOR, CLASS_BLUE);
-				gs.addTailAttribute(COLOR, INSTANCE_BLUE);
+				GraphSegment gs = new GraphSegment(getModelUri(), or.as(Individual.class), "is a", cls, configMgr);
 				if (!instData.contains(gs)) {
+					annotateHeadAsIndividual(gs);
+					annotateTailAsClass(gs);
 					instData.add(gs);
 				}
 			}
@@ -254,7 +264,7 @@ public class GraphGenerator {
 			List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
 		// as object
-		StmtIterator sitr = getTheJenaModel().listStatements(null, null, inst);
+		StmtIterator sitr = getTheJenaModelWithImports().listStatements(null, null, inst);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Property prop = stmt.getPredicate();
@@ -262,24 +272,24 @@ public class GraphGenerator {
 				continue;
 			}
 			Resource subj = stmt.getSubject();
-			GraphSegment sg = new GraphSegment(subj, prop, stmt.getObject(), configMgr);
+			GraphSegment sg = new GraphSegment(getModelUri(), subj, prop, stmt.getObject(), configMgr);
 			if (!stmt.getPredicate().getNameSpace().equals(RDF.getURI()) && !data.contains(sg)) {
 				if (stmt.getObject().isURIResource()) {
 					if (stmt.getObject().canAs(OntClass.class)){
-						sg.addTailAttribute(COLOR, CLASS_BLUE);
+						annotateTailAsClass(sg);
 					}
 					else {
-						sg.addTailAttribute(COLOR, INSTANCE_BLUE);
+						annotateTailAsIndividual(sg);
 					}
 				}
-				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+				annotateEdge(sg, PROPERTY_GREEN, null, null);
 				data.add(sg);
 				if (subj.canAs(Individual.class)) {
-					sg.addHeadAttribute(COLOR, INSTANCE_BLUE);
+					annotateHeadAsIndividual(sg);
 					data = generateIndividualNeighborhood(subj.as(Individual.class), graphRadius - 1, data);
 				}
 				else {
-					sg.addHeadAttribute(COLOR, CLASS_BLUE);
+					annotateHeadAsClass(sg);
 				}
 			}
 		}
@@ -289,16 +299,16 @@ public class GraphGenerator {
 			Statement stmt = sitr.nextStatement();
 			Property prop = stmt.getPredicate();
 			RDFNode obj = stmt.getObject();
-			GraphSegment sg = new GraphSegment(stmt.getSubject(), prop, obj, configMgr);
+			GraphSegment sg = new GraphSegment(getModelUri(), stmt.getSubject(), prop, obj, configMgr);
 			if (!data.contains(sg)) {
-				sg.addHeadAttribute(COLOR, INSTANCE_BLUE);
+				annotateHeadAsIndividual(sg);
 				if (obj.canAs(OntClass.class)){
-					sg.addTailAttribute(COLOR, CLASS_BLUE);
+					annotateTailAsClass(sg);
 				}
 				else if (obj.canAs(Individual.class)){
-					sg.addTailAttribute(COLOR, INSTANCE_BLUE);
+					annotateTailAsIndividual(sg);
 				}
-				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+				annotateEdge(sg, PROPERTY_GREEN, null, null);
 				data.add(sg);
 				if (!stmt.getPredicate().equals(RDF.type) && obj.canAs(Individual.class)) {
 					data = generateIndividualNeighborhood(obj.as(Individual.class), graphRadius - 1, data);
@@ -314,7 +324,7 @@ public class GraphGenerator {
 	private List<GraphSegment> generateClassPropertiesWithRange(OntClass cls, int graphRadius,
 			List<GraphSegment> data) {
 		if (graphRadius <= 0) return data;
-		StmtIterator sitr = getTheJenaModel().listStatements(null, RDFS.range, cls);
+		StmtIterator sitr = getTheJenaModelWithImports().listStatements(null, RDFS.range, cls);
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Resource prop = stmt.getSubject();
@@ -323,15 +333,15 @@ public class GraphGenerator {
 				ExtendedIterator<? extends OntResource> eitr = ontprop.listDomain();
 				while (eitr.hasNext()) {
 					OntResource dmn = eitr.next();
-					GraphSegment sg = new GraphSegment(dmn, prop, cls, configMgr);
+					GraphSegment sg = new GraphSegment(getModelUri(), dmn, prop, cls, configMgr);
 					if (dmn.isClass()) {
-						sg.addHeadAttribute(COLOR, CLASS_BLUE);
+						annotateHeadAsClass(sg);
 					}
 					else if (dmn.isIndividual()) {
-						sg.addHeadAttribute(COLOR, INSTANCE_BLUE);
+						annotateHeadAsIndividual(sg);
 					}
-					sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
-					sg.addTailAttribute(COLOR, CLASS_BLUE);
+					annotateEdge(sg, PROPERTY_GREEN, null, null);
+					annotateTailAsClass(sg);
 					if (!data.contains(sg)) {
 						data.add(sg);
 						data = generateClassPropertiesWithRange(dmn.as(OntClass.class), graphRadius - 1, data);
@@ -352,7 +362,7 @@ public class GraphGenerator {
 		ExtendedIterator<OntClass> superitr = cls.listSuperClasses(true);
 		while (superitr.hasNext()) {
 			OntClass superCls = superitr.next();
-			StmtIterator sitr = getTheJenaModel().listStatements(null, RDFS.domain, superCls);
+			StmtIterator sitr = getTheJenaModelWithImports().listStatements(null, RDFS.domain, superCls);
 			while (sitr.hasNext()) {
 				Statement stmt = sitr.nextStatement();
 				Resource prop = stmt.getSubject();
@@ -366,7 +376,7 @@ public class GraphGenerator {
 		// now look for unions? or intersections containing the cls
 		String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 		qstr += "select ?prop where {?prop rdfs:domain/(owl:unionOf/rdf:rest*/rdf:first)? <" + cls.getURI() + ">}";
-		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getTheJenaModel());;		
+		QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getTheJenaModelWithImports());;		
 		com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
 		while (results.hasNext()) {
 			QuerySolution soln = results.next();
@@ -389,7 +399,7 @@ public class GraphGenerator {
 	}
 
 	private boolean isImpliedPropertyOfClass(Resource cls, Resource prop) {
-		return getTheJenaModel().contains(cls, getImpliedProperty(), prop);
+		return getTheJenaModelWithImports().contains(cls, getImpliedProperty(), prop);
 	}
 
 	private List<GraphSegment> generatePropertyRange(OntClass cls, long subjSeqNumber, Resource prop, int graphRadius, boolean fillNodes, List<GraphSegment> data) {
@@ -400,15 +410,16 @@ public class GraphGenerator {
 		while (eitr.hasNext()) {
 			//get range of prop
 			OntResource rng = eitr.next();
+			RDFNode listtype = null;
 			//if it's a list and range class
 			if (isList && rng.canAs(OntClass.class)) {
 				//get list class
 				//Check for an all values from restriction
-				Resource listClass = getTheJenaModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+				Resource listClass = getTheJenaModelWithImports().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
 				//if list class exists or the range has a superclass that is a list
 				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
 					//iterate across all of the statements that are subclasses of range?
-					StmtIterator stmtitr = getTheJenaModel().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
+					StmtIterator stmtitr = getTheJenaModelWithImports().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
 					while (stmtitr.hasNext()) {
 //					ExtendedIterator<OntClass> scitr = rng.as(OntClass.class).listSuperClasses(true);
 //					while (scitr.hasNext()) {
@@ -418,10 +429,10 @@ public class GraphGenerator {
 						if (supclsnode.canAs(OntClass.class)){
 							//get the subclass
 							OntClass subcls = supclsnode.as(OntClass.class);  // scitr.next();
-							if (subcls.hasProperty(OWL.onProperty, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
+							if (subcls.hasProperty(OWL.onProperty, getTheJenaModelWithImports().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
 								Statement avf = subcls.getProperty(OWL.allValuesFrom);
 								if (avf != null) {
-									RDFNode listtype = avf.getObject();
+									listtype = avf.getObject();
 									if (listtype.canAs(OntResource.class)){
 										rng = listtype.as(OntResource.class);
 									}
@@ -433,7 +444,7 @@ public class GraphGenerator {
 					}
 				}
 			}
-			GraphSegment sg = isList ? new GraphSegment(cls, prop, rng, isList, configMgr) : new GraphSegment(cls, prop, rng, configMgr);
+			GraphSegment sg = isList ? new GraphSegment(getModelUri(), cls, prop, rng, null, listtype, configMgr) : new GraphSegment(getModelUri(), cls, prop, rng, configMgr);
 			long objSeqNumber = -1L;
 			if (isIncludeDuplicates()) {
 				objSeqNumber = getNewSequenceNumber();
@@ -442,19 +453,15 @@ public class GraphGenerator {
 			}
 			if (isIncludeDuplicates() || !data.contains(sg)) {
 				if (fillNodes) {
-					sg.addHeadAttribute(STYLE, FILLED);
-					sg.addHeadAttribute(FILL_COLOR,CLASS_BLUE);
-					sg.addHeadAttribute(FONTCOLOR, WHITE);
+					annotateHeadAsClass(sg);
 				}
 				else {
 					sg.addHeadAttribute(COLOR, CLASS_BLUE);
 				}
-				sg.addEdgeAttribute(COLOR, PROPERTY_GREEN);
+				annotateEdge(sg, PROPERTY_GREEN, null, null);
 				if (prop.canAs(ObjectProperty.class) && !(rng.isURIResource() && rng.getNameSpace().equals(XSD.getURI()))) {
 					if (fillNodes) {
-						sg.addTailAttribute(STYLE, FILLED);
-						sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
-						sg.addTailAttribute(FONTCOLOR, WHITE);
+						annotateTailAsClass(sg);
 					}
 					else {
 						sg.addTailAttribute(COLOR, CLASS_BLUE);
@@ -477,7 +484,7 @@ public class GraphGenerator {
 
 	protected boolean isPropertyAnnotatedAsListRange(Resource prop) {
 		boolean isList = false;
-		Statement stmt = prop.getProperty(getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY));
+		Statement stmt = prop.getProperty(getTheJenaModelWithImports().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY));
 		if (stmt != null) {
 			RDFNode obj = stmt.getObject();
 			if (obj.isLiteral()) {
@@ -505,13 +512,16 @@ public class GraphGenerator {
 					OntClass supercls = scr.as(OntClass.class);
 					GraphSegment sg;
 					if (supercls.isRestriction()) {
-						sg = new GraphSegment(supercls, "restricts", cls, configMgr);
+						sg = new GraphSegment(getModelUri(), supercls, "restricts", cls, configMgr);
 						sg.addHeadAttribute(COLOR, RED);
 						sg.addEdgeAttribute(COLOR, RED);
-						sg.addTailAttribute(COLOR, CLASS_BLUE);
+						annotateTailAsClass(sg);
 					}
 					else {
-						sg = new GraphSegment(supercls, "subClass", cls, configMgr);
+						sg = new GraphSegment(getModelUri(), supercls, "subClass", cls, configMgr);
+						annotateHeadAsClass(sg);
+						annotateTailAsClass(sg);
+						annotateEdge(sg, BLUE, DASHED, null);
 					}
 					if (!data.contains(sg)) {
 						data.add(sg);
@@ -556,9 +566,9 @@ public class GraphGenerator {
 			if (commonSupers.size() > 0) {
 				for (int i = 0; i < commonSupers.size(); i++) {
 					OntClass cscls = commonSupers.get(i);
-					GraphSegment sg = new GraphSegment(cscls, "subClass", cls, configMgr);
-					sg.addHeadAttribute(COLOR, CLASS_BLUE);
-					sg.addTailAttribute(COLOR, CLASS_BLUE);
+					GraphSegment sg = new GraphSegment(getModelUri(), cscls, "subClass", cls, configMgr);
+					annotateHeadAsClass(sg);
+					annotateTailAsClass(sg);
 					if (!data.contains(sg)) {
 						data.add(sg);
 					}
@@ -571,9 +581,9 @@ public class GraphGenerator {
 			ExtendedIterator<? extends OntClass> einteritr = cls.asIntersectionClass().listOperands();
 			while (einteritr.hasNext()) {
 				OntClass member  = einteritr.next();
-				GraphSegment sg = new GraphSegment(member, "subClass", cls, configMgr);
-				sg.addHeadAttribute(COLOR, CLASS_BLUE);
-				sg.addTailAttribute(COLOR, CLASS_BLUE);
+				GraphSegment sg = new GraphSegment(getModelUri(), member, "subClass", cls, configMgr);
+				annotateHeadAsClass(sg);
+				annotateTailAsClass(sg);
 				if (!data.contains(sg)) {
 					data.add(sg);
 					data = generateClassSuperclasses(member, size - 1, data);
@@ -590,14 +600,14 @@ public class GraphGenerator {
 			OntClass subcls = eitr.next();
 			GraphSegment sg;
 			if (subcls.isRestriction()) {
-				sg = new GraphSegment(cls, "restricts", subcls, configMgr);
+				sg = new GraphSegment(getModelUri(), cls, "restricts", subcls, configMgr);
 				sg.addHeadAttribute(COLOR, RED);
 				sg.addEdgeAttribute(COLOR, RED);
 			}
 			else {
-				sg = new GraphSegment(cls, "subClass", subcls, configMgr);
-				sg.addHeadAttribute(COLOR, CLASS_BLUE);
-				sg.addTailAttribute(COLOR, CLASS_BLUE);
+				sg = new GraphSegment(getModelUri(), cls, "subClass", subcls, configMgr);
+				annotateHeadAsClass(sg);
+				annotateTailAsClass(sg);
 			}
 			if (!data.contains(sg)) {
 				data.add(sg);
@@ -610,17 +620,17 @@ public class GraphGenerator {
 			String qstr = "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> prefix owl:   <http://www.w3.org/2002/07/owl#> prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 	//		qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? ?superclass}";
 			qstr += "select ?subclass ?superclass where {?subclass rdfs:subClassOf/(owl:intersectionOf/rdf:rest*/rdf:first)? <" + cls.getURI() + ">}";
-			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getTheJenaModel());;		
+			QueryExecution qexec = QueryExecutionFactory.create(QueryFactory.create(qstr, Syntax.syntaxARQ), getTheJenaModelWithImports());;		
 			com.hp.hpl.jena.query.ResultSet results = qexec.execSelect();
 			while (results.hasNext()) {
 				QuerySolution soln = results.next();
 				RDFNode sub = soln.get("?subclass");
 				if (sub.canAs(OntClass.class)) {
 					OntClass subcls = sub.as(OntClass.class);
-					GraphSegment sg = new GraphSegment(cls, "subClass", subcls, configMgr);
+					GraphSegment sg = new GraphSegment(getModelUri(), cls, "subClass", subcls, configMgr);
 					if (!data.contains(sg)) {
-						sg.addHeadAttribute(COLOR, CLASS_BLUE);
-						sg.addTailAttribute(COLOR, CLASS_BLUE);
+						annotateHeadAsClass(sg);
+						annotateTailAsClass(sg);
 						data.add(sg);
 						data = generateClassSubclasses(subcls, size - 1, data);
 					}	
@@ -643,92 +653,92 @@ public class GraphGenerator {
 		return data;
 	}
 
-	public ResultSet convertDataToResultSet(List<GraphSegment> data) throws InvalidNameException {
-		List<String> columnList = new ArrayList<String>();
-		columnList.add("head");
-		columnList.add("edge");
-		columnList.add("tail");
-		List<String> headKeyList = null;
-		List<String> edgeKeyList = null;
-		List<String> tailKeyList = null;
-		
-		for (int i = 0; i < data.size(); i++) {
-			isCanceled();
-			GraphSegment gs = data.get(i);
-			if (gs.getHeadAttributes() != null) {
-				if (headKeyList == null) headKeyList = new ArrayList<String>();
-				Iterator<String> keyitr = gs.getHeadAttributes().keySet().iterator();
-				while (keyitr.hasNext()) {
-					String key = keyitr.next();
-					if (!headKeyList.contains(key)) {
-						headKeyList.add(key);
-						columnList.add("head_" + key);
-					}
-				}
-			}
-			if (gs.getEdgeAttributes() != null) {
-				if (edgeKeyList == null) edgeKeyList = new ArrayList<String>();
-				Iterator<String> keyitr = gs.getEdgeAttributes().keySet().iterator();
-				while (keyitr.hasNext()) {
-					String key = keyitr.next();
-					if (!edgeKeyList.contains(key)) {
-						edgeKeyList.add(key);
-						columnList.add("edge_" + key);
-					}
-				}
-			}
-			if (gs.getTailAttributes() != null) {
-				if (tailKeyList == null) tailKeyList = new ArrayList<String>();
-				Iterator<String> keyitr = gs.getTailAttributes().keySet().iterator();
-				while (keyitr.hasNext()) {
-					String key = keyitr.next();
-					if (!tailKeyList.contains(key)) {
-						tailKeyList.add(key);
-						columnList.add("tail_" + key);
-					}
-				}
-			}
-		}
-		int maxColumns = 3 + 
-				(headKeyList != null ? headKeyList.size() : 0) + 
-				(edgeKeyList != null ? edgeKeyList.size() : 0) +
-				(tailKeyList != null ? tailKeyList.size() : 0);
-		if (isIncludeDuplicates()) {
-			maxColumns = maxColumns + 2;
-		}
-		Object array[][] = new Object[data.size()][maxColumns];
-		
-		boolean dataFound = false;
-		for(int i = 0; i < data.size(); i++) {
-			isCanceled();
-			GraphSegment gs = data.get(i);
-			gs.setUriStrategy(getUriStrategy());
-			String s = gs.subjectToString();
-			String p = gs.predicateToString();
-			String o = gs.objectToString();
-			array[i][0] = s;
-			array[i][1] = p;
-			array[i][2] = o;
-			dataFound = true;
-			array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
-			array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
-			array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
-			if (isIncludeDuplicates()) {
-				array[i][maxColumns - 2] = gs.getSubjectNodeDuplicateSequenceNumber();
-				array[i][maxColumns - 1] = gs.getObjectNodeDuplicateSequenceNumber();
-			}
-		}
-		if (dataFound) {
-			if (isIncludeDuplicates()) {
-				columnList.add("head_sequence_number");
-				columnList.add("tail_sequence_number");
-			}
-			String[] headers = columnList.toArray(new String[0]);
-			ResultSet rs = new ResultSet(headers, array);
-			return rs;
-		}
-		return null;
-	}
+//	public ResultSet convertDataToResultSet(List<GraphSegment> data) throws InvalidNameException {
+//		List<String> columnList = new ArrayList<String>();
+//		columnList.add("head");
+//		columnList.add("edge");
+//		columnList.add("tail");
+//		List<String> headKeyList = null;
+//		List<String> edgeKeyList = null;
+//		List<String> tailKeyList = null;
+//		
+//		for (int i = 0; i < data.size(); i++) {
+//			isCanceled();
+//			GraphSegment gs = data.get(i);
+//			if (gs.getHeadAttributes() != null) {
+//				if (headKeyList == null) headKeyList = new ArrayList<String>();
+//				Iterator<String> keyitr = gs.getHeadAttributes().keySet().iterator();
+//				while (keyitr.hasNext()) {
+//					String key = keyitr.next();
+//					if (!headKeyList.contains(key)) {
+//						headKeyList.add(key);
+//						columnList.add("head_" + key);
+//					}
+//				}
+//			}
+//			if (gs.getEdgeAttributes() != null) {
+//				if (edgeKeyList == null) edgeKeyList = new ArrayList<String>();
+//				Iterator<String> keyitr = gs.getEdgeAttributes().keySet().iterator();
+//				while (keyitr.hasNext()) {
+//					String key = keyitr.next();
+//					if (!edgeKeyList.contains(key)) {
+//						edgeKeyList.add(key);
+//						columnList.add("edge_" + key);
+//					}
+//				}
+//			}
+//			if (gs.getTailAttributes() != null) {
+//				if (tailKeyList == null) tailKeyList = new ArrayList<String>();
+//				Iterator<String> keyitr = gs.getTailAttributes().keySet().iterator();
+//				while (keyitr.hasNext()) {
+//					String key = keyitr.next();
+//					if (!tailKeyList.contains(key)) {
+//						tailKeyList.add(key);
+//						columnList.add("tail_" + key);
+//					}
+//				}
+//			}
+//		}
+//		int maxColumns = 3 + 
+//				(headKeyList != null ? headKeyList.size() : 0) + 
+//				(edgeKeyList != null ? edgeKeyList.size() : 0) +
+//				(tailKeyList != null ? tailKeyList.size() : 0);
+//		if (isIncludeDuplicates()) {
+//			maxColumns = maxColumns + 2;
+//		}
+//		Object array[][] = new Object[data.size()][maxColumns];
+//		
+//		boolean dataFound = false;
+//		for(int i = 0; i < data.size(); i++) {
+//			isCanceled();
+//			GraphSegment gs = data.get(i);
+//			gs.setUriStrategy(getUriStrategy());
+//			String s = gs.subjectToString(null);
+//			String p = gs.predicateToString();
+//			String o = gs.objectToString(null);
+//			array[i][0] = s;
+//			array[i][1] = p;
+//			array[i][2] = o;
+//			dataFound = true;
+//			array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
+//			array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
+//			array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
+//			if (isIncludeDuplicates()) {
+//				array[i][maxColumns - 2] = gs.getSubjectNodeDuplicateSequenceNumber();
+//				array[i][maxColumns - 1] = gs.getObjectNodeDuplicateSequenceNumber();
+//			}
+//		}
+//		if (dataFound) {
+//			if (isIncludeDuplicates()) {
+//				columnList.add("head_sequence_number");
+//				columnList.add("tail_sequence_number");
+//			}
+//			String[] headers = columnList.toArray(new String[0]);
+//			ResultSet rs = new ResultSet(headers, array);
+//			return rs;
+//		}
+//		return null;
+//	}
 
 	private Object[][] attributeToDataArray(String graphPart, Map<String,String> map, List<String> columnList, Object[][] array, int i, GraphSegment gs) {
 		if (map != null) {
@@ -765,6 +775,8 @@ public class GraphGenerator {
 
 	protected void setTheJenaModel(OntModel model) {
 		this.theJenaModel = model;
+//		System.out.println("**************** theJenaModel:");
+//		theJenaModel.write(System.out);
 	}
 	
 	protected void isCanceled(){
@@ -828,8 +840,8 @@ public class GraphGenerator {
 	}
 
 	private Property getImpliedProperty() {
-		if (impliedProperty == null && getTheJenaModel() != null) {
-			setImpliedProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI));
+		if (impliedProperty == null && getTheJenaModelWithImports() != null) {
+			setImpliedProperty(getTheJenaModelWithImports().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI));
 		}
 		return impliedProperty;
 	}
@@ -978,5 +990,209 @@ public class GraphGenerator {
 			}
 		}
 		throw new Exception("Unable to find actual URL for public URI '" + publicUri + "'");
+	}
+
+	protected void annotateEdge(GraphSegment gs, String color, String style1, String style2) {
+		gs.addEdgeAttribute(COLOR, color);
+		if (style1 != null) {
+			gs.addEdgeAttribute(STYLE, style1);
+		}
+		if (style2 != null) {
+			gs.addEdgeAttribute(STYLE, style2);
+		}
+	}
+
+	protected void annotateHeadAsClass(GraphSegment sg) {
+		sg.addHeadAttribute(STYLE, FILLED);
+		sg.addHeadAttribute(FILL_COLOR, CLASS_BLUE);
+		sg.addHeadAttribute(FONTCOLOR, WHITE);
+	}
+
+	protected void annotateTailAsIndividual(GraphSegment gs) {
+		gs.addTailAttribute(SHAPE, ELLIPSE); //DIAMOND);
+		gs.addTailAttribute(FILL_COLOR, INSTANCE_BLUE);
+		gs.addTailAttribute(STYLE, FILLED);
+		gs.addTailAttribute(FONTCOLOR, WHITE);
+	}
+
+	protected void annotateHeadAsIndividual(GraphSegment gs) {
+		gs.addHeadAttribute(SHAPE, ELLIPSE); //DIAMOND);
+		gs.addHeadAttribute(FILL_COLOR, INSTANCE_BLUE);
+		gs.addHeadAttribute(STYLE, FILLED);
+		gs.addHeadAttribute(FONTCOLOR, WHITE);
+	}
+
+	protected void annotateTailAsProperty(GraphSegment sg, String color) {
+		sg.addTailAttribute(SHAPE, OCTAGON);
+		if (color != null) {
+			sg.addTailAttribute(COLOR, color);
+		}
+	}
+
+	protected void annotateHeadAsProperty(GraphSegment sg, String color) {
+		sg.addHeadAttribute(SHAPE, OCTAGON);		
+		if (color != null) {
+			sg.addHeadAttribute(COLOR, color);
+		}
+	}
+
+	protected void annotateTailAsClass(GraphSegment sg) {
+		sg.addTailAttribute(STYLE, FILLED);
+		sg.addTailAttribute(FILL_COLOR, CLASS_BLUE);
+		sg.addTailAttribute(FONTCOLOR, WHITE);
+	}
+
+	protected OntModel getTheJenaModelWithImports() {
+		return theJenaModelWithImports;
+	}
+
+	private void setTheJenaModelWithImports(OntModel theJenaModelWithImports) {
+		this.theJenaModelWithImports = theJenaModelWithImports;
+//		System.out.println("*********** theJenaModelWithImports:");
+//		theJenaModelWithImports.write(System.out);
+	}
+
+	protected String getModelUri() {
+		return modelUri;
+	}
+
+	protected void setModelUri(String modelUri) {
+		this.modelUri = modelUri;
+	}
+
+	/**
+	 * @param data
+	 * @param publicUri 
+	 * @return
+	 * @throws InvalidNameException 
+	 */
+	public ResultSet convertDataToResultSet(List<GraphSegment> data, UriStrategy uriStrategy, String publicUri) throws InvalidNameException {
+		List<String> columnList = new ArrayList<String>();
+		columnList.add("head");
+		columnList.add("edge");
+		columnList.add("tail");
+		List<String> headKeyList = null;
+		List<String> edgeKeyList = null;
+		List<String> tailKeyList = null;
+		int arraySize = data.size();
+		int listCount = 0;
+		for (int i = 0; i < data.size(); i++) {
+			isCanceled();
+			GraphSegment gs = data.get(i);
+			if (gs.getHeadAttributes() != null) {
+				if (headKeyList == null) headKeyList = new ArrayList<String>();
+				Iterator<String> keyitr = gs.getHeadAttributes().keySet().iterator();
+				while (keyitr.hasNext()) {
+					String key = keyitr.next();
+					if (!headKeyList.contains(key)) {
+						headKeyList.add(key);
+						columnList.add("head_" + key);
+					}
+				}
+			}
+			if (gs.getEdgeAttributes() != null) {
+				if (edgeKeyList == null) edgeKeyList = new ArrayList<String>();
+				Iterator<String> keyitr = gs.getEdgeAttributes().keySet().iterator();
+				while (keyitr.hasNext()) {
+					String key = keyitr.next();
+					if (!edgeKeyList.contains(key)) {
+						edgeKeyList.add(key);
+						columnList.add("edge_" + key);
+					}
+				}
+			}
+			if (gs.getTailAttributes() != null) {
+				if (tailKeyList == null) tailKeyList = new ArrayList<String>();
+				Iterator<String> keyitr = gs.getTailAttributes().keySet().iterator();
+				while (keyitr.hasNext()) {
+					String key = keyitr.next();
+					if (!tailKeyList.contains(key)) {
+						tailKeyList.add(key);
+						columnList.add("tail_" + key);
+					}
+				}
+			}
+		}
+		int maxColumns = 3 + 
+				(headKeyList != null ? headKeyList.size() : 0) + 
+				(edgeKeyList != null ? edgeKeyList.size() : 0) + 
+				(tailKeyList != null ? tailKeyList.size() : 0); 
+		Object array[][] = new Object[data.size()][maxColumns]; 
+		
+		objectDisplayStrings = new HashMap<Object, String>();
+		int bncntr = 1;
+		for (int i = 0; i < arraySize; i++) {
+			isCanceled();
+			GraphSegment gs = data.get(i);
+			gs.setUriStrategy(uriStrategy);
+			Object s = gs.getSubject();
+			if (s != null && s instanceof Resource) {
+				if (!objectDisplayStrings.containsKey(s)) {
+					if (!((Resource)s).canAs(OntClass.class) || 
+							(!((Resource)s).as(OntClass.class).isEnumeratedClass() && 
+									!((Resource)s).as(OntClass.class).isRestriction() &&
+									!((Resource)s).as(OntClass.class).isUnionClass() &&
+									!((Resource)s).as(OntClass.class).isIntersectionClass())) {
+						String ss = null;
+						if (!gs.isSubjectIsList() && !((Resource)s).isURIResource()) {
+							ss = "<bn-" + bncntr++ + ">";
+						}
+						if (ss == null) {
+							ss = gs.subjectToString(null);
+						}
+						objectDisplayStrings.put(s,  ss);
+					}
+				}
+			}
+			Object o = gs.getObject();
+			if (o != null && o instanceof Resource) {
+				if (!objectDisplayStrings.containsKey(o)) {
+					if (!((Resource)o).canAs(OntClass.class) || 
+							(!((Resource)o).as(OntClass.class).isEnumeratedClass() && 
+									!((Resource)o).as(OntClass.class).isRestriction() &&
+									!((Resource)o).as(OntClass.class).isUnionClass() &&
+									!((Resource)o).as(OntClass.class).isIntersectionClass())) {
+						String os = null;
+						if (!gs.isObjectIsList() && !((Resource)o).isURIResource()) {
+							os = "<bn-" + bncntr++ + ">";
+						}
+						if (os == null) {
+							os = gs.objectToString(null);
+						}
+						objectDisplayStrings.put(o,  os);
+					}
+				}
+			}
+		}
+		
+		boolean dataFound = false;
+		listCount = 0;	// restart counter
+		for(int i = 0; i < arraySize; i++) {
+			isCanceled();
+			GraphSegment gs = data.get(i);
+			array[i+listCount][0] = gs.getSubject() != null ? (objectDisplayStrings.containsKey(gs.getSubject()) ? objectDisplayStrings.get(gs.getSubject()) : gs.subjectToString(objectDisplayStrings)) : null;
+			array[i+listCount][1] = gs.getPredicate() != null ? gs.predicateToString() : null;
+			array[i+listCount][2] = gs.getObject() != null ? (objectDisplayStrings.containsKey(gs.getObject()) ? objectDisplayStrings.get(gs.getObject()) : gs.objectToString(objectDisplayStrings)) : null;
+			dataFound = true;
+			if (gs.getHeadAttributes() != null) {
+				array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
+			}
+			if (gs.getEdgeAttributes() != null) {
+				array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
+			}
+			if (gs.getTailAttributes() != null) {
+				array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
+			}
+		}
+		if (dataFound) {
+			if (isIncludeDuplicates()) {
+				columnList.add("head_sequence_number");
+				columnList.add("tail_sequence_number");
+			}
+			String[] headers = columnList.toArray(new String[0]);
+			ResultSet rs = new ResultSet(headers, array);
+			return rs;
+		}
+		return null;
 	}
 }

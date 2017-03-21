@@ -226,7 +226,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri), monitor);
 		gg.setUriStrategy(UriStrategy.QNAME_WITH_URI_TOOLTIP);
 		List<GraphSegment> imports = getAnchoredImports(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
-		ResultSet rs = gg.convertDataToResultSet(imports);
+		ResultSet rs = gg.convertDataToResultSet(imports, UriStrategy.QNAME_IF_IMPORT, prefix);
 		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();
@@ -313,13 +313,13 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 	}
 
 	protected String getSadlResourceAnchor(SadlResource sr, UriStrategy uriStrategy) throws ConfigurationException, CircularDefinitionException, InvalidNameException, URISyntaxException {
-		GraphSegment gsDummy = new GraphSegment(null, null, null, getConfigMgr());
+		GraphSegment gsDummy = new GraphSegment(null, null, null, null, getConfigMgr());
 		gsDummy.setUriStrategy(uriStrategy);
 //		OntConceptType ct = declarationExtensions.getOntConceptType(sr);
 		String sruri = declarationExtensions.getConceptUri(sr);
 		ConceptName cn = new ConceptName(sruri);
 		cn.setPrefix(getConfigMgr().getGlobalPrefix(cn.getNamespace()));
-		String anchorNode = gsDummy.conceptNameToString(cn, false);  // nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
+		String anchorNode = gsDummy.conceptNameToString(cn);  // nodeText(getSadlResourceUri(sr), getSadlResourcePrefix(sr));
 		return anchorNode;
 	}
 
@@ -491,7 +491,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				try {
 					if (graphRadius > 0) {
 						if (!(targetUri.equals(sourceUri))) {
-							gs = new GraphSegment(subj, pred, obj, getConfigMgr());
+							gs = new GraphSegment(null, subj, pred, obj, getConfigMgr());
 							if (!importList.contains(gs)) {
 								importList.add(gs);
 								URI sobjuri = sourceDesc.getEObjectURI();
@@ -576,7 +576,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //					else {
 //						subj = nodeText(key, val);
 //					}
-					GraphSegment gs = new GraphSegment(subj, pred, obj, configMgr);
+					GraphSegment gs = new GraphSegment(null, subj, pred, obj, configMgr);
 					if (!importList.contains(gs) && graphRadius > 0) {
 						importList.add(gs);
 						importList = findImports(importList, configMgr, key, val, graphRadius - 1);

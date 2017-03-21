@@ -35,6 +35,7 @@ import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.ui.SadlConsole;
+import com.ge.research.sadl.ui.visualize.GraphGenerator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.ui.visualize.GraphSegment;
 import com.ge.research.sadl.ui.visualize.OntologyGraphGenerator;
@@ -110,13 +111,13 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 						
 						if (imports.size() > 0) {
 							IGraphVisualizer visualizer = getVisualizer(getConfigMgr());
-							OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project);
+							GraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project);
 							IFile trgtFile = null;
 							String baseFileName = "Project";
 							String graphName = baseFileName;
 							String description = "Project " + project.getName() + " import map";
 			//				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, null);
-							ResultSet importsRS = ogg.convertDataToResultSet(imports, UriStrategy.LOCALNAME_WITH_URI_TOOLTIP);
+							ResultSet importsRS = ogg.convertDataToResultSet(imports, UriStrategy.LOCALNAME_WITH_URI_TOOLTIP, null);
 							if (visualizer != null) {
 								graphResultSet(visualizer, project, baseFileName, graphName, null, description, importsRS, null, true);					
 							}
@@ -262,7 +263,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					imports.addAll(newImports);
 				}
 				else if (oggResults != null){
-					GraphSegment simgs = new GraphSegment((prefix != null ? prefix : publicUri), null, null, getConfigMgr());
+					GraphSegment simgs = new GraphSegment(null, (prefix != null ? prefix : publicUri), null, null, getConfigMgr());
 					simgs.addHeadAttribute("tooltip", "\"" + publicUri + "\"");
 					try {
 						simgs.addHeadAttribute("URL", ogg.getCurrentFileLink(publicUri));
