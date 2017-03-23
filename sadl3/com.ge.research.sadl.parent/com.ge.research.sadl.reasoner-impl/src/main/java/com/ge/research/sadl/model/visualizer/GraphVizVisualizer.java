@@ -232,31 +232,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 					boolean anchored = false;
 					if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
 						anchored = true;
-						// color the "anchor" node
-						sb.append(" color=lightblue");
-//						if (headAttributes == null || !headAttributes.containsValue("color")) {
-							sb.append(" style=filled");
-//						}
-//						else {
-//							sb.append(" style=bold");
-//						}
-						sb.append(" fontcolor=navyblue");
 					}
-					if (headAttributes != null) {
-						Iterator<Integer> itr = headAttributes.keySet().iterator();
-						while (itr.hasNext()) {
-							Integer key = itr.next();
-							String value = headAttributes.get(key);
-							if (!anchored || !value.equals("color")) {
-								if (row[key.intValue()] != null) {
-									sb.append(" ");
-									sb.append(value);
-									sb.append("=");
-									sb.append(row[key.intValue()]);
-								}
-							}
-						}
-					}
+					applyAttributesToNode(headAttributes, row, anchored);
 					sb.append("];\n");
 				}
 
@@ -395,31 +372,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			boolean anchored = false;
 			if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
 				anchored = true;
-				// color the "anchor" node
-				sb.append(" color=lightblue");
-				//				if (headAttributes == null || !headAttributes.containsValue("color")) {
-				sb.append(" style=filled");
-				//				}
-				//				else {
-				//					sb.append(" style=bold");
-				//				}
-				sb.append(" fontcolor=navyblue");
 			}
-			if (headAttributes != null) {
-				Iterator<Integer> itr = headAttributes.keySet().iterator();
-				while (itr.hasNext()) {
-					Integer key = itr.next();
-					String value = headAttributes.get(key);
-					if (!anchored || !value.equals("color")) {
-						if (row[key.intValue()] != null) {
-							sb.append(" ");
-							sb.append(value);
-							sb.append("=");
-							sb.append(row[key.intValue()]);
-						}
-					}
-				}
-			}
+			applyAttributesToNode(headAttributes, row, anchored);
 			sb.append("];\n");
 		}
 		if (!repeatObjNode) {
@@ -436,31 +390,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			boolean anchored = false;
 			if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
 				anchored = true;
-				// color the "anchor" node
-				sb.append(" color=lightblue");
-				//				if (tailAttributes == null || !tailAttributes.containsValue("color")) {
-				sb.append(" style=filled");
-				//				}
-				//				else {
-				//					sb.append(" style=bold");
-				//				}
-				sb.append(" fontcolor=navyblue");
 			}
-			if (tailAttributes != null) {
-				Iterator<Integer> itr = tailAttributes.keySet().iterator();
-				while (itr.hasNext()) {
-					Integer key = itr.next();
-					String value = tailAttributes.get(key);
-					if (!anchored || !value.equals("color")) {
-						if (row[key.intValue()] != null) {
-							sb.append(" ");
-							sb.append(value);
-							sb.append("=");
-							sb.append(row[key.intValue()]);
-						}
-					}
-				}
-			}
+			applyAttributesToNode(tailAttributes, row, anchored);
 			sb.append("];\n");
 		}
 		sb.append("     ");
@@ -468,12 +399,16 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb.append("->");
 		sb.append(olbl);
 		sb.append("[");
+		boolean anchored = false;
 		if (row[1] != null && row[1].toString().length() > 0) {
+			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
+				anchored = true;
+			}
 			sb.append("label=\"");
 			sb.append(edgeLbl);
 			sb.append("\"");
 			// color the "anchor" edge
-			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
+			if (anchored) {
 				sb.append(" style=bold");
 			}
 		}
@@ -482,6 +417,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			while (itr.hasNext()) {
 				Integer key = itr.next();
 				String value = edgeAttributes.get(key);
+				if (anchored && value.equals("style")) {
+					continue; // already set
+				}
 				if (row[key.intValue()] != null) {
 					sb.append(" ");
 					sb.append(value);
@@ -491,6 +429,44 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 		}
 		sb.append("];\n");
+	}
+
+	private void applyAttributesToNode(Map<Integer, String> attributes, Object[] row, boolean anchored) {
+		boolean anchorFillColorSet = false;
+		boolean fontColorSet = false;
+		if (attributes != null) {
+			Iterator<Integer> itr = attributes.keySet().iterator();
+			while (itr.hasNext()) {
+				Integer key = itr.next();
+				String value = attributes.get(key);		
+				if (row[key.intValue()] != null) {
+					if (value.equals("fontcolor")) {
+						fontColorSet = true;
+					}
+					sb.append(" ");
+					sb.append(value);
+					sb.append("=");
+					if (anchored && value.equals("fillcolor")) {
+						sb.append("\"lightblue:");
+						anchorFillColorSet = true;
+						sb.append(row[key.intValue()]);
+						sb.append("\"");
+					}
+					else {
+						sb.append(row[key.intValue()]);
+					}
+				}
+			}
+			if (anchored) {
+				if (!anchorFillColorSet) {
+					sb.append(" fillcolor=lightblue");
+					sb.append(" style=filled");
+				}
+				if (!fontColorSet) {
+					sb.append(" fontcolor=navyblue");
+				}
+			}
+		}
 	}
 	
 	private long getSequenceNumber(Map<Integer, String> attributes, Object[] row) {
