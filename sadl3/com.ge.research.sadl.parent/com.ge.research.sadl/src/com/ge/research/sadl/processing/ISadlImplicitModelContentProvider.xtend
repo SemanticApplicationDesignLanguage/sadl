@@ -45,31 +45,47 @@ interface ISadlImplicitModelContentProvider {
 	def String getContent();
 
 	/**
-	 * Writes the SADL implicit model {@link #getContent() content} into the file under
-	 * the given resource path.
+	 * Writes the SADL implicit model {@link #getContent() content} into the file
+	 * under the given resource path. If a resource with the given path exists, then
+	 * the existing file will be deleted and a new will be created instead.
 	 * 
-	 * @param desiredPath the path to the desired implicit model resource.
+	 * @param desiredPath
+	 *            the path to the desired implicit model resource.
+	 * @param setReadOnly
+	 *            when {@code true} then the underlying code tries to set write
+	 *            protection on the file by calling
+	 *            {@link java.io.File#setReadOnly()} on the file.
 	 * @return the argument.
 	 */
-	def Path createImplicitModel(Path desiredPath) {
+	def Path createImplicitModel(Path desiredPath, boolean setReadOnly) {
 		checkNotNull(desiredPath, 'desiredPath');
 		val file = desiredPath.toFile;
-		checkArgument(
-			!file.exists,
-			'''Cannot create implicit model at «desiredPath». The resource already exist.'''
-		);
-		Files.createDirectories(
-			checkNotNull(desiredPath.parent, '''Missing parent folder for «desiredPath».''').parent);
-		Files.createFile(desiredPath).toString.writeStringIntoFile(content);
+		if (file.exists) {
+			Files.delete(desiredPath);
+		}
+
+		val parent = desiredPath.parent;
+		checkNotNull(parent, '''Missing parent folder for «desiredPath».''');
+		if (!parent.toFile.exists) {
+			Files.createDirectories(parent);
+		}
+
+		if (!file.exists) {
+			Files.createFile(desiredPath).toString.writeStringIntoFile(content);
+		}
+
+		if (setReadOnly) {
+			file.setReadOnly;
+		}
+
 		return desiredPath;
 	}
 
 	/**
-	 * Sugar for {@link #createImplicitModel(Path)}.
+	 * Sugar for {@link #createImplicitModel(Path, boolean)}.
 	 */
-	def File createImplicitModel(File desiredFile) {
-		checkNotNull(desiredFile, 'desiredFile');
-		return desiredFile.toPath.createImplicitModel.toFile;
+	def File createImplicitModel(File desiredFile, boolean setReadOnly) {
+		return createImplicitModel(checkNotNull(desiredFile, 'desiredFile').toPath, setReadOnly).toFile;
 	}
 
 	/**
@@ -79,7 +95,7 @@ interface ISadlImplicitModelContentProvider {
 
 		static val DEFAULT_CONTENT = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-
+			
 			impliedProperty is a type of annotation.
 			UnittedQuantity is a class,
 				described by ^value with values of type decimal,
@@ -98,9 +114,10 @@ interface ISadlImplicitModelContentProvider {
 				Platform.extensionRegistry.getConfigurationElementsFor(EXTENSION_POINT_ID).map [
 					createExecutableExtension(EXECUTABLE_ATTRIBUTE_ID) as ISadlImplicitModelFragmentProvider
 				];
-			} else {
-				ServiceLoader.load(ISadlImplicitModelFragmentProvider).iterator.toIterable;
-			}.map[afterCreation; it];
+			} else
+				{
+					ServiceLoader.load(ISadlImplicitModelFragmentProvider).iterator.toIterable;
+				}.map[afterCreation; it];
 		}
 
 	}
