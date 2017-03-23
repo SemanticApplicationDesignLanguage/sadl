@@ -60,6 +60,8 @@ public class SadlCliHelper {
 
 	@Inject
 	ResourceDescriptionsProvider resourceDescriptionsProvider;
+
+	private Multimap<Resource, Issue> errors;
 	
 	SadlCliHelper() {
 		createInjector().injectMembers(this);
@@ -101,7 +103,7 @@ public class SadlCliHelper {
 						}
 					});
 
-			Multimap<Resource, Issue> errors = HashMultimap
+			errors = HashMultimap
 					.<Resource, Issue> create();
 			
 			
@@ -150,6 +152,8 @@ public class SadlCliHelper {
 				
 			}, new NullProgressMonitor());
 			
+			builder.closeProject();
+			
 			for (Resource resource : mapping.keySet()) {
 				info("Validating resource: " + deresolve(resource.getURI()));
 				List<Issue> issues = validate(resource);
@@ -179,6 +183,10 @@ public class SadlCliHelper {
 				itr.remove();
 			}
 		}
+	}
+	
+	public Multimap<Resource, Issue> getErrors() {
+		return errors;
 	}
 
 	private boolean isSadlFile(File it) {

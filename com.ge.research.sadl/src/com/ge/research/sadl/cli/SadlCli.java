@@ -16,14 +16,19 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.validation.Issue;
 
 import com.ge.research.sadl.builder.ResourceManager;
 import com.google.common.base.Optional;
+import com.google.common.collect.Multimap;
 import com.ibm.icu.text.SimpleDateFormat;
 
 public class SadlCli {
 
 	public static Optional<URI> projectRootUri = Optional.absent();
+	private Multimap<Resource, Issue> errors;
+	
 
 	public static void main(final String[] args) throws Exception {
 		try {
@@ -31,7 +36,8 @@ public class SadlCli {
 			Path file = copyProjectContentToTmp(originalPath);
 			projectRootUri = Optional.fromNullable(URI.createFileURI(file
 					.toFile().getAbsolutePath()));
-			new SadlCliHelper().transform(file);
+			SadlCliHelper sch = new SadlCliHelper();
+			sch.transform(file);
 
 			Path outputPath = Paths.get(originalPath.toString()
 					+ "_transformed_"
@@ -50,7 +56,7 @@ public class SadlCli {
 		}
 
 	}
-	
+
 	public String processProject(String projectPath) throws IOException, Exception {
 		try {
 			String[] input = new String[1];
@@ -59,7 +65,9 @@ public class SadlCli {
 			Path file = copyProjectContentToTmp(originalPath);
 			projectRootUri = Optional.fromNullable(URI.createFileURI(file
 					.toFile().getAbsolutePath()));
-			new SadlCliHelper().transform(file);
+			SadlCliHelper sch = new SadlCliHelper();
+			sch.transform(file);
+			setErrors(sch.getErrors());
 
 			Path outputPath = Paths.get(originalPath.toString()
 					+ "_transformed_"
@@ -80,6 +88,14 @@ public class SadlCli {
 			}
 			projectRootUri = Optional.absent();
 		}
+	}
+
+	private void setErrors(Multimap<Resource, Issue> errors) {
+		this.errors = errors;
+	}
+	
+	public Multimap<Resource, Issue> getErrors() {
+		return errors;
 	}
 
 	private static Path getProjectRootPath(final String[] args) {
