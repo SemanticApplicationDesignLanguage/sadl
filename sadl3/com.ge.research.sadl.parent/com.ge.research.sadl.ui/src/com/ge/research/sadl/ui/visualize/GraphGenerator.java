@@ -19,6 +19,7 @@ package com.ge.research.sadl.ui.visualize;
 
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,8 +39,10 @@ import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -52,6 +55,8 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -90,6 +95,7 @@ public class GraphGenerator {
 	protected static final String PROPERTY_GREEN = "green3";
 	protected static final String BLACK = "black";
 	protected static final String LIST_TYPE_COLOR = "cyan4";
+	protected static final String VARIABLE_PINK = "pink";
 	
 	protected static final String SHAPE = "shape";
 	protected static final String OCTAGON = "octagon";
@@ -128,6 +134,7 @@ public class GraphGenerator {
 	private IProgressMonitor monitor = null;
 	private HashMap<String, List<String>> classToPropertyMap = null;
 	private Map<Object, String> objectDisplayStrings;
+	private OntModel baseModel = null;
 	
 	public enum Orientation {TD, LR}
 
@@ -412,12 +419,11 @@ public class GraphGenerator {
 			OntResource rng = eitr.next();
 			RDFNode listtype = null;
 			//if it's a list and range class
-			if (isList && rng.canAs(OntClass.class)) {
+			if (rng.canAs(OntClass.class)) {
 				//get list class
 				//Check for an all values from restriction
-				Resource listClass = getTheJenaModelWithImports().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
 				//if list class exists or the range has a superclass that is a list
-				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
+				if (rng.as(OntClass.class).hasSuperClass(getListClass())) {
 					//iterate across all of the statements that are subclasses of range?
 					StmtIterator stmtitr = getTheJenaModelWithImports().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
 					while (stmtitr.hasNext()) {
@@ -433,9 +439,7 @@ public class GraphGenerator {
 								Statement avf = subcls.getProperty(OWL.allValuesFrom);
 								if (avf != null) {
 									listtype = avf.getObject();
-									if (listtype.canAs(OntResource.class)){
-										rng = listtype.as(OntResource.class);
-									}
+									isList = true;
 								}
 								stmtitr.close();
 								break;
@@ -444,7 +448,29 @@ public class GraphGenerator {
 					}
 				}
 			}
-			GraphSegment sg = isList ? new GraphSegment(getModelUri(), cls, prop, rng, null, listtype, configMgr) : new GraphSegment(getModelUri(), cls, prop, rng, configMgr);
+			GraphSegment sg;
+			if (isList) {
+				try {
+					RDFNode lst = addTypeListToGraphData(data, getModelUri(), rng.as(OntResource.class), listtype.as(OntClass.class));
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				sg = new GraphSegment(getModelUri(), cls, prop, rng, null, listtype, configMgr);
+
+			}
+			else {
+				sg = new GraphSegment(getModelUri(), cls, prop, rng, configMgr);
+			}
 			long objSeqNumber = -1L;
 			if (isIncludeDuplicates()) {
 				objSeqNumber = getNewSequenceNumber();
@@ -471,8 +497,15 @@ public class GraphGenerator {
 					// what for XSD and user-defined types?
 				}
 				data.add(sg);
-				if (prop.as(OntProperty.class).isObjectProperty() && !cls.equals(rng)) {
-					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), objSeqNumber, graphRadius - 1, fillNodes, data);
+				if (!isList) {
+					if (prop.as(OntProperty.class).isObjectProperty() && !cls.equals(rng)) {
+						data = generateClassPropertiesWithDomain(rng.as(OntClass.class), objSeqNumber, graphRadius - 1, fillNodes, data);
+					}
+				}
+				else {
+					if (!cls.equals(listtype) && listtype.canAs(OntClass.class)) {
+						data = generateClassPropertiesWithDomain(listtype.as(OntClass.class), -1, graphRadius - 1, fillNodes, data);
+					}
 				}
 			}
 			else {
@@ -1194,5 +1227,128 @@ public class GraphGenerator {
 			return rs;
 		}
 		return null;
+	}
+
+	protected Resource getListClass() {
+		return getTheJenaModelWithImports().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+	}
+
+	protected Property getListFirstProp() {
+		return getTheJenaModelWithImports().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+	}
+
+	protected Property getListRestProp() {
+		return getTheJenaModelWithImports().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
+	}
+
+	protected RDFNode addTypeListToGraphData(List<GraphSegment> data, String parentPublicUri, OntResource rng, RDFNode listtype)
+			throws ConfigurationException, IOException, URISyntaxException, Exception {
+				GraphSegment gs = new GraphSegment(parentPublicUri, rng, "list\ntype", listtype, listtype, null, getConfigMgr());
+				if (!data.contains(gs)) {
+					setSubjectObjectClassAttributes(gs, parentPublicUri, rng, listtype);
+					gs.addEdgeAttribute(COLOR, LIST_TYPE_COLOR);
+					gs.addEdgeAttribute(STYLE, DASHED);
+					data.add(gs);
+				}
+				GraphSegment gs2 = new GraphSegment(parentPublicUri, getListClass(), "subClass", rng, null, listtype, getConfigMgr());
+				if (!data.contains(gs2)) {
+					setSubjectObjectClassAttributes(gs2, parentPublicUri, getListClass(), rng);
+					gs2.addEdgeAttribute(COLOR, BLUE);
+					gs2.addEdgeAttribute(STYLE, DASHED);
+					data.add(gs2);
+				}
+				return listtype;
+			}
+
+	/**
+	 * Method used to find the File URL of the graph associated with an imported class
+	 * 
+	 * @param	- Imported class or concept
+	 * @return	- File URL to be added to node hyperlink
+	 * @throws Exception 
+	 */
+	protected String getImportUrl(RDFNode rsrc) throws Exception {
+		if (!rsrc.isResource() || !rsrc.isURIResource()) {
+			return null;
+		}
+		String ns = rsrc.asResource().getNameSpace();
+		if (ns.endsWith("#")) {
+			ns = ns.substring(0, ns.length() - 1);
+		}
+		String baseFilename = getBaseFilenameFromPublicUri(ns);
+		//get the graph folder file path
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
+		
+		if(baseFilename != null){
+			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
+		}
+		return null;
+	}
+
+	private void setSubjectObjectClassAttributes(GraphSegment sg, String parentPublicUri, RDFNode cls, RDFNode rng)
+			throws ConfigurationException, IOException, URISyntaxException, Exception {
+				annotateHeadAsClass(sg);
+				if(isInImports(cls, parentPublicUri)){
+					if(getImportUrl(cls) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(cls));
+					sg.addHeadAttribute(IS_IMPORT, "true");
+				}
+				annotateTailAsClass(sg);
+				if(isInImports(rng, parentPublicUri)){
+					if(getImportUrl(rng) != null) sg.addTailAttribute(LINK_URL, getImportUrl(rng));
+					sg.addTailAttribute(IS_IMPORT, "true");
+				}
+			}
+
+	/**
+	 * Method used to see if a class/instance/etc. is an imported item 
+	 * (i.e) not defined in this file/namespace
+	 * 
+	 * @param classInst			- Item being checked against imports 
+	 * @param parentPublicUri	- URI of file being graphed
+	 * @return
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 * @throws URISyntaxException 
+	 */
+	protected boolean isInImports(RDFNode classInst, String parentPublicUri)
+			throws ConfigurationException, IOException, URISyntaxException {
+				try{
+			
+					if(classInst.isURIResource()){
+						String[] uri = classInst.asResource().getURI().split("#");
+						if(uri != null && uri[0].equals(parentPublicUri)){
+							return false;
+						}
+						else {
+							SadlUtils su = new SadlUtils();
+							if (uri != null && su.fileNameToFileUrl(su.fileUrlToFileName(uri[0])).equals(getConfigMgr().getAltUrlFromPublicUri(parentPublicUri))) {
+								return false;
+							}else{
+								return true;
+							}
+						}
+					}else{
+						if(getLocalModel().containsResource(classInst)){
+							return false;
+							
+						}else{
+							return true;
+						}
+					}
+				}catch(NullPointerException e){
+					return false;
+					//TODO fix issues with OnClassImpl throwing null exception
+				}
+			}
+
+	/**
+	 * @return
+	 */
+	protected OntModel getLocalModel() {
+		if (baseModel == null) {
+			Model m = getTheJenaModel().getBaseModel();
+			baseModel = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+		}
+		return baseModel;
 	}
 }

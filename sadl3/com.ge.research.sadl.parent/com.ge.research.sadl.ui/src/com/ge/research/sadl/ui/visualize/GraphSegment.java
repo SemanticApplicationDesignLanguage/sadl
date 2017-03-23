@@ -713,7 +713,15 @@ public class GraphSegment {
 		if (headAttributes == null) headAttributes = new HashMap<String,String>();
 		headAttributes.put(key, value);
 	}
+	
+	public void setHeadAttributes(Map<String,String>attrs) {
+		headAttributes = attrs;
+	}
 
+	public void setTailAttributes(Map<String,String>attrs) {
+		tailAttributes = attrs;
+	}
+	
 	public Map<String,String> getEdgeAttributes() {
 		return edgeAttributes;
 	}

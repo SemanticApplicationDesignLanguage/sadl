@@ -179,7 +179,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 					argsPlus[args.length] = monitor;
 					graphingMethod.invoke(c, argsPlus);
 				}catch (Exception e) {
-					//e.printStackTrace();
+					e.printStackTrace();
 					return Status.CANCEL_STATUS;
 				}
 				return Status.OK_STATUS;

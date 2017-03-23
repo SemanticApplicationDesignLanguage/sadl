@@ -20,17 +20,13 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.EnumeratedClass;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -46,7 +42,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  */
 public class OntologyGraphGenerator extends GraphGenerator {
 
-	private OntModel baseModel = null;
+	
 	
 	
 //	public enum Orientation {TD, LR, BD, RL}
@@ -135,7 +131,6 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	}
 
 	private void addByStatements(String publicUri, List<GraphSegment> data) throws ConfigurationException, IOException, URISyntaxException, Exception {
-		Resource listClass = getLocalModel().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
 		StmtIterator stmtitr = getLocalModel().listStatements();
 		Map<Resource, RDFNode> propertyDomains = null;
 		Map<Resource, RDFNode> propertyRanges = null;
@@ -154,7 +149,8 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			else if (p.equals(OWL.sameAs)) {
 				addSameAsClass(publicUri, subj, obj, data);
 			}
-			else if (p.equals(RDFS.comment) || p.equals(RDF.rest) || p.equals(RDF.first) || p.getNameSpace().equals(OWL.NAMESPACE.getURI()) ||
+			else if (p.equals(RDFS.comment) || p.equals(RDF.rest) || p.equals(RDF.first) || 
+					p.equals(getListFirstProp()) || p.equals(getListRestProp()) || p.getNameSpace().equals(OWL.NAMESPACE.getURI()) ||
 					(p.isURIResource() && p.getURI().equals(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))) {
 				continue;
 			}
@@ -177,7 +173,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			else if (p.equals(RDFS.subClassOf)) {
 				if (subj.canAs(OntClass.class)){ 
 					OntClass classInst = subj.as(OntClass.class);
-					if (obj.canAs(OntClass.class) && !obj.as(OntClass.class).equals(listClass)) { 
+					if (obj.canAs(OntClass.class) && !obj.as(OntClass.class).equals(getListClass())) { 
 						addIsATypeOfToGraph(publicUri, classInst, obj.as(OntClass.class), data);
 					}
 				}
@@ -190,7 +186,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 				if (propertyRanges == null) propertyRanges = new HashMap<Resource, RDFNode>();
 				RDFNode rng = stmt.getObject();
 				RDFNode listtype = null;
-				boolean isList = isPropertyAnnotatedAsListRange(subj) || (rng.canAs(OntClass.class)&&  rng.as(OntClass.class).hasSuperClass(listClass));
+				boolean isList = isPropertyAnnotatedAsListRange(subj) || (rng.canAs(OntClass.class)&&  rng.as(OntClass.class).hasSuperClass(getListClass()));
 				//if it's a list and range class
 				if (isList) {
 					//Check for an all values from restriction
@@ -220,12 +216,12 @@ public class OntologyGraphGenerator extends GraphGenerator {
 					RDFNode domain = propertyDomains.get(prop);
 					RDFNode range = propertyRanges.get(prop);
 					GraphSegment sg = null;
-					if (range.canAs(OntClass.class)) {
+					if (range.canAs(OntClass.class) && listTypes != null) {
 						if (listTypes.containsKey(range.as(OntClass.class))) {
 							RDFNode lst = addTypeListToGraphData(data, publicUri, range.as(OntResource.class), listTypes.get(range.as(OntClass.class)));
 							sg = new GraphSegment(publicUri, domain, prop, range, null, listTypes.get(range.as(OntClass.class)), configMgr);
 						}
-						else if (domain.canAs(OntClass.class)&&  listTypes.containsKey(domain.as(OntClass.class))) {
+						else if (domain.canAs(OntClass.class) &&  listTypes.containsKey(domain.as(OntClass.class))) {
 							RDFNode lst = addTypeListToGraphData(data, publicUri, domain.as(OntResource.class), listTypes.get(domain.as(OntClass.class)));
 							sg = new GraphSegment(publicUri, domain, prop, range, listTypes.get(domain.as(OntClass.class)), null, configMgr);
 						}
@@ -278,50 +274,6 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		}
 	}
 
-	private RDFNode addTypeListToGraphData(List<GraphSegment> data, String parentPublicUri, OntResource rng, RDFNode listtype) throws ConfigurationException, IOException, URISyntaxException, Exception {
-		OntResource listClass = getLocalModel().getOntResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
-		GraphSegment gs = new GraphSegment(parentPublicUri, rng, "list\ntype", listtype, listtype, null, getConfigMgr());
-		if (!data.contains(gs)) {
-			setSubjectObjectClassAttributes(gs, parentPublicUri, rng, listtype);
-			gs.addEdgeAttribute(COLOR, LIST_TYPE_COLOR);
-			gs.addEdgeAttribute(STYLE, DASHED);
-			data.add(gs);
-		}
-		GraphSegment gs2 = new GraphSegment(parentPublicUri, listClass, "subClass", rng, null, listtype, getConfigMgr());
-		if (!data.contains(gs2)) {
-			setSubjectObjectClassAttributes(gs2, parentPublicUri, listClass, rng);
-			gs2.addEdgeAttribute(COLOR, BLUE);
-			gs2.addEdgeAttribute(STYLE, DASHED);
-			data.add(gs2);
-		}
-		return listtype;
-	}
-
-	/**
-	 * Method used to find the File URL of the graph associated with an imported class
-	 * 
-	 * @param	- Imported class or concept
-	 * @return	- File URL to be added to node hyperlink
-	 * @throws Exception 
-	 */
-	private String getImportUrl(RDFNode rsrc) throws Exception {
-		if (!rsrc.isResource() || !rsrc.isURIResource()) {
-			return null;
-		}
-		String ns = rsrc.asResource().getNameSpace();
-		if (ns.endsWith("#")) {
-			ns = ns.substring(0, ns.length() - 1);
-		}
-		String baseFilename = getBaseFilenameFromPublicUri(ns);
-		//get the graph folder file path
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
-		
-		if(baseFilename != null){
-			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
-		}
-		return null;
-	}
-	
 	private void addInstancePropertyToGraph(String publicUri, Individual inst, Resource prop, RDFNode rng,
 			List<GraphSegment> data)
 			throws ConfigurationException, IOException, URISyntaxException, Exception {
@@ -418,20 +370,6 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		return null;
 	}
 
-	private void setSubjectObjectClassAttributes(GraphSegment sg, String parentPublicUri, RDFNode cls, RDFNode rng)
-			throws ConfigurationException, IOException, URISyntaxException, Exception {
-		annotateHeadAsClass(sg);
-		if(isInImports(cls, parentPublicUri)){
-			if(getImportUrl(cls) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(cls));
-			sg.addHeadAttribute(IS_IMPORT, "true");
-		}
-		annotateTailAsClass(sg);
-		if(isInImports(rng, parentPublicUri)){
-			if(getImportUrl(rng) != null) sg.addTailAttribute(LINK_URL, getImportUrl(rng));
-			sg.addTailAttribute(IS_IMPORT, "true");
-		}
-	}
-
 	/**
 	 * Method to get the type of the elements of a typed List from the restriction in the definition
 	 * @param rng
@@ -494,20 +432,22 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			if (stir.hasNext()) {
 				RDFNode pn = stir.next().getObject();
 				if (pn.canAs(Property.class)){ 
-//					Property onprop = pn.as(Property.class);
-					RDFNode subjlisttype = getListType(supercls);
-					RDFNode objlisttype = getListType(classInst);
-					if (subjlisttype != null || objlisttype != null) {
-						sg = new GraphSegment(publicUri, supercls, "restricts", classInst, subjlisttype, objlisttype, configMgr);
-					}
-					else {
-						sg = new GraphSegment(publicUri, supercls, "restricts", classInst, configMgr);
-					}
-					if (!data.contains(sg)) {
-						data.add(sg);
-						sg.addHeadAttribute(COLOR, RED);
-						sg.addEdgeAttribute(COLOR, RED);
-						annotateTailAsClass(sg);
+					Property onprop = pn.as(Property.class);
+					if (!onprop.equals(getListFirstProp()) && !onprop.equals(getListRestProp())) {
+						RDFNode subjlisttype = getListType(supercls);
+						RDFNode objlisttype = getListType(classInst);
+						if (subjlisttype != null || objlisttype != null) {
+							sg = new GraphSegment(publicUri, supercls, "restricts", classInst, subjlisttype, objlisttype, configMgr);
+						}
+						else {
+							sg = new GraphSegment(publicUri, supercls, "restricts", classInst, configMgr);
+						}
+						if (!data.contains(sg)) {
+							data.add(sg);
+							sg.addHeadAttribute(COLOR, RED);
+							sg.addEdgeAttribute(COLOR, RED);
+							annotateTailAsClass(sg);
+						}
 					}
 				}
 				else {
@@ -536,58 +476,6 @@ public class OntologyGraphGenerator extends GraphGenerator {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Method used to see if a class/instance/etc. is an imported item 
-	 * (i.e) not defined in this file/namespace
-	 * 
-	 * @param classInst			- Item being checked against imports 
-	 * @param parentPublicUri	- URI of file being graphed
-	 * @return
-	 * @throws ConfigurationException
-	 * @throws IOException
-	 * @throws URISyntaxException 
-	 */
-	private boolean isInImports(RDFNode classInst, String parentPublicUri) throws ConfigurationException, IOException, URISyntaxException{
-		try{
-
-			if(classInst.isURIResource()){
-				String[] uri = classInst.asResource().getURI().split("#");
-				if(uri != null && uri[0].equals(parentPublicUri)){
-					return false;
-				}
-				else {
-					SadlUtils su = new SadlUtils();
-					if (uri != null && su.fileNameToFileUrl(su.fileUrlToFileName(uri[0])).equals(getConfigMgr().getAltUrlFromPublicUri(parentPublicUri))) {
-						return false;
-					}else{
-						return true;
-					}
-				}
-			}else{
-				if(getLocalModel().containsResource(classInst)){
-					return false;
-					
-				}else{
-					return true;
-				}
-			}
-		}catch(NullPointerException e){
-			return false;
-			//TODO fix issues with OnClassImpl throwing null exception
-		}
-	}
-
-	/**
-	 * @return
-	 */
-	protected OntModel getLocalModel() {
-		if (baseModel == null) {
-			Model m = getTheJenaModel().getBaseModel();
-			baseModel = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
-		}
-		return baseModel;
 	}
 	
 	/**
@@ -638,12 +526,12 @@ public class OntologyGraphGenerator extends GraphGenerator {
 						GraphSegment gs = new GraphSegment(publicUri, value, pred, prefix, configMgr);
 						gs.addTailAttribute("URL", getCurrentFileLink(publicUri));
 						String str = "\"" + publicUri + "\"";
-						gs.addTailAttribute("tailtooltip", str);
+						gs.addTailAttribute("tooltip", str);
 						if (headUrl != null) {
 							gs.addHeadAttribute("URL", headUrl);
 						}
 						if (headTooltip != null) {
-							gs.addHeadAttribute("headtooltip", headTooltip);
+							gs.addHeadAttribute("tooltip", headTooltip);
 						}
 						importList.add(gs);
 					}
