@@ -18,7 +18,9 @@
 
 package com.ge.research.sadl.builder;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,6 +45,7 @@ import org.eclipse.xtext.resource.IResourceDescription.Delta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.sadl.Import;
 import com.ge.research.sadl.sadl.ModelName;
 import com.google.inject.Inject;
@@ -408,6 +411,17 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 	        		return resource;
 				}
 			}
+			for (Resource resource : sadlResources) {
+				for (TreeIterator<EObject> iter = EcoreUtil.getAllContents(resource, true); iter.hasNext();) { 
+					EObject eObject = iter.next();
+					if (eObject instanceof ModelName) {
+						if (((ModelName)eObject).getBaseUri().equals(impUri)) {
+							return resource;
+						}
+						break;
+					}
+				}
+			}
 		}
 		return null;
 	}
@@ -417,5 +431,40 @@ public class SadlBuilder implements IXtextBuilderParticipant {
 			return true;
 		}
 		return false;
+	}
+	
+	public void closeProject() {
+		if (visitor != null) {
+			try {
+				visitor.getConfigurationMgr(null).saveOntPolicyFile();
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				visitor.getConfigurationMgr(null).saveConfiguration();
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }
