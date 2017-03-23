@@ -139,6 +139,11 @@
 			<artifactId>jena-wrapper-for-sadl</artifactId>
 			<version>2.4.3</version>
 		</dependency>
+ 		<dependency>
+ 			<groupId>com.ge.research.sadl.geonly</groupId>
+ 			<artifactId>jena-wrapper-extensions</artifactId>
+ 			<version>2.4.3</version>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
 			<artifactId>org.eclipse.xtext.standalone</artifactId>
