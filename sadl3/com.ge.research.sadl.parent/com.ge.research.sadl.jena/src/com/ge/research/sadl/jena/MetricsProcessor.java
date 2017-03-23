@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -41,7 +42,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 	private Property markerProperty = null;
 	private IConfigurationManagerForEditing configMgr = null;
 	private Ontology modelOntology;
-	private JenaBasedSadlModelProcessor modelProcessor = null;
+	private SadlModelProcessor modelProcessor = null;
 	
 	public static String SADL_METRICS_NS = "http://com.ge.research.sadl/sadlmetricsmodel#";
 	public static String MARKER_CLASS_URI = SADL_METRICS_NS + "Marker";
@@ -66,7 +67,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 		super();
 	}
 	
-	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr, JenaBasedSadlModelProcessor modelProcessor) throws JenaProcessorException, ConfigurationException {
+	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr, SadlModelProcessor modelProcessor) throws JenaProcessorException, ConfigurationException {
 		if (resource == null) {
 			throw new JenaProcessorException("MetricsProcessor constructor called with null resource");
 		}

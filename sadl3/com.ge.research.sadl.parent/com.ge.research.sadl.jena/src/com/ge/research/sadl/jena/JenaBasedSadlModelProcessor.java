@@ -6003,31 +6003,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return builtinFunctionFile;
 	}
 	
-	static public void createSadlImplicitModel(File implicitModelFile) throws IOException{
-		String implicitModel = getSadlImplicitModel();
-		SadlUtils su = new SadlUtils();
-		implicitModelFile.getParentFile().mkdirs();
-		su.stringToFile(implicitModelFile, implicitModel, true);
-	}
-	
-	static public String getSadlImplicitModel() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("uri \"");
-		sb.append(SadlConstants.SADL_IMPLICIT_MODEL_URI);
-		sb.append("\" alias ");
-		sb.append(SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
-		sb.append(".\n");
-
-		sb.append("Event is a class.\n");
-
-		sb.append("impliedProperty is a type of annotation.\n");
-
-		sb.append("UnittedQuantity is a class,\n");
-		sb.append(" 	described by ^value with values of type decimal,\n");
-		sb.append(" 	described by unit with values of type string.\n");
-		return sb.toString();
-	}
-	
 	static public String getSadlBaseModel() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<rdf:RDF\n");
