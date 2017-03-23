@@ -93,7 +93,10 @@ interface ISadlImplicitModelContentProvider {
 	 */
 	static class Default implements ISadlImplicitModelContentProvider {
 
-		static val DEFAULT_CONTENT = '''
+		/**
+		 * The base content of the SADL implicit model.
+		 */
+		public static val DEFAULT_CONTENT = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
 			
 			impliedProperty is a type of annotation.
