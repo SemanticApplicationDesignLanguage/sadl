@@ -169,5 +169,11 @@
 			<artifactId>guava</artifactId>
 			<version>15.0.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.core/runtime -->
+		<dependency>
+		    <groupId>org.eclipse.core</groupId>
+		    <artifactId>runtime</artifactId>
+		    <version>3.3.100-v20070530</version>
+		</dependency>
 	</dependencies>
 </project>
