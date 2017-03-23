@@ -3755,7 +3755,7 @@ public class SadlModelManager extends SadlSwitch<EObject> {
 					}
 				}
 				else {
-					getModel().saveAllRulePatterns(allRules, lastConfigMgr);
+//					getModel().saveAllRulePatterns(allRules, lastConfigMgr);
 					allRules.clear();
 				}	
 			}
