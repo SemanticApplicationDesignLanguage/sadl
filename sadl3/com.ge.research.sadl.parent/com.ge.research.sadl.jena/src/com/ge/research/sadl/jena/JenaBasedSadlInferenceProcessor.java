@@ -57,6 +57,7 @@ import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlInferenceException;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -133,7 +134,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		OntModel om = OntModelProvider.find(resource);
 		if (om == null) {
 			// This should never happen as the SadlActionHandler makes a call to validate the Resource. However, not deleting this code yet... AWC 9/21/2016
-			JenaBasedSadlModelProcessor modelProcessor = new JenaBasedSadlModelProcessor();
+			SadlModelProcessor modelProcessor = new JenaBasedSadlModelProcessor();
 			final List<Issue> issues = CollectionLiterals.<Issue>newArrayList();
 			final IAcceptor<Issue> _function = new IAcceptor<Issue>() {
 				@Override

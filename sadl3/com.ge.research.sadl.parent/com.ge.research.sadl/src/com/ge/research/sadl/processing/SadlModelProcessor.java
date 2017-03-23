@@ -17,6 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -651,6 +653,31 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			}
 		}
 		return false;
+	}
+
+	public static void createSadlImplicitModel(File implicitModelFile) throws IOException {
+		String implicitModel = getSadlImplicitModel();
+		SadlUtils su = new SadlUtils();
+		implicitModelFile.getParentFile().mkdirs();
+		su.stringToFile(implicitModelFile, implicitModel, true);
+	}
+
+	public static String getSadlImplicitModel() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("uri \"");
+		sb.append(SadlConstants.SADL_IMPLICIT_MODEL_URI);
+		sb.append("\" alias ");
+		sb.append(SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
+		sb.append(".\n");
+	
+		sb.append("Event is a class.\n");
+	
+		sb.append("impliedProperty is a type of annotation.\n");
+	
+		sb.append("UnittedQuantity is a class,\n");
+		sb.append(" 	described by ^value with values of type decimal,\n");
+		sb.append(" 	described by unit with values of type string.\n");
+		return sb.toString();
 	}
 
 	public Set<VariableNode> getSelectVariables(GraphPatternElement pattern) {
