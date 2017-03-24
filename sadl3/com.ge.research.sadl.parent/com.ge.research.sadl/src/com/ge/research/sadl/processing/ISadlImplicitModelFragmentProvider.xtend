@@ -33,7 +33,7 @@ interface ISadlImplicitModelFragmentProvider {
 	/**
 	 * The unique extension point ID for the Eclipse-based service discovery.
 	 */
-	static val EXTENSION_POINT_ID = 'com.ge.research.sadl.sadl_implicit_mode_fragment_provider';
+	static val EXTENSION_POINT_ID = 'com.ge.research.sadl.sadl_implicit_model_fragment_provider';
 	
 	/**
 	 * The attribute ID of the extension point to create a new registered instance.
