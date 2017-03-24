@@ -152,7 +152,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			String headName = headers[0];
 			String edgeName = headers[1];
 			String tailName = headers[2];
-			for (int i = 3; i < rs.getColumnCount(); i++) {
+			for (int i = 3; i < headers.length; i++) {
 				String attrHeader = headers[i];
 				if (attrHeader.startsWith(headName)) {
 					headAttributes = addAttribute(headAttributes, headName, i, attrHeader);
@@ -341,7 +341,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 					olbl = "n" + nodes.size();
 				}
 				repeatObjNode = false;
-				if (subjectNode == null) {
+				if (subjectNode == null && repeatSubjNode) {
 					// now we want to expand out any children that this duplicate should have so it continues what's in the data...
 					if (duplicateObjectMap == null) {
 						duplicateObjectMap = new HashMap<String,String>();
