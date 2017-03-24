@@ -87,6 +87,14 @@ public class GraphSegment {
 						getObject() != null && ((GraphSegment)otherSeg).getObject() != null) {
 					if (getSubject().equals(((GraphSegment)otherSeg).getSubject()) && getPredicate().equals(((GraphSegment)otherSeg).getPredicate()) && 
 							getObject().equals(((GraphSegment)otherSeg).getObject()) && ((GraphSegment)otherSeg).isObjectIsList() == isObjectIsList()) {
+						if (getSubjectNodeDuplicateSequenceNumber() > 0 && ((GraphSegment) otherSeg).getSubjectNodeDuplicateSequenceNumber() > 0 && 
+								getSubjectNodeDuplicateSequenceNumber() != ((GraphSegment) otherSeg).getSubjectNodeDuplicateSequenceNumber()	) {
+							return false;
+						}
+						if (getObjectNodeDuplicateSequenceNumber() > 0 && ((GraphSegment) otherSeg).getObjectNodeDuplicateSequenceNumber() > 0 && 
+								getObjectNodeDuplicateSequenceNumber() != ((GraphSegment) otherSeg).getObjectNodeDuplicateSequenceNumber()	) {
+							return false;
+						}
 						return true;
 					}
 				}
@@ -459,7 +467,7 @@ public class GraphSegment {
 		return "Untranslated Restriction: " + ontcls.toString();
 	}
 	
-	String subjectToStringNoPrefix() throws InvalidNameException {
+	public String subjectToStringNoPrefix() throws InvalidNameException {
 		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getSubject(), isSubjectImport()));
 		if (getSubjectNodeDuplicateSequenceNumber() >= 0) {
 			sb.append("[");
@@ -495,7 +503,7 @@ public class GraphSegment {
 		return false;
 	}
 
-	String predicateToStringNoPrefix() throws InvalidNameException {
+	public String predicateToStringNoPrefix() throws InvalidNameException {
 		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getPredicate(), isPredicateImport()));
 		if (getEdgeAttributes() != null) {
 			sb.append("(");
@@ -523,7 +531,7 @@ public class GraphSegment {
 		return false;
 	}
 
-	String objectToStringNoPrefix() throws InvalidNameException {
+	public String objectToStringNoPrefix() throws InvalidNameException {
 		StringBuilder sb = new StringBuilder(stringFormNoPrefix(getObject(), isObjectImport()));
 		if (getObjectNodeDuplicateSequenceNumber() >= 0) {
 			sb.append("[");
@@ -743,8 +751,8 @@ public class GraphSegment {
 	public Object getSubject() {
 		return subject;
 	}
-
-	private void setSubject(Object subject) {
+	
+	public void setSubject(Object subject) {
 		this.subject = subject;
 	}
 
@@ -760,7 +768,7 @@ public class GraphSegment {
 		return object;
 	}
 
-	private void setObject(Object object) {
+	public void setObject(Object object) {
 		this.object = object;
 	}
 	

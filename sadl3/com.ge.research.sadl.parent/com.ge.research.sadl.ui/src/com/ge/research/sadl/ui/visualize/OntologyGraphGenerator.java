@@ -218,11 +218,11 @@ public class OntologyGraphGenerator extends GraphGenerator {
 					GraphSegment sg = null;
 					if (range.canAs(OntClass.class) && listTypes != null) {
 						if (listTypes.containsKey(range.as(OntClass.class))) {
-							RDFNode lst = addTypeListToGraphData(data, publicUri, range.as(OntResource.class), listTypes.get(range.as(OntClass.class)));
+							addTypeListToGraphData(data, publicUri, range.as(OntResource.class), -1L, listTypes.get(range.as(OntClass.class)), true);
 							sg = new GraphSegment(publicUri, domain, prop, range, null, listTypes.get(range.as(OntClass.class)), configMgr);
 						}
 						else if (domain.canAs(OntClass.class) &&  listTypes.containsKey(domain.as(OntClass.class))) {
-							RDFNode lst = addTypeListToGraphData(data, publicUri, domain.as(OntResource.class), listTypes.get(domain.as(OntClass.class)));
+							addTypeListToGraphData(data, publicUri, domain.as(OntResource.class), -1L, listTypes.get(domain.as(OntClass.class)), true);
 							sg = new GraphSegment(publicUri, domain, prop, range, listTypes.get(domain.as(OntClass.class)), null, configMgr);
 						}
 					}
