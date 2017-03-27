@@ -55,6 +55,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
+import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.SadlModelProcessor;

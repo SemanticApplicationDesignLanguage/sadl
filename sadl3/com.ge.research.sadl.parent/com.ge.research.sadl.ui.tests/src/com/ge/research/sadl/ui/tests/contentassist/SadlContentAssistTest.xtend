@@ -28,8 +28,8 @@ import java.util.Arrays
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.util.URI
 import org.eclipse.jface.text.contentassist.ICompletionProposal
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.junit4.ui.ContentAssistProcessorTestBuilder
 import org.eclipse.xtext.junit4.util.ResourceLoadHelper
 import org.eclipse.xtext.resource.XtextResource

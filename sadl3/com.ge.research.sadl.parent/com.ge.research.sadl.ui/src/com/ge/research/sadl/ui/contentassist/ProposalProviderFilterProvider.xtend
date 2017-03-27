@@ -19,11 +19,11 @@ package com.ge.research.sadl.ui.contentassist
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator
-import com.ge.research.sadl.jena.OntModelProvider
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.processing.CompositeModelProcessor
 import com.ge.research.sadl.processing.IModelProcessorProvider
+import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.PropOfSubject
