@@ -173,7 +173,7 @@ public class RunQuery extends SadlActionHandler {
 								if (rs != null) {
 									if (currentQuery.toLowerCase().startsWith("construct")) {
 										String desc = "Adhoc query Graph";
-	        							String baseFileName = trgtFile.getProjectRelativePath().removeFileExtension().lastSegment() + System.currentTimeMillis(); 							
+	        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + System.currentTimeMillis(); 							
 		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
 									}
 									else {

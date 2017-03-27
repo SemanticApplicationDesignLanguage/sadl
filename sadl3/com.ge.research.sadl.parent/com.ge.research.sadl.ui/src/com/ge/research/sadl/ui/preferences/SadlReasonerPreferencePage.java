@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -645,6 +646,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 				ps.setDefault(this.getQualifier()+".TranslatorName", "");
 				saveTranslatorSpec();
 			}
+			project.build(IncrementalProjectBuilder.CLEAN_BUILD, null);
 		} catch (Throwable t) {
 			t.printStackTrace();
 			String msg = t.getLocalizedMessage();

@@ -435,6 +435,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append("\"");
 			boolean anchored = false;
 			if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
+				anchored = true;
 				// color the "anchor" node
 				sb.append(" color=lightblue");
 				//				if (tailAttributes == null || !tailAttributes.containsValue("color")) {
@@ -473,7 +474,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append("\"");
 			// color the "anchor" edge
 			if (anchorNodeLabel != null && edgeLbl.equals(anchorNodeLabel)) {
-				sb.append(" color=red");
+				sb.append(" style=bold");
 			}
 		}
 		if (edgeAttributes != null) {

@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Xtextgenerator
 Bundle-SymbolicName: com.ge.research.sadl.xtextgenerator
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Export-Package: com.ge.research.sadl.xtextgenerator
-Require-Bundle: org.eclipse.xtext.xtext.generator;bundle-version="2.9.1",
- org.apache.log4j;bundle-version="1.2.15",
- org.eclipse.xtend.lib;bundle-version="2.9.1",
- com.google.inject;bundle-version="3.0.0",
+Require-Bundle: org.eclipse.xtext.xtext.generator,
+ org.apache.log4j,
+ org.eclipse.xtend.lib,
+ com.google.inject,
  org.eclipse.xtext,
  org.eclipse.emf.mwe2.launch
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

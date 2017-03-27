@@ -22,13 +22,17 @@ import com.ge.research.sadl.jena.JenaBasedSadlModelValidator
 import com.ge.research.sadl.jena.OntModelProvider
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.processing.CompositeModelProcessor
 import com.ge.research.sadl.processing.IModelProcessorProvider
-import com.ge.research.sadl.processing.SadlModelProcessorProvider.CompositeModelProcessor
 import com.ge.research.sadl.processing.ValidationAcceptor
+import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
+import com.ge.research.sadl.sADL.SadlHasValueCondition
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.utils.ImportHelper
@@ -41,6 +45,7 @@ import com.google.inject.Singleton
 import com.hp.hpl.jena.ontology.OntResource
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.diagnostics.Severity
@@ -52,11 +57,6 @@ import org.eclipse.xtext.validation.Issue
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
-import org.eclipse.emf.ecore.util.EcoreUtil
-import com.ge.research.sadl.sADL.PropOfSubject
-import com.ge.research.sadl.sADL.Name
-import com.ge.research.sadl.sADL.SadlHasValueCondition
-import com.ge.research.sadl.sADL.SadlPropertyCondition
 
 /**
  * Provides filter for removing items from the content proposal.

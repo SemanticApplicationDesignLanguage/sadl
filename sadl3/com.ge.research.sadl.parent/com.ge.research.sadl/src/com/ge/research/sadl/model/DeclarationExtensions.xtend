@@ -48,6 +48,7 @@ import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 
 class DeclarationExtensions {
 	
@@ -65,6 +66,8 @@ class DeclarationExtensions {
 			].trim
 			if (name.isNullOrEmpty)
 				return null
+			if (converter === null) 	// this will be null when a resource is open in the editor and a clean/build is performed ??
+				return name
 			return converter.toValue(name, null)
 		]
 		if (resource === null)
@@ -251,6 +254,7 @@ class DeclarationExtensions {
 			SadlSimpleTypeReference : #[typeRef.type]
 			SadlIntersectionType : getReferencedSadlResources(typeRef.left) + getReferencedSadlResources(typeRef.right)
 			SadlUnionType : getReferencedSadlResources(typeRef.left) + getReferencedSadlResources(typeRef.right)
+			SadlPropertyCondition : #[]
 			default : throw new IllegalStateException("typeRef "+typeRef+" not handled.") 
 		}
 	}

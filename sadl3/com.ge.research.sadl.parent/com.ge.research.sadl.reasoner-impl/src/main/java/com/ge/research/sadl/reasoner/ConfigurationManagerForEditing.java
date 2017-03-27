@@ -105,6 +105,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 */
 	public boolean setTranslatorClassName(String translatorClassName)
 			throws ConfigurationException {
+		super.setTranslatorClassName(translatorClassName);
 		boolean bChanged = false;
 		Property translatorClassNameProperty = getConfigModel().createProperty(
 				pTRANSLATOR_CLASSNAME);
@@ -197,6 +198,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * setReasonerClassName(java.lang.String)
 	 */
 	public boolean setReasonerClassName(String reasonerClassName) {
+		super.setReasonerClassName(reasonerClassName);
 		boolean bChanged = false;
 		Property reasonerClassNameProperty = getConfigModel().createProperty(
 				pREASONER_CLASSNAME);
@@ -241,6 +243,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		} else {
 			// create entry from scratch
 			getConfigModel().add(reasonerSpec, reasonerClassNameProperty, rcn);
+			setReasoner(null);
+			setTranslator(null);
 			bChanged = true;
 		}
 		if (bChanged) {

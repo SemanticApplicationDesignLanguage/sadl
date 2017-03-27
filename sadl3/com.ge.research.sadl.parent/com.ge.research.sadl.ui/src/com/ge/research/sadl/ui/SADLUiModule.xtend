@@ -20,16 +20,12 @@
  */
 package com.ge.research.sadl.ui
 
-import com.ge.research.sadl.processing.SadlImportProcessorProvider
-import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
-import com.ge.research.sadl.processing.SadlModelProcessorProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
+import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
+import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlImportProcessorProvider
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlInferenceProcessorProvider
-import com.ge.research.sadl.ui.processing.ExtensionPointBasedSadlModelProcessorProvider
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
@@ -40,9 +36,12 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttribute
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.contentassist.AbstractJavaBasedContentProposalProvider.ReferenceProposalCreator
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
+import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+
+import static com.google.inject.Scopes.SINGLETON
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -54,18 +53,6 @@ class SADLUiModule extends AbstractSADLUiModule {
 	new(AbstractUIPlugin plugin) {
 		super(plugin);
 		OutputStreamStrategy.SADL.use;
-	}
-	
-	def Class<? extends SadlModelProcessorProvider> bindSadlModelProcessorProvider() {
-		return ExtensionPointBasedSadlModelProcessorProvider
-	}
-
-	def Class<? extends SadlImportProcessorProvider> bindSadlImportProcessorProvider() {
-		return ExtensionPointBasedSadlImportProcessorProvider
-	}
-
-	def Class<? extends SadlInferenceProcessorProvider> bindSadlInferenceProcessorProvider() {
-		return ExtensionPointBasedSadlInferenceProcessorProvider
 	}
 
 	// Registers our own syntax coloring styles.
@@ -99,6 +86,17 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	def Class<? extends ReferenceProposalCreator> bindReferenceProposalCreator() {
 		return SadlReferenceProposalCreator;
+	}
+	
+	def void configureIPreferenceStoreAccess(Binder binder) {
+		binder.bind(IPreferenceStoreAccess).to(SadlPreferenceStoreAccess).in(SINGLETON);
+	}
+	
+	/**
+	 * Bind a callback that always adds the Xtext nature to the SADL project silently.
+	 */
+	override bindIXtextEditorCallback() {
+		return AlwaysAddXtextNatureCallback;
 	}
 	
 }

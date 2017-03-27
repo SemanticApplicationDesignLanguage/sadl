@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Jena 4 OSGi
 Bundle-SymbolicName: com.ge.research.jena
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-Vendor: GE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: au.com.bytecode.opencsv,
@@ -147,7 +147,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.pojava.transformation,
  org.pojava.util,
  org.slf4j
-Require-Bundle: org.apache.xerces;bundle-version="2.9.0"
+Require-Bundle: org.apache.xerces
 Bundle-ClassPath: lib/commons-codec.jar,
  lib/commons-csv.jar,
  lib/commons-lang3.jar,

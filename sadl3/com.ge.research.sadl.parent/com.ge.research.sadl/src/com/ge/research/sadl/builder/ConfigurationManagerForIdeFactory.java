@@ -3,6 +3,7 @@ package com.ge.research.sadl.builder;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +17,28 @@ public class ConfigurationManagerForIdeFactory {
 	public ConfigurationManagerForIdeFactory() {
 		
 	}
+
+	/**
+	 * Discards the configuration manager state for a project if the platform is
+	 * not running. This is just a workaround to handle the asynchronous build
+	 * event related issue before running the reasoner.
+	 * 
+	 * @param modelFolder
+	 *            the folder path to discard the configuration state.
+	 * @return {@code true} if the state was discarded, otherwise {@code false}.
+	 */
+	public static boolean discardConfigurationManagerState(String modelFolder) {
+		if (configManagers != null && !Platform.isRunning()) {
+			return configManagers.remove(modelFolder) != null;
+		}
+		return false;
+	}
 	
 	public static ConfigurationManagerForIDE getConfigurationManagerForIDE(String modelFolder, String format) throws ConfigurationException {
 		if (configManagers == null) {
 			configManagers = new HashMap<String, ConfigurationManagerForIDE>();
 		}
+		modelFolder = modelFolder != null ? formatModelFolder(modelFolder) : null;
 		if (!configManagers.containsKey(modelFolder)) {
 			ConfigurationManagerForIDE newCM = new ConfigurationManagerForIDE(modelFolder, format);
 			configManagers.put(modelFolder, newCM);
@@ -32,8 +50,7 @@ public class ConfigurationManagerForIdeFactory {
 			return configManagers.get(modelFolder);
 		}
 	}
-	
-	
+
 	public static ConfigurationManagerForIDE getConfigurationManagerForIDE(String modelFolder, String format, boolean noModelFolderNeeded) throws ConfigurationException {
 		if (configManagers == null) {
 			configManagers = new HashMap<String, ConfigurationManagerForIDE>();
@@ -48,6 +65,14 @@ public class ConfigurationManagerForIdeFactory {
 			logger.debug("ConfigurationManagerForIdeFactory returning existing config mgr for '" + modelFolder + "'");
 			return configManagers.get(modelFolder);
 		}
+	}
+	
+	private static String formatModelFolder(String modelFolder) {
+		if(modelFolder == null){
+			return null;
+		}
+		
+		return modelFolder.replace("\\", "/");
 	}
 
 }

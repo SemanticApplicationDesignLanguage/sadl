@@ -17,6 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -27,7 +29,6 @@ import org.apache.log4j.Logger;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -44,8 +45,8 @@ import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
-import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -70,9 +71,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private RulePart rulePart = RulePart.NOT_A_RULE;
     
-	@Inject
-	public DeclarationExtensions declarationExtensions;
-
+    @Inject
+    private ISadlImplicitModelContentProvider implicitModelContentProvider;
+    
 	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
@@ -658,6 +659,10 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return false;
 	}
 
+	public void createSadlImplicitModel(File implicitModelFile) throws IOException {
+		implicitModelContentProvider.createImplicitModel(implicitModelFile, true);
+	}
+
 	public Set<VariableNode> getSelectVariables(GraphPatternElement pattern) {
 		Set<VariableNode> vars = new LinkedHashSet<VariableNode>();
 		if (pattern instanceof TripleElement) {
@@ -743,7 +748,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return node;
 	}
 
-	private ConceptType nodeTypeToConceptType(NodeType nt) throws TranslationException {
+	public ConceptType nodeTypeToConceptType(NodeType nt) throws TranslationException {
 		if (nt.equals(NodeType.ClassNode)) {
 			return ConceptType.ONTCLASS;
 		}
@@ -759,8 +764,35 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		else if (nt.equals(NodeType.VariableNode)) {
 			return ConceptType.VARIABLE;
 		}
+		else if (nt.equals(NodeType.DataTypeNode)) {
+			return ConceptType.RDFDATATYPE;
+		}
 		else {
 			throw new TranslationException("NodeType '" + nt.toString() + "' cannot be converted to a ConceptType");
+		}
+	}
+
+	protected NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
+		if (ct.equals(ConceptType.ONTCLASS)) {
+			return NodeType.ClassNode;
+		}
+		else if (ct.equals(ConceptType.INDIVIDUAL)) {
+			return NodeType.InstanceNode;
+		}
+		else if (ct.equals(ConceptType.DATATYPEPROPERTY)) {
+			return NodeType.DataTypeProperty;
+		}
+		else if (ct.equals(ConceptType.OBJECTPROPERTY)) {
+			return NodeType.ObjectProperty;
+		}
+		else if (ct.equals(ConceptType.VARIABLE)) {
+			return NodeType.VariableNode;
+		}
+		else if (ct.equals(ConceptType.RDFDATATYPE)) {
+			return NodeType.DataTypeNode;
+		}
+		else {
+			throw new TranslationException("ConceptType '" + ct.toString() + "' cannot be converted to a NodeType");
 		}
 	}
 

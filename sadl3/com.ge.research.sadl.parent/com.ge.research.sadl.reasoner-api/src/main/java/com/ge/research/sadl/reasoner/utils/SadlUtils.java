@@ -257,35 +257,42 @@ public class SadlUtils {
 		if (aFile.exists() && !aFile.isFile()) {
 			throw new IllegalArgumentException("Should not be a directory: " + aFile);
 		}
-		if (aFile.exists()) {
-			aFile.delete();
-		}
-		if (!aFile.exists()) {
-			aFile.createNewFile();
-		}
-		if (!aFile.canWrite()) {
-			throw new IllegalArgumentException("File cannot be written: " + aFile);
-		}
-
-		//declared here only to make visible to finally clause; generic reference
-		Writer output = null;
 		try {
-			//use buffering
-			//FileWriter always assumes default encoding is OK!
-			output = new BufferedWriter( new FileWriter(aFile) );
-			output.write( contents );
-		}
-		finally {
-			//flush and close both "output" and its underlying FileWriter
-			if (output != null) output.close();
-		}
-		if (writeProtect) {
+			if (aFile.exists()) {
+				aFile.delete();
+			}
+			if (!aFile.exists()) {
+				aFile.createNewFile();
+			}
+			if (!aFile.canWrite()) {
+				throw new IllegalArgumentException("File cannot be written: " + aFile);
+			}
+	
+			//declared here only to make visible to finally clause; generic reference
+			Writer output = null;
 			try {
-				aFile.setReadOnly();
+				//use buffering
+				//FileWriter always assumes default encoding is OK!
+				output = new BufferedWriter( new FileWriter(aFile) );
+				output.write( contents );
 			}
-			catch (SecurityException e) {
-				e.printStackTrace();
+			finally {
+				//flush and close both "output" and its underlying FileWriter
+				if (output != null) output.close();
 			}
+			if (writeProtect) {
+				try {
+					aFile.setReadOnly();
+				}
+				catch (SecurityException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
+			e.printStackTrace();
+			throw e;
 		}
 	}
 

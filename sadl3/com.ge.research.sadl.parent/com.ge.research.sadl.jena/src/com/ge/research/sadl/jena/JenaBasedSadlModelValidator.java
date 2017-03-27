@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EStructuralFeature;
-
 import com.ge.research.sadl.errorgenerator.generator.*;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
@@ -46,8 +43,10 @@ import com.ge.research.sadl.sADL.ExternalEquationStatement;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
+import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.sADL.SadlDataType;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
+import com.ge.research.sadl.sADL.SadlModelElement;
 import com.ge.research.sadl.sADL.SadlParameterDeclaration;
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
@@ -93,18 +92,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected ValidationAcceptor issueAcceptor = null;
 	protected OntModel theJenaModel = null;
 	protected DeclarationExtensions declarationExtensions = null;
-	private List<String> comparisonOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=","not","unique","in","contains","does",/*"not",*/"contain");
-	private List<String> numericOperators = Arrays.asList("*","+","/","-","%","^");
-	private List<String> canBeNumericOperators = Arrays.asList(">=",">","<=","<","==","!=","is","=");
 	private EObject defaultContext;
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
 	private Map<EObject, Property> impliedPropertiesUsed = null;
 	
 	private IMetricsProcessor metricsProcessor = null;
-	protected JenaBasedSadlModelProcessor sadlModelProcessor = null;
-	private List<ConceptName> binaryLeftTypeCheckInfo;
-	private List<ConceptName> binaryRightTypeCheckInfo; 
+	protected JenaBasedSadlModelProcessor modelProcessor = null;
+	private List<ConceptName> binaryOpLeftImpliedProperties;
+	private List<ConceptName> binaryOpRightImpliedProperties;
+	protected Object lastSuperCallExpression = null; 
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
 
@@ -314,7 +311,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < iprops.size(); i++) {
 				if (i > 0) sb.append(", ");
-				sb.append(getImplicitProperties().get(0).toFQString());
+				sb.append(getImplicitProperties().get(i).toFQString());
 			}
 			return sb.toString();
 		}
@@ -380,7 +377,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		this.issueAcceptor = issueAcceptor;
 		this.theJenaModel = theJenaModel;
 		this.declarationExtensions = declarationExtensions;
-		this.sadlModelProcessor = processor ;
+		this.setModelProcessor(processor) ;
 		this.metricsProcessor  = metricsProcessor;
 	}
 	
@@ -420,21 +417,43 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return true;
 		}
 		try {	
-			TypeCheckInfo leftTypeCheckInfo = getType(leftExpression);
-			TypeCheckInfo rightTypeCheckInfo = getType(rightExpression);
+			boolean dontTypeCheck = false;
+			TypeCheckInfo leftTypeCheckInfo = null;
+			try {
+				leftTypeCheckInfo = getType(leftExpression);
+			} catch (DontTypeCheckException e) {
+				dontTypeCheck = true;
+			}
+			if (useImpliedProperties(op)) {
+				setBinaryOpLeftImpliedProperties(leftTypeCheckInfo != null ? leftTypeCheckInfo.getImplicitProperties() : null);
+			}
+			
+			TypeCheckInfo rightTypeCheckInfo = null;
+			try {
+				rightTypeCheckInfo = getType(rightExpression);
+			} catch (DontTypeCheckException e) {
+				dontTypeCheck = true;
+			}
+			if (useImpliedProperties(op)) {
+				setBinaryOpRightImpliedProperties(rightTypeCheckInfo != null ? rightTypeCheckInfo.getImplicitProperties() : null);
+			}
+			
 			if (leftTypeCheckInfo == null && rightTypeCheckInfo == null) {
 				// this condition happens when a file is loaded in the editor and clean/build is invoked
 				return true;
 			}
-			setBinaryLeftTypeCheckInfo(leftTypeCheckInfo != null ? leftTypeCheckInfo.getImplicitProperties() : null);
-			setBinaryRightTypeCheckInfo(rightTypeCheckInfo != null ? rightTypeCheckInfo.getImplicitProperties() : null);
-			if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+			if(!dontTypeCheck && !compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				if (expression.eContainer() instanceof TestStatement && isQuery(leftExpression)) {
 					// you can't tell what type a query will return
 					return true;
 				}
 				if (!rulePremiseVariableAssignment(operations, leftTypeCheckInfo,rightTypeCheckInfo)) {
-					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, op);
+					String effectiveOp = op;
+					if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("value")) {
+						effectiveOp = "matching value";
+//						leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
+					}
+					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, effectiveOp);
 				}
 				return false;
 			}
@@ -451,9 +470,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
-	private boolean rulePremiseVariableAssignment(List<String> operations, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
+	private boolean useImpliedProperties(String op) {
+		if (op.equals("contains") || op.equals("does not contain")) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean rulePremiseVariableAssignment(List<String> operations, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidTypeException {
 		if (possibleAssignment(operations)) {
-			if (sadlModelProcessor.getRulePart().equals(SadlModelProcessor.RulePart.PREMISE)) {
+			if (getModelProcessor().getRulePart().equals(SadlModelProcessor.RulePart.PREMISE)) {
 				if (isVariable(leftTypeCheckInfo)) {
 					if (!isAlreadyReferenced(leftTypeCheckInfo.getExpressionType())) {
 						return true;
@@ -491,7 +517,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void addLocalRestriction(String subjuri, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
+	public void addLocalRestriction(String subjuri, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidTypeException {
 		try {
 			throw new Exception("addLocalRestriction not implemented");
 		} catch (Exception e) {
@@ -500,48 +526,54 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	private boolean handleValidationException(EObject expr, Throwable t) {
-		if (t instanceof InvalidNameException) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Invalid Name"), expr);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+		try {
+			if (t instanceof InvalidNameException) {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Invalid Name"), expr);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				t.printStackTrace();
+			} else if (t instanceof TranslationException) {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Translation"), expr);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				t.printStackTrace();
+			} else if (t instanceof URISyntaxException) {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("URI Syntax"), expr);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				t.printStackTrace();
+			} else if (t instanceof IOException) {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("IO"), expr);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				t.printStackTrace();
+			} else if (t instanceof ConfigurationException) {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Configuration"), expr);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				t.printStackTrace();
+			} else if (t instanceof NullPointerException){
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Null Pointer"), expr);
+			} else if (t instanceof DontTypeCheckException) {
+				return true;
+			} else if (t instanceof CircularDefinitionException) {
+				t.printStackTrace();
 			}
-			t.printStackTrace();
-		} else if (t instanceof TranslationException) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Translation"), expr);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			else {
+				t.printStackTrace();
 			}
-			t.printStackTrace();
-		} else if (t instanceof URISyntaxException) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("URI Syntax"), expr);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
-			}
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
-			}
-			t.printStackTrace();
-		} else if (t instanceof IOException) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("IO"), expr);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
-			}
-			t.printStackTrace();
-		} else if (t instanceof ConfigurationException) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Configuration"), expr);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
-			}
-			t.printStackTrace();
-		} else if (t instanceof NullPointerException){
-			issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Null Pointer"), expr);
-		} else if (t instanceof DontTypeCheckException) {
-			return true;
-		} else if (t instanceof CircularDefinitionException) {
-			t.printStackTrace();
 		}
-		else {
-			t.printStackTrace();
+		catch (Throwable t2) {
+			issueAcceptor.addError("Unexpected exception (" + t.getClass().getCanonicalName() + ": " + 
+					t2.getMessage() + ") displaying validation error : " + t.getMessage(), expr);
 		}
 		return false;
 	}
@@ -574,18 +606,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return false;
 			}
 		} catch (InvalidNameException e) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Invalid Name"), rightExpression);
+			try {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Invalid Name"), rightExpression);
+			} catch (InvalidTypeException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.INVALID_EXPRESSION_URI);
 			}
 			e.printStackTrace();
 		} catch (DontTypeCheckException e) {
 			return true;
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return true;
 	}
 
-	protected void createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, String operation) {
+	protected void createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, String operation) throws InvalidTypeException {
 		String[] leftDesc = getTypeCheckInfoDescription(leftTypeCheckInfo);
 		String[] rightDesc = getTypeCheckInfoDescription(rightTypeCheckInfo);
 		
@@ -605,7 +645,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
-		if (comparisonOperators.contains(operation)) {
+		if (getModelProcessor().isComparisonOperator(operation)) {
 			op = "be compared (" + operation + ")";
 		}
 		else {
@@ -623,10 +663,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				rightSide = rightSide + " " + rightDesc[1];
 			}
 		}
+		if (leftSide.contains(",")) leftSide = leftSide + ",";
 		errorMessageBuilder.append(SadlErrorMessages.VALIDATE_BIN_OP_ERROR.get(leftSide, op, rightSide));
 	}
 
-	private String[] getTypeCheckInfoDescription(TypeCheckInfo typeCheckInfo) {
+	private String[] getTypeCheckInfoDescription(TypeCheckInfo typeCheckInfo) throws InvalidTypeException {
 		if (typeCheckInfo == null) {
 			String[] result = new String[1];
 			result[0] = "No type check info generated";
@@ -636,7 +677,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			StringBuilder sb1 = new StringBuilder();;
 			StringBuilder sb2 = null;
 			ConceptIdentifier typeExpr = typeCheckInfo.getExpressionType();
-			sb1.append(typeExpr.toString());
+			sb1.append(getModelProcessor().conceptIdentifierToString(typeExpr));
 			if (typeExpr instanceof ConceptName) {
 				ConceptType ct = ((ConceptName)typeExpr).getType();
 				if (ct == null) {
@@ -697,7 +738,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					sb2.append("a List of values of type ");
 				}
 				if (sb2 != null && typeCheckInfo.getTypeCheckType() != null) {
-					sb2.append(typeCheckInfo.getTypeCheckType().toString());
+					sb2.append(getModelProcessor().conceptIdentifierToString(typeCheckInfo.getTypeCheckType()));
 				}
 				else if (typeCheckInfo.getExplicitValue() != null) {
 					RDFNode ev = typeCheckInfo.getExplicitValue();
@@ -706,15 +747,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					if (ev.isLiteral()) {
 						try {
-							sb2.append(ev.asLiteral().getValue().toString());
+							sb2.append(getModelProcessor().rdfNodeToString(ev.asLiteral()));
 						}
 						catch (DatatypeFormatException e) {
-							issueAcceptor.addError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Datatype Format"), typeCheckInfo.context);
+							getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Datatype Format"), typeCheckInfo.context);
 							//addError(e.getMessage(), typeCheckInfo.context);
 						}
 					}
 					else {
-						sb2.append(ev.toString());
+						sb2.append(getModelProcessor().rdfNodeToString(ev));
 					}
 				}
 			}
@@ -783,7 +824,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException{
+	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException{
 //		if (expressionsValidated.containsKey(expression)) {
 //			return expressionsValidated.get(expression);
 //		}
@@ -798,7 +839,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return getType(decltype);
 			}
 			else {
-				issueAcceptor.addError(SadlErrorMessages.NULL_TYPE.toString(), expression);
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.NULL_TYPE.toString(), expression);
 			}
 			//Need to return passing case for time being
 //			ConceptName declarationConceptName = new ConceptName("todo");
@@ -814,7 +855,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Literal litval;
 			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
-				if (!sadlModelProcessor.ignoreUnittedQuantities) {
+				if (!getModelProcessor().ignoreUnittedQuantities) {
 					//String unit = ((Unit)expression).getUnit();
 					ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
 					List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
@@ -840,7 +881,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				litval = theJenaModel.createTypedLiteral(value.doubleValue());
 			}
 			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
-			return new TypeCheckInfo(numberLiteralConceptName, litval, ExplicitValueType.VALUE, this, expression);
+			TypeCheckInfo litTci = new TypeCheckInfo(numberLiteralConceptName, litval, ExplicitValueType.VALUE, this, expression); 
+			litTci.setTypeCheckType(numberLiteralConceptName);
+			return litTci;
 		}
 		else if(expression instanceof BooleanLiteral){
 			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
@@ -871,10 +914,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (el instanceof PropOfSubject) {
 				TypeCheckInfo listtype = getType(((PropOfSubject)el).getRight());
 				if (listtype == null) {
-					issueAcceptor.addError("Unable to get the List type", el);
+					getModelProcessor().addIssueToAcceptor("Unable to get the List type", el);
 				}
 				else if (listtype.getRangeValueType() != RangeValueType.LIST) {
-						issueAcceptor.addError("Expected a List", el);
+					getModelProcessor().addIssueToAcceptor("Expected a List", el);
 				}
 				else {
 					// the element's type is the type of the list but not necessarily a list
@@ -883,7 +926,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return listtype;
 			}
 			else {
-				issueAcceptor.addError(SadlErrorMessages.UNHANDLED.get("element type in element in list construct. ", el.getClass().getCanonicalName() + "; please report"), expression);
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNHANDLED.get("element type in element in list construct. ", el.getClass().getCanonicalName() + "; please report"), expression);
 				if (metricsProcessor != null) {
 					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 				}
@@ -891,19 +934,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof BinaryOperation){
 			List<String> operations = Arrays.asList(((BinaryOperation) expression).getOp().split("\\s+"));
-			TypeCheckInfo leftTypeCheckInfo = getType(((BinaryOperation) expression).getLeft());
-			TypeCheckInfo rightTypeCheckInfo = getType(((BinaryOperation) expression).getRight());
+			TypeCheckInfo leftTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(((BinaryOperation) expression).getLeft()));
+			TypeCheckInfo rightTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(((BinaryOperation) expression).getRight()));
 			if (leftTypeCheckInfo != null && isVariable(leftTypeCheckInfo) && ((BinaryOperation)expression).getRight() instanceof Declaration) {
 				return rightTypeCheckInfo;
 			}
+			if (((BinaryOperation) expression).getLeft() instanceof PropOfSubject && ((BinaryOperation)expression).getRight() instanceof Declaration) {
+				TypeCheckInfo subjtype = getType(((PropOfSubject)((BinaryOperation) expression).getLeft()).getRight());
+				ConceptIdentifier subject = subjtype.getTypeCheckType();
+				if (subject != null) {
+					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
+				}
+			}
+
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
 					leftTypeCheckInfo, rightTypeCheckInfo);
-			if (isNumericOperator(((BinaryOperation) expression).getOp())) {
+			if (getModelProcessor().isNumericOperator(((BinaryOperation) expression).getOp())) {
 				if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo) && !isNumericWithImpliedProperty(leftTypeCheckInfo, ((BinaryOperation)expression).getLeft())) {
-					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
+					getModelProcessor().addIssueToAcceptor("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
 				}
 				if (rightTypeCheckInfo != null && !isNumeric(rightTypeCheckInfo) && !isNumericWithImpliedProperty(rightTypeCheckInfo, ((BinaryOperation)expression).getRight())) {
-					issueAcceptor.addError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
+					getModelProcessor().addIssueToAcceptor("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
 				}
 				ConceptName decimalLiteralConceptName = new ConceptName(XSD.decimal.getURI());
 				decimalLiteralConceptName.setType(ConceptType.RDFDATATYPE);
@@ -923,7 +974,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			// the type is the type of the list
 			TypeCheckInfo listtype = getType((((Sublist)expression).getList()));
 			if (listtype != null && !listtype.getRangeValueType().equals(RangeValueType.LIST)) {
-				issueAcceptor.addError(SadlErrorMessages.IS_NOT_A.get("this","list"), ((Sublist)expression).getList());
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.IS_NOT_A.get("this","list"), ((Sublist)expression).getList());
 			}
 			return listtype;
 		}
@@ -948,18 +999,75 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (expression instanceof SadlUnionType) {
 			return getType((SadlUnionType)expression);
 		}
-		else {
+		else if (expression != null) {
 			throw new TranslationException("Unhandled expression type: " + expression.getClass().getCanonicalName());
 		}
-		
-		issueAcceptor.addError(SadlErrorMessages.DECOMPOSITION_ERROR.get(expression.toString()), expression);
-		if (metricsProcessor != null) {
-			metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+		if (expression != null) {
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.DECOMPOSITION_ERROR.get(expression.toString()), expression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+			}
 		}
 		return null;
 	}
 	
-	private boolean isNumericWithImpliedProperty(TypeCheckInfo tci, Expression expr) throws DontTypeCheckException, InvalidNameException {
+	private TypeCheckInfo unifyCompoundTypeCheckInfos(TypeCheckInfo tci) throws CircularDependencyException, InvalidNameException {
+		// if this is a compound TypeCheckInfo, look to make sure that one isn't a subclass of another and eliminate lower classes
+		if (tci != null && tci.getCompoundTypes() != null) {
+			int size = tci.getCompoundTypes().size();
+			if (size == 1) {
+				return tci.getCompoundTypes().get(0);
+			}
+			List<TypeCheckInfo> considered = new ArrayList<TypeCheckInfo>();
+			considered.add(tci.getCompoundTypes().get(0));
+			List<TypeCheckInfo> toEliminate = null;
+			int index = 1;
+			for (int i = index; i < size; i++) {
+				TypeCheckInfo newTci = tci.getCompoundTypes().get(i);
+				RangeValueType newRvt = newTci.getRangeValueType();
+				if (newRvt.equals(RangeValueType.CLASS_OR_DT)) {
+					ConceptIdentifier newTct = newTci.getTypeCheckType();
+					if (newTct instanceof ConceptName) {
+						OntClass newOr = theJenaModel.getOntClass(((ConceptName)newTct).getUri());
+						if (newOr != null) {
+							for (int j = 0; j < considered.size(); j++) {
+								if (newRvt.equals(considered.get(j).getRangeValueType())) {
+									ConceptIdentifier consideredTct = considered.get(j).getTypeCheckType();
+									if (consideredTct instanceof ConceptName) {
+										OntClass consideredOr = theJenaModel.getOntClass(((ConceptName)consideredTct).getUri());
+										if (consideredOr != null) {
+											if (SadlUtils.classIsSubclassOf(newOr, consideredOr, true, null)) {
+												if (toEliminate == null) toEliminate = new ArrayList<TypeCheckInfo>();
+												toEliminate.add(newTci);
+											}
+											else if (SadlUtils.classIsSubclassOf(consideredOr, newOr, true, null)) {
+												if (toEliminate == null) toEliminate = new ArrayList<TypeCheckInfo>();
+												toEliminate.add(considered.get(j));
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if (toEliminate != null) {
+				for (int i = 0; i < toEliminate.size(); i++) {
+					if (tci.getCompoundTypes().contains(toEliminate.get(i))) {		
+						tci.getCompoundTypes().remove(toEliminate.get(i));
+					}
+				}
+			}
+			size = tci.getCompoundTypes().size();
+			if (size == 1) {
+				return tci.getCompoundTypes().get(0);
+			}
+		}
+		return tci;
+	}
+
+	private boolean isNumericWithImpliedProperty(TypeCheckInfo tci, Expression expr) throws DontTypeCheckException, InvalidNameException, InvalidTypeException {
 		if (tci.getImplicitProperties() != null) {
 			Iterator<ConceptName> litr = tci.getImplicitProperties().iterator();
 			while (litr.hasNext()) {
@@ -983,22 +1091,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private boolean isNumeric(TypeCheckInfo tci) {
+	private boolean isNumeric(TypeCheckInfo tci) throws InvalidTypeException {
 		ConceptIdentifier ci;
 		if (tci.getTypeCheckType() != null) {
 			ci = tci.getTypeCheckType();
 			if (ci instanceof ConceptName) {
-				return isNumericType((ConceptName) ci);
+				return getModelProcessor().isNumericType((ConceptName) ci);
 			}
 		}
 		else if (tci.getExplicitValueType() != null) {
 //TODO this is incomplete; more examples needed AWC 12/19/2016				
 			ExplicitValueType evt = tci.getExplicitValueType();
 			if (evt.equals(ExplicitValueType.RESTRICTION)) {
-				
+				issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
 			}
 			else if (tci.getExpressionType() instanceof ConceptName){
-				return isNumericType((ConceptName) tci.getExpressionType());
+				return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
 			}
 		}
 		return false;
@@ -1046,19 +1154,31 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (constant.endsWith("value")) {
 			throw new DontTypeCheckException();
 		}
+		else if (constant.equals("a type")) {
+			ConceptName rdfType = new ConceptName(RDFS.subClassOf.getURI());
+			rdfType.setType(ConceptType.ONTCLASS);
+			return new TypeCheckInfo(rdfType, rdfType, this, expression);
+		}
 		else if(constant.equals("None")){
+			ConceptName constantConceptName = new ConceptName(constant);
+			constantConceptName.setType(ConceptType.INDIVIDUAL);
+			return new TypeCheckInfo(constantConceptName, constantConceptName, this, expression);
+		}
+		else if (constant.equals("known")) {
 			ConceptName constantConceptName = new ConceptName(constant);
 			constantConceptName.setType(ConceptType.INDIVIDUAL);
 			return new TypeCheckInfo(constantConceptName, constantConceptName, this, expression);
 		}
 		else {
 			// let any subclass validators do their thing
+			lastSuperCallExpression = expression;
 			return getType((Constant)expression);
 		}
 
 	}
 
 	private boolean isVariable(TypeCheckInfo tci) {
+		if (tci == null) return false;
 		ConceptIdentifier ci = tci.getTypeCheckType();
 		if (ci instanceof ConceptName && ((ConceptName)ci).getType() != null && ((ConceptName)ci).getType().equals(ConceptType.VARIABLE)) {
 			return true;
@@ -1066,7 +1186,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private TypeCheckInfo getType(SadlTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
+	private TypeCheckInfo getType(SadlTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException {
 		if (expression instanceof SadlIntersectionType) {
 			return getType((SadlIntersectionType)expression);
 		}
@@ -1082,7 +1202,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (expression instanceof SadlUnionType) {
 			return getType((SadlUnionType)expression);
 		}
-		issueAcceptor.addError(SadlErrorMessages.TYPE_REFERENCE_ERROR.get(expression.getClass().getCanonicalName()), expression);
+		getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_REFERENCE_ERROR.get(expression.getClass().getCanonicalName()), expression);
 		if (metricsProcessor != null) {
 			metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 		}
@@ -1113,7 +1233,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);		
 	}
 	
-	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
+	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException {
 		TypeCheckInfo tci = getType(expression.getType());
 		if (expression.isList()) {
 			tci.setRangeValueType(RangeValueType.LIST);
@@ -1126,7 +1246,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);		
 	}
 
-	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
+	private TypeCheckInfo getType(PropOfSubject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException {
 		String ofOp = expression.getOf();
 		Expression predicate = expression.getLeft();
 		Expression subject = expression.getRight();
@@ -1137,8 +1257,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (constantRequiresListNext(cnstval)) {
 				subjtype = getType(subject);
 				if (subjtype != null && !subjtype.getRangeValueType().equals(RangeValueType.LIST)) {
-					issueAcceptor.addError(SadlErrorMessages.MUST_BE_APPLIED_TO_LIST.get(cnstval, getTypeCheckTypeString(subjtype)), subject);
-//					issueAcceptor.addError("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
+					getModelProcessor().addIssueToAcceptor(SadlErrorMessages.MUST_BE_APPLIED_TO_LIST.get(cnstval, getTypeCheckTypeString(subjtype)), subject);
+//					getModelProcessor().addIssueToAcceptor("'" + cnstval + "' must be applied to a List ('" + getTypeCheckTypeString(subjtype) + "' is not a List)", subject);
 				}
 			}
 			else if (constantFollowedByIntThenList(cnstval)) {
@@ -1158,8 +1278,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
 				return subjtype;
 			}
+			else if (cnstval.equals("a type")) {
+				ConceptName rdfType = new ConceptName(RDFS.subClassOf.getURI());
+				rdfType.setType(ConceptType.ONTCLASS);
+				return new TypeCheckInfo(rdfType, rdfType, this, expression);
+			}
 			else {
-				issueAcceptor.addError(SadlErrorMessages.UNHANDLED.get("Constant Property", cnstval), expression);
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNHANDLED.get("Constant Property", cnstval), expression);
 				if (metricsProcessor != null) {
 					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 				}
@@ -1173,13 +1298,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				else if (!predtype.equals(OntConceptType.CLASS_PROPERTY) && !predtype.equals(OntConceptType.DATATYPE_PROPERTY) && 
 						!predtype.equals(OntConceptType.RDF_PROPERTY) && !predtype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
-					issueAcceptor.addError(SadlErrorMessages.EXPECTED_A.get("property in property chain"), predicate);
+					getModelProcessor().addIssueToAcceptor(SadlErrorMessages.EXPECTED_A.get("property in property chain"), predicate);
 					//String preduri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 				}
 			} catch (CircularDefinitionException e) {
 				e.printStackTrace();
 			}
 		}
+		boolean validSubject = true;
 		if (subject instanceof Name) {
 			// check for applicable local restriction first
 			TypeCheckInfo predicateType;
@@ -1213,18 +1339,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return predicateType;
 			}
 		}
-		TypeCheckInfo predicateType = getType(predicate);
-		if (subject instanceof PropOfSubject) {
-			checkEmbeddedPropOfSubject(subject, predicate);	
-			//TODO figure out how to add effective range for propOfSubj		
-		}else if(predicateType != null && predicateType.getTypeCheckType() != null){
-			//add interface range
-			addEffectiveRange(predicateType, subject);
+		else {
+//			getModelProcessor().addIssueToAcceptor("Property of subject has unexpected subject type '" + subject.getClass().getCanonicalName() + "'", expression);
+			// we don't care about any other types?
+			validSubject = false;
 		}
-		return predicateType;
+		if (predicate != null) {
+			TypeCheckInfo predicateType = getType(predicate);
+			if (subject instanceof PropOfSubject) {
+				checkEmbeddedPropOfSubject(subject, predicate);	
+				//TODO figure out how to add effective range for propOfSubj		
+			}else if(validSubject && predicateType != null && predicateType.getTypeCheckType() != null){
+				//add interface range
+				addEffectiveRange(predicateType, subject);
+			}
+			return predicateType;
+		}
+		return null;
 	}
 	
-	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject) throws CircularDefinitionException{
+	private void addEffectiveRange(TypeCheckInfo predicateType, Expression subject) throws CircularDefinitionException, InvalidTypeException, CircularDependencyException{
 		if(metricsProcessor != null){
 			try {
 				if (subject instanceof Name) {
@@ -1349,7 +1483,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private void checkEmbeddedPropOfSubject(Expression subject, Expression predicate) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
+	private void checkEmbeddedPropOfSubject(Expression subject, Expression predicate) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException {
 		if (predicate instanceof Name) {
 			String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 			OntConceptType oct = declarationExtensions.getOntConceptType(((Name)predicate).getName());
@@ -1436,7 +1570,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, subjType, "chained property");
-					issueAcceptor.addError(errorMessageBuilder.toString(), predicate);
+					getModelProcessor().addIssueToAcceptor(errorMessageBuilder.toString(), predicate);
 				} catch (CircularDefinitionException e) {
 					e.printStackTrace();
 				}
@@ -1470,17 +1604,35 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return results;
 	}
 
-	protected TypeCheckInfo getTypeFromRestriction(Expression subject, Expression predicate) throws CircularDefinitionException {
+	protected TypeCheckInfo getTypeFromRestriction(Expression subject, Expression predicate) throws CircularDefinitionException, InvalidTypeException, DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, CircularDependencyException {
 		if (subject instanceof Name && predicate instanceof Name) {
 			String subjuri = declarationExtensions.getConceptUri(((Name)subject).getName());
+			OntConceptType subjtype = declarationExtensions.getOntConceptType(((Name)subject).getName());
+			if (subjtype.equals(OntConceptType.VARIABLE)) {
+				TypeCheckInfo varTci = getType(((Name)subject).getName());
+				if (varTci != null && varTci.getTypeCheckType() != null) {
+					ConceptIdentifier varci = varTci.getTypeCheckType();
+					if (varci instanceof ConceptName) {
+						if (((ConceptName) varci).toString().equals("TODO")) {
+							return null;
+						}
+						subjuri = ((ConceptName)varci).getUri();
+					}
+				}
+			}
 			String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
-			OntConceptType proptype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
-			return getTypeFromRestriction(subjuri, propuri, proptype, predicate);
+			if (propuri == null) {
+				getModelProcessor().addIssueToAcceptor("Predicate name could not be resolved", predicate);
+			}
+			else {
+				OntConceptType proptype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
+				return getTypeFromRestriction(subjuri, propuri, proptype, predicate);
+			}
 		}
 		return null;
 	}
 	
-	protected TypeCheckInfo getTypeFromRestriction(String subjuri, String propuri, OntConceptType proptype, Expression predicate) {
+	protected TypeCheckInfo getTypeFromRestriction(String subjuri, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException {
 		Resource subj = theJenaModel.getResource(subjuri);
 		if (subj != null) {
 			if (!(subj instanceof OntClass || subj.canAs(OntClass.class)) && subj.canAs(Individual.class)) {
@@ -1488,6 +1640,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (subj != null && subj.canAs(OntClass.class)){ 
 				Property prop = theJenaModel.getProperty(propuri);
+				if (isListAnnotatedProperty(prop)) {
+					return null;
+				}
 				// now look for restrictions on "range"
 				StmtIterator sitr = theJenaModel.listStatements(null, OWL.onProperty, prop);
 				while (sitr.hasNext()) {
@@ -1510,6 +1665,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								if (isListAnnotatedProperty(prop)) {
 									avftci.setRangeValueType(RangeValueType.LIST);
 								}
+								else if (isTypedListSubclass(avf)) {
+									avftci.setTypeCheckType(getTypedListType(avf));
+									avftci.setRangeValueType(RangeValueType.LIST);
+								}
 								return avftci;
 							}
 						}
@@ -1520,6 +1679,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							if (isListAnnotatedProperty(prop)) {
 								hvtci.setRangeValueType(RangeValueType.LIST);
 							}
+							else if (isTypedListSubclass(hvr)) {
+								hvtci.setTypeCheckType(getTypedListType(hvr));
+								hvtci.setRangeValueType(RangeValueType.LIST);
+							}
 							return hvtci;
 						}
 					}
@@ -1528,9 +1691,40 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		return null;
 	}
+	
+	private ConceptName getTypedListType(RDFNode node) {
+		if (node.isResource()) {
+			StmtIterator sitr = theJenaModel.listStatements(node.asResource(), RDFS.subClassOf, (RDFNode)null);
+			while (sitr.hasNext()) {
+				RDFNode supercls = sitr.nextStatement().getObject();
+				if (supercls.isResource()) {
+					if (supercls.asResource().hasProperty(OWL.onProperty, theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
+						Statement avfstmt = supercls.asResource().getProperty(OWL.allValuesFrom);
+						if (avfstmt != null) {
+							RDFNode type = avfstmt.getObject();
+							if (type.isURIResource()) {
+								ConceptName cn = createTypedConceptName(type.asResource().getURI(), OntConceptType.CLASS);
+								return cn;
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean isTypedListSubclass(RDFNode rest) {
+		if (rest.isResource()) {
+			if (rest.asResource().hasProperty(RDFS.subClassOf, theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI))) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private boolean isListAnnotatedProperty(Property prop) {
-		AnnotationProperty annprop = theJenaModel.getAnnotationProperty(SadlConstants.LIST_RANGE_ANNOTATION_PROPERTY);
+		AnnotationProperty annprop = theJenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
 		if (annprop != null) {
 			if (prop.hasProperty(annprop)) {
 				return true;
@@ -1539,7 +1733,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException {
+	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException {
 		SadlResource qnm =expression.getName();
 		if (qnm.eIsProxy()) {
 			handleUndefinedFunctions(expression);
@@ -1560,16 +1754,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			handleUndefinedFunctions(expression);
 		}
-		
 		return getType(qnm);
 	}
 	
-	protected void handleUndefinedFunctions(Name expression) throws ConfigurationException, DontTypeCheckException{
+	private boolean isInQuery(EObject expression) {
+		EObject cntr = expression.eContainer();
+		if (cntr != null) {
+			if (cntr instanceof QueryStatement) {
+				return true;
+			}
+			return isInQuery(cntr);
+		}
+		return false;
+	}
+
+	protected void handleUndefinedFunctions(Name expression) throws ConfigurationException, DontTypeCheckException, InvalidTypeException{
 		String expressionName = declarationExtensions.getConcreteName(expression);
-		ITranslator translator = sadlModelProcessor.getTranslator();
+		ITranslator translator = getModelProcessor().getTranslator();
 		//If only names for built-in functions are available, check the name matches a built-in functions. If not, error.
 		if (translator == null) {
-			issueAcceptor.addWarning(SadlErrorMessages.TYPE_CHECK_TRANSLATOR_CLASS_NOT_FOUND.get(sadlModelProcessor.configMgr.getTranslatorClassName()), expression);
+			issueAcceptor.addWarning(SadlErrorMessages.TYPE_CHECK_TRANSLATOR_CLASS_NOT_FOUND.get(getModelProcessor().getConfigMgr().getTranslatorClassName()), expression);
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
@@ -1581,7 +1785,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					metricsProcessor.addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 				}
 			}else{
-				issueAcceptor.addError(SadlErrorMessages.RETURN_TYPE_WARNING.get("Function " + expressionName), expression);
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.RETURN_TYPE_WARNING.get("Function " + expressionName), expression);
 				if (metricsProcessor != null) {
 					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
 				}
@@ -1590,7 +1794,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		//Either the Reasoner/Translator provides full built-in information or provides nothing. 
 		//Regardless, if this point is reached, error.
 		else {
-			issueAcceptor.addError(SadlErrorMessages.RETURN_TYPE_WARNING.get("Function " + expressionName), expression);
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.RETURN_TYPE_WARNING.get("Function " + expressionName), expression);
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
 			}
@@ -1598,11 +1802,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		throw new DontTypeCheckException();
 	}
 	
-	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException{
+	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException{
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
 		EObject expression = qnm.eContainer();
 		if (conceptUri == null) {
-			issueAcceptor.addError(SadlErrorMessages.UNIDENTIFIED.toString(), (expression != null ? expression : qnm));
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), (expression != null ? expression : qnm));
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
@@ -1613,7 +1817,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			conceptType = declarationExtensions.getOntConceptType(qnm);
 		} catch (CircularDefinitionException e) {
 			conceptType = e.getDefinitionType();
-			issueAcceptor.addError(e.getMessage(), expression);
+			getModelProcessor().addIssueToAcceptor(e.getMessage(), expression);
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
@@ -1625,23 +1829,34 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else if(conceptType.equals(OntConceptType.DATATYPE_PROPERTY)){
-			return getNameProperty(ConceptType.DATATYPEPROPERTY, conceptUri, expression);
+			TypeCheckInfo propcheckinfo = getNameProperty(ConceptType.DATATYPEPROPERTY, conceptUri, expression);
+			if (propcheckinfo != null) {
+				return propcheckinfo;
+			}
+			issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(qnm)), qnm);
+			throw new DontTypeCheckException();
 		}
 		else if(conceptType.equals(OntConceptType.CLASS_PROPERTY)){
-			return getNameProperty(ConceptType.OBJECTPROPERTY, conceptUri, expression);
+			TypeCheckInfo propcheckinfo =  getNameProperty(ConceptType.OBJECTPROPERTY, conceptUri, expression);
+			if (propcheckinfo != null) {
+				return propcheckinfo;
+			}
+			issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(qnm)), qnm);
+			throw new DontTypeCheckException();
 		}
 		else if (conceptType.equals(OntConceptType.RDF_PROPERTY)) {
 			TypeCheckInfo rdfpropcheckinfo = getNameProperty(ConceptType.RDFPROPERTY, conceptUri, expression);
 			if (rdfpropcheckinfo != null) {
 				return rdfpropcheckinfo;
 			}
+			issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(qnm)), qnm);
 			throw new DontTypeCheckException();
 		}
 		else if(conceptType.equals(OntConceptType.INSTANCE)){
 			//Direct type to which the instance belongs
 			Individual individual = theJenaModel.getIndividual(conceptUri);
 			if(individual == null){
-				issueAcceptor.addError(SadlErrorMessages.UNIDENTIFIED.toString(), expression);
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), expression);
 				if (metricsProcessor != null) {
 					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 				}
@@ -1689,7 +1904,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
 			String nm = declarationExtensions.getConcreteName(qnm);
 			String uri = declarationExtensions.getConceptUri(qnm);
-			return getVariableType(ConceptType.VARIABLE, nm, uri, expression);
+			TypeCheckInfo tci = getVariableType(ConceptType.VARIABLE, qnm, nm, uri, expression);
+			if (tci != null) {				// will be null on invalid input, e.g., during clean
+				ConceptName et = new ConceptName(uri);
+				et.setType(ConceptType.VARIABLE);
+				tci.setExpressionType(et);
+			}
+			return tci;
 
 		}
 		else if(conceptType.equals(OntConceptType.ANNOTATION_PROPERTY)){
@@ -1734,10 +1955,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return cn;
 	}
 
-	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException {
+	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException, InvalidTypeException {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
-			issueAcceptor.addError(SadlErrorMessages.UNIDENTIFIED.toString(), expression);
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), expression);
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
@@ -1749,7 +1970,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private TypeCheckInfo getTypeInfoFromRange(ConceptName propConceptName, Property property,
-			EObject expression) throws DontTypeCheckException {
+			EObject expression) throws DontTypeCheckException, InvalidTypeException {
 		ConceptType propertyType = propConceptName.getType();
 		StmtIterator sitr = theJenaModel.listStatements(property, RDFS.range, (RDFNode)null);
 		if (sitr.hasNext()) {
@@ -1805,7 +2026,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private TypeCheckInfo createTypeCheckInfoForNonUriPropertyRange(RDFNode rng, ConceptName propConceptName,
-			EObject expression, ConceptType propertyType) {
+			EObject expression, ConceptType propertyType) throws InvalidTypeException {
 		TypeCheckInfo tci = null;
 		if (isSadlTypedList(rng)) {
 			// get type restriction on "first" property--this is the type
@@ -1831,7 +2052,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			catch (Exception e) {
-				issueAcceptor.addError(SadlErrorMessages.UNEXPECTED_TYPE_CHECK_ERROR.get("union range", e.getMessage() ), getDefaultContext());
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNEXPECTED_TYPE_CHECK_ERROR.get("union range", e.getMessage() ), getDefaultContext());
 			}
 		}
 		else if (rng.canAs(IntersectionClass.class)){
@@ -1843,7 +2064,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return tci;
 	}
 
-	private TypeCheckInfo getSadlTypedListTypeCheckInfo(OntClass lst, ConceptName propConceptName, EObject expression, ConceptType propertyType) {
+	private TypeCheckInfo getSadlTypedListTypeCheckInfo(OntClass lst, ConceptName propConceptName, EObject expression, ConceptType propertyType) throws InvalidTypeException {
 		ExtendedIterator<OntClass> eitr = ((OntClass)lst.as(OntClass.class)).listSuperClasses(true);
 		while (eitr.hasNext()) {
 			OntClass cls = eitr.next();
@@ -1853,7 +2074,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						Resource avf = ((AllValuesFromRestriction)cls.as(AllValuesFromRestriction.class)).getAllValuesFrom();
 						eitr.close();
 						if (avf.isURIResource()) {
-							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+//							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
+							List<ConceptName> impliedProperties = null;		// don't impute implied properties when the range is a List
 							ConceptName rangeConceptName = new ConceptName(avf.getURI());
 							if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 								rangeConceptName.setType(ConceptType.RDFDATATYPE);
@@ -1884,7 +2106,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private TypeCheckInfo createTypeCheckInfoForPropertyRange(RDFNode first, ConceptName propConceptName,
-			EObject expression, ConceptType propertyType) {
+			EObject expression, ConceptType propertyType) throws InvalidTypeException {
 		TypeCheckInfo tci;
 		ConceptName rangeConceptName = new ConceptName(first.asResource().getURI());
 		if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
@@ -1919,8 +2141,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return tci;
 	}
 
-	protected List<ConceptName> getImpliedProperties(Resource first) {
-		return sadlModelProcessor.getImpliedProperties(first);
+	protected List<ConceptName> getImpliedProperties(Resource first) throws InvalidTypeException {
+		return getModelProcessor().getImpliedProperties(first);
 	}
 
 //	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
@@ -1939,7 +2161,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //		return false;
 //	}
 
-	protected TypeCheckInfo getVariableType(ConceptType variable, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException {
+	protected TypeCheckInfo getVariableType(ConceptType variable, SadlResource sr, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException {
 		//Needs filled in for Requirements extension
 		if (conceptUri == null) {
 			return null;
@@ -1950,6 +2172,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (expression instanceof SubjHasProp) {
 			SadlResource psr = ((SubjHasProp)expression).getProp();
+			if (psr.equals(sr)) {
+				ConceptName tci = new ConceptName("TODO");
+				return new TypeCheckInfo(tci, tci, this, expression);
+			}
 			TypeCheckInfo ptci = getType(psr);
 			return ptci;
 		}
@@ -1965,16 +2191,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	private TypeCheckInfo combineTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
-			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 			return null;
 		}
-		if (isBooleanComparison(operations)) {
+		if (getModelProcessor().isBooleanComparison(operations)) {
 			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
 			booleanLiteralConceptName.setType(ConceptType.DATATYPEPROPERTY);
 			return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, leftExpression.eContainer());
 		}
-		else if (isNumericOperator(operations)) {
+		else if (getModelProcessor().isNumericOperator(operations)) {
 			ConceptName lcn = getTypeCheckInfoType(leftTypeCheckInfo);
 			ConceptName rcn = getTypeCheckInfoType(rightTypeCheckInfo);
 			if (lcn == null || lcn.getNamespace() == null) {
@@ -2048,13 +2274,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		throw new InvalidNameException("Failed to get TypeCheckInfoType");
 	}
 
-	protected boolean isBooleanComparison(List<String> operations) {
-		if(comparisonOperators.containsAll(operations)){
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * Compare two TypeCheckInfo structures
 	 * @param operations
@@ -2065,71 +2284,115 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	 * @return return true if they pass type check comparison else false
 	 * @throws InvalidNameException
 	 * @throws DontTypeCheckException 
+	 * @throws InvalidTypeException 
 	 */
 	protected boolean compareTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
-			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
-		List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
-		if (ltciCompound != null) {
-			for (int i = 0; i < ltciCompound.size(); i++) {
-				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
-				if (thisResult) {
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
+		boolean listTemporarilyDisabled = false;
+		try {
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("value")) {
+				listTemporarilyDisabled = true;
+				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
+			}
+			List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
+			if (ltciCompound != null) {
+				for (int i = 0; i < ltciCompound.size(); i++) {
+					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+					if (thisResult) {
+						return true;
+					}
+				}
+				return false;
+			}
+			List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
+			if (rtciCompound != null) {
+				for (int i = 0; i < rtciCompound.size(); i++) {
+					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
+					if (thisResult) {
+						return true;
+					}
+				}
+				return false;
+			}
+	//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
+	//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
+	//			if (rExprType instanceof ConceptName) {
+	//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+	//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
+	//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
+	//						// no chance of implied properties fixing the problem
+	//						return false;
+	//					}
+	//				}
+	//			}
+	//		}
+			ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
+			ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
+			if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
+					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
+					(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
+					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
+				// Can't type-check on "None" as it represents that it doesn't exist.
+				return true;
+			}
+			else if (leftConceptIdentifier == null) {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				return false;
+			}
+			else if(rightConceptIdentifier == null){
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
+				if (metricsProcessor != null) {
+					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+				}
+				return false;
+			}
+			else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				if (isConjunctiveLocalRestriction(leftExpression, rightExpression)) {
 					return true;
 				}
-			}
-			return false;
-		}
-		List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
-		if (rtciCompound != null) {
-			for (int i = 0; i < rtciCompound.size(); i++) {
-				boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
-				if (thisResult) {
-					return true;
+				if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
+					return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
 				}
+				return false;
 			}
-			return false;
 		}
-//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
-//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
-//			if (rExprType instanceof ConceptName) {
-//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
-//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
-//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
-//						// no chance of implied properties fixing the problem
-//						return false;
-//					}
-//				}
-//			}
-//		}
-		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
-		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
-		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
-				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
-			// Can't type-check on "None" as it represents that it doesn't exist.
-			return true;
-		}
-		else if (leftConceptIdentifier == null) {
-			issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+		finally {
+			if (listTemporarilyDisabled) {
+				leftTypeCheckInfo.setRangeValueType(RangeValueType.LIST);
 			}
-			return false;
-		}
-		else if(rightConceptIdentifier == null){
-			issueAcceptor.addError(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
-			}
-			return false;
-		}
-		else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
-			if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
-				return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
-			}
-			return false;
 		}
 		return true;
+	}
+	
+	private boolean isConjunctiveLocalRestriction(EObject leftExpression, EObject rightExpression) {
+		if (rightExpression instanceof Declaration && rightExpression.eContainer() instanceof BinaryOperation && 
+		((BinaryOperation)rightExpression.eContainer()).getOp().equals("is") && rightExpression.eContainer().eContainer() instanceof BinaryOperation &&
+		((BinaryOperation)rightExpression.eContainer().eContainer()).getOp().equals("or") && contains(rightExpression.eContainer().eContainer(), leftExpression)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if eobj1 contains eobj2 else false
+	 * 
+	 * @param eobj1
+	 * @param eobj2
+	 * @return
+	 */
+	protected boolean contains(EObject eobj1, EObject eobj2) {
+		if (eobj2.eContainer() != null) {
+			if (eobj2.eContainer().equals(eobj1)) {
+				return true;
+			}
+			else {
+				return contains(eobj1, eobj2.eContainer());
+			}
+		}
+		return false;
 	}
 	
 	private ConceptIdentifier getConceptIdentifierFromTypeCheckInfo(TypeCheckInfo tci) {
@@ -2157,7 +2420,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean compareTypesUsingImpliedProperties(List<String> operations, EObject leftExpression,
-			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException {
+			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
+		
+		String opstr = (operations != null && operations.size() > 0) ? operations.get(0) : null;
 		if (leftTypeCheckInfo.getImplicitProperties() != null) {
 			Iterator<ConceptName> litr = leftTypeCheckInfo.getImplicitProperties().iterator();
 			while (litr.hasNext()) {
@@ -2174,7 +2439,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, leftExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, newltci, rightTypeCheckInfo)) {
-					issueAcceptor.addInfo("Implied property '" + cn.getUri() + "' applied to '" + leftTypeCheckInfo.getExpressionType().toString() + "' (left side) to pass type check", leftExpression);
+					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (left side" + (opstr != null ? (" of '" + opstr + "'") : "") + ") to pass type check", leftExpression);
 					addImpliedPropertiesUsed(leftExpression, prop);
 					return true;
 				}
@@ -2196,7 +2461,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				TypeCheckInfo newrtci = getTypeInfoFromRange(cn, prop, rightExpression);
 				if (compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, newrtci)) {
-					issueAcceptor.addInfo("Implied property '" + cn.getUri() + "' applied to '" + rightTypeCheckInfo.getExpressionType().toString() + "' (right side) to pass type check", rightExpression);
+					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side" + (opstr != null ? (" of '" + opstr + "'") : "") + ") to pass type check", rightExpression);
 					addImpliedPropertiesUsed(rightExpression, prop);
 					return true;
 				}
@@ -2206,7 +2471,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean compatibleTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
-									TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException{
+									TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, InvalidTypeException{
 		
 		if ((leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) || 
 			(leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null) ||
@@ -2225,11 +2490,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName leftConceptName = (ConceptName) leftConceptIdentifier;
 			ConceptName rightConceptName = (ConceptName) rightConceptIdentifier;
 			
+			if (getModelProcessor().isNumericOperator(operations) && (!isNumeric(leftTypeCheckInfo) || !isNumeric(rightTypeCheckInfo))) {
+				return false;
+			}
 			if (leftConceptName.equals(rightConceptName)) {
 				return true;
 			}
-			else if ((isNumericOperator(operations) || canBeNumericOperator(operations)) && 
-				(isNumericType(leftConceptName) && isNumericType(rightConceptName))) {
+			else if ((getModelProcessor().isNumericOperator(operations) || getModelProcessor().canBeNumericOperator(operations)) && 
+				(getModelProcessor().isNumericType(leftConceptName) && getModelProcessor().isNumericType(rightConceptName))) {
 				return true;
 			}
 			else if (leftConceptName.getType() == null || rightConceptName.getType() == null) {
@@ -2285,7 +2553,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				try {
 					if (rightTypeCheckInfo.getExpressionType() instanceof ConceptName && ((ConceptName)rightTypeCheckInfo.getExpressionType()).getType().equals(ConceptType.INDIVIDUAL)) {
 						// here we can do a tighter check
-						if (!sadlModelProcessor.instanceBelongsToClass(theJenaModel, 
+						if (!getModelProcessor().instanceBelongsToClass(theJenaModel, 
 								theJenaModel.getOntResource(((ConceptName)rightTypeCheckInfo.getExpressionType()).getUri()),
 								theJenaModel.getOntResource(leftConceptName.getUri()))) {
 							return false;
@@ -2336,7 +2604,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (tct instanceof ConceptName) {
 				try {
 					OntResource cls = theJenaModel.getOntResource(((ConceptName)tct).getUri());
-					if (tci.getTypeToExprRelationship().equals("range")) {
+					if (tci.getTypeToExprRelationship().equals("range") || tci.getTypeToExprRelationship().equals("restriction to")) {
 						if (cls.isURIResource()) {
 							return new ConceptName(cls.getURI());
 						}
@@ -2393,50 +2661,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return checkForContainer(expr.eContainer(), t);
 	}
 
-	private boolean canBeNumericOperator(List<String> operations) {
-		Iterator<String> itr = operations.iterator();
-		while (itr.hasNext()) {
-			if (canBeNumericOperator(itr.next())) return true;
-		}
-		return false;
-	}
-	
-	private boolean canBeNumericOperator(String op) {
-		if (canBeNumericOperators.contains(op)) return true;
-		return false;
-	}
-
-	private boolean isNumericOperator(String op) {
-		if (numericOperators.contains(op)) return true;
-		return false;
-	}
-
-	private boolean isNumericOperator(List<String> operations) {
-		Iterator<String> itr = operations.iterator();
-		while (itr.hasNext()) {
-			if (isNumericOperator(itr.next())) return true;
-		}
-		return false;
-	}
-
-	private boolean isNumericType(ConceptName conceptName) {
-		try {
-			if (conceptName.getUri().equals(XSD.decimal.getURI()) ||
-					conceptName.getUri().equals(XSD.integer.getURI()) ||
-					conceptName.getUri().equals(XSD.xdouble.getURI()) ||
-					conceptName.getUri().equals(XSD.xfloat.getURI()) ||
-					conceptName.getUri().equals(XSD.xint.getURI()) ||
-					conceptName.getUri().equals(XSD.xlong.getURI())) {
-				return true;
-			}
-		} catch (InvalidNameException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
 	protected boolean isQualifyingListOperation(List<String> operations, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
-		if (operations.contains("contain") || operations.contains("contains") && leftTypeCheckInfo != null && 
+		if ((operations.contains("contain") || operations.contains("contains")) && leftTypeCheckInfo != null && 
 				leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
 			return true;
 		}
@@ -2446,7 +2672,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		return false;
 	}
-
+	
 	private boolean instancesHaveCommonType(Individual individualL, Individual individualR) {
 		ExtendedIterator<Resource> lcitr = individualL.listRDFTypes(true);
 		ExtendedIterator<Resource> rcitr = individualR.listRDFTypes(true);
@@ -2486,6 +2712,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return true;
 			}
 			else if (uri.equals(XSD.xint.getURI())) {
+				return true;
+			}
+			else if (uri.equals(XSD.xlong.getURI())) {
 				return true;
 			}
 		}
@@ -2529,7 +2758,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean propOfSubjectCheck) {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, boolean propOfSubjectCheck) throws InvalidTypeException {
 		if (subject instanceof SadlResource) {
 			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
 			if (rsrc != null) {
@@ -2547,6 +2776,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								if (stci != null && stci.getTypeCheckType() != null) {
 									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
 									varName = declarationExtensions.getConcreteName((SadlResource)subject);
+									if (subj != null) {
+										Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
+										if (prop != null) {
+											checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+										}
+									}
 								}
 							} catch (InvalidNameException e) {
 								// TODO Auto-generated catch block
@@ -2565,13 +2800,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								e.printStackTrace();
 							} catch (DontTypeCheckException e) {
 								
+							} catch (CircularDependencyException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
 						}
 						else if (stype.equals(OntConceptType.CLASS_PROPERTY)) {
 							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (propsubj != null && prop != null) {
+								if (prop != null) {
 									checkPropertyDomain(ontModel, propsubj, prop, subject, propOfSubjectCheck, varName);
 								}
 							}
@@ -2579,9 +2817,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						else {
 							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (subj != null) {
-								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (subj != null && prop != null) {
-									checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+								String preduri = declarationExtensions.getConceptUri(predicate);
+								if (preduri == null) {
+									getModelProcessor().addIssueToAcceptor("Unable to resolve name", predicate);
+								}
+								else {
+									Property prop = ontModel.getProperty(preduri);
+									if (prop != null) {
+										checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+									}
 								}
 							}
 						}
@@ -2594,7 +2838,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
-	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject, boolean propOfSubjectCheck, String varName) {
+	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression subject, boolean propOfSubjectCheck, String varName) throws InvalidTypeException {
+		if(prop.canAs(AnnotationProperty.class)){
+			return;
+		}
 		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
 		boolean matchFound = false;
 		while (stmtitr.hasNext()) {
@@ -2610,7 +2857,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (subj != null && !matchFound) {
 			if (varName != null) {
 				if(propOfSubjectCheck){
-					issueAcceptor.addError(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), subject);
+					getModelProcessor().addIssueToAcceptor(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), subject);
 				}else{
 					issueAcceptor.addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), subject);
 				}
@@ -2618,13 +2865,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				String msg;
 				if (subj instanceof OntProperty) {
-					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(subj.getURI(),prop.getURI());
+					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				else {
-					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(subj.getURI(),prop.getURI());
+					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				if(propOfSubjectCheck){
-					issueAcceptor.addError(msg, subject);
+					getModelProcessor().addIssueToAcceptor(msg, subject);
 				}else{
 					issueAcceptor.addWarning(msg, subject);
 				}
@@ -2632,10 +2879,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
-	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) {
+	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) throws InvalidTypeException {
 		if (obj.isResource()) {
 			if (obj.canAs(UnionClass.class)){
-				List<OntResource> uclsMembers = sadlModelProcessor.getOntResourcesInUnionClass(theJenaModel, obj.as(UnionClass.class));
+				List<OntResource> uclsMembers = getModelProcessor().getOntResourcesInUnionClass(theJenaModel, obj.as(UnionClass.class));
 				if (uclsMembers.contains(subj)) {
 					return true;
 				}
@@ -2669,7 +2916,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				else if (subj instanceof Property || subj.canAs(OntProperty.class)) {
 					// this is a property chain missing an intermediate class or instance: get the range of the property
-					StmtIterator stmtitr = sadlModelProcessor.getTheJenaModel().listStatements(subj, RDFS.range, (RDFNode)null);
+					StmtIterator stmtitr = getModelProcessor().getTheJenaModel().listStatements(subj, RDFS.range, (RDFNode)null);
 					boolean matchFound = false;
 					while (stmtitr.hasNext()) {
 						RDFNode missingSubject = stmtitr.nextStatement().getObject();
@@ -2704,20 +2951,48 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public List<ConceptName> getBinaryLeftTypeCheckInfo() {
-		return binaryLeftTypeCheckInfo;
+	public List<ConceptName> getBinaryOpLeftImplliedProperties() {
+		return binaryOpLeftImpliedProperties;
 	}
 
-	protected void setBinaryLeftTypeCheckInfo(List<ConceptName> binaryLeftTypeCheckInfo) {
-		this.binaryLeftTypeCheckInfo = binaryLeftTypeCheckInfo;
+	protected void setBinaryOpLeftImpliedProperties(List<ConceptName> binaryLeftTypeCheckInfo) {
+		this.binaryOpLeftImpliedProperties = binaryLeftTypeCheckInfo;
 	}
 
-	public List<ConceptName> getBinaryRightTypeCheckInfo() {
-		return binaryRightTypeCheckInfo;
+	public List<ConceptName> getBinaryOpRightImpliedProperties() {
+		return binaryOpRightImpliedProperties;
 	}
 
-	protected void setBinaryRightTypeCheckInfo(List<ConceptName> binaryRightTypeCheckInfo) {
-		this.binaryRightTypeCheckInfo = binaryRightTypeCheckInfo;
+	protected void setBinaryOpRightImpliedProperties(List<ConceptName> binaryRightTypeCheckInfo) {
+		this.binaryOpRightImpliedProperties = binaryRightTypeCheckInfo;
+	}
+
+	/**
+	 * Clear old values of left and right impliedProperties 
+	 */
+	public void clearImpliedProperties() {
+		setBinaryOpLeftImpliedProperties(null);
+		setBinaryOpRightImpliedProperties(null);
+	}
+
+	protected JenaBasedSadlModelProcessor getModelProcessor() throws InvalidTypeException {
+		return modelProcessor;
+	}
+
+	protected void setModelProcessor(JenaBasedSadlModelProcessor modelProcessor) {
+		this.modelProcessor = modelProcessor;
+	}
+
+	public void resetValidatorState(SadlModelElement element) {
+		if (impliedPropertiesUsed != null) {
+			impliedPropertiesUsed.clear();
+		}
+		if (binaryOpLeftImpliedProperties != null) {
+			binaryOpLeftImpliedProperties.clear();
+		}
+		if (binaryOpRightImpliedProperties != null) {
+			binaryOpRightImpliedProperties.clear();
+		}
 	}
 
 }
