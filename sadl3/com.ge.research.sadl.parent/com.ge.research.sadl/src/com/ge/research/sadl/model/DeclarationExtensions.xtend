@@ -80,11 +80,11 @@ class DeclarationExtensions {
 			return getExternalResourceAdapter.conceptUri
 		}
 		val declaration = declaration
-		if (declaration != null) {	
+		if (declaration !== null) {	
 			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
-			if (part1 != null) {
+			if (part1 !== null) {
 				val part2 = part1.baseUri
-				if (part2 != null) {
+				if (part2 !== null) {
 					return part2 +"#"+declaration.concreteName
 				}
 			}
@@ -111,7 +111,7 @@ class DeclarationExtensions {
 	}
 	
 	def SadlResource getDeclaration(SadlResource resource) {
-		if (resource != null && resource.name !== null && !resource.name.eIsProxy) {
+		if (resource !== null && resource.name !== null && !resource.name.eIsProxy) {
 			return resource.name
 		}
 		return resource
@@ -119,11 +119,11 @@ class DeclarationExtensions {
 	
 	def String getConceptNamespace(SadlResource it) {
 		val declaration = declaration
-		if (declaration != null) {
+		if (declaration !== null) {
 			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
-			if (part1 != null) {
+			if (part1 !== null) {
 				val part2 = part1.baseUri
-				if (part2 != null) {
+				if (part2 !== null) {
 					return part2 + "#"
 				}
 			}
@@ -133,11 +133,11 @@ class DeclarationExtensions {
 	
 	def String getConceptPrefix(SadlResource it) {
 		val declaration = declaration
-		if (declaration != null) {	
+		if (declaration !== null) {	
 			val part1 = EcoreUtil2.getContainerOfType(declaration, SadlModel)
-			if (part1 != null) {
+			if (part1 !== null) {
 				val part2 = part1.alias
-				if (part2 != null) {
+				if (part2 !== null) {
 					return part2
 				}
 			}
@@ -151,7 +151,7 @@ class DeclarationExtensions {
 		if (resource.isExternal) {
 			return resource.getExternalResourceAdapter.type
 		}
-		if (recursionDetection.get == null) {
+		if (recursionDetection.get === null) {
 			recursionDetection.set(new HashSet)
 		}
 		if (!recursionDetection.get.add(resource)) {
@@ -173,7 +173,7 @@ class DeclarationExtensions {
 				return OntConceptType.VARIABLE
 			}
 			
-			switch e: resource.declaration.eContainer {
+			switch e: resource.declaration?.eContainer {
 				
 				EquationStatement, 
 				ExternalEquationStatement :
@@ -277,12 +277,12 @@ class DeclarationExtensions {
 
 	protected def isDatatype(SadlTypeReference typeRef) {
 		typeRef instanceof SadlPrimitiveDataType 
-		|| (typeRef != null && typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType])
-		|| (typeRef != null && typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE])
+		|| (typeRef !== null && typeRef.eAllContents.exists[it instanceof SadlPrimitiveDataType])
+		|| (typeRef !== null && typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE])
 	}
 	
 	public def boolean isExternal(SadlResource resource) {
-		if (resource == null) return false
+		if (resource === null) return false
 		return resource.eResource instanceof ExternalEmfResource
 	}
 	
@@ -291,7 +291,7 @@ class DeclarationExtensions {
 			return isProperty((resource as Name).name)
 		}
 		val octype = getOntConceptType(resource)
-		if (octype != null && 
+		if (octype !== null && 
 			(octype.equals(OntConceptType.DATATYPE_PROPERTY) || 
 				octype.equals(OntConceptType.CLASS_PROPERTY) || 
 				octype.equals(OntConceptType.RDF_PROPERTY) ||
