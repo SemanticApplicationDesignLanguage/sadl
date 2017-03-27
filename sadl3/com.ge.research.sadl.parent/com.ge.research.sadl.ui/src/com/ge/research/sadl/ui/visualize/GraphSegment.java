@@ -760,7 +760,7 @@ public class GraphSegment {
 		return predicate;
 	}
 
-	private void setPredicate(Object predicate) {
+	public void setPredicate(Object predicate) {
 		this.predicate = predicate;
 	}
 
