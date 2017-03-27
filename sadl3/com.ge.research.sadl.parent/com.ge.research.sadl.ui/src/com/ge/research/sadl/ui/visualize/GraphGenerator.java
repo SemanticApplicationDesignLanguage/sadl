@@ -19,6 +19,7 @@ package com.ge.research.sadl.ui.visualize;
 
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,8 +39,11 @@ import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -52,6 +56,8 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -90,6 +96,7 @@ public class GraphGenerator {
 	protected static final String PROPERTY_GREEN = "green3";
 	protected static final String BLACK = "black";
 	protected static final String LIST_TYPE_COLOR = "cyan4";
+	protected static final String VARIABLE_PINK = "pink";
 	
 	protected static final String SHAPE = "shape";
 	protected static final String OCTAGON = "octagon";
@@ -127,7 +134,10 @@ public class GraphGenerator {
 	private IGraphVisualizer visualizer = null;
 	private IProgressMonitor monitor = null;
 	private HashMap<String, List<String>> classToPropertyMap = null;
-	private Map<Object, String> objectDisplayStrings;
+	protected Map<Object, String> objectDisplayStrings;
+	private OntModel baseModel = null;
+	protected Map<SadlResource, Long> explicitSadlResourceNodes = null;	// a queue of SadlResource nodes that need to be further processed after first pass on Context along with their sequence numbers
+	protected Map<Long,String> ctxSequenceNumbers = null;
 	
 	public enum Orientation {TD, LR}
 
@@ -366,7 +376,7 @@ public class GraphGenerator {
 			while (sitr.hasNext()) {
 				Statement stmt = sitr.nextStatement();
 				Resource prop = stmt.getSubject();
-				if (displayPropertyOfClass(cls, prop)) {
+				if (displayPropertyOfClass(cls, subjSeqNumber, prop)) {
 					data = generatePropertyRange(cls, subjSeqNumber, prop, graphRadius - 1, fillNodes, data);
 					handledProperties.add(prop);
 				}
@@ -381,7 +391,7 @@ public class GraphGenerator {
 		while (results.hasNext()) {
 			QuerySolution soln = results.next();
 			RDFNode prop = soln.get("?prop");
-			if (!handledProperties.contains(prop.asResource()) && displayPropertyOfClass(cls, prop.asResource())) {
+			if (!handledProperties.contains(prop.asResource()) && displayPropertyOfClass(cls, subjSeqNumber, prop.asResource())) {
 				data = generatePropertyRange(cls, subjSeqNumber, prop.as(OntProperty.class), graphRadius, fillNodes, data);
 				handledProperties.add(prop.asResource());
 			}
@@ -389,16 +399,16 @@ public class GraphGenerator {
 		return data;
 	}
 	
-	protected boolean displayPropertyOfClass(OntClass cls, Resource prop) {
+	protected boolean displayPropertyOfClass(OntClass cls, long clsSeqNum, Resource prop) {
 		if (prop.canAs(OntProperty.class) && 
 		    !isImpliedPropertyOfClass(cls, prop) &&
-		    !classToPropertyMapContains(cls.getURI(), prop.getURI())) {
+		    !classToPropertyMapContains(cls.toString(), clsSeqNum, prop.toString())) {
 			return true;
 		}
 		return false;
 	}
 
-	private boolean isImpliedPropertyOfClass(Resource cls, Resource prop) {
+	protected boolean isImpliedPropertyOfClass(Resource cls, Resource prop) {
 		return getTheJenaModelWithImports().contains(cls, getImpliedProperty(), prop);
 	}
 
@@ -412,12 +422,11 @@ public class GraphGenerator {
 			OntResource rng = eitr.next();
 			RDFNode listtype = null;
 			//if it's a list and range class
-			if (isList && rng.canAs(OntClass.class)) {
+			if (rng.canAs(OntClass.class)) {
 				//get list class
 				//Check for an all values from restriction
-				Resource listClass = getTheJenaModelWithImports().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
 				//if list class exists or the range has a superclass that is a list
-				if (listClass == null || rng.as(OntClass.class).hasSuperClass(listClass)) {
+				if (rng.as(OntClass.class).hasSuperClass(getListClass())) {
 					//iterate across all of the statements that are subclasses of range?
 					StmtIterator stmtitr = getTheJenaModelWithImports().listStatements(rng, RDFS.subClassOf, (RDFNode)null);
 					while (stmtitr.hasNext()) {
@@ -433,9 +442,7 @@ public class GraphGenerator {
 								Statement avf = subcls.getProperty(OWL.allValuesFrom);
 								if (avf != null) {
 									listtype = avf.getObject();
-									if (listtype.canAs(OntResource.class)){
-										rng = listtype.as(OntResource.class);
-									}
+									isList = true;
 								}
 								stmtitr.close();
 								break;
@@ -444,12 +451,40 @@ public class GraphGenerator {
 					}
 				}
 			}
-			GraphSegment sg = isList ? new GraphSegment(getModelUri(), cls, prop, rng, null, listtype, configMgr) : new GraphSegment(getModelUri(), cls, prop, rng, configMgr);
+			GraphSegment sg;
 			long objSeqNumber = -1L;
-			if (isIncludeDuplicates()) {
-				objSeqNumber = getNewSequenceNumber();
-				sg.setSubjectNodeDuplicateSequenceNumber(subjSeqNumber);
-				sg.setObjectNodeDuplicateSequenceNumber(objSeqNumber);
+			long listTypeSeqNumber = -1L;
+			if (isList) {
+				sg = new GraphSegment(getModelUri(), cls, prop, rng, null, listtype, configMgr);
+				if (isIncludeDuplicates()) {
+					objSeqNumber = getNewCtxResourceSequenceNumber(rng, null, false); //	always get a new one
+					sg.setSubjectNodeDuplicateSequenceNumber(subjSeqNumber);
+					sg.setObjectNodeDuplicateSequenceNumber(objSeqNumber);
+				}
+				try {
+					listTypeSeqNumber = addTypeListToGraphData(data, getModelUri(), rng.as(OntResource.class), objSeqNumber, listtype.as(OntClass.class), fillNodes);
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else {
+				sg = new GraphSegment(getModelUri(), cls, prop, rng, configMgr);
+				if (isIncludeDuplicates()) {
+					objSeqNumber = getNewCtxResourceSequenceNumber(rng, null, false); //	always get a new one
+					sg.setSubjectNodeDuplicateSequenceNumber(subjSeqNumber);
+					sg.setObjectNodeDuplicateSequenceNumber(objSeqNumber);
+					addClassToPropertyMap(cls.toString(), subjSeqNumber, prop.toString());
+				}
 			}
 			if (isIncludeDuplicates() || !data.contains(sg)) {
 				if (fillNodes) {
@@ -471,8 +506,16 @@ public class GraphGenerator {
 					// what for XSD and user-defined types?
 				}
 				data.add(sg);
-				if (prop.as(OntProperty.class).isObjectProperty() && !cls.equals(rng)) {
-					data = generateClassPropertiesWithDomain(rng.as(OntClass.class), objSeqNumber, graphRadius - 1, fillNodes, data);
+				if (!isList) {
+					if (prop.as(OntProperty.class).isObjectProperty() && !cls.equals(rng)) {
+						data = generateClassPropertiesWithDomain(rng.as(OntClass.class), objSeqNumber, graphRadius - 1, fillNodes, data);
+					}
+				}
+				else {
+					if (!cls.equals(listtype) && listtype.canAs(OntClass.class)) {
+						// carry the tree on down from the list type, need sequence number of list type
+						data = generateClassPropertiesWithDomain(listtype.as(OntClass.class), listTypeSeqNumber, graphRadius - 1, fillNodes, data);
+					}
 				}
 			}
 			else {
@@ -797,29 +840,39 @@ public class GraphGenerator {
 		this.anchor = anchor;
 	}
 	
-	protected boolean classToPropertyMapContains(String c, String p){
+	protected boolean classToPropertyMapContains(String c, long cSeqNum, String p){
 		if(this.classToPropertyMap == null){
 			this.classToPropertyMap = new HashMap<String,List<String>>();
-			addClassToPropertyMap(c,p);
+			addClassToPropertyMap(c,cSeqNum, p);
 			return false;
 		}
-		
-		if(this.classToPropertyMap.containsKey(c) &&
-		   this.classToPropertyMap.get(c).contains(p)){
+		String key = c;
+		if (cSeqNum >= 0) {
+			key = c + cSeqNum;
+		}
+		if(this.classToPropertyMap.containsKey(key) &&
+		   this.classToPropertyMap.get(key).contains(p)){
 			return true;
 		}
 		
-		addClassToPropertyMap(c,p);
+		addClassToPropertyMap(c,cSeqNum, p);
 		
 		return false;
 	}
 	
-	protected void addClassToPropertyMap(String c, String p){
-		if(this.classToPropertyMap.containsKey(c)){
-			this.classToPropertyMap.get(c).add(p);
+	protected void addClassToPropertyMap(String c, long cSeqNum, String p){
+		if(this.classToPropertyMap == null){
+			this.classToPropertyMap = new HashMap<String,List<String>>();
+		}
+		String key = c;
+		if (cSeqNum >=0) {
+			key = c + cSeqNum;
+		}
+		if(this.classToPropertyMap.containsKey(key)){
+			this.classToPropertyMap.get(key).add(p);
 		}else{
-			this.classToPropertyMap.put(c, new ArrayList<String>());
-			addClassToPropertyMap(c,p);
+			this.classToPropertyMap.put(key, new ArrayList<String>());
+			addClassToPropertyMap(c, cSeqNum, p);
 		}
 	}
 
@@ -1035,6 +1088,16 @@ public class GraphGenerator {
 			sg.addHeadAttribute(COLOR, color);
 		}
 	}
+	
+	protected void annotateHeadAsList(GraphSegment sg) {
+		sg.addHeadAttribute(COLOR, CLASS_BLUE);
+		sg.addHeadAttribute(SHAPE, "parallelogram");
+	}
+	
+	protected void annotateTailAsList(GraphSegment sg) {
+		sg.addTailAttribute(COLOR, CLASS_BLUE);
+		sg.addTailAttribute(SHAPE, "parallelogram");
+	}
 
 	protected void annotateTailAsClass(GraphSegment sg) {
 		sg.addTailAttribute(STYLE, FILLED);
@@ -1116,7 +1179,8 @@ public class GraphGenerator {
 		int maxColumns = 3 + 
 				(headKeyList != null ? headKeyList.size() : 0) + 
 				(edgeKeyList != null ? edgeKeyList.size() : 0) + 
-				(tailKeyList != null ? tailKeyList.size() : 0); 
+				(tailKeyList != null ? tailKeyList.size() : 0) +
+				(isIncludeDuplicates() ? 2 : 0); 
 		Object array[][] = new Object[data.size()][maxColumns]; 
 		
 		objectDisplayStrings = new HashMap<Object, String>();
@@ -1135,7 +1199,7 @@ public class GraphGenerator {
 									!((Resource)s).as(OntClass.class).isIntersectionClass())) {
 						String ss = null;
 						if (!gs.isSubjectIsList() && !((Resource)s).isURIResource()) {
-							ss = "<bn-" + bncntr++ + ">";
+							ss = "<" + getNewSequenceNumber() + ">"; //"<bn-" + bncntr++ + ">";
 						}
 						if (ss == null) {
 							ss = gs.subjectToString(null);
@@ -1154,7 +1218,7 @@ public class GraphGenerator {
 									!((Resource)o).as(OntClass.class).isIntersectionClass())) {
 						String os = null;
 						if (!gs.isObjectIsList() && !((Resource)o).isURIResource()) {
-							os = "<bn-" + bncntr++ + ">";
+							os = "<" + getNewSequenceNumber() + ">"; //"<bn-" + bncntr++ + ">";
 						}
 						if (os == null) {
 							os = gs.objectToString(null);
@@ -1183,6 +1247,10 @@ public class GraphGenerator {
 			if (gs.getTailAttributes() != null) {
 				array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
 			}
+			if (isIncludeDuplicates()) {
+				array[i+listCount][maxColumns - 2] = gs.getSubjectNodeDuplicateSequenceNumber();
+				array[i+listCount][maxColumns - 1] = gs.getObjectNodeDuplicateSequenceNumber();
+			}
 		}
 		if (dataFound) {
 			if (isIncludeDuplicates()) {
@@ -1194,5 +1262,175 @@ public class GraphGenerator {
 			return rs;
 		}
 		return null;
+	}
+
+	protected Resource getListClass() {
+		return getTheJenaModelWithImports().getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+	}
+
+	protected Property getListFirstProp() {
+		return getTheJenaModelWithImports().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+	}
+
+	protected Property getListRestProp() {
+		return getTheJenaModelWithImports().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
+	}
+
+	protected long addTypeListToGraphData(List<GraphSegment> data, String parentPublicUri, OntResource rng, long rngSeqNumber, RDFNode listtype, boolean fillNodes)
+			throws ConfigurationException, IOException, URISyntaxException, Exception {
+		GraphSegment gs = new GraphSegment(parentPublicUri, rng, "list\ntype", listtype, listtype, null, getConfigMgr());
+		if (!data.contains(gs)) {
+			setSubjectObjectClassAttributes(gs, parentPublicUri, rng, listtype);
+			gs.addEdgeAttribute(COLOR, LIST_TYPE_COLOR);
+			gs.addEdgeAttribute(STYLE, DASHED);
+			data.add(gs);
+		}
+		GraphSegment gs2 = new GraphSegment(parentPublicUri, getListClass(), "subClass", rng, null, listtype, getConfigMgr());
+		if (!data.contains(gs2)) {
+			setSubjectObjectClassAttributes(gs2, parentPublicUri, getListClass(), rng);
+			gs2.addEdgeAttribute(COLOR, BLUE);
+			gs2.addEdgeAttribute(STYLE, DASHED);
+			data.add(gs2);
+		}
+		return -1L;
+	}
+
+	/**
+	 * Method used to find the File URL of the graph associated with an imported class
+	 * 
+	 * @param	- Imported class or concept
+	 * @return	- File URL to be added to node hyperlink
+	 * @throws Exception 
+	 */
+	protected String getImportUrl(RDFNode rsrc) throws Exception {
+		if (!rsrc.isResource() || !rsrc.isURIResource()) {
+			return null;
+		}
+		String ns = rsrc.asResource().getNameSpace();
+		if (ns.endsWith("#")) {
+			ns = ns.substring(0, ns.length() - 1);
+		}
+		String baseFilename = getBaseFilenameFromPublicUri(ns);
+		//get the graph folder file path
+		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
+		
+		if(baseFilename != null){
+			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
+		}
+		return null;
+	}
+
+	protected void setSubjectObjectClassAttributes(GraphSegment sg, String parentPublicUri, RDFNode cls, RDFNode rng)
+			throws ConfigurationException, IOException, URISyntaxException, Exception {
+				annotateHeadAsClass(sg);
+				if(isInImports(cls, parentPublicUri)){
+					if(getImportUrl(cls) != null) sg.addHeadAttribute(LINK_URL, getImportUrl(cls));
+					sg.addHeadAttribute(IS_IMPORT, "true");
+				}
+				annotateTailAsClass(sg);
+				if(isInImports(rng, parentPublicUri)){
+					if(getImportUrl(rng) != null) sg.addTailAttribute(LINK_URL, getImportUrl(rng));
+					sg.addTailAttribute(IS_IMPORT, "true");
+				}
+			}
+
+	/**
+	 * Method used to see if a class/instance/etc. is an imported item 
+	 * (i.e) not defined in this file/namespace
+	 * 
+	 * @param classInst			- Item being checked against imports 
+	 * @param parentPublicUri	- URI of file being graphed
+	 * @return
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 * @throws URISyntaxException 
+	 */
+	protected boolean isInImports(RDFNode classInst, String parentPublicUri)
+			throws ConfigurationException, IOException, URISyntaxException {
+				try{
+			
+					if(classInst.isURIResource()){
+						String[] uri = classInst.asResource().getURI().split("#");
+						if(uri != null && uri[0].equals(parentPublicUri)){
+							return false;
+						}
+						else {
+							SadlUtils su = new SadlUtils();
+							if (uri != null && su.fileNameToFileUrl(su.fileUrlToFileName(uri[0])).equals(getConfigMgr().getAltUrlFromPublicUri(parentPublicUri))) {
+								return false;
+							}else{
+								return true;
+							}
+						}
+					}else{
+						if(getLocalModel().containsResource(classInst)){
+							return false;
+							
+						}else{
+							return true;
+						}
+					}
+				}catch(NullPointerException e){
+					return false;
+					//TODO fix issues with OnClassImpl throwing null exception
+				}
+			}
+
+	/**
+	 * @return
+	 */
+	protected OntModel getLocalModel() {
+		if (baseModel == null) {
+			Model m = getTheJenaModel().getBaseModel();
+			baseModel = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+		}
+		return baseModel;
+	}
+
+	/**
+	 * Method to get the sequence number for a given Jena Resource. If the ctxSequenceNumbers contains the
+	 * Resource identifier, find and return the associated sequence number. 
+	 * If it doesn't, and expand is true, and there is an associated SadlResource, get a new sequence number
+	 * and associate it with the SadlResource in the explicitSadlResourceNodes and add it to ctxSequenceNumbers.
+	 * @param rsrc
+	 * @param sr
+	 * @param expand
+	 * @return
+	 */
+	protected long getCtxResourceSequenceNumber(Resource rsrc, SadlResource sr, boolean expand) {
+		long seqNum;
+		
+		if (ctxSequenceNumbers.containsValue(rsrc.toString())) {
+			seqNum = findSeqNum(ctxSequenceNumbers, rsrc.toString());
+		}
+		else {
+			seqNum = getNewCtxResourceSequenceNumber(rsrc, sr, expand);
+		}
+		return seqNum;
+	}
+	
+	protected long getNewCtxResourceSequenceNumber(Resource rsrc, SadlResource sr, boolean expand) {
+		long seqNum = getNewSequenceNumber();
+		ctxSequenceNumbers.put(seqNum, rsrc.toString());
+		if (expand && sr != null && !explicitSadlResourceNodes.containsKey(sr)) {
+			explicitSadlResourceNodes.put(sr, seqNum);
+		}
+		return seqNum;
+	}
+
+	protected long findSeqNum(Map<Long, String> ctxSequenceNumbers, String uri) {
+	    for (long key : ctxSequenceNumbers.keySet()) {
+	        if (uri.equals(ctxSequenceNumbers.get(key))){
+	            return key;
+	        }
+	    }
+		return -1;
+	}
+
+	protected long findSeqNum(Map<SadlResource, Long> map, SadlResource sr) {
+		if (map.containsKey(sr)) {
+			return map.get(sr);
+		}
+		return -1L;
 	}
 }
