@@ -20,6 +20,7 @@
  */
 package com.ge.research.sadl.ui
 
+import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
@@ -83,6 +84,13 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	def void configureIPreferenceStoreAccess(Binder binder) {
 		binder.bind(IPreferenceStoreAccess).to(SadlPreferenceStoreAccess).in(SINGLETON);
+	}
+	
+	/**
+	 * Bind a callback that always adds the Xtext nature to the SADL project silently.
+	 */
+	override bindIXtextEditorCallback() {
+		return AlwaysAddXtextNatureCallback;
 	}
 	
 }

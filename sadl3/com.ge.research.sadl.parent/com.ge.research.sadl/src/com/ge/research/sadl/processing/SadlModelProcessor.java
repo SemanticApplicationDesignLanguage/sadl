@@ -45,8 +45,8 @@ import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
-import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -60,6 +60,7 @@ import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.StringLiteral;
+import com.google.inject.Inject;
 
 
 public abstract class SadlModelProcessor implements IModelProcessor {
@@ -69,6 +70,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     private Object encapsulatingTarget = null;	// when a query is in a test
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private RulePart rulePart = RulePart.NOT_A_RULE;
+    
+    @Inject
+    private ISadlImplicitModelContentProvider implicitModelContentProvider;
     
 	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
@@ -655,29 +659,8 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return false;
 	}
 
-	public static void createSadlImplicitModel(File implicitModelFile) throws IOException {
-		String implicitModel = getSadlImplicitModel();
-		SadlUtils su = new SadlUtils();
-		implicitModelFile.getParentFile().mkdirs();
-		su.stringToFile(implicitModelFile, implicitModel, true);
-	}
-
-	public static String getSadlImplicitModel() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("uri \"");
-		sb.append(SadlConstants.SADL_IMPLICIT_MODEL_URI);
-		sb.append("\" alias ");
-		sb.append(SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
-		sb.append(".\n");
-	
-		sb.append("Event is a class.\n");
-	
-		sb.append("impliedProperty is a type of annotation.\n");
-	
-		sb.append("UnittedQuantity is a class,\n");
-		sb.append(" 	described by ^value with values of type decimal,\n");
-		sb.append(" 	described by unit with values of type string.\n");
-		return sb.toString();
+	public void createSadlImplicitModel(File implicitModelFile) throws IOException {
+		implicitModelContentProvider.createImplicitModel(implicitModelFile, true);
 	}
 
 	public Set<VariableNode> getSelectVariables(GraphPatternElement pattern) {

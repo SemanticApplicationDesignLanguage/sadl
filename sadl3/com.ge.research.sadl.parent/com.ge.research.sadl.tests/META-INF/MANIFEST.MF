@@ -19,7 +19,8 @@ Require-Bundle: com.ge.research.sadl,
  org.eclipse.xtext.xbase.testing,
  org.junit;bundle-version="4.12.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: com.ge.research.sadl.tests;x-internal=true
+Export-Package: com.ge.research.sadl.tests;x-internal=true,
+ com.ge.research.sadl.tests.helpers
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",
  org.junit.runners.model;version="4.5.0",
