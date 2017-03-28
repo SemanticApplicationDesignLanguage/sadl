@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.emf.ecore.EObject;
 import com.ge.research.sadl.errorgenerator.generator.*;
@@ -186,22 +187,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     	}
     	
 		public boolean equals(Object o) {
-    		if (o instanceof TypeCheckInfo) {
-    			try {
-	    			if (context.equals(((TypeCheckInfo)o).context)) {
-	    				if (getExpressionType().equals(((TypeCheckInfo)o).getExpressionType()) &&
-	    						getRangeValueType().equals(((TypeCheckInfo)o).getRangeValueType()) &&
-	    						getTypeCheckType() != null && getTypeCheckType().equals(((TypeCheckInfo)o).getTypeCheckType())) {
-	    					return true;
-	    				}
-	    			}
-    			}
-    			catch (NullPointerException e) {
-    				
-    			}
-    		}
+			if (o instanceof TypeCheckInfo) {
+				TypeCheckInfo other = (TypeCheckInfo) o;
+				return context == other.context // Identity check should be fine for EObjects
+					&& Objects.equals(getExpressionType(), other.getExpressionType())
+					&& Objects.equals(getRangeValueType(), other.getRangeValueType())
+					&& Objects.equals(getTypeCheckType(), other.getTypeCheckType());
+				
+			}
     		return false;
     	}
+		
+		@Override
+		public int hashCode() {
+			return Objects.hash(context, getExpressionType(), getRangeValueType(), getTypeCheckType());
+		}
 
 		public ConceptIdentifier getExpressionType() {
 			return expressionType;
