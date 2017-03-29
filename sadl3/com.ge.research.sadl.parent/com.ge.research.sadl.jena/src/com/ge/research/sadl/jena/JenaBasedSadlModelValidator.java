@@ -2602,7 +2602,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					OntResource cls = theJenaModel.getOntResource(((ConceptName)tct).getUri());
 					if (tci.getTypeToExprRelationship().equals("range") || tci.getTypeToExprRelationship().equals("restriction to")) {
 						if (cls.isURIResource()) {
-							return new ConceptName(cls.getURI());
+//							return new ConceptName(cls.getURI());
+							return (ConceptName) tct;
 						}
 					}
 					if (cls != null && cls.canAs(OntClass.class)){
