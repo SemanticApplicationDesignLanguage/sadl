@@ -71,7 +71,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 							configMgr = null;		// this is an obsolete ConfigurationManager
 						}
 					}
-					String sadlFile = null;
+					String targetFile = null;
 					String owlFile = null;
 					if (selection.size() > 2) {
 						// something else was selected--is it a .sadl file?
@@ -84,15 +84,16 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 								if (i > 0) sb.append("/");
 								sb.append(selection.get(i));
 							}
-							sadlFile = sb.toString();
+							targetFile = sb.toString();
 						}
 						else if (sf != null && (sf.endsWith(".owl") || sf.endsWith(".nt") || sf.endsWith(".n3"))) {
+							targetFile = sf;
 							owlFile = sf;
 						}
 					}
-					if (sadlFile != null) {
+					if (targetFile != null) {
 						//graph just this file
-						generateOntologyFileGraph(sadlFile, owlFile, monitor, false, true);
+						generateOntologyFileGraph(targetFile, owlFile, monitor, false, true);
 					}
 					else {
 						graphFolder(project);
