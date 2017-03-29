@@ -20,7 +20,7 @@ package com.ge.research.sadl.ui.tests
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.preferences.SadlPreferences
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import com.ge.research.sadl.processing.ValidationAcceptor
+import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.hp.hpl.jena.ontology.OntModel
@@ -29,8 +29,8 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
-import org.junit.Test
 import org.junit.Ignore
+import org.junit.Test
 
 /**
  * Mock test case that shows how to use customized preference values in JUnit Plug-in tests.
@@ -99,7 +99,7 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 		val issues = newArrayList;
 		issues.addAll(validate(resource));
 		val processor = processorProvider.get
-		val acceptor = new ValidationAcceptor([issues += it]);
+		val acceptor = new ValidationAcceptorImpl([issues += it]);
 		val preferenceValues = preferenceValuesProvider.getPreferenceValues(resource);
 		val context = new ProcessorContext(cancelIndicator, preferenceValues);
 		processor.onValidate(resource, acceptor, CheckMode.FAST_ONLY, context);

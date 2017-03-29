@@ -24,7 +24,7 @@ import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.processing.CompositeModelProcessor
 import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.processing.OntModelProvider
-import com.ge.research.sadl.processing.ValidationAcceptor
+import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -102,7 +102,7 @@ class ProposalProviderFilterProvider {
 				// 'x is a Rectangle with' => for properties available on type Rectangle.
 				predicates.add(currentModel.createPropertyInitializerFilter)
 			} else if (clazz === SADL_CLASS_OR_PROPERTY_DECLARATION && key == 'SADLPRIMARYTYPEREFERENCE_TYPE') {
-				// 'x is a type of' => all classes and properties.
+				// 'x is a type of' => all classes, properties and datatypes.
 			} else if (clazz === SADL_CLASS_OR_PROPERTY_DECLARATION && key == 'SADLSTATEMENT_SUPERELEMENT') {
 				// 'Person is a class. {Man, Woman} are types of'
 				// => for super elements, imported types should be there except the defined types: Man, Woman.
@@ -267,7 +267,7 @@ class ProposalProviderFilterProvider {
 
 	private def createValidator(Resource resource) {
 		val issues = <Issue>newArrayList();
-		val acceptor = new ValidationAcceptor([issues.add(it)] as IAcceptor<Issue>);
+		val acceptor = new ValidationAcceptorImpl([issues.add(it)] as IAcceptor<Issue>);
 		val model = OntModelProvider.find(resource);
 		val ^extension = extensionProvider.get;
 		val processor = resource.processor;

@@ -17,30 +17,26 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.diagnostics.Severity
-
-import static org.eclipse.xtext.diagnostics.Severity.*
-
 /**
- * Representation of a validation acceptor.
+ * Extension interface of the validation acceptor.
  * 
  * @author akos.kitta
  */
-interface ValidationAcceptor {
+interface ValidationAcceptorExt extends ValidationAcceptor {
 	
-	def void addInfo(String message, EObject context) {
-		add(message, context, INFO)
-	}
+	/**
+	 * Returns with the number of errors processed by this acceptor.
+	 */
+	def int getErrorCount()
 	
-	def void addError(String message, EObject context) {
-		add(message, context, ERROR)
-	}
+	/**
+	 * Returns with the number of warning processed by this acceptor.
+	 */	
+	def int getWarningCount()
 	
-	def void addWarning(String message, EObject context) {
-		add(message, context, WARNING)
-	}
-	
-	def void add(String message, EObject context, Severity severity);
-	
+	/**
+	 * Returns with the number of issues with info level processed by this acceptor.
+	 */
+	def int getInfoCount()
+		
 }

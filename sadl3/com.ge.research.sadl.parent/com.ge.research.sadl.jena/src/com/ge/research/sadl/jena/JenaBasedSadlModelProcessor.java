@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -44,7 +43,6 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
@@ -105,6 +103,7 @@ import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.processing.ValidationAcceptorExt;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -154,7 +153,6 @@ import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
-import com.ge.research.sadl.sADL.SadlIsFunctional;
 import com.ge.research.sadl.sADL.SadlIsInverseOf;
 import com.ge.research.sadl.sADL.SadlIsSymmetrical;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
@@ -193,7 +191,6 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -226,7 +223,6 @@ import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.sparql.JenaTransactionException;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
@@ -888,15 +884,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     			OntModelProvider.addOtherContent(model.eResource(), rules);
     		}
     	}
-		if (issueAcceptor != null) {
+		if (issueAcceptor instanceof ValidationAcceptorExt) {
+			final ValidationAcceptorExt acceptor = (ValidationAcceptorExt) issueAcceptor;
 			try {
 				if (!resource.getURI().lastSegment().equals("SadlImplicitModel.sadl") &&
 					!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
 //					System.out.println("Metrics for '" + resource.getURI().lastSegment() + "':");
-					if (issueAcceptor.getErrorCount() > 0) {
-						String msg = "    Model totals: " + countPlusLabel(issueAcceptor.getErrorCount(), "error") + ", " + 
-								countPlusLabel(issueAcceptor.getWarningCount(), "warning") + ", " + 
-								countPlusLabel(issueAcceptor.getInfoCount(), "info");
+					if (acceptor.getErrorCount() > 0) {
+						String msg = "    Model totals: " + countPlusLabel(acceptor.getErrorCount(), "error") + ", " + 
+								countPlusLabel(acceptor.getWarningCount(), "warning") + ", " + 
+								countPlusLabel(acceptor.getInfoCount(), "info");
 //						System.out.flush();
 						System.err.println("No OWL model output generated for '" + resource.getURI() + "'.");
 						System.err.println(msg);
