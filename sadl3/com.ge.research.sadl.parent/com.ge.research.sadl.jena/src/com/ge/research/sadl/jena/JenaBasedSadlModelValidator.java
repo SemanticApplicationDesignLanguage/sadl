@@ -1127,7 +1127,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return listtype;
 	}
 
-	protected TypeCheckInfo getType(Constant expression) throws DontTypeCheckException {
+	protected TypeCheckInfo getType(Constant expression) throws DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, CircularDefinitionException, InvalidTypeException, CircularDependencyException {
 		//What do we do about the rest of the constants?
 		/*'--' | 'a'? 'type' ;*/
 		String constant = expression.getConstant();	
@@ -1147,8 +1147,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName declarationConceptName = new ConceptName("TODO");
 			return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
 		}
-		else if (constant.endsWith("value")) {
-			throw new DontTypeCheckException();
+//		else if (constant.endsWith("value")) {
+//			throw new DontTypeCheckException();
+//		}
+		else if (expression instanceof Constant && (((Constant)expression).getConstant().equals("value")
+				|| ((Constant)expression).getConstant().equals("type"))) {
+			Sublist slexpr = getSublistContainer(expression);
+			if (slexpr != null) {
+				return getType(slexpr.getList());
+			}
+			return getType(expression);
 		}
 		else if (constant.equals("a type")) {
 			ConceptName rdfType = new ConceptName(RDFS.subClassOf.getURI());
@@ -2286,7 +2294,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		boolean listTemporarilyDisabled = false;
 		try {
-			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("value")) {
+			if (leftExpression instanceof Constant && 
+					(((Constant)leftExpression).getConstant().equals("value") || ((Constant)leftExpression).getConstant().equals("type"))) {
 				listTemporarilyDisabled = true;
 				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
 			}
@@ -2991,4 +3000,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
+	private Sublist getSublistContainer(EObject expression) {
+		if (expression instanceof Sublist) {
+			return (Sublist) expression;
+		}
+		if (expression.eContainer() != null) {
+			return getSublistContainer(expression.eContainer());
+		}
+		return null;
+	}
 }
