@@ -5180,6 +5180,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (typeStr.equals(XSD.xstring.getLocalName())) onDatatype = XSD.xstring;
 		else if (typeStr.equals(XSD.anyURI.getLocalName())) onDatatype = XSD.anyURI;
 		else if (typeStr.equals(XSD.base64Binary.getLocalName())) onDatatype = XSD.base64Binary;
+		else if (typeStr.equals(XSD.xbyte.getLocalName())) onDatatype = XSD.xbyte;
 		else if (typeStr.equals(XSD.date.getLocalName())) onDatatype = XSD.date;
 		else if (typeStr.equals(XSD.dateTime.getLocalName())) onDatatype = XSD.dateTime;
 		else if (typeStr.equals(XSD.decimal.getLocalName())) onDatatype = XSD.decimal;
