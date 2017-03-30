@@ -18,9 +18,10 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import com.ge.research.sadl.model.DeclarationExtensions
-import com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds
 import org.junit.Test
 
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.*
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static org.junit.Assert.*
 
 /**
@@ -35,10 +36,22 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 		val context = newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a Foo with p1 ''').
 			ontologyContext;
 		assertNotNull(context);
+		assertNotEquals(MISSING_SUBJECT, context.subject);
 		assertTrue(context.grammarContextId.present);
-		assertEquals(GrammarContextIds.SADLPROPERTYINITIALIZER_VALUE, context.grammarContextId.get);
+		assertEquals(SADLPROPERTYINITIALIZER_VALUE, context.grammarContextId.get);
 		assertTrue(context.restriction.present);
 		assertEquals('p1', declarationExtensions.getConcreteName(context.restriction.get));
+	}
+
+	@Test
+	def void checkPropertyInitializerValue() {
+		val context = newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a ''').
+			ontologyContext;
+		assertNotNull(context);
+		assertEquals(MISSING_SUBJECT, context.subject);
+		assertTrue(context.grammarContextId.present);
+		assertEquals(SADLPRIMARYTYPEREFERENCE_TYPE, context.grammarContextId.get);
+		assertFalse(context.restriction.present);
 	}
 
 	private def getDeclarationExtensions() {

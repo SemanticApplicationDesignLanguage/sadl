@@ -19,16 +19,20 @@ package com.ge.research.sadl.ui.contentassist
 
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context
 import com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder
+import com.ge.research.sadl.processing.OntModelProvider
+import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.google.common.base.Optional
+import com.hp.hpl.jena.ontology.OntModel
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import com.ge.research.sadl.sADL.SadlInstance
-import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 
 /**
  * Singleton service converting a Eclipse-based content assist context into
@@ -38,6 +42,10 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
  */
 class OntologyContextProvider {
 
+	/**
+	 * Transforms the content assist context into a ontology helper context and returns with it.
+	 * May return with an absent when the transformation is not viable.
+	 */
 	def Optional<Context> getOntologyContext(ContentAssistContext it) {
 
 		for (grammarElement : firstSetGrammarElements?.filter(Assignment)) {
@@ -52,15 +60,25 @@ class OntologyContextProvider {
 				val type = instance.type;
 				if (type instanceof SadlSimpleTypeReference) {
 					val builder = new ContextBuilder(type.type);
-					builder.grammarContextId = SADLPROPERTYINITIALIZER_VALUE;
+					builder.grammarContextId = key;
 					builder.restriction = initializer.property;
 					return Optional.of(builder.build);
 				}
+			} else if (key == SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE || key == SADLPRIMARYTYPEREFERENCE_TYPE) {
+				val builder = createWithoutSubject(currentModel.ontModel);
+				builder.grammarContextId = SADLPRIMARYTYPEREFERENCE_TYPE;
+				return Optional.of(builder.build);
+			} else {
+				System.err.println('''Unhandled case: «key» [Class: «clazz.name»]''')
 			}
 
 		}
 
 		return Optional.absent;
+	}
+
+	private def OntModel getOntModel(EObject it) {
+		return OntModelProvider.find(eResource);
 	}
 
 }

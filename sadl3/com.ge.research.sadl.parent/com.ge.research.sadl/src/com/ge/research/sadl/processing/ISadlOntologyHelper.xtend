@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.ge.research.sadl.sADL.SADLFactory
 import com.ge.research.sadl.sADL.SadlResource
 import com.google.common.base.Optional
 import com.google.common.base.Preconditions
@@ -74,8 +75,14 @@ interface ISadlOntologyHelper {
 	 */
 	static abstract class GrammarContextIds {
 
+		/**
+		 * {@code C is a class. myC is a <|>}
+		 */
 		public static val SADLPRIMARYTYPEREFERENCE_TYPE = 'SADLPRIMARYTYPEREFERENCE_TYPE';
 
+		/**
+		 * {@code C is a class. myC is a <|>}
+		 */
 		public static val SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE = 'SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE';
 
 		public static val SADLPROPERTYINITIALIZER_PROPERTY = 'SADLPROPERTYINITIALIZER_PROPERTY';
@@ -104,20 +111,36 @@ interface ISadlOntologyHelper {
 	 */
 	static class ContextBuilder {
 
-		val SadlResource subject;
+		public static val MISSING_SUBJECT = SADLFactory.eINSTANCE.createSadlResource;
+
+		var SadlResource subject;
 
 		var OntModel ontModel;
 		var ValidationAcceptor acceptor;
 		var Optional<String> grammarContextId;
 		var Optional<SadlResource> restriction;
 
+		/**
+		 * Returns with a new context builder that has no subject SADL resource.
+		 */
+		static def createWithoutSubject(OntModel ontModel) {
+			val builder = new ContextBuilder();
+			builder.ontModel = ontModel;
+			return builder;
+		}
+
 		new(EObject subject) {
+			this();
 			Preconditions.checkNotNull(subject, 'subject');
 			Preconditions.checkArgument(subject instanceof SadlResource,
 				'Expected an instance of SADL resource. Was: ' + subject);
 			Preconditions.checkNotNull(subject.eResource, 'Subject does not contained in a resource.');
 			this.subject = subject as SadlResource;
 			ontModel = OntModelProvider.find(subject.eResource)
+		}
+
+		private new() {
+			subject = MISSING_SUBJECT;
 			acceptor = ValidationAcceptor.NOOP;
 			grammarContextId = Optional.absent;
 			restriction = Optional.absent;
