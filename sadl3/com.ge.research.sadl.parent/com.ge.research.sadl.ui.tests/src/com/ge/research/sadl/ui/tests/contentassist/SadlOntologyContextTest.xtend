@@ -28,10 +28,10 @@ import static org.junit.Assert.*
  * 
  * @author akos.kitta
  */
-class SadlOntologyContextHelperTest extends AbstractSadlContentAssistTest {
+class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 
 	@Test
-	def void foo() {
+	def void checkPropertyInitializerValueWithRestrictions() {
 		val context = newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a Foo with p1 ''').
 			ontologyContext;
 		assertNotNull(context);
