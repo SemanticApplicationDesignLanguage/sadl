@@ -61,7 +61,7 @@ class OntologyContextProvider {
 				if (type instanceof SadlSimpleTypeReference) {
 					val builder = new ContextBuilder(type.type);
 					builder.grammarContextId = key;
-					builder.restriction = initializer.property;
+					builder.addRestriction(initializer.property);
 					return Optional.of(builder.build);
 				}
 			} else if (key == SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE || key == SADLPRIMARYTYPEREFERENCE_TYPE) {

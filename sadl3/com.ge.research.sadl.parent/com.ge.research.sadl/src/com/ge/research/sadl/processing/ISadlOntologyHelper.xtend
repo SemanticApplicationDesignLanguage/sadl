@@ -23,6 +23,7 @@ import com.google.common.base.Optional
 import com.google.common.base.Preconditions
 import com.google.inject.ImplementedBy
 import com.hp.hpl.jena.ontology.OntModel
+import java.util.Collection
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.annotations.Data
 
@@ -31,6 +32,10 @@ import org.eclipse.xtend.lib.annotations.Data
  */
 @ImplementedBy(SadlOntologyHelper)
 interface ISadlOntologyHelper {
+	
+	
+	def void check(Context context, Iterable<SadlResource> resourcesToFilter)
+	
 
 	/**
 	 * Encapsulates the context for the ontology helper.
@@ -64,9 +69,9 @@ interface ISadlOntologyHelper {
 		def Optional<String> getGrammarContextId();
 
 		/**
-		 * Returns with the restriction for the context.
+		 * Returns with the restrictions for the context.
 		 */
-		def Optional<SadlResource> getRestriction();
+		def Iterable<SadlResource> getRestrictions();
 
 	}
 
@@ -118,7 +123,7 @@ interface ISadlOntologyHelper {
 		var OntModel ontModel;
 		var ValidationAcceptor acceptor;
 		var Optional<String> grammarContextId;
-		var Optional<SadlResource> restriction;
+		var Collection<SadlResource> restrictions;
 
 		/**
 		 * Returns with a new context builder that has no subject SADL resource.
@@ -136,14 +141,14 @@ interface ISadlOntologyHelper {
 				'Expected an instance of SADL resource. Was: ' + subject);
 			Preconditions.checkNotNull(subject.eResource, 'Subject does not contained in a resource.');
 			this.subject = subject as SadlResource;
-			ontModel = OntModelProvider.find(subject.eResource)
+			ontModel = OntModelProvider.find(subject.eResource);
 		}
 
 		private new() {
 			subject = MISSING_SUBJECT;
 			acceptor = ValidationAcceptor.NOOP;
 			grammarContextId = Optional.absent;
-			restriction = Optional.absent;
+			restrictions = newArrayList();
 		}
 
 		def setOntModel(OntModel ontModel) {
@@ -163,14 +168,15 @@ interface ISadlOntologyHelper {
 			return this;
 		}
 
-		def setRestriction(SadlResource restriction) {
-			this.restriction = Optional.fromNullable(restriction);
+		def addRestriction(SadlResource restriction) {
+			Preconditions.checkNotNull(restriction, 'restriction');
+			restrictions.add(restriction);
 			return this;
 		}
 
 		def Context build() {
 			Preconditions.checkNotNull(ontModel, 'ontModel');
-			return new ContextImpl(subject, ontModel, acceptor, grammarContextId, restriction);
+			return new ContextImpl(subject, ontModel, acceptor, grammarContextId, restrictions);
 		}
 
 	}
@@ -181,7 +187,7 @@ interface ISadlOntologyHelper {
 		val OntModel ontModel;
 		val ValidationAcceptor acceptor;
 		val Optional<String> grammarContextId;
-		val Optional<SadlResource> restriction;
+		val Iterable<SadlResource> restrictions;
 	}
 
 }

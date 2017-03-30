@@ -18,6 +18,7 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.google.common.collect.Iterables
 import org.junit.Test
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.*
@@ -39,8 +40,8 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 		assertNotEquals(MISSING_SUBJECT, context.subject);
 		assertTrue(context.grammarContextId.present);
 		assertEquals(SADLPROPERTYINITIALIZER_VALUE, context.grammarContextId.get);
-		assertTrue(context.restriction.present);
-		assertEquals('p1', declarationExtensions.getConcreteName(context.restriction.get));
+		assertEquals(1, Iterables.size(context.restrictions));
+		assertEquals('p1', declarationExtensions.getConcreteName(Iterables.get(context.restrictions, 0)));
 	}
 
 	@Test
@@ -51,7 +52,7 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 		assertEquals(MISSING_SUBJECT, context.subject);
 		assertTrue(context.grammarContextId.present);
 		assertEquals(SADLPRIMARYTYPEREFERENCE_TYPE, context.grammarContextId.get);
-		assertFalse(context.restriction.present);
+		assertTrue(Iterables.isEmpty(context.restrictions));
 	}
 
 	private def getDeclarationExtensions() {
