@@ -52,7 +52,9 @@ public class MetricsProcessor implements IMetricsProcessor {
 	public static String ERROR_MARKER_URI = SADL_METRICS_NS + "Error";
 	public static String WARNING_MARKER_URI = SADL_METRICS_NS + "Warning";
 	public static String INFO_MARKER_URI = SADL_METRICS_NS + "Information";
+	
 	public static String TYPE_CHECK_FAILURE_URI = SADL_METRICS_NS + "TypeCheckFailure";
+	public static String TYPE_CHECK_ERROR_URI = SADL_METRICS_NS + "TypeCheckError";
 	public static String UNCLASSIFIED_FAILURE_URI = SADL_METRICS_NS + "UnclassifiedFailure";
 	public static String RANGE_REDEFINITION_URI = SADL_METRICS_NS + "RangeRedefinition";
 	public static String DOMAIN_REDEFINITION_URI = SADL_METRICS_NS + "DomainRedefinition";
@@ -62,6 +64,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 	public static String NESTED_EQUATION_URI = SADL_METRICS_NS + "NestedEquation";
 	public static String INVALID_TABLE_FORMAT_URI = SADL_METRICS_NS + "InvalidTableFormat";
 	public static String DUPLICATE_NAME_URI = SADL_METRICS_NS + "DuplicateName";
+	public static String UNDEFINED_FUNCTION_URI = SADL_METRICS_NS + "UndefinedFunction";
 
 	public MetricsProcessor() {
 		super();
