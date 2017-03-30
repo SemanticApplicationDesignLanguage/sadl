@@ -111,4 +111,11 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 			assertProposalIsNot('Circle');
 	}
 
+	/** Property initializer value. */
+	@Test
+	def void checCA_14_PropertyInitializerValue_Positive() {
+		newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a Foo with p1 ''').
+			assertProposal('myFoo');
+	}
+
 }

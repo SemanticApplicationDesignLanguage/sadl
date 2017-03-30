@@ -33,6 +33,8 @@ import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import com.google.inject.Singleton
+import com.ge.research.sadl.processing.ValidationAcceptor
 
 /**
  * Singleton service converting a Eclipse-based content assist context into
@@ -40,6 +42,7 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
  * 
  * @author akos.kitta
  */
+@Singleton
 class OntologyContextProvider {
 
 	/**
@@ -47,6 +50,13 @@ class OntologyContextProvider {
 	 * May return with an absent when the transformation is not viable.
 	 */
 	def Optional<Context> getOntologyContext(ContentAssistContext it) {
+		return getOntologyContext(it, ValidationAcceptor.NOOP);
+	}
+
+	/**
+	 * Transforms the content assist context into a ontology helper context with the given acceptor.
+	 */
+	def Optional<Context> getOntologyContext(ContentAssistContext it, ValidationAcceptor acceptor) {
 
 		for (grammarElement : firstSetGrammarElements?.filter(Assignment)) {
 			val ruleName = GrammarUtil.containingParserRule(grammarElement).name;
@@ -62,14 +72,18 @@ class OntologyContextProvider {
 					val builder = new ContextBuilder(type.type);
 					builder.grammarContextId = key;
 					builder.addRestriction(initializer.property);
+					builder.validationAcceptor = acceptor;
 					return Optional.of(builder.build);
 				}
-			} else if (key == SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE || key == SADLPRIMARYTYPEREFERENCE_TYPE) {
+			} else if (key == SADLPRIMARYTYPEREFERENCE_TYPE) {
+				// SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE
+				// Handled via the keyword computer. Primitive types automatically imported.
 				val builder = createWithoutSubject(currentModel.ontModel);
-				builder.grammarContextId = SADLPRIMARYTYPEREFERENCE_TYPE;
+				builder.grammarContextId = key;
 				return Optional.of(builder.build);
 			} else {
-				System.err.println('''Unhandled case: «key» [Class: «clazz.name»]''')
+				// TODO: use a logger instead.
+				System.err.println('''Unhandled case: «key» [Class: «clazz.name»]''');
 			}
 
 		}

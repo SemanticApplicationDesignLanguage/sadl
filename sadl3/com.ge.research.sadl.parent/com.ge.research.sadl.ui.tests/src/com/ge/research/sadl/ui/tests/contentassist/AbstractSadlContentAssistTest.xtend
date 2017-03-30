@@ -64,14 +64,14 @@ import static org.junit.Assert.*
 @InjectWith(SADLUiInjectorProvider)
 class AbstractSadlContentAssistTest extends AbstractLinkingTest implements ResourceLoadHelper {
 
-	static val PROJECT_NAME = 'testProject';
+	static val PROJECT_NAME = 'testProject'
 
 	static val RESOURCES = ImmutableMap.builder.put('Bar.sadl', '''uri "http://barUri". Bar is a class.''').put(
 		'NotVisible.sadl', '''uri "http://notVisibleUri". NotVisible is a class.''').put('Shape.sadl', '''uri "http://shape". 
 			Shape is a class described by area with values of type float.''').put('Circle.sadl', '''uri "http://circle". import "http://shape". 
 			Circle is a type of Shape described by radius with values of type float.''').put('Rectangle.sadl', '''uri "http://rectangle". import "http://shape". 
 			Rectangle is a type of Shape, described by height with values of type float, described by width with values of type float.''').
-		build;
+		build
 
 	@Rule
 	public val name = new TestName();
@@ -103,8 +103,7 @@ class AbstractSadlContentAssistTest extends AbstractLinkingTest implements Resou
 	def static void cleanWorkspace() {
 		projects.forEach[delete(true, monitor)];
 		waitForBuild;
-		assertTrue('''Expected empty workspace. Workspace content was: «Arrays.toString(projects)».''',
-			projects.empty);
+		assertTrue('''Expected empty workspace. Workspace content was: «Arrays.toString(projects)».''', projects.empty);
 	}
 
 	@Before
@@ -129,14 +128,14 @@ class AbstractSadlContentAssistTest extends AbstractLinkingTest implements Resou
 		}
 		return resource;
 	}
-	
+
 	protected static def assertProposalIsNot(ContentAssistProcessorTestBuilder builder, String missing) {
-	try {
-		builder.assertProposal(missing)
-		Assert.fail('''The proposal '«missing»' expected to be not present. But it was.''');
-	} catch (AssertionError e) {
-		// Tricky, but this is the correct way since we have negated the assertion.	
-	}
+		try {
+			builder.assertProposal(missing)
+			Assert.fail('''The proposal '«missing»' expected to be not present. But it was.''');
+		} catch (AssertionError e) {
+			// Tricky, but this is the correct way since we have negated the assertion.	
+		}
 	}
 
 	protected def newBuilder(String content) {
@@ -150,9 +149,9 @@ class AbstractSadlContentAssistTest extends AbstractLinkingTest implements Resou
 		};
 		return builder.append(content) as SadlContentAssistProcessorTestBuilder;
 	}
-	
+
 	protected def <T> get(Class<T> clazz) {
-		return  injector.getInstance(clazz);
+		return injector.getInstance(clazz);
 	}
 
 	private def getResourceSet() {
@@ -207,4 +206,3 @@ class AbstractSadlContentAssistTest extends AbstractLinkingTest implements Resou
 	}
 
 }
-	

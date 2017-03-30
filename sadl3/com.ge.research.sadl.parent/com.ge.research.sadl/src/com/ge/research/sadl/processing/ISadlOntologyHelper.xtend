@@ -33,10 +33,11 @@ import org.eclipse.xtend.lib.annotations.Data
 @ImplementedBy(SadlOntologyHelper)
 interface ISadlOntologyHelper {
 	
+	/**
+	 * Checks the validity of the predicate SADL resource with the ontology context. 
+	 */
+	def void validate(Context context, SadlResource predicate);
 	
-	def void check(Context context, Iterable<SadlResource> resourcesToFilter)
-	
-
 	/**
 	 * Encapsulates the context for the ontology helper.
 	 */

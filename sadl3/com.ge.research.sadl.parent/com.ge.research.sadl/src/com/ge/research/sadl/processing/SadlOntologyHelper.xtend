@@ -17,8 +17,29 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
-import com.ge.research.sadl.processing.ISadlOntologyHelper
+import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.SadlResource
+import com.google.inject.Inject
+import com.google.inject.Singleton
 
+/**
+ * Default, singleton ontology helper service for SADL.
+ * 
+ * @author akos.kitta
+ */
+@Singleton
 class SadlOntologyHelper implements ISadlOntologyHelper {
-	
+
+	@Inject
+	extension DeclarationExtensions;
+
+	@Override
+	override validate(Context context, SadlResource predicate) {
+		val aa = predicate.concreteName
+		println(aa);
+		if (predicate.concreteName !== 'myFoo') {
+			context.acceptor.addError('', predicate);
+		}
+	}
+
 }

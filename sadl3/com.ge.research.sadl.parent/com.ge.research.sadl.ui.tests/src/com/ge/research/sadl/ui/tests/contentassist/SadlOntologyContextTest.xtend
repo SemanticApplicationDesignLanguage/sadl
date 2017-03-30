@@ -34,8 +34,11 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 
 	@Test
 	def void checkPropertyInitializerValueWithRestrictions() {
-		val context = newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a Foo with p1 ''').
-			ontologyContext;
+		val context = newBuilder('''
+		uri "http://myUri". 
+		Foo is a class described by p1 with values of type Foo. 
+		myFoo is a Foo with p1 ''').ontologyContext;
+
 		assertNotNull(context);
 		assertNotEquals(MISSING_SUBJECT, context.subject);
 		assertTrue(context.grammarContextId.present);
@@ -46,8 +49,11 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 
 	@Test
 	def void checkPropertyInitializerValue() {
-		val context = newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a ''').
-			ontologyContext;
+		val context = newBuilder('''
+		uri "http://myUri".
+		Foo is a class described by p1 with values of type Foo.
+		myFoo is a ''').ontologyContext;
+
 		assertNotNull(context);
 		assertEquals(MISSING_SUBJECT, context.subject);
 		assertTrue(context.grammarContextId.present);
