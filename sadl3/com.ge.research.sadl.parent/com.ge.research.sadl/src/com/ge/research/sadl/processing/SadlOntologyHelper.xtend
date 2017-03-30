@@ -17,42 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.diagnostics.Severity
+import com.ge.research.sadl.processing.ISadlOntologyHelper
 
-import static org.eclipse.xtext.diagnostics.Severity.*
-
-/**
- * Representation of a validation acceptor.
- * 
- * @author akos.kitta
- */
-interface ValidationAcceptor {
-	
-	/**
-	 * Shared NOOP validation acceptor.
-	 */
-	val NOOP = new ValidationAcceptor() {
-		
-		@Override
-		override add(String message, EObject context, Severity severity) {
-			// NOOP
-		}
-		
-	}
-	
-	def void addInfo(String message, EObject context) {
-		add(message, context, INFO)
-	}
-	
-	def void addError(String message, EObject context) {
-		add(message, context, ERROR)
-	}
-	
-	def void addWarning(String message, EObject context) {
-		add(message, context, WARNING)
-	}
-	
-	def void add(String message, EObject context, Severity severity);
+class SadlOntologyHelper implements ISadlOntologyHelper {
 	
 }

@@ -36,7 +36,7 @@ import static org.eclipse.xtext.validation.CheckType.NORMAL
 import static org.eclipse.xtext.validation.ValidationMessageAcceptor.INSIGNIFICANT_INDEX
 
 @FinalFieldsConstructor
-class ValidationAcceptorImpl implements ValidationAcceptor {
+class ValidationAcceptorImpl implements ValidationAcceptorExt {
 
 	static val ISSUE_CODE = 'processor.issue';
 	static val DIAGNOSTIC_MAPPING = ImmutableMap.of(ERROR, Diagnostic.ERROR, WARNING, Diagnostic.WARNING, INFO,
@@ -63,7 +63,8 @@ class ValidationAcceptorImpl implements ValidationAcceptor {
 		add(message, context, INFO, feature);
 	}
 
-	def int getErrorCount() {
+	@Override
+	override int getErrorCount() {
 		return ERROR.issueCount;
 	}
 
@@ -71,7 +72,8 @@ class ValidationAcceptorImpl implements ValidationAcceptor {
 		ERROR.reset;
 	}
 
-	def int getWarningCount() {
+	@Override
+	override int getWarningCount() {
 		return WARNING.issueCount;
 	}
 
@@ -79,7 +81,8 @@ class ValidationAcceptorImpl implements ValidationAcceptor {
 		WARNING.reset;
 	}
 
-	def int getInfoCount() {
+	@Override
+	override int getInfoCount() {
 		return INFO.issueCount;
 	}
 

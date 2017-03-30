@@ -158,10 +158,6 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		super.createProposals(context, acceptor)
 	}
 	
-	override void completeSadlPropertyInitializer_Value(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		System.out.println("completeSadlPropertyInitializer_Value called")
-	}
-	
 //	// this is without filtering out duplicates
 //	override void lookupCrossReference(CrossReference crossReference, ContentAssistContext context,
 //			ICompletionProposalAcceptor acceptor) {
