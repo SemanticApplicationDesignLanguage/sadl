@@ -22,3 +22,4 @@ sadl3/com.ge.research.sadl.parent/com.ge.research.jena/lib/reasoner-impl.jar
 *.jar
 sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-impl/tmp/graphviztest/testGraphVizVisualizerGraph.dot.svg
 *.svg
+sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ui/My Run SADL IDE (Eclipse) jdk 1.8 (debug).launch
