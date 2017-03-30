@@ -156,7 +156,11 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			}
 			else if (subj.isURIResource() && (subj.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
 					subj.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
-					subj.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#"))) {
+					subj.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) &&
+					(!publicUri.equals(SadlConstants.SADL_BASE_MODEL_URI) && 
+							!publicUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) && 
+							!publicUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI))) {
+				// only show implicit model concepts when graphing the implicit model
 				continue;
 			}
 			else if (obj.isURIResource() && (obj.asResource().equals(OWL.Class) || obj.asResource().equals(OWL.Ontology)
@@ -523,7 +527,8 @@ public class OntologyGraphGenerator extends GraphGenerator {
 						headUrl = getCurrentFileLink(key);
 						headTooltip = "\"" + key + "\"";
 //						System.out.println("found import for '" + publicUri + "': key = '" + key + "', value = '" + value + "'");
-						GraphSegment gs = new GraphSegment(publicUri, value, pred, prefix, configMgr);
+						GraphSegment gs = new GraphSegment(publicUri, (value != null ? value : key), pred, 
+																(prefix != null ? prefix : publicUri), configMgr);
 						gs.addTailAttribute("URL", getCurrentFileLink(publicUri));
 						String str = "\"" + publicUri + "\"";
 						gs.addTailAttribute("tooltip", str);
