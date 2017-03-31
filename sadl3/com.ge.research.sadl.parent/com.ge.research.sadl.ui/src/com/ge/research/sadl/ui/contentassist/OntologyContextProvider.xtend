@@ -29,7 +29,6 @@ import com.google.inject.Singleton
 import com.hp.hpl.jena.ontology.OntModel
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
-import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.slf4j.LoggerFactory
 
@@ -62,10 +61,8 @@ class OntologyContextProvider {
 	def Optional<Context> getOntologyContext(ContentAssistContext it, ValidationAcceptor acceptor) {
 
 		for (grammarElement : firstSetGrammarElements?.filter(Assignment)) {
-			val ruleName = GrammarUtil.containingParserRule(grammarElement).name;
-			val featureName = grammarElement.feature;
 			val clazz = currentModel?.eClass;
-			val key = '''«ruleName»_«featureName»'''.toString.toUpperCase;
+			val key = TO_STRING.apply(grammarElement);
 
 			if (key == SADLPROPERTYINITIALIZER_VALUE) {
 				val initializer = currentModel as SadlPropertyInitializer;

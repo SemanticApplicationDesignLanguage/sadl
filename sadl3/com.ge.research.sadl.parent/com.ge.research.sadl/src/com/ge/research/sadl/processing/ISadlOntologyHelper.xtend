@@ -24,9 +24,12 @@ import com.google.common.base.Preconditions
 import com.google.inject.ImplementedBy
 import com.hp.hpl.jena.ontology.OntModel
 import java.util.Collection
+import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.annotations.Data
-import org.eclipse.emf.ecore.EClass
+import org.eclipse.xtext.Assignment
+
+import static extension org.eclipse.xtext.GrammarUtil.containingParserRule
 
 /**
  * Reasoner independent implementation of an ontology helper for SADL. 
@@ -93,6 +96,13 @@ interface ISadlOntologyHelper {
 	 * Contains a couple of grammar context ID for SADL.
 	 */
 	static abstract class GrammarContextIds {
+		
+		/**
+		 * Function for transforming an assignment into a grammar context ID.
+		 */
+		public static val (Assignment)=>String TO_STRING = [
+			return '''«containingParserRule.name»_«feature»'''.toString.toUpperCase;
+		];
 
 		/**
 		 * {@code C is a class. myC is a <|>}
@@ -203,7 +213,7 @@ interface ISadlOntologyHelper {
 			this.grammarContextId = Optional.fromNullable(grammarContextId);
 			return this;
 		}
-		
+
 		def setContextClass(EClass contextClass) {
 			this.contextClass = Optional.fromNullable(contextClass);
 			return this;

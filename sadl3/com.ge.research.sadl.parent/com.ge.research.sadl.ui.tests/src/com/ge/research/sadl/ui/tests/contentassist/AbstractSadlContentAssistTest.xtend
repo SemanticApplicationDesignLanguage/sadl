@@ -62,7 +62,7 @@ import static org.junit.Assert.*
  */
 @RunWith(XtextRunner)
 @InjectWith(SADLUiInjectorProvider)
-class AbstractSadlContentAssistTest extends AbstractLinkingTest implements ResourceLoadHelper {
+abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest implements ResourceLoadHelper {
 
 	static val PROJECT_NAME = 'testProject'
 
