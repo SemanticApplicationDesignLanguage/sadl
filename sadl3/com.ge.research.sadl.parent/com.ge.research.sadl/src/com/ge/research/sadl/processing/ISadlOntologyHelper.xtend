@@ -26,18 +26,19 @@ import com.hp.hpl.jena.ontology.OntModel
 import java.util.Collection
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.annotations.Data
+import org.eclipse.emf.ecore.EClass
 
 /**
  * Reasoner independent implementation of an ontology helper for SADL. 
  */
 @ImplementedBy(SadlOntologyHelper)
 interface ISadlOntologyHelper {
-	
+
 	/**
-	 * Checks the validity of the predicate SADL resource with the ontology context. 
+	 * Checks the validity of the candidate SADL resource with the ontology context. 
 	 */
-	def void validate(Context context, SadlResource predicate);
-	
+	def void validate(Context context, SadlResource candidate);
+
 	/**
 	 * Encapsulates the context for the ontology helper.
 	 */
@@ -68,6 +69,18 @@ interface ISadlOntologyHelper {
 		 * Grammar context ID pattern. <code>${CONTAINING_PARSER_RULE_NAME}_${FEATURE_NAME}</code>
 		 */
 		def Optional<String> getGrammarContextId();
+
+		/**
+		 * Returns with the EClass associated with the context. In some cases, when the 
+		 * grammar context ID is insufficient, we need to check the class of the current 
+		 * model element.
+		 * 
+		 * <p>
+		 * For instance; when having {@code Test:} and {@code Test: width of} the the grammar context
+		 * ID is {@code PRIMARYEXPRESSION_VALUE} in both cases, but the EClass is a test statement in 
+		 * the first case and property of subject in the second case.
+		 */
+		def Optional<EClass> getContextClass();
 
 		/**
 		 * Returns with the restrictions for the context.
@@ -106,6 +119,27 @@ interface ISadlOntologyHelper {
 		 */
 		public static val SADLPROPERTYINITIALIZER_VALUE = 'SADLPROPERTYINITIALIZER_VALUE';
 
+		/**
+		 * A subset of grammar context IDs that requires the ontology helper.
+		 */
+		public static val ONTOLOGY_DEPENDENT_CONTEXT_IDS = #{
+			SADLPROPERTYINITIALIZER_VALUE
+		}
+
+		/**
+		 * A subset of grammar context IDs that does *not* require the underlying ontology,
+		 * hence traversing the AST or accessing the Xtext index is sufficient.
+		 */
+		public static val ONTOLOGY_INDEPENDENT_CONTEXT_IDS = #{
+			SADLPRIMARYTYPEREFERENCE_TYPE,
+			SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE,
+			SADLPROPERTYINITIALIZER_PROPERTY,
+			SADLSTATEMENT_SUPERELEMENT,
+			PRIMARYEXPRESSION_VALUE,
+			SADLPROPERTYCONDITION_PROPERTY,
+			SADLRESOURCE_NAME
+		}
+
 		private new() {
 			/* NOOP */
 		}
@@ -124,6 +158,7 @@ interface ISadlOntologyHelper {
 		var OntModel ontModel;
 		var ValidationAcceptor acceptor;
 		var Optional<String> grammarContextId;
+		var Optional<EClass> contextClass;
 		var Collection<SadlResource> restrictions;
 
 		/**
@@ -168,6 +203,11 @@ interface ISadlOntologyHelper {
 			this.grammarContextId = Optional.fromNullable(grammarContextId);
 			return this;
 		}
+		
+		def setContextClass(EClass contextClass) {
+			this.contextClass = Optional.fromNullable(contextClass);
+			return this;
+		}
 
 		def addRestriction(SadlResource restriction) {
 			Preconditions.checkNotNull(restriction, 'restriction');
@@ -177,7 +217,7 @@ interface ISadlOntologyHelper {
 
 		def Context build() {
 			Preconditions.checkNotNull(ontModel, 'ontModel');
-			return new ContextImpl(subject, ontModel, acceptor, grammarContextId, restrictions);
+			return new ContextImpl(subject, ontModel, acceptor, grammarContextId, contextClass, restrictions);
 		}
 
 	}
@@ -188,6 +228,7 @@ interface ISadlOntologyHelper {
 		val OntModel ontModel;
 		val ValidationAcceptor acceptor;
 		val Optional<String> grammarContextId;
+		val Optional<EClass> contextClass;
 		val Iterable<SadlResource> restrictions;
 	}
 

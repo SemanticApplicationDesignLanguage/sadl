@@ -80,7 +80,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	/** Super type element. */
 	@Test
 	def void checkCA_09_SuperElment_Negative() {
-		newBuilder('''uri "http://myUri". Person is a class. {Man, Woman} are types of ''').assertProposal('Man');
+		newBuilder('''uri "http://myUri". Person is a class. {Man, Woman} are types of ''').assertProposalIsNot('Man');
 	}
 
 	/** Subject of property in test statement. */

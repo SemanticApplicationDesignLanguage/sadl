@@ -34,11 +34,10 @@ class SadlOntologyHelper implements ISadlOntologyHelper {
 	extension DeclarationExtensions;
 
 	@Override
-	override validate(Context context, SadlResource predicate) {
-		val aa = predicate.concreteName
-		println(aa);
-		if (predicate.concreteName !== 'myFoo') {
-			context.acceptor.addError('', predicate);
+	override validate(Context context, SadlResource candidate) {		
+		val name = candidate.concreteName
+		if (name !== 'myFoo') {
+			context.acceptor.addError('', candidate);
 		}
 	}
 

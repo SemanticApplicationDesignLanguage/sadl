@@ -29,11 +29,9 @@ import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
-import com.ge.research.sadl.sADL.SadlHasValueCondition
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlProperty
-import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.utils.ImportHelper
@@ -66,8 +64,6 @@ import static extension org.eclipse.xtext.EcoreUtil2.*
 @Singleton
 class ProposalProviderFilterProvider {
 
-	static val USE_ONTOLOGY_HELPER_CONTEXT_IDS = #{ SADLPROPERTYINITIALIZER_VALUE };
-
 	@Inject
 	ImportHelper importHelper;
 
@@ -79,10 +75,10 @@ class ProposalProviderFilterProvider {
 
 	@Inject
 	Provider<DeclarationExtensions> extensionProvider;
-	
+
 	@Inject
 	OntologyContextProvider ontologyContextProvider;
-	
+
 	@Inject
 	ISadlOntologyHelper ontologyHelper;
 
@@ -90,7 +86,7 @@ class ProposalProviderFilterProvider {
 		if (context === null || context.currentModel === null) {
 			return Predicates.alwaysFalse;
 		}
-		
+
 		val acceptor = new ProposalProviderValidationAcceptor;
 		val ontologyContext = ontologyContextProvider.getOntologyContext(context, acceptor).orNull;
 		if (ontologyContext === null) {
@@ -98,107 +94,45 @@ class ProposalProviderFilterProvider {
 		}
 
 		val grammarContextId = ontologyContext.grammarContextId.orNull;
-		if (grammarContextId === null) {
-			return Predicates.alwaysFalse;
-		}
+		val contextClass = ontologyContext.contextClass.orNull;
 		
-		if (USE_ONTOLOGY_HELPER_CONTEXT_IDS.contains(grammarContextId)) {
+		if (ONTOLOGY_DEPENDENT_CONTEXT_IDS.contains(grammarContextId)) {
 			return [
 				if (SADL_RESOURCE == EClass) {
 					ontologyHelper.validate(ontologyContext, EObjectOrProxy as SadlResource);
-					return acceptor.apply(it);					
+					return acceptor.apply(it);
 				}
 				return false;
 			];
 		}
-		
+
 		val it = context.currentModel;
-		return switch (ontologyContext.grammarContextId) {
-			case SADLPRIMARYTYPEREFERENCE_TYPE:
+		return switch (grammarContextId) {
+			case grammarContextId == SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE ||
+				grammarContextId == SADLPRIMARYTYPEREFERENCE_TYPE:
 				createPrimaryTypeRefFilter
 			case SADLPROPERTYINITIALIZER_PROPERTY:
 				createPropertyInitializerFilter
 			case SADLSTATEMENT_SUPERELEMENT:
-				Predicates.and(createPrimaryTypeRefFilter, createSelfClassOrPropertyFilter)
+				createPrimaryTypeRefFilter.and(createNotSelfClassOrPropertyFilter)
+			case PRIMARYEXPRESSION_VALUE:
+				switch (contextClass) {
+					case TEST_STATEMENT:
+						createPropertyFilter
+					case PROP_OF_SUBJECT:
+						createSubjectOfPropertyFilter
+					default:
+						Predicates.alwaysFalse
+				}
 			default:
 				Predicates.alwaysFalse
 		};
+	}
+	
+	private def <T> Predicate<T> and(Predicate<? super T> left, Predicate<? super T> right) {
+		return Predicates.and(left, right);
+	}
 
-		
-		
-		
-//		val grammarElements = context.firstSetGrammarElements;
-//		if (grammarElements.nullOrEmpty) {
-//			return Predicates.alwaysTrue;
-//		}
-//
-//		val predicates = <Predicate<IEObjectDescription>>newArrayList();
-//		for (grammarElement : grammarElements.filter(Assignment)) {
-//			// 'x is a' => for types from imported resources.						
-//			val ruleName = GrammarUtil.containingParserRule(grammarElement).name;
-//			val featureName = grammarElement.feature;
-//			val currentModel = context.currentModel;
-//			val clazz = currentModel?.eClass;
-//			val key = '''«ruleName»_«featureName»'''.toString.toUpperCase;
-//			if (key == 'SADLPRIMARYTYPEREFERENCE_TYPE') {
-//				// 'x is a' => for all declared types from current model and the imported (including the transitive) ones.
-//				predicates.add(currentModel.createPrimaryTypeRefFilter);
-//			} else if (clazz === SADL_INSTANCE && key == 'SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE') {
-//				// 'x is a' => for primitive types.
-//				// XXX: Handled via the keyword computer. Primitive types automatically imported.
-//			} else if (clazz === SADL_PROPERTY_INITIALIZER && key == 'SADLPROPERTYINITIALIZER_PROPERTY') {
-//				// 'x is a Rectangle with' => for properties available on type Rectangle.
-//				predicates.add(currentModel.createPropertyInitializerFilter)
-//			} else if (clazz === SADL_CLASS_OR_PROPERTY_DECLARATION && key == 'SADLPRIMARYTYPEREFERENCE_TYPE') {
-//				// 'x is a type of' => all classes, properties and datatypes.
-//			} else if (clazz === SADL_CLASS_OR_PROPERTY_DECLARATION && key == 'SADLSTATEMENT_SUPERELEMENT') {
-//				// 'Person is a class. {Man, Woman} are types of'
-//				// => for super elements, imported types should be there except the defined types: Man, Woman.
-//				val predicate = Predicates.and(currentModel.createPrimaryTypeRefFilter, // First get the available types.
-//				currentModel.createSelfClassOrPropertyFilter); // Then filter out those which we are defining right now.
-//				predicates.add(predicate);
-//			} else if (clazz === SADL_RANGE_RESTRICTION) {
-//				// 'Person is a class described by birth with a single value of type '
-//				// => allow all primitive and complex, visible types.
-//				predicates.add(Predicates.alwaysTrue);
-//			} else if (clazz === TEST_STATEMENT && key == 'PRIMARYEXPRESSION_VALUE') {
-//				// Test: => properties are allowed
-//				predicates.add(currentModel.createPropertyFilter);
-//			} else if (clazz === PROP_OF_SUBJECT && key == 'PRIMARYEXPRESSION_VALUE') {
-//				// Test: width of => Only types which have property width is allowed here.				
-//				predicates.add(currentModel.createSubjectOfPropertyFilter);
-//			} else if (clazz === SADL_NECESSARY_AND_SUFFICIENT && key == 'SADLPROPERTYCONDITION_PROPERTY') {
-//				// A Person is a Man only if => only properties are available.
-//				predicates.add(currentModel.createPropertyFilter);
-//			} else if (clazz === SADL_HAS_VALUE_CONDITION && key == 'SADLRESOURCE_NAME') {
-//				// A Person is a Man only if gender always has value => instances of Gender type.
-//				// XXX: filter CA properly based on the OWL model.
-//				predicates.add(currentModel.createExplicitValueFilter); 
-//			} else {
-//				// println('''Unhandled case with class: «clazz» and key: «key»''');
-//			}
-//		}
-//		return if(predicates.nullOrEmpty) Predicates.alwaysFalse else Predicates.or(predicates);
-	}
-	
-	private def Predicate<IEObjectDescription> createExplicitValueFilter(EObject currentModel) {
-		if (currentModel instanceof SadlHasValueCondition && currentModel.eContainer instanceof SadlPropertyCondition) {
-			val property = (currentModel.eContainer as SadlPropertyCondition).property
-			if (property instanceof SadlResource) {
-				val Predicate<IEObjectDescription> predicate = [
-						if (EClass === SADL_RESOURCE) {
-							val candidate = EObjectOrProxy as SadlResource;
-							return isSadlResourceInDomainOfProperty(property, candidate);
-						}
-						return false;
-					];
-					return predicate;
-			}
-			
-		}
-		return Predicates.alwaysFalse;
-	}
-	
 	private def Predicate<IEObjectDescription> createSubjectOfPropertyFilter(EObject currentModel) {
 		if (currentModel instanceof PropOfSubject) {
 			val left = currentModel.left;
@@ -219,7 +153,7 @@ class ProposalProviderFilterProvider {
 		}
 		return Predicates.alwaysFalse;
 	}
-	
+
 	private def createPropertyFilter(EObject currentModel) {
 		val Predicate<IEObjectDescription> predicate = [
 			if (EClass === SADL_RESOURCE) {
@@ -280,7 +214,7 @@ class ProposalProviderFilterProvider {
 		return false
 	}
 
-	private def createSelfClassOrPropertyFilter(EObject currentModel) {
+	private def createNotSelfClassOrPropertyFilter(EObject currentModel) {
 		if (currentModel instanceof SadlClassOrPropertyDeclaration) {
 			val filteredUris = currentModel.classOrProperty.map[EcoreUtil.getURI(it)];
 			val Predicate<IEObjectDescription> predicate = [

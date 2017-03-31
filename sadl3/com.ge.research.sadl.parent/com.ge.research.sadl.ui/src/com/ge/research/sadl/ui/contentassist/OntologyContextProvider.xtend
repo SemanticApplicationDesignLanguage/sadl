@@ -20,10 +20,12 @@ package com.ge.research.sadl.ui.contentassist
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context
 import com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder
 import com.ge.research.sadl.processing.OntModelProvider
+import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.google.common.base.Optional
+import com.google.inject.Singleton
 import com.hp.hpl.jena.ontology.OntModel
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
@@ -32,9 +34,6 @@ import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
-import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import com.google.inject.Singleton
-import com.ge.research.sadl.processing.ValidationAcceptor
 
 /**
  * Singleton service converting a Eclipse-based content assist context into
@@ -64,22 +63,24 @@ class OntologyContextProvider {
 			val clazz = currentModel?.eClass;
 			val key = '''«ruleName»_«featureName»'''.toString.toUpperCase;
 
-			if (clazz == SADL_PROPERTY_INITIALIZER && key == SADLPROPERTYINITIALIZER_VALUE) {
+			if (key == SADLPROPERTYINITIALIZER_VALUE) {
 				val initializer = currentModel as SadlPropertyInitializer;
 				val instance = initializer.eContainer as SadlInstance;
 				val type = instance.type;
 				if (type instanceof SadlSimpleTypeReference) {
-					val builder = new ContextBuilder(type.type);
-					builder.grammarContextId = key;
-					builder.addRestriction(initializer.property);
-					builder.validationAcceptor = acceptor;
+					val builder = new ContextBuilder(type.type) => [
+						grammarContextId = key;
+						addRestriction(initializer.property);
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
 					return Optional.of(builder.build);
 				}
-			} else if (key == SADLPRIMARYTYPEREFERENCE_TYPE) {
-				// SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE
-				// Handled via the keyword computer. Primitive types automatically imported.
-				val builder = createWithoutSubject(currentModel.ontModel);
-				builder.grammarContextId = key;
+			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
+				val builder = createWithoutSubject(currentModel.ontModel) => [
+					grammarContextId = key;
+					contextClass = clazz;
+				];
 				return Optional.of(builder.build);
 			} else {
 				// TODO: use a logger instead.
