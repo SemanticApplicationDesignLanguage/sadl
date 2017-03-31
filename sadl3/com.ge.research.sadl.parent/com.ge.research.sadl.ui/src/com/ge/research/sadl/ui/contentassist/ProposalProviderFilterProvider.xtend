@@ -90,8 +90,13 @@ class ProposalProviderFilterProvider {
 				createPrimaryTypeRefFilter
 			case SADLPROPERTYINITIALIZER_PROPERTY:
 				createPropertyInitializerFilter
-			case SADLSTATEMENT_SUPERELEMENT:
-				createPrimaryTypeRefFilter.and(createNotSelfClassOrPropertyFilter)
+			case SADLSTATEMENT_SUPERELEMENT: 
+				switch (contextClass) {
+					case SADL_CLASS_OR_PROPERTY_DECLARATION:
+						createPrimaryTypeRefFilter.and(createNotSelfClassOrPropertyFilter)
+					default:
+						createPrimaryTypeRefFilter
+				}
 			case PRIMARYEXPRESSION_VALUE:
 				switch (contextClass) {
 					case TEST_STATEMENT:

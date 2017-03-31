@@ -117,5 +117,19 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a Foo with p1 ''').
 			assertProposal('myFoo');
 	}
+	
+	/** Super element with `type of`. */
+	@Test
+	def void checCA_15_SuperElement_IsATypeOf_Positive() {
+		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').
+			assertProposal('Foo');
+	}
+	
+	/** Super element with `type of`. */
+	@Test
+	def void checCA_16_SuperElement_IsATypeOf_Negative() {
+		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').
+			assertProposalIsNot('Bar');
+	}
 
 }

@@ -46,7 +46,6 @@ class OntologyContextProvider {
 
 	private static val LOGGER = LoggerFactory.getLogger(OntologyContextProvider);
 
-
 	/**
 	 * Transforms the content assist context into a ontology helper context and returns with it.
 	 * May return with an absent when the transformation is not viable.
