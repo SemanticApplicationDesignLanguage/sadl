@@ -31,6 +31,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
@@ -43,6 +44,9 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
  */
 @Singleton
 class OntologyContextProvider {
+
+	private static val LOGGER = LoggerFactory.getLogger(OntologyContextProvider);
+
 
 	/**
 	 * Transforms the content assist context into a ontology helper context and returns with it.
@@ -83,8 +87,9 @@ class OntologyContextProvider {
 				];
 				return Optional.of(builder.build);
 			} else {
-				// TODO: use a logger instead.
-				System.err.println('''Unhandled case: «key» [Class: «clazz.name»]''');
+				if (LOGGER.debugEnabled) {
+					LOGGER.warn('''Unhandled case: «key» [Class: «clazz.name»]''');
+				}
 			}
 
 		}

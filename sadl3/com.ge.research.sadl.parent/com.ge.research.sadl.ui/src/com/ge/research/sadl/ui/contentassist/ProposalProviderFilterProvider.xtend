@@ -17,15 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.contentassist
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
-import com.ge.research.sadl.jena.JenaBasedSadlModelValidator
-import com.ge.research.sadl.model.DeclarationExtensions
-import com.ge.research.sadl.model.OntConceptType
-import com.ge.research.sadl.processing.CompositeModelProcessor
-import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.processing.ISadlOntologyHelper
-import com.ge.research.sadl.processing.OntModelProvider
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -39,17 +31,11 @@ import com.google.common.base.Predicate
 import com.google.common.base.Predicates
 import com.google.common.collect.Iterables
 import com.google.inject.Inject
-import com.google.inject.Provider
 import com.google.inject.Singleton
-import com.hp.hpl.jena.ontology.OntResource
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
-import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
-import org.eclipse.xtext.util.IAcceptor
-import org.eclipse.xtext.validation.Issue
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
@@ -66,15 +52,6 @@ class ProposalProviderFilterProvider {
 
 	@Inject
 	ImportHelper importHelper;
-
-	@Inject
-	IModelProcessorProvider processorProvider;
-
-	@Inject
-	DeclarationExtensions declarationExtensions;
-
-	@Inject
-	Provider<DeclarationExtensions> extensionProvider;
 
 	@Inject
 	OntologyContextProvider ontologyContextProvider;
@@ -140,11 +117,7 @@ class ProposalProviderFilterProvider {
 				val resource = left.name;
 				if (resource !== null) {
 					val Predicate<IEObjectDescription> predicate = [
-						if (EClass === SADL_RESOURCE) {
-							val candidate = EObjectOrProxy as SadlResource;
-							return isSadlResourceInDomainOfProperty(candidate, resource);
-						}
-						return false;
+						return EClass === SADL_RESOURCE;
 					];
 					return predicate;
 				}
@@ -173,9 +146,7 @@ class ProposalProviderFilterProvider {
 				val Predicate<IEObjectDescription> predicate = [
 					if (EClass === SADL_RESOURCE) {
 						val candidate = EObjectOrProxy as SadlResource;
-						if (candidate.eContainer instanceof SadlProperty) {
-							return isSadlResourceInDomainOfProperty(type.type, candidate);
-						}
+						return candidate.eContainer instanceof SadlProperty;
 					}
 					return false;
 				];
@@ -183,35 +154,6 @@ class ProposalProviderFilterProvider {
 			}
 		}
 		return Predicates.alwaysFalse;
-	}
-
-	private def boolean isSadlResourceInDomainOfProperty(SadlResource currentModel, SadlResource candidate) {
-		// TODO: akitta the setup for the current model should be moved outside of this block.
-		val ontologyModel = OntModelProvider.find(currentModel.eResource)
-		if (ontologyModel !== null && candidate !== null) {
-			val currentModelConceptUri = declarationExtensions.getConceptUri(candidate);
-			val proposedConceptUri = declarationExtensions.getConceptUri(currentModel);
-			val property = ontologyModel.getProperty(proposedConceptUri);
-			if (property !== null) {
-				val srtype = declarationExtensions.getOntConceptType(candidate);
-				var OntResource ontrsrc;
-				if (srtype.equals(OntConceptType.CLASS)) {
-					ontrsrc = ontologyModel.getOntClass(currentModelConceptUri);
-				} else if (srtype.equals(OntConceptType.INSTANCE)) {
-					ontrsrc = ontologyModel.getIndividual(currentModelConceptUri);
-				} else if (srtype.equals(OntConceptType.VARIABLE)) {
-					// TBD
-				} else if (srtype.equals(OntConceptType.DATATYPE_PROPERTY)) {
-					ontrsrc = ontologyModel.getDatatypeProperty(currentModelConceptUri);
-				}
-				val pair = createValidator(currentModel.eResource);
-				val validator = pair.key;
-				val issues = pair.value;
-				validator.checkPropertyDomain(ontologyModel, candidate, currentModel, true);
-				return null !== ontrsrc && issues.filter[severity !== Severity.ERROR].empty;
-			}
-		}
-		return false
 	}
 
 	private def createNotSelfClassOrPropertyFilter(EObject currentModel) {
@@ -245,25 +187,6 @@ class ProposalProviderFilterProvider {
 			return predicate;
 		}
 		return Predicates.alwaysFalse;
-	}
-
-	private def createValidator(Resource resource) {
-		val issues = <Issue>newArrayList();
-		val acceptor = new ValidationAcceptorImpl([issues.add(it)] as IAcceptor<Issue>);
-		val model = OntModelProvider.find(resource);
-		val ^extension = extensionProvider.get;
-		val processor = resource.processor;
-		return new JenaBasedSadlModelValidator(acceptor, model, ^extension, processor, null) -> issues;
-	}
-
-	private def getProcessor(Resource resource) {
-		val processor = processorProvider.getProcessor(resource);
-		if (processor instanceof JenaBasedSadlModelProcessor) {
-			return processor as JenaBasedSadlModelProcessor;
-		} else if (processor instanceof CompositeModelProcessor) {
-			return processor.processors.filter(JenaBasedSadlModelProcessor).head;
-		}
-		throw new IllegalStateException('''Cannot get Jena based model processor for resource: «resource».''');
 	}
 
 }
