@@ -33,6 +33,7 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
 
 import static extension java.lang.reflect.Modifier.*
 import org.junit.AfterClass
+import com.google.common.collect.Sets
 
 /**
  * Test for checking that the {@link ISadlOntologyHelper.GrammarContextIds} are in sync with the actual
@@ -62,6 +63,8 @@ class GrammarContextIDsTest extends Assert {
 		];
 		assertEquals(grammarContextIds.size,
 			ONTOLOGY_DEPENDENT_CONTEXT_IDS.size + ONTOLOGY_INDEPENDENT_CONTEXT_IDS.size);
+			
+		assertTrue(Sets.intersection(ONTOLOGY_DEPENDENT_CONTEXT_IDS, ONTOLOGY_INDEPENDENT_CONTEXT_IDS).empty);
 
 		IDS_TO_TEST.addAll(grammarContextIds.map[name]);
 	}
