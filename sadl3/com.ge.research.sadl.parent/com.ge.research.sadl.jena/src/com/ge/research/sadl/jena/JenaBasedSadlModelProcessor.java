@@ -768,6 +768,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			e.printStackTrace();
 		}
 
+		String impPropDW = context.getPreferenceValues().getPreference(SadlPreferences.USE_IMPLIED_PROPERTIES_IN_TRANSLATION);
+		if (impPropDW != null) {
+			includeImpliedPropertiesInTranslation = Boolean.parseBoolean(impPropDW);
+		}
+
 		setTypeCheckingWarningsOnly(true);
 		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.TYPE_CHECKING_WARNING_ONLY);
 		if (typechecking != null) {
