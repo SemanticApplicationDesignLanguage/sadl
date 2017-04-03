@@ -89,5 +89,4 @@ public enum OutputStreamStrategy {
 		System.setOut(getOut());
 		System.setErr(getErr());
 	}
-
 }

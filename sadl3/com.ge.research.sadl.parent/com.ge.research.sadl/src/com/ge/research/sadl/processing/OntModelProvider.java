@@ -1,4 +1,4 @@
-package com.ge.research.sadl.jena;
+package com.ge.research.sadl.processing;
 
 import java.util.ArrayList;
 import java.util.HashMap;

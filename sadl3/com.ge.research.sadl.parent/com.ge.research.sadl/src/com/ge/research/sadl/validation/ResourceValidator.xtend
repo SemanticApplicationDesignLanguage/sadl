@@ -19,7 +19,7 @@ package com.ge.research.sadl.validation
 
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.IModelProcessorProvider
-import com.ge.research.sadl.processing.ValidationAcceptor
+import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
@@ -49,7 +49,7 @@ class ResourceValidator extends ResourceValidatorImpl {
 	override protected validate(Resource resource, CheckMode mode, CancelIndicator monitor, IAcceptor<Issue> acceptor) {
 		super.validate(resource, mode, monitor, acceptor)
 		val processor = processorProvider.getProcessor(resource)
-		processor.onValidate(resource, new ValidationAcceptor(acceptor), mode, new ProcessorContext(monitor,  preferenceProvider.getPreferenceValues(resource)))
+		processor.onValidate(resource, new ValidationAcceptorImpl(acceptor), mode, new ProcessorContext(monitor,  preferenceProvider.getPreferenceValues(resource)))
 	}
 	
 }

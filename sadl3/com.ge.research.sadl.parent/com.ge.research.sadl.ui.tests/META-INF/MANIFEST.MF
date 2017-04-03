@@ -19,10 +19,4 @@ Require-Bundle: com.ge.research.sadl.ui,
  com.ge.research.sadl.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.ui.tests;x-internal=true
-Import-Package: org.hamcrest.core,
- org.junit;version="4.5.0",
- org.junit.runners.model;version="4.5.0",
- org.junit.runner;version="4.5.0",
- org.junit.runners;version="4.5.0",
- org.junit.runner.manipulation;version="4.5.0",
- org.junit.runner.notification;version="4.5.0"
+Import-Package: org.hamcrest.core

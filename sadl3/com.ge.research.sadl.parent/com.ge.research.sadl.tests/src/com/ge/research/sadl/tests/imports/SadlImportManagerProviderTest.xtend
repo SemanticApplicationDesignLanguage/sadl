@@ -20,7 +20,7 @@ package com.ge.research.sadl.tests.imports
 import com.ge.research.sadl.jena.JenaBasedSadlImportProcessor
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import com.ge.research.sadl.processing.ValidationAcceptor
+import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
@@ -35,19 +35,19 @@ import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.xtext.validation.CheckMode
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -182,7 +182,7 @@ class SadlImportManagerProviderTest {
 		validationTestHelper.assertNoErrors(model)
 		val smprocessor = smProcessorProvider.get
 		val List<Issue> issues= newArrayList
-		smprocessor.onValidate(model.eResource, new ValidationAcceptor([issues += it]), CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+		smprocessor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]), CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(smprocessor.theJenaModel, issues)
 		return model.eResource
 	}
@@ -192,7 +192,7 @@ class SadlImportManagerProviderTest {
 		val xtextIssues = validationTestHelper.validate(model);
 		val processor = smProcessorProvider.get
 		val List<Issue> issues= new ArrayList(xtextIssues);
-		processor.onValidate(model.eResource, new ValidationAcceptor([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
 		assertions.apply(processor.theJenaModel, issues)
 		return model.eResource
 	}

@@ -22,6 +22,7 @@ package com.ge.research.sadl.ui.contentassist
 
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.Declaration
@@ -35,6 +36,7 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.google.common.base.Predicate
 import com.google.inject.Inject
+import com.hp.hpl.jena.ontology.OntResource
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
@@ -50,11 +52,6 @@ import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
-import com.ge.research.sadl.jena.OntModelProvider
-import com.hp.hpl.jena.vocabulary.RDFS
-import com.hp.hpl.jena.rdf.model.RDFNode
-import com.hp.hpl.jena.ontology.OntClass
-import com.hp.hpl.jena.ontology.OntResource
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -62,6 +59,7 @@ import com.hp.hpl.jena.ontology.OntResource
  */
 class SADLProposalProvider extends AbstractSADLProposalProvider {
 	@Inject protected DeclarationExtensions declarationExtensions
+	@Inject extension ProposalProviderFilterProvider;
 	
 	protected List<OntConceptType> typeRestrictions
 	protected List<String> excludedNamespaces
@@ -158,10 +156,6 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		if (excludedNamespaces != null) excludedNamespaces.clear
 		if (typeRestrictions != null) typeRestrictions.clear
 		super.createProposals(context, acceptor)
-	}
-	
-	override void completeSadlPropertyInitializer_Value(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		System.out.println("completeSadlPropertyInitializer_Value called")
 	}
 	
 //	// this is without filtering out duplicates
@@ -330,7 +324,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					if (eliminatedNames.contains(nm)) {
 						return false;
 					}
-					return true;
+					return  context.crossReferenceFilter.apply(input);
 				}
 			})
 	}

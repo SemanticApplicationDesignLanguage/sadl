@@ -369,6 +369,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
     }
 	
+	public JenaBasedSadlModelValidator(ValidationAcceptor issueAcceptor, OntModel theJenaModel, JenaBasedSadlModelProcessor processor) {
+		this(issueAcceptor, theJenaModel, new DeclarationExtensions(), processor, null);
+	}
+	
 	public JenaBasedSadlModelValidator(ValidationAcceptor issueAcceptor, OntModel theJenaModel, DeclarationExtensions declarationExtensions, JenaBasedSadlModelProcessor processor, IMetricsProcessor metricsProcessor){
 		this.issueAcceptor = issueAcceptor;
 		this.theJenaModel = theJenaModel;

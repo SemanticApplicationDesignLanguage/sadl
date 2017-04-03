@@ -20,6 +20,7 @@
  */
 package com.ge.research.sadl.ui
 
+import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
@@ -33,6 +34,7 @@ import com.google.inject.name.Names
 import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
+import org.eclipse.xtext.ui.editor.contentassist.AbstractJavaBasedContentProposalProvider.ReferenceProposalCreator
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
@@ -80,6 +82,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	override Class<? extends CopyQualifiedNameService> bindCopyQualifiedNameService() {
 		return SadlCopyQualifiedNameService;
+	}
+	
+	def Class<? extends ReferenceProposalCreator> bindReferenceProposalCreator() {
+		return SadlReferenceProposalCreator;
 	}
 	
 	def void configureIPreferenceStoreAccess(Binder binder) {
