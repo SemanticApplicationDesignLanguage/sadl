@@ -110,6 +110,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 							 fnm.toLowerCase().endsWith(".ntriple") ||
 							 fnm.toLowerCase().endsWith(".nt")) && 
 							!fnm.equals("SadlImplicitModel.sadl") &&
+							!fnm.equals("SadlBuiltinFunctions.sadl") && 
 							!imports.contains(input.name.toString)
 						) {
 							return true;
