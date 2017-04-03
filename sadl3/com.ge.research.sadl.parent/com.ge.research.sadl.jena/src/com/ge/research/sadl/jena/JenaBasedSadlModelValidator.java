@@ -24,7 +24,10 @@ import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
+import com.ge.research.sadl.processing.SadlOntologyHelper;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
+import com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -901,7 +904,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getType((PropOfSubject)expression);
 		}
 		else if(expression instanceof SubjHasProp){
-			return getType(((SubjHasProp)expression).getLeft());
+			if (((SubjHasProp)expression).getLeft() instanceof Declaration) {
+				return getType(((SubjHasProp)expression).getLeft());				
+			}
+			// at least under some circumstances, the type of SubjHasPro is the type of the root (if there is a chain) property range
+			if (((SubjHasProp)expression).getProp() instanceof SadlResource) {
+				SadlResource prop = ((SubjHasProp)expression).getProp();
+				OntConceptType ptype = declarationExtensions.getOntConceptType(prop);
+				return getType(prop);
+			}
 		}
 		else if (expression instanceof CommaSeparatedAbreviatedExpression) {
 			return getType(((CommaSeparatedAbreviatedExpression)expression).getLeft());
@@ -1811,6 +1822,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	protected TypeCheckInfo getType(SadlResource qnm) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException{
+
+		
+//		ContextBuilder ctxBldr = new ContextBuilder(qnm);
+//		Context ctx = ctxBldr.build();
+//		SadlOntologyHelper soh = new SadlOntologyHelper();
+//		soh.validate(ctx, qnm);
+		
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
 		EObject expression = qnm.eContainer();
 		if (conceptUri == null) {
