@@ -104,6 +104,7 @@ import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorExt;
+import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -638,6 +639,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     	}
 	}
 
+    @Override
+    public void validate(Context context, SadlResource candidate) {
+    	throw new UnsupportedOperationException("Not implemented yet.");
+    }
+    
     @Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
     	logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
