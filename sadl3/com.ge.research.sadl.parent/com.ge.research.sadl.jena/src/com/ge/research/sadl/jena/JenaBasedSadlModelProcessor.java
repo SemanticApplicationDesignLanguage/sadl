@@ -2686,7 +2686,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			addError(SadlErrorMessages.TRANSLATE_NAME_SADLRESOURCE.toString(), expr);
 //			throw new InvalidNameException("Unable to resolve SadlResource to a name");
 		}
-		return processExpression(qnm);
+		else if (qnm.equals(expr) && expr.eContainer() instanceof BinaryOperation && ((BinaryOperation)expr.eContainer()).getRight().equals(qnm)) {
+			addError("It appears that '" + nm + "' is not defined.", expr);
+		}
+		else {
+			return processExpression(qnm);
+		}
+		return null;
 	}
 	
 	private String getPrefix(String qn) {
@@ -3677,6 +3683,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					throw new JenaProcessorException("Unhandled SadlPropertyRestriction type: " + spr.getClass().getCanonicalName());
 				}
 			} // end while
+		}
+		else if (element.getFrom() != null && element.getTo() != null) {
+			SadlTypeReference fromTypeRef = element.getFrom();
+			Object frm;
+			try {
+				frm = processExpression(fromTypeRef);
+				SadlTypeReference toTypeRef = element.getTo();
+				Object t = processExpression(toTypeRef);
+				if (frm != null && t != null && frm instanceof NamedNode && t instanceof NamedNode) {
+					OntClass dmn = getOrCreateOntClass(((NamedNode)frm).toFullyQualifiedString());
+					OntClass rng = getOrCreateOntClass(((NamedNode)t).toFullyQualifiedString());
+					OntProperty pr = createObjectProperty(propUri, null);
+					addPropertyDomain(pr, dmn);
+					addPropertyRange(OntConceptType.CLASS_PROPERTY, pr, rng, RangeValueType.CLASS_OR_DT, element);
+					retProp = pr;
+				}
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		else {
 			// No restrictions--this will become an rdf:Property

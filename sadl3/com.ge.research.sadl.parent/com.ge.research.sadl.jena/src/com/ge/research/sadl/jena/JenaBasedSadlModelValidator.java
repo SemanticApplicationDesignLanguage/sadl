@@ -904,7 +904,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getType((PropOfSubject)expression);
 		}
 		else if(expression instanceof SubjHasProp){
+			boolean isNestedInstance = expression.eContainer() instanceof CommaSeparatedAbreviatedExpression;
 			if (((SubjHasProp)expression).getLeft() instanceof Declaration) {
+				if (!isNestedInstance) {
+					issueAcceptor.addError("This appears to be a declaration which should be nested (in parentheses)", expression);
+				}
 				return getType(((SubjHasProp)expression).getLeft());				
 			}
 			// at least under some circumstances, the type of SubjHasPro is the type of the root (if there is a chain) property range
@@ -2206,7 +2210,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return ptci;
 		}
 		else if (expression instanceof BinaryOperation) {
-			if (((BinaryOperation)expression).getLeft() instanceof Name) {
+			if (((BinaryOperation)expression).getLeft() instanceof Name && !!((BinaryOperation)expression).getLeft().equals(sr)) {
 				TypeCheckInfo ptci = getType(((BinaryOperation)expression).getRight());
 				return ptci;
 			}
