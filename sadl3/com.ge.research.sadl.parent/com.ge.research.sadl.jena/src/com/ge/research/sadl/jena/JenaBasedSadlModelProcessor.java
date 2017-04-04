@@ -17,6 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena;
 
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.MISSING_SUBJECT;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -98,12 +101,14 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.ISadlOntologyHelper;
 import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorExt;
+import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -638,6 +643,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     	}
 	}
 
+    @Override
+    public void validate(Context context, SadlResource candidate) {
+    	String contextId = context.getGrammarContextId().orNull();
+    	OntModel ontModel = context.getOntModel();
+    	SadlResource subject = context.getSubject();
+    	if (subject == MISSING_SUBJECT) {
+    		return;
+    	}
+    	
+		try {
+			switch (contextId) {
+			case SADLPROPERTYINITIALIZER_VALUE: {
+				modelValidator.checkPropertyDomain(ontModel, subject, candidate, true);
+			}
+			default: {
+				// Ignored
+			}
+			}
+		} catch (InvalidTypeException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
     @Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
     	logger.debug("onValidate called for Resource '" + resource.getURI() + "'");

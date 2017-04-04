@@ -30,6 +30,7 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.Assignment
 
 import static extension org.eclipse.xtext.GrammarUtil.containingParserRule
+import org.eclipse.xtext.resource.XtextResource
 
 /**
  * Reasoner independent implementation of an ontology helper for SADL. 
@@ -89,6 +90,11 @@ interface ISadlOntologyHelper {
 		 * Returns with the restrictions for the context.
 		 */
 		def Iterable<SadlResource> getRestrictions();
+		
+		/**
+		 * Returns with the model processor for the context.
+		 */
+		def Optional<IModelProcessor> getModelProcessor();
 
 	}
 
@@ -170,6 +176,7 @@ interface ISadlOntologyHelper {
 		var Optional<String> grammarContextId;
 		var Optional<EClass> contextClass;
 		var Collection<SadlResource> restrictions;
+		var Optional<IModelProcessor> modelProcessor;
 
 		/**
 		 * Returns with a new context builder that has no subject SADL resource.
@@ -227,7 +234,17 @@ interface ISadlOntologyHelper {
 
 		def Context build() {
 			Preconditions.checkNotNull(ontModel, 'ontModel');
-			return new ContextImpl(subject, ontModel, acceptor, grammarContextId, contextClass, restrictions);
+			modelProcessor = Optional.fromNullable(processor)
+			return new ContextImpl(subject, ontModel, acceptor, grammarContextId, contextClass, restrictions, modelProcessor);
+		}
+		
+		private def IModelProcessor getProcessor() {
+			if (subject !== MISSING_SUBJECT) {
+				val resource = (subject.eResource as XtextResource);
+				val provider = resource.resourceServiceProvider.get(IModelProcessorProvider);
+				return provider.getProcessor(subject.eResource);
+			}
+			return null;
 		}
 
 	}
@@ -240,6 +257,7 @@ interface ISadlOntologyHelper {
 		val Optional<String> grammarContextId;
 		val Optional<EClass> contextClass;
 		val Iterable<SadlResource> restrictions;
+		val Optional<IModelProcessor> modelProcessor;
 	}
 
 }
