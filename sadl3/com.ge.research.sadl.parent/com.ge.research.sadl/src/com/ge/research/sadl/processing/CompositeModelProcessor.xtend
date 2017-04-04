@@ -51,7 +51,7 @@ class CompositeModelProcessor implements IModelProcessor {
 
 	@Override	
 	override validate(Context context, SadlResource candidate) {
-		processors.forEach[context.validate(candidate)];
+		processors.forEach[validate(context, candidate)];
 	}
 
 }
