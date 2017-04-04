@@ -18,6 +18,7 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import org.junit.Test
+import org.junit.Ignore
 
 /**
  * Plug-in tests for the SADL content assist.
@@ -58,9 +59,18 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Property check with imports. */
+	@Ignore
 	@Test
 	def void checkCA_06_Property_Positive() {
 		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". C is a Circle with ''').
+			assertProposal('radius');
+	}
+
+	/** Property check with imports. */
+	@Ignore
+	@Test
+	def void checkCA_06b_Property_Positive() {
+		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". C is a Circle. C has ''').
 			assertProposal('radius');
 	}
 
