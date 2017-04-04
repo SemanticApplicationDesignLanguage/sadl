@@ -17,9 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
-import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.SadlResource
-import com.google.inject.Inject
 import com.google.inject.Singleton
 
 /**
@@ -30,29 +28,9 @@ import com.google.inject.Singleton
 @Singleton
 class SadlOntologyHelper implements ISadlOntologyHelper {
 
-	@Inject
-	extension DeclarationExtensions;
-
 	@Override
 	override validate(Context context, SadlResource candidate) {
-		val key = context.grammarContextId.orNull
-		if (key == ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_VALUE)	{
-			
-		}
-		val subj = context.subject
-		val subjUri = subj.conceptUri
-		val subjType = subj.ontConceptType
-		val itr = context.restrictions
-		for (i : 0 ..< itr.size) {
-			val element = itr.get(i)
-			val ruri = element.conceptUri
-			val rtype = element.ontConceptType
-			val j = 0
-		}
-		val name = candidate.concreteName
-		if (name !== 'myFoo') {
-			context.acceptor.addError('', candidate);
-		}
+	context.modelProcessor.orNull.validate(context, candidate);
 	}
 
 }
