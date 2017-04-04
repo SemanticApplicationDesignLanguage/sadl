@@ -46,6 +46,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
@@ -115,6 +116,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -648,6 +650,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     	String contextId = context.getGrammarContextId().orNull();
     	OntModel ontModel = context.getOntModel();
     	SadlResource subject = context.getSubject();
+    	System.out.println("Subject: " + declarationExtensions.getConceptUri(subject));
+    	System.out.println("Candidate: " + declarationExtensions.getConceptUri(candidate));
     	if (subject == MISSING_SUBJECT) {
     		return;
     	}
@@ -655,7 +659,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		try {
 			switch (contextId) {
 			case SADLPROPERTYINITIALIZER_VALUE: {
-				modelValidator.checkPropertyDomain(ontModel, subject, candidate, true);
+				SadlResource prop = context.getRestrictions().iterator().next();
+				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
+				while (ritr.hasNext()) {
+					System.out.println("Restriction: " + declarationExtensions.getConceptUri(ritr.next()));
+				}
+				modelValidator.checkPropertyDomain(ontModel, subject, prop, true);
+				StringBuilder errorMessageBuilder = new StringBuilder();
+				if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is", errorMessageBuilder)) {
+					context.getAcceptor().add(errorMessageBuilder.toString(), candidate.eContainer(), Severity.ERROR);
+				}
 			}
 			default: {
 				// Ignored
