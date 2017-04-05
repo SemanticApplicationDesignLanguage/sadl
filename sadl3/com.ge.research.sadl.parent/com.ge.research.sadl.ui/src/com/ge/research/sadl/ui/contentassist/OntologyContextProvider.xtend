@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
+import com.ge.research.sadl.sADL.SadlModel
+import org.eclipse.xtext.EcoreUtil2
 
 /**
  * Singleton service converting a Eclipse-based content assist context into
@@ -64,13 +66,25 @@ class OntologyContextProvider {
 			val key = TO_STRING.apply(grammarElement);
 
 			if (key == SADLPROPERTYINITIALIZER_VALUE) {
-				val initializer = currentModel as SadlPropertyInitializer;
+				val initializer = currentModel.propertyInitializer;
 				val instance = initializer.eContainer as SadlInstance;
 				val type = instance.type;
 				if (type instanceof SadlSimpleTypeReference) {
 					val builder = new ContextBuilder(type.type) => [
 						grammarContextId = key;
 						addRestriction(initializer.property);
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
+				}
+			} else if (key == SADLPROPERTYINITIALIZER_PROPERTY) {
+				val initializer = currentModel.propertyInitializer;
+				val instance = initializer.eContainer as SadlInstance;
+				val type = instance.type;
+				if (type instanceof SadlSimpleTypeReference) {
+					val builder = new ContextBuilder(type.type) => [
+						grammarContextId = key;
 						validationAcceptor = acceptor;
 						contextClass = clazz;
 					];
@@ -95,6 +109,14 @@ class OntologyContextProvider {
 
 	private def OntModel getOntModel(EObject it) {
 		return OntModelProvider.find(eResource);
+	}
+	
+	private def dispatch getPropertyInitializer(SadlModel it) {
+		return EcoreUtil2.getAllContentsOfType(it, SadlPropertyInitializer).head;
+	}
+	
+	private def dispatch getPropertyInitializer(SadlPropertyInitializer it) {
+		return it;
 	}
 
 }
