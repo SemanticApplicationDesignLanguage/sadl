@@ -80,15 +80,22 @@ class OntologyContextProvider {
 				}
 			} else if (key == SADLPROPERTYINITIALIZER_PROPERTY) {
 				val initializer = currentModel.propertyInitializer;
-				val instance = initializer.eContainer as SadlInstance;
-				val type = instance.type;
-				if (type instanceof SadlSimpleTypeReference) {
-					val builder = new ContextBuilder(type.type) => [
-						grammarContextId = key;
-						validationAcceptor = acceptor;
-						contextClass = clazz;
-					];
-					return Optional.of(builder.build);
+				if (initializer != null) {
+					val instance = initializer.eContainer as SadlInstance;
+					val type = instance.type;
+					if (type instanceof SadlSimpleTypeReference) {
+						val builder = new ContextBuilder(type.type) => [
+							grammarContextId = key;
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						];
+						return Optional.of(builder.build);
+					}
+				}
+				else {
+					if (LOGGER.debugEnabled) {
+						LOGGER.warn('''Case handling incomplete: «key» [Class: «clazz.name»]''');
+					}
 				}
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
 				val builder = createWithoutSubject(currentModel.ontModel) => [
