@@ -5711,7 +5711,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else if (value instanceof SadlBooleanLiteral) {
 				SadlBooleanLiteral val = ((SadlBooleanLiteral)value);
 				if (rng != null) {
-					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.toString());
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.isTruethy());
 				}
 				else {
 					getTheJenaModel().createTypedLiteral(Boolean.parseBoolean(val.toString()));
