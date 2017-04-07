@@ -104,8 +104,9 @@ SadlPropertyInitializer:
 ;
 
 SadlNestedInstance returns SadlInstance:
+{SadlNestedInstance} (
 		instance=SadlResource 'is' article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*
-	|	article=AnArticle type=SadlTypeReference instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*
+	|	article=AnArticle type=SadlTypeReference instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*)
 ;
 
 SadlResource:
