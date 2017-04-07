@@ -49,11 +49,13 @@ import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
+import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
 import com.ge.research.sadl.sADL.SadlDataType;
 import com.ge.research.sadl.sADL.SadlExplicitValue;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlModelElement;
+import com.ge.research.sadl.sADL.SadlMustBeOneOf;
 import com.ge.research.sadl.sADL.SadlNumberLiteral;
 import com.ge.research.sadl.sADL.SadlParameterDeclaration;
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
@@ -921,7 +923,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof SubjHasProp){
 			Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
-			if (expression.eContainer() instanceof BinaryOperation) {
+			if (subjHasPropInDeclaration != null) {
+				return getType(subjHasPropInDeclaration);
+			}
+			else if (expression.eContainer() instanceof BinaryOperation) {
 				// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
 				if (((SubjHasProp)expression).getProp() instanceof SadlResource) {
 					SadlResource prop = ((SubjHasProp)expression).getProp();
@@ -931,10 +936,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else {
 					issueAcceptor.addError("This subject-has-property construct isn't properly validated, please report.", expression);
 				}
-			}
-			else if (subjHasPropInDeclaration != null){
-				// we want the type of the declaration, if there is one
-				return getType(subjHasPropInDeclaration);				
 			}
 			else {
 					issueAcceptor.addError("This appears to be a declaration isn't fully supported; should it be nested (in parentheses)", expression);
@@ -1953,9 +1954,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Individual individual = theJenaModel.getIndividual(conceptUri);
 			if(individual == null){
 				SadlResource qnmDecl = declarationExtensions.getDeclaration(qnm);
-				if (qnmDecl != null && qnmDecl.eContainer() instanceof SadlInstance) {
-					SadlTypeReference typeref = ((SadlInstance)qnmDecl.eContainer()).getType();
-					return getType(typeref);
+				if (qnmDecl != null) {
+					if (qnmDecl.eContainer() instanceof SadlInstance) {
+						SadlTypeReference typeref = ((SadlInstance)qnmDecl.eContainer()).getType();
+						return getType(typeref);
+					}
+					else if (qnmDecl.eContainer() instanceof SadlMustBeOneOf) {
+						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {
+							return getType(((SadlClassOrPropertyDeclaration)qnmDecl.eContainer().eContainer()).getClassOrProperty().get(0));
+						}
+					}
 				}
 				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), expression);
 				if (metricsProcessor != null) {
