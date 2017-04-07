@@ -102,8 +102,6 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
-import com.ge.research.sadl.processing.IModelProcessor;
-import com.ge.research.sadl.processing.ISadlOntologyHelper;
 import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
@@ -117,7 +115,6 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -4083,7 +4080,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			String ns = uri.substring(0, sep);
 			String ln = uri.substring(sep + 1);
 			// get the prefix and if there is one generate qname
-			String prefix = configMgr.getGlobalPrefix(ns);
+			String prefix = getConfigMgr().getGlobalPrefix(ns);
 			if (prefix != null && prefix.length() > 0) {
 				return prefix + ":" + ln;
 			}

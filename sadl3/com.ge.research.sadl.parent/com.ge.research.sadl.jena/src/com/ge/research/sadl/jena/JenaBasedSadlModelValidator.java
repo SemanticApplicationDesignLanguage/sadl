@@ -941,6 +941,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		else if (expression instanceof CommaSeparatedAbreviatedExpression) {
+			// validate the property initializations within
+			validateCommaSeparatedAbreviatedExpression((CommaSeparatedAbreviatedExpression) expression);
 			return getType(((CommaSeparatedAbreviatedExpression)expression).getLeft());
 		}
 		else if(expression instanceof UnaryExpression){
@@ -1071,6 +1073,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 	
+	protected void validateCommaSeparatedAbreviatedExpression(CommaSeparatedAbreviatedExpression expression) throws DontTypeCheckException, CircularDefinitionException, 
+		InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException {
+		TypeCheckInfo proptct = getType(expression.getProp());
+		TypeCheckInfo rghttct = getType(expression.getRight());
+		if (!compareTypesUsingImpliedProperties(Arrays.asList("is"), expression.getProp(), expression.getRight(), proptct, rghttct)) {
+			StringBuilder errorMessageBuilder = new StringBuilder();
+			createErrorMessage(errorMessageBuilder, proptct, rghttct, "property initialization");
+			issueAcceptor.addError(errorMessageBuilder.toString(), expression);
+		}
+	}
+
 	private boolean subjHasPropIsNested(SubjHasProp expression) {
 		if (expression.eContainer() instanceof CommaSeparatedAbreviatedExpression) {
 			return true; 
@@ -1083,7 +1096,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private Declaration subjHasPropIsDeclaration(SubjHasProp expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException {
+	protected Declaration subjHasPropIsDeclaration(SubjHasProp expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException {
 		if (expression.getLeft() instanceof Declaration) {
 			TypeCheckInfo declType = getType(((Declaration)expression.getLeft()).getType());
 			Object tct = declType.getTypeCheckType();
