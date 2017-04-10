@@ -922,11 +922,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getType((PropOfSubject)expression);
 		}
 		else if(expression instanceof SubjHasProp){
-			Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
-			if (subjHasPropInDeclaration != null) {
-				return getType(subjHasPropInDeclaration);
-			}
-			else if (expression.eContainer() instanceof BinaryOperation) {
+			if (expression.eContainer() instanceof BinaryOperation) {
 				// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
 				if (((SubjHasProp)expression).getProp() instanceof SadlResource) {
 					SadlResource prop = ((SubjHasProp)expression).getProp();
@@ -938,7 +934,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			else {
+				Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
+				if (subjHasPropInDeclaration != null) {
+					return getType(subjHasPropInDeclaration);
+				}
+				else {
 					issueAcceptor.addError("This appears to be a declaration isn't fully supported; should it be nested (in parentheses)", expression);
+				}
 			}
 		}
 		else if (expression instanceof CommaSeparatedAbreviatedExpression) {
