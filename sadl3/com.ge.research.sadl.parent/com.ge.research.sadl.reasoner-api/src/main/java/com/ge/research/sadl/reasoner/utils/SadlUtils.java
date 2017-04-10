@@ -742,7 +742,7 @@ public class SadlUtils {
     				sb.append(vorig);
     				sb.append(")");
     			}
-    			sb.append(" to type '");
+    			sb.append("' to type '");
     			sb.append(rnguri);
     			sb.append("'");
     			throw new TranslationException(sb.toString() + "(" + t.getMessage() + ")");

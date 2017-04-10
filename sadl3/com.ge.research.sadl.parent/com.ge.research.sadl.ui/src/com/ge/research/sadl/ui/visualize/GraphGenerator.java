@@ -194,7 +194,12 @@ public class GraphGenerator {
 				instData = classInstances((OntClass)gs.getObject(), instData);
 			}
 		}
-		data.addAll(instData);
+		for (int i = 0; i < instData.size(); i++) {
+			GraphSegment gs = instData.get(i);
+			if (!data.contains(gs)) {
+				data.add(gs);
+			}
+		}
 		return data;
 	}
 
@@ -308,8 +313,15 @@ public class GraphGenerator {
 		while (sitr.hasNext()) {
 			Statement stmt = sitr.nextStatement();
 			Property prop = stmt.getPredicate();
+			Object predObj;
+			if (prop.equals(RDF.type)) {
+				predObj = "is a";
+			}
+			else {
+				predObj = prop;
+			}
 			RDFNode obj = stmt.getObject();
-			GraphSegment sg = new GraphSegment(getModelUri(), stmt.getSubject(), prop, obj, configMgr);
+			GraphSegment sg = new GraphSegment(getModelUri(), stmt.getSubject(), predObj, obj, configMgr);
 			if (!data.contains(sg)) {
 				annotateHeadAsIndividual(sg);
 				if (obj.canAs(OntClass.class)){

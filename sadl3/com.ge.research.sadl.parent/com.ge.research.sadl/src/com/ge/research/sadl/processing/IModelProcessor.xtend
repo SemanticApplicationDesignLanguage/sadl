@@ -34,6 +34,8 @@ import org.eclipse.xtext.validation.CheckMode
  */
 interface IModelProcessor {
 	
+	String SYNTHETIC_FROM_TEST = "__synthetic";
+  
 	/**
 	 * Called in the validation phase
 	 */

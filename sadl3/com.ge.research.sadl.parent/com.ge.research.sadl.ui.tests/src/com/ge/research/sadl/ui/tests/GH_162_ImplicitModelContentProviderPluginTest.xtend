@@ -51,7 +51,9 @@ class GH_162_ImplicitModelContentProviderPluginTest extends Assert {
 	
 	@Test
 	def void checkContent() {
-		assertEquals(ISadlImplicitModelContentProvider.Default.DEFAULT_CONTENT.unifyEOL, content.unifyEOL);
+//		assertEquals(ISadlImplicitModelContentProvider.Default.DEFAULT_CONTENT.unifyEOL, content.unifyEOL);
+// Other extending grammars might add more content
+		assertTrue(content.unifyEOL.startsWith(ISadlImplicitModelContentProvider.Default.DEFAULT_CONTENT.unifyEOL))
 	}
 	
 
