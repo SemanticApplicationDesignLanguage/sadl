@@ -64,6 +64,7 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.external.ExternalEmfResource;
+import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
@@ -1670,6 +1671,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				List<String> names = new ArrayList<String>();
 				for (int i = 0; i < varList.size(); i++) {
 					Object var = translate(varList.get(i));
+					TypeCheckInfo tci = null;
+					try {
+						tci = modelValidator.getType(varList.get(i));
+					} catch (DontTypeCheckException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (CircularDefinitionException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (URISyntaxException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (ConfigurationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					if (!(var instanceof VariableNode)) {
 						try {
 							OntConceptType vtype = declarationExtensions.getOntConceptType(varList.get(i));
@@ -1703,6 +1726,34 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 
 		// Translate the query to the resulting intermediate form.
+		Expression whexpr = expr.getWhereExpression();
+		if (modelValidator != null) {
+			try {
+				TypeCheckInfo tct = modelValidator.getType(whexpr);
+				if (tct != null && tct.getImplicitProperties() != null) {
+					List<ConceptName> ips = tct.getImplicitProperties();
+					int i = 0;
+				}
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DontTypeCheckException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CircularDefinitionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CircularDependencyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		Object pattern = translate(expr.getWhereExpression());
 		
 		Object expandedPattern = null;

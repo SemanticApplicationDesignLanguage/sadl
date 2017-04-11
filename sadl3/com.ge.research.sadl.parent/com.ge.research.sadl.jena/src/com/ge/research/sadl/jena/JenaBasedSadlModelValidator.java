@@ -65,6 +65,7 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlStringLiteral;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnionType;
+import com.ge.research.sadl.sADL.SelectExpression;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.Sublist;
@@ -1726,6 +1727,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (((ConceptName) varci).toString().equals("TODO")) {
 							return null;
 						}
+						if (((ConceptName) varci).getName() == null || ((ConceptName) varci).getNamespace() == null) {
+							return null;
+						}
 						subjuri = ((ConceptName)varci).getUri();
 					}
 				}
@@ -2271,11 +2275,47 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return ptci;
 			}
 		}
+		else if (expression instanceof SelectExpression) {
+			// find name in expression and get type from there
+			Expression sexpr = findDefiningExpression(conceptUri, ((SelectExpression)expression).getWhereExpression());
+			if (sexpr != null) {
+				return getType(sexpr);
+			}
+		}
 		ConceptName declarationConceptName = new ConceptName(conceptUri);
 		declarationConceptName.setType(ConceptType.VARIABLE);
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
 	}
 	
+	private Expression findDefiningExpression(String uri, Expression expr) {
+		if (expr instanceof SubjHasProp) {
+			Expression sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getLeft());
+			if (sexpr != null) {
+				return sexpr;
+			}
+			sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getProp());
+			if (sexpr != null) {
+				return sexpr;
+			}
+			sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getRight());
+			if (sexpr != null) {
+				return ((SubjHasProp)expr).getProp();
+			}
+		} else if (expr instanceof Name) {
+			String nuri = declarationExtensions.getConceptUri(((Name)expr).getName());
+			if (nuri != null && nuri.equals(uri)) {
+				return expr;
+			}
+		}
+		else if (expr instanceof SadlResource) {
+			String nuri = declarationExtensions.getConceptUri((SadlResource)expr);
+			if (nuri != null && nuri.equals(uri)) {
+				return expr;
+			}
+		}
+		return null;
+	}
+
 	private TypeCheckInfo combineTypes(List<String> operations, Expression leftExpression, Expression rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
