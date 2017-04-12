@@ -4901,9 +4901,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 		}
-		getTheJenaModel().add(prop, RDFS.domain, cls);
-		logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
-		logger.debug("Domain of '" + prop.toString() + "' is now: " + nodeToString(cls));
+		if(cls != null){
+			getTheJenaModel().add(prop, RDFS.domain, cls);	
+			logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
+			logger.debug("Domain of '" + prop.toString() + "' is now: " + nodeToString(cls));
+		}else{
+			logger.debug("Domain is not defined for property '" + prop.toString() + "'");
+		}
 	}
 
 	private OntResource createUnionOfClasses(OntResource cls, List<OntResource> existingClasses) throws JenaProcessorException {
