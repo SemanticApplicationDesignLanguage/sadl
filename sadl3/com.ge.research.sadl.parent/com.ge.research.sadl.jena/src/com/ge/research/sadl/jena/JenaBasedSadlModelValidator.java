@@ -2278,7 +2278,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (expression instanceof SelectExpression) {
 			// find name in expression and get type from there
 			Expression sexpr = findDefiningExpression(conceptUri, ((SelectExpression)expression).getWhereExpression());
-			if (sexpr != null) {
+			if (sexpr != null && !sexpr.equals(sr)) {
 				return getType(sexpr);
 			}
 		}

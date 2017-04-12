@@ -4401,6 +4401,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				if (getModelValidator() != null) {
 					try {
 						getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val);
+					} catch (DontTypeCheckException e) {
+						// do nothing
 					} catch (Exception e) {
 						throw new JenaProcessorException("Unexpected error checking value in range", e);
 					}
@@ -5229,7 +5231,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	private Object sadlTypeReferenceToObject(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
+	protected Object sadlTypeReferenceToObject(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
 		OntResource rsrc = null;
 		// TODO How do we tell if this is a union versus an intersection?						
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
