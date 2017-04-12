@@ -39,6 +39,9 @@ import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
 import com.ge.research.sadl.resource.UserDataHelper
+import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression
+import com.ge.research.sadl.sADL.BinaryOperation
+import java.util.function.BinaryOperator
 
 /**
  * This class contains custom validation rules. 
@@ -55,6 +58,7 @@ class SADLValidator extends AbstractSADLValidator {
 	public static final String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
 	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
 	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
+	public static final String INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION = "INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION"
 	 
 	@Inject DeclarationExtensions declarationExtensions
 	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
@@ -219,6 +223,20 @@ class SADLValidator extends AbstractSADLValidator {
 			}
 			catch (Throwable t) {
 				t.printStackTrace
+			}
+		}
+	}
+	
+	@Check
+	def checkCommaSeparatedAbreviatedExpression(CommaSeparatedAbreviatedExpression expr) {
+		// normally this would occur as a nested expression inside an "is" or other assignment (as object of a "with" or "has")
+		val cntr = expr.eContainer
+		if (cntr instanceof BinaryOperation) {
+			val bop = cntr as BinaryOperation
+			val op = bop.op
+			if (op.equals("and") || op.equals("or")) {
+				warning("Is this a declaration that should be nested in parentheses?", expr, SADLPackage.Literals.COMMA_SEPARATED_ABREVIATED_EXPRESSION__LEFT)
+				
 			}
 		}
 	}
