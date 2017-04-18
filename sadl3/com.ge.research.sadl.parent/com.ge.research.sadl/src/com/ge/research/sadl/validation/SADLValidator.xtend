@@ -21,25 +21,27 @@
 package com.ge.research.sadl.validation
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.resource.ResourceDescriptionStrategy
 import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.google.inject.Inject
+import java.util.ArrayList
+import java.util.List
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
-import com.ge.research.sadl.reasoner.utils.SadlUtils
-import com.ge.research.sadl.sADL.SadlResource
-import java.util.List
-import java.util.ArrayList
-import com.ge.research.sadl.sADL.QueryStatement
-import com.ge.research.sadl.sADL.SadlSimpleTypeReference
-import org.eclipse.emf.ecore.EStructuralFeature
-import com.ge.research.sadl.sADL.SubjHasProp
+import com.ge.research.sadl.resource.UserDataHelper
+import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression
+import com.ge.research.sadl.sADL.BinaryOperation
+import java.util.function.BinaryOperator
 
 /**
  * This class contains custom validation rules. 
@@ -48,10 +50,6 @@ import com.ge.research.sadl.sADL.SubjHasProp
  */
 class SADLValidator extends AbstractSADLValidator {
 	
-	@Inject DeclarationExtensions declarationExtensions
-	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
-	@Inject IResourceDescription.Manager resourceDescriptionManager
-
 	public static final String INVALID_MODEL_URI = "INVALID_MODEL_URI"
 	public static final String INVALID_IMPORT_URI = "INVALID_IMPORT_URI"
 	public static final String INVALID_MODEL_ALIAS = "INVALID_MODEL_ALIAS"
@@ -60,6 +58,13 @@ class SADLValidator extends AbstractSADLValidator {
 	public static final String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
 	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
 	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
+	public static final String INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION = "INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION"
+	 
+	@Inject DeclarationExtensions declarationExtensions
+	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
+	@Inject IResourceDescription.Manager resourceDescriptionManager
+	@Inject UserDataHelper userDataHelper
+
 		
 	protected var List<String> otherNames = new ArrayList
 	
@@ -76,7 +81,7 @@ class SADLValidator extends AbstractSADLValidator {
 		initializeValidator()	// this class instance appears to be used repeatedly--need to clear this list for this resource usage this time
 		val thisUri = model.baseUri
 		val errMsg = SadlUtils.validateUri(thisUri);
-		if (errMsg != null) {
+		if (errMsg !== null) {
 			error(errMsg, SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
 		}
 		val thisRsrc = model.eResource
@@ -91,7 +96,7 @@ class SADLValidator extends AbstractSADLValidator {
 			if (modelDescription.name.toString == thisUri) {
 				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 			}
-			if (model.alias !== null && modelDescription.getUserData(ResourceDescriptionStrategy.USER_DATA_ALIAS) == model.alias) {
+			if (model.alias !== null && userDataHelper.getAlias(modelDescription).orNull == model.alias) {
 				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
 			}
 			if (modelDescription.EObjectURI.trimFragment.lastSegment == simpleFileName) {
@@ -101,13 +106,13 @@ class SADLValidator extends AbstractSADLValidator {
 		
 		var imports = model.imports
 		// does an import need any validation?
-		if (imports != null) {
+		if (imports !== null) {
 			var itr = imports.iterator
 			while (itr.hasNext) {
 				var imp = itr.next;
 				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).map[text].join().trimQuotes
 				val errorMsg = SadlUtils.validateUri(importedURI);
-				if (errorMsg != null) {
+				if (errorMsg !== null) {
 					error(errorMsg, imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
 				}
 				if (importedURI == thisUri) {
@@ -158,17 +163,15 @@ class SADLValidator extends AbstractSADLValidator {
 	@Check
 	def checkQueryStatement(QueryStatement query) {
 		// make sure rule name is unique
-		if (query.name != null && otherNames.contains(query.name)) {
+		if (query.name !== null && otherNames.contains(query.name)) {
 			var errMsg = "The name '" + query.name + "' in this namespace is already used."
 			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
 		}
 	}
 	
 	@Check
-	def checkSadlSimpleTypeReference(SadlSimpleTypeReference sstr) {
-		val type = sstr.type
-		val nm = type.name
-		if (nm == null) {
+	def checkSadlSimpleTypeReference(SadlSimpleTypeReference ref) {
+		if (ref.type.name === null) {
 			error("Undefined type", SADLPackage.Literals.SADL_SIMPLE_TYPE_REFERENCE__TYPE, UNRESOLVED_SADL_RESOURCE)
 		}
 	}
@@ -184,15 +187,14 @@ class SADLValidator extends AbstractSADLValidator {
 	@Check
 	def checkSadlResource(SadlResource sr) {
 		var nm = null as String
-		var isProxy = sr.eIsProxy
 		val nm1 = sr.name
-		if (nm1 != null) {
+		if (nm1 !== null) {
 			nm = declarationExtensions.getConcreteName(nm1) 
 		}
 		else {
 			nm = declarationExtensions.getConcreteName(sr)
 		}
-		if (nm == null) {
+		if (nm === null) {
 			try {
 				if (sr instanceof Name) {
 					val isFunc = (sr as Name).function
@@ -221,6 +223,20 @@ class SADLValidator extends AbstractSADLValidator {
 			}
 			catch (Throwable t) {
 				t.printStackTrace
+			}
+		}
+	}
+	
+	@Check
+	def checkCommaSeparatedAbreviatedExpression(CommaSeparatedAbreviatedExpression expr) {
+		// normally this would occur as a nested expression inside an "is" or other assignment (as object of a "with" or "has")
+		val cntr = expr.eContainer
+		if (cntr instanceof BinaryOperation) {
+			val bop = cntr as BinaryOperation
+			val op = bop.op
+			if (op.equals("and") || op.equals("or")) {
+				warning("Is this a declaration that should be nested in parentheses?", expr, SADLPackage.Literals.COMMA_SEPARATED_ABREVIATED_EXPRESSION__LEFT)
+				
 			}
 		}
 	}

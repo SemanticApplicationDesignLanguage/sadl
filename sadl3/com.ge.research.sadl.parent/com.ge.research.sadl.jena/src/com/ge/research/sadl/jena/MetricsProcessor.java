@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -41,7 +42,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 	private Property markerProperty = null;
 	private IConfigurationManagerForEditing configMgr = null;
 	private Ontology modelOntology;
-	private JenaBasedSadlModelProcessor modelProcessor = null;
+	private SadlModelProcessor modelProcessor = null;
 	
 	public static String SADL_METRICS_NS = "http://com.ge.research.sadl/sadlmetricsmodel#";
 	public static String MARKER_CLASS_URI = SADL_METRICS_NS + "Marker";
@@ -51,7 +52,9 @@ public class MetricsProcessor implements IMetricsProcessor {
 	public static String ERROR_MARKER_URI = SADL_METRICS_NS + "Error";
 	public static String WARNING_MARKER_URI = SADL_METRICS_NS + "Warning";
 	public static String INFO_MARKER_URI = SADL_METRICS_NS + "Information";
+	
 	public static String TYPE_CHECK_FAILURE_URI = SADL_METRICS_NS + "TypeCheckFailure";
+	public static String TYPE_CHECK_ERROR_URI = SADL_METRICS_NS + "TypeCheckError";
 	public static String UNCLASSIFIED_FAILURE_URI = SADL_METRICS_NS + "UnclassifiedFailure";
 	public static String RANGE_REDEFINITION_URI = SADL_METRICS_NS + "RangeRedefinition";
 	public static String DOMAIN_REDEFINITION_URI = SADL_METRICS_NS + "DomainRedefinition";
@@ -61,12 +64,13 @@ public class MetricsProcessor implements IMetricsProcessor {
 	public static String NESTED_EQUATION_URI = SADL_METRICS_NS + "NestedEquation";
 	public static String INVALID_TABLE_FORMAT_URI = SADL_METRICS_NS + "InvalidTableFormat";
 	public static String DUPLICATE_NAME_URI = SADL_METRICS_NS + "DuplicateName";
+	public static String UNDEFINED_FUNCTION_URI = SADL_METRICS_NS + "UndefinedFunction";
 
 	public MetricsProcessor() {
 		super();
 	}
 	
-	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr, JenaBasedSadlModelProcessor modelProcessor) throws JenaProcessorException, ConfigurationException {
+	public MetricsProcessor(String uri, org.eclipse.emf.ecore.resource.Resource resource, IConfigurationManagerForIDE configMgr, SadlModelProcessor modelProcessor) throws JenaProcessorException, ConfigurationException {
 		if (resource == null) {
 			throw new JenaProcessorException("MetricsProcessor constructor called with null resource");
 		}

@@ -69,9 +69,9 @@ public class GenerateKeywordSymbolHtmlTable {
 	private static List<String> mapToSortedList(Object map) {
 		List<String> tokenlist = new ArrayList<String>();
 		List<String> symbollist = new ArrayList<String>();
-		Iterator itr = ((Map)map).keySet().iterator();
+		Iterator<?> itr = ((Map<?, ?>)map).keySet().iterator();
 		while (itr.hasNext()) {
-			Object val = ((Map)map).get(itr.next());
+			Object val = ((Map<?, ?>)map).get(itr.next());
 			String strval = val.toString();
 			if (strval.startsWith("'") && strval.length() > 1 && strval.endsWith("'")) {
 				strval = strval.substring(1, strval.length() - 1);

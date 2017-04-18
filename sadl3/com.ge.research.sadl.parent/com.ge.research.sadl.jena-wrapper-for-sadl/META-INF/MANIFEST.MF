@@ -2,22 +2,23 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Jena-plugin
 Bundle-SymbolicName: com.ge.research.sadl.jena-wrapper-for-sadl;singleton:=true
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-Activator: com.ge.research.sadl.jena_plugin.Activator
 Bundle-Vendor: GE Global Research
-Require-Bundle: com.ge.research.jena;bundle-version="3.0.0",
- com.ge.research.sadl;bundle-version="3.0.0",
- com.ge.research.sadl.jena;bundle-version="3.0.0",
+Require-Bundle: com.ge.research.jena,
+ com.ge.research.sadl,
+ com.ge.research.sadl.jena,
  org.eclipse.core.runtime,
  org.eclipse.osgi,
  org.apache.log4j,
- org.apache.xerces;bundle-version="2.9.0",
- org.junit;bundle-version="4.11.0";resolution:=optional
+ org.apache.xerces,
+ org.junit;bundle-version="4.12.0";resolution:=optional
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: com.ge.research.sadl.jena.multithreaded,
- com.ge.research.sadl.jena.reasoner;version="3.0.0";
+Export-Package: com.ge.research.sadl.jena,
+ com.ge.research.sadl.jena.multithreaded,
+ com.ge.research.sadl.jena.reasoner;
   uses:="com.hp.hpl.jena.reasoner,
    com.ge.research.sadl.model.gp,
    org.slf4j,
@@ -34,13 +35,12 @@ Export-Package: com.ge.research.sadl.jena.multithreaded,
    com.hp.hpl.jena.reasoner.rulesys.builtins,
    com.hp.hpl.jena.reasoner.rulesys,
    com.ge.research.sadl.reasoner",
- com.ge.research.sadl.jena.translator;version="3.0.0";
+ com.ge.research.sadl.jena.translator;
   uses:="com.ge.research.sadl.model.gp,
    org.slf4j,
    com.ge.research.sadl.reasoner,
    com.ge.research.sadl.model,
-   com.hp.hpl.jena.ontology",
- com.ge.research.sadl.jena
+   com.hp.hpl.jena.ontology"
 Bundle-ClassPath: .
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>com.ge.research.sadl.parent</artifactId>
-		<version>3.0.0-SNAPSHOT</version>
+		<version>3.1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>com.ge.research.sadl.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
@@ -21,8 +21,6 @@
 				<version>${tycho-version}</version>
 				<configuration>
 					<failIfNoTests>false</failIfNoTests>
-					<!-- disable when tests are green -->
-					<testFailureIgnore>true</testFailureIgnore>
 				</configuration>
 			</plugin>
 			<plugin>

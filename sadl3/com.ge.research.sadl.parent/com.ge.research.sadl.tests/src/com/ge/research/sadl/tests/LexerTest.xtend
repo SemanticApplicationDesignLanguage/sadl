@@ -22,8 +22,8 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import org.antlr.runtime.ANTLRStringStream
 import org.antlr.runtime.Token
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +34,7 @@ import static com.ge.research.sadl.parser.antlr.lexer.InternalSADLLexer.*
 @InjectWith(SADLInjectorProvider)
 class LexerTest {
 	
-	static val _ = 9999
+	static val MAX_LEXER_TYPE = 9999
 	
 	@Inject Provider<InternalSADLLexer> lexerProvider
 	
@@ -46,8 +46,8 @@ class LexerTest {
 						Pizza is a type of Food.
 		'''.assertTokens(
 			Uri, RULE_STRING, Alias, RULE_ID, FullStop,
-			RULE_ID, Is, _, Class, FullStop,
-			RULE_ID, Is, _, Type, Of, RULE_ID, FullStop
+			RULE_ID, Is, MAX_LEXER_TYPE, Class, FullStop,
+			RULE_ID, Is, MAX_LEXER_TYPE, Type, Of, RULE_ID, FullStop
 		)
 	}
 	
@@ -105,7 +105,7 @@ class LexerTest {
 				token = lexer.nextToken
 				println(token)
 			}
-			if (t !== _) {
+			if (t !== MAX_LEXER_TYPE) {
 				 token => t
 			}
 		}

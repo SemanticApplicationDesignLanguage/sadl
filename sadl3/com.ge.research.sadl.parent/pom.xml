@@ -2,16 +2,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ge.research.sadl</groupId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<artifactId>com.ge.research.sadl.parent</artifactId>
 	<packaging>pom</packaging>
 
 	<properties>
-		<tycho-version>0.23.1</tycho-version>
-		<xtextVersion>2.9.2</xtextVersion>
+		<tycho-version>0.25.0</tycho-version>
+		<xtextVersion>2.11.0</xtextVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<modules>
 		<module>com.ge.research.sadl.xtextgenerator</module>
@@ -31,21 +31,41 @@
 		<module>com.ge.research.sadl.perspective</module>
 		<module>com.ge.research.sadl.update</module>
 		<module>com.ge.research.sadl.swi-prolog-plugin</module>
-		<module>com.ge.reasearch.sadl.errorgenerator</module>
+		<module>com.ge.research.sadl.errorgenerator</module>
 	</modules>
 	<build>
 		<plugins>
+			<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-enforcer-plugin</artifactId>
+			<version>1.4.1</version>
+			<executions>
+				<execution>
+					<id>enforce-maven</id>
+					<goals>
+						<goal>enforce</goal>
+					</goals>
+					<configuration>
+						<rules>
+							<requireMavenVersion>
+								<version>[3.3.9,)</version>
+							</requireMavenVersion>
+						</rules>
+					</configuration>
+				</execution>
+			</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
-	        <plugin>
-	          <groupId>org.eclipse.tycho</groupId>
-	          <artifactId>tycho-surefire-plugin</artifactId>
-	          <version>${tycho-version}</version>
-	        </plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
@@ -113,8 +133,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<dependencies>
-	</dependencies>
 	<repositories>
 		<repository>
 			<id>codehaus-snapshots</id>
@@ -128,11 +146,15 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<releases><enabled>false</enabled></releases>
-			<snapshots><enabled>false</enabled></snapshots>
-		</repository>
+			<id>snapshots-repo</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+	</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -145,12 +167,16 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
-		</pluginRepository>
+		</pluginRepository>		
 		<pluginRepository>
-			<id>sonatype-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<releases><enabled>false</enabled></releases>
-			<snapshots><enabled>false</enabled></snapshots>
+			<id>snapshots-repo</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
 </project>

@@ -17,25 +17,25 @@
  ***********************************************************************/
 package com.ge.research.sadl.resource
 
-import com.ge.research.sadl.sADL.SadlModel
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.resource.EObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
 import org.eclipse.xtext.util.IAcceptor
 
+@Singleton
 class ResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
 	
-	public static val USER_DATA_ALIAS = "alias"
+	@Inject
+	extension UserDataHelper;
 	
+	@Override
 	override createEObjectDescriptions(EObject eObject, IAcceptor<IEObjectDescription> acceptor) {
 		val qualifiedName = qualifiedNameProvider.getFullyQualifiedName(eObject);
-		if (qualifiedName != null) {
-			if (eObject instanceof SadlModel) {
-				acceptor.accept(EObjectDescription.create(qualifiedName, eObject, #{USER_DATA_ALIAS -> eObject.alias}));
-			} else {
-				acceptor.accept(EObjectDescription.create(qualifiedName, eObject));
-			}
+		if (qualifiedName !== null) {
+			acceptor.accept(EObjectDescription.create(qualifiedName, eObject, eObject.createUserData));
 		}
 		return true;
 	}

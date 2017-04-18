@@ -17,6 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.ge.research.sadl.processing.ISadlOntologyHelper.Context
+import com.ge.research.sadl.sADL.SadlResource
 import java.io.IOException
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
@@ -25,9 +27,6 @@ import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.preferences.IPreferenceValues
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
-import com.ge.research.sadl.reasoner.ResultSet
-import org.eclipse.xtext.util.IAcceptor
-import com.ge.research.sadl.builder.MessageManager.SadlMessage
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -35,6 +34,8 @@ import com.ge.research.sadl.builder.MessageManager.SadlMessage
  */
 interface IModelProcessor {
 	
+	String SYNTHETIC_FROM_TEST = "__synthetic";
+  
 	/**
 	 * Called in the validation phase
 	 */
@@ -44,6 +45,11 @@ interface IModelProcessor {
 	 * Called during code generation
 	 */
 	def void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context);
+	
+	/**
+	 * Checks whether the candidate SADL resource is valid in the given context. 
+	 */
+	def void validate(Context context, SadlResource candidate);
 	
 	/**
 	 * Called when external models are downloaded

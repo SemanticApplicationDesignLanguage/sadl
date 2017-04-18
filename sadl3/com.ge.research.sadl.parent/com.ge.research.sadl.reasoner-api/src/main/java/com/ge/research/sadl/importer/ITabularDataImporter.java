@@ -10,7 +10,6 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
-import com.hp.hpl.jena.ontology.OntModel;
 
 public interface ITabularDataImporter {
 

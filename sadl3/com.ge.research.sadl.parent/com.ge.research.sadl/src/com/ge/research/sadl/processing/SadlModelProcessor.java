@@ -17,6 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -27,7 +29,6 @@ import org.apache.log4j.Logger;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -44,8 +45,8 @@ import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
-import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -70,9 +71,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     private RulePart rulePart = RulePart.NOT_A_RULE;
     
-	@Inject
-	public DeclarationExtensions declarationExtensions;
-
+    @Inject
+    private ISadlImplicitModelContentProvider implicitModelContentProvider;
+    
 	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
@@ -656,6 +657,10 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			}
 		}
 		return false;
+	}
+
+	public void createSadlImplicitModel(File implicitModelFile) throws IOException {
+		implicitModelContentProvider.createImplicitModel(implicitModelFile, true);
 	}
 
 	public Set<VariableNode> getSelectVariables(GraphPatternElement pattern) {
