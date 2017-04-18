@@ -22,6 +22,7 @@ import com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder
 import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.sADL.SadlInstance
+import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.google.common.base.Optional
@@ -29,37 +30,30 @@ import com.google.inject.Singleton
 import com.hp.hpl.jena.ontology.OntModel
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
-import com.ge.research.sadl.sADL.SadlModel
-import org.eclipse.xtext.EcoreUtil2
 
 /**
- * Singleton service converting a Eclipse-based content assist context into
- * an ontology helper context.
+ * Singleton service ontology context provider service for SADL.
  * 
  * @author akos.kitta
  */
 @Singleton
-class OntologyContextProvider {
+class SadlOntologyContextProvider implements IOntologyContextProvider {
 
-	private static val LOGGER = LoggerFactory.getLogger(OntologyContextProvider);
+	private static val LOGGER = LoggerFactory.getLogger(SadlOntologyContextProvider);
 
-	/**
-	 * Transforms the content assist context into a ontology helper context and returns with it.
-	 * May return with an absent when the transformation is not viable.
-	 */
-	def Optional<Context> getOntologyContext(ContentAssistContext it) {
+	@Override
+	override Optional<Context> getOntologyContext(ContentAssistContext it) {
 		return getOntologyContext(it, ValidationAcceptor.NOOP);
 	}
 
-	/**
-	 * Transforms the content assist context into a ontology helper context with the given acceptor.
-	 */
-	def Optional<Context> getOntologyContext(ContentAssistContext it, ValidationAcceptor acceptor) {
+	@Override
+	override Optional<Context> getOntologyContext(ContentAssistContext it, ValidationAcceptor acceptor) {
 
 		for (grammarElement : firstSetGrammarElements?.filter(Assignment)) {
 			val clazz = currentModel?.eClass;

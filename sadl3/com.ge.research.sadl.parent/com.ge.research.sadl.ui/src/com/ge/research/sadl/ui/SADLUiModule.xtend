@@ -20,6 +20,8 @@
  */
 package com.ge.research.sadl.ui
 
+import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
+import com.ge.research.sadl.ui.contentassist.SadlOntologyContextProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
@@ -97,6 +99,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 	 */
 	override bindIXtextEditorCallback() {
 		return AlwaysAddXtextNatureCallback;
+	}
+	
+	def Class<? extends IOntologyContextProvider> bindIOntologyContextProvider() {
+		return SadlOntologyContextProvider;
 	}
 	
 }
