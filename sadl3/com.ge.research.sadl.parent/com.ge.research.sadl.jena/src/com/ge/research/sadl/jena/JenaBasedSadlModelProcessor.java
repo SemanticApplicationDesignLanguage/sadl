@@ -6720,23 +6720,27 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		return false;
 	}
 	protected boolean sharedDisjunctiveContainer(Expression expr1, Expression expr2) {
-		EObject cont1 = expr1.eContainer();
-		do {
-			if (cont1 instanceof BinaryOperation && ((BinaryOperation)cont1).getOp().equals("or")) {
-				break;
+		if (expr1 != null) {
+			EObject cont1 = expr1.eContainer();
+			do {
+				if (cont1 instanceof BinaryOperation && ((BinaryOperation)cont1).getOp().equals("or")) {
+					break;
+				}
+				cont1 = cont1.eContainer();
+			} while (cont1 != null && cont1.eContainer() != null);
+	
+			if (expr2 != null) {
+				EObject cont2 = expr2;
+				do {
+					if (cont2 instanceof BinaryOperation && ((BinaryOperation)cont2).getOp().equals("or")) {
+						break;
+					}
+					cont2 = cont2.eContainer();
+				} while (cont2 != null && cont2.eContainer() != null);
+				if (cont1 != null && cont2 != null && cont1.equals(cont2)) {
+					return true;
+				}
 			}
-			cont1 = cont1.eContainer();
-		} while (cont1.eContainer() != null);
-
-		EObject cont2 = expr2;
-		do {
-			if (cont2 instanceof BinaryOperation && ((BinaryOperation)cont2).getOp().equals("or")) {
-				break;
-			}
-			cont2 = cont2.eContainer();
-		} while (cont2.eContainer() != null);
-		if (cont1 != null && cont2 != null && cont1.equals(cont2)) {
-			return true;
 		}
 		return false;
 	}
