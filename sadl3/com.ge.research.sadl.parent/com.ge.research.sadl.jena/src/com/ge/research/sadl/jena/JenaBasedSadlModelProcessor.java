@@ -2860,10 +2860,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				subjNode = (Node) sn;
 			}
 			else if (sn instanceof TripleElement) {
-				throw new TranslationException("Property chains not yet handled.");
+				subjNode = new ProxyNode(sn);
 			}
 			else {
-				throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node");
+				throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node or Triple");
 //				addError(SadlErrorMessages.TRANSLATE_TO_NODE.get(sn.toString()), subject);
 			}
 		}
@@ -3441,6 +3441,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							throw new JenaProcessorException("Range failed to resolve to a class or datatype");
 						}
 						retProp = assignRangeToProperty(propUri, propType, rngRsrc, rngValueType, rng);
+					}
+				}
+				if (((SadlRangeRestriction)spr1).isSingleValued()) {
+					// add cardinality restriction
+					if (subject != null && subject.canAs(OntClass.class)) {
+						CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, retProp, 1);
+						subject.as(OntClass.class).addSuperClass(cr);
 					}
 				}
 			}

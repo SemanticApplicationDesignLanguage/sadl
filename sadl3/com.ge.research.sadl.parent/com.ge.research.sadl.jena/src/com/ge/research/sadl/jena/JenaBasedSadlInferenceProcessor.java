@@ -49,6 +49,7 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
@@ -821,7 +822,26 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				newQuery.setVariables(testVars);
 			}
 			obj = newQuery;
-		} else if (obj instanceof List<?>
+		} 
+		else if (obj instanceof Junction) {
+			if (((Junction)obj).getJunctionType().equals(JunctionType.Conj)) {
+				Object lhs = ((Junction)obj).getLhs();
+				Object rhs = ((Junction)obj).getRhs();
+				Query newQuery = new Query();
+				if (lhs instanceof GraphPatternElement && rhs instanceof GraphPatternElement) {
+					newQuery.addPattern((GraphPatternElement) lhs);
+					newQuery.addPattern((GraphPatternElement) rhs);
+					obj = newQuery;
+				}
+				else {
+					throw new TranslationException("Conversion of disjunction encountered unexpected non-GraphPatternElement content.");
+				}
+			}
+			else {
+				throw new TranslationException("Conversion of disjunction to a comparable object not currently supported.");
+			}
+		}
+		else if (obj instanceof List<?>
 				&& ((List<?>) obj).get(0) instanceof GraphPatternElement) {
 			Query newQuery = new Query();
 			newQuery.setPatterns((List<GraphPatternElement>) obj);
