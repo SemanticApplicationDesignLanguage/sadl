@@ -2069,16 +2069,42 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			while (sitr.hasNext()) {
 				RDFNode first = sitr.next().getObject();
 				boolean isList = false;
-				
+				//Rev1
 				if (isSadlTypedList(first)) {
 					// get type restriction on "first" property--this is the type
+					OntClass test = first.as(OntClass.class);
 					tci = getSadlTypedListTypeCheckInfo(first.as(OntClass.class), propConceptName, expression, propertyType);
-					isList = true;
-				}else if(first.isURIResource()){
+					if(tci != null) isList = true;
+				}
+				if(first.isURIResource() && tci == null){
 					tci = createTypeCheckInfoForPropertyRange(first, propConceptName, expression, propertyType);
-				}else {
+				}
+				if(!isSadlTypedList(first) && !first.isURIResource()) {
 					tci = createTypeCheckInfoForNonUriPropertyRange(first, propConceptName, expression, propertyType);
 				}
+				//Rev2
+//				if (isSadlTypedList(first)) {
+//					// get type restriction on "first" property--this is the type
+//					tci = getSadlTypedListTypeCheckInfo(first.as(OntClass.class), propConceptName, expression, propertyType);
+//					if(tci != null) isList = true;
+//				}else if(first.isURIResource()){
+//					tci = createTypeCheckInfoForPropertyRange(first, propConceptName, expression, propertyType);
+//				}else{
+//					tci = createTypeCheckInfoForNonUriPropertyRange(first, propConceptName, expression, propertyType);
+//				}
+				
+				//Original
+//				if(first.isURIResource()){
+//					tci = createTypeCheckInfoForPropertyRange(first, propConceptName, expression, propertyType);
+//				}else if (isSadlTypedList(first)) {
+//				// get type restriction on "first" property--this is the type
+//				OntClass test = first.as(OntClass.class);
+//				tci = getSadlTypedListTypeCheckInfo(first.as(OntClass.class), propConceptName, expression, propertyType);
+//				if(tci != null) isList = true;
+//				}else {
+//					tci = createTypeCheckInfoForNonUriPropertyRange(first, propConceptName, expression, propertyType);
+//				}
+			
 				if (tci != null) {
 					if (sitr.hasNext() && compoundTci == null) {
 						compoundTci = new TypeCheckInfo(propConceptName, this, expression);
