@@ -921,6 +921,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				catch (Throwable t) {
+					t.printStackTrace();
+				}
 			}
 		}
     	logger.debug("onValidate completed for Resource '" + resource.getURI() + "'");
@@ -2844,6 +2847,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if(predobj instanceof Node) {
 				predNode = (Node) predobj;
 			}
+//			else if (predobj instanceof String) {
+//				predNode = new NamedNode((String) predobj);
+//			}
 			else {
 				throw new TranslationException("Predicate '" + predobj.toString() + "' did not translate to Node");
 			}
@@ -2853,9 +2859,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (sn instanceof Node) {
 				subjNode = (Node) sn;
 			}
+			else if (sn instanceof TripleElement) {
+				subjNode = new ProxyNode(sn);
+			}
 			else {
-//				throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node");
-				addError(SadlErrorMessages.TRANSLATE_TO_NODE.get(sn.toString()), subject);
+				throw new TranslationException("Subject '" + sn.toString() + "' did not translate to Node or Triple");
+//				addError(SadlErrorMessages.TRANSLATE_TO_NODE.get(sn.toString()), subject);
 			}
 		}
 		else {
@@ -3432,6 +3441,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							throw new JenaProcessorException("Range failed to resolve to a class or datatype");
 						}
 						retProp = assignRangeToProperty(propUri, propType, rngRsrc, rngValueType, rng);
+					}
+				}
+				if (((SadlRangeRestriction)spr1).isSingleValued()) {
+					// add cardinality restriction
+					if (subject != null && subject.canAs(OntClass.class)) {
+						CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, retProp, 1);
+						subject.as(OntClass.class).addSuperClass(cr);
 					}
 				}
 			}
@@ -4849,7 +4865,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private OntProperty getOrCreateRdfProperty(String propUri) {
 		Property op = getTheJenaModel().getProperty(propUri);
-		if (op != null) {
+		if (op != null && op.canAs(OntProperty.class)) {
 			return op.as(OntProperty.class);
 		}
 		return createRdfProperty(propUri, null);
@@ -6710,5 +6726,38 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		}
 		return false;
 	}
+	protected boolean sharedDisjunctiveContainer(Expression expr1, Expression expr2) {
+		if (expr1 != null) {
+			EObject cont1 = expr1.eContainer();
+			do {
+				if (cont1 instanceof BinaryOperation && ((BinaryOperation)cont1).getOp().equals("or")) {
+					break;
+				}
+				cont1 = cont1.eContainer();
+			} while (cont1 != null && cont1.eContainer() != null);
+	
+			if (expr2 != null) {
+				EObject cont2 = expr2;
+				do {
+					if (cont2 instanceof BinaryOperation && ((BinaryOperation)cont2).getOp().equals("or")) {
+						break;
+					}
+					cont2 = cont2.eContainer();
+				} while (cont2 != null && cont2.eContainer() != null);
+				if (cont1 != null && cont2 != null && cont1.equals(cont2)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	protected boolean isEqualOperator(String op) {
+		BuiltinType optype = BuiltinType.getType(op);
+		if (optype.equals(BuiltinType.Equal)) {
+			return true;
+		}
+		return false;
+	}
 
-}
+};

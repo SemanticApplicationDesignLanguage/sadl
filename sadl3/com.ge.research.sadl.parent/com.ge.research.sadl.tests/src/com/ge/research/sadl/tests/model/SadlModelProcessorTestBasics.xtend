@@ -30,6 +30,7 @@ import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.junit.Test
 import com.hp.hpl.jena.rdf.model.RDFNode
+import com.hp.hpl.jena.ontology.CardinalityRestriction
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -69,6 +70,27 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
  		]
 	}
 	
+	@Test
+	def void testPropertySingleValue() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by age with a single value of type float.
+ 		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof CardinalityRestriction) {
+ 				assertTrue((sprc as CardinalityRestriction).onProperty.URI.equals("http://sadl.org/test.sadl#age"))
+ 				assertTrue((sprc as CardinalityRestriction).cardinality == 1)
+ 			}
+ 		]
+	}
+
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)

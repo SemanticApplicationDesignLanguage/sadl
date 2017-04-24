@@ -1963,7 +1963,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (qnmDecl != null) {
 					if (qnmDecl.eContainer() instanceof SadlInstance) {
 						SadlTypeReference typeref = ((SadlInstance)qnmDecl.eContainer()).getType();
-						return getType(typeref);
+						if (typeref != null) {
+							return getType(typeref);
+						}
 					}
 					else if (qnmDecl.eContainer() instanceof SadlMustBeOneOf) {
 						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {
@@ -2303,7 +2305,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (expression instanceof SelectExpression) {
 			// find name in expression and get type from there
 			Expression sexpr = findDefiningExpression(conceptUri, ((SelectExpression)expression).getWhereExpression());
-			if (sexpr != null && !sexpr.equals(sr)) {
+			if (sexpr != null && !sexpr.equals(sr) && !(sexpr instanceof Name && ((Name)sexpr).getName().equals(sr))) {
 				return getType(sexpr);
 			}
 		}
