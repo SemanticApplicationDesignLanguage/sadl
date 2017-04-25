@@ -222,6 +222,7 @@ import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -1296,6 +1297,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 				// now translate the test expression
 				Object testtrans = translate(expr);
+				List<Property> impprops = OntModelProvider.getImpliedProperties(expr.eResource(), expr);
 				
 				// Examine testtrans, the results of the translation.
 				// The recognition of various Test patterns, so that the LHS, RHS, Comparison of the Test can be
@@ -4627,13 +4629,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				if (val instanceof SadlInstance) {
 					Individual instval = processSadlInstance((SadlInstance) val);
-					addInstancePropertyValue(inst, oprop, instval);
+					addInstancePropertyValue(inst, oprop, instval, val);
 				}
 				else if (val instanceof SadlResource) {
 					String uri = declarationExtensions.getConceptUri((SadlResource) val);
 					com.hp.hpl.jena.rdf.model.Resource rsrc = getTheJenaModel().getResource(uri);
 					if (rsrc.canAs(Individual.class)){
-						addInstancePropertyValue(inst, oprop, rsrc.as(Individual.class));
+						addInstancePropertyValue(inst, oprop, rsrc.as(Individual.class), val);
 					}
 					else {
 						throw new JenaProcessorException("unhandled value type SadlResource that isn't an instance (URI is '" + uri + "')");
@@ -4662,7 +4664,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
 							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, effectiveRng);
 							if (lval != null) {
-								addInstancePropertyValue(inst, oprop, lval);
+								addInstancePropertyValue(inst, oprop, lval, val);
 							}
 						}
 					}
@@ -4670,7 +4672,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						if (rng == null) {
 							// this isn't really an ObjectProperty--should probably be an rdf:Property
 							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, null);
-							addInstancePropertyValue(inst, oprop, lval);
+							addInstancePropertyValue(inst, oprop, lval, val);
 						}
 						else {
 							addError("A SadlExplicitValue is given to an an ObjectProperty", val);
@@ -4700,7 +4702,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, dprop.getRange());
 					if (lval != null) {
-						addInstancePropertyValue(inst, dprop, lval);
+						addInstancePropertyValue(inst, dprop, lval, val);
 					}
 				}
 				else {
@@ -4728,7 +4730,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else {
 					throw new JenaProcessorException(SadlErrorMessages.UNHANDLED.get(val.getClass().getCanonicalName(), "unable to handle annotation value"));
 				}
-				addInstancePropertyValue(inst, annprop, rsrcval);
+				addInstancePropertyValue(inst, annprop, rsrcval, val);
 			}
 		}
 		else if (type.equals(OntConceptType.RDF_PROPERTY)) {
@@ -4750,7 +4752,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				throw new JenaProcessorException("unable to handle rdf property value of type '" + val.getClass().getCanonicalName() + "')");
 			}
-			addInstancePropertyValue(inst, rdfprop, rsrcval);
+			addInstancePropertyValue(inst, rdfprop, rsrcval, val);
 		}
 		else if (type.equals(OntConceptType.VARIABLE)) {
 			// a variable for a property type is only valid in a rule or query.
@@ -4770,7 +4772,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return effectiveRng;
 	}
 	
-	private void addInstancePropertyValue(Individual inst, Property prop, RDFNode value) {
+	private void addInstancePropertyValue(Individual inst, Property prop, RDFNode value, EObject ctx) {
+		if (prop.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
+			// check for ambiguity through duplication of property range
+			if (value.canAs(OntProperty.class)){ 
+				NodeIterator ipvs = inst.listPropertyValues(prop);
+				if (ipvs.hasNext()) {
+					List<OntResource> valueRngLst = new ArrayList<OntResource>();
+					ExtendedIterator<? extends OntResource> vitr = value.as(OntProperty.class).listRange();
+					while (vitr.hasNext()) {
+						valueRngLst.add(vitr.next());
+					}
+					vitr.close();
+					boolean overlap = false;
+					while (ipvs.hasNext()) {
+						RDFNode ipv = ipvs.next();
+						if (ipv.canAs(OntProperty.class)){
+							ExtendedIterator<? extends OntResource> ipvitr = ipv.as(OntProperty.class).listRange();
+							while (ipvitr.hasNext()) {
+								OntResource ipvr = ipvitr.next();
+								if (valueRngLst.contains(ipvr)) {
+									addError("Ambiguous condition--multiple implied properties (" + 
+											value.as(OntProperty.class).getLocalName() + "," + ipv.as(OntProperty.class).getLocalName() + 
+											") have the same range (" + ipvr.getLocalName() + ")", ctx);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		inst.addProperty(prop, value);
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '" + inst.toString() + "'");
 	}
