@@ -19,7 +19,7 @@ package com.ge.research.sadl.ui.tests.contentassist
 
 import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.ui.OutputStreamStrategy
-import com.ge.research.sadl.ui.contentassist.OntologyContextProvider
+import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ui.tests.SADLUiInjectorProvider
 import com.ge.research.sadl.ui.tests.contentassist.AbstractSadlContentAssistTest.SadlContentAssistProcessorTestBuilder
 import com.google.common.collect.ImmutableMap
@@ -191,7 +191,7 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 						processor.contextFactory.create(sourceViewer, document.length, it)
 					]);
 					for (context : contexts) {
-						val ontologyContext = get(OntologyContextProvider).getOntologyContext(context);
+						val ontologyContext = get(IOntologyContextProvider).getOntologyContext(context);
 						if (ontologyContext.present) {
 							return ontologyContext.get;
 						}
