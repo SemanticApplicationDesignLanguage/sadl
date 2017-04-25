@@ -67,7 +67,6 @@
         eType="#//SadlPropertyInitializer" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="instance" eType="#//SadlResource"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlResource" eSuperTypes="#//SadlStatement #//SadlExplicitValue #//Expression">
     <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//SadlResource"/>
@@ -232,6 +231,9 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="propConditions" upperBound="-1"
         eType="#//SadlPropertyCondition" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SadlNestedInstance" eSuperTypes="#//SadlInstance">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="article" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlUnionType" eSuperTypes="#//SadlTypeReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//SadlTypeReference"
