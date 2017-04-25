@@ -88,7 +88,16 @@ public class RunQuery extends SadlActionHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
 			String[] validTargetTypes = getValidTargetFileTypes();
-			Object[] target = getCommandTarget(validTargetTypes);
+			boolean tryAddingOwlExtension = false;
+			Object[] target = null;
+			try {
+				target = getCommandTarget(validTargetTypes);
+			}
+			catch (TranslationException e) {
+				// invalid file type--but maybe this is a derivative grammar OWL file
+				// assume naming is to append ".owl" to the file name for any derivative grammar file
+				tryAddingOwlExtension = true;
+			}
 			IProject project = null;
 			IPath trgtFolder = null;
 			IFile trgtFile = null;
@@ -127,6 +136,9 @@ public class RunQuery extends SadlActionHandler {
 	//				Resource res = prepareActionHandler(trgtFile);
 					SadlConsole.writeToConsole(MessageType.INFO, "Adhoc Query of '" + trgtFile.getFullPath().toPortableString() + "' requested.\n");
 					owlFileName = trgtFile.getFullPath().lastSegment();
+				}
+				else if (tryAddingOwlExtension) {
+					owlFileName = trgtFile.getFullPath().lastSegment().concat(".owl");
 				}
 				String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
 				final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
