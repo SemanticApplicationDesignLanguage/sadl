@@ -1432,11 +1432,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private void applyImpliedProperties(Test sadlTest, Expression element) throws TranslationException {
-		sadlTest.setLhs(applayImpliedPropertiesToSide(sadlTest.getLhs(), element));
-		sadlTest.setRhs(applayImpliedPropertiesToSide(sadlTest.getRhs(), element));
+		sadlTest.setLhs(applyImpliedPropertiesToSide(sadlTest.getLhs(), element));
+		sadlTest.setRhs(applyImpliedPropertiesToSide(sadlTest.getRhs(), element));
 	}
 	
-	private Object applayImpliedPropertiesToSide(Object side, Expression element) throws TranslationException {
+	private Object applyImpliedPropertiesToSide(Object side, Expression element) throws TranslationException {
 		Map<EObject, List<Property>> impprops = OntModelProvider.getAllImpliedProperties(getCurrentResource());
 		if (impprops != null) {
 			Iterator<EObject> imppropitr = impprops.keySet().iterator();
