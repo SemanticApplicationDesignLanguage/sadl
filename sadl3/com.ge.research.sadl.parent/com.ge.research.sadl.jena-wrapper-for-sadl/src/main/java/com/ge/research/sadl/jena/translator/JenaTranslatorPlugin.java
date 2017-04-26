@@ -453,6 +453,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		StringBuilder sbmain = new StringBuilder();
 		StringBuilder sbfilter = new StringBuilder();
 		sbmain.append(query.getKeyword());		
+		sbmain.append(" ");
 		if (query.isDistinct()) {
 			sbmain.append("distinct ");
 		}

@@ -197,6 +197,7 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -1297,7 +1298,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 				// now translate the test expression
 				Object testtrans = translate(expr);
-				List<Property> impprops = OntModelProvider.getImpliedProperties(expr.eResource(), expr);
 				
 				// Examine testtrans, the results of the translation.
 				// The recognition of various Test patterns, so that the LHS, RHS, Comparison of the Test can be
@@ -1391,6 +1391,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			
 			for (int i = 0; generatedTests != null && i < generatedTests.length; i++) {
 				sadlTest = generatedTests[i];
+				applyImpliedProperties(sadlTest, tests.get(0));
 				getIfTranslator().postProcessTest(sadlTest, element);
 //				ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
 //				if (node != null) {
@@ -1413,7 +1414,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								(err.getCause() != null ? (" (" + err.getCause().getLocalizedMessage() + ")") : ""));
 					}
 				}
-		
 				validateTest(element, sadlTest);
 				addSadlCommand(sadlTest);
 			}
@@ -1429,6 +1429,54 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //			e.printStackTrace();
 		}
 		return generatedTests;
+	}
+	
+	private void applyImpliedProperties(Test sadlTest, Expression element) throws TranslationException {
+		sadlTest.setLhs(applayImpliedPropertiesToSide(sadlTest.getLhs(), element));
+		sadlTest.setRhs(applayImpliedPropertiesToSide(sadlTest.getRhs(), element));
+	}
+	
+	private Object applayImpliedPropertiesToSide(Object side, Expression element) throws TranslationException {
+		Map<EObject, List<Property>> impprops = OntModelProvider.getAllImpliedProperties(getCurrentResource());
+		if (impprops != null) {
+			Iterator<EObject> imppropitr = impprops.keySet().iterator();
+			while (imppropitr.hasNext()) {
+				EObject eobj = imppropitr.next();
+				String uri = null;
+				if (eobj instanceof SadlResource) {
+					uri = declarationExtensions.getConceptUri((SadlResource)eobj);
+				}
+				else if (eobj instanceof Name) {
+					uri = declarationExtensions.getConceptUri(((Name)eobj).getName());
+				}
+				if (uri != null) {
+					if (side instanceof NamedNode) {
+						if (((NamedNode)side).toFullyQualifiedString().equals(uri)) {
+							List<Property> props = impprops.get(eobj);
+							if (props != null && props.size() > 0) {
+								if (props.size() > 1) {
+									throw new TranslationException("More than 1 implied property found!");
+								}
+								// apply impliedProperties
+								NamedNode pred = new NamedNode(props.get(0).getURI());
+								if (props.get(0) instanceof DatatypeProperty) {
+									pred.setNodeType(NodeType.DataTypeProperty);
+								}
+								else if (props.get(0) instanceof ObjectProperty) {
+									pred.setNodeType(NodeType.ObjectProperty);
+								}
+								else {
+									pred.setNodeType(NodeType.PropertyNode);
+								}
+								return new TripleElement((NamedNode)side, pred, new VariableNode(getNewVar(element)));
+							}
+						}
+					}
+
+				}
+			}
+		}
+		return side;		
 	}
 	
 	private boolean containsMultipleTests(List<GraphPatternElement> testtrans) {
