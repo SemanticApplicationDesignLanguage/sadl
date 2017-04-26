@@ -29,6 +29,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 
 	/** Primitive primary type reference. */
 	@Test
+// TODO this should actually not be a proposal--can't create an instance of an XSD datatype
 	def void checkCA_01_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposal('integer');
 	}

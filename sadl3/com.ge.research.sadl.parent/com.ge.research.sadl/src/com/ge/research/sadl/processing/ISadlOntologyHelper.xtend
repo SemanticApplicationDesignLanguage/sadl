@@ -131,6 +131,8 @@ interface ISadlOntologyHelper {
 		public static val SADLRESOURCE_NAME = 'SADLRESOURCE_NAME';
 		
 		public static val SADLPROPERTYRESTRICTION_TYPEONLY = 'SADLPROPERTYRESTRICTION_TYPEONLY';
+		
+		public static val PROPOFSUBJECT_RIGHT = 'PROPOFSUBJECT_RIGHT';
 
 		/**
 		 * {@code C is a class described by p1 with values of type C. myC is a C with p1 <|>}
@@ -146,7 +148,8 @@ interface ISadlOntologyHelper {
 			SADLPROPERTYINITIALIZER_VALUE,
 			SADLPROPERTYINITIALIZER_PROPERTY,
 			SADLRESOURCE_NAME,
-			SADLSTATEMENT_SUPERELEMENT
+			SADLSTATEMENT_SUPERELEMENT,
+			PROPOFSUBJECT_RIGHT
 		}
 
 		/**

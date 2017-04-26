@@ -52,6 +52,7 @@ import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import com.ge.research.sadl.sADL.SadlRangeRestriction
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -60,6 +61,12 @@ import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 class SADLProposalProvider extends AbstractSADLProposalProvider {
 	@Inject protected DeclarationExtensions declarationExtensions
 	@Inject extension ProposalProviderFilterProvider;
+	
+	val PropertyRangeKeywords = newArrayList(
+		'string','boolean','decimal','int','long','float','double','duration','dateTime','time','date',
+    	'gYearMonth','gYear','gMonthDay','gDay','gMonth','hexBinary','base64Binary','anyURI','
+    	integer','negativeInteger','nonNegativeInteger','positiveInteger','nonPositiveInteger',' 
+    	unsignedByte','unsignedInt','anySimpleType','data','class')
 	
 	protected List<OntConceptType> typeRestrictions
 	protected List<String> excludedNamespaces
@@ -340,6 +347,11 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			val container = model.eContainer
 			val kval = keyword.value
 			if (container instanceof SadlProperty) {
+				if (model instanceof SadlRangeRestriction) {
+					if (PropertyRangeKeywords.contains(kval)) {
+						return true;
+					}
+				}
 				return false
 			}
 			else if (container instanceof Declaration) {
