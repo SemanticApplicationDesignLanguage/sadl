@@ -36,6 +36,10 @@ import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
+import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
+import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SadlRangeRestriction
+import java.util.List
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -61,20 +65,31 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 
 			if (key == SADLPROPERTYINITIALIZER_VALUE) {
 				val initializer = currentModel.propertyInitializer;
-				val instance = initializer.eContainer as SadlInstance;
-				val type = instance.type;
-				if (type instanceof SadlSimpleTypeReference) {
-					val builder = new ContextBuilder(type.type) => [
-						grammarContextId = key;
-						addRestriction(initializer.property);
-						validationAcceptor = acceptor;
-						contextClass = clazz;
-					];
-					return Optional.of(builder.build);
+				if (initializer !== null) {
+					val instance = initializer.eContainer as SadlInstance;
+					val type = instance.type;
+					if (type instanceof SadlSimpleTypeReference) {
+						val builder = new ContextBuilder(type.type) => [
+							grammarContextId = key;
+							if (initializer instanceof SadlPropertyInitializer) {
+								addRestriction((initializer as SadlPropertyInitializer).property);
+							}
+							else if (initializer instanceof SadlResource) {
+								addRestriction(initializer)
+							}
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						];
+						return Optional.of(builder.build);
+					}
+				}
+				else {
+					// need to do something else to get the type
+					val i = 0;
 				}
 			} else if (key == SADLPROPERTYINITIALIZER_PROPERTY) {
 				val initializer = currentModel.propertyInitializer;
-				if (initializer != null) {
+				if (initializer !== null) {
 					val instance = initializer.eContainer as SadlInstance;
 					val type = instance.type;
 					if (type instanceof SadlSimpleTypeReference) {
@@ -89,6 +104,88 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 				else {
 					if (LOGGER.debugEnabled) {
 						LOGGER.warn('''Case handling incomplete: «key» [Class: «clazz.name»]''');
+					}
+				}
+			} else if (key == SADLSTATEMENT_SUPERELEMENT) {
+				val initializer = currentModel.getClassOrPropertyInitializer;
+				if (initializer !== null) {
+					if (initializer instanceof SadlClassOrPropertyDeclaration) {
+						val type = (initializer as SadlClassOrPropertyDeclaration).classOrProperty.get(0)
+						if (type instanceof SadlResource) {
+							val builder = new ContextBuilder(type) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							];
+							return Optional.of(builder.build);
+						}
+					}
+					else if (initializer instanceof SadlRangeRestriction) {
+						val type = (initializer as SadlRangeRestriction).classOrPropertyInitializer
+						if (type instanceof SadlResource) {
+							val builder = new ContextBuilder(type) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							];
+							return Optional.of(builder.build);
+						}
+					}
+				}
+			} else if (key == SADLPRIMARYTYPEREFERENCE_TYPE) {
+				val initializer = currentModel.getClassOrPropertyInitializer;
+				if (initializer !== null) {
+					if (initializer instanceof SadlClassOrPropertyDeclaration) {
+						val type = (initializer as SadlClassOrPropertyDeclaration).classOrProperty.get(0)
+//						val instance = initializer.eContainer as SadlClassOrPropertyDeclaration
+						if (type instanceof SadlResource) {
+							val builder = new ContextBuilder(type) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							];
+							return Optional.of(builder.build);
+						}
+					}
+					else if (initializer instanceof SadlRangeRestriction) {
+						val type = (initializer as SadlRangeRestriction).classOrPropertyInitializer
+//						val instance = initializer.eContainer as SadlClassOrPropertyDeclaration
+						if (type instanceof SadlResource) {
+							val builder = new ContextBuilder(type) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							];
+							return Optional.of(builder.build);
+						}
+					}
+				}
+			} else if (key == SADLPROPERTYRESTRICTION_TYPEONLY) {
+				val initializer = currentModel.getClassOrPropertyInitializer;
+				if (initializer !== null) {
+					if (initializer instanceof SadlClassOrPropertyDeclaration) {
+						val type = (initializer as SadlClassOrPropertyDeclaration).classOrProperty.get(0)
+//						val instance = initializer.eContainer as SadlClassOrPropertyDeclaration
+						if (type instanceof SadlResource) {
+							val builder = new ContextBuilder(type) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							];
+							return Optional.of(builder.build);
+						}
+					}
+					else if (initializer instanceof SadlRangeRestriction) {
+						val type = (initializer as SadlRangeRestriction).classOrPropertyInitializer
+//						val instance = initializer.eContainer as SadlClassOrPropertyDeclaration
+						if (type instanceof SadlResource) {
+							val builder = new ContextBuilder(type) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							];
+							return Optional.of(builder.build);
+						}
 					}
 				}
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
@@ -107,17 +204,37 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 
 		return Optional.absent;
 	}
-
+	
 	private def OntModel getOntModel(EObject it) {
 		return OntModelProvider.find(eResource);
 	}
 	
 	private def dispatch getPropertyInitializer(SadlModel it) {
-		return EcoreUtil2.getAllContentsOfType(it, SadlPropertyInitializer).head;
+		val spi = EcoreUtil2.getAllContentsOfType(it, SadlPropertyInitializer)
+		if (!spi.empty) {
+			return (spi as List<SadlPropertyInitializer>).head;
+		}
+		val spsr = EcoreUtil2.getAllContentsOfType(it, SadlResource)
+		if (!spsr.empty) {
+			return (spsr as List<SadlResource>).head;
+		}
+		return null
 	}
 	
 	private def dispatch getPropertyInitializer(SadlPropertyInitializer it) {
 		return it;
+	}
+
+	private def dispatch getClassOrPropertyInitializer(SadlClassOrPropertyDeclaration it) {
+		return it;
+	}
+	
+	private def dispatch getClassOrPropertyInitializer(SadlRangeRestriction it) {
+		return it;
+	}
+
+	private def dispatch getClassOrPropertyInitializer(SadlModel it) {
+		return EcoreUtil2.getAllContentsOfType(it, SadlClassOrPropertyDeclaration).head;
 	}
 
 }

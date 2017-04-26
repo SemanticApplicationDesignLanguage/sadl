@@ -1837,20 +1837,28 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		//If the expression is a function, find equation definition from name and get the return type
 		if(expression.isFunction()){
-			if(qnm.eContainer() instanceof EquationStatement){
-				EquationStatement es = (EquationStatement) qnm.eContainer();
-				if(es != null){
-					return getType(es.getReturnType());
-				}
-			}else if(qnm.eContainer() instanceof ExternalEquationStatement){
-				ExternalEquationStatement ees = (ExternalEquationStatement)qnm.eContainer();
-				if(ees != null){
-					return getType(ees.getReturnType());
-				}
+			TypeCheckInfo ftci = getFunctionType(qnm);
+			if (ftci != null) {
+				return ftci;
 			}
 			handleUndefinedFunctions(expression);
 		}
 		return getType(qnm);
+	}
+	
+	private TypeCheckInfo getFunctionType(SadlResource fsr) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException {
+		if(fsr.eContainer() instanceof EquationStatement){
+			EquationStatement es = (EquationStatement) fsr.eContainer();
+			if(es != null){
+				return getType(es.getReturnType());
+			}
+		}else if(fsr.eContainer() instanceof ExternalEquationStatement){
+			ExternalEquationStatement ees = (ExternalEquationStatement)fsr.eContainer();
+			if(ees != null){
+				return getType(ees.getReturnType());
+			}
+		}
+		return null;
 	}
 	
 	private boolean isInQuery(EObject expression) {
@@ -2038,7 +2046,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName declarationConceptName = new ConceptName("TODO");
 			return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
 		}
-		
+		else if (conceptType.equals(OntConceptType.FUNCTION_DEFN)) {
+			return getFunctionType(qnm);
+		}
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
 	}
@@ -2954,7 +2964,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								else {
 									Property prop = ontModel.getProperty(preduri);
 									if (prop != null) {
-										checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+										checkPropertyDomain(ontModel, subj, prop, predicate, propOfSubjectCheck, varName);
 									}
 								}
 							}

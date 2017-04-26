@@ -59,7 +59,6 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Property check with imports. */
-	@Ignore
 	@Test
 	def void checkCA_06_Property_Positive() {
 		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". C is a Circle with ''').
@@ -67,7 +66,6 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Property check with imports. */
-	@Ignore
 	@Test
 	def void checkCA_06b_Property_Positive() {
 		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". C is a Circle. C has ''').

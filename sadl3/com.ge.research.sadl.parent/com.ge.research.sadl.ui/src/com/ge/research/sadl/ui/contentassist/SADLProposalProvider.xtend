@@ -397,7 +397,16 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				}
 				return false
 			}
-			
+			else if (model instanceof SadlPropertyInitializer) {
+				if (kval.equals("true") || kval.equals("false") || kval.equals("PI") || kval.equals("e")) {
+					val proptype = declarationExtensions.getOntConceptType((model as SadlPropertyInitializer).property)
+					if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
+						// check property range
+//TODO how do we do this?
+					}
+				}
+				return false;
+			}	
 		}
 		return true
 	}

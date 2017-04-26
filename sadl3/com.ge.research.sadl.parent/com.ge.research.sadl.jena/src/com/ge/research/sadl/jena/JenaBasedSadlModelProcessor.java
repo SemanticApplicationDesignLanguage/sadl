@@ -649,22 +649,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
     @Override
     public void validate(Context context, SadlResource candidate) {
+    	ValidationAcceptor savedIssueAccpetor = this.issueAcceptor;
+    	setIssueAcceptor(context.getAcceptor());
+    	
     	String contextId = context.getGrammarContextId().orNull();
     	OntModel ontModel = context.getOntModel();
     	SadlResource subject = context.getSubject();
     	System.out.println("Subject: " + declarationExtensions.getConceptUri(subject));
     	System.out.println("Candidate: " + declarationExtensions.getConceptUri(candidate));
-    	if (subject == MISSING_SUBJECT) {
-    		return;
-    	}
     	
 		try {
+	    	if (subject == MISSING_SUBJECT) {
+	    		return;
+	    	}
 			switch (contextId) {
 			case SADLPROPERTYINITIALIZER_PROPERTY: {
+				OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+				if (!isProperty(candtype)) {
+					context.getAcceptor().add("No", candidate, Severity.ERROR);
+					return;
+				}
 				modelValidator.checkPropertyDomain(ontModel, subject, candidate, true);
+				return;
 			}
 			case SADLPROPERTYINITIALIZER_VALUE: {
 				SadlResource prop = context.getRestrictions().iterator().next();
+				OntConceptType proptype = declarationExtensions.getOntConceptType(prop);
+				if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
+					context.getAcceptor().add("No", candidate, Severity.ERROR);
+					return;
+				}
+				if (proptype.equals(OntConceptType.CLASS_PROPERTY)) {
+					OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+					if (!candtype.equals(OntConceptType.INSTANCE)) {
+						context.getAcceptor().add("No", candidate, Severity.ERROR);
+						return;
+					}
+				}
 				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
 				while (ritr.hasNext()) {
 					System.out.println("Restriction: " + declarationExtensions.getConceptUri(ritr.next()));
@@ -672,8 +693,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				modelValidator.checkPropertyDomain(ontModel, subject, prop, true);
 				StringBuilder errorMessageBuilder = new StringBuilder();
 				if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is", errorMessageBuilder)) {
-					context.getAcceptor().add(errorMessageBuilder.toString(), candidate.eContainer(), Severity.ERROR);
+					context.getAcceptor().add(errorMessageBuilder.toString(), candidate, Severity.ERROR);
 				}
+				return;
+			}
+			case SADLSTATEMENT_SUPERELEMENT: {
+				OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+				if (candtype.equals(OntConceptType.CLASS) ||
+						candtype.equals(OntConceptType.CLASS_LIST) ||
+						candtype.equals(OntConceptType.CLASS_PROPERTY) ||
+						candtype.equals(OntConceptType.DATATYPE) ||
+						candtype.equals(OntConceptType.DATATYPE_LIST) ||
+						candtype.equals(OntConceptType.DATATYPE_PROPERTY) ||
+						candtype.equals(OntConceptType.RDF_PROPERTY)) {
+					return;
+				}
+				context.getAcceptor().add("No", candidate, Severity.ERROR);
 			}
 			default: {
 				// Ignored
@@ -681,6 +716,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		} catch (InvalidTypeException e) {
 			throw new RuntimeException(e);
+		} catch (CircularDefinitionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally {
+			if (savedIssueAccpetor != null) {
+				setIssueAcceptor(savedIssueAccpetor);
+			}
 		}
     }
     
