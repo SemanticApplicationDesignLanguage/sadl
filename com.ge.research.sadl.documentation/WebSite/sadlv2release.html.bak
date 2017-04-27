@@ -5,7 +5,7 @@
 </head>
 <h1 dir="rtl" align="left">Installing the Semantic Application Design Language (SADL) Version2</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->02/05/2015<!--webbot bot="Timestamp" endspan i-checksum="12571" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->03/05/2014<!--webbot bot="Timestamp" endspan i-checksum="12571" --> 
 by <a href="mailto:crapo@research.ge.com?subject=SADL">A. W. Crapo</a>.</h6>
 <h3>Table of Contents</h3>
 <ul>
@@ -15,12 +15,6 @@ by <a href="mailto:crapo@research.ge.com?subject=SADL">A. W. Crapo</a>.</h6>
 </ul>
 <h3><a name="Version 2 Release History">Version 2 Release History</a></h3>
 <ul>
-  <li>Version 2.2.0.2015051358 for Eclipse Kepler (using Xtext 2.43.) released 
-  2/5/2015<ul>
-  <li>Ontologies now have annotations</li>
-  <li>User-defined data types supported</li>
-</ul>
-  </li>
   <li>Version 2.2.0 for Eclipse Kepler (using Xtext 2.4.3) released 3/5/2014 (<b><font color="#CC0000">Note 
   that Eclipse Kepler and Java 1.7 are required for this release.</font></b>)<ul>
   <li>Vocabulary for rules extended to support OWL constructs such as 
@@ -351,7 +345,7 @@ Version 2.2.0 and Later</a></h2>
   to create the new update site with Location
   <a href="http://sadl.sourceforge.net/kepler/update/">
   http://sadl.sourceforge.net/kepler/update/</a> and whatever Name you wish. 
-  Click OK to install SADL. Select all features, accept the license 
+  Click OK to install SADL for GE. Select all features, accept the license 
   agreement, confirm installation and restart. </li>
   <li><b><font color="#ff0000">Note that the Eclipse workspace path must NOT 
   have any spaces or other non-URL compatible characters.</font></b> If needed, 

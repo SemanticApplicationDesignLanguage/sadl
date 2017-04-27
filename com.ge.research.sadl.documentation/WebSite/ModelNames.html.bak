@@ -13,7 +13,7 @@
 <h1 dir="ltr">Model Names, Namespaces, and Aliases in SADL</h1>
 
 <h5 dir="ltr">Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->02/05/2015<!--webbot bot="Timestamp" endspan i-checksum="12571" -->.</h5>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/04/2014<!--webbot bot="Timestamp" endspan i-checksum="12561" -->.</h5>
 
 <h2 dir="ltr">The Basics</h2>
 
@@ -58,7 +58,7 @@ XML/RDF format.</p>
 <blockquote>
   <p ALIGN="LEFT">uri</font><font SIZE="2"> <b>&quot;http://sadl.imp/shapes&quot;</b>
   </font><font SIZE="2" COLOR="#800080">version</font><font SIZE="2"> 
-  &quot;$Revision: 1.3 $ Last modified on $Date: 2015/02/05 13:33:00 $&quot;.</font></p>
+  &quot;$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:06:20 $&quot;.</font></p>
   <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Shape</b></font><font SIZE="2">
   </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
@@ -83,7 +83,7 @@ XML/RDF format.</p>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xml:base=&quot;http://sadl.imp/shapes&quot;&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Ontology rdf:about=&quot;http://sadl.imp/shapes#&quot;&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-  &lt;owl:versionInfo&gt;$Revision: 1.3 $ Last modified on $Date: 2009/03/06 14:37:54 
+  &lt;owl:versionInfo&gt;$Revision: 1.1 $ Last modified on $Date: 2009/03/06 14:37:54 
   $&lt;/owl:versionInfo&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
   &lt;rdfs:comment xml:lang=&quot;en&quot;&gt;This ontology was created from a SADL file 'shapes.sadl' 
@@ -147,7 +147,7 @@ of the model above could be</p>
   <p ALIGN="LEFT">uri</font><font SIZE="2"> <b>&quot;http://sadl.imp/shapes&quot;</b>
   </font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> shapes
   </font><font SIZE="2" COLOR="#800080">version</font><font SIZE="2"> 
-  &quot;$Revision: 1.3 $ Last modified on $Date: 2015/02/05 13:33:00 $&quot;.</font></p>
+  &quot;$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:06:20 $&quot;.</font></p>
   </blockquote>
 <p>This will create a global alias in the Jena policy file, ont-policy.rdf 
 (located in the OwlModels folder of a SADL-IDE project). </p>
@@ -183,27 +183,6 @@ either show the model names (http scheme) of known models or the actual SADL
 file name 
 (file scheme), depending upon the setting in the SADL preferences (Window -&gt; 
 Preferences -&gt; Sadl).</p>
-<h3>Ontology Annotations</h3>
-<p>Just as concepts with a model can be given rdfs:label and rdfs:comment 
-annotations, so can the model itself. As with model concepts, this is done with 
-&quot;alias&quot; and &quot;note&quot; within parentheses. This use of &quot;alias&quot; within parentheses is 
-different from the&nbsp; alias described above: this creates an rdfs:label 
-whereas the &quot;alias&quot; keyword not in parentheses creates an XML namespace prefix. 
-Here is an example of a model URI with annotations:</p>
-<blockquote>
-  <font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">uri</font><font SIZE="2"> <b>&quot;http://sadl.org/TestSadlIde/OntologyComments&quot;</b>
-  </font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> Name <br>
-  </font><font SIZE="2" COLOR="#800080">&nbsp;&nbsp;&nbsp; version</font><font SIZE="2"> 
-  &quot;$Revision: 1.3 $ Last modified on $Date: 2015/02/05 13:33:00 $&quot;<br>
-&nbsp;&nbsp;&nbsp; (</font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> 
-  &quot;This is a label for the <u>ontology</u>&quot;)<br>
-&nbsp;&nbsp;&nbsp; (</font><font SIZE="2" COLOR="#800080">note</font><font SIZE="2"> 
-  &quot;This is a comment on the <u>ontology</u>&quot;, &quot;This is a second comment&quot;) <br>
-&nbsp;&nbsp;&nbsp; (</font><font SIZE="2" COLOR="#800080">note</font><font SIZE="2"> 
-  &quot;This is a third comment&quot;). </p>
-  </font>
-</blockquote>
 <h2>Jena TDB, Default and Named Graphs</h2>
 <p>The approach described above works well when each SADL model file generates 
 an OWL model file. The mapping between an actual OWL model file, identified by a 
