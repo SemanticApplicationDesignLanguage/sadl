@@ -42,6 +42,7 @@ import com.ge.research.sadl.sADL.SadlRangeRestriction
 import java.util.List
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.Name
+import com.ge.research.sadl.sADL.SubjHasProp
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -204,7 +205,11 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 						return Optional.of(builder.build);
 					}
 				}
-				 
+			} else if (key == PROPOFSUBJECT_PROP) {
+				val initializer = currentModel.getSubjHasPropInitializer
+				if (initializer != null) {
+					
+				}
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
 				val builder = createWithoutSubject(currentModel.ontModel) => [
 					grammarContextId = key;
@@ -262,4 +267,11 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 		return EcoreUtil2.getAllContentsOfType(it, PropOfSubject).head;
 	}
 	
+	private def dispatch getSubjHasPropInitializer(SubjHasProp it) {
+		return it;
+	}
+	
+	private def dispatch getSubjHasPropInitializer(SadlModel it) {
+		return EcoreUtil2.getAllContentsOfType(it, SubjHasProp).head;
+	}
 }

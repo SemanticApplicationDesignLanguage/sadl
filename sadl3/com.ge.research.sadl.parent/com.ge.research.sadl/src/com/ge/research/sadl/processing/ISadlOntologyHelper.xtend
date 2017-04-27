@@ -133,6 +133,8 @@ interface ISadlOntologyHelper {
 		public static val SADLPROPERTYRESTRICTION_TYPEONLY = 'SADLPROPERTYRESTRICTION_TYPEONLY';
 		
 		public static val PROPOFSUBJECT_RIGHT = 'PROPOFSUBJECT_RIGHT';
+		
+		public static val PROPOFSUBJECT_PROP = 'PROPOFSUBJECT_PROP';
 
 		/**
 		 * {@code C is a class described by p1 with values of type C. myC is a C with p1 <|>}

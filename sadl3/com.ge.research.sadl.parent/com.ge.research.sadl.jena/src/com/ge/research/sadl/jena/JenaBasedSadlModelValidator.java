@@ -2919,7 +2919,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									if (subj != null) {
 										Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
 										if (prop != null) {
-											checkPropertyDomain(ontModel, subj, prop, subject, propOfSubjectCheck, varName);
+											checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
 										}
 									}
 								}
@@ -2950,7 +2950,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
 								if (prop != null) {
-									checkPropertyDomain(ontModel, propsubj, prop, subject, propOfSubjectCheck, varName);
+									checkPropertyDomain(ontModel, propsubj, prop, target, propOfSubjectCheck, varName);
 								}
 							}
 						}
@@ -2964,7 +2964,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								else {
 									Property prop = ontModel.getProperty(preduri);
 									if (prop != null) {
-										checkPropertyDomain(ontModel, subj, prop, predicate, propOfSubjectCheck, varName);
+										checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
 									}
 								}
 							}
