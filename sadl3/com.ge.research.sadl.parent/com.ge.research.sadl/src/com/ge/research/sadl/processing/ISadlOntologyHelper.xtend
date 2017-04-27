@@ -129,11 +129,19 @@ interface ISadlOntologyHelper {
 		public static val SADLPROPERTYCONDITION_PROPERTY = 'SADLPROPERTYCONDITION_PROPERTY';
 
 		public static val SADLRESOURCE_NAME = 'SADLRESOURCE_NAME';
+		
+		public static val SADLPROPERTYRESTRICTION_TYPEONLY = 'SADLPROPERTYRESTRICTION_TYPEONLY';
+		
+		public static val PROPOFSUBJECT_RIGHT = 'PROPOFSUBJECT_RIGHT';
+		
+		public static val PROPOFSUBJECT_PROP = 'PROPOFSUBJECT_PROP';
 
 		/**
 		 * {@code C is a class described by p1 with values of type C. myC is a C with p1 <|>}
 		 */
 		public static val SADLPROPERTYINITIALIZER_VALUE = 'SADLPROPERTYINITIALIZER_VALUE';
+		
+		public static val SADLSTATEMENT_TYPE = 'SADLSTATEMENT_TYPE';
 
 		/**
 		 * A subset of grammar context IDs that requires the ontology helper.
@@ -141,7 +149,9 @@ interface ISadlOntologyHelper {
 		public static val ONTOLOGY_DEPENDENT_CONTEXT_IDS = #{
 			SADLPROPERTYINITIALIZER_VALUE,
 			SADLPROPERTYINITIALIZER_PROPERTY,
-			SADLRESOURCE_NAME
+			SADLRESOURCE_NAME,
+			SADLSTATEMENT_SUPERELEMENT,
+			PROPOFSUBJECT_RIGHT
 		}
 
 		/**

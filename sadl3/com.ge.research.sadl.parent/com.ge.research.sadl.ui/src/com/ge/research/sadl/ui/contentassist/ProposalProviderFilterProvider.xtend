@@ -54,7 +54,7 @@ class ProposalProviderFilterProvider {
 	ImportHelper importHelper;
 
 	@Inject
-	OntologyContextProvider ontologyContextProvider;
+	IOntologyContextProvider ontologyContextProvider;
 
 	@Inject
 	ISadlOntologyHelper ontologyHelper;
