@@ -53,6 +53,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 import com.ge.research.sadl.sADL.SadlRangeRestriction
+import com.hp.hpl.jena.vocabulary.XSD
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -414,7 +415,33 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					val proptype = declarationExtensions.getOntConceptType((model as SadlPropertyInitializer).property)
 					if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 						// check property range
-//TODO how do we do this?
+						val ontModel = OntModelProvider.find(model.eResource)
+						if (ontModel != null) {
+							val ontprop = ontModel.getOntProperty(declarationExtensions.getConceptUri((model as SadlPropertyInitializer).property))
+							if (ontprop != null) {
+								val rnglst = ontprop.listRange
+								if (rnglst != null) {
+									if (kval.equals("true") || kval.equals("false")) {
+										while (rnglst.hasNext) {
+											val rng = rnglst.next
+											if (rng.equals(XSD.xboolean)) {
+												rnglst.close
+												return true
+											}
+										}
+									}
+									else {
+										while (rnglst.hasNext) {
+											val rng = rnglst.next
+											if (rng.equals(XSD.decimal) || rng.equals(XSD.xdouble) || rng.equals(XSD.xfloat)) {
+												rnglst.close
+												return true
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 				return false;
