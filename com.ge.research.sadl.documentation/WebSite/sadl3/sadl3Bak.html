@@ -1,0 +1,604 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Introduction to SADL 3, SRL 2</title>
+</head>
+
+<body>
+
+<h1>Quick Introduction to SADL 3</h1>
+<p>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/20/2017<!--webbot bot="Timestamp" endspan i-checksum="12515" -->. 
+Send comments to <a href="mailto:crapo@research.ge.com?subject=SRL2">
+mailto:crapo@research.ge.com</a>.</p>
+<h2>What's New or Different</h2>
+<h3>Grammar</h3>
+<ol>
+  <li>Properties<ol type="a">
+  <li>rdf:Property: properties that are not given a range as part of their definition are 
+  created as rdf:Property in the ontology OWL file. These properties are colored 
+  a <font size="2" color="#00cc00"><b>lighter green</b></font> in the SADL 
+  editor. <font SIZE="2" COLOR="#00cc00"><b>
+  </li>
+  </b></font>
+  <font SIZE="2">
+  <ul>
+    <li></font><font SIZE="2" COLOR="#00cc00"><b>causes</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">property</font><font SIZE="2">.</li>
+  </ul>
+  </font>
+  </li>
+  <li>Properties without range: properties can be forced to be an owl:ObjectProperty or an 
+  owl:DatatypeProperty using the range statements &quot;with values of type class&quot; or 
+  &quot;with values of type data&quot;, respectively. No range is given to the class but 
+  the specified OWL property type is created.<ul>
+    <li><font SIZE="2">
+    <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#008000"><b>likes</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">property</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">.</font></li>
+    <li>
+    <p ALIGN="LEFT"><font SIZE="2" COLOR="#008000"><b>size</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">property</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">data</font><font SIZE="2">.</font></li>
+  </ul>
+  </li>
+</ol>
+  <li>User-defined datatypes<ol type="a">
+  <li>syntax for user-defined datatypes has changed to be more consistent with 
+  the rest of the grammar<ul>
+    <li>&lt;user-defined-datatype-name&gt; is a type of &lt;xsd-data-type(s)&gt; &lt;facets&gt;</li>
+    <li>Examples<font SIZE="2" COLOR="#000080">
+      <blockquote>
+      <p ALIGN="LEFT">over12</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+      <font SIZE="2" COLOR="#800080">int</font><font SIZE="2"> [12,]. </font>
+      <font SIZE="2" COLOR="#808080"><i>// an <u>int</u> &gt;= 12</i></font><font SIZE="2" COLOR="#000080"><br>
+      clothingsize</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#800080">int</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">or</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">string</font><font SIZE="2">}. </font>
+    <font SIZE="2" COLOR="#808080"><i>// either an <u>int</u> or a string</i></font><font SIZE="2" COLOR="#000080"><br>
+      enumeratedheight</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">string</font><font SIZE="2"> {&quot;short&quot;, 
+    &quot;medium&quot;, &quot;tall&quot;}. </font><font SIZE="2" COLOR="#808080"><i>// enumeration 
+    of 3 possible string values</i></font><font SIZE="2" COLOR="#000080"><br>
+      SSN</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">string</font><font SIZE="2"> 
+    &quot;[0-9]{3}-[0-9]{2}-[0-9]{4}&quot;.</font><font SIZE="2" COLOR="#000080"><br>
+      year</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">int</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">length</font><font SIZE="2"> 4 .</font><font SIZE="2" COLOR="#000080"><br>
+      Airport_Ident</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">string</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">length</font><font SIZE="2"> 1-4 .</font></p>
+    </blockquote>
+    </li>
+  </ul>
+  </li>
+  <li>now implemented as RDFS Datatypes<font SIZE="2" COLOR="#000080"><p>
+  Latitude</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2"> [-90, 90].</p>
+  </font><font SIZE="2">
+  <p ALIGN="LEFT">&lt;rdfs:Datatype rdf:ID=&quot;Latitude&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;owl:equivalentClass&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;rdfs:Datatype&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:withRestrictions 
+  rdf:parseType=&quot;Collection&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;rdf:Description&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;xsd:maxInclusive&gt;90&lt;/xsd:maxInclusive&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;xsd:minInclusive&gt;-90&lt;/xsd:minInclusive&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &lt;/rdf:Description&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:withRestrictions&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:onDatatype 
+  rdf:resource=&quot;http://www.w3.org/2001/XMLSchema#float&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/rdfs:Datatype&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/owl:equivalentClass&gt;<br>
+  &lt;/rdfs:Datatype&gt;<br>
+&nbsp;</li>
+</ol>
+  </li>
+  </font>
+  <li>Typed lists<ol type="a">
+  <li>Example<b><font SIZE="2" COLOR="#000080"><p>Person<font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000">children</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>Person<font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">List</font><font SIZE="2">.<br>
+&nbsp;</font></p>
+  </font></b>
+  </li>
+  <li>What's happening behind the scenes<ul>
+    <li>In SADL list model</li>
+  </ul>
+  <blockquote>
+    <font SIZE="2" COLOR="#000080"><b>
+    <p ALIGN="LEFT">^List</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#00cc00"><b>^first</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>rest</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#000080"><b>^List</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>lengthRestriction</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">int</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>minLengthRestriction</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">int</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>maxLengthRestriction</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">int</font><font SIZE="2">.</font></p>
+  </blockquote>
+  <ul>
+    <li>
+    <p ALIGN="LEFT"><font size="2">So ...</font><font SIZE="2" COLOR="#000080"><b><font SIZE="2" COLOR="#008000"> children</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>Person<font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">List </font></b></font>creates</p>
+    </li>
+  </ul>
+  <blockquote>
+    <font SIZE="2">
+    <p ALIGN="LEFT"><span style="background-color: #FFFFCC">&lt;owl:ObjectProperty 
+    rdf:ID=&quot;children&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;rdfs:domain rdf:resource=&quot;#Person&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;rdfs:range rdf:nodeID=&quot;A0&quot;/&gt;<br>
+    &lt;/owl:ObjectProperty&gt;<br>
+    </span>&lt;owl:Class rdf:nodeID=&quot;A0&quot;&gt;<br>
+    <span style="background-color: #66CCFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;rdfs:subClassOf rdf:resource=&quot;<u>sadllistmodel</u>#<b><u>List</u></b>&quot;/&gt;<br>
+    </span><span style="background-color: #FF99FF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;rdfs:subClassOf&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;owl:Restriction&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;owl:allValuesFrom&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;owl:Class rdf:ID=&quot;<u><b>Person</b></u>&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;/owl:allValuesFrom&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;owl:onProperty rdf:resource=&quot;<u>sadllistmodel</u>#<b><u>first</u></b>&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;/owl:Restriction&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/rdfs:subClassOf&gt;<br>
+    </span><span style="background-color: #66FF99">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;rdfs:subClassOf&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;owl:Restriction&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;owl:allValuesFrom rdf:nodeID=&quot;<b><u>A0</u></b>&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;owl:onProperty rdf:resource=&quot;<u>sadllistmodel</u>#<b><u>rest</u></b>&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    &lt;/owl:Restriction&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/rdfs:subClassOf&gt;<br>
+    </span>&lt;/owl:Class&gt;</p>
+    </font>
+  </blockquote>
+  </li>
+  <li>List length restrictions are possible for named lists only. An &quot;*&quot; is 
+    used to represent no upper-bound on list length. A lower bound is required.<blockquote>
+    <p><font size="2" color="#000080"><b>SmallGroupType</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">is</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">a</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">type</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">of</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><b><font SIZE="2" COLOR="#000080">Person<font SIZE="2"> </font>
+  </font></b>
+    <font size="2" color="#800080">List</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">length</font><font size="2"><span class="Apple-converted-space">&nbsp;</span>0-6.</font></p>
+    </blockquote>
+  <blockquote>
+    <p><font size="2" color="#000080"><b>LargeGroupType</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">is</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">a</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">type</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">of</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><b><font SIZE="2" COLOR="#000080">Person<font SIZE="2"> </font>
+  </font></b>
+    <font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+    List</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">length</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span>7-*.</font></p>
+  </blockquote>
+  </li>
+  <li>An instance of a List can be initialized.<blockquote>
+    <p><span style="letter-spacing: normal"><font size="2" color="#0000FF">
+    <span style="font-family: Times New Roman">MyFriends</span></font></span><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">is</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">the</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></font><b><font SIZE="2" COLOR="#000080">Person<font SIZE="2"> </font>
+  </font></b>
+    <font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+    List</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span>[</font><font size="2" color="#0000ff" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">Mark</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">,<span class="Apple-converted-space">&nbsp;</span></font><font size="2" style="font-family: Times New Roman; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px" color="#0000FF">Samantha</font><font size="2" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;">].&nbsp;</font></p>
+  </blockquote>
+  </li>
+  <li>List operations include:<ul>
+    <li>&quot;length of &lt;list&gt;&quot;</li>
+    <li>&quot;count of &lt;element&gt; in &lt;list&gt;&quot;</li>
+    <li>&quot;index of &lt;element&gt; in &lt;list&gt;&quot;</li>
+    <li>&quot;the sublist of &lt;list&gt; matching &lt;conditions&gt;&quot;<ul>
+    <li><font SIZE="2" COLOR="#800080">&nbsp;</font><font SIZE="2" COLOR="#ff00ff"><b>Items</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">the</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">sublist</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>list_of_items</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">matching</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>var1</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">true</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>var2</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">true</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>var3</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">false</font><font SIZE="2">). </font></li>
+    <li><font size="2"><font color="#ff00ff"><b>OldPeople</b></font>
+    <font color="#800080">is </font>(</font><font SIZE="2" COLOR="#800080">the</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">sublist</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2">
+    <font color="#008000"><b>all_people</b></font> </font>
+    <font SIZE="2" COLOR="#800080">matching</font><font SIZE="2">
+    <font color="#008000"><b>age</b></font> </font>
+    <font SIZE="2" COLOR="#800080">&gt; </font>
+    <font SIZE="2" COLOR="#333399">65</font><font SIZE="2" COLOR="#800080"> </font>
+    <font SIZE="2">years). </font></li>
+    <li><font size="2" color="#FF00FF"><b>GoodGrades</b></font><font size="2">
+    <font color="#800080">is </font>(</font><font SIZE="2" COLOR="#800080">the</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">sublist</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2">
+    <font color="#008000"><b>all_grades</b></font> </font>
+    <font SIZE="2" COLOR="#800080">matching value</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">&gt; </font>
+    <font SIZE="2" COLOR="#333399">95</font><font SIZE="2">). </font></li>
+  </ul>
+    </li>
+    <li>&quot;&lt;list&gt; contains &lt;element&gt;&quot;, &quot;&lt;list&gt; does not contain &lt;element&gt;&quot;</li>
+    <li>&quot;&lt;element&gt; is unique in &lt;list&gt;&quot;, &quot;&lt;element&gt; is not unique in &lt;list&gt;&quot;</li>
+    <li>&quot;element before &lt;element&gt; in &lt;list&gt;&quot;, &quot;element after &lt;element&gt; in 
+    &lt;list&gt;&quot;</li>
+    <li>&quot;first element of &lt;list&gt;&quot;, &quot;last element of &lt;lilst&gt;, &quot;element &lt;expr&gt; in 
+    &lt;list&gt;&quot;</li>
+  </ul>
+  </li>
+  <li>For more information, see
+  <a href="http://sadl.home.openge.ge.com/Requirements/WebSite/Overview.html#Lists">
+  http://sadl.home.openge.ge.com/Requirements/WebSite/Overview.html#Lists</a></li>
+</ol>
+  </li>
+  <li>Equations<ol type="a">
+  <li>Internally defined (Equation)<font SIZE="2" COLOR="#800080"><ul>
+    <li>
+    <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#801480"><b>areaOfSquare</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">float</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#ff00ff"><b>s</b></font><font SIZE="2">) </font>
+    <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">: </font>
+    <font SIZE="2" COLOR="#ff00ff"><b>s</b></font><font SIZE="2">^2 .</font></li>
+    </li>
+    <li>
+    <p ALIGN="LEFT">
+  
+  <font SIZE="2" COLOR="#800080">
+    Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>areaOfRectangle</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">float</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>h</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>w</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">: </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>h</b></font><font SIZE="2">*</font><font SIZE="2" COLOR="#ff00ff"><b>w</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#800080"></li>
+    <li>Equation</font><font SIZE="2"> </font><font SIZE="2" COLOR="#801480"><b>
+  areaOfCircle</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">float</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>r</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">: </font>
+  <font SIZE="2" COLOR="#800080">PI</font><font SIZE="2">*</font><font SIZE="2" COLOR="#ff00ff"><b>r</b></font><font SIZE="2">^2.</font></li>
+  </li>
+  </li>
+  </li>
+  <li>Externally defined (External)<ul>
+  <li><font SIZE="2">
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#800080">External</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#801480"><b>min</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">float</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">: &quot;java.lang.Math.min&quot;.</font></li>
+  <li>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#800080">External</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#801480"><b>max</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">float</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>y</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">: &quot;java.lang.Math.max&quot;.</font></li>
+  </ul>
+  </li>
+</ol>
+  <li>UnittedQuantityUnitted Quantity<font SIZE="2"><ol type="a">
+  <li>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Person</b></font>
+  <font SIZE="2" COLOR="#800080">is</font> <font SIZE="2" COLOR="#800080">a</font>
+  <font SIZE="2" COLOR="#800080">class</font> <font SIZE="2" COLOR="#800080">
+  described</font> <font SIZE="2" COLOR="#800080">by</font>
+  <font SIZE="2" COLOR="#008000"><b>gender</b></font>
+  <font SIZE="2" COLOR="#800080">with</font> <font SIZE="2" COLOR="#800080">a</font>
+  <font SIZE="2" COLOR="#800080">single</font> <font SIZE="2" COLOR="#800080">
+  value</font> <font SIZE="2" COLOR="#800080">of</font>
+  <font SIZE="2" COLOR="#800080">type</font> <font SIZE="2" COLOR="#000080"><b>
+  Gender</b></font>,<font SIZE="2" COLOR="#800080"><br>
+&nbsp;&nbsp;&nbsp; described</font> <font SIZE="2" COLOR="#800080">by</font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font>
+  <font SIZE="2" COLOR="#800080">with</font> <font SIZE="2" COLOR="#800080">
+  values</font> <font SIZE="2" COLOR="#800080">of</font>
+  <font SIZE="2" COLOR="#800080">type</font> <font SIZE="2" COLOR="#000080"><b>
+  UnittedQuantity</b></font>,<font SIZE="2" COLOR="#800080"><br>
+&nbsp;&nbsp;&nbsp; described</font> <font SIZE="2" COLOR="#800080">by</font>
+  <font SIZE="2" COLOR="#008000"><b>height</b></font>
+  <font SIZE="2" COLOR="#800080">with</font> <font SIZE="2" COLOR="#800080">
+  values</font> <font SIZE="2" COLOR="#800080">of</font>
+  <font SIZE="2" COLOR="#800080">type</font> <font SIZE="2" COLOR="#000080"><b>
+  UnittedQuantity</b></font>,<font SIZE="2" COLOR="#800080"><br>
+&nbsp;&nbsp;&nbsp; described</font> <font SIZE="2" COLOR="#800080">by</font>
+  <font SIZE="2" COLOR="#008000"><b>heightPercentile</b></font>
+  <font SIZE="2" COLOR="#800080">with</font> <font SIZE="2" COLOR="#800080">
+  values</font> <font SIZE="2" COLOR="#800080">of</font>
+  <font SIZE="2" COLOR="#800080">type</font> <font SIZE="2" COLOR="#000080"><b>
+  UnittedQuantity</b></font>,<font SIZE="2" COLOR="#800080"><br>
+&nbsp;&nbsp;&nbsp; described</font> <font SIZE="2" COLOR="#800080">by</font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font>
+  <font SIZE="2" COLOR="#800080">with</font> <font SIZE="2" COLOR="#800080">
+  values</font> <font SIZE="2" COLOR="#800080">of</font>
+  <font SIZE="2" COLOR="#800080">type</font> <font SIZE="2" COLOR="#000080"><b>
+  UnittedQuantity</b></font>.</p>
+  </li>
+</ol>
+
+  </li>
+</ol>
+  </font>
+  <blockquote>
+    <blockquote>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> 23 years,
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> 165 lbs,
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>height</b></font><font SIZE="2"> 70 inches,
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2" COLOR="#008000"><b> 
+  heightPercentile</b></font><font SIZE="2"> 50 &quot;%&quot; .<br>
+&nbsp;</font></blockquote>
+</blockquote>
+<ul>
+    <ol type="a" start="2">
+  <li><p ALIGN="LEFT"><font size="2">Underlying construct</font></p>
+  </li>
+</ol>
+  <blockquote>
+    <p ALIGN="LEFT"> <font SIZE="2" COLOR="#000080"><b>
+    UnittedQuantity</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">string</font><font SIZE="2">.<br>
+    </font><font SIZE="2" COLOR="#808080"><i>//UnittedQuantity has 
+    impliedProperty ^value.</p>
+    </i></font>
+  </blockquote>
+  </li>
+  </li>
+  </li>
+  </ul>
+<ol start="6">
+  <li>Implied Properties<ol type="a">
+    <li>&quot;Martha is 26.&quot; &quot;George is 185.&quot;</li>
+  <font SIZE="2">
+    </li>
+    <li>
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#800080">Test:</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>height</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> &lt; 70.</font></li>
+    <li>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#800080">Test:</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> &gt; 21.</font></li>
+  <font SIZE="2">
+    </li>
+    <li>
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#800080">Test:</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> &lt; </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Joan</font><font SIZE="2">.</font></li>
+    <li>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#800080">Test:</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> = </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Joan</font><font SIZE="2">.</font></li>
+    <li>From SRL</li>
+    </li>
+  </ol>
+  </li>
+</ol>
+<blockquote>
+  <blockquote>
+  <p>&nbsp;&nbsp;&nbsp;
+  <img border="0" src="sadl3.1.gif" width="549" height="104"></p>
+  </blockquote>
+</blockquote>
+  <blockquote>
+  <blockquote>
+    <blockquote>
+  <p>i(1):<span style="background-color: #FFFF00"><font size="2"> </font></span>
+  <font SIZE="2"><span style="background-color: #FFFF00">Implied property 'RaviDocOnt:_value' 
+  used (left side of 'function') to pass type check</span></font></p>
+  <p>i(2):<font size="2"><span style="background-color: #FFFF00"> </span></font>
+  <font size="2"><span style="background-color: #FFFF00">Implied property 'RaviDocOnt:_value' 
+  used (left side of '/') to pass type check</span></font></p>
+  <p>i(3): <font size="2"><span style="background-color: #FFFF00">Multiple 
+  markers at this line <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Implied 
+  property 'RaviDocOnt:_validity' added to both sides of 'set to' in translation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Implied 
+  property 'RaviDocOnt:_value' added to both sides of 'set to' in translation</span></font></p>
+  <p>i(4):<font SIZE="1"> </font><font size="2">
+  <span style="background-color: #FFFF00">Implied property 'RaviDocOnt:_value' 
+  used (left side of '&gt;') to pass type check</span></font></blockquote>
+  </blockquote>
+</blockquote>
+<ol start="6">
+  <li>&quot;Implicit&quot; models do not need to be explicitly imported to a 
+  SADL model</li>
+</ol>
+<blockquote>
+  <ol type="a">
+  <li><b>SadlBaseModel.owl</b> in OwlModels folder<ul>
+    <li>Equation</li>
+    <li>External&nbsp;&nbsp;&nbsp; </li>
+  </ul>
+  </li>
+  <li><b>SadlListModel.owl</b> in OwlModels folder (but only if List is used)</li>
+  <li><b>SadlBuiltinFunctions.sadl</b> in ImplicitModel folder (generated by selected 
+  translator)</li>
+  <li><b>SadlImplicitModel.sadl</b> in ImplicitModel folder (content from SADL 
+  and from deriviative grammars, editable/extensible by 
+  user)<p ALIGN="LEFT"><font size="2" color="#000080"><b>
+    <img border="0" src="sadl3_ImplicitModel.jpg" width="799" height="391"></b></font><p ALIGN="LEFT">&nbsp;<ul>
+    <li>Lines 1 through 6 added by SADL plug-ins. </li>
+    <li>Lines 9 through 26 added by SRL plug-ins.<br>
+&nbsp;</li>
+    </ul>
+  </li>
+</ol>
+  </blockquote>
+<ol start="7">
+  <li>Improved graphing (Graphs folder)<ol type="a">
+    <li>Neighborhood graphs, anchored on class, individual, or property</li>
+    <li>Complete ontology graph</li>
+  </ol>
+  </li>
+  <li>
+  <p align="left">The SADL Xtext Grammar</li>
+  </li>
+</ol>
+  <ul>
+<ul>
+    <ul>
+    <ul>
+    <ul>
+    <ul>
+<p>&nbsp;</p>
+
+</ul>
+
+  </ul>
+</ul>
+
+</ul>
+</ul>
+</ul>
+</ul>
+
+</body>
+
+</html>
