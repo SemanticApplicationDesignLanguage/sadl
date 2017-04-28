@@ -271,7 +271,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 
-		protected void setRangeValueType(RangeValueType rangeValueType) {
+		public void setRangeValueType(RangeValueType rangeValueType) {
 			this.rangeValueType = rangeValueType;
 		}
 		
