@@ -3039,6 +3039,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 				}
+				else if (subj.canAs(Individual.class)){
+					ExtendedIterator<Resource> titr = subj.as(Individual.class).listRDFTypes(false);
+					while (titr.hasNext()) {
+						Resource type = titr.next();
+						if (uclsMembers.contains(type)) {
+							titr.close();
+							return true;
+						}
+					}
+				}
 			}
 			else if (subj != null && obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
 				return true;	
