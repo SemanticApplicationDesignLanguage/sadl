@@ -50,6 +50,7 @@ import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
+import com.ge.research.sadl.sADL.SadlConstantLiteral;
 import com.ge.research.sadl.sADL.SadlDataType;
 import com.ge.research.sadl.sADL.SadlExplicitValue;
 import com.ge.research.sadl.sADL.SadlInstance;
@@ -914,6 +915,24 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof Constant){
 			return getType((Constant)expression);
+		}
+		else if (expression instanceof SadlConstantLiteral) {
+			String term = ((SadlConstantLiteral)expression).getTerm();
+			Literal litval = null;
+			if (term.equals("PI")) {
+				litval = theJenaModel.createTypedLiteral(Math.PI);
+			}
+			else if (term.equals("e")) {
+				litval = theJenaModel.createTypedLiteral(Math.E);
+			}
+			else {
+				throw new TranslationException("Unhandled SadlConstantLiteral type: " + expression.getClass().getCanonicalName());
+			}
+			ConceptName numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
+			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
+			TypeCheckInfo litTci = new TypeCheckInfo(numberLiteralConceptName, litval, ExplicitValueType.VALUE, this, expression); 
+			litTci.setTypeCheckType(numberLiteralConceptName);
+			return litTci;
 		}
 		else if(expression instanceof ValueTable){
 			ConceptName declarationConceptName = new ConceptName("TODO");

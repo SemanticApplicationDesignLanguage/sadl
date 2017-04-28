@@ -35,18 +35,21 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Primary type reference. */
+	@Ignore
 	@Test
 	def void checkCA_02_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposal('Foo');
 	}
 
 	/** Imported primary type reference. */
+	@Ignore
 	@Test
 	def void checkCA_03_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". import "http://barUri". Foo is a class. myFoo is a ''').assertProposal('Bar');
 	}
 
 	/** Self primary type reference with imports. */
+	@Ignore
 	@Test
 	def void checkCA_04_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". import "http://barUri". Foo is a class. myFoo is a ''').assertProposal('Foo');
