@@ -1,0 +1,564 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>OWL and SADL</title>
+
+<style>
+<!--
+span.MsoFootnoteReference
+	{vertical-align:super}
+-->
+</style>
+
+</head>
+
+<body>
+
+<h1>The Web Ontology Language (OWL) and the Semantic Application Design Language 
+(SADL)</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/28/2017<!--webbot bot="Timestamp" endspan i-checksum="12643" -->. 
+Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
+<h4>Table of Contents</h4>
+<ul>
+  <li>The Web Ontology Language (OWL)</li>
+  <li>Defining Classes, Properties, and Individuals in SADL</li>
+  <li><span style="font-family:&quot;Times New Roman&quot;,serif">Further Definition of Classes Using Property Restrictions</span></li>
+  <li>Equivalent Classes, Also Known as Necessary and Sufficient Conditions</li>
+  <li>XSD and User-Defined Data Types</li>
+  <li>Anatomy of a SADL Project<ul>
+    <li>The OwlModels Folder</li>
+    <li>Implicit Models</li>
+    <li>Temp Folder</li>
+    <li>Graphs</li>
+  </ul>
+  </li>
+</ul>
+<h2>The Web Ontology Language (OWL)</h2>
+<p>The Web Ontology 
+Language (OWL) is a recommendation of the W3C. It supports all the foundational 
+concept identified above. </p>
+<ul>
+  <li>OWL uses URIs as identifiers and supports XML namespaces</li>
+  <li>OWL supports blank nodes</li>
+  <li>OWL supports the definition of classes and class hierarchies</li>
+  <li>OWL supports declaration of individuals and specification of the class(es) 
+  to which the individual belongs.</li>
+  <li>OWL supports the declaration of properties, which may be more specifically 
+  declared to be object properties or data type properties</li>
+  <li>OWL supports the declaration of the domain and/or range of a property</li>
+</ul>
+Properties which are 
+not specified as object properties or data type properties are called RDF 
+properties. (RDF stands for Resource Description Framework and is a W3C 
+“standard”; rdf:Property is actually the super class of owl:ObjectProperty and 
+owl:DatatypeProperty.) In general, it is a good idea to define properties that 
+are used as being either object properties or data types properties instead of 
+using RDF properties as that provides additional information. OWL also defines 
+owl:AnnotationProperty. Annotation properties are meant to provide additional 
+information not of a logical nature and which will be ignored by reasoners. In 
+OWL 1 annotation properties cannot be given domain and range.
+<h2>Defining Classes, 
+Properties, and Individuals in SADL</h2>
+The Semantic 
+Application Design Language (SADL) is a controlled-English grammar and 
+a supporting integrated development environment (IDE) for creating OWL models 
+(along with other constructs discussed latter). The current version of SADL is 
+Version 3 and has the expressivity of and maps directly to OWL Version 1 plus 
+qualified cardinality from OWL Version 2. All our examples in this section will 
+be expressed in SADL syntax.
+<p>
+To provide a grounding example, we take the challenge problem of a steam boiler 
+system. Following are some classes that begin to define a formal model of this 
+domain. </p>
+<blockquote>
+<p><img border="0" src="images/OwlAnd1.jpg" width="629" height="227"></p>
+
+</blockquote>
+Note that this model 
+has a URI identifier given on line 1 as well as the prefix <i>boiler</i>, 
+referred to as “alias”. As noted above in the discussion of XML namespaces, all 
+of the concepts defined in this model are in this namespace. So, for example, 
+the full identifier of <i>SteamBoilerSystem</i> is <i>
+http://sadl.org/SteamBoiler.sadl#SteamBoilerSystem</i>. In any context which has 
+the same prefix to namespace URI mapping, it can also be referred to by the 
+qualified name <i>boiler:SteamBoilerSystem</i>.
+<p>Note that on line 4
+<i>SteamBoilerSystem</i> is declared to be a sub-class of <i>System</i>. <i>
+System</i> is defined in the <i>basic</i> model which is imported on line 2. 
+This model is shown below.</p>
+<blockquote>
+  <p><img border="0" src="images/OwlAnd2.gif" width="540" height="200"></p>
+</blockquote>
+<p>The parenthetical 
+“note” on lines 2 and 6 are SADL’s way of adding the <i>owl:AnnotationProperty</i>
+<i>rdfs:comment</i> to a concept, the overall model in line 2 and the <i>
+component</i> property in line 6. Observe also that <i>Failed</i> is given an 
+“alias” on line 11. This translates in the OWL to the annotation property <i>
+rdfs:label.</i> Any concept being defined may be given as many “notes” and 
+“aliases” as desired. Note that the <i>alias</i> (<i>rdfs:label</i>) cannot be 
+directly used instead of the concept name, but it can be retrieved by queries 
+and other constructs by explicitly identifying that the <i>rdfs:label</i> of the 
+concept is to be used.</p>
+<p>As can be seen in 
+the example above, the SADL IDE uses different colors and fonts for different 
+kinds of model concepts. Class names are </span><font color="#000080"><b>dark 
+blue bold</b></font><span style="font-family:&quot;Times New Roman&quot;,serif">, 
+individuals are </span><font color="#0000ff">light blue</font><span style="font-family:&quot;Times New Roman&quot;,serif">, 
+object and data type properties are </span><font color="#008000"><b>green bold</b></font><span style="font-family:&quot;Times New Roman&quot;,serif">. 
+While there is no enforcement, OWL modeling convention is to use upper case 
+starting letters for class and individual names and to use lower case starting 
+letters for property names.</p>
+<h2>Further Definition of Classes Using Property Restrictions</h2>
+<p>There are two ways 
+of defining a class. One way is to specify all the individuals that belong to 
+the class. In other words, the class is the specified set of members and there 
+are no other members of the class. For example, </p>
+<blockquote>
+  <font SIZE="2" COLOR="#000080"><b>
+  <p>Season</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">can</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">only</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">Spring</font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#0000ff">Summer</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#0000ff">Fall</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#0000ff">Winter</font><font SIZE="2">}.</p>
+  </font>
+</blockquote>
+<p>Obviously, this 
+approach will not work in many cases as the members cannot be enumerated. The 
+other way to define a class is to specify the properties and possibly the 
+property values that members of the class must have or not have. Axioms in the 
+model that do this are called property restrictions. <a>There are several types 
+of property restrictions.</a></p>
+<ol>
+  <li>Cardinality   restrictions identify the number of values for a given property that a member 
+  of the class can/must have</li>
+<ol>
+  <li>Exact cardinality – a member of the class must have exactly the specified number of 
+values for the given property<br>
+</span><font SIZE="2" COLOR="#008000"><b>wheel</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Bicycle</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">exactly</font><font SIZE="2"> 2 </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2">.</p>
+</font></li>
+<li>Minimum cardinality—a member of the class must have at least the specified 
+number of values for the given property but can have more<br>
+</span><font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Parent</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">at</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">least</font><font SIZE="2"> 1 </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2">.</p>
+</font>
+</li>
+<li>Maximum cardinality—a member of the class can at most have the specified number 
+of values for the given property but can have fewer<br>
+</span><font SIZE="2" COLOR="#008000"><b>primaryResidence</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">at</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">most</font><font SIZE="2"> 1 </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2">.</p>
+</font>
+</ol>
+  <li>Qualified cardinality restrictions identify the number of values of a 
+  specified type for a given property that a member of the class can/must have</li>
+<ol>
+<li>Exact qualified cardinality – a member of the class must have exactly the specified 
+number of values of the specified type for the given property; it can have other 
+values of the property of other types<br>
+</span><font SIZE="2" COLOR="#008000"><b>part</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Bicycle</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">exactly</font><font SIZE="2"> 2 </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Wheel</b></font><font SIZE="2">.</p>
+</font>
+</li>
+<li>Minimum qualified cardinality—a member of the class must have at least the 
+specified number of values of the specified type for the given property but can 
+have more; it can have other values of the property of other types
+</li>
+<li>Maximum qualified cardinality—a member of the class can at most have the 
+specified number of values of the specified type for the given property but can 
+have fewer; it can have other values of the property of other types</li>
+</ol>
+  <li>Some values from restrictions specify that a member of a class must have some values 
+(at least one) of a specified type for a given property; it can have values of 
+other types for the property unless otherwise restricted</li>
+  <li>All values from restrictions specify that, for a member of the given class, all the 
+values of a given property must be of a given type; it cannot have values of the 
+property of any other type, but it does not require that there be any values</li>
+  <li>Has value restrictions specify that a member of a class must have the specified 
+value for the specified property; it can have other values as well, unless 
+otherwise restricted</li>
+</ol>
+Property 
+restrictions allow us to refine our steam boiler model. Qualified cardinality 
+restrictions on lines 13 through 16 and 19 through 20 allow us to constrain how 
+the equipment is configured to create a <i>SteamBoilerSystem</i>. Such a system 
+has exactly one <i>SteamBoiler</i> and at least 1 <i>Pump</i> and <i>
+PumpController</i>. Each <i>Pump</i> is controlled by exactly one <i>
+PumpController</i>. The <i>SteamBoiler</i> has exactly one <i>WaterLevelDetector</i> 
+and one <i>SteamFlowDetector</i>.<blockquote>
+  <p><img border="0" src="images/OwlAnd3.jpg" width="625" height="304"></p>
+</blockquote>
+<h2><br>
+Equivalent Classes, Also Known as Necessary and Sufficient Conditions</h2>
+<p>The property 
+restrictions introduced in the previous section allow a model builder to specify 
+necessary conditions for an individual to be a member of a class. It is possible 
+to express a stronger axiom stating that a set of conditions is not only 
+necessary for an individual to be a member of a class, but they are sufficient 
+conditions, meaning that if the conditions are met the individual can be 
+inferred to be a member of the class. While in logic one might expect necessary 
+and sufficient conditions to be expressed as “if and only if”, in SADL the 
+expression is just “only if”. In terms of propositional logic, for the 
+propositions <i>p</i> and <i>q</i>, we have the following:</p>
+<p class="MsoListParagraphCxSpFirst" style="text-indent: -.25in">
+<span style="font-family: 'Times New Roman',serif">1.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><i><span style="font-family:&quot;Times New Roman&quot;,serif">p &#8594; 
+q</span></i><span style="font-family:&quot;Times New Roman&quot;,serif"> (read
+<i>p</i> <i>implies</i> <i>q</i>, example: [<i>X</i> is a member of class <i>Man</i>] 
+implies [<i>X</i> has property <i>gender</i> with value <i>Male</i>], a has 
+value restriction)</span></p>
+<p class="MsoListParagraphCxSpLast" style="text-indent: -.25in">
+<span style="font-family: 'Times New Roman',serif">2.<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><i><span style="font-family:&quot;Times New Roman&quot;,serif">p 
+&#8596;q </span></i><span style="font-family:&quot;Times New Roman&quot;,serif">(read
+<i>p if and only if q</i>, example: [<i>X</i> is a member of class <i>Parent</i>] 
+if and only if [<i>X</i> has at least one value of <i>child</i> property], a 
+minimum cardinality restriction)</span></p>
+<p>**** Examples, discussion ****</p>
+<h2>XSD and User-Defined Data Types</h2>
+<p>The possible ranges of an OWL data type property are the set of XML Schema 
+Definition (XSD) data types and their derivatives. The SADL keywords 
+corresponding to the XSD data types are the following.</p>
+<blockquote>
+  <table border="1" cellpadding="2" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="70%">
+    <tr>
+      <td width="20%">anyURI</td>
+      <td width="20%">double</td>
+      <td width="20%">gYearMonth</td>
+      <td width="20%">nonPositiveInteger</td>
+    </tr>
+    <tr>
+      <td width="20%">base64Binary</td>
+      <td width="20%">duration</td>
+      <td width="20%">hexBinary</td>
+      <td width="20%">positiveInteger</td>
+    </tr>
+    <tr>
+      <td width="20%">boolean</td>
+      <td width="20%">float</td>
+      <td width="20%">int</td>
+      <td width="20%">string</td>
+    </tr>
+    <tr>
+      <td width="20%">byte</td>
+      <td width="20%">gDay</td>
+      <td width="20%">integer</td>
+      <td width="20%">time</td>
+    </tr>
+    <tr>
+      <td width="20%">date</td>
+      <td width="20%">gMonth</td>
+      <td width="20%">long</td>
+      <td width="20%">unsignedByte</td>
+    </tr>
+    <tr>
+      <td width="20%">dateTime</td>
+      <td width="20%">gMonthDay</td>
+      <td width="20%">negativeInteger</td>
+      <td width="20%">unsignedInt</td>
+    </tr>
+    <tr>
+      <td width="20%">decimal</td>
+      <td width="20%">gYear</td>
+      <td width="20%">nonNegativeInteger</td>
+      <td width="20%">&nbsp;</td>
+    </tr>
+  </table>
+</blockquote>
+<p>The most common use of these XSD data types is in specifying the range of an 
+OWL data type property. </p>
+<font SIZE="2" COLOR="#008000"><b>
+<blockquote>
+  <p>age</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+  describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>
+  PhysicalThing</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+  with</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">values</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+<p>But what if we would like to 
+have a more restricted range? Say decimal number greater than or equal to 12 and 
+less than 18 as a property restriction of age on the Adolescent class? We 
+accomplish this with user-defined data types. A user-defined data type is like a 
+subclass of an XSD data type or of a union of XSD data types. The SADL grammar 
+is like sub-classing except that the restriction is expressed as <i>facets</i>. The 
+general syntax is as follows.</p>
+<p class="MsoNormal" style="text-indent: .5in; line-height: normal">
+&lt;user-defined-datatype-name&gt; is a type of &lt;xsd-data-type(s)&gt; &lt;facets&gt;</p>
+<p class="MsoNormal" style="line-height: normal">Here are some examples.<span style="font-family:&quot;Times New Roman&quot;,serif"> </span></p>
+<blockquote>
+  <p>
+  <span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: navy">
+  adolescentAge</span><span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: black">
+  </span>
+  <span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: purple">
+  is</span><span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: black">
+  </span>
+  <span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: purple">
+  a</span><span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: black">
+  </span>
+  <span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: purple">
+  type</span><span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: black">
+  </span>
+  <span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: purple">
+  of</span><span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: black">
+  </span>
+  <span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: purple">
+  decimal</span><span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: black"> 
+  [12.0, 18.0).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>
+  <span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: gray">
+  // decimal number &gt;= 12 and &lt; 18</span></i><span style="font-size: 10.0pt; line-height: 107%; font-family: 'Times New Roman',serif; color: navy"><br>
+  </span>
+  <span style="line-height: 107%; font-family: 'Times New Roman',serif; color: navy">
+  <font size="2">clothingSize</font></span><span style="line-height: 107%; font-family: 'Times New Roman',serif"><font size="2">
+  <span style="color:purple">is</span> <span style="color:purple">a</span>
+  <span style="color:purple">type</span> <span style="color:purple">of</span> {<span style="color:purple">int</span>
+  <span style="color:purple">or</span> <span style="color:purple">string</span>}.
+  <i><span style="color:gray">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  // either an int or a string</span></i><span style="color:navy"><br>
+  enumeratedHeight</span> <span style="color:purple">is</span>
+  <span style="color:purple">a</span> <span style="color:purple">type</span>
+  <span style="color:purple">of</span> <span style="color:purple">string</span> 
+  {&quot;short&quot;, &quot;medium&quot;, &quot;tall&quot;}. <i><span style="color:gray">// enumeration of 3 
+  possible string values for height</span></i><span style="color:navy"><br>
+  SSN</span> <span style="color:purple">is</span> <span style="color:purple">a</span>
+  <span style="color:purple">type</span> <span style="color:purple">of</span>
+  <span style="color:purple">string</span> &quot;[0-9]{3}-[0-9]{2}-[0-9]{4}&quot;.<span style="color:navy">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="color:gray"> <i>
+  // </i></span><span style="color: #808080"><i>here the facet is a regular 
+  expression that matches valid Social Security Numbers</i></span><span style="color:navy"><br>
+  year</span> <span style="color:purple">is</span> <span style="color:purple">a</span>
+  <span style="color:purple">type</span> <span style="color:purple">of</span>
+  <span style="color:purple">int</span> <span style="color:purple">length</span> 
+  4 .<span style="color:navy"><br>
+  airportIdent</span> <span style="color:purple">is</span>
+  <span style="color:purple">a</span> <span style="color:purple">type</span>
+  <span style="color:purple">of</span> <span style="color:purple">string</span>
+  <span style="color:purple">length</span> 1-4 .</font></span></p>
+</blockquote>
+<p>Once a user-defined 
+data type has been defined, it can be used as a property range or in a property 
+restriction.</p>
+<p class="MsoNormal" style="line-height: normal; margin-left: .5in"><b>
+<span style="font-size:10.0pt;
+font-family:&quot;Times New Roman&quot;,serif;color:green">age</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+of</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:navy">
+Adolescent</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+only</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+has</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+values</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+of</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+type</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:navy">
+adolescentAge</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">.</span></p>
+<p class="MsoNormal" style="line-height: normal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">Note that 
+user-defined data types are blue like classes but not bold. User-defined data 
+types are translated to RDFS Datatypes in the OWL model. </span></p>
+<h2>Anatomy of a SADL Project</h2>
+<h3>The OwlModels Folder </h3>
+
+<p>Models created or 
+edited in SADL are saved in multiple formats. The actual SADL model is saved in 
+a text format as a .sadl file and is normally opened in the SADL Xtext editor, 
+which provides semantic coloring, hyperlinking, etc. This model file is 
+sequential in nature and lends itself well to comparison between versions. It 
+should be placed under version control. In addition, if the model is valid so 
+that it can be translated to OWL, the file is saved as an OWL file in the <i>
+OwlModels</i> folder. The OWL file is used by the model processors to do 
+semantic tasks such as validation of imported models. The OWL model should not 
+be edited as it is frequently regenerated from the .sadl file. The base filename 
+of the OWL file is the base file name of the .sadl file. The exact syntax of the 
+OWL file, and therefore the file extension, is controlled by a preference and 
+can be any one of</p>
+<ul>
+  <li>
+  <p class="MsoNormal">
+  <span style="font-style: normal; font-variant: normal; font-weight: normal; font-size: 7.0pt; font-family: Times New Roman">&nbsp;</span><span style="font-family:&quot;Times New Roman&quot;,serif">.owl 
+  – RDF/XML or RDF/XML-ABREV format</span></li>
+  <li>
+  <p class="MsoNormal">
+  <span style="font-style: normal; font-variant: normal; font-weight: normal; font-size: 7.0pt; font-family: Times New Roman">&nbsp;</span><span style="font-family:&quot;Times New Roman&quot;,serif">.ntriple 
+  – N-Triple format</span></li>
+  <li>
+  <p class="MsoNormal">
+  <span style="font-family:&quot;Times New Roman&quot;,serif">.n3 – N3 format</span></li>
+</ul>
+The SADL IDE architecture requires reasoner/translator pairs to accomplish functions beyond 
+model editing. The default reasoner is the Jena reasoner and it has an 
+associated Jena translator. This translator does not do anything to the OWL 
+model as the reasoner can read in OWL directly. It saves rules to a .rules file 
+in Jena rule syntax. It saves equations to a .pl Prolog file. These files also 
+have the same base filename as the .sadl file. Other reasoners may require that 
+the OWL file and any other constructs be in other formats and it is the job of 
+the associated translator to generate the necessary input format for the 
+reasoner.
+
+<h3>Implicit Models</h3>
+<p>SADL 3 has some built-in concepts that are deemed to be widely useful, which 
+will be elaborated in SADL Constructs Useful in Building Models. Rather than having to explicitly import the models for 
+these concepts, the models are imported into SADL models implicitly. Some of 
+these implicit models are present as OWL models automatically created in the 
+OwlModels folder. These models have content that a modeler would not normally 
+need to see to use the built-in concept. Others models are automatically created 
+as .sadl files placed in a project folder named ImplicitModel. It is anticipated 
+that modelers will want to be able to easily view and in some cases even edit 
+the content of these implicit models. </p>
+<p>The SADL 3 implicit models, with folder identified, are as follows.</p>
+<ul>
+  <li>OwlModels/SadlBaseModel.owl – defines the underlying model for <i>
+  Equations</i> and <i>External</i> equations (see 
+  <a href="SadlConstructs.html#Equations">Equations</a>)</li>
+  <li>OwlModels/SadlListModel.owl – defines the underlying model for typed lists 
+  (see <a href="SadlConstructs.html#TypedLists">Typed Lists</a>). This model is only imported by a SADL model if a typed list 
+  construct is used, in which case it is automatically added to the project and 
+  becomes an import</li>
+  <li>ImplicitModel/SadlBuiltinFunctions.sadl – generated by the selected 
+  translator for the selected reasoner, this model identifies all the built-in 
+  functions known by the reasoner. Some translators will provide complete 
+  signatures for the built-in functions enabling better type checking.</li>
+  <li>ImplicitModel/SadlImplicitModel.sadl – defines <i>UnittedQuantity</i> and 
+  its associated properties (see <a href="SadlConstructs.html#UnittedQuantities">
+  Unitted Quantities</a>); also defines the <i>impliedProperty</i> 
+  annotation (see <a href="SadlConstructs.html#ImpliedProperties">Implied 
+  Properties</a>).
+  <ul>
+    <li>Note: derivative languages may add their own content to this model</li>
+    <li>Note: users may edit this file and add their own implicit content which 
+    is then available to all SADL models in the project</li>
+    <li>Note: once created, this file is not overwritten by clean/build, thus 
+    preserving any user-added content.</li>
+  </ul>
+  </li>
+</ul>
+<h3>The Temp Folder</h3>
+<p>The project’s <i>
+Temp</i> folder can be used for various purposes. One subfolder of potential 
+interest is the <i>ErrorDocs</i> folder which contains the file SadlErrors.html. 
+This file contains a table of all the SADL IDE errors along with their 
+descriptions. Derivative grammars may also provide their own error tables and 
+other output.</p>
+<p>Another subfolder is
+<i>Logs</i>, in which metrics reports are placed. Metrics reports capture 
+information about the project as a whole.</p>
+<h3>The Graphs Folder: An OWL Ontology is a Graph</h3>
+<p>All elements of an OWL model can be expressed as a statement with a subject, 
+a predicate, and an object or value. Such a statement is called a triple. Such a 
+statement also constitutes one segment of a directed graph: node-&gt;edge-&gt;node. 
+Since an OWL model is a collection of such statements, it is also a mathematical 
+directed graph. This means that graph-theoretic methodologies can be applied to 
+OWL models. An example is the use of graph query languages such as SPARQL to 
+retrieve information from an OWL model.</p>
+<p>Such a model can also be visualized as a graph. Two kinds of ontology graphs 
+can be generated in the SADL IDE. One can create a graph of an entire ontology 
+file. This is done by selecting a .sadl or .owl file in the Eclipse Project 
+Explorer and activating “Graph Ontology” on the SADL menu. The default 
+visualizer uses GraphViz and generates .svg files. 
+
+
+
+    To enable the default GraphViz visualizer, download and install GraphViz. 
+    Then set the environment variable GRAPHVIZPATH to the absolute file system 
+    location of the installed GraphViz &quot;bin&quot; directory. If the .svg graphics file extension is associated with a browser, the generated 
+file will be opened automatically. Subject to browser support, .svg graphic 
+files may be searched by text matching, making it much easier to find nodes and 
+edges in the graph.</p>
+
+
+
+<p>Alternatively, one can select the project and 
+“Graph Ontology” command will create a graph (.svg file) of each of the .sadl and 
+independent .owl 
+files in the Eclipse project and also generate a graph of the project's imports of 
+one model by another. In that case, it is this imports graph which will be opened 
+automatically if the .svg file association exists. In either case, 
+each external reference in a graph is a link to the .svg file containing the 
+resource, which can be opened in the browser by clicking on the node. Graphing 
+our steam boiler project as an example, here is the imports graph.</p>
+
+
+
+    <blockquote>
+<p><img border="1" src="images/OwlAnd4.jpg" width="521" height="188"></p>
+
+
+
+    </blockquote>
+<p>Note that namespace prefixes are used to label nodes in the graph. The only 
+explicit import is that of the <i>basic</i> model by the <i>boiler</i> model. 
+Each node in the graph is a hyperlink to the graph of that model. Clicking on <i>
+basic</i> displays its graph.</p>
+
+
+
+    <blockquote>
+<p><img border="1" src="images/OwlAnd5.jpg" width="518" height="503"></p>
+
+
+
+    </blockquote>
+<p>Likewise, clicking on <i>boiler</i> displays its graph.</p>
+
+
+
+<p><img border="1" src="images/SteamBoiler.owl.png" width="4150" height="414"></p>
+
+
+
+<p>The Graphs subfolder of a project contains all of the graph files that have 
+been generated. These files are given names indicative of their content and can 
+be opened directly. Note that the contents of the folder may need to be 
+refreshed before all results are visible in Eclipse. Note also that SADL models 
+with errors will not generate OWL files and therefore will not generate graphs 
+as the graph is a rendition of the OWL file model.</p>
+
+
+
+    &nbsp;</body></html>

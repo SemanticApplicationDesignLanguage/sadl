@@ -1,0 +1,29 @@
+<http://sadl.imp/QueryTest#age> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#age> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/QueryTest#age> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/QueryTest#spouse> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#spouse> <http://www.w3.org/2000/01/rdf-schema#range> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#spouse> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://sadl.imp/QueryTest#Tom> <http://sadl.imp/QueryTest#spouse> <http://sadl.imp/QueryTest#Betty> .
+<http://sadl.imp/QueryTest#Tom> <http://sadl.imp/QueryTest#age> "35"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/QueryTest#Tom> <http://sadl.imp/QueryTest#name> "Tom Dunham"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/QueryTest#Tom> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#Person> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:A236a7e36X3aX14039f40781X3aXX2dX6b1b .
+<http://sadl.imp/QueryTest#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6b1b <http://www.w3.org/2002/07/owl#maxCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6b1b <http://www.w3.org/2002/07/owl#onProperty> <http://sadl.imp/QueryTest#spouse> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6b1b <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+<http://sadl.imp/QueryTest> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'QueryTest.sadl' and should not be edited."@en .
+<http://sadl.imp/QueryTest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/QueryTest#name> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#name> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/QueryTest#name> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/QueryTest#John> <http://sadl.imp/QueryTest#friend> <http://sadl.imp/QueryTest#Betty> .
+<http://sadl.imp/QueryTest#John> <http://sadl.imp/QueryTest#friend> <http://sadl.imp/QueryTest#Tom> .
+<http://sadl.imp/QueryTest#John> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#Betty> <http://sadl.imp/QueryTest#spouse> <http://sadl.imp/QueryTest#Tom> .
+<http://sadl.imp/QueryTest#Betty> <http://sadl.imp/QueryTest#name> "Betty Dunham"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/QueryTest#Betty> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#friend> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#friend> <http://www.w3.org/2000/01/rdf-schema#range> <http://sadl.imp/QueryTest#Person> .
+<http://sadl.imp/QueryTest#friend> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .

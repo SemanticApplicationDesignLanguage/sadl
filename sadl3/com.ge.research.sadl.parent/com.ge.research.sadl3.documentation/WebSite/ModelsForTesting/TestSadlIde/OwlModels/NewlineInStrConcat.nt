@@ -1,0 +1,7 @@
+<http://com.ge.research.sadlNewlineInStrConcat> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'NewlineInStrConcat.sadl' and should not be edited."@en .
+<http://com.ge.research.sadlNewlineInStrConcat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://com.ge.research.sadlNewlineInStrConcat#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadlNewlineInStrConcat#Thingy> .
+<http://com.ge.research.sadlNewlineInStrConcat#description> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadlNewlineInStrConcat#Thingy> .
+<http://com.ge.research.sadlNewlineInStrConcat#description> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<http://com.ge.research.sadlNewlineInStrConcat#description> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://com.ge.research.sadlNewlineInStrConcat#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

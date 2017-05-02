@@ -1,0 +1,665 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#">
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/shapes-rules-alt.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes-rules-alt"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/SelfImport.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/SelfImport"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RDFSTransitiveClosureWithRule.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/RDFSTransitiveClosureWithRule"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestComparisonFailures.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlTestComparisonFailures"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >top</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/ThinkingOfPredicates.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/SwitchedSV.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlSwitchedSV"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >cmrp1</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/CrossModelRestrictionPart1.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/CrossModelRestrictionPart1"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestDirect.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/TestDirect"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/IsNotRule.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/IsNotRule"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rwm</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RuleWithMeta.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/NotEqualRule2.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/NotEqualRule2"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestAliasLabels.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/testaliaslabels"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hl4http</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/HyperLink4http.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/HyperLink4http"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hl2http</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/HyperLink2http.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/HyperLink2http"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/JenaBuiltin.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/JenaBuiltin"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/DuplicateImportPrefixLevel2.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/DuplicateImportPrefixLevel2"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestMustBeOneOfDatatypeProperty.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/mustbeoneofdatatypeproperty"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hl2</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/HyperLink2.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/HyperLink2"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/FloatInRuleProblem.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/floatinruleproblem"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RDFSTransitiveClosure.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/RDFSTransitiveClosure"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/DuplicateImportPrefixLevel3.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/DuplicateImportPrefixLevel3"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >tmp</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/temp.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/temp"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RuleCommentIsComment.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/RuleCommentIsComment"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >cmrp2</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/CrossModelRestrictionPart2.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/CrossModelRestrictionPart2"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/error1.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/error1"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/IsNotOfTypeRule.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/IsNotOfTypeRule"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestCanOnlyBeOneOfDatatypeProperty.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/GeorgeAndMartha.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlGeorgeAndMartha"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/abs.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/abs"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hl3</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/HyperLink3.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/HyperLink3"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >v2</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/validity2.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/validity2"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Bug3453776</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/Bug3453776.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/Bug3453776"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ole</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/OverlappingEnumeration.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/OverlappingEnumeration"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RuleTranslationTests.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlRuleTranslationTests"/>
+  </OntologySpec>
+  <OntologySpec>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/DuplicateImportPrefixTop.n3"/>
+    <publicURI rdf:resource="http://sadl.imp/DuplicateImportPrefixTop"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/DuplicateImportPrefixTop.owl"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/test.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/test"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/QuickFixes.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlQuickFixes"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/shapes-test.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes_test"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/FamilyRelationshipsDL.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/familyrelationshipsDL"/>
+  </OntologySpec>
+  <OntologySpec>
+    <publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/defaults.owl"/>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <createdBy>SADL</createdBy>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >def</prefix>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/CircularImportA.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/CircularImportA"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RuleRefBeforeDefinition.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/rulerefbeforedef"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/PeircesNessesMotherhoodTwo.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/PeircesNessesMotherhoodTwo"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/InferComments.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/InferComments"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/errorDualPropertyType.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/errorDualPropertyType"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestOnlyHasValuesOfType.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/TestOnlyHasValuesOfType"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hl4</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/HyperLink4.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/HyperLink4"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hl3http</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/HyperLink3http.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/HyperLink3http"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >custluceneidx</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/CustomLuceneIndexing.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/CustomLuceneIndexing"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Bug3434542</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/Bug3434542.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/Bug3434542"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >wisis</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/WhatIsIs.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/WhatIsIs"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/shape-rules.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shape_rules"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/FamilyRelationships.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/familyrelationships"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >msvs</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/MultipleSingleValues.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/MultipleSingleValues"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/urionly.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlurionly"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RuleWarnings.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/RuleWarnings"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/NewlineInStrConcat.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlNewlineInStrConcat"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >lincolns</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/Lincolns.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/Lincolns"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/testImportApvf.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/test_import_apvf"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/baduris.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/baduris"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestFamilyRelationships.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/TestFamilyRelationships"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/errorImportingError1.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/errorImportingError1"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestComparisons.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlTestComparisons"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TransitiveCLosureOnProperties.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/TransitiveCLosureOnProperties"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/PeircesNessesMotherhoodOne.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/PeircesNessesMotherhoodOne"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/shapes-top.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes_top"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >gen</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/genealogy.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/genealogy"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/shapes-specific.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/shapes_specific"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >der</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/DoubleEqualInRule.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/DoubleEqualInRule"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/NotKnownTest.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/NotKnownTest"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/CircularImportB.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/CircularImportB"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/negation.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlnegation"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/min.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/min"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/SubtractDates.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/SubtractDates"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TransitiveClosureOnClasses.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/TransitiveClosureOnClasses"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TransitiveClosureOnClasses.nt"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/GeorgeAndMarthaErr.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlGeorgeAndMarthaErr"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/NotClassRule.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/NotClassRule"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/NotEqualRule.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/NotEqualRule"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/hasValue.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/hasValue"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/validity1.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadlvalidity1"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hl1</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/HyperLink1.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/HyperLink1"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/annotation.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/annotation"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >f237434</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/F237434.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/F237434"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RuleT1IsT2.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/tests/rules/t1ist2"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestMustBeOneOfObjectProperty.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/mustbeoneofobjectpropertysv"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestFamilyRelationshipsDL.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/TestFamilyRelationshipsDL"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rq</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RecursiveQuery.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/RecursiveQuery"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/errorUndefinedConceptInRule.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/errorUndefinedConceptInRule"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >dttm</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/DateAndTime.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/DateAndTime"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/PropOfPropOf.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/PropOfPropOf"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/fm234573.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/fm234573"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/RuleLiterals.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/RuleLiterals"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >BRep</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/BRep.owl"/>
+    <publicURI rdf:resource="http://sadl.org/BRep/BRep_model"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >amp</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/AllMembersPresent.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/AllMembersPresent"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/QueryTest.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/QueryTest"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/PeircesNesses.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/PeircesNesses"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >tst2</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/test2.owl"/>
+    <publicURI rdf:resource="http://com.ge.research.sadl/test2"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestMustBeOfTypeRestriction.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/mustbeoftypeRestriction"/>
+  </OntologySpec>
+  <OntologySpec>
+    <prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >trig</prefix>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/Trig.owl"/>
+    <publicURI rdf:resource="http://sadl.org/TestSadlIde/Trig"/>
+  </OntologySpec>
+  <OntologySpec>
+    <createdBy>SADL</createdBy>
+    <language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <altURL rdf:resource="file:/E:/sadl/eclipse/workspace/TestSadlIde/OwlModels/TestMustBeOneOfObjectPropertySingleValue.owl"/>
+    <publicURI rdf:resource="http://sadl.imp/testsadlide/mustbeoneofobjectproperty"/>
+  </OntologySpec>
+</rdf:RDF>

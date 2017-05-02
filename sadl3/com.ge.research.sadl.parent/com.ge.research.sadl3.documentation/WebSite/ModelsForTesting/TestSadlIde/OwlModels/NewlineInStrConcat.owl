@@ -1,0 +1,16 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://com.ge.research.sadlNewlineInStrConcat#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research.sadlNewlineInStrConcat">
+  <owl:Ontology rdf:about="http://com.ge.research.sadlNewlineInStrConcat">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'NewlineInStrConcat.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:DatatypeProperty rdf:ID="description">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadlNewlineInStrConcat#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="MyThingy"/>
+</rdf:RDF>

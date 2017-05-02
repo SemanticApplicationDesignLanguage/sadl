@@ -1,0 +1,16 @@
+<http://sadl.imp/shapes_specific#Rectangle> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/shapes_specific#Shape> .
+<http://sadl.imp/shapes_specific#Rectangle> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/shapes_specific#height> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/shapes_specific#Rectangle> .
+<http://sadl.imp/shapes_specific#height> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/shapes_specific#height> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/shapes_specific#radius> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/shapes_specific#Circle> .
+<http://sadl.imp/shapes_specific#radius> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/shapes_specific#radius> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/shapes_specific> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:38 $" .
+<http://sadl.imp/shapes_specific> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'shapes-specific.sadl' and should not be edited."@en .
+<http://sadl.imp/shapes_specific> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/shapes_specific#Circle> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/shapes_specific#Shape> .
+<http://sadl.imp/shapes_specific#Circle> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/shapes_specific#width> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/shapes_specific#Rectangle> .
+<http://sadl.imp/shapes_specific#width> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/shapes_specific#width> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .

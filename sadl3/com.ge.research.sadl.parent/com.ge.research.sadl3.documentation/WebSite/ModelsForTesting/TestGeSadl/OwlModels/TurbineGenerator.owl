@@ -1,0 +1,59 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.org/TestGeSadl/TurbineGenerator#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestGeSadl/TurbineGenerator">
+  <owl:Ontology rdf:about="http://sadl.org/TestGeSadl/TurbineGenerator">
+    <owl:imports rdf:resource="http://sadl.imp/measurement"/>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:41 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TurbineGenerator.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Power">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/measurement#Amount"/>
+  </owl:Class>
+  <owl:Class rdf:ID="PowerUnit">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <PowerUnit rdf:ID="MW">
+            <rdfs:label>MW</rdfs:label>
+          </PowerUnit>
+          <PowerUnit rdf:ID="HP">
+            <rdfs:label>horsepower</rdfs:label>
+          </PowerUnit>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/measurement#Unit"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Speed">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/measurement#Amount"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Generator"/>
+  <owl:Class rdf:ID="AngularVelocityUnit">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <AngularVelocityUnit rdf:ID="RPM">
+            <rdfs:label>rpm</rdfs:label>
+          </AngularVelocityUnit>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/measurement#Unit"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Turbine"/>
+  <owl:ObjectProperty rdf:ID="drives">
+    <rdfs:domain rdf:resource="http://sadl.org/TestGeSadl/TurbineGenerator#Turbine"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestGeSadl/TurbineGenerator#Generator"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="speed">
+    <rdfs:domain rdf:resource="http://sadl.org/TestGeSadl/TurbineGenerator#Turbine"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestGeSadl/TurbineGenerator#Speed"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="power">
+    <rdfs:domain rdf:resource="http://sadl.org/TestGeSadl/TurbineGenerator#Generator"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestGeSadl/TurbineGenerator#Power"/>
+  </owl:ObjectProperty>
+</rdf:RDF>

@@ -1,0 +1,89 @@
+@prefix :        <http://sadl.org/Angie/jcrnr#> .
+@prefix addto:   <http://sadl.org/TestGeSadl/AddTo#> .
+@prefix measure:  <http://sadl.imp/measurement#> .
+@prefix test:    <http://sadl.org/MDM/test#> .
+@prefix tg:      <http://sadl.org/TestGeSadl/TurbineGenerator#> .
+@prefix listui:  <http://sadl.org/TestGeSadl/ListUnionIntersection#> .
+@prefix lt2:     <http://sadl.org/TestGeSadl/ListTest2#> .
+@prefix aggreg:  <http://sadl.imp/aggregation#> .
+@prefix drid:    <http://sadl.org/TestGeSadl/defRestrictionsIndirect#> .
+@prefix jcrnr:   <http://sadl.org/Angie/jcrnr#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ginc:    <http://sadl.org/TestGeSadl/GetInstanceNumberCreated#> .
+@prefix def:     <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix listsubtract:  <http://sadl.org/TestGeSadl/ListSubtract#> .
+@prefix BRep:    <http://sadl.org/BRep/BRep_model#> .
+@prefix listtest:  <http://sadl.org/TestGeSadl/ListTest#> .
+@prefix dr:      <http://sadl.org/TestGeSadl/defRestrictions#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/#> .
+@prefix ult:     <http://sadl.org/TestGeSadl/UniqueListTest#> .
+@prefix exampletempate:  <http://sadl.org/templates/exampletempate#> .
+@prefix sumcost:  <http://sadl.org/TestGeSadl/SummingCosts#> .
+@prefix owlrestric:  <http://sadl.org/ContextDrivenTyping/owlrestrictions#> .
+@prefix gcfce2:  <http://sadl.org/TestGeSadl/GetClassFromConstraintExample2#> .
+@prefix listadd:  <http://sadl.org/TestGeSadl/ListAdd#> .
+@prefix checktype:  <http://sadl.org/TestGeSadl/CheckType#> .
+@prefix ut1:     <http://sadl.org/TestSadlIde/UnionTest1#> .
+@prefix ut2:     <http://sadl.org/TestSadlIde/UnionTest2#> .
+@prefix fae:     <http://sadl.org/TestGeSadl/FacesAndEdges1#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix nihpr:   <http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#> .
+@prefix gcfce:   <http://sadl.org/TestGeSadl/GetClassFromConstraintExample#> .
+@prefix dfn:     <http://sadl.org/TestGeSadl/defs#> .
+
+<http://sadl.org/Angie/jcrnr>
+      a       owl:Ontology ;
+      rdfs:comment "This ontology was created from a SADL file 'JenaCardinalityRestrictionNotReasoned.sadl' and should not be edited."@en ;
+      owl:versionInfo "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:40 $" .
+
+jcrnr:DataSet
+      a       owl:Class .
+
+jcrnr:sample
+      a       owl:ObjectProperty ;
+      rdfs:domain jcrnr:T_Test ;
+      rdfs:range jcrnr:DataSet .
+
+jcrnr:Test1
+      a       jcrnr:T_Test ;
+      jcrnr:sample jcrnr:DS2 , jcrnr:DS1 .
+
+jcrnr:T_Test_1S
+      a       owl:Class ;
+      rdfs:subClassOf jcrnr:T_Test ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:intersectionOf (jcrnr:T_Test [ a       owl:Restriction ;
+                            owl:cardinality "1"^^xsd:int ;
+                            owl:onProperty jcrnr:sample
+                          ])
+              ] .
+
+jcrnr:Test2
+      a       jcrnr:T_Test ;
+      jcrnr:sample
+              [ a       jcrnr:DataSet
+              ] .
+
+jcrnr:T_Test_2S
+      a       owl:Class ;
+      rdfs:subClassOf jcrnr:T_Test .
+
+jcrnr:Analytic
+      a       owl:Class .
+
+jcrnr:T_Test
+      a       owl:Class ;
+      rdfs:subClassOf jcrnr:Analytic .
+
+jcrnr:DS2
+      a       jcrnr:DataSet .
+
+jcrnr:DS1
+      a       jcrnr:DataSet .
+
+jcrnr:SPC
+      a       owl:Class ;
+      rdfs:subClassOf jcrnr:Analytic .

@@ -1,0 +1,52 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.imp/PropOfPropOf#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/PropOfPropOf">
+  <owl:Ontology rdf:about="http://sadl.imp/PropOfPropOf">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PropOfPropOf.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Meal"/>
+  <owl:Class rdf:ID="Food"/>
+  <owl:ObjectProperty rdf:ID="entree">
+    <rdfs:domain rdf:resource="http://sadl.imp/PropOfPropOf#Meal"/>
+    <rdfs:range rdf:resource="http://sadl.imp/PropOfPropOf#Food"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="appetizer">
+    <rdfs:domain rdf:resource="http://sadl.imp/PropOfPropOf#Meal"/>
+    <rdfs:range rdf:resource="http://sadl.imp/PropOfPropOf#Food"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="desert">
+    <rdfs:domain rdf:resource="http://sadl.imp/PropOfPropOf#Meal"/>
+    <rdfs:range rdf:resource="http://sadl.imp/PropOfPropOf#Food"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="price">
+    <rdfs:domain rdf:resource="http://sadl.imp/PropOfPropOf#Food"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="bill">
+    <rdfs:domain rdf:resource="http://sadl.imp/PropOfPropOf#Meal"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <Meal rdf:ID="AMeal">
+    <desert>
+      <Food rdf:ID="SomeCheeseCake">
+        <price rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+        >5.0</price>
+      </Food>
+    </desert>
+    <entree>
+      <Food rdf:ID="SomeSteak">
+        <price rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+        >12.95</price>
+      </Food>
+    </entree>
+    <appetizer>
+      <Food rdf:ID="SomeBreadSticks">
+        <price rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+        >3.25</price>
+      </Food>
+    </appetizer>
+  </Meal>
+</rdf:RDF>

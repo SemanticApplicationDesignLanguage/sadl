@@ -1,0 +1,906 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+<title>SADL Constructs Useful in Building Models</title>
+<!--[if !mso]>
+<style>
+v\:*         { behavior: url(#default#VML) }
+o\:*         { behavior: url(#default#VML) }
+.shape       { behavior: url(#default#VML) }
+</style>
+<![endif]--><!--[if gte mso 9]>
+<xml><o:shapedefaults v:ext="edit" spidmax="1027"/>
+</xml><![endif]-->
+</head>
+
+<body>
+
+<h1>SADL Constructs Useful in Building Models</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/28/2017<!--webbot bot="Timestamp" endspan i-checksum="12643" -->. 
+Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
+
+<h4>Table of Contents</h4>
+
+<ul>
+  <li><a href="#Equations">Equations</a></li>
+  <li><a href="#TypedLists">Typed Lists</a></li>
+  <li><a href="#ImpliedProperties">Implied Properties</a></li>
+  <li><a href="#UnittedQuantities">Unitted Quantities</a></li>
+</ul>
+<h2><a name="Equations">Equations</a></h2>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">Equations are 
+snippets of procedural code that provide instructions for computing an output 
+from a set of inputs. These functions can be very important in modeling a 
+domain. For example, many reasoners allow rules to have built-in functions to 
+handle math operations, and without the ability to do math operations it may not 
+be possible to construct a useful model.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The SADL grammar 
+supports two kinds of equations, one in which the body of the function </span>
+<span style="font-family: 'Times New Roman',serif">(the set of instructions for 
+computing) </span><span style="font-family:&quot;Times New Roman&quot;,serif">is 
+defined in the SADL statement, and another where the body of the function exists 
+somewhere outside of the ontology. The first kind uses the <i>Equation</i> 
+keyword.</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">Equation</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:#801480">areaOfCircle</span></b><span style="font-size:10.0pt;font-family:
+&quot;Times New Roman&quot;,serif;color:black"> (</span><span style="font-size:10.0pt;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">float</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:fuchsia">
+radius</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">)
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+returns</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+float</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">:
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+PI</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">*</span><b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:fuchsia">radius</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">^2 
+.</span></p>
+<p class="MsoNormal" style="margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+Equation</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:#801480">volumeOfCylinder</span></b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> (</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">float</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:fuchsia">radius</span></b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black">, </span>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">float</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:fuchsia">height</span></b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black">) </span>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">returns</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">float</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">:</span><b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:#801480"> areaOfCircle</span></b><span style="font-size:10.0pt;line-height:
+107%;font-family:&quot;Times New Roman&quot;,serif;color:black">(</span><b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:fuchsia">radius</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black">) * </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:fuchsia">height</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black">.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">As the example 
+illustrates, one <i>Equation</i> may use another in its body. Here the <b>
+<span style="font-size: 10.0pt; line-height: 107%; color: #801480">
+volumeOfCircle</span></b> <i>Equation</i> uses </span>
+<span style="font-family: 'Times New Roman',serif"><b>
+<span style="font-size: 10.0pt; color: #801480">areaOfCircle</span></b> in its 
+body.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The second kind of 
+equation uses the <i>External</i> keyword. This kind of equation needs a means 
+of specifying where, outside of the ontology, the complete specification may be 
+found. Consistent with W3C identity by URI, the instance of <i>External</i> is 
+given an <i>externalURI</i> identity. It may also have an optional <i>location</i> 
+to help code using the <i>External</i> to find it.</span></p>
+<p class="MsoNormal" style="margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+External</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:#801480">abs</span></b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> (</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">float</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:fuchsia">x</span></b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black">) </span>
+<span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">returns</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">float</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">: 
+&quot;http://java.lang.Math.abs&quot; </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; located</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">at</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> &quot;java.lang.Math.abs&quot;.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The named functions 
+declared with either the <i>Equation</i> or <i>External</i> keyword can be used 
+in expressions in SADL or derivative grammars. Using the functions to do actual 
+computation is a task for the reasoner or other related processors.</span></p>
+<h2><a name="TypedLists">Typed Lists</a></h2>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">A list differs from 
+a set in that the members of a list are in a specified order and there can be 
+duplicate members. From a modeling perspective, this is a big difference. It is 
+typical in many modeling languages to represent a list using a construct with 
+two pointers: the first points to the current member of the list and the second 
+points to a list which is the rest of the list. A typed list has further 
+constraints to specify that members of the list must also be members of a 
+specified class.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">OWL does not have a 
+standardized mechanism for typed lists. OWL builds on RDF which does have a list 
+construct but an RDF list is not typed and, because of the way it is 
+constructed, it’s use makes reasoning over a model theoretically undecidable. 
+Because of the significant importance of lists in modeling many real-world 
+domains, SADL provides a typed list construct defined in SadlListModel.owl, 
+which is automatically added to the OwlModels folder of a project and 
+automatically imported into any .sadl file (and its corresponding OWL file) that 
+uses a typed list. The basic construct in SadlListModel.owl, in SADL syntax is:</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">&nbsp;uri</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+&quot;http://sadl.org/sadllistmodel&quot; </span>
+<span style="font-size:10.0pt;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">alias</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+<b>sadllist</b>.</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif">&nbsp;</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">&nbsp;</span><b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:navy">^List</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+is</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+class</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+described</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+by</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:#00CC00">
+^first</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">,</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+described</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+by</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+rest</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+values</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+of</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+type</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:navy">
+^List</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">,</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+described</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+by</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+lengthRestriction</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+values</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+of</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+type</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+int</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">,</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+described</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+by</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+minLengthRestriction</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+values</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+of</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+type</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+int</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">,</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:
+10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+described</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">by</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">maxLengthRestriction</span></b><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">values</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">of</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">type</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">int</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black">.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">A typed list is 
+created in a SADL ontology by referencing the type followed by the keyword <i>
+List</i>. (In the sadllist model above, the caret (^) in front of <i>List</i> 
+tells the editor that this is not the SADL grammar keyword <i>List</i> but a 
+user-defined concept named <i>List</i>.) Note that the property <i>^first</i> is 
+an RDF properties, as indicated by the more florescent green color, so that the 
+members of the list can either be instances or data types. Since <i>first</i> is 
+also a keyword in the SADL grammar it must be preceded by a caret. Below are two 
+typed list declarations, the first with members from the <i>Person</i> class and 
+the second a list of XSD strings.</span></p>
+<blockquote>
+  <blockquote>
+    <p class="MsoListParagraphCxSpFirst" style="text-indent: -.25in"><b>
+    <span style="font-size:10.0pt;line-height:
+107%;font-family:&quot;Times New Roman&quot;,serif;color:navy">Person</span></b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+    <span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">List</span></p>
+    <p class="MsoListParagraphCxSpLast" style="text-indent: -.25in">
+    <span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">string</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+    <span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">List</span></p>
+  </blockquote>
+</blockquote>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">In a SADL model 
+using a list construct, the type list definition creates a subclass of <i>
+sadllist:List</i> with some additional restrictions.</span></p>
+<p class="MsoListParagraphCxSpFirst" style="text-indent: -.25in">
+<span style="font-family: Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><i><span style="font-family:&quot;Times New Roman&quot;,serif">
+first</span></i><span style="font-family:&quot;Times New Roman&quot;,serif"> can 
+only have values of the specified type, e.g., <i>Person</i> or <i>string </i>in 
+the above examples.</span></p>
+<p class="MsoListParagraphCxSpLast" style="text-indent: -.25in">
+<span style="font-family: Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><i><span style="font-family:&quot;Times New Roman&quot;,serif">
+rest</span></i><span style="font-family:&quot;Times New Roman&quot;,serif"> can 
+only have values of which belong to the class being defined, e.g., <i>Person 
+List</i> or <i>string List</i></span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">Note that the other 
+properties in the <i>sadllist</i> model (<i>lengthRestriction</i>, <i>
+minLengthRestriction</i>, <i>maxLengthRestriction</i>) are used to constrain the 
+length of lists belonging to the defined <i>sadllist:List</i> subclass. These 
+can only be added to named lists. For example,</span></p>
+<p class="MsoNormal" style="margin-left:.5in"><b>
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:navy">
+ChildrenList</span></b><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">is</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">type</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">of</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">List</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">length</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 1-*.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">creates a subclass 
+of <i>sadllist:List</i> named <i>ChildrenList</i> and whose members can only be 
+instances of <i>Person</i> and which must contain at least one element but can 
+contain any number larger number of elements.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">It is also possible 
+to create declared instances of a typed list class. For example,</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">John</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">is</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">. </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">Sue</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">is</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">. </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">Craig</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">is</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black">.</span></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:blue">
+JoesChildren</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">is</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">the</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">ChildrenList</span></b><span style="font-size:10.0pt;line-height:
+107%;font-family:&quot;Times New Roman&quot;,serif;color:black"> [</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">John</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black">, </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">Sue</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black">, </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">Craig</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black">].</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">creates an instance 
+of <i>ChildrenList</i> with ordered members <i>John</i>, <i>Sue</i>, and <i>
+Craig</i>.</span></p>
+<h2><a name="ImpliedProperties">Implied Properties</a></h2>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">It is often the case 
+in natural language that we leave out information that can easily be inferred by 
+the recipient of the communication. For example, we might say “Sue is 23.” or 
+“Joe is at least 250.” What we mean by these statements can probably correctly 
+be inferred to be “Sue has age 23 years.” “The weight of Joe &gt;= 250 lbs.” (See 
+Unitted Quantities below.)</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">SADL tries to allow 
+similar incompleteness as in these English examples, as long as it is not 
+ambiguous, by supporting the concept of an implied property. Implied properties 
+are defined in terms of a specific class using the <i>impliedProperty</i> 
+annotation property defined in the <i>SadlImplicitModel</i>.</span></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:Consolas;color:green">impliedProperty</span><span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:purple">
+is</span><span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:purple">
+a</span><span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:purple">
+type</span><span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:purple">
+of</span><span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:purple">
+annotation</span><span style="font-size:10.0pt;line-height:107%;font-family:Consolas;color:black">.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">This statement 
+creates <i>impliedProperty</i> as an instance of <i>owl:AnnotationProperty</i>. 
+Note that annotation properties in SADL are green but not bold. </span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">Suppose that we 
+created the following model.</span></p>
+<p class="MsoNormal" style="margin-left:.5in"><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
+ coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
+ filled="f" stroked="f">
+ <v:stroke joinstyle="miter"/>
+ <v:formulas>
+  <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+  <v:f eqn="sum @0 1 0"/>
+  <v:f eqn="sum 0 0 @1"/>
+  <v:f eqn="prod @2 1 2"/>
+  <v:f eqn="prod @3 21600 pixelWidth"/>
+  <v:f eqn="prod @3 21600 pixelHeight"/>
+  <v:f eqn="sum @0 0 1"/>
+  <v:f eqn="prod @6 1 2"/>
+  <v:f eqn="prod @7 21600 pixelWidth"/>
+  <v:f eqn="sum @8 21600 0"/>
+  <v:f eqn="prod @7 21600 pixelHeight"/>
+  <v:f eqn="sum @10 21600 0"/>
+ </v:formulas>
+ <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+ <o:lock v:ext="edit" aspectratio="t"/>
+</v:shapetype><v:shape id="Picture_x0020_3" o:spid="_x0000_s1025" type="#_x0000_t75"
+ style='width:300.75pt;height:81pt;visibility:visible;mso-wrap-style:square'>
+ <v:imagedata src="images/image001.png" o:title=""/>
+</v:shape><![endif]--><![if !vml]><img border=0 width=401 height=108
+src="images/image002.jpg" v:shapes="Picture_x0020_3"><![endif]></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-family:&quot;Times New Roman&quot;,serif">&nbsp;</span></p>
+<p class="MsoNormal" style="text-indent: .05pt; line-height: normal; text-autospace: none; margin-bottom: .0001pt">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The “i” to the left 
+of line 9 is an information marker which, when moused over, displays the 
+information </span></p>
+<p class="MsoNormal" style="text-indent: .05pt; line-height: normal; text-autospace: none; margin-bottom: .0001pt">
+<span style="font-family:&quot;Times New Roman&quot;,serif">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; “</span><span style="font-size:9.0pt;font-family:&quot;Segoe UI&quot;,sans-serif">Implied 
+property 'age' used (left side of 'is') to pass type check</span><span style="font-family:
+&quot;Times New Roman&quot;,serif">”. </span></p>
+<p class="MsoNormal" style="text-indent: .05pt; line-height: normal; text-autospace: none; margin-bottom: .0001pt">
+<span style="font-family:
+&quot;Times New Roman&quot;,serif">Whenever implied properties are applied in 
+SADL an information marker is created to make the behavior more transparent to 
+the user.</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-bottom: .0001pt">
+<span style="font-family:
+&quot;Times New Roman&quot;,serif">There are some limitations to the current 
+implementation of implied properties. There must be no ambiguity. For example, 
+if both age and weight were defined to be implied properties of Person, both 
+with a numeric range, it would not be possible to know which implied property to 
+apply in the example above so the expression would be ambiguous. This would 
+therefore create an error. </span></p>
+<h2><a name="UnittedQuantities">Unitted Quantities</a></h2>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">Suppose that we have 
+a domain model defining <i>age</i> and <i>weight</i> as examples of data type 
+properties. </span></p>
+<blockquote>
+  <font SIZE="2">
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>age</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">We could use these 
+properties in instance data statements like</span></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:blue">
+George</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">is</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">age</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 23, </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">weight</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 165.</span></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:blue">Jim</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">is</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">age</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 2, </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">weight</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 9.5.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The problem of 
+course is that many numerical values require a specification of the unit in 
+order to be unambiguous. These statements might more precisely be expressed as</span></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:blue">
+George</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">is</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">age</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 23 years, </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">weight</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 165 lbs.</span></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:blue">Jim</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:purple">is</span><span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">age</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 2 days, </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">weight</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 9.5 lbs.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The SADL grammar 
+supports placing a unit designation after a numeric value in such statements. If 
+the unit has spaces, e.g., <i>“feet per second”</i>, it must be placed in 
+quotes. </span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The translation of 
+such SADL statements to OWL depends upon a SADL preference setting. If the 
+preference “Ignore Unitted Quantities (treat as numeric only) during 
+translation” is checked, the translation will happen as if the units were not 
+present. </span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">If this preference 
+is not checked, the definition of <i>UnittedQuantity</i> from the 
+SadlImplicitModel.sadl is used. The basic unit model is</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">UnittedQuantity</span></b><span style="font-size:10.0pt;font-family:
+&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">is</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+class</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">,</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-bottom: .0001pt">
+<span style="font-size:
+10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+described</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+by</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+^value</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+values</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+of</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+type</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+decimal</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">,</span></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<span style="font-size:10.0pt;
+line-height:107%;font-family:&quot;Times New Roman&quot;,serif;color:black">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">described</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">by</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">unit</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">values</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">of</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">type</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">string</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black">.</span></p>
+<p class="MsoNormal">
+<span style="font-family:&quot;Times New Roman&quot;,serif">The translation to 
+OWL is made as if the SADL statements were</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">George</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">is</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span></p>
+<p class="MsoNormal" style="text-indent: .5in; line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+age</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+(</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:navy">
+UnittedQuantity</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+^value</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+23, </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+unit</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+&quot;years&quot;),</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-bottom: .0001pt">
+<span style="font-size:
+10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+weight</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+(</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:navy">
+UnittedQuantity</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+^value</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+165, </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+unit</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+&quot;<u>lbs</u>&quot;).</span></p>
+<p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:blue">Jim</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">is</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:black"> </span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">Person</span></b></p>
+<p class="MsoNormal" style="text-indent: .5in; line-height: normal; text-autospace: none; margin-left: .5in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt">
+<span style="font-size:10.0pt;
+font-family:&quot;Times New Roman&quot;,serif;color:purple">with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+age</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+(</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">a</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:navy">
+UnittedQuantity</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+^value</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+2, </span>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:purple">
+with</span><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black">
+</span><b>
+<span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:green">
+unit</span></b><span style="font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;color:black"> 
+&quot;days&quot;),</span></p>
+<p class="MsoNormal">
+<span style="font-size:10.0pt;line-height:107%;font-family:
+&quot;Times New Roman&quot;,serif;color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">weight</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> (</span><span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">a</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:navy">UnittedQuantity</span></b><span style="font-size:10.0pt;line-height:
+107%;font-family:&quot;Times New Roman&quot;,serif;color:black"> </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">^value</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> 9.5, </span>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:purple">with</span><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
+<span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
+color:green">unit</span></b><span style="font-size:10.0pt;line-height:107%;
+font-family:&quot;Times New Roman&quot;,serif;color:black"> &quot;<u>lbs</u>&quot;).</span></p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

@@ -1,0 +1,244 @@
+@prefix :        <http://sadl.org/ContextDrivenTyping/owlrestrictions#> .
+@prefix addto:   <http://sadl.org/TestGeSadl/AddTo#> .
+@prefix measure:  <http://sadl.imp/measurement#> .
+@prefix test:    <http://sadl.org/MDM/test#> .
+@prefix tg:      <http://sadl.org/TestGeSadl/TurbineGenerator#> .
+@prefix listui:  <http://sadl.org/TestGeSadl/ListUnionIntersection#> .
+@prefix lt2:     <http://sadl.org/TestGeSadl/ListTest2#> .
+@prefix aggreg:  <http://sadl.imp/aggregation#> .
+@prefix drid:    <http://sadl.org/TestGeSadl/defRestrictionsIndirect#> .
+@prefix jcrnr:   <http://sadl.org/Angie/jcrnr#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ginc:    <http://sadl.org/TestGeSadl/GetInstanceNumberCreated#> .
+@prefix def:     <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix listsubtract:  <http://sadl.org/TestGeSadl/ListSubtract#> .
+@prefix BRep:    <http://sadl.org/BRep/BRep_model#> .
+@prefix listtest:  <http://sadl.org/TestGeSadl/ListTest#> .
+@prefix dr:      <http://sadl.org/TestGeSadl/defRestrictions#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/#> .
+@prefix ult:     <http://sadl.org/TestGeSadl/UniqueListTest#> .
+@prefix defs:    <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix exampletempate:  <http://sadl.org/templates/exampletempate#> .
+@prefix sumcost:  <http://sadl.org/TestGeSadl/SummingCosts#> .
+@prefix owlrestric:  <http://sadl.org/ContextDrivenTyping/owlrestrictions#> .
+@prefix gcfce2:  <http://sadl.org/TestGeSadl/GetClassFromConstraintExample2#> .
+@prefix listadd:  <http://sadl.org/TestGeSadl/ListAdd#> .
+@prefix checktype:  <http://sadl.org/TestGeSadl/CheckType#> .
+@prefix ut1:     <http://sadl.org/TestSadlIde/UnionTest1#> .
+@prefix ut2:     <http://sadl.org/TestSadlIde/UnionTest2#> .
+@prefix fae:     <http://sadl.org/TestGeSadl/FacesAndEdges1#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix nihpr:   <http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#> .
+@prefix gcfce:   <http://sadl.org/TestGeSadl/GetClassFromConstraintExample#> .
+@prefix dfn:     <http://sadl.org/TestGeSadl/defs#> .
+
+owlrestric:Loco2
+      a       owlrestric:Locomotive ;
+      owlrestric:location owlrestric:USA .
+
+owlrestric:Black
+      a       owlrestric:Color , owlrestric:FavoriteColorItaly .
+
+owlrestric:Other
+      a       owlrestric:Location ;
+      owlrestric:locatedIn
+              owlrestric:World .
+
+owlrestric:Blue
+      a       owlrestric:DefaultFavoriteColor , owlrestric:Color , owlrestric:FavoriteColorUSA .
+
+owlrestric:DefaultFavoriteColor
+      a       owl:Class ;
+      rdfs:subClassOf owlrestric:Color ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:oneOf (owlrestric:Blue owlrestric:Green owlrestric:Red)
+              ] .
+
+owlrestric:Locomotive_possibleColor_default2
+      a       defs:ObjectDefault ;
+      defs:appliesToProperty
+              owlrestric:possibleColor ;
+      defs:hasObjectDefault
+              owlrestric:Red .
+
+owlrestric:Canada
+      a       owlrestric:Location ;
+      owlrestric:locatedIn
+              owlrestric:NorthAmerica .
+
+owlrestric:LocomotiveInUSA
+      a       owl:Class ;
+      rdfs:subClassOf owlrestric:Locomotive ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:allValuesFrom owlrestric:FavoriteColorUSA ;
+                owl:onProperty owlrestric:color
+              ] ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:onProperty owlrestric:color ;
+                owl:someValuesFrom owlrestric:FavoriteColorUSA
+              ] ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:intersectionOf (owlrestric:Locomotive [ a       owl:Restriction ;
+                            owl:hasValue owlrestric:USA ;
+                            owl:onProperty owlrestric:location
+                          ])
+              ] .
+
+owlrestric:Green
+      a       owlrestric:DefaultFavoriteColor , owlrestric:Color .
+
+owlrestric:Red
+      a       owlrestric:DefaultFavoriteColor , owlrestric:Color , owlrestric:FavoriteColorUSA .
+
+owlrestric:USA
+      a       owlrestric:Location ;
+      owlrestric:locatedIn
+              owlrestric:NorthAmerica .
+
+owlrestric:Yellow
+      a       owlrestric:Color , owlrestric:FavoriteColorItaly .
+
+owlrestric:Loco3
+      a       owlrestric:Locomotive ;
+      owlrestric:location owlrestric:Germany .
+
+owlrestric:location
+      a       owl:ObjectProperty ;
+      rdfs:domain owlrestric:Locomotive ;
+      rdfs:range owlrestric:Location .
+
+owlrestric:Germany
+      a       owlrestric:Location ;
+      owlrestric:locatedIn
+              owlrestric:Europe .
+
+owlrestric:FavoriteColorItaly
+      a       owl:Class ;
+      rdfs:subClassOf owlrestric:Color ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:oneOf (owlrestric:Yellow owlrestric:Orange owlrestric:Black)
+              ] .
+
+owlrestric:Color
+      a       owl:Class ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:oneOf (owlrestric:Blue owlrestric:Green owlrestric:Red owlrestric:Yellow owlrestric:Orange owlrestric:Black owlrestric:White)
+              ] .
+
+owlrestric:NorthAmerica
+      a       owlrestric:Location ;
+      owlrestric:locatedIn
+              owlrestric:World .
+
+owlrestric:FavoriteColorUSA
+      a       owl:Class ;
+      rdfs:subClassOf owlrestric:Color ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:oneOf (owlrestric:Red owlrestric:White owlrestric:Blue)
+              ] .
+
+owlrestric:World
+      a       owlrestric:Location ;
+      rdfs:label "Global" .
+
+<http://sadl.org/ContextDrivenTyping/owlrestrictions>
+      a       owl:Ontology ;
+      rdfs:comment "This ontology was created from a SADL file 'OwlRestrictions.sadl' and should not be edited."@en ;
+      owl:imports <http://research.ge.com/Acuity/defaults.owl> ;
+      owl:versionInfo "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:40 $" .
+
+owlrestric:White
+      a       owlrestric:Color , owlrestric:FavoriteColorUSA .
+
+owlrestric:locatedIn
+      a       owl:ObjectProperty ;
+      rdfs:domain owlrestric:Location ;
+      rdfs:range owlrestric:Location .
+
+owlrestric:Europe
+      a       owlrestric:Location ;
+      owlrestric:locatedIn
+              owlrestric:World .
+
+owlrestric:Orange
+      a       owlrestric:Color , owlrestric:FavoriteColorItaly .
+
+owlrestric:Location
+      a       owl:Class .
+
+owlrestric:LocomotiveInItaly
+      a       owl:Class ;
+      rdfs:subClassOf owlrestric:Locomotive ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:allValuesFrom owlrestric:FavoriteColorItaly ;
+                owl:onProperty owlrestric:color
+              ] ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:onProperty owlrestric:color ;
+                owl:someValuesFrom owlrestric:FavoriteColorItaly
+              ] ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:intersectionOf (owlrestric:Locomotive [ a       owl:Restriction ;
+                            owl:hasValue owlrestric:Italy ;
+                            owl:onProperty owlrestric:location
+                          ])
+              ] .
+
+owlrestric:Loco1
+      a       owlrestric:Locomotive ;
+      owlrestric:location owlrestric:Italy .
+
+owlrestric:Italy
+      a       owlrestric:Location ;
+      owlrestric:locatedIn
+              owlrestric:Europe .
+
+owlrestric:possibleColor
+      a       owl:ObjectProperty ;
+      rdfs:domain owlrestric:Locomotive ;
+      rdfs:range owlrestric:Color .
+
+owlrestric:Locomotive_possibleColor_default1
+      a       defs:ObjectDefault ;
+      defs:appliesToProperty
+              owlrestric:possibleColor ;
+      defs:hasObjectDefault
+              owlrestric:Green .
+
+owlrestric:color
+      a       owl:ObjectProperty ;
+      rdfs:domain owlrestric:Locomotive ;
+      rdfs:range owlrestric:Color .
+
+owlrestric:Locomotive_possibleColor_default
+      a       defs:ObjectDefault ;
+      defs:appliesToProperty
+              owlrestric:possibleColor ;
+      defs:hasObjectDefault
+              owlrestric:Blue .
+
+owlrestric:Locomotive
+      a       owl:Class ;
+      rdfs:seeAlso owlrestric:Locomotive_possibleColor_default2 , owlrestric:Locomotive_possibleColor_default1 , owlrestric:Locomotive_possibleColor_default ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty owlrestric:color
+              ] ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty owlrestric:location
+              ] .

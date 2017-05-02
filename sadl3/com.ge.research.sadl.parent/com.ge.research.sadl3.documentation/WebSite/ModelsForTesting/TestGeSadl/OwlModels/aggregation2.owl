@@ -1,0 +1,9 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/aggregation2">
+  <owl:Ontology rdf:about="http://sadl.imp/aggregation2">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'aggregation2.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+</rdf:RDF>

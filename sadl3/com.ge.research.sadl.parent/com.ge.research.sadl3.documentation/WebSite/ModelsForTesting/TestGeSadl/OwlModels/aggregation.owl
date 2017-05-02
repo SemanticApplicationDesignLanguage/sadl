@@ -1,0 +1,23 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/aggregation">
+  <owl:Ontology rdf:about="http://sadl.imp/aggregation">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:40 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'aggregation.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="SurfaceAreaAggregator"/>
+  <owl:ObjectProperty rdf:ID="surfaces">
+    <rdfs:domain rdf:resource="http://sadl.imp/aggregation#SurfaceAreaAggregator"/>
+    <rdfs:range rdf:resource="http://sadl.imp/aggregation#List"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="aggregates">
+    <rdfs:domain rdf:resource="http://sadl.imp/aggregation#SurfaceAreaAggregator"/>
+    <rdfs:range rdf:resource="http://sadl.imp/aggregation#Shape_3D"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="amounts">
+    <rdfs:domain rdf:resource="http://sadl.imp/aggregation#SurfaceAreaAggregator"/>
+    <rdfs:range rdf:resource="http://sadl.imp/aggregation#List"/>
+  </owl:ObjectProperty>
+</rdf:RDF>

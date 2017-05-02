@@ -1,0 +1,19 @@
+_:A236a7e36X3aX14039f40781X3aXX2dX6a39 <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a39 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "Female"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a37 <http://www.w3.org/2002/07/owl#allValuesFrom> _:A236a7e36X3aX14039f40781X3aXX2dX6a38 .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a37 <http://www.w3.org/2002/07/owl#onProperty> <http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#gender> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a37 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a3a <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:A236a7e36X3aX14039f40781X3aXX2dX6a39 .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a3a <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "Male"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:37 $" .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'TestCanOnlyBeOneOfDatatypeProperty.sadl' and should not be edited."@en .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#Janie> <http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#gender> "girl"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#Janie> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#Person> .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#gender> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#Person> .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#gender> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#gender> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a38 <http://www.w3.org/2002/07/owl#oneOf> _:A236a7e36X3aX14039f40781X3aXX2dX6a3a .
+_:A236a7e36X3aX14039f40781X3aXX2dX6a38 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DataRange> .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#Person> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:A236a7e36X3aX14039f40781X3aXX2dX6a37 .
+<http://sadl.imp/testsadlide/canonlybeoneofdatatypeproperty#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

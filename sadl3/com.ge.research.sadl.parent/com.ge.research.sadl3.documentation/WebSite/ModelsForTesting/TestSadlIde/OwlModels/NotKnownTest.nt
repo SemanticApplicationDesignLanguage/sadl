@@ -1,0 +1,7 @@
+<http://sadl.imp/NotKnownTest#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/NotKnownTest#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/NotKnownTest#Thingy> .
+<http://sadl.imp/NotKnownTest#disposable> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/NotKnownTest#Thingy> .
+<http://sadl.imp/NotKnownTest#disposable> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+<http://sadl.imp/NotKnownTest#disposable> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/NotKnownTest> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'NotKnownTest.sadl' and should not be edited."@en .
+<http://sadl.imp/NotKnownTest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .

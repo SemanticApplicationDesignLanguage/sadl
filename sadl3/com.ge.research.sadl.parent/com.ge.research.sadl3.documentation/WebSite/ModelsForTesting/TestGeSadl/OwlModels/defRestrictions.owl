@@ -1,0 +1,49 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestGeSadl/defRestrictions">
+  <owl:Ontology rdf:about="http://sadl.org/TestGeSadl/defRestrictions">
+    <owl:imports rdf:resource="http://sadl.org/TestGeSadl/defs"/>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:41 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'defRestrictions.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:about="http://sadl.org/TestGeSadl/defs#Thingy">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:DataRange>
+            <owl:oneOf rdf:parseType="Resource">
+              <rdf:rest rdf:parseType="Resource">
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                >SN2</rdf:first>
+              </rdf:rest>
+              <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >SN1</rdf:first>
+            </owl:oneOf>
+          </owl:DataRange>
+        </owl:someValuesFrom>
+        <owl:onProperty rdf:resource="http://sadl.org/TestGeSadl/defs#serialNumber"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom>
+          <owl:DataRange>
+            <owl:oneOf rdf:parseType="Resource">
+              <rdf:rest rdf:parseType="Resource">
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                >SN2</rdf:first>
+              </rdf:rest>
+              <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >SN1</rdf:first>
+            </owl:oneOf>
+          </owl:DataRange>
+        </owl:allValuesFrom>
+        <owl:onProperty rdf:resource="http://sadl.org/TestGeSadl/defs#serialNumber"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+</rdf:RDF>

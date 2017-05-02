@@ -1,0 +1,3 @@
+<http://sadl.imp/shape_rules> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:38 $" .
+<http://sadl.imp/shape_rules> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'shape-rules.sadl' and should not be edited."@en .
+<http://sadl.imp/shape_rules> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .

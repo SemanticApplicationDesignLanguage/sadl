@@ -1,0 +1,10 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/CircularImportB">
+  <owl:Ontology rdf:about="http://sadl.imp/CircularImportB">
+    <owl:imports rdf:resource="http://sadl.imp/CircularImportA"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'CircularImportB.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+</rdf:RDF>

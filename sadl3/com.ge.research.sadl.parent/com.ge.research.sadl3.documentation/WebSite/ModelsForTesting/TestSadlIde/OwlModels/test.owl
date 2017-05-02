@@ -1,0 +1,54 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/testsadlide/test#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/testsadlide/test">
+  <owl:Ontology rdf:about="http://sadl.imp/testsadlide/test">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:38 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'test.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:DatatypeProperty rdf:ID="dp5">
+    <rdfs:domain rdf:resource="http://sadl.imp/testsadlide/test#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="dp4">
+    <rdfs:domain rdf:resource="http://sadl.imp/testsadlide/test#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="dp1">
+    <rdfs:domain rdf:resource="http://sadl.imp/testsadlide/test#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="dp3">
+    <rdfs:domain rdf:resource="http://sadl.imp/testsadlide/test#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="dp2">
+    <rdfs:domain rdf:resource="http://sadl.imp/testsadlide/test#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="MyOtherThingy3">
+    <dp1 rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >4.0</dp1>
+    <dp1 rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >3.0</dp1>
+  </Thingy>
+  <Thingy rdf:ID="MyOtherThingy2">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >This is a different thingy.</rdfs:comment>
+  </Thingy>
+  <Thingy rdf:ID="MyOtherThingy">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >This is another of my things.</rdfs:comment>
+  </Thingy>
+  <Thingy rdf:ID="MyThingy">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >This is my thing.</rdfs:comment>
+    <dp2 rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >4.0</dp2>
+    <dp1 rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >3.0</dp1>
+  </Thingy>
+</rdf:RDF>

@@ -1,0 +1,11 @@
+<http://com.ge.research.sadlQuickFixes#Granite> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://com.ge.research.sadlQuickFixes#Rock> .
+<http://com.ge.research.sadlQuickFixes#Granite> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadlQuickFixes> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'QuickFixes.sadl' and should not be edited."@en .
+<http://com.ge.research.sadlQuickFixes> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://com.ge.research.sadlQuickFixes#hardness> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadlQuickFixes#Rock> .
+<http://com.ge.research.sadlQuickFixes#hardness> <http://www.w3.org/2000/01/rdf-schema#range> <http://com.ge.research.sadlQuickFixes#Hardness> .
+<http://com.ge.research.sadlQuickFixes#hardness> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://com.ge.research.sadlQuickFixes#MyPetRock> <http://com.ge.research.sadlQuickFixes#hardness> <http://com.ge.research.sadlQuickFixes#Soft> .
+<http://com.ge.research.sadlQuickFixes#MyPetRock> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadlQuickFixes#Rock> .
+<http://com.ge.research.sadlQuickFixes#Rock> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadlQuickFixes#Hard> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadlQuickFixes#Hardness> .

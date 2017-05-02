@@ -1,0 +1,16 @@
+<http://com.ge.research.sadl/RecursiveQuery#Seth> <http://com.ge.research.sadl/RecursiveQuery#child> <http://com.ge.research.sadl/RecursiveQuery#Enosh> .
+<http://com.ge.research.sadl/RecursiveQuery#Seth> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/RecursiveQuery#Person> .
+<http://com.ge.research.sadl/RecursiveQuery#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/RecursiveQuery#Adam> <http://com.ge.research.sadl/RecursiveQuery#child> <http://com.ge.research.sadl/RecursiveQuery#Seth> .
+<http://com.ge.research.sadl/RecursiveQuery#Adam> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/RecursiveQuery#Person> .
+<http://com.ge.research.sadl/RecursiveQuery#Mahalalel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/RecursiveQuery#Person> .
+<http://com.ge.research.sadl/RecursiveQuery#Enosh> <http://com.ge.research.sadl/RecursiveQuery#child> <http://com.ge.research.sadl/RecursiveQuery#Kenan> .
+<http://com.ge.research.sadl/RecursiveQuery#Enosh> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/RecursiveQuery#Person> .
+<http://com.ge.research.sadl/RecursiveQuery#child> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadl/RecursiveQuery#Person> .
+<http://com.ge.research.sadl/RecursiveQuery#child> <http://www.w3.org/2000/01/rdf-schema#range> <http://com.ge.research.sadl/RecursiveQuery#Person> .
+<http://com.ge.research.sadl/RecursiveQuery#child> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://com.ge.research.sadl/RecursiveQuery> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $" .
+<http://com.ge.research.sadl/RecursiveQuery> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'RecursiveQuery.sadl' and should not be edited."@en .
+<http://com.ge.research.sadl/RecursiveQuery> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://com.ge.research.sadl/RecursiveQuery#Kenan> <http://com.ge.research.sadl/RecursiveQuery#child> <http://com.ge.research.sadl/RecursiveQuery#Mahalalel> .
+<http://com.ge.research.sadl/RecursiveQuery#Kenan> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/RecursiveQuery#Person> .

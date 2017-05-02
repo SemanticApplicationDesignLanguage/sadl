@@ -1,0 +1,264 @@
+@prefix :        <http://sadl.org/MDM/test#> .
+@prefix addto:   <http://sadl.org/TestGeSadl/AddTo#> .
+@prefix measure:  <http://sadl.imp/measurement#> .
+@prefix test:    <http://sadl.org/MDM/test#> .
+@prefix tg:      <http://sadl.org/TestGeSadl/TurbineGenerator#> .
+@prefix listui:  <http://sadl.org/TestGeSadl/ListUnionIntersection#> .
+@prefix lt2:     <http://sadl.org/TestGeSadl/ListTest2#> .
+@prefix aggreg:  <http://sadl.imp/aggregation#> .
+@prefix drid:    <http://sadl.org/TestGeSadl/defRestrictionsIndirect#> .
+@prefix jcrnr:   <http://sadl.org/Angie/jcrnr#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ginc:    <http://sadl.org/TestGeSadl/GetInstanceNumberCreated#> .
+@prefix def:     <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix listsubtract:  <http://sadl.org/TestGeSadl/ListSubtract#> .
+@prefix BRep:    <http://sadl.org/BRep/BRep_model#> .
+@prefix listtest:  <http://sadl.org/TestGeSadl/ListTest#> .
+@prefix dr:      <http://sadl.org/TestGeSadl/defRestrictions#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/#> .
+@prefix ult:     <http://sadl.org/TestGeSadl/UniqueListTest#> .
+@prefix exampletempate:  <http://sadl.org/templates/exampletempate#> .
+@prefix sumcost:  <http://sadl.org/TestGeSadl/SummingCosts#> .
+@prefix owlrestric:  <http://sadl.org/ContextDrivenTyping/owlrestrictions#> .
+@prefix gcfce2:  <http://sadl.org/TestGeSadl/GetClassFromConstraintExample2#> .
+@prefix listadd:  <http://sadl.org/TestGeSadl/ListAdd#> .
+@prefix checktype:  <http://sadl.org/TestGeSadl/CheckType#> .
+@prefix ut1:     <http://sadl.org/TestSadlIde/UnionTest1#> .
+@prefix ut2:     <http://sadl.org/TestSadlIde/UnionTest2#> .
+@prefix fae:     <http://sadl.org/TestGeSadl/FacesAndEdges1#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix nihpr:   <http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#> .
+@prefix gcfce:   <http://sadl.org/TestGeSadl/GetClassFromConstraintExample#> .
+@prefix dfn:     <http://sadl.org/TestGeSadl/defs#> .
+
+test:Vertex
+      a       owl:Class ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty test:z
+              ] ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty test:x
+              ] ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty test:y
+              ] .
+
+test:AbstractFace
+      a       owl:Class .
+
+test:v7
+      a       test:Vertex ;
+      test:x  "1.0"^^xsd:double ;
+      test:y  "0.0"^^xsd:double ;
+      test:z  "1.0"^^xsd:double .
+
+test:v3
+      a       test:Vertex ;
+      test:x  "1.0"^^xsd:double ;
+      test:y  "1.0"^^xsd:double ;
+      test:z  "1.0"^^xsd:double .
+
+test:x
+      a       owl:DatatypeProperty ;
+      rdfs:domain test:Vertex ;
+      rdfs:range xsd:double .
+
+test:face1
+      a       test:Planar ;
+      test:edge test:e1 , test:e4 , test:e3 , test:e2 .
+
+test:hasEdge
+      a       owl:ObjectProperty ;
+      rdfs:domain test:Cuboid ;
+      rdfs:range test:AbstractEdge .
+
+test:e5
+      a       test:AbstractEdge ;
+      test:endpoint test:v7 , test:v6 ;
+      test:faceAdjacency test:CONVEX .
+
+test:v2
+      a       test:Vertex ;
+      test:x  "1.0"^^xsd:double ;
+      test:y  "1.0"^^xsd:double ;
+      test:z  "0.0"^^xsd:double .
+
+test:AdjacencyType
+      a       owl:Class ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:oneOf (test:TANGENT test:CONVEX test:CONCAVE)
+              ] .
+
+test:faceAdjacency
+      a       owl:ObjectProperty ;
+      rdfs:domain test:AbstractEdge ;
+      rdfs:range test:AdjacencyType .
+
+test:e1
+      a       test:AbstractEdge ;
+      test:endpoint test:v2 , test:v1 ;
+      test:faceAdjacency test:CONCAVE .
+
+test:hasFace
+      a       owl:ObjectProperty ;
+      rdfs:domain test:Cuboid ;
+      rdfs:range test:SimpleQuadrilateralFace .
+
+test:v8
+      a       test:Vertex ;
+      test:x  "0.0"^^xsd:double ;
+      test:y  "0.0"^^xsd:double ;
+      test:z  "1.0"^^xsd:double .
+
+test:connectedFaces
+      a       owl:ObjectProperty ;
+      rdfs:domain test:AbstractEdge ;
+      rdfs:range test:AbstractFace .
+
+test:Feature
+      a       owl:Class .
+
+test:v4
+      a       test:Vertex ;
+      test:x  "0.0"^^xsd:double ;
+      test:y  "1.0"^^xsd:double ;
+      test:z  "1.0"^^xsd:double .
+
+test:connectedTo
+      a       owl:ObjectProperty ;
+      rdfs:domain test:AbstractEdge ;
+      rdfs:range test:AbstractEdge .
+
+test:CONVEX
+      a       test:AdjacencyType .
+
+test:endpoint
+      a       owl:ObjectProperty ;
+      rdfs:domain test:AbstractEdge ;
+      rdfs:range test:Vertex .
+
+test:e6
+      a       test:AbstractEdge ;
+      test:endpoint test:v7 , test:v3 ;
+      test:faceAdjacency test:CONVEX .
+
+test:edge
+      a       owl:ObjectProperty ;
+      rdfs:domain test:AbstractFace ;
+      rdfs:range test:AbstractEdge .
+
+test:adjFace
+      a       owl:ObjectProperty ;
+      rdfs:domain test:AbstractFace ;
+      rdfs:range test:AbstractFace .
+
+test:v1
+      a       test:Vertex ;
+      test:x  "0.0"^^xsd:double ;
+      test:y  "1.0"^^xsd:double ;
+      test:z  "0.0"^^xsd:double .
+
+test:e2
+      a       test:AbstractEdge ;
+      test:endpoint test:v2 , test:v6 ;
+      test:faceAdjacency test:CONVEX .
+
+test:z
+      a       owl:DatatypeProperty ;
+      rdfs:domain test:Vertex ;
+      rdfs:range xsd:double .
+
+test:v5
+      a       test:Vertex ;
+      test:x  "0.0"^^xsd:double ;
+      test:y  "0.0"^^xsd:double ;
+      test:z  "0.0"^^xsd:double .
+
+test:SimplePlanarFace
+      a       owl:Class ;
+      rdfs:subClassOf test:Planar .
+
+test:connectedEdges
+      a       owl:ObjectProperty ;
+      rdfs:domain test:Vertex ;
+      rdfs:range test:AbstractEdge .
+
+test:Cuboid
+      a       owl:Class ;
+      rdfs:subClassOf test:Feature .
+
+test:SimpleQuadrilateralFace
+      a       owl:Class ;
+      rdfs:subClassOf test:SimplePlanarFace .
+
+test:TANGENT
+      a       test:AdjacencyType .
+
+test:AbstractEdge
+      a       owl:Class ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:cardinality "2"^^xsd:int ;
+                owl:onProperty test:connectedFaces
+              ] ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty test:faceAdjacency
+              ] .
+
+test:hasVertices
+      a       owl:ObjectProperty ;
+      rdfs:domain test:Cuboid ;
+      rdfs:range test:Vertex .
+
+test:CONCAVE
+      a       test:AdjacencyType .
+
+test:e7
+      a       test:AbstractEdge ;
+      test:endpoint test:v3 , test:v2 ;
+      test:faceAdjacency test:CONVEX .
+
+test:e3
+      a       test:AbstractEdge ;
+      test:endpoint test:v5 , test:v6 ;
+      test:faceAdjacency test:CONVEX .
+
+<http://sadl.org/MDM/test>
+      a       owl:Ontology ;
+      rdfs:comment "This ontology was created from a SADL file 'AbhaTest.sadl' and should not be edited."@en ;
+      owl:versionInfo "$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:41 $" .
+
+test:face2
+      a       test:Planar ;
+      test:edge test:e5 , test:e6 , test:e7 , test:e2 .
+
+test:y
+      a       owl:DatatypeProperty ;
+      rdfs:domain test:Vertex ;
+      rdfs:range xsd:double .
+
+test:v6
+      a       test:Vertex ;
+      test:x  "1.0"^^xsd:double ;
+      test:y  "0.0"^^xsd:double ;
+      test:z  "0.0"^^xsd:double .
+
+test:Planar
+      a       owl:Class ;
+      rdfs:subClassOf test:AbstractFace .
+
+test:e4
+      a       test:AbstractEdge ;
+      test:endpoint test:v1 , test:v5 ;
+      test:faceAdjacency test:CONVEX .

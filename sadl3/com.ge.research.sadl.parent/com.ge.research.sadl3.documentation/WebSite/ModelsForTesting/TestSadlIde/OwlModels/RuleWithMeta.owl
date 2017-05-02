@@ -1,0 +1,148 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.org/TestSadlIde/RuleWithMeta#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/RuleWithMeta">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:37 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleWithMeta.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Body">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="Door"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="component"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="Window"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#component"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="SubAssembly"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Vehicle">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Body"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="subAssembly"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="Chasis"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#subAssembly"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Component"/>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#Door">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Component"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#Chasis">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="Frame"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#component"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="Wheel"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#component"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#SubAssembly"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#Frame">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:DataRange>
+            <owl:oneOf rdf:parseType="Resource">
+              <rdf:rest rdf:parseType="Resource">
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                >FR2</rdf:first>
+              </rdf:rest>
+              <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >FR1</rdf:first>
+            </owl:oneOf>
+          </owl:DataRange>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="part_number"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom>
+          <owl:DataRange>
+            <owl:oneOf rdf:parseType="Resource">
+              <rdf:rest rdf:parseType="Resource">
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                >FR2</rdf:first>
+              </rdf:rest>
+              <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >FR1</rdf:first>
+            </owl:oneOf>
+          </owl:DataRange>
+        </owl:allValuesFrom>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#part_number"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Component"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#Window">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Component"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#Wheel">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Component"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#subAssembly">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Vehicle"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#SubAssembly"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#component">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#SubAssembly"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Component"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/TestSadlIde/RuleWithMeta#part_number">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/RuleWithMeta#Component"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <Component rdf:ID="MyFrame">
+    <part_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >FR2</part_number>
+  </Component>
+</rdf:RDF>
