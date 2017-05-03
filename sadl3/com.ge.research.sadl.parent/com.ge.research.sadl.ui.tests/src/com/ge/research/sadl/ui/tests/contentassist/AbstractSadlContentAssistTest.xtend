@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests.contentassist
 
+import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.ui.OutputStreamStrategy
 import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
@@ -190,8 +191,11 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 					val contexts = document.readOnly([
 						processor.contextFactory.create(sourceViewer, document.length, it)
 					]);
+					val modelProcessor = document.readOnly([
+						get(IModelProcessorProvider).getProcessor(it);
+					]);
 					for (context : contexts) {
-						val ontologyContext = get(IOntologyContextProvider).getOntologyContext(context);
+						val ontologyContext = get(IOntologyContextProvider).getOntologyContext(context, modelProcessor);
 						if (ontologyContext.present) {
 							return ontologyContext.get;
 						}

@@ -30,7 +30,7 @@ class SadlOntologyHelper implements ISadlOntologyHelper {
 
 	@Override
 	override validate(Context context, SadlResource candidate) {
-		context.modelProcessor.orNull?.validate(context, candidate);
+		context.modelProcessor.validate(context, candidate);
 	}
 
 }
