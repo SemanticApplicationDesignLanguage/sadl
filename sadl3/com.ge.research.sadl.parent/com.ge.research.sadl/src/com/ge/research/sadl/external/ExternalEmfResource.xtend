@@ -32,6 +32,15 @@ import com.ge.research.sadl.sADL.SadlResource
 
 class ExternalEmfResource extends ResourceImpl {
 	@Accessors OntModel jenaModel
+	
+	override public void load(Map<?, ?> options) throws IOException {
+		try {
+			super.load(options)
+		}
+		catch (Throwable t) {
+			System.err.println("Error loading '" + this.uri.toString + "': " + t.message)
+		}
+    }
 
 	override protected doLoad(InputStream inputStream, Map<?, ?> options) throws IOException {
 //		val om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM) as OntModel
