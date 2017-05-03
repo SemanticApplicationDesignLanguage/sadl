@@ -19,11 +19,13 @@ package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds
 import com.ge.research.sadl.services.SADLGrammarAccess
+import com.google.common.collect.Sets
 import com.google.inject.Inject
 import java.util.Collection
 import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.BeforeClass
 import org.junit.Test
@@ -32,9 +34,6 @@ import org.junit.runner.RunWith
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 
 import static extension java.lang.reflect.Modifier.*
-import org.junit.AfterClass
-import com.google.common.collect.Sets
-import org.junit.Ignore
 
 /**
  * Test for checking that the {@link ISadlOntologyHelper.GrammarContextIds} are in sync with the actual
@@ -64,7 +63,7 @@ class GrammarContextIDsTest extends Assert {
 		];
 		assertEquals(grammarContextIds.size,
 			ONTOLOGY_DEPENDENT_CONTEXT_IDS.size + ONTOLOGY_INDEPENDENT_CONTEXT_IDS.size);
-			
+
 		assertTrue(Sets.intersection(ONTOLOGY_DEPENDENT_CONTEXT_IDS, ONTOLOGY_INDEPENDENT_CONTEXT_IDS).empty);
 
 		IDS_TO_TEST.addAll(grammarContextIds.map[name]);
@@ -72,8 +71,8 @@ class GrammarContextIDsTest extends Assert {
 
 	@AfterClass
 	static def void afterClass() {
-//		assertTrue('''The following grammar context IDs do not have corresponding test case: «IDS_TO_TEST».''',
-//			IDS_TO_TEST.empty);
+		assertTrue('''The following grammar context IDs do not have corresponding test case: «IDS_TO_TEST».''',
+			IDS_TO_TEST.empty);
 	}
 
 	@Test
@@ -139,7 +138,7 @@ class GrammarContextIDsTest extends Assert {
 			sadlPropertyConditionAccess.propertyAssignment_0
 		);
 	}
-	
+
 	@Test
 	def void check_09() {
 		assertEquals(
@@ -147,31 +146,36 @@ class GrammarContextIDsTest extends Assert {
 			sadlPropertyInitializerAccess.valueAssignment_0_2_0
 		);
 	}
-	
-	@Ignore
+
 	@Test
 	def void check_10() {
 		assertEquals(
 			PROPOFSUBJECT_RIGHT,
-			sadlPropertyInitializerAccess.valueAssignment_0_2_0
+			propOfSubjectAccess.rightAssignment_0_1_0_1_1
 		);
 	}
-	
-	@Ignore
+
 	@Test
 	def void check_11() {
 		assertEquals(
 			PROPOFSUBJECT_PROP,
-			sadlPropertyInitializerAccess.valueAssignment_0_2_0
+			propOfSubjectAccess.propAssignment_0_1_0_1_0_0_2
 		);
 	}
-	
-	@Ignore
+
 	@Test
 	def void check_12() {
 		assertEquals(
 			SADLPROPERTYRESTRICTION_TYPEONLY,
-			sadlPropertyInitializerAccess.valueAssignment_0_2_0
+			sadlPropertyRestrictionAccess.typeonlyAssignment_2_5_0
+		);
+	}
+
+	@Test
+	def void check_13() {
+		assertEquals(
+			SADLSTATEMENT_TYPE,
+			sadlStatementAccess.typeAssignment_0_1_5_1_2
 		);
 	}
 
