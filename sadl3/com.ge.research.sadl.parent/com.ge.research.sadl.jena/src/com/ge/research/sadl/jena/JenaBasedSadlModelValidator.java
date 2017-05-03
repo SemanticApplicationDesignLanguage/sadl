@@ -469,19 +469,24 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				return false;
 			}
-			if (leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
-				TypeCheckInfo subjtype = getType(((PropOfSubject)leftExpression).getRight());
-				ConceptIdentifier subject = subjtype.getTypeCheckType();
-				if (subject != null) {
-					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
-				}
-			}
+			//It's possible there may be a local type restriction
+			handleLocalRestriction(leftExpression,rightExpression,leftTypeCheckInfo,rightTypeCheckInfo);
 			return true;
 		} catch (Throwable t) {
 			return handleValidationException(expression, t);
 		}
 	}
 	
+	protected void handleLocalRestriction(Expression leftExpression, Expression rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException {
+		if (leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
+			TypeCheckInfo subjtype = getType(((PropOfSubject)leftExpression).getRight());
+			ConceptIdentifier subject = subjtype.getTypeCheckType();
+			if (subject != null) {
+				addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
+			}
+		}
+	}
+
 	private boolean useImpliedProperties(String op) {
 		if (op.equals("contains") || op.equals("does not contain")) {
 			return false;
@@ -2932,6 +2937,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							// for now don't do any checking--may be able to do so later with variable definitions
 							try {
 								stci = getType(subject);
+								//It's possible that there are local restrictions
+								stci = getApplicableLocalRestriction(stci);
 								if (stci != null && stci.getTypeCheckType() != null) {
 									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
 									varName = declarationExtensions.getConcreteName((SadlResource)subject);
@@ -2995,6 +3002,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
+	}
+
+	protected TypeCheckInfo getApplicableLocalRestriction(TypeCheckInfo stci) {
+		return stci;	
 	}
 
 	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression target, boolean propOfSubjectCheck, String varName) throws InvalidTypeException {
