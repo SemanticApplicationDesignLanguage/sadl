@@ -578,6 +578,39 @@ hosted on github.com.</p>
     </ul>
   </blockquote>
   </li>
+  <li>External Models (Models External to a Project)<p>SADL 3 supports the 
+  inclusion of imported models that are not in the current project in two ways.<ol type="a">
+  <li>The current project can make reference to another SADL project, making the 
+  models of the other project assessable for use in this project as if they were 
+  defined in this project.<p>To make a SADL project reference another project:<ol type="i">
+  <li>open the <i>Project Properties</i> dialog</li>
+  <li>select<i> Project References</i> in the left side of the dialog</li>
+  <li>check the project(s) this project should reference.<br>
+&nbsp;</li>
+  </li>
+  <li>A project can include external OWL files, making them available for import 
+  into SADL models.
+  <p>To make an external OWL file available for import in a SADL project:<ol type="i">
+  <li>select the project in the <i>Project Explorer</i></li>
+  <li>select <i>New</i> -&gt; <i>Other</i></li>
+  <li>expand (if necessary) <i>SADL Model URL List Wizards</i></li>
+  <li>select <i>SADL Model URL List file</i></li>
+  <li>click on <i>Next</i></li>
+  <li>select a project subfolder if desired, change the filename if desired (do 
+  not change the &quot;.url&quot; file extension).</li>
+  </ol>
+  <p>This will create a &quot;.url&quot; file if it doesn't exist and open it in the 
+  External URL editor. If it does already exist it can be opened directly from 
+  the <i>Project Explorer</i>. Once the &quot;.url&quot; file is open:<ol type="i">
+  <li>add the desired URL(s) (the actual URL from which the OWL file can be 
+  downloaded; this can be a &quot;file:/...&quot; URL for OWL files on the local file 
+  system or &quot;http://...&quot;)</li>
+  <li>change the editor view from the tab (below the editor) with the name of 
+  the &quot;.url&quot; file to the tab <i>Download</i>.</li>
+  <li>click on <i>Download</i> to download and index the external OWL files, 
+  dealing with any errors (the OWL files must be valid and parsable).<br>
+&nbsp;</li>
+  </li>
   <li>Graphing (Graph files in the <b>Graphs</b> folder)<ol type="a">
   <li>Neighborhood graphs, anchored on class, individual, or property</li>
   <li>Complete ontology graph including graph of imports</li>
