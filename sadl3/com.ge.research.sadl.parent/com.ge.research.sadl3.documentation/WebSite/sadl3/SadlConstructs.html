@@ -6,6 +6,9 @@
 <meta name="ProgId" content="FrontPage.Editor.Document">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 
+<link rel="File-List" href="SadlConstructs_files/filelist.xml">
+
+
 <title>SADL Constructs Useful in Building Models</title>
 <!--[if !mso]>
 <style>
@@ -22,7 +25,7 @@ o\:*         { behavior: url(#default#VML) }
 
 <h1>SADL Constructs Useful in Building Models</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/28/2017<!--webbot bot="Timestamp" endspan i-checksum="12643" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/04/2017<!--webbot bot="Timestamp" endspan i-checksum="12565" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h4>Table of Contents</h4>
@@ -520,9 +523,9 @@ created the following model.</span></p>
  <o:lock v:ext="edit" aspectratio="t"/>
 </v:shapetype><v:shape id="Picture_x0020_3" o:spid="_x0000_s1025" type="#_x0000_t75"
  style='width:300.75pt;height:81pt;visibility:visible;mso-wrap-style:square'>
- <v:imagedata src="images/image001.png" o:title=""/>
+ <v:imagedata src="SadlConstructs_files/image001.png" o:title=""/>
 </v:shape><![endif]--><![if !vml]><img border=0 width=401 height=108
-src="images/image002.jpg" v:shapes="Picture_x0020_3"><![endif]></p>
+src="SadlConstructs_files/image002.jpg" v:shapes="Picture_x0020_3"><![endif]></p>
 <p class="MsoNormal" style="margin-left:.5in">
 <span style="font-family:&quot;Times New Roman&quot;,serif">&nbsp;</span></p>
 <p class="MsoNormal" style="text-indent: .05pt; line-height: normal; text-autospace: none; margin-bottom: .0001pt">
@@ -899,7 +902,46 @@ font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
 <span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
 color:green">unit</span></b><span style="font-size:10.0pt;line-height:107%;
 font-family:&quot;Times New Roman&quot;,serif;color:black"> &quot;<u>lbs</u>&quot;).</span></p>
-<p>&nbsp;</p>
+<h2>External Models (Models External to a Project)</h2>
+<p>SADL 3 supports the inclusion of imported models that are not in the current 
+project in two ways.</p>
+<ol type="a">
+  <li>The current project can make reference to another SADL project, making the 
+  models of the other project assessable for use in this project as if they were 
+  defined in this project.<p>To make a SADL project reference another project in 
+  the Eclipse environment:<ol type="i">
+  <li>open the <i>Project Properties</i> dialog</li>
+  <li>select<i> Project References</i> in the left side of the dialog</li>
+  <li>check the project(s) this project should reference.<br>
+&nbsp;</li>
+  </li>
+  <li>A project can include external OWL files, making them available for import 
+  into SADL models.
+  <p>To make an external OWL file available for import in a SADL project:<ol type="i">
+  <li>select the project in the <i>Project Explorer,</i></li>
+  <li>select <i>New</i> -&gt; <i>Other,</i></li>
+  <li>expand (if necessary) <i>SADL Model URL List Wizards,</i></li>
+  <li>select <i>SADL Model URL List file,</i></li>
+  <li>click on <i>Next,</i></li>
+  <li>select a project subfolder if desired, change the filename if desired (do 
+  not change the &quot;.url&quot; file extension).</li>
+  </ol>
+  <p>This will create a &quot;.url&quot; file if it doesn't exist and open it in the 
+  External URL editor. If it does already exist it can be opened directly from 
+  the <i>Project Explorer</i>. Once the &quot;.url&quot; file is open:<ol type="i">
+  <li>add the desired URL(s) (the actual URL from which the OWL file can be 
+  downloaded; this can be a &quot;file:/...&quot; URL for OWL files on the local file 
+  system or &quot;http://...&quot;),</li>
+  <li>change the editor view from the tab (below the editor) with the name of 
+  the &quot;.url&quot; file to the tab labeled <i>Download,</i></li>
+  <li>click on <i>Download</i> to download and index the external OWL files, 
+  dealing with any errors ,<ul>
+    <li>the OWL files must be valid and parsable,</li>
+    <li>Eclipse must be configured so that any &quot;http://...&quot; URL's can be 
+    retrieved programmatically through any existing firewalls.</li>
+  </ul>
+  </li>
+  </li>
 
 </body>
 

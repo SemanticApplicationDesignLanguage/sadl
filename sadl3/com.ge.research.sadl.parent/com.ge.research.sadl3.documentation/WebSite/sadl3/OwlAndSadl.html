@@ -21,7 +21,7 @@ span.MsoFootnoteReference
 <h1>The Web Ontology Language (OWL) and the Semantic Application Design Language 
 (SADL)</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/28/2017<!--webbot bot="Timestamp" endspan i-checksum="12643" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/04/2017<!--webbot bot="Timestamp" endspan i-checksum="12565" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 <h4>Table of Contents</h4>
 <ul>
@@ -62,6 +62,13 @@ using RDF properties as that provides additional information. OWL also defines
 owl:AnnotationProperty. Annotation properties are meant to provide additional 
 information not of a logical nature and which will be ignored by reasoners. In 
 OWL 1 annotation properties cannot be given domain and range.
+<p>In addition, OWL supports the importing of one model into another using the
+<i>owl:imports</i> property. The subject of an import statement is the URI 
+identifying the importing model. The object (value) of the property is the URI 
+of the model being imported. All of the concepts in any imported model, directly 
+or indirectly imported, are available for use in the importing model. This is 
+illustrated in the next section by the import statement on line 2 of the 
+example.</p>
 <h2>Defining Classes, 
 Properties, and Individuals in SADL</h2>
 The Semantic 
