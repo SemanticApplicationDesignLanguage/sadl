@@ -57,7 +57,7 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 		assertNotNull(context);
 		assertEquals(MISSING_SUBJECT, context.subject);
 		assertTrue(context.grammarContextId.present);
-		assertEquals(SADLSTATEMENT_TYPE, context.grammarContextId.get);
+		assertEquals(SADLPRIMARYTYPEREFERENCE_TYPE, context.grammarContextId.get);
 		assertTrue(Iterables.isEmpty(context.restrictions));
 	}
 

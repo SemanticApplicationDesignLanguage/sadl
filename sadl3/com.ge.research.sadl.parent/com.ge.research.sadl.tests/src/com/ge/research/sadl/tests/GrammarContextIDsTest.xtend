@@ -171,14 +171,6 @@ class GrammarContextIDsTest extends Assert {
 		);
 	}
 
-	@Test
-	def void check_13() {
-		assertEquals(
-			SADLSTATEMENT_TYPE,
-			sadlStatementAccess.typeAssignment_0_1_5_1_2
-		);
-	}
-
 	private def void assertEquals(String expected, Assignment actual) {
 		try {
 			assertEquals(expected, GrammarContextIds.TO_STRING.apply(actual));

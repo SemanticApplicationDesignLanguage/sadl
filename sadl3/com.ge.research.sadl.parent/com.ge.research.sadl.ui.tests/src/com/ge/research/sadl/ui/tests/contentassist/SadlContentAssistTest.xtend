@@ -18,7 +18,6 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import org.junit.Test
-import org.junit.Ignore
 
 /**
  * Plug-in tests for the SADL content assist.
@@ -35,21 +34,18 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Primary type reference. */
-	@Ignore
 	@Test
 	def void checkCA_02_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposal('Foo');
 	}
 
 	/** Imported primary type reference. */
-	@Ignore
 	@Test
 	def void checkCA_03_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". import "http://barUri". Foo is a class. myFoo is a ''').assertProposal('Bar');
 	}
 
 	/** Self primary type reference with imports. */
-	@Ignore
 	@Test
 	def void checkCA_04_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". import "http://barUri". Foo is a class. myFoo is a ''').assertProposal('Foo');
@@ -129,19 +125,17 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		newBuilder('''uri "http://myUri". Foo is a class described by p1 with values of type Foo. myFoo is a Foo with p1 ''').
 			assertProposal('myFoo');
 	}
-	
+
 	/** Super element with `type of`. */
 	@Test
 	def void checCA_15_SuperElement_IsATypeOf_Positive() {
-		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').
-			assertProposal('Foo');
+		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').assertProposal('Foo');
 	}
-	
+
 	/** Super element with `type of`. */
 	@Test
 	def void checCA_16_SuperElement_IsATypeOf_Negative() {
-		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').
-			assertProposalIsNot('Bar');
+		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').assertProposalIsNot('Bar');
 	}
 
 }

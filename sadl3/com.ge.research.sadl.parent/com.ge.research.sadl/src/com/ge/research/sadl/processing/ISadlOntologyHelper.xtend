@@ -139,8 +139,6 @@ interface ISadlOntologyHelper {
 		 * {@code C is a class described by p1 with values of type C. myC is a C with p1 <|>}
 		 */
 		public static val SADLPROPERTYINITIALIZER_VALUE = 'SADLPROPERTYINITIALIZER_VALUE';
-		
-		public static val SADLSTATEMENT_TYPE = 'SADLSTATEMENT_TYPE';
 
 		/**
 		 * A subset of grammar context IDs that requires the ontology helper.
@@ -164,8 +162,7 @@ interface ISadlOntologyHelper {
 			SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE,
 			SADLSTATEMENT_SUPERELEMENT,
 			PRIMARYEXPRESSION_VALUE,
-			SADLPROPERTYCONDITION_PROPERTY,
-			SADLSTATEMENT_TYPE
+			SADLPROPERTYCONDITION_PROPERTY
 		}
 
 		private new() {
