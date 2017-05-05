@@ -45,7 +45,6 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 		assertEquals(SADLPROPERTYINITIALIZER_VALUE, context.grammarContextId.get);
 		assertEquals(1, Iterables.size(context.restrictions));
 		assertEquals('p1', declarationExtensions.getConcreteName(Iterables.get(context.restrictions, 0)));
-		assertTrue(context.modelProcessor.present);
 	}
 
 	@Test
@@ -56,11 +55,10 @@ class SadlOntologyContextTest extends AbstractSadlContentAssistTest {
 		myFoo is a ''').ontologyContext;
 
 		assertNotNull(context);
-		assertEquals(MISSING_SUBJECT, context.subject);
+		assertNotEquals(MISSING_SUBJECT, context.subject);
 		assertTrue(context.grammarContextId.present);
-		assertEquals(SADLSTATEMENT_TYPE, context.grammarContextId.get);
+		assertEquals(SADLPRIMARYTYPEREFERENCE_TYPE, context.grammarContextId.get);
 		assertTrue(Iterables.isEmpty(context.restrictions));
-		assertFalse(context.modelProcessor.present);
 	}
 
 	private def getDeclarationExtensions() {
