@@ -2938,7 +2938,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							try {
 								stci = getType(subject);
 								//It's possible that there are local restrictions
-								stci = getApplicableLocalRestriction(stci);
+								if (stci != null) {
+									stci = getApplicableLocalRestriction(stci);
+								}
 								if (stci != null && stci.getTypeCheckType() != null) {
 									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
 									varName = declarationExtensions.getConcreteName((SadlResource)subject);
