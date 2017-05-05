@@ -18,7 +18,8 @@ Require-Bundle: com.ge.research.sadl.ui,
  com.ge.research.jena,
  com.ge.research.sadl.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: com.ge.research.sadl.ui.tests;x-internal=true
+Export-Package: com.ge.research.sadl.ui.tests;x-internal=true,
+ com.ge.research.sadl.ui.tests.contentassist
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",
  org.junit.runners.model;version="4.5.0",

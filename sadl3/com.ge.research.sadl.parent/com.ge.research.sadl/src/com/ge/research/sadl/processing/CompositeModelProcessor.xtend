@@ -19,11 +19,13 @@ package com.ge.research.sadl.processing
 
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context
 import com.ge.research.sadl.sADL.SadlResource
+import com.google.common.collect.ImmutableList
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.validation.CheckMode
+import com.google.common.annotations.VisibleForTesting
 
 /**
  * Composite {@link IModelProcessor model processor} implementation.
@@ -49,9 +51,14 @@ class CompositeModelProcessor implements IModelProcessor {
 		processors.forEach[processExternalModels(mappingFileFolder, fileNames)];
 	}
 
-	@Override	
+	@Override
 	override validate(Context context, SadlResource candidate) {
 		processors.forEach[validate(context, candidate)];
+	}
+
+	@VisibleForTesting
+	def Iterable<IModelProcessor> getProcessors() {
+		return ImmutableList.copyOf(processors);
 	}
 
 }
