@@ -159,6 +159,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage DOMAIN_MATCHING = new SadlErrorMessage("domain_matching");
 /**
+* Using a datatype as a domain--probably not what was intended?
+**/
+    public static final SadlErrorMessage DATATYPE_AS_DOMAIN = new SadlErrorMessage("datatype_as_domain");
+/**
 * unable to create {0}: {1}
 **/
     public static final SadlErrorMessage UNABLE_TO_CREATE = new SadlErrorMessage("unable_to_create");

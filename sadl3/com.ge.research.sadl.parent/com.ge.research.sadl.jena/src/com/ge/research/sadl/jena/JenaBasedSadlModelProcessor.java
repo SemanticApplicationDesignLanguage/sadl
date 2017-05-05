@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
+import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
@@ -3612,6 +3613,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				if (spr1 instanceof SadlTypeAssociation && spr2 instanceof SadlRangeRestriction) {
 					// this is case 3
 					SadlTypeReference domain = ((SadlTypeAssociation)spr1).getDomain();
+					OntConceptType domaintype;
+					try {
+						domaintype = sadlTypeReferenceOntConceptType(domain);
+						if (domaintype != null && domaintype.equals(OntConceptType.DATATYPE)) {
+							addWarning(SadlErrorMessages.DATATYPE_AS_DOMAIN.get() , domain);
+						}
+					} catch (CircularDefinitionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
 					OntProperty prop;
 					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
@@ -5404,6 +5415,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else {
 			throw new JenaProcessorException("SadlTypeReference is not a URI resource");
 		}
+	}
+	
+	private OntConceptType sadlTypeReferenceOntConceptType(SadlTypeReference sadlTypeRef) throws CircularDefinitionException {
+		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
+			SadlResource strSR = ((SadlSimpleTypeReference)sadlTypeRef).getType();
+			return declarationExtensions.getOntConceptType(strSR);
+		}
+		else if (sadlTypeRef instanceof SadlPrimitiveDataType) {
+			return OntConceptType.DATATYPE;
+		}
+		else if (sadlTypeRef instanceof SadlPropertyCondition) {
+			SadlResource sr = ((SadlPropertyCondition)sadlTypeRef).getProperty();
+			return declarationExtensions.getOntConceptType(sr);		
+		}
+		else if (sadlTypeRef instanceof SadlUnionType || sadlTypeRef instanceof SadlIntersectionType) {
+			return OntConceptType.CLASS;
+		}
+		return null;
 	}
 	
 	protected Object sadlTypeReferenceToObject(SadlTypeReference sadlTypeRef) throws JenaProcessorException {
