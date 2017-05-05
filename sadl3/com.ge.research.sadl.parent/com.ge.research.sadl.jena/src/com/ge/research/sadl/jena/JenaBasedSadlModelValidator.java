@@ -1502,7 +1502,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (!declarationExtensions.getOntConceptType(cls).equals(OntConceptType.CLASS)) {
 						// need to convert this to the Class representing the type; use existing type checking functionality
 						TypeCheckInfo subjTCI = getType(cls);
-						if (subjTCI != null) {
+						if (subjTCI != null && !subjTCI.getTypeCheckType().toString().equals("TODO")) {
 							addEffectiveRangeByTypeCheckInfo(predicateType, subjTCI);
 						}
 					}
@@ -1957,7 +1957,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
 			}
 		}
-		if(conceptType.equals(OntConceptType.CLASS)){
+		if(conceptType.equals(OntConceptType.CLASS) || conceptType.equals(OntConceptType.DATATYPE)){
 			ConceptName conceptName = createTypedConceptName(conceptUri, conceptType);
 			List<ConceptName> impliedProps = getImpliedProperties(theJenaModel.getResource(conceptUri));
 			TypeCheckInfo tci = new TypeCheckInfo(conceptName, conceptName, this, impliedProps, expression);
