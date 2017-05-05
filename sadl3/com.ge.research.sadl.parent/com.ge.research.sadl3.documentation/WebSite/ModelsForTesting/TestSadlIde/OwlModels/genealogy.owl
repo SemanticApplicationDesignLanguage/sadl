@@ -1,0 +1,115 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.org/TestSadlIde/genealogy#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/genealogy">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/genealogy">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'genealogy.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Person">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="gender"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="birthdate"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Woman">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/genealogy#Person"/>
+          <owl:Restriction>
+            <owl:hasValue>
+              <Gender rdf:ID="Female"/>
+            </owl:hasValue>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/genealogy#gender"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Gender">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <Gender rdf:ID="Male"/>
+          <Gender rdf:about="http://sadl.org/TestSadlIde/genealogy#Female"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Parent">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/genealogy#Person"/>
+          <owl:Restriction>
+            <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >1</owl:minCardinality>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:ID="child"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Man">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/TestSadlIde/genealogy#Person"/>
+          <owl:Restriction>
+            <owl:hasValue rdf:resource="http://sadl.org/TestSadlIde/genealogy#Male"/>
+            <owl:onProperty>
+              <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/genealogy#gender"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="US_President">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="uncle">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/genealogy#Man"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="married">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/genealogy#gender">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/genealogy#Gender"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/TestSadlIde/genealogy#child">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="http://sadl.org/TestSadlIde/genealogy#birthdate">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/genealogy#Person"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>

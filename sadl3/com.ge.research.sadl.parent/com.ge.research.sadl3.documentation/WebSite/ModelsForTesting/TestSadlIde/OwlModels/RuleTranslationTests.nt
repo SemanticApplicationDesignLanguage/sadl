@@ -1,0 +1,12 @@
+<http://com.ge.research.sadlRuleTranslationTests#MyThingy2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadlRuleTranslationTests#Thingy> .
+<http://com.ge.research.sadlRuleTranslationTests#op2> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadlRuleTranslationTests#Thingy> .
+<http://com.ge.research.sadlRuleTranslationTests#op2> <http://www.w3.org/2000/01/rdf-schema#range> <http://com.ge.research.sadlRuleTranslationTests#Thingy> .
+<http://com.ge.research.sadlRuleTranslationTests#op2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://com.ge.research.sadlRuleTranslationTests> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'RuleTranslationTests.sadl' and should not be edited."@en .
+<http://com.ge.research.sadlRuleTranslationTests> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://com.ge.research.sadlRuleTranslationTests#MyThingy> <http://com.ge.research.sadlRuleTranslationTests#op1> <http://com.ge.research.sadlRuleTranslationTests#MyThingy2> .
+<http://com.ge.research.sadlRuleTranslationTests#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadlRuleTranslationTests#Thingy> .
+<http://com.ge.research.sadlRuleTranslationTests#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadlRuleTranslationTests#op1> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadlRuleTranslationTests#Thingy> .
+<http://com.ge.research.sadlRuleTranslationTests#op1> <http://www.w3.org/2000/01/rdf-schema#range> <http://com.ge.research.sadlRuleTranslationTests#Thingy> .
+<http://com.ge.research.sadlRuleTranslationTests#op1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .

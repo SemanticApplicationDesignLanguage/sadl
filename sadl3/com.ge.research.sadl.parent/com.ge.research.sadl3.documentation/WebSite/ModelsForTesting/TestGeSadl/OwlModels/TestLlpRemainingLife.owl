@@ -1,0 +1,86 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://ctp.geae.ge.com/iws/iws#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://ctp.geae.ge.com/iws/iws">
+  <owl:Ontology rdf:about="http://ctp.geae.ge.com/iws/iws">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestLlpRemainingLife.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="LLP_Usage"/>
+  <owl:Class rdf:ID="LLP_Category"/>
+  <owl:Class rdf:ID="Component"/>
+  <owl:Class rdf:ID="LLP_Model"/>
+  <owl:Class rdf:ID="LLP-Part">
+    <rdfs:subClassOf rdf:resource="http://ctp.geae.ge.com/iws/iws#Component"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="llp_used_life">
+    <rdfs:domain rdf:resource="http://ctp.geae.ge.com/iws/iws#LLP-Part"/>
+    <rdfs:range rdf:resource="http://ctp.geae.ge.com/iws/iws#LLP_Usage"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="llp_usage_type">
+    <rdfs:domain rdf:resource="http://ctp.geae.ge.com/iws/iws#LLP_Usage"/>
+    <rdfs:range>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://ctp.geae.ge.com/iws/iws#LLP_Category"/>
+          <owl:Class rdf:about="http://ctp.geae.ge.com/iws/iws#LLP_Model"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:range>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="part_number">
+    <rdfs:domain rdf:resource="http://ctp.geae.ge.com/iws/iws#Component"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="llp_remaining">
+    <rdfs:domain rdf:resource="http://ctp.geae.ge.com/iws/iws#LLP_Usage"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="llp_cycles">
+    <rdfs:domain rdf:resource="http://ctp.geae.ge.com/iws/iws#LLP_Usage"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="llp_remaining_fraction_life">
+    <rdfs:domain rdf:resource="http://ctp.geae.ge.com/iws/iws#LLP-Part"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="llp_limit">
+    <rdfs:domain rdf:resource="http://ctp.geae.ge.com/iws/iws#LLP_Usage"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <LLP_Model rdf:ID="M7B22"/>
+  <LLP_Model rdf:ID="M7B24"/>
+  <LLP_Model rdf:ID="M7B20"/>
+  <LLP-Part rdf:ID="AnLLPPart">
+    <llp_used_life>
+      <LLP_Usage rdf:ID="LLP_Usage_C">
+        <llp_usage_type>
+          <LLP_Category rdf:ID="C"/>
+        </llp_usage_type>
+      </LLP_Usage>
+    </llp_used_life>
+    <llp_used_life>
+      <LLP_Usage rdf:ID="LLP_Usage_B">
+        <llp_cycles rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+        >1000.0</llp_cycles>
+        <llp_usage_type>
+          <LLP_Category rdf:ID="B"/>
+        </llp_usage_type>
+      </LLP_Usage>
+    </llp_used_life>
+    <llp_used_life>
+      <LLP_Usage rdf:ID="LLP_Usage_A">
+        <llp_cycles rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+        >10000.0</llp_cycles>
+        <llp_usage_type>
+          <LLP_Category rdf:ID="A"/>
+        </llp_usage_type>
+      </LLP_Usage>
+    </llp_used_life>
+    <part_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >335-014-509-0</part_number>
+  </LLP-Part>
+  <LLP_Model rdf:ID="M7B26"/>
+  <LLP_Model rdf:ID="M7B18"/>
+</rdf:RDF>

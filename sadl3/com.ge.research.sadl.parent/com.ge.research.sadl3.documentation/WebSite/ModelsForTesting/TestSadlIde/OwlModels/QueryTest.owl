@@ -1,0 +1,55 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/QueryTest#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/QueryTest">
+  <owl:Ontology rdf:about="http://sadl.imp/QueryTest">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'QueryTest.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Person">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:maxCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="spouse"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="http://sadl.imp/QueryTest#spouse">
+    <rdfs:domain rdf:resource="http://sadl.imp/QueryTest#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/QueryTest#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="friend">
+    <rdfs:domain rdf:resource="http://sadl.imp/QueryTest#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/QueryTest#Person"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="name">
+    <rdfs:domain rdf:resource="http://sadl.imp/QueryTest#Person"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="age">
+    <rdfs:domain rdf:resource="http://sadl.imp/QueryTest#Person"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <Person rdf:ID="John">
+    <friend>
+      <Person rdf:ID="Betty">
+        <spouse>
+          <Person rdf:ID="Tom">
+            <spouse rdf:resource="http://sadl.imp/QueryTest#Betty"/>
+            <age rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >35</age>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >Tom Dunham</name>
+          </Person>
+        </spouse>
+        <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Betty Dunham</name>
+      </Person>
+    </friend>
+    <friend rdf:resource="http://sadl.imp/QueryTest#Tom"/>
+  </Person>
+</rdf:RDF>

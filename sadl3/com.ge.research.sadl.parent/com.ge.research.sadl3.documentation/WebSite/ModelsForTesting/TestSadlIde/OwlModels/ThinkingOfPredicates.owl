@@ -1,0 +1,164 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.org/TestSadlIde/ThinkingOfPredicates#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/ThinkingOfPredicates">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/ThinkingOfPredicates">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'ThinkingOfPredicates.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Man">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Person"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Gender">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <Gender rdf:ID="Male"/>
+          <Gender rdf:ID="Female"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="Woman">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="ancestor">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="child">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="uncle">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="grandChild">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="cousin">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="sibling">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="aunt">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="gender">
+    <rdfs:domain rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Person"/>
+    <rdfs:range rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Gender"/>
+  </owl:ObjectProperty>
+  <Person rdf:ID="David">
+    <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+  </Person>
+  <Person rdf:ID="Clyde">
+    <child>
+      <Person rdf:ID="Carolyn">
+        <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+      </Person>
+    </child>
+    <child>
+      <Person rdf:ID="James">
+        <child>
+          <Person rdf:ID="Craig">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Scott">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Melissa">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Eric">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+          </Person>
+        </child>
+        <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+      </Person>
+    </child>
+    <child>
+      <Person rdf:ID="Alan">
+        <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+      </Person>
+    </child>
+    <child>
+      <Person rdf:ID="Anita">
+        <child>
+          <Person rdf:ID="Allison">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Lynn">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+          </Person>
+        </child>
+        <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+      </Person>
+    </child>
+    <child>
+      <Person rdf:ID="Nancy">
+        <child>
+          <Person rdf:ID="Lana">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Sharon">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Janet">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Eileen">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+          </Person>
+        </child>
+        <child>
+          <Person rdf:ID="Peter">
+            <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+          </Person>
+        </child>
+        <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+      </Person>
+    </child>
+    <child>
+      <Person rdf:ID="Bruce">
+        <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+      </Person>
+    </child>
+    <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Male"/>
+  </Person>
+  <Person rdf:ID="Norma">
+    <child rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Carolyn"/>
+    <child rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#James"/>
+    <child rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Alan"/>
+    <child rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Anita"/>
+    <child rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Nancy"/>
+    <child rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Bruce"/>
+    <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+  </Person>
+  <Person rdf:ID="Lindsey">
+    <gender rdf:resource="http://sadl.org/TestSadlIde/ThinkingOfPredicates#Female"/>
+  </Person>
+</rdf:RDF>

@@ -1,0 +1,30 @@
+<http://sadl.imp/testsadlide/test#MyThingy> <http://www.w3.org/2000/01/rdf-schema#comment> "This is my thing."^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/testsadlide/test#MyThingy> <http://sadl.imp/testsadlide/test#dp2> "4.0"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#MyThingy> <http://sadl.imp/testsadlide/test#dp1> "3.0"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp1> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp1> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#dp1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/testsadlide/test#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/testsadlide/test> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:38 $" .
+<http://sadl.imp/testsadlide/test> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'test.sadl' and should not be edited."@en .
+<http://sadl.imp/testsadlide/test> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/testsadlide/test#dp4> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp4> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#dp4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/testsadlide/test#MyOtherThingy2> <http://www.w3.org/2000/01/rdf-schema#comment> "This is a different thingy."^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/testsadlide/test#MyOtherThingy2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp2> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp2> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#dp2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/testsadlide/test#MyOtherThingy> <http://www.w3.org/2000/01/rdf-schema#comment> "This is another of my things."^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.imp/testsadlide/test#MyOtherThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp5> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp5> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#dp5> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/testsadlide/test#MyOtherThingy3> <http://sadl.imp/testsadlide/test#dp1> "4.0"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#MyOtherThingy3> <http://sadl.imp/testsadlide/test#dp1> "3.0"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#MyOtherThingy3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp3> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/testsadlide/test#Thingy> .
+<http://sadl.imp/testsadlide/test#dp3> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/testsadlide/test#dp3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .

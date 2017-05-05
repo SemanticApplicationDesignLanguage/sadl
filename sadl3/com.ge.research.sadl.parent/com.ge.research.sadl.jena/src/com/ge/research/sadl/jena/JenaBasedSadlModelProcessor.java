@@ -197,6 +197,7 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -222,6 +223,7 @@ import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -647,38 +649,92 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
     @Override
     public void validate(Context context, SadlResource candidate) {
+    	ValidationAcceptor savedIssueAccpetor = this.issueAcceptor;
+    	setIssueAcceptor(context.getAcceptor());
+    	
     	String contextId = context.getGrammarContextId().orNull();
     	OntModel ontModel = context.getOntModel();
     	SadlResource subject = context.getSubject();
     	System.out.println("Subject: " + declarationExtensions.getConceptUri(subject));
     	System.out.println("Candidate: " + declarationExtensions.getConceptUri(candidate));
-    	if (subject == MISSING_SUBJECT) {
-    		return;
-    	}
     	
 		try {
+	    	if (subject == MISSING_SUBJECT) {
+	    		return;
+	    	}
 			switch (contextId) {
-			case SADLPROPERTYINITIALIZER_PROPERTY: {
-				modelValidator.checkPropertyDomain(ontModel, subject, candidate, true);
-			}
-			case SADLPROPERTYINITIALIZER_VALUE: {
-				SadlResource prop = context.getRestrictions().iterator().next();
-				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
-				while (ritr.hasNext()) {
-					System.out.println("Restriction: " + declarationExtensions.getConceptUri(ritr.next()));
+				case SADLPROPERTYINITIALIZER_PROPERTY: {
+					OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+					if (!isProperty(candtype)) {
+						context.getAcceptor().add("No", candidate, Severity.ERROR);
+						return;
+					}
+					modelValidator.checkPropertyDomain(ontModel, subject, candidate, candidate, true);
+					return;
 				}
-				modelValidator.checkPropertyDomain(ontModel, subject, prop, true);
-				StringBuilder errorMessageBuilder = new StringBuilder();
-				if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is", errorMessageBuilder)) {
-					context.getAcceptor().add(errorMessageBuilder.toString(), candidate.eContainer(), Severity.ERROR);
+				case SADLPROPERTYINITIALIZER_VALUE: {
+					SadlResource prop = context.getRestrictions().iterator().next();
+					OntConceptType proptype = declarationExtensions.getOntConceptType(prop);
+					if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
+						context.getAcceptor().add("No", candidate, Severity.ERROR);
+						return;
+					}
+					if (proptype.equals(OntConceptType.CLASS_PROPERTY)) {
+						OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+						if (!candtype.equals(OntConceptType.INSTANCE)) {
+							context.getAcceptor().add("No", candidate, Severity.ERROR);
+							return;
+						}
+					}
+					Iterator<SadlResource> ritr = context.getRestrictions().iterator();
+					while (ritr.hasNext()) {
+						System.out.println("Restriction: " + declarationExtensions.getConceptUri(ritr.next()));
+					}
+					modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true);
+					StringBuilder errorMessageBuilder = new StringBuilder();
+					if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is", errorMessageBuilder)) {
+						context.getAcceptor().add(errorMessageBuilder.toString(), candidate, Severity.ERROR);
+					}
+					return;
 				}
-			}
-			default: {
-				// Ignored
-			}
+				case SADLSTATEMENT_SUPERELEMENT: {
+					OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+					if (candtype.equals(OntConceptType.CLASS) ||
+							candtype.equals(OntConceptType.CLASS_LIST) ||
+							candtype.equals(OntConceptType.CLASS_PROPERTY) ||
+							candtype.equals(OntConceptType.DATATYPE) ||
+							candtype.equals(OntConceptType.DATATYPE_LIST) ||
+							candtype.equals(OntConceptType.DATATYPE_PROPERTY) ||
+							candtype.equals(OntConceptType.RDF_PROPERTY)) {
+						return;
+					}
+					context.getAcceptor().add("No", candidate, Severity.ERROR);
+				}
+				case PROPOFSUBJECT_RIGHT: {
+					OntConceptType subjtype = declarationExtensions.getOntConceptType(subject);
+					OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+					if ((candtype.equals(OntConceptType.CLASS) || candtype.equals(OntConceptType.INSTANCE)) && isProperty(subjtype)) {
+						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+						return;
+					}
+					context.getAcceptor().add("No", candidate, Severity.ERROR);
+					return;
+					
+				}
+				default: {
+					// Ignored
+				}
 			}
 		} catch (InvalidTypeException e) {
 			throw new RuntimeException(e);
+		} catch (CircularDefinitionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally {
+			if (savedIssueAccpetor != null) {
+				setIssueAcceptor(savedIssueAccpetor);
+			}
 		}
     }
     
@@ -1389,6 +1445,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			
 			for (int i = 0; generatedTests != null && i < generatedTests.length; i++) {
 				sadlTest = generatedTests[i];
+				applyImpliedProperties(sadlTest, tests.get(0));
 				getIfTranslator().postProcessTest(sadlTest, element);
 //				ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
 //				if (node != null) {
@@ -1411,7 +1468,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								(err.getCause() != null ? (" (" + err.getCause().getLocalizedMessage() + ")") : ""));
 					}
 				}
-		
 				validateTest(element, sadlTest);
 				addSadlCommand(sadlTest);
 			}
@@ -1427,6 +1483,54 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //			e.printStackTrace();
 		}
 		return generatedTests;
+	}
+	
+	private void applyImpliedProperties(Test sadlTest, Expression element) throws TranslationException {
+		sadlTest.setLhs(applyImpliedPropertiesToSide(sadlTest.getLhs(), element));
+		sadlTest.setRhs(applyImpliedPropertiesToSide(sadlTest.getRhs(), element));
+	}
+	
+	private Object applyImpliedPropertiesToSide(Object side, Expression element) throws TranslationException {
+		Map<EObject, List<Property>> impprops = OntModelProvider.getAllImpliedProperties(getCurrentResource());
+		if (impprops != null) {
+			Iterator<EObject> imppropitr = impprops.keySet().iterator();
+			while (imppropitr.hasNext()) {
+				EObject eobj = imppropitr.next();
+				String uri = null;
+				if (eobj instanceof SadlResource) {
+					uri = declarationExtensions.getConceptUri((SadlResource)eobj);
+				}
+				else if (eobj instanceof Name) {
+					uri = declarationExtensions.getConceptUri(((Name)eobj).getName());
+				}
+				if (uri != null) {
+					if (side instanceof NamedNode) {
+						if (((NamedNode)side).toFullyQualifiedString().equals(uri)) {
+							List<Property> props = impprops.get(eobj);
+							if (props != null && props.size() > 0) {
+								if (props.size() > 1) {
+									throw new TranslationException("More than 1 implied property found!");
+								}
+								// apply impliedProperties
+								NamedNode pred = new NamedNode(props.get(0).getURI());
+								if (props.get(0) instanceof DatatypeProperty) {
+									pred.setNodeType(NodeType.DataTypeProperty);
+								}
+								else if (props.get(0) instanceof ObjectProperty) {
+									pred.setNodeType(NodeType.ObjectProperty);
+								}
+								else {
+									pred.setNodeType(NodeType.PropertyNode);
+								}
+								return new TripleElement((NamedNode)side, pred, new VariableNode(getNewVar(element)));
+							}
+						}
+					}
+
+				}
+			}
+		}
+		return side;		
 	}
 	
 	private boolean containsMultipleTests(List<GraphPatternElement> testtrans) {
@@ -2935,7 +3039,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (getModelValidator() != null) {
-			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, false);
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, pred, false);
 			try {
 				getModelValidator().checkPropertyValueInRange(getTheJenaModel(), subj, pred, obj);
 			} catch (Exception e) {
@@ -4627,13 +4731,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				if (val instanceof SadlInstance) {
 					Individual instval = processSadlInstance((SadlInstance) val);
-					addInstancePropertyValue(inst, oprop, instval);
+					addInstancePropertyValue(inst, oprop, instval, val);
 				}
 				else if (val instanceof SadlResource) {
 					String uri = declarationExtensions.getConceptUri((SadlResource) val);
 					com.hp.hpl.jena.rdf.model.Resource rsrc = getTheJenaModel().getResource(uri);
 					if (rsrc.canAs(Individual.class)){
-						addInstancePropertyValue(inst, oprop, rsrc.as(Individual.class));
+						addInstancePropertyValue(inst, oprop, rsrc.as(Individual.class), val);
 					}
 					else {
 						throw new JenaProcessorException("unhandled value type SadlResource that isn't an instance (URI is '" + uri + "')");
@@ -4662,7 +4766,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
 							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, effectiveRng);
 							if (lval != null) {
-								addInstancePropertyValue(inst, oprop, lval);
+								addInstancePropertyValue(inst, oprop, lval, val);
 							}
 						}
 					}
@@ -4670,7 +4774,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						if (rng == null) {
 							// this isn't really an ObjectProperty--should probably be an rdf:Property
 							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, null);
-							addInstancePropertyValue(inst, oprop, lval);
+							addInstancePropertyValue(inst, oprop, lval, val);
 						}
 						else {
 							addError("A SadlExplicitValue is given to an an ObjectProperty", val);
@@ -4700,7 +4804,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, dprop.getRange());
 					if (lval != null) {
-						addInstancePropertyValue(inst, dprop, lval);
+						addInstancePropertyValue(inst, dprop, lval, val);
 					}
 				}
 				else {
@@ -4728,7 +4832,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else {
 					throw new JenaProcessorException(SadlErrorMessages.UNHANDLED.get(val.getClass().getCanonicalName(), "unable to handle annotation value"));
 				}
-				addInstancePropertyValue(inst, annprop, rsrcval);
+				addInstancePropertyValue(inst, annprop, rsrcval, val);
 			}
 		}
 		else if (type.equals(OntConceptType.RDF_PROPERTY)) {
@@ -4750,7 +4854,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				throw new JenaProcessorException("unable to handle rdf property value of type '" + val.getClass().getCanonicalName() + "')");
 			}
-			addInstancePropertyValue(inst, rdfprop, rsrcval);
+			addInstancePropertyValue(inst, rdfprop, rsrcval, val);
 		}
 		else if (type.equals(OntConceptType.VARIABLE)) {
 			// a variable for a property type is only valid in a rule or query.
@@ -4770,7 +4874,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return effectiveRng;
 	}
 	
-	private void addInstancePropertyValue(Individual inst, Property prop, RDFNode value) {
+	private void addInstancePropertyValue(Individual inst, Property prop, RDFNode value, EObject ctx) {
+		if (prop.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
+			// check for ambiguity through duplication of property range
+			if (value.canAs(OntProperty.class)){ 
+				NodeIterator ipvs = inst.listPropertyValues(prop);
+				if (ipvs.hasNext()) {
+					List<OntResource> valueRngLst = new ArrayList<OntResource>();
+					ExtendedIterator<? extends OntResource> vitr = value.as(OntProperty.class).listRange();
+					while (vitr.hasNext()) {
+						valueRngLst.add(vitr.next());
+					}
+					vitr.close();
+					boolean overlap = false;
+					while (ipvs.hasNext()) {
+						RDFNode ipv = ipvs.next();
+						if (ipv.canAs(OntProperty.class)){
+							ExtendedIterator<? extends OntResource> ipvitr = ipv.as(OntProperty.class).listRange();
+							while (ipvitr.hasNext()) {
+								OntResource ipvr = ipvitr.next();
+								if (valueRngLst.contains(ipvr)) {
+									addError("Ambiguous condition--multiple implied properties (" + 
+											value.as(OntProperty.class).getLocalName() + "," + ipv.as(OntProperty.class).getLocalName() + 
+											") have the same range (" + ipvr.getLocalName() + ")", ctx);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		inst.addProperty(prop, value);
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '" + inst.toString() + "'");
 	}

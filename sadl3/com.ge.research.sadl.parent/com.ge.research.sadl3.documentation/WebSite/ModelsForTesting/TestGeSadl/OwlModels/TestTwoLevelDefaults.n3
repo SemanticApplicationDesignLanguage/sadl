@@ -1,0 +1,105 @@
+@prefix :        <http://sadl.imp/TestTwoLevelDefaults#> .
+@prefix addto:   <http://sadl.org/TestGeSadl/AddTo#> .
+@prefix measure:  <http://sadl.imp/measurement#> .
+@prefix test:    <http://sadl.org/MDM/test#> .
+@prefix tg:      <http://sadl.org/TestGeSadl/TurbineGenerator#> .
+@prefix listui:  <http://sadl.org/TestGeSadl/ListUnionIntersection#> .
+@prefix lt2:     <http://sadl.org/TestGeSadl/ListTest2#> .
+@prefix aggreg:  <http://sadl.imp/aggregation#> .
+@prefix drid:    <http://sadl.org/TestGeSadl/defRestrictionsIndirect#> .
+@prefix jcrnr:   <http://sadl.org/Angie/jcrnr#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ginc:    <http://sadl.org/TestGeSadl/GetInstanceNumberCreated#> .
+@prefix def:     <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix listsubtract:  <http://sadl.org/TestGeSadl/ListSubtract#> .
+@prefix BRep:    <http://sadl.org/BRep/BRep_model#> .
+@prefix listtest:  <http://sadl.org/TestGeSadl/ListTest#> .
+@prefix dr:      <http://sadl.org/TestGeSadl/defRestrictions#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/#> .
+@prefix ult:     <http://sadl.org/TestGeSadl/UniqueListTest#> .
+@prefix defs:    <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix exampletempate:  <http://sadl.org/templates/exampletempate#> .
+@prefix sumcost:  <http://sadl.org/TestGeSadl/SummingCosts#> .
+@prefix owlrestric:  <http://sadl.org/ContextDrivenTyping/owlrestrictions#> .
+@prefix gcfce2:  <http://sadl.org/TestGeSadl/GetClassFromConstraintExample2#> .
+@prefix listadd:  <http://sadl.org/TestGeSadl/ListAdd#> .
+@prefix checktype:  <http://sadl.org/TestGeSadl/CheckType#> .
+@prefix ut1:     <http://sadl.org/TestSadlIde/UnionTest1#> .
+@prefix ut2:     <http://sadl.org/TestSadlIde/UnionTest2#> .
+@prefix fae:     <http://sadl.org/TestGeSadl/FacesAndEdges1#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix nihpr:   <http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#> .
+@prefix gcfce:   <http://sadl.org/TestGeSadl/GetClassFromConstraintExample#> .
+@prefix dfn:     <http://sadl.org/TestGeSadl/defs#> .
+
+:Thingy_ready_default
+      a       defs:DataDefault ;
+      defs:appliesToProperty
+              :ready ;
+      defs:hasDataDefault "true"^^xsd:boolean ;
+      defs:hasLevel "1"^^xsd:int .
+
+:op   a       owl:ObjectProperty ;
+      rdfs:domain :Thingy ;
+      rdfs:range :Color .
+
+:Green
+      a       :Color .
+
+:White
+      a       :Color .
+
+:MyThing1
+      a       :Thingy .
+
+:Thingy_op_default
+      a       defs:ObjectDefault ;
+      defs:appliesToProperty
+              :op ;
+      defs:hasObjectDefault
+              :White .
+
+<http://sadl.imp/TestTwoLevelDefaults>
+      a       owl:Ontology ;
+      rdfs:comment "This ontology was created from a SADL file 'TestTwoLevelDefaults.sadl' and should not be edited."@en ;
+      owl:imports <http://research.ge.com/Acuity/defaults.owl> .
+
+:Thingy_dp_default
+      a       defs:DataDefault ;
+      defs:appliesToProperty
+              :dp ;
+      defs:hasDataDefault "2.3"^^xsd:float .
+
+:Black
+      a       :Color .
+
+:Color
+      a       owl:Class ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:oneOf (:Black :White :Green)
+              ] .
+
+:MyThing2
+      a       :Thingy ;
+      :dp     "1.5"^^xsd:float .
+
+:ready
+      a       owl:DatatypeProperty ;
+      rdfs:domain :Thingy ;
+      rdfs:range xsd:boolean .
+
+:dp   a       owl:DatatypeProperty ;
+      rdfs:domain :Thingy ;
+      rdfs:range xsd:float .
+
+:Thingy
+      a       owl:Class ;
+      rdfs:seeAlso :Thingy_op_default , :Thingy_dp_default , :Thingy_ready_default ;
+      rdfs:subClassOf
+              [ a       owl:Restriction ;
+                owl:maxCardinality "1"^^xsd:int ;
+                owl:onProperty :ready
+              ] .

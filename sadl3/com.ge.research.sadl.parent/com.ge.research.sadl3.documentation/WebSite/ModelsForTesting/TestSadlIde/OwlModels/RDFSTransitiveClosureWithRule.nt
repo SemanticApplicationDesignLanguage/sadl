@@ -1,0 +1,13 @@
+<http://sadl.imp/RDFSTransitiveClosureWithRule#SomeNewThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/RDFSTransitiveClosureWithRule#NewThingy> .
+<http://sadl.imp/RDFSTransitiveClosureWithRule#Thingy> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:A236a7e36X3aX14039f40781X3aXX2dX69f0 .
+<http://sadl.imp/RDFSTransitiveClosureWithRule#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/RDFSTransitiveClosureWithRule> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'RDFSTransitiveClosureWithRule.sadl' and should not be edited."@en .
+<http://sadl.imp/RDFSTransitiveClosureWithRule> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/RDFSTransitiveClosureWithRule#ruleFired> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/RDFSTransitiveClosureWithRule#Thingy> .
+<http://sadl.imp/RDFSTransitiveClosureWithRule#ruleFired> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+<http://sadl.imp/RDFSTransitiveClosureWithRule#ruleFired> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69f0 <http://www.w3.org/2002/07/owl#maxCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69f0 <http://www.w3.org/2002/07/owl#onProperty> <http://sadl.imp/RDFSTransitiveClosureWithRule#ruleFired> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69f0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .
+<http://sadl.imp/RDFSTransitiveClosureWithRule#NewThingy> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/RDFSTransitiveClosureWithRule#Thingy> .
+<http://sadl.imp/RDFSTransitiveClosureWithRule#NewThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

@@ -14,6 +14,7 @@ import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.EnumeratedClass;
+import com.hp.hpl.jena.ontology.HasValueRestriction;
 import com.hp.hpl.jena.ontology.IntersectionClass;
 import com.hp.hpl.jena.ontology.MaxCardinalityRestriction;
 import com.hp.hpl.jena.ontology.MinCardinalityRestriction;
@@ -235,10 +236,10 @@ public class GraphSegment {
 
 	private String enumeratedClassToString(EnumeratedClass enumcls) throws InvalidNameException {
 		StringBuilder sb = new StringBuilder("one of {");
-		ExtendedIterator<? extends OntResource> eitr = enumcls.listOneOf();
+		ExtendedIterator<RDFNode> eitr = enumcls.listIsDefinedBy(); //listOneOf();
 		int cnt = 0;
 		while (eitr.hasNext()) {
-			OntResource r = eitr.next();
+			RDFNode r = eitr.next();
 			if (cnt++ > 0) {
 				sb.append(", ");
 			}
@@ -329,20 +330,20 @@ public class GraphSegment {
 		}
 		else if (ontcls.as(Restriction.class).isHasValueRestriction()) {
 			StringBuilder sb = new StringBuilder("value of ");
-			SomeValuesFromRestriction svfr = ontcls.as(SomeValuesFromRestriction.class);
+			HasValueRestriction hvr = ontcls.as(HasValueRestriction.class);
 			sb.append(rdfNodeToString(onprop, isRDFNodeImported(onprop)));
 			sb.append(" is ");
-			Resource svfcls = svfr.getSomeValuesFrom();
-			if (objectDisplayStrings != null && objectDisplayStrings.containsKey(svfcls)) {
-				sb.append(objectDisplayStrings.get(svfcls));
+			RDFNode hvrv = hvr.getHasValue();
+			if (objectDisplayStrings != null && objectDisplayStrings.containsKey(hvrv)) {
+				sb.append(objectDisplayStrings.get(hvrv));
 			}
 			else {
-				if (svfcls.isURIResource()) {
-					sb.append(rdfNodeToString(svfcls, isRDFNodeImported(svfcls)));
+				if (hvrv.isURIResource()) {
+					sb.append(rdfNodeToString(hvrv, isRDFNodeImported(hvrv)));
 				}
 				else {
 					sb.append("(");
-					sb.append(stringForm(svfcls));
+					sb.append(stringForm(hvrv));
 					sb.append(")");
 				}
 			}

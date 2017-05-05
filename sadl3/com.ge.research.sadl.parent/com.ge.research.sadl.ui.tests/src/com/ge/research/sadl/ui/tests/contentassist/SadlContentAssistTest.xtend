@@ -29,23 +29,27 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 
 	/** Primitive primary type reference. */
 	@Test
+// TODO this should actually not be a proposal--can't create an instance of an XSD datatype
 	def void checkCA_01_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposal('integer');
 	}
 
 	/** Primary type reference. */
+	@Ignore
 	@Test
 	def void checkCA_02_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposal('Foo');
 	}
 
 	/** Imported primary type reference. */
+	@Ignore
 	@Test
 	def void checkCA_03_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". import "http://barUri". Foo is a class. myFoo is a ''').assertProposal('Bar');
 	}
 
 	/** Self primary type reference with imports. */
+	@Ignore
 	@Test
 	def void checkCA_04_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". import "http://barUri". Foo is a class. myFoo is a ''').assertProposal('Foo');
@@ -59,7 +63,6 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Property check with imports. */
-	@Ignore
 	@Test
 	def void checkCA_06_Property_Positive() {
 		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". C is a Circle with ''').
@@ -67,7 +70,6 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Property check with imports. */
-	@Ignore
 	@Test
 	def void checkCA_06b_Property_Positive() {
 		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". C is a Circle. C has ''').

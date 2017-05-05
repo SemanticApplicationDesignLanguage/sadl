@@ -1,0 +1,15 @@
+<http://sadl.imp/JenaBuiltin#p2> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/JenaBuiltin#Widget> .
+<http://sadl.imp/JenaBuiltin#p2> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/JenaBuiltin#p2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/JenaBuiltin#MyWidget> <http://sadl.imp/JenaBuiltin#p2> "4"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/JenaBuiltin#MyWidget> <http://sadl.imp/JenaBuiltin#p1> "5"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/JenaBuiltin#MyWidget> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/JenaBuiltin#Widget> .
+<http://sadl.imp/JenaBuiltin#p3> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/JenaBuiltin#Widget> .
+<http://sadl.imp/JenaBuiltin#p3> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/JenaBuiltin#p3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/JenaBuiltin> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'JenaBuiltin.sadl' and should not be edited."@en .
+<http://sadl.imp/JenaBuiltin> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/JenaBuiltin#Widget> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/JenaBuiltin#p1> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/JenaBuiltin#Widget> .
+<http://sadl.imp/JenaBuiltin#p1> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/JenaBuiltin#p1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .

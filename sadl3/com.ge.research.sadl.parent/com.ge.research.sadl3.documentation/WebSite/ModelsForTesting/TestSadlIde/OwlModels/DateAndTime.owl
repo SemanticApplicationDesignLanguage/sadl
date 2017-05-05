@@ -1,0 +1,38 @@
+<rdf:RDF
+    xmlns="http://com.ge.research.sadl/DateAndTime#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research.sadl/DateAndTime">
+  <owl:Ontology rdf:about="http://com.ge.research.sadl/DateAndTime">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'DateAndTime.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:DatatypeProperty rdf:ID="time">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadl/DateAndTime#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#time"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="timestamp">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadl/DateAndTime#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="date">
+    <rdfs:domain rdf:resource="http://com.ge.research.sadl/DateAndTime#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="MyThingy">
+    <timestamp rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime"
+    >2010-10-31T20:00:00-04:00</timestamp>
+    <timestamp rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime"
+    >2011-11-12T00:00:00-05:00</timestamp>
+    <time rdf:datatype="http://www.w3.org/2001/XMLSchema#time"
+    >15:23:00-05:00</time>
+    <time rdf:datatype="http://www.w3.org/2001/XMLSchema#time"
+    >17:59</time>
+    <time rdf:datatype="http://www.w3.org/2001/XMLSchema#time"
+    >23:35:15</time>
+    <date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >2010-11-12</date>
+  </Thingy>
+</rdf:RDF>

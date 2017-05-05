@@ -55,7 +55,7 @@ class ProposalProviderValidationAcceptor implements ValidationAcceptor, Predicat
 	
 	@Override
 	override apply(IEObjectDescription it) {
-		if (SADL_RESOURCE == it) {
+		if (SADL_RESOURCE == it.EClass) {
 			val errors = Multimaps.unmodifiableMultimap(issues.get(Severity.ERROR)).asMap;
 			return errors.get(EObjectOrProxy).nullOrEmpty;
 		}

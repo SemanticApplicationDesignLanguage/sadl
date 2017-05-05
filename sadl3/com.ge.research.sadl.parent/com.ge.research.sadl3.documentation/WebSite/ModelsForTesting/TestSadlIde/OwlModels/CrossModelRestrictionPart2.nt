@@ -1,0 +1,12 @@
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart2> <http://www.w3.org/2002/07/owl#imports> <http://sadl.org/TestSadlIde/CrossModelRestrictionPart1> .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart2> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $" .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart2> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'CrossModelRestrictionPart2.sadl' and should not be edited."@en .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart1#Thingy> <http://www.w3.org/2000/01/rdf-schema#subClassOf> _:A236a7e36X3aX14039f40781X3aXX2dX69f9 .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart1#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart2#myprop> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.org/TestSadlIde/CrossModelRestrictionPart1#Thingy> .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart2#myprop> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<http://sadl.org/TestSadlIde/CrossModelRestrictionPart2#myprop> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69f9 <http://www.w3.org/2002/07/owl#maxCardinality> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69f9 <http://www.w3.org/2002/07/owl#onProperty> <http://sadl.org/TestSadlIde/CrossModelRestrictionPart2#myprop> .
+_:A236a7e36X3aX14039f40781X3aXX2dX69f9 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Restriction> .

@@ -151,6 +151,14 @@ public class OntModelProvider {
 		return null;
 	}
 	
+	public static Map<EObject, List<Property>> getAllImpliedProperties(Resource resource) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null && a.impliedPropertiesUsed != null) {
+			return a.impliedPropertiesUsed;
+		}
+		return null;
+	}
+	
 	public static Property getImpliedProperty(Resource resource, EObject context) throws TranslationException {
 		List<Property> properties = getImpliedProperties(resource, context);
 		if (properties != null) {

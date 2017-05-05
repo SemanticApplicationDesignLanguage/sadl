@@ -1,0 +1,27 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:defs="http://research.ge.com/Acuity/defaults.owl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:ut1="http://sadl.org/TestSadlIde/UnionTest1#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/TestSadlIde/UnionTest2">
+  <owl:Ontology rdf:about="http://sadl.org/TestSadlIde/UnionTest2">
+    <owl:imports rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+    <owl:imports rdf:resource="http://sadl.org/TestSadlIde/UnionTest1"/>
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:41 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'UnionTest2.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class>
+    <rdfs:seeAlso>
+      <defs:ObjectDefault rdf:ID="null_obprop_default">
+        <defs:hasObjectDefault rdf:resource="http://sadl.org/TestSadlIde/UnionTest1#DefaultClass"/>
+        <defs:appliesToProperty rdf:resource="http://sadl.org/TestSadlIde/UnionTest1#obprop"/>
+      </defs:ObjectDefault>
+    </rdfs:seeAlso>
+    <owl:unionOf rdf:parseType="Collection">
+      <rdf:Description rdf:about="http://sadl.org/TestSadlIde/UnionTest1#SC1"/>
+      <rdf:Description rdf:about="http://sadl.org/TestSadlIde/UnionTest1#SC2"/>
+    </owl:unionOf>
+  </owl:Class>
+  <ut1:SC1 rdf:ID="AnotherClass"/>
+</rdf:RDF>

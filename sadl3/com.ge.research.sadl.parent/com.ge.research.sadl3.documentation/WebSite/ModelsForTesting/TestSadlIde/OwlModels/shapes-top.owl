@@ -1,0 +1,40 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://sadl.imp/shapes_top#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/shapes_top">
+  <owl:Ontology rdf:about="http://sadl.imp/shapes_top">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:38 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'shapes-top.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Shape">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A Shape is any geometric object.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="LengthUnits">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <LengthUnits rdf:ID="Millimeter"/>
+          <LengthUnits rdf:ID="Centimeter"/>
+          <LengthUnits rdf:ID="Inch"/>
+          <LengthUnits rdf:ID="Meter"/>
+          <LengthUnits rdf:ID="Foot"/>
+          <LengthUnits rdf:ID="Mile"/>
+          <LengthUnits rdf:ID="Kilometer"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="unitOfMeasure">
+    <rdfs:domain rdf:resource="http://sadl.imp/shapes_top#Shape"/>
+    <rdfs:range rdf:resource="http://sadl.imp/shapes_top#LengthUnits"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="area">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Sub-properties can be used for different kinds of area</rdfs:comment>
+    <rdfs:domain rdf:resource="http://sadl.imp/shapes_top#Shape"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>

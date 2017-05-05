@@ -1,0 +1,142 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/measurement#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/measurement">
+  <owl:Ontology rdf:about="http://sadl.imp/measurement">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'measurement.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="LengthUnit">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <LengthUnit rdf:ID="Millimeter">
+            <rdfs:label>mm</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Centimeter">
+            <rdfs:label>cm</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Meter">
+            <rdfs:label>m</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Kilometer">
+            <rdfs:label>km</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Inch">
+            <cube>
+              <VolumeUnit rdf:ID="CubicInch">
+                <rdfs:label>cubic in</rdfs:label>
+              </VolumeUnit>
+            </cube>
+            <square>
+              <AreaUnit rdf:ID="SquareInch">
+                <rdfs:label>sq in</rdfs:label>
+              </AreaUnit>
+            </square>
+            <rdfs:label>in</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Foot">
+            <cube>
+              <VolumeUnit rdf:ID="CubicFoot">
+                <rdfs:label>cubic ft</rdfs:label>
+              </VolumeUnit>
+            </cube>
+            <square>
+              <AreaUnit rdf:ID="SquareFoot">
+                <rdfs:label>sq ft</rdfs:label>
+              </AreaUnit>
+            </square>
+            <rdfs:label>ft</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Yard">
+            <rdfs:label>yd</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Rod">
+            <rdfs:label>rod</rdfs:label>
+          </LengthUnit>
+          <LengthUnit rdf:ID="Mile">
+            <rdfs:label>mi</rdfs:label>
+          </LengthUnit>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Unit"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="CalculatedAmount">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Amount"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="VolumeUnit">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <VolumeUnit rdf:about="http://sadl.imp/measurement#CubicInch"/>
+          <VolumeUnit rdf:about="http://sadl.imp/measurement#CubicFoot"/>
+          <VolumeUnit rdf:ID="Gallon">
+            <rdfs:label>gal</rdfs:label>
+          </VolumeUnit>
+          <VolumeUnit rdf:ID="Liter">
+            <rdfs:label>lit</rdfs:label>
+          </VolumeUnit>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/measurement#Unit"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Observation">
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/measurement#Amount"/>
+  </owl:Class>
+  <owl:Class rdf:ID="AreaUnit">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <AreaUnit rdf:ID="SquareMillimeter">
+            <rdfs:label>sq mm</rdfs:label>
+          </AreaUnit>
+          <AreaUnit rdf:ID="SquareCentimeter">
+            <rdfs:label>sq cm</rdfs:label>
+          </AreaUnit>
+          <AreaUnit rdf:about="http://sadl.imp/measurement#SquareInch"/>
+          <AreaUnit rdf:about="http://sadl.imp/measurement#SquareFoot"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/measurement#Unit"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="cube">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#LengthUnit"/>
+    <rdfs:range rdf:resource="http://sadl.imp/measurement#VolumeUnit"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="unit">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#Amount"/>
+    <rdfs:range rdf:resource="http://sadl.imp/measurement#Unit"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="conversion">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#Amount"/>
+    <rdfs:range rdf:resource="http://sadl.imp/measurement#CalculatedAmount"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="square">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#LengthUnit"/>
+    <rdfs:range rdf:resource="http://sadl.imp/measurement#AreaUnit"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="observer">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#Observation"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="method">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#CalculatedAmount"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="amount">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#Amount"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="timestamp">
+    <rdfs:domain rdf:resource="http://sadl.imp/measurement#Observation"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+  </owl:DatatypeProperty>
+</rdf:RDF>

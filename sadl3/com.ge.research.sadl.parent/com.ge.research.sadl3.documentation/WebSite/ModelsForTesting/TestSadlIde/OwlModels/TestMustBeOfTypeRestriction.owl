@@ -1,0 +1,43 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/testsadlide/mustbeoftypeRestriction#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/testsadlide/mustbeoftypeRestriction">
+  <owl:Ontology rdf:about="http://sadl.imp/testsadlide/mustbeoftypeRestriction">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestMustBeOfTypeRestriction.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Gender"/>
+  <owl:Class rdf:ID="Person">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom>
+          <owl:Class rdf:ID="MammalGender"/>
+        </owl:allValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="gender"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="http://sadl.imp/testsadlide/mustbeoftypeRestriction#MammalGender">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <MammalGender rdf:ID="Male"/>
+          <MammalGender rdf:ID="Female"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://sadl.imp/testsadlide/mustbeoftypeRestriction#Gender"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="http://sadl.imp/testsadlide/mustbeoftypeRestriction#gender">
+    <rdfs:domain rdf:resource="http://sadl.imp/testsadlide/mustbeoftypeRestriction#Person"/>
+    <rdfs:range rdf:resource="http://sadl.imp/testsadlide/mustbeoftypeRestriction#Gender"/>
+  </owl:ObjectProperty>
+  <Person rdf:ID="Janie">
+    <gender>
+      <Gender rdf:ID="Asexual"/>
+    </gender>
+  </Person>
+</rdf:RDF>

@@ -1,0 +1,31 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.imp/RuleCommentIsComment#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.imp/RuleCommentIsComment">
+  <owl:Ontology rdf:about="http://sadl.imp/RuleCommentIsComment">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleCommentIsComment.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Thingy"/>
+  <owl:ObjectProperty rdf:ID="madeOf">
+    <rdfs:domain rdf:resource="http://sadl.imp/RuleCommentIsComment#Thingy"/>
+    <rdfs:range rdf:resource="http://sadl.imp/RuleCommentIsComment#Thingy"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="color">
+    <rdfs:domain rdf:resource="http://sadl.imp/RuleCommentIsComment#Thingy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <Thingy rdf:ID="T2">
+    <madeOf>
+      <Thingy rdf:ID="Mud"/>
+    </madeOf>
+  </Thingy>
+  <Thingy rdf:ID="T1">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >This is a test</rdfs:comment>
+    <color rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >brown</color>
+    <madeOf rdf:resource="http://sadl.imp/RuleCommentIsComment#Mud"/>
+  </Thingy>
+</rdf:RDF>

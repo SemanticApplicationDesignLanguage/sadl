@@ -96,7 +96,7 @@ build&nbsp; the projects.</p>
 <ol>
 
   <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Eclipse
-Helios properly installed and configured</span></li>
+  Kepler properly installed and configured with Xtext.</span></li>
   <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">
   If you wish to be able to run Maven from the command line (as opposed to only 
   within Eclipse, install the latest Maven (3.0.3) from <a href="http://maven.apache.org/download.html">http://maven.apache.org/download.html</a>.<br>
@@ -108,8 +108,9 @@ Steps</span></h2>
 
 <ol>
 
-  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Install
-    <span style="font-weight: bold;">Xtext</span> via the Eclipse
+  <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Install 
+  Eclpse Kepler with
+    <span style="font-weight: bold;">Xtext</span> 2.4.3 via the Eclipse
 Update Manager from the update site: <a href="http://download.eclipse.org/modeling/tmf/updates/releases">http://download.eclipse.org/modeling/tmf/updates/releases</a>&nbsp;</span></li>
   <li><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">Install
 the Maven plugin, <span style="font-weight: bold;">m2eclipse</span>, </span><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">via the
@@ -1149,5 +1150,31 @@ and click Run as -&gt; Eclipse Application</span></li>
     this should get me to the point where I can build outside of GE and put 
     directions on SourceForge that will allow Karsten to build the projects.</div>
 </div>
+
+<h2>Creating Reasoner/Translator Plug-in Projects that as Maven Projects</h2>
+<p>It is desirable to have a reasoner/translator plug-in project be a Maven 
+project without any Eclipse dependencies so that it can be packaged with the 
+SadlServer or other service providers. It is desirable to have a reasoner/translator 
+plug-in project be an Eclipse plug-in project so that it will automatically be 
+included and the implementation classes discovered by the Java Service loader. 
+While one can meet these competing demands by having two projects, the 
+disadvantage is that the code is duplicated. The following approach allows a 
+single project to exist.</p>
+<ol>
+  <li>Create a Maven project with source in src/java/main, etc., and a pom.xml 
+  file. The output should be target/classes.</li>
+  <li>Place the plug-in Activator class in the project but exclude it in the pom.
+  </li>
+  <li>Create a META-INF folder with a MANIFEST.MF file with all of the 
+  appropriate plug-in information.</li>
+  <li>Run Maven -&gt; Update Project to generate a classpath from the pom file.</li>
+  <li>Run Maven install to build source and binary jars in the target folder.</li>
+  <li>Open the binary jar and extract the META-INF/services folder and 
+  subfolders to the project's META-INF folder.</li>
+  <li>Open the project properties and remove, from the sources tab, the 
+  exclusion of the Activator class.</li>
+  <li>Clean the Eclipse project if it doesn't automatically rebuild.</li>
+</ol>
+<p>&nbsp;</p>
 
 </body></html>

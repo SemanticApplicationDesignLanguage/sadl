@@ -1,0 +1,99 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://sadl.org/BRep/BRep_model#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://sadl.org/BRep/BRep_model">
+  <owl:Ontology rdf:about="http://sadl.org/BRep/BRep_model">
+    <owl:versionInfo>$Revision: 1.1 $ Last modified on $Date: 2013/08/06 17:12:40 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'BRep.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Quadrilateral">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Face"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Vertex"/>
+  <owl:Class rdf:ID="Pentagon">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/BRep/BRep_model#Face"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Rectangle">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/BRep/BRep_model#Quadrilateral"/>
+  </owl:Class>
+  <owl:Class rdf:ID="GLOBAL_VARIBLES"/>
+  <owl:Class rdf:ID="Triangle">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/BRep/BRep_model#Face"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Square">
+    <rdfs:subClassOf rdf:resource="http://sadl.org/BRep/BRep_model#Rectangle"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Edge">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom>
+          <owl:Class rdf:ID="Vector"/>
+        </owl:someValuesFrom>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="direction"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="endpoint">
+    <rdfs:domain rdf:resource="http://sadl.org/BRep/BRep_model#Edge"/>
+    <rdfs:range rdf:resource="http://sadl.org/BRep/BRep_model#Vertex"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="edge">
+    <rdfs:domain rdf:resource="http://sadl.org/BRep/BRep_model#Face"/>
+    <rdfs:range rdf:resource="http://sadl.org/BRep/BRep_model#Edge"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://sadl.org/BRep/BRep_model#direction">
+    <rdfs:domain rdf:resource="http://sadl.org/BRep/BRep_model#Edge"/>
+    <rdfs:range rdf:resource="http://sadl.org/BRep/BRep_model#Vector"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="mag">
+    <rdfs:domain rdf:resource="http://sadl.org/BRep/BRep_model#Vector"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="z">
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/BRep/BRep_model#Vector"/>
+          <owl:Class rdf:about="http://sadl.org/BRep/BRep_model#Vertex"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="y">
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/BRep/BRep_model#Vector"/>
+          <owl:Class rdf:about="http://sadl.org/BRep/BRep_model#Vertex"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="x">
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="http://sadl.org/BRep/BRep_model#Vector"/>
+          <owl:Class rdf:about="http://sadl.org/BRep/BRep_model#Vertex"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="tol">
+    <rdfs:domain rdf:resource="http://sadl.org/BRep/BRep_model#GLOBAL_VARIBLES"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <GLOBAL_VARIBLES rdf:ID="Constants">
+    <tol rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >0.001</tol>
+  </GLOBAL_VARIBLES>
+</rdf:RDF>

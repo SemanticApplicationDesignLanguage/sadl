@@ -1,0 +1,117 @@
+@prefix :        <http://sadl.org/TestGeSadl/FacesAndEdges1#> .
+@prefix addto:   <http://sadl.org/TestGeSadl/AddTo#> .
+@prefix measure:  <http://sadl.imp/measurement#> .
+@prefix test:    <http://sadl.org/MDM/test#> .
+@prefix tg:      <http://sadl.org/TestGeSadl/TurbineGenerator#> .
+@prefix listui:  <http://sadl.org/TestGeSadl/ListUnionIntersection#> .
+@prefix lt2:     <http://sadl.org/TestGeSadl/ListTest2#> .
+@prefix aggreg:  <http://sadl.imp/aggregation#> .
+@prefix drid:    <http://sadl.org/TestGeSadl/defRestrictionsIndirect#> .
+@prefix jcrnr:   <http://sadl.org/Angie/jcrnr#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ginc:    <http://sadl.org/TestGeSadl/GetInstanceNumberCreated#> .
+@prefix def:     <http://research.ge.com/Acuity/defaults.owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix listsubtract:  <http://sadl.org/TestGeSadl/ListSubtract#> .
+@prefix BRep:    <http://sadl.org/BRep/BRep_model#> .
+@prefix listtest:  <http://sadl.org/TestGeSadl/ListTest#> .
+@prefix dr:      <http://sadl.org/TestGeSadl/defRestrictions#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/#> .
+@prefix ult:     <http://sadl.org/TestGeSadl/UniqueListTest#> .
+@prefix exampletempate:  <http://sadl.org/templates/exampletempate#> .
+@prefix sumcost:  <http://sadl.org/TestGeSadl/SummingCosts#> .
+@prefix owlrestric:  <http://sadl.org/ContextDrivenTyping/owlrestrictions#> .
+@prefix gcfce2:  <http://sadl.org/TestGeSadl/GetClassFromConstraintExample2#> .
+@prefix listadd:  <http://sadl.org/TestGeSadl/ListAdd#> .
+@prefix checktype:  <http://sadl.org/TestGeSadl/CheckType#> .
+@prefix ut1:     <http://sadl.org/TestSadlIde/UnionTest1#> .
+@prefix ut2:     <http://sadl.org/TestSadlIde/UnionTest2#> .
+@prefix fae:     <http://sadl.org/TestGeSadl/FacesAndEdges1#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix nihpr:   <http://sadl.org/TestGeSadl/NoInstanceHasPropertyRule#> .
+@prefix gcfce:   <http://sadl.org/TestGeSadl/GetClassFromConstraintExample#> .
+@prefix dfn:     <http://sadl.org/TestGeSadl/defs#> .
+
+fae:El4
+      a       fae:Linear .
+
+fae:Edge
+      a       owl:Class .
+
+fae:edge
+      a       owl:ObjectProperty ;
+      rdfs:domain fae:Face ;
+      rdfs:range fae:Edge .
+
+fae:F1
+      a       fae:Face ;
+      fae:edge fae:El2 , fae:El1 , fae:El3 .
+
+fae:F3
+      a       fae:Face ;
+      fae:edge fae:EC4 , fae:El4 .
+
+fae:EC2
+      a       fae:Circular .
+
+<http://sadl.org/TestGeSadl/FacesAndEdges1>
+      a       owl:Ontology ;
+      rdfs:comment "This ontology was created from a SADL file 'FacesAndEdges1.sadl' and should not be edited."@en ;
+      owl:versionInfo "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:40 $" .
+
+fae:El1
+      a       fae:Linear .
+
+fae:El3
+      a       fae:Linear .
+
+fae:EC4
+      a       fae:Circular .
+
+fae:Planar
+      a       owl:Class ;
+      rdfs:subClassOf fae:Face ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:intersectionOf (fae:Face [ a       owl:Restriction ;
+                            owl:allValuesFrom fae:Linear ;
+                            owl:onProperty fae:edge
+                          ])
+              ] .
+
+fae:Face
+      a       owl:Class .
+
+fae:Circular
+      a       owl:Class ;
+      rdfs:subClassOf fae:Edge .
+
+fae:Cylinderical
+      a       owl:Class ;
+      rdfs:subClassOf fae:Face ;
+      owl:equivalentClass
+              [ a       owl:Class ;
+                owl:intersectionOf (fae:Face [ a       owl:Restriction ;
+                            owl:allValuesFrom fae:Circular ;
+                            owl:onProperty fae:edge
+                          ])
+              ] .
+
+fae:F2
+      a       fae:Face ;
+      fae:edge fae:EC3 , fae:EC2 , fae:EC1 .
+
+fae:EC3
+      a       fae:Circular .
+
+fae:Linear
+      a       owl:Class ;
+      rdfs:subClassOf fae:Edge ;
+      owl:disjointWith fae:Circular .
+
+fae:EC1
+      a       fae:Circular .
+
+fae:El2
+      a       fae:Linear .

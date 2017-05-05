@@ -1,0 +1,15 @@
+<http://sadl.imp/floatinruleproblem#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://sadl.imp/floatinruleproblem#result> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/floatinruleproblem#Thingy> .
+<http://sadl.imp/floatinruleproblem#result> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+<http://sadl.imp/floatinruleproblem#result> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/floatinruleproblem#MyThingy> <http://sadl.imp/floatinruleproblem#floatVal> "1.0"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/floatinruleproblem#MyThingy> <http://sadl.imp/floatinruleproblem#intVal> "1"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/floatinruleproblem#MyThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/floatinruleproblem#Thingy> .
+<http://sadl.imp/floatinruleproblem> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'FloatInRuleProblem.sadl' and should not be edited."@en .
+<http://sadl.imp/floatinruleproblem> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+<http://sadl.imp/floatinruleproblem#intVal> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/floatinruleproblem#Thingy> .
+<http://sadl.imp/floatinruleproblem#intVal> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#int> .
+<http://sadl.imp/floatinruleproblem#intVal> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://sadl.imp/floatinruleproblem#floatVal> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/floatinruleproblem#Thingy> .
+<http://sadl.imp/floatinruleproblem#floatVal> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
+<http://sadl.imp/floatinruleproblem#floatVal> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .

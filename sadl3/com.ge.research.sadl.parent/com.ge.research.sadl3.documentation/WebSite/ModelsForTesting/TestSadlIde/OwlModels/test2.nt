@@ -1,0 +1,9 @@
+<http://com.ge.research.sadl/test2#AnInstance> <http://com.ge.research.sadl/test2#someBooleanProperty> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<http://com.ge.research.sadl/test2#AnInstance> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/test2#Thingy> .
+<http://com.ge.research.sadl/test2#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/test2#someBooleanProperty> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadl/test2#Thingy> .
+<http://com.ge.research.sadl/test2#someBooleanProperty> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+<http://com.ge.research.sadl/test2#someBooleanProperty> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<http://com.ge.research.sadl/test2> <http://www.w3.org/2002/07/owl#versionInfo> "$Revision: 1.1 $ Last modified on   $Date: 2013/08/06 17:12:38 $" .
+<http://com.ge.research.sadl/test2> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'test2.sadl' and should not be edited."@en .
+<http://com.ge.research.sadl/test2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .

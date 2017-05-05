@@ -52,6 +52,8 @@ import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import com.ge.research.sadl.sADL.SadlRangeRestriction
+import com.hp.hpl.jena.vocabulary.XSD
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -60,6 +62,12 @@ import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 class SADLProposalProvider extends AbstractSADLProposalProvider {
 	@Inject protected DeclarationExtensions declarationExtensions
 	@Inject extension ProposalProviderFilterProvider;
+	
+	val PropertyRangeKeywords = newArrayList(
+		'string','boolean','decimal','int','long','float','double','duration','dateTime','time','date',
+    	'gYearMonth','gYear','gMonthDay','gDay','gMonth','hexBinary','base64Binary','anyURI','
+    	integer','negativeInteger','nonNegativeInteger','positiveInteger','nonPositiveInteger',' 
+    	unsignedByte','unsignedInt','anySimpleType','data','class')
 	
 	protected List<OntConceptType> typeRestrictions
 	protected List<String> excludedNamespaces
@@ -340,6 +348,11 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			val container = model.eContainer
 			val kval = keyword.value
 			if (container instanceof SadlProperty) {
+				if (model instanceof SadlRangeRestriction) {
+					if (PropertyRangeKeywords.contains(kval)) {
+						return true;
+					}
+				}
 				return false
 			}
 			else if (container instanceof Declaration) {
@@ -397,7 +410,42 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				}
 				return false
 			}
-			
+			else if (model instanceof SadlPropertyInitializer) {
+				if (kval.equals("true") || kval.equals("false") || kval.equals("PI") || kval.equals("e")) {
+					val proptype = declarationExtensions.getOntConceptType((model as SadlPropertyInitializer).property)
+					if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
+						// check property range
+						val ontModel = OntModelProvider.find(model.eResource)
+						if (ontModel != null) {
+							val ontprop = ontModel.getOntProperty(declarationExtensions.getConceptUri((model as SadlPropertyInitializer).property))
+							if (ontprop != null) {
+								val rnglst = ontprop.listRange
+								if (rnglst != null) {
+									if (kval.equals("true") || kval.equals("false")) {
+										while (rnglst.hasNext) {
+											val rng = rnglst.next
+											if (rng.equals(XSD.xboolean)) {
+												rnglst.close
+												return true
+											}
+										}
+									}
+									else {
+										while (rnglst.hasNext) {
+											val rng = rnglst.next
+											if (rng.equals(XSD.decimal) || rng.equals(XSD.xdouble) || rng.equals(XSD.xfloat)) {
+												rnglst.close
+												return true
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				return false;
+			}	
 		}
 		return true
 	}

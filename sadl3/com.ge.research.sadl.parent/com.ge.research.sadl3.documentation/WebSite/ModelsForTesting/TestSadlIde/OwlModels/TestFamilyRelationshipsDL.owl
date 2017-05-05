@@ -1,0 +1,114 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:FamilyRelationshipsDL="http://sadl.imp/familyrelationshipsDL#"
+  xml:base="http://sadl.imp/TestFamilyRelationshipsDL">
+  <owl:Ontology rdf:about="http://sadl.imp/TestFamilyRelationshipsDL">
+    <owl:imports rdf:resource="http://sadl.imp/familyrelationshipsDL"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestFamilyRelationshipsDL.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <FamilyRelationshipsDL:Person rdf:ID="Lindsey">
+    <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+  </FamilyRelationshipsDL:Person>
+  <FamilyRelationshipsDL:Person rdf:ID="Norma">
+    <FamilyRelationshipsDL:child>
+      <FamilyRelationshipsDL:Person rdf:ID="Carolyn">
+        <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+      </FamilyRelationshipsDL:Person>
+    </FamilyRelationshipsDL:child>
+    <FamilyRelationshipsDL:child>
+      <FamilyRelationshipsDL:Person rdf:ID="James">
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Craig">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Scott">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Melissa">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Eric">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+      </FamilyRelationshipsDL:Person>
+    </FamilyRelationshipsDL:child>
+    <FamilyRelationshipsDL:child>
+      <FamilyRelationshipsDL:Person rdf:ID="Alan">
+        <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+      </FamilyRelationshipsDL:Person>
+    </FamilyRelationshipsDL:child>
+    <FamilyRelationshipsDL:child>
+      <FamilyRelationshipsDL:Person rdf:ID="Anita">
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Allison">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Lynn">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+      </FamilyRelationshipsDL:Person>
+    </FamilyRelationshipsDL:child>
+    <FamilyRelationshipsDL:child>
+      <FamilyRelationshipsDL:Person rdf:ID="Nancy">
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Lana">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Sharon">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Janet">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Eileen">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:child>
+          <FamilyRelationshipsDL:Person rdf:ID="Peter">
+            <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+          </FamilyRelationshipsDL:Person>
+        </FamilyRelationshipsDL:child>
+        <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+      </FamilyRelationshipsDL:Person>
+    </FamilyRelationshipsDL:child>
+    <FamilyRelationshipsDL:child>
+      <FamilyRelationshipsDL:Person rdf:ID="Bruce">
+        <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+      </FamilyRelationshipsDL:Person>
+    </FamilyRelationshipsDL:child>
+    <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Female"/>
+  </FamilyRelationshipsDL:Person>
+  <FamilyRelationshipsDL:Person rdf:ID="Clyde">
+    <FamilyRelationshipsDL:child rdf:resource="http://sadl.imp/TestFamilyRelationshipsDL#Carolyn"/>
+    <FamilyRelationshipsDL:child rdf:resource="http://sadl.imp/TestFamilyRelationshipsDL#James"/>
+    <FamilyRelationshipsDL:child rdf:resource="http://sadl.imp/TestFamilyRelationshipsDL#Alan"/>
+    <FamilyRelationshipsDL:child rdf:resource="http://sadl.imp/TestFamilyRelationshipsDL#Anita"/>
+    <FamilyRelationshipsDL:child rdf:resource="http://sadl.imp/TestFamilyRelationshipsDL#Nancy"/>
+    <FamilyRelationshipsDL:child rdf:resource="http://sadl.imp/TestFamilyRelationshipsDL#Bruce"/>
+    <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+  </FamilyRelationshipsDL:Person>
+  <FamilyRelationshipsDL:Person rdf:ID="David">
+    <FamilyRelationshipsDL:gender rdf:resource="http://sadl.imp/familyrelationshipsDL#Male"/>
+  </FamilyRelationshipsDL:Person>
+</rdf:RDF>

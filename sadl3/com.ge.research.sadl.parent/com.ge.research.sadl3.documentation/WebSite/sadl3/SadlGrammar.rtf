@@ -1,0 +1,441 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil Consolas;}{\f1\fnil\fcharset0 Calibri;}}
+{\colortbl ;\red63\green127\blue95;\red0\green0\blue255;\red127\green0\blue85;\red0\green0\blue0;\red42\green0\blue255;\red128\green128\blue128;\red171\green48\blue0;\red0\green0\blue192;}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sl240\slmult1\cf1\lang9\f0\fs20 /************************************************************************\cf0\par
+\cf1  * Copyright 2007-2016 - General Electric Company, All Rights Reserved\cf0\par
+\cf1  *\cf0\par
+\cf1  * Project: SADL\cf0\par
+\cf1  *\cf0\par
+\cf1  * Description: The Semantic Application Design Language (SADL) is a\cf0\par
+\cf1  * language for building semantic models and expressing rules that\cf0\par
+\cf1  * capture additional domain knowledge. The SADL-IDE (integrated\cf0\par
+\cf1  * development environment) is a set of Eclipse plug-ins that\cf0\par
+\cf1  * support the editing and testing of semantic models using the\cf0\par
+\cf1  * SADL language.\cf0\par
+\cf1  *\cf0\par
+\cf1  * This software is distributed "AS-IS" without ANY WARRANTIES\cf0\par
+\cf1  * and licensed under the Eclipse Public License - v 1.0\cf0\par
+\cf1  * which is available at {\field{\*\fldinst{HYPERLINK "http://www.eclipse.org/org/documents/epl-v10.php"}}{\fldrslt{\ul\cf2 http://www.eclipse.org/org/documents/epl-v10.php}}}\cf0\f0\fs20\par
+\cf1  *\cf0\par
+\cf1  ***********************************************************************/\cf0\par
+\cf3\b grammar\cf4\b0  com.ge.research.sadl.SADL \cf3\b hidden\cf4\b0 (WS, ML_COMMENT, SL_COMMENT) \cf1 //with with org.eclipse.xtext.common.Terminals\cf0\par
+\par
+\cf3\b import\cf4\b0  \cf5 "{\field{\*\fldinst{HYPERLINK "http://www.eclipse.org/emf/2002/Ecore"}}{\fldrslt{\ul\cf2 http://www.eclipse.org/emf/2002/Ecore}}}\f0\fs20 "\cf4  \cf3\b as\cf4\b0  ecore\cf0\par
+\cf3\b generate\cf4\b0  sADL \cf5 "{\field{\*\fldinst{HYPERLINK "http://www.ge.com/research/sadl/SADL"}}{\fldrslt{\ul\cf2 http://www.ge.com/research/sadl/SADL}}}\f0\fs20 "\cf0\par
+\par
+\cf4 SadlModel :\cf0\par
+\cf4     \cf5 '\ul uri\ulnone '\cf4  baseUri=STRING (\cf5 'alias'\cf4  alias=ID)? (\cf5 'version'\cf4  version=STRING)? \cf0\par
+\cf4     \tab annotations+=SadlAnnotation* \cf6 EOS\cf4  \cf0\par
+\cf4     imports+=SadlImport*\cf0\par
+\cf4     elements+=SadlModelElement*;\cf0\par
+\cf4     \cf0\par
+\cf4 SadlAnnotation :\cf0\par
+\cf4\tab\cf5 ','\cf4 ? \cf5 '('\cf4  type=(\cf5 'alias'\cf4 |\cf5 'note'\cf4 ) contents+=STRING (\cf5 ','\cf4  contents+=STRING)* \cf5 ')'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlImport :\cf0\par
+\cf4     \cf5 'import'\cf4  importedResource=[\i SadlModel\i0 |STRING] (\cf5 'as'\cf4  alias=ID)? \cf6 EOS\cf4 ;\cf0\par
+\par
+\cf1 // The various kinds of elements that make up the body of a model.\cf0\par
+\cf4 SadlModelElement :\cf0\par
+\cf4\tab\tab SadlStatement \cf6 EOS\cf0\par
+\cf4\tab |\tab ExpressionStatement => \cf6 EOS\cf0\par
+\cf4\tab |\tab RuleStatement => \cf6 EOS\cf0\par
+\cf4\tab |\tab QueryStatement => \cf6 EOS\cf0\par
+\cf4\tab |\tab TestStatement => \cf6 EOS\cf0\par
+\cf4\tab | \tab PrintStatement => \cf6 EOS\cf0\par
+\cf4\tab |\tab ReadStatement => \cf6 EOS\cf0\par
+\cf4\tab | \tab ExplainStatement => \cf6 EOS\cf0\par
+\cf4\tab |\tab StartWriteStatement\cf0\par
+\cf4\tab |\tab EndWriteStatement => \cf6 EOS\cf0\par
+\cf4\tab |   EquationStatement => \cf6 EOS\cf0\par
+\cf4\tab |   ExternalEquationStatement => \cf6 EOS\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 EquationStatement:\cf0\par
+\cf4\tab\cf5 'Equation'\cf4  EquationSignature\cf0\par
+\cf4\tab body = Expression\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 ExternalEquationStatement:\cf0\par
+\cf4\tab\cf5 'External'\cf4  EquationSignature\cf0\par
+\cf4\tab uri = STRING (\cf5 'located'\cf4  \cf5 'at'\cf4  location=STRING)?\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf3\b fragment\cf4\b0  EquationSignature \cf3\b returns\cf4\b0  \i AbstractSadlEquation\i0 :\cf0\par
+\cf4\tab\cf7 name\cf4 =SadlResource \cf5 '('\cf4  (parameter+=SadlParameterDeclaration (\cf5 ','\cf4  parameter+=SadlParameterDeclaration)* )?\cf5 ')'\cf4  \cf5 'returns'\cf4  returnType=SadlPrimaryTypeReference \cf5 ':'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlParameterDeclaration:\cf0\par
+\cf4\tab type=SadlPrimaryTypeReference \cf7 name\cf4 =SadlResource\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf1 // These are the things that translate directly to OWL.\cf0\par
+\cf4 SadlStatement \cf3\b returns\cf4\b0  \i SadlStatement\i0 :\cf0\par
+\cf4\tab     SadlResource \cf0\par
+\cf4\tab     \tab (\{\i SadlClassOrPropertyDeclaration\i0 .classOrProperty+=\cf3\b current\cf4\b0\} \cf5 'is'\cf4  \cf5 'a'\cf4  \cf0\par
+\cf4\tab     \tab\tab (\cf5 'top-level'\cf4 ? \cf5 'class'\cf4  \cf0\par
+\cf4\tab     \tab\tab | \cf5 'type'\cf4  \cf5 'of'\cf4  superElement=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)\cf0\par
+\cf4\tab\tab\tab\tab (describedBy+=SadlPropertyDeclarationInClass+ | (\cf5 ','\cf4 ? restrictions+=SadlPropertyRestriction)+)?\cf0\par
+\cf4\tab\tab\tab |\{\i SadlProperty\i0 .nameOrRef=\cf3\b current\cf4\b0\} primaryDeclaration?=\cf5 'is'\cf4  \cf5 'a'\cf4  \cf5 'property'\cf4  (\cf5 ','\cf4 ? restrictions+=SadlPropertyRestriction)*\cf0\par
+\cf4\tab\tab\tab |\{\i SadlProperty\i0 .nameOrRef=\cf3\b current\cf4\b0\} (\cf5 ','\cf4 ? restrictions+=SadlPropertyRestriction)+\cf0\par
+\cf4\tab\tab\tab |\{\i SadlSameAs\i0 .nameOrRef=\cf3\b current\cf4\b0\} \cf5 'is'\cf4  \cf5 'the'\cf4  \cf5 'same'\cf4  \cf5 'as'\cf4  (complement?=\cf5 'not'\cf4 )? sameAs=SadlTypeReference\cf0\par
+\cf4\tab\tab\tab |\{\i SadlDifferentFrom\i0 .nameOrRef=\cf3\b current\cf4\b0\} \cf5 'is'\cf4  \cf5 'not'\cf4  \cf5 'the'\cf4  \cf5 'same'\cf4  \cf5 'as'\cf4  notTheSameAs=SadlTypeReference\cf0\par
+\cf4\tab\tab\tab |\{\i SadlInstance\i0 .nameOrRef=\cf3\b current\cf4\b0\} (\cf5 'is'\cf4  \cf6 AnArticle\cf4  type=SadlTypeReference)? (listInitializer=SadlValueList | propertyInitializers+=SadlPropertyInitializer+)?\cf0\par
+\cf4\tab\tab\tab |\{\i SadlDisjointClasses\i0 .classes+=\cf3\b current\cf4\b0\} (\cf5 'and'\cf4  classes+=SadlResource)+ \cf5 'are'\cf4  \cf5 'disjoint'\cf0\par
+\cf4\tab\tab\tab )\cf0\par
+\cf4\tab | \tab\{\i SadlClassOrPropertyDeclaration\i0\}  \cf5 '\{'\cf4  classOrProperty+=SadlResource (\cf5 ','\cf4   classOrProperty+=SadlResource)* \cf5 '\}'\cf4  \cf5 'are'\cf4  \cf0\par
+\cf4\tab\tab\tab\tab ((\cf5 'top-level'\cf4 ? \cf5 'classes'\cf4  | \cf5 'types'\cf4  \cf5 'of'\cf4  superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* \cf0\par
+\cf4\tab\tab\tab |\tab\{\i SadlDisjointClasses\i0 .types+=\cf3\b current\cf4\b0\} \cf5 'disjoint'\cf0\par
+\cf4\tab\tab\tab |\tab\{\i SadlDifferentFrom\i0 .types+=\cf3\b current\cf4\b0\} (complement?=\cf5 'not'\cf4 )? \cf5 'the'\cf4  \cf5 'same'\cf4 )\cf0\par
+\cf4     | \tab\{\i SadlProperty\i0\} \cf6 AnArticle\cf4 ? \cf5 'relationship'\cf4  \cf5 'of'\cf4  from=SadlTypeReference \cf5 'to'\cf4  to=SadlTypeReference \cf5 'is'\cf4  property=SadlResource \cf0\par
+\cf4     | \tab\cf6 AnArticle\cf4  SadlTypeReference (\cf0\par
+\cf4     \tab\tab\{\i SadlInstance\i0 .type=\cf3\b current\cf4\b0\} instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*\cf0\par
+\cf4     \tab |\tab\{\i SadlNecessaryAndSufficient\i0 .subject=\cf3\b current\cf4\b0\} \cf5 'is'\cf4  \cf6 AnArticle\cf4  object=SadlResource \cf5 'only'\cf4  \cf5 'if'\cf4  propConditions+=SadlPropertyCondition (\cf5 'and'\cf4  propConditions+=SadlPropertyCondition)*)\cf0\par
+\cf4 ;\cf0\par
+\par
+\par
+\par
+\cf4 SadlPropertyCondition :\cf0\par
+\cf4\tab property=[\i SadlResource\i0 |QNAME] cond+=SadlCondition\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlPropertyInitializer:\cf0\par
+\cf4\tab (\cf5 ','\cf4 ? (\cf5 'with'\cf4 |\cf5 'has'\cf4 ))? property=[\i SadlResource\i0 |QNAME] (value=SadlExplicitValue | \cf5 '('\cf4  value=SadlNestedInstance\cf5 ')'\cf4 )\cf0\par
+\cf4\tab |\cf5 ','\cf4 ? \cf5 'is'\cf4  property=[\i SadlResource\i0 |QNAME] \cf5 'of'\cf4  type=[\i SadlResource\i0 |QNAME]\cf0\par
+\cf4\tab |\cf5 ','\cf4 ? \cf5 'of'\cf4  property=[\i SadlResource\i0 |QNAME] \cf5 'is'\cf4  (value=SadlExplicitValue | \cf5 '('\cf4  value=SadlNestedInstance\cf5 ')'\cf4 )\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlNestedInstance \cf3\b returns\cf4\b0  \i SadlInstance\i0 :\cf0\par
+\cf4\{\i SadlNestedInstance\i0\} (\cf0\par
+\cf4\tab\tab instance=SadlResource \cf5 'is'\cf4  article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*\cf0\par
+\cf4\tab |\tab article=AnArticle type=SadlTypeReference instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*)\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlResource:\cf0\par
+\cf4\tab\cf7 name\cf4 =[\i SadlResource\i0 |QNAME] annotations+=SadlAnnotation*\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlDataTypeFacet :\tab\cf0\par
+\cf4\tab\tab\{\i SadlDataTypeFacet\i0\} (\cf5 '('\cf4  | minInclusive?=\cf5 '['\cf4 ) min=FacetNumber? \cf5 ','\cf4  max=FacetNumber? (maxInclusive?=\cf5 ']'\cf4  | \cf5 ')'\cf4 )\cf0\par
+\cf4\tab |\tab regex=STRING\cf0\par
+\cf4\tab |\tab\cf5 'length'\cf4  (len=FacetNumber | minlen=FacetNumber \cf5 '-'\cf4  maxlen=(FacetNumber|\cf5 '*'\cf4 ))\cf0\par
+\cf4\tab |\tab\cf5 '\{'\cf4  values+=FacetValue (\cf5 ','\cf4 ? values+=FacetValue)* \cf5 '\}'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf8 FacetNumber\cf4  :\cf0\par
+\cf4\tab\cf5 '-'\cf4 ? AnyNumber\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf8 FacetValue\cf4  :\cf0\par
+\cf4\tab STRING | FacetNumber\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf1 // TypeReferences\cf0\par
+\cf4 SadlTypeReference \cf3\b returns\cf4\b0  \i SadlTypeReference\i0 :\cf0\par
+\cf4     SadlUnionType\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlUnionType \cf3\b returns\cf4\b0  \i SadlTypeReference\i0 :\cf0\par
+\cf4\tab SadlIntersectionType (\{\i SadlUnionType\i0 .left=\cf3\b current\cf4\b0\} (\cf5 ','\cf4 |\cf5 'or'\cf4 ) right=SadlIntersectionType)*\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlIntersectionType \cf3\b returns\cf4\b0  \i SadlTypeReference\i0 :\cf0\par
+\cf4\tab SadlPrimaryTypeReference (\{\i SadlIntersectionType\i0 .left=\cf3\b current\cf4\b0\} (\cf5 'and'\cf4 ) right=SadlPrimaryTypeReference)*\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlPrimaryTypeReference \cf3\b returns\cf4\b0  \i SadlTypeReference\i0 :\cf0\par
+\cf4\tab\tab\{\i SadlSimpleTypeReference\i0\} type=[\i SadlResource\i0 |QNAME] list?=\cf5 'List'\cf4 ?\cf0\par
+\cf4\tab |\tab\{\i SadlPrimitiveDataType\i0\} primitiveType=SadlDataType list?=\cf5 'List'\cf4 ?\cf0\par
+\cf4\tab |\tab\cf5 '('\cf4  SadlPropertyCondition \cf5 ')'\cf0\par
+\cf4\tab |\tab\cf5 '\{'\cf4  SadlTypeReference \cf5 '\}'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf1 // Built-in primitive data types\cf0\par
+\cf3\b enum\cf4\b0  SadlDataType :\cf0\par
+\cf4     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |\cf0\par
+\cf4     gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | \cf0\par
+\cf4     integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger |  \cf0\par
+\cf4     unsignedByte | unsignedInt | anySimpleType;\cf0\par
+\par
+\cf1 // Class declarations may also describe the class's properties.\cf0\par
+\cf4 SadlPropertyDeclarationInClass \cf3\b returns\cf4\b0  \i SadlProperty\i0 :\cf0\par
+\cf4     \tab\cf5 ','\cf4 ? \cf5 'described'\cf4  \cf5 'by'\cf4  nameDeclarations+=SadlResource restrictions+=SadlPropertyRestriction*;\cf0\par
+\par
+\cf4 SadlPropertyRestriction :\cf0\par
+\cf4     \tab SadlCondition\cf0\par
+\cf4     |   \{\i SadlTypeAssociation\i0\} (\cf5 'describes'\cf4 |\cf5 'of'\cf4 ) domain=SadlTypeReference\cf0\par
+\cf4     |   \{\i SadlRangeRestriction\i0\} (\cf5 'has'\cf4 |\cf5 'with'\cf4 ) (\cf5 'a'\cf4  singleValued?=\cf5 'single'\cf4  \cf5 'value'\cf4 |\cf5 'values'\cf4 ) \cf5 'of'\cf4  \cf5 'type'\cf4  ((typeonly=(\cf5 'class'\cf4 |\cf5 'data'\cf4 )) | range=SadlPrimaryTypeReference)\cf0\par
+\cf4     |   \{\i SadlIsInverseOf\i0\}\tab\cf5 'is'\cf4  \cf5 'the'\cf4  \cf5 'inverse'\cf4  \cf5 'of'\cf4  otherProperty=[\i SadlResource\i0 |QNAME]\cf0\par
+\cf4     |   \{\i SadlIsTransitive\i0\} \cf5 'is'\cf4  \cf5 'transitive'\cf0\par
+\cf4     |   \{\i SadlIsSymmetrical\i0\} \cf5 'is'\cf4  \cf5 'symmetrical'\cf0\par
+\cf4     |   \{\i SadlIsAnnotation\i0\} \cf5 'is'\cf4  \cf5 'a'\cf4  \cf5 'type'\cf4  \cf5 'of'\cf4  \cf5 'annotation'\cf0\par
+\cf4     |   \{\i SadlDefaultValue\i0\} \cf5 'has'\cf4  (\cf5 'level'\cf4  level=NUMBER)? \cf5 'default'\cf4  defValue=SadlExplicitValue\cf0\par
+\cf4     |   \{\i SadlIsFunctional\i0\} \cf5 'has'\cf4  \cf5 'a'\cf4  \cf5 'single'\cf4  (inverse?=\cf5 'subject'\cf4  | \cf5 'value'\cf4 )?\cf0\par
+\cf4     |   \{\i SadlMustBeOneOf\i0\} \cf5 'must'\cf4  \cf5 'be'\cf4  \cf5 'one'\cf4  \cf5 'of'\cf4  \cf5 '\{'\cf4  values+=SadlExplicitValue (\cf5 ','\cf4  values+=SadlExplicitValue)* \cf5 '\}'\cf0\par
+\cf4     |   \{\i SadlCanOnlyBeOneOf\i0\} \cf5 'can'\cf4  \cf5 'only'\cf4  \cf5 'be'\cf4  \cf5 'one'\cf4  \cf5 'of'\cf4  \cf5 '\{'\cf4  values+=SadlExplicitValue (\cf5 ','\cf4  values+=SadlExplicitValue)* \cf5 '\}'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlCondition :\cf0\par
+\cf4\tab\tab SadlAllValuesCondition\cf0\par
+\cf4\tab |   SadlHasValueCondition\cf0\par
+\cf4     |   SadlCardinalityCondition\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlAllValuesCondition :\cf0\par
+\cf4\tab\cf5 'only'\cf4  (\cf5 'has'\cf4 |\cf5 'with'\cf4 ) \cf5 'values'\cf4  \cf5 'of'\cf4  \cf5 'type'\cf4  type=SadlPrimaryTypeReference;\cf0\par
+\par
+\cf4 SadlHasValueCondition :\cf0\par
+\cf4\tab\cf5 'always'\cf4  (\cf5 'has'\cf4 |\cf5 'with'\cf4 ) \cf5 'value'\cf4  restriction=SadlExplicitValue;\cf0\par
+\par
+\cf4 SadlCardinalityCondition :\cf0\par
+\cf4\tab (\cf5 'has'\cf4 |\cf5 'with'\cf4 ) \cf0\par
+\cf4\tab (\cf5 'at'\cf4  operator=(\cf5 'least'\cf4 |\cf5 'most'\cf4 ) |\cf5 'exactly'\cf4 )? \cf0\par
+\cf4\tab cardinality=CardinalityValue (\cf5 'value'\cf4 |\cf5 'values'\cf4 ) \cf0\par
+\cf4\tab (\cf5 'of'\cf4  \cf5 'type'\cf4  type=SadlPrimaryTypeReference | \cf5 'each'\cf4  \cf5 'of'\cf4  \cf5 'types'\cf4  type=SadlPrimaryTypeReference)?;\cf0\par
+\par
+\cf8 CardinalityValue\cf4  :\cf0\par
+\cf4\tab NUMBER | \cf5 'one'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlExplicitValue:\cf0\par
+\cf4\tab\tab SadlResource\tab\tab\cf1 // e.g., \ul George\cf0\ulnone\par
+\cf4\tab |\tab\{\i SadlNumberLiteral\i0\} literalNumber=FacetNumber (-> unit=UNIT)?\cf0\par
+\cf4     |   \{\i SadlStringLiteral\i0\} literalString=STRING\cf0\par
+\cf4     |   \{\i SadlBooleanLiteral\i0\} (truethy?=\cf5 'true'\cf4 |\cf5 'false'\cf4 )\cf0\par
+\cf4     |   SadlValueList\cf0\par
+\cf4\tab |\tab\{\i SadlConstantLiteral\i0\} term=(\cf5 'PI'\cf4 |\cf5 'known'\cf4 )\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SadlValueList:\cf0\par
+\cf4\tab\{\i SadlValueList\i0\} \cf5 '['\cf4  (explicitValues+=SadlExplicitValue (\cf5 ','\cf4  explicitValues+=SadlExplicitValue)*)? \cf5 ']'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf1 // These articles can appear before the property name and are indicative of the functionality of the property or\cf0\par
+\cf1 //\tab the cardinality of the property on the class\cf0\par
+\cf8 AnArticle\cf4  :\cf0\par
+\cf4\tab IndefiniteArticle | DefiniteArticle;\cf0\par
+\par
+\cf8 IndefiniteArticle\cf4  :\cf0\par
+\cf4\tab\cf5 'A'\cf4 |\cf5 'a'\cf4 |\cf5 'An'\cf4 |\cf5 'an'\cf4 ;\cf0\par
+\par
+\cf8 DefiniteArticle\cf4  :\cf0\par
+\cf4\tab\cf5 'The'\cf4 |\cf5 'the'\cf4 ;\cf0\par
+\par
+\cf1 // This is primarily for debugging purposes. Any expression can be given after "\ul Expr\ulnone :" to see if it is valid. \cf0\par
+\cf1 // Such an expression has no meaning in translation.\cf0\par
+\cf4 ExpressionStatement \cf3\b returns\cf4\b0  \i ExpressionScope\i0  :\cf0\par
+\cf4\tab\{\i ExpressionStatement\i0\}\cf0\par
+\cf4\tab\cf5 '\ul Expr\ulnone :'\cf4  expr=Expression (\cf5 '=>'\cf4  evaluatesTo=STRING)?;\cf0\par
+\par
+\cf4 RuleStatement \cf3\b returns\cf4\b0  \i ExpressionScope\i0  :\cf0\par
+\cf4\tab\{\i RuleStatement\i0\}\cf0\par
+\cf4\tab\cf5 'Rule'\cf4  \cf7 name\cf4 =QNAME \cf5 ':'\cf4 ? (\cf5 'given'\cf4  ifs+=Expression)? (\cf5 'if'\cf4  ifs+=Expression)? \cf1 // (','? \ul ifs\ulnone +=Expression)*\cf0\par
+\cf4\tab\tab\tab\tab\tab\tab    \cf5 'then'\cf4  thens +=Expression \cf1 // (','? \ul thens\ulnone +=Expression)*\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 QueryStatement \cf3\b returns\cf4\b0  \i ExpressionScope\i0  :\cf0\par
+\cf4\tab\{\i QueryStatement\i0\}\cf0\par
+\cf4\tab start = (\cf5 'Ask'\cf4 |\cf5 'Graph'\cf4 ) (\cf7 name\cf4 =QNAME)? \cf5 ':'\cf4  expr=(ConstructExpression | AskExpression | Expression) \cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 ConstructExpression \cf3\b returns\cf4\b0  \i Expression\i0  :\cf0\par
+\cf4\tab\{\i ConstructExpression\i0\}\cf0\par
+\cf4\tab\cf5 'construct'\cf4  subj=SadlResource pred=SadlResource obj=SadlResource \cf5 'where'\cf4  whereExpression=Expression\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 AskExpression \cf3\b returns\cf4\b0  \i Expression\i0  :\cf0\par
+\cf4\tab\{\i AskExpression\i0\}\cf0\par
+\cf4\tab\cf5 'ask'\cf4  \cf5 'where'\cf4  whereExpression=Expression\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 TestStatement \cf3\b returns\cf4\b0  \i ExpressionScope\i0  :\cf0\par
+\cf4\tab\{\i TestStatement\i0\}\cf0\par
+\cf4\tab\cf5 'Test:'\cf4  tests+=Expression\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 PrintStatement :\cf0\par
+\cf4\tab\cf5 'Print:'\cf0\par
+\cf4\tab\tab\tab (displayString=STRING \cf0\par
+\cf4\tab\tab |\tab model=\cf5 'Deductions'\cf0\par
+\cf4\tab\tab |\tab model=\cf5 'Model'\cf4 );\cf0\par
+\par
+\cf4 ExplainStatement :\cf0\par
+\cf4\tab\cf5 'Explain:'\cf0\par
+\cf4\tab\tab\tab (expr=Expression\cf0\par
+\cf4\tab\tab | \tab\cf5 'Rule'\cf4  rulename=QNAME)\cf0\par
+\cf4\tab\tab\tab ;\cf0\par
+\cf4\tab\tab\tab\cf0\par
+\cf4 StartWriteStatement :\cf0\par
+\cf4\tab write=\cf5 'Write:'\cf4  (dataOnly=\cf5 'data'\cf4 )? \cf5 '\{'\cf4  \cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 EndWriteStatement :\cf0\par
+\cf4\tab\cf5 '\}'\cf4  \cf5 'to'\cf4  filename=STRING \cf0\par
+\cf4 ;\cf0\par
+\cf4\tab\tab\tab\cf0\par
+\cf4 ReadStatement :\cf0\par
+\cf4\tab\cf5 'Read:'\cf4  \cf5 'data'\cf4  \cf5 'from'\cf4  filename=STRING (\cf5 'using'\cf4  templateFilename=STRING)? \cf0\par
+\cf4 ;\cf0\par
+\par
+\par
+\cf4 Expression \cf3\b returns\cf4\b0  \i Expression\i0 : \cf1 // (1)\cf0\par
+\cf4\tab SelectExpression<\cf3\b true\cf4\b0 >\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 SelectExpression<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0  :\cf0\par
+\cf4\tab ->(\{\i SelectExpression\i0\}\cf0\par
+\cf4\tab\cf5 'select'\cf4  distinct?=\cf5 'distinct'\cf4 ? (\cf5 '*'\cf4  | selectFrom+=SadlResource (\cf5 ','\cf4  selectFrom+=SadlResource)*) \cf5 'where'\cf4  whereExpression=ExpressionParameterized<EnabledWith> (orderby=\cf5 'order'\cf4  \cf5 'by'\cf4  orderList+=OrderElement ->(\cf5 ','\cf4  (orderList+=OrderElement))*)?)\cf0\par
+\cf4\tab | ExpressionParameterized<\cf3\b true\cf4\b0 >\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 OrderElement :\cf0\par
+\cf4\tab (\cf5 '\ul asc\ulnone '\cf4  | desc?=\cf5 '\ul desc\ulnone '\cf4 )? orderBy=SadlResource;\cf0\par
+\par
+\cf1 // Real expressions start here\cf0\par
+\cf4 ExpressionParameterized<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 : \cf1 // (1)\cf0\par
+\cf4     \{\i Sublist\i0\} \cf6 AnArticle\cf4 ? \cf5 'sublist'\cf4  \cf5 'of'\cf4  list=OrExpression<EnabledWith> \cf5 'matching'\cf4  where=OrExpression<EnabledWith>\cf0\par
+\cf4     | OrExpression<EnabledWith>;\cf0\par
+\par
+\cf4 OrExpression<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab AndExpression<EnabledWith> (\{\i BinaryOperation\i0 .left=\cf3\b current\cf4\b0\} op=OpOr right=AndExpression<EnabledWith>)*;\cf0\par
+\par
+\cf8 OpOr\cf4 :\cf0\par
+\cf4\tab\cf5 'or'\cf4  | \cf5 '||'\cf4 ;\cf0\par
+\par
+\cf4 AndExpression<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab CommaSeparatedAbreviatedExpression<EnabledWith> (\{\i BinaryOperation\i0 .left=\cf3\b current\cf4\b0\} op=OpAnd right=CommaSeparatedAbreviatedExpression<EnabledWith>)*;\cf0\par
+\par
+\cf8 OpAnd\cf4 :\cf0\par
+\cf4\tab\cf5 'and'\cf4  | \cf5 '&&'\cf4 ;\cf0\par
+\cf4\tab\cf0\par
+\cf4 CommaSeparatedAbreviatedExpression<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab EqualityExpression<EnabledWith> (\{\i CommaSeparatedAbreviatedExpression\i0 .left=\cf3\b current\cf4\b0\} \cf5 ','\cf4  =>((<EnabledWith>\cf5 'with'\cf4 |\cf5 'has'\cf4 ) prop=SadlResource) right=PrimaryExpression<EnabledWith>?)*;\cf0\par
+\par
+\cf4 EqualityExpression<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab RelationalExpression<EnabledWith> (\{\i BinaryOperation\i0 .left=\cf3\b current\cf4\b0\} op=InfixOperator right=RelationalExpression<EnabledWith>)*;\cf0\par
+\par
+\cf8 InfixOperator\cf4  :\cf0\par
+\cf4\tab\cf5 '=='\cf4  \cf0\par
+\cf4\tab | \cf5 '!='\cf4  \cf0\par
+\cf4\tab | \cf5 '='\cf4  \cf0\par
+\cf4\tab | \cf5 'is'\cf4  (\cf5 'not'\cf4 ? \cf5 'unique'\cf4  \cf5 'in'\cf4 )? \cf0\par
+\cf4\tab | \cf5 'contains'\cf0\par
+\cf4\tab | \cf5 'does'\cf4  \cf5 'not'\cf4  \cf5 'contain'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 RelationalExpression<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab Addition<EnabledWith> ->(\{\i BinaryOperation\i0 .left=\cf3\b current\cf4\b0\} =>op=OpCompare right=Addition<EnabledWith>)*;\cf0\par
+\par
+\cf8 OpCompare\cf4 :\cf0\par
+\cf4\tab\cf5 '>='\cf4  | \cf5 '<='\cf4  | \cf5 '>'\cf4  | \cf5 '<'\cf4 ;\cf0\par
+\par
+\cf4 Addition<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab Multiplication<EnabledWith> (\{\i BinaryOperation\i0 .left=\cf3\b current\cf4\b0\} op=AddOp right=Multiplication<EnabledWith>)*;\cf0\par
+\par
+\cf8 AddOp\cf4 :\cf0\par
+\cf4\tab\cf5 '+'\cf4  | \cf5 '-'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 Multiplication<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab Power<EnabledWith> (\{\i BinaryOperation\i0 .left=\cf3\b current\cf4\b0\} op=MultiOp right=Power<EnabledWith>)*;\cf0\par
+\cf4\tab\cf0\par
+\cf8 MultiOp\cf4  :\cf0\par
+\cf4\tab\cf5 '*'\cf4 |\cf5 '/'\cf4 |\cf5 '%'\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4 Power<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 :\cf0\par
+\cf4\tab PropOfSubject<EnabledWith> (\{\i BinaryOperation\i0 .left=\cf3\b current\cf4\b0\} op=\cf5 '^'\cf4  right=PropOfSubject<EnabledWith>)*;\cf0\par
+\par
+\cf1 // PropOfSubject has right associativity: prop1 of prop2 of \ul Subj\ulnone  is equivalent to prop1 of (prop2 of \ul Subj\ulnone )\cf0\par
+\cf4 PropOfSubject<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 : \cf1 // (17)\cf0\par
+\cf4\tab PrimaryExpression<EnabledWith> ->((\{\i PropOfSubject\i0 .left=\cf3\b current\cf4\b0\} of=(\cf5 'of'\cf4 |\cf5 'for'\cf4 |\cf5 'in'\cf4 ) right=PropOfSubject<EnabledWith>) |  \cf0\par
+\cf4\tab\tab\tab\tab\tab   (=>(\{\i SubjHasProp\i0 .left=\cf3\b current\cf4\b0\} (<EnabledWith>\cf5 'with'\cf4 |\cf5 'has'\cf4 ) prop=SadlResource) right=PrimaryExpression<EnabledWith>?)+)?\cf0\par
+\cf4 |   \{\i UnaryExpression\i0\} op=(\cf5 'not'\cf4  | \cf5 '!'\cf4  | \cf5 'only'\cf4  | \cf5 '-'\cf4 ) expr=PropOfSubject<EnabledWith> \cf1 // this can be applied to other \ul unitary\ulnone  operations\cf0\par
+\cf4 |   \{\i ElementInList\i0\} \cf5 'element'\cf4  (before?=\cf5 'before'\cf4 |after?=\cf5 'after'\cf4 )? element=PropOfSubject<EnabledWith>;\cf0\par
+\par
+\cf1 // primary expressions are the atom units of expression in the grammar\tab\cf0\par
+\cf4 PrimaryExpression<EnabledWith> \cf3\b returns\cf4\b0  \i Expression\i0 : \cf1 // (20)\cf0\par
+\cf4\tab\cf5 '('\cf4  SelectExpression<EnabledWith> \cf5 ')'\cf4  \cf0\par
+\cf4\tab | \{\i Declaration\i0\} article=AnArticle type=SadlPrimaryTypeReference \cf0\par
+\cf4\tab ->(\cf5 '['\cf4  arglist+=Expression? (\cf5 ','\cf4  arglist+=Expression)* \cf5 ']'\cf4 |\cf0\par
+\cf4\tab\tab newName=DNAME\cf0\par
+\cf4\tab )?\cf0\par
+\cf4\tab | \{\i StringLiteral\i0\} value=STRING \cf0\par
+\cf4\tab | \{\i NumberLiteral\i0\} value=AnyNumber ->(\{\i Unit\i0 .value=\cf3\b current\cf4\b0\} unit=UNIT)?\cf0\par
+\cf4\tab | \{\i BooleanLiteral\i0\} value=BooleanValue \cf0\par
+\cf4\tab | \{\i Constant\i0\} constant=Constants\cf0\par
+\cf4\tab | FeatureCall\cf0\par
+\cf4\tab | \{\i ValueTable\i0\} valueTable=ValueTable;\cf0\par
+\par
+\cf4 FeatureCall \cf3\b returns\cf4\b0  \i SadlResource\i0 :\cf0\par
+\cf4\tab\{\i Name\i0\} \cf7 name\cf4 =[\i SadlResource\i0 |QNAME] ->(function?=\cf5 '('\cf4  arglist+=Expression? (\cf5 ','\cf4  arglist+=Expression)* \cf5 ')'\cf4 )?\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf8 UNIT\cf4  :\cf0\par
+\cf4\tab ID | STRING\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf4\tab\cf1 // the truth table\cf0\par
+\cf4 ValueTable:\cf0\par
+\cf4\tab\cf5 '['\cf4  row=ValueRow \cf5 ']'\cf0\par
+\cf4\tab\cf1 // e.g., [\ul George\ulnone , 23, "Purple", 38.186111]\cf0\par
+\cf4\tab | \cf5 '\{'\cf4  \cf5 '['\cf4  rows+=ValueRow \cf5 ']'\cf4  (\cf5 ','\cf4 ? \cf5 '['\cf4  rows+=ValueRow \cf5 ']'\cf4 )* \cf5 '\}'\cf0\par
+\cf4\tab\cf1 // e.g., \{[\ul George\ulnone , 23, "Purple", 38.186111], [\ul Martha\ulnone , 24, "Pink", 45.203]\}\cf0\par
+\cf4 ;\cf0\par
+\par
+\cf8 BooleanValue\cf4 :\cf0\par
+\cf4\tab\cf5 'true'\cf4  | \cf5 'false'\cf4 ;\cf0\par
+\cf4\tab\cf0\par
+\par
+\cf8 Constants\cf4 :\cf0\par
+\cf4\tab\cf5 'PI'\cf4  | \cf5 'known'\cf4  | \cf5 'e'\cf4  | \cf5 '--'\cf4  | \cf5 'None'\cf4  | \cf5 'a'\cf4 ? \cf5 'type'\cf4  | \cf5 'length'\cf4  | \cf5 'count'\cf4  | \cf5 'index'\cf4  | (\cf5 'first'\cf4 |\cf5 'last'\cf4 ) \cf5 'element'\cf4  | \cf5 'value'\cf4 ;\cf0\par
+\par
+\cf4 ValueRow:\cf0\par
+\cf4\tab explicitValues+=Expression (\cf5 ','\cf4  explicitValues+=Expression)*; \cf1 // e.g., \ul George\ulnone , 23, "Purple", 38.186111\cf0\par
+\par
+\cf8 DNAME\cf4 :\cf0\par
+\cf4\tab ID;\cf0\par
+\par
+\cf8 AnyNumber\cf4  \cf3\b returns\cf4\b0  \i ecore::EBigDecimal\i0  :\cf0\par
+\cf4\tab DecimalNumber EXPONENT?;\cf0\par
+\par
+\cf8 DecimalNumber\cf4  \cf3\b returns\cf4\b0  \i ecore::EBigDecimal\i0  :\cf0\par
+\cf4\tab NUMBER ;\cf0\par
+\par
+\cf8 EXPONENT\cf4  \cf3\b returns\cf4\b0  \i ecore::EBigDecimal\i0 :\cf0\par
+\cf4\tab (\cf5 'e'\cf4  | \cf5 'E'\cf4 ) (\cf5 '-'\cf4  | \cf5 '+'\cf4 )? DecimalNumber;\cf0\par
+\par
+\cf8 EOS\cf4 :\cf0\par
+\cf4\tab\cf5 '.'\cf4 ;\cf0\par
+\cf4\tab\cf0\par
+\cf8 QNAME\cf4  :\cf0\par
+\cf4\tab QNAME_TERMINAL | ID\cf0\par
+\cf4 ;\cf0\par
+\cf4\tab\cf0\par
+\cf3\b terminal\cf4\b0  NUMBER \cf3\b returns\cf4\b0  \i ecore::EInt\i0  :\cf0\par
+\cf4\tab\cf5 '0'\cf4 ..\cf5 '9'\cf4 +;\cf0\par
+\par
+\cf3\b terminal\cf4\b0  WS:\cf0\par
+\cf4\tab (\cf5 '\\u00A0'\cf4  | \cf5 ' '\cf4  | \cf5 '\\t'\cf4  | \cf5 '\\r'\cf4  | \cf5 '\\n'\cf4 )+;\cf0\par
+\par
+\cf3\b terminal\cf4\b0  ID:\cf0\par
+\cf4\tab\cf5 '^'\cf4 ? (\cf5 'a'\cf4 ..\cf5 'z'\cf4  | \cf5 'A'\cf4 ..\cf5 'Z'\cf4  | \cf5 '_'\cf4 ) (\cf5 'a'\cf4 ..\cf5 'z'\cf4  | \cf5 'A'\cf4 ..\cf5 'Z'\cf4  | \cf5 '_'\cf4  | \cf5 '0'\cf4 ..\cf5 '9'\cf4  | \cf5 '-'\cf4  | \cf5 '%'\cf4  | \cf5 '~'\cf4 )* ;\cf0\par
+\cf4\tab\cf0\par
+\cf3\b terminal\cf4\b0  QNAME_TERMINAL:\cf0\par
+\cf4\tab ID \cf5 ':'\cf4  ID;\cf0\par
+\cf4\tab\cf0\par
+\cf3\b terminal\cf4\b0  STRING:\cf0\par
+\cf4\tab\cf5 '"'\cf4  (\cf5 '\\\\'\cf4  (\cf5 'b'\cf4  | \cf5 't'\cf4  | \cf5 'n'\cf4  | \cf5 'f'\cf4  | \cf5 'r'\cf4  | \cf5 'u'\cf4  | \cf5 '"'\cf4  | \cf5 "'"\cf4  | \cf5 '\\\\'\cf4 ) | !(\cf5 '\\\\'\cf4  | \cf5 '"'\cf4 ))* \cf5 '"'\cf4  |\cf0\par
+\cf4\tab\cf5 "'"\cf4  (\cf5 '\\\\'\cf4  (\cf5 'b'\cf4  | \cf5 't'\cf4  | \cf5 'n'\cf4  | \cf5 'f'\cf4  | \cf5 'r'\cf4  | \cf5 'u'\cf4  | \cf5 '"'\cf4  | \cf5 "'"\cf4  | \cf5 '\\\\'\cf4 ) | !(\cf5 '\\\\'\cf4  | \cf5 "'"\cf4 ))* \cf5 "'"\cf4 ;\cf0\par
+\par
+\cf3\b terminal\cf4\b0  ML_COMMENT:\cf0\par
+\cf4\tab\cf5 '/*'\cf4 ->\cf5 '*/'\cf4 ;\cf0\par
+\par
+\cf3\b terminal\cf4\b0  SL_COMMENT:\cf0\par
+\cf4\tab\cf5 '//'\cf4  !(\cf5 '\\n'\cf4  | \cf5 '\\r'\cf4 )* (\cf5 '\\r'\cf4 ? \cf5 '\\n'\cf4 )?;\cf0\par
+\par
+\cf3\b terminal\cf4\b0  \cf6 ANY_OTHER\cf4 :\cf0\par
+\cf4\tab .;\cf0\par
+\cf4\tab\cf0\f1\fs22\par
+}
+ 

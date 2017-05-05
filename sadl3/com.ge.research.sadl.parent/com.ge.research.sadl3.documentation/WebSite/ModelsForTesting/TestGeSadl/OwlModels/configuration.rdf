@@ -1,0 +1,223 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://com.ge.research.sadl.configuration#">
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Jena">
+    <subcategory>
+      <rdf:Bag>
+        <rdf:li>
+        </rdf:li>
+      </rdf:Bag>
+    </subcategory>
+    <pDerivationLogging rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pDerivationLogging>
+    <pModelSpec rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >OWL_MEM_RDFS_INF</pModelSpec>
+    <pRuleMode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hybrid</pRuleMode>
+    <translatorClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.translator.JenaTranslatorPlugin</translatorClassName>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#JenaForGE">
+    <pTrace rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pTrace>
+    <pModelSpec rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >OWL_DL_MEM_RULE</pModelSpec>
+    <pOWLTranslation rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pOWLTranslation>
+    <pRuleMode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hybrid</pRuleMode>
+    <pUseLuceneIndexer rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pUseLuceneIndexer>
+    <pDerivationLogging rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Deep</pDerivationLogging>
+    <translatorClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.translator.JenaTranslatorPlugin</translatorClassName>
+    <pCacheInferredModel rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pCacheInferredModel>
+    <pTransitiveClosureCaching rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pTransitiveClosureCaching>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Console">
+    <pShowNamespaces rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pShowNamespaces>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#AdHocQuery">
+    <pSeqSizeLimit rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >10</pSeqSizeLimit>
+    <pQuery>
+      <rdf:Seq>
+        <rdf:li rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >"select ?sa ?u where {&lt;MyCuboid&gt; &lt;area&gt; ?x . ?x &lt;amount&gt; ?sa . ?x &lt;unit&gt; ?u}"</rdf:li>
+        <rdf:li rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >select p, v where MyCuboid p v</rdf:li>
+        <rdf:li rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >select p, v where MyCuboid surfaceArea sa and sa p v</rdf:li>
+        <rdf:li rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >select sa, u where MyCuboid surfaceArea x and x amount sa and x unit u</rdf:li>
+        <rdf:li rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >"select ?s0 ?o0 ?s1 ?o1 where {{?s0 &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;http://sadl.imp/TestOneLevelDefaults#Thingy&gt;  . OPTIONAL {?s0 &lt;http://sadl.imp/TestOneLevelDefaults#dp&gt; ?o0} . FILTER (!bound(?o0))} UNION {?s1 &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;http://sadl.imp/TestOneLevelDefaults#Thingy&gt; . OPTIONAL {?s1 &lt;http://sadl.imp/TestOneLevelDefaults#op&gt; ?o1} . FILTER (!bound(?o1))}}"</rdf:li>
+      </rdf:Seq>
+    </pQuery>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#ReasonerSpec">
+    <reasonerClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.geonly.jena.JenaGEReasonerPlugin</reasonerClassName>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Jena-Based">
+    <subcategory>
+      <rdf:Bag>
+        <rdf:li>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.builtin.GetClassFromConstraint</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >getClassFromConstraint</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >getInstance</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.GetInstance</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.AddTo</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >addTo</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >list</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.List</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.ListAdd</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listAdd</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >checkType</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.builtin.CheckType</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.builtin.LLP_RemainingLife</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >llpRemainingLife</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >getDataValue</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.GetDataValue</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.builtin.Update</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >update</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listDifference</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.prolific.jena.builtins.ListDifference</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.AllDifferent</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >allDifferent</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listUnion</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.ListUnion</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >unique</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.builtin.Unique</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.lmsv.jena.builtin.ListIntersection</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listIntersection</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listToString</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.builtin.ListToString</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listSimilarityByType</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.prolific.jena.builtins.ListSimilarityByType</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listConcat</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.builtin.ListConcat</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.geonly.jena.ListSubtract</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >listSubtract</name>
+          </Builtin>
+        </rdf:li>
+      </rdf:Bag>
+    </subcategory>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#TranslatorSpec">
+    <translatorClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.translator.JenaTranslatorPlugin</translatorClassName>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Builtin"/>
+</rdf:RDF>

@@ -1,0 +1,497 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Implied Properties</title>
+</head>
+
+<body>
+
+<h1>Implied Properties</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/06/2017<!--webbot bot="Timestamp" endspan i-checksum="12595" -->. 
+Send comments to
+<a href="mailto:crapo@research.ge.com?subject=ImpliedProperties">
+mailto:crapo@research.ge.com</a>.</h5>
+<h2>Introduction</h2>
+<p>It is often the case in natural language that we use the name of a class to 
+represent an instance of the class. Usually a preceding article indicates 
+whether we are referring to a specific instance or to any instance. Consider, 
+for example, the sentence &quot;George is playing under the tree.&quot; The phrase &quot;the 
+tree&quot; indicates a particular instance of the &quot;tree&quot; class. Which instance is 
+presumably clear from context. By contrast, consider the sentence &quot;Plan for the 
+future--plant a tree.&quot; Here &quot;a tree&quot; indicates some unidentified member of the 
+&quot;tree&quot; class.</p>
+<p>As an extension of this kind of construct, it is also the case in natural 
+language that class names are sometimes used as proxies for a particular value 
+of an instance of the class. This is particularly the case when the existence of 
+a class in the formal model is required in order to give additional information 
+about a data value. In OWL a data value does not have identity and so cannot be 
+the subject of a triple (statement), so an instance of a class is created to 
+allow the additional information to be associated with the data value. For 
+example, measurements often have not only a numeric value but also a unit. Below 
+is part of a simple ontology capturing a conceptualization of measurement. It is 
+expressed in the Semantic Application Design Language (SADL), which is a 
+controlled-English representation that seeks to make semantic models more easily 
+understood and authored by subject matter experts.</p>
+<font SIZE="2" COLOR="#000080"><b>
+<blockquote>
+<p ALIGN="LEFT">MeasurementSystem</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">must</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">SystemInternationale</font><font SIZE="2"> 
+(</font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> &quot;SI&quot;), </font>
+<font SIZE="2" COLOR="#0000ff">ImperialUnits</font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#0000ff">US_CustomaryUnits</font><font SIZE="2">}.<br>
+</font><i><font SIZE="2" COLOR="#000080"><b>Unit</b></font></i><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>system</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>MeasurementSystem</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b><br>
+Measurement</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">double</font><font SIZE="2">, <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Unit</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>timeStamp</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">dateTime</font><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b><br>
+LengthUnit</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>Unit</b></font><font SIZE="2">, </font>
+<font SIZE="2" COLOR="#800080">must</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">Foot</font><font SIZE="2"> 
+(</font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> &quot;<u>ft</u>&quot;, 
+&quot;<u>feet</u>&quot;), </font><font SIZE="2" COLOR="#0000ff">Meter</font><font SIZE="2"> 
+(</font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> &quot;m&quot;), </font>
+<font SIZE="2" COLOR="#0000ff">Centimeter</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> 
+&quot;<u>cm</u>&quot;), </font><font SIZE="2" COLOR="#0000ff">Millimeter</font><font SIZE="2"> 
+(</font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> &quot;<u>mm</u>&quot;)}.</p>
+</blockquote>
+</font>
+<p>Using the above model, given the task of measuring a football field, on might 
+say &quot;The Measurement is 300&quot;. Someone might respond to this assertion 
+by saying, &quot;Oh, then the Measurement is in feet.&quot; To be consistent with the model, 
+the first should have said, &quot;The value of the instance of Measurement is 300&quot; 
+and the second &quot;The unit of the instance of Measurement is Foot&quot;. The problem to 
+be solved by implied properties is to allow a model builder to say things using just class or instance 
+names rather having to say things in a complete, model-consistent way. This 
+makes the expressions more natural, which is the objective of SADL. In fact, 
+this capability has been demanded by users of the language.</p>
+<h2>Implied Properties</h2>
+<p>The SADL grammar supports the syntax of comparing a class or instance of a 
+class to a value, including a value which is a number or a string. However, type 
+checking by the validation function will identify such a comparison when the two 
+sides of the comparison are not the same type as an error. And even if 
+validation didn't complain, translators will generate output that cannot be 
+processed or is unexpected. Both validators and translators must be aware of any 
+special handling of the class or instance comparison with the value. This can be 
+accomplished by designating &quot;implied properties&quot; on a class. This is done with 
+an annotation property for two reasons. First, OWL DL, our target maximally 
+expressive flavor of OWL, does not allow statements with user-defined OWL object properties 
+to have classes as subjects or properties as values. But even if it did, we do 
+not want reasoners trying to use the statements we make about implied 
+properties. These are only for the validator and translator to use in their 
+processes. Annotation properties are normally ignored by reasoners, as we would 
+want these to be.</p>
+<p>Therefore we add the following to our example model. (The definition of &quot;impliedProperty&quot; 
+is shown here, but would not actually be part of the user model but is part of 
+the SADL pre-defined, implicitly included concepts in SadlImplicitModel.sadl.)</p>
+<font SIZE="2" COLOR="#008000">
+<p ALIGN="LEFT">impliedProperty</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">annotation</font><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b><br>
+Measurement</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#008000">impliedProperty</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b><br>
+Measurement</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#008000">impliedProperty</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2">.</p>
+</font>
+<p>When a validator or reasoner sees an apparent type conflict, e.g. comparing 
+an instance of Measurement to an incompatible value, e.g., a number, it will look for implied properties 
+associated with the class specified, or the class to which a specified instance 
+belongs. If there is an implied property whose range is compatible with the 
+value in the comparison, it will insert that value to create a &quot;property of&quot; 
+construct, e.g., &quot;value of Measurement&quot;, &quot;unit of Measurement&quot;. </p>
+<h3>Limitations</h3>
+<p>Clearly a class cannot have more than one implied property with a given 
+range or ambiguity results. Even specifying two properties as implied if their ranges that are close, 
+e.g., decimal and float, may be&nbsp; less reliable in practice as the values 
+would have to be specified carefully to make sure they match the desired 
+property even though the value would work with the other property. </p>
+
+<h2>A Graph Model View</h2>
+
+<p>As an alternative way of understanding implied properties, consider them from 
+a graph model perspective. In the domain model (AKA t-box), we define classes, 
+properties, and property domain and range classes. Suppose, for example, that we 
+define the following, shown in SADL syntax.</p>
+
+<font SIZE="2">
+<blockquote>
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, <br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>value</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>validity</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">boolean</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">string</font><font SIZE="2">.</p>
+  <p ALIGN="LEFT"></p>
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>PhysicalObject</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2">.</p>
+</blockquote>
+</font>
+<p>Thus the properties <i>value</i>, <i>validity</i>, and <i>unit</i> all have 
+domain <i>DATA</i> and ranges <i>xsd:decimal</i>, <i>xsd:boolean</i>, and <i>
+xsd:string</i>, respectively. The property <i>weight</i> has domain <i>
+PhysicalObject</i> and range <i>DATA</i>. As a visual graph, the domain model 
+looks like this.</p>
+
+<blockquote>
+<p><img border="0" src="Implie1.jpg" width="375" height="291"></p>
+
+</blockquote>
+<p>To complete the picture, consider a small amount of instance data for the 
+domain.</p>
+
+<blockquote>
+  <font SIZE="2">
+  <p></font><font SIZE="2" COLOR="#0000ff">MonaLisa</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>PhysicalObject</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2"> 200, </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> &quot;<u>lbs</u>&quot;,
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>validity</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">true</font><font SIZE="2">).</p>
+  </font>
+</blockquote>
+<p>Viewed as a graph, it looks like this.</p>
+
+<blockquote>
+<p><img border="0" src="Implie2.jpg" width="385" height="289"></p>
+
+</blockquote>
+<p>The &quot;&lt;1&gt;&quot; in the graph signifies a blank node, given the identifier &quot;&lt;1&gt;&quot; to 
+distinguish it from other blank nodes in the graph. Now suppose that I want to 
+query my triple store. I might ask </p>
+
+<blockquote>
+  <font SIZE="2" COLOR="#008000"><b>
+  <p>weight</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">MonaLisa&nbsp;&nbsp;&nbsp; </font>(in 
+  SPARQL, namespaces omitted, &quot;select ?w where {&lt;MonaLisa&gt; &lt;weight&gt; ?w}&quot;)</p>
+</blockquote>
+<p>This query would return the blank node designated &quot;&lt;1&gt;&quot; in the graph. Using 
+Jena, the result is &quot;w = -1f420ac5:15b49f44305:-5089(blank node)&quot;. Hardly what a 
+naive user would expect. </p>
+<p>Now let us use implied properties. I add to my domain model the following.</p>
+<blockquote>
+  <font SIZE="2">
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000">impliedProperty</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>value</b></font><font SIZE="2">.<br>
+  </font><font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000">impliedProperty</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2">.<br>
+  </font><font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000">impliedProperty</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>validity</b></font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+<p>Now if I ask the same question the answer will be &quot;w-&gt;value = 200, w -&gt; unit 
+= &quot;lbs&quot;, w -&gt; validity = true&quot;.</p>
+<h3>Property Chains and Implied Properties</h3>
+<p>In natural language we are not limited to a single triple statement (subject, 
+predicate, object) per sentence, but we often create chains of relationships. 
+Consider this snippet of OWL data (in which &quot;validity&quot; is dropped for simlicity).</p>
+<blockquote>
+  <font SIZE="2" COLOR="#0000ff">
+  <p ALIGN="LEFT">Margie</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>value</b></font><font SIZE="2"> 135, </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> &quot;<u>lbs</u>&quot;).
+  </font><font SIZE="2" COLOR="#0000ff"><br>
+  John</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>value</b></font><font SIZE="2"> 180, </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> &quot;<u>lbs</u>&quot;).</font><font SIZE="2" COLOR="#0000ff"><br>
+  John</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Margie</font><font SIZE="2">)).</p>
+  </font>
+</blockquote>
+<p>Shown as a visual graph, this data looks like this. There are two unnamed 
+instance nodes of type Person in the property chain connecting John and Margie.</p>
+<blockquote>
+<p><img border="0" src="Implie3.jpg" width="662" height="643"></p>
+</blockquote>
+<p>Consider these two statements.</p>
+<font SIZE="2" COLOR="#800080">
+<ul>
+  <li>
+  <p ALIGN="LEFT">Ask</font><font SIZE="2">: </font>
+  <font SIZE="2" COLOR="#800080">select</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>p</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Margie</font><font SIZE="2">.</font></li>
+  <font SIZE="2" COLOR="#800080">
+  <li>
+  <p ALIGN="LEFT">Ask</font><font SIZE="2">: </font>
+  <font SIZE="2" COLOR="#800080">select</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>q</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>q</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">John</font></u><font SIZE="2">.</li>
+</ul>
+</font>
+<p>The first query looks for a pattern with a &quot;forward&quot; property chain from an 
+unbound variable &quot;p&quot; to the instance node &quot;Margie&quot;. The second query looks for a 
+pattern with a &quot;backward&quot; property chain from an unbound variable &quot;q&quot; to the 
+instance node &quot;John&quot;. Given the example data set, the first query will return a 
+single possible binding for &quot;p = John&quot;, the second the single possible binding 
+&quot;q = Margie&quot;.</p>
+<p>Now suppose that we modify the second query above slightly</p>
+<font SIZE="2" COLOR="#800080">
+<ul>
+  <li>Ask</font><font SIZE="2">: </font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>w</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>w</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">John</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>w</b></font><font SIZE="2"> &lt; 150.</li>
+</ul>
+</font>
+<p>Since the range of &quot;weight&quot; is &quot;DATA&quot;, and &quot;DATA&quot; cannot be compared (&quot;&lt;&quot;) 
+the number 150, we again would look for an implied property to make sense of the 
+query and we find one in &quot;value&quot;. Therefore the translated query is</p>
+<font SIZE="2" COLOR="#800080">
+<ul>
+  <li>Ask</font><font SIZE="2">: </font><font SIZE="2" COLOR="#800080">select</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>wv</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">where</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>wv</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>friend</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">John</font></u><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>w</b></font><font SIZE="2">v &lt; 150.</li>
+</ul>
+</font>
+<p>or in SPARQL it is</p>
+<ul>
+  <li>select ?wv where {&lt;John&gt; &lt;child&gt; ?x . ?x &lt;friend&gt; ?y . ?y &lt;spouse&gt; ?z . ?z 
+  &lt;weight&gt; ?w . ?w &lt;value&gt; ?wv . filter(?wv &lt; 150)}</li>
+</ul>
+<p>where variable &quot;x&quot; corresponds to node &quot;&lt;3&gt;&quot; in the graph, &quot;y&quot; corresponds to 
+node &quot;&lt;4&gt;&quot;, &quot;z&quot; will be bound to &quot;Margie&quot;, &quot;w corresponds with node &quot;&lt;2&gt;&quot;, and &quot;wv&quot; 
+will be bound to &quot;135&quot;.</p>
+<p>The applicability of impliedProperties goes beyond querying. For example, in 
+a rule premise one might wish to compare two objects, &quot;<font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#ff00ff"><b>X</b></font><font SIZE="2" COLOR="#0000ff"> =
+</font><font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font> <font size="2" color="#ff00ff"><b>Y</b></font>&quot;. 
+(Other rule premise conditions would bind variables X and Y, e.g., a binding 
+might be &quot;<font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">MonaLisa = </font><font SIZE="2" COLOR="#008000">
+<b>weight</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2">
+<font color="#0000FF">JohnDoe.</font></font>&quot;<font SIZE="2" color="#0000FF">
+</font>This comparison would return true only if all three of these statements 
+were true.</p>
+<blockquote>
+  <ul>
+    <li><font SIZE="2" COLOR="#008000"><b>value</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+    <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#0000ff">MonaLisa</font></u><font SIZE="2"> = </font>
+    <font SIZE="2" COLOR="#008000"><b>value</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+    <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#0000ff">JohnDoe</font></u></li>
+    <li><font SIZE="2" color="#008000"><b>unit </b></font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+    <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#0000ff">MonaLisa</font></u><font SIZE="2"> =
+    <font color="#008000"><b>unit </b></font></font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+    <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#0000ff">JohnDoe</font></u></li>
+    <li><font SIZE="2" COLOR="#008000"><b>validity</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+    <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#0000ff">MonaLisa</font></u><font SIZE="2"> = </font>
+    <font SIZE="2" COLOR="#008000"><b>validity</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font><u>
+    <font SIZE="2" COLOR="#008000"><b>weight</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#0000ff">JohnDoe</font></u></li>
+  </ul>
+</blockquote>
+
+</body>
+
+</html>

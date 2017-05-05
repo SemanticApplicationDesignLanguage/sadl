@@ -1,0 +1,22 @@
+<rdf:RDF
+    xmlns:hl2="http://com.ge.research.sadl/HyperLink2#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:hl1="http://com.ge.research.sadl/HyperLink1#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://com.ge.research.sadl/HyperLink3http">
+  <owl:Ontology rdf:about="http://com.ge.research.sadl/HyperLink3http">
+    <owl:imports rdf:resource="http://com.ge.research.sadl/HyperLink2"/>
+    <owl:imports rdf:resource="http://com.ge.research.sadl/HyperLink2http"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'HyperLink3http.sadl' and should not be edited.</rdfs:comment>
+  </owl:Ontology>
+  <hl2:HL2 rdf:ID="MyHL3">
+    <hl2:hlp2>
+      <hl1:HL1 rdf:ID="MyHL2">
+        <hl1:hlp1>
+          <hl1:HL1 rdf:ID="MyHL"/>
+        </hl1:hlp1>
+      </hl1:HL1>
+    </hl2:hlp2>
+  </hl2:HL2>
+</rdf:RDF>

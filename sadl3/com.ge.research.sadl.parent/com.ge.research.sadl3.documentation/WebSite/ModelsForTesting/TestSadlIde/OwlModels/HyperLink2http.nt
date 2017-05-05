@@ -1,0 +1,7 @@
+<http://com.ge.research.sadl/HyperLink2http#hlp2> <http://www.w3.org/2000/01/rdf-schema#domain> <http://com.ge.research.sadl/HyperLink2http#HL2> .
+<http://com.ge.research.sadl/HyperLink2http#hlp2> <http://www.w3.org/2000/01/rdf-schema#range> <http://com.ge.research.sadl/HyperLink1#HL1> .
+<http://com.ge.research.sadl/HyperLink2http#hlp2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<http://com.ge.research.sadl/HyperLink2http#HL2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/HyperLink2http> <http://www.w3.org/2002/07/owl#imports> <http://com.ge.research.sadl/HyperLink1> .
+<http://com.ge.research.sadl/HyperLink2http> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'HyperLink2http.sadl' and should not be edited."@en .
+<http://com.ge.research.sadl/HyperLink2http> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .

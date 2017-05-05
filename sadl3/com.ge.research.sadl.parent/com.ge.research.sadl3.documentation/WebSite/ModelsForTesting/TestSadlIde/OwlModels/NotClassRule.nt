@@ -1,0 +1,8 @@
+<http://com.ge.research.sadl/NotClassRule#Dog> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://com.ge.research.sadl/NotClassRule#Mammal> .
+<http://com.ge.research.sadl/NotClassRule#Dog> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/NotClassRule#Felix> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/NotClassRule#Cat> .
+<http://com.ge.research.sadl/NotClassRule#Mammal> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/NotClassRule#Cat> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://com.ge.research.sadl/NotClassRule#Mammal> .
+<http://com.ge.research.sadl/NotClassRule#Cat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://com.ge.research.sadl/NotClassRule> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'NotClassRule.sadl' and should not be edited."@en .
+<http://com.ge.research.sadl/NotClassRule> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
