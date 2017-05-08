@@ -195,4 +195,20 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
 					   Shape is a class described by area with values of type ''').assertProposal('float');
 	}
+	
+	/** Keywords NOT in declaration */
+	@Test
+	def void checkCA_24_DeclarationCompletion() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values of type float.
+					   MyShape is a ''').assertProposal('Shape');
+	}
+	
+	/** Keywords NOT in declaration */
+	@Test
+	def void checkCA_25_DeclarationCompletion() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values of type float.
+					   MyShape is a ''').assertProposalIsNot('float');
+	}
 }
