@@ -128,14 +128,71 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 
 	/** Super element with `type of`. */
 	@Test
-	def void checCA_15_SuperElement_IsATypeOf_Positive() {
+	def void checkCA_15_SuperElement_IsATypeOf_Positive() {
 		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').assertProposal('Foo');
 	}
 
 	/** Super element with `type of`. */
 	@Test
-	def void checCA_16_SuperElement_IsATypeOf_Negative() {
+	def void checkCA_16_SuperElement_IsATypeOf_Negative() {
 		newBuilder('''uri "http://myUri". Foo is a class. Bar is a type of ''').assertProposalIsNot('Bar');
 	}
 
+	/** Instance declaration. */
+	@Test
+	def void checkCA_17_InstanceDeclaration1() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values of type float .
+					   MyShape is a  ''').assertProposal('Shape');
+	}
+	
+	/** Instance declaration. */
+	@Test
+	def void checkCA_17_InstanceDeclaration2() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values of type float .
+					   MyShape is a  ''').assertProposalIsNot('float');
+	}
+	
+	/** Keywords in range definition */
+	@Test
+	def void checkCA_18_RangeKeyword1() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area ''').assertProposal('with');
+	}
+
+	/** Keywords in range definition */
+	@Test
+	def void checkCA_19_RangeKeyword2() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with ''').assertProposal('values');
+	}
+	
+	/** Keywords in range definition */
+	@Test
+	def void checkCA_20_RangeKeyword3() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values ''').assertProposal('of');
+	}
+	
+	/** Keywords in range definition */
+	@Test
+	def void checkCA_21_RangeKeyword4() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values of ''').assertProposal('type');
+	}
+	
+	/** Keywords in range definition */
+	@Test
+	def void checkCA_22_Range1() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values of type ''').assertProposal('Shape');
+	}
+	
+	/** Keywords in range definition */
+	@Test
+	def void checkCA_23_Range2() {
+		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
+					   Shape is a class described by area with values of type ''').assertProposal('float');
+	}
 }
