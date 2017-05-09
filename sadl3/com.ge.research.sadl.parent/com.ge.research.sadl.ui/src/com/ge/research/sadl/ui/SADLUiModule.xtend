@@ -20,11 +20,13 @@
  */
 package com.ge.research.sadl.ui
 
+import com.ge.research.sadl.markers.api.SadlMarkerSeverityMapper
 import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ui.contentassist.SadlOntologyContextProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
+import com.ge.research.sadl.ui.markers.EclipseMarkerSeverityMapper
 import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
@@ -103,6 +105,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	def Class<? extends IOntologyContextProvider> bindIOntologyContextProvider() {
 		return SadlOntologyContextProvider;
+	}
+	
+	def Class<? extends SadlMarkerSeverityMapper> bindSadlMarkerSeverityMapper() {
+		return EclipseMarkerSeverityMapper;
 	}
 	
 }
