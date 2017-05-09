@@ -131,7 +131,8 @@ class SadlMarkerStartup implements IStartup {
 	}
 
 	private def setLocation(IMarker it, Location location) {
-		setAttribute(IMarker.LOCATION, "line: " + location.lineNumber);
+		val locationStr = if(location == Location.UNKNOWN) "unknown location" else '''line: «location.lineNumber»''';
+		setAttribute(IMarker.LOCATION, locationStr);
 		setAttribute(IMarker.CHAR_START, location.start);
 		setAttribute(IMarker.CHAR_END, location.end);
 		setAttribute(IMarker.LINE_NUMBER, location.lineNumber);

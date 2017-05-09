@@ -522,12 +522,4 @@
      <persistent value="true"/>
      <attribute name="ORIGIN_KEY"/>
   </extension>
-  <extension
-        point="org.eclipse.ui.editors.markerUpdaters">
-     <updater
-           class="org.eclipse.ui.texteditor.BasicMarkerUpdater"
-           id="com.ge.research.sadl.ui.sadlMarkerUpdater"
-           markerType="com.ge.research.sadl.ui.sadlproblem">
-     </updater>
-  </extension>
 </plugin>
