@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="urn:com:ge:aviation:rce:markerservice"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+	xmlns="urn:com:ge:aviation:rce:markerservice">
+	<xs:complexType name="MarkerService">
+		<xs:sequence>
+			<xs:element name="Process" type="process" minOccurs="1"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="marker">
+		<xs:sequence>
+			<xs:element name="ReqID" type="xs:string" minOccurs="1"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="filePath" use="required" type="xs:string" />
+		<xs:attribute name="astNodeName" use="required" type="xs:string" />
+		<xs:attribute name="msgText" use="required" type="xs:string" />
+		<xs:attribute name="projectMarker" use="optional" type="xs:boolean"
+			default="false" />
+		<xs:attribute name="time" use="optional" type="xs:dateTime" />
+		<xs:attribute name="markerType" use="required" type="markerType" />
+		<xs:attribute name="priority" use="optional" type="priorityType"
+			default="Normal" />
+	</xs:complexType>
+	<xs:complexType name="process">
+		<xs:sequence>
+			<xs:element name="Marker" type="marker" minOccurs="1"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="build" use="required" type="xs:string" />
+		<xs:attribute name="name" use="required" type="xs:string" />
+		<xs:attribute name="pn" use="required" type="xs:string" />
+	</xs:complexType>
+	<xs:simpleType name="markerType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Error" />
+			<xs:enumeration value="Warning" />
+			<xs:enumeration value="Info" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="priorityType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Low" />
+			<xs:enumeration value="Normal" />
+			<xs:enumeration value="High" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="MarkerService" type="MarkerService" />
+</xs:schema>
