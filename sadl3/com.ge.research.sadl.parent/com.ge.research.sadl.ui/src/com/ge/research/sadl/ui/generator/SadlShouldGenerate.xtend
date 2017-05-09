@@ -62,7 +62,7 @@ class SadlShouldGenerate implements IShouldGenerate {
 		if (noErrors) {
 			return false;
 		} else {
-			return resource.findMarkers(PROBLEM, true, DEPTH_INFINITE).exists[println(type); return type !== SADL_PROBLEM_MARKER];
+			return resource.findMarkers(PROBLEM, true, DEPTH_INFINITE).exists[type !== SADL_PROBLEM_MARKER];
 		}
 	}
 
