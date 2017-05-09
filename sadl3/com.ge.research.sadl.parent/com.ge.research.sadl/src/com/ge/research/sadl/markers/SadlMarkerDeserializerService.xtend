@@ -18,9 +18,11 @@
 package com.ge.research.sadl.markers
 
 import com.google.common.collect.ImmutableList
+import com.google.common.collect.Iterators
 import com.google.inject.ImplementedBy
 import java.nio.file.Path
 import javax.xml.parsers.DocumentBuilderFactory
+import org.eclipse.xtend.lib.annotations.Data
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
 
@@ -38,7 +40,31 @@ interface SadlMarkerDeserializerService {
 	/**
 	 * Deserializes the XML SADL error-marker file.
 	 */
-	def Iterable<SadlMarker> deserialize(Path path);
+	def SadlMarkerInfos deserialize(Path path);
+
+	/**
+	 * Wraps zero to any SADL markers and their origin.
+	 */
+	@Data
+	static class SadlMarkerInfos implements Iterable<SadlMarker> {
+
+		/**
+		 * The unique path or identifier of the error ({@code .err}) file where the markers
+		 * are coming from.
+		 */
+		val String origin;
+
+		/**
+		 * An iterable of external SADL markers based on the content of the XML.
+		 */
+		val Iterable<SadlMarker> markers;
+		
+		@Override
+		override iterator() {
+			return Iterators.unmodifiableIterator(markers.iterator);
+		}
+
+	}
 
 	/**
 	 * Default DOM based parser implementation.
@@ -88,11 +114,11 @@ interface SadlMarkerDeserializerService {
 					val message = attributes.getTextContentOfNamedItem(MESSAGE_TEXT_NAME);
 					val severity = attributes.getTextContentOfNamedItem(MARKER_TYPE_NAME).severityByName;
 					val astNodeName = attributes.getTextContentOfNamedItem(AST_NODE_NAME);
-					markers.add(new SadlMarker(filePath, message, astNodeName, severity, origin));
+					markers.add(new SadlMarker(filePath, message, astNodeName, severity));
 				}
 			}
 
-			return markers.build;
+			return new SadlMarkerInfos(origin, markers.build);
 		}
 
 		private def getTextContentOfNamedItem(NamedNodeMap attributes, String name) {

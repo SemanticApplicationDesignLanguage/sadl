@@ -43,7 +43,7 @@ class SadlShouldGenerate implements IShouldGenerate {
 	override shouldGenerate(Resource resource, CancelIndicator cancelIndicator) {
 		val uri = resource.URI;
 		if (uri === null || !uri.isPlatformResource) {
-			return false
+			return false;
 		}
 
 		val member = ResourcesPlugin.workspace.root.findMember(new Path(uri.toPlatformString(true)));
@@ -54,7 +54,7 @@ class SadlShouldGenerate implements IShouldGenerate {
 			}
 		}
 
-		return false
+		return false;
 	}
 
 	def boolean hasErrors(IResource resource) {
@@ -62,6 +62,8 @@ class SadlShouldGenerate implements IShouldGenerate {
 		if (noErrors) {
 			return false;
 		} else {
+			// This returns with true if we have any errors that are not external, downstream SADL error markers.
+			// Otherwise it just returns with false, and the generation should proceed.
 			return resource.findMarkers(PROBLEM, true, DEPTH_INFINITE).exists[type !== SADL_PROBLEM_MARKER];
 		}
 	}

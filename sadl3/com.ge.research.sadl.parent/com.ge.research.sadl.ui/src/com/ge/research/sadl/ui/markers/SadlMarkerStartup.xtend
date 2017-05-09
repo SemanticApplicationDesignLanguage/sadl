@@ -28,6 +28,7 @@ import java.nio.file.Paths
 import java.util.Collection
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IMarker
+import org.eclipse.core.resources.IProject
 import org.eclipse.core.resources.IResource
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.resources.WorkspaceJob
@@ -66,10 +67,12 @@ class SadlMarkerStartup implements IStartup {
 			val Collection<()=>void> modifications = newArrayList();
 			event?.delta.accept([
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
-					val markers = deserializerService.deserialize(Paths.get(resource.locationURI));
+					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
+					val origin = markerInfos.origin;
 					val project = resource.project;
 					if (project.accessible) {
-						markers.groupBy[filePath].forEach [ filePath, entries |
+						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
+						markerInfos.groupBy[filePath].forEach [ filePath, entries |
 							val uri = URI.createPlatformResourceURI('''«project.name»/«filePath»''', true);
 							if (uri.platformResource) {
 								val path = uri.toPlatformString(true);
@@ -77,11 +80,10 @@ class SadlMarkerStartup implements IStartup {
 								if (member !== null && member.accessible) {
 									val projectLocation = Paths.get(project.locationURI);
 									val resourceSet = resourceSetProvider.get(project);
-									modifications.add([member.deleteExistingMarkersWithOrigin(entries.map[origin])]);
 									entries.forEach [ entry |
 										val location = locationProvider.getLocation(resourceSet, entry,
 											projectLocation);
-										modifications.add([member.createMarker(entry, location)]);
+										modifications.add([member.createMarker(entry, location, origin)]);
 									];
 								}
 							}
@@ -111,22 +113,26 @@ class SadlMarkerStartup implements IStartup {
 		]);
 	}
 
-	def void deleteExistingMarkersWithOrigin(IResource resource, Collection<String> origins) {
-		resource.findMarkers(SadlMarkerConstants.SADL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE).filter [
-			origins.contains(getAttribute(SadlMarkerConstants.ORIGIN_KEY));
-		].forEach [
-			delete();
-		];
+	def deleteExistingMarkersWithOrigin(IProject project, String origin) {
+		val markersToDelete = <IMarker>newArrayList();
+		project.accept([
+			markersToDelete +=
+				findMarkers(SadlMarkerConstants.SADL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE).filter [
+					origin == getAttribute(SadlMarkerConstants.ORIGIN_KEY);
+				]
+		], IResource.DEPTH_INFINITE, false);
+		markersToDelete.forEach[delete];
 	}
 
-	private def void createMarker(IResource resource, SadlMarker marker, Location location) {
-		resource.createMarker(SadlMarkerConstants.SADL_PROBLEM_MARKER).setAttributes(resource, marker, location);
+	private def void createMarker(IResource resource, SadlMarker marker, Location location, String origin) {
+		resource.createMarker(SadlMarkerConstants.SADL_PROBLEM_MARKER).setAttributes(resource, marker, location,
+			origin);
 	}
 
-	private def setAttributes(IMarker it, IResource resource, SadlMarker marker, Location location) {
+	private def setAttributes(IMarker it, IResource resource, SadlMarker marker, Location location, String origin) {
 		setAttribute(IMarker.MESSAGE, marker.message);
 		setAttribute(IMarker.SEVERITY, severityMapper.map(marker.severity));
-		setAttribute(SadlMarkerConstants.ORIGIN_KEY, marker.origin);
+		setAttribute(SadlMarkerConstants.ORIGIN_KEY, origin);
 		return setLocation(location);
 	}
 

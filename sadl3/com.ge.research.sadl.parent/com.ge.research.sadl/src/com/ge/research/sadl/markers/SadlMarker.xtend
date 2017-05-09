@@ -30,28 +30,22 @@ class SadlMarker {
 	/**
 	 * Returns with the project relative path to the resource where this marker belongs to. 
 	 */
-	String filePath;
+	val String filePath;
 
 	/**
 	 * Returns with the human readable message of this marker.
 	 * Eventually, this is the description of the marker.
 	 */
-	String message;
+	val String message;
 
 	/**
 	 * The unique name of the AST element this marker attached to in the resource.
 	 */
-	String astNodeName;
+	val String astNodeName;
 
 	/**
 	 * The severity of the marker.
 	 */
-	SadlMarkerSeverity severity;
-
-	/**
-	 * The unique path or identifier of the error ({@code .err}) file where this
-	 * marker is from.
-	 */
-	String origin;
+	val SadlMarkerSeverity severity;
 
 }
