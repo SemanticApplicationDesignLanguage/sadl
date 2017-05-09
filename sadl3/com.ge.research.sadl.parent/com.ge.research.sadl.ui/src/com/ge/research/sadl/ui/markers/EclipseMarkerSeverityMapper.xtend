@@ -17,12 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.markers
 
-import com.ge.research.sadl.markers.api.SadlMarkerSeverity
-import com.ge.research.sadl.markers.api.SadlMarkerSeverityMapper
+import com.ge.research.sadl.markers.SadlMarkerSeverity
+import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
 import com.google.common.base.Preconditions
 import com.google.common.collect.ImmutableMap
 
-import static com.ge.research.sadl.markers.api.SadlMarkerSeverity.*
+import static com.ge.research.sadl.markers.SadlMarkerSeverity.*
 import static org.eclipse.core.resources.IMarker.*
 
 /**

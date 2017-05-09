@@ -15,13 +15,15 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.markers.api
+package com.ge.research.sadl.markers
 
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.SadlResource
 import com.google.inject.ImplementedBy
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import java.nio.file.Path
+import org.eclipse.emf.common.EMFPlugin
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
@@ -46,7 +48,7 @@ interface SadlMarkerLocationProvider {
 		/**
 		 * Shared, unknown location.
 		 */
-		public static val UNKNOWN = new Location(-1, -1, -1);
+		public static val UNKNOWN = new Location(0, 1, 1);
 
 		/**
 		 * An integer value indicating where a text marker starts.
@@ -71,7 +73,7 @@ interface SadlMarkerLocationProvider {
 	/**
 	 * Returns with the location of the marker argument.
 	 */
-	def Location getLocation(ResourceSet resourceSet, SadlMarker marker);
+	def Location getLocation(ResourceSet resourceSet, SadlMarker marker, Path projectLocation);
 
 	@Singleton
 	static class Default implements SadlMarkerLocationProvider {
@@ -82,9 +84,14 @@ interface SadlMarkerLocationProvider {
 		extension DeclarationExtensions;
 
 		@Override
-		override getLocation(ResourceSet resourceSet, SadlMarker marker) {
+		override getLocation(ResourceSet resourceSet, SadlMarker marker, Path projectLocation) {
 			try {
-				val resource = resourceSet.getResource(URI.createURI(marker.uri), true);
+				val uri = if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+					URI.createPlatformResourceURI('''«projectLocation.fileName»/«marker.filePath»''', true);
+				} else {
+					URI.createFileURI(projectLocation.resolve(marker.filePath).toFile.absolutePath);
+				}
+				val resource = resourceSet.getResource(uri, true);
 				if (resource === null) {
 					return Location.UNKNOWN;
 				}
@@ -107,7 +114,7 @@ interface SadlMarkerLocationProvider {
 		}
 
 		protected def getEObjectForMarker(Resource resource, SadlMarker marker) {
-			return resource.getAllContents(true).filter(SadlResource).filter[concreteName == marker.name].head;
+			return resource.getAllContents(true).filter(SadlResource).filter[concreteName == marker.astNodeName].head;
 		}
 
 	}

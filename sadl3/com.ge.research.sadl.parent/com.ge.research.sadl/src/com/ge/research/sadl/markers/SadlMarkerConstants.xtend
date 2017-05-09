@@ -15,40 +15,38 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.markers.api
+package com.ge.research.sadl.markers
 
 /**
- * Representation of a SADL marker.
+ * Constants for the SADL marker service.
  * 
  * @author akos.kitta
  */
-interface SadlMarker {
+abstract class SadlMarkerConstants {
 
 	/**
-	 * Returns with the (EMF) URI of the resource where this marker belongs to. 
+	 * File extension of the SADL error XML.
 	 */
-	def String getUri();
+	public static val FILE_EXTENSION = 'err';
+	
+	/**
+	 * The error file extension with the {@code '.'}.
+	 */
+	public static val FILE_EXTENSION_WITH_DOT = '''.«FILE_EXTENSION»''';
 
 	/**
-	 * Returns with the human readable message of this marker.
-	 * Eventually, this is the description of the marker.
+	 * The unique marker type ID.
+	 * // TODO we either need to introduce o.e.c.resources or in SADL core or we move the constants to UI.
 	 */
-	def String getMessage();
+	public static val SADL_PROBLEM_MARKER = "com.ge.research.sadl.ui.sadlproblem";
 
 	/**
-	 * The name of the AST element this marker attached to in the resource.
+	 * Marker attribute for storing the origin of the marker. This could be the project
+	 * relative path of the error file resource or anything else unless this is unique.
 	 */
-	def String getName()
+	public static val ORIGIN_KEY = "ORIGIN_KEY";
 
-	/**
-	 * The severity of the marker.
-	 */
-	def SadlMarkerSeverity getSeverity();
-
-	/**
-	 * The unique path or identifier of the error ({@code .err}) file where this
-	 * marker is from.
-	 */
-	def String getOrigin();
+	private new() {
+	}
 
 }

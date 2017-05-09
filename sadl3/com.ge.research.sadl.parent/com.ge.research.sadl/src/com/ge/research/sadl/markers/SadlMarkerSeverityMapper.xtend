@@ -15,38 +15,36 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.markers.api
+package com.ge.research.sadl.markers
 
-/**
- * Constants for the SADL marker service.
+import com.google.common.base.Preconditions
+import com.google.inject.ImplementedBy
+import com.google.inject.Singleton
+
+/** 
+ * Maps a SADL marker severity.
  * 
  * @author akos.kitta
  */
-abstract class SadlMarkerConstants {
-
-	/**
-	 * File extension of the SADL error XML.
+@ImplementedBy(SadlMarkerSeverityMapper.Default)
+interface SadlMarkerSeverityMapper {
+	
+	/** 
+	 * Maps the SADL severity argument into the corresponding mapped value and returns with it.
 	 */
-	public static val FILE_EXTENSION = 'err';
+	def Object map(SadlMarkerSeverity severity);
 	
 	/**
-	 * The error file extension with the {@code '.'}.
+	 * Default implementation that maps to the ordinal of the SADL marker severity.
 	 */
-	public static val FILE_EXTENSION_WITH_DOT = '''.«FILE_EXTENSION»''';
+	@Singleton
+	static class Default implements SadlMarkerSeverityMapper {
 
-	/**
-	 * The unique marker type ID.
-	 * // TODO we either need to introduce o.e.c.resources or in SADL core or we move the constants to UI.
-	 */
-	public static val SADL_PROBLEM_MARKER = "com.ge.research.sadl.ui.sadlproblem";
-
-	/**
-	 * Marker attribute for storing the origin of the marker. This could be the project
-	 * relative path of the error file resource or anything else unless this is unique.
-	 */
-	public static val ORIGIN_KEY = "ORIGIN_KEY";
-
-	private new() {
+		@Override		
+		override map(SadlMarkerSeverity severity) {
+			return Preconditions.checkNotNull(severity, "severity").ordinal;
+		}
+		
 	}
 
 }

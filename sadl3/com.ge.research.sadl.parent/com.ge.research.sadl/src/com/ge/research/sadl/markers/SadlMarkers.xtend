@@ -15,7 +15,7 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.markers.api
+package com.ge.research.sadl.markers
 
 import com.google.common.collect.Iterators
 import com.google.common.collect.Lists

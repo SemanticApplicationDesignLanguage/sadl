@@ -17,15 +17,14 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.markers
 
-import com.ge.research.sadl.markers.api.SadlMarker
-import com.ge.research.sadl.markers.api.SadlMarkerConstants
-import com.ge.research.sadl.markers.api.SadlMarkerLocationProvider
-import com.ge.research.sadl.markers.api.SadlMarkerLocationProvider.Location
-import com.ge.research.sadl.markers.api.SadlMarkerSeverityMapper
-import com.ge.research.sadl.markers.api.SadlMarkers
-import com.ge.research.sadl.utils.SerializationService
-import com.google.common.collect.ImmutableMap
+import com.ge.research.sadl.markers.SadlMarker
+import com.ge.research.sadl.markers.SadlMarkerConstants
+import com.ge.research.sadl.markers.SadlMarkerDeserializerService
+import com.ge.research.sadl.markers.SadlMarkerLocationProvider
+import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
+import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
 import com.google.inject.Inject
+import java.nio.file.Paths
 import java.util.Collection
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IMarker
@@ -39,7 +38,6 @@ import org.eclipse.core.runtime.SubMonitor
 import org.eclipse.emf.common.util.URI
 import org.eclipse.ui.IStartup
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
-import org.eclipse.xtext.util.Files
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -53,7 +51,7 @@ class SadlMarkerStartup implements IStartup {
 	IResourceSetProvider resourceSetProvider;
 
 	@Inject
-	SerializationService serializationService;
+	SadlMarkerDeserializerService deserializerService;
 
 	@Inject
 	SadlMarkerLocationProvider locationProvider;
@@ -68,26 +66,27 @@ class SadlMarkerStartup implements IStartup {
 			val Collection<()=>void> modifications = newArrayList();
 			event?.delta.accept([
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
-					val file = resource as IFile;
-					val content = Files.readStreamIntoString(file.contents);
-					val markers = serializationService.<SadlMarkers>deserialize(content, this.class.classLoader);
-					markers.groupBy[URI.createURI(uri)].forEach [ uri, entries |
-						if (uri.platformResource) {
-							val path = uri.toPlatformString(true);
-							val member = ws.root.findMember(path);
-							if (member !== null && member.accessible) {
-								val project = member.project;
-								if (project.accessible) {
+					val markers = deserializerService.deserialize(Paths.get(resource.locationURI));
+					val project = resource.project;
+					if (project.accessible) {
+						markers.groupBy[filePath].forEach [ filePath, entries |
+							val uri = URI.createPlatformResourceURI('''«project.name»/«filePath»''', true);
+							if (uri.platformResource) {
+								val path = uri.toPlatformString(true);
+								val member = ws.root.findMember(path);
+								if (member !== null && member.accessible) {
+									val projectLocation = Paths.get(project.locationURI);
 									val resourceSet = resourceSetProvider.get(project);
 									modifications.add([member.deleteExistingMarkersWithOrigin(entries.map[origin])]);
 									entries.forEach [ entry |
-										val location = locationProvider.getLocation(resourceSet, entry);
+										val location = locationProvider.getLocation(resourceSet, entry,
+											projectLocation);
 										modifications.add([member.createMarker(entry, location)]);
 									];
 								}
 							}
-						}
-					];
+						];
+					}
 					return false; // No need to visit any delta children.
 				}
 				return true; // Visit child resources (if any).
@@ -114,7 +113,6 @@ class SadlMarkerStartup implements IStartup {
 
 	def void deleteExistingMarkersWithOrigin(IResource resource, Collection<String> origins) {
 		resource.findMarkers(SadlMarkerConstants.SADL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE).filter [
-			println(ImmutableMap.copyOf(it.attributes))
 			origins.contains(getAttribute(SadlMarkerConstants.ORIGIN_KEY));
 		].forEach [
 			delete();

@@ -15,36 +15,43 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.markers.api
+package com.ge.research.sadl.markers
 
-import com.google.common.base.Preconditions
-import com.google.inject.ImplementedBy
-import com.google.inject.Singleton
+import org.eclipse.xtend.lib.annotations.Data
 
-/** 
- * Maps a SADL marker severity.
+/**
+ * Representation of a SADL marker.
  * 
  * @author akos.kitta
  */
-@ImplementedBy(SadlMarkerSeverityMapper.Default)
-interface SadlMarkerSeverityMapper {
-	
-	/** 
-	 * Maps the SADL severity argument into the corresponding mapped value and returns with it.
-	 */
-	def Object map(SadlMarkerSeverity severity);
-	
-	/**
-	 * Default implementation that maps to the ordinal of the SADL marker severity.
-	 */
-	@Singleton
-	static class Default implements SadlMarkerSeverityMapper {
+@Data
+class SadlMarker {
 
-		@Override		
-		override map(SadlMarkerSeverity severity) {
-			return Preconditions.checkNotNull(severity, "severity").ordinal;
-		}
-		
-	}
+	/**
+	 * Returns with the project relative path to the resource where this marker belongs to. 
+	 */
+	String filePath;
+
+	/**
+	 * Returns with the human readable message of this marker.
+	 * Eventually, this is the description of the marker.
+	 */
+	String message;
+
+	/**
+	 * The unique name of the AST element this marker attached to in the resource.
+	 */
+	String astNodeName;
+
+	/**
+	 * The severity of the marker.
+	 */
+	SadlMarkerSeverity severity;
+
+	/**
+	 * The unique path or identifier of the error ({@code .err}) file where this
+	 * marker is from.
+	 */
+	String origin;
 
 }

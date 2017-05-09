@@ -15,14 +15,18 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.markers.api
+package com.ge.research.sadl.markers;
+
+import java.util.Arrays;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Enumeration of SADL marker severities.
  * 
  * @author akos.kitta
  */
-enum SadlMarkerSeverity {
+public enum SadlMarkerSeverity {
 
 	/**
 	 * Info.
@@ -38,5 +42,16 @@ enum SadlMarkerSeverity {
 	 * Error.
 	 */
 	ERROR;
+
+	/**
+	 * Returns with the severity with the given name. The desired name argument
+	 * is case insensitive.
+	 */
+	public static SadlMarkerSeverity getSeverityByName(String name) {
+		Preconditions.checkNotNull(name, "name");
+		return Arrays.stream(SadlMarkerSeverity.values())
+				.filter(severity -> severity.toString().equals(name.toUpperCase())).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Unexpected severity type: " + name));
+	}
 
 }
