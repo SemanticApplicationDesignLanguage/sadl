@@ -723,6 +723,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					return;
 					
 				}
+				case PROPOFSUBJECT_PROP: {
+					OntConceptType subjtype = declarationExtensions.getOntConceptType(subject);
+					OntConceptType candtype = declarationExtensions.getOntConceptType(candidate);
+					if ((candtype.equals(OntConceptType.CLASS) || candtype.equals(OntConceptType.INSTANCE)) && isProperty(subjtype)) {
+						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+						return;
+					}
+					context.getAcceptor().add("No", candidate, Severity.ERROR);
+					return;
+				}
 				default: {
 					// Ignored
 				}

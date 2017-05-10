@@ -18,6 +18,7 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import org.junit.Test
+import org.junit.Ignore
 
 /**
  * Plug-in tests for the SADL content assist.
@@ -204,11 +205,12 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 					   MyShape is a ''').assertProposal('Shape');
 	}
 	
-	/** Keywords NOT in declaration */
+	/** Completion after start of input */
+	@Ignore
 	@Test
 	def void checkCA_25_DeclarationCompletion() {
 		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
 					   Shape is a class described by area with values of type float.
-					   MyShape is a ''').assertProposalIsNot('float');
+					   MyShape is a Sh''').assertProposal('Shape');
 	}
 }

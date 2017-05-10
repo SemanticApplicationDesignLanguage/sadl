@@ -204,6 +204,7 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 			} else if (key == PROPOFSUBJECT_PROP) {
 				val initializer = currentModel.getSubjHasPropInitializer
 				if (initializer !== null) {
+					
 				}
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
 				val builder = createWithoutSubject(currentModel.ontModel) => [
@@ -262,11 +263,11 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 		return EcoreUtil2.getAllContentsOfType(it, PropOfSubject).head;
 	}
 
-	private def dispatch getSubjHasPropInitializer(SubjHasProp it) {
+	protected def dispatch getSubjHasPropInitializer(SubjHasProp it) {
 		return it;
 	}
 
-	private def dispatch getSubjHasPropInitializer(SadlModel it) {
+	protected def dispatch getSubjHasPropInitializer(SadlModel it) {
 		return EcoreUtil2.getAllContentsOfType(it, SubjHasProp).head;
 	}
 }
