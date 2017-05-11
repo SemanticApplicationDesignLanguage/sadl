@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.markers
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
 import com.ge.research.sadl.markers.SadlMarker
 import com.ge.research.sadl.markers.SadlMarkerConstants
 import com.ge.research.sadl.markers.SadlMarkerDeserializerService
@@ -37,8 +38,13 @@ import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.Status
 import org.eclipse.core.runtime.SubMonitor
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.ui.IStartup
+import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
+
+import static com.ge.research.sadl.jena.UtilsForJena.*
+import static com.ge.research.sadl.reasoner.IConfigurationManager.*
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -55,9 +61,6 @@ class SadlMarkerStartup implements IStartup {
 	SadlMarkerDeserializerService deserializerService;
 
 	@Inject
-	SadlMarkerLocationProvider locationProvider;
-
-	@Inject
 	SadlMarkerSeverityMapper severityMapper;
 
 	@Override
@@ -66,26 +69,24 @@ class SadlMarkerStartup implements IStartup {
 		ws.addResourceChangeListener([ event |
 			val Collection<()=>void> modifications = newArrayList();
 			event?.delta.accept([
+				println(it);
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
 					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
 					val origin = markerInfos.origin;
 					val project = resource.project;
 					if (project.accessible) {
 						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
-						markerInfos.groupBy[filePath].forEach [ filePath, entries |
-							val uri = URI.createPlatformResourceURI('''«project.name»/«filePath»''', true);
-							if (uri.platformResource) {
-								val path = uri.toPlatformString(true);
-								val member = ws.root.findMember(path);
-								if (member !== null && member.accessible) {
-									val projectLocation = Paths.get(project.locationURI);
-									val resourceSet = resourceSetProvider.get(project);
-									entries.forEach [ entry |
-										val location = locationProvider.getLocation(resourceSet, entry,
-											projectLocation);
-										modifications.add([member.createMarker(entry, location, origin)]);
-									];
-								}
+						markerInfos.groupBy[modelUri].forEach [ modelUri, entries |
+							val resourceUri = modelUri.getResourceUri(project);
+							val resource = resourceSetProvider.get(project).getResource(resourceUri, true);
+							val locationProvider = resource.locationProvider;
+							val member = ws.root.findMember(resourceUri.toPlatformString(true));
+							if (member !== null && member.accessible) {
+								val projectLocation = Paths.get(project.locationURI);
+								entries.forEach [ marker |
+									val location = locationProvider.getLocation(marker, resource, projectLocation);
+									modifications.add([member.createMarker(marker, location, origin)]);
+								];
 							}
 						];
 					}
@@ -113,7 +114,35 @@ class SadlMarkerStartup implements IStartup {
 		]);
 	}
 
-	def deleteExistingMarkersWithOrigin(IProject project, String origin) {
+	private def getLocationProvider(Resource resource) {
+		return (resource as XtextResource).resourceServiceProvider.get(SadlMarkerLocationProvider);
+	}
+
+	private def getConfigurationManager(IProject it) {
+		val modelFolder = '''«Paths.get(locationURI).resolve(OWL_MODELS_FOLDER_NAME)»''';
+		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, RDF_XML_FORMAT);
+	}
+
+	private def getResourceUri(String modelUri, IProject project) {
+		val configurationManager = project.configurationManager;
+		val owlFilePath = configurationManager.mappings.get(modelUri);
+		val owlFileName = Paths.get(owlFilePath).toFile.name;
+		val resourceName = owlFileName.substring(0, owlFileName.lastIndexOf("."));
+		val resourceUri = <URI>newArrayList();
+		project.accept([
+			if (it instanceof IFile) {
+				if (name == resourceName) {
+					resourceUri.add(URI.createPlatformResourceURI('''«fullPath»''', true));
+				}
+				return false;
+			} else {
+				return true;
+			}
+		], IResource.DEPTH_INFINITE, false);
+		return resourceUri.head;
+	}
+
+	private def deleteExistingMarkersWithOrigin(IProject project, String origin) {
 		val markersToDelete = <IMarker>newArrayList();
 		project.accept([
 			markersToDelete +=

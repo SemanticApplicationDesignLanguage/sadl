@@ -98,13 +98,18 @@ interface SadlMarkerDeserializerService {
 
 		@Override
 		override deserialize(Path path) {
+			val origin = '''«path.parent.fileName»/«path.fileName»''';
+			val file = path.toFile;
+			if (!file.exists) {
+				return new SadlMarkerInfos(origin, emptyList);
+			}
+			
 			val factory = DocumentBuilderFactory.newInstance();
 			val builder = factory.newDocumentBuilder();
-			val doc = builder.parse(path.toFile);
+			val doc = builder.parse(file);
 			doc.documentElement.normalize;
 
 			val markers = ImmutableList.builder;
-			val origin = '''«path.parent.fileName»/«path.fileName»''';
 			val elements = doc.getElementsByTagName(MARKER_NAME);
 			for (var i = 0; i < elements.length; i++) {
 				val element = elements.item(i);

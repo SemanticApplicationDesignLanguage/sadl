@@ -28,9 +28,9 @@ import org.eclipse.xtend.lib.annotations.Data
 class SadlMarker {
 
 	/**
-	 * Returns with the project relative path to the resource where this marker belongs to. 
+	 * Returns with the URI of the model where this marker belongs to. 
 	 */
-	val String filePath;
+	val String modelUri;
 
 	/**
 	 * Returns with the human readable message of this marker.

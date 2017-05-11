@@ -13,7 +13,7 @@
 			<xs:element name="ReqID" type="xs:string" minOccurs="1"
 				maxOccurs="unbounded" />
 		</xs:sequence>
-		<xs:attribute name="filePath" use="required" type="xs:string" />
+		<xs:attribute name="modelUri" use="required" type="xs:string" />
 		<xs:attribute name="astNodeName" use="required" type="xs:string" />
 		<xs:attribute name="msgText" use="required" type="xs:string" />
 		<xs:attribute name="projectMarker" use="optional" type="xs:boolean"

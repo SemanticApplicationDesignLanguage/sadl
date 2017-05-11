@@ -23,16 +23,12 @@ import com.google.inject.ImplementedBy
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import java.nio.file.Path
-import org.eclipse.emf.common.EMFPlugin
-import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
-import org.slf4j.LoggerFactory
 
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.getAllContents
-import org.eclipse.emf.ecore.EObject
 
 /**
  * Representation of a service that provides the location of a SADL marker in
@@ -74,49 +70,34 @@ interface SadlMarkerLocationProvider {
 	/**
 	 * Returns with the location of the marker argument.
 	 */
-	def Location getLocation(ResourceSet resourceSet, SadlMarker marker, Path projectLocation);
+	def Location getLocation(SadlMarker marker, Resource resource, Path projectLocation);
 
 	@Singleton
 	static class Default implements SadlMarkerLocationProvider {
-
-		static val LOGGER = LoggerFactory.getLogger(Default);
 
 		@Inject
 		extension DeclarationExtensions;
 
 		@Override
-		override getLocation(ResourceSet resourceSet, SadlMarker marker, Path projectLocation) {
-			try {
-				//TODO this is where a model URI would need to be used to get the Xtext Resource
-				val uri = if (EMFPlugin.IS_ECLIPSE_RUNNING) {
-					URI.createPlatformResourceURI('''«projectLocation.fileName»/«marker.filePath»''', true);
-				} else {
-					URI.createFileURI(projectLocation.resolve(marker.filePath).toFile.absolutePath);
-				}
-				val resource = resourceSet.getResource(uri, true);
-				if (resource === null) {
-					return Location.UNKNOWN;
-				}
-
-				val eObject = getEObjectForMarker(resource, marker);
-				if (eObject === null) {
-					return Location.UNKNOWN;
-				}
-
-				val node = NodeModelUtils.getNode(eObject);
-				if (node === null) {
-					return Location.UNKNOWN;
-				}
-
-				return new Location(node.offset, node.offset + node.length, node.startLine);
-			} catch (Exception e) {
-				LOGGER.error('''Error while trying to get the location of marker: «marker».''', e);
+		override getLocation(SadlMarker marker, Resource resource, Path projectLocation) {
+			val eObject = getEObjectForMarker(resource, marker);
+			if (eObject === null) {
 				return Location.UNKNOWN;
 			}
+			return eObject.location;
 		}
 
 		protected def EObject getEObjectForMarker(Resource resource, SadlMarker marker) {
 			return resource.getAllContents(true).filter(SadlResource).filter[concreteName == marker.astNodeName].head;
+		}
+		
+		protected def Location getLocation(EObject eObject) {
+			val node = NodeModelUtils.getNode(eObject);
+			if (node === null) {
+				return Location.UNKNOWN;
+			}
+
+			return new Location(node.offset, node.offset + node.length, node.startLine);
 		}
 
 	}
