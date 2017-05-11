@@ -32,6 +32,7 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.slf4j.LoggerFactory
 
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.getAllContents
+import org.eclipse.emf.ecore.EObject
 
 /**
  * Representation of a service that provides the location of a SADL marker in
@@ -86,6 +87,7 @@ interface SadlMarkerLocationProvider {
 		@Override
 		override getLocation(ResourceSet resourceSet, SadlMarker marker, Path projectLocation) {
 			try {
+				//TODO this is where a model URI would need to be used to get the Xtext Resource
 				val uri = if (EMFPlugin.IS_ECLIPSE_RUNNING) {
 					URI.createPlatformResourceURI('''«projectLocation.fileName»/«marker.filePath»''', true);
 				} else {
@@ -113,7 +115,7 @@ interface SadlMarkerLocationProvider {
 			}
 		}
 
-		protected def getEObjectForMarker(Resource resource, SadlMarker marker) {
+		protected def EObject getEObjectForMarker(Resource resource, SadlMarker marker) {
 			return resource.getAllContents(true).filter(SadlResource).filter[concreteName == marker.astNodeName].head;
 		}
 
