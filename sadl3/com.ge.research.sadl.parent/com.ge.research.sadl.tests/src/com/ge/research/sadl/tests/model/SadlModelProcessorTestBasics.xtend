@@ -31,6 +31,7 @@ import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.junit.Test
 import com.hp.hpl.jena.rdf.model.RDFNode
 import com.hp.hpl.jena.ontology.CardinalityRestriction
+import com.hp.hpl.jena.ontology.HasValueRestriction
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -87,6 +88,34 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
  			if (sprc instanceof CardinalityRestriction) {
  				assertTrue((sprc as CardinalityRestriction).onProperty.URI.equals("http://sadl.org/test.sadl#age"))
  				assertTrue((sprc as CardinalityRestriction).cardinality == 1)
+ 			}
+ 		]
+	}
+
+	@Test
+	def void testPropertyAlwaysHasValueTrue() {
+		val sadlModel = '''
+			 uri "http://sadl.org/MTC1" alias Name version "$Revision:$ Last modified on   $Date:$". 
+			 
+			 SYSTEM is a class,
+			 	described by input1 with a single value of type int,
+			 	described by output1 with a single value of type boolean,
+			 	described by output2 with a single value of type boolean,
+			 	described by output3 with values of type int,
+			 	described by output4 with values of type boolean,
+			 	described by output5 with values of type int.
+			 output1 of SYSTEM always has value true.
+ 		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/MTC1#SYSTEM")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof HasValueRestriction) {
+ 				assertTrue((sprc as HasValueRestriction).onProperty.URI.equals("http://sadl.org/MTC1#output1"))
+ 				assertTrue((sprc as HasValueRestriction).hasValue.asLiteral.value.equals("true"))
  			}
  		]
 	}

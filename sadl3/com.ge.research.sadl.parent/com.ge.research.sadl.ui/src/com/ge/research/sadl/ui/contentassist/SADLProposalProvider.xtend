@@ -349,11 +349,17 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			val kval = keyword.value
 			if (container instanceof SadlProperty) {
 				if (model instanceof SadlRangeRestriction) {
-					if (PropertyRangeKeywords.contains(kval)) {
-						return true;
+					val ge = context.lastCompleteNode.grammarElement
+					if (ge instanceof Keyword && (ge as Keyword).value.equals("type")) {
+						if (PropertyRangeKeywords.contains(kval)) {
+							return true
+						}
+						else {
+							return false
+						}
 					}
 				}
-				return false
+				return true
 			}
 			else if (container instanceof Declaration) {
 				if (kval.equals("with") ||

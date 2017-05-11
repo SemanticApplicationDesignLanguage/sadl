@@ -1,0 +1,84 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>SADL Preferences</title>
+</head>
+
+<body>
+
+<h1>SADL Preferences</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/10/2017<!--webbot bot="Timestamp" endspan i-checksum="12509" -->. 
+Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
+
+<h2>Introduction</h2>
+<p>The SADL IDE has a number of <i>preferences</i>, some of which can be set at 
+the workspace level, some which may optionally be set at the project level, and 
+some which can only be set at the project level. The latter are also called<i> 
+project properties</i>. These preferences control how the IDE behaves, how the 
+translation from SADL to OWL occurs, and how inference is accomplished. Some of 
+these preferences may also be used by grammars and IDE's that extend SADL. </p>
+<p>In the Eclipse-based IDE, workspace-level SADL preferences are viewed and 
+edited by selecting <i>Window</i> on the top-level menu bar and then selecting
+<i>SADL</i> in the resulting modal dialog. </p>
+<p>Project-specific SADL preferences are viewed and edited by selecting a 
+project in the Project Explorer, then selecting <i>Project</i> on the top-level 
+menu bar, then selecting <i>Properties</i>, and then selecting <i>SADL</i>. The 
+checkbox at the top of the resulting modal dialog box allows project-specific 
+preferences to be enabled. Alternatively, one can right-click on the project 
+name in the Project Explorer and select <i>Properties</i> from the resulting 
+popup menu.</p>
+<p>On the project-specific preferences modal dialog box only, if one clicks on 
+the arrow in front of <i>SADL</i> to expand the submenu items, there is an 
+option called <i>Reasoner Preferences</i>. Clicking on this option allows 
+selection of the reasoner and translator to use for the project. Clicking on the 
+name of a reasoner or translator to select it will enable the Edit button to the 
+the left of the names. Clicking on this Edit button allows reasoner-specific or 
+translator-specific preferences for this project to be set. These settings are 
+preserved in the <i>configuration.rdf</i> file in the project's <i>OwlModels</i> 
+folder.</p>
+<h2>General Preferences</h2>
+<p>General SADL preferences include the following.</p>
+<ol>
+  <li>Base URI -- the default base namespace given to models in the workspace or 
+  project. The name of the model file is used as a suffix on this base to create 
+  the default namespace URI of a model. This default will be filled in if 
+  content assist (<i>control-space</i>) is invoked with the cursor after the <i>
+  uri</i> keyword at the beginning of the model.</li>
+  <li>Saved OWL model format -- the format in which OWL models will be persisted<ul>
+    <li>RDF/XML-ABBREV -- abbreviated RDF/XML format</li>
+    <li>RDF/XML -- non-abbreviated RDF/XML format</li>
+    <li>N3 -- N3 format</li>
+    <li>N-TRIPLE -- N-tripple format</li>
+    <li>Jena TDB -- use a Jena TDB triple store rather than a file storage</li>
+  </ul>
+  </li>
+  <li>Show import model list as -- when content assist (<i>control-space</i>) is 
+  requested with the cursor located after the <i>import</i> keyword, the 
+  available imports can be show as namespace URIs or as file names.</li>
+  <li>Show prefixes for imported concpets only when needed for disambiguation --
+  </li>
+  <li>Validate before Testing --</li>
+  <li>Test/Query with Knowledge Server --</li>
+  <li>Show Namespaces in Query Results --</li>
+  <li>Show Timing Information (Builds, Reasoning) -- </li>
+  <li>Interpret Date 10/22/2012 as --</li>
+  <li>Disable Deep Validation of Model --</li>
+  <li>Graph rendering package and class --</li>
+  <li>Check for ambiguous names --</li>
+  <li>Type checking issues as warning only --</li>
+  <li>Ignore Unitted Quantities (treat as numeric only) during translation --
+  </li>
+  <li>Include implied properties in translation --</li>
+  <li>Translate disjunctive domain/range classes as owl:unionOf -- </li>
+  <li>Generate metrics report during project clean/build --</li>
+  <li>File containing metrics queries --</li>
+</ol>
+
+</body>
+
+</html>
