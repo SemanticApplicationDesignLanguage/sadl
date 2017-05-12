@@ -50,7 +50,7 @@ class SadlShouldGenerate implements IShouldGenerate {
 		if (member !== null && member.type === FILE) {
 			val projectConfig = ProjectConfigAdapter.findInEmfObject(resource.resourceSet)?.projectConfig;
 			if (member.project.name == projectConfig?.name) {
-				return member.hasErrors();
+				return !member.hasErrors();
 			}
 		}
 

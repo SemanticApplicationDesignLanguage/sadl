@@ -45,6 +45,8 @@ import org.eclipse.xtext.ui.resource.IResourceSetProvider
 
 import static com.ge.research.sadl.jena.UtilsForJena.*
 import static com.ge.research.sadl.reasoner.IConfigurationManager.*
+import com.ge.research.sadl.reasoner.utils.SadlUtils
+import java.io.File
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -69,7 +71,7 @@ class SadlMarkerStartup implements IStartup {
 		ws.addResourceChangeListener([ event |
 			val Collection<()=>void> modifications = newArrayList();
 			event?.delta.accept([
-				println(it);
+//				println(it);
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
 					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
 					val origin = markerInfos.origin;
@@ -123,15 +125,28 @@ class SadlMarkerStartup implements IStartup {
 		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, RDF_XML_FORMAT);
 	}
 
-	private def getResourceUri(String modelUri, IProject project) {
+ 	private def getResourceUri(String modelUri, IProject project) {
 		val configurationManager = project.configurationManager;
 		val owlFilePath = configurationManager.mappings.get(modelUri);
-		val owlFileName = Paths.get(owlFilePath).toFile.name;
-		val resourceName = owlFileName.substring(0, owlFileName.lastIndexOf("."));
+		val fp2 = new SadlUtils().fileUrlToFileName(owlFilePath)
+		var f = new File(fp2)
+		var fp = null as String
+		if (f.exists()) {
+			fp = f.toPath.fileName.toString
+		}
+		else {
+			return null
+		}
+		val owlFileName = Paths.get(fp).toFile.name
+		var resourceName = owlFileName.substring(0, owlFileName.lastIndexOf("."));
+		if (resourceName.indexOf('.') < 0) {
+			resourceName = resourceName + ".sadl"
+		}
+		val rn = resourceName
 		val resourceUri = <URI>newArrayList();
 		project.accept([
 			if (it instanceof IFile) {
-				if (name == resourceName) {
+				if (name == rn) {
 					resourceUri.add(URI.createPlatformResourceURI('''«fullPath»''', true));
 				}
 				return false;
