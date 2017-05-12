@@ -2744,9 +2744,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					e.printStackTrace();
 				}
 			}
-			//Case: a class is being type-checked against a decomposition which is a sub/super-class of the former
-			else if (leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
-					rightConceptName.getType().equals(ConceptType.VARIABLE)) {
+			//Case: a class is being type-checked against a decomposition which is a sub/super-class of the former or
+			// a decomposition variable is being type-checked against a class
+			else if ((leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
+					rightConceptName.getType().equals(ConceptType.VARIABLE)) || 
+					(leftConceptName.getType().equals(ConceptType.VARIABLE) &&
+					rightConceptName.getType().equals(ConceptType.ONTCLASS))) {
 				try {
 					if (SadlUtils.classIsSubclassOf(theJenaModel.getOntClass(leftConceptName.getUri()), theJenaModel.getOntResource(rightConceptName.getUri()), true, null)) {
 						return true;
