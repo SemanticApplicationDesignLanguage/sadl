@@ -24,7 +24,10 @@ import com.ge.research.sadl.markers.SadlMarkerDeserializerService
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
+import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.google.common.base.Suppliers
 import com.google.inject.Inject
+import java.io.File
 import java.nio.file.Paths
 import java.util.Collection
 import org.eclipse.core.resources.IFile
@@ -45,8 +48,6 @@ import org.eclipse.xtext.ui.resource.IResourceSetProvider
 
 import static com.ge.research.sadl.jena.UtilsForJena.*
 import static com.ge.research.sadl.reasoner.IConfigurationManager.*
-import com.ge.research.sadl.reasoner.utils.SadlUtils
-import java.io.File
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -71,24 +72,32 @@ class SadlMarkerStartup implements IStartup {
 		ws.addResourceChangeListener([ event |
 			val Collection<()=>void> modifications = newArrayList();
 			event?.delta.accept([
-//				println(it);
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
 					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
 					val origin = markerInfos.origin;
 					val project = resource.project;
 					if (project.accessible) {
 						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
-						markerInfos.groupBy[modelUri].forEach [ modelUri, entries |
+						val translator = Suppliers.memoize([getConfigurationManager(project).translator]);
+						markerInfos.map[if (isModelUriSet) {
+							// If the model URI is set, then it returns with the identical instance.
+							it 
+						} else {
+							// Otherwise let's create a new copy of the original marker with the model URI from the translator.
+							SadlMarker.copyWithModelUri(it, translator.get.getLocalFragmentNamespace(astNodeName))
+						}].groupBy[modelUri].forEach [ modelUri, entries |
 							val resourceUri = modelUri.getResourceUri(project);
-							val resource = resourceSetProvider.get(project).getResource(resourceUri, true);
-							val locationProvider = resource.locationProvider;
-							val member = ws.root.findMember(resourceUri.toPlatformString(true));
-							if (member !== null && member.accessible) {
-								val projectLocation = Paths.get(project.locationURI);
-								entries.forEach [ marker |
-									val location = locationProvider.getLocation(marker, resource, projectLocation);
-									modifications.add([member.createMarker(marker, location, origin)]);
-								];
+							if (resourceUri !== null) {
+								val resource = resourceSetProvider.get(project).getResource(resourceUri, true);
+								val locationProvider = resource.locationProvider;
+								val member = ws.root.findMember(resourceUri.toPlatformString(true));
+								if (member !== null && member.accessible) {
+									val projectLocation = Paths.get(project.locationURI);
+									entries.forEach [ marker |
+										val location = locationProvider.getLocation(marker, resource, projectLocation);
+										modifications.add([member.createMarker(marker, location, origin)]);
+									];
+								}
 							}
 						];
 					}
@@ -128,6 +137,9 @@ class SadlMarkerStartup implements IStartup {
  	private def getResourceUri(String modelUri, IProject project) {
 		val configurationManager = project.configurationManager;
 		val owlFilePath = configurationManager.mappings.get(modelUri);
+		if (owlFilePath === null) {
+			return null
+		}
 		val fp2 = new SadlUtils().fileUrlToFileName(owlFilePath)
 		var f = new File(fp2)
 		var fp = null as String

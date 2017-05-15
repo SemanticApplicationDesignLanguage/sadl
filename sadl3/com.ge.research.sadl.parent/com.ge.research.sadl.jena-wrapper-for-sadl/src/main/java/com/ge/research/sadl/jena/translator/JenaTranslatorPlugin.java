@@ -1864,5 +1864,26 @@ public class JenaTranslatorPlugin implements ITranslator {
 	public Enum isBuiltinFunctionTypeCheckingAvailable(){
 		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
+
+
+	@Override
+	public String getLocalFragmentNamespace(String name) throws InvalidNameException, ConfigurationException {
+		OntModel model = getTheModel();
+		if (model != null) {
+			String fqn = findNameNs(model, name);
+			if (fqn != null) {
+				if (fqn.indexOf('#') > 0) {
+					return fqn.substring(0, fqn.indexOf('#'));
+				}
+				else {
+					throw new InvalidNameException("Found fully qualified name '" + fqn + "' but it doesn't appear to be a valid in-namespace concept URI.");
+				}
+			}
+			else {
+				throw new InvalidNameException("No URI found in any model for local name '" + name + "'");
+			}
+		}
+		throw new ConfigurationException("No model is identified in the translator, unable to search for '" + name + "'");
+	}
 	
 }
