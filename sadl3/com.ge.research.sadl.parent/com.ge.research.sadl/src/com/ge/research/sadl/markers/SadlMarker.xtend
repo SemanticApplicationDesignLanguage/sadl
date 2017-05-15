@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.markers
 
+import com.google.common.base.Preconditions
 import org.eclipse.xtend.lib.annotations.Data
 
 /**
@@ -26,6 +27,16 @@ import org.eclipse.xtend.lib.annotations.Data
  */
 @Data
 class SadlMarker {
+
+	/**
+	 * Copies the marker argument and returns with a new instance after setting the missing model URI.
+	 * Throws an exception if the model URI is neither empty nor {@code null}.
+	 */
+	static def copyWithModelUri(SadlMarker it, String newModelUri) {
+		Preconditions.checkArgument(modelUri === null ||
+			modelUri.empty, '''Expected empty or null model URI. Was: '«modelUri»'.''');
+		return new SadlMarker(newModelUri, message, astNodeName, severity);
+	}
 
 	/**
 	 * Returns with the URI of the model where this marker belongs to. 
@@ -47,5 +58,12 @@ class SadlMarker {
 	 * The severity of the marker.
 	 */
 	val SadlMarkerSeverity severity;
+
+	/**
+	 * Returns with {@code true} if the model URI is neither {@code null} nor empty string.
+	 */
+	def boolean isModelUriSet() {
+		return modelUri !== null && !modelUri.empty;
+	}
 
 }
