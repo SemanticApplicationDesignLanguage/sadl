@@ -24,7 +24,10 @@ import com.ge.research.sadl.markers.SadlMarkerDeserializerService
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
+import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.google.common.base.Suppliers
 import com.google.inject.Inject
+import java.io.File
 import java.nio.file.Paths
 import java.util.Collection
 import org.eclipse.core.resources.IFile
@@ -45,9 +48,6 @@ import org.eclipse.xtext.ui.resource.IResourceSetProvider
 
 import static com.ge.research.sadl.jena.UtilsForJena.*
 import static com.ge.research.sadl.reasoner.IConfigurationManager.*
-import com.ge.research.sadl.reasoner.utils.SadlUtils
-import java.io.File
-import com.ge.research.sadl.reasoner.ITranslator
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -72,29 +72,20 @@ class SadlMarkerStartup implements IStartup {
 		ws.addResourceChangeListener([ event |
 			val Collection<()=>void> modifications = newArrayList();
 			event?.delta.accept([
-//				println(it);
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
 					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
 					val origin = markerInfos.origin;
 					val project = resource.project;
 					if (project.accessible) {
 						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
-						val mkritr = markerInfos.markers
-						var translator = null as ITranslator
-						for (mkr:mkritr) {
-//							println(mkr.modelUri)
-							if (mkr.modelUri === null || mkr.modelUri.empty) {
-								if (translator === null) {
-									translator = getConfigurationManager(project).translator
-								}
-								val uri = translator.getLocalFragmentNamespace(mkr.astNodeName)
-								if (uri === null) {
-									System.err.println("Model URI for marker associated with name '" + mkr.astNodeName + "' not found. (Text is '" + mkr.message + "'.)")
-								}	
-//								mkr.modelUri = uri
-							}
-						}
-						markerInfos.groupBy[modelUri].forEach [ modelUri, entries |
+						val translator = Suppliers.memoize([getConfigurationManager(project).translator]);
+						markerInfos.map[if (isModelUriSet) {
+							// If the model URI is set, then it returns with the identical instance.
+							it 
+						} else {
+							// Otherwise let's create a new copy of the original marker with the model URI from the translator.
+							SadlMarker.copyWithModelUri(it, translator.get.getLocalFragmentNamespace(astNodeName))
+						}].groupBy[modelUri].forEach [ modelUri, entries |
 							val resourceUri = modelUri.getResourceUri(project);
 							if (resourceUri !== null) {
 								val resource = resourceSetProvider.get(project).getResource(resourceUri, true);
