@@ -25,6 +25,7 @@ import com.ge.research.sadl.markers.SadlMarkerLocationProvider
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
 import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.google.common.base.Suppliers
 import com.google.inject.Inject
 import java.io.File
 import java.nio.file.Paths
@@ -77,13 +78,13 @@ class SadlMarkerStartup implements IStartup {
 					val project = resource.project;
 					if (project.accessible) {
 						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
-						val translator = getConfigurationManager(project).translator;
+						val translator = Suppliers.memoize([getConfigurationManager(project).translator]);
 						markerInfos.map[if (isModelUriSet) {
-							// If the model URI is set, the return to the identical instance.
+							// If the model URI is set, then it returns with the identical instance.
 							it 
 						} else {
-							// Otherwise create a new copy of the original marker with the name from the translator.
-							SadlMarker.copyWithModelUri(it, translator.getLocalFragmentNamespace(astNodeName))
+							// Otherwise let's create a new copy of the original marker with the model URI from the translator.
+							SadlMarker.copyWithModelUri(it, translator.get.getLocalFragmentNamespace(astNodeName))
 						}].groupBy[modelUri].forEach [ modelUri, entries |
 							val resourceUri = modelUri.getResourceUri(project);
 							if (resourceUri !== null) {

@@ -33,8 +33,7 @@ class SadlMarker {
 	 * Throws an exception if the model URI is neither empty nor {@code null}.
 	 */
 	static def copyWithModelUri(SadlMarker it, String newModelUri) {
-		Preconditions.checkArgument(modelUri === null ||
-			modelUri.empty, '''Expected empty or null model URI. Was: '«modelUri»'.''');
+		Preconditions.checkArgument(!isModelUriSet, '''Expected empty or null model URI. Was: '«modelUri»'.''');
 		return new SadlMarker(newModelUri, message, astNodeName, severity);
 	}
 
