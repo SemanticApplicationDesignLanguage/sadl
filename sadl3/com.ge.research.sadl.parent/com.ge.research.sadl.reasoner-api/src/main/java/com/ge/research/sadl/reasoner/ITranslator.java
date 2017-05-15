@@ -232,4 +232,14 @@ public interface ITranslator {
 	 * @return -- Built-in Function Implicit model as a string
 	 */
 	public String getBuiltinFunctionModel();
+	
+	/**
+	 * Method to take the name (local fragment) of a concept or construct (e.g., class or rule) and return the
+	 * namespace in which that concept or construct is defined.
+	 * @param localFragmentName
+	 * @return namespace URI
+	 * @throws InvalidNameException
+	 * @throws ConfigurationException
+	 */
+	public String getLocalFragmentNamespace(String localFragmentName) throws InvalidNameException, ConfigurationException;
 }

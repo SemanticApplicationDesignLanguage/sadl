@@ -1755,4 +1755,9 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 
+	@Override
+	public String getLocalFragmentNamespace(String arg0) throws ConfigurationException {
+		throw new ConfigurationException("getLocalFragmentNamespace not implemented in this translator");
+	}
+
 }
