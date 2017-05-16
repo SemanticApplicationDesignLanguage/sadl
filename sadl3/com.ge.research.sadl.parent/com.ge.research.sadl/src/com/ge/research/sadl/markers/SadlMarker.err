@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <MarkerService>
   <Process build="str1234" name="str1234" pn="str1234">
-    <Marker modelUri="http://sadl.org/B.sadl" astNodeName="Bar" msgText="str1234" projectMarker="true" time="2012-12-13T12:12:12" markerType="Error" priority="Low">
-      <ReqID>str1234</ReqID>
+    <Marker msgName="str1234" msgText="str1234" projectMarker="true" time="2012-12-13T12:12:12" markerType="Error" priority="Low">
+      <ObjectID>str1234</ObjectID>
+	  <ObjectID>str1235</ObjectID>
+	  <ObjectID>str1236</ObjectID>
     </Marker>
   </Process>
 </MarkerService>

@@ -23,6 +23,7 @@ import com.google.inject.ImplementedBy
 import java.nio.file.Path
 import javax.xml.parsers.DocumentBuilderFactory
 import org.eclipse.xtend.lib.annotations.Data
+import org.w3c.dom.Element
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
 
@@ -58,7 +59,7 @@ interface SadlMarkerDeserializerService {
 		 * An iterable of external SADL markers based on the content of the XML.
 		 */
 		val Iterable<SadlMarker> markers;
-		
+
 		@Override
 		override iterator() {
 			return Iterators.unmodifiableIterator(markers.iterator);
@@ -77,11 +78,6 @@ interface SadlMarkerDeserializerService {
 		static val MARKER_NAME = "Marker";
 
 		/**
-		 * This is the project relative path of the resource which has the marker attached to it. 
-		 */
-		static val FILE_PATH_NAME = "filePath";
-
-		/**
 		 * This is the severity of the marker.
 		 */
 		static val MARKER_TYPE_NAME = "markerType";
@@ -92,9 +88,14 @@ interface SadlMarkerDeserializerService {
 		static val MESSAGE_TEXT_NAME = "msgText";
 
 		/**
-		 * The unique name of the AST node which the marker is attached to.
+		 * The unique object ID that is used to identify the resource where the SADL marker is attached to. 
 		 */
-		static val AST_NODE_NAME = "astNodeName";
+		static val OBJECT_ID_NAME = "ObjectID";
+
+		/**
+		 * Separator for the FQN of the object.
+		 */
+		static val OBJECT_ID_SEPARATOR = "#";
 
 		@Override
 		override deserialize(Path path) {
@@ -103,7 +104,7 @@ interface SadlMarkerDeserializerService {
 			if (!file.exists) {
 				return new SadlMarkerInfos(origin, emptyList);
 			}
-			
+
 			val factory = DocumentBuilderFactory.newInstance();
 			val builder = factory.newDocumentBuilder();
 			val doc = builder.parse(file);
@@ -115,14 +116,25 @@ interface SadlMarkerDeserializerService {
 				val element = elements.item(i);
 				if (element.nodeType === Node.ELEMENT_NODE) {
 					val attributes = element.attributes;
-					val filePath = attributes.getTextContentOfNamedItem(FILE_PATH_NAME);
 					val message = attributes.getTextContentOfNamedItem(MESSAGE_TEXT_NAME);
 					val severity = attributes.getTextContentOfNamedItem(MARKER_TYPE_NAME).severityByName;
-					val astNodeName = attributes.getTextContentOfNamedItem(AST_NODE_NAME);
-					markers.add(new SadlMarker(filePath, message, astNodeName, severity));
+					val objectIds = (element as Element).getElementsByTagName(OBJECT_ID_NAME);
+					for (var j = 0; j < objectIds.length; j++) {
+						val objectId = objectIds.item(j);
+						if (objectId.nodeType === Node.ELEMENT_NODE) {
+							val fqn = objectId.textContent;
+							if (fqn !== null && !fqn.empty) {
+								val segments = fqn.split(OBJECT_ID_SEPARATOR);
+								switch (segments.length) {
+									case 1: markers.add(new SadlMarker(null, message, segments.head, severity))
+									case 2: markers.add(new SadlMarker(segments.head, message, segments.last, severity))
+									default: throw new IllegalArgumentException('''Unexpected FQN: «fqn»''')
+								}
+							}
+						}
+					}
 				}
 			}
-
 			return new SadlMarkerInfos(origin, markers.build);
 		}
 

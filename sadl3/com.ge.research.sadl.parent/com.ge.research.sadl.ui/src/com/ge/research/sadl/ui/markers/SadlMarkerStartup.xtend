@@ -138,23 +138,20 @@ class SadlMarkerStartup implements IStartup {
 		val configurationManager = project.configurationManager;
 		val owlFilePath = configurationManager.mappings.get(modelUri);
 		if (owlFilePath === null) {
-			return null
+			return null;
 		}
-		val fp2 = new SadlUtils().fileUrlToFileName(owlFilePath)
-		var f = new File(fp2)
-		var fp = null as String
-		if (f.exists()) {
-			fp = f.toPath.fileName.toString
+		val fileName = new SadlUtils().fileUrlToFileName(owlFilePath);
+		val file = new File(fileName);
+		if (!file.exists()) {
+			return null;
 		}
-		else {
-			return null
-		}
-		val owlFileName = Paths.get(fp).toFile.name
+		val normalizedFilePath = file.toPath.fileName.toString;
+		val owlFileName = Paths.get(normalizedFilePath).toFile.name
 		var resourceName = owlFileName.substring(0, owlFileName.lastIndexOf("."));
 		if (resourceName.indexOf('.') < 0) {
 			resourceName = resourceName + ".sadl"
 		}
-		val rn = resourceName
+		val rn = resourceName;
 		val resourceUri = <URI>newArrayList();
 		project.accept([
 			if (it instanceof IFile) {
