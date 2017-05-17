@@ -4577,17 +4577,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		SadlValueList listInitializer = element.getListInitializer();
 		if (listInitializer != null) {
-			if (cls == null) {
-				ConceptName cn = getTypedListType(inst);
-				if (cn != null) {
-					cls = getTheJenaModel().getOntClass(cn.toFQString());
+			if(listInitializer.getExplicitValues().isEmpty()){
+				addError(SadlErrorMessages.EMPTY_LIST_DEFINITION.get(), element);
+			}else{
+				if (cls == null) {
+					ConceptName cn = getTypedListType(inst);
+					if (cn != null) {
+						cls = getTheJenaModel().getOntClass(cn.toFQString());
+					}
 				}
-			}
-			if (cls != null) {
-				addListValues(inst, cls, listInitializer);
-			}
-			else {
-				throw new JenaProcessorException("Unable to find type of list '" + inst.toString() + "'");
+				if (cls != null) {
+					addListValues(inst, cls, listInitializer);
+				}
+				else {
+					throw new JenaProcessorException("Unable to find type of list '" + inst.toString() + "'");
+				}
 			}
 		}
 		return inst;
