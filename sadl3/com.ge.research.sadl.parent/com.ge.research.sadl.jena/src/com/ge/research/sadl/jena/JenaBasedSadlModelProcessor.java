@@ -1832,6 +1832,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					} catch (CircularDependencyException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 					if (!(var instanceof VariableNode)) {
 						try {
@@ -1890,6 +1893,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (CircularDependencyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (PropertyWithoutRangeException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -4566,6 +4572,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val);
 					} catch (DontTypeCheckException e) {
 						// do nothing
+					} catch(PropertyWithoutRangeException e){
+						issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(prop)), propinit);
 					} catch (Exception e) {
 						throw new JenaProcessorException("Unexpected error checking value in range", e);
 					}
