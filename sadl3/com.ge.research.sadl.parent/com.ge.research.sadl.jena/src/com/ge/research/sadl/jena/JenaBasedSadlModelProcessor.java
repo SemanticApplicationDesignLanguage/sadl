@@ -623,6 +623,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private String translatorClassName = null;
 
 	protected boolean ignoreUnittedQuantities;
+	
+	protected boolean domainAndRangeAsUnionClasses = true;
 
 	private boolean typeCheckingWarningsOnly;
 
@@ -921,6 +923,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		String ignoreUnits = context.getPreferenceValues().getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
 		if (ignoreUnits != null) {
 			ignoreUnittedQuantities = Boolean.parseBoolean(ignoreUnits);
+		}
+		
+		domainAndRangeAsUnionClasses = true;
+		String domainAndRangeAsUnionClassesStr = context.getPreferenceValues().getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
+		if (domainAndRangeAsUnionClassesStr != null) {
+			domainAndRangeAsUnionClasses = Boolean.parseBoolean(domainAndRangeAsUnionClassesStr);
 		}
 
 		// create validator for expressions
@@ -3435,7 +3443,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				//  but if it is a condition to be added as property restriction null will be returned
 				Property prop = processSadlProperty(rsrcList.get(i), sp);
 				if (prop != null) {
-					addPropertyDomain(prop, rsrcList.get(i));
+					addPropertyDomain(prop, rsrcList.get(i), sp.eContainer());
 				}
 			}
 
@@ -3647,7 +3655,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else {
 						throw new JenaProcessorException("Invalid property type (" + propType.toString() + ") for '" + propUri + "'");
 					}
-					addPropertyDomain(prop, domainrsrc);
+					addPropertyDomain(prop, domainrsrc, domain);
 					SadlTypeReference from = element.getFrom();
 					if (from != null) {
 						OntResource fromrsrc = sadlTypeReferenceToOntResource(from);
@@ -3855,7 +3863,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
 				ObjectProperty prop = getOrCreateObjectProperty(propUri);
 				if (domainrsrc != null) {
-					addPropertyDomain(prop, domainrsrc);
+					addPropertyDomain(prop, domainrsrc, domain);
 				}
 			}
 			else if (spr1 instanceof SadlIsSymmetrical) {
@@ -3923,7 +3931,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
 					ObjectProperty prop = getOrCreateObjectProperty(propUri);
 					if (domainrsrc != null) {
-						addPropertyDomain(prop, domainrsrc);
+						addPropertyDomain(prop, domainrsrc, domain);
 					}
 					SadlTypeReference from = element.getFrom();
 					if (from != null) {
@@ -3960,7 +3968,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					OntClass dmn = getOrCreateOntClass(((NamedNode)frm).toFullyQualifiedString());
 					OntClass rng = getOrCreateOntClass(((NamedNode)t).toFullyQualifiedString());
 					OntProperty pr = createObjectProperty(propUri, null);
-					addPropertyDomain(pr, dmn);
+					addPropertyDomain(pr, dmn, toTypeRef);
 					addPropertyRange(OntConceptType.CLASS_PROPERTY, pr, rng, RangeValueType.CLASS_OR_DT, element);
 					retProp = pr;
 				}
@@ -4125,34 +4133,67 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private void addPropertyRange(OntConceptType propType, OntProperty prop, RDFNode rngNode, RangeValueType rngValueType, EObject context) throws JenaProcessorException {
+		OntResource rngResource = null;
+		// Is the range an unnamed List?
 		if (context instanceof SadlSimpleTypeReference && ((SadlSimpleTypeReference)context).isList()) {
 			rngValueType = RangeValueType.LIST;
 		}
 		else if (context instanceof SadlPrimitiveDataType && ((SadlPrimitiveDataType)context).isList()) {
 			rngValueType = RangeValueType.LIST;
 		}
-		if (ignoreUnittedQuantities && rngNode.isURIResource() && rngNode.canAs(OntClass.class) && 
-				rngNode.asResource().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+		// If so create the unnamed List as the range class (rngResource)
+		if (rngValueType.equals(RangeValueType.LIST)) {
+			rngResource = createListSubclass(null, rngNode.toString(), context.eResource());
+			getTheJenaModel().remove(prop,RDF.type, OWL.DatatypeProperty);
+			getTheJenaModel().add(prop, RDF.type, OWL.ObjectProperty);
+			// TODO this should be removed as soon as translators are updated to new List ontology representation
+			AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
+			prop.addProperty(annprop, RangeValueType.LIST.toString());
+			
+		}
+		else if (rngNode instanceof OntClass){
+			rngResource = rngNode.as(OntClass.class);
+			if (prop.isDatatypeProperty()) {
+				// this happens when the range is a union of Lists of primitive types
+				getTheJenaModel().remove(prop,RDF.type, OWL.DatatypeProperty);
+				getTheJenaModel().add(prop, RDF.type, OWL.ObjectProperty);
+			}
+		}
+		// If ignoring UnittedQuantity, change any UnittedQuantity range to the range of value and make the property an owl:DatatypeProperty
+		// TODO this should probably work for any declared subclass of UnittedQuantity and associated value restriction?
+		if (ignoreUnittedQuantities && rngResource != null && rngResource.isURIResource() && rngResource.canAs(OntClass.class) && 
+				rngResource.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 			com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
 			rngNode = effectiveRng;
+			rngResource = null;
 			getTheJenaModel().remove(prop,RDF.type, OWL.ObjectProperty);
 			getTheJenaModel().add(prop, RDF.type, OWL.DatatypeProperty);
 		}
+		
 		RDFNode propOwlType = null;
-		boolean existingRangeAnywhere = false;
 		boolean existingRangeThisModel = false;
+		boolean addNewRange = false;
 		StmtIterator existingRngItr = getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null);
-		while (existingRngItr.hasNext()) {
-			existingRangeAnywhere = true;
+		if (existingRngItr.hasNext()) {
 			RDFNode existingRngNode = existingRngItr.next().getObject();
-			if (rngNode.equals(existingRngNode)) {
+			// property already has a range know to this model
+			if (rngNode.equals(existingRngNode) || (rngResource != null && rngResource.equals(existingRngNode))) {
 				// do nothing-- rngNode is already in range
 				return;
 			}
-			
+			if (prop.isDatatypeProperty()) {
+				String existingRange = stmtIteratorToObjectString(getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null));
+				addError(SadlErrorMessages.CANNOT_ASSIGN_EXISTING.get("range", nodeToString(prop), existingRange), context);
+				return;
+			}
+			if (!rngNode.isResource()) {
+				addError("Proposed range node '" + rngNode.toString() + "' is not a Resource so cannot be added to create a union class as range", context);
+				return;
+			}		
 			if (existingRngNode.canAs(OntClass.class)){
 				// is the new range a subclass of the existing range, or vice versa?
-				if (rngNode.canAs(OntClass.class) && checkForSubclassing(rngNode.as(OntClass.class), existingRngNode.as(OntClass.class), context)) {
+				if ((rngResource != null && rngResource.canAs(OntClass.class) && checkForSubclassing(rngResource.as(OntClass.class), existingRngNode.as(OntClass.class), context)) || 
+						rngNode.canAs(OntClass.class) && checkForSubclassing(rngNode.as(OntClass.class), existingRngNode.as(OntClass.class), context)) {
 					StringBuilder sb = new StringBuilder("This range is a subclass of the range which is already defined");
 					String existingRange = nodeToString(existingRngNode);
 					if (existingRange != null) {
@@ -4165,56 +4206,81 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					return;
 				}
 			}
-		}
 
-		StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null);
-		if (inModelStmtItr.hasNext()) {
-			existingRangeThisModel = true;
-		}
-		if (existingRangeAnywhere && !existingRangeThisModel) {
-			addWarning("This changes the range of property '" + prop.getURI() + "' which has an imported range; are you sure that's what you want to do?", context);
-		}
-		if (existingRangeAnywhere && existingRangeThisModel) {
-			// property has existing range known to this model
-			if (prop.isDatatypeProperty()) {
-				String existingRange = stmtIteratorToObjectString(getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null));
-				addError(SadlErrorMessages.CANNOT_ASSIGN_EXISTING.get("range", prop.getURI(), existingRange), context);
-			}
-			else {
-				if (rngNode.isResource() && rngNode.asResource().canAs(OntClass.class)) {
-					OntClass newRngCls;
-					if (rngValueType.equals(RangeValueType.LIST)) {
-						newRngCls = createListSubclass(null, rngNode.toString(), context.eResource());
-						// TODO this should be removed as soon as translators are updated to new List ontology representation
-						AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
-						prop.addProperty(annprop, RangeValueType.LIST.toString());
+			if (domainAndRangeAsUnionClasses) {
+				// in this case we want to create a union class if necessary
+				StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null);
+				if (inModelStmtItr.hasNext()) {
+					// this model (as opposed to imports) already has a range specified
+					addNewRange = false;
+					UnionClass newUnionClass = null;
+					existingRangeThisModel = true;
+					while (inModelStmtItr.hasNext()) {
+						RDFNode rngThisModel = inModelStmtItr.nextStatement().getObject();
+						if (rngThisModel.isResource()) {
+							if (rngThisModel.canAs(OntResource.class)){
+								if (existingRngNode.toString().equals(rngThisModel.toString())) {
+									rngThisModel = existingRngNode;
+								}
+								newUnionClass = createUnionClass(rngThisModel.as(OntResource.class), rngResource != null ? rngResource : rngNode.asResource());
+								logger.debug("Range '" + rngNode.toString() + "' added to property '" + prop.getURI() + "'");
+								if (!newUnionClass.equals(rngThisModel)) {
+									addNewRange = true;
+									rngResource = newUnionClass;
+								}
+								else {
+									rngNode = null;
+								}
+							}
+							else {
+								throw new JenaProcessorException("Encountered non-OntResource in range of '" + prop.getURI() + "'");
+							}
+						}
+						else {
+							throw new JenaProcessorException("Encountered non-Resource in range of '" + prop.getURI() + "'");
+						}
 					}
-					else {
-						newRngCls = rngNode.asResource().as(OntClass.class);
+					if (addNewRange) {
+						getTheJenaModel().remove(getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null));
+						rngNode = newUnionClass;
 					}
-					ExtendedIterator<? extends OntResource> ritr = prop.listRange();
-					if (updateObjectPropertyRange(prop, newRngCls, ritr, rngValueType, context)) {
-						propOwlType = OWL.ObjectProperty;
+				}	// end if existing range in this model
+				else {
+					if (existingRngNode != null) {
+						addWarning("This changes the range of property '" + prop.getURI() + "' which has an imported range; are you sure that's what you want to do?", context);
 					}
-					ritr.close();
+					// check to see if this is something new
+					do {
+						if (existingRngNode.equals(rngNode)) {
+							existingRngItr.close();
+							return;	// already in domain, nothing to add
+						}
+						if (existingRngItr.hasNext()) {
+							existingRngNode = existingRngItr.next().getObject();
+						}
+						else {
+							existingRngNode = null;
+						}
+					} while (existingRngNode != null);
+				}
+			}	// end if domainAndRangeAsUnionClasses
+		}	// end if existing range in any model, this or imports
+		if (rngNode != null) {	
+			if (rngResource != null) {
+				if (!domainAndRangeAsUnionClasses && rngResource instanceof UnionClass) {
+					List<com.hp.hpl.jena.rdf.model.Resource> uclsmembers = getUnionClassMemebers((UnionClass)rngResource);
+					for (int i = 0; i < uclsmembers.size(); i++) {
+						getTheJenaModel().add(prop, RDFS.range, uclsmembers.get(i));
+						logger.debug("Range '" + uclsmembers.get(i).toString() + "' added to property '" + prop.getURI() + "'");
+					}
 				}
 				else {
-					throw new JenaProcessorException("Unable to convert object property range to a class");
+					getTheJenaModel().add(prop, RDFS.range, rngResource);
+					logger.debug("Range '" + rngResource.toString() + "' added to property '" + prop.getURI() + "'");
 				}
-			}
-		}
-		else {
-			// no existing range--this is a fresh range assignment
-			if (rngValueType.equals(RangeValueType.LIST)) {
-				// range is a List
-				prop.addRange(createListSubclass(null, rngNode.toString(), context.eResource()));
-				// TODO this should be removed as soon as translators are updated to new List ontology representation
-				AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
-				prop.addProperty(annprop, RangeValueType.LIST.toString());
 				propOwlType = OWL.ObjectProperty;
 			}
 			else {
-				// range is not a List
 				com.hp.hpl.jena.rdf.model.Resource rngrsrc = rngNode.asResource();
 				if (rngrsrc.hasProperty(RDF.type, RDFS.Datatype)) {
 					propOwlType = OWL.DatatypeProperty;
@@ -4225,16 +4291,70 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				else {
 					propOwlType = OWL.DatatypeProperty;
 				}
-				getTheJenaModel().add(prop, RDFS.range, rngrsrc);
+				getTheJenaModel().add(prop, RDFS.range, rngNode);
 			}
-			if (logger.isDebugEnabled()) {
-				StringBuffer sb = new StringBuffer();
-				sb.append(rngNode.toString());
-				if (rngValueType.equals(RangeValueType.LIST)) {
-					sb.append(" List");
-				}
-				logger.debug("Range '" + sb.toString() + "' given to property '" + prop.toString() + "'");
-			}
+//			if (existingRangeAnywhere && existingRangeThisModel) {
+//				// property has existing range known to this model
+//				if (rngNode.isResource() && rngNode.asResource().canAs(OntClass.class)) {
+//					OntClass newRngCls;
+//					if (rngValueType.equals(RangeValueType.LIST)) {
+//						newRngCls = createListSubclass(null, rngNode.toString(), context.eResource());
+//						// TODO this should be removed as soon as translators are updated to new List ontology representation
+//						AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
+//						prop.addProperty(annprop, RangeValueType.LIST.toString());
+//					}
+//					else {
+//						newRngCls = rngNode.asResource().as(OntClass.class);
+//					}
+//					getTheJenaModel().add(prop, RDFS.range, newRngCls);
+//					propOwlType = OWL.ObjectProperty;
+//				}
+//				else {
+//					throw new JenaProcessorException("Unable to convert object property range to a class");
+//				}
+//			}
+//			else {
+//				// no existing range or not using union class for multi-class range--this is a fresh range assignment
+//				if (rngValueType.equals(RangeValueType.LIST)) {
+//					// range is a List
+//					prop.addRange(createListSubclass(null, rngNode.toString(), context.eResource()));
+//					// TODO this should be removed as soon as translators are updated to new List ontology representation
+//					AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
+//					prop.addProperty(annprop, RangeValueType.LIST.toString());
+//					propOwlType = OWL.ObjectProperty;
+//				}
+//				else {
+//					// range is not a List
+//					com.hp.hpl.jena.rdf.model.Resource rngrsrc = rngNode.asResource();
+//					if (rngrsrc.hasProperty(RDF.type, RDFS.Datatype)) {
+//						propOwlType = OWL.DatatypeProperty;
+//					}
+//					else if (rngrsrc.canAs(OntClass.class)){
+//						propOwlType = OWL.ObjectProperty;					
+//					}
+//					else {
+//						propOwlType = OWL.DatatypeProperty;
+//					}
+//					if (!domainAndRangeAsUnionClasses && rngrsrc instanceof UnionClass) {
+//						List<com.hp.hpl.jena.rdf.model.Resource> uclsmembers = getUnionClassMemebers((UnionClass)rngrsrc);
+//						for (int i = 0; i < uclsmembers.size(); i++) {
+//							getTheJenaModel().add(prop, RDFS.range, uclsmembers.get(i));
+//							logger.debug("Range '" + uclsmembers.get(i).toString() + "' added to property '" + prop.getURI() + "'");
+//						}
+//					}
+//					else {
+//						getTheJenaModel().add(prop, RDFS.range, rngrsrc);
+//						if (logger.isDebugEnabled()) {
+//							StringBuffer sb = new StringBuffer();
+//							sb.append(rngNode.toString());
+//							if (rngValueType.equals(RangeValueType.LIST)) {
+//								sb.append(" List");
+//							}
+//							logger.debug("Range '" + sb.toString() + "' given to property '" + prop.toString() + "'");
+//						}
+//					}
+//				}
+//			}
 		}
 		if (propType.equals(OntConceptType.RDF_PROPERTY) && propOwlType != null) {
 			getTheJenaModel().add(prop, RDF.type, propOwlType);
@@ -4281,6 +4401,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				sb.append(nodeToString(iitr.next()));
 			}
 			sb.append(")");
+		}
+		else if (obj.isResource() && 
+				getTheJenaModel().contains(obj.asResource(), RDFS.subClassOf, getTheJenaModel().getOntClass(SadlConstants.SADL_LIST_MODEL_LIST_URI))) {
+			ConceptName cn = getTypedListType(obj);
+			sb.append(cn.getName());
+			sb.append(" List");
 		}
 		else {
 			sb.append("<blank node>");
@@ -4366,56 +4492,56 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
-	private OntResource addClassToUnionClass(OntResource existingCls,
-			OntResource cls) throws JenaProcessorException {
-		if (existingCls != null && !existingCls.equals(cls)) {
-			try {
-				if (existingCls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(existingCls.as(OntClass.class), cls, true, null)) {
-					return cls;
-				}
-				else if (cls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(cls.as(OntClass.class), existingCls, true, null)) {
-					return existingCls;
-				}
-				else {
-					RDFList classes = null;
-					if (existingCls.canAs(UnionClass.class)) {
-						try {
-							 UnionClass ucls = existingCls.as(UnionClass.class);
-							 ucls.addOperand(cls);
-							 return ucls;
-						} catch (Exception e) {
-							// don't know why this is happening
-							logger.error("Union class error that hasn't been resolved or understood.");
-							return cls;
-						}
-					} else {
-						if (cls.equals(existingCls)) {
-							return existingCls;
-						}
-						classes = getTheJenaModel().createList();
-						OntResource inCurrentModel = null;
-						if (existingCls.isURIResource()) {
-							inCurrentModel = getTheJenaModel().getOntResource(existingCls.getURI());
-						}
-						if (inCurrentModel != null) {
-							classes = classes.with(inCurrentModel);
-						}
-						else {
-							classes = classes.with(existingCls);
-						}
-						classes = classes.with(cls);
-					}
-					OntResource unionClass = getTheJenaModel().createUnionClass(null,
-							classes);
-					return unionClass;
-				}
-			} catch (CircularDependencyException e) {
-				throw new JenaProcessorException(e.getMessage(), e);
-			}
-		} else {
-			return cls;
-		}
-	}
+//	private OntResource addClassToUnionClass(OntResource existingCls,
+//			OntResource cls) throws JenaProcessorException {
+//		if (existingCls != null && !existingCls.equals(cls)) {
+//			try {
+//				if (existingCls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(existingCls.as(OntClass.class), cls, true, null)) {
+//					return cls;
+//				}
+//				else if (cls.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(cls.as(OntClass.class), existingCls, true, null)) {
+//					return existingCls;
+//				}
+//				else {
+//					RDFList classes = null;
+//					if (existingCls.canAs(UnionClass.class)) {
+//						try {
+//							 UnionClass ucls = existingCls.as(UnionClass.class);
+//							 ucls.addOperand(cls);
+//							 return ucls;
+//						} catch (Exception e) {
+//							// don't know why this is happening
+//							logger.error("Union class error that hasn't been resolved or understood.");
+//							return cls;
+//						}
+//					} else {
+//						if (cls.equals(existingCls)) {
+//							return existingCls;
+//						}
+//						classes = getTheJenaModel().createList();
+//						OntResource inCurrentModel = null;
+//						if (existingCls.isURIResource()) {
+//							inCurrentModel = getTheJenaModel().getOntResource(existingCls.getURI());
+//						}
+//						if (inCurrentModel != null) {
+//							classes = classes.with(inCurrentModel);
+//						}
+//						else {
+//							classes = classes.with(existingCls);
+//						}
+//						classes = classes.with(cls);
+//					}
+//					OntResource unionClass = getTheJenaModel().createUnionClass(null,
+//							classes);
+//					return unionClass;
+//				}
+//			} catch (CircularDependencyException e) {
+//				throw new JenaProcessorException(e.getMessage(), e);
+//			}
+//		} else {
+//			return cls;
+//		}
+//	}
 
 	private void processSadlNecessaryAndSufficient(SadlNecessaryAndSufficient element) throws JenaProcessorException {
 		OntClass supercls = sadlTypeReferenceToOntResource(element.getSubject()).asClass();
@@ -5059,49 +5185,133 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 
-	private void addPropertyDomain(Property prop, OntResource cls) throws JenaProcessorException {
-		boolean existingDomainThisModel = false;
+	private void addPropertyDomain(Property prop, OntResource cls, EObject context) throws JenaProcessorException {
+		boolean addNewDomain = true;
 		StmtIterator sitr = getTheJenaModel().listStatements(prop, RDFS.domain, (RDFNode)null);
 		if (sitr.hasNext()) {
+			RDFNode existingDomain = sitr.next().getObject();
 			// property already has a domain known to this model
-			StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null);
-			if (inModelStmtItr.hasNext()) {
-				existingDomainThisModel = true;
-				List<OntResource> inModelDomainClasses = new ArrayList<OntResource>();
-				while (inModelStmtItr.hasNext()) {
-					RDFNode dmn = inModelStmtItr.nextStatement().getObject();
-					if (dmn.isResource()) {	// should always be a Resource
-						if (dmn.canAs(OntResource.class)){
-							inModelDomainClasses.add(dmn.as(OntResource.class));
+			if (cls.equals(existingDomain)) {
+				// do nothing--cls is already in domain
+				return;
+			}
+			
+			if (existingDomain.canAs(OntClass.class)) {
+				// is the new domain a subclass of the existing domain?
+				if (cls.canAs(OntClass.class) && checkForSubclassing(cls.as(OntClass.class), existingDomain.as(OntClass.class), context) ) {
+					StringBuilder sb = new StringBuilder("This domain is a subclass of the domain which is already defined");
+					String dmnstr = nodeToString(existingDomain);
+					if (dmnstr != null) {
+						sb.append(" (");
+						sb.append(dmnstr);
+						sb.append(") ");
+					}
+					addWarning(sb.toString(), context);		
+					return;
+				}
+			}
+				
+			if (domainAndRangeAsUnionClasses) {
+				// in this case we want to create a union class if necessary
+				StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null);
+				if (inModelStmtItr.hasNext()) {
+					// this model (as opposed to imports) already has a domain specified
+					addNewDomain = false;
+					UnionClass newUnionClass = null;
+					while (inModelStmtItr.hasNext()) {
+						RDFNode dmn = inModelStmtItr.nextStatement().getObject();
+						if (dmn.isResource()) {	// should always be a Resource
+							if (dmn.canAs(OntResource.class)){
+								if (existingDomain.toString().equals(dmn.toString())) {
+									dmn = existingDomain;
+								}
+								newUnionClass = createUnionClass(dmn.as(OntResource.class), cls);
+								logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
+								if (!newUnionClass.equals(dmn)) {
+									addNewDomain = true;
+								}
+							}
+							else {
+								throw new JenaProcessorException("Encountered non-OntResource in domain of '" + prop.getURI() + "'");
+							}
 						}
 						else {
-							throw new JenaProcessorException("Encountered non-OntResource in domain of '" + prop.getURI() + "'");
+							throw new JenaProcessorException("Encountered non-Resource in domain of '" + prop.getURI() + "'");
 						}
 					}
-				}
-				cls = createUnionOfClasses(cls, inModelDomainClasses);
-				getTheJenaModel().remove(getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null));
-			}
-			else {
-				// check to see if this is something new
-				while (sitr.hasNext()) {
-					RDFNode existingDomain = sitr.next().getObject();
-					if (existingDomain.equals(cls)) {
-						sitr.close();
-						return;	// already in domain, nothing to add
+					if (addNewDomain) {
+						getTheJenaModel().remove(getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null));
+						cls = newUnionClass;
 					}
+				}	// end if existing domain in this model
+				else {
+					if (existingDomain != null) {
+						addWarning("This changes the domain of property '" + prop.getURI() + "' which has an imported domain; are you sure that's what you want to do?", context);
+					}
+					// check to see if this is something new
+					do {
+						if (existingDomain.equals(cls)) {
+							sitr.close();
+							return;	// already in domain, nothing to add
+						}
+						if (sitr.hasNext()) {
+							existingDomain = sitr.next().getObject();
+						}
+						else {
+							existingDomain = null;
+						}
+					} while (existingDomain != null);
+				}
+			}	// end if domainAndRangeAsUnionClasses
+		}	// end if existing domain in any model, this or imports
+		if(cls != null){
+			if (!domainAndRangeAsUnionClasses && cls instanceof UnionClass) {
+				List<com.hp.hpl.jena.rdf.model.Resource> uclsmembers = getUnionClassMemebers((UnionClass)cls);
+				for (int i = 0; i < uclsmembers.size(); i++) {
+					getTheJenaModel().add(prop, RDFS.domain, uclsmembers.get(i));
+					logger.debug("Domain '" + uclsmembers.get(i).toString() + "' added to property '" + prop.getURI() + "'");
 				}
 			}
-		}
-		if(cls != null){
-			getTheJenaModel().add(prop, RDFS.domain, cls);	
-			logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
-			logger.debug("Domain of '" + prop.toString() + "' is now: " + nodeToString(cls));
+			else if (addNewDomain) {
+				getTheJenaModel().add(prop, RDFS.domain, cls);	
+				logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
+				logger.debug("Domain of '" + prop.toString() + "' is now: " + nodeToString(cls));
+			}
 		}else{
 			logger.debug("Domain is not defined for property '" + prop.toString() + "'");
 		}
 	}
 
+	private List<com.hp.hpl.jena.rdf.model.Resource> getUnionClassMemebers(UnionClass cls) {
+		List<com.hp.hpl.jena.rdf.model.Resource> members = null;
+		ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> itr = ((UnionClass)cls).listOperands();
+		while (itr.hasNext()) {
+			com.hp.hpl.jena.rdf.model.Resource ucls = itr.next();
+			if (ucls instanceof UnionClass || ucls.canAs(UnionClass.class)) {
+				List<com.hp.hpl.jena.rdf.model.Resource> nested = getUnionClassMemebers(ucls.as(UnionClass.class));
+				if (members == null) {
+					members = nested;
+				}
+				else {
+					members.addAll(nested);
+				}
+			}
+			else {
+				if (members == null) members = new ArrayList<com.hp.hpl.jena.rdf.model.Resource>();
+				members.add(ucls);
+			}
+		}
+		if (cls.isAnon()) {
+			for (int i = 0; i < members.size(); i++) {
+				((UnionClass)cls).removeOperand(members.get(i));
+			}
+			getTheJenaModel().removeAll(cls, null, null);
+			getTheJenaModel().removeAll(null, null, cls);
+			cls.remove();
+		}
+		return members;
+	}
+	
 	private OntResource createUnionOfClasses(OntResource cls, List<OntResource> existingClasses) throws JenaProcessorException {
 		OntResource unionClass = null;
 		RDFList classes = null;
@@ -5110,7 +5320,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		while (ecitr.hasNext()) {
 			OntResource existingCls = ecitr.next();
 			if (!existingCls.canAs(OntResource.class)){
-				throw new JenaProcessorException("Unable to '" + existingCls.toString() + "' to OntResource to put into union of classes");
+				throw new JenaProcessorException("Unable to convert '" + existingCls.toString() + "' to OntResource to put into union of classes");
 			}
 			if (existingCls.equals(cls)) {
 				continue;
@@ -5643,6 +5853,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private com.hp.hpl.jena.rdf.model.Resource processSadlPrimitiveDataType(SadlClassOrPropertyDeclaration element, SadlPrimitiveDataType sadlTypeRef, String newDatatypeUri) throws JenaProcessorException {
 		com.hp.hpl.jena.rdf.model.Resource onDatatype = getSadlPrimitiveDataTypeResource(sadlTypeRef);
+		if (sadlTypeRef.isList()) {
+			onDatatype = createListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource());
+		}
 		if (newDatatypeUri == null) {
 			return onDatatype;
 		}
@@ -6063,11 +6276,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private UnionClass createUnionClass(RDFNode... members) throws JenaProcessorException {
-		RDFList classes = getTheJenaModel().createList(members);
-		if (!classes.isEmpty()) {
-			UnionClass unionCls = getTheJenaModel().createUnionClass(null, classes);
-			logger.debug("New union class created");
-			return unionCls;
+		UnionClass existingBnodeUnion = null;
+		for (int i = 0; i < members.length; i++) {
+			RDFNode mmbr = members[i];
+			if ((mmbr instanceof UnionClass || mmbr.canAs(UnionClass.class) && mmbr.isAnon())) {
+				existingBnodeUnion = mmbr.as(UnionClass.class);
+				break;
+			}
+		}
+		if (existingBnodeUnion != null) {
+			for (int i = 0; i < members.length; i++) {
+				RDFNode mmbr = members[i];
+				if (!mmbr.equals(existingBnodeUnion)) {
+					existingBnodeUnion.addOperand(mmbr.asResource());
+					logger.debug("Added member '" + mmbr.toString() + "' to existing union class");
+				}
+			}
+			return existingBnodeUnion;
+		}
+		else {
+			RDFList classes = getTheJenaModel().createList(members);
+			if (!classes.isEmpty()) {
+				UnionClass unionCls = getTheJenaModel().createUnionClass(null, classes);
+				logger.debug("New union class created");
+				return unionCls;
+			}
 		}
 		throw new JenaProcessorException("createUnionClass called with empty list of classes");
 	}
