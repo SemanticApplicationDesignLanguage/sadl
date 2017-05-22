@@ -188,7 +188,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 		});
 		addField(new BooleanFieldEditor(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(),
-				"Translate mutilple-class domain or range as union class (owl:unionOf)", getFieldEditorParent()) {
+				"Translate multiple-class domain or range as union class (owl:unionOf)", getFieldEditorParent()) {
 
 			@Override
 			protected void doStore() {
