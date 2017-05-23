@@ -96,12 +96,17 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 					val instance = initializer.eContainer as SadlInstance;
 					val type = instance.type;
 					if (type instanceof SadlSimpleTypeReference) {
-						val builder = new ContextBuilder(type.type, processor) => [
-							grammarContextId = key;
-							validationAcceptor = acceptor;
-							contextClass = clazz;
-						];
-						return Optional.of(builder.build);
+						// Broken AST. We have type reference to a non-existing type eventually.
+						// For instance: `Shape is a class. myShape is a S<|>`
+						// TODO: Is it possible (and required at all) to move this logic to the context builder? 
+						if (!type.type.eIsProxy) {
+							val builder = new ContextBuilder(type.type, processor) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							];
+							return Optional.of(builder.build);
+						}
 					}
 				} else {
 					if (LOGGER.debugEnabled) {
@@ -238,10 +243,18 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 		}
 		return null
 	}
+	
+	private def dispatch getPropertyInitializer(SadlSimpleTypeReference it) {
+		return it
+	}
 
 	private def dispatch getPropertyInitializer(SadlPropertyInitializer it) {
 		return it;
 	}
+	
+	private def dispatch getClassOrPropertyInitializer(SadlInstance it) {
+		return it;
+	} 
 
 	private def dispatch getClassOrPropertyInitializer(SadlClassOrPropertyDeclaration it) {
 		return it;

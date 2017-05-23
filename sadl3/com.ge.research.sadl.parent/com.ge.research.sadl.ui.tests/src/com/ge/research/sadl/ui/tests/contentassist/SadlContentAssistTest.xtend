@@ -18,7 +18,6 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import org.junit.Test
-import org.junit.Ignore
 
 /**
  * Plug-in tests for the SADL content assist.
@@ -206,7 +205,6 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 	
 	/** Completion after start of input */
-	@Ignore
 	@Test
 	def void checkCA_25_DeclarationCompletion() {
 		newBuilder(''' uri "http://sadl.org/classes.sadl" alias clses.
