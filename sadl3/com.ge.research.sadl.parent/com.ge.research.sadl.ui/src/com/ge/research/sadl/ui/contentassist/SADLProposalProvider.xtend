@@ -245,9 +245,6 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					}
 				}
 			}
-			else if (pm instanceof SadlSimpleTypeReference) {
-				return
-			}
 			else if (pm instanceof SadlPropertyInitializer) {
 				if ((pm as SadlPropertyInitializer).property == null) {
 					excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
