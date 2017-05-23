@@ -18,6 +18,7 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import org.junit.Test
+import org.junit.Ignore
 
 /**
  * Plug-in tests for the SADL content assist.
@@ -126,6 +127,28 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 			assertProposal('myFoo');
 	}
 
+	/** Property initializer value. */
+	@Test
+	def void checCA_14b_PropertyInitializerValue_Positive() {
+		newBuilder('''uri "http://myUri". 
+					  Bar is a class.
+					  MyBar is a Bar.
+					  Foo is a class described by p1 with values of type Bar. 
+					  MyFoo is a Foo with p1 ''').
+			assertProposal('MyBar');
+	}
+
+	/** Property initializer value. */
+	@Ignore
+	@Test
+	def void checCA_14c_PropertyInitializerValue_Positive() {
+		newBuilder('''uri "http://myUri". 
+					  Bar is a class.
+					  MyBar is a Bar.
+					  Foo is a class described by p1 with values of type Bar. 
+					  MyFoo is a Foo with p1 M''').
+			assertProposal('MyBar');
+	}
 	/** Super element with `type of`. */
 	@Test
 	def void checkCA_15_SuperElement_IsATypeOf_Positive() {
@@ -211,4 +234,6 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 					   Shape is a class described by area with values of type float.
 					   MyShape is a Sh''').assertProposal('Shape');
 	}
+	
+	
 }

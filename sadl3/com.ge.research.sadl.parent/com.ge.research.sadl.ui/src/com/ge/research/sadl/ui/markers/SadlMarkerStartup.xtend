@@ -71,7 +71,7 @@ class SadlMarkerStartup implements IStartup {
 		val ws = ResourcesPlugin.workspace;
 		ws.addResourceChangeListener([ event |
 			val Collection<()=>void> modifications = newArrayList();
-			event?.delta.accept([
+			event?.delta?.accept([
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
 					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
 					val origin = markerInfos.origin;

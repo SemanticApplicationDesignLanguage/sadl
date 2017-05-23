@@ -255,6 +255,10 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 	private def dispatch getClassOrPropertyInitializer(SadlInstance it) {
 		return it;
 	} 
+	
+	private def dispatch getClassOrPropertyInitializer(SadlSimpleTypeReference it) {
+		return it;
+	}
 
 	private def dispatch getClassOrPropertyInitializer(SadlClassOrPropertyDeclaration it) {
 		return it;
