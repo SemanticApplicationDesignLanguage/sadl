@@ -7204,7 +7204,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	}
 	
 	public boolean isTypedListSubclass(RDFNode node) {
-		if (node.isResource()) {
+		if (node != null && node.isResource()) {
 			if (node.asResource().hasProperty(RDFS.subClassOf, theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI))) {
 				return true;
 			}
