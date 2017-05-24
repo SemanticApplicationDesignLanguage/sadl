@@ -66,7 +66,6 @@ class SadlMarkerStartup implements IStartup {
 	@Inject
 	SadlMarkerSeverityMapper severityMapper;
 
-	@Override
 	override earlyStartup() {
 		val ws = ResourcesPlugin.workspace;
 		ws.addResourceChangeListener([ event |
@@ -108,7 +107,6 @@ class SadlMarkerStartup implements IStartup {
 			if (!modifications.empty) {
 				new WorkspaceJob("External SADL marker job") {
 
-					@Override
 					override runInWorkspace(IProgressMonitor monitor) throws CoreException {
 						monitor.beginTask("Updating external SADL markers...", modifications.size);
 						val subMonitor = SubMonitor.convert(monitor, modifications.size);
