@@ -10,6 +10,6 @@ public class PropertyWithoutRangeException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	public PropertyWithoutRangeException(){
-		super();
+		super("Property does not have a range");
 	}
 }
