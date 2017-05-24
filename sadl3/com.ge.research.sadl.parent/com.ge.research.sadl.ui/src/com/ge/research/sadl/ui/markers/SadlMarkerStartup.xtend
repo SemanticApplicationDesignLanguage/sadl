@@ -66,12 +66,11 @@ class SadlMarkerStartup implements IStartup {
 	@Inject
 	SadlMarkerSeverityMapper severityMapper;
 
-	@Override
 	override earlyStartup() {
 		val ws = ResourcesPlugin.workspace;
 		ws.addResourceChangeListener([ event |
 			val Collection<()=>void> modifications = newArrayList();
-			event?.delta.accept([
+			event?.delta?.accept([
 				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
 					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
 					val origin = markerInfos.origin;
@@ -108,7 +107,6 @@ class SadlMarkerStartup implements IStartup {
 			if (!modifications.empty) {
 				new WorkspaceJob("External SADL marker job") {
 
-					@Override
 					override runInWorkspace(IProgressMonitor monitor) throws CoreException {
 						monitor.beginTask("Updating external SADL markers...", modifications.size);
 						val subMonitor = SubMonitor.convert(monitor, modifications.size);
