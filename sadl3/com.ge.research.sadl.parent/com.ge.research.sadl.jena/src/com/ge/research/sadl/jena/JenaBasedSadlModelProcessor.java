@@ -4747,6 +4747,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							RDFNode type = avfstmt.getObject();
 							if (type.isURIResource()) {
 								ConceptName cn = createTypedConceptName(type.asResource().getURI(), OntConceptType.CLASS);
+								cn.setRangeValueType(RangeValueType.LIST);
 								sitr.close();
 								return cn;
 							}
@@ -7197,6 +7198,15 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 				if (cont1 != null && cont2 != null && cont1.equals(cont2)) {
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean isTypedListSubclass(RDFNode node) {
+		if (node != null && node.isResource()) {
+			if (node.asResource().hasProperty(RDFS.subClassOf, theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI))) {
+				return true;
 			}
 		}
 		return false;

@@ -229,6 +229,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 		public void setTypeCheckType(ConceptIdentifier typeCheckType) {
 			this.typeCheckType = typeCheckType;
+			if (typeCheckType instanceof ConceptName) {
+				setRangeValueType(((ConceptName)typeCheckType).getRangeValueType());
+			}
 		}
 		
 		public RangeValueType getRangeValueType() {
@@ -2263,6 +2266,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		List<ConceptName> impliedProperties = getImpliedProperties(first.asResource());
 		tci = new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
+		if (isTypedListSubclass(first)) {
+			tci.setRangeValueType(RangeValueType.LIST);
+			if (first.isURIResource()) {
+				// looks like a named list in which case we probably have the wrong type
+				if (!first.asResource().canAs(OntClass.class)){
+					issueAcceptor.addError("Unexpected non-OntClass named list, please report."	, expression); 
+				}
+				return getSadlTypedListTypeCheckInfo(first.asResource().as(OntClass.class), propConceptName, expression, propertyType);
+			}
+		}
 		return tci;
 	}
 
@@ -2639,6 +2652,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			(leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null) ||
 			(leftTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType() != null && !(leftTypeCheckInfo.getRangeValueType().equals(rightTypeCheckInfo.getRangeValueType())))) {
 			if (!isQualifyingListOperation(operations, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				if (isCompatibleListTypes(operations, leftTypeCheckInfo, rightTypeCheckInfo)) {
+					return true;
+				}
 				return false;
 			}
 		}
@@ -2778,6 +2794,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
+	private boolean isCompatibleListTypes(List<String> operations, TypeCheckInfo leftTypeCheckInfo,
+			TypeCheckInfo rightTypeCheckInfo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	private ConceptName getListType(TypeCheckInfo tci) {
 		ConceptIdentifier tct = tci.getTypeCheckType();
 		if (tct != null) {
