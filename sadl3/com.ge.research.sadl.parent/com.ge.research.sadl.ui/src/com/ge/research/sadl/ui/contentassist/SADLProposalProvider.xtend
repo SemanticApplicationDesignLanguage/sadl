@@ -65,9 +65,9 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 	
 	val PropertyRangeKeywords = newArrayList(
 		'string','boolean','decimal','int','long','float','double','duration','dateTime','time','date',
-    	'gYearMonth','gYear','gMonthDay','gDay','gMonth','hexBinary','base64Binary','anyURI','
-    	integer','negativeInteger','nonNegativeInteger','positiveInteger','nonPositiveInteger',' 
-    	unsignedByte','unsignedInt','anySimpleType','data','class')
+    	'gYearMonth','gYear','gMonthDay','gDay','gMonth','hexBinary','base64Binary','anyURI',
+    	'integer','negativeInteger','nonNegativeInteger','positiveInteger','nonPositiveInteger', 
+    	'byte','unsignedByte','unsignedInt','anySimpleType','data','class')
 	
 	protected List<OntConceptType> typeRestrictions
 	protected List<String> excludedNamespaces

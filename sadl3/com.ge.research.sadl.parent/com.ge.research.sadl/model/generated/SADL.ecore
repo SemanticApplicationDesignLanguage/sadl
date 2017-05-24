@@ -111,9 +111,10 @@
     <eLiterals name="nonNegativeInteger" value="21" literal="nonNegativeInteger"/>
     <eLiterals name="positiveInteger" value="22" literal="positiveInteger"/>
     <eLiterals name="nonPositiveInteger" value="23" literal="nonPositiveInteger"/>
-    <eLiterals name="unsignedByte" value="24" literal="unsignedByte"/>
-    <eLiterals name="unsignedInt" value="25" literal="unsignedInt"/>
-    <eLiterals name="anySimpleType" value="26" literal="anySimpleType"/>
+    <eLiterals name="byte" value="24" literal="byte"/>
+    <eLiterals name="unsignedByte" value="25" literal="unsignedByte"/>
+    <eLiterals name="unsignedInt" value="26" literal="unsignedInt"/>
+    <eLiterals name="anySimpleType" value="27" literal="anySimpleType"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlProperty" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="nameOrRef" eType="#//SadlResource"

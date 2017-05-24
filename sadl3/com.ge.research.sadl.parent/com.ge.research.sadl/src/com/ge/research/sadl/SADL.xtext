@@ -153,7 +153,7 @@ enum SadlDataType :
     string | boolean | decimal | int | long | float | double | duration | dateTime | time | date |
     gYearMonth | gYear | gMonthDay | gDay | gMonth | hexBinary | base64Binary | anyURI | 
     integer | negativeInteger | nonNegativeInteger | positiveInteger | nonPositiveInteger |  
-    unsignedByte | unsignedInt | anySimpleType;
+    byte | unsignedByte | unsignedInt | anySimpleType;
 
 // Class declarations may also describe the class's properties.
 SadlPropertyDeclarationInClass returns SadlProperty:
