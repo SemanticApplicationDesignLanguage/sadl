@@ -6,24 +6,58 @@
 <meta name="ProgId" content="FrontPage.Editor.Document">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>Quick Introduction to SADL 3</title>
+<style>
+<!--
+ li.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;
+	margin-left:0in; margin-right:0in; margin-top:0in}
+-->
+</style>
 </head>
 
 <body>
 
 <h1>Quick Introduction to SADL 3</h1>
 <p>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/02/2017<!--webbot bot="Timestamp" endspan i-checksum="12533" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/23/2017<!--webbot bot="Timestamp" endspan i-checksum="12565" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</p>
 <h2>Current Status</h2>
 <p>An alpha release of SADL Version 3 is available at
 <a target="_blank" href="https://github.com/crapo/sadlos2/releases">
-https://github.com/crapo/sadlos2/releases</a>. <br>
-Download the com.ge.research.sadl.update-3.x.x.xxxxxxxxx.zip file and expand to 
-a local directory. <br>
-Then do an Eclipse update or install of new software from this newly created 
-update location.</p>
-<p>Note that SADL source code is now 
-hosted on github.com.</p>
+https://github.com/crapo/sadlos2/releases</a>. To install, do the following:</p>
+<ol>
+  <li>If not already installed, install Java 1.8 from&nbsp;<a href="http://www.java.com/">http://www.java.com</a>&nbsp; 
+  (Java 1.8 required!). (See&nbsp;<a href="http://sadl.sourceforge.net/sadlv2release.html#CheckJavaVersion">How 
+  to check Java Version</a>.)</li>
+  <li>Download and install Eclipse Standard Kepler SR2 (Eclipse 4.3.x) from&nbsp;<a href="http://www.eclipse.org/downloads/packages/eclipse-standard-432/keplersr2">http://www.eclipse.org/downloads/packages/eclipse-standard-432/keplersr2</a>.</li>
+<li>Download the com.ge.research.sadl.update-3.x.x.xxxxxxxxx.zip file and expand to 
+a local directory. </li>
+<li>Then do an Eclipse update or install of new software from this newly created 
+update location.</li>
+<li>Note: if you get an error containing &quot;<span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 14px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">requires 
+'bundle org.junit 4.12.0' but it could not be found&quot; </span>
+<span style="font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none; background-color: rgb(255, 255, 255)">
+do the following:</span><ul>
+  <li>In the top menu bar click on <i>Help</i> -&gt; <i>Install new Software...</i></li>
+    <li>Open the <i>Available Software Sites</i> by clicking on the hyperlink just below the 
+    first text field.</li>
+    <li>Click on <i>Add...</i></li>
+    <li>Add the following Location:
+    <a href="http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/">
+    http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/</a> 
+    by copying and pasting into the <i>Location:</i> field. The name can be empty, or 
+    you can choose any arbitrary name.</li>
+    <li>Close both dialogs with <i>OK</i>.</li>
+    <li>Repeat step 4 above to install SADL.</li>
+  </ul>
+  </li>
+</ul>
+  </li>
+</ol><p>Note that SADL source code is now 
+hosted on <a href="http://github.com/crapo/sadlos2">http://github.com/crapo/sadlos2</a>.</p>
 <h3>Known limitations</h3>
 <ol>
   <li>Translation of rules, tests, and queries is not complete</li>
