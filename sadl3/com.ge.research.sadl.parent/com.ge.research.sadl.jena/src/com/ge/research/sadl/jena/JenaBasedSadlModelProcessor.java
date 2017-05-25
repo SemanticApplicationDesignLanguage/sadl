@@ -7031,7 +7031,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	protected void setCurrentEquation(Equation currentEquation) {
 		this.currentEquation = currentEquation;
 	}
-	protected JenaBasedSadlModelValidator getModelValidator() {
+	public JenaBasedSadlModelValidator getModelValidator() {
 		return modelValidator;
 	}
 	protected void setModelValidator(JenaBasedSadlModelValidator modelValidator) {
