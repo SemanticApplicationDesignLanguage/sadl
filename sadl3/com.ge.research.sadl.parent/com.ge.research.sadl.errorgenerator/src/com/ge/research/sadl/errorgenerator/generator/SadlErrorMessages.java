@@ -79,6 +79,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage MUST_BE_APPLIED_TO_LIST = new SadlErrorMessage("must_be_applied_to_list");
 /**
+* List definition is empty. Remove empty list brackets from definition. 
+**/
+    public static final SadlErrorMessage EMPTY_LIST_DEFINITION = new SadlErrorMessage("empty_list_definition");
+/**
 * Property ''{0}'' has no range; type cannot be determined so type checking is not possible.
 **/
     public static final SadlErrorMessage PROPERTY_WITHOUT_RANGE = new SadlErrorMessage("property_without_range");
@@ -158,6 +162,10 @@ public final class SadlErrorMessages {
 * Unable to do domain-range matching on a(n) {0}
 **/
     public static final SadlErrorMessage DOMAIN_MATCHING = new SadlErrorMessage("domain_matching");
+/**
+* Using a datatype as a domain--probably not what was intended?
+**/
+    public static final SadlErrorMessage DATATYPE_AS_DOMAIN = new SadlErrorMessage("datatype_as_domain");
 /**
 * unable to create {0}: {1}
 **/

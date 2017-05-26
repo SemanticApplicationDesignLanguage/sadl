@@ -6,26 +6,15 @@
 <meta name="ProgId" content="FrontPage.Editor.Document">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 
-<link rel="File-List" href="SadlConstructs_files/filelist.xml">
-
 
 <title>SADL Constructs Useful in Building Models</title>
-<!--[if !mso]>
-<style>
-v\:*         { behavior: url(#default#VML) }
-o\:*         { behavior: url(#default#VML) }
-.shape       { behavior: url(#default#VML) }
-</style>
-<![endif]--><!--[if gte mso 9]>
-<xml><o:shapedefaults v:ext="edit" spidmax="1027"/>
-</xml><![endif]-->
 </head>
 
 <body>
 
 <h1>SADL Constructs Useful in Building Models</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/04/2017<!--webbot bot="Timestamp" endspan i-checksum="12565" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/10/2017<!--webbot bot="Timestamp" endspan i-checksum="12509" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h4>Table of Contents</h4>
@@ -35,6 +24,7 @@ Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:cr
   <li><a href="#TypedLists">Typed Lists</a></li>
   <li><a href="#ImpliedProperties">Implied Properties</a></li>
   <li><a href="#UnittedQuantities">Unitted Quantities</a></li>
+  <li><a href="#ExternalModels">External Models</a></li>
 </ul>
 <h2><a name="Equations">Equations</a></h2>
 <p class="MsoNormal">
@@ -462,6 +452,13 @@ font-family:&quot;Times New Roman&quot;,serif;color:black">].</span></p>
 <span style="font-family:&quot;Times New Roman&quot;,serif">creates an instance 
 of <i>ChildrenList</i> with ordered members <i>John</i>, <i>Sue</i>, and <i>
 Craig</i>.</span></p>
+<p class="MsoNormal">
+<span style="font-family: 'Times New Roman',serif">This part of the 
+documentation does not address when and how one might use Lists. There are a 
+number of list expressions which can be used where expressions are allowed, 
+e.g., in <a href="#Equations">Equations</a> or in
+<a href="SadlConstructs2.html#Rules">Rules</a>. As an example, consider the 
+following ontology snippet.</span></p>
 <h2><a name="ImpliedProperties">Implied Properties</a></h2>
 <p class="MsoNormal">
 <span style="font-family:&quot;Times New Roman&quot;,serif">It is often the case 
@@ -501,31 +498,8 @@ Note that annotation properties in SADL are green but not bold. </span></p>
 <p class="MsoNormal">
 <span style="font-family:&quot;Times New Roman&quot;,serif">Suppose that we 
 created the following model.</span></p>
-<p class="MsoNormal" style="margin-left:.5in"><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
- coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
- filled="f" stroked="f">
- <v:stroke joinstyle="miter"/>
- <v:formulas>
-  <v:f eqn="if lineDrawn pixelLineWidth 0"/>
-  <v:f eqn="sum @0 1 0"/>
-  <v:f eqn="sum 0 0 @1"/>
-  <v:f eqn="prod @2 1 2"/>
-  <v:f eqn="prod @3 21600 pixelWidth"/>
-  <v:f eqn="prod @3 21600 pixelHeight"/>
-  <v:f eqn="sum @0 0 1"/>
-  <v:f eqn="prod @6 1 2"/>
-  <v:f eqn="prod @7 21600 pixelWidth"/>
-  <v:f eqn="sum @8 21600 0"/>
-  <v:f eqn="prod @7 21600 pixelHeight"/>
-  <v:f eqn="sum @10 21600 0"/>
- </v:formulas>
- <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
- <o:lock v:ext="edit" aspectratio="t"/>
-</v:shapetype><v:shape id="Picture_x0020_3" o:spid="_x0000_s1025" type="#_x0000_t75"
- style='width:300.75pt;height:81pt;visibility:visible;mso-wrap-style:square'>
- <v:imagedata src="SadlConstructs_files/image001.png" o:title=""/>
-</v:shape><![endif]--><![if !vml]><img border=0 width=401 height=108
-src="SadlConstructs_files/image002.jpg" v:shapes="Picture_x0020_3"><![endif]></p>
+<p class="MsoNormal" style="margin-left:.5in">
+<img border="0" src="images/image002.jpg" width="401" height="108"></p>
 <p class="MsoNormal" style="margin-left:.5in">
 <span style="font-family:&quot;Times New Roman&quot;,serif">&nbsp;</span></p>
 <p class="MsoNormal" style="text-indent: .05pt; line-height: normal; text-autospace: none; margin-bottom: .0001pt">
@@ -902,7 +876,7 @@ font-family:&quot;Times New Roman&quot;,serif;color:black"> </span><b>
 <span style="font-size:10.0pt;line-height:107%;font-family:&quot;Times New Roman&quot;,serif;
 color:green">unit</span></b><span style="font-size:10.0pt;line-height:107%;
 font-family:&quot;Times New Roman&quot;,serif;color:black"> &quot;<u>lbs</u>&quot;).</span></p>
-<h2>External Models (Models External to a Project)</h2>
+<h2><a name="ExternalModels">External Models (Models External to a Project)</a></h2>
 <p>SADL 3 supports the inclusion of imported models that are not in the current 
 project in two ways.</p>
 <ol type="a">

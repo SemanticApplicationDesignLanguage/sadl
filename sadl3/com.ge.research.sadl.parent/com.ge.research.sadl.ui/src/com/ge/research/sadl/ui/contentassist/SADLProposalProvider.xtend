@@ -65,9 +65,9 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 	
 	val PropertyRangeKeywords = newArrayList(
 		'string','boolean','decimal','int','long','float','double','duration','dateTime','time','date',
-    	'gYearMonth','gYear','gMonthDay','gDay','gMonth','hexBinary','base64Binary','anyURI','
-    	integer','negativeInteger','nonNegativeInteger','positiveInteger','nonPositiveInteger',' 
-    	unsignedByte','unsignedInt','anySimpleType','data','class')
+    	'gYearMonth','gYear','gMonthDay','gDay','gMonth','hexBinary','base64Binary','anyURI',
+    	'integer','negativeInteger','nonNegativeInteger','positiveInteger','nonPositiveInteger', 
+    	'byte','unsignedByte','unsignedInt','anySimpleType','data','class')
 	
 	protected List<OntConceptType> typeRestrictions
 	protected List<String> excludedNamespaces
@@ -245,9 +245,6 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					}
 				}
 			}
-			else if (pm instanceof SadlSimpleTypeReference) {
-				return
-			}
 			else if (pm instanceof SadlPropertyInitializer) {
 				if ((pm as SadlPropertyInitializer).property == null) {
 					excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
@@ -349,11 +346,17 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			val kval = keyword.value
 			if (container instanceof SadlProperty) {
 				if (model instanceof SadlRangeRestriction) {
-					if (PropertyRangeKeywords.contains(kval)) {
-						return true;
+					val ge = context.lastCompleteNode.grammarElement
+					if (ge instanceof Keyword && (ge as Keyword).value.equals("type")) {
+						if (PropertyRangeKeywords.contains(kval)) {
+							return true
+						}
+						else {
+							return false
+						}
 					}
 				}
-				return false
+				return true
 			}
 			else if (container instanceof Declaration) {
 				if (kval.equals("with") ||

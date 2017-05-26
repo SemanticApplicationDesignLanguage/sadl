@@ -509,5 +509,17 @@
 			<description>Import Owl files to a SADL project</description> 
 			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
 		</wizard> 
-   </extension> 
+   </extension>
+  <extension
+        point="org.eclipse.ui.startup">
+     <startup
+           class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.ui.markers.SadlMarkerStartup"></startup>
+  </extension>
+  <extension
+        id="sadlproblem"
+        point="org.eclipse.core.resources.markers">
+     <super type="org.eclipse.core.resources.problemmarker"/>
+     <persistent value="true"/>
+     <attribute name="ORIGIN_KEY"/>
+  </extension>
 </plugin>

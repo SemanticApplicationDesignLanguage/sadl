@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.contentassist
 
+import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.processing.ISadlOntologyHelper
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.PropOfSubject
@@ -58,14 +59,19 @@ class ProposalProviderFilterProvider {
 
 	@Inject
 	ISadlOntologyHelper ontologyHelper;
+	
+	@Inject
+	IModelProcessorProvider modelProcessorProvider;
 
 	def Predicate<IEObjectDescription> getCrossReferenceFilter(ContentAssistContext context) {
-		if (context === null || context.currentModel === null) {
+		if (context === null || context.currentModel === null || context.currentModel.eResource === null) {
 			return Predicates.alwaysFalse;
 		}
-
+		
+		val resource = context.currentModel.eResource;
+		val processor = modelProcessorProvider.getProcessor(resource);
 		val acceptor = new ProposalProviderValidationAcceptor;
-		val ontologyContext = ontologyContextProvider.getOntologyContext(context, acceptor).orNull;
+		val ontologyContext = ontologyContextProvider.getOntologyContext(context, processor, acceptor).orNull;
 		if (ontologyContext === null) {
 			return Predicates.alwaysFalse;
 		}

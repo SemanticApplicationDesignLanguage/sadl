@@ -15,22 +15,36 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.processing
+package com.ge.research.sadl.markers
 
-import com.ge.research.sadl.sADL.SadlResource
+import com.google.common.base.Preconditions
+import com.google.inject.ImplementedBy
 import com.google.inject.Singleton
 
-/**
- * Default, singleton ontology helper service for SADL.
+/** 
+ * Maps a SADL marker severity.
  * 
  * @author akos.kitta
  */
-@Singleton
-class SadlOntologyHelper implements ISadlOntologyHelper {
+@ImplementedBy(SadlMarkerSeverityMapper.Default)
+interface SadlMarkerSeverityMapper {
+	
+	/** 
+	 * Maps the SADL severity argument into the corresponding mapped value and returns with it.
+	 */
+	def Object map(SadlMarkerSeverity severity);
+	
+	/**
+	 * Default implementation that maps to the ordinal of the SADL marker severity.
+	 */
+	@Singleton
+	static class Default implements SadlMarkerSeverityMapper {
 
-	@Override
-	override validate(Context context, SadlResource candidate) {
-		context.modelProcessor.validate(context, candidate);
+		@Override		
+		override map(SadlMarkerSeverity severity) {
+			return Preconditions.checkNotNull(severity, "severity").ordinal;
+		}
+		
 	}
 
 }

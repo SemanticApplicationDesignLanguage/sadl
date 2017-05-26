@@ -15,22 +15,38 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.processing
-
-import com.ge.research.sadl.sADL.SadlResource
-import com.google.inject.Singleton
+package com.ge.research.sadl.markers
 
 /**
- * Default, singleton ontology helper service for SADL.
+ * Constants for the SADL marker service.
  * 
  * @author akos.kitta
  */
-@Singleton
-class SadlOntologyHelper implements ISadlOntologyHelper {
+abstract class SadlMarkerConstants {
 
-	@Override
-	override validate(Context context, SadlResource candidate) {
-		context.modelProcessor.validate(context, candidate);
+	/**
+	 * File extension of the SADL error XML.
+	 */
+	public static val FILE_EXTENSION = 'err';
+	
+	/**
+	 * The error file extension with the {@code '.'}.
+	 */
+	public static val FILE_EXTENSION_WITH_DOT = '''.«FILE_EXTENSION»''';
+
+	/**
+	 * The unique marker type ID.
+	 * // TODO we either need to introduce o.e.c.resources or in SADL core or we move the constants to UI.
+	 */
+	public static val SADL_PROBLEM_MARKER = "com.ge.research.sadl.ui.sadlproblem";
+
+	/**
+	 * Marker attribute for storing the origin of the marker. This could be the project
+	 * relative path of the error file resource or anything else unless this is unique.
+	 */
+	public static val ORIGIN_KEY = "ORIGIN_KEY";
+
+	private new() {
 	}
 
 }

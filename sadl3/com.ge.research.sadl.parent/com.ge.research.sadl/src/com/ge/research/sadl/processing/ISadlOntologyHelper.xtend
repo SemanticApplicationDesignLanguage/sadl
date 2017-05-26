@@ -30,7 +30,6 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.Assignment
 
 import static extension org.eclipse.xtext.GrammarUtil.containingParserRule
-import org.eclipse.xtext.resource.XtextResource
 
 /**
  * Reasoner independent implementation of an ontology helper for SADL. 
@@ -57,6 +56,11 @@ interface ISadlOntologyHelper {
 		 * Returns with the subject SADL resource.
 		 */
 		def SadlResource getSubject();
+		
+		/**
+		 * Returns with the model processor for the context.
+		 */
+		def IModelProcessor getModelProcessor();
 
 		/**
 		 * Returns with the validation acceptor.
@@ -90,11 +94,6 @@ interface ISadlOntologyHelper {
 		 * Returns with the restrictions for the context.
 		 */
 		def Iterable<SadlResource> getRestrictions();
-		
-		/**
-		 * Returns with the model processor for the context.
-		 */
-		def Optional<IModelProcessor> getModelProcessor();
 
 	}
 
@@ -119,6 +118,8 @@ interface ISadlOntologyHelper {
 		 * {@code C is a class. myC is a <|>}
 		 */
 		public static val SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE = 'SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE';
+		
+		public static val SADLPRIMARYTYPEREFERENCE_LIST = "SADLPRIMARYTYPEREFERENCE_LIST";
 
 		public static val SADLPROPERTYINITIALIZER_PROPERTY = 'SADLPROPERTYINITIALIZER_PROPERTY';
 
@@ -140,8 +141,6 @@ interface ISadlOntologyHelper {
 		 * {@code C is a class described by p1 with values of type C. myC is a C with p1 <|>}
 		 */
 		public static val SADLPROPERTYINITIALIZER_VALUE = 'SADLPROPERTYINITIALIZER_VALUE';
-		
-		public static val SADLSTATEMENT_TYPE = 'SADLSTATEMENT_TYPE';
 
 		/**
 		 * A subset of grammar context IDs that requires the ontology helper.
@@ -162,11 +161,11 @@ interface ISadlOntologyHelper {
 		 */
 		public static val ONTOLOGY_INDEPENDENT_CONTEXT_IDS = #{
 			SADLPRIMARYTYPEREFERENCE_TYPE,
+			SADLPRIMARYTYPEREFERENCE_LIST,
 			SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE,
 			SADLSTATEMENT_SUPERELEMENT,
 			PRIMARYEXPRESSION_VALUE,
-			SADLPROPERTYCONDITION_PROPERTY,
-			SADLSTATEMENT_TYPE
+			SADLPROPERTYCONDITION_PROPERTY
 		}
 
 		private new() {
@@ -183,13 +182,13 @@ interface ISadlOntologyHelper {
 		public static val MISSING_SUBJECT = SADLFactory.eINSTANCE.createSadlResource;
 
 		var SadlResource subject;
+		var IModelProcessor modelProcessor;
 
 		var OntModel ontModel;
 		var ValidationAcceptor acceptor;
 		var Optional<String> grammarContextId;
 		var Optional<EClass> contextClass;
 		var Collection<SadlResource> restrictions;
-		var Optional<IModelProcessor> modelProcessor;
 
 		/**
 		 * Returns with a new context builder that has no subject SADL resource.
@@ -200,13 +199,14 @@ interface ISadlOntologyHelper {
 			return builder;
 		}
 
-		new(EObject subject) {
+		new(EObject subject, IModelProcessor processor) {
 			this();
 			Preconditions.checkNotNull(subject, 'subject');
 			Preconditions.checkArgument(subject instanceof SadlResource,
 				'Expected an instance of SADL resource. Was: ' + subject);
 			Preconditions.checkNotNull(subject.eResource, 'Subject does not contained in a resource.');
 			this.subject = subject as SadlResource;
+			this.modelProcessor = Preconditions.checkNotNull(processor, 'processor');
 			ontModel = OntModelProvider.find(subject.eResource);
 		}
 
@@ -247,30 +247,20 @@ interface ISadlOntologyHelper {
 
 		def Context build() {
 			Preconditions.checkNotNull(ontModel, 'ontModel');
-			modelProcessor = Optional.fromNullable(processor)
-			return new ContextImpl(subject, ontModel, acceptor, grammarContextId, contextClass, restrictions, modelProcessor);
-		}
-		
-		private def IModelProcessor getProcessor() {
-			if (subject !== MISSING_SUBJECT) {
-				val resource = (subject.eResource as XtextResource);
-				val provider = resource.resourceServiceProvider.get(IModelProcessorProvider);
-				return provider.getProcessor(subject.eResource);
-			}
-			return null;
+			return new ContextImpl(ontModel, subject, modelProcessor, acceptor, grammarContextId, contextClass, restrictions);
 		}
 
 	}
 
 	@Data
 	static class ContextImpl implements Context {
-		val SadlResource subject;
 		val OntModel ontModel;
+		val SadlResource subject;
+		val IModelProcessor modelProcessor;
 		val ValidationAcceptor acceptor;
 		val Optional<String> grammarContextId;
 		val Optional<EClass> contextClass;
 		val Iterable<SadlResource> restrictions;
-		val Optional<IModelProcessor> modelProcessor;
 	}
 
 }

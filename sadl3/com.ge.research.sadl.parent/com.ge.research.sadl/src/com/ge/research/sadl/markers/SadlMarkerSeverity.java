@@ -15,22 +15,43 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.processing
+package com.ge.research.sadl.markers;
 
-import com.ge.research.sadl.sADL.SadlResource
-import com.google.inject.Singleton
+import java.util.Arrays;
+
+import com.google.common.base.Preconditions;
 
 /**
- * Default, singleton ontology helper service for SADL.
+ * Enumeration of SADL marker severities.
  * 
  * @author akos.kitta
  */
-@Singleton
-class SadlOntologyHelper implements ISadlOntologyHelper {
+public enum SadlMarkerSeverity {
 
-	@Override
-	override validate(Context context, SadlResource candidate) {
-		context.modelProcessor.validate(context, candidate);
+	/**
+	 * Info.
+	 */
+	INFO,
+
+	/**
+	 * Warning.
+	 */
+	WARNING,
+
+	/**
+	 * Error.
+	 */
+	ERROR;
+
+	/**
+	 * Returns with the severity with the given name. The desired name argument
+	 * is case insensitive.
+	 */
+	public static SadlMarkerSeverity getSeverityByName(String name) {
+		Preconditions.checkNotNull(name, "name");
+		return Arrays.stream(SadlMarkerSeverity.values())
+				.filter(severity -> severity.toString().equals(name.toUpperCase())).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Unexpected severity type: " + name));
 	}
 
 }

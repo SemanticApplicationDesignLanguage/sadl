@@ -50,6 +50,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.processing.SadlConstants
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
@@ -630,12 +631,13 @@ class SadlModelManagerProviderTest {
 		'''.assertValidatesTo [ jenaModel, issues |
 			// expectations go here
 			assertNotNull(jenaModel)
+			jenaModel.write(System.out,"N-TRIPLE")
 			assertTrue(issues.size == 0)
 			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
-			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
 			assertTrue(ann.toString().equals("LIST"))
 			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
-			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
 			assertTrue(ann2.toString().equals("LIST"))
 		]
 	}
@@ -651,10 +653,10 @@ class SadlModelManagerProviderTest {
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
-			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
 			assertTrue(ann.toString().equals("LIST"))
 			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
-			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty("http://sadl.org/range/annotation/listtype"))
+			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
 			assertTrue(ann2.toString().equals("LIST"))
 		]
 	}

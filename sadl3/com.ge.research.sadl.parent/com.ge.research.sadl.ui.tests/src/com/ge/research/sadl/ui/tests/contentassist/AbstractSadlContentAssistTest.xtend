@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests.contentassist
 
+import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.ui.OutputStreamStrategy
 import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
@@ -64,7 +65,7 @@ import static org.junit.Assert.*
 @InjectWith(SADLUiInjectorProvider)
 abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest implements ResourceLoadHelper {
 
-	static val PROJECT_NAME = 'testProject'
+	protected static val PROJECT_NAME = 'testProject'
 
 	static val RESOURCES = ImmutableMap.builder.put('Bar.sadl', '''uri "http://barUri". Bar is a class.''').put(
 		'NotVisible.sadl', '''uri "http://notVisibleUri". NotVisible is a class.''').put('Shape.sadl', '''uri "http://shape". 
@@ -113,7 +114,7 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 
 	@Override
 	override getResourceFor(InputStream stream) {
-		val uri = URI.createURI('''platform:/resource/«PROJECT_NAME»/«name.methodName».sadl''');
+		val uri = URI.createURI('''platform:/resource/«PROJECT_NAME»/«name.methodName»«fileExtension»''');
 		val resource = resourceSet.createResource(uri) as XtextResource;
 		try {
 			resource.load(stream, null);
@@ -138,6 +139,16 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 		}
 	}
 
+	protected static def getProject() {
+		val project = root.getProject(PROJECT_NAME);
+		assertTrue('''Project '«project»' is not accessible.''', project.accessible);
+		return project;
+	}
+
+	protected static def getProjects() {
+		return root.projects;
+	}
+
 	protected def newBuilder(String content) {
 		val builder = new SadlContentAssistProcessorTestBuilder(injector, this) {
 
@@ -153,6 +164,10 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 	protected def <T> get(Class<T> clazz) {
 		return injector.getInstance(clazz);
 	}
+	
+	protected def getFileExtension() {
+		return '.sadl';
+	}
 
 	private def getResourceSet() {
 		val resourceSetProvider = injector.getInstance(IResourceSetProvider);
@@ -161,17 +176,7 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 		return resourceSet;
 	}
 
-	private static def getProject() {
-		val project = root.getProject(PROJECT_NAME);
-		assertTrue('''Project '«project»' is not accessible.''', project.accessible);
-		return project;
-	}
-
-	private static def getProjects() {
-		return root.projects;
-	}
-
-	package static class SadlContentAssistProcessorTestBuilder extends ContentAssistProcessorTestBuilder {
+	protected static class SadlContentAssistProcessorTestBuilder extends ContentAssistProcessorTestBuilder {
 
 		new(Injector injector, ResourceLoadHelper helper) throws Exception {
 			super(injector, helper)
@@ -188,10 +193,14 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 				val processor = contentAssist.getContentAssistProcessor(contentType);
 				if (processor instanceof XtextContentAssistProcessor) {
 					val contexts = document.readOnly([
-						processor.contextFactory.create(sourceViewer, document.length, it)
+						return processor.contextFactory.create(sourceViewer, document.length, it);
+					]);
+					val modelProcessor = document.readOnly([
+						val provider = get(IModelProcessorProvider);
+						return provider.getProcessor(it);
 					]);
 					for (context : contexts) {
-						val ontologyContext = get(IOntologyContextProvider).getOntologyContext(context);
+						val ontologyContext = get(IOntologyContextProvider).getOntologyContext(context, modelProcessor);
 						if (ontologyContext.present) {
 							return ontologyContext.get;
 						}

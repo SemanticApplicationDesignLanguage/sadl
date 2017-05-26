@@ -3,10 +3,14 @@ package com.ge.research.sadl.perspective.util;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -32,6 +36,13 @@ public class Util {
 	}
 
 	public static IProject selectSADLProject() {
+		//First, if a project is already selected, return it
+		IProject selectedProject = obtainSelectedSADLProject();
+		if(selectedProject != null){
+			return selectedProject;
+		}
+				
+		//Second, open menu to select project
 		// this method returns a project that the user selects from a list of
 		// SADL projects in the workspace
 
@@ -85,6 +96,24 @@ public class Util {
 			return null;
 		}
 		// Give up, didn't match the project
+		return null;
+	}
+	
+	private static IProject obtainSelectedSADLProject() {
+		ISelectionService ss = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		ISelection s = ss.getSelection("org.eclipse.ui.navigator.ProjectExplorer");
+		if(s instanceof IStructuredSelection){
+			Object o = ((IStructuredSelection)s).getFirstElement();
+			if(o instanceof IResource){
+				IProject p = ((IResource)o).getProject();
+				try {
+					if(p != null && p.isOpen() && p.isNatureEnabled("org.eclipse.xtext.ui.shared.xtextNature")){
+						return p;
+					}
+				} catch (CoreException e) {
+				}
+			}
+		}
 		return null;
 	}
 }

@@ -170,12 +170,11 @@ class GrammarContextIDsTest extends Assert {
 			sadlPropertyRestrictionAccess.typeonlyAssignment_2_5_0
 		);
 	}
-
+	
 	@Test
 	def void check_13() {
-		assertEquals(
-			SADLSTATEMENT_TYPE,
-			sadlStatementAccess.typeAssignment_0_1_5_1_2
+		assertEquals(SADLPRIMARYTYPEREFERENCE_LIST, 
+			sadlPrimaryTypeReferenceAccess.getListAssignment_1_2
 		);
 	}
 

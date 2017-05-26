@@ -187,6 +187,14 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(),
+				"Translate multiple-class domain or range as union class (owl:unionOf)", getFieldEditorParent()) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
 		// addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(),
 				"Generate metrics report during project clean/build", getFieldEditorParent()) {
@@ -232,6 +240,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 
 		//General Settings
 		store.setDefault(SadlPreferences.USE_IMPLIED_PROPERTIES_IN_TRANSLATION.getId(), true);
+		store.setDefault(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), true);
 //		store.setDefault(RAEConstants.ANALYSIS_TIMEOUT,"600");
 //		store.setDefault(RAEConstants.RUN_PARTIAL_ANALYSIS,false);
 //		store.setDefault(RAEConstants.ENABLE_PREPROCESSING,true);

@@ -19,6 +19,7 @@ package com.ge.research.sadl.ui.contentassist;
 
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 
+import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.google.common.base.Optional;
@@ -37,14 +38,15 @@ public interface IOntologyContextProvider {
 	 * returns with it. May return with an absent when the transformation is not
 	 * viable.
 	 */
-	default Optional<Context> getOntologyContext(ContentAssistContext it) {
-		return getOntologyContext(it, ValidationAcceptor.NOOP);
+	default Optional<Context> getOntologyContext(ContentAssistContext it, IModelProcessor processor) {
+		return getOntologyContext(it, processor, ValidationAcceptor.NOOP);
 	}
 
 	/**
 	 * Transforms the content assist context into a ontology helper context with
 	 * the given acceptor.
 	 */
-	Optional<Context> getOntologyContext(ContentAssistContext it, ValidationAcceptor acceptor);
+	Optional<Context> getOntologyContext(ContentAssistContext it, IModelProcessor processor,
+			ValidationAcceptor acceptor);
 
 }

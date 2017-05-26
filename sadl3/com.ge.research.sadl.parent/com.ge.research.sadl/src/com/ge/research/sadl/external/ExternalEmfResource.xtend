@@ -99,11 +99,15 @@ class ExternalEmfResource extends ResourceImpl {
 								this.getContents += it
 							]
 						}
-					rootModel.elements += SADLFactory.eINSTANCE.createSadlResource => [
+						rootModel.elements += SADLFactory.eINSTANCE.createSadlResource => [
 						new ExternalResourceAdapter(rdfRes.localName, rdfRes.URI, getType(rdfRes)).attachToEmfObject(it)
 						name = it;
 					]
 				}
+//				else {
+//					val importedResource = rdfRes.getPropertyResourceValue(OWL.imports)
+//					System.out.println(importedResource)
+//				}
 			}
 		}
 	}
