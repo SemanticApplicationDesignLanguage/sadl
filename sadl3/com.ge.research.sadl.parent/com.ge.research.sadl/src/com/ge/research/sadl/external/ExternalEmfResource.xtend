@@ -3,11 +3,14 @@ package com.ge.research.sadl.external
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.sADL.SADLFactory
 import com.google.inject.Inject
+import com.google.inject.Injector
 import com.hp.hpl.jena.ontology.AnnotationProperty
 import com.hp.hpl.jena.ontology.DatatypeProperty
 import com.hp.hpl.jena.ontology.Individual
 import com.hp.hpl.jena.ontology.ObjectProperty
 import com.hp.hpl.jena.ontology.OntClass
+import com.hp.hpl.jena.ontology.OntModel
+import com.hp.hpl.jena.ontology.OntModelSpec
 import com.hp.hpl.jena.rdf.model.ModelFactory
 import com.hp.hpl.jena.rdf.model.Resource
 import com.hp.hpl.jena.util.iterator.ExtendedIterator
@@ -23,12 +26,10 @@ import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtend.lib.annotations.Delegate
+import org.eclipse.xtext.generator.GeneratorDelegate
 import org.eclipse.xtext.resource.IResourceServiceProvider
 import org.eclipse.xtext.util.internal.EmfAdaptable
 import org.eclipse.xtext.validation.IResourceValidator
-import com.hp.hpl.jena.ontology.OntModelSpec
-import com.hp.hpl.jena.ontology.OntModel
-import com.ge.research.sadl.sADL.SadlResource
 
 class ExternalEmfResource extends ResourceImpl {
 	@Accessors OntModel jenaModel
@@ -195,6 +196,9 @@ class ExternalEmfResourceServiceProvider implements IResourceServiceProvider {
 
 	@Inject @Delegate IResourceServiceProvider delegate
 
+	@Inject
+	Injector injector;
+	
 	override canHandle(URI uri) {
 		// exclude:
 		// 1) SadlBaseModel.owl
@@ -209,6 +213,13 @@ class ExternalEmfResourceServiceProvider implements IResourceServiceProvider {
 
 	override getResourceValidator() {
 		return IResourceValidator.NULL
+	}
+	
+	override <T> get(Class<T> clazz) {
+		if (GeneratorDelegate === clazz) {
+			return injector.getInstance(ExternalEmfResourceGenerator) as T;
+		}
+		return delegate.get(clazz);
 	}
 
 }
