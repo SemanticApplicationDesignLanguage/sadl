@@ -56,7 +56,6 @@ class ExternalEmfBuilderParticipant extends BuilderParticipant implements IResou
 	override handleChangedContents(Delta delta, IBuildContext context,
 		EclipseResourceFileSystemAccess2 fileSystemAccess) throws CoreException {
 
-		// TODO: we will run out of memory here if the number of deltas is large enough
 		if (!getResourceServiceProvider().canHandle(delta.getUri())) {
 			return;
 		}
