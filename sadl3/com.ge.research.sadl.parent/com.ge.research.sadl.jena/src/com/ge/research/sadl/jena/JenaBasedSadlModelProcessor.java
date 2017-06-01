@@ -4699,7 +4699,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					} catch (DontTypeCheckException e) {
 						// do nothing
 					} catch(PropertyWithoutRangeException e){
-						issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(prop)), propinit);
+						String propUri = declarationExtensions.getConceptUri(prop);
+//						if (!propUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
+							issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(prop)), propinit);
+//						}
 					} catch (Exception e) {
 						throw new JenaProcessorException("Unexpected error checking value in range", e);
 					}
@@ -6972,12 +6975,17 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		return cm.getTranslator();
 	}
 	
-	public List<ConceptName> getImpliedProperties(com.hp.hpl.jena.rdf.model.Resource first) {
+	/**
+	 * Method to obtain the sadlimplicitmodel:impliedProperty annotation property values for the given class
+	 * @param cls -- the Jena Resource (nominally a class) for which the values are desired
+	 * @return -- a List of the ConceptNames of the values 
+	 */
+	public List<ConceptName> getImpliedProperties(com.hp.hpl.jena.rdf.model.Resource cls) {
 		List<ConceptName> retlst = null;
-		if (first == null) return null;
+		if (cls == null) return null;
 		// check superclasses
-		if (first.canAs(OntClass.class)) {
-			OntClass ontcls = first.as(OntClass.class);
+		if (cls.canAs(OntClass.class)) {
+			OntClass ontcls = cls.as(OntClass.class);
 			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
 			while (eitr.hasNext()) {
 				OntClass supercls = eitr.next();
@@ -6997,7 +7005,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 				}
 			}
 		}
-		StmtIterator sitr = getTheJenaModel().listStatements(first, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
+		StmtIterator sitr = getTheJenaModel().listStatements(cls, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
 		if (sitr.hasNext()) {
 			if (retlst == null) {
 				retlst = new ArrayList<ConceptName>();
@@ -7006,6 +7014,55 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 				RDFNode obj = sitr.nextStatement().getObject();
 				if (obj.isURIResource()) {
 					ConceptName cn = new ConceptName(obj.asResource().getURI());
+					if (!retlst.contains(cn)) {
+						retlst.add(cn);
+					}
+				}
+			}
+			return retlst;
+		}
+		return retlst;
+	}
+	
+	/**
+	 * Method to obtain the sadlimplicitmodel:expandedProperty annotation property values for the given class
+	 * @param cls -- the Jena Resource (nominally a class) for which the values are desired
+	 * @return -- a List of the URI strings of the values 
+	 */
+	public List<String> getExpandedProperties(com.hp.hpl.jena.rdf.model.Resource cls) {
+		List<String> retlst = null;
+		if (cls == null) return null;
+		// check superclasses
+		if (cls.canAs(OntClass.class)) {
+			OntClass ontcls = cls.as(OntClass.class);
+			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
+			while (eitr.hasNext()) {
+				OntClass supercls = eitr.next();
+				List<String> scips = getExpandedProperties(supercls);
+				if (scips != null) {
+					if (retlst == null) {
+						retlst = scips;
+					}
+					else {
+						for (int i = 0; i < scips.size(); i++) {
+							String cn = scips.get(i);
+							if (!scips.contains(cn)) {
+								retlst.add(scips.get(i));
+							}
+						}
+					}
+				}
+			}
+		}
+		StmtIterator sitr = getTheJenaModel().listStatements(cls, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPANDED_PROPERTY_URI), (RDFNode)null);
+		if (sitr.hasNext()) {
+			if (retlst == null) {
+				retlst = new ArrayList<String>();
+			}
+			while (sitr.hasNext()) {
+				RDFNode obj = sitr.nextStatement().getObject();
+				if (obj.isURIResource()) {
+					String cn = obj.asResource().getURI();
 					if (!retlst.contains(cn)) {
 						retlst.add(cn);
 					}
