@@ -22,6 +22,7 @@ package com.ge.research.sadl.ui
 
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
 import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
+import com.ge.research.sadl.ui.contentassist.SadlContentAssistContextFactory
 import com.ge.research.sadl.ui.contentassist.SadlOntologyContextProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
@@ -38,6 +39,7 @@ import com.google.inject.Binder
 import com.google.inject.name.Names
 import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.generator.IShouldGenerate
+import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.contentassist.AbstractJavaBasedContentProposalProvider.ReferenceProposalCreator
@@ -113,9 +115,12 @@ class SADLUiModule extends AbstractSADLUiModule {
 		return EclipseMarkerSeverityMapper;
 	}
 	
-	@Override
 	override Class<? extends IShouldGenerate> bindIShouldGenerate() {
 		return SadlShouldGenerate;
+	}
+	
+	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
+		return SadlContentAssistContextFactory;
 	}
 	
 }
