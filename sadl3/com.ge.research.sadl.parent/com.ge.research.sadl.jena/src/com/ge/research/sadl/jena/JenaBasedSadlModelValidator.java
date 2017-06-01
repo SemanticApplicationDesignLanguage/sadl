@@ -3066,6 +3066,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				break;
 			}
 		}
+		//Check for super properties
+		stmtitr = prop.listProperties();
+		while (stmtitr.hasNext()) {
+			if(matchFound){
+				break;
+			}
+			RDFNode obj = stmtitr.nextStatement().getObject();
+			if(obj.canAs(Property.class)){
+				StmtIterator stmtitr2 = ontModel.listStatements(obj.as(Property.class), RDFS.domain, (RDFNode)null);
+				while(stmtitr2.hasNext()){
+					RDFNode obj2 = stmtitr2.nextStatement().getObject();
+					if (obj2.isResource()) {
+						matchFound = checkForPropertyDomainMatch(subj, obj.as(Property.class), obj2.asResource());
+					}
+					if (matchFound) {
+						break;
+					}
+				}
+			}
+		}
 		stmtitr.close();
 		if (subj != null && !matchFound) {
 			if (varName != null) {
