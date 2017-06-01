@@ -137,6 +137,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Property initializer value. */
+
 	@Test
 	def void checCA_14c_PropertyInitializerValue_Positive() {
 		newBuilder('''uri "http://myUri". 
