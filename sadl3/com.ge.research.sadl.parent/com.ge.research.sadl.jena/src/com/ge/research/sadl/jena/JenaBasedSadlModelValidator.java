@@ -584,6 +584,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Null Pointer"), expr);
 			} else if (t instanceof DontTypeCheckException) {
 				return true;
+			} else if (t instanceof PropertyWithoutRangeException) {
+				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(((PropertyWithoutRangeException)t).getPropID()), expr);
+				return true;
 			} else if (t instanceof CircularDefinitionException) {
 				t.printStackTrace();
 			}
@@ -1969,25 +1972,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else if(conceptType.equals(OntConceptType.DATATYPE_PROPERTY)){
-			TypeCheckInfo propcheckinfo = getNameProperty(ConceptType.DATATYPEPROPERTY, conceptUri, expression);
+			TypeCheckInfo propcheckinfo = getNameProperty(qnm, ConceptType.DATATYPEPROPERTY, conceptUri, expression);
 			if (propcheckinfo != null) {
 				return propcheckinfo;
 			}
-			throw new PropertyWithoutRangeException();
+			throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(qnm));
 		}
 		else if(conceptType.equals(OntConceptType.CLASS_PROPERTY)){
-			TypeCheckInfo propcheckinfo =  getNameProperty(ConceptType.OBJECTPROPERTY, conceptUri, expression);
+			TypeCheckInfo propcheckinfo =  getNameProperty(qnm, ConceptType.OBJECTPROPERTY, conceptUri, expression);
 			if (propcheckinfo != null) {
 				return propcheckinfo;
 			}
-			throw new PropertyWithoutRangeException();
+			throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(qnm));
 		}
 		else if (conceptType.equals(OntConceptType.RDF_PROPERTY)) {
-			TypeCheckInfo rdfpropcheckinfo = getNameProperty(ConceptType.RDFPROPERTY, conceptUri, expression);
+			TypeCheckInfo rdfpropcheckinfo = getNameProperty(qnm, ConceptType.RDFPROPERTY, conceptUri, expression);
 			if (rdfpropcheckinfo != null) {
 				return rdfpropcheckinfo;
 			}
-			throw new PropertyWithoutRangeException();
+			throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(qnm));
 		}
 		else if(conceptType.equals(OntConceptType.INSTANCE)){
 			// this is an instance--if it is already in the ontology we can get its type. If not maybe we can get it from its declaration
@@ -2083,10 +2086,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return modelProcessor.createTypedConceptName(conceptUri, conceptType);
 	}
 
-	protected TypeCheckInfo getNameProperty(ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException, InvalidTypeException {
+	protected TypeCheckInfo getNameProperty(SadlResource qnm, ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException, InvalidTypeException {
 		OntProperty property = theJenaModel.getOntProperty(conceptUri);
 		if(property == null){
-			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), expression);
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), qnm != null ? qnm : expression);
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
 			}
@@ -2142,7 +2145,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			while (sitr2.hasNext()) {
 				RDFNode psuper = sitr2.next().getObject();
 				if (psuper.isResource()) {
-					TypeCheckInfo superTCInfo = getNameProperty(propertyType, psuper.asResource().getURI(), expression);
+					TypeCheckInfo superTCInfo = getNameProperty(null, propertyType, psuper.asResource().getURI(), expression);
 					if (superTCInfo != null) {
 						sitr2.close();
 						return superTCInfo;
