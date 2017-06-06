@@ -62,6 +62,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
@@ -199,6 +200,7 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.google.common.math.IntMath;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -4177,11 +4179,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		
 		RDFNode propOwlType = null;
-		boolean existingRangeThisModel = false;
+		boolean rangeExists = false;
 		boolean addNewRange = false;
 		StmtIterator existingRngItr = getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null);
 		if (existingRngItr.hasNext()) {
 			RDFNode existingRngNode = existingRngItr.next().getObject();
+			rangeExists = true;
 			// property already has a range know to this model
 			if (rngNode.equals(existingRngNode) || (rngResource != null && rngResource.equals(existingRngNode))) {
 				// do nothing-- rngNode is already in range
@@ -4213,14 +4216,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 			}
 
+			boolean rangeInThisModel = false;
+			StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null);
+			if (inModelStmtItr.hasNext()) {
+				rangeInThisModel = true;
+			}
 			if (domainAndRangeAsUnionClasses) {
 				// in this case we want to create a union class if necessary
-				StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null);
-				if (inModelStmtItr.hasNext()) {
+//				StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null);
+//				if (inModelStmtItr.hasNext()) {
+				if (rangeInThisModel) {
 					// this model (as opposed to imports) already has a range specified
 					addNewRange = false;
 					UnionClass newUnionClass = null;
-					existingRangeThisModel = true;
 					while (inModelStmtItr.hasNext()) {
 						RDFNode rngThisModel = inModelStmtItr.nextStatement().getObject();
 						if (rngThisModel.isResource()) {
@@ -4252,9 +4260,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}	// end if existing range in this model
 				else {
-					if (existingRngNode != null) {
-						addWarning("This changes the range of property '" + prop.getURI() + "' which has an imported range; are you sure that's what you want to do?", context);
-					}
+					inModelStmtItr.close();
 					// check to see if this is something new
 					do {
 						if (existingRngNode.equals(rngNode)) {
@@ -4270,6 +4276,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					} while (existingRngNode != null);
 				}
 			}	// end if domainAndRangeAsUnionClasses
+			else {
+				inModelStmtItr.close();
+			}
+			if (rangeExists && !rangeInThisModel) {
+				addWarning(SadlErrorMessages.IMPORTED_RANGE_CHANGE.get(nodeToString(prop)), context);
+			}
 		}	// end if existing range in any model, this or imports
 		if (rngNode != null) {	
 			if (rngResource != null) {
@@ -4382,7 +4394,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private String nodeToString(RDFNode obj) {
 		StringBuilder sb = new StringBuilder();
 		if (obj.isURIResource()) {
-			sb.append(obj.toString());
+			sb.append(uriStringToString(obj.toString()));
 		}
 		else if (obj.canAs(UnionClass.class)){
 			UnionClass ucls = obj.as(UnionClass.class);
@@ -4699,7 +4711,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					} catch (DontTypeCheckException e) {
 						// do nothing
 					} catch(PropertyWithoutRangeException e){
-						issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(prop)), propinit);
+						String propUri = declarationExtensions.getConceptUri(prop);
+						if (!propUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
+							issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(declarationExtensions.getConcreteName(prop)), propinit);
+						}
 					} catch (Exception e) {
 						throw new JenaProcessorException("Unexpected error checking value in range", e);
 					}
@@ -5201,8 +5216,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private void addPropertyDomain(Property prop, OntResource cls, EObject context) throws JenaProcessorException {
 		boolean addNewDomain = true;
 		StmtIterator sitr = getTheJenaModel().listStatements(prop, RDFS.domain, (RDFNode)null);
+		boolean domainExists = false;
 		if (sitr.hasNext()) {
 			RDFNode existingDomain = sitr.next().getObject();
+			domainExists = true;
 			// property already has a domain known to this model
 			if (cls.equals(existingDomain)) {
 				// do nothing--cls is already in domain
@@ -5223,11 +5240,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					return;
 				}
 			}
-				
+			
+			boolean domainInThisModel = false;
+			StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null);
+			if (inModelStmtItr.hasNext()) {
+				domainInThisModel = true;
+			}
 			if (domainAndRangeAsUnionClasses) {
 				// in this case we want to create a union class if necessary
-				StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.domain, (RDFNode)null);
-				if (inModelStmtItr.hasNext()) {
+				if (domainInThisModel) {
 					// this model (as opposed to imports) already has a domain specified
 					addNewDomain = false;
 					UnionClass newUnionClass = null;
@@ -5258,9 +5279,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}	// end if existing domain in this model
 				else {
-					if (existingDomain != null) {
-						addWarning("This changes the domain of property '" + prop.getURI() + "' which has an imported domain; are you sure that's what you want to do?", context);
-					}
+					inModelStmtItr.close();
 					// check to see if this is something new
 					do {
 						if (existingDomain.equals(cls)) {
@@ -5276,6 +5295,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					} while (existingDomain != null);
 				}
 			}	// end if domainAndRangeAsUnionClasses
+			else {
+				inModelStmtItr.close();
+			}
+			if (domainExists && !domainInThisModel) {
+				addWarning(SadlErrorMessages.IMPORTED_DOMAIN_CHANGE.get(nodeToString(prop)), context);
+			}
 		}	// end if existing domain in any model, this or imports
 		if(cls != null){
 			if (!domainAndRangeAsUnionClasses && cls instanceof UnionClass) {
@@ -6972,12 +6997,17 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		return cm.getTranslator();
 	}
 	
-	public List<ConceptName> getImpliedProperties(com.hp.hpl.jena.rdf.model.Resource first) {
+	/**
+	 * Method to obtain the sadlimplicitmodel:impliedProperty annotation property values for the given class
+	 * @param cls -- the Jena Resource (nominally a class) for which the values are desired
+	 * @return -- a List of the ConceptNames of the values 
+	 */
+	public List<ConceptName> getImpliedProperties(com.hp.hpl.jena.rdf.model.Resource cls) {
 		List<ConceptName> retlst = null;
-		if (first == null) return null;
+		if (cls == null) return null;
 		// check superclasses
-		if (first.canAs(OntClass.class)) {
-			OntClass ontcls = first.as(OntClass.class);
+		if (cls.canAs(OntClass.class)) {
+			OntClass ontcls = cls.as(OntClass.class);
 			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
 			while (eitr.hasNext()) {
 				OntClass supercls = eitr.next();
@@ -6997,7 +7027,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 				}
 			}
 		}
-		StmtIterator sitr = getTheJenaModel().listStatements(first, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
+		StmtIterator sitr = getTheJenaModel().listStatements(cls, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
 		if (sitr.hasNext()) {
 			if (retlst == null) {
 				retlst = new ArrayList<ConceptName>();
@@ -7006,6 +7036,55 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 				RDFNode obj = sitr.nextStatement().getObject();
 				if (obj.isURIResource()) {
 					ConceptName cn = new ConceptName(obj.asResource().getURI());
+					if (!retlst.contains(cn)) {
+						retlst.add(cn);
+					}
+				}
+			}
+			return retlst;
+		}
+		return retlst;
+	}
+	
+	/**
+	 * Method to obtain the sadlimplicitmodel:expandedProperty annotation property values for the given class
+	 * @param cls -- the Jena Resource (nominally a class) for which the values are desired
+	 * @return -- a List of the URI strings of the values 
+	 */
+	public List<String> getExpandedProperties(com.hp.hpl.jena.rdf.model.Resource cls) {
+		List<String> retlst = null;
+		if (cls == null) return null;
+		// check superclasses
+		if (cls.canAs(OntClass.class)) {
+			OntClass ontcls = cls.as(OntClass.class);
+			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
+			while (eitr.hasNext()) {
+				OntClass supercls = eitr.next();
+				List<String> scips = getExpandedProperties(supercls);
+				if (scips != null) {
+					if (retlst == null) {
+						retlst = scips;
+					}
+					else {
+						for (int i = 0; i < scips.size(); i++) {
+							String cn = scips.get(i);
+							if (!scips.contains(cn)) {
+								retlst.add(scips.get(i));
+							}
+						}
+					}
+				}
+			}
+		}
+		StmtIterator sitr = getTheJenaModel().listStatements(cls, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPANDED_PROPERTY_URI), (RDFNode)null);
+		if (sitr.hasNext()) {
+			if (retlst == null) {
+				retlst = new ArrayList<String>();
+			}
+			while (sitr.hasNext()) {
+				RDFNode obj = sitr.nextStatement().getObject();
+				if (obj.isURIResource()) {
+					String cn = obj.asResource().getURI();
 					if (!retlst.contains(cn)) {
 						retlst.add(cn);
 					}

@@ -79,6 +79,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage MUST_BE_APPLIED_TO_LIST = new SadlErrorMessage("must_be_applied_to_list");
 /**
+* This changes the domain of property ''{0}'' which has an imported domain; are you sure that's what you want to do?
+**/
+    public static final SadlErrorMessage IMPORTED_DOMAIN_CHANGE = new SadlErrorMessage("imported_domain_change");
+/**
 * List definition is empty. Remove empty list brackets from definition. 
 **/
     public static final SadlErrorMessage EMPTY_LIST_DEFINITION = new SadlErrorMessage("empty_list_definition");
@@ -210,6 +214,10 @@ public final class SadlErrorMessages {
 * A {0} with name ''{1}'' already exists in the set of {0}s. {0} names must be unique.
 **/
     public static final SadlErrorMessage UNIQUE_NAME = new SadlErrorMessage("unique_name");
+/**
+* This changes the range of property ''{0}'' which has an imported range; are you sure that's what you want to do?
+**/
+    public static final SadlErrorMessage IMPORTED_RANGE_CHANGE = new SadlErrorMessage("imported_range_change");
 /**
 * translate(Name) called with a SadlResource which resolved to null; this needs to be caught in validation
 **/

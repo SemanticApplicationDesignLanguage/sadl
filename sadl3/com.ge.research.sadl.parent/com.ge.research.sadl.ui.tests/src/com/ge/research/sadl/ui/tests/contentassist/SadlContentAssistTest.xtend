@@ -18,7 +18,6 @@
 package com.ge.research.sadl.ui.tests.contentassist
 
 import org.junit.Test
-import org.junit.Ignore
 
 /**
  * Plug-in tests for the SADL content assist.
@@ -29,7 +28,6 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 
 	/** Primitive primary type reference. */
 	@Test
-// TODO this should actually not be a proposal--can't create an instance of an XSD datatype
 	def void checkCA_01_PrimaryType_Positive() {
 		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposal('integer');
 	}
@@ -139,7 +137,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	/** Property initializer value. */
-	@Ignore
+
 	@Test
 	def void checCA_14c_PropertyInitializerValue_Positive() {
 		newBuilder('''uri "http://myUri". 

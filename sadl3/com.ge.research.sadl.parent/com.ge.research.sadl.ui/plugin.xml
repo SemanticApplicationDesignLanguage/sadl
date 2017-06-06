@@ -312,6 +312,12 @@
 			fileExtensions="sadl">
 		</participant>
 	</extension>
+	<extension point="org.eclipse.xtext.builder.participant">
+		<participant
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:com.ge.research.sadl.ui.external.ExternalEmfBuilderParticipant"
+			fileExtensions="owl,nt,n3">
+		</participant>
+	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
 			category="com.ge.research.sadl.SADL"

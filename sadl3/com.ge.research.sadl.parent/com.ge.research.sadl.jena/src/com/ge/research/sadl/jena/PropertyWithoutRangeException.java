@@ -8,8 +8,19 @@ public class PropertyWithoutRangeException extends Exception {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private String propID = null;
 
 	public PropertyWithoutRangeException(){
 		super("Property does not have a range");
+	}
+	
+	public PropertyWithoutRangeException(String pid) {
+		super("Property does not have a range");
+		propID = pid;
+	}
+
+	public String getPropID() {
+		return propID;
 	}
 }
