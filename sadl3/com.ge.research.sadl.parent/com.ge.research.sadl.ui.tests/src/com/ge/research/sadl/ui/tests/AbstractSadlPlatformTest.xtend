@@ -21,9 +21,12 @@ import com.google.common.collect.Lists
 import com.google.inject.Inject
 import java.util.Arrays
 import org.eclipse.core.resources.IFile
+import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.ui.actions.WorkspaceModifyOperation
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
@@ -35,18 +38,19 @@ import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Rule
+import org.junit.rules.TestName
 import org.junit.runner.RunWith
 
 import static org.eclipse.core.runtime.IPath.SEPARATOR
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
-import org.junit.Rule
-import org.junit.rules.TestName
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -58,8 +62,6 @@ import org.junit.rules.TestName
 @InjectWith(SADLUiInjectorProvider)
 abstract class AbstractSadlPlatformTest extends Assert {
 
-	static val PROJECT_NAME = 'testProject';
-
 	val modifiedPreferences = <String>newHashSet();
 
 	@Rule
@@ -67,7 +69,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	@Inject
 	IResourceSetProvider resourceSetProvider;
-	
+
 	@Inject
 	IPreferenceStoreAccess access;
 
@@ -199,6 +201,24 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	}
 
 	/**
+	 * Set the content of an existing file. If the file does not yet exist, creates it.
+	 */
+	protected def setFileContent(String fileName, String content) {
+		val file = project.getFile(fileName);
+		if (!file.accessible) {
+			return createFile(fileName, content);
+		}
+		new WorkspaceModifyOperation() {
+
+			override protected execute(IProgressMonitor monitor) {
+				file.setContents(new StringInputStream(content), true, false, monitor);
+			}
+
+		}.run(new NullProgressMonitor());
+		waitForBuild();
+	}
+
+	/**
 	 * Returns with the EMF resource for the given workspace file.
 	 */
 	protected def getResource(IFile file) {
@@ -246,7 +266,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	protected def cancelIndicator() {
 		return CancelIndicator.NullImpl;
 	}
-	
+
 	/**
 	 * Returns with the name of the project being tested. This differs per test case.
 	 */
