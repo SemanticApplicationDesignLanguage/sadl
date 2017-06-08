@@ -45,7 +45,12 @@ public class OntModelProvider {
 			resource.eAdapters().add(a);
 		}
 	}
-	
+
+	/**
+	 * Deprecated. As of GH-200 the cyclic dependency check is the Xtext-based SADL validator's responsibility.
+	 * Will be removed with GH-202.
+	 */
+	@Deprecated
 	public static boolean checkForCircularImport(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null) {
@@ -57,6 +62,11 @@ public class OntModelProvider {
 		return false;
 	}
 	
+	/**
+	 * Deprecated. As of GH-200 the cyclic dependency check is the Xtext-based SADL validator's responsibility.
+	 * Will be removed with GH-202.
+	 */
+	@Deprecated
 	public static boolean hasCircularImport(Resource resource) {
 		OntModelAdapter a = findAdapter(resource);
 		if (a != null) {
