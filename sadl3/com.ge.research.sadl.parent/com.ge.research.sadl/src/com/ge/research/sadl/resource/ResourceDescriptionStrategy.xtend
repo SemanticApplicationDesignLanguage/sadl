@@ -31,11 +31,16 @@ class ResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
 	@Inject
 	extension UserDataHelper;
 	
-	@Override
 	override createEObjectDescriptions(EObject eObject, IAcceptor<IEObjectDescription> acceptor) {
 		val qualifiedName = qualifiedNameProvider.getFullyQualifiedName(eObject);
 		if (qualifiedName !== null) {
 			acceptor.accept(EObjectDescription.create(qualifiedName, eObject, eObject.createUserData));
+			if (qualifiedName.segmentCount > 1) {
+				// Export the simple name of the SADL resources, so that the resource description manager
+				// can mark a resource as `affected` when comparing the imported names of the candidates
+				// with the exported name of the deltas.
+				acceptor.accept(EObjectDescription.create(qualifiedName.lastSegment, eObject, eObject.createUserData));	
+			}
 		}
 		return true;
 	}
