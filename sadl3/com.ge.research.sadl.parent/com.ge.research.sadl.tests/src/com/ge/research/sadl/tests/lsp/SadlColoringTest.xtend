@@ -38,13 +38,11 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 	@Inject
 	PathToFileUriConverter uriConverter;
 
-	@Override
 	override setup() {
 		super.setup();
 		initialize();
 	}
 	
-	@Override
 	override assertEquals(String expected, String actual) {
 		super.assertEquals(expected.unifyEOL, actual.unifyEOL)
 	}
@@ -124,7 +122,6 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 		 * [[7, 19] .. [7, 23]] -> [20]''', coloringParams.toExpectation);
 	}
 
-	@Override
 	override protected initialize() {
 		val rootPath = root.absoluteFile.toPath;
 		projectStructureInitializer.initialize(rootPath);

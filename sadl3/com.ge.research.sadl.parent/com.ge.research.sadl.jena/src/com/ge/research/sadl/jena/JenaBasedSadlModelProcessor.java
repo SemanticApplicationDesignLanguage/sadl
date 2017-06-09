@@ -752,10 +752,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     
     @Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
-    	if (!resource.getURI().toString().endsWith(".sadl")) {
-    		return;
-    	}
-    	logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
+	    	if (!resource.getURI().toString().endsWith(".sadl")) {
+	    		return;
+	    	}
+    		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate' action was invoked. 
 		}

@@ -43,6 +43,25 @@ class GH_200_SadlCyclicDependecyTest extends AbstractLinkingTest {
 		val issues = validate(resource);
 		assertEquals(0, issues.size);
 	}
+	
+	@Test
+	def void checkRedundantImportIsNoCycle() {
+		val resource = '''uri "http://sadl.org/A.sadl". import "http://sadl.org/B.sadl". import "http://sadl.org/B.sadl".'''.sadl;
+		'''uri "http://sadl.org/B.sadl". import "http://sadl.org/C.sadl". import "http://sadl.org/C.sadl".'''.sadl;
+		'''uri "http://sadl.org/C.sadl". import "http://sadl.org/D.sadl". import "http://sadl.org/D.sadl".'''.sadl;
+		'''uri "http://sadl.org/D.sadl".'''.sadl;
+		val issues = validate(resource);
+		assertEquals(0, issues.size);
+	}
+	
+	@Test
+	def void checkExplicitReImportIsNoCycle() {
+		val resource = '''uri "http://sadl.org/A.sadl". import "http://sadl.org/B.sadl". import "http://sadl.org/C.sadl".'''.sadl;
+		'''uri "http://sadl.org/B.sadl". import "http://sadl.org/C.sadl".'''.sadl;
+		'''uri "http://sadl.org/C.sadl".'''.sadl;
+		val issues = validate(resource);
+		assertEquals(0, issues.size);
+	}
 
 	@Test
 	@Ignore("https://github.com/crapo/sadlos2/issues/158")

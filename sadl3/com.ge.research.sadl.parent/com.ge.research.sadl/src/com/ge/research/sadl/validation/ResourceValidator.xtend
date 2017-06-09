@@ -30,9 +30,6 @@ import org.eclipse.xtext.util.IAcceptor
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
 import org.eclipse.xtext.validation.ResourceValidatorImpl
-import org.eclipse.emf.common.notify.impl.AdapterImpl
-import org.eclipse.xtext.util.internal.EmfAdaptable
-import com.ge.research.sadl.validation.ResourceValidator.ResourceValidationIsInProgress.ResourceValidationIsInProgressAdapter
 
 class ResourceValidator extends ResourceValidatorImpl {
 
@@ -47,16 +44,7 @@ class ResourceValidator extends ResourceValidatorImpl {
 	override validate(Resource resource, CheckMode mode, CancelIndicator mon) throws OperationCanceledError {
 		if (resource instanceof XtextResource) {
 			return resource.cache.get(CACHED_ISSUES_KEY, resource) [
-				if (null !== ResourceValidationIsInProgress.findInEmfObject(resource)) {
-					return emptyList;
-				}
-				try {
-					new ResourceValidationIsInProgress().attachToEmfObject(resource);
-					super.validate(resource, mode, mon)
-				} finally {
-					ResourceValidationIsInProgress.removeFromEmfObject(resource);
-				}
-
+				super.validate(resource, mode, mon)
 			];
 		} else {
 			return emptyList;
@@ -64,14 +52,11 @@ class ResourceValidator extends ResourceValidatorImpl {
 	}
 
 	override protected validate(Resource resource, CheckMode mode, CancelIndicator monitor, IAcceptor<Issue> acceptor) {
-		super.validate(resource, mode, monitor, acceptor)
-		val processor = processorProvider.getProcessor(resource)
-		processor.onValidate(resource, new ValidationAcceptorImpl(acceptor), mode,
-			new ProcessorContext(monitor, preferenceProvider.getPreferenceValues(resource)))
-	}
-
-	@EmfAdaptable
-	private static final class ResourceValidationIsInProgress {
+		super.validate(resource, mode, monitor, acceptor);
+		val processor = processorProvider.getProcessor(resource);
+		val delegateAcceptor = new ValidationAcceptorImpl(acceptor);
+		val context = new ProcessorContext(monitor, preferenceProvider.getPreferenceValues(resource));
+		processor.onValidate(resource, delegateAcceptor, mode, context);
 	}
 
 }

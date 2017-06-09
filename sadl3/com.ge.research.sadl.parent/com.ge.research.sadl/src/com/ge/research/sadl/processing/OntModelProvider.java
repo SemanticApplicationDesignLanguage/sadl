@@ -36,7 +36,6 @@ public class OntModelProvider {
 		List<SadlCommand> sadlCommands = null;
 		Map<EObject, List<Property>> impliedPropertiesUsed = null;
 		boolean isLoading = false;
-		boolean hasCircularImport = false;
 		
 		@Override
 		public boolean isAdapterForType(Object type) {
@@ -45,16 +44,17 @@ public class OntModelProvider {
 	}
 	
 	public static void registerResource(Resource resource) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a == null) {
-			a = new OntModelAdapter();
-			a.isLoading = true;
-			resource.eAdapters().add(a);
+		if (resource != null) {
+			if (!FIND_ADAPTER_FUNC.apply(resource).isPresent()) {
+				OntModelAdapter adapter = new OntModelAdapter();
+				adapter.isLoading = true;
+				resource.eAdapters().add(adapter);
+			}
 		}
 	}
 
 	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix) {
-		OntModelAdapter adapter = findAdapter(resource);
+		OntModelAdapter adapter = FIND_ADAPTER_FUNC.apply(resource).orNull();
 		if (adapter == null) {
 			adapter = new OntModelAdapter();
 			resource.eAdapters().add(adapter);
@@ -67,7 +67,7 @@ public class OntModelProvider {
 	
 	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix, 
 			List<SadlCommand> sadlCommands) {
-		OntModelAdapter adapter = findAdapter(resource);
+		OntModelAdapter adapter = FIND_ADAPTER_FUNC.apply(resource).orNull();
 		if (adapter == null) {
 			adapter = new OntModelAdapter();
 			resource.eAdapters().add(adapter);
