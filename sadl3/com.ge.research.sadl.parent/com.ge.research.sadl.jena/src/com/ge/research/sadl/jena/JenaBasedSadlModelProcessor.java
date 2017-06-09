@@ -843,14 +843,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
 						if (importedOntModel == null) {
 							if (OntModelProvider.checkForCircularImport(eResource)) {
-								addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
+								// GH-200 will take care of the validation errors.
+								// GH-202 must make sure to clean up this part. 
+								// addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
 							}
 							else {
 					        	logger.debug("JenaBasedSadlModelProcessor encountered null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
 								xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 						        importedOntModel = OntModelProvider.find(xtrsrc);
 						        if (OntModelProvider.hasCircularImport(resource)) {
-						        	addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
+									// GH-200 will take care of the validation errors.
+									// GH-202 must make sure to clean up this part. 
+						        		// addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
 						        }
 							}
 						}
