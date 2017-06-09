@@ -1,5 +1,8 @@
 package com.ge.research.sadl.processing;
 
+import static org.eclipse.xtext.util.CancelIndicator.NullImpl;
+import static org.eclipse.xtext.validation.CheckMode.FAST_ONLY;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,11 +11,11 @@ import java.util.Map;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.validation.IResourceValidator;
 
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.utils.ValidationHelper;
-import com.ge.research.sadl.validation.SADLValidator;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
@@ -168,8 +171,9 @@ public class OntModelProvider {
 		if (adapter.isPresent()) {
 			return adapter.get();
 		}
-		if (new ValidationHelper().hasErrors(resource, SADLValidator.CYCLIC_DEPENDENCY)) {
-			return null;
+		if (resource instanceof XtextResource) {
+			final IResourceValidator validator = ((XtextResource) resource).getResourceServiceProvider().getResourceValidator();
+			validator.validate(resource, FAST_ONLY, NullImpl);
 		}
 		return FIND_ADAPTER_FUNC.apply(resource).orNull();
 	}
