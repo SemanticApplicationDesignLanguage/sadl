@@ -21,7 +21,6 @@
 package com.ge.research.sadl
 
 import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
-import com.ge.research.sadl.resource.ResourceDescriptionStrategy
 import com.ge.research.sadl.scoping.ErrorAddingLinkingService
 import com.ge.research.sadl.scoping.QualifiedNameConverter
 import com.ge.research.sadl.scoping.QualifiedNameProvider
@@ -38,6 +37,7 @@ import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.parsetree.reconstr.ITokenStream
 import java.io.IOException
+import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -45,12 +45,10 @@ import java.io.IOException
 class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	
 	
-	@Override
 	override bindIValueConverterService() {
 		return ValueConverterService;
 	}
 	
-	@Override
 	override bindIQualifiedNameProvider() {
 		return QualifiedNameProvider;
 	}
@@ -76,7 +74,7 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	}
 	
 	def Class<? extends DefaultResourceDescriptionStrategy> bindResourceDescritpionStrategy() {
-		return ResourceDescriptionStrategy;
+		return SadlResourceDescriptionStrategy;
 	}
 	
 	def Class<? extends DefaultLinkingService> bindDefaultLinkingService() {

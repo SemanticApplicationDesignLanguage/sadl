@@ -5,17 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.utils.ValidationHelper;
+import com.ge.research.sadl.validation.SADLValidator;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Property;
 
 public class OntModelProvider {
+	
+	private static Function<Resource, Optional<OntModelAdapter>> FIND_ADAPTER_FUNC = resource -> FluentIterable
+			.from(resource.eAdapters()).filter(OntModelAdapter.class).first();
 	
 	private static OntModel sadlBaseModel;
 	private static OntModel sadlListModel;
@@ -44,35 +51,6 @@ public class OntModelProvider {
 			a.isLoading = true;
 			resource.eAdapters().add(a);
 		}
-	}
-
-	/**
-	 * Deprecated. As of GH-200 the cyclic dependency check is the Xtext-based SADL validator's responsibility.
-	 * Will be removed with GH-202.
-	 */
-	@Deprecated
-	public static boolean checkForCircularImport(Resource resource) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			if (a.isLoading) {
-				a.hasCircularImport = true;
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * Deprecated. As of GH-200 the cyclic dependency check is the Xtext-based SADL validator's responsibility.
-	 * Will be removed with GH-202.
-	 */
-	@Deprecated
-	public static boolean hasCircularImport(Resource resource) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.hasCircularImport;
-		}
-		return false;
 	}
 
 	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix) {
@@ -182,15 +160,18 @@ public class OntModelProvider {
 		return null;
 	}
 	
-	public static OntModelAdapter findAdapter(Resource resource) {
-		if (resource != null) {
-			for (Adapter a : resource.eAdapters()) {
-				if (a instanceof OntModelAdapter) {
-					return ((OntModelAdapter) a);
-				}
-			}
+	private static OntModelAdapter findAdapter(Resource resource) {
+		if (resource == null) {
+			return null;
 		}
-		return null;
+		Optional<OntModelAdapter> adapter = FIND_ADAPTER_FUNC.apply(resource);
+		if (adapter.isPresent()) {
+			return adapter.get();
+		}
+		if (new ValidationHelper().hasErrors(resource, SADLValidator.CYCLIC_DEPENDENCY)) {
+			return null;
+		}
+		return FIND_ADAPTER_FUNC.apply(resource).orNull();
 	}
 	
 	public static OntModel find(Resource resource) {

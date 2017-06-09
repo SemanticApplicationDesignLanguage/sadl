@@ -24,9 +24,10 @@ import org.eclipse.xtext.resource.EObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
 import org.eclipse.xtext.util.IAcceptor
+import org.eclipse.xtext.resource.XtextResource
 
 @Singleton
-class ResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
+class SadlResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
 	
 	@Inject
 	extension UserDataHelper;
@@ -35,10 +36,11 @@ class ResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
 		val qualifiedName = qualifiedNameProvider.getFullyQualifiedName(eObject);
 		if (qualifiedName !== null) {
 			acceptor.accept(EObjectDescription.create(qualifiedName, eObject, eObject.createUserData));
-			if (qualifiedName.segmentCount > 1) {
+			if (qualifiedName.segmentCount > 1 && eObject.eResource instanceof XtextResource) {
 				// Export the simple name of the SADL resources, so that the resource description manager
 				// can mark a resource as `affected` when comparing the imported names of the candidates
-				// with the exported name of the deltas.
+				// with the exported name of the deltas. Ignore external resources they do not participate
+				// in the incremental builder anyway.
 				acceptor.accept(EObjectDescription.create(qualifiedName.lastSegment, eObject, eObject.createUserData));	
 			}
 		}

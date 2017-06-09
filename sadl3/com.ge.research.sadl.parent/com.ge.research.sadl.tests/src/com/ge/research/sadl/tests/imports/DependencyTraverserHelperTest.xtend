@@ -37,6 +37,28 @@ class DependencyTraverserHelperTest extends Assert {
 		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
 		assertFalse(actual.present);
 	}
+
+	@Test
+	def void checkRedundantImportIsNoCycle() {
+		val graph = #{
+			1 -> #[2, 2],
+			2 -> #[3, 3],
+			3 -> #[4, 4]
+		};
+		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
+		assertFalse(actual.present);
+	}
+	
+	@Test
+	def void checkExplicitReImportIsNoCycle() {
+		val graph = #{
+			1 -> #[2, 3],
+			2 -> #[3],
+			3 -> #[]
+		};
+		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
+		assertFalse(actual.present);
+	}
 	
 	@Test
 	def void checkSelfReference() {
@@ -78,7 +100,6 @@ class DependencyTraverserHelperTest extends Assert {
 		};
 		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
 		assertEquals(actual.get.prettyPrint, '1 -> 2 -> [3] -> 4 -> [3]');
-	}
-	
+	} 
 	
 }

@@ -419,11 +419,11 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 						// check property range
 						val ontModel = OntModelProvider.find(model.eResource)
-						if (ontModel != null) {
+						if (ontModel !== null) {
 							val ontprop = ontModel.getOntProperty(declarationExtensions.getConceptUri((model as SadlPropertyInitializer).property))
-							if (ontprop != null) {
+							if (ontprop !== null) {
 								val rnglst = ontprop.listRange
-								if (rnglst != null) {
+								if (rnglst !== null) {
 									if (kval.equals("true") || kval.equals("false")) {
 										while (rnglst.hasNext) {
 											val rng = rnglst.next
@@ -496,33 +496,6 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			typeList.add(OntConceptType.CLASS)
 			typeRestrictions = typeList
 		}
-	}
-	
-	/**
-	 * Method to determine if a particular SadlResource (OntConceptType.INSTANCE, OntConceptType.CLASS, or OntConceptType.VARIABLE)
-	 * is in the domain of the given property
-	 */
-	def boolean isSadlResourceInDomainOfProperty(SadlResource propsr, SadlResource sr) {
-			val om = OntModelProvider.find(propsr.eResource)
-			if (om != null) {
-				val p = om.getProperty(declarationExtensions.getConceptUri(propsr))
-				if (p != null) {
-					val srtype = declarationExtensions.getOntConceptType(sr)
-					var OntResource ontrsrc
-					if (srtype.equals(OntConceptType.CLASS)) {
-						ontrsrc = om.getOntClass(declarationExtensions.getConceptUri(sr))
-					}
-					else if (srtype.equals(OntConceptType.INSTANCE)) {
-						ontrsrc = om.getIndividual(declarationExtensions.getConceptUri(sr))
-					}
-					else if (srtype.equals(OntConceptType.VARIABLE)) {
-						//TBD
-					}
-//					return JenaBasedSadlModelValidator.checkPropertyDomain(om, p, ontrsrc, propsr.eContainer, false)
-				}
-			}
-		
-		return false
 	}
 	
 	def restrictTypeToAllPropertyTypes() {

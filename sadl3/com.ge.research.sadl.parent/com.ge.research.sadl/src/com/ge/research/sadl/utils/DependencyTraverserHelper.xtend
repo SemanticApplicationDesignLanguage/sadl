@@ -23,6 +23,7 @@ import com.google.common.base.Optional
 import com.google.common.base.Preconditions
 import com.google.common.collect.ImmutableList
 import java.util.Stack
+import com.google.common.collect.HashMultimap
 
 /**
  * Helper for traversing dependencies.
@@ -69,23 +70,26 @@ class DependencyTraverserHelper {
 	 * Checks whether the dependency graph has any cycles or not. Returns with a cycle instance if the graph
 	 * has cycle, otherwise the cycle is absent.
 	 */
-	def <T> Optional<Cycle<T>> checkCycle(T root, (T)=>Iterable<T> dependencies, Equivalence<T> equivalence) {
+	def <T> Optional<Cycle<T>> checkCycle(T root, (T)=>Iterable<T> dependencies, extension Equivalence<T> equivalence) {
 		Preconditions.checkNotNull(root, 'root');
 		Preconditions.checkNotNull(dependencies, 'dependencies');
 		Preconditions.checkNotNull(equivalence, 'equivalence');
 
 		val stack = new Stack();
-		val visited = newHashSet();
+		val visited = HashMultimap.create();
 		val chain = newArrayList();
 
 		stack.push(root);
 		while (!stack.empty()) {
 			var node = stack.pop();
 			chain.add(node);
-			if (!visited.add(node)) {
-				return Optional.of(createCycle(chain, equivalence));
+			val wrappedNode = wrap(node);
+			for (upstreamNode : dependencies.apply(node).filterDuplicates(equivalence)) {
+				stack.push(upstreamNode);
+				if (!visited.put(wrappedNode, wrap(upstreamNode))) {
+					return Optional.of(createCycle(chain, equivalence));
+				}
 			}
-			dependencies.apply(node)?.forEach[stack.push(it)];
 		}
 
 		return Optional.absent;
@@ -97,6 +101,10 @@ class DependencyTraverserHelper {
 	 */
 	protected def <T> createCycle(Iterable<? extends T> chain, Equivalence<T> equivalence) {
 		return new Cycle(chain, equivalence);
+	}
+	
+	private def <T> filterDuplicates(Iterable<? extends T> nullable, extension Equivalence<T> equivalence) {
+		return if (nullable === null) emptyList else nullable.map[wrap].toSet.map[get];
 	}
 
 	/**

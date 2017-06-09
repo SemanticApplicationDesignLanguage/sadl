@@ -200,6 +200,8 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.ge.research.sadl.utils.ValidationHelper;
+import com.ge.research.sadl.validation.SADLValidator;
 import com.google.common.math.IntMath;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -343,7 +345,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return currentResource;
 	}
 
-	@SuppressWarnings("restriction")
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
     	if (!resource.getURI().toString().endsWith(".sadl")) {
@@ -357,14 +358,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		// save the model
 		if (getTheJenaModel() == null) {
 			OntModel m = OntModelProvider.find(resource);
-			if (m == null) {
-				onValidate(resource, null, CheckMode.FAST_ONLY, context);
-			}
-			else {
-				theJenaModel = m;
-				setModelName(OntModelProvider.getModelName(resource));
-				setModelAlias(OntModelProvider.getModelPrefix(resource));
-			}
+			theJenaModel = m;
+			setModelName(OntModelProvider.getModelName(resource));
+			setModelAlias(OntModelProvider.getModelPrefix(resource));
 		}
 		if (fsa !=null) {
 			String format = getOwlModelFormat(context);
@@ -842,29 +838,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						URI importedResourceUri = xtrsrc.getURI();
 						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
 						if (importedOntModel == null) {
-							if (OntModelProvider.checkForCircularImport(eResource)) {
-								// GH-200 will take care of the validation errors.
-								// GH-202 must make sure to clean up this part. 
-								// addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
-							}
-							else {
-					        	logger.debug("JenaBasedSadlModelProcessor encountered null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
-								xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-						        importedOntModel = OntModelProvider.find(xtrsrc);
-						        if (OntModelProvider.hasCircularImport(resource)) {
-									// GH-200 will take care of the validation errors.
-									// GH-202 must make sure to clean up this part. 
-						        		// addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
-						        }
-							}
-						}
-						if (importedOntModel == null) {
-				        	logger.debug("JenaBasedSadlModelProcessor failed to resolve null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
-				    		addError(SadlErrorMessages.NULL_ONT_MODEL.toString(), simport);
-						}
-						else {
+							logger.debug("JenaBasedSadlModelProcessor failed to resolve null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
+						} else {
 							addImportToJenaModel(modelName, importUri, importPrefix, importedOntModel);							
-				    	}
+				    		}
 					} else if (eResource instanceof ExternalEmfResource) {
 						ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
 						addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getJenaModel());
