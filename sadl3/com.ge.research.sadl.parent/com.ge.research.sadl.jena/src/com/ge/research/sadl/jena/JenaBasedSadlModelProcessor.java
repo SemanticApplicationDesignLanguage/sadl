@@ -17,8 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena;
 
-import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.MISSING_SUBJECT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_PROP;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_RIGHT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_PROPERTY;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_VALUE;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SUPERELEMENT;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -62,9 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
-import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
@@ -105,13 +107,13 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorExt;
-import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -200,10 +202,6 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.ge.research.sadl.utils.ValidationHelper;
-import com.ge.research.sadl.validation.SADLValidator;
-import com.google.common.math.IntMath;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
