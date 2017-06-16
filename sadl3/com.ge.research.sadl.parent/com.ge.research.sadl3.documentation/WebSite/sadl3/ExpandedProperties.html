@@ -1,0 +1,166 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Expanded Properties</title>
+</head>
+
+<body>
+
+<h1>Expanded Properties</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/08/2017<!--webbot bot="Timestamp" endspan i-checksum="12631" -->. 
+Send comments to
+<a href="mailto:crapo@research.ge.com?subject=ImpliedProperties">
+mailto:crapo@research.ge.com</a>.</h5>
+<h5>See also<a href="ImpliedProperties.html"> Implied Properties</a>.</h5>
+<h2>Introduction</h2>
+
+<p>When an object property is used in a comparison, one usually expects the 
+condition tested to be if the two sides of the comparison return the same 
+individual, as identified by URI. For example, suppose a conditional statement 
+has this comparison:</p>
+<b><font SIZE="2" COLOR="#008000">
+<p>&nbsp;&nbsp;&nbsp; </font></b>Example 1: <b><font SIZE="2" COLOR="#008000">&nbsp;&nbsp; 
+input_1</font></b><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2">
+</font><font SIZE="2" COLOR="#0000ff">&nbsp;SystemB</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>input_2</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">SystemB</font><font SIZE="2"> </font></p>
+<p>The left side expression (input_1 of SystemB) is a triple pattern with 
+subject &quot;SystemB&quot; and predicate &quot;input_1&quot;. When evaluated against the model 
+graph it should identify 0 or more instances (individuals) which are objects of 
+triples with that subject and predicate. Likewise the right side of the 
+comparison should evaluate to 0 or more individuals. If both the left and right 
+sides evaluate to 1 or more individuals, and each evaluation set contains the 
+same individual, the condition is true.</p>
+<p>However, sometimes we do not actually want to compare identities but rather 
+compare a specified set of properties of the individuals identified on the left 
+and right hand sides. Perhaps what we really want to compare is this:</p>
+<p>&nbsp;&nbsp;&nbsp; Example 2:<b><font SIZE="2" COLOR="#008000"> _value</font></b><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>input_1</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">SystemB</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>_value</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>input_2</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">SystemB</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>_validity</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>input_1</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">SystemB</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>_validity</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>input_2</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#0000ff">SystemB</font></p>
+<p>Exactly the same possibility exist with assignment statements. If the first 
+example above were in an assignment statement we would normally want the 
+left-hand side to create a new triple with &quot;SystemB&quot; as subject, &quot;input_1&quot; as 
+predicate, and as object an individual which is the object of the triple 
+matching the pattern on the right side. But suppose our desire is not to assign 
+the actual individual identified by the pattern on the right as the value of the 
+triple on the left, but rather to assign a specified set of property values as 
+suggested by the second example above.</p>
+<p>Expanded Properties provide a way of&nbsp; causing a statement like the first 
+example to be translated as if the second example above had been specified.</p>
+<h2>Expanded Properties</h2>
+<p>Specifying that the expansion from the first example above to the second 
+example should happen automatically when a comparison or assignment is 
+encountered, where the individual(s) involved belong to a particular class, can be 
+accomplished by designating &quot;expanded properties&quot; on the class. This is done with 
+an annotation property for two reasons. First, OWL DL, our target maximally 
+expressive flavor of OWL, does not allow statements with user-defined OWL object properties 
+to have classes as subjects or properties as values. But even if it did, we do 
+not want reasoners trying to use the statements we make about expanded 
+properties. These are only for the translator to use in its 
+processes. Annotation properties are normally ignored by reasoners, as we would 
+want this property to be. Therefore the following definition of &quot;expandedProperty&quot; 
+is part of 
+the SADL pre-defined, implicitly included concepts in SadlImplicitModel.sadl.</p>
+<p>&nbsp;&nbsp;&nbsp;
+<font SIZE="2" COLOR="#008000">
+expandedProperty</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">annotation</font><font SIZE="2">.</font></p>
+<p>Continuing the examples above, suppose that our ontology contains the 
+following:</p>
+<font SIZE="2" COLOR="#000080"><b>
+<p ALIGN="LEFT">&nbsp;&nbsp;&nbsp; DATA</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">class</font><font SIZE="2">.</font><font SIZE="2" COLOR="#008000"><b><br>
+&nbsp;&nbsp;&nbsp; _value</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">.<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#008000"><b>_validity</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> <font color="#800080">
+boolean</font>.</font><font SIZE="2" COLOR="#008000"><b><br>
+&nbsp;&nbsp;&nbsp; input_1</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>SYSTEM</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#008000"><b><br>
+&nbsp;&nbsp;&nbsp; input_2</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>SYSTEM</b></font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#000080"><b>DATA</b></font><font SIZE="2">.</p>
+</font>
+<p>We can now add the following statements to our user-defined model:</p>
+<p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>&nbsp;&nbsp;&nbsp; DATA</b></font><font SIZE="2">
+</font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
+</font>
+<font SIZE="2" COLOR="#008000">
+expandedProperty</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>_value</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b><br>
+&nbsp;&nbsp;&nbsp; DATA</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
+</font>
+<font SIZE="2" COLOR="#008000">
+expandedProperty</font><font SIZE="2"> </font>
+<font SIZE="2" COLOR="#008000"><b>_validity</b></font><font SIZE="2">.</p>
+</font>
+<p>When a translator sees a comparison involving 
+an instance of &quot;DATA&quot; as is found in Example 1, it will look for expanded properties 
+associated with the class. If there are expanded properties, the translator will 
+replace the original comparison or assignment statements with the expanded 
+statements as found in Example 2. In other words, given these expandedProperty 
+statements for the class DATA, a translator would translate the first example 
+above exactly as if it had been expressed as the second example above. Expanded 
+properties is entirely about reducing the level of detail in certain statements 
+with the intent of making sets of statements easier to read and write.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>
