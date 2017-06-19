@@ -51,6 +51,7 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
@@ -566,7 +567,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			while (itr.hasNext()) {
 				String key = itr.next();
 				String val = map.get(key);
-				if (!key.equals("http://sadl.org/sadlbasemodel") && !key.equals("http://sadl.org/sadlimplicitmodel")) {
+				if (!key.equals(SadlConstants.SADL_BASE_MODEL_URI) && !key.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
 					String obj = parentPublicUri; //nodeText(parentPublicUri, parentPrefix);
 					String pred = "importedBy";
 					String subj = key;

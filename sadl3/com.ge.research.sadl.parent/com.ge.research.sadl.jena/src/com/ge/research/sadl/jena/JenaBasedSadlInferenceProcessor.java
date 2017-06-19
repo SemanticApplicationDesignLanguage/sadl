@@ -1278,7 +1278,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			}
 			if ((getModelFolderPath() == null && 
 					getCurrentResource().getURI().toString().startsWith("synthetic")) ||
-							getCurrentResource().getURI().toString().startsWith(JenaBasedSadlModelProcessor.SYNTHETIC_FROM_TEST)) {
+							getCurrentResource().getURI().toString().startsWith(SadlModelProcessor.SYNTHETIC_FROM_TEST)) {
 				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath(), format, true);
 			}
 			else {

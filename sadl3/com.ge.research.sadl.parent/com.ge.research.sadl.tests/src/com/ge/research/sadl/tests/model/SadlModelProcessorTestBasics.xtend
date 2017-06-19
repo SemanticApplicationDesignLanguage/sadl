@@ -93,6 +93,28 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 	}
 
 	@Test
+	def void testPropertySingleValue2() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 age describes Person with a single value of type float.
+ 		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof CardinalityRestriction) {
+ 				assertTrue((sprc as CardinalityRestriction).onProperty.URI.equals("http://sadl.org/test.sadl#age"))
+ 				assertTrue((sprc as CardinalityRestriction).cardinality == 1)
+ 			}
+ 		]
+	}
+
+	@Test
 	def void testPropertyAlwaysHasValueTrue() {
 		val sadlModel = '''
 			 uri "http://sadl.org/MTC1" alias Name version "$Revision:$ Last modified on   $Date:$". 

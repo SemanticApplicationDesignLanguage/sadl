@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.OntConceptType;
@@ -993,4 +992,5 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	protected void setRulePart(RulePart rulePart) {
 		this.rulePart = rulePart;
 	}
+
 }
