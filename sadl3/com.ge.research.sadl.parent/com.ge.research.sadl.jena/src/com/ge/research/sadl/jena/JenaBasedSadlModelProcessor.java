@@ -1219,7 +1219,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	private OntModel prepareEmptyOntModel(Resource resource) throws ConfigurationException {
+	public OntModel prepareEmptyOntModel(Resource resource) throws ConfigurationException {
 		try {
 			IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(getProcessorContext()));
 			OntDocumentManager owlDocMgr = cm.getJenaDocumentMgr();
@@ -2130,6 +2130,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private NamedNode sadlTypeReferenceToNode(SadlTypeReference rtype) throws JenaProcessorException, InvalidNameException, TranslationException {
 		ConceptName cn = sadlSimpleTypeReferenceToConceptName(rtype);
+		if (cn == null) {
+			return null;
+		}
 		NamedNode rtnn = new NamedNode(cn.getUri());
 		rtnn.setNodeType(conceptTypeToNodeType(cn.getType()));
 		return rtnn;
@@ -3598,10 +3601,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				if (((SadlRangeRestriction)spr1).isSingleValued()) {
 					// add cardinality restriction
-					if (subject != null && subject.canAs(OntClass.class)) {
-						CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, retProp, 1);
-						subject.as(OntClass.class).addSuperClass(cr);
-					}
+					addCardinalityRestriction(subject, retProp, 1);
 				}
 			}
 			else if (spr1 instanceof SadlCondition) {
@@ -3702,6 +3702,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 					else {
 						retProp = prop;
+					}
+					if (((SadlRangeRestriction)spr2).isSingleValued()) {
+						addCardinalityRestriction(domainrsrc, retProp, 1);
 					}
 				}
 				else if (spr1 instanceof SadlTypeAssociation && spr2 instanceof SadlCondition) {
@@ -3993,6 +3996,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			addAnnotationsToResource(retProp.as(OntResource.class), sr.getAnnotations());
 		}
 		return retProp;
+	}
+	
+	private void addCardinalityRestriction(OntResource cls, Property retProp, int cardinality) {
+		if (cls != null && cls.canAs(OntClass.class)) {
+			CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, retProp, cardinality);
+			cls.as(OntClass.class).addSuperClass(cr);
+		}
 	}
 	
 	private String createUniqueDefaultValName(OntClass restricted,
@@ -6878,13 +6888,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return sb.toString();
 	}
 	
-	public OntModel getOntModelFromString(Resource resource, String serializedModel) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-		OntModel listModel = prepareEmptyOntModel(resource);
-		InputStream stream = new ByteArrayInputStream(serializedModel.getBytes());
-		listModel.read(stream, null);
-		return listModel;
-	}
-	
 	private boolean importSadlListModel(Resource resource) throws JenaProcessorException, ConfigurationException {
 		if (sadlListModel == null) {
 			try {
@@ -6897,6 +6900,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return true;
 		}
 		return false;
+	}
+	
+	public OntModel getOntModelFromString(Resource resource, String serializedModel)
+			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
+		OntModel listModel = prepareEmptyOntModel(resource);
+		InputStream stream = new ByteArrayInputStream(serializedModel.getBytes());
+		listModel.read(stream, null);
+		return listModel;
 	}
 	
 	private boolean importSadlDefaultsModel(Resource resource) throws JenaProcessorException, ConfigurationException {

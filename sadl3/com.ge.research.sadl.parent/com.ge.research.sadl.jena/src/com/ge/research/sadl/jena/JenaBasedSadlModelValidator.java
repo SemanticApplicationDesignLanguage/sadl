@@ -1134,7 +1134,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (expression.getLeft() instanceof Declaration) {
 			TypeCheckInfo declType = getType(((Declaration)expression.getLeft()).getType());
 			Object tct = declType.getTypeCheckType();
-			if (tct instanceof ConceptName && ((ConceptName)tct).getType().equals(ConceptType.ONTCLASS)) {
+			if (tct instanceof ConceptName && ((ConceptName)tct).getType() != null && ((ConceptName)tct).getType().equals(ConceptType.ONTCLASS)) {
 				return (Declaration)expression.getLeft();
 			}
 		}
