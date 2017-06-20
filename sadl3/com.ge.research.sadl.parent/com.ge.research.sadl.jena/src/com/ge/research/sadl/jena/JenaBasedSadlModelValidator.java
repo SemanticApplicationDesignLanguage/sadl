@@ -2472,76 +2472,82 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				listTemporarilyDisabled = true;
 				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
 			}
-			List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
-			if (ltciCompound != null) {
-				for (int i = 0; i < ltciCompound.size(); i++) {
-					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+			
+			List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo.getCompoundTypes();
+			if(ltciCompound == null){
+				ltciCompound = new ArrayList<TypeCheckInfo>();
+				ltciCompound.add(leftTypeCheckInfo);
+			}
+			
+			List<TypeCheckInfo> rtciCompound = rightTypeCheckInfo.getCompoundTypes();
+			if(rtciCompound == null){
+				rtciCompound = new ArrayList<TypeCheckInfo>();
+				rtciCompound.add(rightTypeCheckInfo);
+			}
+			
+			//Compare literal types
+			for (int i = 0; i < ltciCompound.size(); i++) {
+				for (int j = 0; j < rtciCompound.size(); j++) {
+					boolean thisResult = compareTypesSingle(operations, leftExpression, rightExpression, ltciCompound.get(i), rtciCompound.get(j));
 					if (thisResult) {
 						return true;
 					}
 				}
-				return false;
 			}
-			List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
-			if (rtciCompound != null) {
-				for (int i = 0; i < rtciCompound.size(); i++) {
-					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
+			
+			//Compare implied types
+			for (int i = 0; i < ltciCompound.size(); i++) {
+				for (int j = 0; j < rtciCompound.size(); j++) {
+					boolean thisResult = compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, ltciCompound.get(i), rtciCompound.get(j));
 					if (thisResult) {
 						return true;
 					}
 				}
-				return false;
 			}
-	//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
-	//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
-	//			if (rExprType instanceof ConceptName) {
-	//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
-	//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
-	//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
-	//						// no chance of implied properties fixing the problem
-	//						return false;
-	//					}
-	//				}
-	//			}
-	//		}
-			ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
-			ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
-			if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
-					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
-					(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
-					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
-				// Can't type-check on "None" as it represents that it doesn't exist.
-				return true;
-			}
-			else if (leftConceptIdentifier == null) {
-				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
-				if (metricsProcessor != null) {
-					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
-				}
-				return false;
-			}
-			else if(rightConceptIdentifier == null){
-				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
-				if (metricsProcessor != null) {
-					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
-				}
-				return false;
-			}
-			else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
-				if (isConjunctiveLocalRestriction(leftExpression, rightExpression)) {
-					return true;
-				}
-				if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
-					return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
-				}
-				return false;
-			}
+				
+			return false;
 		}
 		finally {
 			if (listTemporarilyDisabled) {
 				leftTypeCheckInfo.setRangeValueType(RangeValueType.LIST);
 			}
 		}
+	}
+	
+	protected boolean compareTypesSingle(List<String> operations, EObject leftExpression, EObject rightExpression,
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
+
+		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
+		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
+		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
+				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
+			// Can't type-check on "None" as it represents that it doesn't exist.
+			return true;
+		}
+		else if (leftConceptIdentifier == null) {
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+			}
+			return false;
+		}
+		else if(rightConceptIdentifier == null){
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+			}
+			return false;
+		}
+		else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+			if (isConjunctiveLocalRestriction(leftExpression, rightExpression)) {
+				return true;
+			}
+			
+			return false;
+		}
+		
 		return true;
 	}
 	
