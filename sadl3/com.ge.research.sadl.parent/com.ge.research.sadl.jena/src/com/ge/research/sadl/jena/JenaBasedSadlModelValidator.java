@@ -2473,36 +2473,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
 			}
 			
-			List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo.getCompoundTypes();
-			if(ltciCompound == null){
-				ltciCompound = new ArrayList<TypeCheckInfo>();
-				ltciCompound.add(leftTypeCheckInfo);
-			}
-			
-			List<TypeCheckInfo> rtciCompound = rightTypeCheckInfo.getCompoundTypes();
-			if(rtciCompound == null){
-				rtciCompound = new ArrayList<TypeCheckInfo>();
-				rtciCompound.add(rightTypeCheckInfo);
-			}
-			
 			//Compare literal types
-			for (int i = 0; i < ltciCompound.size(); i++) {
-				for (int j = 0; j < rtciCompound.size(); j++) {
-					boolean thisResult = compareTypesSingle(operations, leftExpression, rightExpression, ltciCompound.get(i), rtciCompound.get(j));
-					if (thisResult) {
-						return true;
-					}
-				}
+			if(compareTypesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+				return true;
 			}
 			
-			//Compare implied types
-			for (int i = 0; i < ltciCompound.size(); i++) {
-				for (int j = 0; j < rtciCompound.size(); j++) {
-					boolean thisResult = compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, ltciCompound.get(i), rtciCompound.get(j));
-					if (thisResult) {
-						return true;
-					}
-				}
+			//Compare implied property types
+			if(compareTypesUsingImpliedPropertiesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+				return true;
 			}
 				
 			return false;
@@ -2514,9 +2492,58 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
-	protected boolean compareTypesSingle(List<String> operations, EObject leftExpression, EObject rightExpression,
+	private boolean compareTypesUsingImpliedPropertiesRecursively(List<String> operations, EObject leftExpression,
+			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
+		List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo != null ? leftTypeCheckInfo.getCompoundTypes() : null;
+		if(ltciCompound != null){
+			for (int i = 0; i < ltciCompound.size(); i++) {
+				boolean thisResult = compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
+		List<TypeCheckInfo> rtciCompound = rightTypeCheckInfo != null ? rightTypeCheckInfo.getCompoundTypes() : null;
+		if(rtciCompound != null){
+			for (int j = 0; j < rtciCompound.size(); j++) {
+				boolean thisResult = compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(j));
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
+		if(compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+			return true;
+		}
+		
+		return false;
+	}
+
+	protected boolean compareTypesRecursively(List<String> operations, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
 
+		List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo != null ? leftTypeCheckInfo.getCompoundTypes() : null;
+		if(ltciCompound != null){
+			for (int i = 0; i < ltciCompound.size(); i++) {
+				boolean thisResult = compareTypesRecursively(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
+		List<TypeCheckInfo> rtciCompound = rightTypeCheckInfo != null ? rightTypeCheckInfo.getCompoundTypes() : null;
+		if(rtciCompound != null){
+			for (int j = 0; j < rtciCompound.size(); j++) {
+				boolean thisResult = compareTypesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(j));
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
 		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
@@ -2544,7 +2571,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (isConjunctiveLocalRestriction(leftExpression, rightExpression)) {
 				return true;
 			}
-			
 			return false;
 		}
 		
