@@ -239,6 +239,9 @@ class DeclarationExtensions {
 				SadlMustBeOneOf :
 					OntConceptType.INSTANCE
 					
+				QueryStatement :
+					OntConceptType.STRUCTURE_NAME					
+					
 				default: OntConceptType.VARIABLE // linking errors and the like
 			}
 		} finally {

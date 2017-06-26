@@ -233,7 +233,9 @@ RuleStatement returns ExpressionScope :
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	start = ('Ask'|'Graph') (name=QNAME)? ':' expr=(ConstructExpression | AskExpression | Expression) 
+	start = ('Ask'|'Graph') ((name=SadlResource)? ':' expr=(ConstructExpression | AskExpression | Expression) 
+		| name=SadlResource
+	)
 ;
 
 ConstructExpression returns Expression :

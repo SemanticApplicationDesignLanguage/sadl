@@ -344,17 +344,17 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //		return sb.toString();
 //	}
 
-	private Object translate(SadlTypeReference type) throws TranslationException, InvalidNameException, InvalidTypeException {
-		if (type instanceof SadlSimpleTypeReference) {
-			return translate(((SadlSimpleTypeReference)type).getType());
-		}
-		else if (type instanceof SadlPrimitiveDataType) {
-			SadlDataType pt = ((SadlPrimitiveDataType)type).getPrimitiveType();
-			String typeStr = pt.getLiteral();
-			return typeStr;
-		}
-		throw new TranslationException("Unhandled type of SadlTypeReference");
-	}
+//	private Object translate(SadlTypeReference type) throws TranslationException, InvalidNameException, InvalidTypeException {
+//		if (type instanceof SadlSimpleTypeReference) {
+//			return translate(((SadlSimpleTypeReference)type).getType());
+//		}
+//		else if (type instanceof SadlPrimitiveDataType) {
+//			SadlDataType pt = ((SadlPrimitiveDataType)type).getPrimitiveType();
+//			String typeStr = pt.getLiteral();
+//			return typeStr;
+//		}
+//		throw new TranslationException("Unhandled type of SadlTypeReference");
+//	}
 
 	protected Object translate(BooleanLiteral expr) {
 		Literal lit = new Literal();
@@ -388,31 +388,30 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //		return expr.getConstant();
 //	}
 
-	private boolean hasCommonVariableSubject(Object robj) {
-		if (robj instanceof TripleElement && 
-				(((TripleElement)robj).getSubject() instanceof VariableNode && 
-						(((TripleElement)robj).getSourceType().equals(TripleSourceType.SPV)) ||
-						((TripleElement)robj).getSourceType().equals(TripleSourceType.ITC))) {
-			VariableNode subjvar = (VariableNode) ((TripleElement)robj).getSubject();
-			Object trel = robj;
-			while (trel != null && trel instanceof TripleElement) {
-				if (!(trel instanceof TripleElement) || 
-						(((TripleElement)trel).getSubject() != null &&!(((TripleElement)trel).getSubject().equals(subjvar)))) {
-					return false;
-				}
-				trel = ((TripleElement)trel).getNext();
-			}
-			if (trel == null) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	private boolean hasCommonVariableSubject(Object robj) {
+//		if (robj instanceof TripleElement && 
+//				(((TripleElement)robj).getSubject() instanceof VariableNode && 
+//						(((TripleElement)robj).getSourceType().equals(TripleSourceType.SPV)) ||
+//						((TripleElement)robj).getSourceType().equals(TripleSourceType.ITC))) {
+//			VariableNode subjvar = (VariableNode) ((TripleElement)robj).getSubject();
+//			Object trel = robj;
+//			while (trel != null && trel instanceof TripleElement) {
+//				if (!(trel instanceof TripleElement) || 
+//						(((TripleElement)trel).getSubject() != null &&!(((TripleElement)trel).getSubject().equals(subjvar)))) {
+//					return false;
+//				}
+//				trel = ((TripleElement)trel).getNext();
+//			}
+//			if (trel == null) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	public static boolean isSparqlQuery(String litObj) {
 		litObj = litObj.trim();
-		SadlUtils su = new SadlUtils();
-		litObj = su.stripQuotes(litObj);
+		litObj = SadlUtils.stripQuotes(litObj);
 		litObj = litObj.trim();
 		if (litObj.toLowerCase().indexOf("where") > 0 &&
 				(( litObj.toLowerCase().indexOf("select ") == 0 && ((String) litObj).indexOf("?") > 0) ||
