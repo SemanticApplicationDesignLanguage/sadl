@@ -1785,7 +1785,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			if (query != null) {
 				if (element.getName() != null) {
-					query.setFqName(getModelNamespace() + element.getName());
+					String uri = declarationExtensions.getConceptUri(element.getName());
+					query.setFqName(uri);
 				}
 				if (element.getStart().equals("Graph")) {
 					query.setGraph(true);
@@ -1797,6 +1798,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				addSadlCommand(query);
 				return query;
+			}
+		}
+		else {
+			// this is a reference to a named query defined elsewhere
+			SadlResource sr = element.getName();
+			SadlResource sr2 = declarationExtensions.getDeclaration(sr);
+			if (sr2 != null) {
+			EObject cont = sr2.eContainer();
+				if (cont instanceof QueryStatement && ((QueryStatement)cont).getExpr() != null) {
+					return processStatement((QueryStatement)cont);
+				}
 			}
 		}
 		return null;
