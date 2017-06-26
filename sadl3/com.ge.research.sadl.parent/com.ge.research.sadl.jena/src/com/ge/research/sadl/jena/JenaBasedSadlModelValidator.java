@@ -2633,7 +2633,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		
 		String opstr = (operations != null && operations.size() > 0) ? operations.get(0) : null;
-		if (leftTypeCheckInfo.getImplicitProperties() != null) {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getImplicitProperties() != null) {
 			Iterator<ConceptName> litr = leftTypeCheckInfo.getImplicitProperties().iterator();
 			while (litr.hasNext()) {
 				ConceptName cn = litr.next();
@@ -2655,7 +2655,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-		else if (rightTypeCheckInfo.getImplicitProperties() != null) {
+		else if (rightTypeCheckInfo != null && rightTypeCheckInfo.getImplicitProperties() != null) {
 			Iterator<ConceptName> ritr = rightTypeCheckInfo.getImplicitProperties().iterator();
 			while (ritr.hasNext()) {
 				ConceptName cn = ritr.next();
