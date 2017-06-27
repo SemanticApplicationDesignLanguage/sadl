@@ -2087,7 +2087,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getNameProperty(SadlResource qnm, ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException, InvalidTypeException {
-		OntProperty property = theJenaModel.getOntProperty(conceptUri);
+//		OntProperty property = theJenaModel.getOntProperty(conceptUri);
+		Property property = theJenaModel.getProperty(conceptUri);
+//		OntProperty test = theJenaModel.getOntProperty(property2.getLocalName());
+
 		if(property == null){
 			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), qnm != null ? qnm : expression);
 			if (metricsProcessor != null) {
