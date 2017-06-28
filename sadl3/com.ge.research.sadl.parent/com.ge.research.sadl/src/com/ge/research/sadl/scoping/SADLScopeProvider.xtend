@@ -105,11 +105,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				equation.parameter.map[EObjectDescription.create(name.concreteName, it.name)])
 		}
 		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
-		if (ask !== null && ask.expr != null) {
+		if (ask?.expr !== null) {
 			return getLocalVariableScope(ask.expr, parent)
 		}
 		val test = EcoreUtil2.getContainerOfType(context, TestStatement)
-		if (test !== null && test.tests != null) {
+		if (test?.tests !== null) {
 			return getLocalVariableScope(test.tests, parent)
 		}
 		return parent
@@ -265,13 +265,30 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 							map.addElement(name2, it)
 						}
 					}
-					EquationStatement : {
+					EquationStatement: {
 						val name = converter.toQualifiedName(it.name.concreteName)
 						map.addElement(name, it.name)
 						if (name.segmentCount > 1) {
 							map.addElement(name.skipFirst(1), it.name)
 						} else if (namespace !== null) {
 							map.addElement(namespace.append(name), it.name)
+						}
+					}
+					QueryStatement: {
+						// Ignore `anonymous` query statements. Nothing to put into the scope.
+						if (it?.name?.concreteName !== null) {
+							val name = converter.toQualifiedName(it.name.concreteName)
+							map.addElement(name, it.name)
+							if (name.segmentCount > 1) {
+								map.addElement(name.skipFirst(1), it.name)
+							} else if (namespace !== null) {
+								map.addElement(namespace.append(name), it.name)
+							}
+							// Make sure we do not expose the parameters from the query expression to the scope.
+							// Stop processing the subtree of the current AST element by pruning the iterator.
+							// For instance, we do not let `c` into the scope. 
+							// `C is a class. Ask myQuery: select c where c is a C.` 
+							iter.prune
 						}
 					}
 					default :
@@ -368,8 +385,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 
-		// Do not put parameters of external and local equation statements into the scope.
 		if (obj instanceof SadlResource) {
+			// Do not put parameters of external and local equation statements into the scope.
 			if (obj.eContainer instanceof SadlParameterDeclaration) {
 				val declaration = obj.eContainer as SadlParameterDeclaration;
 				val container = declaration.eContainer;
@@ -379,6 +396,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			} else if (EcoreUtil2.getContainerOfType(obj, BinaryOperation) !== null) {
 				// Also filter out resources from the expression of any equations.
 				return;
+			} else if (obj.eContainer instanceof QueryStatement) {
+				// The SADL resource from the use-site should not go into the scope.
+				// In such cases the statement does not have an expression.
+				val queryStatement = obj.eContainer as QueryStatement
+				if (queryStatement.expr === null) {
+					return;
+				}
 			}
 		}
 
