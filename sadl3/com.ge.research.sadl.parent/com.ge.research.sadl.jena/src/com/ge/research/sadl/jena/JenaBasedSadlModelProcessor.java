@@ -1796,7 +1796,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					query.setOffset(node.getOffset() - 1);
 					query.setLength(node.getLength());
 				}
-				query = addExpandedPropertiesToQuery(query);
+				query = addExpandedPropertiesToQuery(query, qexpr);
 				addSadlCommand(query);
 				return query;
 			}
@@ -1814,48 +1814,99 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		return null;
 	}
-	private Query addExpandedPropertiesToQuery(Query query) {
+	private Query addExpandedPropertiesToQuery(Query query, Expression expr) {
 		List<String> vars = query.getVariables();
 		List<GraphPatternElement> elements = query.getPatterns();
+		List<TripleElement> triplesToAdd = null;
 		for (GraphPatternElement e: elements) {
-			if (e instanceof TripleElement && ((TripleElement)e).getObject() instanceof VariableNode) {
-				VariableNode vn = (VariableNode) ((TripleElement)e).getObject();
-				if (vars.contains(vn.getName())) {
-					Node pred = ((TripleElement)e).getPredicate();
-					ConceptName predcn = new ConceptName(pred.toFullyQualifiedString());
-					Property predProp = getTheJenaModel().getProperty(pred.toFullyQualifiedString());
-					if (predProp instanceof ObjectProperty) {
-						predcn.setType(ConceptType.OBJECTPROPERTY);
-					}
-					else if (predProp instanceof DatatypeProperty) {
-						predcn.setType(ConceptType.DATATYPEPROPERTY);
-					}
-					else if (predProp instanceof AnnotationProperty) {
-						predcn.setType(ConceptType.ANNOTATIONPROPERTY);
-					}
-					else {
-						predcn.setType(ConceptType.RDFPROPERTY);
-					}
-					try {
-						TypeCheckInfo tci = getModelValidator().getTypeInfoFromRange(predcn, predProp, null);
-						if (tci != null) {
-							int  i = 0;
+			if (e instanceof TripleElement) {
+				Node obj = ((TripleElement)e).getObject();
+				boolean implicitObject = false;
+				if (obj == null) {
+					obj = new VariableNode(getIfTranslator().getNewVar());
+					((TripleElement) e).setObject(obj);
+					implicitObject = true;
+				}
+				if (implicitObject  || obj instanceof VariableNode) {
+					VariableNode vn = (VariableNode) ((TripleElement)e).getObject();
+//					if (vars != null && vars.contains(vn.getName())) {
+						Node pred = ((TripleElement)e).getPredicate();
+						ConceptName predcn = new ConceptName(pred.toFullyQualifiedString());
+						Property predProp = getTheJenaModel().getProperty(pred.toFullyQualifiedString());
+						if (predProp instanceof ObjectProperty) {
+							predcn.setType(ConceptType.OBJECTPROPERTY);
 						}
-					} catch (DontTypeCheckException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (InvalidTypeException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					List<Node> nvt = pred.getNodeValueTypes();
-//					getExpandedProperties(getRange())
-					int i =0;
+						else if (predProp instanceof DatatypeProperty) {
+							predcn.setType(ConceptType.DATATYPEPROPERTY);
+						}
+						else if (predProp instanceof AnnotationProperty) {
+							predcn.setType(ConceptType.ANNOTATIONPROPERTY);
+						}
+						else {
+							predcn.setType(ConceptType.RDFPROPERTY);
+						}
+						try {
+							TypeCheckInfo tci = getModelValidator().getTypeInfoFromRange(predcn, predProp, null);
+							if (tci != null) {
+								ConceptIdentifier tct = tci.getTypeCheckType();
+								if (tct instanceof ConceptName) {
+									try {
+										OntClass rngcls = getTheJenaModel().getOntClass(((ConceptName)tct).getUri());
+										if (rngcls != null) {
+											List<String> expandedProps = getExpandedProperties(rngcls);
+											if (expandedProps != null) {
+												for (int i = 0; i < expandedProps.size(); i++) {
+													String epstr = expandedProps.get(i);
+													if (!subjPredMatch(elements, vn, epstr)) {
+														NamedNode propnode = new NamedNode(epstr, NodeType.ObjectProperty);
+														VariableNode newvar = new VariableNode("x_" + propnode.getName()); //getIfTranslator().getNewVar());
+														TripleElement newtriple = new TripleElement(vn, propnode, newvar);
+														vars.add(newvar.getName());
+														if (triplesToAdd == null) triplesToAdd = new ArrayList<TripleElement>();
+														triplesToAdd.add(newtriple);
+													}
+												}
+											}
+										}
+									} catch (InvalidNameException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+								}
+							}
+						} catch (DontTypeCheckException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (InvalidTypeException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+//					}
 				}
 			}
 		}
-		return null;
+		if (triplesToAdd != null) {
+			for (int i = 0; i < triplesToAdd.size(); i++) {
+				query.addPattern(triplesToAdd.get(i));
+			}
+		}
+		
+		return query;
 	}
+	
+	private boolean subjPredMatch(List<GraphPatternElement> elements, VariableNode vn, String epstr) {
+		for (int i = 0; elements != null && i < elements.size(); i++) {
+			GraphPatternElement gp = elements.get(i);
+			if (gp instanceof TripleElement) {
+				TripleElement tr = (TripleElement)gp;
+				if (tr.getSubject().equals(vn) && tr.getPredicate().toFullyQualifiedString().equals(epstr)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	public Query processExpression(SelectExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Query query = new Query();
 		query.setContext(expr);
@@ -2025,6 +2076,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (qobj instanceof String) {
 			qstr = qobj.toString();
 			q.setSparqlQueryString(qstr);
+		}
+		else if (qobj instanceof NamedNode) {
+			if (isProperty(((NamedNode)qobj).getNodeType())) {
+				VariableNode sn = new VariableNode(getIfTranslator().getNewVar());
+				TripleElement tr = new TripleElement(sn, (Node) qobj, null);
+				q.addPattern(tr);
+				List<String> vars = q.getVariables();
+				if (vars == null) {
+					vars = new ArrayList<String>();
+					q.setVariables(vars);
+				}
+				q.getVariables().add(sn.getName());
+			}
 		}
 		else if (qobj instanceof TripleElement) {
 			Set<VariableNode> vars = getIfTranslator().getSelectVariables((GraphPatternElement) qobj);
@@ -7042,6 +7106,15 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		return false;
 	}
 	
+	protected boolean isProperty(NodeType oct) {
+		if (oct.equals(NodeType.ObjectProperty) || 
+				oct.equals(NodeType.DataTypeProperty) || 
+				oct.equals(NodeType.PropertyNode)){
+			return true;
+		}
+		return false;
+	}
+	
 	protected boolean isProperty(OntConceptType oct) {
 		if (oct.equals(OntConceptType.DATATYPE_PROPERTY) || 
 				oct.equals(OntConceptType.CLASS_PROPERTY) || 
@@ -7051,7 +7124,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		}
 		return false;
 	}
-	
+
 	public SadlCommand getTargetCommand() {
 		return targetCommand;
 	}
