@@ -566,6 +566,25 @@ public class IntermediateFormTranslator {
 			else if (triple.getPredicate() instanceof VariableNode) {
 				vars.add(((VariableNode)triple.getPredicate()));
 			}
+			if (vars.size() == 0) {
+				// need to construct variables
+				Object result;
+				try {
+					result = expandProxyNodes(triple, false, true);
+					if (result instanceof List<?> && ((List<?>)result).size() > 0 && ((List<?>)result).get(0) instanceof GraphPatternElement) {
+						return getSelectVariables((List<GraphPatternElement>) result);
+					}
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidTypeException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		else if (pattern instanceof BuiltinElement) {
 			List<Node> args = ((BuiltinElement)pattern).getArguments();

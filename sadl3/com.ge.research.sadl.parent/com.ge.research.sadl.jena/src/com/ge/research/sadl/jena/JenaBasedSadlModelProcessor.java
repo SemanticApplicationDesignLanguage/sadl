@@ -1796,6 +1796,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					query.setOffset(node.getOffset() - 1);
 					query.setLength(node.getLength());
 				}
+				query = addExpandedPropertiesToQuery(query);
 				addSadlCommand(query);
 				return query;
 			}
@@ -1808,6 +1809,48 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			EObject cont = sr2.eContainer();
 				if (cont instanceof QueryStatement && ((QueryStatement)cont).getExpr() != null) {
 					return processStatement((QueryStatement)cont);
+				}
+			}
+		}
+		return null;
+	}
+	private Query addExpandedPropertiesToQuery(Query query) {
+		List<String> vars = query.getVariables();
+		List<GraphPatternElement> elements = query.getPatterns();
+		for (GraphPatternElement e: elements) {
+			if (e instanceof TripleElement && ((TripleElement)e).getObject() instanceof VariableNode) {
+				VariableNode vn = (VariableNode) ((TripleElement)e).getObject();
+				if (vars.contains(vn.getName())) {
+					Node pred = ((TripleElement)e).getPredicate();
+					ConceptName predcn = new ConceptName(pred.toFullyQualifiedString());
+					Property predProp = getTheJenaModel().getProperty(pred.toFullyQualifiedString());
+					if (predProp instanceof ObjectProperty) {
+						predcn.setType(ConceptType.OBJECTPROPERTY);
+					}
+					else if (predProp instanceof DatatypeProperty) {
+						predcn.setType(ConceptType.DATATYPEPROPERTY);
+					}
+					else if (predProp instanceof AnnotationProperty) {
+						predcn.setType(ConceptType.ANNOTATIONPROPERTY);
+					}
+					else {
+						predcn.setType(ConceptType.RDFPROPERTY);
+					}
+					try {
+						TypeCheckInfo tci = getModelValidator().getTypeInfoFromRange(predcn, predProp, null);
+						if (tci != null) {
+							int  i = 0;
+						}
+					} catch (DontTypeCheckException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (InvalidTypeException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					List<Node> nvt = pred.getNodeValueTypes();
+//					getExpandedProperties(getRange())
+					int i =0;
 				}
 			}
 		}
@@ -4729,7 +4772,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (val != null) {
 				if (getModelValidator() != null) {
 					try {
-						getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val);
+						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val)) {
+							issueAcceptor.addWarning("Type check issue", propinit);
+						}
 					} catch (DontTypeCheckException e) {
 						// do nothing
 					} catch(PropertyWithoutRangeException e){

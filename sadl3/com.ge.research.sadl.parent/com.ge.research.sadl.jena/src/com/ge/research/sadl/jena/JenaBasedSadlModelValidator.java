@@ -881,21 +881,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
 				if (!getModelProcessor().ignoreUnittedQuantities) {
-					//String unit = ((Unit)expression).getUnit();
-					ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
-					List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
-					if (impliedProperties != null) {
-						return new TypeCheckInfo(uqcn, uqcn, impliedProperties, this, expression);
-					}
-					else {
-						return new TypeCheckInfo(uqcn, uqcn, this, expression);
-					}
+					return getUnittedQuantityTypeCheckInfo(expression);
 				}
 			}
 			else if (expression instanceof NumberLiteral) {
 				value = ((NumberLiteral)expression).getValue();
 			}
 			else {
+				if (((SadlNumberLiteral)expression).getUnit() != null) {
+					return getUnittedQuantityTypeCheckInfo(expression);
+				}
 				String strval = ((SadlNumberLiteral)expression).getLiteralNumber();
 				if (strval.indexOf('.') >= 0) {
 					value = BigDecimal.valueOf(Double.parseDouble(strval));
@@ -1105,6 +1100,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return null;
+	}
+
+	private TypeCheckInfo getUnittedQuantityTypeCheckInfo(EObject expression)
+			throws InvalidTypeException, InvalidNameException {
+		//String unit = ((Unit)expression).getUnit();
+		ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
+		if (impliedProperties != null) {
+			return new TypeCheckInfo(uqcn, uqcn, impliedProperties, this, expression);
+		}
+		else {
+			return new TypeCheckInfo(uqcn, uqcn, this, expression);
+		}
 	}
 	
 	protected void validateCommaSeparatedAbreviatedExpression(CommaSeparatedAbreviatedExpression expression) throws DontTypeCheckException, CircularDefinitionException, 
@@ -2100,7 +2108,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return getTypeInfoFromRange(propConceptName, property, expression);
 	}
 
-	private TypeCheckInfo getTypeInfoFromRange(ConceptName propConceptName, Property property,
+	public TypeCheckInfo getTypeInfoFromRange(ConceptName propConceptName, Property property,
 			EObject expression) throws DontTypeCheckException, InvalidTypeException {
 		ConceptType propertyType = propConceptName.getType();
 		StmtIterator sitr = theJenaModel.listStatements(property, RDFS.range, (RDFNode)null);
