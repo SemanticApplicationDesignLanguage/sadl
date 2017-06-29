@@ -1893,6 +1893,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							}
 	//					}
 					}
+					if (triplesToAdd == null && implicitObject) {
+						query.getVariables().add(((VariableNode)obj).getName());
+					}
 				}
 			}
 			if (triplesToAdd != null) {
