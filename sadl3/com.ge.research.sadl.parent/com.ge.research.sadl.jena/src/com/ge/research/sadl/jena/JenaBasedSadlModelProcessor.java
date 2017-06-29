@@ -2300,7 +2300,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private void processStatement(RuleStatement element) throws InvalidNameException, InvalidTypeException, TranslationException {
-		String ruleName = element.getName();
+		String ruleName = getDeclarationExtensions().getConcreteName(element.getName());
 		Rule rule = new Rule(ruleName);
 		setTarget(rule);
 		EList<Expression> ifs = element.getIfs();
@@ -3073,7 +3073,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			addError(SadlErrorMessages.TRANSLATE_NAME_SADLRESOURCE.toString(), expr);
 //			throw new InvalidNameException("Unable to resolve SadlResource to a name");
 		}
-		else if (qnm.equals(expr) && expr.eContainer() instanceof BinaryOperation && ((BinaryOperation)expr.eContainer()).getRight().equals(qnm)) {
+		else if (qnm.equals(expr) && expr.eContainer() instanceof BinaryOperation && 
+				((BinaryOperation)expr.eContainer()).getRight() != null && ((BinaryOperation)expr.eContainer()).getRight().equals(qnm)) {
 			addError("It appears that '" + nm + "' is not defined.", expr);
 		}
 		else {
@@ -3106,6 +3107,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			String cnstval = ((Constant)predicate).getConstant();
 			if (cnstval.equals("length")) {
+				throw new TranslationException("Handling 'length of' not yet implemented");
 			}
 			else if (cnstval.equals("count")) {
 				if (subject instanceof PropOfSubject) {
@@ -3122,8 +3124,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				Object idxobj = translate(predicate);
 			}
 			else if (cnstval.equals("first element")) {
+				throw new TranslationException("Handling 'first element of' not yet implemented");
 			}
 			else if (cnstval.equals("last element")) {
+				throw new TranslationException("Handling 'last element of' not yet implemented");
 			}
 			else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);

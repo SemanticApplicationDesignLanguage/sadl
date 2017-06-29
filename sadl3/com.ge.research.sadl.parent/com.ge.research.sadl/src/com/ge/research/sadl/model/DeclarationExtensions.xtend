@@ -49,6 +49,7 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import com.ge.research.sadl.sADL.SadlPropertyCondition
+import com.ge.research.sadl.sADL.RuleStatement
 
 class DeclarationExtensions {
 	
@@ -239,7 +240,8 @@ class DeclarationExtensions {
 				SadlMustBeOneOf :
 					OntConceptType.INSTANCE
 					
-				QueryStatement :
+				QueryStatement,
+				RuleStatement :
 					OntConceptType.STRUCTURE_NAME					
 					
 				default: OntConceptType.VARIABLE // linking errors and the like

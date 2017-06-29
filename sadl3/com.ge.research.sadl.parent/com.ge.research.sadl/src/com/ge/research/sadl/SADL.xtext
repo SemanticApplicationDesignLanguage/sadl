@@ -227,7 +227,7 @@ ExpressionStatement returns ExpressionScope :
 
 RuleStatement returns ExpressionScope :
 	{RuleStatement}
-	'Rule' name=QNAME ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
+	'Rule' name=SadlResource ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
 

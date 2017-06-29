@@ -291,6 +291,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 							iter.prune
 						}
 					}
+					RuleStatement: {
+						if (it?.name?.concreteName !== null) {
+							val name = converter.toQualifiedName(it.name.concreteName)
+							map.addElement(name, it.name)
+							if (name.segmentCount > 1) {
+								map.addElement(name.skipFirst(1), it.name)
+							}
+							else if (namespace !== null) {
+								map.addElement(namespace.append(name), it.name)
+							}
+							iter.prune
+						}
+					}
 					default :
 						if (pruneScope(it)) {
 							iter.prune
@@ -401,6 +414,12 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				// In such cases the statement does not have an expression.
 				val queryStatement = obj.eContainer as QueryStatement
 				if (queryStatement.expr === null) {
+					return;
+				}
+			}
+			else if (obj.eContainer instanceof RuleStatement) {
+				val ruleStatement = obj.eContainer as RuleStatement
+				if (ruleStatement.thens === null) {
 					return;
 				}
 			}
