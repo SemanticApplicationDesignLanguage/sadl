@@ -27,6 +27,7 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 	public static final String URI_ID = "uri"
 	public static final String CLASS_ID = "class"
 	public static final String INSTANCE_ID = "instance"
+	public static final String STRUCTURE_NAME_ID = "structureName"
 	public static final String VARIABLE_ID = "variable"
 	public static final String DATA_PROPERTY_ID = "dataProperty"
 	public static final String OBJECT_PROPERTY_ID = "objectProperty"
@@ -40,6 +41,7 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 		acceptor.acceptDefaultHighlighting(URI_ID, "URI", uriTextStyle())
 		acceptor.acceptDefaultHighlighting(CLASS_ID, "Class", classTextStyle())
 		acceptor.acceptDefaultHighlighting(INSTANCE_ID, "Instance", instanceTextStyle())
+		acceptor.acceptDefaultHighlighting(STRUCTURE_NAME_ID, "Structure Name", structureInstanceTextStyle())
 		acceptor.acceptDefaultHighlighting(VARIABLE_ID, "Variable", variableTextStyle())
 		acceptor.acceptDefaultHighlighting(DATA_PROPERTY_ID, "Data Property", dataPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(OBJECT_PROPERTY_ID, "Object Property", objectPropertyTextStyle())
@@ -79,6 +81,14 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
 		return textStyle
 	}
 
+	// SADL 3 structure name instance
+	def structureInstanceTextStyle() {
+		var TextStyle textStyle = defaultTextStyle().copy()
+		textStyle.setColor(new RGB(0, 0, 255))
+		textStyle.setStyle(SWT.BOLD)
+		return textStyle
+	}
+	
 	// SADL V1 used SWT.COLOR_MAGENTA and SWT.BOLD.
 	def TextStyle variableTextStyle() {
 		var TextStyle textStyle = defaultTextStyle().copy()

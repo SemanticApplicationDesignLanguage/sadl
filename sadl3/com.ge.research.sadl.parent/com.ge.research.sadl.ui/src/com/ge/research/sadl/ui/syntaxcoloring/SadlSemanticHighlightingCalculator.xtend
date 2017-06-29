@@ -161,7 +161,7 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 				return SadlHighlightingConfiguration.INSTANCE_ID
 			}
 			case STRUCTURE_NAME: {
-				return SadlHighlightingConfiguration.INSTANCE_ID
+				return SadlHighlightingConfiguration.STRUCTURE_NAME_ID
 			}
 			case CLASS: {
 				return SadlHighlightingConfiguration.CLASS_ID
