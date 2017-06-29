@@ -342,6 +342,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
+		public void addImplicitProperties(List<ConceptName> implicitProps) {
+			if (implicitProperties == null) {
+				implicitProperties = implicitProps;
+			}
+			else {
+				implicitProperties.addAll(implicitProps);
+			}
+		}
+		
 		public List<ConceptName> getImplicitProperties() {
 			return implicitProperties;
 		}
@@ -948,7 +957,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getType((PropOfSubject)expression);
 		}
 		else if(expression instanceof SubjHasProp){
-			if (expression.eContainer() instanceof BinaryOperation) {
+			if (expression.eContainer() instanceof BinaryOperation || expression.eContainer() instanceof SelectExpression) {
 				// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
 				if (((SubjHasProp)expression).getProp() instanceof SadlResource) {
 					SadlResource prop = ((SubjHasProp)expression).getProp();
@@ -959,13 +968,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					issueAcceptor.addError("This subject-has-property construct isn't properly validated, please report.", expression);
 				}
 			}
+//			else if (expression.eContainer() instanceof SelectExpression) {
+//				
+//			}
 			else {
 				Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
 				if (subjHasPropInDeclaration != null) {
 					return getType(subjHasPropInDeclaration);
 				}
 				else {
-					issueAcceptor.addError("This appears to be a declaration isn't fully supported; should it be nested (in parentheses)", expression);
+					issueAcceptor.addError("This appears to be a declaration that isn't fully supported; should it be nested (in parentheses)", expression);
 				}
 			}
 		}
@@ -2246,7 +2258,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private TypeCheckInfo createTypeCheckInfoForPropertyRange(RDFNode first, ConceptName propConceptName,
 			EObject expression, ConceptType propertyType) throws InvalidTypeException {
-		TypeCheckInfo tci;
+		TypeCheckInfo tci = null;
 		ConceptName rangeConceptName = new ConceptName(first.asResource().getURI());
 		if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 			rangeConceptName.setType(ConceptType.RDFDATATYPE);
@@ -2276,7 +2288,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			rangeConceptName.setType(ConceptType.ONTCLASS);
 		}
 		List<ConceptName> impliedProperties = getImpliedProperties(first.asResource());
-		tci = new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
+		if (tci == null) {
+			tci = new TypeCheckInfo(propConceptName, rangeConceptName, impliedProperties, this, expression);
+		}
+		else if (impliedProperties != null){
+			tci.addImplicitProperties(impliedProperties);
+		}
 		if (isTypedListSubclass(first)) {
 			tci.setRangeValueType(RangeValueType.LIST);
 			if (first.isURIResource()) {
@@ -2714,6 +2731,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				else if(isDecimal(leftConceptName) && isDecimal(rightConceptName)){
 					return true;
+				}
+				else {
+					// maybe one or both is a user-defined datatype
+					
 				}
 			}
 			else if (leftConceptName.getType().equals(ConceptType.DATATYPEPROPERTY) &&
@@ -3261,6 +3282,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	public boolean checkPropertyValueInRange(OntModel theJenaModel, Expression subj, SadlResource pred, EObject val) throws CircularDefinitionException, DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		TypeCheckInfo predType = getType(pred);
+		if (val == null && isInQuery(pred)) {
+			return true;	// this is OK
+		}
 		TypeCheckInfo valType = getType(val);
 		List<String> operations = Arrays.asList("is");
 		if (compareTypes(operations , pred, val, predType, valType)) {
