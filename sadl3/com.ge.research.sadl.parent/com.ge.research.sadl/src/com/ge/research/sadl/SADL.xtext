@@ -225,15 +225,19 @@ ExpressionStatement returns ExpressionScope :
 	{ExpressionStatement}
 	'Expr:' expr=Expression ('=>' evaluatesTo=STRING)?;
 
+NamedStructureAnnotation :
+	','? '(' type=SadlResource contents+=SadlExplicitValue (',' contents+=SadlExplicitValue)* ')'
+;
+
 RuleStatement returns ExpressionScope :
 	{RuleStatement}
-	'Rule' name=SadlResource ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
+	'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	start = ('Ask'|'Graph') ((name=SadlResource)? ':' expr=(ConstructExpression | AskExpression | Expression) 
+	start = ('Ask'|'Graph') ((name=SadlResource (annotations+=NamedStructureAnnotation)* )? ':' expr=(ConstructExpression | AskExpression | Expression) 
 		| name=SadlResource
 	)
 ;

@@ -47,11 +47,13 @@ class SadlProjectStructureInitializer {
 
 	static val IMPLICIT_MODEL_CONTENT = '''
 		uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-		Event is a class.
+
 		impliedProperty is a type of annotation.
 		UnittedQuantity is a class,
 		 	described by ^value with values of type decimal,
-		 	described by unit with values of type string.''';
+		 	described by unit with values of type string.
+		^Rule is a class.
+		NamedQuery is a class.''';
 
 	static val SHAPES_FILE_CONTENT = '''
 		uri "http://sadl.org/«SHAPES_FILENAME»" alias Shapes.

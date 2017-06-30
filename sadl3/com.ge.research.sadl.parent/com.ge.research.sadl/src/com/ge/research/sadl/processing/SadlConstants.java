@@ -32,7 +32,9 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_VALUE_URI = SADL_IMPLICIT_MODEL_URI + "#value";
 	public static final String SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#impliedProperty";
 	public static final String SADL_IMPLICIT_MODEL_EXPANDED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#expandedProperty";
+	public static final String SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#NamedQuery";
 	public static final String SADL_IMPLICIT_MODEL_QUERY_STRING_URI = SADL_IMPLICIT_MODEL_URI + "#queryString";
+	public static final String SADL_IMPLICIT_MODEL_RULE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Rule";
 	
 	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
 	public static final String SADL_RULE_PATTERN_PREFIX = "";

@@ -1150,4 +1150,40 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			println("Iteration " + i + " Took : " + started.elapsed(TimeUnit.MILLISECONDS))
 		}
 	}
+	
+	@Test
+	def void testQueryVariable_1() {
+		'''
+			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			
+			impliedProperty is a type of annotation.
+			expandedProperty is a type of annotation.
+			UnittedQuantity is a class,
+				described by ^value with values of type decimal,
+				described by unit with values of type string.
+			UnittedQuantity has expandedProperty ^value, has expandedProperty unit.
+		'''.assertLinking[sadl]
+		
+		'''
+			 uri "http://sadl.org/TestExpandedInQuery.sadl" alias TestExpandedInQuery.
+			 
+			 [PhysicalObject] is a class described by [weight] with values of type <UnittedQuantity>.
+			 
+			 [MonaLisa] is a <PhysicalObject> with <weight> 25 lbs.
+			 [AngelOak] is a <PhysicalObject> with <weight> 10000 lbs.
+			 
+			 Ask: <weight>.
+			 Ask: <weight> of [x].
+«««			 Ask: [x] has <weight>.
+«««			 Ask Q1: [x] has <weight>.
+			 Ask: <weight> of <AngelOak>.
+			 Ask: <AngelOak> has <weight>.
+«««			 Ask: select <po> where [po] has <weight>. 
+«««			 Ask: select po, w where po has weight w. 
+«««			 Ask: select po, v, u where po has weight w and w has ^value v and w has unit u. 
+«««			 Ask: select po, v, u where po has weight w and w has ^value v and w has unit u and v > 1000 .  
+«««			 Ask: select p where p is a PhysicalObject.
+			 Ask Named: select <p> where [p] is a PhysicalObject.
+		'''.assertLinking[sadl]
+	}
 }

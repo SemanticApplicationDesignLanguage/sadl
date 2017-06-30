@@ -135,6 +135,7 @@ import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.ExpressionStatement;
 import com.ge.research.sadl.sADL.ExternalEquationStatement;
 import com.ge.research.sadl.sADL.Name;
+import com.ge.research.sadl.sADL.NamedStructureAnnotation;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PrintStatement;
 import com.ge.research.sadl.sADL.PropOfSubject;
@@ -1787,6 +1788,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				if (element.getName() != null) {
 					String uri = declarationExtensions.getConceptUri(element.getName());
 					query.setFqName(uri);
+					OntClass nqcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI);
+					if (nqcls != null) {
+						Individual nqry = getTheJenaModel().createIndividual(uri, nqcls);
+						// Add annotations, if any
+						EList<NamedStructureAnnotation> annotations = element.getAnnotations();
+						if (annotations != null && annotations.size() > 0) {
+							addNamedStructureAnnotations(nqry, annotations);
+						}
+					}				
 				}
 				if (element.getStart().equals("Graph")) {
 					query.setGraph(true);
@@ -2336,6 +2346,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			rules = new ArrayList<Rule>();
 		}
 		rules.add(rule);
+		String uri = declarationExtensions.getConceptUri(element.getName());
+		OntClass rcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_RULE_CLASS_URI);
+		if (rcls != null) {
+			Individual rl = getTheJenaModel().createIndividual(uri, rcls);
+			// Add annotations, if any
+			EList<NamedStructureAnnotation> annotations = element.getAnnotations();
+			if (annotations != null && annotations.size() > 0) {
+				addNamedStructureAnnotations(rl, annotations);
+			}
+		}
 		setTarget(null);
 	}
 	
@@ -3110,7 +3130,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			String cnstval = ((Constant)predicate).getConstant();
 			if (cnstval.equals("length")) {
-				throw new TranslationException("Handling 'length of' not yet implemented");
+//				throw new TranslationException("Handling 'length of' not yet implemented");
+				addError("'length of' not yet implemented", expr);
+				return null;
 			}
 			else if (cnstval.equals("count")) {
 				if (subject instanceof PropOfSubject) {
@@ -3127,10 +3149,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				Object idxobj = translate(predicate);
 			}
 			else if (cnstval.equals("first element")) {
-				throw new TranslationException("Handling 'first element of' not yet implemented");
+//				throw new TranslationException("Handling 'first element of' not yet implemented");
+				addError("'first element of' not yet implemented", expr);
+				return null;
 			}
 			else if (cnstval.equals("last element")) {
-				throw new TranslationException("Handling 'last element of' not yet implemented");
+//				throw new TranslationException("Handling 'last element of' not yet implemented");
+				addError("'last element of' not yet implemented", expr);
+				return null;
 			}
 			else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
@@ -7459,11 +7485,79 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		}
 		return false;
 	}
+	
 	public DeclarationExtensions getDeclarationExtensions() {
 		return declarationExtensions;
 	}
+	
 	public void setDeclarationExtensions(DeclarationExtensions declarationExtensions) {
 		this.declarationExtensions = declarationExtensions;
 	}
+	protected void addNamedStructureAnnotations(Individual requirement, EList<NamedStructureAnnotation> annotations) throws TranslationException {
+		Iterator<NamedStructureAnnotation> annitr = annotations.iterator();
+		if (annitr.hasNext()) {
+			while (annitr.hasNext()) {
+				NamedStructureAnnotation ra = annitr.next();
+				String annuri = getDeclarationExtensions().getConceptUri(ra.getType());
+				Property annProp = getTheJenaModel().getProperty(annuri);
+				if (annProp == null) {
+					issueAcceptor.addError("Annotation '" + annuri + "' not found in model", ra);
+					continue;
+				}
+				Iterator<SadlExplicitValue> cntntitr = ra.getContents().iterator();
+				StringBuilder sb = new StringBuilder();
+				int cntr = 0;
+				while (cntntitr.hasNext()) {
+					SadlExplicitValue annvalue = cntntitr.next();
+					if (annvalue instanceof SadlResource) {
+						Node n = processExpression((SadlResource)annvalue);
+						OntResource nor = getTheJenaModel().getOntResource(n.toFullyQualifiedString());
+						getTheJenaModel().add(requirement, annProp, nor);
+					}
+					else {
+						try {
+							com.hp.hpl.jena.ontology.OntResource range = annProp.canAs(OntProperty.class) ? annProp.as(OntProperty.class).getRange() : null;
+							com.hp.hpl.jena.rdf.model.Literal annLiteral = sadlExplicitValueToLiteral(annvalue, range);
+							getTheJenaModel().add(requirement, annProp, annLiteral);
+							if (cntr > 0) sb.append(", ");
+							sb.append("\"");
+							sb.append(annvalue);
+							sb.append("\"");
+							cntr++;
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} //getTheJenaModel().createTypedLiteral(annvalue);
+					}
+				}
+				System.out.println("Requirement annotation: " + getDeclarationExtensions().getConceptUri(ra.getType()) + " = " + sb.toString());
+			}
+		}
+	}
+	
+//	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, OntProperty prop) throws JenaProcessorException, TranslationException {
+//		if (value instanceof SadlNumberLiteral) {
+//			String strval = ((SadlNumberLiteral)value).getLiteralNumber();
+//			return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, strval);
+//		}
+//		else if (value instanceof SadlStringLiteral) {
+//			String val = ((SadlStringLiteral)value).getLiteralString();
+//			return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val);
+//		}
+//		else if (value instanceof SadlBooleanLiteral) {
+//			SadlBooleanLiteral val = ((SadlBooleanLiteral)value);
+//			return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val.toString());
+//		}
+//		else if (value instanceof SadlValueList) {
+//			throw new JenaProcessorException("A SADL value list cannot be converted to a Literal");
+//		}
+//		else if (value instanceof SadlConstantLiteral) {
+//			String val = ((SadlConstantLiteral)value).getTerm();
+//			return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, val);
+//		}
+//		else {
+//			throw new JenaProcessorException("Unhandled sadl explicit vaue type: " + value.getClass().getCanonicalName());
+//		}
+//	}
 
 };

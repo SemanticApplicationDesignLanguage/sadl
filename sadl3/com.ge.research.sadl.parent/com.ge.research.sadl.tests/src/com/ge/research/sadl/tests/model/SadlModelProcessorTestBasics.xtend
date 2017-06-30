@@ -141,6 +141,34 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
  			}
  		]
 	}
+	
+	@Test
+	def void testNamedStructureAnnotationsRule() {
+		val sadlModel = '''
+			uri "http://sadl.org/Shapes.sadl" alias Shapes.
+			 
+			Shape is a class described by area with values of type float.
+			 
+			comment is a type of annotation.
+			 
+			Circle is a type of Shape, described by radius with values of type float.
+			 
+			MyCircle is a Circle with radius 3.
+			 
+			Rule AreaOfCircle:
+			 	if c is a Circle
+			 	then area of c is radius of c ^ 2 * PI.
+			 	
+			AreaOfCircle has comment "ho".
+			 	
+			Ask: area. 	
+			
+			Ask: x is a ^Rule.'''.assertValidatesTo[jenaModel, issues |
+				assertNotNull(jenaModel)
+				jenaModel.write(System.out)
+				assertTrue(issues.size == 0)
+			]
+	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
