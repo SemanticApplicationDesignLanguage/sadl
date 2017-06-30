@@ -144,6 +144,18 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 	
 	@Test
 	def void testNamedStructureAnnotationsRule() {
+		val implicitModel = '''
+			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			
+			impliedProperty is a type of annotation.
+			expandedProperty is a type of annotation.
+			UnittedQuantity is a class,
+				described by ^value with values of type decimal,
+				described by unit with values of type string.
+			^Rule is a class.
+			NamedQuery is a class.
+		'''.assertValidatesTo[p1, p2|]
+		
 		val sadlModel = '''
 			uri "http://sadl.org/Shapes.sadl" alias Shapes.
 			 
@@ -163,7 +175,8 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 			 	
 			Ask: area. 	
 			
-			Ask: x is a ^Rule.'''.assertValidatesTo[jenaModel, issues |
+«««			Ask: x is a ^Rule.
+		'''.assertValidatesTo[jenaModel, issues |
 				assertNotNull(jenaModel)
 				jenaModel.write(System.out)
 				assertTrue(issues.size == 0)
