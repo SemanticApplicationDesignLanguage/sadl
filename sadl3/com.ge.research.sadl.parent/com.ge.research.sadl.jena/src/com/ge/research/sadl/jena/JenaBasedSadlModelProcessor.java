@@ -2096,7 +2096,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	private Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
+	protected Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
 			EList<SadlParameterDeclaration> params, String location)
 			throws JenaProcessorException, TranslationException, InvalidNameException {
 		Equation eq = new Equation(declarationExtensions.getConcreteName(nm));
