@@ -183,6 +183,39 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 			]
 	}
 
+	@Test
+	def void testOnlyIf() {
+		val implicitModel = '''
+			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			
+			impliedProperty is a type of annotation.
+			expandedProperty is a type of annotation.
+			UnittedQuantity is a class,
+				described by ^value with values of type decimal,
+				described by unit with values of type string.
+			^Rule is a class.
+			NamedQuery is a class.
+		'''.assertValidatesTo[p1, p2|]
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+
+			 IRS is a class
+			 	described by ground_speed with values of type DATA.
+			 ground_speed of IRS only has values of type DATA. 	
+			 DATA is a class described by _value with values of type decimal.
+			 
+			 is_ground_speed_of describes DATA with values of type IRS.
+			 is_ground_speed_of is the inverse of ground_speed.
+			 
+«««			 DATA2 is a type of DATA.
+			 A DATA is a DATA2 only if is_ground_speed_of only has values of type IRS.
+			 DATA2 has expandedProperty _value. 
+		'''.assertValidatesTo[jenaModel, issues |
+				assertNotNull(jenaModel)
+				jenaModel.write(System.out)
+				assertTrue(issues.size == 0)
+			]
+	}
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)

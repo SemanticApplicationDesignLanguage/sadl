@@ -26,6 +26,7 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -1184,6 +1185,26 @@ class SadlLinkingTest extends AbstractLinkingTest {
 «««			 Ask: select po, v, u where po has weight w and w has ^value v and w has unit u and v > 1000 .  
 «««			 Ask: select p where p is a PhysicalObject.
 			 Ask Named: select <p> where [p] is a PhysicalObject.
+		'''.assertLinking[sadl]
+	}
+	
+//	@Ignore
+	@Test
+	def void testOnlyIf() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 IRS is a class
+			 	described by ground_speed with values of type DATA.
+			 ground_speed of IRS only has values of type DATA. 	
+			 DATA is a class described by _value with values of type decimal.
+			 
+			 is_ground_speed_of describes DATA with values of type IRS.
+			 is_ground_speed_of is the inverse of ground_speed.
+			 
+«««			 DATA2 is a type of DATA.
+			 A <DATA> is a [DATA2] only if is_ground_speed_of only has values of type IRS.
+			 <DATA2> has expandedProperty _value. 
 		'''.assertLinking[sadl]
 	}
 }
