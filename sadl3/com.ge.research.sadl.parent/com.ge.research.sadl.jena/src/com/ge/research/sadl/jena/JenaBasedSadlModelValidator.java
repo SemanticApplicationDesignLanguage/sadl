@@ -440,6 +440,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if(skipOperations(operations)){
 			return true;
 		}
+		if (skipNonCheckedExpressions(leftExpression, rightExpression)) {
+			return true;
+		}
 		try {	
 			boolean dontTypeCheck = false;
 			TypeCheckInfo leftTypeCheckInfo = null;
@@ -478,8 +481,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //						leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
 					}
 					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, effectiveOp);
+					return false;
 				}
-				return false;
 			}
 			//It's possible there may be a local type restriction
 			handleLocalRestriction(leftExpression,rightExpression,leftTypeCheckInfo,rightTypeCheckInfo);
@@ -489,6 +492,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private boolean skipNonCheckedExpressions(Expression leftExpression, Expression rightExpression) {
+		Expression rExpr = rightExpression;
+		if (rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getOp().equals("not")) {
+			rExpr = ((UnaryExpression)rightExpression).getExpr();
+		}
+		if (rExpr instanceof Constant && ((Constant)rExpr).getConstant().equals("known")) {
+			return true;
+		}
+		return false;
+	}
+
 	protected void handleLocalRestriction(Expression leftExpression, Expression rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
 			TypeCheckInfo subjtype = getType(((PropOfSubject)leftExpression).getRight());
