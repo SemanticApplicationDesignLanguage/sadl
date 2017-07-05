@@ -2523,22 +2523,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				return robj;
 			}
-			if (getRulePart().equals(RulePart.CONCLUSION) &&
-					(lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal && isSparqlQuery(((com.ge.research.sadl.model.gp.Literal)lobj).toString())))
-					) {
-				if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
-					if (((TripleElement)lobj).getObject() == null) {
-						((TripleElement)lobj).setObject((com.ge.research.sadl.model.gp.Literal)robj);
-						return lobj;
+			if ((lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal && isSparqlQuery(((com.ge.research.sadl.model.gp.Literal)lobj).toString())))
+					&& !(robj instanceof KnownNode)) {
+				if (getRulePart().equals(RulePart.CONCLUSION)) {
+					if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
+						if (((TripleElement)lobj).getObject() == null) {
+							((TripleElement)lobj).setObject((com.ge.research.sadl.model.gp.Literal)robj);
+							return lobj;
+						}
+						else {
+							addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), expr);
+						}
+					}
+					else if (robj instanceof VariableNode) {
+						if (((TripleElement)lobj).getObject() == null) {
+							((TripleElement)lobj).setObject((VariableNode) robj);
+							return lobj;
+						}
+					}
+					else if (robj instanceof BuiltinElement) {
+						if (isModifiedTriple(((BuiltinElement)robj).getFuncType())) {
+							assignedNode = ((BuiltinElement)robj).getArguments().get(0);
+							optype = ((BuiltinElement)robj).getFuncType();
+							pattern = lobj;
+						}
+						else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
+							if ( ((BuiltinElement)robj).getArguments().get(0) instanceof com.ge.research.sadl.model.gp.Literal) {
+								((TripleElement)lobj).setObject(nodeCheck(robj));
+								return lobj;
+							}
+							else {
+								return createBinaryBuiltin(rexpr, ((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
+							}
+						}
+					}
+					else if (robj instanceof TripleElement) {
+						// do nothing
 					}
 					else {
-						addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), expr);
-					}
-				}
-				else if (robj instanceof VariableNode) {
-					if (((TripleElement)lobj).getObject() == null) {
-						((TripleElement)lobj).setObject((VariableNode) robj);
-						return lobj;
+						addError(SadlErrorMessages.UNHANDLED.get("assignment construct in rule conclusion", " "), expr);
 					}
 				}
 				else if (robj instanceof BuiltinElement) {
@@ -2548,7 +2571,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						pattern = lobj;
 					}
 					else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
-						if ( ((BuiltinElement)robj).getArguments().get(0) instanceof com.ge.research.sadl.model.gp.Literal) {
+						if ( ((BuiltinElement)robj).getArguments().get(0) instanceof Literal) {
 							((TripleElement)lobj).setObject(nodeCheck(robj));
 							return lobj;
 						}
@@ -2556,9 +2579,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							return createBinaryBuiltin(rexpr, ((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
 						}
 					}
-				}
-				else {
-					addError(SadlErrorMessages.UNHANDLED.get("Unhandled assignment construct in rule conclusion", " "), expr);
 				}
 			}
 			else if (lobj instanceof Node && robj instanceof TripleElement) {
@@ -3058,8 +3078,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return lit;
 	}
 	
-	public ConstantNode processExpression(Constant expr) throws InvalidNameException {
+	public Node processExpression(Constant expr) throws InvalidNameException {
 //		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getConstant());
+		if (expr.getConstant().equals("known")) {
+			return new KnownNode();
+		}
 		return new ConstantNode(expr.getConstant());
 	}
 	
@@ -3188,7 +3211,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		else {
-			throw new TranslationException("Subject of PropOfSubject is null (Resource '" + expr.eResource().getURI() + "')");
+			return null;	// this condition will occur during typing as PropOfSubject will be incomplete
+//			throw new TranslationException("Subject of PropOfSubject is null (Resource '" + expr.eResource().getURI() + "')");
 		}
 		TripleElement returnTriple = null;
 		if (predNode != null) {
@@ -3619,7 +3643,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				//  but if it is a condition to be added as property restriction null will be returned
 				Property prop = processSadlProperty(rsrcList.get(i), sp);
 				if (prop != null) {
-					addPropertyDomain(prop, rsrcList.get(i), sp.eContainer());
+					addPropertyDomain(prop, rsrcList.get(i), sp); //.eContainer());
 				}
 			}
 
@@ -4612,6 +4636,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (sep > 0) {
 			String ns = uri.substring(0, sep);
 			String ln = uri.substring(sep + 1);
+			// if the concept is in the current model just return the localname
+			if (ns.equals(getModelName())) {
+				return ln;
+			}
 			// get the prefix and if there is one generate qname
 			String prefix = getConfigMgr().getGlobalPrefix(ns);
 			if (prefix != null && prefix.length() > 0) {
@@ -5406,7 +5434,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (existingDomain.canAs(OntClass.class)) {
 				// is the new domain a subclass of the existing domain?
 				if (cls.canAs(OntClass.class) && checkForSubclassing(cls.as(OntClass.class), existingDomain.as(OntClass.class), context) ) {
-					StringBuilder sb = new StringBuilder("This domain is a subclass of the domain which is already defined");
+					StringBuilder sb = new StringBuilder("This specified domain of '");
+					sb.append(nodeToString(prop));
+					sb.append("' is a subclass of the domain which is already defined");
 					String dmnstr = nodeToString(existingDomain);
 					if (dmnstr != null) {
 						sb.append(" (");
@@ -7493,7 +7523,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	public void setDeclarationExtensions(DeclarationExtensions declarationExtensions) {
 		this.declarationExtensions = declarationExtensions;
 	}
-	protected void addNamedStructureAnnotations(Individual requirement, EList<NamedStructureAnnotation> annotations) throws TranslationException {
+	protected void addNamedStructureAnnotations(Individual namedStructure, EList<NamedStructureAnnotation> annotations) throws TranslationException {
 		Iterator<NamedStructureAnnotation> annitr = annotations.iterator();
 		if (annitr.hasNext()) {
 			while (annitr.hasNext()) {
@@ -7512,13 +7542,15 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 					if (annvalue instanceof SadlResource) {
 						Node n = processExpression((SadlResource)annvalue);
 						OntResource nor = getTheJenaModel().getOntResource(n.toFullyQualifiedString());
-						getTheJenaModel().add(requirement, annProp, nor);
+						if (nor != null) {		// can be null during entry of statement in editor
+							getTheJenaModel().add(namedStructure, annProp, nor);
+						}
 					}
 					else {
 						try {
 							com.hp.hpl.jena.ontology.OntResource range = annProp.canAs(OntProperty.class) ? annProp.as(OntProperty.class).getRange() : null;
 							com.hp.hpl.jena.rdf.model.Literal annLiteral = sadlExplicitValueToLiteral(annvalue, range);
-							getTheJenaModel().add(requirement, annProp, annLiteral);
+							getTheJenaModel().add(namedStructure, annProp, annLiteral);
 							if (cntr > 0) sb.append(", ");
 							sb.append("\"");
 							sb.append(annvalue);
@@ -7530,7 +7562,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 						} //getTheJenaModel().createTypedLiteral(annvalue);
 					}
 				}
-				System.out.println("Requirement annotation: " + getDeclarationExtensions().getConceptUri(ra.getType()) + " = " + sb.toString());
+				logger.debug("Named structure annotation: " + getDeclarationExtensions().getConceptUri(ra.getType()) + " = " + sb.toString());
 			}
 		}
 	}
