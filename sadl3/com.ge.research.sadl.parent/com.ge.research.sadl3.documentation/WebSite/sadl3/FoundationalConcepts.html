@@ -13,9 +13,20 @@
 <h1>Foundational Concepts</h1>
 
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/27/2017<!--webbot bot="Timestamp" endspan i-checksum="12627" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->07/03/2017<!--webbot bot="Timestamp" endspan i-checksum="12553" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
-<h2>Identity, Namespace, and Names (or Lack of Names)</h2>
+<h3>Table of Contents</h3>
+<ul>
+  <li><a href="#Identity">Identity, Namespace, and Names (or Lack of Names)</a></li>
+  <li><a href="#Sets">Sets and Members (AKA Classes and Instances)</a><ul>
+    <li><a href="#Hierarchies">Class Hierarchies</a></li>
+    <li><a href="#ClassVsInstance">When Is Something a Class, When Is It an Instance?</a></li>
+  </ul>
+  </li>
+  <li><a href="#Properties">Characteristics, Relationships, and Properties</a></li>
+  <li><a href="#Graphs">Graph Models, Graph Patterns, and Graph Query Languages</a></li>
+</ul>
+<h2><a name="Identity">Identity, Namespace, and Names (or Lack of Names)</a></h2>
 <p><i>Identity</i> in necessary for communication, formal or informal. In other words, 
 the concepts that are defined in our ontology are only useful and usable if I 
 can distinguish one from another. This ability to distinguish one concept from 
@@ -71,11 +82,11 @@ persons by their qname:</p>
 identifier for everything. As humans, we don’t do it. (In fact, even when an 
 identifier exists we will not necessarily use it. When’s the last time you used 
 the VIN of your automobile in conversation?) Mostly we identify things by their 
-relationship to other things that are identified. Fortunately, in the ontology 
+relationship to other things that are easily identified. Fortunately, in the ontology 
 language we use, we can do exactly that—identify things solely by their 
 relationship to other things. As we’ll see a little later, such an unnamed 
 concept is called a <i>blank node</i> or <i>bnode</i>.</p>
-<h2>Sets and Members (AKA Classes and Instances)</h2>
+<h2><a name="Sets">Sets and Members (AKA Classes and Instances)</a></h2>
 <p>People naturally categorize things. This is very beneficial in at least two 
 ways. 1) It allows us to compress the enormous quantity of information that 
 bombards us every day into higher-level representations. 2) It allows us to 
@@ -83,7 +94,7 @@ communicate much more parsimoniously. What people do subconsciously
 mathematicians have been formalizing for millennia as set theory. A set is a 
 grouping of things, usually similar in some way we care about. In ontologies we 
 often call this grouping or category or type a <i>class</i>. </p>
-<h3>Class Hierarchies</h3>
+<h3><a name="Hierarchies">Class Hierarchies</a></h3>
 <p>Sets, whether formal or informal, are useful in part because we can order 
 them in hierarchies of classes, sub-classes, and super-classes. For example, we 
 might define the class <i>LivingThing</i> and put in it all things that are alive. We 
@@ -118,7 +129,7 @@ Suppose that you are tempted to say that <i>Frame</i> is a type of <i>Bicycle</i
 Ask the question, is every instance of <i>Frame</i> also an instance of <i>
 Bicycle</i>? Obviously not, so the class-subclass relationship is NOT the right 
 one.</p>
-<h3>When Is Something a Class, When Is It an Instance?</h3>
+<h3><a name="ClassVsInstance">When Is Something a Class, When Is It an Instance?</a></h3>
 <p>The individual things that we group together in a class are instances or 
 members of the class. In creating an ontology the question often arises as to 
 when to make a concept a class and when to model it as an instance. A couple of 
@@ -129,7 +140,7 @@ concern. However,
 if there are multiple instances AND these instances differ in some way important 
 to the purpose of the model, then the concept must be modeled as a class so that 
 individual instances of the class can be given different properties and there by differentiated.</p>
-<h2>Characteristics, Relationships, and Properties</h2>
+<h2><a name="Properties">Characteristics, Relationships, and Properties</a></h2>
 <p>Generalizing over individual things to create classes and class hierarchies 
 is not the only way in which people extract models from observations. We also 
 create groupings of the characteristics of things and how things are related to 
@@ -161,6 +172,32 @@ domain of <i>age</i> and <i>weight</i> is <i>PhysicalThing</i> while the domain 
 <i>friend</i> is <i>Person</i>. 
 The range of <i>age</i> and <i>weight</i> might be specified (ignoring units for the moment) 
 as <i>numeric</i>. </p>
+
+<h2><a name="Graphs">Graph Models, Graph Patterns, and Graph Query Languages</a></h2>
+<p>Implicit in our discussion of properties in the previous section is the idea 
+of a directed graph. An instance of the domain class can have a property with a 
+value drawn from the range. For example, If <i>Jonathan</i> and <i>David</i> are 
+instances of the class <i>Person</i>, one might say <i>Jonathan friend David</i>. 
+Or one might say <i>Jonathan age 23</i>. Each of these statements has a subject, 
+a property, and a property value. There is an explicit order to the statement.
+<i>Jonathan</i> has an <i>age</i>, <i>23</i> does not have an <i>age</i>. 
+Therefore statements of this kind are a set of edges of a directed graph. We say 
+that an ontology of this type is a graph model.</p>
+<p>Given a graph model, we can express patterns to query the model. Continuing 
+our example, one possible pattern would be <i>? age 23</i>, meaning, &quot;<i>who has 
+age 23?&quot; </i>The question mark in the subject location indicates that we want to 
+find all of the statements in our model that have any subject and the property
+<i>age</i> with value <i>23</i>. By giving question marks names to create what 
+we call &quot;variables&quot;, we can tie multiple graph patterns together to create a 
+more complex pattern. For example, <i>?p1 friend ?p2, ?p2 age 23</i> means find 
+all possible instances in the model such that some instance (<i>p1</i>) has a <i>
+friend</i> (<i>p2</i>) who has <i>age</i> <i>23</i>. </p>
+<p>Graph query languages allow one to express complex queries over a graph model 
+by specifying a set of graph patterns. Languages differ in how the variables are 
+identified (some use the <i>?&lt;name&gt;</i> syntax as in this example), what 
+connective is used between the individual graph patterns (we arbitrarily used a 
+comma in this example), etc. Graph query languages are powerful ways to extract 
+information from our ontologies.</p>
 
 </body>
 
