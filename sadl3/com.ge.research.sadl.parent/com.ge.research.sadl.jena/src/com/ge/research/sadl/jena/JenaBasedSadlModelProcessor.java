@@ -43,6 +43,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -2096,7 +2097,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	private Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
+	protected Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
 			EList<SadlParameterDeclaration> params, String location)
 			throws JenaProcessorException, TranslationException, InvalidNameException {
 		Equation eq = new Equation(declarationExtensions.getConcreteName(nm));
@@ -2157,10 +2158,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		List<Equation> eqlist = getEquations();
 		for (int i = 0; i < eqlist.size(); i++) {
 			if (eqlist.get(i).getName().equals(newEqName)) {
-				getIssueAcceptor().addError("Name '" + newEqName + "' is already used. Please provide a unique name.", nm);
+				if(!namespaceIsImported(eq.getNamespace(), resource)) {
+					getIssueAcceptor().addError("Name '" + newEqName + "' is already used. Please provide a unique name.", nm);
+				}else {
+					return;
+				}
 			}
 		}
 		getEquations().add(eq);
+	}
+	
+	private boolean namespaceIsImported(String namespace, Resource resource) {
+		String currentNamespace = namespace.replace("#", "");
+		if(currentNamespace.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) || 
+				currentNamespace.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
+			return true;
+		}
+		
+		TreeIterator<EObject> it = resource.getAllContents();	
+		while(it.hasNext()) {
+			EObject eObj = it.next();
+			if(eObj instanceof SadlImport) {
+				SadlModel sadlModel = ((SadlImport)eObj).getImportedResource();
+				if(sadlModel.getBaseUri().equals(currentNamespace)){
+					return true;
+				}else if(namespaceIsImported(namespace, sadlModel.eResource())) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+	
+	private boolean namespaceIsImported(String namespace, OntModel currentModel) {
+		OntModel importedModel = currentModel.getImportedModel(namespace.replace("#", ""));
+		if(importedModel != null) {
+			return true;
+		}
+		return false;
 	}
 	
 	public List<Equation> getEquations(Resource resource) {
