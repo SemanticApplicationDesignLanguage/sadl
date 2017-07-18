@@ -20,7 +20,9 @@
  */
 package com.ge.research.sadl.tests
 
+import com.ge.research.sadl.processing.ISadlImplicitModelContentProvider
 import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.inject.Inject
@@ -28,41 +30,35 @@ import com.google.inject.Provider
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.diagnostics.Severity
+import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.resource.XtextResource
-import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.util.StringInputStream
 import org.junit.Assert
 import org.junit.Before
 import org.junit.runner.RunWith
-import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
 abstract class AbstractSADLParsingTest{
+
 	@Inject extension ValidationTestHelper
 
 	@Inject ParseHelper<SadlModel> parseHelper
-	@Inject protected ValidationTestHelper validationTestHelper
 	@Inject Provider<XtextResourceSet> resourceSetProvider
-	XtextResourceSet resourceSet
+	@Inject ISadlImplicitModelContentProvider modelContentProvider
 
-	static val IMPLICIT_MODEL = '''
-		uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-		Event is a class.
-		impliedProperty is a type of annotation.
-		UnittedQuantity is a class,
-	 	described by ^value with values of type decimal,
-	 	described by unit with values of type string.
-	'''
+	@Inject protected ValidationTestHelper validationTestHelper
+	
+	XtextResourceSet resourceSet
 
 	private final Supplier<Void> implicitModelSupplier = Suppliers.memoize[
 		val uri = URI.createURI('synthetic://test/SadlImplicitModel.sadl');
 		if (!resourceSet.resources.map[uri.lastSegment].exists[it == 'SadlImplicitModel.sadl']) {
-			resource(IMPLICIT_MODEL, uri);
+			resource(modelContentProvider.content, uri);
 		}
 		return null;
 	]

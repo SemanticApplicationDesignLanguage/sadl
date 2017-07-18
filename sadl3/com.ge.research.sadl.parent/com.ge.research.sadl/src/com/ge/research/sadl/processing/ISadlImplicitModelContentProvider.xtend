@@ -54,7 +54,7 @@ interface ISadlImplicitModelContentProvider {
 	 * @param setReadOnly
 	 *            when {@code true} then the underlying code tries to set write
 	 *            protection on the file by calling
-	 *            {@link java.io.File#setReadOnly()} on the file.
+	 *            {@link File#setReadOnly()} on the file.
 	 * @return the argument.
 	 */
 	def Path createImplicitModel(Path desiredPath, boolean setReadOnly) {
@@ -98,7 +98,8 @@ interface ISadlImplicitModelContentProvider {
 		 */
 		public static val DEFAULT_CONTENT = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-			
+
+			Event is a class.
 			impliedProperty is a type of annotation.
 			expandedProperty is a type of annotation.
 			UnittedQuantity is a class,
@@ -106,7 +107,6 @@ interface ISadlImplicitModelContentProvider {
 				described by unit with values of type string.
 		''';
 
-		@Override
 		override getContent() {
 			return fragmentProviders.fold(new StringBuilder(DEFAULT_CONTENT), [ sb, provider |
 				sb.append(lineSeparator.repeat(2)).append(provider.fragmentToAppend)
