@@ -108,6 +108,7 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -142,6 +143,7 @@ import com.hp.hpl.jena.reasoner.rulesys.Rule.ParserException;
 import com.hp.hpl.jena.reasoner.rulesys.RuleDerivation;
 import com.hp.hpl.jena.reasoner.rulesys.builtins.Product;
 import com.hp.hpl.jena.shared.RulesetNotFoundException;
+import com.hp.hpl.jena.sparql.syntax.Template;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
@@ -1076,9 +1078,19 @@ public class JenaReasonerPlugin extends Reasoner{
 						StmtIterator sitr = constructModel.listStatements();
 						if (sitr.hasNext()) {
 							String[] columnName = new String[3];
-							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
-							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
-							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+							Query q = qexec.getQuery();
+							Template template = q.getConstructTemplate();
+							Triple triple0 = template.getBGP().get(0);
+//							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
+//							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
+//							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+							com.hp.hpl.jena.graph.Node subj = triple0.getSubject();
+							com.hp.hpl.jena.graph.Node pred = triple0.getPredicate();
+							com.hp.hpl.jena.graph.Node obj = triple0.getObject();
+							
+							columnName[0] = subj.isVariable() ? subj.getName() : subj.getLocalName();
+							columnName[1] = pred.isVariable() ? pred.getName() : pred.getLocalName();
+							columnName[2] = obj.isVariable() ? obj.getName() : obj.getLocalName();
 							List<Object[]> dataList = new ArrayList<Object[]>();
 							while (sitr.hasNext()) {
 								Statement stmt = sitr.nextStatement();
