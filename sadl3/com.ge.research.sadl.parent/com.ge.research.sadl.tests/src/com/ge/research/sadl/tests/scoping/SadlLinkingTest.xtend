@@ -201,9 +201,9 @@ class SadlLinkingTest extends AbstractLinkingTest {
 				can only be one of {[ToKillaMockingbird], <GoSetaWatchman>}.	
 			[GoSetaWatchman] is a <Book>.	
 			
-			[Event] is a class described by [when] with values of type <Season>.
-			[NewYear] is an Event with when <Winter>.
-			[BastilleDay] is an Event with when <Summer>.
+			[Holiday] is a class described by [when] with values of type <Season>.
+			[NewYear] is a Holiday with when <Winter>.
+			[BastilleDay] is a Holiday with when <Summer>.
 		'''.assertLinking[sadl]
 	}
 
@@ -1097,7 +1097,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	@Test
 	def void testLinkingImplicitPackage_01() {
 		'''
-			uri "http://sadl.org/sadlimplicitmodel".
+			uri "http://sadl.org/baseModel".
 			
 			[Car] is a class described by [position] with values of type <Location>.
 			[Location] is a class
@@ -1106,6 +1106,8 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 		'''
 			uri "http://sadl.org/NS3.sadl" alias ns3.
+
+			import "http://sadl.org/baseModel".
 			
 			[MyCar] is an <Car> with <position> (a <Location> with <longitude> -72.025, with <latitude> 43.654).
 			

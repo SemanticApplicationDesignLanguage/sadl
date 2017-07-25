@@ -2121,7 +2121,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getNameProperty(SadlResource qnm, ConceptType propertyType, String conceptUri, EObject expression) throws DontTypeCheckException, InvalidTypeException {
-		OntProperty property = theJenaModel.getOntProperty(conceptUri);
+		Property property = theJenaModel.getProperty(conceptUri);
+
 		if(property == null){
 			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), qnm != null ? qnm : expression);
 			if (metricsProcessor != null) {
@@ -2542,76 +2543,108 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				listTemporarilyDisabled = true;
 				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
 			}
-			List<TypeCheckInfo> ltciCompound = (leftTypeCheckInfo != null) ? leftTypeCheckInfo.getCompoundTypes() : null;
-			if (ltciCompound != null) {
-				for (int i = 0; i < ltciCompound.size(); i++) {
-					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
-					if (thisResult) {
-						return true;
-					}
-				}
-				return false;
-			}
-			List<TypeCheckInfo> rtciCompound = (rightTypeCheckInfo != null) ? rightTypeCheckInfo.getCompoundTypes() : null;
-			if (rtciCompound != null) {
-				for (int i = 0; i < rtciCompound.size(); i++) {
-					boolean thisResult = compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(i));
-					if (thisResult) {
-						return true;
-					}
-				}
-				return false;
-			}
-	//		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getExplicitValue() != null && rightTypeCheckInfo != null) {
-	//			ConceptIdentifier rExprType = rightTypeCheckInfo.getExpressionType();
-	//			if (rExprType instanceof ConceptName) {
-	//				ConceptIdentifier lci = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
-	//				if (!(lci instanceof ConceptName) || !((ConceptName)rExprType).getUri().equals(((ConceptName)lci).getUri())) {
-	//					if (rightTypeCheckInfo.getImplicitProperties() == null) {
-	//						// no chance of implied properties fixing the problem
-	//						return false;
-	//					}
-	//				}
-	//			}
-	//		}
-			ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
-			ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
-			if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
-					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
-					(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
-					(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
-				// Can't type-check on "None" as it represents that it doesn't exist.
+			
+			//Compare literal types
+			if(compareTypesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				return true;
 			}
-			else if (leftConceptIdentifier == null) {
-				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
-				if (metricsProcessor != null) {
-					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
-				}
-				return false;
+			
+			//Compare implied property types
+			if(compareTypesUsingImpliedPropertiesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+				return true;
 			}
-			else if(rightConceptIdentifier == null){
-				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
-				if (metricsProcessor != null) {
-					metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
-				}
-				return false;
-			}
-			else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
-				if (isConjunctiveLocalRestriction(leftExpression, rightExpression)) {
-					return true;
-				}
-				if (leftTypeCheckInfo.getImplicitProperties() != null || rightTypeCheckInfo.getImplicitProperties() != null) {
-					return compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo);
-				}
-				return false;
-			}
+				
+			return false;
 		}
 		finally {
 			if (listTemporarilyDisabled) {
 				leftTypeCheckInfo.setRangeValueType(RangeValueType.LIST);
 			}
 		}
+	}
+	
+	private boolean compareTypesUsingImpliedPropertiesRecursively(List<String> operations, EObject leftExpression,
+			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
+		List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo != null ? leftTypeCheckInfo.getCompoundTypes() : null;
+		if(ltciCompound != null){
+			for (int i = 0; i < ltciCompound.size(); i++) {
+				boolean thisResult = compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
+		List<TypeCheckInfo> rtciCompound = rightTypeCheckInfo != null ? rightTypeCheckInfo.getCompoundTypes() : null;
+		if(rtciCompound != null){
+			for (int j = 0; j < rtciCompound.size(); j++) {
+				boolean thisResult = compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(j));
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
+		if(compareTypesUsingImpliedProperties(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
+			return true;
+		}
+		
+		return false;
+	}
+
+	protected boolean compareTypesRecursively(List<String> operations, EObject leftExpression, EObject rightExpression,
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
+
+		List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo != null ? leftTypeCheckInfo.getCompoundTypes() : null;
+		if(ltciCompound != null){
+			for (int i = 0; i < ltciCompound.size(); i++) {
+				boolean thisResult = compareTypesRecursively(operations, leftExpression, rightExpression, ltciCompound.get(i), rightTypeCheckInfo);
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
+		List<TypeCheckInfo> rtciCompound = rightTypeCheckInfo != null ? rightTypeCheckInfo.getCompoundTypes() : null;
+		if(rtciCompound != null){
+			for (int j = 0; j < rtciCompound.size(); j++) {
+				boolean thisResult = compareTypesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, rtciCompound.get(j));
+				if (thisResult) {
+					return true;
+				}
+			}
+		}
+		
+		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
+		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
+		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("None")) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("None")) ||
+				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
+			// Can't type-check on "None" as it represents that it doesn't exist.
+			return true;
+		}
+		else if (leftConceptIdentifier == null) {
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), leftExpression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+			}
+			return false;
+		}
+		else if(rightConceptIdentifier == null){
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), rightExpression);
+			if (metricsProcessor != null) {
+				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
+			}
+			return false;
+		}
+		else if (!compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+			if (isConjunctiveLocalRestriction(leftExpression, rightExpression)) {
+				return true;
+			}
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -2671,7 +2704,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		
 		String opstr = (operations != null && operations.size() > 0) ? operations.get(0) : null;
-		if (leftTypeCheckInfo.getImplicitProperties() != null) {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getImplicitProperties() != null) {
 			Iterator<ConceptName> litr = leftTypeCheckInfo.getImplicitProperties().iterator();
 			while (litr.hasNext()) {
 				ConceptName cn = litr.next();
@@ -2693,7 +2726,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-		else if (rightTypeCheckInfo.getImplicitProperties() != null) {
+		else if (rightTypeCheckInfo != null && rightTypeCheckInfo.getImplicitProperties() != null) {
 			Iterator<ConceptName> ritr = rightTypeCheckInfo.getImplicitProperties().iterator();
 			while (ritr.hasNext()) {
 				ConceptName cn = ritr.next();

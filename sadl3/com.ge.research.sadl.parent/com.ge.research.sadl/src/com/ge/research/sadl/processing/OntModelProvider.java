@@ -1,21 +1,31 @@
 package com.ge.research.sadl.processing;
 
+import static org.eclipse.xtext.util.CancelIndicator.NullImpl;
+import static org.eclipse.xtext.validation.CheckMode.FAST_ONLY;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.validation.IResourceValidator;
 
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Property;
 
 public class OntModelProvider {
+	
+	private static Function<Resource, Optional<OntModelAdapter>> FIND_ADAPTER_FUNC = resource -> FluentIterable
+			.from(resource.eAdapters()).filter(OntModelAdapter.class).first();
 	
 	private static OntModel sadlBaseModel;
 	private static OntModel sadlListModel;
@@ -29,7 +39,6 @@ public class OntModelProvider {
 		List<SadlCommand> sadlCommands = null;
 		Map<EObject, List<Property>> impliedPropertiesUsed = null;
 		boolean isLoading = false;
-		boolean hasCircularImport = false;
 		
 		@Override
 		public boolean isAdapterForType(Object type) {
@@ -38,35 +47,17 @@ public class OntModelProvider {
 	}
 	
 	public static void registerResource(Resource resource) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a == null) {
-			a = new OntModelAdapter();
-			a.isLoading = true;
-			resource.eAdapters().add(a);
-		}
-	}
-	
-	public static boolean checkForCircularImport(Resource resource) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			if (a.isLoading) {
-				a.hasCircularImport = true;
-				return true;
+		if (resource != null) {
+			if (!FIND_ADAPTER_FUNC.apply(resource).isPresent()) {
+				OntModelAdapter adapter = new OntModelAdapter();
+				adapter.isLoading = true;
+				resource.eAdapters().add(adapter);
 			}
 		}
-		return false;
-	}
-	
-	public static boolean hasCircularImport(Resource resource) {
-		OntModelAdapter a = findAdapter(resource);
-		if (a != null) {
-			return a.hasCircularImport;
-		}
-		return false;
 	}
 
 	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix) {
-		OntModelAdapter adapter = findAdapter(resource);
+		OntModelAdapter adapter = FIND_ADAPTER_FUNC.apply(resource).orNull();
 		if (adapter == null) {
 			adapter = new OntModelAdapter();
 			resource.eAdapters().add(adapter);
@@ -79,7 +70,7 @@ public class OntModelProvider {
 	
 	public static void attach(Resource resource, OntModel model, String modelName, String modelPrefix, 
 			List<SadlCommand> sadlCommands) {
-		OntModelAdapter adapter = findAdapter(resource);
+		OntModelAdapter adapter = FIND_ADAPTER_FUNC.apply(resource).orNull();
 		if (adapter == null) {
 			adapter = new OntModelAdapter();
 			resource.eAdapters().add(adapter);
@@ -172,15 +163,19 @@ public class OntModelProvider {
 		return null;
 	}
 	
-	public static OntModelAdapter findAdapter(Resource resource) {
-		if (resource != null) {
-			for (Adapter a : resource.eAdapters()) {
-				if (a instanceof OntModelAdapter) {
-					return ((OntModelAdapter) a);
-				}
-			}
+	private static OntModelAdapter findAdapter(Resource resource) {
+		if (resource == null) {
+			return null;
 		}
-		return null;
+		Optional<OntModelAdapter> adapter = FIND_ADAPTER_FUNC.apply(resource);
+		if (adapter.isPresent()) {
+			return adapter.get();
+		}
+		if (resource instanceof XtextResource) {
+			final IResourceValidator validator = ((XtextResource) resource).getResourceServiceProvider().getResourceValidator();
+			validator.validate(resource, FAST_ONLY, NullImpl);
+		}
+		return FIND_ADAPTER_FUNC.apply(resource).orNull();
 	}
 	
 	public static OntModel find(Resource resource) {
