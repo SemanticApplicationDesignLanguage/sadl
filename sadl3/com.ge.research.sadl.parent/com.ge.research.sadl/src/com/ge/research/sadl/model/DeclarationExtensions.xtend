@@ -24,6 +24,7 @@ import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.ExternalEquationStatement
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -36,6 +37,7 @@ import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
 import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType
 import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlRangeRestriction
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
@@ -48,8 +50,6 @@ import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import com.ge.research.sadl.sADL.SadlPropertyCondition
-import com.ge.research.sadl.sADL.RuleStatement
 
 class DeclarationExtensions {
 	
@@ -181,30 +181,30 @@ class DeclarationExtensions {
 					OntConceptType.FUNCTION_DEFN
 					
 				SadlClassOrPropertyDeclaration case e.restrictions.exists[it instanceof SadlIsAnnotation],
-				SadlProperty case e.restrictions.exists[it instanceof SadlIsAnnotation] :
+				SadlProperty case e.restrictions.exists[it instanceof SadlIsAnnotation]:
 					OntConceptType.ANNOTATION_PROPERTY
 					
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY]:
 					OntConceptType.CLASS_PROPERTY
 					
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY]:
 					OntConceptType.CLASS_PROPERTY
 				
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE_PROPERTY]:
 					OntConceptType.DATATYPE_PROPERTY
 					 
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY]:
 					OntConceptType.ANNOTATION_PROPERTY
 					 
-				SadlClassOrPropertyDeclaration case e.superElement.isList : 
+				SadlClassOrPropertyDeclaration case e.superElement.isList: 
 					if (e.superElement.isDatatype) OntConceptType.DATATYPE_LIST
 					else OntConceptType.CLASS_LIST
 				
-				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype : 
+				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype: 
 					OntConceptType.DATATYPE
 					
 				SadlNecessaryAndSufficient,
-				SadlClassOrPropertyDeclaration : 
+				SadlClassOrPropertyDeclaration: 
 					OntConceptType.CLASS
 					
 	//			SadlDataTypeDeclaration :
@@ -228,23 +228,35 @@ class DeclarationExtensions {
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[!range.isDatatype]: 
 					OntConceptType.CLASS_PROPERTY
 
-				SadlProperty : 
+				SadlProperty: 
 					OntConceptType.RDF_PROPERTY
 					
-				SadlParameterDeclaration :
+				SadlParameterDeclaration:
 					OntConceptType.VARIABLE				
 					
 				SadlInstance,
 				SadlCanOnlyBeOneOf,
 				SadlValueList,
-				SadlMustBeOneOf :
+				SadlMustBeOneOf:
 					OntConceptType.INSTANCE
 					
 				QueryStatement,
-				RuleStatement :
+				RuleStatement:
 					OntConceptType.STRUCTURE_NAME					
 					
-				default: OntConceptType.VARIABLE // linking errors and the like
+				default: {
+					if (resource.eResource instanceof XtextResource) {
+						val xtextResource = resource.eResource as XtextResource;
+						val contribution = xtextResource.resourceServiceProvider.get(IDeclarationExtensionsContribution);
+						if (contribution !== null) {
+							val ontConceptType = contribution.getOntConceptType(e);
+							if (ontConceptType !== null) {
+								return ontConceptType;
+							}
+						}
+					}
+					OntConceptType.VARIABLE // linking errors and the like
+				}
 			}
 		} finally {
 			recursionDetection.get.remove(resource)
