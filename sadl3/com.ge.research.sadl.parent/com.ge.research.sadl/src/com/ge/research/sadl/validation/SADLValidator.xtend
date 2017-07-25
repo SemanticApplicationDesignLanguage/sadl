@@ -20,9 +20,12 @@
  */
 package com.ge.research.sadl.validation
 
+import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.reasoner.utils.SadlUtils
-import com.ge.research.sadl.resource.ResourceDescriptionStrategy
+import com.ge.research.sadl.resource.UserDataHelper
+import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
@@ -30,6 +33,9 @@ import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
+import com.ge.research.sadl.utils.DependencyTraverserHelper
+import com.ge.research.sadl.utils.ImportHelper
+import com.ge.research.sadl.utils.SadlModelEquivalence
 import com.google.inject.Inject
 import java.util.ArrayList
 import java.util.List
@@ -38,10 +44,8 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
-import com.ge.research.sadl.resource.UserDataHelper
-import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression
-import com.ge.research.sadl.sADL.BinaryOperation
-import java.util.function.BinaryOperator
+
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
  * This class contains custom validation rules. 
@@ -59,6 +63,7 @@ class SADLValidator extends AbstractSADLValidator {
 	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
 	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
 	public static final String INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION = "INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION"
+	public static final String CYCLIC_DEPENDENCY = "CYCLIC_DEPENDENCY" 
 	 
 	@Inject DeclarationExtensions declarationExtensions
 	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
@@ -82,7 +87,7 @@ class SADLValidator extends AbstractSADLValidator {
 		val thisUri = model.baseUri
 		val errMsg = SadlUtils.validateUri(thisUri);
 		if (errMsg !== null) {
-			error(errMsg, SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
+			error(errMsg, SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
 		}
 		val thisRsrc = model.eResource
 		val emfURI = thisRsrc.URI;
@@ -94,13 +99,13 @@ class SADLValidator extends AbstractSADLValidator {
 			    || EObjectURI.segmentCount > 1 && thisResourceDescription.URI.segmentCount > 1
 				&& EObjectURI.segment(1) == thisResourceDescription.URI.segment(1))]) {
 			if (modelDescription.name.toString == thisUri) {
-				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
+				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 			}
 			if (model.alias !== null && userDataHelper.getAlias(modelDescription).orNull == model.alias) {
-				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADLPackage.Literals.SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
 			}
 			if (modelDescription.EObjectURI.trimFragment.lastSegment == simpleFileName) {
-				error("The simple filename (" + simpleFileName + ") is already used by model '" + modelDescription.EObjectURI.trimFragment + "'; filenames must be unique within a project.", SADLPackage.Literals.SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
+				error("The simple filename (" + simpleFileName + ") is already used by model '" + modelDescription.EObjectURI.trimFragment + "'; filenames must be unique within a project.", SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
 			}
 		}
 		
@@ -110,13 +115,13 @@ class SADLValidator extends AbstractSADLValidator {
 			var itr = imports.iterator
 			while (itr.hasNext) {
 				var imp = itr.next;
-				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).map[text].join().trimQuotes
+				var importedURI = NodeModelUtils.findNodesForFeature(imp, SADL_IMPORT__IMPORTED_RESOURCE).map[text].join().trimQuotes
 				val errorMsg = SadlUtils.validateUri(importedURI);
 				if (errorMsg !== null) {
-					error(errorMsg, imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE);
+					error(errorMsg, imp, SADL_IMPORT__IMPORTED_RESOURCE);
 				}
 				if (importedURI == thisUri) {
-					error("A model cannot import itself", imp, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE)
+					error("A model cannot import itself", imp, SADL_IMPORT__IMPORTED_RESOURCE)
 				}
 			}
 		}
@@ -156,7 +161,7 @@ class SADLValidator extends AbstractSADLValidator {
 				}
 				if (!foundInBody) {
 					var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name) + "' which is not bound in the rule premises."
-					error(errMsg, SADLPackage.Literals.RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+					error(errMsg, RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
 				}
 			}
 		}
@@ -167,14 +172,14 @@ class SADLValidator extends AbstractSADLValidator {
 		// make sure rule name is unique
 		if (query.name !== null && otherNames.contains(query.name)) {
 			var errMsg = "The name '" + query.name + "' in this namespace is already used."
-			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
+			error(errMsg, RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
 		}
 	}
 	
 	@Check
 	def checkSadlSimpleTypeReference(SadlSimpleTypeReference ref) {
 		if (ref.type.name === null) {
-			error("Undefined type", SADLPackage.Literals.SADL_SIMPLE_TYPE_REFERENCE__TYPE, UNRESOLVED_SADL_RESOURCE)
+			error("Undefined type", SADL_SIMPLE_TYPE_REFERENCE__TYPE, UNRESOLVED_SADL_RESOURCE)
 		}
 	}
 
@@ -182,7 +187,7 @@ class SADLValidator extends AbstractSADLValidator {
 //	def checkResourceName(SadlResource name) {
 //		val nm = declarationExtensions.getConcreteName(name)
 //		if (nm.startsWith("__")) {
-//			error("", SADLPackage.Literals.SADL_RESOURCE__NAME, <constant>)
+//			error("", SADL_RESOURCE__NAME, <constant>)
 //		}
 //	}
 
@@ -201,7 +206,7 @@ class SADLValidator extends AbstractSADLValidator {
 				if (sr instanceof Name) {
 					val isFunc = (sr as Name).function
 					if (!isFunc) {	
-						error("Is this an undeclared variable?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
+						error("Is this an undeclared variable?", SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
 					}
 //					else {
 //						// this might be a built-in so get the text and check the name
@@ -218,7 +223,7 @@ class SADLValidator extends AbstractSADLValidator {
 //							}
 //						}
 //						if (!isBuiltin) {
-//							error("Is this an undeclared function?", SADLPackage.Literals.SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
+//							error("Is this an undeclared function?", SADL_RESOURCE__NAME, UNRESOLVED_SADL_RESOURCE)
 //						}
 //					}
 				}
@@ -237,12 +242,23 @@ class SADLValidator extends AbstractSADLValidator {
 			val bop = cntr as BinaryOperation
 			val op = bop.op
 			if (op.equals("and") || op.equals("or")) {
-				warning("Is this a declaration that should be nested in parentheses?", expr, SADLPackage.Literals.COMMA_SEPARATED_ABREVIATED_EXPRESSION__LEFT)
+				warning("Is this a declaration that should be nested in parentheses?", expr, COMMA_SEPARATED_ABREVIATED_EXPRESSION__LEFT)
 				
 			}
 		}
 	}
 	
+	@Check
+	def checkHasDependencyCycle(SadlModel model) {
+		val dependencies = ImportHelper.DEPENDENCIES; 
+		val eqivalence = SadlModelEquivalence.INSTANCE;
+		val cycle = new DependencyTraverserHelper().checkCycle(model, dependencies, eqivalence);
+		if (cycle.present) {
+			val message = SadlErrorMessages.CIRCULAR_IMPORT.get('''Dependnecy cycle was detected: «cycle.get.prettyPrint[baseUri]».''');
+			error(message, model, SADL_MODEL__IMPORTS, CYCLIC_DEPENDENCY);
+		}
+	}
+
 	/**
 	 * This method initializes this instance of this validator class for use on a specified Resource
 	 */
