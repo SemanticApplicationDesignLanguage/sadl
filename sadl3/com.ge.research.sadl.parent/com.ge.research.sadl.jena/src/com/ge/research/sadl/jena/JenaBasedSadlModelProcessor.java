@@ -17,8 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena;
 
-import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.MISSING_SUBJECT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_PROP;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_RIGHT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_PROPERTY;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_VALUE;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SUPERELEMENT;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -63,9 +67,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
-import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
@@ -106,13 +108,13 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorExt;
-import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -201,8 +203,6 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.google.common.math.IntMath;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -344,7 +344,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return currentResource;
 	}
 
-	@SuppressWarnings("restriction")
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
     	if (!resource.getURI().toString().endsWith(".sadl")) {
@@ -358,14 +357,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		// save the model
 		if (getTheJenaModel() == null) {
 			OntModel m = OntModelProvider.find(resource);
-			if (m == null) {
-				onValidate(resource, null, CheckMode.FAST_ONLY, context);
-			}
-			else {
-				theJenaModel = m;
-				setModelName(OntModelProvider.getModelName(resource));
-				setModelAlias(OntModelProvider.getModelPrefix(resource));
-			}
+			theJenaModel = m;
+			setModelName(OntModelProvider.getModelName(resource));
+			setModelAlias(OntModelProvider.getModelPrefix(resource));
 		}
 		if (fsa !=null) {
 			String format = getOwlModelFormat(context);
@@ -757,10 +751,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
     
     @Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
-    	if (!resource.getURI().toString().endsWith(".sadl")) {
-    		return;
-    	}
-    	logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
+	    	if (!resource.getURI().toString().endsWith(".sadl")) {
+	    		return;
+	    	}
+    		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate' action was invoked. 
 		}
@@ -843,25 +837,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						URI importedResourceUri = xtrsrc.getURI();
 						OntModel importedOntModel = OntModelProvider.find(xtrsrc);
 						if (importedOntModel == null) {
-							if (OntModelProvider.checkForCircularImport(eResource)) {
-								addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
-							}
-							else {
-					        	logger.debug("JenaBasedSadlModelProcessor encountered null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
-								xtrsrc.getResourceServiceProvider().getResourceValidator().validate(xtrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-						        importedOntModel = OntModelProvider.find(xtrsrc);
-						        if (OntModelProvider.hasCircularImport(resource)) {
-						        	addError(SadlErrorMessages.CIRCULAR_IMPORT.get(importedResourceUri.toString()), simport);
-						        }
-							}
-						}
-						if (importedOntModel == null) {
-				        	logger.debug("JenaBasedSadlModelProcessor failed to resolve null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
-				    		addError(SadlErrorMessages.NULL_ONT_MODEL.toString(), simport);
-						}
-						else {
+							logger.debug("JenaBasedSadlModelProcessor failed to resolve null OntModel for Resource '" + importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
+						} else {
 							addImportToJenaModel(modelName, importUri, importPrefix, importedOntModel);							
-				    	}
+				    		}
 					} else if (eResource instanceof ExternalEmfResource) {
 						ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
 						addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getJenaModel());
