@@ -21,6 +21,8 @@ package com.ge.research.sadl.jena.translator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +34,7 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -57,6 +60,7 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -64,6 +68,7 @@ import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.FunctionNotSupportedException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
@@ -1808,6 +1813,10 @@ public class JenaTranslatorPlugin implements ITranslator {
 		throw new TranslationException("Equation translation not yet implemented in " + this.getClass().getCanonicalName());
 	}
 	
+	public List<FunctionSignature> getBuiltinFunctionSignatures() throws ConfigurationException{
+		return configurationMgr.getReasoner().getImplicitBuiltinSignatures();
+	}
+	
 	@Override
 	public String getBuiltinFunctionModel(){
 		StringBuilder sb = new StringBuilder();
@@ -1817,9 +1826,102 @@ public class JenaTranslatorPlugin implements ITranslator {
 		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
 		
+		try {
+			List<FunctionSignature> bfsigs = getBuiltinFunctionSignatures();
+			for(FunctionSignature fs : bfsigs){
+				sb.append(fs.FunctionSignatureToSadlModelFormat());
+				sb.append("\n\n");
+			}
+			
+			if (configurationMgr instanceof IConfigurationManagerForEditing) {
+				IReasoner reasonerInst = null;
+				try {
+					reasonerInst = configurationMgr.getReasoner();
+					Class<?> bcls = reasonerInst.getBuiltinClass();
+					 ServiceLoader<?> serviceLoader = ServiceLoader.load(bcls);
+
+					if (serviceLoader != null) {
+						for ( Iterator<?> itr = serviceLoader.iterator(); itr.hasNext();) {
+							try {
+								Object trans = itr.next();
+								BuiltinInfo binfo = reasonerInst.getBuiltinInfo(trans
+										.getClass());
+								if (trans != null) {
+									if (trans instanceof TypedBaseBuiltin) {
+										System.out.println(((TypedBaseBuiltin)trans).getFunctionSignatureString());
+										FunctionSignature fs = new FunctionSignature(((TypedBaseBuiltin)trans).getFunctionSignatureString(), binfo.getUri());
+										sb.append(fs.FunctionSignatureToSadlModelFormat());
+										sb.append("\n\n");
+									} else {
+										System.out.println(binfo.getClassName());
+									}
+								}
+							} catch (Throwable t) {
+								t.printStackTrace();
+							}
+						}
+					}
+
+				} catch (ConfigurationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+//				try {
+//					List<BuiltinInfo> builtins = ((IConfigurationManagerForEditing)configurationMgr).getAvailableBuiltinsForCurrentReasoner();
+//					for (int i = 0; builtins != null && i < builtins.size(); i++) {
+//						BuiltinInfo bi = builtins.get(i);
+//						if (!builtinInSignatureList(bfsigs, bi)) {
+//							sb.append("External ");
+//							sb.append(bi.getName());
+//							sb.append("(");		
+//							sb.append("None");
+//	//						for(int i = 0; i < bi..parameterTypes.length; i++){
+//	//							if(!this.parameterTypes[i].isEmpty()){
+//	//								sb.append(this.parameterTypes[i].toLowerCase());
+//	//								sb.append(" X");
+//	//								if(i != this.parameterTypes.length - 1){
+//	//									sb.append(", ");
+//	//								}
+//	//							}
+//	//						}
+//							sb.append(") returns ");
+//	//						sb.append(this.returnType.toLowerCase());
+//							sb.append("None");
+//							sb.append(":\n\""); 
+//	//						sb.append(this.uri);
+//							sb.append(bi.getUri());
+//							sb.append("\".\n");
+//						}
+//					}
+//				} catch (ConfigurationException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+			}
+		} catch (ConfigurationException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
 		return sb.toString();
 	}
 	
+	private boolean builtinInSignatureList(List<FunctionSignature> bfsigs, BuiltinInfo bi) {
+		String biName = bi.getName();
+		String biNS = bi.getClassName().substring(0, bi.getClassName().lastIndexOf('.'));
+		if (bfsigs != null) {
+			for (int i = 0; i < bfsigs.size(); i++) {
+				FunctionSignature bfsig = bfsigs.get(i);
+				if (bfsig.getName().equals(biName) && bfsig.getUri().substring(0, bfsig.getUri().indexOf('#')).equals(biNS)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
 	@Override
 	public boolean isBuiltinFunction(String builtinName){
 		// is it known to the ConfigurationManager?

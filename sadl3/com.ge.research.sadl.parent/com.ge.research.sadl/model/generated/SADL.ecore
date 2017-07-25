@@ -37,12 +37,14 @@
         eType="#//SadlParameterDeclaration" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="returnType" eType="#//SadlTypeReference"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unknown" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlParameterDeclaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//SadlResource"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unknown" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlStatement" eSuperTypes="#//SadlModelElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="SadlPropertyCondition" eSuperTypes="#//SadlTypeReference">
@@ -167,7 +169,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="ExplainStatement" eSuperTypes="#//SadlModelElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="expr" eType="#//Expression"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rulename" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rulename" eType="#//SadlResource"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="StartWriteStatement" eSuperTypes="#//SadlModelElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="write" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

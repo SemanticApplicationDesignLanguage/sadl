@@ -64,10 +64,12 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//AbstractSadlEquation/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//AbstractSadlEquation/parameter"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//AbstractSadlEquation/returnType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//AbstractSadlEquation/unknown"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlParameterDeclaration">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlParameterDeclaration/type"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlParameterDeclaration/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlParameterDeclaration/unknown"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlStatement"/>
     <genClasses ecoreClass="SADL.ecore#//SadlPropertyCondition">
@@ -140,7 +142,7 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//ExplainStatement">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExplainStatement/expr"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExplainStatement/rulename"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExplainStatement/rulename"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//StartWriteStatement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//StartWriteStatement/write"/>

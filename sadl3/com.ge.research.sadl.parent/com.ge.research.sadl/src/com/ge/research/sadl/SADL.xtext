@@ -60,11 +60,12 @@ ExternalEquationStatement:
 ;
 
 fragment EquationSignature returns AbstractSadlEquation:
-	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' returnType=SadlPrimaryTypeReference ':'
+	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' (returnType=SadlPrimaryTypeReference | unknown='--') ':'
 ;
 
 SadlParameterDeclaration:
-	type=SadlPrimaryTypeReference name=SadlResource
+		type=SadlPrimaryTypeReference name=SadlResource
+	|  unknown='--'
 ;
 
 // These are the things that translate directly to OWL.
@@ -214,7 +215,7 @@ AnArticle :
 	IndefiniteArticle | DefiniteArticle;
 
 IndefiniteArticle :
-	'A'|'a'|'An'|'an';
+	'A'|'a'|'An'|'an'|'any';
 
 DefiniteArticle :
 	'The'|'the';
@@ -266,7 +267,7 @@ PrintStatement :
 ExplainStatement :
 	'Explain:'
 			(expr=Expression
-		| 	'Rule' rulename=QNAME)
+		| 	'Rule' rulename=SadlResource)
 			;
 			
 StartWriteStatement :

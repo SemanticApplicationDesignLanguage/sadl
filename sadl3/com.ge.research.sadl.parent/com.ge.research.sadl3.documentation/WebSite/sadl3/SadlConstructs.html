@@ -29,7 +29,68 @@ Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:cr
   <li><a href="#ExternalModels">External Models</a></li>
 </ul>
 <h2><a name="Rules">Rules and Built-in Functions</a></h2>
-<p>&nbsp;</p>
+<p>Rules are a convenient way to capture domain knowledge in the familiar format 
+of &quot;if this then that&quot;. Sometimes the same knowledge could be captured in OWL 
+property restrictions and/or necessary and sufficient conditions (see
+<a href="http://sadl.sourceforge.net/sadl3/OwlAndSadl.html#Restrictions">
+Property Restrictions</a>,
+<a href="http://sadl.sourceforge.net/sadl3/OwlAndSadl.html#Equivalent">
+Equivalent Classes</a>). Sometimes it is not possible to capture the knowledge 
+in OWL. Sometimes the knowledge can be captured in OWL or rules, but rules are 
+easier to write and understand. It should be noted that if rules are used in a 
+SADL knowledge base, a reasoner should be selected&nbsp; (with a compatible 
+translator) that supports both OWL and rules. </p>
+<p>An if then rule has two parts: 1) the conditions in the if part, also known 
+as the rule body or premise, and 2) the conclusions in the then part, also known 
+as the rule head. In SADL there is an optional &quot;given&quot; part that can be used to 
+set certain conditions apart from other conditions. Both &quot;given&quot; and &quot;if&quot; 
+conditions are translated into the rule body in the target rule representation.
+</p>
+<p>Here are some example SADL rules.</p>
+<p align="left" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+<font size="2" color="#800080">&nbsp;&nbsp;&nbsp; Rule<span class="Apple-converted-space">&nbsp;</span></font><font size="2">AreaOfRectangle<span class="Apple-converted-space">&nbsp;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">given&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font size="2" color="#ff00ff"><b>x</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">is</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">any</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#000080"><b>Rectangle</b></font><font size="2" color="#800080"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; then&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#008000"><b>area</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">=<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>height</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">*<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>width</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">.</font></p>
+<font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+<p>&nbsp;&nbsp;&nbsp; Rule<font size="2"><span class="Apple-converted-space">&nbsp;</span></font></font><font size="2">ChildRule</font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;"><font size="2"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font>given<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font>is<font size="2"><span class="Apple-converted-space">&nbsp;</span></font>a<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Person</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font>if<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font>has<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>age</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span>&lt;= 
+12<span class="Apple-converted-space">&nbsp;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font>then<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font>is<font size="2"><span class="Apple-converted-space">&nbsp;</span></font>a<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Child</b></font><font size="2">.</font></p>
+</font>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+<font size="2" color="#800080">&nbsp;&nbsp;&nbsp; Rule</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2">ChildRule2:<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">if</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">is</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">a</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Person</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">with</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>age</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span>&lt;= 
+12<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">then</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">is</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">a</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Child</b></font><font size="2">.</font></p>
+<p align="left" style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+These examples illustrate that SADL rules are constructed from
+<a href="http://sadl.sourceforge.net/sadl3/FoundationalConcepts.html#Graphs">
+graph patterns</a> but also illustrate that graph patterns can be combined using 
+the SADL grammar for expressions. When variables are used in multiple graph 
+patterns, as they are in these examples, the first occurrence in the rule 
+conditions &quot;binds&quot; the variable and those bindings are then used in subsequent 
+conditions or in the conclusions. In the first rule above, for example,
+<font size="2" color="#ff00ff"><b>x</b></font> is bound to instances of the 
+class <font size="2" color="#000080"><b>Rectangle</b></font>. Each possible 
+binding will result in the rule being evaluated by the reasoner. The rule will 
+translate into something like the following for most reasoners, where a &quot;?&quot; is 
+placed in front of variable names to identify them as variables.</p>
+<blockquote>
+<p align="left" style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+if<br>
+&nbsp; ?x rdf:type Rectangle<br>
+&nbsp; ?x height ?v1<br>
+&nbsp; ?x width ?v2<br>
+&nbsp; product(?v1,?v2,?v3)<br>
+then<br>
+&nbsp; ?x area ?v3</p>
+</blockquote>
+<p align="left" style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+All of the conditions and the conclusion are graph patterns <i><b>except</b></i> 
+&quot;product(?v1,?v2,?v3)&quot;. This condition is a function. Functions in a rule's 
+conditions return true (meaning the condition is satisfied) or false (meaning 
+the condition is not satisfied so the rule should not &quot;fire&quot; (cause the 
+conclusions to be processed). In a case like this, the functional also binds the 
+result of a procedural computation to a new variable, ?v3 in this case.</p>
 <h2><a name="Equations">Equations</a></h2>
 <p class="MsoNormal">
 <span style="font-family:&quot;Times New Roman&quot;,serif">Equations are 

@@ -53,15 +53,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
+import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarget;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.TripleElement;
@@ -1452,6 +1455,12 @@ public class JenaReasonerPlugin extends Reasoner{
 				} catch (QueryParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			else {
@@ -1650,8 +1659,9 @@ public class JenaReasonerPlugin extends Reasoner{
 		return tripleStr;
 	}
 
-	protected ResultSet processRuleQuery(com.hp.hpl.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException {
+	protected ResultSet processRuleQuery(com.hp.hpl.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException, InvalidNameException, ConfigurationException {
 		logger.debug("Explanation executing query: " + q);
+		q = prepareQuery(q);
 		ResultSet rs = ask(q);
 		if (rs != null) {
 			int numResults = rs.getRowCount();
@@ -2721,8 +2731,14 @@ public class JenaReasonerPlugin extends Reasoner{
 	public BuiltinInfo getBuiltinInfo(Class<?> bcls) {
 		try {
 			Builtin binst = (Builtin) this.getClass().getClassLoader().loadClass(bcls.getCanonicalName()).newInstance();
-			return new BuiltinInfo(binst.getName(), bcls.getCanonicalName(), getReasonerFamily(),
-			binst.getArgLength());
+			BuiltinInfo binfo = new BuiltinInfo(binst.getName(), bcls.getCanonicalName(), getReasonerFamily(), binst.getArgLength());
+			if (binst instanceof TypedBaseBuiltin) {
+				binfo.setSignature(((TypedBaseBuiltin)binst).getFunctionSignatureString());
+				return binfo;
+			}
+			else {
+				return binfo;
+			}
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2782,6 +2798,50 @@ public class JenaReasonerPlugin extends Reasoner{
 		return implbltins;
 	}
 
+	public String[] getBuiltinFunctions(){
+		return new String[]{"addOne(decimal)decimal", 
+							"bound(string)boolean", 
+							"countLiteralValues(string,string)int", 
+							"isBNode(string)boolean", 
+							"isDType(string)boolean", 
+							"isLiteral(string)boolean",
+							"listContains(string,string)boolean", 
+							"listEntry(string,int)string", 
+							"listEqual(string,string)boolean", 
+							"listLength(string)int", 
+							"listMapAsObject(string,string,string)boolean", 
+							"listMapAsSubject(string,string,string)boolean", 
+							"listNotContains(string,string)boolean", 
+							"listNotEqual(string,string)boolean", 
+							"notBNode(string)boolean", 
+							"notBType(string)boolean", 
+							"notDType(string)boolean", 
+							"notLiteral(string)boolean", 
+							"now()dateTime", 
+							"regex(string,string)string", 
+							"strConcat(string,string)string", 
+							"uriConcat(string,string)string"};
+	}
+	
+	@Override
+	public List<FunctionSignature> getImplicitBuiltinSignatures() {
+		List<FunctionSignature> fsList = new ArrayList<FunctionSignature>();
+		for(String s : getBuiltinFunctions()){
+			int openParenLoc = s.indexOf("(");
+			String localName;
+			if (openParenLoc > 0) {
+				localName = s.substring(0,openParenLoc).trim();
+			}
+			else {
+				localName = s.trim();
+			}
+			if (localName.startsWith("^")) {
+				localName = localName.substring(1);
+			}
+			fsList.add(new FunctionSignature(s,	"com.hp.hpl.jena.reasoner.rulesys.builtins" + "#" + localName));
+		}
+		return fsList;
+	}
 
 	public DataSource getDerivations() throws InvalidDerivationException, ConfigurationException {
 		getReasonerOnlyWhenNeeded();
@@ -3151,6 +3211,5 @@ public class JenaReasonerPlugin extends Reasoner{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 
 }
