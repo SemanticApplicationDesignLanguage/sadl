@@ -1177,16 +1177,16 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			 
 			 Ask: <weight>.
 			 Ask: <weight> of [x].
-«««			 Ask: [x] has <weight>.
-«««			 Ask Q1: [x] has <weight>.
+			 Ask: [x] has <weight>.
+			 Ask Q1: [x] has <weight>.
 			 Ask: <weight> of <AngelOak>.
 			 Ask: <AngelOak> has <weight>.
-«««			 Ask: select <po> where [po] has <weight>. 
-«««			 Ask: select po, w where po has weight w. 
-«««			 Ask: select po, v, u where po has weight w and w has ^value v and w has unit u. 
-«««			 Ask: select po, v, u where po has weight w and w has ^value v and w has unit u and v > 1000 .  
-«««			 Ask: select p where p is a PhysicalObject.
-			 Ask Named: select <p> where [p] is a PhysicalObject.
+			 Ask: select <po> where [po] has <weight>.
+			 Ask: select <po>, <w> where [po] has weight [w].
+			 Ask: select <po>, <v>, <u> where [po] has <weight> [w] and <w> has ^value [v] and <w> has unit [u].
+			 Ask: select <po>, <v>, <u> where [po] has weight [w] and <w> has ^value [v] and <w> has unit [u] and <v> > 1000.
+			 Ask: select <p> where [p] is a <PhysicalObject>.
+			 Ask Named: select <p> where [p] is a <PhysicalObject>.
 		'''.assertLinking[sadl]
 	}
 	
