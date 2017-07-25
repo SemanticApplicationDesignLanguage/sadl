@@ -17,7 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.lsp
 
-import com.ge.research.sadl.ide.SadlProjectStructureInitializer
+import com.ge.research.sadl.tests.helpers.SadlTestProjectStructureInitializer
 import com.ge.research.sadl.utils.PathToFileUriConverter
 import com.google.inject.Inject
 import org.junit.Test
@@ -33,7 +33,7 @@ import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.u
 class SadlColoringTest extends AbstractSadlLanguageServerTest {
 
 	@Inject
-	SadlProjectStructureInitializer projectStructureInitializer;
+	SadlTestProjectStructureInitializer projectStructureInitializer;
 
 	@Inject
 	PathToFileUriConverter uriConverter;

@@ -22,7 +22,6 @@ import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.ui.OutputStreamStrategy
 import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ui.tests.SADLUiInjectorProvider
-import com.ge.research.sadl.ui.tests.contentassist.AbstractSadlContentAssistTest.SadlContentAssistProcessorTestBuilder
 import com.google.common.collect.ImmutableMap
 import com.google.inject.Inject
 import com.google.inject.Injector
@@ -112,7 +111,6 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 		OutputStreamStrategy.STD.use;
 	}
 
-	@Override
 	override getResourceFor(InputStream stream) {
 		val uri = URI.createURI('''platform:/resource/«PROJECT_NAME»/«name.methodName»«fileExtension»''');
 		val resource = resourceSet.createResource(uri) as XtextResource;
@@ -152,7 +150,6 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 	protected def newBuilder(String content) {
 		val builder = new SadlContentAssistProcessorTestBuilder(injector, this) {
 
-			@Override
 			override protected toString(ICompletionProposal proposal) {
 				return super.toString(proposal).trim;
 			}

@@ -21,60 +21,21 @@
 package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.sADL.SadlModel
-import com.google.common.base.Supplier
-import com.google.common.base.Suppliers
-import com.google.inject.Inject
-import com.google.inject.Provider
-import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.diagnostics.Severity
+import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.testing.util.ParseHelper
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.resource.XtextResource
-import org.eclipse.xtext.resource.XtextResourceSet
-import org.eclipse.xtext.util.StringInputStream
 import org.junit.Assert
-import org.junit.Before
 import org.junit.runner.RunWith
-import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
-abstract class AbstractSADLParsingTest{
-	@Inject extension ValidationTestHelper
-
-	@Inject ParseHelper<SadlModel> parseHelper
-	@Inject protected ValidationTestHelper validationTestHelper
-	@Inject Provider<XtextResourceSet> resourceSetProvider
-	XtextResourceSet resourceSet
-
-	static val IMPLICIT_MODEL = '''
-		uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-		Event is a class.
-		impliedProperty is a type of annotation.
-		UnittedQuantity is a class,
-	 	described by ^value with values of type decimal,
-	 	described by unit with values of type string.
-	'''
-
-	private final Supplier<Void> implicitModelSupplier = Suppliers.memoize[
-		val uri = URI.createURI('synthetic://test/SadlImplicitModel.sadl');
-		if (!resourceSet.resources.map[uri.lastSegment].exists[it == 'SadlImplicitModel.sadl']) {
-			resource(IMPLICIT_MODEL, uri);
-		}
-		return null;
-	]
-	
-	@Before
-	def void initialize() {
-		resourceSet = resourceSetProvider.get
-	}
+abstract class AbstractSADLParsingTest extends AbstractSadlTest {
 		
 	protected def void assertNoErrors(CharSequence text) {
 		val model = parseHelper.parse(text)
-		val issues = validationTestHelper.validate(model)
+		val issues = validate(model)
 		if (issues.isEmpty)
 			return;
 		var String annotatedText = text.toString
@@ -86,7 +47,7 @@ abstract class AbstractSADLParsingTest{
 	
 	protected def void assertErrors(CharSequence text, String[] errPartials) {
 		val model = parseHelper.parse(text)
-		val issues = validationTestHelper.validate(model)
+		val issues = validate(model)
 		Assert.assertFalse(issues.isEmpty)
 		Assert.assertEquals(issues.size, 1)
 		for (err : errPartials) {
@@ -99,28 +60,10 @@ abstract class AbstractSADLParsingTest{
 			Assert.assertTrue(found)
 		}
 	}
-	
-	protected def Resource sadl(CharSequence seq) {
-		// This will create one single implicit model instance into the resource set
-		// per test method no matter how many times it is invoked.
-		implicitModelSupplier.get;
-		return resource(seq, 'sadl');
-	}
-	
-	protected def Resource resource(CharSequence seq, String fileExtension) {
-		val name = "Resource" + resourceSet.resources.size + "." + fileExtension;
-		return resource(seq, URI.createURI("synthetic://test/" + name));
-	}
-	
-	protected def Resource resource(CharSequence seq, URI uri) {
-		val resource = resourceSet.createResource(uri);
-		resource.load(new StringInputStream(XtendTemplateHelper.unifyEOL(seq)), null);
-		return resource;
-	}
 
 	def void assertAST(CharSequence text, (SadlModel)=>void assertion) {
 		val model = parseHelper.parse(text)
-		validationTestHelper.assertNoErrors(model)
+		assertNoErrors(model)
 		assertion.apply(model)
 	}
 	
