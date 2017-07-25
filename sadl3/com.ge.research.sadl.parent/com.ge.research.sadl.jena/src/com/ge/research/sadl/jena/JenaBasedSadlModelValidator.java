@@ -1103,7 +1103,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (inst != null) {
 				TypeCheckInfo insttci = getType(inst);
-				if (insttci.getTypeCheckType() == null) {
+				if (insttci != null && insttci.getTypeCheckType() == null) {
 					SadlTypeReference typ = ((SadlInstance)expression).getType();
 					if (typ != null && typ instanceof SadlSimpleTypeReference) {
 						SadlResource typsr = ((SadlSimpleTypeReference)typ).getType();

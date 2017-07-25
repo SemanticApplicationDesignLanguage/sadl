@@ -1691,7 +1691,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
     
 	private void processStatement(ExplainStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
-		String ruleName = declarationExtensions.getConcreteName(element.getRulename());
+		String ruleName = element.getRulename() != null ? declarationExtensions.getConcreteName(element.getRulename()) : null;
 		if (ruleName != null) {
 			Explain cmd = new Explain(ruleName);
 			addSadlCommand(cmd);
@@ -2229,24 +2229,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (location != null) {
 			eq.setLocation(location);
 		}
-		Node rtnode = sadlTypeReferenceToNode(rtype);
-		eq.setReturnType(rtnode);
+		if (rtype != null) {
+			Node rtnode = sadlTypeReferenceToNode(rtype);
+			eq.setReturnType(rtnode);
+		}
 		if (params != null && params.size() > 0) {
-			List<Node> args = new ArrayList<Node>();
-			List<Node> argtypes = new ArrayList<Node>();
-			for (int i = 0; i < params.size(); i++) {
-				SadlParameterDeclaration param = params.get(i);
-				SadlResource pr = param.getName();
-				if (pr != null) {
-					Object pn = processExpression(pr);
-					args.add((Node) pn);
-					SadlTypeReference prtype = param.getType();
-					Node prtnode = sadlTypeReferenceToNode(prtype); 
-					argtypes.add(prtnode);
+			if (params.get(0).getUnknown() == null) {
+				List<Node> args = new ArrayList<Node>();
+				List<Node> argtypes = new ArrayList<Node>();
+				for (int i = 0; i < params.size(); i++) {
+					SadlParameterDeclaration param = params.get(i);
+					SadlResource pr = param.getName();
+					if (pr != null) {
+						Object pn = processExpression(pr);
+						args.add((Node) pn);
+						SadlTypeReference prtype = param.getType();
+						Node prtnode = sadlTypeReferenceToNode(prtype); 
+						argtypes.add(prtnode);
+					}
 				}
+				eq.setArguments(args);
+				eq.setArgumentTypes(argtypes);
 			}
-			eq.setArguments(args);
-			eq.setArgumentTypes(argtypes);
 		}
 		
 		logger.debug("External Equation: " + eq.toFullyQualifiedString());

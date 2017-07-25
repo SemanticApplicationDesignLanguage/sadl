@@ -1848,12 +1848,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 										.getClass());
 								if (trans != null) {
 									if (trans instanceof TypedBaseBuiltin) {
-										System.out.println(((TypedBaseBuiltin)trans).getFunctionSignatureString());
 										FunctionSignature fs = new FunctionSignature(((TypedBaseBuiltin)trans).getFunctionSignatureString(), binfo.getUri());
 										sb.append(fs.FunctionSignatureToSadlModelFormat());
 										sb.append("\n\n");
 									} else {
-										System.out.println(binfo.getClassName());
+										String untypedFctSignature = binfo.getName() + "(--)--";
+										FunctionSignature fs = new FunctionSignature(untypedFctSignature, binfo.getUri());
+										sb.append(fs.FunctionSignatureToSadlModelFormat());
+										sb.append("\n\n");
 									}
 								}
 							} catch (Throwable t) {
@@ -1867,37 +1869,37 @@ public class JenaTranslatorPlugin implements ITranslator {
 					e1.printStackTrace();
 				}
 
-//				try {
-//					List<BuiltinInfo> builtins = ((IConfigurationManagerForEditing)configurationMgr).getAvailableBuiltinsForCurrentReasoner();
-//					for (int i = 0; builtins != null && i < builtins.size(); i++) {
-//						BuiltinInfo bi = builtins.get(i);
-//						if (!builtinInSignatureList(bfsigs, bi)) {
-//							sb.append("External ");
-//							sb.append(bi.getName());
-//							sb.append("(");		
-//							sb.append("None");
-//	//						for(int i = 0; i < bi..parameterTypes.length; i++){
-//	//							if(!this.parameterTypes[i].isEmpty()){
-//	//								sb.append(this.parameterTypes[i].toLowerCase());
-//	//								sb.append(" X");
-//	//								if(i != this.parameterTypes.length - 1){
-//	//									sb.append(", ");
-//	//								}
-//	//							}
-//	//						}
-//							sb.append(") returns ");
-//	//						sb.append(this.returnType.toLowerCase());
-//							sb.append("None");
-//							sb.append(":\n\""); 
-//	//						sb.append(this.uri);
-//							sb.append(bi.getUri());
-//							sb.append("\".\n");
-//						}
-//					}
-//				} catch (ConfigurationException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+				try {
+					List<BuiltinInfo> builtins = ((IConfigurationManagerForEditing)configurationMgr).getAvailableBuiltinsForCurrentReasoner();
+					for (int i = 0; builtins != null && i < builtins.size(); i++) {
+						BuiltinInfo bi = builtins.get(i);
+						if (!builtinInSignatureList(bfsigs, bi)) {
+							sb.append("External ");
+							sb.append(bi.getName());
+							sb.append("(");		
+							sb.append("--");
+	//						for(int i = 0; i < bi..parameterTypes.length; i++){
+	//							if(!this.parameterTypes[i].isEmpty()){
+	//								sb.append(this.parameterTypes[i].toLowerCase());
+	//								sb.append(" X");
+	//								if(i != this.parameterTypes.length - 1){
+	//									sb.append(", ");
+	//								}
+	//							}
+	//						}
+							sb.append(") returns ");
+	//						sb.append(this.returnType.toLowerCase());
+							sb.append("--");
+							sb.append(":\n\""); 
+	//						sb.append(this.uri);
+							sb.append(bi.getUri());
+							sb.append("\".\n\n");
+						}
+					}
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		} catch (ConfigurationException e2) {
 			// TODO Auto-generated catch block

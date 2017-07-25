@@ -2820,7 +2820,8 @@ public class JenaReasonerPlugin extends Reasoner{
 							"now()dateTime", 
 							"regex(string,string)string", 
 							"strConcat(string,string)string", 
-							"uriConcat(string,string)string"};
+							"uriConcat(string,string)string",
+							"unbound(string)string"};
 	}
 	
 	@Override

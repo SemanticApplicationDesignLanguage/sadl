@@ -81,7 +81,12 @@ public class Equation {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getReturnType().toString());
+		if (getReturnType() != null) {
+			sb.append(getReturnType().toString());
+		}
+		else {
+			sb.append("--");
+		}
 		sb.append(" ");
 		sb.append(getName());
 		sb.append("(");
@@ -125,7 +130,12 @@ public class Equation {
 	
 	public String toFullyQualifiedString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getReturnType().toFullyQualifiedString());
+		if (getReturnType() != null) {
+			sb.append(getReturnType().toFullyQualifiedString());
+		}
+		else {
+			sb.append("--");
+		}
 		sb.append(" ");
 		sb.append(getNamespace());
 		sb.append(getName());
