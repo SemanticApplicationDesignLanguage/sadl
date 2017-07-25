@@ -8,30 +8,32 @@
  */
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
+import com.ge.research.sadl.processing.ValidationAcceptorImpl
+import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
-import static org.junit.Assert.*
-import org.junit.runner.RunWith
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.testing.util.ParseHelper
-import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Provider
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
-import com.hp.hpl.jena.ontology.OntModel
-import java.util.List
-import org.eclipse.xtext.validation.Issue
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
-import org.eclipse.xtext.validation.CheckMode
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
-import org.junit.Test
-import com.hp.hpl.jena.rdf.model.RDFNode
 import com.hp.hpl.jena.ontology.CardinalityRestriction
 import com.hp.hpl.jena.ontology.HasValueRestriction
+import com.hp.hpl.jena.ontology.OntModel
+import com.hp.hpl.jena.rdf.model.RDFNode
+import java.util.List
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.util.ParseHelper
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.validation.CheckMode
+import org.eclipse.xtext.validation.Issue
+import org.junit.Ignore
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -183,6 +185,7 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 			]
 	}
 
+	@Ignore("Should be moved to environment is defined with DATA in the implicit model. See: https://github.com/crapo/sadlos2/issues/215")
 	@Test
 	def void testOnlyIf() {
 		val implicitModel = '''
