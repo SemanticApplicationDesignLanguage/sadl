@@ -1825,18 +1825,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							Node pred = ((TripleElement)e).getPredicate();
 							ConceptName predcn = new ConceptName(pred.toFullyQualifiedString());
 							Property predProp = getTheJenaModel().getProperty(pred.toFullyQualifiedString());
-							if (predProp instanceof ObjectProperty) {
-								predcn.setType(ConceptType.OBJECTPROPERTY);
-							}
-							else if (predProp instanceof DatatypeProperty) {
-								predcn.setType(ConceptType.DATATYPEPROPERTY);
-							}
-							else if (predProp instanceof AnnotationProperty) {
-								predcn.setType(ConceptType.ANNOTATIONPROPERTY);
-							}
-							else {
-								predcn.setType(ConceptType.RDFPROPERTY);
-							}
+							setPropertyConceptNameType(predcn, predProp);
 							try {
 								TypeCheckInfo tci = getModelValidator().getTypeInfoFromRange(predcn, predProp, null);
 								if (tci != null) {
@@ -1895,6 +1884,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		return query;
+	}
+	
+	public void setPropertyConceptNameType(ConceptName predcn, Property predProp) {
+		if (predProp instanceof ObjectProperty) {
+			predcn.setType(ConceptType.OBJECTPROPERTY);
+		}
+		else if (predProp instanceof DatatypeProperty) {
+			predcn.setType(ConceptType.DATATYPEPROPERTY);
+		}
+		else if (predProp instanceof AnnotationProperty) {
+			predcn.setType(ConceptType.ANNOTATIONPROPERTY);
+		}
+		else {
+			predcn.setType(ConceptType.RDFPROPERTY);
+		}
 	}
 	
 	private boolean subjPredMatch(List<GraphPatternElement> elements, VariableNode vn, String epstr) {

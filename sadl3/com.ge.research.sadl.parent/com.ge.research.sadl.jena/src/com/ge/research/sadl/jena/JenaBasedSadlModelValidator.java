@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.emf.ecore.EObject;
-import com.ge.research.sadl.errorgenerator.generator.*;
+
+import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
@@ -24,10 +25,7 @@ import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
-import com.ge.research.sadl.processing.SadlOntologyHelper;
 import com.ge.research.sadl.processing.ValidationAcceptor;
-import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
-import com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -52,7 +50,6 @@ import com.ge.research.sadl.sADL.SadlBooleanLiteral;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
 import com.ge.research.sadl.sADL.SadlConstantLiteral;
 import com.ge.research.sadl.sADL.SadlDataType;
-import com.ge.research.sadl.sADL.SadlExplicitValue;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlModelElement;
@@ -2102,7 +2099,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				tci.setExpressionType(et);
 			}
 			return tci;
-
 		}
 		else if(conceptType.equals(OntConceptType.ANNOTATION_PROPERTY)){
 			//This matches any type.
@@ -2133,6 +2129,38 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		ConceptName propConceptName = new ConceptName(conceptUri);
 		propConceptName.setType(propertyType);
 		return getTypeInfoFromRange(propConceptName, property, expression);
+	}
+
+	private TypeCheckInfo getPropertyDomainType(SadlResource propsr, EObject expr) throws InvalidTypeException {
+		String propuri = declarationExtensions.getConceptUri(propsr);
+		Property prop = theJenaModel.getProperty(propuri);
+		ConceptName pcn = new ConceptName(propuri);
+		getModelProcessor().setPropertyConceptNameType(pcn, prop);
+		return getTypeInfoFromDomain(pcn, prop, expr);
+	}
+	
+	private TypeCheckInfo getPropertyRangeType(SadlResource propsr, EObject expr) throws DontTypeCheckException, InvalidTypeException {
+		String propuri = declarationExtensions.getConceptUri(propsr);
+		Property prop = theJenaModel.getProperty(propuri);
+		ConceptName pcn = new ConceptName(propuri);
+		getModelProcessor().setPropertyConceptNameType(pcn, prop);
+		return getTypeInfoFromRange(pcn, prop, expr);
+	}
+
+	public TypeCheckInfo getTypeInfoFromDomain(ConceptName propConceptName, Property property, EObject expression) {
+		StmtIterator stmtitr = theJenaModel.listStatements(property, RDFS.domain, (RDFNode)null);
+		while (stmtitr.hasNext()) {
+			RDFNode obj = stmtitr.nextStatement().getObject();
+			if (obj.canAs(Resource.class)) {
+				try {
+					return createTypeCheckInfoForPropertyDomain(obj.asResource(), propConceptName, expression);
+				} catch (DontTypeCheckException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}			
+			}
+		}
+		return null;
 	}
 
 	public TypeCheckInfo getTypeInfoFromRange(ConceptName propConceptName, Property property,
@@ -2270,6 +2298,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		return false;
 	}
+	
+	private TypeCheckInfo createTypeCheckInfoForPropertyDomain(Resource domain, ConceptName propConceptName, EObject expression) throws DontTypeCheckException {
+		TypeCheckInfo tci = null;
+		if (!domain.isURIResource()) {
+			throw new DontTypeCheckException();
+		}
+		ConceptName domainConceptName = new ConceptName(domain.getURI());
+		domainConceptName.setType(ConceptType.ONTCLASS);
+		if (tci == null) {
+			tci = new TypeCheckInfo(propConceptName, domainConceptName, this, expression);
+			tci.setTypeToExprRelationship("domain");
+		}
+		if (isTypedListSubclass(domain)) {
+			tci.setRangeValueType(RangeValueType.LIST);
+		}
+		return tci;
+	}
 
 	private TypeCheckInfo createTypeCheckInfoForPropertyRange(RDFNode first, ConceptName propConceptName,
 			EObject expression, ConceptType propertyType) throws InvalidTypeException {
@@ -2343,6 +2388,24 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //	}
 
 	protected TypeCheckInfo getVariableType(ConceptType variable, SadlResource sr, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+		//	1) get the Name of the SadlResource for the variable
+		//	2) get the definition of the Name
+		//  3) if the container of the Name is a SubjHasProp:
+		//		3a) look at the SubjHasProp left and right
+		//			3aa) if the Name matches left, get the type as the domain of the SubjHasProp prop
+		//			3ab) if the Name matches right, get the type as the range of the SubjHasProp prop
+		SadlResource name = sr.getName();
+		SadlResource def = declarationExtensions.getDeclaration(name);
+		EObject defContainer = def.eContainer();
+		if (defContainer instanceof SubjHasProp) {
+			SadlResource propsr = ((SubjHasProp)defContainer).getProp();
+			if (((SubjHasProp)defContainer).getLeft().equals(name)) {
+				return getPropertyDomainType(propsr, expression);
+			}
+			else if (((SubjHasProp)defContainer).getRight().equals(name)) {
+				return getPropertyRangeType(propsr, expression);
+			}
+		}
 		//Needs filled in for Requirements extension
 		if (conceptUri == null) {
 			return null;

@@ -465,9 +465,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 		
 		List<String> vars = query.getVariables();
 		List<GraphPatternElement> elements = query.getPatterns();
-		for (int i = 0; vars != null && i < vars.size(); i++) {
-			if (i > 0) sbmain.append(" ");
-			sbmain.append("?" + vars.get(i));
+		if (vars != null && vars.size() > 0) {
+			for (int i = 0; i < vars.size(); i++) {
+				if (i > 0) sbmain.append(" ");
+				sbmain.append("?" + vars.get(i));
+			}
+		}
+		else {
+			sbmain.append("*");
 		}
 		sbmain.append(" where {");
 		

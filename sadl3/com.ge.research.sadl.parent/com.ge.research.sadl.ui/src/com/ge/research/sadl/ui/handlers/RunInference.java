@@ -133,6 +133,10 @@ public class RunInference extends SadlActionHandler {
 		        		}
     					else {
     						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + " is empty\n");
+    						if (cmd instanceof Query) {
+    							String msg = "Query: " + ((Query)cmd).toString() + "\n";
+    							SadlConsole.writeToConsole(MessageType.INFO, msg);
+    						}
     					}
 		        		if (errors != null) {
 		        			for (int j = 0; j < errors.size(); j++) {
