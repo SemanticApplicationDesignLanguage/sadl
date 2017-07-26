@@ -7674,9 +7674,14 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 				NamedStructureAnnotation ra = annitr.next();
 				String annuri = getDeclarationExtensions().getConceptUri(ra.getType());
 				Property annProp = getTheJenaModel().getProperty(annuri);
-				if (annProp == null) {
-					issueAcceptor.addError("Annotation '" + annuri + "' not found in model", ra);
-					continue;
+				try {
+					if (annProp == null || !isProperty(getDeclarationExtensions().getOntConceptType(ra.getType()))) {
+						issueAcceptor.addError("Annotation property '" + annuri + "' not found in model", ra);
+						continue;
+					}
+				} catch (CircularDefinitionException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 				Iterator<SadlExplicitValue> cntntitr = ra.getContents().iterator();
 				StringBuilder sb = new StringBuilder();

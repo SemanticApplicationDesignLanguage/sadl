@@ -88,7 +88,7 @@ public class RunQuery extends SadlActionHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
 			String[] validTargetTypes = getValidTargetFileTypes();
-			boolean tryAddingOwlExtension = false;
+			boolean tryAddingOwlExtension = true;
 			Object[] target = null;
 			try {
 				target = getCommandTarget(validTargetTypes);

@@ -2388,22 +2388,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //	}
 
 	protected TypeCheckInfo getVariableType(ConceptType variable, SadlResource sr, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
-		//	1) get the Name of the SadlResource for the variable
+		if (sr == null) {
+			return null;	// this might happen when cleaning with editor open
+		}
+		//  1) get the Name of the SadlResource for the variable
 		//	2) get the definition of the Name
 		//  3) if the container of the Name is a SubjHasProp:
 		//		3a) look at the SubjHasProp left and right
 		//			3aa) if the Name matches left, get the type as the domain of the SubjHasProp prop
 		//			3ab) if the Name matches right, get the type as the range of the SubjHasProp prop
 		SadlResource name = sr.getName();
-		SadlResource def = declarationExtensions.getDeclaration(name);
-		EObject defContainer = def.eContainer();
-		if (defContainer instanceof SubjHasProp) {
-			SadlResource propsr = ((SubjHasProp)defContainer).getProp();
-			if (((SubjHasProp)defContainer).getLeft().equals(name)) {
-				return getPropertyDomainType(propsr, expression);
-			}
-			else if (((SubjHasProp)defContainer).getRight().equals(name)) {
-				return getPropertyRangeType(propsr, expression);
+		if (name != null) {
+			SadlResource def = declarationExtensions.getDeclaration(name);
+			EObject defContainer = def.eContainer();
+			if (defContainer instanceof SubjHasProp) {
+				SadlResource propsr = ((SubjHasProp)defContainer).getProp();
+				if (((SubjHasProp)defContainer).getLeft().equals(name)) {
+					return getPropertyDomainType(propsr, expression);
+				}
+				else if (((SubjHasProp)defContainer).getRight().equals(name)) {
+					return getPropertyRangeType(propsr, expression);
+				}
 			}
 		}
 		//Needs filled in for Requirements extension
