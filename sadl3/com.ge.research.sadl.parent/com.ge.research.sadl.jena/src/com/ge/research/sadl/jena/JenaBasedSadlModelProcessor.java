@@ -2011,8 +2011,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (DontTypeCheckException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// OK to not be able to type check
 			} catch (CircularDefinitionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

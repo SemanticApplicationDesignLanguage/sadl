@@ -91,9 +91,9 @@ public class ConfigurationManager implements IConfigurationManager {
 	protected static final String ONT_MANAGER_PREFIX = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#prefix";
 	protected static final String ONT_MANAGER_ONTOLOGY_SPEC = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#OntologySpec";
 	
-	private static final String DEFAULT_TRANSLATOR = "com.ge.research.sadl.jena.translator.JenaTranslatorPlugin";
+	public static final String DEFAULT_TRANSLATOR = "com.ge.research.sadl.jena.translator.JenaTranslatorPlugin";
 //	private static final String DEFAULT_TRANSLATOR = "com.ge.research.sadl.geonly.jena.JenaOptimizingTranslator";
-	private static final String DEFAULT_REASONER = "com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin";
+	public static final String DEFAULT_REASONER = "com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin";
 	private static final String REASONER_SPEC = CONFIG_NAMESPACE + "ReasonerSpec";
 //	private static final String TRANSLATOR_SPEC = CONFIG_NAMESPACE + "TranslatorSpec";
 	protected static final String pREASONER_CLASSNAME = CONFIG_NAMESPACE + "reasonerClassName";

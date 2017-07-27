@@ -34,6 +34,7 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
+import com.ge.research.sadl.sADL.QueryStatement
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -54,6 +55,8 @@ abstract class AbstractLinkingTest extends AbstractSadlTest {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
 			} else if (obj instanceof SadlPropertyCondition) {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
+			} else if (obj instanceof QueryStatement) {
+//				updateActual(markerFile, decl.value, decl.region, obj, obj.expr)
 			} else {
 				Assert.fail("unexpected node "+obj)
 			}
