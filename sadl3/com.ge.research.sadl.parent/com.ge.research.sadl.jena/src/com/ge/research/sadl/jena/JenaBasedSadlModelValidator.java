@@ -968,7 +968,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getType((PropOfSubject)expression);
 		}
 		else if(expression instanceof SubjHasProp){
-			if (expression.eContainer() instanceof BinaryOperation || expression.eContainer() instanceof SelectExpression) {
+			if (!isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || expression.eContainer() instanceof SelectExpression) {
 				// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
 				if (((SubjHasProp)expression).getProp() instanceof SadlResource) {
 					SadlResource prop = ((SubjHasProp)expression).getProp();
@@ -979,9 +979,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					issueAcceptor.addError("This subject-has-property construct isn't properly validated, please report.", expression);
 				}
 			}
-//			else if (expression.eContainer() instanceof SelectExpression) {
-//				
-//			}
 			else {
 				Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
 				if (subjHasPropInDeclaration != null) {
@@ -1125,6 +1122,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
+	protected boolean isDeclaration(EObject expr) {
+		if (expr instanceof SubjHasProp) {
+			return isDeclaration(((SubjHasProp)expr).getLeft());
+		}
+		else if (expr instanceof CommaSeparatedAbreviatedExpression) {
+			return isDeclaration(((CommaSeparatedAbreviatedExpression)expr).getLeft());
+		}
+		else if (expr instanceof UnaryExpression && ((UnaryExpression)expr).getExpr() instanceof Declaration) {
+			return true;
+		}
+		else if (expr instanceof Declaration) {
+			return true;
+		}
+		return false;
+	}
+	
 	private TypeCheckInfo getUnittedQuantityTypeCheckInfo(EObject expression)
 			throws InvalidTypeException, InvalidNameException {
 		//String unit = ((Unit)expression).getUnit();
@@ -3013,16 +3026,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return null;
-	}
-
-	private boolean isDeclaration(EObject expr) {
-		if (expr instanceof Declaration) {
-			return true;
-		}
-		if (expr instanceof UnaryExpression && ((UnaryExpression)expr).getExpr() instanceof Declaration) {
-			return true;
-		}
-		return false;
 	}
 
 	private boolean partOfTest(EObject leftExpression, EObject rightExpression) {
