@@ -25,6 +25,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
 	public static final String OWL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.owl";
 	public static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
+	public static final String SADL_IMPLICIT_MODEL_SYNTHETIC_URI = "synthetic://test/SadlImplicitModel.sadl";
 	public static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
 	public static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
 	public static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
@@ -52,6 +53,7 @@ public class SadlConstants {
 	public static final String SADL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.sadl";
 	public static final String OWL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.owl";
 	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
+	public static final String SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI = "synthetic://sadl.org/builtinfunctions";
 	public static final String SADL_BUILTIN_FUNCTIONS_ALIAS = "builtinfunctions";
 	public static enum SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY{FULL,NAME_ONLY,NONE};
 	
