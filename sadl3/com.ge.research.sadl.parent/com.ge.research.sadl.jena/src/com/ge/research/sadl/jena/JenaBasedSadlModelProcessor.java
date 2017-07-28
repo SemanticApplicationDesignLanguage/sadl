@@ -867,7 +867,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //							e.printStackTrace();
 //						}
 					}
-					else {
+					else if (!resource.getURI().equals(importingResourceUri)) {
 						addError(SadlErrorMessages.NULL_IMPORT.get("XtextResource"), simport);
 						return;
 					}
@@ -1134,42 +1134,56 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private void addImplicitSadlModelImportToJenaModel(Resource resource, ProcessorContext context) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-		java.nio.file.Path implfn = checkImplicitSadlModelExistence(resource, context);
-		if (implfn != null) {
-			final PathToFileUriConverter uriConverter = getUriConverter(resource);
-			final URI uri = uriConverter.createFileUri(implfn);
-			Resource imrsrc = resource.getResourceSet().getResource(uri, true);
-			if (sadlImplicitModel == null) {
-				if (imrsrc instanceof XtextResource) {
-					sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
-				}
-				else if (imrsrc instanceof ExternalEmfResource) {
-					sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
-				}
+		if (isSyntheticUri(null, resource)) {
+			// test case: get SadlImplicitModel OWL model from the OntModelProvider
+			URI simTestUri = URI.createURI(SadlConstants.SADL_IMPLICIT_MODEL_SYNTHETIC_URI);
+			try {
+				sadlImplicitModel = OntModelProvider.find(resource.getResourceSet().getResource(simTestUri, true));
+			}
+			catch (Exception e) {
+				// this happens if the test case doesn't cause the implicit model to be loaded--here now for backward compatibility but test cases should be fixed?
+				sadlImplicitModel = null;
+			}
+		}
+		else {
+			java.nio.file.Path implfn = checkImplicitSadlModelExistence(resource, context);
+			if (implfn != null) {
+				final PathToFileUriConverter uriConverter = getUriConverter(resource);
+				final URI uri = uriConverter.createFileUri(implfn);
+				Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 				if (sadlImplicitModel == null) {
 					if (imrsrc instanceof XtextResource) {
-						((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-						sadlImplicitModel = OntModelProvider.find(imrsrc);
-						OntModelProvider.attach(imrsrc, sadlImplicitModel, SadlConstants.SADL_IMPLICIT_MODEL_URI, SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
+						sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
-					else {
-						IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-						if (cm.getModelGetter() == null) {
-							cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+					else if (imrsrc instanceof ExternalEmfResource) {
+						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+					}
+					if (sadlImplicitModel == null) {
+						if (imrsrc instanceof XtextResource) {
+							((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+							sadlImplicitModel = OntModelProvider.find(imrsrc);
+							OntModelProvider.attach(imrsrc, sadlImplicitModel, SadlConstants.SADL_IMPLICIT_MODEL_URI, SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
 						}
-						cm.getModelGetter().getOntModel(SadlConstants.SADL_IMPLICIT_MODEL_URI,
-								ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
-										.appendFragment(SadlConstants.OWL_IMPLICIT_MODEL_FILENAME)
-										.toFileString(),
-								getOwlModelFormat(context));
+						else {
+							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+							if (cm.getModelGetter() == null) {
+								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+							}
+							cm.getModelGetter().getOntModel(SadlConstants.SADL_IMPLICIT_MODEL_URI,
+									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
+											.appendFragment(SadlConstants.OWL_IMPLICIT_MODEL_FILENAME)
+											.toFileString(),
+									getOwlModelFormat(context));
+						}
 					}
-				}
-				if (sadlImplicitModel != null) {
-					addImportToJenaModel(getModelName(), SadlConstants.SADL_IMPLICIT_MODEL_URI, SadlConstants.SADL_IMPLICIT_MODEL_PREFIX, sadlImplicitModel);
 				}
 			}
 		}
+		if (sadlImplicitModel != null) {
+			addImportToJenaModel(getModelName(), SadlConstants.SADL_IMPLICIT_MODEL_URI, SadlConstants.SADL_IMPLICIT_MODEL_PREFIX, sadlImplicitModel);
+		}
 	}
+	
 	private void addSadlBaseModelImportToJenaModel(Resource resource) throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		if (sadlBaseModel == null) {
 			sadlBaseModel = OntModelProvider.getSadlBaseModel();
@@ -1737,9 +1751,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		addSadlCommand(print);
 	}
 	
-	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
+	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException, CircularDefinitionException {
 		Expression qexpr = element.getExpr();
 		if (qexpr != null) {
+			if (qexpr instanceof Name) {
+				OntConceptType qntype = getDeclarationExtensions().getOntConceptType(((Name)qexpr).getName());
+				if (qntype.equals(OntConceptType.STRUCTURE_NAME)) {
+					// this is just a named query declared elsewhere
+					SadlResource qdecl = getDeclarationExtensions().getDeclaration(((Name)qexpr).getName());
+					EObject qdeclcont = qdecl.eContainer();
+					if (qdeclcont instanceof QueryStatement) {
+						qexpr = ((QueryStatement)qdeclcont).getExpr();
+					}
+					else {
+						addError("Unexpected named structure name whose definition is not a query statement", qexpr);
+						return null;
+					}
+				}
+			}
 			Object qobj = processExpression(qexpr);
 			Query query = null;
 			if (qobj instanceof Query) {
@@ -3992,6 +4021,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else if (propType.equals(OntConceptType.RDF_PROPERTY)) {
 						prop = getOrCreateRdfProperty(propUri);
 					}
+					else if (propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+						addError("Can't specify domain of an annotation property. Did you want to use a property restriction?", sr);
+						throw new JenaProcessorException("Invalid property type (" + propType.toString() + ") for '" + propUri + "'");
+					}
 					else {
 						throw new JenaProcessorException("Invalid property type (" + propType.toString() + ") for '" + propUri + "'");
 					}
@@ -4988,54 +5021,63 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		SadlTypeReference type = element.getType();
 		boolean isList = typeRefIsList(type);
 		SadlResource sr = sadlResourceFromSadlInstance(element);
+		Individual inst = null;
 		String instUri = null;
 		OntConceptType subjType = null;
+		boolean isActuallyClass = false;
 		if (sr != null) {
 			instUri = getDeclarationExtensions().getConceptUri(sr);
 			if (instUri == null) {
 				throw new JenaProcessorException("Failed to get concept URI of SadlResource in processSadlInstance");
 			}
 			subjType = getDeclarationExtensions().getOntConceptType(sr);
+			if (subjType.equals(OntConceptType.CLASS)) {
+				// This is really a class so don't treat as an instance
+				OntClass actualClass = getOrCreateOntClass(instUri);
+				isActuallyClass = true;
+				inst = actualClass.asIndividual();
+			}
 		}
 		OntClass cls = null;
-		Individual inst = null;
-		if (type != null) {
-			if (type instanceof SadlPrimitiveDataType) {
-				com.hp.hpl.jena.rdf.model.Resource rsrc = sadlTypeReferenceToResource(type);
-				if (isList) {
-					try {
-						cls = createListSubclass(null, rsrc.getURI(), type.eResource());
-					} catch (JenaProcessorException e) {
-						addError(e.getMessage(), type);
-					}
-				}
-			}
-			else {
-				OntResource or = sadlTypeReferenceToOntResource(type);
-				if (or != null && or.canAs(OntClass.class)){
-					cls = or.asClass();					
+		if (!isActuallyClass) {
+			if (type != null) {
+				if (type instanceof SadlPrimitiveDataType) {
+					com.hp.hpl.jena.rdf.model.Resource rsrc = sadlTypeReferenceToResource(type);
 					if (isList) {
 						try {
-							cls = createListSubclass(null, cls.getURI(), type.eResource());
+							cls = createListSubclass(null, rsrc.getURI(), type.eResource());
 						} catch (JenaProcessorException e) {
 							addError(e.getMessage(), type);
 						}
 					}
 				}
-				else if (or instanceof Individual) {
-					inst = (Individual) or;
+				else {
+					OntResource or = sadlTypeReferenceToOntResource(type);
+					if (or != null && or.canAs(OntClass.class)){
+						cls = or.asClass();					
+						if (isList) {
+							try {
+								cls = createListSubclass(null, cls.getURI(), type.eResource());
+							} catch (JenaProcessorException e) {
+								addError(e.getMessage(), type);
+							}
+						}
+					}
+					else if (or instanceof Individual) {
+						inst = (Individual) or;
+					}
 				}
-			}
-		} 
-		if (inst == null) {
-			if (cls != null) {
-				inst = createIndividual(instUri, cls);
-			}
-			else if (instUri != null) {
-				inst = createIndividual(instUri, (OntClass)null);
-			}
-			else {
-				throw new JenaProcessorException("Can't create an unnamed instance with no class given");
+			} 
+			if (inst == null) {
+				if (cls != null) {
+					inst = createIndividual(instUri, cls);
+				}
+				else if (instUri != null) {
+					inst = createIndividual(instUri, (OntClass)null);
+				}
+				else {
+					throw new JenaProcessorException("Can't create an unnamed instance with no class given");
+				}
 			}
 		}
 		
