@@ -64,12 +64,11 @@ class GH_200_SadlCyclicDependecyTest extends AbstractLinkingTest {
 	}
 
 	@Test
-	@Ignore("https://github.com/crapo/sadlos2/issues/158")
 	def void checkSelfReference() {
 		val resource = '''uri "http://sadl.org/A.sadl". import "http://sadl.org/A.sadl".'''.sadl.contents.head as SadlModel;
 		val issues = validate(resource);
-		assertEquals(1, issues.size);
-		assertTrue(issues.head.message.contains('[http://sadl.org/A.sadl] -> [http://sadl.org/A.sadl]'));
+		assertEquals(2, issues.size);
+		assertTrue(issues.get(1).message.contains('A model cannot import itself')); //contains('[http://sadl.org/A.sadl] -> [http://sadl.org/A.sadl]'));
 	}
 
 	@Test
