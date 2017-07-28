@@ -1190,7 +1190,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore("Should be moved to environment is defined with DATA in the implicit model. See: https://github.com/crapo/sadlos2/issues/215")
+	@Ignore("#215: If possible, the declaration of DATA2 should be as indicated. If not possible, we need to detect error (Andy can do) and provide quick fix to insert previous line into model")
 	@Test
 	def void testOnlyIf() {
 		'''
