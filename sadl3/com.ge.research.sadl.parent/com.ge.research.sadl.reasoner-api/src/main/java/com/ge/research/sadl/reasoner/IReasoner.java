@@ -33,6 +33,7 @@ import java.util.Map;
 import javax.activation.DataSource;
 
 import com.ge.research.sadl.model.Explanation;
+import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 
 public interface IReasoner {
@@ -342,11 +343,17 @@ public interface IReasoner {
 	public String objectValueToStringValue(Object objValue, String predicate) throws ConfigurationException;
 	
 	/**
-	 * Method to get a list of implicit (not registered as a service) builts.
+	 * Method to get a list of implicit (not registered as a service) built-ins.
 	 * 
 	 * @return
 	 */
 	public List<BuiltinInfo> getImplicitBuiltins();
+	
+	/**
+	 * Method to get a list of implicit (not registered as a service) built-ins along with their signatures
+	 * @return
+	 */
+	public List<FunctionSignature> getImplicitBuiltinSignatures();
 	
 	/**
 	 * Method to extract the BuiltinInfo information from a reasoner-specific (or reasoner family-specific) builtin class.

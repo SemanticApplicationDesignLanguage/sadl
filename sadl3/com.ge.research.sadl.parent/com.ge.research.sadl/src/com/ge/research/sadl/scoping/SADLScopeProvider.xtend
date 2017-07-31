@@ -37,6 +37,7 @@ import com.ge.research.sadl.sADL.SadlMustBeOneOf
 import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SelectExpression
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.ge.research.sadl.sADL.TestStatement
 import com.google.common.base.Predicate
@@ -46,7 +47,7 @@ import java.util.Set
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtend.lib.annotations.Data
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
@@ -57,7 +58,6 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * This class contains custom scoping description.
@@ -105,51 +105,52 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				equation.parameter.map[EObjectDescription.create(name.concreteName, it.name)])
 		}
 		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
-		if (ask !== null && ask.expr != null) {
-			return getLocalVariableScope(ask.expr, parent)
+		if (ask?.expr !== null) {
+			return getLocalVariableScope(#[ask.expr], parent)
 		}
 		val test = EcoreUtil2.getContainerOfType(context, TestStatement)
-		if (test !== null && test.tests != null) {
+		if (test?.tests !== null) {
 			return getLocalVariableScope(test.tests, parent)
 		}
 		return parent
 	}
 	
 	protected def IScope getLocalVariableScope(Iterable<Expression> expressions, IScope parent) {
-		if (expressions.empty)
+		if (expressions.nullOrEmpty) {
 			return parent;
+		}
 		var newParent = doGetLocalVariableScope(expressions, parent) [
-			var container = eContainer
+			var container = eContainer;
+			if (container instanceof SelectExpression) {
+				if (container.whereExpression instanceof SubjHasProp) {
+					val subjHasProp = container.whereExpression as SubjHasProp;
+					return subjHasProp.left === it || subjHasProp.right === it;
+				}
+			}
 			if (container instanceof PropOfSubject || container instanceof SubjHasProp) {
-				container = container.eContainer
+				container = container.eContainer;
 			}
 			if (container instanceof BinaryOperation) {
-				if (container.op == 'is' || container.op == '==' || container.op == '=') 
-					return true
-			}
+				if (container.op == 'is' || container.op == '==' || container.op == '=' ||
+					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, SelectExpression) !== null) // we are in the middle of a select expression.
+				) {
+					return true;
+				}
+			} else if (container instanceof SelectExpression) {
+				if (container.whereExpression instanceof SubjHasProp) {
+					val subjHasProp = container.whereExpression as SubjHasProp;
+					return subjHasProp.left === it || subjHasProp.right === it;
+				}
+			};
 			return false
 		]
-		return doGetLocalVariableScope(expressions, newParent) [true]
-	}
-	
-	protected def IScope getLocalVariableScope(Expression expression, IScope parent) {
-		var newParent = doGetLocalVariableScope(expression, parent) [
-			var container = eContainer
-			if (container instanceof PropOfSubject || container instanceof SubjHasProp) {
-				container = container.eContainer
-			}
-			if (container instanceof BinaryOperation) {
-				if (container.op == 'is' || container.op == '==' || container.op == '=') 
-					return true
-			}
-			return false
-		]
-		return doGetLocalVariableScope(expression, newParent) [true]
+		return doGetLocalVariableScope(expressions, newParent)[true];
 	}
 	
 	protected def IScope doGetLocalVariableScope(Iterable<Expression> expressions, IScope parent, Predicate<SadlResource> predicate) {
-		 if (expressions.empty)
+		if (expressions.nullOrEmpty) {
 			return parent;
+		}
 		val map = newHashMap
 		for (expression : expressions) {
 			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate)
@@ -165,26 +166,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 		}
 		return MapBasedScope.createScope(parent, map.values)
-	}
-	
-	
-	protected def IScope doGetLocalVariableScope(Expression expression, IScope parent, Predicate<SadlResource> predicate) {
-		val map = newHashMap
-		val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate)
-		while (iter.hasNext) {
-			val name = iter.next
-			val concreteName = name.concreteName
-			if (concreteName !== null) {
-				val qn = QualifiedName.create(concreteName)
-				if (!map.containsKey(qn) && parent.getSingleElement(qn) === null) {
-					map.put(qn, new EObjectDescription(qn, name, emptyMap))
-				}
-			}
-		}
-		return MapBasedScope.createScope(parent, map.values)
-	}
-	
-	@Data static class LocalSymbols {
 	}
 	
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
@@ -265,7 +246,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 							map.addElement(name2, it)
 						}
 					}
-					EquationStatement : {
+					EquationStatement: {
 						val name = converter.toQualifiedName(it.name.concreteName)
 						map.addElement(name, it.name)
 						if (name.segmentCount > 1) {
@@ -273,6 +254,36 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						} else if (namespace !== null) {
 							map.addElement(namespace.append(name), it.name)
 						}
+					}
+					QueryStatement: {
+						// Ignore `anonymous` query statements. Nothing to put into the scope.
+						if (it?.name?.concreteName !== null) {
+							val name = converter.toQualifiedName(it.name.concreteName)
+							map.addElement(name, it.name)
+							if (name.segmentCount > 1) {
+								map.addElement(name.skipFirst(1), it.name)
+							} else if (namespace !== null) {
+								map.addElement(namespace.append(name), it.name)
+							}
+							// Make sure we do not expose the parameters from the query expression to the scope.
+							// Stop processing the subtree of the current AST element by pruning the iterator.
+							// For instance, we do not let `c` into the scope. 
+							// `C is a class. Ask myQuery: select c where c is a C.` 
+						}
+						iter.prune // variables from a query expression w/o a name should not leave the variable scope. 
+					}
+					RuleStatement: {
+						if (it?.name?.concreteName !== null) {
+							val name = converter.toQualifiedName(it.name.concreteName)
+							map.addElement(name, it.name)
+							if (name.segmentCount > 1) {
+								map.addElement(name.skipFirst(1), it.name)
+							}
+							else if (namespace !== null) {
+								map.addElement(namespace.append(name), it.name)
+							}
+						}
+						iter.prune
 					}
 					default :
 						if (pruneScope(it)) {
@@ -368,8 +379,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 
-		// Do not put parameters of external and local equation statements into the scope.
 		if (obj instanceof SadlResource) {
+			// Do not put parameters of external and local equation statements into the scope.
 			if (obj.eContainer instanceof SadlParameterDeclaration) {
 				val declaration = obj.eContainer as SadlParameterDeclaration;
 				val container = declaration.eContainer;
@@ -379,6 +390,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			} else if (EcoreUtil2.getContainerOfType(obj, BinaryOperation) !== null) {
 				// Also filter out resources from the expression of any equations.
 				return;
+			} else if (obj.eContainer instanceof QueryStatement) {
+				// The SADL resource from the use-site should not go into the scope.
+				// In such cases the statement does not have an expression.
+				val queryStatement = obj.eContainer as QueryStatement
+				if (queryStatement.expr === null) {
+					return;
+				}
+			}
+			else if (obj.eContainer instanceof RuleStatement) {
+				val ruleStatement = obj.eContainer as RuleStatement
+				if (ruleStatement.thens === null) {
+					return;
+				}
 			}
 		}
 

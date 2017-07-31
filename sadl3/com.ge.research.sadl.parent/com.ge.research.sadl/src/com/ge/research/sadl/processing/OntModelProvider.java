@@ -92,7 +92,9 @@ public class OntModelProvider {
 		if (adapter.otherContent == null) {
 			adapter.otherContent = new ArrayList<Object>();
 		}
-		adapter.otherContent.add(otherContent);
+		if (!adapter.otherContent.contains(otherContent)) {
+			adapter.otherContent.add(otherContent);
+		}
 	}
 	
 	public static List<Object> getOtherContent(Resource resource) {

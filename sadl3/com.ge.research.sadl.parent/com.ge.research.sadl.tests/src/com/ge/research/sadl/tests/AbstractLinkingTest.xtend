@@ -34,13 +34,16 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
+import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 abstract class AbstractLinkingTest extends AbstractSadlTest {
 	
 	protected def void assertLinking(CharSequence contents, (CharSequence)=>XtextResource parser) {
-		val markerFile = parseReferenceMarker(contents)
+		val escapedContents = XtendTemplateHelper.unifyEOL(contents);
+		val markerFile = parseReferenceMarker(escapedContents)
 		val model = parser.apply(markerFile.parseableContents)
 		Assert.assertTrue(model.errors.map[message].join('\n'), model.errors.isEmpty)
 		for (decl : markerFile.allNames) {
@@ -54,6 +57,8 @@ abstract class AbstractLinkingTest extends AbstractSadlTest {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
 			} else if (obj instanceof SadlPropertyCondition) {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
+			} else if (obj instanceof QueryStatement) {
+//				updateActual(markerFile, decl.value, decl.region, obj, obj.expr)
 			} else {
 				Assert.fail("unexpected node "+obj)
 			}

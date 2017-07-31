@@ -1173,8 +1173,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	private SadlCommandResult processAdhocQuery(Query cmd) throws ConfigurationException, JenaProcessorException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString;
 		String query = cmd.getSparqlQueryString();
+		ITranslator translator = null;
 		if (query == null) {
-			query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+			try {
+				query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+			}
+			catch (UnsupportedOperationException e) {
+				IReasoner defaultReasoner = getConfigMgr(null).getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
+				translator = getConfigMgr(null).getTranslatorForReasoner(defaultReasoner);
+				query = translator.translateQuery(getTheJenaModel(), cmd);
+			}
 		}
 		query = SadlUtils.stripQuotes(query);
 		if (getTheJenaModel() == null) {
@@ -1192,7 +1200,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				// load from OWL file
 			}
 		}
-		ITranslator translator = getConfigMgr(getOwlFormat()).getTranslator();
+		if (translator == null) {
+			translator = getConfigMgr(getOwlFormat()).getTranslator();
+		}
 		Query q = processQuery(query);
 		SadlCommandResult result = new SadlCommandResult(cmd);
 		result.setResults(processAdhocQuery(translator, q));

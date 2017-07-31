@@ -8,30 +8,32 @@
  */
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
+import com.ge.research.sadl.processing.ValidationAcceptorImpl
+import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
-import static org.junit.Assert.*
-import org.junit.runner.RunWith
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.testing.util.ParseHelper
-import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Provider
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
-import com.hp.hpl.jena.ontology.OntModel
-import java.util.List
-import org.eclipse.xtext.validation.Issue
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
-import org.eclipse.xtext.validation.CheckMode
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
-import org.junit.Test
-import com.hp.hpl.jena.rdf.model.RDFNode
 import com.hp.hpl.jena.ontology.CardinalityRestriction
 import com.hp.hpl.jena.ontology.HasValueRestriction
+import com.hp.hpl.jena.ontology.OntModel
+import com.hp.hpl.jena.rdf.model.RDFNode
+import java.util.List
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.util.ParseHelper
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.validation.CheckMode
+import org.eclipse.xtext.validation.Issue
+import org.junit.Ignore
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -140,6 +142,47 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
  				assertTrue((sprc as HasValueRestriction).hasValue.asLiteral.value.equals("true"))
  			}
  		]
+	}
+	
+	@Test
+	def void testNamedStructureAnnotationsRule() {
+		val implicitModel = '''
+			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			
+			impliedProperty is a type of annotation.
+			expandedProperty is a type of annotation.
+			UnittedQuantity is a class,
+				described by ^value with values of type decimal,
+				described by unit with values of type string.
+			^Rule is a class.
+			NamedQuery is a class.
+		'''.assertValidatesTo[p1, p2|]
+		
+		val sadlModel = '''
+			uri "http://sadl.org/Shapes.sadl" alias Shapes.
+			 
+			Shape is a class described by area with values of type float.
+			 
+			comment is a type of annotation.
+			 
+			Circle is a type of Shape, described by radius with values of type float.
+			 
+			MyCircle is a Circle with radius 3.
+			 
+			Rule AreaOfCircle:
+			 	if c is a Circle
+			 	then area of c is radius of c ^ 2 * PI.
+			 	
+			AreaOfCircle has comment "ho".
+			 	
+			Ask: area. 	
+			
+«««			Ask: x is a ^Rule.
+		'''.assertValidatesTo[jenaModel, issues |
+				assertNotNull(jenaModel)
+				jenaModel.write(System.out)
+				assertTrue(issues.size == 0)
+			]
 	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {

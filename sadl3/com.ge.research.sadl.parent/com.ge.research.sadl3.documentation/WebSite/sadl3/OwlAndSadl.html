@@ -21,26 +21,29 @@ span.MsoFootnoteReference
 <h1>The Web Ontology Language (OWL) and the Semantic Application Design Language 
 (SADL)</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/04/2017<!--webbot bot="Timestamp" endspan i-checksum="12565" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->07/03/2017<!--webbot bot="Timestamp" endspan i-checksum="12553" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 <h4>Table of Contents</h4>
 <ul>
-  <li>The Web Ontology Language (OWL)</li>
-  <li>Defining Classes, Properties, and Individuals in SADL</li>
-  <li><span style="font-family:&quot;Times New Roman&quot;,serif">Further Definition of Classes Using Property Restrictions</span></li>
-  <li>Equivalent Classes, Also Known as Necessary and Sufficient Conditions</li>
-  <li>XSD and User-Defined Data Types</li>
-  <li>Anatomy of a SADL Project<ul>
-    <li>The OwlModels Folder</li>
-    <li>Implicit Models</li>
-    <li>Temp Folder</li>
-    <li>Graphs</li>
+  <li><a href="#OWL">The Web Ontology Language (OWL)</a></li>
+  <li><a href="#Defining">Defining Classes, Properties, and Individuals in SADL</a></li>
+  <li><span style="font-family:&quot;Times New Roman&quot;,serif">
+  <a href="#Restrictions">Further Definition of Classes Using Property Restrictions</a></span></li>
+  <li><a href="#Equivalent">Equivalent Classes, Also Known as Necessary and Sufficient Conditions</a></li>
+  <li><a href="#DataTypes">XSD and User-Defined Data Types</a></li>
+  <li><a href="#QueryLanguage">SPARQL Graph Query Language and the SADL Query 
+  Language</a></li>
+  <li><a href="#Anatomy">Anatomy of a SADL Project</a><ul>
+    <li><a href="#OwlModels">The OwlModels Folder</a></li>
+    <li><a href="#ImplicitModels">Implicit Models</a></li>
+    <li><a href="#Temp">Temp Folder</a></li>
+    <li><a href="#GraphsFolder">Graphs</a></li>
   </ul>
   </li>
 </ul>
-<h2>The Web Ontology Language (OWL)</h2>
+<h2><a name="OWL">The Web Ontology Language (OWL)</a></h2>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/04/2017<!--webbot bot="Timestamp" endspan i-checksum="12565" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->07/03/2017<!--webbot bot="Timestamp" endspan i-checksum="12553" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 <p>The Web Ontology 
 Language (OWL) is a recommendation of the W3C. It supports all the foundational 
@@ -72,8 +75,8 @@ of the model being imported. All of the concepts in any imported model, directly
 or indirectly imported, are available for use in the importing model. This is 
 illustrated in the next section by the import statement on line 2 of the 
 example.</p>
-<h2>Defining Classes, 
-Properties, and Individuals in SADL</h2>
+<h2><a name="Defining">Defining Classes, 
+Properties, and Individuals in SADL</a></h2>
 The Semantic 
 Application Design Language (SADL) is a controlled-English grammar and 
 a supporting integrated development environment (IDE) for creating OWL models 
@@ -123,7 +126,7 @@ object and data type properties are </span><font color="#008000"><b>green bold</
 While there is no enforcement, OWL modeling convention is to use upper case 
 starting letters for class and individual names and to use lower case starting 
 letters for property names.</p>
-<h2>Further Definition of Classes Using Property Restrictions</h2>
+<h2><a name="Restrictions">Further Definition of Classes Using Property Restrictions</a></h2>
 <p>There are two ways 
 of defining a class. One way is to specify all the individuals that belong to 
 the class. In other words, the class is the specified set of members and there 
@@ -230,7 +233,7 @@ and one <i>SteamFlowDetector</i>.<blockquote>
   <p><img border="0" src="images/OwlAnd3.jpg" width="625" height="304"></p>
 </blockquote>
 <h2><br>
-Equivalent Classes, Also Known as Necessary and Sufficient Conditions</h2>
+<a name="Equivalent">Equivalent Classes, Also Known as Necessary and Sufficient Conditions</a></h2>
 <p>The property 
 restrictions introduced in the previous section allow a model builder to specify 
 necessary conditions for an individual to be a member of a class. It is possible 
@@ -256,7 +259,7 @@ value restriction)</span></p>
 if and only if [<i>X</i> has at least one value of <i>child</i> property], a 
 minimum cardinality restriction)</span></p>
 <p>**** Examples, discussion ****</p>
-<h2>XSD and User-Defined Data Types</h2>
+<h2><a name="DataTypes">XSD and User-Defined Data Types</a></h2>
 <p>The possible ranges of an OWL data type property are the set of XML Schema 
 Definition (XSD) data types and their derivatives. The SADL keywords 
 corresponding to the XSD data types are the following.</p>
@@ -412,8 +415,68 @@ adolescentAge</span><span style="font-size:10.0pt;font-family:&quot;Times New Ro
 <span style="font-family:&quot;Times New Roman&quot;,serif">Note that 
 user-defined data types are blue like classes but not bold. User-defined data 
 types are translated to RDFS Datatypes in the OWL model. </span></p>
-<h2>Anatomy of a SADL Project</h2>
-<h3>The OwlModels Folder </h3>
+<h2><a name="QueryLanguage">SPARQL and the SADL Query Language</a></h2>
+<p><a href="https://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> is a W3C 
+recommendation and a powerful <a href="FoundationalConcepts.html#Graph">graph 
+query language</a> for finding information in a graph-based ontology model. 
+While SPARQL is very powerful, it is also complex. SADL supports writing 
+relatively simple queries in the SADL Query Language, which has the same syntax 
+and coloring as the rest of SADL. The SADL Query Language translates to SPARQL 
+behind the scenes. SADL also supports expressing queries directly in SPARQL, 
+although then the query is not validated for syntax and correct reference to 
+model concepts until it is executed.</p>
+<p>A query in SADL is preceded by the <i>Ask</i> keyword, which is followed by 
+an optional <a href="NamedStructures.html">query name</a> and then a colon. This 
+is followed either by a SPARQL query as a quoted string or a SADL query. Below 
+is an example of each.</p>
+<blockquote>
+  <font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Ask</font><font SIZE="2">: </font>
+  <font SIZE="2" COLOR="#800080">select</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">distinct</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>m</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>agent</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>sc</b></font><font SIZE="2"> <br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">where</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>m</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Knowledge</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>m</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>usability</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>ku</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>ku</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>user</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>agent</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>ku</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>score</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>sc<br>
+&nbsp;&nbsp;&nbsp; </b></font><font SIZE="2" COLOR="#800080">order</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">desc</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>sc</b></font><font SIZE="2">.</p>
+  </font><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Ask</font><font SIZE="2">: &quot;select ?m ?agent ?<u>sc<br>
+  </u>where {?m <u>&lt;rdf:type&gt;</u> &lt;Knowledge&gt; .<br>
+  OPTIONAL {?m &lt;usability&gt; ?<u>ku</u> .<br>
+  ?<u>ku</u> &lt;user&gt; ?<u>agnt</u> .<br>
+  ?<u>ku</u> &lt;score&gt; ?<u>sc</u>}}<br>
+  order by desc(?<u>sc)</u>&quot;.</p>
+  </font>
+</blockquote>
+<p>The first query, in SADL syntax, shows variables in pink bold and makes it 
+easy to identify the properties and classes involved. The second query shows a 
+little bit of the greatly larger expressivity of SPARQL. In the latter all but 
+the first triple pattern is optional, meaning that a match to the first pattern 
+will be returned even if the additional patterns are not matched.</p>
+<h2><a name="Anatomy">Anatomy of a SADL Project</a></h2>
+<h3><a name="OwlModels">The OwlModels Folder</a> </h3>
 
 <p>Models created or 
 edited in SADL are saved in multiple formats. The actual SADL model is saved in 
@@ -451,7 +514,7 @@ the OWL file and any other constructs be in other formats and it is the job of
 the associated translator to generate the necessary input format for the 
 reasoner.
 
-<h3>Implicit Models</h3>
+<h3><a name="ImplicitModels">Implicit Models</a></h3>
 <p>SADL 3 has some built-in concepts that are deemed to be widely useful, which 
 will be elaborated in SADL Constructs Useful in Building Models. Rather than having to explicitly import the models for 
 these concepts, the models are imported into SADL models implicitly. Some of 
@@ -478,7 +541,9 @@ the content of these implicit models. </p>
   its associated properties (see <a href="SadlConstructs.html#UnittedQuantities">
   Unitted Quantities</a>); also defines the <i>impliedProperty</i> 
   annotation (see <a href="SadlConstructs.html#ImpliedProperties">Implied 
-  Properties</a>).
+  Properties</a>); also defines classes for named structures (see
+  <a href="NamedStructures.html">Named Structures as Instances of Implicit 
+  Classes</a>).
   <ul>
     <li>Note: derivative languages may add their own content to this model</li>
     <li>Note: users may edit this file and add their own implicit content which 
@@ -488,7 +553,7 @@ the content of these implicit models. </p>
   </ul>
   </li>
 </ul>
-<h3>The Temp Folder</h3>
+<h3><a name="Temp">The Temp Folder</a></h3>
 <p>The project’s <i>
 Temp</i> folder can be used for various purposes. One subfolder of potential 
 interest is the <i>ErrorDocs</i> folder which contains the file SadlErrors.html. 
@@ -498,7 +563,7 @@ other output.</p>
 <p>Another subfolder is
 <i>Logs</i>, in which metrics reports are placed. Metrics reports capture 
 information about the project as a whole.</p>
-<h3>The Graphs Folder: An OWL Ontology is a Graph</h3>
+<h3><a name="GraphsFolder">The Graphs Folder: An OWL Ontology is a Graph</a></h3>
 <p>All elements of an OWL model can be expressed as a statement with a subject, 
 a predicate, and an object or value. Such a statement is called a triple. Such a 
 statement also constitutes one segment of a directed graph: node-&gt;edge-&gt;node. 

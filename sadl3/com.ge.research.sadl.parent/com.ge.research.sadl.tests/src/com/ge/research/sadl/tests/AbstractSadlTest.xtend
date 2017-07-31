@@ -37,6 +37,8 @@ import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.util.StringInputStream
 import org.junit.Before
 import org.junit.runner.RunWith
+import com.ge.research.sadl.processing.OntModelProvider
+import com.ge.research.sadl.processing.SadlConstants
 
 /**
  * Base SADL test class.
@@ -61,9 +63,10 @@ abstract class AbstractSadlTest {
 	XtextResourceSet currentResourceSet;
 	
 	private val Supplier<Void> implicitModelSupplier = Suppliers.memoize[
-		val uri = URI.createURI('synthetic://test/SadlImplicitModel.sadl');
+		val uri = URI.createURI(SadlConstants.SADL_IMPLICIT_MODEL_SYNTHETIC_URI);
 		if (!currentResourceSet.resources.map[uri.lastSegment].exists[it == 'SadlImplicitModel.sadl']) {
-			loadResource(modelContentProvider.content, uri);
+			val resource = loadResource(modelContentProvider.content, uri);
+			OntModelProvider.find(resource)
 		}
 		return null;
 	]

@@ -139,11 +139,13 @@ class SADLValidator extends AbstractSADLValidator {
 	@Check
 	def checkRuleStatement(RuleStatement rule) {
 		// make sure rule name is unique
-		if (otherNames.contains(rule.name)) {
-			var errMsg = "The name '" + rule.name + "' in this namespace is already used."
-			error(errMsg, RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
+		val thisName = declarationExtensions.getConcreteName(rule.name);
+		
+		if (otherNames.contains(thisName)) {
+			var errMsg = "The name '" + thisName + "' in this namespace is already used."
+			error(errMsg, SADLPackage.Literals.RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
 		}
-		otherNames.add(rule.name)
+		otherNames.add(thisName)
 		// make sure all variables used in the head are bound in the body
 		val itr = EcoreUtil2.getAllContents(rule.thens).filter(Name).toList.iterator
 		while (itr.hasNext) {

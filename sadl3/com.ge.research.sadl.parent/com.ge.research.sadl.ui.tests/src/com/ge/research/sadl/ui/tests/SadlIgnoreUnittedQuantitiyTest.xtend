@@ -62,7 +62,7 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 			George has height 70 inches, has heightPercentile 50 "%" .
 		''').resource.assertValidatesTo [ jenaModel, issues |
 			assertNotNull(jenaModel)
-			assertTrue(issues.empty)
+			assertTrue(issues.empty);
 			val ageProperty = jenaModel.getDatatypeProperty("http://sadl.org/OntologyWithUnittedQuantity.sadl#age")
 			assertNotNull(ageProperty);
 		]

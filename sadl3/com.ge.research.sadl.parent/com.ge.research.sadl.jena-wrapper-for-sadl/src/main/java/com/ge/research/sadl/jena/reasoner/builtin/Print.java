@@ -33,7 +33,7 @@ import com.hp.hpl.jena.graph.*;
  * Note: this version of print is a copy of the HP Labs version with the
  * output modified to go to the message handler instead of to System.out.
  */
-public class Print extends BaseBuiltin {
+public class Print extends TypedBaseBuiltin {
 
     /**
      * Return a name for this builtin, normally this will be the name of the 
@@ -80,6 +80,11 @@ public class Print extends BaseBuiltin {
         }
     	System.out.println("print: " + msg);
     }
+
+	@Override
+	public String getFunctionSignatureString() {
+		return "print(--)string";
+	}
 }
 
 /*
