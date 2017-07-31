@@ -5318,7 +5318,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else {
 				if (val instanceof SadlInstance) {
 					Individual instval = processSadlInstance((SadlInstance) val);
-					addInstancePropertyValue(inst, oprop, instval, val);
+					OntClass uQCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+					if (uQCls != null && instval.hasRDFType(uQCls) && ignoreUnittedQuantities) {
+						if (val instanceof SadlNestedInstance) {
+							Iterator<SadlPropertyInitializer> propinititr = ((SadlNestedInstance)val).getPropertyInitializers().iterator();
+							while (propinititr.hasNext()) {
+								EObject pval = propinititr.next().getValue();
+								if (pval instanceof SadlNumberLiteral) {
+									com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
+									Literal lval = sadlExplicitValueToLiteral((SadlNumberLiteral)pval, effectiveRng);
+									if (lval != null) {
+										addInstancePropertyValue(inst, oprop, lval, val);
+									}
+								}
+							}
+						}
+					}
+					else {
+						addInstancePropertyValue(inst, oprop, instval, val);
+					}
 				}
 				else if (val instanceof SadlResource) {
 					String uri = getDeclarationExtensions().getConceptUri((SadlResource) val);

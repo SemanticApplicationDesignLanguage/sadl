@@ -54,10 +54,13 @@ import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlModelElement;
 import com.ge.research.sadl.sADL.SadlMustBeOneOf;
+import com.ge.research.sadl.sADL.SadlNestedInstance;
 import com.ge.research.sadl.sADL.SadlNumberLiteral;
 import com.ge.research.sadl.sADL.SadlParameterDeclaration;
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
+import com.ge.research.sadl.sADL.SadlProperty;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
+import com.ge.research.sadl.sADL.SadlPropertyInitializer;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlStringLiteral;
@@ -908,7 +911,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				value = ((NumberLiteral)expression).getValue();
 			}
 			else {
-				if (((SadlNumberLiteral)expression).getUnit() != null) {
+				if (((SadlNumberLiteral)expression).getUnit() != null && !getModelProcessor().ignoreUnittedQuantities) {
 					return getUnittedQuantityTypeCheckInfo(expression);
 				}
 				String strval = ((SadlNumberLiteral)expression).getLiteralNumber();
@@ -1093,6 +1096,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				SadlTypeReference typ = ((SadlInstance)expression).getType();
 				if (typ != null && typ instanceof SadlSimpleTypeReference) {
 					inst = ((SadlSimpleTypeReference)typ).getType();
+					if (declarationExtensions.getConceptUri(inst).equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().ignoreUnittedQuantities) {
+						if (expression instanceof SadlNestedInstance) {
+							Iterator<SadlPropertyInitializer> pinititr = ((SadlNestedInstance)expression).getPropertyInitializers().iterator();
+							while (pinititr.hasNext()) {
+								SadlPropertyInitializer spinit = pinititr.next();
+								if (declarationExtensions.getConceptUri(spinit.getProperty()).equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI)) {
+									return getType(spinit.getProperty());
+								}
+							}
+						}
+					}
 				}
 			}
 			if (inst != null) {
@@ -2011,9 +2025,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		if(conceptType.equals(OntConceptType.CLASS) || conceptType.equals(OntConceptType.DATATYPE)){
 			ConceptName conceptName = createTypedConceptName(conceptUri, conceptType);
-			List<ConceptName> impliedProps = getImpliedProperties(theJenaModel.getResource(conceptUri));
-			TypeCheckInfo tci = new TypeCheckInfo(conceptName, conceptName, this, impliedProps, expression);
-			return tci;
+			if (conceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().ignoreUnittedQuantities) {
+				if (expression instanceof SadlClassOrPropertyDeclaration) {
+					Iterator<SadlProperty> spitr = ((SadlClassOrPropertyDeclaration)expression).getDescribedBy().iterator();
+					while (spitr.hasNext()) {
+						SadlProperty sp = spitr.next();
+						if (declarationExtensions.getConceptUri(sp.getProperty()).equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI)) {
+							return getType(declarationExtensions.getDeclaration(sp.getProperty()));
+						}
+					}
+				}
+				else {
+					getModelProcessor().addIssueToAcceptor("Can't handle this expression type when ignoring UnittedQuantities",expression);
+				}
+			}
+			else {
+				List<ConceptName> impliedProps = getImpliedProperties(theJenaModel.getResource(conceptUri));
+				TypeCheckInfo tci = new TypeCheckInfo(conceptName, conceptName, this, impliedProps, expression);
+				return tci;
+			}
 		}
 		else if(conceptType.equals(OntConceptType.DATATYPE_PROPERTY)){
 			TypeCheckInfo propcheckinfo = getNameProperty(qnm, ConceptType.DATATYPEPROPERTY, conceptUri, expression);
