@@ -118,6 +118,7 @@ import com.ge.research.sadl.processing.ValidationAcceptorExt;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -364,6 +365,50 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		if (fsa !=null) {
 			String format = getOwlModelFormat(context);
+			try {
+				ITranslator translator = null;
+				List<SadlCommand> cmds = getSadlCommands();
+				if (cmds != null) {
+					Iterator<SadlCommand> cmditr = cmds.iterator();
+					List<String> namedQueryList = null;
+					while (cmditr.hasNext()) {
+						SadlCommand cmd = cmditr.next();
+						if (cmd instanceof Query && ((Query)cmd).getName() != null) {
+							if (translator == null) {
+								translator = getConfigMgr(resource, format).getTranslator();
+								namedQueryList = new ArrayList<String>();
+							}
+							Individual queryInst = getTheJenaModel().getIndividual(((Query)cmd).getFqName());
+							if (queryInst != null && !namedQueryList.contains(queryInst.getURI())) {
+								try {
+									String translatedQuery = null;
+									try {
+										translatedQuery = translator.translateQuery(getTheJenaModel(), (Query)cmd);
+									}
+									catch (UnsupportedOperationException e) {
+										IReasoner defaultReasoner = getConfigMgr(resource, format).getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
+										translator = getConfigMgr(resource, format).getTranslatorForReasoner(defaultReasoner);
+										translatedQuery = translator.translateQuery(getTheJenaModel(), (Query)cmd);
+									}
+									Literal queryLit = getTheJenaModel().createTypedLiteral(translatedQuery);
+									queryInst.addProperty(RDFS.isDefinedBy, queryLit);
+									namedQueryList.add(queryInst.getURI());
+								} catch (TranslationException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (InvalidNameException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 
 //			// Output the OWL file for the ontology model
 			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
