@@ -19,7 +19,8 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.core.runtime,
  org.apache.log4j,
  com.ge.research.jena,
- com.ge.research.sadl.errorgenerator
+ com.ge.research.sadl.errorgenerator,
+ org.jsoup
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl,
