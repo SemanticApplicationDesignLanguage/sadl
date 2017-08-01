@@ -254,7 +254,7 @@ class SADLValidator extends AbstractSADLValidator {
 		val eqivalence = SadlModelEquivalence.INSTANCE;
 		val cycle = new DependencyTraverserHelper().checkCycle(model, dependencies, eqivalence);
 		if (cycle.present) {
-			val message = SadlErrorMessages.CIRCULAR_IMPORT.get('''Dependnecy cycle was detected: «cycle.get.prettyPrint[baseUri]».''');
+			val message = SadlErrorMessages.CIRCULAR_IMPORT.get('''Dependency cycle was detected: «cycle.get.prettyPrint[baseUri]».''');
 			error(message, model, SADL_MODEL__IMPORTS, CYCLIC_DEPENDENCY);
 		}
 	}
