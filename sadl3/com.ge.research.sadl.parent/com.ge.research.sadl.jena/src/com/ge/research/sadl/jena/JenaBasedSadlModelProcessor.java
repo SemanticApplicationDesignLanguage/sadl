@@ -844,6 +844,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		EList<SadlAnnotation> anns = model.getAnnotations();
 		addAnnotationsToResource(modelOntology, anns);
 		
+		OntModelProvider.registerResource(resource);
+
 		try {
 			//Add SadlBaseModel to everything except the SadlImplicitModel
 			if(!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)){
@@ -852,7 +854,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// Add the SadlImplicitModel to everything except itself and the SadlBuilinFunctions
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME) &&
 					!resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-				OntModelProvider.registerResource(resource);
 				addImplicitSadlModelImportToJenaModel(resource, context);
 				addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
 
@@ -1240,7 +1241,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, SadlConstants.SADL_BASE_MODEL_PREFIX, sadlBaseModel);
 	}
 	
-	private void addAnnotationsToResource(OntResource modelOntology, EList<SadlAnnotation> anns) {
+	protected void addAnnotationsToResource(OntResource modelOntology, EList<SadlAnnotation> anns) {
 		Iterator<SadlAnnotation> iter = anns.iterator();
 		while (iter.hasNext()) {
 			SadlAnnotation ann = iter.next();
