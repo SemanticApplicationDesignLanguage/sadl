@@ -66,7 +66,7 @@ class DependencyTraverserHelperTest extends Assert {
 			1 -> #[1]
 		};
 		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
-		assertEquals(actual.get.prettyPrint, '[1] -> [1]');
+		assertEquals('[1] -> [1]', actual.get.prettyPrint);
 	}
 	
 	@Test
@@ -76,7 +76,7 @@ class DependencyTraverserHelperTest extends Assert {
 			2 -> #[1]
 		};
 		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
-		assertEquals(actual.get.prettyPrint, '[1] -> 2 -> [1]');
+		assertEquals('[1] -> 2 -> [1]', actual.get.prettyPrint);
 	}
 	
 	@Test
@@ -87,7 +87,7 @@ class DependencyTraverserHelperTest extends Assert {
 			3 -> #[1]
 		};
 		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
-		assertEquals(actual.get.prettyPrint, '[1] -> 2 -> 3 -> [1]');
+		assertEquals('[1] -> 2 -> 3 -> [1]', actual.get.prettyPrint);
 	}
 
 	@Test
@@ -99,7 +99,19 @@ class DependencyTraverserHelperTest extends Assert {
 			4 -> #[3]
 		};
 		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
-		assertEquals(actual.get.prettyPrint, '1 -> 2 -> [3] -> 4 -> [3]');
-	} 
+		assertEquals('1 -> 2 -> [3] -> 4 -> [3]', actual.get.prettyPrint);
+	}
+	
+	@Test
+	def void checkNoCycle_01() {
+		val graph = #{
+			1 -> #[2, 5],
+			2 -> #[3, 4],
+			3 -> #[4],
+			5 -> #[3]
+		};
+		val actual = new DependencyTraverserHelper().checkCycle(1, [graph.get(it)], DependencyTraverserHelper.equals);
+		assertFalse(actual.present);
+	}
 	
 }

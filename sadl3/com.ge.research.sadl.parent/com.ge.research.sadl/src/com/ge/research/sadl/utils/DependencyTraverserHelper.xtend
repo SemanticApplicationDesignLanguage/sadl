@@ -22,8 +22,7 @@ import com.google.common.base.Objects
 import com.google.common.base.Optional
 import com.google.common.base.Preconditions
 import com.google.common.collect.ImmutableList
-import java.util.Stack
-import com.google.common.collect.HashMultimap
+import java.util.List
 
 /**
  * Helper for traversing dependencies.
@@ -75,36 +74,52 @@ class DependencyTraverserHelper {
 		Preconditions.checkNotNull(dependencies, 'dependencies');
 		Preconditions.checkNotNull(equivalence, 'equivalence');
 
-		val stack = new Stack();
-		val visited = HashMultimap.create();
+		val visited = newArrayList();
 		val chain = newArrayList();
-
-		stack.push(root);
-		while (!stack.empty()) {
-			var node = stack.pop();
-			chain.add(node);
-			val wrappedNode = wrap(node);
-			for (upstreamNode : dependencies.apply(node).filterDuplicates(equivalence)) {
-				stack.push(upstreamNode);
-				if (!visited.put(wrappedNode, wrap(upstreamNode))) {
-					return Optional.of(createCycle(chain, equivalence));
-				}
+		chain.add(root);
+		val upstreamNodes = dependencies.apply(root).filterDuplicates(equivalence).toList;
+		for (upstreamNode : upstreamNodes) {
+			if (hasCycle(upstreamNode, dependencies, equivalence, visited, chain)) {
+				return Optional.of(createCycle(chain, equivalence));
 			}
 		}
 
 		return Optional.absent;
 	}
-	
-	/**
+
+	private def <T> boolean hasCycle(T node, (T)=>Iterable<T> dependencies, extension Equivalence<T> equivalence,
+		List<? super T> visited, List<? super T> chain) {
+
+		if (visited.contains(node)) {
+			// That is only for showing fancy error message in case of hooks
+			if (visited.size > 2 && visited.get(visited.size - 2).equals(node)) {
+				chain.add(node);
+			}
+			return true;
+		}
+
+		chain.add(node);
+		visited.add(node);
+		val upstreamNodes = dependencies.apply(node).filterDuplicates(equivalence).toList;
+		for (upstreamNode : upstreamNodes) {
+			if (hasCycle(upstreamNode, dependencies, equivalence, visited, chain)) {
+				return true;
+			}
+		}
+		visited.remove(visited.size - 1);
+		return false;
+	}
+
+	/** 
 	 * Creates and returns with the cycle with the chain of graph nodes (in the visiting order)
 	 * and the equivalence.
 	 */
 	protected def <T> createCycle(Iterable<? extends T> chain, Equivalence<T> equivalence) {
 		return new Cycle(chain, equivalence);
 	}
-	
+
 	private def <T> filterDuplicates(Iterable<? extends T> nullable, extension Equivalence<T> equivalence) {
-		return if (nullable === null) emptyList else nullable.map[wrap].toSet.map[get];
+		return if(nullable === null) emptyList else nullable.map[wrap].toSet.map[get];
 	}
 
 	/**
