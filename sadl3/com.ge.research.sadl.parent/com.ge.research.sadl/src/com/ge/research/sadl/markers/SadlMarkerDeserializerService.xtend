@@ -20,12 +20,10 @@ package com.ge.research.sadl.markers
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterators
 import com.google.inject.ImplementedBy
+import java.nio.charset.StandardCharsets
 import java.nio.file.Path
-import javax.xml.parsers.DocumentBuilderFactory
 import org.eclipse.xtend.lib.annotations.Data
-import org.w3c.dom.Element
-import org.w3c.dom.NamedNodeMap
-import org.w3c.dom.Node
+import org.jsoup.Jsoup
 
 import static extension com.ge.research.sadl.markers.SadlMarkerSeverity.getSeverityByName
 
@@ -35,7 +33,7 @@ import static extension com.ge.research.sadl.markers.SadlMarkerSeverity.getSever
  * 
  * @author akos.kitta
  */
-@ImplementedBy(SadlMarkerDeserializerService.DOM)
+@ImplementedBy(SadlMarkerDeserializerService.JsoupDeserializer)
 interface SadlMarkerDeserializerService {
 
 	/**
@@ -60,7 +58,6 @@ interface SadlMarkerDeserializerService {
 		 */
 		val Iterable<SadlMarker> markers;
 
-		@Override
 		override iterator() {
 			return Iterators.unmodifiableIterator(markers.iterator);
 		}
@@ -68,9 +65,9 @@ interface SadlMarkerDeserializerService {
 	}
 
 	/**
-	 * Default DOM based parser implementation.
+	 * Default parser with a <a href="https://jsoup.org">Jsoup-based</a> implementation.
 	 */
-	static class DOM implements SadlMarkerDeserializerService {
+	static class JsoupDeserializer implements SadlMarkerDeserializerService {
 
 		/**
 		 * The tag name of the markers.
@@ -97,7 +94,6 @@ interface SadlMarkerDeserializerService {
 		 */
 		static val OBJECT_ID_SEPARATOR = "#";
 
-		@Override
 		override deserialize(Path path) {
 			val origin = '''«path.parent.fileName»/«path.fileName»''';
 			val file = path.toFile;
@@ -105,42 +101,23 @@ interface SadlMarkerDeserializerService {
 				return new SadlMarkerInfos(origin, emptyList);
 			}
 
-			val factory = DocumentBuilderFactory.newInstance();
-			val builder = factory.newDocumentBuilder();
-			val doc = builder.parse(file);
-			doc.documentElement.normalize;
-
 			val markers = ImmutableList.builder;
-			val elements = doc.getElementsByTagName(MARKER_NAME);
-			for (var i = 0; i < elements.length; i++) {
-				val element = elements.item(i);
-				if (element.nodeType === Node.ELEMENT_NODE) {
-					val attributes = element.attributes;
-					val message = attributes.getTextContentOfNamedItem(MESSAGE_TEXT_NAME);
-					val severity = attributes.getTextContentOfNamedItem(MARKER_TYPE_NAME).severityByName;
-					val objectIds = (element as Element).getElementsByTagName(OBJECT_ID_NAME);
-					for (var j = 0; j < objectIds.length; j++) {
-						val objectId = objectIds.item(j);
-						if (objectId.nodeType === Node.ELEMENT_NODE) {
-							val fqn = objectId.textContent;
-							if (fqn !== null && !fqn.empty) {
-								val segments = fqn.split(OBJECT_ID_SEPARATOR);
-								switch (segments.length) {
-									case 1: markers.add(new SadlMarker(null, message, segments.head, severity))
-									case 2: markers.add(new SadlMarker(segments.head, message, segments.last, severity))
-									default: throw new IllegalArgumentException('''Unexpected FQN: «fqn»''')
-								}
-							}
+			Jsoup.parse(file, StandardCharsets.UTF_8.name).getElementsByTag(MARKER_NAME).forEach [
+				val message = attributes.get(MESSAGE_TEXT_NAME);
+				val severity = attributes.get(MARKER_TYPE_NAME).severityByName;
+				getElementsByTag(OBJECT_ID_NAME).forEach [
+					val fqn = text;
+					if (!fqn.nullOrEmpty) {
+						val segments = fqn.split(OBJECT_ID_SEPARATOR);
+						switch (segments.length) {
+							case 1: markers.add(new SadlMarker(null, message, segments.head, severity))
+							case 2: markers.add(new SadlMarker(segments.head, message, segments.last, severity))
+							default: throw new IllegalArgumentException('''Unexpected FQN: «fqn»''')
 						}
 					}
-				}
-			}
+				];
+			];
 			return new SadlMarkerInfos(origin, markers.build);
-		}
-
-		private def getTextContentOfNamedItem(NamedNodeMap attributes, String name) {
-			val node = attributes.getNamedItem(name);
-			return if(node === null) "" else node.textContent;
 		}
 
 	}
