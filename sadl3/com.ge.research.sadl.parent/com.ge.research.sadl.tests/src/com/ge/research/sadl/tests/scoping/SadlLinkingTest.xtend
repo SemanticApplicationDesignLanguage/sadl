@@ -26,6 +26,7 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -200,9 +201,9 @@ class SadlLinkingTest extends AbstractLinkingTest {
 				can only be one of {[ToKillaMockingbird], <GoSetaWatchman>}.	
 			[GoSetaWatchman] is a <Book>.	
 			
-			[Event] is a class described by [when] with values of type <Season>.
-			[NewYear] is an Event with when <Winter>.
-			[BastilleDay] is an Event with when <Summer>.
+			[Holiday] is a class described by [when] with values of type <Season>.
+			[NewYear] is a Holiday with when <Winter>.
+			[BastilleDay] is a Holiday with when <Summer>.
 		'''.assertLinking[sadl]
 	}
 
@@ -1096,7 +1097,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	@Test
 	def void testLinkingImplicitPackage_01() {
 		'''
-			uri "http://sadl.org/sadlimplicitmodel".
+			uri "http://sadl.org/baseModel".
 			
 			[Car] is a class described by [position] with values of type <Location>.
 			[Location] is a class
@@ -1105,6 +1106,8 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 		'''
 			uri "http://sadl.org/NS3.sadl" alias ns3.
+
+			import "http://sadl.org/baseModel".
 			
 			[MyCar] is an <Car> with <position> (a <Location> with <longitude> -72.025, with <latitude> 43.654).
 			
@@ -1149,5 +1152,61 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			EcoreUtil.resolveAll(resource)
 			println("Iteration " + i + " Took : " + started.elapsed(TimeUnit.MILLISECONDS))
 		}
+	}
+	
+	@Test
+	def void testQueryVariable_1() {
+		'''
+			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			
+			impliedProperty is a type of annotation.
+			expandedProperty is a type of annotation.
+			UnittedQuantity is a class,
+				described by ^value with values of type decimal,
+				described by unit with values of type string.
+			UnittedQuantity has expandedProperty ^value, has expandedProperty unit.
+		'''.assertLinking[sadl]
+		
+		'''
+			 uri "http://sadl.org/TestExpandedInQuery.sadl" alias TestExpandedInQuery.
+			 
+			 [PhysicalObject] is a class described by [weight] with values of type <UnittedQuantity>.
+			 
+			 [MonaLisa] is a <PhysicalObject> with <weight> 25 lbs.
+			 [AngelOak] is a <PhysicalObject> with <weight> 10000 lbs.
+			 
+			 Ask: <weight>.
+			 Ask: <weight> of [x].
+			 Ask: [x] has <weight>.
+			 Ask Q1: [x] has <weight>.
+			 Ask: <weight> of <AngelOak>.
+			 Ask: <AngelOak> has <weight>.
+			 Ask: select <po> where [po] has <weight>.
+			 Ask: select <po>, <w> where [po] has weight [w].
+			 Ask: select <po>, <v>, <u> where [po] has <weight> [w] and <w> has ^value [v] and <w> has unit [u].
+			 Ask: select <po>, <v>, <u> where [po] has weight [w] and <w> has ^value [v] and <w> has unit [u] and <v> > 1000.
+			 Ask: select <p> where [p] is a <PhysicalObject>.
+			 Ask Named: select <p> where [p] is a <PhysicalObject>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Ignore("#215: If possible, the declaration of DATA2 should be as indicated. If not possible, we need to detect error (Andy can do) and provide quick fix to insert previous line into model")
+	@Test
+	def void testOnlyIf() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 IRS is a class
+			 	described by ground_speed with values of type DATA.
+			 ground_speed of IRS only has values of type DATA. 	
+			 DATA is a class described by _value with values of type decimal.
+			 
+			 is_ground_speed_of describes DATA with values of type IRS.
+			 is_ground_speed_of is the inverse of ground_speed.
+			 
+«««			 DATA2 is a type of DATA.
+			 A <DATA> is a [DATA2] only if is_ground_speed_of only has values of type IRS.
+			 <DATA2> has expandedProperty _value. 
+		'''.assertLinking[sadl]
 	}
 }

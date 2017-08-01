@@ -1,48 +1,47 @@
 /************************************************************************
- * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
- *
+ * Copyright 2007-2016- General Electric Company, All Rights Reserved
+ * 
  * Project: SADL
- *
+ * 
  * Description: The Semantic Application Design Language (SADL) is a
  * language for building semantic models and expressing rules that
  * capture additional domain knowledge. The SADL-IDE (integrated
  * development environment) is a set of Eclipse plug-ins that
  * support the editing and testing of semantic models using the
  * SADL language.
- *
+ * 
  * This software is distributed "AS-IS" without ANY WARRANTIES
  * and licensed under the Eclipse Public License - v 1.0
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
- *
+ * 
  ***********************************************************************/
-package com.ge.research.sadl.tests.lsp
+package com.ge.research.sadl.utils
 
-import org.eclipse.emf.common.EMFPlugin
-import org.eclipse.xtext.testing.AbstractLanguageServerTest
-import org.junit.Assume
+import com.ge.research.sadl.sADL.SadlModel
+import com.google.common.base.Equivalence
+import com.google.common.base.Objects
 
 /**
- * Base class for all language server tests for the {@code SADL} language.
+ * Equivalence for SADL models. Marks two models equal if they have equal
+ * base URIs.
  * 
  * @author akos.kitta
  */
-class AbstractSadlLanguageServerTest extends AbstractLanguageServerTest {
+class SadlModelEquivalence extends Equivalence<SadlModel> {
 	
 	/**
-	 * The desired file extension for the {@code SADL} language. 
+	 * The shared (eager) singleton equivalence for SADL models.
 	 */
-	protected static val FILE_EXTENSION = 'sadl';
+	public static val Equivalence<SadlModel> INSTANCE = new SadlModelEquivalence();
 	
-	override setup() {
-		Assume.assumeTrue(!EMFPlugin.IS_ECLIPSE_RUNNING);
-		super.setup()
+	private new() { }
+	
+	override protected doEquivalent(SadlModel a, SadlModel b) {
+		return Objects.equal(a?.baseUri, b?.baseUri);
 	}
 	
-	/**
-	 * Sole constructor. Defines the proper file extension.
-	 */
-	new() {
-		super(FILE_EXTENSION)
+	override protected doHash(SadlModel model) {
+		return Objects.hashCode(model?.baseUri);
 	}
 	
 }

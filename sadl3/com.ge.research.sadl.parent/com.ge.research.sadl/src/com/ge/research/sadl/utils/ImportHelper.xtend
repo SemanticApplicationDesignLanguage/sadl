@@ -33,6 +33,11 @@ import static com.google.common.collect.ImmutableSet.builder
 class ImportHelper {
 
 	/**
+	 * Function that returns all upstream SADL models through the imports for an arbitrary SADL model.
+	 */
+	public static val (SadlModel)=> Iterable<SadlModel> DEPENDENCIES = [imports.map[importedResource].filterNull]; 
+
+	/**
 	 * Returns with an iterable containing the URI of the SADL model argument 
 	 * and all explicitly declared imported resource URIs including the 
 	 * transitive ones. Also contains the implicit SADL model URI.

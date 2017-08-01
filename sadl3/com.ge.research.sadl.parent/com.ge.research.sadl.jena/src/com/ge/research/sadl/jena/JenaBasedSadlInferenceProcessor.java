@@ -131,23 +131,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		preferenceMap = prefMap;
 		OntModel om = OntModelProvider.find(resource);
 		if (om == null) {
-			// This should never happen as the SadlActionHandler makes a call to validate the Resource. However, not deleting this code yet... AWC 9/21/2016
-			SadlModelProcessor modelProcessor = new JenaBasedSadlModelProcessor();
-			final List<Issue> issues = CollectionLiterals.<Issue>newArrayList();
-			final IAcceptor<Issue> _function = new IAcceptor<Issue>() {
-				@Override
-				public void accept(final Issue it) {
-					issues.add(it);
-				}
-			};
-			ValidationAcceptor _validationAcceptor = new ValidationAcceptorImpl(_function);
-			IPreferenceValues _preferenceValues = this.preferenceProvider.getPreferenceValues(resource);
-			IModelProcessor.ProcessorContext _processorContext = new IModelProcessor.ProcessorContext(CancelIndicator.NullImpl, _preferenceValues);
-			modelProcessor.onValidate(resource,_validationAcceptor,  CheckMode.FAST_ONLY, _processorContext);
-			om = OntModelProvider.find(resource);
-			if (om == null) {
-				throw new SadlInferenceException("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'");
-			}
+			throw new SadlInferenceException("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'");
 		}
 		List<SadlCommand> cmds = OntModelProvider.getSadlCommands(resource);
 		if (cmds == null || cmds.size() < 1) {
@@ -1189,8 +1173,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	private SadlCommandResult processAdhocQuery(Query cmd) throws ConfigurationException, JenaProcessorException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString;
 		String query = cmd.getSparqlQueryString();
+		ITranslator translator = null;
 		if (query == null) {
-			query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+			try {
+				query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+			}
+			catch (UnsupportedOperationException e) {
+				IReasoner defaultReasoner = getConfigMgr(null).getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
+				translator = getConfigMgr(null).getTranslatorForReasoner(defaultReasoner);
+				query = translator.translateQuery(getTheJenaModel(), cmd);
+			}
 		}
 		query = SadlUtils.stripQuotes(query);
 		if (getTheJenaModel() == null) {
@@ -1208,7 +1200,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				// load from OWL file
 			}
 		}
-		ITranslator translator = getConfigMgr(getOwlFormat()).getTranslator();
+		if (translator == null) {
+			translator = getConfigMgr(getOwlFormat()).getTranslator();
+		}
 		Query q = processQuery(query);
 		SadlCommandResult result = new SadlCommandResult(cmd);
 		result.setResults(processAdhocQuery(translator, q));

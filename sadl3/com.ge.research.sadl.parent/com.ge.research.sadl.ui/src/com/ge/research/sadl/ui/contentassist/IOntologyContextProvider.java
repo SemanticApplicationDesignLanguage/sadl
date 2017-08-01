@@ -23,6 +23,7 @@ import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.google.common.base.Optional;
+import com.google.inject.ImplementedBy;
 
 /**
  * Representation of a service for converting an Eclipse-based content assist
@@ -31,6 +32,7 @@ import com.google.common.base.Optional;
  * @author akos.kitta
  *
  */
+@ImplementedBy(SadlOntologyContextProvider.class)
 public interface IOntologyContextProvider {
 
 	/**

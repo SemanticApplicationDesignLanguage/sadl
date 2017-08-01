@@ -37,7 +37,6 @@ import org.eclipse.lsp4j.Range
 import org.eclipse.xtext.ide.server.Document
 import org.eclipse.xtext.resource.XtextResource
 
-import static com.ge.research.sadl.ide.SadlProjectStructureInitializer.*
 import static com.ge.research.sadl.ide.lsp.inference.InferenceStatus.*
 import static com.ge.research.sadl.jena.UtilsForJena.*
 
@@ -49,7 +48,11 @@ import static com.ge.research.sadl.jena.UtilsForJena.*
 @Singleton
 class SadlInferencer {
 
-	val static URI_PREFIX = 'file:///';
+	/**
+	 * The file name of the {@code .project} file that is available in the project root.
+	 */
+	static val DOT_PROJECT_FILENAME = '.project';
+	static val URI_PREFIX = 'file:///';
 
 	@Inject
 	SadlInferenceProcessorProvider processorProvider;

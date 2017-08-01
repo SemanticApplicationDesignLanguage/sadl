@@ -14,12 +14,13 @@
 
 <h1>SADL Constructs Useful in Building Models</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/08/2017<!--webbot bot="Timestamp" endspan i-checksum="12631" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/29/2017<!--webbot bot="Timestamp" endspan i-checksum="12663" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h4>Table of Contents</h4>
 
 <ul>
+  <li><a href="#Rules">Rules and Built-in Functions</a></li>
   <li><a href="#Equations">Equations</a></li>
   <li><a href="#TypedLists">Typed Lists</a></li>
   <li><a href="#ImpliedProperties">Implied Properties</a></li>
@@ -27,6 +28,69 @@ Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:cr
   <li><a href="#UnittedQuantities">Unitted Quantities</a></li>
   <li><a href="#ExternalModels">External Models</a></li>
 </ul>
+<h2><a name="Rules">Rules and Built-in Functions</a></h2>
+<p>Rules are a convenient way to capture domain knowledge in the familiar format 
+of &quot;if this then that&quot;. Sometimes the same knowledge could be captured in OWL 
+property restrictions and/or necessary and sufficient conditions (see
+<a href="http://sadl.sourceforge.net/sadl3/OwlAndSadl.html#Restrictions">
+Property Restrictions</a>,
+<a href="http://sadl.sourceforge.net/sadl3/OwlAndSadl.html#Equivalent">
+Equivalent Classes</a>). Sometimes it is not possible to capture the knowledge 
+in OWL. Sometimes the knowledge can be captured in OWL or rules, but rules are 
+easier to write and understand. It should be noted that if rules are used in a 
+SADL knowledge base, a reasoner should be selected&nbsp; (with a compatible 
+translator) that supports both OWL and rules. </p>
+<p>An if then rule has two parts: 1) the conditions in the if part, also known 
+as the rule body or premise, and 2) the conclusions in the then part, also known 
+as the rule head. In SADL there is an optional &quot;given&quot; part that can be used to 
+set certain conditions apart from other conditions. Both &quot;given&quot; and &quot;if&quot; 
+conditions are translated into the rule body in the target rule representation.
+</p>
+<p>Here are some example SADL rules.</p>
+<p align="left" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+<font size="2" color="#800080">&nbsp;&nbsp;&nbsp; Rule<span class="Apple-converted-space">&nbsp;</span></font><font size="2">AreaOfRectangle<span class="Apple-converted-space">&nbsp;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">given&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font size="2" color="#ff00ff"><b>x</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">is</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">any</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#000080"><b>Rectangle</b></font><font size="2" color="#800080"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; then&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#008000"><b>area</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">=<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>height</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">*<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>width</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">.</font></p>
+<font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+<p>&nbsp;&nbsp;&nbsp; Rule<font size="2"><span class="Apple-converted-space">&nbsp;</span></font></font><font size="2">ChildRule</font><font size="2" color="#800080" style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;"><font size="2"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font>given<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font>is<font size="2"><span class="Apple-converted-space">&nbsp;</span></font>a<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Person</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font>if<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font>has<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>age</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span>&lt;= 
+12<span class="Apple-converted-space">&nbsp;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span></font>then<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font>is<font size="2"><span class="Apple-converted-space">&nbsp;</span></font>a<font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Child</b></font><font size="2">.</font></p>
+</font>
+<p style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+<font size="2" color="#800080">&nbsp;&nbsp;&nbsp; Rule</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2">ChildRule2:<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">if</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">is</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">a</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Person</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">with</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>age</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span>&lt;= 
+12<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">then</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#ff00ff"><b>x</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">is</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#800080">a</font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#000080"><b>Child</b></font><font size="2">.</font></p>
+<p align="left" style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+These examples illustrate that SADL rules are constructed from
+<a href="http://sadl.sourceforge.net/sadl3/FoundationalConcepts.html#Graphs">
+graph patterns</a> but also illustrate that graph patterns can be combined using 
+the SADL grammar for expressions. When variables are used in multiple graph 
+patterns, as they are in these examples, the first occurrence in the rule 
+conditions &quot;binds&quot; the variable and those bindings are then used in subsequent 
+conditions or in the conclusions. In the first rule above, for example,
+<font size="2" color="#ff00ff"><b>x</b></font> is bound to instances of the 
+class <font size="2" color="#000080"><b>Rectangle</b></font>. Each possible 
+binding will result in the rule being evaluated by the reasoner. The rule will 
+translate into something like the following for most reasoners, where a &quot;?&quot; is 
+placed in front of variable names to identify them as variables.</p>
+<blockquote>
+<p align="left" style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+if<br>
+&nbsp; ?x rdf:type Rectangle<br>
+&nbsp; ?x height ?v1<br>
+&nbsp; ?x width ?v2<br>
+&nbsp; product(?v1,?v2,?v3)<br>
+then<br>
+&nbsp; ?x area ?v3</p>
+</blockquote>
+<p align="left" style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+All of the conditions and the conclusion are graph patterns <i><b>except</b></i> 
+&quot;product(?v1,?v2,?v3)&quot;. This condition is a function. Functions in a rule's 
+conditions return true (meaning the condition is satisfied) or false (meaning 
+the condition is not satisfied so the rule should not &quot;fire&quot; (cause the 
+conclusions to be processed). In a case like this, the functional also binds the 
+result of a procedural computation to a new variable, ?v3 in this case.</p>
 <h2><a name="Equations">Equations</a></h2>
 <p class="MsoNormal">
 <span style="font-family:&quot;Times New Roman&quot;,serif">Equations are 
@@ -461,6 +525,7 @@ e.g., in <a href="#Equations">Equations</a> or in
 <a href="SadlConstructs2.html#Rules">Rules</a>. As an example, consider the 
 following ontology snippet.</span></p>
 <h2><a name="ImpliedProperties">Implied Properties</a></h2>
+<p>See also <a href="ImpliedProperties.html">Implied Properties</a>.</p>
 <p class="MsoNormal">
 <span style="font-family:&quot;Times New Roman&quot;,serif">It is often the case 
 in natural language that we leave out information that can easily be inferred by 
@@ -514,23 +579,23 @@ property 'age' used (left side of 'is') to pass type check</span><span style="fo
 <p class="MsoNormal" style="text-indent: .05pt; line-height: normal; text-autospace: none; margin-bottom: .0001pt">
 <span style="font-family:
 &quot;Times New Roman&quot;,serif">Whenever implied properties are applied in 
-SADL an information marker is created to make the behavior more transparent to 
+SADL to resolve type checking, an information marker is created to make the behavior more transparent to 
 the user.</span></p>
 <p class="MsoNormal" style="line-height: normal; text-autospace: none; margin-bottom: .0001pt">
 <span style="font-family:
-&quot;Times New Roman&quot;,serif">There are some limitations to the current 
-implementation of implied properties. There must be no ambiguity. For example, 
+&quot;Times New Roman&quot;,serif">There are some limitations to the the use of implied properties 
+in type checking. There must be no ambiguity. For example, 
 if both age and weight were defined to be implied properties of Person, both 
 with a numeric range, it would not be possible to know which implied property to 
 apply in the example above so the expression would be ambiguous. This would 
 therefore create an error. </span></p>
 <h2><a name="ExpandedProperties">Expanded Properties</a></h2>
-<p>Expanded properties provide a means of writing abbreviated statements that do 
-comparison or assignment. Instead of comparing or assigning the individual(s) 
+<p>Expanded properties are another application of implied properties, this time 
+to the case of expanding both sides of a comparison or assignment statement. Instead of comparing or assigning the individual(s) 
 matching the left and right hand sides of the statement, the statement is 
-expanded to a set of statements adding the expanded properties of the class 
+expanded to a set of statements adding the &quot;expandedProperty&quot; implied properties of the class 
 being compared to the left and right side property chains. See
-<a href="ExpandedProperties.html">Expanded Properties</a>.</p>
+<a href="ImpliedProperties.html#ExpandedProperty">Expanded Properties</a>.</p>
 <h2><a name="UnittedQuantities">Unitted Quantities</a></h2>
 <p class="MsoNormal">
 <span style="font-family:&quot;Times New Roman&quot;,serif">Suppose that we have 

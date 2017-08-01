@@ -51,7 +51,7 @@ public class NamedNode extends Node {
 	}
 	
 	public NamedNode(String name, NodeType type) {
-		setName(name);
+		this(name);
 		setNodeType(type);
 	}
 

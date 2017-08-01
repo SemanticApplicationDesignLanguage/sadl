@@ -36,14 +36,12 @@ class SADLNoopModelProcessorsInjectorProvider extends SADLInjectorProvider {
 	 */
 	public static val NOOP_PROCESSOR_PROVIDER = new IModelProcessorProvider() {
 
-		@Override
 		override getProcessor(Resource resource) {
 			return new CompositeModelProcessor(emptyList());
 		}
 
 	};
 
-	@Override
 	override protected createRuntimeModule() {
 		return new NoopModelProcessorsRuntimeModule();
 	}

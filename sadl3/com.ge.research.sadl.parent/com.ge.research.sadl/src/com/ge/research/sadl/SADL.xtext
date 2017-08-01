@@ -60,11 +60,12 @@ ExternalEquationStatement:
 ;
 
 fragment EquationSignature returns AbstractSadlEquation:
-	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' returnType=SadlPrimaryTypeReference ':'
+	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' (returnType=SadlPrimaryTypeReference | unknown='--') ':'
 ;
 
 SadlParameterDeclaration:
-	type=SadlPrimaryTypeReference name=SadlResource
+		type=SadlPrimaryTypeReference name=SadlResource
+	|  unknown='--'
 ;
 
 // These are the things that translate directly to OWL.
@@ -214,7 +215,7 @@ AnArticle :
 	IndefiniteArticle | DefiniteArticle;
 
 IndefiniteArticle :
-	'A'|'a'|'An'|'an';
+	'A'|'a'|'An'|'an'|'any';
 
 DefiniteArticle :
 	'The'|'the';
@@ -225,15 +226,21 @@ ExpressionStatement returns ExpressionScope :
 	{ExpressionStatement}
 	'Expr:' expr=Expression ('=>' evaluatesTo=STRING)?;
 
+NamedStructureAnnotation :
+	','? '(' type=SadlResource contents+=SadlExplicitValue (',' contents+=SadlExplicitValue)* ')'
+;
+
 RuleStatement returns ExpressionScope :
 	{RuleStatement}
-	'Rule' name=QNAME ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
+	'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
-	start = ('Ask'|'Graph') (name=QNAME)? ':' expr=(ConstructExpression | AskExpression | Expression) 
+	start = ('Ask'|'Graph') ((name=SadlResource (annotations+=NamedStructureAnnotation)* )? ':' expr=(ConstructExpression | AskExpression | Expression) 
+		| name=SadlResource
+	)
 ;
 
 ConstructExpression returns Expression :
@@ -260,7 +267,7 @@ PrintStatement :
 ExplainStatement :
 	'Explain:'
 			(expr=Expression
-		| 	'Rule' rulename=QNAME)
+		| 	'Rule' rulename=SadlResource)
 			;
 			
 StartWriteStatement :

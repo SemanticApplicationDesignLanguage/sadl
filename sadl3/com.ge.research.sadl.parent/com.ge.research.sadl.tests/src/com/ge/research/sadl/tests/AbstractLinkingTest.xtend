@@ -17,65 +17,33 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
-import com.ge.research.sadl.external.ExternalEmfResource
 import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
-import com.google.inject.Inject
 import java.util.List
 import java.util.regex.Pattern
-import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtend.lib.annotations.ToString
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.util.TextRegion
 import org.junit.Assert
 import org.junit.runner.RunWith
+import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-abstract class AbstractLinkingTest {
-	
-	@Accessors(PROTECTED_GETTER)
-	@Inject XtextResourceSet currentResourceSet
-	
-	protected def XtextResource sadl(CharSequence contents) {
-		loadResource(computeURI('sadl'), contents) as XtextResource
-	}
-	
-	protected def ExternalEmfResource owl(CharSequence contents) {
-		loadResource(computeURI('owl'), contents) as ExternalEmfResource
-	}
-	
-	protected def ExternalEmfResource nt(CharSequence contents) {
-		loadResource(computeURI('nt'), contents) as ExternalEmfResource
-	}
-	
-	protected def ExternalEmfResource n3(CharSequence contents) {
-		loadResource(computeURI('n3'), contents) as ExternalEmfResource
-	}
-	
-	protected def Resource loadResource(URI uri, CharSequence contents) {
-		val resource = currentResourceSet.createResource(uri)
-		resource.load(new StringInputStream(contents.toString), null)
-		return resource
-	}
-	
-	protected def URI computeURI(String ext) {
-		return URI.createURI("synthetic:/Model"+currentResourceSet.resources.size+"."+ext)
-	}
+abstract class AbstractLinkingTest extends AbstractSadlTest {
 	
 	protected def void assertLinking(CharSequence contents, (CharSequence)=>XtextResource parser) {
-		val markerFile = parseReferenceMarker(contents)
+		val escapedContents = XtendTemplateHelper.unifyEOL(contents);
+		val markerFile = parseReferenceMarker(escapedContents)
 		val model = parser.apply(markerFile.parseableContents)
 		Assert.assertTrue(model.errors.map[message].join('\n'), model.errors.isEmpty)
 		for (decl : markerFile.allNames) {
@@ -89,6 +57,8 @@ abstract class AbstractLinkingTest {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
 			} else if (obj instanceof SadlPropertyCondition) {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
+			} else if (obj instanceof QueryStatement) {
+//				updateActual(markerFile, decl.value, decl.region, obj, obj.expr)
 			} else {
 				Assert.fail("unexpected node "+obj)
 			}

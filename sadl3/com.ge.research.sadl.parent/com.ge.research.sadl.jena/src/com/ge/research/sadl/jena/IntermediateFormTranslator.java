@@ -19,6 +19,7 @@
  package com.ge.research.sadl.jena;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -914,20 +915,57 @@ public class IntermediateFormTranslator {
 	}
 
 	private List<GraphPatternElement> flattenRuleJunctions(List<GraphPatternElement> lst) {
-		List<GraphPatternElement> results = lst;
-		if (lst != null) {
-			for (int i = 0; i < lst.size(); i++) {
-				GraphPatternElement element = lst.get(i);
-				if (element instanceof BuiltinElement && 
-						((BuiltinElement)element).getFuncName() != null && ((BuiltinElement)element).getFuncName().equals("and")) {
-					if (results == null) {
-						results = new ArrayList<GraphPatternElement>();
-					}
-					for (int j = 0; j <= 1; j++) {
-						Node nj = ((BuiltinElement)element).getArguments().get(j);
+		if (lst == null) return null;
+		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>();
+		for (int i = 0; i < lst.size(); i++) {
+			GraphPatternElement gpe = lst.get(i);
+			if (gpe instanceof Junction) {
+				if (((Junction)gpe).getJunctionType().equals(JunctionType.Conj)) {
+					try {
+						results.addAll(flattenRuleJunction((Junction) gpe));
+					} catch (TranslationException e) {
+						addError(new IFTranslationError(e.getMessage(), e));
 					}
 				}
+				else {
+					addError(new IFTranslationError("Disjunction not supported in rules at this time"));
+				}
 			}
+//			else if (gpe instanceof BuiltinElement && 
+//					((BuiltinElement)gpe).getFuncName() != null && ((BuiltinElement)gpe).getFuncName().equals("and")) {
+//				List<Node> args = ((BuiltinElement)gpe).getArguments();
+//				for (int j = 0; j <= args.size(); j++) {
+//					Node nj = args.get(j);
+//				}
+//			}
+			else {
+				results.add(gpe);
+			}
+		}
+		return results;
+	}
+
+	private List<GraphPatternElement> flattenRuleJunction(Junction jct) throws TranslationException {
+		if (!jct.getJunctionType().equals(JunctionType.Conj)) {
+			addError(new IFTranslationError("Disjunction not supported in rules at this time"));
+		}
+		List<GraphPatternElement>results = new ArrayList<GraphPatternElement>();
+		Object lhs = jct.getLhs();
+		if (lhs instanceof Junction) {
+			results.addAll(flattenRuleJunction((Junction)lhs));
+		}
+		else if (lhs instanceof GraphPatternElement){
+			results.add((GraphPatternElement) lhs);
+		}
+		else {
+			throw new TranslationException("Encountered non-GraphPatternElement during rule translation");
+		}
+		Object rhs = jct.getRhs();
+		if (rhs instanceof Junction) {
+			results.addAll(flattenRuleJunction((Junction)rhs));
+		}
+		else if (rhs instanceof GraphPatternElement) {
+			results.add((GraphPatternElement)rhs);
 		}
 		return results;
 	}

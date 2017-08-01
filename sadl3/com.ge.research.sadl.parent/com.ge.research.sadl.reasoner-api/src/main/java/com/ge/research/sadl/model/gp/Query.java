@@ -123,9 +123,14 @@ public class Query extends SadlCommand {
 			if (isDistinct()) {
 				sb.append(" distinct");
 			}
-			for (int i = 0; i < variables.size(); i++) {
-				sb.append(" ");
-				sb.append(variables.get(i));
+			if (variables.size() > 0) {
+				for (int i = 0; i < variables.size(); i++) {
+					sb.append(" ");
+					sb.append(variables.get(i));
+				}
+			}
+			else {
+				sb.append(" *");
 			}
 			sb.append(" where ");
 		}

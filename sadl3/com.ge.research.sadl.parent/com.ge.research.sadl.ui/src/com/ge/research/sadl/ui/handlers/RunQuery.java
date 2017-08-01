@@ -37,6 +37,7 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class RunQuery extends SadlActionHandler {
 
@@ -88,7 +89,7 @@ public class RunQuery extends SadlActionHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
 			String[] validTargetTypes = getValidTargetFileTypes();
-			boolean tryAddingOwlExtension = false;
+			boolean tryAddingOwlExtension = true;
 			Object[] target = null;
 			try {
 				target = getCommandTarget(validTargetTypes);
@@ -181,6 +182,18 @@ public class RunQuery extends SadlActionHandler {
 							}
 							try {
 								String currentQuery = reasoner.prepareQuery(query);
+								if (!currentQuery.contains(" ") && !currentQuery.contains("?")) {
+									// this might be a named query
+									String queryquery = "select ?nq ?qnq where {?nq <rdf:type> <NamedQuery> . ?nq <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> ?qnq}";
+									queryquery = reasoner.prepareQuery(queryquery);
+									ResultSet qrs = reasoner.ask(queryquery);
+									if (qrs != null && qrs.getRowCount() > 0) {
+										if (qrs.getResultAt(0, 0).toString().endsWith(currentQuery)) {
+											currentQuery = qrs.getResultAt(0, 1).toString();
+										}
+									}
+									
+								}
 								ResultSet rs = reasoner.ask(currentQuery);
 								if (rs != null) {
 									if (currentQuery.toLowerCase().startsWith("construct")) {
