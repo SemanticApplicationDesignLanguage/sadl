@@ -1944,7 +1944,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}else if(fsr.eContainer() instanceof ExternalEquationStatement){
 			ExternalEquationStatement ees = (ExternalEquationStatement)fsr.eContainer();
-			if(ees != null){
+			if(ees != null && ees.getUnknown() == null){
 				return getType(ees.getReturnType());
 			}
 		}
@@ -3180,6 +3180,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					OntConceptType stype;
 					try {
 						stype = declarationExtensions.getOntConceptType((SadlResource)subject);
+						OntConceptType ptype = declarationExtensions.getOntConceptType(predicate);
+						boolean checkDomain = true;
+						if (ptype.equals(OntConceptType.VARIABLE) && declarationExtensions.getDeclaration(predicate).equals(predicate)) {
+							getModelProcessor().addIssueToAcceptor(SadlErrorMessages.VARIABLE_INSTEAD_OF_PROP2.get(declarationExtensions.getConcreteName(predicate)), predicate);
+							checkDomain = false;
+						}
 						OntResource subj = null;
 						String varName = null;
 						if (stype.equals(OntConceptType.VARIABLE)) {
@@ -3196,7 +3202,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									varName = declarationExtensions.getConcreteName((SadlResource)subject);
 									if (subj != null) {
 										Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-										if (prop != null) {
+										if (prop != null && checkDomain) {
 											checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
 										}
 									}
@@ -3229,7 +3235,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
-								if (prop != null) {
+								if (prop != null && checkDomain) {
 									checkPropertyDomain(ontModel, propsubj, prop, target, propOfSubjectCheck, varName);
 								}
 							}
@@ -3243,7 +3249,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								}
 								else {
 									Property prop = ontModel.getProperty(preduri);
-									if (prop != null) {
+									if (prop != null && checkDomain) {
 										checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
 									}
 								}
