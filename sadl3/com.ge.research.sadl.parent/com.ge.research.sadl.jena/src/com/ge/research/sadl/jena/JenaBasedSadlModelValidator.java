@@ -52,6 +52,7 @@ import com.ge.research.sadl.sADL.SadlConstantLiteral;
 import com.ge.research.sadl.sADL.SadlDataType;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
+import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.SadlModelElement;
 import com.ge.research.sadl.sADL.SadlMustBeOneOf;
 import com.ge.research.sadl.sADL.SadlNestedInstance;
@@ -2003,6 +2004,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //		Context ctx = ctxBldr.build();
 //		SadlOntologyHelper soh = new SadlOntologyHelper();
 //		soh.validate(ctx, qnm);
+//		String modelUri = getSadlModelUri(qnm);
+//		if (modelUri.equals(getModelProcessor().getModelName())) {
+//			System.err.println("getType(SadlResource) called for arg declaration same as reference. Decl=" + modelUri); // + ", Ref=" + getModelProcessor().getModelName());
+//		}
 		
 		String conceptUri = declarationExtensions.getConceptUri(qnm);
 		EObject expression = qnm.eContainer();
@@ -2155,6 +2160,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
 	}
 	
+	private String getSadlModelUri(EObject eobj) {
+		if (eobj.eContainer() instanceof SadlModel) {
+			return ((SadlModel)eobj.eContainer()).getBaseUri();
+		}
+		else if (eobj.eContainer() != null) {
+			return getSadlModelUri(eobj.eContainer());
+		}
+		return null;
+	}
+
 	private ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) {
 		return modelProcessor.createTypedConceptName(conceptUri, conceptType);
 	}
