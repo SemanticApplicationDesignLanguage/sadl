@@ -257,7 +257,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				
 				if(rvt != null){
 					if(rvt != rvt2){
-						issueAcceptor.addError("Incompatable Range Types", tci.context); //TODO add new error message
+						issueAcceptor.addError("Property '" + tci.getExpressionType() + "' has incompatable Range Types, '" + rvt.toString() + "' and '" + rvt2.toString() + "'", tci.context); //TODO add new error message
 					}
 				}else{
 					rvt = rvt2;

@@ -17,8 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
-import org.eclipse.emf.ecore.resource.Resource
 import java.util.Map
+import org.eclipse.emf.ecore.resource.Resource
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -35,4 +35,9 @@ interface ISadlInferenceProcessor {
 	 */	
 	def Object[] runInference(Resource resource, String owlModelPath, String modelFolderPath, Map<String,String> prefMap) throws SadlInferenceException;
 		
+	/**
+	 * Called to run a named query
+	 * 0th and only element is SadlCmdResults
+	 */
+	def Object[] runNamedQuery(Resource resource, String queryName) throws SadlInferenceException;
 }
