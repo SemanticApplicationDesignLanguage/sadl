@@ -155,6 +155,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage TYPE_CHECK_BUILTIN_EXCEPTION = new SadlErrorMessage("type_check_builtin_exception");
 /**
+* It is unusual to use an undefined variable (''{0}'') as a property.
+**/
+    public static final SadlErrorMessage VARIABLE_INSTEAD_OF_PROP2 = new SadlErrorMessage("variable_instead_of_prop2");
+/**
 * expected a {0}
 **/
     public static final SadlErrorMessage EXPECTED_A = new SadlErrorMessage("expected_a");

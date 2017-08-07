@@ -258,7 +258,6 @@ public class JenaReasonerPlugin extends Reasoner{
 	protected List<ConfigurationItem> preferences = null;
 	private OntModel tboxModelWithSpec;
 	private List<ModelError> newErrors = null;
-;
 	
 	public JenaReasonerPlugin() {
 		// these will have been loaded by the translator and added to the configuration if they are needed
@@ -3198,8 +3197,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	@Override
 	public boolean isInitialized() {
-		// TODO Auto-generated method stub
-		return false;
+		return initialized;
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -23,20 +24,30 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.xtext.xbase.lib.Extension;
+
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
+import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.SadlCommand;
+import com.ge.research.sadl.processing.OntModelProvider;
+import com.ge.research.sadl.query.SadlQueryHelper;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.SadlCommandResult;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.google.inject.Inject;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class RunQuery extends SadlActionHandler {
@@ -46,7 +57,7 @@ public class RunQuery extends SadlActionHandler {
 	public String projectLocation;
 	protected Process Process;
 
-    /**
+	/**
      * Class to capture the user's input in the dialog
      * @author crapo
      *
@@ -181,32 +192,68 @@ public class RunQuery extends SadlActionHandler {
 								}
 							}
 							try {
+								boolean success = false;
 								String currentQuery = reasoner.prepareQuery(query);
 								if (!currentQuery.contains(" ") && !currentQuery.contains("?")) {
 									// this might be a named query
-									String queryquery = "select ?nq ?qnq where {?nq <rdf:type> <NamedQuery> . ?nq <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> ?qnq}";
-									queryquery = reasoner.prepareQuery(queryquery);
-									ResultSet qrs = reasoner.ask(queryquery);
-									if (qrs != null && qrs.getRowCount() > 0) {
-										if (qrs.getResultAt(0, 0).toString().endsWith(currentQuery)) {
-											currentQuery = qrs.getResultAt(0, 1).toString();
+									Resource res = prepareActionHandler(project, trgtFile);
+									Object[] results = processor.runNamedQuery(res, currentQuery);
+									if (results != null && results.length > 0 && results[0] != null) {
+										SadlCommandResult result = (SadlCommandResult) results[0];
+										String qdisplay = currentQuery;
+										if (result.getClass() != null && result.getCmd() instanceof Query && ((Query)result.getCmd()).getSparqlQueryString() != null) {
+											qdisplay += " (" + ((Query)result.getCmd()).getSparqlQueryString() + ")";
+										}
+										if (result.getResults() != null) {
+											if (result.getResults() instanceof ResultSet) {
+												SadlConsole.getInstance().writeToConsole(MessageType.INFO, "Query '" + qdisplay + "' returned:\n");
+												SadlConsole.getInstance().writeToConsole(MessageType.INFO, ((ResultSet)result.getResults()).toStringWithIndent(5));
+												success = true;
+											}
+											else {
+												SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + qdisplay + "' returned no results\n");
+											}
+										}
+										else {
+											SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + qdisplay + "' returned no results\n");
+										}
+										if (result.getErrors() != null) {
+											List<ModelError> errors = result.getErrors();
+											if (errors.size() > 0) {
+												SadlConsole.getInstance().writeToConsole(MessageType.ERROR, "Query '" + qdisplay + "' errors:\n");
+											}
+											for (int i = 0; i < errors.size(); i++) {
+												SadlConsole.getInstance().writeToConsole(MessageType.ERROR, errors.get(i).toString() + "\n");
+											}
 										}
 									}
+
+//									String queryquery = null;
+//									queryquery = "select ?nq ?qnq where {?nq <rdf:type> <NamedQuery> . ?nq <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> ?qnq}";
+//									queryquery = reasoner.prepareQuery(queryquery);
+//									ResultSet qrs = reasoner.ask(queryquery);
+//									if (qrs != null && qrs.getRowCount() > 0) {
+//										if (qrs.getResultAt(0, 0).toString().endsWith(currentQuery)) {
+//											currentQuery = qrs.getResultAt(0, 1).toString();
+//										}
+//									}
 									
 								}
-								ResultSet rs = reasoner.ask(currentQuery);
-								if (rs != null) {
-									if (currentQuery.toLowerCase().startsWith("construct")) {
-										String desc = "Adhoc query Graph";
-	        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + System.currentTimeMillis(); 							
-		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
+								if (!success) {
+									ResultSet rs = reasoner.ask(currentQuery);
+									if (rs != null) {
+										if (currentQuery.toLowerCase().startsWith("construct")) {
+											String desc = "Adhoc query Graph";
+		        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + System.currentTimeMillis(); 							
+			        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
+										}
+										else {
+											SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
+										}
 									}
 									else {
-										SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
+										SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + currentQuery + "' returned no results\n");
 									}
-								}
-								else {
-									SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + currentQuery + "' returned no results\n");
 								}
 							}
 							catch (Throwable t) {

@@ -78,7 +78,6 @@ interface SadlMarkerLocationProvider {
 		@Inject
 		extension DeclarationExtensions;
 
-		@Override
 		override getLocation(SadlMarker marker, Resource resource, Path projectLocation) {
 			val eObject = getEObjectForMarker(resource, marker);
 			if (eObject === null) {

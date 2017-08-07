@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList
 import com.google.inject.Inject
 import com.google.inject.Injector
 import org.eclipse.emf.ecore.resource.Resource
+import java.util.Map
 
 /**
  * Provides {@code SADL} inferences.
@@ -30,21 +31,28 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 
 	static val EXTENSION_ID = 'com.ge.research.sadl.sadl_inference_processor';
 
-	static val ISadlInferenceProcessor NOOP_INFERENCER = [
-		return newArrayOfSize(0);
-	];
+	static val ISadlInferenceProcessor NOOP_INFERENCER = new ISadlInferenceProcessor() {
+		
+		override runInference(Resource resource, String owlModelPath, String modelFolderPath, Map<String, String> prefMap) throws SadlInferenceException {
+			return newArrayOfSize(0);
+		}
+		
+		override runNamedQuery(Resource resource, String queryName) throws SadlInferenceException {
+			return newArrayOfSize(0);
+		}		
+	}
 
 	@Inject
 	new(Injector injector) {
 		super(ISadlInferenceProcessor, injector);
 	}
 
-	@Override
+	
 	override getProcessor(Resource resource) {
 		return doCreateProcessor(resource);
 	}
 
-	@Override
+	
 	override protected getExtensionPointId() {
 		return Optional.of(EXTENSION_ID);
 	}

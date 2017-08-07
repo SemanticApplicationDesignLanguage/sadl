@@ -2664,7 +2664,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				else if (robj instanceof BuiltinElement) {
 					if (isModifiedTriple(((BuiltinElement)robj).getFuncType())) {
-						assignedNode = ((BuiltinElement)robj).getArguments().get(0);
+						if (((BuiltinElement)robj).getArguments() != null && ((BuiltinElement)robj).getArguments().size() > 0) {
+							assignedNode = ((BuiltinElement)robj).getArguments().get(0);
+						}
 						optype = ((BuiltinElement)robj).getFuncType();
 						pattern = lobj;
 					}
@@ -3566,7 +3568,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		BuiltinElement bi = new BuiltinElement();
 		bi.setFuncName(op);
-		bi.addArgument((Node) eobj);
+		if (eobj instanceof Node) {
+			bi.addArgument((Node) eobj);
+		}
+		else if (eobj instanceof GraphPatternElement) {
+			bi.addArgument(new ProxyNode(eobj));
+		}
+		else if (eobj == null) {
+			addError("Unary operator '" + op + "' has null argument", expr);
+		}
+		else {
+			throw new TranslationException("Expected node, got '" + eobj.getClass().getCanonicalName() + "'");
+		}
 		return bi;
 	}
 	
@@ -4987,7 +5000,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 //	}
 
 	private void processSadlNecessaryAndSufficient(SadlNecessaryAndSufficient element) throws JenaProcessorException {
-		OntClass supercls = sadlTypeReferenceToOntResource(element.getSubject()).asClass();
+		OntResource rsrc = sadlTypeReferenceToOntResource(element.getSubject());
+		OntClass supercls = null;
+		if (rsrc != null) {
+			supercls = rsrc.asClass();
+		}
 		OntClass rolecls = getOrCreateOntClass(getDeclarationExtensions().getConceptUri(element.getObject()));
 		Iterator<SadlPropertyCondition> itr = element.getPropConditions().iterator();
 		List<OntClass> conditionClasses = new ArrayList<OntClass>();
@@ -6252,7 +6269,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (rhtObj == null) {
 				return null;
 			}
-			if (rhtObj instanceof OntResource) {
+			if (rhtObj instanceof OntResource && ((OntResource) rhtObj).canAs(OntClass.class)) {
 				rhtNode = ((OntResource)rhtObj).asClass();
 			}
 			else {
@@ -7509,6 +7526,14 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 			}
 			return retlst;
 		}
+//		if (retlst == null && cls.isURIResource() && cls.getURI().endsWith("#DATA")) {
+////			dumpModel(getTheJenaModel());
+////			StmtIterator stmtitr = cls.listProperties();
+//			StmtIterator stmtitr = getTheJenaModel().listStatements(cls, null, (RDFNode)null);
+//			while (stmtitr.hasNext()) {
+//				System.out.println(stmtitr.next().toString());
+//			}
+//		}
 		return retlst;
 	}
 	

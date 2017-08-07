@@ -50,6 +50,7 @@ import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.nodemodel.INode
 
 class DeclarationExtensions {
 	
@@ -57,25 +58,37 @@ class DeclarationExtensions {
 	
 	def String getConcreteName(SadlResource it) {
 		if (isExternal) {
-			return getExternalResourceAdapter.concreteName
+			return getExternalResourceAdapter.concreteName;
 		}
 		val resource = it.eResource as XtextResource
 		val ()=>String nameSupplyer = [
-			val nodes = NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME)
-			val name = nodes.join('') [
-				NodeModelUtils.getTokenText(it)
-			].trim
-			if (name.isNullOrEmpty)
-				return null
-			if (converter === null) 	// this will be null when a resource is open in the editor and a clean/build is performed ??
-				return name
-			return converter.toValue(name, null)
-		]
-		if (resource === null)
-			return nameSupplyer.apply
+			val nodes = findNamedNodes;
+			val name = nodes.map[NodeModelUtils.getTokenText(it)].join('').trim;
+			if (name.isNullOrEmpty) {
+				return null;
+			}
+			// this will be null when a resource is open in the editor and a clean/build is performed ??
+			if (converter === null) {
+				return name;
+			}
+			return converter.toValue(name, null);
+		];
+		if (resource === null) {
+			return nameSupplyer.apply;
+		}
 		return resource.cache.get(it -> 'concreteName', eResource, nameSupplyer)
 	}
 	
+
+ private def dispatch findNamedNodes(SadlResource it) {
+   return NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME);
+ }
+
+ private def dispatch findNamedNodes(Name it) {
+   val node = NodeModelUtils.getNode(it) as INode;
+   return if(node === null) emptyList else #[node];
+ }
+ 
 	def String getConceptUri(SadlResource it) {
 		if (isExternal) {
 			return getExternalResourceAdapter.conceptUri
