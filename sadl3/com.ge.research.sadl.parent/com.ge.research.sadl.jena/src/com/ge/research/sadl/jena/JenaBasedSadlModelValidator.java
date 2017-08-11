@@ -2156,6 +2156,34 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (conceptType.equals(OntConceptType.FUNCTION_DEFN)) {
 			return getFunctionType(qnm);
 		}
+		else if (conceptType.equals(OntConceptType.CLASS_LIST)) {
+			//Currently the DeclarationExtensions.getOntConceptType(SadlResource) will return a Class List for a 
+			//decomposition declaration that is a Class itself but is of a type Class List
+			//Please see AATIM-2073 for more details, NGB 08-11-2017
+			//This is a temporary workaround and should be removed ASAP
+			ConceptName conceptName = new ConceptName(conceptUri);
+			conceptName.setType(ConceptType.ONTCLASS);
+			if (conceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().ignoreUnittedQuantities) {
+				if (expression instanceof SadlClassOrPropertyDeclaration) {
+					Iterator<SadlProperty> spitr = ((SadlClassOrPropertyDeclaration)expression).getDescribedBy().iterator();
+					while (spitr.hasNext()) {
+						SadlProperty sp = spitr.next();
+						if (declarationExtensions.getConceptUri(sp.getProperty()).equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI)) {
+							return getType(declarationExtensions.getDeclaration(sp.getProperty()));
+						}
+					}
+				}
+				else {
+					getModelProcessor().addIssueToAcceptor("Can't handle this expression type when ignoring UnittedQuantities",expression);
+				}
+			}
+			else {
+				List<ConceptName> impliedProps = getImpliedProperties(theJenaModel.getResource(conceptUri));
+				TypeCheckInfo tci = new TypeCheckInfo(conceptName, conceptName, this, impliedProps, expression);
+				return tci;
+			}
+		}
+		
 		ConceptName declarationConceptName = new ConceptName("TODO");
 		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
 	}
