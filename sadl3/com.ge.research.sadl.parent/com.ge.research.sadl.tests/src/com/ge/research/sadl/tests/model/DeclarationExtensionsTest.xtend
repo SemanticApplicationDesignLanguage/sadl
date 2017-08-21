@@ -271,6 +271,7 @@ class DeclarationExtensionsTest {
 		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
 		assertTrue(name2resource.containsKey('Bar'))
 		assertEquals(OntConceptType.CLASS, name2resource.get('Bar').ontConceptType)
+		// Next two lines are incorrect. The concrete name is "foo", not "qn:foo"
 		assertTrue(name2resource.containsKey('qn:foo'))
 		assertEquals(OntConceptType.DATATYPE_PROPERTY, name2resource.get('qn:foo').ontConceptType)
 	}
