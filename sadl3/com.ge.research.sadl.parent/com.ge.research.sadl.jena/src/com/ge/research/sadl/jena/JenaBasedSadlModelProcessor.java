@@ -3747,7 +3747,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		//				b) a SadlPrimitiveDataType
 		else if (superElement instanceof SadlPrimitiveDataType) {
 			if (isList) {
-				com.hp.hpl.jena.rdf.model.Resource spdt = processSadlPrimitiveDataType(element, (SadlPrimitiveDataType) superElement, null);
+				com.hp.hpl.jena.rdf.model.Resource spdt = getSadlPrimitiveDataTypeResource((SadlPrimitiveDataType) superElement);
 				rsrcList.add(createListSubclass(newNames.get(0), spdt.getURI(), superElement.eResource()));
 			}
 			else {

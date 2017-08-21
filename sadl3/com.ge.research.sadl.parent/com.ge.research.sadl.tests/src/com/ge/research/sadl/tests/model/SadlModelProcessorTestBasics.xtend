@@ -34,6 +34,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.ontology.AllValuesFromRestriction
+import com.hp.hpl.jena.ontology.OntClass
+import com.hp.hpl.jena.ontology.OntResource
+import com.hp.hpl.jena.vocabulary.OWL
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -183,6 +187,40 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 				jenaModel.write(System.out)
 				assertTrue(issues.size == 0)
 			]
+	}
+
+	@Test
+	def void testTypedList1() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 IntegerList is a type of int List.
+ 		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#IntegerList")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			var listSubclass = false
+ 			do {
+ 				val sprc = itr.next as OntClass
+ 				if ((sprc as OntClass).URIResource && (sprc as OntClass).URI.equals("http://sadl.org/sadllistmodel#List")) {
+ 					listSubclass = true
+ 				}
+ 				if (sprc.canAs(AllValuesFromRestriction)) {
+ 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+ 					val obj = opitr.nextStatement.object
+ 					if ((obj as com.hp.hpl.jena.rdf.model.Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
+ 						val vitr = jenaModel.listStatements(sprc, OWL.allValuesFrom, null as RDFNode)
+ 						val v = vitr.nextStatement.object
+ 						assertTrue((v as com.hp.hpl.jena.rdf.model.Resource).URI.equals("http://www.w3.org/2001/XMLSchema#int"));
+  					}
+ 				}
+ 			} while (itr.hasNext)
+ 			assertTrue(listSubclass)
+ 					
+ 		]
 	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
