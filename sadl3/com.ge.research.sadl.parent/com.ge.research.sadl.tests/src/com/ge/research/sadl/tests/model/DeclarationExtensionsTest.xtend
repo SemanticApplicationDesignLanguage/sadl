@@ -265,13 +265,14 @@ class DeclarationExtensionsTest {
 		val model = '''
 			uri "http://sadl.org/Test/qualifiedname" alias qn. 
 					
-			Bar is a class, described by qn:foo with a single valueof type string.
+			Bar is a class, described by qn:foo with a single value of type string.
 		'''.parse
 		
 		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
-		
+		assertTrue(name2resource.containsKey('Bar'))
 		assertEquals(OntConceptType.CLASS, name2resource.get('Bar').ontConceptType)
-		assertEquals(OntConceptType.DATATYPE_PROPERTY, name2resource.get('foo').ontConceptType)
+		assertTrue(name2resource.containsKey('qn:foo'))
+		assertEquals(OntConceptType.DATATYPE_PROPERTY, name2resource.get('qn:foo').ontConceptType)
 	}
 	
 	protected def void assertIs(SadlResource it, OntConceptType type) {
