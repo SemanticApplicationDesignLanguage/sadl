@@ -1990,6 +1990,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	public Query processExpression(SelectExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		return processAsk(expr);
+	}
+	
+	public Query processExpression(ConstructExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		return processAsk(expr);
+	}
+	
+	public Query processExpression(AskExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		return processAsk(expr);
+	}
+	
+	private Query processAsk(Expression expr) {
 		Query query = new Query();
 		query.setContext(expr);
 //		setTranslationTarget(query);
@@ -1999,7 +2011,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		
 		// get variables and other information from the SelectExpression
 		EList<SadlResource> varList = null;
+		Expression whexpr = null;
 		if (expr instanceof SelectExpression) {
+			whexpr = ((SelectExpression) expr).getWhereExpression();
 			query.setKeyword("select");
 			if (((SelectExpression)expr).isDistinct()) {
 				query.setDistinct(true);
@@ -2008,7 +2022,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (varList != null) {
 				List<String> names = new ArrayList<String>();
 				for (int i = 0; i < varList.size(); i++) {
-					Object var = translate(varList.get(i));
+					Object var = null;
+					try {
+						var = translate(varList.get(i));
+					} catch (InvalidNameException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					} catch (InvalidTypeException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					} catch (TranslationException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
 					TypeCheckInfo tci = null;
 					try {
 						tci = modelValidator.getType(varList.get(i));
@@ -2030,6 +2056,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -2056,19 +2091,52 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		else if (expr instanceof ConstructExpression) {
+			whexpr = ((ConstructExpression) expr).getWhereExpression();
 			query.setKeyword("construct");
 			List<String> names = new ArrayList<String>();
-			names.add(translate(((ConstructExpression)expr).getSubj()).toString());
-			names.add(translate(((ConstructExpression)expr).getPred()).toString());
-			names.add(translate(((ConstructExpression)expr).getObj()).toString());
-			query.setVariables(names);
+			try {
+				Object result = translate(((ConstructExpression)expr).getSubj());
+				if (result instanceof VariableNode) {
+					names.add(((NamedNode) result).getName());
+				}
+				else {
+					names.add(result.toString());
+				}
+				result = translate(((ConstructExpression)expr).getPred());
+				if (result instanceof VariableNode) {
+					names.add(((NamedNode) result).getName());
+				}
+				else {
+					names.add(result.toString());
+				}
+				result = translate(((ConstructExpression)expr).getObj());
+				if (result instanceof VariableNode) {
+					names.add(((NamedNode) result).getName());
+				}
+				else {
+					names.add(result.toString());
+				}
+				if (names.size() != 3) {
+					addWarning("A 'construct' statement should have 3 variables so as to be able to generate a graph.", expr);
+				}
+				query.setVariables(names);
+			} catch (InvalidNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		else if (expr instanceof AskExpression) {
+			whexpr = ((AskExpression) expr).getWhereExpression();
 			query.setKeyword("ask");
 		}
 
 		// Translate the query to the resulting intermediate form.
-		Expression whexpr = expr.getWhereExpression();
 		if (modelValidator != null) {
 			try {
 				TypeCheckInfo tct = modelValidator.getType(whexpr);
@@ -2096,9 +2164,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} catch (PropertyWithoutRangeException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (InvalidNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
-		Object pattern = translate(expr.getWhereExpression());
+		Object pattern = null;
+		try {
+			pattern = translate(whexpr);
+		} catch (InvalidNameException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InvalidTypeException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TranslationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		Object expandedPattern = null;
 		try {
@@ -2530,7 +2619,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return processExpression((SelectExpression)expr);
 		}
 		else if (expr instanceof AskExpression) {
-			addError(SadlErrorMessages.UNHANDLED.get("AskExpression", " "), expr);
+//			addError(SadlErrorMessages.UNHANDLED.get("AskExpression", " "), expr);
+			return processExpression((AskExpression)expr);
+		}
+		else if (expr instanceof ConstructExpression) {
+			return processExpression((ConstructExpression)expr);
 		}
 		else if (expr != null){
 			throw new TranslationException("Unhandled rule expression type: " + expr.getClass().getCanonicalName());
