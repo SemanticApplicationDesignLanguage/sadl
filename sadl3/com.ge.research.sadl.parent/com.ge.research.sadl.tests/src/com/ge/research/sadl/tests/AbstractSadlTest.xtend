@@ -39,6 +39,7 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.processing.SadlConstants
+import com.ge.research.sadl.processing.ISadlBuiltinFunctionsModelContentProvider
 
 /**
  * Base SADL test class.
@@ -58,16 +59,23 @@ abstract class AbstractSadlTest {
 	@Inject protected ParseHelper<SadlModel> parseHelper;
 	@Inject protected Provider<XtextResourceSet> resourceSetProvider;
 	@Inject protected ISadlImplicitModelContentProvider modelContentProvider;
+	@Inject protected ISadlBuiltinFunctionsModelContentProvider builtinModelContentProvider;
 	
 	@Accessors(PROTECTED_GETTER)
 	XtextResourceSet currentResourceSet;
 	
 	private val Supplier<Void> implicitModelSupplier = Suppliers.memoize[
 		val uri = URI.createURI(SadlConstants.SADL_IMPLICIT_MODEL_SYNTHETIC_URI);
-		if (!currentResourceSet.resources.map[uri.lastSegment].exists[it == 'SadlImplicitModel.sadl']) {
+		if (!currentResourceSet.resources.map[uri.lastSegment].exists[it == SadlConstants.SADL_IMPLICIT_MODEL_FILENAME]) {
 			val resource = loadResource(modelContentProvider.content, uri);
 			OntModelProvider.find(resource)
 		}
+		val bfuri = URI.createURI(SadlConstants.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
+//		if (!currentResourceSet.resources.map[bfuri.lastSegment].exists[it == SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME]) {
+			val resource = loadResource(builtinModelContentProvider.content, bfuri);
+			OntModelProvider.find(resource)
+//		}
+		
 		return null;
 	]
 	

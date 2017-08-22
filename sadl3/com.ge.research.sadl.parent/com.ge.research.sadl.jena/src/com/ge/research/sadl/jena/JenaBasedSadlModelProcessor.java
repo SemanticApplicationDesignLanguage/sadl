@@ -1111,44 +1111,59 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected void validateResourcePathAndName(Resource resource, SadlModel model, String modelActualUrl) {
 		if (!isReservedFolder(resource, model)) {
 			if (isReservedName(resource)) {
-				addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+				if (!isSyntheticUri(null, resource)) {
+					addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+				}
 			}
 		}
 	}
     
 	private void addImplicitBuiltinFunctionModelImportToJenaModel(Resource resource, ProcessorContext context) throws ConfigurationException, IOException, URISyntaxException, JenaProcessorException {
-		String implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
-		if (implfn != null) {
-			Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
-			if (sadlBuiltinFunctionModel == null) {
-				if (imrsrc instanceof XtextResource) {
-					sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource)imrsrc);
-				}
-				else if (imrsrc instanceof ExternalEmfResource) {
-					sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getJenaModel();
-				}
+		if (isSyntheticUri(null, resource)) {
+			// test case: get SadlImplicitModel OWL model from the OntModelProvider
+			URI simTestUri = URI.createURI(SadlConstants.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
+			try {
+				sadlBuiltinFunctionModel = OntModelProvider.find(resource.getResourceSet().getResource(simTestUri, true));
+			}
+			catch (Exception e) {
+				// this happens if the test case doesn't cause the implicit model to be loaded--here now for backward compatibility but test cases should be fixed?
+				sadlBuiltinFunctionModel = null;
+			}
+		}
+		else {
+			String implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
+			if (implfn != null) {
+				Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
 				if (sadlBuiltinFunctionModel == null) {
 					if (imrsrc instanceof XtextResource) {
-						((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-						sadlBuiltinFunctionModel = OntModelProvider.find(imrsrc);
-						OntModelProvider.attach(imrsrc, sadlBuiltinFunctionModel, SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+						sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
-					else {
-						IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-						if (cm.getModelGetter() == null) {
-							cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+					else if (imrsrc instanceof ExternalEmfResource) {
+						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+					}
+					if (sadlBuiltinFunctionModel == null) {
+						if (imrsrc instanceof XtextResource) {
+							((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator().validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
+							sadlBuiltinFunctionModel = OntModelProvider.find(imrsrc);
+							OntModelProvider.attach(imrsrc, sadlBuiltinFunctionModel, SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
 						}
-						cm.getModelGetter().getOntModel(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI,
-								ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
-										.appendFragment(SadlConstants.OWL_BUILTIN_FUNCTIONS_FILENAME)
-										.toFileString(),
-								getOwlModelFormat(context));
+						else {
+							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+							if (cm.getModelGetter() == null) {
+								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+							}
+							cm.getModelGetter().getOntModel(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI,
+									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
+											.appendFragment(SadlConstants.OWL_BUILTIN_FUNCTIONS_FILENAME)
+											.toFileString(),
+									getOwlModelFormat(context));
+						}
 					}
-				}
-				if (sadlBuiltinFunctionModel != null) {
-					addImportToJenaModel(getModelName(), SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS, sadlBuiltinFunctionModel);
 				}
 			}
+		}
+		if (sadlBuiltinFunctionModel != null) {
+			addImportToJenaModel(getModelName(), SadlConstants.SADL_BUILTIN_FUNCTIONS_URI, SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS, sadlBuiltinFunctionModel);
 		}
 	}
 	

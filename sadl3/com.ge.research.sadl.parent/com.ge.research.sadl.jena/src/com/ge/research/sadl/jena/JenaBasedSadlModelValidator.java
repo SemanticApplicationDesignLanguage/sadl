@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.debug.internal.ui.actions.expressions.AddWatchExpressionAction;
 import org.eclipse.emf.ecore.EObject;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
@@ -1933,9 +1934,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		//If the expression is a function, find equation definition from name and get the return type
 		if(expression.isFunction()){
-			TypeCheckInfo ftci = getFunctionType(qnm);
-			if (ftci != null) {
-				return ftci;
+			try {
+				TypeCheckInfo ftci = getFunctionType(qnm);
+				if (ftci != null) {
+					return ftci;
+				}
+			}
+			catch (DontTypeCheckException e) {
+				getModelProcessor().addIssueToAcceptor("External equation declaration does not provide type information; can't type check.", expression);
+				throw e;
 			}
 			handleUndefinedFunctions(expression);
 		}
@@ -1950,8 +1957,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}else if(fsr.eContainer() instanceof ExternalEquationStatement){
 			ExternalEquationStatement ees = (ExternalEquationStatement)fsr.eContainer();
-			if(ees != null && ees.getUnknown() == null){
-				return getType(ees.getReturnType());
+			if(ees != null) {
+				if (ees.getUnknown() == null){
+					return getType(ees.getReturnType());
+				}
+				else {
+					throw new DontTypeCheckException();
+				}
 			}
 		}
 		return null;
