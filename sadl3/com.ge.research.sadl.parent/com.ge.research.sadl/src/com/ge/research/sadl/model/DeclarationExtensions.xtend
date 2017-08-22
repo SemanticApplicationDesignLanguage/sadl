@@ -44,13 +44,14 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
+import com.ge.research.sadl.scoping.QualifiedNameConverter
 import com.google.inject.Inject
 import java.util.HashSet
 import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import org.eclipse.xtext.nodemodel.INode
 
 class DeclarationExtensions {
 	
@@ -63,11 +64,26 @@ class DeclarationExtensions {
 		val resource = it.eResource as XtextResource
 		val ()=>String nameSupplyer = [
 			val nodes = findNamedNodes;
-			val name = nodes.map[NodeModelUtils.getTokenText(it)].join('').trim;
+			var name = nodes.map[NodeModelUtils.getTokenText(it)].join('').trim;
 			if (name.isNullOrEmpty) {
 				return null;
 			}
+			val index = name.lastIndexOf(QualifiedNameConverter.SEGMENT_SEPARATOR);
+			if (index !== -1) {
+				val ()=>String aliasSupplier = [
+					EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;	
+				];
+				val alias = if (resource !== null) {
+					resource.cache.get(it -> 'alias', resource, aliasSupplier);
+				} else {
+					aliasSupplier.apply;
+				};
+				if (alias == name.substring(0, index) && name.length >= (index + 1)) {
+					name = name.substring(index + 1);
+				}
+			}
 			// this will be null when a resource is open in the editor and a clean/build is performed ??
+			// And if the extensions instance is not injected into the context but instantiated via its constructor. 
 			if (converter === null) {
 				return name;
 			}
@@ -78,16 +94,15 @@ class DeclarationExtensions {
 		}
 		return resource.cache.get(it -> 'concreteName', eResource, nameSupplyer)
 	}
-	
 
- private def dispatch findNamedNodes(SadlResource it) {
-   return NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME);
- }
+	private def dispatch findNamedNodes(SadlResource it) {
+		return NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME);
+	}
 
- private def dispatch findNamedNodes(Name it) {
-   val node = NodeModelUtils.getNode(it) as INode;
-   return if(node === null) emptyList else #[node];
- }
+	private def dispatch findNamedNodes(Name it) {
+		val node = NodeModelUtils.getNode(it) as INode;
+		return if(node === null) emptyList else #[node];
+	}
  
 	def String getConceptUri(SadlResource it) {
 		if (isExternal) {

@@ -22,8 +22,10 @@ import org.eclipse.xtext.naming.QualifiedName
 
 class QualifiedNameConverter implements IQualifiedNameConverter {
 	
+	public static val SEGMENT_SEPARATOR = ':';
+	
 	override toQualifiedName(String qualifiedNameAsText) {
-		val idx = qualifiedNameAsText.lastIndexOf(':')
+		val idx = qualifiedNameAsText.lastIndexOf(SEGMENT_SEPARATOR)
 		if (idx === -1) {
 			return QualifiedName.create(qualifiedNameAsText)
 		}
@@ -41,7 +43,7 @@ class QualifiedNameConverter implements IQualifiedNameConverter {
 	}
 	
 	override toString(QualifiedName name) {
-		return name.segments.join(':')
+		return name.segments.join(SEGMENT_SEPARATOR)
 	}
 	
 }
