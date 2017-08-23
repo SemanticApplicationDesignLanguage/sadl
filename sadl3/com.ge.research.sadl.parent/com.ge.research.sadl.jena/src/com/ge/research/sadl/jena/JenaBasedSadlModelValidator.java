@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.debug.internal.ui.actions.expressions.AddWatchExpressionAction;
 import org.eclipse.emf.ecore.EObject;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
@@ -23,6 +22,7 @@ import com.ge.research.sadl.model.ConceptName.RangeValueType;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
+import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
@@ -990,12 +990,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			else {
-				Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
-				if (subjHasPropInDeclaration != null) {
-					return getType(subjHasPropInDeclaration);
+				if (modelProcessor.getTarget() instanceof Rule) {
+					return getType(((SubjHasProp)expression).getProp());
 				}
 				else {
-					issueAcceptor.addError("This appears to be a declaration that isn't fully supported; should it be nested (in parentheses)", expression);
+					Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
+					if (subjHasPropInDeclaration != null) {
+						return getType(subjHasPropInDeclaration);
+					}
+					else {
+						issueAcceptor.addError("This appears to be a declaration that isn't fully supported; should it be nested (in parentheses)", expression);
+					}
 				}
 			}
 		}
@@ -2979,6 +2984,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return true;
 				}
 				else if(isDecimal(leftConceptName) && isDecimal(rightConceptName)){
+					return true;
+				}
+				else if (rightConceptName.getUri().equals(XSD.xstring.getURI()) && 
+						(leftConceptName.getUri().equals(XSD.dateTime.getURI()) || leftConceptName.getUri().equals(XSD.date.getURI()))) {
 					return true;
 				}
 				else {

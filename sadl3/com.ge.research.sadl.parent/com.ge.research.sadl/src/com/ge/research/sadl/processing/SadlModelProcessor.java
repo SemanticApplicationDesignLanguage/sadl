@@ -971,7 +971,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
 	}
 
-	protected Object getTarget() {
+	public Object getTarget() {
 		return target;
 	}
 
