@@ -1202,6 +1202,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			throws InvalidTypeException, InvalidNameException {
 		//String unit = ((Unit)expression).getUnit();
 		ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		uqcn.setType(ConceptType.ONTCLASS);
 		List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
 		if (impliedProperties != null) {
 			return new TypeCheckInfo(uqcn, uqcn, impliedProperties, this, expression);
@@ -2989,7 +2990,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName rightConceptName = (ConceptName) rightConceptIdentifier;
 			
 			if (getModelProcessor().isNumericOperator(operations) && (!isNumeric(leftTypeCheckInfo) || !isNumeric(rightTypeCheckInfo))) {
-				return false;
+				if (!leftConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) || 
+						!rightConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+					return false;
+				}
 			}
 			if (leftConceptName.equals(rightConceptName)) {
 				return true;
