@@ -321,6 +321,10 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/after"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ElementInList/element"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Unit">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Unit/value"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Unit/unit"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Declaration">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Declaration/article"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/type"/>
@@ -332,10 +336,6 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//NumberLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//NumberLiteral/value"/>
-    </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//Unit">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Unit/value"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Unit/unit"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//BooleanLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BooleanLiteral/value"/>
