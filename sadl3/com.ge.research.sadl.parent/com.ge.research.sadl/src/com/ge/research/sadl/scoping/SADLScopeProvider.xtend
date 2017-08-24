@@ -354,7 +354,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return null
 		}
 		val imports = #[first, second].map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
-		val message = '''Ambiguously imported name '«first.name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
+		val message = '''Ambiguously imported name '«first.name»' from «imports.map["'"+it+"'"].join(", ")». Please use a prefix to disambiguate name.'''
 		
 		return new ForwardingEObjectDescription(first) {
 			override getUserData(String key) {
