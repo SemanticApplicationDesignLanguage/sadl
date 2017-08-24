@@ -14,7 +14,7 @@
 
 <h1>SADL Constructs Useful in Building Models</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/29/2017<!--webbot bot="Timestamp" endspan i-checksum="12663" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->08/24/2017<!--webbot bot="Timestamp" endspan i-checksum="12587" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h4>Table of Contents</h4>
@@ -449,7 +449,47 @@ font-family:&quot;Times New Roman&quot;,serif;color:black"> 1-*.</span></p>
 <span style="font-family:&quot;Times New Roman&quot;,serif">creates a subclass 
 of <i>sadllist:List</i> named <i>ChildrenList</i> and whose members can only be 
 instances of <i>Person</i> and which must contain at least one element but can 
-contain any number larger number of elements.</span></p>
+contain any number larger number of elements. Please do not confuse a 
+cardinality restriction on a property whose range is a List subclass with 
+restrictions on the length lists belonging to the List subclass. To illustrate:</span></p>
+<blockquote>
+  <font SIZE="2">
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">.<br>
+  </font><font SIZE="2" COLOR="#000080"><b>ChildrenList</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">List</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">length</font><font SIZE="2"> 1-*.<br>
+  </font><font SIZE="2" COLOR="#008000"><b>children</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>ChildrenList</b></font><font SIZE="2">.<br>
+  </font><font SIZE="2" COLOR="#008000"><b>children</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">at</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">most</font><font SIZE="2"> 1 </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2">.</p>
+  </font>
+</blockquote>
+<p class="MsoNormal">
+<font face="Times New Roman,serif">The second line in this example includes a 
+list length restriction that instances of the class <i>ChildrenList</i> should 
+have at least one and may have any number of members.<br>
+The fourth line in the example is a maximum cardinality restriction indicating 
+that an instance of <i>Person</i> should have at most one value of the <i>
+children</i> property.</font></p>
 <p class="MsoNormal">
 <span style="font-family:&quot;Times New Roman&quot;,serif">It is also possible 
 to create declared instances of a typed list class. For example,</span></p>
@@ -522,8 +562,7 @@ Craig</i>.</span></p>
 documentation does not address when and how one might use Lists. There are a 
 number of list expressions which can be used where expressions are allowed, 
 e.g., in <a href="#Equations">Equations</a> or in
-<a href="SadlConstructs2.html#Rules">Rules</a>. As an example, consider the 
-following ontology snippet.</span></p>
+<a href="SadlConstructs2.html#Rules">Rules</a>. </span></p>
 <h2><a name="ImpliedProperties">Implied Properties</a></h2>
 <p>See also <a href="ImpliedProperties.html">Implied Properties</a>.</p>
 <p class="MsoNormal">
