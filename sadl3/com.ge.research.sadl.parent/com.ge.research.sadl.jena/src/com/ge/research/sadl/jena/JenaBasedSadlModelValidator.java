@@ -1516,14 +1516,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				subjtype = getType(subject);
 				
 			}
-			if (cnstval.equals("length") || cnstval.equals("count") || cnstval.equals("index")) {
+			if (cnstval.endsWith("length") || cnstval.equals("count") || cnstval.endsWith("index")) {
 				ConceptName nlcn = new ConceptName(XSD.xint.getURI());
 				nlcn.setType(ConceptType.RDFDATATYPE);
 				return new TypeCheckInfo(nlcn, nlcn, this, expression);
 			}
-			else if (subjtype != null && (cnstval.equals("first element") || cnstval.equals("last element")) ) {
+			else if (subjtype != null && (cnstval.endsWith(" element"))) {
+				if (subjtype != null && (cnstval.equals("first element") || cnstval.equals("last element")) ) {
+					subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
+					return subjtype;
+				}
+				String article = cnstval.substring(0, cnstval.indexOf(" "));
 				subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
 				return subjtype;
+			
 			}
 			else if (cnstval.equals("a type")) {
 				ConceptName rdfType = new ConceptName(RDFS.subClassOf.getURI());
@@ -1728,6 +1734,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean constantRequiresListNext(String cnstval) {
 		if (cnstval.equals("length") ||
+				cnstval.endsWith(" element") ||
 				cnstval.equals("first element") ||
 				cnstval.equals("last element")) {
 			return true;
@@ -2101,6 +2108,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				List<ConceptName> impliedProps = getImpliedProperties(theJenaModel.getResource(conceptUri));
 				TypeCheckInfo tci = new TypeCheckInfo(conceptName, conceptName, this, impliedProps, reference);
+				if (conceptType.equals(OntConceptType.CLASS)) {
+					tci.setTypeToExprRelationship("self");
+				}
 				return tci;
 			}
 		}
@@ -2981,6 +2991,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
+		if (isDeclaration(leftExpression) && isDeclaration(rightExpression) && 
+				leftTypeCheckInfo.getTypeToExprRelationship().equals("self") && 
+				rightTypeCheckInfo.getTypeToExprRelationship().equals("self")) {
+			// this is a test for class membership to be resolved by the reasoner
+			return true;
+		}
+		
 		ConceptIdentifier leftConceptIdentifier = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
 		ConceptIdentifier rightConceptIdentifier = getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
 		if (leftConceptIdentifier == null || rightConceptIdentifier == null) {
@@ -3285,6 +3302,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, Expression target, boolean propOfSubjectCheck) throws InvalidTypeException {
+		OntConceptType ptype = null;
+		try {
+			ptype = declarationExtensions.getOntConceptType(predicate);
+		} catch (CircularDefinitionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			getModelProcessor().addIssueToAcceptor("Unable to get type. This should not happen. Please report.", predicate);
+			return;
+		}
+		boolean checkDomain = true;
+		if (ptype.equals(OntConceptType.VARIABLE) && declarationExtensions.getDeclaration(predicate).equals(predicate)) {
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.VARIABLE_INSTEAD_OF_PROP2.get(declarationExtensions.getConcreteName(predicate)), predicate);
+			checkDomain = false;
+		}
 		if (subject instanceof SadlResource) {
 			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
 			if (rsrc != null) {
@@ -3292,12 +3323,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					OntConceptType stype;
 					try {
 						stype = declarationExtensions.getOntConceptType((SadlResource)subject);
-						OntConceptType ptype = declarationExtensions.getOntConceptType(predicate);
-						boolean checkDomain = true;
-						if (ptype.equals(OntConceptType.VARIABLE) && declarationExtensions.getDeclaration(predicate).equals(predicate)) {
-							getModelProcessor().addIssueToAcceptor(SadlErrorMessages.VARIABLE_INSTEAD_OF_PROP2.get(declarationExtensions.getConcreteName(predicate)), predicate);
-							checkDomain = false;
-						}
 						OntResource subj = null;
 						String varName = null;
 						if (stype.equals(OntConceptType.VARIABLE)) {

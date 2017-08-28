@@ -3426,6 +3426,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			String typeStr = pt.getLiteral();
 			return typeStr;
 		}
+		else if (type instanceof SadlUnionType) {
+			try {
+				Object unionObj = sadlTypeReferenceToObject(type);
+				if (unionObj instanceof Node) {
+					return unionObj;
+				}
+				else {
+					addWarning("Unions not yet handled in this context", type);
+				}
+			} catch (JenaProcessorException e) {
+				throw new TranslationException("Error processing union", e);
+			}
+		}
 		throw new TranslationException("Unhandled type of SadlTypeReference");
 	}
 	
@@ -3488,7 +3501,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				Object elobj = translate(predicate);
 			}
-			else if (cnstval.equals("index")) {
+			else if (cnstval.endsWith("index")) {
 				if (subject instanceof PropOfSubject) {
 					predicate = ((PropOfSubject)subject).getLeft();
 					subject = ((PropOfSubject)subject).getRight();
@@ -3503,6 +3516,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else if (cnstval.equals("last element")) {
 //				throw new TranslationException("Handling 'last element of' not yet implemented");
 				addError("'last element of' not yet implemented", expr);
+				return null;
+			}
+			else if (cnstval.endsWith(" element")) {
+				addError("'" + cnstval + "of' not yet implemented", expr);
 				return null;
 			}
 			else {
@@ -3767,6 +3784,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			while (citer.hasNext()) {
 				SadlResource sr = citer.next();
 				String nm = getDeclarationExtensions().getConceptUri(sr);
+				SadlResource decl = getDeclarationExtensions().getDeclaration(sr);
+				if (!(decl.equals(sr))) {
+					// defined already
+					try {
+						if (getDeclarationExtensions().getOntConceptType(decl).equals(OntConceptType.STRUCTURE_NAME)) {
+							addError("This is already a Named Structure", sr);
+						}
+					} catch (CircularDefinitionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 				newNames.add(nm);
 				EList<SadlAnnotation> anns = sr.getAnnotations();
 				if (anns != null && anns.size() > 0) {
