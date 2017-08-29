@@ -235,6 +235,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNEXPECTED_TRIPLE = new SadlErrorMessage("unexpected_triple");
 /**
+* Comparison using {0} cannot have a constant or literal on both sides.
+**/
+    public static final SadlErrorMessage COMPARISON_LITERALS_CONSTANTS = new SadlErrorMessage("comparison_literals_constants");
+/**
 * type checking doesn't handle {0}
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
