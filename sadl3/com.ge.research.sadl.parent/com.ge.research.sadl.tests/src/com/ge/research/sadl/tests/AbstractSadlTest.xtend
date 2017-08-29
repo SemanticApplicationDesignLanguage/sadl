@@ -39,6 +39,10 @@ import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.util.StringInputStream
 import org.junit.Before
 import org.junit.runner.RunWith
+import com.ge.research.sadl.scoping.TestScopeProvider
+import com.ge.research.sadl.model.DeclarationExtensions
+import org.eclipse.xtext.EcoreUtil2
+import com.ge.research.sadl.sADL.SadlResource
 
 /**
  * Base SADL test class.
@@ -54,6 +58,7 @@ import org.junit.runner.RunWith
 abstract class AbstractSadlTest {
 	
 	@Inject protected extension ValidationTestHelper;
+	@Inject protected extension DeclarationExtensions;
 
 	@Inject protected ParseHelper<SadlModel> parseHelper;
 	@Inject protected Provider<XtextResourceSet> resourceSetProvider;
@@ -80,6 +85,22 @@ abstract class AbstractSadlTest {
 	@Before
 	def void initialize() {
 		currentResourceSet = resourceSetProvider.get
+	}
+	
+	protected def getSadlResourcesFrom(Resource it) {
+		(contents.head as SadlModel).sadlResourcesFrom;
+	}
+	
+	protected def getSadlResourcesFrom(SadlModel it) {
+		return EcoreUtil2.getAllContentsOfType(it, SadlResource).toMap([concreteName]);
+	}
+	
+	/**
+	 * Enables the `ambiguous name detection` on the given resource. Returns with the argument.
+	 */
+	protected def <R extends Resource> R enableAmbiguousNameDetection(R resource) {
+		TestScopeProvider.registerResource(resource, true);
+		return resource;
 	}
 	
 	protected def XtextResource sadl(CharSequence seq) {
