@@ -78,6 +78,7 @@ import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.ge.research.sadl.sADL.impl.NumberLiteralImpl;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -440,12 +441,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	public boolean validateBinaryOperationByParts(EObject expression, Expression leftExpression,
 			Expression rightExpression, String op, StringBuilder errorMessageBuilder) {
 		List<String> operations = Arrays.asList(op.split("\\s+"));
+		boolean errorsFound = false;
 		
 		if(skipOperations(operations)){
 			return true;
 		}
 		if (skipNonCheckedExpressions(leftExpression, rightExpression)) {
 			return true;
+		}
+		if (!passLiteralConstantComparisonCheck(expression, leftExpression, rightExpression, op, errorMessageBuilder)) {
+			errorsFound = true;
 		}
 		try {	
 			boolean dontTypeCheck = false;
@@ -476,7 +481,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if(!dontTypeCheck && !compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				if (expression.eContainer() instanceof TestStatement && isQuery(leftExpression)) {
 					// you can't tell what type a query will return
-					return true;
+					return !errorsFound;
 				}
 				if (!rulePremiseVariableAssignment(operations, leftTypeCheckInfo,rightTypeCheckInfo)) {
 					String effectiveOp = op;
@@ -490,12 +495,30 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			//It's possible there may be a local type restriction
 			handleLocalRestriction(leftExpression,rightExpression,leftTypeCheckInfo,rightTypeCheckInfo);
-			return true;
+			return !errorsFound;
 		} catch (Throwable t) {
 			return handleValidationException(expression, t);
 		}
 	}
 	
+	private boolean passLiteralConstantComparisonCheck(EObject expression, Expression leftExpression,
+			Expression rightExpression, String op, StringBuilder errorMessageBuilder) {
+		if (modelProcessor.canBeNumericOperator(op)) {
+			if (isLiteralOrConstant(leftExpression) && isLiteralOrConstant(rightExpression)) {
+				errorMessageBuilder.append(SadlErrorMessages.COMPARISON_LITERALS_CONSTANTS.get(op));
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isLiteralOrConstant(Expression expr) {
+		if (expr instanceof Constant || expr instanceof NumberLiteral) {
+			return true;
+		}
+		return false;
+	}
+
 	private boolean skipNonCheckedExpressions(Expression leftExpression, Expression rightExpression) {
 		Expression rExpr = rightExpression;
 		if (rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getOp().equals("not")) {
