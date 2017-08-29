@@ -3426,7 +3426,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			String typeStr = pt.getLiteral();
 			return typeStr;
 		}
-		throw new TranslationException("Unhandled type of SadlTypeReference");
+		else if (type instanceof SadlUnionType) {
+			try {
+				Object unionObj = sadlTypeReferenceToObject(type);
+				if (unionObj instanceof Node) {
+					return unionObj;
+				}
+				else {
+					addWarning("Unions not yet handled in this context", type);
+				}
+			} catch (JenaProcessorException e) {
+				throw new TranslationException("Error processing union", e);
+			}
+		}		throw new TranslationException("Unhandled type of SadlTypeReference");
 	}
 	
 	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
@@ -3767,7 +3779,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			while (citer.hasNext()) {
 				SadlResource sr = citer.next();
 				String nm = getDeclarationExtensions().getConceptUri(sr);
-				newNames.add(nm);
+				SadlResource decl = getDeclarationExtensions().getDeclaration(sr);
+				if (!(decl.equals(sr))) {
+					// defined already
+					try {
+						if (getDeclarationExtensions().getOntConceptType(decl).equals(OntConceptType.STRUCTURE_NAME)) {
+							addError("This is already a Named Structure", sr);
+						}
+					} catch (CircularDefinitionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+ 				newNames.add(nm);
 				EList<SadlAnnotation> anns = sr.getAnnotations();
 				if (anns != null && anns.size() > 0) {
 					if (nmanns == null) {
