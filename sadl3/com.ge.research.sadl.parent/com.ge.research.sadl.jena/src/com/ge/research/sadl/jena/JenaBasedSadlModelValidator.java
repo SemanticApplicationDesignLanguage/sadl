@@ -1239,6 +1239,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected Declaration subjHasPropIsDeclaration(SubjHasProp expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (expression.getLeft() instanceof Declaration) {
 			TypeCheckInfo declType = getType(((Declaration)expression.getLeft()).getType());
+			if (declType == null) {
+				throw new TranslationException("Declaration has no type");
+			}
 			Object tct = declType.getTypeCheckType();
 			if (tct instanceof ConceptName && ((ConceptName)tct).getType() != null && ((ConceptName)tct).getType().equals(ConceptType.ONTCLASS)) {
 				return (Declaration)expression.getLeft();
