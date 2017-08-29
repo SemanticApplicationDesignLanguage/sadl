@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
-    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="***********************************************************************&#xA;Copyright 2007-2016- General Electric Company, All Rights Reserved&#xA; *&#xA;Project: SADL&#xA; *&#xA;Description: The Semantic Application Design Language (SADL) is a&#xA;language for building semantic models and expressing rules that&#xA;capture additional domain knowledge. The SADL-IDE (integrated&#xA;development environment) is a set of Eclipse plug-ins that&#xA;support the editing and testing of semantic models using the&#xA;SADL language.&#xA; *&#xA;This software is distributed &quot;AS-IS&quot; without ANY WARRANTIES&#xA;and licensed under the Eclipse Public License - v 1.0&#xA;which is available at http://www.eclipse.org/org/documents/epl-v10.php&#xA; *&#xA; **********************************************************************"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="***********************************************************************&#xD;&#xA;Copyright 2007-2016- General Electric Company, All Rights Reserved&#xD;&#xA; *&#xD;&#xA;Project: SADL&#xD;&#xA; *&#xD;&#xA;Description: The Semantic Application Design Language (SADL) is a&#xD;&#xA;language for building semantic models and expressing rules that&#xD;&#xA;capture additional domain knowledge. The SADL-IDE (integrated&#xD;&#xA;development environment) is a set of Eclipse plug-ins that&#xD;&#xA;support the editing and testing of semantic models using the&#xD;&#xA;SADL language.&#xD;&#xA; *&#xD;&#xA;This software is distributed &quot;AS-IS&quot; without ANY WARRANTIES&#xD;&#xA;and licensed under the Eclipse Public License - v 1.0&#xD;&#xA;which is available at http://www.eclipse.org/org/documents/epl-v10.php&#xD;&#xA; *&#xD;&#xA; **********************************************************************"
     modelDirectory="/com.ge.research.sadl/src-gen" modelPluginID="com.ge.research.sadl"
     forceOverwrite="true" modelName="SADL" updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
     complianceLevel="6.0" copyrightFields="false" runtimeVersion="2.12">
@@ -321,10 +321,6 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/after"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ElementInList/element"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//Unit">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Unit/value"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Unit/unit"/>
-    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//Declaration">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Declaration/article"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Declaration/type"/>
@@ -336,6 +332,10 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//NumberLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//NumberLiteral/value"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//Unit">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//Unit/value"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//Unit/unit"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//BooleanLiteral">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BooleanLiteral/value"/>

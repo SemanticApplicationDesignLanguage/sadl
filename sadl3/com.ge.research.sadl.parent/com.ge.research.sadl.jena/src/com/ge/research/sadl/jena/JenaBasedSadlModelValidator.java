@@ -902,17 +902,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			stringLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(stringLiteralConceptName, stringLiteralConceptName, this, expression);
 		}
-		else if(expression instanceof Unit) {
-			Expression value = ((Unit)expression).getValue();
-			if (!getModelProcessor().ignoreUnittedQuantities) {
-				return getUnittedQuantityTypeCheckInfo(expression);
-			}
-			return getType(value);
-		} 
-		else if(expression instanceof NumberLiteral || expression instanceof SadlNumberLiteral){
+		else if(expression instanceof NumberLiteral || expression instanceof SadlNumberLiteral || expression instanceof Unit){
 			BigDecimal value;
 			Literal litval;
-			if (expression instanceof NumberLiteral) {
+			if (expression instanceof Unit) { 
+				value = ((Unit)expression).getValue().getValue();
+				if (!getModelProcessor().ignoreUnittedQuantities) {
+					return getUnittedQuantityTypeCheckInfo(expression);
+				}
+			}
+			else if (expression instanceof NumberLiteral) {
 				value = ((NumberLiteral)expression).getValue();
 			}
 			else {
