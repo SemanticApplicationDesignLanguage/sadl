@@ -81,7 +81,7 @@ class ValidationTest {
 		'''.sadl
 		TestScopeProvider.registerResource(model, true)
 		val issues = validationTestHelper.validate(model)
-		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use an alias or choose different names.", issues.head.message)
+		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use a prefix to disambiguate name.", issues.head.message)
 	}
 	
 	@Test def void testLinkingAmbiguousElementsIndirect() {
@@ -110,7 +110,7 @@ class ValidationTest {
 		'''.sadl
 		TestScopeProvider.registerResource(model, true)
 		val issues = validationTestHelper.validate(model)
-		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use an alias or choose different names.", issues.head.message)
+		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use a prefix to disambiguate name.", issues.head.message)
 	}
 	
 	@Test def void testLinkingAmbiguousElementsBigger() {
