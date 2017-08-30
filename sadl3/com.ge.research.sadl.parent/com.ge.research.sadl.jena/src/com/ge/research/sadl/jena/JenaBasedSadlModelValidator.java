@@ -513,7 +513,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean isLiteralOrConstant(Expression expr) {
-		if (expr instanceof Constant || expr instanceof NumberLiteral) {
+		if ((expr instanceof Constant && 
+				(((Constant)expr).getConstant().equals("PI") || ((Constant)expr).getConstant().equals("e"))) 
+				|| expr instanceof NumberLiteral) {
 			return true;
 		}
 		return false;
