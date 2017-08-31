@@ -107,6 +107,10 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
+	private static final int MIN_INT = -2147483648;
+	private static final int MAX_INT = 2147483647;
+	private static final long MIN_LONG = -9223372036854775808L;
+	private static final long MAX_LONG = 9223372036854775807L;
 	protected ValidationAcceptor issueAcceptor = null;
 	protected OntModel theJenaModel = null;
 	protected DeclarationExtensions declarationExtensions = null;
@@ -477,6 +481,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (leftTypeCheckInfo == null && rightTypeCheckInfo == null) {
 				// this condition happens when a file is loaded in the editor and clean/build is invoked
 				return true;
+			}
+			if (modelProcessor.isComparisonOperator(op) && (rightExpression instanceof NumberLiteral || 
+					rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getExpr() instanceof NumberLiteral)) {
+				checkNumericRangeLimits(op, leftTypeCheckInfo, rightTypeCheckInfo);
 			}
 			if(!dontTypeCheck && !compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)){
 				if (expression.eContainer() instanceof TestStatement && isQuery(leftExpression)) {
@@ -928,8 +936,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(stringLiteralConceptName, stringLiteralConceptName, this, expression);
 		}
 		else if(expression instanceof NumberLiteral || expression instanceof SadlNumberLiteral || expression instanceof Unit){
-			BigDecimal value;
-			Literal litval;
+			BigDecimal value = null;
+			Literal litval = null;
 			if (expression instanceof Unit) { 
 				value = ((Unit)expression).getValue().getValue();
 				if (!getModelProcessor().ignoreUnittedQuantities) {
@@ -944,18 +952,34 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return getUnittedQuantityTypeCheckInfo(expression);
 				}
 				String strval = ((SadlNumberLiteral)expression).getLiteralNumber();
-				if (strval.indexOf('.') >= 0) {
-					value = BigDecimal.valueOf(Double.parseDouble(strval));
+				try {
+					if (strval.indexOf('.') >= 0) {
+						value = BigDecimal.valueOf(Double.parseDouble(strval));
+					}
+					else {
+						value = BigDecimal.valueOf(Long.parseLong(strval));
+					}
 				}
-				else {
-					value = BigDecimal.valueOf(Long.parseLong(strval));
+				catch (NumberFormatException e) {
+					issueAcceptor.addError("Error converting to a number", expression);
+					return null;
 				}
 			}
 			ConceptName numberLiteralConceptName = null;
 			if (value.stripTrailingZeros().scale() <= 0 || value.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0) {
-				numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
-				litval = theJenaModel.createTypedLiteral(value.intValue());
-				
+				if (value.compareTo(BigDecimal.valueOf(2147483647L)) <= 0 && value.compareTo(BigDecimal.valueOf(-2147483648L)) >= 0) {
+					numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
+					litval = theJenaModel.createTypedLiteral(value.intValue());
+				}
+				else {
+					numberLiteralConceptName = new ConceptName(XSD.xlong.getURI());
+					if (value.compareTo(BigDecimal.valueOf(MAX_LONG)) > 0 || value.compareTo(BigDecimal.valueOf(MIN_LONG)) < 0) {
+						issueAcceptor.addError("Error converting to a number", expression);
+					}
+					else {
+						litval = theJenaModel.createTypedLiteral(value.longValue());
+					}
+				}
 			}
 			else {
 				numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
@@ -1263,6 +1287,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected Declaration subjHasPropIsDeclaration(SubjHasProp expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (expression.getLeft() instanceof Declaration) {
 			TypeCheckInfo declType = getType(((Declaration)expression.getLeft()).getType());
+			if (declType == null) {
+				throw new TranslationException("Declaration has no type");
+			}
 			Object tct = declType.getTypeCheckType();
 			if (tct instanceof ConceptName && ((ConceptName)tct).getType() != null && ((ConceptName)tct).getType().equals(ConceptType.ONTCLASS)) {
 				return (Declaration)expression.getLeft();
@@ -3626,6 +3653,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		TypeCheckInfo valType = getType(val);
 		List<String> operations = Arrays.asList("is");
+		if (declarationExtensions.getOntConceptType(pred).equals(OntConceptType.DATATYPE_PROPERTY)) {
+			if (!checkNumericRangeLimits("=", predType, valType)) {
+				return true;  // return true so as to not generate error at higher level; failure has already created marker
+			}
+		}
 		if (compareTypes(operations , pred, val, predType, valType)) {
 			return true;
 		}
@@ -3672,6 +3704,63 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //			return checkDataPropertyValueInRange(theJenaModel, null, prop, val);
 //		}
 		return false;
+	}
+
+	private boolean checkNumericRangeLimits(String op, TypeCheckInfo predType, TypeCheckInfo valType) {
+		if (valType == null || predType == null) {
+			return false;	// assume caught else where	
+		}
+		if (valType.getExplicitValue() instanceof Literal) {
+			 Object value = ((Literal)valType.getExplicitValue()).getValue();
+			  ConceptIdentifier rngType = predType.getTypeCheckType();
+			  boolean outOfRange = false;
+			  if (rngType.toString().equals(XSD.xint.getURI())) {
+				  if (op.contains(">") || op.contains("<")) {
+					  if (value instanceof Long && ((Long)value >= MAX_INT || (Long)value <= MIN_INT)) {
+						  outOfRange = true;
+					  }
+					  else if (value instanceof Integer && ((Integer)value >= MAX_INT || (Integer)value <= MIN_INT)) {
+						  outOfRange = true;
+					  }
+				  }
+				  else {
+					  if (value instanceof Long && ((Long)value > 2147483647 || (Long)value < -2147483648)) {
+						  outOfRange = true;
+					  }
+					  else if (value instanceof Integer && ((Integer)value > 2147483647 || (Integer)value < -2147483648)) {
+						  outOfRange = true;
+					  }
+				  }
+				  if (outOfRange) {
+					  modelProcessor.addIssueToAcceptor("Value is not in range of property", valType.context);
+					  return false;
+				  }
+			  }
+			  else if (rngType.toString().equals(XSD.xlong.getURI())) {
+				  if (op.contains(">") || op.contains("<")) {
+					  if (value instanceof Long && ((Long)value >= MAX_LONG || (Long)value <= MIN_LONG)) {
+						  outOfRange = true;
+					  }
+					  else if (value instanceof Integer && ((Integer)value >= MAX_LONG || (Integer)value <= MIN_LONG)) {
+						  outOfRange = true;
+					  }
+				  }
+				  else {
+					  if (value instanceof Long && ((Long)value > MAX_LONG || (Long)value < MIN_LONG)) {
+						  outOfRange = true;
+					  }
+					  else if (value instanceof Integer && ((Integer)value > MAX_LONG || (Integer)value < MIN_LONG)) {
+						  outOfRange = true;
+					  }
+				  }
+				  if (outOfRange) {
+					  modelProcessor.addIssueToAcceptor("Value is not in range of property", valType.context);
+					  return false;
+				  }
+			  }
+			 
+		}
+		return true;	// if we don't detect a problem assume that there isn't one
 	}
 
 	public boolean checkDataPropertyValueInRange(OntModel theJenaModel2, Resource subj, OntProperty prop, Literal val) {
