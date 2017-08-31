@@ -8,6 +8,7 @@
  */
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.common.collect.Iterables
 import org.eclipse.xtext.testing.InjectWith
@@ -19,7 +20,7 @@ import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
+class SadlModelProcessorTestTypeChecking extends AbstractSADLParsingTest {
 
 	@Test
 	def void testRuleVariableAsDomain() {
