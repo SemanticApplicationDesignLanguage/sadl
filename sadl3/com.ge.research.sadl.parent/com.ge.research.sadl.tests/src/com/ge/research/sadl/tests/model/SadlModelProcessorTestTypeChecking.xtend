@@ -12,7 +12,6 @@ import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.common.collect.Iterables
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -54,8 +53,6 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 			"Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
 	}
 
-	@Ignore("This test should pass, just like the one following. It should not be necessary to specify the prefix of the current model to reference a SadlResource in the current model, 
-			even if there is an imported SadlResource with the same local name.")
 	@Test
 	def void testUserDefinedEquation1() {
 		val sadlModel = '''
@@ -78,9 +75,9 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 			Pet is a class, described by caredFor with a single value of type boolean.
 			owns describes Person with values of type Pet.
 			
-			External subtractDates(dateTime t1, dateTime t2, string u) returns float : "http://sadl.org/builtins/subtractDates".
+			External Test1:subtractDates(dateTime t1, dateTime t2, string u) returns float : "http://sadl.org/builtins/subtractDates".
 			
-			Rule AgeRule: if p is a LivingThing then age of p is subtractDates(now(), dateOfBirth of p, "y"). 		
+			Rule AgeRule: if p is a LivingThing then age of p is Test1:subtractDates(now(), dateOfBirth of p, "y").
 		'''.sadl
 		sadlModel.assertNoErrors
 	}
@@ -382,6 +379,23 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 
 		val issues_3 = validate(model_3);
 		assertEquals(Iterables.toString(issues_3), 0, issues_3.size);
+	}
+	
+	@Test
+	def void testLocalVsImportedNames_GH_226_x() {
+
+		val model_1 = '''
+			uri "http://sadl.org/ExternalFooBar.sadl" alias efb.
+			
+			External efb:addOne(decimal X) returns decimal: "http://some/other/ns#addOne".
+			
+			Rule R1:
+				if x = 1 and y = builtinfunctions:addOne(x) and z = efb:addOne(x)
+				then print("builtinfunctions:addOne returned ",y," , efb:addOne returned ", z).
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_1 = validate(model_1);
+		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
 	}
 
 }
