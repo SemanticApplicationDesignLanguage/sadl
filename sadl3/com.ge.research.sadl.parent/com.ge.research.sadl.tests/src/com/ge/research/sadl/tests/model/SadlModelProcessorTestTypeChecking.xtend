@@ -252,7 +252,7 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 	
 	@Test
 	def void testLocalVsImportedNames_GH_226_10() {
-		val i1 = '''
+		'''
 			uri "http://sadl.org/I1.sadl" alias I1.
 			Foo is a class.
 		'''.sadl;
@@ -270,9 +270,8 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 		'''.sadl.enableAmbiguousNameDetection;
 
 		val issues_1 = validate(model_1);
-		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
-		assertFalse(model_1.sadlResourcesFrom + "", model_1.sadlResourcesFrom.containsKey('Foo'));
-		assertTrue(i1.sadlResourcesFrom.containsKey('Foo'));
+		assertEquals(Iterables.toString(issues_1), 1, issues_1.size);
+		assertTrue(issues_1.head.message, issues_1.head.message.startsWith('''Ambiguously imported name 'Foo'''));
 
 		val model_2 = '''
 			uri "http://sadl.org/Current_2.sadl" alias current_2.
@@ -284,6 +283,105 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 
 		val issues_2 = validate(model_2);
 		assertEquals(Iterables.toString(issues_2), 0, issues_2.size);
+	}
+	
+	@Test
+	def void testLocalVsImportedNames_GH_226_13() {
+		'''
+			uri "http://sadl.org/I1.sadl" alias I1.
+			Foo is a class.
+		'''.sadl;
+
+		'''
+			uri "http://sadl.org/I2.sadl" alias I2.
+			Foo is a class.
+		'''.sadl;
+
+		val model_1 = '''
+			uri "http://sadl.org/Current_1.sadl" alias current_1.
+			import "http://sadl.org/I1.sadl" as i1.
+			import "http://sadl.org/I2.sadl" as i2.
+			
+			Foo is a class.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_1 = validate(model_1);
+		assertEquals(Iterables.toString(issues_1), 1, issues_1.size);
+		assertTrue(issues_1.head.message, issues_1.head.message.startsWith('''Ambiguously imported name 'Foo'''));
+
+		val model_2 = '''
+			uri "http://sadl.org/Current_2.sadl" alias current_2.
+			import "http://sadl.org/I1.sadl" as i1.
+			import "http://sadl.org/I2.sadl" as i2.
+			
+			Bar is a type of Foo.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_2 = validate(model_2);
+		assertEquals(Iterables.toString(issues_2), 1, issues_2.size);
+		assertTrue(issues_2.head.message, issues_2.head.message.startsWith('''Ambiguously imported name 'Foo'''));
+		
+		val model_3 = '''
+			uri "http://sadl.org/Current_3.sadl" alias current_3.
+			import "http://sadl.org/I1.sadl" as i1.
+			import "http://sadl.org/I2.sadl" as i2.
+			
+			current_3:Foo is a class.
+			Bar is a type of current_3:Foo.
+			Baz is a type of i1:Foo.
+			Qux is a type of i2:Foo.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_3 = validate(model_3);
+		assertEquals(Iterables.toString(issues_3), 0, issues_3.size);
+	}
+	
+	@Test
+	def void testLocalVsImportedNames_GH_226_14() {
+		'''
+			uri "http://sadl.org/I1.sadl" alias I1.
+			Foo is a class.
+		'''.sadl;
+
+		'''
+			uri "http://sadl.org/I2.sadl" alias I2.
+		'''.sadl;
+
+		val model_1 = '''
+			uri "http://sadl.org/Current_1.sadl" alias current_1.
+			import "http://sadl.org/I1.sadl" as i1.
+			import "http://sadl.org/I2.sadl" as i2.
+			
+			Foo is a class.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_1 = validate(model_1);
+		assertEquals(Iterables.toString(issues_1), 1, issues_1.size);
+		assertTrue(issues_1.head.message, issues_1.head.message.startsWith('''Ambiguously imported name 'Foo'''));
+
+		val model_2 = '''
+			uri "http://sadl.org/Current_2.sadl" alias current_2.
+			import "http://sadl.org/I1.sadl" as i1.
+			import "http://sadl.org/I2.sadl" as i2.
+			
+			Bar is a type of Foo.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_2 = validate(model_2);
+		assertEquals(Iterables.toString(issues_2), 0, issues_2.size);
+		
+		val model_3 = '''
+			uri "http://sadl.org/Current_3.sadl" alias current_3.
+			import "http://sadl.org/I1.sadl" as i1.
+			import "http://sadl.org/I2.sadl" as i2.
+			
+			current_3:Foo is a class.
+			Bar is a type of current_3:Foo.
+			Baz is a type of i1:Foo.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_3 = validate(model_3);
+		assertEquals(Iterables.toString(issues_3), 0, issues_3.size);
 	}
 
 }

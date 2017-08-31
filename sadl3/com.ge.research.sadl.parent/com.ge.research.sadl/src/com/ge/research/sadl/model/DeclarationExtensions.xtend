@@ -57,7 +57,28 @@ class DeclarationExtensions {
 	
 	@Inject ValueConverterService.QNameConverter converter
 	
-	def String getConcreteName(SadlResource it) {
+	/**
+	 * Unlike {@link #getConcreteName(SadlResource)} this can be configured, whether the any leading prefixes
+	 * has to be trimmed from the concrete name or not. Let assume the following SADL model:
+	 * 
+	 * <pre>
+	 * uri "http://sadl.org/Current.sadl" alias current.
+	 * current:Foo is a class.
+	 * </pre>
+	 * Then
+	 * <pre>
+	 * val extensions = // ...
+	 * val resource = // ...
+	 * 
+	 * println(extensions.getConcreteName(resource)); // Foo
+	 * println(extensions.getConcreteName(resource, true)); // Foo
+	 * println(extensions.getConcreteName(resource, false)); // current:Foo
+	 * </pre>
+	 * 
+	 * @param it the SADL resource who's name we are looking for.
+	 * @param trimPrefix when {@code true} any leading prefixes (if any) will be omitted from the result.
+	 */
+	def String getConcreteName(SadlResource it, boolean trimPrefix) {
 		if (isExternal) {
 			return getExternalResourceAdapter.concreteName;
 		}
@@ -68,18 +89,20 @@ class DeclarationExtensions {
 			if (name.isNullOrEmpty) {
 				return null;
 			}
-			val index = name.lastIndexOf(QualifiedNameConverter.SEGMENT_SEPARATOR);
-			if (index !== -1) {
-				val ()=>String aliasSupplier = [
-					EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;	
-				];
-				val alias = if (resource !== null) {
-					resource.cache.get(it -> 'alias', resource, aliasSupplier);
-				} else {
-					aliasSupplier.apply;
-				};
-				if (alias == name.substring(0, index) && name.length >= (index + 1)) {
-					name = name.substring(index + 1);
+			if (trimPrefix) {				
+				val index = name.lastIndexOf(QualifiedNameConverter.SEGMENT_SEPARATOR);
+				if (index !== -1) {
+					val ()=>String aliasSupplier = [
+						EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;	
+					];
+					val alias = if (resource !== null) {
+						resource.cache.get(it -> 'alias', resource, aliasSupplier);
+					} else {
+						aliasSupplier.apply;
+					};
+					if (alias == name.substring(0, index) && name.length >= (index + 1)) {
+						name = name.substring(index + 1);
+					}
 				}
 			}
 			// this will be null when a resource is open in the editor and a clean/build is performed ??
@@ -92,7 +115,17 @@ class DeclarationExtensions {
 		if (resource === null) {
 			return nameSupplyer.apply;
 		}
-		return resource.cache.get(it -> 'concreteName', eResource, nameSupplyer)
+		return resource.cache.get(it -> '''concreteName[trimPrefix«trimPrefix»]''', eResource, nameSupplyer)
+	}
+	
+	/**
+	 * Returns with the concrete name of the SADL resource argument. Any leading prefixes will be removed
+	 * from the name.
+	 * <p>
+	 * This method is equivalent with calling {@link getConcreteName(SadlResource, true)}.
+	 */
+	def String getConcreteName(SadlResource it) {
+		return getConcreteName(it, true);
 	}
 
 	private def dispatch findNamedNodes(SadlResource it) {
