@@ -223,6 +223,68 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
  		]
 	}
 
+	@Test
+	def void testLiteralOutOfRangeInt() {
+		var errs = newArrayList("Value is not in range of property",
+			"Unable to convert value '-2147483649 (-2147483649)' to type 'http://www.w3.org/2001/XMLSchema#int'(For input string: \"-2147483649\")",
+			"Value is not in range of property",
+			"Unable to convert value '2147483648 (2147483648)' to type 'http://www.w3.org/2001/XMLSchema#int'(For input string: \"2147483648\"))",
+			"Value is not in range of property",
+			"Value is not in range of property"
+		)
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type int.
+			 MyFoo1 is a Foo with bar -2147483649 .
+			 MyFoo2 is a Foo with bar 2147483648 .
+			 
+			 Rule R1 if f is a Foo and bar of f > 2147483648 then print("bigger than int").
+			 Rule R2 if f is a Foo then bar of f is -2147483649 .
+ 		'''.sadl
+ 		val issues = validationTestHelper.validate(sadlModel)
+		assertNotNull(issues)
+		assertEquals(6, issues.size)
+		var errIdx = 0
+		for (issue:issues) {
+			val err = errs.get(errIdx++)
+			if (!issue.toString.equals(err)) {
+				System.out.println(issue.toString + " != " + err)
+			}
+		}
+ 	}
+
+	@Test
+	def void testLiteralOutOfRangeLong() {
+		var errs = newArrayList("Error converting to a number",
+			"Unable to convert value '-9223372036854775809' to type 'http://www.w3.org/2001/XMLSchema#long'(For input string: \"-9223372036854775809\")",
+			"Error converting to a number",
+			"Unable to convert value '9223372036854775808' to type 'http://www.w3.org/2001/XMLSchema#long'(For input string: \"9223372036854775808\")",
+			"Error converting to a number",
+			"Error converting to a number"
+		)
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type long.
+			 MyFoo1 is a Foo with bar -9223372036854775809 .
+			 MyFoo2 is a Foo with bar 9223372036854775808 .
+			 
+			 Rule R1 if f is a Foo and bar of f > 9223372036854775808 then print("bigger than long").
+			 Rule R2 if f is a Foo then bar of f is -9223372036854775809 .
+ 		'''.sadl
+		val issues = validationTestHelper.validate(sadlModel)
+		assertNotNull(issues)
+		assertEquals(6, issues.size)
+		var errIdx = 0
+		for (issue:issues) {
+			val err = errs.get(errIdx++)
+			if (!issue.toString.equals(err)) {
+				System.out.println(issue.toString + " != " + err)
+			}
+		}
+	}
+
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)
