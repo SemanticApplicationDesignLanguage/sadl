@@ -306,7 +306,7 @@ class DeclarationExtensions {
 					OntConceptType.STRUCTURE_NAME					
 					
 				default: {
-					if (resource.eResource instanceof XtextResource) {
+					if (resource !== null && resource.eResource instanceof XtextResource) {
 						val xtextResource = resource.eResource as XtextResource;
 						val contribution = xtextResource.resourceServiceProvider.get(IDeclarationExtensionsContribution);
 						if (contribution !== null) {
