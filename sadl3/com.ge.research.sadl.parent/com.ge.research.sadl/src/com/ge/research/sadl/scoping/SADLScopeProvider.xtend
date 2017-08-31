@@ -58,6 +58,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 
 /**
  * This class contains custom scoping description.
@@ -67,9 +68,9 @@ import org.eclipse.xtext.util.OnChangeEvictingCache
  */
 class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 
-	@Inject extension DeclarationExtensions
+	@Inject protected extension DeclarationExtensions
 	@Inject OnChangeEvictingCache cache
-	@Inject IQualifiedNameConverter converter
+	@Inject protected IQualifiedNameConverter converter
 	
 	boolean ambiguousNameDetection;
 	
@@ -193,7 +194,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	protected def getLocalScope4(Resource resource, QualifiedName namespace, IScope parentScope) {
 		return internalGetLocalResourceScope(resource, namespace, parentScope) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES
+				return (eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES) ||
+				(eContainer instanceof SadlCanOnlyBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_CAN_ONLY_BE_ONE_OF__VALUES)
 			} 
 			return false
 		]
@@ -377,7 +379,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		
 	}
 	
-	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
+	protected def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 
 		if (obj instanceof SadlResource) {
 			// Do not put parameters of external and local equation statements into the scope.

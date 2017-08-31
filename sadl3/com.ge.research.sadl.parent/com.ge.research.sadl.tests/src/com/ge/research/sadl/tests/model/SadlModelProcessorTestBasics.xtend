@@ -290,6 +290,39 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 		}
 		assertEquals(mismatches, 0)
 	}
+	
+	@Test
+	def void testInstanceInConditionBeforeDeclaration() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias m.
+			 
+			  SYSTEM is a class.
+			      property_1 describes SYSTEM with values of type CLASS.
+			      property_1 of SYSTEM only has values of type CLASS.
+			      property_1 of SYSTEM has exactly 1 values.
+			      property_1 of SYSTEM always has value Instance_1. 
+			      
+			  CLASS is a class, must be one of {Instance_1, Instance_2}.
+
+			  SYSTEM2 is a class.
+			     property_1b describes SYSTEM2 with values of type CLASS2.
+			     property_1b of SYSTEM2 only has values of type CLASS2.
+			     property_1b of SYSTEM2 has exactly 1 values.
+			     property_1b of SYSTEM2 always has value Instance_1b. 
+			      
+			 CLASS2 is a class, can only be one of {Instance_1b, Instance_2b}.
+			 
+			 Bar is a class.
+			 OtherClass is a class described by foo with values of type Bar.
+			 foo of OtherClass always has value GoldBar.
+			 
+			 GoldBar is a Bar.
+		'''.assertValidatesTo[jenaModel, issues |
+				assertNotNull(jenaModel)
+//				jenaModel.write(System.out)
+				assertTrue(issues.size == 0)
+			]
+	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)

@@ -6693,7 +6693,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						}
 						val = getTheJenaModel().getIndividual(valUri);
 						if (val == null) {
-							throw new JenaProcessorException("Failed to retrieve instance '" + valUri + "' from Jena model");
+							SadlResource decl = getDeclarationExtensions().getDeclaration(srValue);
+							if (decl != null && !decl.equals(srValue)) {
+								EObject cont = decl.eContainer();
+								if (cont instanceof SadlInstance) {
+									try {
+										val = processSadlInstance((SadlInstance)cont);
+									} catch (CircularDefinitionException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+								else if (cont instanceof SadlMustBeOneOf) {
+									cont = ((SadlMustBeOneOf)cont).eContainer();
+									if (cont instanceof SadlClassOrPropertyDeclaration) {
+										try {
+											processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) cont);
+										} catch (TranslationException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										val = getTheJenaModel().getIndividual(valUri);
+									}
+								}
+								else if (cont instanceof SadlCanOnlyBeOneOf) {
+									cont = ((SadlCanOnlyBeOneOf)cont).eContainer();
+									if (cont instanceof SadlClassOrPropertyDeclaration) {
+										try {
+											processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) cont);
+										} catch (TranslationException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										val = getTheJenaModel().getIndividual(valUri);
+									}
+								}
+							}
+							if (val == null) {
+								throw new JenaProcessorException("Failed to retrieve instance '" + valUri + "' from Jena model");
+							}
 						}
 					}
 					else {
