@@ -228,7 +228,7 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 		var errs = newArrayList("Value is not in range of property",
 			"Unable to convert value '-2147483649 (-2147483649)' to type 'http://www.w3.org/2001/XMLSchema#int'(For input string: \"-2147483649\")",
 			"Value is not in range of property",
-			"Unable to convert value '2147483648 (2147483648)' to type 'http://www.w3.org/2001/XMLSchema#int'(For input string: \"2147483648\"))",
+			"Unable to convert value '2147483648 (2147483648)' to type 'http://www.w3.org/2001/XMLSchema#int'(For input string: \"2147483648\")",
 			"Value is not in range of property",
 			"Value is not in range of property"
 		)
@@ -246,12 +246,15 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 		assertNotNull(issues)
 		assertEquals(6, issues.size)
 		var errIdx = 0
+		var mismatches = 0
 		for (issue:issues) {
 			val err = errs.get(errIdx++)
-			if (!issue.toString.equals(err)) {
+			if (!issue.toString.contains(err)) {
 				System.out.println(issue.toString + " != " + err)
+				mismatches++
 			}
 		}
+		assertEquals(mismatches, 0)
  	}
 
 	@Test
@@ -277,12 +280,15 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 		assertNotNull(issues)
 		assertEquals(6, issues.size)
 		var errIdx = 0
+		var mismatches = 0
 		for (issue:issues) {
 			val err = errs.get(errIdx++)
-			if (!issue.toString.equals(err)) {
+			if (!issue.toString.contains(err)) {
 				System.out.println(issue.toString + " != " + err)
+				mismatches++
 			}
 		}
+		assertEquals(mismatches, 0)
 	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
