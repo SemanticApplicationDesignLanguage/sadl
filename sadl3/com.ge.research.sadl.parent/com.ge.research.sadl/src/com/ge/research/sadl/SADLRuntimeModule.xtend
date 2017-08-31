@@ -21,23 +21,25 @@
 package com.ge.research.sadl
 
 import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
+import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy
 import com.ge.research.sadl.scoping.ErrorAddingLinkingService
 import com.ge.research.sadl.scoping.QualifiedNameConverter
 import com.ge.research.sadl.scoping.QualifiedNameProvider
+import com.ge.research.sadl.scoping.SilencedImportedNamesAdapter
 import com.ge.research.sadl.validation.ResourceValidator
 import com.ge.research.sadl.validation.SoftLinkingMessageProvider
+import java.io.IOException
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.linking.impl.DefaultLinkingService
+import org.eclipse.xtext.linking.impl.ImportedNamesAdapter
 import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
 import org.eclipse.xtext.naming.IQualifiedNameConverter
+import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
+import org.eclipse.xtext.parsetree.reconstr.ITokenStream
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
 import org.eclipse.xtext.validation.ResourceValidatorImpl
-import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.parsetree.reconstr.ITokenStream
-import java.io.IOException
-import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -83,6 +85,10 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	
 	def Class<? extends IParseTreeConstructor> bindIParseTreeConstructor() {
 		NoImplParseTreeConstructor
+	}
+	
+	def Class<? extends ImportedNamesAdapter> bindImportedNamesAdapter() {
+		return SilencedImportedNamesAdapter; 
 	}
 	
 	static class NoImplParseTreeConstructor implements IParseTreeConstructor {
