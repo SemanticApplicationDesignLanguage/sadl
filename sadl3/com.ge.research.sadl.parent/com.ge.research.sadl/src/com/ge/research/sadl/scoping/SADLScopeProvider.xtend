@@ -67,9 +67,9 @@ import org.eclipse.xtext.util.OnChangeEvictingCache
  */
 class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 
-	@Inject extension DeclarationExtensions
 	@Inject OnChangeEvictingCache cache
-	@Inject IQualifiedNameConverter converter
+	@Inject protected extension DeclarationExtensions
+	@Inject protected IQualifiedNameConverter converter
 	
 	boolean ambiguousNameDetection;
 	
@@ -134,7 +134,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				if (container.op == 'is' || container.op == '==' || container.op == '=' ||
 					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, SelectExpression) !== null) // we are in the middle of a select expression.
 				) {
-					return true;
+					 return true;
 				}
 			} else if (container instanceof SelectExpression) {
 				if (container.whereExpression instanceof SubjHasProp) {
@@ -377,7 +377,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		
 	}
 	
-	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
+	protected def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 
 		if (obj instanceof SadlResource) {
 			// Do not put parameters of external and local equation statements into the scope.
