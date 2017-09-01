@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,9 +44,11 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
@@ -205,6 +208,8 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -1133,9 +1138,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		else {
-			String implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
+			java.nio.file.Path implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
 			if (implfn != null) {
-				Resource imrsrc = resource.getResourceSet().getResource(URI.createFileURI(implfn), true);
+				final URI uri = getUri(resource, implfn);
+				Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 				if (sadlBuiltinFunctionModel == null) {
 					if (imrsrc instanceof XtextResource) {
 						sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource)imrsrc);
@@ -1169,7 +1175,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	private String checkImplicitBuiltinFunctionModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException {
+	/**
+	 * 
+	 * @param anyResource any resource is just to 
+	 * @param resourcePath the Java NIO path of the resource to load as a `platform:/resource/` if the Eclipse platform is running, otherwise
+	 * 	loads it as a file resource. 
+	 */
+	private URI getUri(Resource anyResource, java.nio.file.Path resourcePath) {
+		Preconditions.checkArgument(anyResource instanceof XtextResource, "Expected an Xtext resource. Got: " + anyResource);
+		if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+			java.nio.file.Path workspaceRootPath = Paths.get(workspaceRoot.getLocationURI());
+			java.nio.file.Path relativePath = workspaceRootPath.relativize(resourcePath);
+			Path relativeResourcePath = new Path(relativePath.toString());
+			return URI.createPlatformResourceURI(relativeResourcePath.toOSString(), true);
+		} else {
+			final PathToFileUriConverter uriConverter = getUriConverter(anyResource);
+			return uriConverter.createFileUri(resourcePath);
+		}
+		
+	}
+	
+	private java.nio.file.Path checkImplicitBuiltinFunctionModelExistence(Resource resource, ProcessorContext context) throws IOException, ConfigurationException {
 		UtilsForJena ufj = new UtilsForJena();
 		String policyFileUrl = ufj.getPolicyFilename(resource);
 		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
@@ -1191,7 +1218,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				catch (Throwable t) {}
 			}
-			return implicitModelFile.getAbsolutePath();
+			return implicitModelFile.getAbsoluteFile().toPath();
 		}
 		return null;
 	}
@@ -1211,8 +1238,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else {
 			java.nio.file.Path implfn = checkImplicitSadlModelExistence(resource, context);
 			if (implfn != null) {
-				final PathToFileUriConverter uriConverter = getUriConverter(resource);
-				final URI uri = uriConverter.createFileUri(implfn);
+				final URI uri = getUri(resource, implfn);
 				Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 				if (sadlImplicitModel == null) {
 					if (imrsrc instanceof XtextResource) {

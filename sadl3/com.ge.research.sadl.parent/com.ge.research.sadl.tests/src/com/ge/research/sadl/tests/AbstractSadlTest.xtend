@@ -19,6 +19,8 @@ package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.external.ExternalEmfResource
 import com.ge.research.sadl.processing.ISadlImplicitModelContentProvider
+import com.ge.research.sadl.processing.OntModelProvider
+import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 import com.google.common.base.Supplier
@@ -37,9 +39,10 @@ import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.util.StringInputStream
 import org.junit.Before
 import org.junit.runner.RunWith
-import com.ge.research.sadl.processing.OntModelProvider
-import com.ge.research.sadl.processing.SadlConstants
-import com.ge.research.sadl.processing.ISadlBuiltinFunctionsModelContentProvider
+import com.ge.research.sadl.scoping.TestScopeProvider
+import com.ge.research.sadl.model.DeclarationExtensions
+import org.eclipse.xtext.EcoreUtil2
+import com.ge.research.sadl.sADL.SadlResource
 
 /**
  * Base SADL test class.
@@ -55,26 +58,26 @@ import com.ge.research.sadl.processing.ISadlBuiltinFunctionsModelContentProvider
 abstract class AbstractSadlTest {
 	
 	@Inject protected extension ValidationTestHelper;
+	@Inject protected extension DeclarationExtensions;
 
 	@Inject protected ParseHelper<SadlModel> parseHelper;
 	@Inject protected Provider<XtextResourceSet> resourceSetProvider;
-	@Inject protected ISadlImplicitModelContentProvider modelContentProvider;
-	@Inject protected ISadlBuiltinFunctionsModelContentProvider builtinModelContentProvider;
+	@Inject protected ISadlImplicitModelContentProvider implicitModelContentProvider;
 	
 	@Accessors(PROTECTED_GETTER)
 	XtextResourceSet currentResourceSet;
 	
 	private val Supplier<Void> implicitModelSupplier = Suppliers.memoize[
-		val uri = URI.createURI(SadlConstants.SADL_IMPLICIT_MODEL_SYNTHETIC_URI);
-		if (!currentResourceSet.resources.map[uri.lastSegment].exists[it == SadlConstants.SADL_IMPLICIT_MODEL_FILENAME]) {
-			val resource = loadResource(modelContentProvider.content, uri);
+		val implicitModelUri = URI.createURI(SadlConstants.SADL_IMPLICIT_MODEL_SYNTHETIC_URI);
+		if (!currentResourceSet.resources.map[URI.lastSegment].exists[it == SadlConstants.SADL_IMPLICIT_MODEL_FILENAME]) {
+			val resource = loadResource(implicitModelContentProvider.content, implicitModelUri);
 			OntModelProvider.find(resource)
 		}
-		val bfuri = URI.createURI(SadlConstants.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
-//		if (!currentResourceSet.resources.map[bfuri.lastSegment].exists[it == SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME]) {
-			val resource = loadResource(builtinModelContentProvider.content, bfuri);
+		val builtinFunctionsUri = URI.createURI(SadlConstants.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
+		if (!currentResourceSet.resources.map[URI.lastSegment].exists[it == SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME]) {
+			val resource = loadResource(SadlTestHelper.SADL_BUILTIN_FUNCTIONS_CONTENT, builtinFunctionsUri);
 			OntModelProvider.find(resource)
-//		}
+		}
 		
 		return null;
 	]
@@ -82,6 +85,22 @@ abstract class AbstractSadlTest {
 	@Before
 	def void initialize() {
 		currentResourceSet = resourceSetProvider.get
+	}
+	
+	protected def getSadlResourcesFrom(Resource it) {
+		(contents.head as SadlModel).sadlResourcesFrom;
+	}
+	
+	protected def getSadlResourcesFrom(SadlModel it) {
+		return EcoreUtil2.getAllContentsOfType(it, SadlResource).toMap([concreteName]);
+	}
+	
+	/**
+	 * Enables the `ambiguous name detection` on the given resource. Returns with the argument.
+	 */
+	protected def <R extends Resource> R enableAmbiguousNameDetection(R resource) {
+		TestScopeProvider.registerResource(resource, true);
+		return resource;
 	}
 	
 	protected def XtextResource sadl(CharSequence seq) {
