@@ -273,6 +273,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private int vNum = 0;	// used to create unique variables
 	private List<String> userDefinedVariables = new ArrayList<String>();
 	
+	private List<EObject> preprocessedEObjects = null;	
+	
 	protected String modelName;
 	protected String modelAlias;
 	protected String modelNamespace;
@@ -3760,6 +3762,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 
 	private List<OntResource> processSadlClassOrPropertyDeclaration(SadlClassOrPropertyDeclaration element) throws JenaProcessorException, TranslationException {
+		if (isEObjectPreprocessed(element)) {
+			return null;
+		}
 		// Get the names of the declared concepts and store in a list
 		List<String> newNames = new ArrayList<String>();
 		Map<String, EList<SadlAnnotation>> nmanns = null;
@@ -6709,6 +6714,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 									if (cont instanceof SadlClassOrPropertyDeclaration) {
 										try {
 											processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) cont);
+											eobjectPreprocessed(cont);
 										} catch (TranslationException e) {
 											// TODO Auto-generated catch block
 											e.printStackTrace();
@@ -6721,6 +6727,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 									if (cont instanceof SadlClassOrPropertyDeclaration) {
 										try {
 											processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) cont);
+											eobjectPreprocessed(cont);
 										} catch (TranslationException e) {
 											// TODO Auto-generated catch block
 											e.printStackTrace();
@@ -8042,6 +8049,26 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 			return getDeclarationFromSubjHasProp((CommaSeparatedAbreviatedExpression)left);
 		}
 		return null;
+	}
+	
+	protected boolean isEObjectPreprocessed(EObject eobj) {
+		if (preprocessedEObjects != null && preprocessedEObjects.contains(eobj)) {
+			return true;
+		}
+		return false;
+	}
+	
+	protected boolean eobjectPreprocessed(EObject eobj) {
+		if (preprocessedEObjects == null) {
+			preprocessedEObjects = new ArrayList<EObject>();
+			preprocessedEObjects.add(eobj);
+			return true;
+		}
+		if (preprocessedEObjects.contains(eobj)) {
+			return false;
+		}
+		preprocessedEObjects.add(eobj);
+		return true;
 	}
 	
 //	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, OntProperty prop) throws JenaProcessorException, TranslationException {
