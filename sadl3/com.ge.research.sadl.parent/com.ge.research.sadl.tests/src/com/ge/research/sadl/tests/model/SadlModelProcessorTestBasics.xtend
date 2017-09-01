@@ -230,21 +230,50 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 			"Value is not in range of property",
 			"Unable to convert value '2147483648 (2147483648)' to type 'http://www.w3.org/2001/XMLSchema#int'(For input string: \"2147483648\")",
 			"Value is not in range of property",
+			"Value is not in range of property",
+			"Value is not in range of property",
+			"Value is not in range of property",
+			"Value is not in range of property",
+			"Value is not in range of property",
+			"Value is not in range of property",
+			"Value is not in range of property",
+			"Value is not in range of property",
 			"Value is not in range of property"
 		)
 		val sadlModel = '''
-			 uri "http://sadl.org/test.sadl" alias test.
+			 uri "http://sadl.org/LiteralOutOfRange.sadl" alias LiteralOutOfRange.
 			 
 			 Foo is a class described by bar with values of type int.
 			 MyFoo1 is a Foo with bar -2147483649 .
 			 MyFoo2 is a Foo with bar 2147483648 .
 			 
-			 Rule R1 if f is a Foo and bar of f > 2147483648 then print("bigger than int").
+			 Rule R1 if f is a Foo and bar of f > 2147483648 then print("big").
 			 Rule R2 if f is a Foo then bar of f is -2147483649 .
+			 
+			 Rule R3 if f is a Foo and bar of f >= 2147483648 then print("big").
+			 Rule R4 if f is a Foo then bar of f is -2147483649 .
+			 
+			 Rule R5 if f is a Foo and bar of f < -2147483649 then print("big").
+			 Rule R6 if f is a Foo then bar of f is -2147483649 .
+			 
+			 Rule R7 if f is a Foo and bar of f <= -2147483649 then print("big").
+			 Rule R8 if f is a Foo then bar of f is -2147483649 .
+			  
+			 Rule R9 if f is a Foo and bar of f > 2147483647 then print("big").
+			 Rule R10 if f is a Foo then bar of f is -2147483648 .
+			 
+			 Rule R11 if f is a Foo and bar of f >= 2147483647 then print("big").
+			 Rule R12 if f is a Foo then bar of f is -2147483648 .
+			 
+			 Rule R13 if f is a Foo and bar of f < -2147483648 then print("big").
+			 Rule R14 if f is a Foo then bar of f is -2147483648 .
+			 
+			 Rule R15 if f is a Foo and bar of f <= -2147483648 then print("big").
+			 Rule R16 if f is a Foo then bar of f is -2147483648 .
  		'''.sadl
  		val issues = validationTestHelper.validate(sadlModel)
 		assertNotNull(issues)
-		assertEquals(6, issues.size)
+		assertEquals(14, issues.size)
 		var errIdx = 0
 		var mismatches = 0
 		for (issue:issues) {
@@ -263,22 +292,35 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 			"Unable to convert value '-9223372036854775809' to type 'http://www.w3.org/2001/XMLSchema#long'(For input string: \"-9223372036854775809\")",
 			"Error converting to a number",
 			"Unable to convert value '9223372036854775808' to type 'http://www.w3.org/2001/XMLSchema#long'(For input string: \"9223372036854775808\")",
+			"Value is not in range of property",
 			"Error converting to a number",
-			"Error converting to a number"
+			"Value is not in range of property"
 		)
 		val sadlModel = '''
-			 uri "http://sadl.org/test.sadl" alias test.
+			 uri "http://sadl.org/LiteralOutOfRangeLong.sadl" alias LiteralOutOfRangeLong.
 			 
 			 Foo is a class described by bar with values of type long.
 			 MyFoo1 is a Foo with bar -9223372036854775809 .
 			 MyFoo2 is a Foo with bar 9223372036854775808 .
 			 
-			 Rule R1 if f is a Foo and bar of f > 9223372036854775808 then print("bigger than long").
-			 Rule R2 if f is a Foo then bar of f is -9223372036854775809 .
+			 Rule R1 if f is a Foo and bar of f >= 9223372036854775807 then print("bigger than long").
+			 Rule R2 if f is a Foo then bar of f is -9223372036854775808 .   
+			
+			 Rule R3 if f is a Foo and bar of f > 9223372036854775807 then print("bigger than long").
+			 Rule R4 if f is a Foo then bar of f is -9223372036854775809 .
+			  
+			 Rule R5 if f is a Foo and bar of f = 9223372036854775807 then print("bigger than long").
+			 Rule R6 if f is a Foo then bar of f is -9223372036854775808 .   
+			  
+			 Rule R7 if f is a Foo and bar of f <= 9223372036854775807 then print("bigger than long").
+			 Rule R8 if f is a Foo then bar of f is -9223372036854775808 .   
+			
+			 Rule R9 if f is a Foo and bar of f < 9223372036854775807 then print("bigger than long").
+			 Rule R10 if f is a Foo then bar of f is -9223372036854775808 .
  		'''.sadl
 		val issues = validationTestHelper.validate(sadlModel)
 		assertNotNull(issues)
-		assertEquals(6, issues.size)
+		assertEquals(7, issues.size)
 		var errIdx = 0
 		var mismatches = 0
 		for (issue:issues) {

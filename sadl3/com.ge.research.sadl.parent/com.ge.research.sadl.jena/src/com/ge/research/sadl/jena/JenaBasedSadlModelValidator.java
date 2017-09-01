@@ -949,7 +949,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else if (expression instanceof NumberLiteral) {
 				value = ((NumberLiteral)expression).getValue();
 			}
-			else {
+			else {	// SadlNumberLiteral
 				if (((SadlNumberLiteral)expression).getUnit() != null && !getModelProcessor().ignoreUnittedQuantities) {
 					return getUnittedQuantityTypeCheckInfo(expression);
 				}
@@ -967,9 +967,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return null;
 				}
 			}
+			if (expression.eContainer() != null && expression.eContainer() instanceof UnaryExpression && ((UnaryExpression)expression.eContainer()).getOp().equals("-")) {
+				value = value.negate();
+			}
 			ConceptName numberLiteralConceptName = null;
 			if (value.stripTrailingZeros().scale() <= 0 || value.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0) {
-				if (value.compareTo(BigDecimal.valueOf(2147483647L)) <= 0 && value.compareTo(BigDecimal.valueOf(-2147483648L)) >= 0) {
+				if (value.compareTo(BigDecimal.valueOf(MAX_INT)) <= 0 && value.compareTo(BigDecimal.valueOf(MIN_INT)) >= 0) {
 					numberLiteralConceptName = new ConceptName(XSD.xint.getURI());
 					litval = theJenaModel.createTypedLiteral(value.intValue());
 				}
@@ -3729,7 +3732,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			  ConceptIdentifier rngType = predType.getTypeCheckType();
 			  boolean outOfRange = false;
 			  if (rngType.toString().equals(XSD.xint.getURI())) {
-				  if (op.contains(">") || op.contains("<")) {
+				  if (op.equals(">") || op.equals("<")) {
 					  if (value instanceof Long && ((Long)value >= MAX_INT || (Long)value <= MIN_INT)) {
 						  outOfRange = true;
 					  }
@@ -3738,10 +3741,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					  }
 				  }
 				  else {
-					  if (value instanceof Long && ((Long)value > 2147483647 || (Long)value < -2147483648)) {
+					  if (value instanceof Long && ((Long)value > MAX_INT || (Long)value < MIN_INT)) {
 						  outOfRange = true;
 					  }
-					  else if (value instanceof Integer && ((Integer)value > 2147483647 || (Integer)value < -2147483648)) {
+					  else if (value instanceof Integer && ((Integer)value > MAX_INT || (Integer)value < MIN_INT)) {
 						  outOfRange = true;
 					  }
 				  }
@@ -3751,7 +3754,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				  }
 			  }
 			  else if (rngType.toString().equals(XSD.xlong.getURI())) {
-				  if (op.contains(">") || op.contains("<")) {
+				  if (op.equals(">") || op.equals("<")) {
 					  if (value instanceof Long && ((Long)value >= MAX_LONG || (Long)value <= MIN_LONG)) {
 						  outOfRange = true;
 					  }
