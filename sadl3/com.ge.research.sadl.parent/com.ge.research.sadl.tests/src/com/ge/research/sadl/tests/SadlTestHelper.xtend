@@ -140,10 +140,10 @@ class SadlTestHelper {
 		External localname(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#localname".
 		
-		External max(--) returns --:
+		External max(decimal x, decimal y) returns decimal:
 		"com.ge.research.sadl.jena.reasoner.builtin#max".
 		
-		External min(--) returns --:
+		External min(decimal x,decimal y) returns decimal:
 		"com.ge.research.sadl.jena.reasoner.builtin#min".
 		
 		External mod(--) returns --:

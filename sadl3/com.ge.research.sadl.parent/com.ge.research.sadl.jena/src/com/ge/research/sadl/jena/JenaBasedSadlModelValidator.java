@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
@@ -78,6 +79,7 @@ import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.ge.research.sadl.sADL.impl.ExternalEquationStatementImpl;
 import com.ge.research.sadl.sADL.impl.NumberLiteralImpl;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
@@ -2036,6 +2038,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if(expression.isFunction()){
 			try {
 				TypeCheckInfo ftci = getFunctionType(qnm);
+				if (qnm.eContainer() instanceof ExternalEquationStatement) {
+					EList<Expression> args = expression.getArglist();
+					EList<SadlParameterDeclaration> params = ((ExternalEquationStatementImpl)qnm.eContainer()).getParameter();
+					checkFunctionArguments(params, args, expression);
+				}
+				else if (qnm.eContainer() instanceof EquationStatement) {
+					EList<Expression> args = expression.getArglist();
+					EList<SadlParameterDeclaration> params = ((EquationStatement)qnm.eContainer()).getParameter();
+					checkFunctionArguments(params, args, expression);
+				}
 				if (ftci != null) {
 					return ftci;
 				}
@@ -2047,6 +2059,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			handleUndefinedFunctions(expression);
 		}
 		return getType(qnm, expression);
+	}
+
+	private void checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression)
+			throws InvalidTypeException {
+		if (args.size() != params.size()) {
+			getModelProcessor().addIssueToAcceptor("Number of arguments does not match function declaration", expression);
+		}
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < params.size(); i++) {
+			SadlParameterDeclaration param = params.get(i);
+			Expression arg = args.get(i);
+			validate(arg, param.getType(), "passed argument", sb);
+			if (sb.length() > 0) {
+				getModelProcessor().addIssueToAcceptor(sb.toString(), expression);
+			}
+		}
 	}
 	
 	private TypeCheckInfo getFunctionType(SadlResource fsr) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
@@ -2605,6 +2633,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if (((SubjHasProp)defContainer).getRight().equals(name)) {
 					return getPropertyRangeType(propsr, expression);
 				}
+			}
+			else if (defContainer instanceof SadlParameterDeclaration) {
+				SadlTypeReference exprType = ((SadlParameterDeclaration)defContainer).getType();
+				return getType(exprType);
 			}
 		}
 		//Needs filled in for Requirements extension

@@ -364,6 +364,43 @@ class SadlModelProcessorTestBasics extends AbstractSADLParsingTest {
 				assertTrue(issues.size == 0)
 			]
 	}
+	
+	@Test
+	def void testParametersPassed() {
+		var errs = newArrayList("string, an RDF datatype  string, cannot operate (passed argument) with decimal, an RDF datatype  decimal.",
+			"string, an RDF datatype  string, cannot operate (passed argument) with decimal, an RDF datatype  decimal.",
+			"Number of arguments does not match function declaration "
+		)
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias m.
+			 
+			 Foo is a class described by intProp with values of type int,
+			 	described by longProp with values of type long,
+			 	described by decimalProp with values of type decimal,
+			 	described by otherDecimalProp with values of type decimal.
+			 	
+			 Equation eqAdd23(decimal x) returns decimal: x + 23 .
+			 	
+			 Rule R1: if f is a Foo then otherDecimalProp is max(PI, decimalProp of f).
+			 Rule R2: if f is a Foo then otherDecimalProp is max(PI, "23").
+			 Rule R3: if f is a Foo then otherDecimalProp is eqAdd23(PI).
+			 Rule R4: if f is a Foo then otherDecimalProp is eqAdd23("14").
+			 Rule R5: if f is a Foo then otherDecimalProp is eqAdd23(PI, "14").
+		'''.sadl
+		val issues = validationTestHelper.validate(sadlModel)
+		assertNotNull(issues)
+		assertEquals(3, issues.size)
+		var errIdx = 0
+		var mismatches = 0
+		for (issue:issues) {
+			val err = errs.get(errIdx++)
+			if (!issue.toString.contains(err)) {
+				System.out.println(issue.toString + " != " + err)
+				mismatches++
+			}
+		}
+		assertEquals(mismatches, 0)
+	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
