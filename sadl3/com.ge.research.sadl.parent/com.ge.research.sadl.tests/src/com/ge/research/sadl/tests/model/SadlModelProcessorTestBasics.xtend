@@ -366,8 +366,59 @@ class SadlModelProcessorTestBasics extends AbstractSADLParsingTest {
 	}
 	
 	@Test
+	def void testInstanceInConditionBeforeDeclaration2() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias m.
+			 
+			  SYSTEM is a class.
+			      property_1 describes SYSTEM with values of type CLASS2.
+			      property_1 of SYSTEM only has values of type CLASS2.
+			      property_1 of SYSTEM has exactly 1 values.
+			      
+			  CLASS2 is a class.
+
+			  SYSTEM2 is a class.
+			     property_1b describes SYSTEM2 with values of type CLASS3.
+			     property_1b of SYSTEM2 only has values of type CLASS3.
+			     property_1b of SYSTEM2 has exactly 1 values.
+			      
+			 CLASS3 is a type of CLASS2.
+		'''.assertValidatesTo[jenaModel, issues |
+				assertNotNull(jenaModel)
+//				jenaModel.write(System.out)
+				assertTrue(issues.size == 0)
+			]
+	}
+	
+	@Test
+	def void testInstanceInConditionBeforeDeclaration3() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias m.
+			 
+			  SYSTEM is a class.
+			      property_1 describes SYSTEM with values of type CLASS2.
+			      property_1 of SYSTEM has at least one value of type CLASS2.
+			      property_1 of SYSTEM has exactly 1 values.
+			      
+			  CLASS2 is a class.
+
+			  SYSTEM2 is a class.
+			     property_1b describes SYSTEM2 with values of type CLASS3.
+			     property_1b of SYSTEM2 has at least one value of type CLASS3.
+			     property_1b of SYSTEM2 has exactly 1 values.
+			      
+			 CLASS3 is a type of CLASS2.
+		'''.assertValidatesTo[jenaModel, issues |
+				assertNotNull(jenaModel)
+//				jenaModel.write(System.out)
+				assertTrue(issues.size == 0)
+			]
+	}
+	
+	@Test
 	def void testParametersPassed() {
-		var errs = newArrayList("string, an RDF datatype  string, cannot operate (passed argument) with decimal, an RDF datatype  decimal.",
+		var errs = newArrayList("Number of arguments does not match function declaration",
+			"string, an RDF datatype  string, cannot operate (passed argument) with decimal, an RDF datatype  decimal.",
 			"string, an RDF datatype  string, cannot operate (passed argument) with decimal, an RDF datatype  decimal.",
 			"Number of arguments does not match function declaration "
 		)
@@ -382,6 +433,8 @@ class SadlModelProcessorTestBasics extends AbstractSADLParsingTest {
 			 Equation eqAdd23(decimal x) returns decimal: x + 23 .
 			 	
 			 Rule R1: if f is a Foo then otherDecimalProp is max(PI, decimalProp of f).
+			 Rule R1b: if f is a Foo then otherDecimalProp is max(PI, decimalProp of f, e). 
+			 Rule R1c: if f is a Foo then otherDecimalProp is max(PI). 
 			 Rule R2: if f is a Foo then otherDecimalProp is max(PI, "23").
 			 Rule R3: if f is a Foo then otherDecimalProp is eqAdd23(PI).
 			 Rule R4: if f is a Foo then otherDecimalProp is eqAdd23("14").
@@ -389,7 +442,7 @@ class SadlModelProcessorTestBasics extends AbstractSADLParsingTest {
 		'''.sadl
 		val issues = validationTestHelper.validate(sadlModel)
 		assertNotNull(issues)
-		assertEquals(3, issues.size)
+		assertEquals(4, issues.size)
 		var errIdx = 0
 		var mismatches = 0
 		for (issue:issues) {

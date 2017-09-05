@@ -65,7 +65,8 @@ fragment EquationSignature returns AbstractSadlEquation:
 
 SadlParameterDeclaration:
 		type=SadlPrimaryTypeReference name=SadlResource
-	|  unknown='--'
+	|   unknown='--'
+	|   ellipsis='...'
 ;
 
 // These are the things that translate directly to OWL.

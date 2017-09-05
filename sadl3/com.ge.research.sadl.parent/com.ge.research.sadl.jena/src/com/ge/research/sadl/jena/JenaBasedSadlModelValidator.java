@@ -2063,16 +2063,36 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private void checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression)
 			throws InvalidTypeException {
-		if (args.size() != params.size()) {
-			getModelProcessor().addIssueToAcceptor("Number of arguments does not match function declaration", expression);
+		boolean variableNumArgs = false;
+		int minNumArgs = 0;
+		if (args.size() != params.size() || params.get(params.size() - 1).getEllipsis() != null) {
+			boolean wrongNumArgs = true;
+			if (params.get(params.size() - 1).getEllipsis() != null) {
+				minNumArgs = params.size() - 1;
+				variableNumArgs = true;
+				if (args.size() >= minNumArgs) {
+					wrongNumArgs = false;
+				}
+			}
+			if (wrongNumArgs) {
+				getModelProcessor().addIssueToAcceptor("Number of arguments does not match function declaration", expression);
+			}
 		}
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < params.size(); i++) {
-			SadlParameterDeclaration param = params.get(i);
+		for (int i = 0; i < args.size(); i++) {
 			Expression arg = args.get(i);
-			validate(arg, param.getType(), "passed argument", sb);
-			if (sb.length() > 0) {
-				getModelProcessor().addIssueToAcceptor(sb.toString(), expression);
+			SadlParameterDeclaration param = null;
+			if (variableNumArgs) {
+				param = (i >= minNumArgs) ? params.get(minNumArgs - 1) : params.get(i);
+			}
+			else if (i < params.size()) {
+				param = params.get(i);
+			}
+			if (param != null) {
+				validate(arg, param.getType(), "passed argument", sb);
+				if (sb.length() > 0) {
+					getModelProcessor().addIssueToAcceptor(sb.toString(), expression);
+				}
 			}
 		}
 	}
@@ -3754,7 +3774,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean checkNumericRangeLimits(String op, TypeCheckInfo predType, TypeCheckInfo valType) {
 		if (valType == null || predType == null) {
-			return false;	// assume caught else where	
+			return false;	// return as error
 		}
 		if (valType.getExplicitValue() instanceof Literal) {
 			 Object value = ((Literal)valType.getExplicitValue()).getValue();
