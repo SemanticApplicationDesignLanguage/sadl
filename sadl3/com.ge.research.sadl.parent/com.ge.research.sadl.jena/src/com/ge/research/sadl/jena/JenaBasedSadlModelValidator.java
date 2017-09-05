@@ -2270,12 +2270,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getFunctionType(sr);
 		}
 		else if (conceptType.equals(OntConceptType.CLASS_LIST)) {
-			//Currently the DeclarationExtensions.getOntConceptType(SadlResource) will return a Class List for a 
-			//decomposition declaration that is a Class itself but is of a type Class List
-			//Please see AATIM-2073 for more details, NGB 08-11-2017
-			//This is a temporary workaround and should be removed ASAP
 			ConceptName conceptName = new ConceptName(conceptUri);
 			conceptName.setType(ConceptType.ONTCLASS);
+			conceptName.setRangeValueType(RangeValueType.LIST);
 			if (conceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().ignoreUnittedQuantities) {
 				if (expression instanceof SadlClassOrPropertyDeclaration) {
 					Iterator<SadlProperty> spitr = ((SadlClassOrPropertyDeclaration)expression).getDescribedBy().iterator();
