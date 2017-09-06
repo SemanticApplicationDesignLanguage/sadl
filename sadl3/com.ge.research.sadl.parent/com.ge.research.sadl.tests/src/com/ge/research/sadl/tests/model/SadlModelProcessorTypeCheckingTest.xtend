@@ -20,7 +20,7 @@ import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorTestTypeChecking extends AbstractSADLParsingTest {
+class SadlModelProcessorTypeCheckingTest extends AbstractSADLParsingTest {
 
 	@Test
 	def void testRuleVariableAsDomain() {

@@ -203,7 +203,7 @@ SadlExplicitValue:
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
     |   SadlValueList
-	|	{SadlConstantLiteral} term=('PI'|'known')
+	|	{SadlConstantLiteral} term=('PI'|'e'|'known')
 ;
 
 SadlValueList:
