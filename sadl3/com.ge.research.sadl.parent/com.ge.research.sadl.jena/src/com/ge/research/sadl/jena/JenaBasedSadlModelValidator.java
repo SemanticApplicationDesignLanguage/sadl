@@ -2631,13 +2631,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //		return false;
 //	}
 
-	protected TypeCheckInfo getVariableType(ConceptType variable, SadlResource sr, String conceptNm, String conceptUri, EObject expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+	protected TypeCheckInfo getVariableType(ConceptType variable, SadlResource sr, String conceptNm, String conceptUri, EObject reference) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (sr == null) {
 			return null;	// this might happen when cleaning with editor open
 		}
 		//  1) get the Name of the SadlResource for the variable
 		//	2) get the definition of the Name
-		//  3) if the container of the Name is a SubjHasProp:
+		//  3) if the container of the reference is a SubjHasProp:
 		//		3a) look at the SubjHasProp left and right
 		//			3aa) if the Name matches left, get the type as the domain of the SubjHasProp prop
 		//			3ab) if the Name matches right, get the type as the range of the SubjHasProp prop
@@ -2648,58 +2648,79 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (defContainer instanceof SubjHasProp) {
 				SadlResource propsr = ((SubjHasProp)defContainer).getProp();
 				if (((SubjHasProp)defContainer).getLeft().equals(name)) {
-					return getPropertyDomainType(propsr, expression);
+					return getPropertyDomainType(propsr, reference);
 				}
 				else if (((SubjHasProp)defContainer).getRight().equals(name)) {
-					return getPropertyRangeType(propsr, expression);
+					return getPropertyRangeType(propsr, reference);
 				}
 			}
 			else if (defContainer instanceof SadlParameterDeclaration) {
 				SadlTypeReference exprType = ((SadlParameterDeclaration)defContainer).getType();
 				return getType(exprType);
 			}
+			else if (defContainer instanceof BinaryOperation) {
+				if (((BinaryOperation)defContainer).getLeft() instanceof Name && !((BinaryOperation)defContainer).getLeft().equals(reference)) {
+					if (isDeclaration(((BinaryOperation)defContainer).getRight())) {
+						Declaration decl = getEmbeddedDeclaration(defContainer);  // are we in a Declaration (a real declaration--the type is a class)
+						if (decl != null) {
+							return getType(decl);
+						}
+					}
+					else {
+						TypeCheckInfo ptci = getType(((BinaryOperation)defContainer).getRight());
+						return ptci;
+					}
+				}
+			}
 		}
-		//Needs filled in for Requirements extension
+		
 		if (conceptUri == null) {
 			return null;
 		}
-		if (expression instanceof SadlParameterDeclaration) {
-			SadlTypeReference exprType = ((SadlParameterDeclaration)expression).getType();
+		EObject refContainer = reference.eContainer();
+		if (refContainer instanceof SadlParameterDeclaration) {
+			SadlTypeReference exprType = ((SadlParameterDeclaration)refContainer).getType();
 			return getType(exprType);
 		}
-		else if (expression instanceof SubjHasProp) {
-			SadlResource psr = ((SubjHasProp)expression).getProp();
+		else if (refContainer instanceof SubjHasProp) {
+			SadlResource psr = ((SubjHasProp)refContainer).getProp();
 			if (psr.equals(sr)) {
 				ConceptName tci = new ConceptName("TODO");
-				return new TypeCheckInfo(tci, tci, this, expression);
+				return new TypeCheckInfo(tci, tci, this, refContainer);
 			}
 			TypeCheckInfo ptci = getType(psr);
 			return ptci;
 		}
-		else if (expression instanceof BinaryOperation) {
-			if (((BinaryOperation)expression).getLeft() instanceof Name && !!((BinaryOperation)expression).getLeft().equals(sr)) {
-				if (isDeclaration(((BinaryOperation)expression).getRight())) {
-					Declaration decl = getEmbeddedDeclaration(expression);  // are we in a Declaration (a real declaration--the type is a class)
+		else if (refContainer instanceof PropOfSubject) {
+			Expression pred = ((PropOfSubject)refContainer).getLeft();
+			if (pred instanceof SadlResource && ((PropOfSubject)refContainer).getRight().equals(name)) {
+				return getPropertyDomainType((SadlResource) pred, reference);
+			}
+		}
+		else if (refContainer instanceof BinaryOperation) {
+			if (((BinaryOperation)refContainer).getLeft() instanceof Name && !((BinaryOperation)refContainer).getLeft().equals(reference)) {
+				if (isDeclaration(((BinaryOperation)refContainer).getRight())) {
+					Declaration decl = getEmbeddedDeclaration(refContainer);  // are we in a Declaration (a real declaration--the type is a class)
 					if (decl != null) {
 						return getType(decl);
 					}
 				}
 				else {
-					TypeCheckInfo ptci = getType(((BinaryOperation)expression).getRight());
+					TypeCheckInfo ptci = getType(((BinaryOperation)refContainer).getRight());
 					return ptci;
 				}
 			}
 		}
-		else if (expression instanceof SelectExpression) {
+		else if (refContainer instanceof SelectExpression) {
 			// find name in expression and get type from there
-			TypeCheckInfo tci = getTypeFromWhereExpression(sr, conceptUri, ((SelectExpression)expression).getWhereExpression());
+			TypeCheckInfo tci = getTypeFromWhereExpression(sr, conceptUri, ((SelectExpression)refContainer).getWhereExpression());
 			if (tci == null) {
 				throw new DontTypeCheckException();
 			}
 		}
 		ConceptName declarationConceptName = new ConceptName(conceptUri);
 		declarationConceptName.setType(ConceptType.VARIABLE);
-		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, expression);
+		return new TypeCheckInfo(declarationConceptName, declarationConceptName, this, reference);
 	}
 	
 	private TypeCheckInfo getTypeFromWhereExpression(SadlResource sr, String uri, Expression expr) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
