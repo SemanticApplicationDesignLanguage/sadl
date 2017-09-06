@@ -29,6 +29,7 @@ import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
+import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 import com.ge.research.sadl.sADL.SadlImport
 import com.ge.research.sadl.sADL.SadlInstance
@@ -58,7 +59,6 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 
 /**
  * This class contains custom scoping description.
@@ -223,7 +223,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def getLocalScope1(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
-		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADLPackage.Literals.SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
 					|| eContainer instanceof SadlProperty && (eContainer as SadlProperty).isPrimaryDeclaration() && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
@@ -234,6 +234,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope, Predicate<EObject> isIncluded) {
+		internalGetLocalResourceScope(resource, namespace, parentScope, importScope, false, isIncluded);
+	}
+	
+	def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope, boolean checkAmbiguity, Predicate<EObject> isIncluded) {
 		val map = <QualifiedName, IEObjectDescription>newHashMap
 		val iter = resource.allContents
 		while (iter.hasNext) {
@@ -247,13 +251,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						if (resourceInParentScope === null) {
 							map.addElement(name1, it)
 						} else {
-							val resourceInImportScope = importScope.getSingleElement(name1);
-							if (resourceInImportScope !== null) {
-								val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
-								if (name1 == nameWithPrefixes) {
-									ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
-									if (ambiguousProblem !== null) {
-										map.put(name1, ambiguousProblem);
+							if (checkAmbiguity) {
+								val resourceInImportScope = importScope.getSingleElement(name1);
+								if (resourceInImportScope !== null) {
+									val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
+									if (name1 == nameWithPrefixes) {
+										ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+										if (ambiguousProblem !== null) {
+											map.put(name1, ambiguousProblem);
+										}
 									}
 								}
 							}
