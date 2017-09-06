@@ -2065,7 +2065,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			throws InvalidTypeException {
 		boolean variableNumArgs = false;
 		int minNumArgs = 0;
-		if (args.size() != params.size() || params.get(params.size() - 1).getEllipsis() != null) {
+		if (args.size() != params.size() || (params.size() > 1 && params.get(params.size() - 1).getEllipsis() != null)) {
 			boolean wrongNumArgs = true;
 			if (params.get(params.size() - 1).getEllipsis() != null) {
 				minNumArgs = params.size() - 1;
