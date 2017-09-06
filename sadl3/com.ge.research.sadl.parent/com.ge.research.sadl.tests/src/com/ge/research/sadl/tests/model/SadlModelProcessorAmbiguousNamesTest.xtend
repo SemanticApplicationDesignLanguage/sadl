@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-class SadlModelProcessorTestAmbiguousNames extends AbstractSADLParsingTest {
+class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLParsingTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	

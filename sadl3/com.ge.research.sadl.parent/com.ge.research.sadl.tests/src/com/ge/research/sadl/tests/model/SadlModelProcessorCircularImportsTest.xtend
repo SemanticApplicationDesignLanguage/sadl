@@ -17,7 +17,7 @@ import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
 //@InjectWith(RequirementsInjectorProvider)
-class SadlModelProcessorTestCircularImports extends AbstractSADLParsingTest {
+class SadlModelProcessorCircularImportsTest extends AbstractSADLParsingTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	

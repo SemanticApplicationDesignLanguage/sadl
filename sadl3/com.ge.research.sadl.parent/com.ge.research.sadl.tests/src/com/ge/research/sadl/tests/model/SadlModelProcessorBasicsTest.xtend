@@ -40,7 +40,7 @@ import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorTestBasics extends AbstractSADLParsingTest {
+class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 	
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper
