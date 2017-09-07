@@ -459,6 +459,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 		StringBuilder sbfilter = new StringBuilder();
 		sbmain.append(query.getKeyword());		
 		sbmain.append(" ");
+		if (query.getKeyword().equalsIgnoreCase("construct")) {
+			sbmain.append("{");
+		}
 		if (query.isDistinct()) {
 			sbmain.append("distinct ");
 		}
@@ -473,6 +476,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 		else {
 			sbmain.append("*");
+		}
+		if (query.getKeyword().equalsIgnoreCase("construct")) {
+			sbmain.append("} ");
 		}
 		sbmain.append(" where {");
 		

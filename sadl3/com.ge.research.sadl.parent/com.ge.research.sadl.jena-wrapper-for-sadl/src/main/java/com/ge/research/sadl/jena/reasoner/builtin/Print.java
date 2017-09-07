@@ -83,7 +83,7 @@ public class Print extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "print(--)string";
+		return "print(string,...)--";
 	}
 }
 

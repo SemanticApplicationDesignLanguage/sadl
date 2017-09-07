@@ -29,6 +29,7 @@ import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
+import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 import com.ge.research.sadl.sADL.SadlImport
 import com.ge.research.sadl.sADL.SadlInstance
@@ -67,9 +68,9 @@ import org.eclipse.xtext.util.OnChangeEvictingCache
  */
 class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 
-	@Inject extension DeclarationExtensions
+	@Inject protected extension DeclarationExtensions
 	@Inject OnChangeEvictingCache cache
-	@Inject IQualifiedNameConverter converter
+	@Inject protected IQualifiedNameConverter converter
 	
 	boolean ambiguousNameDetection;
 	
@@ -176,31 +177,34 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 			
 			var newParent = createImportScope(resource, importedResources)
-			if (shouldWrap)
-				newParent = wrap(newParent)
+			if (shouldWrap) {
+				newParent = wrap(newParent)				
+			}
+			val importScope = newParent;
 			val aliasToUse = alias ?: resource.getAlias
 			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
-			newParent = getLocalScope1(resource, namespace, newParent)
-			newParent = getLocalScope2(resource, namespace, newParent)
-			newParent = getLocalScope3(resource, namespace, newParent)
-			newParent = getLocalScope4(resource, namespace, newParent)
+			newParent = getLocalScope1(resource, namespace, newParent, importScope)
+			newParent = getLocalScope2(resource, namespace, newParent, importScope)
+			newParent = getLocalScope3(resource, namespace, newParent, importScope)
+			newParent = getLocalScope4(resource, namespace, newParent, importScope)
 			// finally all the rest
-			newParent = internalGetLocalResourceScope(resource, namespace, newParent) [true]
+			newParent = internalGetLocalResourceScope(resource, namespace, newParent, importScope) [true]
 			return newParent
 		]
 	}
 	
-	protected def getLocalScope4(Resource resource, QualifiedName namespace, IScope parentScope) {
-		return internalGetLocalResourceScope(resource, namespace, parentScope) [
+	protected def getLocalScope4(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES
+				return (eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES) ||
+				(eContainer instanceof SadlCanOnlyBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_CAN_ONLY_BE_ONE_OF__VALUES)
 			} 
 			return false
 		]
 	}
 	
-	protected def getLocalScope3(Resource resource, QualifiedName namespace, IScope parentScope) {
-		return internalGetLocalResourceScope(resource, namespace, parentScope) [
+	protected def getLocalScope3(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF
 			} 
@@ -208,8 +212,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		]
 	}
 	
-	protected def getLocalScope2(Resource resource, QualifiedName namespace, IScope parentScope) {
-		return internalGetLocalResourceScope(resource, namespace, parentScope) [
+	protected def getLocalScope2(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
 					|| eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_DECLARATIONS
@@ -218,8 +222,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		]
 	}
 	
-	protected def getLocalScope1(Resource resource, QualifiedName namespace, IScope parentScope) {
-		return internalGetLocalResourceScope(resource, namespace, parentScope) [
+	protected def getLocalScope1(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADLPackage.Literals.SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
 					|| eContainer instanceof SadlProperty && (eContainer as SadlProperty).isPrimaryDeclaration() && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
@@ -229,7 +233,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		]
 	}
 	
-	def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope, Predicate<EObject> isIncluded) {
+	def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope, Predicate<EObject> isIncluded) {
+		internalGetLocalResourceScope(resource, namespace, parentScope, importScope, false, isIncluded);
+	}
+	
+	def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope, boolean checkAmbiguity, Predicate<EObject> isIncluded) {
 		val map = <QualifiedName, IEObjectDescription>newHashMap
 		val iter = resource.allContents
 		while (iter.hasNext) {
@@ -238,11 +246,27 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				switch it {
 					SadlResource case concreteName !== null: {
 						val name1 = converter.toQualifiedName(concreteName)
-						if (parentScope.getSingleElement(name1) === null) {
+						val resourceInParentScope = parentScope.getSingleElement(name1);
+						var ambiguousProblem = null as IEObjectDescription;
+						if (resourceInParentScope === null) {
 							map.addElement(name1, it)
+						} else {
+							if (checkAmbiguity) {
+								val resourceInImportScope = importScope.getSingleElement(name1);
+								if (resourceInImportScope !== null) {
+									val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
+									if (name1 == nameWithPrefixes) {
+										ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+										if (ambiguousProblem !== null) {
+											map.put(name1, ambiguousProblem);
+										}
+									}
+								}
+							}
 						}
-						val name2 = if (name1.segments.size==1) namespace?.append(name1) else name1.skipFirst(1)
-						if (name2 !== null && parentScope.getSingleElement(name2) === null) {
+						val name2 = if(name1.segments.size == 1) namespace?.append(name1) else name1.skipFirst(1)
+						if (name2 !== null && parentScope.getSingleElement(name2) === null &&
+							ambiguousProblem === null) {
 							map.addElement(name2, it)
 						}
 					}
@@ -257,7 +281,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					}
 					QueryStatement: {
 						// Ignore `anonymous` query statements. Nothing to put into the scope.
-						if (it?.name?.concreteName !== null) {
+						if (name?.concreteName !== null) {
 							val name = converter.toQualifiedName(it.name.concreteName)
 							map.addElement(name, it.name)
 							if (name.segmentCount > 1) {
@@ -273,7 +297,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						iter.prune // variables from a query expression w/o a name should not leave the variable scope. 
 					}
 					RuleStatement: {
-						if (it?.name?.concreteName !== null) {
+						if (name?.concreteName !== null) {
 							val name = converter.toQualifiedName(it.name.concreteName)
 							map.addElement(name, it.name)
 							if (name.segmentCount > 1) {
@@ -307,9 +331,9 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
 		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
-			val externalResource = imp.importedResource
-			if (externalResource !== null && !externalResource.eIsProxy) {
-				createResourceScope(externalResource.eResource, imp.alias, importedResources).allElements.forEach[
+			val importedResource = imp.importedResource
+			if (importedResource !== null && !importedResource.eIsProxy) {
+				createResourceScope(importedResource.eResource, imp.alias, importedResources).allElements.forEach[
 					val existing = importedSymbols.put(name, it)
 					val duplicateProblem = checkDuplicate(existing, it)
 					if (duplicateProblem !== null) {
@@ -354,7 +378,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return null
 		}
 		val imports = #[first, second].map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
-		val message = '''Ambiguously imported name '«first.name»' from «imports.map["'"+it+"'"].join(", ")». Please use an alias or choose different names.'''
+		val message = '''Ambiguously imported name '«first.name»' from «imports.map["'"+it+"'"].join(", ")». Please use a prefix to disambiguate name.'''
 		
 		return new ForwardingEObjectDescription(first) {
 			override getUserData(String key) {
@@ -377,7 +401,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		
 	}
 	
-	private def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
+	protected def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 
 		if (obj instanceof SadlResource) {
 			// Do not put parameters of external and local equation statements into the scope.

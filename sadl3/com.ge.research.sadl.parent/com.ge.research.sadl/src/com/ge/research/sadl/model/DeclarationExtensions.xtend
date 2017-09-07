@@ -44,30 +44,69 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
+import com.ge.research.sadl.scoping.QualifiedNameConverter
 import com.google.inject.Inject
 import java.util.HashSet
 import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import org.eclipse.xtext.nodemodel.INode
 
 class DeclarationExtensions {
 	
 	@Inject ValueConverterService.QNameConverter converter
 	
-	def String getConcreteName(SadlResource it) {
+	/**
+	 * Unlike {@link #getConcreteName(SadlResource)} this can be configured, whether the any leading prefixes
+	 * has to be trimmed from the concrete name or not. Let assume the following SADL model:
+	 * 
+	 * <pre>
+	 * uri "http://sadl.org/Current.sadl" alias current.
+	 * current:Foo is a class.
+	 * </pre>
+	 * Then
+	 * <pre>
+	 * val extensions = // ...
+	 * val resource = // ...
+	 * 
+	 * println(extensions.getConcreteName(resource)); // Foo
+	 * println(extensions.getConcreteName(resource, true)); // Foo
+	 * println(extensions.getConcreteName(resource, false)); // current:Foo
+	 * </pre>
+	 * 
+	 * @param it the SADL resource who's name we are looking for.
+	 * @param trimPrefix when {@code true} any leading prefixes (if any) will be omitted from the result.
+	 */
+	def String getConcreteName(SadlResource it, boolean trimPrefix) {
 		if (isExternal) {
 			return getExternalResourceAdapter.concreteName;
 		}
 		val resource = it.eResource as XtextResource
 		val ()=>String nameSupplyer = [
 			val nodes = findNamedNodes;
-			val name = nodes.map[NodeModelUtils.getTokenText(it)].join('').trim;
+			var name = nodes.map[NodeModelUtils.getTokenText(it)].join('').trim;
 			if (name.isNullOrEmpty) {
 				return null;
 			}
+			if (trimPrefix) {				
+				val index = name.lastIndexOf(QualifiedNameConverter.SEGMENT_SEPARATOR);
+				if (index !== -1) {
+					val ()=>String aliasSupplier = [
+						EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;	
+					];
+					val alias = if (resource !== null) {
+						resource.cache.get(it -> 'alias', resource, aliasSupplier);
+					} else {
+						aliasSupplier.apply;
+					};
+					if (alias == name.substring(0, index) && name.length >= (index + 1)) {
+						name = name.substring(index + 1);
+					}
+				}
+			}
 			// this will be null when a resource is open in the editor and a clean/build is performed ??
+			// And if the extensions instance is not injected into the context but instantiated via its constructor. 
 			if (converter === null) {
 				return name;
 			}
@@ -76,18 +115,27 @@ class DeclarationExtensions {
 		if (resource === null) {
 			return nameSupplyer.apply;
 		}
-		return resource.cache.get(it -> 'concreteName', eResource, nameSupplyer)
+		return resource.cache.get(it -> '''concreteName[trimPrefix«trimPrefix»]''', eResource, nameSupplyer)
 	}
 	
+	/**
+	 * Returns with the concrete name of the SADL resource argument. Any leading prefixes will be removed
+	 * from the name.
+	 * <p>
+	 * This method is equivalent with calling {@link getConcreteName(SadlResource, true)}.
+	 */
+	def String getConcreteName(SadlResource it) {
+		return getConcreteName(it, true);
+	}
 
- private def dispatch findNamedNodes(SadlResource it) {
-   return NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME);
- }
+	private def dispatch findNamedNodes(SadlResource it) {
+		return NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME);
+	}
 
- private def dispatch findNamedNodes(Name it) {
-   val node = NodeModelUtils.getNode(it) as INode;
-   return if(node === null) emptyList else #[node];
- }
+	private def dispatch findNamedNodes(Name it) {
+		val node = NodeModelUtils.getNode(it) as INode;
+		return if(node === null) emptyList else #[node];
+	}
  
 	def String getConceptUri(SadlResource it) {
 		if (isExternal) {
@@ -258,7 +306,7 @@ class DeclarationExtensions {
 					OntConceptType.STRUCTURE_NAME					
 					
 				default: {
-					if (resource.eResource instanceof XtextResource) {
+					if (resource !== null && resource.eResource instanceof XtextResource) {
 						val xtextResource = resource.eResource as XtextResource;
 						val contribution = xtextResource.resourceServiceProvider.get(IDeclarationExtensionsContribution);
 						if (contribution !== null) {

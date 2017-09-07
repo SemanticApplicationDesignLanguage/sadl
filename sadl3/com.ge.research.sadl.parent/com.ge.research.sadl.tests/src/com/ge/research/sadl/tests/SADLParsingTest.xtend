@@ -278,7 +278,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		Assert.assertEquals(3, model.elements.size)
 		val test = model.elements.get(0) as SadlClassOrPropertyDeclaration
 		val psr = test.describedBy.get(0) as SadlProperty
-		Assert.assertEquals("LatticeToTree:value", psr.nameDeclarations.head.concreteName)
+		Assert.assertEquals("value", psr.nameDeclarations.head.concreteName)
 		Assert.assertEquals("LatticeToTree:value", psr.nameDeclarations.head.conceptQualifiedName)
 	}
 

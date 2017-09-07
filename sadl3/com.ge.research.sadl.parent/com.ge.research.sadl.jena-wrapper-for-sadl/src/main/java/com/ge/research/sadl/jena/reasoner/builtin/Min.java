@@ -24,10 +24,9 @@ import com.hp.hpl.jena.reasoner.rulesys.BindingEnvironment;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
 import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 import com.hp.hpl.jena.reasoner.rulesys.Util;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-public class Min extends BaseBuiltin {
+public class Min extends TypedBaseBuiltin {
 	
 	private int argLength = 0;
 
@@ -50,6 +49,10 @@ public class Min extends BaseBuiltin {
     	argLength = len;
     }
 
+	@Override
+	public String getFunctionSignatureString() {
+		return "min(decimal,decimal,...)decimal";
+	}
     /**
      * This method is invoked when the builtin is called in a rule body.
      * @param args the array of argument values for the builtin, this is an array 

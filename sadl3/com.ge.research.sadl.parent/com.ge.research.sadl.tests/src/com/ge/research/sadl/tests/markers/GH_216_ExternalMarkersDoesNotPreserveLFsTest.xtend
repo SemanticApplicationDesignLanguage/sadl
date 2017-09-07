@@ -39,7 +39,7 @@ import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.*
  */
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class GH_216_ExternalMarkersDoesNotPreserveLFs {
+class GH_216_ExternalMarkersDoesNotPreserveLFsTest {
 
 	@Inject
 	extension SadlMarkerDeserializerService;
