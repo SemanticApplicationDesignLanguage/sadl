@@ -1,0 +1,19 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+os:
+  - linux
+  - osx
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+  - $HOME/.m2/repository
+
+script:
+  - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
