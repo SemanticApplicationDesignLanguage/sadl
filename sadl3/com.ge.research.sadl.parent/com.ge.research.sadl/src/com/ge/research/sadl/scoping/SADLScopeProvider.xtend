@@ -35,6 +35,7 @@ import com.ge.research.sadl.sADL.SadlImport
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
+import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
 import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlResource
@@ -187,13 +188,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			newParent = getLocalScope2(resource, namespace, newParent, importScope)
 			newParent = getLocalScope3(resource, namespace, newParent, importScope)
 			newParent = getLocalScope4(resource, namespace, newParent, importScope)
+			newParent = getLocalScope5(resource, namespace, newParent, importScope)
 			// finally all the rest
 			newParent = internalGetLocalResourceScope(resource, namespace, newParent, importScope) [true]
 			return newParent
 		]
 	}
 	
-	protected def getLocalScope4(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+	protected def getLocalScope5(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
 				return (eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES) ||
@@ -203,10 +205,20 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		]
 	}
 	
-	protected def getLocalScope3(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+	protected def getLocalScope4(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
 				return eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF
+			} 
+			return false
+		]
+	}
+	
+	// only if (https://github.com/crapo/sadlos2/issues/215)
+	protected def getLocalScope3(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
+			if (it instanceof SadlResource) {
+				return eContainer instanceof SadlNecessaryAndSufficient && eContainingFeature == SADLPackage.Literals.SADL_NECESSARY_AND_SUFFICIENT__OBJECT
 			} 
 			return false
 		]
