@@ -29,6 +29,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
@@ -61,6 +62,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.utils.NetworkProxySettingsProvider;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -250,14 +252,17 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 					Object prop = p.get(key);
 					System.out.println("Key=" + key.toString() + ", value = " + prop.toString());
 				}
+				for (Entry<String, String> entry : new NetworkProxySettingsProvider().getConfigurations().entrySet()) {
+					p.put(entry.getKey(), entry.getValue());
+				}
 //				p.put("http.proxyHost", "http-proxy.ae.ge.com");
 //				p.put("http.proxyPort", "80");
 //				p.put("https.proxyHost", "http-proxy.ae.ge.com");
 //				p.put("https.proxyPort", "80");
-				p.put("http.proxyHost", "proxy-src.research.ge.com");
-				p.put("http.proxyPort", "8080");
-				p.put("https.proxyHost", "proxy-src.research.ge.com");
-				p.put("https.proxyPort", "8080");
+//				p.put("http.proxyHost", "proxy-src.research.ge.com");
+//				p.put("http.proxyPort", "8080");
+//				p.put("https.proxyHost", "proxy-src.research.ge.com");
+//				p.put("https.proxyPort", "8080");
 				System.setProperties(p);
 				url = new URL(downloadUrl);
 				is = url.openStream(); // throws an IOException
