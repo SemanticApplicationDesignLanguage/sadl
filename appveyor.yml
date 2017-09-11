@@ -1,0 +1,14 @@
+shallow_clone: true
+
+branches:
+  only:
+  - master
+
+platform:
+  - x64
+
+build_script:
+  - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
+
+cache:
+ - C:\Users\appveyor\.m2
