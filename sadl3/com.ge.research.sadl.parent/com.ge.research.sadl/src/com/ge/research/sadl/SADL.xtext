@@ -164,7 +164,7 @@ SadlPropertyDeclarationInClass returns SadlProperty:
 SadlPropertyRestriction :
     	SadlCondition
     |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
-    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|'values') 'of' 'type' ((typeonly=('class'|'data')) | range=SadlPrimaryTypeReference)
+    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|'values') 'of' 'type' ((typeonly=('class'|'data')) | range=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
     |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|QNAME]
     |   {SadlIsTransitive} 'is' 'transitive'
     |   {SadlIsSymmetrical} 'is' 'symmetrical'
@@ -182,7 +182,7 @@ SadlCondition :
 ;
 
 SadlAllValuesCondition :
-	'only' ('has'|'with') 'values' 'of' 'type' type=SadlPrimaryTypeReference;
+	'only' ('has'|'with') 'values' 'of' 'type' type=SadlPrimaryTypeReference facet=SadlDataTypeFacet?;
 
 SadlHasValueCondition :
 	'always' ('has'|'with') 'value' (restriction=SadlExplicitValue | '(' restriction=SadlNestedInstance ')');
@@ -191,7 +191,7 @@ SadlCardinalityCondition :
 	('has'|'with') 
 	('at' operator=('least'|'most') |'exactly')? 
 	cardinality=CardinalityValue ('value'|'values') 
-	('of' 'type' type=SadlPrimaryTypeReference | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
+	('of' 'type' type=SadlPrimaryTypeReference facet=SadlDataTypeFacet? | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
 
 CardinalityValue :
 	NUMBER | 'one'
