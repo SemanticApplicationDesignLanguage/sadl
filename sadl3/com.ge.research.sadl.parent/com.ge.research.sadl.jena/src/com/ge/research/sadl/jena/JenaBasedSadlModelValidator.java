@@ -3109,7 +3109,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean compatibleTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
-									TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, InvalidTypeException{
+									TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, InvalidTypeException, DontTypeCheckException{
 		
 		if ((leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) || 
 			(leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null) ||
@@ -3138,7 +3138,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName leftConceptName = (ConceptName) leftConceptIdentifier;
 			ConceptName rightConceptName = (ConceptName) rightConceptIdentifier;
 			
-			if (getModelProcessor().isNumericOperator(operations) && (!isNumeric(leftTypeCheckInfo) || !isNumeric(rightTypeCheckInfo))) {
+			if (getModelProcessor().isNumericOperator(operations) && ((!isNumeric(leftTypeCheckInfo) && !isNumericWithImpliedProperty(leftTypeCheckInfo,(Expression)leftExpression))||
+																	  (!isNumeric(rightTypeCheckInfo) && !isNumericWithImpliedProperty(rightTypeCheckInfo,(Expression)rightExpression)))) {
 				if (!leftConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) || 
 						!rightConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 					return false;

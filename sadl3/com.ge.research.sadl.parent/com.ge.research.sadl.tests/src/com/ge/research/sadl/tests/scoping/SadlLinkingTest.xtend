@@ -26,7 +26,6 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -1190,23 +1189,40 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore("#215: If possible, the declaration of DATA2 should be as indicated. If not possible, we need to detect error (Andy can do) and provide quick fix to insert previous line into model")
 	@Test
-	def void testOnlyIf() {
+	def void testOnlyIf_01() {
 		'''
 			 uri "http://sadl.org/test.sadl" alias test.
 			 
 			 IRS is a class
 			 	described by ground_speed with values of type DATA.
-			 ground_speed of IRS only has values of type DATA. 	
+			 ground_speed of IRS only has values of type DATA.
 			 DATA is a class described by _value with values of type decimal.
 			 
 			 is_ground_speed_of describes DATA with values of type IRS.
 			 is_ground_speed_of is the inverse of ground_speed.
 			 
-«««			 DATA2 is a type of DATA.
 			 A <DATA> is a [DATA2] only if is_ground_speed_of only has values of type IRS.
-			 <DATA2> has expandedProperty _value. 
+			 <DATA2> has expandedProperty _value.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testOnlyIf_02() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 IRS is a class
+			 	described by ground_speed with values of type DATA.
+			 ground_speed of IRS only has values of type DATA.
+			 DATA is a class described by _value with values of type decimal.
+			 
+			 is_ground_speed_of describes DATA with values of type IRS.
+			 is_ground_speed_of is the inverse of ground_speed.
+			 
+			 [DATA2] is a type of DATA.
+			 A <DATA> is a <DATA2> only if is_ground_speed_of only has values of type IRS.
+			 <DATA2> has expandedProperty _value.
 		'''.assertLinking[sadl]
 	}
 }
