@@ -14,7 +14,7 @@
 
 <h1>SADL Constructs Useful in Building Models</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->08/24/2017<!--webbot bot="Timestamp" endspan i-checksum="12587" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/11/2017<!--webbot bot="Timestamp" endspan i-checksum="12533" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h4>Table of Contents</h4>
@@ -998,14 +998,16 @@ project in two ways.</p>
   the Eclipse environment:<ol type="i">
   <li>open the <i>Project Properties</i> dialog</li>
   <li>select<i> Project References</i> in the left side of the dialog</li>
-  <li>check the project(s) this project should reference.<br>
+  <li>check the project(s) this project should reference (depend upon).<br>
 &nbsp;</li>
   </li>
   <li>A project can include external OWL files, making them available for import 
   into SADL models.
   <p>To make an external OWL file available for import in a SADL project:<ol type="i">
   <li>select the project in the <i>Project Explorer,</i></li>
-  <li>select <i>New</i> -&gt; <i>Other,</i></li>
+  <li>select <i>New</i> -&gt; <i>Other </i>on the context menu on the project 
+  (right-click with the mouse over the project name) or select <i>File -&gt; New -&gt; 
+  Other</i> from the menu bar</li>
   <li>expand (if necessary) <i>SADL Model URL List Wizards,</i></li>
   <li>select <i>SADL Model URL List file,</i></li>
   <li>click on <i>Next,</i></li>
@@ -1022,11 +1024,23 @@ project in two ways.</p>
   the &quot;.url&quot; file to the tab labeled <i>Download,</i></li>
   <li>click on <i>Download</i> to download and index the external OWL files, 
   dealing with any errors ,<ul>
-    <li>the OWL files must be valid and parsable,</li>
     <li>Eclipse must be configured so that any &quot;http://...&quot; URL's can be 
-    retrieved programmatically through any existing firewalls.</li>
+    retrieved programmatically through any existing firewalls. If you are behind 
+    a firewall, you may need to do the following:<ul>
+    <li>Open the preferences page on the Window dropdown menu</li>
+    <li>Select <i>General -&gt; Network Connections</i></li>
+    <li>Set the <i>Active Provider</i> to <i>Manual</i></li>
+    <li>
+    <a href="https://help.eclipse.org/mars/index.jsp?topic=/org.eclipse.platform.doc.user/reference/ref-net-preferences.htm">
+    Configure the proxy settings manually</a></li>
   </ul>
+    </li>
+    <li>the OWL files must be valid and parsable</li>
+  </ul>
+  <p>&nbsp;</p>
   </li>
+  </li>
+
   </li>
 
 </body>
