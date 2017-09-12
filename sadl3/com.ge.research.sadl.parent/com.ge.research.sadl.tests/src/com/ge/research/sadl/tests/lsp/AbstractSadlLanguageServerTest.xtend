@@ -33,7 +33,6 @@ class AbstractSadlLanguageServerTest extends AbstractLanguageServerTest {
 	 */
 	protected static val FILE_EXTENSION = 'sadl';
 	
-	@Override
 	override setup() {
 		Assume.assumeTrue(!EMFPlugin.IS_ECLIPSE_RUNNING);
 		super.setup()

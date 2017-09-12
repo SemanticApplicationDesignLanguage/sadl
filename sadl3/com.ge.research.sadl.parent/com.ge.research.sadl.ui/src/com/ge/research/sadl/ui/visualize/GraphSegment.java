@@ -19,6 +19,7 @@ import com.hp.hpl.jena.ontology.IntersectionClass;
 import com.hp.hpl.jena.ontology.MaxCardinalityRestriction;
 import com.hp.hpl.jena.ontology.MinCardinalityRestriction;
 import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
@@ -182,6 +183,8 @@ public class GraphSegment {
 				}
 				catch (Exception e) {
 					logger.error("Unexpected error; apparent Interection Class does not return operands: " + e.getMessage());
+					OntModel om = ucls.getOntModel();
+					om.write(System.out, "N-TRIPLE");
 					e.printStackTrace();
 				}
 			}

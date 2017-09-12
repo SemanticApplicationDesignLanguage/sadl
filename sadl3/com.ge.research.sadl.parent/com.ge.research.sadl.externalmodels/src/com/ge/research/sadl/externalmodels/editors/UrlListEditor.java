@@ -27,18 +27,26 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -60,6 +68,8 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.utils.NetworkProxySettingsProvider;
+import com.ge.research.sadl.utils.ResourceManager;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -233,6 +243,18 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 					e.printStackTrace();
 				}
 			}
+			// refresh the folder
+			try {
+				for(IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()){
+					IPath prjpath = project.getLocation();
+					if (outputPath.toOSString().startsWith(prjpath.toOSString())) {
+						project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+						break;	// there's only one at a time to refresh
+					}
+				}
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -243,10 +265,15 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	    if (downloadUrl != null && !downloadUrl.isEmpty() && !downloadUrl.startsWith("--")) {
 			try {
 				Properties p = System.getProperties();
-				p.put("http.proxyHost", "http-proxy.ae.ge.com");
-				p.put("http.proxyPort", "80");
-				p.put("https.proxyHost", "http-proxy.ae.ge.com");
-				p.put("https.proxyPort", "80");
+				Iterator<Object> pitr = p.keySet().iterator();
+				while (pitr.hasNext()) {
+					Object key = pitr.next();
+					Object prop = p.get(key);
+//					System.out.println("Key=" + key.toString() + ", value = " + prop.toString());
+				}
+				for (Entry<String, String> entry : new NetworkProxySettingsProvider().getConfigurations().entrySet()) {
+					p.put(entry.getKey(), entry.getValue());
+				}
 				System.setProperties(p);
 				url = new URL(downloadUrl);
 				is = url.openStream(); // throws an IOException

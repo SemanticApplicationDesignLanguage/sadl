@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.Explanation;
+import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -561,6 +562,12 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 
 	@Override
 	public List<BuiltinInfo> getImplicitBuiltins() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<FunctionSignature> getImplicitBuiltinSignatures() {
 		// TODO Auto-generated method stub
 		return null;
 	}

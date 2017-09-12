@@ -36,7 +36,7 @@ import org.eclipse.xtext.testing.InjectWith
  */
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class GH_145_IncorrectValueConverterServiceOutput {
+class GH_145_IncorrectValueConverterServiceOutputTest {
 
 	@Inject
 	IQualifiedNameConverter qualifiedNameConverter;

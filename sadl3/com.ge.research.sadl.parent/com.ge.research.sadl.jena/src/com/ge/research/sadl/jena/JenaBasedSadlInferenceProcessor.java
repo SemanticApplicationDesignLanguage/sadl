@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.preferences.IPreferenceValues;
@@ -19,6 +22,7 @@ import org.eclipse.xtext.util.IAcceptor;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.Issue;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+import org.eclipse.xtext.xbase.lib.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +63,7 @@ import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorImpl;
+import com.ge.research.sadl.query.SadlQueryHelper;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
@@ -76,6 +81,7 @@ import com.ge.research.sadl.reasoner.SadlCommandResult;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
@@ -131,23 +137,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		preferenceMap = prefMap;
 		OntModel om = OntModelProvider.find(resource);
 		if (om == null) {
-			// This should never happen as the SadlActionHandler makes a call to validate the Resource. However, not deleting this code yet... AWC 9/21/2016
-			SadlModelProcessor modelProcessor = new JenaBasedSadlModelProcessor();
-			final List<Issue> issues = CollectionLiterals.<Issue>newArrayList();
-			final IAcceptor<Issue> _function = new IAcceptor<Issue>() {
-				@Override
-				public void accept(final Issue it) {
-					issues.add(it);
-				}
-			};
-			ValidationAcceptor _validationAcceptor = new ValidationAcceptorImpl(_function);
-			IPreferenceValues _preferenceValues = this.preferenceProvider.getPreferenceValues(resource);
-			IModelProcessor.ProcessorContext _processorContext = new IModelProcessor.ProcessorContext(CancelIndicator.NullImpl, _preferenceValues);
-			modelProcessor.onValidate(resource,_validationAcceptor,  CheckMode.FAST_ONLY, _processorContext);
-			om = OntModelProvider.find(resource);
-			if (om == null) {
-				throw new SadlInferenceException("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'");
-			}
+			throw new SadlInferenceException("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'");
 		}
 		List<SadlCommand> cmds = OntModelProvider.getSadlCommands(resource);
 		if (cmds == null || cmds.size() < 1) {
@@ -1189,8 +1179,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	private SadlCommandResult processAdhocQuery(Query cmd) throws ConfigurationException, JenaProcessorException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString;
 		String query = cmd.getSparqlQueryString();
+		ITranslator translator = null;
 		if (query == null) {
-			query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+			try {
+				query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+			}
+			catch (UnsupportedOperationException e) {
+				IReasoner defaultReasoner = getConfigMgr(null).getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
+				translator = getConfigMgr(null).getTranslatorForReasoner(defaultReasoner);
+				query = translator.translateQuery(getTheJenaModel(), cmd);
+			}
 		}
 		query = SadlUtils.stripQuotes(query);
 		if (getTheJenaModel() == null) {
@@ -1208,16 +1206,27 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				// load from OWL file
 			}
 		}
-		ITranslator translator = getConfigMgr(getOwlFormat()).getTranslator();
+		if (translator == null) {
+			translator = getConfigMgr(getOwlFormat()).getTranslator();
+		}
 		Query q = processQuery(query);
-		SadlCommandResult result = new SadlCommandResult(cmd);
+		q.setGraph(cmd.isGraph());
+		SadlCommandResult result = new SadlCommandResult(q);
 		result.setResults(processAdhocQuery(translator, q));
 		result.setErrors(getInitializedReasoner().getErrors());
 		return result;
 	}
 	
 	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
-		String queryString = translator.translateQuery(getTheJenaModel(), q);
+		String queryString = null;
+		try {
+			queryString = translator.translateQuery(getTheJenaModel(), q);
+		}
+		catch (UnsupportedOperationException e) {
+			IReasoner defaultReasoner = getConfigMgr(null).getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
+			ITranslator alttranslator = getConfigMgr(null).getTranslatorForReasoner(defaultReasoner);
+			queryString = alttranslator.translateQuery(getTheJenaModel(), q);
+		}
 		if (queryString == null && q.getSparqlQueryString() != null) {
 			queryString = q.getSparqlQueryString();
 		}
@@ -1252,25 +1261,66 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return q;
 	}
 	
-	public ResultSet processNamedQuery(String queryName) throws JenaProcessorException {
-		SadlModel model = (SadlModel) getCurrentResource().getContents().get(0);
-		if (model != null) {
-			URI resourceUri = getCurrentResource().getURI();
-			XtextResource xtrsrc = (XtextResource) model.eResource();
-			if (xtrsrc != null) {
-				URI importedResourceUri = xtrsrc.getURI();
-				OntModel m = OntModelProvider.find(xtrsrc);
-				if (m == null) {
-					throw new JenaProcessorException("Unable to retrieve OntModel for resource '" + resourceUri + "'");
+	@Inject
+	@Extension
+	private SadlQueryHelper sadlQueryHelper;
+
+	@Override
+	public Object[] runNamedQuery(Resource resource, String queryName) throws SadlInferenceException {
+		setCurrentResource(resource);
+		setTheJenaModel(OntModelProvider.find(resource));
+		setModelFolderPath(getModelFolderPath(resource));
+		setModelName(OntModelProvider.getModelName(resource));
+		QueryStatement qstmt = sadlQueryHelper.findQueryByName(resource, queryName);
+		List<SadlCommand> cmds = OntModelProvider.getSadlCommands(qstmt.eResource());
+		Query queryObj = null;
+		for (int i = 0; i < cmds.size(); i++) {
+			if (cmds.get(i) instanceof Query) {
+				String qnm = ((Query)cmds.get(i)).getFqName();
+				if (qnm != null) {
+					if (qnm.endsWith("#" + queryName)) {
+						queryObj = (Query) cmds.get(i);
+						break;
+					}
 				}
-				OntResource query = m.getOntResource(queryName);
-				Statement s = query.getProperty(m.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_QUERY_STRING_URI));
-// TODO what happens to s?				
 			}
+		}
+		if (queryObj != null) {
+			try {
+				SadlCommandResult result = processAdhocQuery(queryObj);
+				Object[] results = new Object[1];
+				results[0] = result;
+				return results;
+			} catch (Exception e) {
+				SadlCommandResult scr = new SadlCommandResult(queryObj);	
+				List<ModelError> errors = new ArrayList<ModelError>();
+				errors.add(new ModelError(e.getMessage(), ErrorType.ERROR));
+				scr.setErrors(errors);
+				Object[] results = new Object[1];
+				results[0] = scr;
+				return results;
+			} 
 		}
 		return null;
 	}
 	
+	private String getModelFolderPath(Resource resource) {
+		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
+		v = v.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
+		String modelFolderPathname;
+		if (v.isPlatform()) {
+			 IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(v.toPlatformString(true)));
+			 modelFolderPathname = file.getRawLocation().toPortableString();
+		}
+		else {
+			modelFolderPathname = JenaBasedSadlModelProcessor.findModelFolderPath(resource.getURI());
+			if(modelFolderPathname == null) {
+				modelFolderPathname = v.toFileString();
+			}
+		}
+		return modelFolderPathname;
+	}
+
 	private IConfigurationManagerForIDE getConfigMgr(String format) throws ConfigurationException {
 		if (configMgr == null) {
 			if (format == null) {
@@ -1278,11 +1328,11 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			}
 			if ((getModelFolderPath() == null && 
 					getCurrentResource().getURI().toString().startsWith("synthetic")) ||
-							getCurrentResource().getURI().toString().startsWith(JenaBasedSadlModelProcessor.SYNTHETIC_FROM_TEST)) {
+							getCurrentResource().getURI().toString().startsWith(SadlModelProcessor.SYNTHETIC_FROM_TEST)) {
 				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath(), format, true);
 			}
 			else {
-				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath() , format);
+				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath() , format, true);
 			}
 		}
 		return configMgr;
@@ -1322,5 +1372,5 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	private void setModelName(String modelName) {
 		this.modelName = modelName;
 	}
-	
+
 }

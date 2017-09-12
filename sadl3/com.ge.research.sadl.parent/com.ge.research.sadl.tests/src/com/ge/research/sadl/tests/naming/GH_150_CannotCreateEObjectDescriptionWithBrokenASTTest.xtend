@@ -37,7 +37,7 @@ import static extension org.eclipse.emf.ecore.util.EcoreUtil.getAllProperContent
  * 
  * @author akos.kitta
  */
-class GH_150_CannotCreateEObjectDescriptionWithBrokenAST extends AbstractLinkingTest {
+class GH_150_CannotCreateEObjectDescriptionWithBrokenASTTest extends AbstractLinkingTest {
 
 	static val IAcceptor<IEObjectDescription> NOOP_ACCEPTOR = [];
 

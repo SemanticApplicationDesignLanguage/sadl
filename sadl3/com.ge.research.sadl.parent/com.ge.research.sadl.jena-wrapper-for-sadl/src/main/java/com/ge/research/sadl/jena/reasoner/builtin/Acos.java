@@ -24,7 +24,7 @@ import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 import com.hp.hpl.jena.reasoner.rulesys.Util;
 import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
-public class Acos extends BaseBuiltin {
+public class Acos extends TypedBaseBuiltin {
 
     /**
      * Return a name for this builtin, normally this will be the name of the 
@@ -68,5 +68,10 @@ public class Acos extends BaseBuiltin {
         // Doesn't (yet) handle partially bound cases
         return false;
     }
+
+	@Override
+	public String getFunctionSignatureString() {
+		return "acos(decimal)decimal";
+	}
 
 }

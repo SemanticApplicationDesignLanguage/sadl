@@ -321,7 +321,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		else {
 			repeatSubjNode = true;
 		}
-		if (row[2].equals(OWL.Nothing.getURI())) {
+		if (row[2] != null && row[2].equals(OWL.Nothing.getURI())) {
 			o = OWL.Nothing;
 			olbl = OWL.Nothing.getLocalName() + nothingCount;
 			nothingCount++;
@@ -367,7 +367,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			else {
 				sb.append("[shape=box label=\"");
 			}
-			sb.append(s.toString());
+			sb.append(replaceDoubleQuotes(s.toString()));
 			sb.append("\"");
 			boolean anchored = false;
 			if (anchorNodeLabel != null && s.toString().equals(anchorNodeLabel)) {
@@ -385,7 +385,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			else {
 				sb.append("[shape=box label=\"");
 			}
-			sb.append(o.toString());
+			sb.append(replaceDoubleQuotes(o.toString()));
 			sb.append("\"");
 			boolean anchored = false;
 			if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
@@ -405,7 +405,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				anchored = true;
 			}
 			sb.append("label=\"");
-			sb.append(edgeLbl);
+			sb.append(replaceDoubleQuotes(edgeLbl));
 			sb.append("\"");
 			// color the "anchor" edge
 			if (anchored) {
@@ -429,6 +429,18 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 		}
 		sb.append("];\n");
+	}
+
+	/**
+	 * Label strings are double quoted, so they cannot contain double quotes or dot file will be invalid
+	 * @param lbl
+	 * @return
+	 */
+	private Object replaceDoubleQuotes(String lbl) {
+		if (lbl.contains("\"")) {
+			lbl = lbl.replace('\"', '\'');
+		}
+		return lbl;
 	}
 
 	private void applyAttributesToNode(Map<Integer, String> attributes, Object[] row, boolean anchored) {

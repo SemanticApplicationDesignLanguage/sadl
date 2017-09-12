@@ -24,6 +24,7 @@ import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.ExternalEquationStatement
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -36,45 +37,106 @@ import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
 import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlPrimitiveDataType
 import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlRangeRestriction
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
+import com.ge.research.sadl.scoping.QualifiedNameConverter
 import com.google.inject.Inject
 import java.util.HashSet
 import java.util.Set
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import com.ge.research.sadl.sADL.SadlPropertyCondition
 
 class DeclarationExtensions {
 	
 	@Inject ValueConverterService.QNameConverter converter
 	
-	def String getConcreteName(SadlResource it) {
+	/**
+	 * Unlike {@link #getConcreteName(SadlResource)} this can be configured, whether the any leading prefixes
+	 * has to be trimmed from the concrete name or not. Let assume the following SADL model:
+	 * 
+	 * <pre>
+	 * uri "http://sadl.org/Current.sadl" alias current.
+	 * current:Foo is a class.
+	 * </pre>
+	 * Then
+	 * <pre>
+	 * val extensions = // ...
+	 * val resource = // ...
+	 * 
+	 * println(extensions.getConcreteName(resource)); // Foo
+	 * println(extensions.getConcreteName(resource, true)); // Foo
+	 * println(extensions.getConcreteName(resource, false)); // current:Foo
+	 * </pre>
+	 * 
+	 * @param it the SADL resource who's name we are looking for.
+	 * @param trimPrefix when {@code true} any leading prefixes (if any) will be omitted from the result.
+	 */
+	def String getConcreteName(SadlResource it, boolean trimPrefix) {
 		if (isExternal) {
-			return getExternalResourceAdapter.concreteName
+			return getExternalResourceAdapter.concreteName;
 		}
 		val resource = it.eResource as XtextResource
 		val ()=>String nameSupplyer = [
-			val nodes = NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME)
-			val name = nodes.join('') [
-				NodeModelUtils.getTokenText(it)
-			].trim
-			if (name.isNullOrEmpty)
-				return null
-			if (converter === null) 	// this will be null when a resource is open in the editor and a clean/build is performed ??
-				return name
-			return converter.toValue(name, null)
-		]
-		if (resource === null)
-			return nameSupplyer.apply
-		return resource.cache.get(it -> 'concreteName', eResource, nameSupplyer)
+			val nodes = findNamedNodes;
+			var name = nodes.map[NodeModelUtils.getTokenText(it)].join('').trim;
+			if (name.isNullOrEmpty) {
+				return null;
+			}
+			if (trimPrefix) {				
+				val index = name.lastIndexOf(QualifiedNameConverter.SEGMENT_SEPARATOR);
+				if (index !== -1) {
+					val ()=>String aliasSupplier = [
+						EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;	
+					];
+					val alias = if (resource !== null) {
+						resource.cache.get(it -> 'alias', resource, aliasSupplier);
+					} else {
+						aliasSupplier.apply;
+					};
+					if (alias == name.substring(0, index) && name.length >= (index + 1)) {
+						name = name.substring(index + 1);
+					}
+				}
+			}
+			// this will be null when a resource is open in the editor and a clean/build is performed ??
+			// And if the extensions instance is not injected into the context but instantiated via its constructor. 
+			if (converter === null) {
+				return name;
+			}
+			return converter.toValue(name, null);
+		];
+		if (resource === null) {
+			return nameSupplyer.apply;
+		}
+		return resource.cache.get(it -> '''concreteName[trimPrefix«trimPrefix»]''', eResource, nameSupplyer)
 	}
 	
+	/**
+	 * Returns with the concrete name of the SADL resource argument. Any leading prefixes will be removed
+	 * from the name.
+	 * <p>
+	 * This method is equivalent with calling {@link getConcreteName(SadlResource, true)}.
+	 */
+	def String getConcreteName(SadlResource it) {
+		return getConcreteName(it, true);
+	}
+
+	private def dispatch findNamedNodes(SadlResource it) {
+		return NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME);
+	}
+
+	private def dispatch findNamedNodes(Name it) {
+		val node = NodeModelUtils.getNode(it) as INode;
+		return if(node === null) emptyList else #[node];
+	}
+ 
 	def String getConceptUri(SadlResource it) {
 		if (isExternal) {
 			return getExternalResourceAdapter.conceptUri
@@ -180,30 +242,30 @@ class DeclarationExtensions {
 					OntConceptType.FUNCTION_DEFN
 					
 				SadlClassOrPropertyDeclaration case e.restrictions.exists[it instanceof SadlIsAnnotation],
-				SadlProperty case e.restrictions.exists[it instanceof SadlIsAnnotation] :
+				SadlProperty case e.restrictions.exists[it instanceof SadlIsAnnotation]:
 					OntConceptType.ANNOTATION_PROPERTY
 					
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY]:
 					OntConceptType.CLASS_PROPERTY
 					
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY]:
 					OntConceptType.CLASS_PROPERTY
 				
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE_PROPERTY]:
 					OntConceptType.DATATYPE_PROPERTY
 					 
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY] :
+				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY]:
 					OntConceptType.ANNOTATION_PROPERTY
 					 
-				SadlClassOrPropertyDeclaration case e.superElement.isList : 
+				SadlClassOrPropertyDeclaration case e.superElement.isList: 
 					if (e.superElement.isDatatype) OntConceptType.DATATYPE_LIST
 					else OntConceptType.CLASS_LIST
 				
-				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype : 
+				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype: 
 					OntConceptType.DATATYPE
 					
 				SadlNecessaryAndSufficient,
-				SadlClassOrPropertyDeclaration : 
+				SadlClassOrPropertyDeclaration: 
 					OntConceptType.CLASS
 					
 	//			SadlDataTypeDeclaration :
@@ -227,19 +289,35 @@ class DeclarationExtensions {
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[!range.isDatatype]: 
 					OntConceptType.CLASS_PROPERTY
 
-				SadlProperty : 
+				SadlProperty: 
 					OntConceptType.RDF_PROPERTY
 					
-				SadlParameterDeclaration :
+				SadlParameterDeclaration:
 					OntConceptType.VARIABLE				
 					
 				SadlInstance,
 				SadlCanOnlyBeOneOf,
 				SadlValueList,
-				SadlMustBeOneOf :
+				SadlMustBeOneOf:
 					OntConceptType.INSTANCE
 					
-				default: OntConceptType.VARIABLE // linking errors and the like
+				QueryStatement,
+				RuleStatement:
+					OntConceptType.STRUCTURE_NAME					
+					
+				default: {
+					if (resource !== null && resource.eResource instanceof XtextResource) {
+						val xtextResource = resource.eResource as XtextResource;
+						val contribution = xtextResource.resourceServiceProvider.get(IDeclarationExtensionsContribution);
+						if (contribution !== null) {
+							val ontConceptType = contribution.getOntConceptType(e);
+							if (ontConceptType !== null) {
+								return ontConceptType;
+							}
+						}
+					}
+					OntConceptType.VARIABLE // linking errors and the like
+				}
 			}
 		} finally {
 			recursionDetection.get.remove(resource)

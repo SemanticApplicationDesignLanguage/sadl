@@ -31,6 +31,7 @@ public class BuiltinInfo {
 	private String className;
 	private String reasonerFamily;
 	private int numArgs;
+	private String signature;
 	
 	public BuiltinInfo(String name, String className, String family) {
 		setName(name);
@@ -43,6 +44,13 @@ public class BuiltinInfo {
 		setClassName(className);
 		setReasonerFamily(family);
 		setNumArgs(numArgs);
+	}
+	
+	public String getUri() {
+		String uri = getClassName().substring(0, getClassName().lastIndexOf('.'));
+		uri += "#";
+		uri += getName();
+		return uri;
 	}
 	
 	private void setReasonerFamily(String reasonerFamily) {
@@ -75,5 +83,13 @@ public class BuiltinInfo {
 	
 	public int getNumArgs() {
 		return numArgs;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
 	}
 }

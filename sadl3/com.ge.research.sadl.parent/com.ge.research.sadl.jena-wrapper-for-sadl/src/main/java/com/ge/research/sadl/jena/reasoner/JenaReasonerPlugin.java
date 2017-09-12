@@ -53,15 +53,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
+import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarget;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.TripleElement;
@@ -108,6 +111,7 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -142,6 +146,7 @@ import com.hp.hpl.jena.reasoner.rulesys.Rule.ParserException;
 import com.hp.hpl.jena.reasoner.rulesys.RuleDerivation;
 import com.hp.hpl.jena.reasoner.rulesys.builtins.Product;
 import com.hp.hpl.jena.shared.RulesetNotFoundException;
+import com.hp.hpl.jena.sparql.syntax.Template;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
@@ -253,7 +258,6 @@ public class JenaReasonerPlugin extends Reasoner{
 	protected List<ConfigurationItem> preferences = null;
 	private OntModel tboxModelWithSpec;
 	private List<ModelError> newErrors = null;
-;
 	
 	public JenaReasonerPlugin() {
 		// these will have been loaded by the translator and added to the configuration if they are needed
@@ -1076,9 +1080,19 @@ public class JenaReasonerPlugin extends Reasoner{
 						StmtIterator sitr = constructModel.listStatements();
 						if (sitr.hasNext()) {
 							String[] columnName = new String[3];
-							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
-							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
-							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+							Query q = qexec.getQuery();
+							Template template = q.getConstructTemplate();
+							Triple triple0 = template.getBGP().get(0);
+//							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
+//							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
+//							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+							com.hp.hpl.jena.graph.Node subj = triple0.getSubject();
+							com.hp.hpl.jena.graph.Node pred = triple0.getPredicate();
+							com.hp.hpl.jena.graph.Node obj = triple0.getObject();
+							
+							columnName[0] = subj.isVariable() ? subj.getName() : subj.getLocalName();
+							columnName[1] = pred.isVariable() ? pred.getName() : pred.getLocalName();
+							columnName[2] = obj.isVariable() ? obj.getName() : obj.getLocalName();
 							List<Object[]> dataList = new ArrayList<Object[]>();
 							while (sitr.hasNext()) {
 								Statement stmt = sitr.nextStatement();
@@ -1440,6 +1454,12 @@ public class JenaReasonerPlugin extends Reasoner{
 				} catch (QueryParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			else {
@@ -1638,8 +1658,9 @@ public class JenaReasonerPlugin extends Reasoner{
 		return tripleStr;
 	}
 
-	protected ResultSet processRuleQuery(com.hp.hpl.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException {
+	protected ResultSet processRuleQuery(com.hp.hpl.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException, InvalidNameException, ConfigurationException {
 		logger.debug("Explanation executing query: " + q);
+		q = prepareQuery(q);
 		ResultSet rs = ask(q);
 		if (rs != null) {
 			int numResults = rs.getRowCount();
@@ -2709,8 +2730,14 @@ public class JenaReasonerPlugin extends Reasoner{
 	public BuiltinInfo getBuiltinInfo(Class<?> bcls) {
 		try {
 			Builtin binst = (Builtin) this.getClass().getClassLoader().loadClass(bcls.getCanonicalName()).newInstance();
-			return new BuiltinInfo(binst.getName(), bcls.getCanonicalName(), getReasonerFamily(),
-			binst.getArgLength());
+			BuiltinInfo binfo = new BuiltinInfo(binst.getName(), bcls.getCanonicalName(), getReasonerFamily(), binst.getArgLength());
+			if (binst instanceof TypedBaseBuiltin) {
+				binfo.setSignature(((TypedBaseBuiltin)binst).getFunctionSignatureString());
+				return binfo;
+			}
+			else {
+				return binfo;
+			}
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2770,6 +2797,51 @@ public class JenaReasonerPlugin extends Reasoner{
 		return implbltins;
 	}
 
+	public String[] getBuiltinFunctions(){
+		return new String[]{"addOne(decimal)decimal", 
+							"bound(string)boolean", 
+							"countLiteralValues(string,string)int", 
+							"isBNode(string)boolean", 
+							"isDType(string)boolean", 
+							"isLiteral(string)boolean",
+							"listContains(string,string)boolean", 
+							"listEntry(string,int)string", 
+							"listEqual(string,string)boolean", 
+							"listLength(string)int", 
+							"listMapAsObject(string,string,string)boolean", 
+							"listMapAsSubject(string,string,string)boolean", 
+							"listNotContains(string,string)boolean", 
+							"listNotEqual(string,string)boolean", 
+							"notBNode(string)boolean", 
+							"notBType(string)boolean", 
+							"notDType(string)boolean", 
+							"notLiteral(string)boolean", 
+							"now()dateTime", 
+							"regex(string,string)string", 
+							"strConcat(string,string)string", 
+							"uriConcat(string,string)string",
+							"unbound(string)string"};
+	}
+	
+	@Override
+	public List<FunctionSignature> getImplicitBuiltinSignatures() {
+		List<FunctionSignature> fsList = new ArrayList<FunctionSignature>();
+		for(String s : getBuiltinFunctions()){
+			int openParenLoc = s.indexOf("(");
+			String localName;
+			if (openParenLoc > 0) {
+				localName = s.substring(0,openParenLoc).trim();
+			}
+			else {
+				localName = s.trim();
+			}
+			if (localName.startsWith("^")) {
+				localName = localName.substring(1);
+			}
+			fsList.add(new FunctionSignature(s,	"com.hp.hpl.jena.reasoner.rulesys.builtins" + "#" + localName));
+		}
+		return fsList;
+	}
 
 	public DataSource getDerivations() throws InvalidDerivationException, ConfigurationException {
 		getReasonerOnlyWhenNeeded();
@@ -3125,8 +3197,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	@Override
 	public boolean isInitialized() {
-		// TODO Auto-generated method stub
-		return false;
+		return initialized;
 	}
 
 	@Override
@@ -3139,6 +3210,5 @@ public class JenaReasonerPlugin extends Reasoner{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 
 }

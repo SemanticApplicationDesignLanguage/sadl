@@ -1,0 +1,102 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>SADL Version 3</title>
+</head>
+
+<body>
+
+<h1>SADL Version 3</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->07/03/2017<!--webbot bot="Timestamp" endspan i-checksum="12553" -->. 
+Send comments to
+<a href="mailto:crapo@research.ge.com?subject=ImpliedProperties">
+mailto:crapo@research.ge.com</a>.</h5>
+<h2>Introduction</h2>
+<p>
+<span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none; background-color: rgb(255, 255, 255)">
+The<span class="Apple-converted-space">&nbsp;</span></span><em style="box-sizing: border-box; color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; background-color: rgb(255, 255, 255)">Semantic 
+Application Design Language</em><span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none; background-color: rgb(255, 255, 255)"><span class="Apple-converted-space">&nbsp;</span>(SADL) 
+is both a controlled-English language for capturing semantic models, which are 
+translated automatically to the Web Ontology Language (OWL), and an integrated 
+development environment (IDE) that facilitates authoring knowledge bases in the 
+SADL language. This documentation is for SADL Version 3. The Java source code for the SADL grammar and for the 
+Eclipse-based IDE. SADL are Open Source under the Eclipse Public License. SADL 
+documentation resides on<span class="Apple-converted-space">&nbsp;</span></span><a href="http://sadl.sourceforge.net/" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255)">SourceForge.net</a><span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none; background-color: rgb(255, 255, 255)">. 
+The source code for SADL Version 3 resides on
+<a href="https://github.com/crapo/sadlos2">GitHub, Inc.</a></span></p>
+<h2>SADL Topics</h2>
+<p style="box-sizing: border-box; color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; margin-top: 0px; margin-bottom: 16px; background-color: rgb(255, 255, 255)">
+A number of topics describing authoring semantic models in SADL are available. 
+These include the following.</p>
+<ul>
+  <li>Capturing a Domain Model in SADL<ul>
+    <li>
+    <a href="http://sadl.sourceforge.net/sadl3/WhyAnOntology.html" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+    Why an Ontology?</a></li>
+    <li>
+    <a href="http://sadl.sourceforge.net/sadl3/FoundationalConcepts.html" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+    Foundational Concepts</a></li>
+    <li>
+    <a href="http://sadl.sourceforge.net/sadl3/OwlAndSadl.html" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+    The Web Ontology Language (OWL) and the Semantic Application Design Language 
+    (SADL)</a></li>
+    <li>
+    <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+    Leveraging OWL: SADL Constructs Useful in Building Models</a><ul>
+      <li>
+      <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html#Rules" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+      Rules and Built-in Functions</li>
+      <li>
+      <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html#Equations" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+      Equations</a></li>
+      <li>
+      <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html#TypedLists" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+      Typed Lists</a></li>
+      <li>
+      <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html#ImpliedProperties" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+      Implied Properties</a></li>
+      <li>
+      <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html#ExpandedProperties" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+      Expanded Properties</a></li>
+      <li>
+      <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html#UnittedQuantities" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+      Unitted Quantities</a></li>
+      <li>
+      <a href="http://sadl.sourceforge.net/sadl3/SadlConstructs.html#ExternalModels" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+      External Models</a></li>
+    </ul>
+    </li>
+    <li>
+     <a href="http://sadl.sourceforge.net/sadl3/NamedStructures.html" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+	 Named Structures as Instances of Implicit Classes</a></li>
+  </ul>
+  </li>
+  <li>Testing, Debugging, and Managing Knowledge Bases<ul>
+    <li>Ask</li>
+    <li>Test</li>
+    <li>Explain</li>
+    <li>Print</li>
+    <li>Read</li>
+    <li>Write</li>
+    <li>Model Versioning and Version Control</li>
+  </ul>
+  </li>
+  <li>Additional Information<ul>
+    <li>
+    <a href="http://sadl.sourceforge.net/sadl3/SadlGrammar.rtf" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+    Appendix A: The SADL Grammar</a></li>
+    <li>
+    <a href="http://sadl.sourceforge.net/sadl3/SadlPreferences.html" style="box-sizing: border-box; color: rgb(3, 102, 214); text-decoration: none; background-color: transparent">
+    Appendix B: SADL Preferences</a></li>
+  </ul>
+  </li>
+</ul>
+
+</body>
+
+</html>

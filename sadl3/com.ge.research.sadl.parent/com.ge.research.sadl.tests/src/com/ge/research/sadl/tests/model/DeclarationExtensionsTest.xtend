@@ -32,6 +32,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -197,6 +198,23 @@ class DeclarationExtensionsTest {
 		assertEquals(OntConceptType.CLASS, name2resource.get('Rock').ontConceptType)
 	}
 	
+	@Ignore ("When GH-168 is fixed this ignore can be removed")
+	@Test def void testGetOntConceptType_08() {
+		val model = '''
+			uri "http://sadl.imp/relationship" alias rel.
+			
+			Person is a class.
+			Pet is a class.
+			
+			relationship of Person to Pet is owns.
+		'''.parse
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		
+		assertEquals(OntConceptType.CLASS, name2resource.get('Person').ontConceptType)
+		assertEquals(OntConceptType.CLASS, name2resource.get('Pet').ontConceptType)
+		assertEquals(OntConceptType.CLASS_PROPERTY, name2resource.get('owns').ontConceptType)
+	}
+	
 	@Test def void testEscapedName() {
 		val model = '''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen. 
@@ -258,6 +276,21 @@ class DeclarationExtensionsTest {
               val resources = model.eAllContents.filter(SadlResource).toMap[concreteName]
               // TODO how do we check that the two rules have separate local variables?
               resources.get('Grades').assertIs(OntConceptType.DATATYPE_LIST)
+	}
+	
+	@Test
+	def void testGetConcreteName() {
+		val model = '''
+			uri "http://sadl.org/Test/qualifiedname" alias qn. 
+					
+			Bar is a class, described by qn:foo with a single value of type string.
+		'''.parse
+		
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		assertTrue(name2resource.containsKey('Bar'))
+		assertEquals(OntConceptType.CLASS, name2resource.get('Bar').ontConceptType)
+		assertTrue(name2resource.containsKey('foo'))
+		assertEquals(OntConceptType.DATATYPE_PROPERTY, name2resource.get('foo').ontConceptType)
 	}
 	
 	protected def void assertIs(SadlResource it, OntConceptType type) {

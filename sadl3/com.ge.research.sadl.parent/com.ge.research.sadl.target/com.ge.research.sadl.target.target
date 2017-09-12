@@ -14,6 +14,8 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xerces" version="0.0.0"/>
+<unit id="org.jsoup" version="1.7.2.v201411291515"/>
+<unit id="org.jsoup.source" version="1.7.2.v201411291515"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">

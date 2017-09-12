@@ -25,6 +25,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.sadl";	// this is a .sadl file and for now will be imported explicitly
 	public static final String OWL_IMPLICIT_MODEL_FILENAME = "SadlImplicitModel.owl";
 	public static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
+	public static final String SADL_IMPLICIT_MODEL_SYNTHETIC_URI = "synthetic://test/SadlImplicitModel.sadl";
 	public static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
 	public static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
 	public static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
@@ -32,7 +33,9 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_VALUE_URI = SADL_IMPLICIT_MODEL_URI + "#value";
 	public static final String SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#impliedProperty";
 	public static final String SADL_IMPLICIT_MODEL_EXPANDED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#expandedProperty";
+	public static final String SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#NamedQuery";
 	public static final String SADL_IMPLICIT_MODEL_QUERY_STRING_URI = SADL_IMPLICIT_MODEL_URI + "#queryString";
+	public static final String SADL_IMPLICIT_MODEL_RULE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Rule";
 	
 	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
 	public static final String SADL_RULE_PATTERN_PREFIX = "";
@@ -50,6 +53,7 @@ public class SadlConstants {
 	public static final String SADL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.sadl";
 	public static final String OWL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.owl";
 	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
+	public static final String SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI = "synthetic://test/SadlBuiltinFunctions.sadl";
 	public static final String SADL_BUILTIN_FUNCTIONS_ALIAS = "builtinfunctions";
 	public static enum SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY{FULL,NAME_ONLY,NONE};
 	

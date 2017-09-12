@@ -155,6 +155,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage TYPE_CHECK_BUILTIN_EXCEPTION = new SadlErrorMessage("type_check_builtin_exception");
 /**
+* It is unusual to use an undefined variable (''{0}'') as a property.
+**/
+    public static final SadlErrorMessage VARIABLE_INSTEAD_OF_PROP2 = new SadlErrorMessage("variable_instead_of_prop2");
+/**
 * expected a {0}
 **/
     public static final SadlErrorMessage EXPECTED_A = new SadlErrorMessage("expected_a");
@@ -230,6 +234,10 @@ public final class SadlErrorMessages {
 * Did not expect a property ({0}) as a triple pattern subject.
 **/
     public static final SadlErrorMessage UNEXPECTED_TRIPLE = new SadlErrorMessage("unexpected_triple");
+/**
+* Comparison using {0} cannot have a constant or literal on both sides.
+**/
+    public static final SadlErrorMessage COMPARISON_LITERALS_CONSTANTS = new SadlErrorMessage("comparison_literals_constants");
 /**
 * type checking doesn't handle {0}
 **/

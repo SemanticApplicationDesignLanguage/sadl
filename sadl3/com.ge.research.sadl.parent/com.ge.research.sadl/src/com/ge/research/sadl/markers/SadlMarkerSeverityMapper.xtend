@@ -40,7 +40,6 @@ interface SadlMarkerSeverityMapper {
 	@Singleton
 	static class Default implements SadlMarkerSeverityMapper {
 
-		@Override		
 		override map(SadlMarkerSeverity severity) {
 			return Preconditions.checkNotNull(severity, "severity").ordinal;
 		}

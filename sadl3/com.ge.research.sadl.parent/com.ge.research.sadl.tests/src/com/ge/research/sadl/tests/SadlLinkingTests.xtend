@@ -73,7 +73,6 @@ class SadlLinkingTests {
 			second.elements.filter(SadlClassOrPropertyDeclaration).head.superElement.referencedSadlResources.head)
 	}
 	
-	@Ignore
 	@Test def void testCrossResourceSadlResourceLinks_01() {
 		val first = parse('''
 			uri "http://sadl.org.Tests/ModelName" alias foo.
@@ -92,7 +91,6 @@ class SadlLinkingTests {
 			second.elements.filter(SadlClassOrPropertyDeclaration).head.superElement.referencedSadlResources.head)
 	}
 	
-	@Ignore
 	@Test def void testCrossResourceSadlResourceLinks_02() {
 		val first = parse('''
 			uri "http://sadl.org.Tests/ModelName".
@@ -102,13 +100,36 @@ class SadlLinkingTests {
 			uri "http://sadl.org/Tests/Import" alias imp.
 			import "http://sadl.org.Tests/ModelName" as foo.
 			
-			Bar is a type of foo:Foo.
+			Bar is a type of Foo.
 		''', first.eResource.resourceSet)
 		first.assertNoErrors
 		second.assertNoErrors
 		assertSame(first, second.imports.head.importedResource)
 		assertSame(first.elements.filter(SadlClassOrPropertyDeclaration).head.classOrProperty.head, 
 			second.elements.filter(SadlClassOrPropertyDeclaration).head.superElement.referencedSadlResources.head)
+	}
+	
+	@Ignore
+	@Test def void testCrossResourceSadlResourceLinks_03() {
+		val first = parse('''
+			uri "http://sadl.org.Tests/ModelName" alias m1.
+			Foo is a class.
+		''')
+		val second = parse('''
+			uri "http://sadl.org/Tests/Import" alias m2.
+			import "http://sadl.org.Tests/ModelName" as foo.
+			
+			m2:Foo is a class.	// this creates a new class in the current namespace (model) with local name "Foo"
+			Bar is a type of Foo.	// this should reference the class "m2:Foo", the "Foo" in this namespace, not the imported one.
+		''', first.eResource.resourceSet)
+		first.assertNoErrors
+		second.assertNoErrors
+		assertSame(first, second.imports.head.importedResource)
+		assertNotSame(first.elements.filter(SadlClassOrPropertyDeclaration).head.classOrProperty.head, 
+			second.elements.filter(SadlClassOrPropertyDeclaration).get(1).superElement.referencedSadlResources.head)
+		assertSame(second.elements.filter(SadlClassOrPropertyDeclaration).head.classOrProperty.head,
+			second.elements.filter(SadlClassOrPropertyDeclaration).get(1).superElement.referencedSadlResources.head)
+		
 	}
 	
 	@Test def void testClassesLink() {
@@ -125,7 +146,6 @@ class SadlLinkingTests {
 		assertSame(foo, referencedSuperType.eContainer)
 	}
 	
-	@Ignore
 	@Test def void testResourceLinking_02() {
 		val first = parse('''
 			uri "http://com.ge.research.sadlGeorgeAndMarthaErr".

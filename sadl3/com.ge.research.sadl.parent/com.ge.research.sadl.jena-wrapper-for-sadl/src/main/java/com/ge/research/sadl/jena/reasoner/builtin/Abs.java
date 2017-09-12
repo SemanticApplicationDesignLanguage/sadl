@@ -27,7 +27,7 @@ import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 import com.hp.hpl.jena.reasoner.rulesys.Util;
 import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
-public class Abs extends BaseBuiltin {
+public class Abs extends TypedBaseBuiltin {
 	private static final Logger logger = LoggerFactory.getLogger(Abs.class);
 
     /**
@@ -84,5 +84,10 @@ public class Abs extends BaseBuiltin {
         // Doesn't (yet) handle partially bound cases
         return false;
     }
+
+	@Override
+	public String getFunctionSignatureString() {
+		return "abs(decimal)decimal";
+	}
 
 }

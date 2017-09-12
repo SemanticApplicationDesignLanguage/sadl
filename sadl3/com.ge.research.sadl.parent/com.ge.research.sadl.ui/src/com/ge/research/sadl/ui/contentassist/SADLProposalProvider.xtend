@@ -31,13 +31,15 @@ import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
+import com.ge.research.sadl.sADL.SadlRangeRestriction
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.google.common.base.Predicate
 import com.google.inject.Inject
-import com.hp.hpl.jena.ontology.OntResource
+import com.hp.hpl.jena.vocabulary.XSD
 import java.util.ArrayList
+import java.util.Collection
 import java.util.HashMap
 import java.util.List
 import org.eclipse.emf.ecore.EObject
@@ -52,15 +54,17 @@ import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
-import com.ge.research.sadl.sADL.SadlRangeRestriction
-import com.hp.hpl.jena.vocabulary.XSD
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
  */
 class SADLProposalProvider extends AbstractSADLProposalProvider {
-	@Inject protected DeclarationExtensions declarationExtensions
+
+	protected static val SUPPORTED_FILE_EXTENSION = #{'sadl', 'n3', 'owl', 'ntriple', 'nt'};
+	protected static val BUILTIN_FILES = #{'SadlImplicitModel.sadl', 'SadlBuiltinFunctions.sadl'};
+
+	@Inject protected DeclarationExtensions declarationExtensions;
 	@Inject extension ProposalProviderFilterProvider;
 	
 	val PropertyRangeKeywords = newArrayList(
@@ -85,48 +89,33 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 		
 	}
 	
-	override def void completeSadlImport_ImportedResource(EObject model,  Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		val term = assignment.terminal
-		val container = EcoreUtil2.getContainerOfType(model, SadlModel)
-		
-// When there is a partial statement of the form "import ", cursor at end, the call on the next line results in a NullPointerException and no proposals are generated.		
-//		val imports = container.imports.map[importedResource.baseUri].toSet
-		
-// An alternative for the above is the code below, up to the call to lookupCrossReference, which has sufficient not null checks to work
-		val imports = new ArrayList<String>()
-		val importsList = container.imports
-		if (importsList != null) {
-			for (imp:importsList) {
-				if (imp != null) {
-					val import = imp.importedResource
-					if (import != null) {
-						val impUri = import.baseUri
-						if (impUri != null) {
-							imports.add(impUri)
-						}
-					}
-				}
-			}
-		}
 
-		lookupCrossReference(term as CrossReference, context, acceptor, new Predicate<IEObjectDescription>() {
-					override apply(IEObjectDescription input) {
-						val fnm = input.EObjectURI.lastSegment
-						if (fnm != null && (fnm.toLowerCase().endsWith(".sadl") || 
-							fnm.toLowerCase().endsWith(".owl") ||
-							 fnm.toLowerCase().endsWith(".n3") || 
-							 fnm.toLowerCase().endsWith(".ntriple") ||
-							 fnm.toLowerCase().endsWith(".nt")) && 
-							!fnm.equals("SadlImplicitModel.sadl") &&
-							!fnm.equals("SadlBuiltinFunctions.sadl") && 
-							!imports.contains(input.name.toString)
-						) {
-							return true;
-						}
-						return false
-					}
-					
-				})
+	protected def Collection<String> getBuiltinFiles() {
+		return BUILTIN_FILES;
+	}
+
+	protected def Collection<String> getSupporedFileExtensions() {
+		return SUPPORTED_FILE_EXTENSION;
+	}
+
+	protected def boolean canBeImported(IEObjectDescription it, Collection<String> alreadyImportedFiles) {
+		val fileExtension = EObjectURI?.fileExtension;
+		val fileName = EObjectURI?.lastSegment;
+		return supporedFileExtensions.contains(fileExtension) && !builtinFiles.contains(fileName) &&
+			!alreadyImportedFiles.contains(name?.toString);
+	}
+
+	override def void completeSadlImport_ImportedResource(EObject model, Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+
+		val term = assignment.terminal;
+		val sadlModel = EcoreUtil2.getContainerOfType(model, SadlModel);
+		if (sadlModel !== null) {
+			val imports = sadlModel.imports.map[importedResource].filterNull.map[baseUri].filterNull.toSet;
+			lookupCrossReference(term as CrossReference, context, acceptor) [
+				return canBeImported(it, imports);
+			];
+		}
 	}
 
 	// Creates a proposal for an EOS terminal.  Xtext can't guess (at
@@ -419,11 +408,11 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 						// check property range
 						val ontModel = OntModelProvider.find(model.eResource)
-						if (ontModel != null) {
+						if (ontModel !== null) {
 							val ontprop = ontModel.getOntProperty(declarationExtensions.getConceptUri((model as SadlPropertyInitializer).property))
-							if (ontprop != null) {
+							if (ontprop !== null) {
 								val rnglst = ontprop.listRange
-								if (rnglst != null) {
+								if (rnglst !== null) {
 									if (kval.equals("true") || kval.equals("false")) {
 										while (rnglst.hasNext) {
 											val rng = rnglst.next
@@ -496,33 +485,6 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			typeList.add(OntConceptType.CLASS)
 			typeRestrictions = typeList
 		}
-	}
-	
-	/**
-	 * Method to determine if a particular SadlResource (OntConceptType.INSTANCE, OntConceptType.CLASS, or OntConceptType.VARIABLE)
-	 * is in the domain of the given property
-	 */
-	def boolean isSadlResourceInDomainOfProperty(SadlResource propsr, SadlResource sr) {
-			val om = OntModelProvider.find(propsr.eResource)
-			if (om != null) {
-				val p = om.getProperty(declarationExtensions.getConceptUri(propsr))
-				if (p != null) {
-					val srtype = declarationExtensions.getOntConceptType(sr)
-					var OntResource ontrsrc
-					if (srtype.equals(OntConceptType.CLASS)) {
-						ontrsrc = om.getOntClass(declarationExtensions.getConceptUri(sr))
-					}
-					else if (srtype.equals(OntConceptType.INSTANCE)) {
-						ontrsrc = om.getIndividual(declarationExtensions.getConceptUri(sr))
-					}
-					else if (srtype.equals(OntConceptType.VARIABLE)) {
-						//TBD
-					}
-//					return JenaBasedSadlModelValidator.checkPropertyDomain(om, p, ontrsrc, propsr.eContainer, false)
-				}
-			}
-		
-		return false
 	}
 	
 	def restrictTypeToAllPropertyTypes() {
