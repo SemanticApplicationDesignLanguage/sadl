@@ -118,18 +118,45 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 	@Test 
 	def void testListTypes_04() {
 		'''
-			uri "http://com.ge.research.sadl/sublists". 
-			
-			Test: MyPets is a Pet List.
-		'''.assertNoErrors
+			 uri  "http://sadl.org/Test.sadl" alias Test.
+			 
+			 Person is a class described by age with values of type int.
+			 ChildrenList is a type of Person List length 1-*.
+			 children describes Person with values of type ChildrenList.
+			 children of Person has at most 1 value.
+			 
+			 PersonList is a type of Person List.
+			 PersonListList is a type of PersonList List.
+			 
+			 foo describes Person with values of type PersonListList.
+			 bar describes Person with values of type Person List length 1-4.
+			 bar of Person only has values of type Person List.
+			 bar of Person only has values of type Person List length 1-4.
+			 bar of Person has at least one value of type Person List length 1-4.
+			 bar of Person has at least 1 value of type Person List length 1-4.
+			 bar of Person has at most 2 value of type Person List length 1-4.
+ 		'''.assertNoErrors
 	}
 
+	@Ignore
 	@Test 
 	def void testListTypes_05() {
 		'''
-			uri "http://com.ge.research.sadl/sublists". 
-			
-			Test: MyPets is a Pet List.
+			 uri  "http://sadl.org/Test.sadl" alias Test.
+			 
+			 Person is a class described by age with values of type int.
+			 
+			 bar describes Person with values of type Person List length 1-4.
+			 
+			  Rule R1: if x is a Person and
+			  		x has bar y and 
+			  		y is a Person List
+			  then print("Hurray!").
+			  
+			   Rule R2: if x is a Person and
+			   		x has bar y and 
+			   		y is a Person List length 1-4
+			   then print("Hurray!!!").
 		'''.assertNoErrors
 	}
 
