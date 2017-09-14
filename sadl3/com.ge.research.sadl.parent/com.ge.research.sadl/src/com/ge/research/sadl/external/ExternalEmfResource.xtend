@@ -17,7 +17,11 @@
  ***********************************************************************/
 package com.ge.research.sadl.external
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE
 import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.reasoner.ConfigurationManager
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.sADL.SADLFactory
 import com.ge.research.sadl.sADL.SadlModel
 import com.google.inject.Inject
@@ -31,15 +35,19 @@ import com.hp.hpl.jena.ontology.OntModel
 import com.hp.hpl.jena.ontology.OntModelSpec
 import com.hp.hpl.jena.ontology.OntResource
 import com.hp.hpl.jena.rdf.model.ModelFactory
+import com.hp.hpl.jena.rdf.model.Property
 import com.hp.hpl.jena.rdf.model.Resource
 import com.hp.hpl.jena.util.iterator.ExtendedIterator
 import com.hp.hpl.jena.vocabulary.OWL
 import com.hp.hpl.jena.vocabulary.RDF
 import com.hp.hpl.jena.vocabulary.RDFS
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.Collection
 import java.util.Map
+import org.eclipse.core.resources.ResourcesPlugin
+import org.eclipse.core.runtime.Path
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
@@ -59,6 +67,9 @@ class ExternalEmfResource extends ResourceImpl {
 
 	@Accessors(PUBLIC_GETTER)
 	OntModel jenaModel;
+	
+	IConfigurationManagerForIDE configMgr
+	public static final String OWL_MODELS_FOLDER_NAME = "OwlModels";
 
 	override public void load(Map<?, ?> options) throws IOException {
 		try {
@@ -70,28 +81,52 @@ class ExternalEmfResource extends ResourceImpl {
 
 	override protected doLoad(InputStream inputStream, Map<?, ?> options) throws IOException {
 		jenaModel = initOntModel(inputStream);
+		val buri = getJenaModelBaseUri(jenaModel)
 		jenaModel.listSubjects.filter[URIResource].map[it -> createURI(URI)].filter[key.localName == value.fragment].
 			forEach [
 				val rdfResource = key;
-				val uri = value;
-				val baseUri = uri.trimFragment.toString;
-				val model = getOrCreateSadlModel(baseUri);
+//				val uri = value;
+//				val baseUri = uri.trimFragment.toString;
+				var altBaseUri = buri
+				if (buri != null && buri.endsWith("#")) {
+					altBaseUri = buri.substring(0, buri.length() - 1);
+				}	
+				val model = getOrCreateSadlModel(altBaseUri, options);
 				model.elements += createSadlResource(rdfResource);
 			];
 
 		jenaModel.listOntologies.forEach [
 			val baseUri = URI;
 			listImports.forEach [
-				val model = getOrCreateSadlModel(baseUri);
+				val resource = it
+				if (resource instanceof Resource) {
+					if ((resource as Resource).URIResource) {
+						val importUri = resource.URI
+						System.out.println("Importing " + importUri)
+					}
+				}
+				val model = getOrCreateSadlModel(baseUri, options);
 				model.imports += createSadlImport(it);
 			];
 		];
+	}
+	
+	def getJenaModelBaseUri(OntModel m) {
+		return m.getNsPrefixURI("")
 	}
 
 	def createSadlImport(OntResource resource) {
 		println("IMPORT? " + resource.URI)
 		return SADLFactory.eINSTANCE.createSadlImport => [
 			// TODO load SADL models?	
+			val q = it
+			System.out.println(q)
+			var prefix = jenaModel.getNsURIPrefix(resource.URI)
+			if (prefix === null) {
+				prefix = jenaModel.getNsURIPrefix(resource.URI + "#")
+			}
+			it.alias = prefix
+		
 		];
 	}
 
@@ -101,19 +136,122 @@ class ExternalEmfResource extends ResourceImpl {
 		super.doUnload()
 	}
 
-	private def getOrCreateSadlModel(String baseUri) {
+	private def getOrCreateSadlModel(String baseUri, Map<?, ?> options) {
 		var model = modelMapping.get(baseUri);
 		if (model === null) {
 			model = SADLFactory.eINSTANCE.createSadlModel => [
 				it.baseUri = baseUri;
+				// is this a good place to add the mapping for the external resource to the policy file?
+//  need to convert platform URI to a valid file URI--the ResourcesPlugin.getWorkspace doesn't work in tests and is Eclipse-specific
+				val file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(URI.toPlatformString(true)));
+				val filename = file.getRawLocation().toOSString();
+				System.out.println("URL= " + filename + ", URI=" + baseUri)
+				if (configMgr === null) {
+					val modelFolderPath = getModelFolderPath(URI, options)
+					var modelFolderPathname = toFile(modelFolderPath)
+					var	format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+					if (isSyntheticUri(modelFolderPathname.toString, URI)) {
+						modelFolderPathname = null;
+						configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname, format, true);
+					}
+					else {
+						configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname , format);
+					}
+				}
+				configMgr.addMapping(new SadlUtils().fileNameToFileUrl(filename), baseUri, null, true, "ExternalResource")
 			];
 			modelMapping.put(baseUri, model);
 			// Attach the SADL model to the contents list of the external resource.
+// this adds models other than for the current resource to the current resource? 
 			this.getContents.add(model);
 		}
 		return model;
 	}
 
+	def toFile(URI uri) {
+        if (uri.isFile()) {
+            return uri.toFileString();
+        } else if (uri.isPlatform()) {
+			val workspace = ResourcesPlugin.getWorkspace();
+			val root = workspace.getRoot();
+			val path = root.getFile(new Path(uri.toPlatformString(true))).getLocation();
+			val absolutePath = path.toString();
+			return absolutePath;
+//	}
+//
+//        	 IWorkspaceRoot.getProject(uri.segment(0))
+//        	 getFile(new Path(uri.toPlatformString())).getLocation() 
+//            return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(uri.toPlatformString(true)).toOSString();
+        }
+    }
+ 
+	private def isSyntheticUri(String modelFolderPathname, URI uri) {
+		if ((modelFolderPathname === null && 
+				uri.toString().startsWith("synthetic")) ||
+						uri.toString().startsWith("__synthetic")) {
+			return true;
+		}
+		return false;
+	}
+	
+	private def getModelFolderPath(URI resourceUri, Map<?, ?> options) {
+		var segCnt = resourceUri.segmentCount
+		for (var dropCnt = 1; dropCnt < segCnt; dropCnt++) {
+			val shortenedUri = resourceUri.trimSegments(dropCnt)
+			val proposedModelFolderUri = shortenedUri.appendSegment(OWL_MODELS_FOLDER_NAME)
+			if (getResourceSet.URIConverter.exists(proposedModelFolderUri, options)) {
+				return getResourceSet.URIConverter.normalize(proposedModelFolderUri)
+			}
+		}
+//		var segOff = 0
+//		if (resourceUri.isFile()) 
+//			segOff = 1
+//		else 
+//			segOff = 2
+//		val modelFolderUri = resourceUri.trimSegments(segOff).appendSegment(OWL_MODELS_FOLDER_NAME)
+//		
+//		if (resourceUri.isPlatformResource()) {
+//			 val file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(modelFolderUri.toPlatformString(true)))
+//			 return file.getRawLocation().toPortableString()
+//		} else {
+//			val modelFolderPathname = findModelFolderPath(resourceUri)
+//			if (modelFolderPathname === null) {
+//				return modelFolderUri.toFileString()
+//			}
+//			else {
+//				return modelFolderPathname
+//			}
+//		}
+		return null
+	}
+	
+   def String findModelFolderPath(URI uri){
+    	var file = new File(uri.path())
+    	if(file !== null){
+    		if(file.isDirectory()){
+    			if(file.getAbsolutePath().endsWith(OWL_MODELS_FOLDER_NAME)){
+    				return file.getAbsolutePath()
+    			}
+    			
+    			for(File child : file.listFiles()){
+    				if(child.getAbsolutePath().endsWith(OWL_MODELS_FOLDER_NAME)){
+    					return child.getAbsolutePath()
+    				}
+    			}
+    			//Didn't find a project file in this directory, check parent
+    			if(file.getParentFile() !== null){
+    				return findModelFolderPath(uri.trimSegments(1))
+    			}
+    		}
+    		if(file.isFile() && file.getParentFile() !== null){
+    			return findModelFolderPath(uri.trimSegments(1))
+    		}
+    	}
+    	
+    	return null;
+    }
+	
+	
 	private def createSadlResource(Resource rdfResource) {
 		return SADLFactory.eINSTANCE.createSadlResource => [
 			val conceptName = rdfResource.localName;
@@ -149,7 +287,7 @@ class ExternalEmfResource extends ResourceImpl {
 			} else if (r.canAs(DatatypeProperty)) {
 				ctype = OntConceptType.DATATYPE_PROPERTY
 			} else if (r.canAs(ObjectProperty)) {
-				ctype = OntConceptType.RDF_PROPERTY
+				ctype = OntConceptType.CLASS_PROPERTY
 			} else if (r.canAs(OntClass)) {
 				ctype = OntConceptType.CLASS
 				var ExtendedIterator<Resource> itr = r.^as(OntClass).listRDFTypes(true)
@@ -160,6 +298,10 @@ class ExternalEmfResource extends ResourceImpl {
 				}
 			} else if (r.canAs(AnnotationProperty)) {
 				ctype = OntConceptType.ANNOTATION_PROPERTY
+			} else if (r.canAs(Individual)) {
+				ctype = OntConceptType.INSTANCE
+			} else if (r.canAs(Property)) {
+				ctype = OntConceptType.RDF_PROPERTY
 			} else if (r.getNameSpace().equals(OWL.NAMESPACE.getNameSpace()) ||
 				r.getNameSpace().equals(RDFS.getURI())) {
 				// this is an OWL or RDFS concept--requires special handling

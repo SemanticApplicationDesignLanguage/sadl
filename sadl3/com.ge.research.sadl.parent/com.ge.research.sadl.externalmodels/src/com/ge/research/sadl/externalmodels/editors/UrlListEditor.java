@@ -238,11 +238,18 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 					if (filename != null) {
 						uploadedFiles.add(filename);
 					}
+					// get xml:base from the uploaded OWL file--this is the namespace to be mapped to from the filename
+					// add the mapping of filename ->xml:base to the policy file (here? or on build of OWL files?
+					// get the import URIs from this uploaded OWL file and save them to check when all uploads are done
+// TODO					
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			
+			// check to see if there are any imports that are not either SADL models or external models processed above
+// TODO
 			// refresh the folder
 			try {
 				for(IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()){

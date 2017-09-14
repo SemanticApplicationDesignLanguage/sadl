@@ -837,7 +837,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			addError(e1.getMessage(), model);
 			return; // this is a fatal error
 		}
-		getTheJenaModel().setNsPrefix(getModelAlias(), getModelNamespace());
+//		getTheJenaModel().setNsPrefix(getModelAlias(), getModelNamespace());
+		getTheJenaModel().setNsPrefix("", getModelNamespace());
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
 		logger.debug("Ontology '" + modelName + "' created");
 		modelOntology.addComment("This ontology was created from a SADL file '"

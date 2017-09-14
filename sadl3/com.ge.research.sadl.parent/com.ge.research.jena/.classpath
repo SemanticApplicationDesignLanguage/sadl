@@ -13,7 +13,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jackson-databind.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-arq.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jena-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jena-core.jar" sourcepath="C:/Users/200005201/.m2/repository/org/apache/jena/jena-core/2.13.0/jena-core-2.13.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-iri.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jena-tdb.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsonld-java.jar"/>
