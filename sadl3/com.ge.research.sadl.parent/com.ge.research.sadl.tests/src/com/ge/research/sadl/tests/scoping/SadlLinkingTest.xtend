@@ -1190,6 +1190,21 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	}
 	
 	@Test
+	def void testRuleVariable_1() {
+		'''
+			uri "http://sadl.org/rulevars.sadl" alias rulevars.
+			Person is a class.
+			teaches describes Person with values of type Person.
+			knows describes Person with values of type Person.
+			A relationship of Person to Person is acquaintance. 
+			
+			Rule R1 if [x] is a Person and <x> has teaches [y] then <x> has knows <y>.
+			 
+			Rule R2 if [x] is a Person and <x> has teaches [y] then <x> has acquaintance <y>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
 	def void testOnlyIf_01() {
 		'''
 			 uri "http://sadl.org/test.sadl" alias test.
