@@ -1205,6 +1205,48 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	}
 	
 	@Test
+	def void testRuleVariable_2() {
+		'''
+			uri "http://sadl.org/RuleDeclSHPvsPofS.sadl" alias RuleDeclSHPvsPofS.
+			 
+			PhysicalThing is a class.
+			
+			Person is a type of PhysicalThing, described by favoriteColor with values of type string, 
+				described by owns with values of type PhysicalThing
+				described by age with values of type float.
+			 
+			Vehicle is a type of PhysicalThing, 
+				described by number_of_wheels with values of type int,
+				described by number_of_seats with values of type int,
+				described by color with values of type string.
+				
+			Unicycle is a type of Vehicle.
+			number_of_wheels of Unicycle always has value 1 .
+			number_of_seats of Unicycle always has value 1 .
+			
+				
+			Bicycle is a type of Vehicle.
+			number_of_wheels of Bicycle always has value 2 .
+			number_of_seats of Bicycle always has value 1 .
+			
+			Car is a type of Vehicle.
+			number_of_wheels of Car always has value 4 .
+			 
+			Rule CarIsFavoriteColor
+			  given [p] is a Person
+			  if <p> has owns [t] and
+			  	 <t> has color [c]
+			  then <p> has favoriteColor <c>.
+			
+			Rule CarIsFavoriteColorAlt
+			  given p is a Person
+			  if p has owns t and
+			  	 t has color [c]
+			  then favoriteColor of p is <c>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
 	def void testOnlyIf_01() {
 		'''
 			 uri "http://sadl.org/test.sadl" alias test.
