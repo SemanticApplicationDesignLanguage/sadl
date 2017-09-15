@@ -119,14 +119,20 @@ class ExternalEmfResource extends ResourceImpl {
 		println("IMPORT? " + resource.URI)
 		return SADLFactory.eINSTANCE.createSadlImport => [
 			// TODO load SADL models?	
-			val q = it
-			System.out.println(q)
-			var prefix = jenaModel.getNsURIPrefix(resource.URI)
-			if (prefix === null) {
-				prefix = jenaModel.getNsURIPrefix(resource.URI + "#")
+			if (configMgr.containsMappingForURI(resource.URI)) {
+				val altUrl = configMgr.getAltUrlFromPublicUri(resource.URI)	// this is the actual location of the imported OWL file on disk
+				var prefix = jenaModel.getNsURIPrefix(resource.URI)
+				if (prefix === null) {
+					prefix = jenaModel.getNsURIPrefix(resource.URI + "#")
+				}
+				it.alias = prefix
 			}
-			it.alias = prefix
-		
+			else {
+				// add error marker to this SadlImport or to ExternalEmfResource
+				val msg = "Import '" + resource.URI + "' not found."
+				println(msg)
+			}
+			println(it)		
 		];
 	}
 
@@ -158,7 +164,9 @@ class ExternalEmfResource extends ResourceImpl {
 						configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderPathname , format);
 					}
 				}
-				configMgr.addMapping(new SadlUtils().fileNameToFileUrl(filename), baseUri, null, true, "ExternalResource")
+				if (filename !== null && baseUri !== null) {
+					configMgr.addMapping(new SadlUtils().fileNameToFileUrl(filename), baseUri, null, true, "ExternalResource")					
+				}
 			];
 			modelMapping.put(baseUri, model);
 			// Attach the SADL model to the contents list of the external resource.

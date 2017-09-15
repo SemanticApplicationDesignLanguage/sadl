@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -35,18 +36,21 @@ import javax.inject.Inject;
 import javax.swing.JOptionPane;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -66,10 +70,14 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.NetworkProxySettingsProvider;
-import com.ge.research.sadl.utils.ResourceManager;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -85,6 +93,8 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 
 	/** The text editor used in page 0. */
 	private UrlListTextEditor editor;
+
+	private IConfigurationManagerForIDE configMgr;
 
 	/**
 	 * Creates a multi-page editor.
@@ -226,6 +236,15 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			List<String>[] urlsAndPrefixes = su.getUrlsAndPrefixesFromExternalUrlContent(editorText);
 			List<String> urls = urlsAndPrefixes[0];
 			IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
+			IFolder modelsFolder = editorFile.getProject().getFolder(ExternalEmfResource.OWL_MODELS_FOLDER_NAME);
+			String modelFolderPath = modelsFolder.getLocation().makeAbsolute().toPortableString();
+			IConfigurationManagerForIDE cm = null;
+			try {
+				cm = getConfigMgr(modelFolderPath, ConfigurationManagerForIDE.getOWLFormat());
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			String sFolder = su.getExternalModelRootFromUrlFilename(editorFile.getFullPath().toFile());
 			IPath outputPath = (editorFile.getParent().getLocation())
 					.append(sFolder);
@@ -237,12 +256,26 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 					String filename = downloadURL((String) urls.get(i), outputPath, urlPath);
 					if (filename != null) {
 						uploadedFiles.add(filename);
+						String publicUri =cm.getBaseUriFromOwlFile(filename);
+						String altUrl = su.fileNameToFileUrl(filename);
+						if (publicUri != null && altUrl != null) {
+							cm.addMapping(altUrl, publicUri, null, false, "External Model");
+						}
 					}
 					// get xml:base from the uploaded OWL file--this is the namespace to be mapped to from the filename
 					// add the mapping of filename ->xml:base to the policy file (here? or on build of OWL files?
 					// get the import URIs from this uploaded OWL file and save them to check when all uploads are done
 // TODO					
 				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -264,6 +297,49 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			}
 		}
 	}
+	
+	private String getModelFolderPath(Resource resource) {
+		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
+		v = v.appendSegment(ExternalEmfResource.OWL_MODELS_FOLDER_NAME);
+		String modelFolderPathname;
+		if (v.isPlatform()) {
+			 IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(v.toPlatformString(true)));
+			 modelFolderPathname = file.getRawLocation().toPortableString();
+		}
+		else {
+			modelFolderPathname = findModelFolderPath(resource.getURI());
+			if(modelFolderPathname == null) {
+				modelFolderPathname = v.toFileString();
+			}
+		}
+		return modelFolderPathname;
+	}
+
+    static String findModelFolderPath(URI uri){
+    	File file = new File(uri.path());
+    	if(file != null){
+    		if(file.isDirectory()){
+    			if(file.getAbsolutePath().endsWith(ExternalEmfResource.OWL_MODELS_FOLDER_NAME)){
+    				return file.getAbsolutePath();
+    			}
+    			
+    			for(File child : file.listFiles()){
+    				if(child.getAbsolutePath().endsWith(ExternalEmfResource.OWL_MODELS_FOLDER_NAME)){
+    					return child.getAbsolutePath();
+    				}
+    			}
+    			//Didn't find a project file in this directory, check parent
+    			if(file.getParentFile() != null){
+    				return findModelFolderPath(uri.trimSegments(1));
+    			}
+    		}
+    		if(file.isFile() && file.getParentFile() != null){
+    			return findModelFolderPath(uri.trimSegments(1));
+    		}
+    	}
+    	
+    	return null;
+    }
 	
 	String downloadURL(String downloadUrl, IPath downloadsRootFolder, String destinationRelativePath) {
 		URL url;
@@ -311,5 +387,15 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			} 
 		}
 		return null;
+	}
+	private IConfigurationManagerForIDE getConfigMgr(String modelFolder, String format) throws ConfigurationException {
+		if (configMgr == null) {
+			setConfigMgr(ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, format));
+		}
+		return configMgr;
+	}
+	
+	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
+		this.configMgr = configMgr;
 	}
 }
