@@ -48,6 +48,7 @@ import java.util.Collection
 import java.util.Map
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.runtime.Path
+import static org.eclipse.emf.common.util.URI.createPlatformResourceURI
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
@@ -60,6 +61,8 @@ import org.eclipse.xtext.util.internal.EmfAdaptable
 import org.eclipse.xtext.validation.IResourceValidator
 
 import static org.eclipse.emf.common.util.URI.createURI
+import org.eclipse.emf.common.EMFPlugin
+import java.nio.file.Paths
 
 class ExternalEmfResource extends ResourceImpl {
 
@@ -126,9 +129,33 @@ class ExternalEmfResource extends ResourceImpl {
 					prefix = jenaModel.getNsURIPrefix(resource.URI + "#")
 				}
 				it.alias = prefix
+				// load resource
+				// convert file URI to platform URI
+				if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+					val rfile = new File(configMgr.fileUrlToFileName(altUrl))
+					val path = Paths.get(rfile.toURI)
+					val relpath = Paths.get(ResourcesPlugin.workspace.root.locationURI).relativize(path)
+					val importUri = createPlatformResourceURI(relpath.toString, true)
+					val importResource = resourceSet.getResource(importUri, false)
+					if (importResource != null) {
+						it.importedResource = importResource.contents.head as SadlModel
+					}
+					else {
+						// TODO add error marker to this ExternalEmfResource
+						// also must clear error markers before processing
+						val msg = "Import '" + resource.URI + "' not found."
+						println(msg)
+					}
+				}
+				else {
+					val importUri = createURI(altUrl)
+					val importResource = resourceSet.getResource(importUri, true)
+					it.importedResource = importResource.contents.head as SadlModel
+				}
 			}
 			else {
-				// add error marker to this SadlImport or to ExternalEmfResource
+				// TODO add error marker to this ExternalEmfResource
+				// also must clear error markers before processing
 				val msg = "Import '" + resource.URI + "' not found."
 				println(msg)
 			}
@@ -272,7 +299,7 @@ class ExternalEmfResource extends ResourceImpl {
 
 	private def initOntModel(InputStream is) {
 		val ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM) as OntModel;
-		ontModel.documentManager.processImports = false;
+//		ontModel.documentManager.processImports = false;
 		ontModel.read(is, URI.toString, serializationLanguage);
 		return ontModel;
 	}
