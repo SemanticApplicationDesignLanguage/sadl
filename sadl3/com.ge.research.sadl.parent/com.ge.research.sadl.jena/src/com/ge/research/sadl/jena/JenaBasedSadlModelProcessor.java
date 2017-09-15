@@ -7439,7 +7439,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		sb.append("	    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
 		sb.append("	    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n");
 		sb.append("	    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
-		sb.append("	    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n");
+		sb.append("	    xmlns=\"http://sadl.org/sadlbasemodel#\"\n");
 		sb.append("	    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
 		sb.append("	    xml:base=\"http://sadl.org/sadlbasemodel\">\n");
 		sb.append("	  <owl:Ontology rdf:about=\"\">\n");
@@ -7471,7 +7471,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		sb.append("    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
 		sb.append("    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
 		sb.append("    xmlns:base=\"http://sadl.org/sadllistmodel\"\n");
-		sb.append("    xmlns:sadllistmodel=\"http://sadl.org/sadllistmodel#\" > \n");
+		sb.append("    xmlns=\"http://sadl.org/sadllistmodel#\" > \n");
 		sb.append("  <rdf:Description rdf:about=\"http://sadl.org/sadllistmodel#first\">\n");
 		sb.append("    <rdfs:domain rdf:resource=\"http://sadl.org/sadllistmodel#List\"/>\n");
 		sb.append("    <rdf:type rdf:resource=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#Property\"/>\n");
