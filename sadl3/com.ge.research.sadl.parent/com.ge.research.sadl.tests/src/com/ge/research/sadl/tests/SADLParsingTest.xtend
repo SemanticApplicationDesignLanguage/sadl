@@ -161,24 +161,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 	}
 
 	@Test 
-	def void testListTypes_06() {
-		'''
-			uri "http://com.ge.research.sadl/sublists". 
-			
-			Test: MyPets is a Pet List.
-		'''.assertNoErrors
-	}
-
-	@Test 
-	def void testListTypes_07() {
-		'''
-			uri "http://com.ge.research.sadl/sublists". 
-			
-			Test: MyPets is a Pet List.
-		'''.assertNoErrors
-	}
-
-	@Test 
 	def void testPropertyTypeOnly() {
 		'''
 			uri "http://com.ge.research.sadl/proptypeonly". 
