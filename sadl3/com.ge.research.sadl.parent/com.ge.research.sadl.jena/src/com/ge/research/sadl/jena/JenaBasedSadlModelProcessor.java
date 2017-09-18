@@ -3467,7 +3467,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			} catch (JenaProcessorException e) {
 				throw new TranslationException("Error processing union", e);
 			}
-		}		throw new TranslationException("Unhandled type of SadlTypeReference");
+		}
+		throw new TranslationException("Unhandled type of SadlTypeReference");
 	}
 	
 	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
@@ -4587,6 +4588,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					addPropertyDomain(pr, dmn, toTypeRef);
 					addPropertyRange(OntConceptType.CLASS_PROPERTY, pr, rng, RangeValueType.CLASS_OR_DT, element);
 					retProp = pr;
+				}
+				else if (frm == null){
+					throw new JenaTransactionException("Valid domian not identified");
+				}
+				else if (t == null) {
+					throw new JenaTransactionException("Valid range not identified");
 				}
 			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
