@@ -138,7 +138,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
  		'''.assertNoErrors
 	}
 	
-	@Ignore
+	
 	@Test
 	def void testSubjectHasPropSomeMore() {
 		'''
