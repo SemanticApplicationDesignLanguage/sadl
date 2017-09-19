@@ -233,6 +233,75 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Ignore
+	@Test
+	def void testNegativeNumericConstants() {
+		'''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 MyFoo is a Foo with fprop PI.
+			 MyFoo4 is a Foo with fprop 3.14.
+			 
+			 MyFoo3 is a Foo with fprop -PI.	// grammar error: this should work just like the negative number below
+			 MyFoo5 is a Foo with fprop -3.14.
+
+			 MyFoo5 has fprop -e.				// this should work also
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testNegatedConstantsPropOfSubject() {
+		'''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 // the following all work as PropOfSubject expressions
+			 Test: fprop of MyFoo3 is PI.
+			 Test: fprop of MyFoo3 is -PI.
+			 Test: fprop of MyFoo3 is not PI.
+			 Test: fprop of MyFoo3 is known.
+			 Test: fprop of MyFoo3 is not known.
+			 Test: fprop of MyFoo3 is e.
+			 Test: fprop of MyFoo3 is -e.
+		'''.assertNoErrors
+	}
+	
+	@Ignore
+	@Test
+	def void testNegatedConstantsSubjHasProp() {
+		'''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 // some of the following do not work as SubjHasPop expressions
+			 Test: MyFoo3 has fprop PI.
+			 Test: MyFoo3 has fprop -PI.
+			 Test: MyFoo3 has fprop not PI.		// grammar error
+			 Test: MyFoo3 has fprop known.
+			 Test: MyFoo3 has fprop not known.	// grammar error
+			 Test: MyFoo3 has fprop e.
+			 Test: MyFoo3 has fprop -e.
+			 Test: MyFoo3 has fprop not e.		// grammar error
+			 Test: MyFoo3 has fprop not -e.		// grammar error		
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testInvalidUseOfConstants() {
+		var errs = newArrayList("mismatched input '*' expecting '.'")
+		assertErrors('''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 MyFoo2 is a Foo with fprop PI * -1 .	// this should not work--it involves a computation 
+		''', errs)
+	}
+	
 	@Test
 	def void testUnitsOnNumbers() {
 		''' uri "http://sadl.org/OntologyWithUnittedQuantity.sadl" alias OntologyWithUnittedQuantity.
