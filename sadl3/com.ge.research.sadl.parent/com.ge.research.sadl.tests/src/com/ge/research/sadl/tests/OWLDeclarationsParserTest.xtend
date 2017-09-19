@@ -224,7 +224,6 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 				described by p1 only with values of type SomeClass,
 				described by p2 always has value 42,
 				described by p3 with at least 42 values of type string,
-				described by p4 with at most 42 values each of types {string or int},
 				described by p4 with exactly one value.
 				
 		'''.assertNoErrors
