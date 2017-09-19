@@ -360,6 +360,26 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 	}
 	
 	@Test
+	def void testAskWithAndWithoutCommas() {
+		'''
+			 uri "http://sadl.org/TestGraphConstruct.sadl" alias TestGraphConstruct.
+			 
+			 Person is a class described by friend with values of type Person,
+			 	described by age with values of type int.
+			 	
+			 George is a Person with friend (a Person Meg).
+			 
+			 Ask: select s p v where s has p v order by s p v.
+			 Ask: select s,p,v where s p v order by s,p,v.
+			 Ask: construct s p v where s has p v .
+			 Ask: construct s p v where s p v .
+			 Ask: construct s,p,v where s p v.
+			 Graph: select s p v where s p v .
+			 Graph: select s, p, v where s has p v .
+		'''.assertNoErrors
+	}
+	
+	@Test
 	def void testNewlineSeparation() {
 		val model = '''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 

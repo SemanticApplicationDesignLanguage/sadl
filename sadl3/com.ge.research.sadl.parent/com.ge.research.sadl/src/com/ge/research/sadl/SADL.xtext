@@ -246,7 +246,7 @@ QueryStatement returns ExpressionScope :
 
 ConstructExpression returns Expression :
 	{ConstructExpression}
-	'construct' subj=SadlResource pred=SadlResource obj=SadlResource 'where' whereExpression=Expression
+	'construct' subj=SadlResource ','? pred=SadlResource ','? obj=SadlResource 'where' whereExpression=Expression
 ;
 
 AskExpression returns Expression :
@@ -290,7 +290,7 @@ Expression returns Expression: // (1)
 
 SelectExpression<EnabledWith> returns Expression :
 	->({SelectExpression}
-	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (',' selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(',' (orderList+=OrderElement))*)?)
+	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (','? selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(','? (orderList+=OrderElement))*)?)
 	| ExpressionParameterized<true>
 ;
 
