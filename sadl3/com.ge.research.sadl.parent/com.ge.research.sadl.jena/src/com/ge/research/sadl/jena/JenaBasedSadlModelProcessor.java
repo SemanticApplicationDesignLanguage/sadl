@@ -243,6 +243,7 @@ import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.sparql.JenaTransactionException;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
@@ -3461,12 +3462,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					return unionObj;
 				}
 				else {
-					addWarning("Unions not yet handled in this context", type);
+					return unionObj;
 				}
 			} catch (JenaProcessorException e) {
 				throw new TranslationException("Error processing union", e);
 			}
-		}		throw new TranslationException("Unhandled type of SadlTypeReference");
+		}
+		throw new TranslationException("Unhandled type of SadlTypeReference");
 	}
 	
 	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
@@ -4562,13 +4564,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				frm = processExpression(fromTypeRef);
 				SadlTypeReference toTypeRef = element.getTo();
 				Object t = processExpression(toTypeRef);
-				if (frm != null && t != null && frm instanceof NamedNode && t instanceof NamedNode) {
-					OntClass dmn = getOrCreateOntClass(((NamedNode)frm).toFullyQualifiedString());
-					OntClass rng = getOrCreateOntClass(((NamedNode)t).toFullyQualifiedString());
+				if (frm != null && t != null) {
+					OntClass dmn;
+					OntClass rng;
+					if (frm instanceof OntClass) {
+						dmn = (OntClass)frm;
+					}
+					else if (frm instanceof NamedNode) {
+						dmn = getOrCreateOntClass(((NamedNode)frm).toFullyQualifiedString());
+					}
+					else {
+						throw new JenaTransactionException("Valid domain not identified: " + frm.toString());
+					}
+					if (t instanceof OntClass) {
+						rng = (OntClass)t;
+					} else if (t instanceof NamedNode) {
+						rng = getOrCreateOntClass(((NamedNode)t).toFullyQualifiedString());						
+					}
+					else {
+						throw new JenaTransactionException("Valid range not identified: " + t.toString());
+					}
 					OntProperty pr = createObjectProperty(propUri, null);
 					addPropertyDomain(pr, dmn, toTypeRef);
 					addPropertyRange(OntConceptType.CLASS_PROPERTY, pr, rng, RangeValueType.CLASS_OR_DT, element);
 					retProp = pr;
+				}
+				else if (frm == null){
+					throw new JenaTransactionException("Valid domian not identified");
+				}
+				else if (t == null) {
+					throw new JenaTransactionException("Valid range not identified");
 				}
 			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
