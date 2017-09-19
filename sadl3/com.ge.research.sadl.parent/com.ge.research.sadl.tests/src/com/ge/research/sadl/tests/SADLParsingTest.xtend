@@ -170,6 +170,70 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 	}
 	
 	@Test
+	def void testGrammarCoverage() {
+		'''
+			 uri "http://sadl.org/GrammarCoverage.sadl" alias GrammarCoverage.
+			 
+			 Person is a class described by age with values of type int, described by friend with values of type Person.
+			 weight describes Person with values of type float.
+			 child describes Person with values of type Person.
+			 son is a type of child.
+			 
+			 Gender is a class, must be one of {Male, Female}.
+			 gender describes Person with values of type Gender.
+			 son of Person only has values of type Male.
+			 
+			 Pet is a class.
+			 The relationship of Person to Pet is owns.
+			 
+			 {Professor, Teacher, Student, Pupil} are types of Person.
+			 relationship of {Professor or Teacher} to {Student or Pupil} is teaches.
+			 
+			 Woman is a type of Person.
+			 
+			 gender of Woman always has value Female.
+			 
+			 Woman is the same as {Person and (gender always has value Female)}.	// this 'has' is part of 'always has value' and is not optional
+			 
+			 Plato is a Student.
+			 Socrates is a Professor, has teaches Plato.  // *** this 'has' should be optional
+			 Socrates is a Professor, teaches Plato.  // *** this 'has' should be optional
+			 Socrates has teaches Plato.				  // this 'has' is already optional, as shown in next statement
+			 	Socrates teaches Plato.
+			 	
+			// A friend of Socrates is Plato.		// OK that this isn't supported, can be said more plainly as:
+			 	Plato has friend Socrates.
+			// Plato is a friend of Socrates. 		// OK that this isn't supported, can be said more plainly as:
+			 	Socrates has friend Plato.
+			// Plato is a friend of a friend of Socrates.	// as a graph pattern (see below), this is OK but as a declarative statement it is ambiguous
+			// The age of a friend of Socrates is 23.	// as a graph bappern (see below), this is OK but as a declarative statement it is ambiguous
+			 
+			 Expr: a friend of a friend of Plato.
+			 Expr: the age of a friend of Plato.
+			 Expr: the age of a friend of Plato is 23.
+			 
+			 Sue is a Professor with friend (a Person with teaches Plato).		// 'with' here is optional, although in English we would say 'who'
+			 	Sue is a Professor, friend (a Person teaches Plato).
+			 
+			 Rule R1: if x is a friend of a friend of Plato then Plato has friend x.	// *** 'has' should be optional
+			 Rule R11: if x is a friend of a friend of Plato then Plato friend x.	// *** 'has' should be optional
+			 Rule R1a: if Plato has friend x and x has friend y then Plato has friend y.	// *** all 3 'has' words should be optional
+			 Rule R1a2: if Plato friend x and x friend y then Plato friend y.	// *** all 3 'has' words should be optional
+			 
+			 Ask: Plato has age x and x > 30 and x < 40.	// 'has' should be optional
+			 Ask: Plato age x and x > 30 and x < 40.	// 'has' should be optional
+			 Ask: x has age y and y > 30 and y < 40.		// 'has' should be optional
+			 Ask: x age y and y > 30 and y < 40.		// 'has' should be optional
+			 
+			 Test: Socrates has teaches Plato.		// 'has' should be optional
+			 Test: Socrates teaches Plato.		// 'has' should be optional
+			 Test: not Socrates has teaches Plato.	// 'has' should be optional
+			 Test: not Socrates teaches Plato.	// 'has' should be optional
+			 Test: teaches of Socrates is not Plato.
+		'''.assertNoErrors
+	}
+	
+	@Test
 	def void testUnitsOnNumbers() {
 		''' uri "http://sadl.org/OntologyWithUnittedQuantity.sadl" alias OntologyWithUnittedQuantity.
 		 
