@@ -78,6 +78,7 @@ import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.NetworkProxySettingsProvider;
+import com.ge.research.sadl.utils.ResourceManager;
 
 /**
  * An example showing how to create a multi-page editor.
@@ -236,7 +237,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			List<String>[] urlsAndPrefixes = su.getUrlsAndPrefixesFromExternalUrlContent(editorText);
 			List<String> urls = urlsAndPrefixes[0];
 			IFile editorFile = ((FileEditorInput) editor.getEditorInput()).getFile();
-			IFolder modelsFolder = editorFile.getProject().getFolder(ExternalEmfResource.OWL_MODELS_FOLDER_NAME);
+			IFolder modelsFolder = editorFile.getProject().getFolder(ResourceManager.OWLDIR);
 			String modelFolderPath = modelsFolder.getLocation().makeAbsolute().toPortableString();
 			IConfigurationManagerForIDE cm = null;
 			try {
@@ -300,7 +301,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	
 	private String getModelFolderPath(Resource resource) {
 		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
-		v = v.appendSegment(ExternalEmfResource.OWL_MODELS_FOLDER_NAME);
+		v = v.appendSegment(ResourceManager.OWLDIR);
 		String modelFolderPathname;
 		if (v.isPlatform()) {
 			 IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(v.toPlatformString(true)));
@@ -319,12 +320,12 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
     	File file = new File(uri.path());
     	if(file != null){
     		if(file.isDirectory()){
-    			if(file.getAbsolutePath().endsWith(ExternalEmfResource.OWL_MODELS_FOLDER_NAME)){
+    			if(file.getAbsolutePath().endsWith(ResourceManager.OWLDIR)){
     				return file.getAbsolutePath();
     			}
     			
     			for(File child : file.listFiles()){
-    				if(child.getAbsolutePath().endsWith(ExternalEmfResource.OWL_MODELS_FOLDER_NAME)){
+    				if(child.getAbsolutePath().endsWith(ResourceManager.OWLDIR)){
     					return child.getAbsolutePath();
     				}
     			}

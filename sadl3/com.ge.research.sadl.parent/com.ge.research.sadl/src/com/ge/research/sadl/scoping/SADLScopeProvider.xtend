@@ -21,6 +21,7 @@
 package com.ge.research.sadl.scoping
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.Expression
@@ -236,7 +237,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 			val importScope = newParent;
 			val aliasToUse = alias ?: resource.getAlias
-			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
+			val namespace = if(aliasToUse !== null) QualifiedName.create(aliasToUse) else null
 			
 			// Get an ordered collection of local scope providers which are used to determine
 			// the precedence of the SADL resources. In other words, which one should be the declarations
@@ -359,13 +360,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		(resource.contents.head as SadlModel).alias
 	}
 	
-	protected def IScope createImportScope(Resource resource, Set<Resource> importedResources) {
+	protected def IScope createImportScope(Resource resource, Set<Resource> visitedImports) {
+		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap;
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
-		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
 			val importedResource = imp.importedResource
 			if (importedResource !== null && !importedResource.eIsProxy) {
-				createResourceScope(importedResource.eResource, imp.alias, importedResources).allElements.forEach[
+				createResourceScope(importedResource.eResource, imp.alias, visitedImports).allElements.forEach[
 					val existing = importedSymbols.put(name, it)
 					val duplicateProblem = checkDuplicate(existing, it)
 					if (duplicateProblem !== null) {
@@ -373,15 +374,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					}
 				]
 			}
-				
 		}
+
 		if (importedSymbols.isEmpty) {
-			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl")) {
+			if (!resource.URI.toString.endsWith(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)) {
 				val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
 				if (element !== null) {
 					val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 					if (eobject !== null) {
-						createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
+						createResourceScope(eobject.eResource, null, visitedImports).allElements.forEach[
 							importedSymbols.put(name, it)
 						]
 					}
@@ -389,18 +390,17 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 		}
 		
-		if (!resource.URI.toString.endsWith("SadlBuiltinFunctions.sadl")) {
+		if (!resource.URI.toString.endsWith(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
 			val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
 			if (element !== null) {
 				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 				if (eobject !== null) {
-					createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
+					createResourceScope(eobject.eResource, null, visitedImports).allElements.forEach[
 						importedSymbols.put(name, it)
 					]
 				}
 			}
 		}
-		
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
 	}
 	

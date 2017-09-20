@@ -898,7 +898,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				    		}
 					} else if (eResource instanceof ExternalEmfResource) {
 						ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
-						addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getJenaModel());
+						addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getOntModel());
 //						URI importUrl = emfResource.getURI();
 //						String strUrl;
 //						if (importUrl.isPlatform()) {
@@ -1148,7 +1148,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
 					else if (imrsrc instanceof ExternalEmfResource) {
-						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getOntModel();
 					}
 					if (sadlBuiltinFunctionModel == null) {
 						if (imrsrc instanceof XtextResource) {
@@ -1246,7 +1246,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
 					else if (imrsrc instanceof ExternalEmfResource) {
-						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getOntModel();
 					}
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {

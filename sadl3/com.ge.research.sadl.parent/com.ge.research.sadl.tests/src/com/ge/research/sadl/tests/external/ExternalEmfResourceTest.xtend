@@ -1,5 +1,23 @@
+/************************************************************************
+ * Copyright © 2007-2017 - General Electric Company, All Rights Reserved
+ * 
+ * Project: SADL
+ * 
+ * Description: The Semantic Application Design Language (SADL) is a
+ * language for building semantic models and expressing rules that
+ * capture additional domain knowledge. The SADL-IDE (integrated
+ * development environment) is a set of Eclipse plug-ins that
+ * support the editing and testing of semantic models using the
+ * SADL language.
+ * 
+ * This software is distributed "AS-IS" without ANY WARRANTIES
+ * and licensed under the Eclipse Public License - v 1.0
+ * which is available at http://www.eclipse.org/org/documents/epl-v10.php
+ * 
+ ***********************************************************************/
 package com.ge.research.sadl.tests.external
 
+import com.ge.research.sadl.external.XMLHelper
 import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
@@ -26,7 +44,7 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 			  <owl:Class rdf:ID="Foo"/>
 			  <owl:ObjectProperty rdf:ID="myProperty"/>
 			</rdf:RDF>
-		'''.owl
+		'''.owl;
 		val sadlFile = '''
 			uri "http://sadl.org/Tests/Import" alias imp.
 			import "http://assert/Properties".
@@ -95,8 +113,37 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		'''.owl.assertContents
 	}
 	
+	
+	public static val CONTENT = '''
+	@base <http://sadl.org/test.sadl222> .
+				@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+				@prefix test:  <http://sadl.org/test.sadl#> .
+				@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+				@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+				@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+				
+				test:relation1  a    owl:ObjectProperty ;
+				        rdfs:domain  test:Thingy ;
+				        rdfs:range   test:Thingy .
+				
+				test:Thingy  a  owl:Class .
+				
+				test:attribute1  a   owl:DatatypeProperty ;
+				        rdfs:domain  test:Thingy ;
+				        rdfs:range   xsd:int .
+				
+				test:MyThingy  a         test:Thingy ;
+				        test:attribute1  "23"^^xsd:int ;
+				        test:relation1   test:OtherThingy .
+				
+				<>      a             owl:Ontology ;
+				        rdfs:comment  "This ontology was created from a SADL file 'test.sadl' and should not be directly edited."@en ;
+				        owl:imports   <sadlbasemodel> .
+				
+				test:OtherThingy  a  test:Thingy .'''
+	
 	@Test def void testN3Format() {
-		'''
+		val content = '''
 			@base          <http://sadl.org/test.sadl> .
 			@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 			@prefix test:  <http://sadl.org/test.sadl#> .
@@ -123,7 +170,42 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 			        owl:imports   <sadlbasemodel> .
 			
 			test:OtherThingy  a  test:Thingy .
-		'''.n3.assertContents
+		''';
+		
+		content.n3.assertContents;
+	}
+	
+	@Test def void gh_201() {
+		ExternalResourceContentHelper.getContent('aulo.owl').owl;
+		ExternalResourceContentHelper.getContent('apvf.owl').owl;
+		'''
+			uri "http://sadl.org/base.sadl".
+			Shape is a class.
+		'''.sadl;
+		'''
+			uri "http://sadl.org/extension.sadl" alias extension.
+
+			import "http://research.ge.com/Acuity/apvf.owl".
+			import "http://sadl.org/base.sadl".
+			
+			Circle is a Shape. 
+			FooBar is a type of AcuityController.
+			MyHero is an ArtificialAgent.
+		'''.sadl.assertNoErrors;
+	}
+	
+	@Test def void foo() {
+		val a = '''			<rdf:RDF
+					    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+					    xmlns:owl="http://www.w3.org/2002/07/owl#"
+					    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+					    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+					  xml:base="http://assert/Properties#">
+		«««			  TODO add a fallback logic that parses the base from the XML.
+					  <owl:Class rdf:ID="Foo"/>
+					  <owl:ObjectProperty rdf:ID="myProperty"/>
+					</rdf:RDF>'''
+					new XMLHelper().tryReadBaseUri(a);
 	}
 	
 	protected def void assertContents(Resource resource) {
