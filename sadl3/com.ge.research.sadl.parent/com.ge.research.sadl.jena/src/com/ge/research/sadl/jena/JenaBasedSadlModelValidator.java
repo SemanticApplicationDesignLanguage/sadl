@@ -2149,6 +2149,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (typeref != null) {
 							return getType(typeref);
 						}
+						else {
+							SadlResource nor = ((SadlInstance)qnmDecl.eContainer()).getNameOrRef();
+							if (!nor.equals(qnmDecl)) {
+								return getType(nor);
+							}
+						}
 					}
 					else if (qnmDecl.eContainer() instanceof SadlMustBeOneOf) {
 						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {

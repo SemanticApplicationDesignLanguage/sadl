@@ -139,7 +139,9 @@ public class IntermediateFormTranslator {
     private List<String> userDefinedVariables = new ArrayList<String>();
     private OntModel theJenaModel = null;
     
-    /**
+	private List<VariableNode> cruleVariablesTypeOutput = null;		// list of crule variables that have had type statements output (only do so once)
+
+	/**
      * The constructor takes a ModelManager argument
      * @param ontModel 
      * @param modmgr
@@ -841,6 +843,7 @@ public class IntermediateFormTranslator {
 	}
 
 	public Rule postProcessRule(Rule rule, EObject object) {
+		clearCruleVariableTypedOutput();
 		// convert givens linked list to array; expand conjunctions
 		List<GraphPatternElement> givens = flattenRuleJunctions(rule.getGivens());
 		if (givens != null) {
@@ -868,6 +871,31 @@ public class IntermediateFormTranslator {
 		// convert ifs linked list to array; expand conjunctions
 		List<GraphPatternElement> ifs = flattenRuleJunctions(rule.getIfs());
 		if (ifs != null) {
+			for (int i = 0; i < ifs.size(); i++) {
+				Object premise = ifs.get(i);
+				if (premise instanceof TripleElement) {
+					try {
+						TripleElement gpe = (TripleElement) premise;
+						Node subj = gpe.getSubject();
+						Node obj = gpe.getObject();
+						if (subj instanceof VariableNode && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
+							TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
+							ifs.add(i++, newTypeTriple);
+							addCruleVariableToTypeOutput((VariableNode) subj);
+							i = addNotEqualsBuiltinsForNewCruleVariable(ifs, i, (VariableNode) subj);
+						}
+						if (obj instanceof VariableNode && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
+							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
+							ifs.add(++i, newTypeTriple);
+							addCruleVariableToTypeOutput((VariableNode) obj);
+							i = addNotEqualsBuiltinsForNewCruleVariable(ifs, i, (VariableNode) obj);
+						}
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
 			Object results;
 			try {
 				results = expandProxyNodes(ifs, false, false);
@@ -2039,4 +2067,46 @@ public class IntermediateFormTranslator {
 		this.namedNodes = namedNodes;
 	}
 
+	private boolean isCruleVariableInTypeOutput(VariableNode cruleVariable) {
+		if (cruleVariablesTypeOutput == null) return false;
+		 return cruleVariablesTypeOutput.contains(cruleVariable);
+	}
+
+	private void addCruleVariableToTypeOutput(VariableNode cruleVariable) {
+		if (cruleVariablesTypeOutput == null) {
+			cruleVariablesTypeOutput = new ArrayList<VariableNode>();
+		}
+		cruleVariablesTypeOutput.add(cruleVariable);
+	}
+	
+	private void clearCruleVariableTypedOutput() {
+		if (cruleVariablesTypeOutput != null) {
+			cruleVariablesTypeOutput.clear();
+		}
+	}
+
+	private int addNotEqualsBuiltinsForNewCruleVariable(List<GraphPatternElement> results, int currentIdx, VariableNode node) throws TranslationException {
+		if (cruleVariablesTypeOutput == null) {
+			throw new TranslationException("This should never happen! Please report.");
+		}
+		int crvSize = cruleVariablesTypeOutput.size();
+		if (!cruleVariablesTypeOutput.get(crvSize - 1).equals(node)) {
+			throw new TranslationException("This method should always be called immediately after creating a Crules variable.");
+		}
+		if (crvSize == 1) {
+			return currentIdx;
+		}
+		for (int i = crvSize - 2; i >= 0; i--) {
+			VariableNode otherVar = cruleVariablesTypeOutput.get(i);
+			if (otherVar.getType().equals(node.getType())) {
+				BuiltinElement newBi = new BuiltinElement();
+				newBi.setFuncName("!=");
+				newBi.setFuncType(BuiltinType.NotEqual);
+				newBi.addArgument(otherVar);
+				newBi.addArgument(node);
+				results.add(++currentIdx, newBi);
+			}
+		}
+		return currentIdx;
+	}
 }

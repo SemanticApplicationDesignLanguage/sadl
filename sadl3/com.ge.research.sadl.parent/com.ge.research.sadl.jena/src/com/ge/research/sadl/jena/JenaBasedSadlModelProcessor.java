@@ -273,6 +273,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private int vNum = 0;	// used to create unique variables
 	private List<String> userDefinedVariables = new ArrayList<String>();
 	
+	// A "crule" variable has a type, a number indicating its ordinal, and a name
+	//	They are stored by type as key to a list of names, the index in the list is its ordinal number
+	private Map<NamedNode, List<VariableNode>> cruleVariables = null;
+	
 	protected String modelName;
 	protected String modelAlias;
 	protected String modelNamespace;
@@ -2515,6 +2519,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private void processStatement(RuleStatement element) throws InvalidNameException, InvalidTypeException, TranslationException {
+		clearCruleVariables();
 		String ruleName = getDeclarationExtensions().getConcreteName(element.getName());
 		Rule rule = new Rule(ruleName);
 		setTarget(rule);
@@ -3413,10 +3418,68 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public Object processExpression(Declaration expr) throws TranslationException {
 //		String nn = expr.getNewName();
 		SadlTypeReference type = expr.getType();
+		String article = expr.getArticle();
+		String ordinal = expr.getOrdinal();
 		Object typenode = processExpression(type);
+		if (article != null) {
+			int ordNum = 1;
+			if (ordinal != null) {
+				ordNum = getOrdinalNumber(ordinal);
+			}
+			else if (article.equals("another")) {
+				ordNum = 2;
+			}
+
+			if (!isDefiniteArticle(article) && 
+					typenode instanceof NamedNode && ((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode)) {
+				if (getRulePart().equals(RulePart.CONCLUSION)) {
+					// this can't be a crule variable
+					if (ordinal != null) {
+						addError("Did not expect an indefinite article reference with ordinality in rule conclusion", expr);
+					}
+					return typenode;
+				}
+
+				// create a CRule variable
+				String nvar = getNewVar(expr);
+				VariableNode var = addCruleVariables((NamedNode)typenode, ordNum, nvar);
+//				System.out.println("Added crule variable: " + typenode.toString() + ", " + ordNum + ", " + var.toString());
+				return var;
+			}
+			else {
+				VariableNode var = getCruleVariable((NamedNode)typenode, ordNum);
+				if (var == null) {
+					addError("Did not find crule variable for type '" + ((NamedNode)typenode).toString() + "', definite article, ordinal " + ordNum, expr);
+				}
+//				System.out.println("Retrieved crule variable: " + typenode.toString() + ", " + ordNum + ", " + var.toString());
+				return var;
+			}
+		}
 		return typenode;
 	}
 	
+	private int getOrdinalNumber(String ordinal) throws TranslationException {
+		if (ordinal == null) {
+			throw new TranslationException("Unexpected null ordinal on call to getOrdinalNumber");
+		}
+		if (ordinal.equals("first")) return 1;
+		if (ordinal.equals("second") || ordinal.equals("other")) return 2;
+		if (ordinal.equals("third")) return 3;
+		if (ordinal.equals("fourth")) return 4;
+		if (ordinal.equals("fifth")) return 5;
+		if (ordinal.equals("sixth")) return 6;
+		if (ordinal.equals("seventh")) return 7;
+		if (ordinal.equals("eighth")) return 8;
+		if (ordinal.equals("ninth")) return 9;
+		if (ordinal.equals("tenth")) return 10;
+		throw new TranslationException("Unexpected ordinal '" + ordinal + "'; can't handle.");
+	}
+	private boolean isDefiniteArticle(String article) {
+		if (article != null && article.equalsIgnoreCase("the")) {
+			return true;
+		}
+		return false;
+	}
 	private Object processExpression(SadlTypeReference type) throws TranslationException {
 		if (type instanceof SadlSimpleTypeReference) {
 			return processExpression(((SadlSimpleTypeReference)type).getType());
@@ -5321,7 +5384,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				assignInstancePropertyValue(inst, cls, prop, val);
 			} else {
-				throw new JenaProcessorException("no value found");
+				addError("no value found", propinit);
 			}
 		}
 		SadlValueList listInitializer = element.getListInitializer();
@@ -8021,7 +8084,55 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		return null;
 	}
 	
-//	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, OntProperty prop) throws JenaProcessorException, TranslationException {
+	protected VariableNode getCruleVariable(NamedNode type, int ordNum) {
+		List<VariableNode> existingList = cruleVariables.get(type);
+		if (existingList != null && ordNum >= 0 && ordNum <= existingList.size()) {
+			return existingList.get(ordNum -1);
+		}
+		return null;
+	}
+	
+	protected VariableNode addCruleVariables(NamedNode type, int ordinalNumber, String name) throws TranslationException {
+		if (cruleVariables == null) {
+			cruleVariables = new HashMap<NamedNode,List<VariableNode>>();
+		}
+		if (!cruleVariables.containsKey(type)) {
+			List<VariableNode> newList = new ArrayList<VariableNode>();
+			VariableNode var = new VariableNode(name);
+			var.setType(type);
+			newList.add(var);
+			cruleVariables.put(type, newList);
+			return var;
+		}
+		else {
+			List<VariableNode> existingList = cruleVariables.get(type);
+			Iterator<VariableNode> nodeitr = existingList.iterator();
+			while (nodeitr.hasNext()) {
+				if (nodeitr.next().getName().equals(name)) {
+					return null;
+				}
+			}
+			int idx = existingList.size();
+			if (idx == ordinalNumber - 1) {
+				VariableNode var = new VariableNode(name);
+				var.setType(type);
+				existingList.add(var);
+				return var;
+			}
+			else {
+				throw new TranslationException("Failed to add crule variable, index is out of sequence expected");
+			}
+		}
+	}
+	
+	private void clearCruleVariables() {
+		if (cruleVariables != null) {
+			cruleVariables.clear();
+		}
+		
+	}
+
+	//	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, OntProperty prop) throws JenaProcessorException, TranslationException {
 //		if (value instanceof SadlNumberLiteral) {
 //			String strval = ((SadlNumberLiteral)value).getLiteralNumber();
 //			return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), prop, strval);

@@ -229,7 +229,7 @@ Ordinal :
 	| 	'sixth'
 	|	'seventh'
 	|	'eighth'
-	|	'nineth'
+	|	'ninth'
 	|	'tenth'
 ;
 

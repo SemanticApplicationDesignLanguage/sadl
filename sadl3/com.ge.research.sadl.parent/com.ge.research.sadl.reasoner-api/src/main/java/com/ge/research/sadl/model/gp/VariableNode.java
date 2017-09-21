@@ -24,6 +24,7 @@ package com.ge.research.sadl.model.gp;
  */
 public class VariableNode extends NamedNode {
 	private int references = 0;
+	private NamedNode type = null;
 
 	public VariableNode(String name) {
 		super(name, NamedNode.NodeType.VariableNode);
@@ -57,5 +58,13 @@ public class VariableNode extends NamedNode {
 //		if (references != other.references)
 //			return false;
 		return true;
+	}
+
+	public NamedNode getType() {
+		return type;
+	}
+
+	public void setType(NamedNode type) {
+		this.type = type;
 	}
 }
