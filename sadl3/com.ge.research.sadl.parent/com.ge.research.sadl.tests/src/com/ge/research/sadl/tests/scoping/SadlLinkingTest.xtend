@@ -1284,4 +1284,17 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			 <DATA2> has expandedProperty _value.
 		'''.assertLinking[sadl]
 	}
+	
+	@Ignore
+	@Test
+	def void testEmbeddedInstanceDeclaration() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 [Person] is a class described by [child] with values of type <Person>.
+			 
+			 [Clyde] is a Person with child (a Person [Nancy]).
+			 <Nancy> has child (a Person [Peter]).
+		'''.assertLinking[sadl]
+	}
 }
