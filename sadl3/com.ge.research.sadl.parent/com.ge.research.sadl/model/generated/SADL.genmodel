@@ -70,6 +70,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlParameterDeclaration/type"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlParameterDeclaration/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlParameterDeclaration/unknown"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlParameterDeclaration/ellipsis"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlStatement"/>
     <genClasses ecoreClass="SADL.ecore#//SadlPropertyCondition">
@@ -117,6 +118,7 @@
     <genClasses ecoreClass="SADL.ecore#//SadlCondition"/>
     <genClasses ecoreClass="SADL.ecore#//SadlAllValuesCondition">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlAllValuesCondition/type"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlAllValuesCondition/facet"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlHasValueCondition">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlHasValueCondition/restriction"/>
@@ -125,6 +127,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlCardinalityCondition/operator"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlCardinalityCondition/cardinality"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlCardinalityCondition/type"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlCardinalityCondition/facet"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlExplicitValue"/>
     <genClasses ecoreClass="SADL.ecore#//SadlValueList">
@@ -220,6 +223,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/singleValued"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlRangeRestriction/typeonly"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlRangeRestriction/range"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlRangeRestriction/facet"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlIsInverseOf">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlIsInverseOf/otherProperty"/>

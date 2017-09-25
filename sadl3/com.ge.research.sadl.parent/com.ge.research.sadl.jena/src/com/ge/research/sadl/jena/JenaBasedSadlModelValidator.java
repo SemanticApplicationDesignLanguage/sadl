@@ -2656,7 +2656,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getRight());
 			if (sexpr != null) {
-				return ((SubjHasProp)expr).getProp();
+				return (Expression) ((SubjHasProp)expr).getProp();
 			}
 		} else if (expr instanceof Name) {
 			String nuri = declarationExtensions.getConceptUri(((Name)expr).getName());
@@ -2685,18 +2685,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getRight());
 			if (sexpr != null) {
-				return ((SubjHasProp)expr).getProp();
+				return (Expression) ((SubjHasProp)expr).getProp();
 			}
 		} else if (expr instanceof Name) {
 			String nuri = declarationExtensions.getConceptUri(((Name)expr).getName());
 			if (nuri != null && nuri.equals(uri)) {
-				return expr;
+				return (Expression) expr;
 			}
 		}
 		else if (expr instanceof SadlResource) {
 			String nuri = declarationExtensions.getConceptUri((SadlResource)expr);
 			if (nuri != null && nuri.equals(uri)) {
-				return expr;
+				return (Expression) expr;
 			}
 		}
 		return null;

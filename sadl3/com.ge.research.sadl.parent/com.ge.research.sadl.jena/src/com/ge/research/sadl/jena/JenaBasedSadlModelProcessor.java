@@ -744,7 +744,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 					modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true);
 					StringBuilder errorMessageBuilder = new StringBuilder();
-					if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is", errorMessageBuilder)) {
+					if (!modelValidator.validateBinaryOperationByParts(candidate, (Expression)prop, (Expression)candidate, "is", errorMessageBuilder)) {
 						context.getAcceptor().add(errorMessageBuilder.toString(), candidate, Severity.ERROR);
 					}
 					return;
@@ -2053,7 +2053,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				for (int i = 0; i < varList.size(); i++) {
 					Object var = null;
 					try {
-						var = translate(varList.get(i));
+						var = translate((Expression)varList.get(i));
 					} catch (InvalidNameException e2) {
 						// TODO Auto-generated catch block
 						e2.printStackTrace();
@@ -2124,21 +2124,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			query.setKeyword("construct");
 			List<String> names = new ArrayList<String>();
 			try {
-				Object result = translate(((ConstructExpression)expr).getSubj());
+				Object result = translate((Expression)((ConstructExpression)expr).getSubj());
 				if (result instanceof VariableNode) {
 					names.add(((NamedNode) result).getName());
 				}
 				else {
 					names.add(result.toString());
 				}
-				result = translate(((ConstructExpression)expr).getPred());
+				result = translate((Expression)((ConstructExpression)expr).getPred());
 				if (result instanceof VariableNode) {
 					names.add(((NamedNode) result).getName());
 				}
 				else {
 					names.add(result.toString());
 				}
-				result = translate(((ConstructExpression)expr).getObj());
+				result = translate((Expression)((ConstructExpression)expr).getObj());
 				if (result instanceof VariableNode) {
 					names.add(((NamedNode) result).getName());
 				}
@@ -3694,7 +3694,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (getModelValidator() != null) {
-			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, pred, false);
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), (SadlResource) subj, pred, pred, false);
 			if (obj != null) {	// rules can have SubjHasProp expressions with null object
 				try {
 					getModelValidator().checkPropertyValueInRange(getTheJenaModel(), subj, pred, obj);
@@ -3712,7 +3712,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			sobj = translate(subj);
 		}
 		if (pred != null) {
-			pobj = translate(pred);
+			pobj = translate((Expression) pred);
 		}
 		if (obj != null) {
 			oobj = translate(obj);
@@ -5378,7 +5378,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (val != null) {
 				try {
 					if (getModelValidator() != null) {
-						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val)) {
+						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), (Expression) sr, prop, val)) {
 							issueAcceptor.addWarning("Type check issue", propinit);
 						}
 					}

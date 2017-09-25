@@ -66,6 +66,7 @@ fragment EquationSignature returns AbstractSadlEquation:
 SadlParameterDeclaration:
 		type=SadlPrimaryTypeReference name=SadlResource
 	|  unknown='--'
+	|   ellipsis='...'
 ;
 
 // These are the things that translate directly to OWL.
@@ -165,7 +166,7 @@ SadlPropertyDeclarationInClass returns SadlProperty:
 SadlPropertyRestriction :
     	SadlCondition
     |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
-    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|'values') 'of' 'type' ((typeonly=('class'|'data')) | range=SadlPrimaryTypeReference)
+    |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|'values') 'of' 'type' ((typeonly=('class'|'data')) | range=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
     |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|QNAME]
     |   {SadlIsTransitive} 'is' 'transitive'
     |   {SadlIsSymmetrical} 'is' 'symmetrical'
@@ -183,7 +184,7 @@ SadlCondition :
 ;
 
 SadlAllValuesCondition :
-	'only' ('has'|'with') 'values' 'of' 'type' type=SadlPrimaryTypeReference;
+	'only' ('has'|'with') 'values' 'of' 'type' type=SadlPrimaryTypeReference facet=SadlDataTypeFacet?;
 
 SadlHasValueCondition :
 	'always' ('has'|'with') 'value' (restriction=SadlExplicitValue | '(' restriction=SadlNestedInstance ')');
@@ -192,7 +193,7 @@ SadlCardinalityCondition :
 	('has'|'with') 
 	('at' operator=('least'|'most') |'exactly')? 
 	cardinality=CardinalityValue ('value'|'values') 
-	('of' 'type' type=SadlPrimaryTypeReference | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
+	('of' 'type' type=SadlPrimaryTypeReference  facet=SadlDataTypeFacet?)?;
 
 CardinalityValue :
 	NUMBER | 'one'
@@ -260,7 +261,7 @@ QueryStatement returns ExpressionScope :
 
 ConstructExpression returns Expression :
 	{ConstructExpression}
-	'construct' subj=SadlResource pred=SadlResource obj=SadlResource 'where' whereExpression=Expression
+	'construct' subj=SadlResource ','? pred=SadlResource ','? obj=SadlResource 'where' whereExpression=Expression
 ;
 
 AskExpression returns Expression :
@@ -304,7 +305,7 @@ Expression returns Expression: // (1)
 
 SelectExpression<EnabledWith> returns Expression :
 	->({SelectExpression}
-	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (',' selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(',' (orderList+=OrderElement))*)?)
+	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (','? selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(','? (orderList+=OrderElement))*)?)
 	| ExpressionParameterized<true>
 ;
 
@@ -329,7 +330,7 @@ OpAnd:
 	'and' | '&&';
 	
 CommaSeparatedAbreviatedExpression<EnabledWith> returns Expression:
-	EqualityExpression<EnabledWith> ({CommaSeparatedAbreviatedExpression.left=current} ',' =>((<EnabledWith>'with'|'has') prop=SadlResource) right=UnitsExpression<EnabledWith>?)*;
+	EqualityExpression<EnabledWith> ({CommaSeparatedAbreviatedExpression.left=current} ',' =>((<EnabledWith>'with'|'has') prop=SadlResource) right=FeatureCall<EnabledWith>?)*;
 
 EqualityExpression<EnabledWith> returns Expression:
 	RelationalExpression<EnabledWith> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<EnabledWith>)*;

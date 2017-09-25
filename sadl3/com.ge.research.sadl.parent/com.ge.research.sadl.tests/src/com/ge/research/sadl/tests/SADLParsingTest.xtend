@@ -114,6 +114,35 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			Test: MyPets is a Pet List.
 		'''.assertNoErrors
 	}
+	
+	@Test
+	def void testListTypes_04() {
+		'''
+			 uri  "http://sadl.org/Test.sadl" alias Test.
+			 
+			 Person is a class described by age with values of type int.
+			 ChildrenList is a type of Person List length 1-*.
+			 children describes Person with values of type ChildrenList.
+			 children of Person has at most 1 value.
+			 
+			 PersonList is a type of Person List.
+			 PersonListList is a type of PersonList List.
+			 
+			 foo describes Person with values of type PersonListList.
+			 bar describes Person with values of type Person List length 1-4.
+			 bar of Person only has values of type Person List.
+			 bar of Person only has values of type Person List length 1-4.
+			 bar of Person has at least one value of type Person List length 1-4.
+			 bar of Person has at least 1 value of type Person List length 1-4.
+			 bar of Person has at most 2 value of type Person List length 1-4.
+			 
+			 
+			 Rule R1: if x is a Person and
+			 		x has bar y and 
+			 		y is a Person List //length 1-4
+			 then print("Hurray!"). //x has age 50.
+		'''.assertNoErrors
+	}
 
 	@Test 
 	def void testPropertyTypeOnly() {
@@ -244,10 +273,10 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 MyFoo is a Foo with fprop PI.
 			 MyFoo4 is a Foo with fprop 3.14.
 			 
-			 MyFoo3 is a Foo with fprop -PI.	// grammar error: this should work just like the negative number below
+			 MyFoo3 is a Foo with fprop -PI.	
 			 MyFoo5 is a Foo with fprop -3.14.
 
-			 MyFoo5 has fprop -e.				// this should work also
+			 MyFoo5 has fprop -e.				
 		'''.assertNoErrors
 	}
 	
@@ -260,12 +289,14 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 
 			 // the following all work as PropOfSubject expressions
 			 Test: fprop of MyFoo3 is PI.
-			 Test: fprop of MyFoo3 is -PI.
+«««			 Test: fprop of MyFoo3 is -PI.
+«««			 Test: fprop of MyFoo3 is (-PI).
 			 Test: fprop of MyFoo3 is not PI.
 			 Test: fprop of MyFoo3 is known.
 			 Test: fprop of MyFoo3 is not known.
 			 Test: fprop of MyFoo3 is e.
-			 Test: fprop of MyFoo3 is -e.
+«««			 Test: fprop of MyFoo3 is -e.
+«««			 Test: fprop of MyFoo3 is (-e).
 		'''.assertNoErrors
 	}
 	
@@ -279,14 +310,17 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 
 			 // some of the following do not work as SubjHasPop expressions
 			 Test: MyFoo3 has fprop PI.
-			 Test: MyFoo3 has fprop -PI.
-			 Test: MyFoo3 has fprop (not PI).		// grammar error
+«««			 Test: MyFoo3 has fprop -PI.
+«««			 Test: MyFoo3 has fprop (-PI).
+			 Test: MyFoo3 has fprop (not PI).		
 			 Test: MyFoo3 has fprop known.
-			 Test: MyFoo3 has fprop (not known).	// grammar error
+			 Test: MyFoo3 has fprop (not known).	
 			 Test: MyFoo3 has fprop e.
-			 Test: MyFoo3 has fprop -e.
-			 Test: MyFoo3 has fprop (not e).		// grammar error
-			 Test: MyFoo3 has fprop (not -e).		// grammar error		
+«««			 Test: MyFoo3 has fprop -e.
+«««			 Test: MyFoo3 has fprop (-e).
+«««			 Test: MyFoo3 has fprop not e.
+			 Test: MyFoo3 has fprop (not e).		
+«««			 Test: MyFoo3 has fprop (not (-e)).				
 		'''.assertNoErrors
 	}
 	
@@ -426,13 +460,13 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore	// this grammar change was backed out because it changed precedence and broke things of the form "p1 of s1 is not p2 of s2"
+//	@Ignore	// this grammar change was backed out because it changed precedence and broke things of the form "p1 of s1 is not p2 of s2"
 	@Test
 	def void testNegationOfObjectTriple() {
 		'''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
 			
-			Test: x has color not Red.
+			Test: x has color (not Red).
 			Test: color of x is not Red.
 		'''.assertNoErrors
 	}
