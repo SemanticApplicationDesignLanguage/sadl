@@ -99,7 +99,8 @@ SadlPropertyCondition :
 ;
 
 SadlPropertyInitializer:
-	(','? ('with'|'has'))? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+//	(','? ('with'|'has'))? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	 ','? ('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 	|','? 'is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
 	|','? 'of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
@@ -135,7 +136,8 @@ SadlTypeReference returns SadlTypeReference:
 ;
 
 SadlUnionType returns SadlTypeReference:
-	SadlIntersectionType ({SadlUnionType.left=current} (','|'or') right=SadlIntersectionType)*
+//	SadlIntersectionType ({SadlUnionType.left=current} (','|'or') right=SadlIntersectionType)*
+	SadlIntersectionType ({SadlUnionType.left=current} ('or') right=SadlIntersectionType)*
 ;
 
 SadlIntersectionType returns SadlTypeReference:
@@ -202,7 +204,7 @@ SadlExplicitValue:
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
     |   SadlValueList
-	|	{SadlConstantLiteral} term=('PI'|'known')
+	|	{SadlConstantLiteral} term=('PI'|'-PI'|'e'|'-e'|'known')
 ;
 
 SadlValueList:
@@ -366,10 +368,19 @@ Power<EnabledWith> returns Expression:
 
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject<EnabledWith> returns Expression: // (17)
-	UnitsExpression<EnabledWith> ->(({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
-					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=UnitsExpression<EnabledWith>?)+)?
+//	UnitsExpression<EnabledWith> ->(({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
+//					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=UnitsExpression<EnabledWith>?)+)?
+	FeatureCall<EnabledWith> ->(		({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) 
+ 	|   =>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource right=FeatureCall<EnabledWith>?)+
+ 	|   =>({SubjHasProp.left=current} prop=SadlResource right=FeatureCall<EnabledWith>)+)?
 |   {UnaryExpression} op=('not' | '!' | 'only' | '-' | ThereExists) expr=PropOfSubject<EnabledWith> // this can be applied to other unitary operations
 |   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith>;
+
+
+FeatureCall<EnabledWith> returns Expression:
+	UnitsExpression<EnabledWith> |
+	{Name} name=[SadlResource|QNAME] ->(function?='(' arglist+=Expression? (',' arglist+=Expression)* ')')?
+;
 
 UnitsExpression<EnabledWith> returns Expression:
 	PrimaryExpression<EnabledWith> ->({Unit.value=current} unit=UNIT)?
@@ -390,12 +401,8 @@ PrimaryExpression<EnabledWith> returns Expression: // (20)
 	| {NumberLiteral} value=AnyNumber
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-	| FeatureCall
+//	| FeatureCall
 	| {ValueTable} valueTable=ValueTable;
-
-FeatureCall returns SadlResource:
-	{Name} name=[SadlResource|QNAME] ->(function?='(' arglist+=Expression? (',' arglist+=Expression)* ')')?
-;
 
 UNIT :
 	ID | STRING
