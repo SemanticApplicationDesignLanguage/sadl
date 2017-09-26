@@ -2035,7 +2035,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected void handleUndefinedFunctions(Name expression) throws ConfigurationException, DontTypeCheckException, InvalidTypeException{
-		String expressionName = declarationExtensions.getConcreteName(expression.getName());
+		String expressionName = declarationExtensions.getConcreteName(expression);
 		ITranslator translator = getModelProcessor().getTranslator();
 		//If only names for built-in functions are available, check the name matches a built-in functions. If not, error.
 		if (translator == null) {
@@ -2569,6 +2569,24 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return getPropertyRangeType(propsr, expression);
 				}
 			}
+			else if (defContainer instanceof SadlParameterDeclaration) {
+				SadlTypeReference exprType = ((SadlParameterDeclaration)defContainer).getType();
+				return getType(exprType);
+			}
+			else if (defContainer instanceof BinaryOperation) {
+				if (((BinaryOperation)defContainer).getLeft() instanceof Name && !((BinaryOperation)defContainer).getLeft().equals(expression)) {
+					if (isDeclaration(((BinaryOperation)defContainer).getRight())) {
+						Declaration decl = getEmbeddedDeclaration(defContainer);  // are we in a Declaration (a real declaration--the type is a class)
+						if (decl != null) {
+							return getType(decl);
+						}
+					}
+					else {
+						TypeCheckInfo ptci = getType(((BinaryOperation)defContainer).getRight());
+						return ptci;
+					}
+				}
+			}
 		}
 		//Needs filled in for Requirements extension
 		if (conceptUri == null) {
@@ -2656,7 +2674,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getRight());
 			if (sexpr != null) {
-				return (Expression) ((SubjHasProp)expr).getProp();
+				return ((SubjHasProp)expr).getProp();
 			}
 		} else if (expr instanceof Name) {
 			String nuri = declarationExtensions.getConceptUri(((Name)expr).getName());
@@ -2668,35 +2686,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			String nuri = declarationExtensions.getConceptUri((SadlResource)expr);
 			if (nuri != null && nuri.equals(uri)) {
 				return expr;
-			}
-		}
-		return null;
-	}
-
-	private Expression findDefiningExpression(String uri, SadlResource expr) {
-		if (expr instanceof SubjHasProp) {
-			Expression sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getLeft());
-			if (sexpr != null) {
-				return sexpr;
-			}
-			sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getProp());
-			if (sexpr != null) {
-				return sexpr;
-			}
-			sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getRight());
-			if (sexpr != null) {
-				return (Expression) ((SubjHasProp)expr).getProp();
-			}
-		} else if (expr instanceof Name) {
-			String nuri = declarationExtensions.getConceptUri(((Name)expr).getName());
-			if (nuri != null && nuri.equals(uri)) {
-				return (Expression) expr;
-			}
-		}
-		else if (expr instanceof SadlResource) {
-			String nuri = declarationExtensions.getConceptUri((SadlResource)expr);
-			if (nuri != null && nuri.equals(uri)) {
-				return (Expression) expr;
 			}
 		}
 		return null;
@@ -3339,7 +3328,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, SadlResource candidate, SadlResource predicate, SadlResource candidate2, boolean propOfSubjectCheck) throws InvalidTypeException {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, Expression target, boolean propOfSubjectCheck) throws InvalidTypeException {
 		OntConceptType ptype = null;
 		try {
 			ptype = declarationExtensions.getOntConceptType(predicate);
@@ -3354,31 +3343,31 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.VARIABLE_INSTEAD_OF_PROP2.get(declarationExtensions.getConcreteName(predicate)), predicate);
 			checkDomain = false;
 		}
-		if (candidate instanceof SadlResource) {
-			org.eclipse.emf.ecore.resource.Resource rsrc = candidate.eResource();
+		if (subject instanceof SadlResource) {
+			org.eclipse.emf.ecore.resource.Resource rsrc = subject.eResource();
 			if (rsrc != null) {
 				if (ontModel != null) {
 					OntConceptType stype;
 					try {
-						stype = declarationExtensions.getOntConceptType((SadlResource)candidate);
+						stype = declarationExtensions.getOntConceptType((SadlResource)subject);
 						OntResource subj = null;
 						String varName = null;
 						if (stype.equals(OntConceptType.VARIABLE)) {
 							TypeCheckInfo stci;
 							// for now don't do any checking--may be able to do so later with variable definitions
 							try {
-								stci = getType(candidate);
+								stci = getType(subject);
 								//It's possible that there are local restrictions
 								if (stci != null) {
 									stci = getApplicableLocalRestriction(stci);
 								}
 								if (stci != null && stci.getTypeCheckType() != null) {
 									subj = ontModel.getOntResource(stci.getTypeCheckType().toString());
-									varName = declarationExtensions.getConcreteName((SadlResource)candidate);
+									varName = declarationExtensions.getConcreteName((SadlResource)subject);
 									if (subj != null) {
 										Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
 										if (prop != null && checkDomain) {
-											checkPropertyDomain(ontModel, subj, prop, candidate2, propOfSubjectCheck, varName);
+											checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
 										}
 									}
 								}
@@ -3407,16 +3396,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							}
 						}
 						else if (stype.equals(OntConceptType.CLASS_PROPERTY)) {
-							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)candidate));
+							OntProperty propsubj = ontModel.getOntProperty(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(declarationExtensions.getConceptUri(predicate));
 								if (prop != null && checkDomain) {
-									checkPropertyDomain(ontModel, propsubj, prop, candidate2, propOfSubjectCheck, varName);
+									checkPropertyDomain(ontModel, propsubj, prop, target, propOfSubjectCheck, varName);
 								}
 							}
 						}
 						else {
-							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)candidate));
+							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
 							if (subj != null) {
 								String preduri = declarationExtensions.getConceptUri(predicate);
 								if (preduri == null) {
@@ -3425,7 +3414,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								else {
 									Property prop = ontModel.getProperty(preduri);
 									if (prop != null && checkDomain) {
-										checkPropertyDomain(ontModel, subj, prop, candidate2, propOfSubjectCheck, varName);
+										checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
 									}
 								}
 							}
@@ -3443,7 +3432,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return stci;	
 	}
 
-	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, SadlResource candidate2, boolean propOfSubjectCheck, String varName) throws InvalidTypeException {
+	private void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression target, boolean propOfSubjectCheck, String varName) throws InvalidTypeException {
 		if(prop.canAs(AnnotationProperty.class)){
 			return;
 		}
@@ -3482,9 +3471,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (subj != null && !matchFound) {
 			if (varName != null) {
 				if(propOfSubjectCheck){
-					getModelProcessor().addIssueToAcceptor(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), candidate2);
+					getModelProcessor().addIssueToAcceptor(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), target);
 				}else{
-					issueAcceptor.addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), candidate2);
+					issueAcceptor.addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), target);
 				}
 			}
 			else {
@@ -3496,9 +3485,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				if(propOfSubjectCheck){
-					getModelProcessor().addIssueToAcceptor(msg, candidate2);
+					getModelProcessor().addIssueToAcceptor(msg, target);
 				}else{
-					issueAcceptor.addWarning(msg, candidate2);
+					issueAcceptor.addWarning(msg, target);
 				}
 			}
 		}

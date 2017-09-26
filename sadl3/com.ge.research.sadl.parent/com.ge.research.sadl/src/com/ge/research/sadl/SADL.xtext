@@ -380,6 +380,10 @@ PropOfSubject<EnabledWith> returns Expression: // (17)
 
 FeatureCall<EnabledWith> returns Expression:
 	UnitsExpression<EnabledWith> |
+	Name
+;
+
+Name returns SadlResource: 
 	{Name} name=[SadlResource|QNAME] ->(function?='(' arglist+=Expression? (',' arglist+=Expression)* ')')?
 ;
 

@@ -71,7 +71,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="instance" eType="#//SadlResource"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlResource" eSuperTypes="#//SadlStatement #//SadlExplicitValue">
+  <eClassifiers xsi:type="ecore:EClass" name="SadlResource" eSuperTypes="#//SadlStatement #//SadlExplicitValue #//Expression">
     <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//SadlResource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="annotations" upperBound="-1"
         eType="#//SadlAnnotation" containment="true"/>
@@ -417,8 +417,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="element" eType="#//Expression"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Name" eSuperTypes="#//Expression">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//SadlResource"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Name" eSuperTypes="#//SadlResource">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="function" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="arglist" upperBound="-1"
         eType="#//Expression" containment="true"/>
