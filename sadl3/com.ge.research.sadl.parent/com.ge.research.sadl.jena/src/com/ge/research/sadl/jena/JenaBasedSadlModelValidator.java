@@ -609,7 +609,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
-	private boolean handleValidationException(EObject expr, Throwable t) {
+	protected boolean handleValidationException(EObject expr, Throwable t) {
 		try {
 			if (t instanceof InvalidNameException) {
 				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Invalid Name"), expr);
@@ -3033,7 +3033,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
-	private ConceptIdentifier getConceptIdentifierFromTypeCheckInfo(TypeCheckInfo tci) {
+	protected ConceptIdentifier getConceptIdentifierFromTypeCheckInfo(TypeCheckInfo tci) {
 		
 		if (tci.getRangeValueType().equals(RangeValueType.LIST)) {
 			ConceptName cn = getListType(tci);
