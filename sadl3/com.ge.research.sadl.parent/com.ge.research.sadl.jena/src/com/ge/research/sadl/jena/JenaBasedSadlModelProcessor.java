@@ -2700,9 +2700,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		
 		String op = expr.getOp();
-		BuiltinType optype = BuiltinType.getType(op);
 		
 		Expression lexpr = expr.getLeft();
+		Expression rexpr = expr.getRight();
+
+		return processBinaryExpressionByParts(expr, op, lexpr, rexpr);
+	}
+	
+	protected Object processBinaryExpressionByParts(EObject container, String op, Expression lexpr,
+			Expression rexpr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		BuiltinType optype = BuiltinType.getType(op);
 		Object lobj;
 		if (lexpr != null) {
 			lobj = translate(lexpr);			
@@ -2711,7 +2718,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			addError("Left side of '" + op + "' is null", lexpr); //TODO Add new error
 			return null;
 		}
-		Expression rexpr = expr.getRight();
 		Object robj = null;
 		if (rexpr != null) {
 			robj = translate(rexpr);
@@ -2733,7 +2739,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				else {
 //					throw new TranslationException("Unhandled binary operation condition: left and right are not both nodes.");
-					addError(SadlErrorMessages.UNHANDLED.get("binary operation condition. ", "Left and right are not both nodes."), expr);
+					addError(SadlErrorMessages.UNHANDLED.get("binary operation condition. ", "Left and right are not both nodes."), container);
 				}
 			}
 			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
@@ -2753,7 +2759,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							return lobj;
 						}
 						else {
-							addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), expr);
+							addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), container);
 						}
 					}
 					else if (robj instanceof VariableNode) {
@@ -2780,7 +2786,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								return lobj;
 							}
 							else {
-								return createBinaryBuiltin(rexpr, ((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
+								return createBinaryBuiltin(((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
 							}
 						}
 					}
@@ -2788,7 +2794,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						// do nothing
 					}
 					else {
-						addError(SadlErrorMessages.UNHANDLED.get("assignment construct in rule conclusion", " "), expr);
+						addError(SadlErrorMessages.UNHANDLED.get("assignment construct in rule conclusion", " "), container);
 					}
 				}
 				else if (robj instanceof BuiltinElement) {
@@ -2805,7 +2811,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 							return lobj;
 						}
 						else {
-							return createBinaryBuiltin(rexpr, ((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
+							return createBinaryBuiltin(((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
 						}
 					}
 				}
@@ -2986,9 +2992,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		//	and the VariableNode hasn't already been bound, change from type equal to type assign.
 		if (optype == BuiltinType.Equal && getTarget() instanceof Rule && lobj instanceof VariableNode && robj instanceof com.ge.research.sadl.model.gp.Literal && 
 				!variableIsBound((Rule)getTarget(), null, (VariableNode)lobj)) {
-			return createBinaryBuiltin(expr, "assign", robj, lobj);
+			return createBinaryBuiltin("assign", robj, lobj);
 		}
-		return createBinaryBuiltin(expr, op, lobj, robj);
+		return createBinaryBuiltin(op, lobj, robj);
 	}
 	
 	private Object replaceDeclarationWithVariableAndAddUseDeclarationAsDefinition(Expression lexpr, Object lobj, Expression rexpr, Object robj) throws TranslationException, InvalidTypeException {
@@ -3300,7 +3306,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return false;
 	}
 
-	private GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	private GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (name.equals(JunctionType.AND_ALPHA) || name.equals(JunctionType.AND_SYMBOL) || name.equals(JunctionType.OR_ALPHA) || name.equals(JunctionType.OR_SYMBOL)) {
 			Junction jct = new Junction();
 			jct.setJunctionName(name);
@@ -3329,7 +3335,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return junction;
 	}
 
-	private Object createUnaryBuiltin(Expression sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	private Object createUnaryBuiltin(String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (sobj instanceof com.ge.research.sadl.model.gp.Literal && BuiltinType.getType(name).equals(BuiltinType.Minus)) {
 			Object theVal = ((com.ge.research.sadl.model.gp.Literal)sobj).getValue();
 			if (theVal instanceof Integer) {
@@ -3354,8 +3360,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			Object lhs = junc.getLhs();
 			Object rhs = junc.getRhs();
 			if (lhs instanceof com.ge.research.sadl.model.gp.Literal && rhs instanceof com.ge.research.sadl.model.gp.Literal) {
-				lhs = createUnaryBuiltin(sexpr, name, lhs);
-				rhs = createUnaryBuiltin(sexpr, name, rhs);
+				lhs = createUnaryBuiltin(name, lhs);
+				rhs = createUnaryBuiltin(name, rhs);
 				junc.setLhs(lhs);
 				junc.setRhs(rhs);
 			}
