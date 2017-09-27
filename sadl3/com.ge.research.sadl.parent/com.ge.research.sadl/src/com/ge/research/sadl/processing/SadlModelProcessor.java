@@ -26,6 +26,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.resource.XtextResource;
+
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.OntConceptType;
@@ -994,5 +1000,38 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	protected void setRulePart(RulePart rulePart) {
 		this.rulePart = rulePart;
 	}
+
+	public String getSourceText(EObject po) {
+		INode node = getParserObjectNode(po);
+		if (node != null) {
+			String txt = NodeModelUtils.getTokenText(node);
+			return txt.trim() + ".\n";
+		}
+		return null;
+	}
+
+	protected INode getParserObjectNode(EObject po) {
+		Object r = po.eResource();
+		if (r instanceof XtextResource) {
+			INode root = ((XtextResource) r).getParseResult().getRootNode();
+	        for(INode node : root.getAsTreeIterable()) {   
+	        	if (node instanceof CompositeNodeWithSemanticElement) {
+	        		EObject semElt = ((CompositeNodeWithSemanticElement)node).getSemanticElement();
+	        		if (semElt != null && semElt.equals(po)) {
+	        			// this is the one!
+       					return node;
+	        		}
+	        	}
+	        }
+		}
+		org.eclipse.emf.common.util.TreeIterator<EObject> titr = po.eAllContents();
+		while (titr.hasNext()) {
+			EObject el = titr.next();
+//TODO what's supposed to happen here?
+			int i = 0;
+		}
+		return null;
+	}
+
 
 }

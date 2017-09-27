@@ -5174,7 +5174,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
-	private void addWarning(String msg, EObject context) {
+	protected void addWarning(String msg, EObject context) {
 		if (getIssueAcceptor() != null) {
 			getIssueAcceptor().addWarning(msg, context);
 			if (isSyntheticUri(null, getCurrentResource())) {
