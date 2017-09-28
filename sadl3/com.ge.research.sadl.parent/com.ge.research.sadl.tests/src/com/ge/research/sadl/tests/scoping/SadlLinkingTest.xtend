@@ -1190,6 +1190,18 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
+	@Test
+	def void testQueryVariable_2() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type Whim.
+			 Whim is a class described by wham with values of type string.
+			 Ask: select <i> where [i] is a Foo.
+			 Ask: select <i> where [i] is a Foo with bar (a Whim with wham "hi").
+		'''.assertLinking[sadl]
+	}
+	
 	@Ignore("#215: If possible, the declaration of DATA2 should be as indicated. If not possible, we need to detect error (Andy can do) and provide quick fix to insert previous line into model")
 	@Test
 	def void testOnlyIf() {
@@ -1207,6 +1219,28 @@ class SadlLinkingTest extends AbstractLinkingTest {
 «««			 DATA2 is a type of DATA.
 			 A <DATA> is a [DATA2] only if is_ground_speed_of only has values of type IRS.
 			 <DATA2> has expandedProperty _value. 
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testRuleVariables_01() {
+		'''
+			uri "http://sadl.org/rulevars.sadl" alias rulevars.
+						
+			Person is a class.
+			teaches describes Person with values of type Person.
+			knows describes Person with values of type Person.
+			A relationship of Person to Person is acquaintance. 
+			
+			Rule R1 if x is a Person and x has teaches y then x has knows y.
+			 
+			Rule R2 if x is a Person and x has teaches y then x has acquaintance y. 
+			
+			Rule R3 if [x] is a Person and <x> teaches [y] then <x> knows <y>.
+			
+«««			Rule R4: if a Person knows a second Person then the second Person knows the first Person.
+			
+			Rule R5: if [x] is a Person and knows of <x> is [y] then knows of <y> is <x>.
 		'''.assertLinking[sadl]
 	}
 }

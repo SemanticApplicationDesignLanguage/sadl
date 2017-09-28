@@ -3465,7 +3465,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 				// create a CRule variable
 				String nvar = getNewVar(expr);
-				VariableNode var = addCruleVariables((NamedNode)typenode, ordNum, nvar);
+				VariableNode var = addCruleVariable((NamedNode)typenode, ordNum, nvar);
 //				System.out.println("Added crule variable: " + typenode.toString() + ", " + ordNum + ", " + var.toString());
 				return var;
 			}
@@ -8142,7 +8142,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		return null;
 	}
 	
-	protected VariableNode addCruleVariables(NamedNode type, int ordinalNumber, String name) throws TranslationException {
+	protected VariableNode addCruleVariable(NamedNode type, int ordinalNumber, String name) throws TranslationException {
 		if (cruleVariables == null) {
 			cruleVariables = new HashMap<NamedNode,List<VariableNode>>();
 		}

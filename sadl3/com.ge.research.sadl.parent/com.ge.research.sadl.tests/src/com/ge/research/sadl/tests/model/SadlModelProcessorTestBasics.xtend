@@ -190,6 +190,26 @@ class SadlModelProcessorTestBasics extends AbstractProcessorTest {
 	}
 
 	@Test
+	def void testQueries() {
+		val sadlModel = '''
+			 uri "http://sadl.org/QueryWithEmbeddedDecl.sadl" alias QueryWithEmbeddedDecl.
+			 			 
+			 Foo is a class described by bar with values of type Whim.
+			 Whim is a class described by wham with values of type string.
+			 
+			 W1 is a Whim with wham "hi".
+			 F1 is a Foo with bar W1.
+			 
+			 Ask: select i where i is a Foo.
+			 Ask: select i where i is a Foo with bar (a Whim with wham "hi").
+			 Ask: select i where i is a Foo and i has bar x and x is a Whim and x has wham "hi".
+ 		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+  			assertTrue(issues.size == 0)
+		]
+ 	}
+	
+	@Test
 	def void testTypedList1() {
 		val sadlModel = '''
 			 uri "http://sadl.org/test.sadl" alias test.

@@ -2574,7 +2574,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return getType(exprType);
 			}
 			else if (defContainer instanceof BinaryOperation) {
-				if (((BinaryOperation)defContainer).getLeft() instanceof Name && !((BinaryOperation)defContainer).getLeft().equals(expression)) {
+				if (((BinaryOperation)defContainer).getLeft() instanceof Name) { // && !((BinaryOperation)defContainer).getLeft().equals(expression)) { // this causes failure in some cases awc 9/27/17
 					if (isDeclaration(((BinaryOperation)defContainer).getRight())) {
 						Declaration decl = getEmbeddedDeclaration(defContainer);  // are we in a Declaration (a real declaration--the type is a class)
 						if (decl != null) {
