@@ -1642,6 +1642,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return side;		
 	}
 	
+	protected VariableNode createVariable(String name) {
+		return new VariableNode(name);
+	}
+	
 	private boolean containsMultipleTests(List<GraphPatternElement> testtrans) {
 		if (testtrans.size() == 1) {
 			return false;
@@ -2710,6 +2714,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected Object processBinaryExpressionByParts(EObject container, String op, Expression lexpr,
 			Expression rexpr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		BuiltinType optype = BuiltinType.getType(op);
+		try {
+			if (lexpr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)lexpr).getName()).equals(OntConceptType.VARIABLE)) {
+				if (getDeclarationExtensions().getDeclaration(((Name)lexpr).getName()).equals((Name)lexpr)) {
+					addInfo("This is a left side of binary '" + op + "' variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)lexpr).getName()) + "'", lexpr);
+				}
+			}
+			if (rexpr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)rexpr).getName()).equals(OntConceptType.VARIABLE)) {
+				if (getDeclarationExtensions().getDeclaration(((Name)rexpr).getName()).equals((Name)rexpr)) {
+					addInfo("This is a right side of binary '" + op + "' variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)rexpr).getName()) + "'", rexpr);
+				}
+			}
+		} catch (CircularDefinitionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Object lobj;
 		if (lexpr != null) {
 			lobj = translate(lexpr);			
@@ -3719,6 +3738,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
+		try {
+			if (subj instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)subj).getName()).equals(OntConceptType.VARIABLE)) {
+				if (getDeclarationExtensions().getDeclaration(((Name)subj).getName()).equals((Name)subj)) {
+					SadlResource decl = getDeclarationExtensions().getDeclaration(((Name)subj).getName());
+					addInfo("This is a subject of SubjHasProp variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)subj).getName()) + "'", subj);
+				}
+			}
+			if (obj instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)obj).getName()).equals(OntConceptType.VARIABLE)) {
+				if (getDeclarationExtensions().getDeclaration(((Name)obj).getName()).equals((Name)obj)) {
+					addInfo("This is an object of SubjHasProp variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)obj).getName()) + "'", obj);
+				}
+			}
+		} catch (CircularDefinitionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		if (getModelValidator() != null) {
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, pred, false);
 			if (obj != null) {	// rules can have SubjHasProp expressions with null object
@@ -5180,12 +5216,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
-	protected void addWarning(String msg, EObject context) {
+	public void addWarning(String msg, EObject context) {
 		if (getIssueAcceptor() != null) {
 			getIssueAcceptor().addWarning(msg, context);
 			if (isSyntheticUri(null, getCurrentResource())) {
 				if (getMetricsProcessor() != null) {
-					getMetricsProcessor().addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.UNCLASSIFIED_FAILURE_URI);
+					getMetricsProcessor().addMarker(null, MetricsProcessor.WARNING_MARKER_URI, MetricsProcessor.WARNING_MARKER_URI);
 				}
 			}
 		}
@@ -5194,7 +5230,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 
-//	private OntResource addClassToUnionClass(OntResource existingCls,
+	public void addInfo(String msg, EObject context) {
+		if (getIssueAcceptor() != null) {
+			getIssueAcceptor().addInfo(msg, context);
+			if (isSyntheticUri(null, getCurrentResource())) {
+				if (getMetricsProcessor() != null) {
+					getMetricsProcessor().addMarker(null, MetricsProcessor.INFO_MARKER_URI, MetricsProcessor.INFO_MARKER_URI);
+				}
+			}
+		}
+		else if (!generationInProgress) {
+			System.out.println(msg);			
+		}
+	}
+
+	//	private OntResource addClassToUnionClass(OntResource existingCls,
 //			OntResource cls) throws JenaProcessorException {
 //		if (existingCls != null && !existingCls.equals(cls)) {
 //			try {

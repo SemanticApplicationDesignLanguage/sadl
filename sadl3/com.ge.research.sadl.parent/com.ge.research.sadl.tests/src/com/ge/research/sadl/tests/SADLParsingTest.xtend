@@ -201,6 +201,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 
 			 Rule R4: if a Person knows a second Person then the second Person knows the first Person.
 			 Rule R4b: if a Person has knows a second Person then the second Person has knows the first Person.
+			 Rule R4c: if x knows y then y knows x.
 			 
 			 Rule R5: if x is a Person and knows of x is y then knows of y is x.
 		'''.assertNoErrors
