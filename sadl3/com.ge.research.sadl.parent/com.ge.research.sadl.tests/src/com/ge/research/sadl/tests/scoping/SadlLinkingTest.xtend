@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -1205,7 +1204,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testRuleVariable_2() {
 		'''

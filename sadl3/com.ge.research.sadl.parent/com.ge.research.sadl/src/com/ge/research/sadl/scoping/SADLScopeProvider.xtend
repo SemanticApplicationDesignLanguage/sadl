@@ -204,7 +204,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 			if (container instanceof BinaryOperation) {
 				if (container.op == 'is' || container.op == '==' || container.op == '=' ||
-					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, SelectExpression) !== null) // we are in the middle of a select expression.
+					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, SelectExpression) !== null) || // we are in the middle of a select expression.
+					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, RuleStatement) !== null)    // we are in the middle of a rule statement (GH-245).
 				) {
 					return true;
 				}
