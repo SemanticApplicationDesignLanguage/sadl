@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -1285,7 +1285,6 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore
 	@Test
 	def void testEmbeddedInstanceDeclaration() {
 		'''
