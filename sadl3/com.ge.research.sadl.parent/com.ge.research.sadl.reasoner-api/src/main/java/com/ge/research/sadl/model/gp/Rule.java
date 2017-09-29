@@ -33,6 +33,7 @@ public class Rule {
 	private List<GraphPatternElement> givens = null;
 	private List<GraphPatternElement> ifs = null;
 	private List<GraphPatternElement> thens = null;
+	private List<VariableNode> ruleVariables = null;
 	
 	public Rule(String name) {
 		setRuleName(name);
@@ -190,4 +191,28 @@ public class Rule {
 	public void setEditorOffset(int editorOffset) {
 		this.editorOffset = editorOffset;
 	}
+
+	public List<VariableNode> getRuleVariables() {
+		return ruleVariables;
+	}
+
+	public boolean addRuleVariable(VariableNode ruleVariable) {
+		if (ruleVariables == null) {
+			ruleVariables = new ArrayList<VariableNode>();
+		}
+		ruleVariables.add(ruleVariable);
+		return true;
+	}
+	
+	public VariableNode getVariable(String name) {
+		if (ruleVariables != null) {
+			for (int i = 0; i < ruleVariables.size(); i++) {
+				if (ruleVariables.get(i).getName().equals(name)) {
+					return ruleVariables.get(i);
+				}
+			}
+		}
+		return null;
+	}
+	
 }

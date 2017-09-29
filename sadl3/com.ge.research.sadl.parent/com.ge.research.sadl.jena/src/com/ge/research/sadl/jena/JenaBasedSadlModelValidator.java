@@ -23,6 +23,7 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
@@ -2556,6 +2557,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		//		3a) look at the SubjHasProp left and right
 		//			3aa) if the Name matches left, get the type as the domain of the SubjHasProp prop
 		//			3ab) if the Name matches right, get the type as the range of the SubjHasProp prop
+		
+		VariableNode var = getModelProcessor().getVariable(conceptNm);
+		if (var != null) {
+			ConceptName et = new ConceptName(var.getType().toFullyQualifiedString());
+			et.setType(ConceptType.VARIABLE);
+			TypeCheckInfo tci = new TypeCheckInfo(et, et, this, expression);
+			tci.setExpressionType(et);
+			return tci;
+		}
 		SadlResource name = sr.getName();
 		if (name != null) {
 			SadlResource def = declarationExtensions.getDeclaration(name);

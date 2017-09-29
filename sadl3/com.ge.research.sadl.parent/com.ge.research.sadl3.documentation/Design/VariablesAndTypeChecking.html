@@ -1,0 +1,24 @@
+<title>Variables and Type Checking</title>
+<h1>Variables and Type Checking</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/28/2017<!--webbot bot="Timestamp" endspan i-checksum="12653" -->. 
+Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
+
+<h4>Table of Contents</h4>
+
+<h2><a name="Introduction">Introduction</a></h2>
+<p>Model processing in SADL 3 makes much greater use of the functionality of 
+Xtext. One such use of Xtext is in cleaner, simpler handling of variables. 
+Variables in SADL are local in scope--a variable is only defined within the 
+context of a rule, query, or test. If another rule, query, or test in the same 
+SADL file has a variable of the same name, it is a different, independent 
+variable. Xtext scoping differentiates between the definition of a concept, 
+including a variable, and references to that concept. This allows the &quot;Open 
+Declaration&quot; hyper linking from references to declaration to work. Xtext also 
+can identify the type of a name, necessary for coloring of variables pink, etc. 
+Therefore, Xtext scoping can be leveraged in the model processor to create a 
+SADL VariableNode (class com.ge.research.sadl.model.gp.VariableNode) when the 
+defining parse tree element is processed. The newly created VariableNode is 
+given, using the Xtext information, a type and definition. Note that no type 
+checking is needed for a variable definition since the definition defines the 
+type.</p>

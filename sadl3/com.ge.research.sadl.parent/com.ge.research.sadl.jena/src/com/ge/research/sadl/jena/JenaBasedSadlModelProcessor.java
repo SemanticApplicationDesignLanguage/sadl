@@ -1642,8 +1642,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return side;		
 	}
 	
-	protected VariableNode createVariable(String name) {
-		return new VariableNode(name);
+	protected VariableNode createVariable(String name) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
+		VariableNode newVar = new VariableNode(name);
+		Object trgt = getTarget();
+		if (trgt instanceof Rule) {
+			((Rule)trgt).addRuleVariable(newVar);
+		}
+		else if (trgt instanceof Query) {
+			((Query)trgt).addVariable(newVar);
+		}
+		else if (trgt instanceof Test) {
+			// TODO
+		}
+		return newVar;
 	}
 	
 	private boolean containsMultipleTests(List<GraphPatternElement> testtrans) {
@@ -1909,7 +1920,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return null;
 	}
 	private Query addExpandedPropertiesToQuery(Query query, Expression expr) {
-		List<String> vars = query.getVariables();
+		List<VariableNode> vars = query.getVariables();
 		List<GraphPatternElement> elements = query.getPatterns();
 		if (elements != null) {
 			List<TripleElement> triplesToAdd = null;
@@ -1951,10 +1962,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 														VariableNode newvar = new VariableNode(vnameprefix + "_" + propnode.getName()); //getIfTranslator().getNewVar());
 														TripleElement newtriple = new TripleElement(vn, propnode, newvar);
 														if (vars == null) {
-															vars = new ArrayList<String>();
+															vars = new ArrayList<VariableNode>();
 															query.setVariables(vars);
 														}
-														vars.add(newvar.getName());
+														vars.add(newvar);
 														if (triplesToAdd == null) triplesToAdd = new ArrayList<TripleElement>();
 														triplesToAdd.add(newtriple);
 													}
@@ -1981,7 +1992,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						}
 					}
 					if (triplesToAdd == null && implicitObject) {
-						query.getVariables().add(((VariableNode)obj).getName());
+						query.getVariables().add(((VariableNode)obj));
 					}
 				}
 			}
@@ -2053,7 +2064,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			varList = ((SelectExpression)expr).getSelectFrom();
 			if (varList != null) {
-				List<String> names = new ArrayList<String>();
+				List<VariableNode> names = new ArrayList<VariableNode>();
 				for (int i = 0; i < varList.size(); i++) {
 					Object var = null;
 					try {
@@ -2117,7 +2128,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						}
 					}
 					else {
-						names.add(((VariableNode)var).getName());
+						names.add(((VariableNode)var));
 					}
 				}
 				query.setVariables(names);
@@ -2126,28 +2137,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof ConstructExpression) {
 			whexpr = ((ConstructExpression) expr).getWhereExpression();
 			query.setKeyword("construct");
-			List<String> names = new ArrayList<String>();
+			List<VariableNode> names = new ArrayList<VariableNode>();
 			try {
 				Object result = translate(((ConstructExpression)expr).getSubj());
 				if (result instanceof VariableNode) {
-					names.add(((NamedNode) result).getName());
+					names.add(((VariableNode) result));
 				}
 				else {
-					names.add(result.toString());
+					names.add(createVariable(result.toString()));
 				}
 				result = translate(((ConstructExpression)expr).getPred());
 				if (result instanceof VariableNode) {
-					names.add(((NamedNode) result).getName());
+					names.add((VariableNode) result);
 				}
 				else {
-					names.add(result.toString());
+					names.add(createVariable(result.toString()));
 				}
 				result = translate(((ConstructExpression)expr).getObj());
 				if (result instanceof VariableNode) {
-					names.add(((NamedNode) result).getName());
+					names.add(((VariableNode) result));
 				}
 				else {
-					names.add(result.toString());
+					names.add(createVariable(result.toString()));
 				}
 				if (names.size() != 3) {
 					addWarning("A 'construct' statement should have 3 variables so as to be able to generate a graph.", expr);
@@ -2160,6 +2171,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (PrefixNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -2243,9 +2263,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (query.getVariables() == null) {
 				Set<VariableNode> nodes = getIfTranslator().getSelectVariables((List<GraphPatternElement>)pattern);
 				if (nodes != null && nodes.size() > 0) {
-					List<String> names = new ArrayList<String>(1);
+					List<VariableNode> names = new ArrayList<VariableNode>(1);
 					for (VariableNode node : nodes) {
-						names.add(node.getName());
+						names.add(node);
 					}
 					query.setVariables(names);
 					if (query.getKeyword() == null) {
@@ -2286,12 +2306,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				VariableNode sn = new VariableNode(getIfTranslator().getNewVar());
 				TripleElement tr = new TripleElement(sn, (Node) qobj, null);
 				q.addPattern(tr);
-				List<String> vars = q.getVariables();
+				List<VariableNode> vars = q.getVariables();
 				if (vars == null) {
-					vars = new ArrayList<String>();
+					vars = new ArrayList<VariableNode>();
 					q.setVariables(vars);
 				}
-				q.getVariables().add(sn.getName());
+				q.getVariables().add(sn);
 			}
 		}
 		else if (qobj instanceof TripleElement) {
@@ -2299,10 +2319,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			List<IFTranslationError> errs = getIfTranslator().getErrors();
 			if (errs == null || errs.size() == 0) {
 				if (vars != null && vars.size() > 0) {
-					List<String> varNames = new ArrayList<String>();
+					List<VariableNode> varNames = new ArrayList<VariableNode>();
 					Iterator<VariableNode> vitr = vars.iterator();
 					while (vitr.hasNext()) {
-						varNames.add(vitr.next().getName());
+						varNames.add(vitr.next());
 					}
 					q.setVariables(varNames);
 				}
@@ -2679,9 +2699,73 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	public Object processExpression(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		// is this a variable definition?
+		boolean isVariableDefinition = false;
+		Name variableName = null;
+		Expression variableDefn = null;
+		try {
+			if (expr.getLeft() instanceof Name && isVariableDefinition((Name) expr.getLeft())) {
+				// left is variable name, right is variable definition
+				isVariableDefinition = true;
+				variableName = (Name) expr.getLeft();
+				variableDefn = expr.getRight();
+			}
+			else if (expr.getRight() instanceof Name && isVariableDefinition((Name)expr.getRight())) {
+				// right is variable name, left is variable definition
+				isVariableDefinition = true;
+				variableName = (Name) expr.getRight();
+				variableDefn = expr.getLeft();
+			}
+		} catch (CircularDefinitionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (isVariableDefinition) {
+			Object defn = translate(variableDefn);
+			try {
+				VariableNode var = createVariable(getDeclarationExtensions().getConcreteName(variableName.getName()));
+				if (defn instanceof NamedNode) {
+					var.setType((NamedNode) defn);
+				}
+				else {
+					TypeCheckInfo varType = getModelValidator().getType(variableDefn);
+					if (varType.getTypeCheckType() != null) {
+						NamedNode varTypeNN = new NamedNode(varType.getTypeCheckType().toString());
+						var.setType(varTypeNN);
+					}
+				}
+				return var;
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DontTypeCheckException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CircularDefinitionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CircularDependencyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (PropertyWithoutRangeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (PrefixNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		//Validate BinaryOperation expression
 		StringBuilder errorMessage = new StringBuilder();
-		if(getModelValidator() != null) {
+		if(!isVariableDefinition && getModelValidator() != null) {		// don't type check a variable definition
 			if (!getModelValidator().validate(expr, errorMessage)) {
 				addIssueToAcceptor(errorMessage.toString(), expr);
 				if (isSyntheticUri(null, getCurrentResource())) {
@@ -2711,24 +2795,34 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return processBinaryExpressionByParts(expr, op, lexpr, rexpr);
 	}
 	
+	protected boolean isVariableDefinition(Name expr) throws CircularDefinitionException {
+		if (expr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)expr).getName()).equals(OntConceptType.VARIABLE)) {
+			if (getDeclarationExtensions().getDeclaration(((Name)expr).getName()).equals((Name)expr)) {
+				addInfo("This is a variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)expr).getName()) + "'", expr);
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	protected Object processBinaryExpressionByParts(EObject container, String op, Expression lexpr,
 			Expression rexpr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		BuiltinType optype = BuiltinType.getType(op);
-		try {
-			if (lexpr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)lexpr).getName()).equals(OntConceptType.VARIABLE)) {
-				if (getDeclarationExtensions().getDeclaration(((Name)lexpr).getName()).equals((Name)lexpr)) {
-					addInfo("This is a left side of binary '" + op + "' variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)lexpr).getName()) + "'", lexpr);
-				}
-			}
-			if (rexpr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)rexpr).getName()).equals(OntConceptType.VARIABLE)) {
-				if (getDeclarationExtensions().getDeclaration(((Name)rexpr).getName()).equals((Name)rexpr)) {
-					addInfo("This is a right side of binary '" + op + "' variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)rexpr).getName()) + "'", rexpr);
-				}
-			}
-		} catch (CircularDefinitionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			if (lexpr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)lexpr).getName()).equals(OntConceptType.VARIABLE)) {
+//				if (getDeclarationExtensions().getDeclaration(((Name)lexpr).getName()).equals((Name)lexpr)) {
+//					addInfo("This is a left side of binary '" + op + "' variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)lexpr).getName()) + "'", lexpr);
+//				}
+//			}
+//			if (rexpr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)rexpr).getName()).equals(OntConceptType.VARIABLE)) {
+//				if (getDeclarationExtensions().getDeclaration(((Name)rexpr).getName()).equals((Name)rexpr)) {
+//					addInfo("This is a right side of binary '" + op + "' variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)rexpr).getName()) + "'", rexpr);
+//				}
+//			}
+//		} catch (CircularDefinitionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		Object lobj;
 		if (lexpr != null) {
 			lobj = translate(lexpr);			
@@ -3738,24 +3832,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
+		boolean isVariableDefinition = false;
 		try {
-			if (subj instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)subj).getName()).equals(OntConceptType.VARIABLE)) {
-				if (getDeclarationExtensions().getDeclaration(((Name)subj).getName()).equals((Name)subj)) {
-					SadlResource decl = getDeclarationExtensions().getDeclaration(((Name)subj).getName());
-					addInfo("This is a subject of SubjHasProp variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)subj).getName()) + "'", subj);
-				}
+			if (subj instanceof Name && isVariableDefinition((Name)subj)) {
+				// variable is defined by domain of property pred
+				isVariableDefinition = true;
 			}
-			if (obj instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)obj).getName()).equals(OntConceptType.VARIABLE)) {
-				if (getDeclarationExtensions().getDeclaration(((Name)obj).getName()).equals((Name)obj)) {
-					addInfo("This is an object of SubjHasProp variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)obj).getName()) + "'", obj);
-				}
+			if (obj instanceof Name && isVariableDefinition((Name)obj)) {
+				// variable is defined by range of property pred
+				isVariableDefinition = true;
 			}
 		} catch (CircularDefinitionException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
-		if (getModelValidator() != null) {
+		if (!isVariableDefinition && getModelValidator() != null) {
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, pred, false);
 			if (obj != null) {	// rules can have SubjHasProp expressions with null object
 				try {
@@ -8335,6 +8427,16 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 			addError("Tabular requirement appears to have an invalid set statement", expr);
 		}
 		return results;
+	}
+	public VariableNode getVariable(String name) {
+		Object trgt = getTarget();
+		if (trgt instanceof Rule) {
+			return ((Rule)trgt).getVariable(name);
+		}
+		else if (trgt instanceof Query) {
+			return ((Query)trgt).getVariable(name);
+		}
+		return null;
 	}
 
 }

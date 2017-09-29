@@ -466,12 +466,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 			sbmain.append("distinct ");
 		}
 		
-		List<String> vars = query.getVariables();
+		List<VariableNode> vars = query.getVariables();
 		List<GraphPatternElement> elements = query.getPatterns();
 		if (vars != null && vars.size() > 0) {
 			for (int i = 0; i < vars.size(); i++) {
 				if (i > 0) sbmain.append(" ");
-				sbmain.append("?" + vars.get(i));
+				sbmain.append("?" + vars.get(i).getName());
 			}
 		}
 		else {

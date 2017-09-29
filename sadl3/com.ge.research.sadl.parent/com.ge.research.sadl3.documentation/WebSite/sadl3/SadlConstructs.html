@@ -213,15 +213,18 @@ in expressions in SADL or derivative grammars. Using the functions to do actual
 computation is a task for the reasoner or other related processors.</span></p>
 <h2><a name="Variables">Variables</a></h2>
 <p>Variables were introduced in the section above discussing <a href="#Rules">
-Rules and Built-in Functions</a>. Variables can show up SADL models in rules, 
+Rules and Built-in Functions</a>. Variables can show up in SADL models in rules, 
 queries, and tests. One of the potential benefits offered by authoring rules, 
 queries, and tests in SADL is that many fewer variables may be needed than in 
 the translation to the target representation. The AreaOfRectangle rule above 
 provides an example of this. There is only one variable, x, in the SADL rule but 
-the translation contains 4 variables. This is because SADL a) allows nesting of 
-patterns, b) uses common symbols for functions, e.g., &quot;*&quot; for &quot;product(...)&quot;,&nbsp; 
-and c) uses more English-like syntax than most target representation that allows 
-only graph triple patterns and functions. </p>
+the translation contains 4 variables. This reduction in the number of variables 
+is because SADL a) allows nesting of patterns, b) uses common symbols for 
+functions, e.g., &quot;*&quot; for &quot;product(...)&quot;,&nbsp; and c) uses more English-like 
+syntax than most target representation, which allow only graph triple patterns 
+and functions. However, the translation to triple patterns and functions is 
+important--it defines the semantics of SADL in terms of the semantics of OWL 
+plus functions, which can be equivalently represented in predicate logic.</p>
 <p>Consider these example expressions and their pseudo rule translations (triple 
 patterns in square brackets to facilitate identification):</p>
 <ol>
@@ -229,7 +232,7 @@ patterns in square brackets to facilitate identification):</p>
   (or<b><font size="2" color="#000080"> </font></b><font size="2" color="#ff00ff"><b>x</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">is</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">a</font><span class="Apple-converted-space">&nbsp;</span><b><font size="2" color="#000080">Rectangle</font></b>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
   -&gt; [?x rdf:type Rectangle]</li>
   <li><font size="2" color="#008000"><b>area</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">=<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>height</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#ff00ff"><b>x</b></font><font size="2">*<span class="Apple-converted-space">&nbsp;</span></font><font size="2" color="#008000"><b>width</b></font><span class="Apple-converted-space">&nbsp;</span><font size="2" color="#800080">of</font><span class="Apple-converted-space">&nbsp;</span><b><font size="2" color="#ff00ff">x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-  -&gt; if [?x height ?v1]and [?x width ?v2] and product(?v1,?v2,?v3)
+  -&gt; if [?x height ?v1] and [?x width ?v2] and product(?v1,?v2,?v3)
 then [?x area ?v3]</li>
   <li><font SIZE="2" COLOR="#800080">if</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#ff00ff"><b>x</b></font><font SIZE="2"> </font>

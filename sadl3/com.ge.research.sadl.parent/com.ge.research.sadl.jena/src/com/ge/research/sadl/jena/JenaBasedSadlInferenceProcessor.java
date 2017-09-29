@@ -798,7 +798,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	private Object convertToComparableObject(String knowledgeBaseIdentifier,
-			IReasoner reasoner, Object obj, List<String> testVars)
+			IReasoner reasoner, Object obj, List<VariableNode> testVars)
 			throws TranslationException, ConfigurationException,
 			QueryParseException, TripleNotFoundException, QueryCancelledException {
 		if (obj instanceof Query) {
@@ -945,7 +945,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	private void setVariablesFromPatterns(Query query) {
 		List<GraphPatternElement> elements = query.getPatterns();
-		List<String> vars = new ArrayList<String>();
+		List<VariableNode> vars = new ArrayList<VariableNode>();
 		for (int i = 0; i < elements.size(); i++) {
 			GraphPatternElement gpe = elements.get(i);
 			vars = getVarsInGraphPatternElement(vars, gpe);
@@ -959,18 +959,18 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 	}
 
-	private List<String> getVarsInGraphPatternElement(List<String> vars,
+	private List<VariableNode> getVarsInGraphPatternElement(List<VariableNode> vars,
 			GraphPatternElement gpe) {
 		if (gpe instanceof TripleElement) {
 			Node subj = ((TripleElement) gpe).getSubject();
 			Node obj = ((TripleElement) gpe).getObject();
 			if (subj instanceof VariableNode
 					&& !vars.contains(((VariableNode) subj).getName())) {
-				vars.add(((VariableNode) subj).getName());
+				vars.add(((VariableNode) subj));
 			}
 			if (obj instanceof VariableNode
 					&& !vars.contains(((VariableNode) obj).getName())) {
-				vars.add(((VariableNode) obj).getName());
+				vars.add(((VariableNode) obj));
 			}
 		} else if (gpe instanceof Junction) {
 			vars = getVarsInGraphPatternElement(vars,

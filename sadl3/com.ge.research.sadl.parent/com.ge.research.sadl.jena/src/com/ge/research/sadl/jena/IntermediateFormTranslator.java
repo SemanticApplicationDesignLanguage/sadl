@@ -746,7 +746,7 @@ public class IntermediateFormTranslator {
 				&& test.getLhs() != null && test.getRhs() != null 
 				&& test.getLhs() instanceof NamedNode && test.getRhs() instanceof List<?>) {
 			if (test.getRhsVariables() != null && test.getRhsVariables().size() == 1) {
-				String rhsvar = test.getRhsVariables().get(0);
+				String rhsvar = test.getRhsVariables().get(0).getName();
 				List<?> rhslist = (List<?>) test.getRhs();
 				boolean allPass = true;
 				for (int i = 0; i < rhslist.size(); i++) {
