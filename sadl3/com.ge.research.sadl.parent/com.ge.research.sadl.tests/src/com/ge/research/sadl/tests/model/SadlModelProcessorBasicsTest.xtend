@@ -41,7 +41,7 @@ import com.hp.hpl.jena.vocabulary.OWL
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorTestBasics extends AbstractProcessorTest {
+class SadlModelProcessorBasicsTest extends AbstractProcessorTest {
 	
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper

@@ -2818,7 +2818,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected boolean isVariableDefinition(Name expr) throws CircularDefinitionException {
 		if (expr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)expr).getName()).equals(OntConceptType.VARIABLE)) {
 			if (getDeclarationExtensions().getDeclaration(((Name)expr).getName()).equals((Name)expr)) {
-				addInfo("This is a variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)expr).getName()) + "'", expr);
+//				addInfo("This is a variable definition of '" + getDeclarationExtensions().getConceptUri(((Name)expr).getName()) + "'", expr);
 				return true;
 			}
 		}

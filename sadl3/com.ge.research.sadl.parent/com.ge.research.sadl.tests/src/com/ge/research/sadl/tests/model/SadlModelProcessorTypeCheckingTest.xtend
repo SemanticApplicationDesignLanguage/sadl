@@ -20,7 +20,7 @@ import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
+class SadlModelProcessorTypeCheckingTest extends AbstractProcessorTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	

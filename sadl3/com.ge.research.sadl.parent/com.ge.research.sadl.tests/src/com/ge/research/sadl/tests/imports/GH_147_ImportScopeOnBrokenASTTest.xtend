@@ -30,7 +30,7 @@ import org.junit.Assert
  * 
  * @author akos.kitta
  */
-class GH_147_ImportScopeOnBrokenAST extends AbstractLinkingTest {
+class GH_147_ImportScopeOnBrokenASTTest extends AbstractLinkingTest {
 	
 	@Inject
 	IScopeProvider scopeProvider;
