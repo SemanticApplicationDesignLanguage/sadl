@@ -86,6 +86,43 @@ class SadlModelProcessorTestTypeChecking extends AbstractProcessorTest {
 	}
 	
 	@Test
+	def void testSimpleRule() {
+		val sadlModel = '''
+			 uri "http://sadl.org/rulevars2.sadl" alias rulevars2.
+			 
+			 System is a class,
+			    described by var1 with a single value of type int,
+			    described by var2 with a single value of type int,
+			    described by var3 with a single value of type int,
+			    described by var4 with a single value of type int.
+			     	
+			 Rule example-1:
+			 	if var2 of System is not var3 of System
+			 	then var1 of System is  var2 of System + var3 of System.
+		'''.sadl
+		sadlModel.assertNoErrors
+	}
+	
+	@Test
+	def void testSimpleRule2() {
+		val sadlModel = '''
+			 uri "http://sadl.org/rulevars2.sadl" alias rulevars2.
+			 
+			 System is a class,
+			    described by var1 with a single value of type int,
+			    described by var2 with a single value of type int,
+			    described by var3 with a single value of type int,
+			    described by var4 with a single value of type int.
+			     	
+			 Rule example-1:
+			 	if var2 of System is not var3 of System and
+			 	x is var2 of System + var3 of System
+			 	then var1 of System is  x.
+		'''.sadl
+		sadlModel.assertNoErrors
+	}
+	
+	@Test
 	def void testUserDefinedEquation2() {
 		val sadlModel = '''
 			 uri "http://sadl.org/Test1.sadl" alias Test1.

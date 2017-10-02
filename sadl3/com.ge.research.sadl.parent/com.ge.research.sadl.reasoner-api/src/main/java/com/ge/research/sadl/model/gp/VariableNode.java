@@ -18,6 +18,10 @@
 
 package com.ge.research.sadl.model.gp;
 
+import java.util.List;
+
+import com.ge.research.sadl.reasoner.TranslationException;
+
 /**
  * Keeps track of whether a connective variable (explicitly specified or 
  * generated automatically) has been used in another triple element. 
@@ -25,6 +29,7 @@ package com.ge.research.sadl.model.gp;
 public class VariableNode extends NamedNode {
 	private int references = 0;
 	private NamedNode type = null;
+	private List<GraphPatternElement> definition = null;
 
 	public VariableNode(String name) {
 		super(name, NamedNode.NodeType.VariableNode);
@@ -64,7 +69,21 @@ public class VariableNode extends NamedNode {
 		return type;
 	}
 
-	public void setType(NamedNode type) {
+	public void setType(NamedNode type) throws TranslationException {
+		if (this.type != null && 
+				!this.type.equals(type)) {
+			throw new TranslationException("Cannot change the type of a variable. (Attempted change from '" + 
+				this.type.toFullyQualifiedString() + "' to '" + type.toFullyQualifiedString() + "'");
+		}
 		this.type = type;
 	}
+
+	public List<GraphPatternElement> getDefinition() {
+		return definition;
+	}
+
+	public void setDefinition(List<GraphPatternElement> definition) {
+		this.definition = definition;
+	}
+
 }

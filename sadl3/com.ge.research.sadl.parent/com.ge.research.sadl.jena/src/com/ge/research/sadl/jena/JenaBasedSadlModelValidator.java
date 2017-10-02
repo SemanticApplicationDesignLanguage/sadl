@@ -2559,7 +2559,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		//			3ab) if the Name matches right, get the type as the range of the SubjHasProp prop
 		
 		VariableNode var = getModelProcessor().getVariable(conceptNm);
-		if (var != null) {
+		if (var != null && var.getType() != null) {
 			ConceptName et = new ConceptName(var.getType().toFullyQualifiedString());
 			et.setType(ConceptType.VARIABLE);
 			TypeCheckInfo tci = new TypeCheckInfo(et, et, this, expression);

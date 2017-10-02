@@ -1176,7 +1176,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 	private String nodeToString(Node node, TranslationTarget target) throws TranslationException {
 		if (node instanceof NamedNode) {
 			NodeType ntype = ((NamedNode)node).getNodeType();
-			if (ntype.equals(NodeType.VariableNode)) {
+			if (ntype == null) {
+				String msg = "Node '" + node.toFullyQualifiedString() + "' has a null node type.";
+				addError(msg);
+				logger.error(msg);
+			}
+			else if (ntype.equals(NodeType.VariableNode)) {
 				// double-check this; if a concept was declared after reference in a rule or query 
 				//	it may have been parsed as a variable but actually be a defined concept 
 				OntResource r = getTheModel().getOntResource(getModelName() + "#" + ((NamedNode)node).getName());

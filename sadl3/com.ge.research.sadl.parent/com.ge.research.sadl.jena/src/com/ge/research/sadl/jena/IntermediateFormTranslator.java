@@ -1085,7 +1085,7 @@ public class IntermediateFormTranslator {
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
 	 */
-	Object expandProxyNodes(Object pattern, boolean isRuleThen, boolean clearPreviousRetired) throws InvalidNameException, InvalidTypeException, TranslationException {
+	public Object expandProxyNodes(Object pattern, boolean isRuleThen, boolean clearPreviousRetired) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (clearPreviousRetired) {
 			retiredProxyNodes.clear();
 		}
