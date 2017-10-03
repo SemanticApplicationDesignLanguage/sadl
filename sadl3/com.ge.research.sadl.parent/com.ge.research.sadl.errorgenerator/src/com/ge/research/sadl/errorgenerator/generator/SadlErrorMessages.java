@@ -99,6 +99,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage PROPERTY_RESTRICTIONS = new SadlErrorMessage("property_restrictions");
 /**
+* Controlled variable must have a range of type Boolean or a range of exactly two instances in order to be used with an "Only When" clause.
+**/
+    public static final SadlErrorMessage CONTROL_VARIABLE_INAPPLICABLE_FOR_ONLY_WHEN = new SadlErrorMessage("control_variable_inapplicable_for_only_when");
+/**
 * {0} is undefined. Please define the {1} before referencing it.
 **/
     public static final SadlErrorMessage UNDEFINED = new SadlErrorMessage("undefined");
