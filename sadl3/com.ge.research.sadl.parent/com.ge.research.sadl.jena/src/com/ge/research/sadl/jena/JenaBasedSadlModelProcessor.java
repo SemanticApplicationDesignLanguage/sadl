@@ -5300,6 +5300,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						} catch (JenaProcessorException e) {
 							addError(e.getMessage(), type);
 						}
+					}else{
+						//AATIM-2306 If not list, generate error when creating instances of primitive data types.
+						addError("Invalid to create an instance of a primitive datatype ( \'" + ((SadlPrimitiveDataType) type).getPrimitiveType().toString() + "\' in this case).  Instances of primitive datatypes exist implicitly.", type );
 					}
 				}
 				else {
