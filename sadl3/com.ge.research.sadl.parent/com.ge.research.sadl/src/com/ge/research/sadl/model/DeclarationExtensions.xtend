@@ -289,6 +289,9 @@ class DeclarationExtensions {
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[!range.isDatatype]: 
 					OntConceptType.CLASS_PROPERTY
 
+				SadlProperty case e.hasFromToRestriction:
+					e.inferrConceptTypeFromToType
+
 				SadlProperty: 
 					OntConceptType.RDF_PROPERTY
 					
@@ -322,6 +325,31 @@ class DeclarationExtensions {
 		} finally {
 			recursionDetection.get.remove(resource)
 		}
+	}
+	
+	/**
+	 * Returns with the SADL resource of the `TO` of the given SADL property argument.
+	 * Returns {@code null} if the argument is {@code null}, if any of the {@code from} or 
+	 * {@code to} type references are not given. Also provides a {@code null} return value
+	 * if the {@code to} is not a type of the simple SADL type reference. 
+	 */
+	private def SadlResource getToType(SadlProperty it) {
+		if (it !== null && from !== null && to instanceof SadlSimpleTypeReference) {
+			return (to as SadlSimpleTypeReference).type as SadlResource;
+		}
+		return null;
+	}
+	
+	private def boolean hasFromToRestriction(SadlProperty it) {
+		return null !== toType;
+	}
+	
+	private def OntConceptType inferrConceptTypeFromToType(SadlProperty it) {
+		return switch (toType.ontConceptType) {
+			case CLASS: OntConceptType.CLASS_PROPERTY
+			case DATATYPE: OntConceptType.DATATYPE_PROPERTY
+			default: OntConceptType.RDF_PROPERTY
+		}		
 	}
 	
 	def Iterable<? extends SadlResource> getReferencedSadlResources(SadlTypeReference typeRef) {
