@@ -18,8 +18,6 @@
 package com.ge.research.sadl.ui.tests
 
 import org.junit.Test
-import static org.eclipse.core.resources.IMarker.*
-import static org.eclipse.core.resources.IResource.*
 
 /**
  * Test for checking whether transitive downstream resources get rebuilt when a change
@@ -27,10 +25,10 @@ import static org.eclipse.core.resources.IResource.*
  * 
  * @author akos.kitta
  */
-class GH_199_CheckAffectedResourcesTest extends AbstractSadlPlatformTest {
-	
+class GH_199_CheckAffectedResourcesTest extends AbstractSadlBuilderTest {
+
 	@Test
-	def void checkTransitiveDownstreamGetsRebuilt() {
+	def void checkTransitiveDownstreamGetsRebuilt_01() {
 		createFile('A.sadl', '''
 			uri "http://sadl.org/A.sadl".
 			// AAA is a class.
@@ -39,19 +37,49 @@ class GH_199_CheckAffectedResourcesTest extends AbstractSadlPlatformTest {
 			uri "http://sadl.org/B.sadl".
 			import "http://sadl.org/A.sadl".
 		''');
+
 		val downstreamFile = createFile('C.sadl', '''
 			uri "http://sadl.org/C.sadl".
 			import "http://sadl.org/B.sadl".
 			MyAAA is a AAA.
 		''');
-		assertEquals(SEVERITY_ERROR, downstreamFile.findMaxProblemSeverity(PROBLEM, true, DEPTH_INFINITE));
-		
+		downstreamFile.assertHasErrors;
+
 		setFileContent('A.sadl', '''
 			uri "http://sadl.org/A.sadl".
 			AAA is a class.
 		''');
-		assertEquals(/*No errors/warnings.*/ -1, downstreamFile.findMaxProblemSeverity(PROBLEM, true, DEPTH_INFINITE));
-		
+
+		downstreamFile.assertHasNoIssues;
 	}
-	
+
+	/**
+	 * This test case was merged from SRL GH-28.
+	 */
+	@Test
+	def void checkTransitiveDownstreamGetsRebuilt_02() {
+		createFile('m.sadl', '''
+			uri "http://sadl.org/m.sadl" alias m.
+			System is a class described by p1 with values of type int.
+		''');
+		val test = createFile('t.sadl', '''
+			uri "http://sadl.org/t.sadl" alias t.
+			import "http://sadl.org/m.sadl".
+			Test: p1 > 12.
+		''');
+		test.assertHasNoIssues;
+
+		setFileContent('m.sadl', '''
+			uri "http://sadl.org/m.sadl" alias m.
+			System is a class described by p1 with values of type string.
+		''');
+		test.assertHasErrors;
+
+		setFileContent('m.sadl', '''
+			uri "http://sadl.org/m.sadl" alias m.
+			System is a class described by p1 with values of type int.
+		''');
+		test.assertHasNoIssues;
+	}
+
 }
