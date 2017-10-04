@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 import org.eclipse.core.resources.IFile;
@@ -111,14 +112,17 @@ public class MetricsProcessor implements IMetricsProcessor {
 	 */
 	@Override
 	public boolean saveMetrics(String format) throws IOException, ConfigurationException, URISyntaxException {
-		RDFWriter w = getTheJenaModel().getWriter(format);
-		w.setProperty("xmlbase", baseUri);
-		FileOutputStream out = new FileOutputStream(filename);
-		w.write(getTheJenaModel().getBaseModel(), out, baseUri);
-		out.close();
-		SadlUtils su = new SadlUtils();
-		configMgr.addMapping(su.fileNameToFileUrl(filename), baseUri, null, false, "SRL_Metrics");
-		return true;
+		if (Paths.get(filename).toFile().exists()) {
+			RDFWriter w = getTheJenaModel().getWriter(format);
+			w.setProperty("xmlbase", baseUri);
+			FileOutputStream out = new FileOutputStream(filename);
+			w.write(getTheJenaModel().getBaseModel(), out, baseUri);
+			out.close();
+			SadlUtils su = new SadlUtils();
+			configMgr.addMapping(su.fileNameToFileUrl(filename), baseUri, null, false, "SRL_Metrics");
+			return true;
+		}
+		return false;
 	}
 	
 	/* (non-Javadoc)
