@@ -18,7 +18,6 @@
 package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.SADLRuntimeModule
-import com.ge.research.sadl.processing.CompositeModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor
 import com.ge.research.sadl.processing.IModelProcessorProvider
 import org.eclipse.emf.ecore.resource.Resource
@@ -37,7 +36,7 @@ class SADLNoopModelProcessorsInjectorProvider extends SADLInjectorProvider {
 	public static val NOOP_PROCESSOR_PROVIDER = new IModelProcessorProvider() {
 
 		override getProcessor(Resource resource) {
-			return new CompositeModelProcessor(emptyList());
+			return IModelProcessor.NOOP;
 		}
 
 	};
