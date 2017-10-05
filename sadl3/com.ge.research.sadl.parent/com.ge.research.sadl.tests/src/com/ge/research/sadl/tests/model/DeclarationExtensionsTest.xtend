@@ -32,7 +32,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -198,7 +197,6 @@ class DeclarationExtensionsTest {
 		assertEquals(OntConceptType.CLASS, name2resource.get('Rock').ontConceptType)
 	}
 	
-	@Ignore ("When GH-168 is fixed this ignore can be removed")
 	@Test def void testGetOntConceptType_08() {
 		val model = '''
 			uri "http://sadl.imp/relationship" alias rel.
