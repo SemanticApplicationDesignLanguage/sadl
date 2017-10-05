@@ -1258,6 +1258,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 			lit.setOriginalText(node.getName());
 			return lit;
 		}
+		else if (node.getName().equals("e")) {
+			Literal lit = new Literal();
+			lit.setValue(Math.E);
+			lit.setOriginalText(node.getName());
+			return lit;
+		}
 		throw new TranslationException("Unknown constant '" + node.getName() + "' cannot be translated");
 	}
 

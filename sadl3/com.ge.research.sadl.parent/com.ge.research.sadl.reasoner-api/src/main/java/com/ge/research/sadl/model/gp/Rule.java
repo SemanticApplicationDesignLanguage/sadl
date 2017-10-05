@@ -204,10 +204,10 @@ public class Rule {
 		return true;
 	}
 	
-	public VariableNode getVariable(String name) {
+	public VariableNode getVariable(String uri) {
 		if (ruleVariables != null) {
 			for (int i = 0; i < ruleVariables.size(); i++) {
-				if (ruleVariables.get(i).getName().equals(name)) {
+				if (ruleVariables.get(i).toFullyQualifiedString().equals(uri)) {
 					return ruleVariables.get(i);
 				}
 			}

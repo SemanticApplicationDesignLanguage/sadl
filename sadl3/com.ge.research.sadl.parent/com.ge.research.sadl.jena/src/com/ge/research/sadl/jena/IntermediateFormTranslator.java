@@ -878,13 +878,13 @@ public class IntermediateFormTranslator {
 						TripleElement gpe = (TripleElement) premise;
 						Node subj = gpe.getSubject();
 						Node obj = gpe.getObject();
-						if (subj instanceof VariableNode && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
+						if (subj instanceof VariableNode && ((VariableNode)subj).isCRulesVariable() && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
 							TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
 							ifs.add(i++, newTypeTriple);
 							addCruleVariableToTypeOutput((VariableNode) subj);
 							i = addNotEqualsBuiltinsForNewCruleVariable(ifs, i, (VariableNode) subj);
 						}
-						if (obj instanceof VariableNode && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
+						if (obj instanceof VariableNode && ((VariableNode)obj).isCRulesVariable() && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
 							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
 							ifs.add(++i, newTypeTriple);
 							addCruleVariableToTypeOutput((VariableNode) obj);
@@ -1590,7 +1590,12 @@ public class IntermediateFormTranslator {
 					}
 					else {
 						((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
-						retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
+						if (realArg instanceof GraphPatternElement) {
+							retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
+						}
+						else {
+							throw new TranslationException("Expected GraphPatternElement in ProxyNode but got " + realArg.getClass().getCanonicalName());
+						}
 						args.set(i, nodeCheck(argNode));
 					}
 				}

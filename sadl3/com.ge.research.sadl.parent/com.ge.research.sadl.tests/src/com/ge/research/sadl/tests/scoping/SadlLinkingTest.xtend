@@ -1239,6 +1239,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			Rule R3 if [x] is a Person and <x> teaches [y] then <x> knows <y>.
 			
 «««			Rule R4: if a Person knows a second Person then the second Person knows the first Person.
+			 Rule R4b: if a Person has knows a second Person then the second Person has knows the first Person.
 			
 			Rule R5: if [x] is a Person and knows of <x> is [y] then knows of <y> is <x>.
 		'''.assertLinking[sadl]

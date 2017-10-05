@@ -392,7 +392,7 @@ UnitsExpression<EnabledWith> returns Expression:
 ;
 
 ThereExists : 
-	('there' 'exists' 'a')
+	('there' 'exists')
 ;
 
 // primary expressions are the atom units of expression in the grammar	

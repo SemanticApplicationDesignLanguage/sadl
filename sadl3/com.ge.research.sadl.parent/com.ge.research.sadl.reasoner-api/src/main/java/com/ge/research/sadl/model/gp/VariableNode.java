@@ -30,6 +30,7 @@ public class VariableNode extends NamedNode {
 	private int references = 0;
 	private NamedNode type = null;
 	private List<GraphPatternElement> definition = null;
+	private boolean isCRulesVariable = false;
 
 	public VariableNode(String name) {
 		super(name, NamedNode.NodeType.VariableNode);
@@ -86,4 +87,17 @@ public class VariableNode extends NamedNode {
 		this.definition = definition;
 	}
 
+	public boolean isCRulesVariable() {
+		return isCRulesVariable;
+	}
+
+	public void setCRulesVariable(boolean isCRulesVariable) {
+		this.isCRulesVariable = isCRulesVariable;
+	}
+
+	@Override
+	public String toString() {
+		// a variable need only have the name as the scope is this namespace, often this named structure--it can't be from another namespace.
+		return getName();
+	}
 }

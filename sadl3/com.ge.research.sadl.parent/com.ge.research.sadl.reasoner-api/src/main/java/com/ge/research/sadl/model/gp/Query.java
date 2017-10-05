@@ -97,7 +97,7 @@ public class Query extends SadlCommand {
 	public VariableNode getVariable(String name) {
 		if (variables != null) {
 			for (int i = 0; i < variables.size(); i++) {
-				if (variables.get(i).getName().equals(name)) {
+				if (variables.get(i).toFullyQualifiedString().equals(name)) {
 					return variables.get(i);
 				}
 			}
