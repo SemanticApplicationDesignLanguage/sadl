@@ -356,9 +356,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
-    	if (!resource.getURI().toString().endsWith(".sadl")) {
-    		return;
-    	}
 		generationInProgress  = true;
 		setProcessorContext(context);
 		List<String[]> newMappings = new ArrayList<String[]>();
@@ -803,11 +800,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
     }
     
+	@Override
+	public boolean isSupported(String fileExtension) {
+		return "sadl".equals(fileExtension);
+	}
+
     @Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
-	    	if (!resource.getURI().toString().endsWith(".sadl")) {
-	    		return;
-	    	}
     		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate' action was invoked. 
