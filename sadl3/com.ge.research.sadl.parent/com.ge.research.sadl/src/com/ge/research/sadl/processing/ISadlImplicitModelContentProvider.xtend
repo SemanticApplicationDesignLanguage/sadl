@@ -99,7 +99,6 @@ interface ISadlImplicitModelContentProvider {
 		public static val DEFAULT_CONTENT = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
 
-			Event is a class.
 			impliedProperty is a type of annotation.
 			expandedProperty is a type of annotation.
 			UnittedQuantity is a class,
