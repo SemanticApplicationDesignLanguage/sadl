@@ -58,7 +58,8 @@ class SadlModelProcessorProvider extends AbstractSadlProcessorProvider<IModelPro
 	 * specific behavior.
 	 */
 	protected def IModelProcessor doCreateProcessor(Resource resource) {
-		return new CompositeModelProcessor(allProcessors);
+		val processor = allProcessors.findFirst[isSupported(resource)];
+		return if (processor === null) IModelProcessor.NOOP else processor;
 	}
 
 }

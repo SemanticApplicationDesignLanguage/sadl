@@ -284,6 +284,38 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 		}
 		assertEquals(mismatches, 0)
  	}
+ 	
+ 	@Test
+ 	def void testUseOfClassAsProperty() {
+ 		var errs = newArrayList("'THING' is not a property",
+ 			"'THING' is not a property"
+ 		)
+ 		val sadlModel = '''
+ 			 uri "http://sadl.org/ErrorFromCraig.sadl" alias ErrorFromCraig.
+ 			 
+ 			SYSTEM is a class.	// this must have been imported?
+ 			
+ 			THING is a class.
+ 			THING describes SYSTEM.
+ 			THING has exactly 2 values.
+ 			input describes THING with values of type INPUT.
+ 			INPUT is a class.
+ 			stuff describes INPUT with values of type integer.
+ 		'''.sadl
+ 		val issues = validationTestHelper.validate(sadlModel)
+ 		assertNotNull(issues)
+ 		assertEquals(2, issues.size)
+		var errIdx = 0
+		var mismatches = 0
+		for (issue:issues) {
+			val err = errs.get(errIdx++)
+			if (!issue.toString.contains(err)) {
+				System.out.println(issue.toString + " != " + err)
+				mismatches++
+			}
+		}
+		assertEquals(mismatches, 0)
+ 	}
 
 	@Test
 	def void testLiteralOutOfRangeLong() {

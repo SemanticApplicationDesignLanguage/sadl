@@ -147,7 +147,7 @@ public class SadlUtils {
 	 * @param imcf folder to be deleted recursively
 	 * @return true if successful
 	 */
-	public boolean recursiveDelete(File imcf) {
+	public static boolean recursiveDelete(File imcf) {
 		boolean stat = true;
 		File[] children = imcf.listFiles();
 		for (int i = 0; children != null && i < children.length; i++) {

@@ -356,9 +356,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
-    	if (!resource.getURI().toString().endsWith(".sadl")) {
-    		return;
-    	}
 		generationInProgress  = true;
 		setProcessorContext(context);
 		List<String[]> newMappings = new ArrayList<String[]>();
@@ -803,11 +800,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
     }
     
+	@Override
+	public boolean isSupported(String fileExtension) {
+		return "sadl".equals(fileExtension);
+	}
+
     @Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
-	    	if (!resource.getURI().toString().endsWith(".sadl")) {
-	    		return;
-	    	}
     		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate' action was invoked. 
@@ -4088,6 +4087,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		OntConceptType propType;
 		try {
 			propType = getDeclarationExtensions().getOntConceptType(sr);
+			if (!isProperty(propType)) {
+				addError(SadlErrorMessages.INVALID_USE_OF_CLASS_AS_PROPERTY.get(getDeclarationExtensions().getConcreteName(sr)),element);
+			}
 		} catch (CircularDefinitionException e) {
 			propType = e.getDefinitionType();
 			addError(e.getMessage(), element);
@@ -5300,6 +5302,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						} catch (JenaProcessorException e) {
 							addError(e.getMessage(), type);
 						}
+					}else{
+						//AATIM-2306 If not list, generate error when creating instances of primitive data types.
+						addError("Invalid to create an instance of a primitive datatype ( \'" + ((SadlPrimitiveDataType) type).getPrimitiveType().toString() + "\' in this case).  Instances of primitive datatypes exist implicitly.", type );
 					}
 				}
 				else {
@@ -6944,7 +6949,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val.isTruethy());
 				}
 				else {
-					getTheJenaModel().createTypedLiteral(Boolean.parseBoolean(val.toString()));
+					return getTheJenaModel().createTypedLiteral(val.isTruethy());
 				}
 			}
 			else if (value instanceof SadlValueList) {
