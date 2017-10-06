@@ -259,6 +259,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNHANDLED = new SadlErrorMessage("unhandled");
 /**
+* ''{0}'' is not a property
+**/
+    public static final SadlErrorMessage INVALID_USE_OF_CLASS_AS_PROPERTY = new SadlErrorMessage("invalid_use_of_class_as_property");
+/**
 * {0} is not in domain of property {1} 
 **/
     public static final SadlErrorMessage SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("subject_not_in_domain_of_property");

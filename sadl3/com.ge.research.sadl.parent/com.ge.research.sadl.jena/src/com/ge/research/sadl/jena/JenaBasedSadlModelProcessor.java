@@ -4087,6 +4087,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		OntConceptType propType;
 		try {
 			propType = getDeclarationExtensions().getOntConceptType(sr);
+			if (!isProperty(propType)) {
+				addError(SadlErrorMessages.INVALID_USE_OF_CLASS_AS_PROPERTY.get(getDeclarationExtensions().getConcreteName(sr)),element);
+			}
 		} catch (CircularDefinitionException e) {
 			propType = e.getDefinitionType();
 			addError(e.getMessage(), element);
