@@ -80,7 +80,7 @@ public class RunInference extends SadlActionHandler {
 	        						if (query.isGraph() ||
 	        								(query.getSparqlQueryString() != null && 
 	        										(query.getSparqlQueryString().toLowerCase().startsWith("construct")))) {
-		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
+//		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
 		    							String msg = "Graph: " + query.toString() + "\n";
 		    							msg += rs.toStringWithIndent(5);
 		        						SadlConsole.writeToConsole(MessageType.INFO, msg);
@@ -91,7 +91,7 @@ public class RunInference extends SadlActionHandler {
 		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
 	        						}
 	        						else {
-		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
+//		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
 		    							String msg = "Query: " + query.toString() + "\n";
 		    							msg += rs.toStringWithIndent(5);
 		        						SadlConsole.writeToConsole(MessageType.INFO, msg);
@@ -100,7 +100,7 @@ public class RunInference extends SadlActionHandler {
 		        			}
         					else if (infresults instanceof TestResult) {
         						TestResult tr = (TestResult)infresults;
-        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
+//        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
         						String msg;
         						if (tr.isPassed()) {
         							msg = "Test passed: " + cmd.toString() + "\n";
@@ -111,7 +111,7 @@ public class RunInference extends SadlActionHandler {
         						SadlConsole.writeToConsole(MessageType.INFO, msg);
         					}
         					else if (infresults instanceof List<?> && cmd instanceof Explain) {
-        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
+//        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
 								SadlConsole.writeToConsole(MessageType.INFO, "  " + cmd.toString() + ":\n");
 								consoleOutput((List<?>) infresults);
         					}

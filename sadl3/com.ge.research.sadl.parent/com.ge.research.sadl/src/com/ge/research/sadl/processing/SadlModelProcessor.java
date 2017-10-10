@@ -771,6 +771,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		else if (nt.equals(NodeType.DataTypeNode)) {
 			return ConceptType.RDFDATATYPE;
 		}
+		else if (nt.equals(NodeType.PropertyNode)) {
+			return ConceptType.RDFPROPERTY;
+		}
 		else {
 			throw new TranslationException("NodeType '" + nt.toString() + "' cannot be converted to a ConceptType");
 		}

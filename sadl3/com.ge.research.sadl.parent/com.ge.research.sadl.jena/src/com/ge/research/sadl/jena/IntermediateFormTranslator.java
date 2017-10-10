@@ -871,31 +871,6 @@ public class IntermediateFormTranslator {
 		// convert ifs linked list to array; expand conjunctions
 		List<GraphPatternElement> ifs = flattenRuleJunctions(rule.getIfs());
 		if (ifs != null) {
-			for (int i = 0; i < ifs.size(); i++) {
-				Object premise = ifs.get(i);
-				if (premise instanceof TripleElement) {
-					try {
-						TripleElement gpe = (TripleElement) premise;
-						Node subj = gpe.getSubject();
-						Node obj = gpe.getObject();
-						if (subj instanceof VariableNode && ((VariableNode)subj).isCRulesVariable() && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
-							TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
-							ifs.add(i++, newTypeTriple);
-							addCruleVariableToTypeOutput((VariableNode) subj);
-							i = addNotEqualsBuiltinsForNewCruleVariable(ifs, i, (VariableNode) subj);
-						}
-						if (obj instanceof VariableNode && ((VariableNode)obj).isCRulesVariable() && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
-							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
-							ifs.add(++i, newTypeTriple);
-							addCruleVariableToTypeOutput((VariableNode) obj);
-							i = addNotEqualsBuiltinsForNewCruleVariable(ifs, i, (VariableNode) obj);
-						}
-					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
 			Object results;
 			try {
 				results = expandProxyNodes(ifs, false, false);
@@ -940,6 +915,39 @@ public class IntermediateFormTranslator {
 		}
 		removeDuplicateElements(rule);
 		return rule;
+	}
+
+	private List<GraphPatternElement> decorateCRuleVariables(List<GraphPatternElement> gpes, boolean isRuleThen) {
+		for (int i = 0; i < gpes.size(); i++) {
+			Object premise = gpes.get(i);
+			if (premise instanceof TripleElement) {
+				try {
+					TripleElement gpe = (TripleElement) premise;
+					Node subj = gpe.getSubject();
+					Node obj = gpe.getObject();
+					if (subj instanceof VariableNode && ((VariableNode)subj).isCRulesVariable() && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
+						TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
+						gpes.add(i++, newTypeTriple);
+						addCruleVariableToTypeOutput((VariableNode) subj);
+						if (!isRuleThen) {
+							i = addNotEqualsBuiltinsForNewCruleVariable(gpes, i, (VariableNode) subj);
+						}
+					}
+					if (obj instanceof VariableNode && ((VariableNode)obj).isCRulesVariable() && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
+						TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
+						gpes.add(++i, newTypeTriple);
+						addCruleVariableToTypeOutput((VariableNode) obj);
+						if (!isRuleThen) {
+							i = addNotEqualsBuiltinsForNewCruleVariable(gpes, i, (VariableNode) obj);
+						}
+					}
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return gpes;
 	}
 
 	private List<GraphPatternElement> flattenRuleJunctions(List<GraphPatternElement> lst) {
@@ -1101,8 +1109,11 @@ public class IntermediateFormTranslator {
 				return result;
 			}
 		}
-		if (patterns.size() > 1 && !(target instanceof Test)) {
-			patterns = listToAnd(patterns);
+		if (patterns.size() > 0) {
+			patterns = decorateCRuleVariables((List<GraphPatternElement>) patterns, isRuleThen);
+			if (!(target instanceof Test) && patterns.size() > 1) {
+				patterns = listToAnd(patterns);
+			}
 		}
 		return patterns;
 	}
@@ -1244,6 +1255,9 @@ public class IntermediateFormTranslator {
 			else {
 				Object realSubj = ((ProxyNode)subj).getProxyFor();
 				Object subjNode = expandProxyNodes(patterns, realSubj, isRuleThen);
+				if (subjNode == null && realSubj instanceof TripleElement && ((TripleElement)realSubj).getObject() instanceof VariableNode) {
+					subjNode = ((TripleElement)realSubj).getObject();
+				}
 				((ProxyNode)subj).setReplacementNode(nodeCheck(subjNode));
 				retiredProxyNodes.put((GraphPatternElement) realSubj, (ProxyNode)subj);
 				subj = nodeCheck(subjNode);
@@ -1579,9 +1593,17 @@ public class IntermediateFormTranslator {
 							}
 						}
 						else if (realArg instanceof TripleElement) {
-							// don't do anything--keep proxy and triple
+							// don't do anything--keep proxy if triple, negate triple if "not" builtin
 							if (patterns.get(patterns.size() - 1).equals(realArg)) {
-								patterns.remove(patterns.size() - 1);
+								if (be.getFuncType().equals(BuiltinType.Not)) {
+									((TripleElement)realArg).setType(TripleModifierType.Not);
+									return realArg;	// "not" is a unary operator, so it is safe to assume this is the only argument
+								}
+								else if (be.getFuncName().equals("there exists") && ((TripleElement)realArg).getSubject() instanceof VariableNode){
+									be.getArguments().set(0, ((TripleElement)realArg).getSubject());
+									patterns.add(patterns.size() - 1, be);
+									return null;
+								}
 							}
 						}
 						else {
@@ -2090,7 +2112,7 @@ public class IntermediateFormTranslator {
 		}
 	}
 
-	private int addNotEqualsBuiltinsForNewCruleVariable(List<GraphPatternElement> results, int currentIdx, VariableNode node) throws TranslationException {
+	private int addNotEqualsBuiltinsForNewCruleVariable(List<GraphPatternElement> gpes, int currentIdx, VariableNode node) throws TranslationException {
 		if (cruleVariablesTypeOutput == null) {
 			throw new TranslationException("This should never happen! Please report.");
 		}
@@ -2104,14 +2126,39 @@ public class IntermediateFormTranslator {
 		for (int i = crvSize - 2; i >= 0; i--) {
 			VariableNode otherVar = cruleVariablesTypeOutput.get(i);
 			if (otherVar.getType().equals(node.getType())) {
-				BuiltinElement newBi = new BuiltinElement();
-				newBi.setFuncName("!=");
-				newBi.setFuncType(BuiltinType.NotEqual);
-				newBi.addArgument(otherVar);
-				newBi.addArgument(node);
-				results.add(++currentIdx, newBi);
+				if (!notEqualAlreadyPresent(gpes, otherVar, node)) {
+					BuiltinElement newBi = new BuiltinElement();
+					newBi.setFuncName("!=");
+					newBi.setFuncType(BuiltinType.NotEqual);
+					newBi.addArgument(otherVar);
+					newBi.addArgument(node);
+					gpes.add(++currentIdx, newBi);
+				}
 			}
 		}
 		return currentIdx;
+	}
+
+	private boolean notEqualAlreadyPresent(List<GraphPatternElement> gpes, VariableNode var1,
+			VariableNode var2) {
+		for (int i = 0; i < gpes.size(); i++) {
+			GraphPatternElement gpe = gpes.get(i);
+			if (gpe instanceof BuiltinElement && ((BuiltinElement)gpe).getFuncType().equals(BuiltinType.NotEqual)) {
+				List<Node> args = ((BuiltinElement)gpe).getArguments();
+				int found = 0;
+				for (int j =0; args != null && j < args.size(); j++) {
+					if (args.get(j).equals(var1)) {
+						found++;
+					}
+					if (args.get(j).equals(var2)) {
+						found++;
+					}
+				}
+				if (found == 2) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

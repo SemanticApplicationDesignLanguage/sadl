@@ -6,6 +6,11 @@ Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:cr
 
 <h4>Table of Contents</h4>
 
+<ul>
+  <li><a href="#Introduction">Introduction</a></li>
+  <li><a href="#VariablesSADL3">Variables in SADL3</a></li>
+  <li><a href="#CRules">Implicit Variables (CRules)</a></li>
+</ul>
 <h2><a name="Introduction">Introduction</a></h2>
 <p>A variable in SADL is a name which is not defined in the ontology but is used 
 in expressions, that is in triple patterns or as built-in function arguments, as 
@@ -110,3 +115,13 @@ maintain the order of patterns in the original SADL representation. The model
 author may have explicitly placed the patterns in a particular order and while 
 an optimizing translator may change that order, the job of the Intermediate Form 
 is to preserve all information, including order. </p>
+<h2><a name="CRules">Implicit Variables (CRules)</a></h2>
+<p>It is possible to use definite and indefinite articles with class names to 
+tie graph patterns together instead of using explicit variables in SADL rules, 
+queries, etc. This is the same way that English makes connections between 
+phrases and sentences. This approach to writing graph patterns is sometimes 
+referred to as Concept Rules or CRules.</p>
+<p>In the Intermediate Form, a triple for the type of the implicit variable is 
+not included because this information is already in the VariableNode and the 
+translator from Intermediate Form to the final representation can add the type 
+triple where it deems appropriate.</p>

@@ -58,7 +58,7 @@ class SadlModelProcessorVariablesTest extends AbstractProcessorTest {
 			 Person is a class.
 			 age describes Person with values of type int.		// a "passive" property--a characteristic that a Person has; also a DatatypeProperty
 			 child describes Person with values of type Person.	// another "passive" property, this time an ObjectProperty
-			 
+			 A Person is a Parent only if child has at least 1 value.
 			 
 			 teaches describes Person with values of type Person. // an "action" property--something that a Person does
 			 
@@ -69,6 +69,8 @@ class SadlModelProcessorVariablesTest extends AbstractProcessorTest {
 			 
 			 Sue is a Person. 
 			 Sue teaches George.	// this works currently, which is good
+			 
+			 Lana is a Parent.
 			 
 			 
 			 knows describes Person with values of type Person.		// an "active" property
@@ -83,15 +85,25 @@ class SadlModelProcessorVariablesTest extends AbstractProcessorTest {
 			 Rule R5: if x knows y then y knows x.
 			 
 			 Rule R6: if x is a Person and knows of x is y then knows of y is x.
+			 
+			 Rule R7: if x is a Parent then there exists a Person and x has teaches the Person.
  		'''.assertValidatesTo [ jenaModel, rules, cmds, issues |
  			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+ 			if (issues.size > 0) {
+ 				for (issue:issues) {
+ 					print(issue.toString)
+ 				}
+ 			}
  			assertTrue(issues.size == 0)
- 			assertTrue(rules.size == 5)
+ 			assertTrue(rules.size == 6)
  			assertTrue(processorProvider.get.compareTranslations(rules.get(0).toString(),"Rule R1:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:acquaintance, y)."))
  			assertTrue(processorProvider.get.compareTranslations(rules.get(1).toString(),"Rule R2:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:knows, y)."))
  			assertTrue(processorProvider.get.compareTranslations(rules.get(2).toString(),"Rule R4:  if and(rdf(v0, rdf:type, ht:Person), and(rdf(v0, ht:knows, v1), and(rdf(v1, rdf:type, ht:Person), !=(v0,v1)))) then rdf(v1, ht:knows, v0)."))
   			assertTrue(processorProvider.get.compareTranslations(rules.get(3).toString(),"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
  			assertTrue(processorProvider.get.compareTranslations(rules.get(4).toString(),"Rule R6:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:knows, y)) then rdf(y, ht:knows, x)."))
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(5).toString(),"Rule R7:  if rdf(x, rdf:type, ht:Parent) then and(there exists(v2), and(rdf(x, ht:teaches, v2), rdf(v2, rdf:type, ht:Person)))."))
+ 			print(rules.get(5))
  		]
 	}
 	

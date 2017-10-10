@@ -3543,6 +3543,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if ( SadlUtils.classIsSubclassOf(subj.as(OntClass.class), obj.as(OntResource.class),true, null)) {
 							return true;
 						}
+						if (obj.canAs(OntClass.class) &&  SadlUtils.classIsSuperClassOf(obj.as(OntClass.class), subj.as(OntClass.class))) {
+							return true;
+						}
 					} catch (CircularDependencyException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

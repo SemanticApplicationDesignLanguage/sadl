@@ -100,6 +100,8 @@ import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.Query.Order;
+import com.ge.research.sadl.model.gp.Query.OrderingPair;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Read;
 import com.ge.research.sadl.model.gp.Rule;
@@ -144,6 +146,7 @@ import com.ge.research.sadl.sADL.ExternalEquationStatement;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NamedStructureAnnotation;
 import com.ge.research.sadl.sADL.NumberLiteral;
+import com.ge.research.sadl.sADL.OrderElement;
 import com.ge.research.sadl.sADL.PrintStatement;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
@@ -2094,6 +2097,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				query.setVariables(names);
 			}
+			if (((SelectExpression)expr).getOrderby() != null) {
+				EList<OrderElement> ol = ((SelectExpression)expr).getOrderList();
+				List<OrderingPair> orderingPairs = new ArrayList<OrderingPair>();
+				for (int i = 0; i < ol.size(); i++) {
+					OrderElement oele = ol.get(i);
+					SadlResource ord = oele.getOrderBy();
+					orderingPairs.add(query.new OrderingPair(getDeclarationExtensions().getConcreteName(ord), 
+							(oele.isDesc() ? Order.DESC : Order.ASC)));
+				}
+				query.setOrderBy(orderingPairs);
+			}
 		}
 		else if (expr instanceof ConstructExpression) {
 			whexpr = ((ConstructExpression) expr).getWhereExpression();
@@ -2796,14 +2810,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private boolean isVariableDefinition(Declaration decl) {
-		if ( isDeclInThereExists(decl) && !isDefiniteArticle(decl.getArticle())) { // && decl.getNewName() == null && decl.getType() instanceof SadlSimpleTypeReference) {
+		if (!isDefiniteArticle(decl.getArticle()) && (isDeclInThereExists(decl) || (decl.getNewName() == null && decl.getType() instanceof SadlSimpleTypeReference))) { 
 			return true;
 		}
 		return false;
 	}
 	
 	private boolean isDeclInThereExists(Declaration decl) {
-		if (decl.eContainer() != null && decl.eContainer().eContainer() instanceof UnaryExpression && 
+		if (decl.eContainer() != null && decl.eContainer() instanceof UnaryExpression && 
+				((UnaryExpression)decl.eContainer()).getOp().equals("there exists")) {
+			return true;
+		}
+		else if (decl.eContainer() != null && decl.eContainer() instanceof SubjHasProp && 
+				decl.eContainer().eContainer() != null && decl.eContainer().eContainer() instanceof UnaryExpression && 
 				((UnaryExpression)decl.eContainer().eContainer()).getOp().equals("there exists")) {
 			return true;
 		}
@@ -2834,7 +2853,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			// If we're doing an assignment, we can simplify the pattern.
 			Node assignedNode = null;
 			Object pattern = null;
-			if (rexpr instanceof Declaration) {
+			if (rexpr instanceof Declaration && !(robj instanceof VariableNode)) {
 				if (lobj instanceof Node && robj instanceof Node) {
 					TripleElement trel = new TripleElement((Node)lobj, new RDFTypeNode(), (Node)robj);
 					trel.setSourceType(TripleSourceType.ITC);
@@ -2855,7 +2874,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			if ((lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal && isSparqlQuery(((com.ge.research.sadl.model.gp.Literal)lobj).toString())))
 					&& !(robj instanceof KnownNode)) {
-				if (getRulePart().equals(RulePart.CONCLUSION)) {
+				if (getRulePart().equals(RulePart.CONCLUSION) || getRulePart().equals(RulePart.PREMISE)) {		// added PREMISE--side effects? awc 10/9/17
 					if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
 						if (lobj instanceof TripleElement) {
 							if (((TripleElement)lobj).getObject() == null) {
@@ -3563,8 +3582,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 			if (!isDefiniteArticle(article) && 
 					typenode instanceof NamedNode && ((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode)) {
-				if (getRulePart().equals(RulePart.CONCLUSION) && !isDeclInThereExists(expr)) {
-					// this can't be a crule variable
+				if (!isCruleVariableDefinitionPossible(expr)) {
 					if (ordinal != null) {
 						addError("Did not expect an indefinite article reference with ordinality in rule conclusion", expr);
 					}
@@ -3594,6 +3612,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return typenode;
 	}
 	
+	private boolean isCruleVariableDefinitionPossible(Declaration expr) {
+		if (getRulePart().equals(RulePart.CONCLUSION) && !isDeclInThereExists(expr)) {
+			// this can't be a crule variable
+			return false;
+		}
+		if (expr.eContainer() != null && expr.eContainer() instanceof BinaryOperation && isEqualOperator(((BinaryOperation)expr.eContainer()).getOp()) &&
+				!((BinaryOperation)expr.eContainer()).getLeft().equals(expr) && ((BinaryOperation)expr.eContainer()).getLeft() instanceof Declaration) {
+			return false;
+		}
+		return true;
+	}
+		
 	private boolean isDefinitionOfExplicitVariable(Declaration expr) {
 		EObject cont = expr.eContainer();
 		try {
@@ -3852,37 +3882,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
-		boolean isVariableDefinition = false;
-		Name variableName = null;
-		boolean variableIsSubject = false;
+		boolean isSubjVariableDefinition = false;
+		boolean isObjVariableDefinition = false;
+		Name subjVariableName = null;
+		Name objVariableName = null;
+		boolean subjectIsVariable = false;
+		boolean objectIsVariable = false;
 		try {
 			if (subj instanceof Name && isVariableDefinition((Name)subj)) {
 				// variable is defined by domain of property pred
-				isVariableDefinition = true;
-				variableName = (Name)subj;
-				variableIsSubject = true;
+				isSubjVariableDefinition = true;
+				subjVariableName = (Name)subj;
+				subjectIsVariable = true;
 			}
 			else if (subj instanceof Declaration && isVariableDefinition((Declaration)subj)) {
 				// variable is defined by a CRule declaration
-				isVariableDefinition = true;
-				variableIsSubject = true;			}
+				isSubjVariableDefinition = true;
+				subjectIsVariable = true;			}
 			if (obj instanceof Name && isVariableDefinition((Name)obj)) {
 				// variable is defined by range of property pred
-				isVariableDefinition = true;
-				variableName = (Name)obj;
-				variableIsSubject = false;
+				isObjVariableDefinition = true;
+				objVariableName = (Name)obj;
+				objectIsVariable = true;
 			}
 			else if (obj instanceof Declaration && isVariableDefinition((Declaration)obj)) {
 				// variable is defined by a CRule declaration
-				isVariableDefinition = true;
-				variableIsSubject = false;
+				isObjVariableDefinition = true;
+				objectIsVariable = true;
 			}
 		} catch (CircularDefinitionException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
-		if (!isVariableDefinition && getModelValidator() != null) {
+		if (!isSubjVariableDefinition && !isObjVariableDefinition && getModelValidator() != null) {
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, pred, false);
 			if (obj != null) {	// rules can have SubjHasProp expressions with null object
 				try {
@@ -3899,35 +3932,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		Object oobj = null;
 
 		if (pred != null) {
-			pobj = translate(pred);
-			if (isVariableDefinition && pobj instanceof NamedNode) {
-				try {
+			try {
+				pobj = translate(pred);
+				Property prop = getTheJenaModel().getProperty(((NamedNode)pobj).toFullyQualifiedString());
+				OntConceptType predOntConceptType = getDeclarationExtensions().getOntConceptType(pred);
+				ConceptName propcn = new ConceptName(((NamedNode)pobj).toFullyQualifiedString());
+				propcn.setType(nodeTypeToConceptType(ontConceptTypeToNodeType(predOntConceptType)));
+				if (isSubjVariableDefinition && pobj instanceof NamedNode) {
 					VariableNode var = null;
-					if (variableName != null) {
-						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(variableName.getName()) + "' is defined by " + (variableIsSubject ? "domain" : "range") + " of property '" + 
+					if (subjVariableName != null) {
+						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(subjVariableName.getName()) + "' is defined by domain of property '" + 
 								getDeclarationExtensions().getConceptUri(pred) + "'");
-						var = createVariable(getDeclarationExtensions().getConceptUri(variableName.getName()));
+						var = createVariable(getDeclarationExtensions().getConceptUri(subjVariableName.getName()));
 					}
 					else {
-						if (variableIsSubject) {
-							sobj = processExpression(subj);
-						}
-						else {
-							oobj = processExpression(obj);
-						}
-//						if (declobj instanceof NamedNode) {
-//							String nvar = getNewVar(subj);
-//							addCruleVariable((NamedNode)declobj, 1, nvar);
-//						}
+						sobj = processExpression(subj);
 					}
-					Property prop = getTheJenaModel().getProperty(((NamedNode)pobj).toFullyQualifiedString());
-					OntConceptType predOntConceptType = getDeclarationExtensions().getOntConceptType(pred);
-					ConceptName propcn = new ConceptName(((NamedNode)pobj).toFullyQualifiedString());
-					propcn.setType(nodeTypeToConceptType(ontConceptTypeToNodeType(predOntConceptType)));
-// TODO should also check for restrictions on the class and local restrictions?
 					if (var != null) {
-						TypeCheckInfo dtci = variableIsSubject ? getModelValidator().getTypeInfoFromDomain(propcn, prop, pred) :
-							getModelValidator().getTypeInfoFromRange(propcn, prop, pred);
+						TypeCheckInfo dtci = getModelValidator().getTypeInfoFromDomain(propcn, prop, pred);
 						if (dtci != null && dtci.getTypeCheckType() != null) {
 							ConceptIdentifier tcitype = dtci.getTypeCheckType();
 							if (tcitype instanceof ConceptName) {
@@ -3935,33 +3957,54 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								var.setType((NamedNode) defn);
 							}
 							else {
-								addError(variableIsSubject ? "Domain" : "Range" + " type did not return a ConceptName", pred);
+								addError("Domain type did not return a ConceptName", pred);
 							}
 						}
-						if (sobj == null && variableIsSubject) {
-							sobj = var;
-						}
-						else if (oobj == null) {
-							oobj = var;
-						}
+						sobj = var;
 					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (PrefixNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (DontTypeCheckException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (CircularDefinitionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
-			}	
+				if (isObjVariableDefinition && pobj instanceof NamedNode) {
+					VariableNode var = null;
+					if (objVariableName != null) {
+						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(objVariableName.getName()) + "' is defined by range of property '" + 
+								getDeclarationExtensions().getConceptUri(pred) + "'");
+						var = createVariable(getDeclarationExtensions().getConceptUri(objVariableName.getName()));
+					}
+					else {
+						oobj = processExpression(obj);
+					}
+					if (var != null) {
+						TypeCheckInfo dtci = getModelValidator().getTypeInfoFromRange(propcn, prop, pred);
+						if (dtci != null && dtci.getTypeCheckType() != null) {
+							ConceptIdentifier tcitype = dtci.getTypeCheckType();
+							if (tcitype instanceof ConceptName) {
+								NamedNode defn = new NamedNode(((ConceptName)tcitype).getUri(), conceptTypeToNodeType(((ConceptName)tcitype).getType()));
+								var.setType((NamedNode) defn);
+							}
+							else {
+								addError("Range type did not return a ConceptName", pred);
+							}
+						}
+						oobj = var;
+					}
+				}
+// TODO should also check for restrictions on the class and local restrictions?
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (PrefixNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DontTypeCheckException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CircularDefinitionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 		}
 		
 		if (sobj == null && subj != null) {
