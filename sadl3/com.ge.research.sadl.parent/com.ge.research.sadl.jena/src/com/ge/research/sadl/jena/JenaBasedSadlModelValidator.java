@@ -1672,7 +1672,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (!declarationExtensions.getOntConceptType(cls).equals(OntConceptType.CLASS)) {
 						// need to convert this to the Class representing the type; use existing type checking functionality
 						TypeCheckInfo subjTCI = getType(cls);
-						if (subjTCI != null && !subjTCI.getTypeCheckType().toString().equals("TODO")) {
+						if (subjTCI != null /* && !subjTCI.getTypeCheckType().toString().equals("TODO")*/) {
 							addEffectiveRangeByTypeCheckInfo(predicateType, subjTCI);
 						}
 					}
@@ -1949,55 +1949,67 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		Resource subj = theJenaModel.getResource(subjuri);
 		if (subj != null) {
 			if (!(subj instanceof OntClass || subj.canAs(OntClass.class)) && subj.canAs(Individual.class)) {
-				subj = subj.as(Individual.class).getRDFType(true);
-			}
-			if (subj != null && subj.canAs(OntClass.class)){ 
-				Property prop = theJenaModel.getProperty(propuri);
-				if (isListAnnotatedProperty(prop)) {
-					return null;
+				ExtendedIterator<Resource> subjects = subj.as(Individual.class).listRDFTypes(true);
+				while(subjects.hasNext()) {
+					TypeCheckInfo type = getTypeFromRestriction(subjects.next(), propuri, proptype, predicate);
+					if(type != null) {
+						return type;
+					}
 				}
-				// now look for restrictions on "range"
-				StmtIterator sitr = theJenaModel.listStatements(null, OWL.onProperty, prop);
-				while (sitr.hasNext()) {
-					Statement stmt = sitr.nextStatement();
-					Resource sr = stmt.getSubject();
-					if (sr.canAs(OntClass.class) && subj.as(OntClass.class).hasSuperClass(sr.as(OntClass.class))) {
-						if (sr.as(OntClass.class).asRestriction().isAllValuesFromRestriction()) {
-							Resource avf = sr.as(OntClass.class).asRestriction().asAllValuesFromRestriction().getAllValuesFrom();
-							if (avf.isLiteral()) {
-								TypeCheckInfo avftci =  new TypeCheckInfo(createTypedConceptName(propuri, proptype), 
-										createTypedConceptName(avf.getURI(), OntConceptType.CLASS), this, predicate);
-								avftci.setTypeToExprRelationship("restriction to");
-								return avftci;
-							}
-							else if (avf.isURIResource()){
-								List<ConceptName> impliedProperties = getImpliedProperties(avf);
-								TypeCheckInfo avftci = new TypeCheckInfo(createTypedConceptName(propuri, proptype), 
-										createTypedConceptName(avf.getURI(), OntConceptType.CLASS), impliedProperties, this, predicate);
-								avftci.setTypeToExprRelationship("restriction to");
-								if (isListAnnotatedProperty(prop)) {
-									avftci.setRangeValueType(RangeValueType.LIST);
-								}
-								else if (isTypedListSubclass(avf)) {
-									avftci.setTypeCheckType(getTypedListType(avf));
-									avftci.setRangeValueType(RangeValueType.LIST);
-								}
-								return avftci;
-							}
+			}else {
+				return getTypeFromRestriction(subj, propuri, proptype, predicate);
+			}
+		}
+		return null;
+	}
+	
+	protected TypeCheckInfo getTypeFromRestriction(Resource subj, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException {
+		if (subj != null && subj.canAs(OntClass.class)){ 
+			Property prop = theJenaModel.getProperty(propuri);
+			if (isListAnnotatedProperty(prop)) {
+				return null;
+			}
+			// now look for restrictions on "range"
+			StmtIterator sitr = theJenaModel.listStatements(null, OWL.onProperty, prop);
+			while (sitr.hasNext()) {
+				Statement stmt = sitr.nextStatement();
+				Resource sr = stmt.getSubject();
+				if (sr.canAs(OntClass.class) && subj.as(OntClass.class).hasSuperClass(sr.as(OntClass.class))) {
+					if (sr.as(OntClass.class).asRestriction().isAllValuesFromRestriction()) {
+						Resource avf = sr.as(OntClass.class).asRestriction().asAllValuesFromRestriction().getAllValuesFrom();
+						if (avf.isLiteral()) {
+							TypeCheckInfo avftci =  new TypeCheckInfo(createTypedConceptName(propuri, proptype), 
+									createTypedConceptName(avf.getURI(), OntConceptType.CLASS), this, predicate);
+							avftci.setTypeToExprRelationship("restriction to");
+							return avftci;
 						}
-						else if (sr.as(OntClass.class).asRestriction().isHasValueRestriction()) {
-							RDFNode hvr = sr.as(OntClass.class).asRestriction().asHasValueRestriction().getHasValue();
-							TypeCheckInfo hvtci = new TypeCheckInfo(createTypedConceptName(propuri, proptype), 
-								hvr, ExplicitValueType.RESTRICTION, this, predicate);
+						else if (avf.isURIResource()){
+							List<ConceptName> impliedProperties = getImpliedProperties(avf);
+							TypeCheckInfo avftci = new TypeCheckInfo(createTypedConceptName(propuri, proptype), 
+									createTypedConceptName(avf.getURI(), OntConceptType.CLASS), impliedProperties, this, predicate);
+							avftci.setTypeToExprRelationship("restriction to");
 							if (isListAnnotatedProperty(prop)) {
-								hvtci.setRangeValueType(RangeValueType.LIST);
+								avftci.setRangeValueType(RangeValueType.LIST);
 							}
-							else if (isTypedListSubclass(hvr)) {
-								hvtci.setTypeCheckType(getTypedListType(hvr));
-								hvtci.setRangeValueType(RangeValueType.LIST);
+							else if (isTypedListSubclass(avf)) {
+								avftci.setTypeCheckType(getTypedListType(avf));
+								avftci.setRangeValueType(RangeValueType.LIST);
 							}
-							return hvtci;
+							return avftci;
 						}
+					}
+					else if (sr.as(OntClass.class).asRestriction().isHasValueRestriction()) {
+						RDFNode hvr = sr.as(OntClass.class).asRestriction().asHasValueRestriction().getHasValue();
+						TypeCheckInfo hvtci = new TypeCheckInfo(createTypedConceptName(propuri, proptype), 
+							hvr, ExplicitValueType.RESTRICTION, this, predicate);
+						if (isListAnnotatedProperty(prop)) {
+							hvtci.setRangeValueType(RangeValueType.LIST);
+						}
+						else if (isTypedListSubclass(hvr)) {
+							hvtci.setTypeCheckType(getTypedListType(hvr));
+							hvtci.setRangeValueType(RangeValueType.LIST);
+						}
+						return hvtci;
 					}
 				}
 			}
