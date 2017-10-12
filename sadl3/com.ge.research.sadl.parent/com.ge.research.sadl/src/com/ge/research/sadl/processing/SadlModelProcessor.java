@@ -779,7 +779,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 	}
 
-	protected NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
+	public static NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
 		if (ct.equals(ConceptType.ONTCLASS)) {
 			return NodeType.ClassNode;
 		}

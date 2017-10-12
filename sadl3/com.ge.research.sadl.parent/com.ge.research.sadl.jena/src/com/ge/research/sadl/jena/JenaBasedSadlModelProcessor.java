@@ -2592,7 +2592,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	public IntermediateFormTranslator getIfTranslator() {
 		if (intermediateFormTranslator == null) {
-			intermediateFormTranslator = new IntermediateFormTranslator(getTheJenaModel());
+			intermediateFormTranslator = new IntermediateFormTranslator(this, getTheJenaModel());
 		}
 		return intermediateFormTranslator;
 	}
@@ -4058,6 +4058,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				((com.ge.research.sadl.model.gp.Literal)eobj).setValue(val);
 				((com.ge.research.sadl.model.gp.Literal)eobj).setOriginalText(op + ((com.ge.research.sadl.model.gp.Literal)eobj).getOriginalText());
 				return eobj;
+			}
+			else if (op.equals("not") && val instanceof Boolean) {
+				try {
+					boolean bval = ((Boolean)val).booleanValue();
+					if (bval) {
+						((com.ge.research.sadl.model.gp.Literal)eobj).setValue(false);
+					}
+					else {
+						((com.ge.research.sadl.model.gp.Literal)eobj).setValue(true);
+					}
+					return eobj;
+				}
+				catch (Exception e) {
+					
+				}
 			}
 		}
 		BuiltinElement bi = new BuiltinElement();
