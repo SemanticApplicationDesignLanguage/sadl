@@ -200,13 +200,20 @@ CardinalityValue :
 ;
 
 SadlExplicitValue:
+	SadlExplicitValueLiteral |
+	=>({SadlUnaryExpression} operator=('-' | 'not') value=SadlExplicitValueLiteral) 
+;
+	
+SadlExplicitValueLiteral:
 		SadlResource		// e.g., George
-	|	{SadlNumberLiteral} literalNumber=FacetNumber (-> unit=UNIT)?
+	|	{SadlNumberLiteral} literalNumber=AnyNumber (-> unit=UNIT)?
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
     |   SadlValueList
-	|	{SadlConstantLiteral} term=('PI'|'-PI'|'e'|'-e'|'known')
+	|	{SadlConstantLiteral} term=('PI'|'e'|'known')
 ;
+
+UNIT: STRING | ID;
 
 SadlValueList:
 	{SadlValueList} '[' (explicitValues+=SadlExplicitValue (',' explicitValues+=SadlExplicitValue)*)? ']'
@@ -300,40 +307,41 @@ ReadStatement :
 
 
 Expression returns Expression: // (1)
-	SelectExpression<true>
+	SelectExpression<true, true>
 ;
 
-SelectExpression<EnabledWith> returns Expression :
+NestedExpression returns Expression: // (1)
+	SelectExpression<true, false>
+;
+
+SelectExpression<EnabledWith, EnableComma> returns Expression :
 	->({SelectExpression}
-	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (','? selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(','? (orderList+=OrderElement))*)?)
-	| ExpressionParameterized<true>
+	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (','? selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith, EnableComma> (orderby='order' 'by' orderList+=OrderElement ->(','? (orderList+=OrderElement))*)?)
+	| ExpressionParameterized<EnabledWith, EnableComma>
 ;
 
 OrderElement :
 	('asc' | desc?='desc')? orderBy=SadlResource;
 
 // Real expressions start here
-ExpressionParameterized<EnabledWith> returns Expression: // (1)
-    {Sublist} AnArticle? 'sublist' 'of' list=OrExpression<EnabledWith> 'matching' where=OrExpression<EnabledWith>
-    | OrExpression<EnabledWith>;
+ExpressionParameterized<EnabledWith, EnableComma> returns Expression: // (1)
+    {Sublist} AnArticle? 'sublist' 'of' list=OrExpression<EnabledWith, EnableComma> 'matching' where=OrExpression<EnabledWith, EnableComma>
+    | OrExpression<EnabledWith, EnableComma>;
 
-OrExpression<EnabledWith> returns Expression:
-	AndExpression<EnabledWith> ({BinaryOperation.left=current} op=OpOr right=AndExpression<EnabledWith>)*;
+OrExpression<EnabledWith, EnableComma> returns Expression:
+	AndExpression<EnabledWith, EnableComma> ({BinaryOperation.left=current} op=OpOr right=AndExpression<EnabledWith, EnableComma>)*;
 
 OpOr:
 	'or' | '||';
 
-AndExpression<EnabledWith> returns Expression:
-	CommaSeparatedAbreviatedExpression<EnabledWith> ({BinaryOperation.left=current} op=OpAnd right=CommaSeparatedAbreviatedExpression<EnabledWith>)*;
+AndExpression<EnabledWith, EnableComma> returns Expression:
+	EqualityExpression<EnabledWith, EnableComma> ({BinaryOperation.left=current} op=OpAnd right=EqualityExpression<EnabledWith, EnableComma>)*;
 
 OpAnd:
 	'and' | '&&';
-	
-CommaSeparatedAbreviatedExpression<EnabledWith> returns Expression:
-	EqualityExpression<EnabledWith> ({CommaSeparatedAbreviatedExpression.left=current} ',' =>((<EnabledWith>'with'|'has') prop=SadlResource) right=FeatureCall<EnabledWith>?)*;
 
-EqualityExpression<EnabledWith> returns Expression:
-	RelationalExpression<EnabledWith> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<EnabledWith>)*;
+EqualityExpression<EnabledWith, EnableComma> returns Expression:
+	RelationalExpression<EnabledWith, EnableComma> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<EnabledWith, EnableComma>)*;
 
 InfixOperator :
 	'==' 
@@ -344,73 +352,62 @@ InfixOperator :
 	| 'does' 'not' 'contain'
 ;
 
-RelationalExpression<EnabledWith> returns Expression:
-	Addition<EnabledWith> ->({BinaryOperation.left=current} =>op=OpCompare right=Addition<EnabledWith>)*;
+RelationalExpression<EnabledWith, EnableComma> returns Expression:
+	Addition<EnabledWith, EnableComma> ->({BinaryOperation.left=current} =>op=OpCompare right=Addition<EnabledWith, EnableComma>)*;
 
 OpCompare:
 	'>=' | '<=' | '>' | '<';
 
-Addition<EnabledWith> returns Expression:
-	Multiplication<EnabledWith> ({BinaryOperation.left=current} op=AddOp right=Multiplication<EnabledWith>)*;
+Addition<EnabledWith, EnableComma> returns Expression:
+	Multiplication<EnabledWith, EnableComma> ({BinaryOperation.left=current} op=AddOp right=Multiplication<EnabledWith, EnableComma>)*;
 
 AddOp:
 	'+' | '-'
 ;
 
-Multiplication<EnabledWith> returns Expression:
-	Power<EnabledWith> ({BinaryOperation.left=current} op=MultiOp right=Power<EnabledWith>)*;
+Multiplication<EnabledWith, EnableComma> returns Expression:
+	Power<EnabledWith, EnableComma> ({BinaryOperation.left=current} op=MultiOp right=Power<EnabledWith, EnableComma>)*;
 	
 MultiOp :
 	'*'|'/'|'%'
 ;
 
-Power<EnabledWith> returns Expression:
-	PropOfSubject<EnabledWith> ({BinaryOperation.left=current} op='^' right=PropOfSubject<EnabledWith>)*;
-
-// PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
-PropOfSubject<EnabledWith> returns Expression: // (17)
-//	UnitsExpression<EnabledWith> ->(({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
-//					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=UnitsExpression<EnabledWith>?)+)?
-	FeatureCall<EnabledWith> ->(		({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) 
- 	|   =>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource right=FeatureCall<EnabledWith>?)+
- 	|   =>({SubjHasProp.left=current} prop=SadlResource right=FeatureCall<EnabledWith>)+)?
-|   {UnaryExpression} op=('not' | '!' | 'only' | '-' | ThereExists) expr=PropOfSubject<EnabledWith> // this can be applied to other unitary operations
-|   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith>;
-
-
-FeatureCall<EnabledWith> returns Expression:
-	UnitsExpression<EnabledWith> |
-	Name
+Power<EnabledWith, EnableComma> returns Expression:
+	ElementInList<EnabledWith, EnableComma> ({BinaryOperation.left=current} op='^' right=ElementInList<EnabledWith, EnableComma>)*;
+   
+ElementInList<EnabledWith, EnableComma> returns Expression:
+	PropOfSubject<EnabledWith, EnableComma> |
+	{ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith, EnableComma>
 ;
 
-Name returns SadlResource: 
-	{Name} name=[SadlResource|QNAME] ->(function?='(' arglist+=Expression? (',' arglist+=Expression)* ')')?
+PropOfSubject<EnabledWith, EnableComma> returns Expression:
+	UnaryExpression<EnabledWith, EnableComma> ->(
+		   ({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith, EnableComma>) 
+ 	   | ->({SubjHasProp.left=current} (<EnableComma> comma?=',')? (<EnabledWith>'with'|'has')? prop=SadlResource ->right=UnaryExpression<EnabledWith, EnableComma>?)+)?
 ;
 
-UnitsExpression<EnabledWith> returns Expression:
-	PrimaryExpression<EnabledWith> ->({Unit.value=current} unit=UNIT)?
+UnaryExpression<EnabledWith, EnableComma> returns Expression:
+	PrimaryExpression<EnabledWith, EnableComma> |
+   {UnaryExpression} op=('not' | '!' | 'only' | '-' | ThereExists) expr=PrimaryExpression<EnabledWith, EnableComma>
 ;
 
 ThereExists : 
-	('there' 'exists')
+	('there' 'exists' 'a')
 ;
 
 // primary expressions are the atom units of expression in the grammar	
-PrimaryExpression<EnabledWith> returns Expression: // (20)
-	'(' SelectExpression<EnabledWith> ')' 
-	| {Declaration} article=AnArticle (ordinal=Ordinal)? type=SadlPrimaryTypeReference 
-	->('[' arglist+=Expression? (',' arglist+=Expression)* ']'|
-		newName=DNAME
-	)?
+PrimaryExpression<EnabledWith, EnableComma> returns Expression:
+	'(' SelectExpression<EnabledWith, EnableComma> ')'
+	| Name 
+	| {Declaration} article=AnArticle (ordinal=Ordinal)? type=SadlPrimaryTypeReference ('[' arglist+=NestedExpression? (',' arglist+=NestedExpression)* ']')?
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber
 	| {BooleanLiteral} value=BooleanValue 
 	| {Constant} constant=Constants
-//	| FeatureCall
 	| {ValueTable} valueTable=ValueTable;
 
-UNIT :
-	ID | STRING
+Name returns SadlResource: 
+	{Name} name=[SadlResource|QNAME] ->(function?='(' arglist+=NestedExpression? (',' arglist+=NestedExpression)* ')')?
 ;
 
 	// the truth table
@@ -429,7 +426,7 @@ Constants:
 	'PI' | 'known' | 'e' | '--' | 'None' | 'a'? 'type' | DefiniteArticle? 'length' | 'count' | DefiniteArticle? 'index' | ('first'|'last'|AnArticle Ordinal?) 'element' | 'value';
 
 ValueRow:
-	explicitValues+=Expression (',' explicitValues+=Expression)*; // e.g., George, 23, "Purple", 38.186111
+	explicitValues+=NestedExpression (',' explicitValues+=NestedExpression)*; // e.g., George, 23, "Purple", 38.186111
 
 DNAME:
 	ID;
@@ -474,4 +471,3 @@ terminal SL_COMMENT:
 
 terminal ANY_OTHER:
 	.;
-	
