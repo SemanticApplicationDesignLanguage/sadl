@@ -38,7 +38,6 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
-import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.ConstructExpression;
 import com.ge.research.sadl.sADL.Declaration;
@@ -77,9 +76,9 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
-import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
+import com.ge.research.sadl.utils.SadlASTUtils;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -903,8 +902,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			stringLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(stringLiteralConceptName, stringLiteralConceptName, this, expression);
 		}
-		else if(expression instanceof Unit) {
-			Expression value = ((Unit)expression).getValue();
+		else if(expression instanceof SubjHasProp) {
+			Expression value = (Expression) expression;
 			if (!getModelProcessor().ignoreUnittedQuantities) {
 				return getUnittedQuantityTypeCheckInfo(expression);
 			}
@@ -920,7 +919,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (((SadlNumberLiteral)expression).getUnit() != null && !getModelProcessor().ignoreUnittedQuantities) {
 					return getUnittedQuantityTypeCheckInfo(expression);
 				}
-				String strval = ((SadlNumberLiteral)expression).getLiteralNumber();
+				String strval = ((SadlNumberLiteral)expression).getLiteralNumber().toPlainString();
 				if (strval.indexOf('.') >= 0) {
 					value = BigDecimal.valueOf(Double.parseDouble(strval));
 				}
@@ -1006,10 +1005,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-		else if (expression instanceof CommaSeparatedAbreviatedExpression) {
+		else if (SadlASTUtils.isCommaSeparatedAbbreviatedExpression(expression)) {
 			// validate the property initializations within
-			validateCommaSeparatedAbreviatedExpression((CommaSeparatedAbreviatedExpression) expression);
-			return getType(((CommaSeparatedAbreviatedExpression)expression).getLeft());
+			validateCommaSeparatedAbreviatedExpression((SubjHasProp) expression);
+			return getType(((SubjHasProp)expression).getLeft());
 		}
 		else if(expression instanceof UnaryExpression){
 			return getType(((UnaryExpression) expression).getExpr());
@@ -1154,9 +1153,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (expr instanceof SubjHasProp) {
 			return isDeclaration(((SubjHasProp)expr).getLeft());
 		}
-		else if (expr instanceof CommaSeparatedAbreviatedExpression) {
-			return isDeclaration(((CommaSeparatedAbreviatedExpression)expr).getLeft());
-		}
 		else if (expr instanceof BinaryOperation) {
 			if (isDeclaration(((BinaryOperation)expr).getLeft())){
 				return true;
@@ -1177,9 +1173,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private Declaration getEmbeddedDeclaration(EObject expr) {
 		if (expr instanceof SubjHasProp) {
 			return getEmbeddedDeclaration(((SubjHasProp)expr).getLeft());
-		}
-		else if (expr instanceof CommaSeparatedAbreviatedExpression) {
-			return getEmbeddedDeclaration(((CommaSeparatedAbreviatedExpression)expr).getLeft());
 		}
 		else if (expr instanceof BinaryOperation) {
 			Declaration decl = getEmbeddedDeclaration(((BinaryOperation)expr).getLeft());
@@ -1214,7 +1207,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
-	protected void validateCommaSeparatedAbreviatedExpression(CommaSeparatedAbreviatedExpression expression) throws DontTypeCheckException, CircularDefinitionException, 
+	protected void validateCommaSeparatedAbreviatedExpression(SubjHasProp expression) throws DontTypeCheckException, CircularDefinitionException, 
 		InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		TypeCheckInfo proptct = getType(expression.getProp());
 		TypeCheckInfo rghttct = getType(expression.getRight());
@@ -1223,18 +1216,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			createErrorMessage(errorMessageBuilder, proptct, rghttct, "property initialization");
 			issueAcceptor.addError(errorMessageBuilder.toString(), expression);
 		}
-	}
-
-	private boolean subjHasPropIsNested(SubjHasProp expression) {
-		if (expression.eContainer() instanceof CommaSeparatedAbreviatedExpression) {
-			return true; 
-		}
-		if (expression.eContainer() instanceof BinaryOperation 
-//				&& modelProcessor.isEqualityInequalityComparisonOperator(((BinaryOperation)expression.eContainer()).getOp())
-				) {
-			return true;
-		}
-		return false;
 	}
 
 	protected Declaration subjHasPropIsDeclaration(SubjHasProp expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {

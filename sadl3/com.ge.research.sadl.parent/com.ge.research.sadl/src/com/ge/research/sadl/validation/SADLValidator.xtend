@@ -25,7 +25,6 @@ import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.resource.UserDataHelper
 import com.ge.research.sadl.sADL.BinaryOperation
-import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
@@ -33,6 +32,7 @@ import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
+import com.ge.research.sadl.sADL.SubjHasProp
 import com.ge.research.sadl.utils.DependencyTraverserHelper
 import com.ge.research.sadl.utils.ImportHelper
 import com.ge.research.sadl.utils.SadlModelEquivalence
@@ -235,15 +235,13 @@ class SADLValidator extends AbstractSADLValidator {
 	}
 	
 	@Check
-	def checkCommaSeparatedAbreviatedExpression(CommaSeparatedAbreviatedExpression expr) {
+	def checkCommaSeparatedAbreviatedExpression(SubjHasProp it) {
 		// normally this would occur as a nested expression inside an "is" or other assignment (as object of a "with" or "has")
-		val cntr = expr.eContainer
-		if (cntr instanceof BinaryOperation) {
-			val bop = cntr as BinaryOperation
+		if (eContainer instanceof BinaryOperation && comma) {
+			val bop = eContainer as BinaryOperation
 			val op = bop.op
 			if (op.equals("and") || op.equals("or")) {
-				warning("Is this a declaration that should be nested in parentheses?", expr, COMMA_SEPARATED_ABREVIATED_EXPRESSION__LEFT)
-				
+				 warning("Is this a declaration that should be nested in parentheses?", it, SUBJ_HAS_PROP__LEFT)	
 			}
 		}
 	}

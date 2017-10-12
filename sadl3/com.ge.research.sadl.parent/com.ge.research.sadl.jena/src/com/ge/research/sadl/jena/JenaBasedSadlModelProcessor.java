@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -133,7 +134,6 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
-import com.ge.research.sadl.sADL.CommaSeparatedAbreviatedExpression;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.ConstructExpression;
 import com.ge.research.sadl.sADL.Declaration;
@@ -203,7 +203,6 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
-import com.ge.research.sadl.sADL.Unit;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.utils.PathToFileUriConverter;
@@ -2630,14 +2629,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof SubjHasProp) {
 			return processExpression((SubjHasProp)expr);
 		}
-		else if (expr instanceof CommaSeparatedAbreviatedExpression) {
-			return processExpression((CommaSeparatedAbreviatedExpression)expr);
-		}
 		else if (expr instanceof SadlResource) {
 			return processExpression((SadlResource)expr);
-		}
-		else if (expr instanceof Unit) {
-			return processExpression((Unit)expr);
 		}
 		else if (expr instanceof UnaryExpression) {
 			return processExpression((UnaryExpression)expr);
@@ -2810,7 +2803,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	}
 	
 	private boolean isVariableDefinition(Declaration decl) {
-		if (!isDefiniteArticle(decl.getArticle()) && (isDeclInThereExists(decl) || (decl.getNewName() == null && decl.getType() instanceof SadlSimpleTypeReference))) { 
+		if (!isDefiniteArticle(decl.getArticle()) && (isDeclInThereExists(decl) || (decl.getType() instanceof SadlSimpleTypeReference))) { 
 			return true;
 		}
 		return false;
@@ -3873,13 +3866,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return processSubjHasProp(subj, pred, obj);
 	}
 	
-	public Object processExpression(CommaSeparatedAbreviatedExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
-		Expression subj = expr.getLeft();
-		SadlResource pred = expr.getProp();
-		Expression obj = expr.getRight();
-		return processSubjHasProp(subj, pred, obj);
-	}
-	
 	private TripleElement processSubjHasProp(Expression subj, SadlResource pred, Expression obj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		boolean isSubjVariableDefinition = false;
@@ -4077,25 +4063,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return bi;
 	}
 	
-	public Object processExpression(Unit expr) {
-		String unit = expr.getUnit();
-		Expression value = expr.getValue();
-		Object valobj;
-		try {
-			valobj = translate(value);
-			if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
-				((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
-			}
-			return valobj;
-		} catch (TranslationException e) {
-			addError(e.getMessage(), expr);
-		} catch (InvalidNameException e) {
-			addError(e.getMessage(), expr);
-		} catch (InvalidTypeException e) {
-			addError(e.getMessage(), expr);
-		}
-		return null;
-	}
+//	public Object processExpression(SubjHasProp expr) {
+//		String unit = expr.getUnit();
+//		Expression value = expr.getValue();
+//		Object valobj;
+//		try {
+//			valobj = translate(value);
+//			if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
+//				((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
+//			}
+//			return valobj;
+//		} catch (TranslationException e) {
+//			addError(e.getMessage(), expr);
+//		} catch (InvalidNameException e) {
+//			addError(e.getMessage(), expr);
+//		} catch (InvalidTypeException e) {
+//			addError(e.getMessage(), expr);
+//		}
+//		return null;
+//	}
 	
 	private void processSadlSameAs(SadlSameAs element) throws JenaProcessorException {
 		SadlResource sr = element.getNameOrRef();
@@ -6106,6 +6092,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '" + inst.toString() + "'");
 	}
 
+	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, OntProperty oprop, OntResource rng, BigDecimal number, String unit) {
+		addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, number.toPlainString(), unit);
+	}
+	
 	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, OntProperty oprop, OntResource rng, String literalNumber, String unit) {
 		Individual unittedVal;
 		if (rng != null && rng.canAs(OntClass.class)) {
@@ -7223,7 +7213,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, com.hp.hpl.jena.rdf.model.Resource rng) throws JenaProcessorException {
 		try {
 			if (value instanceof SadlNumberLiteral) {
-				String val = ((SadlNumberLiteral)value).getLiteralNumber();
+				String val = ((SadlNumberLiteral)value).getLiteralNumber().toPlainString();
 				if (rng != null && rng.getURI() != null) {
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
@@ -8397,23 +8387,6 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		}
 		else if (left instanceof SubjHasProp) {
 			return getDeclarationFromSubjHasProp((SubjHasProp)left);
-		}
-		else if (left instanceof CommaSeparatedAbreviatedExpression) {
-			return getDeclarationFromSubjHasProp((CommaSeparatedAbreviatedExpression)left);
-		}
-		return null;
-	}
-	
-	protected Declaration getDeclarationFromSubjHasProp(CommaSeparatedAbreviatedExpression subject) {
-		Expression left = subject.getLeft();
-		if (left instanceof Declaration) {
-			return (Declaration)left;
-		}
-		else if (left instanceof SubjHasProp) {
-			return getDeclarationFromSubjHasProp((SubjHasProp)left);
-		}
-		else if (left instanceof CommaSeparatedAbreviatedExpression) {
-			return getDeclarationFromSubjHasProp((CommaSeparatedAbreviatedExpression)left);
 		}
 		return null;
 	}
