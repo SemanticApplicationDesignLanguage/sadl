@@ -676,6 +676,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private boolean typeCheckingWarningsOnly;
 
+	private List<OntResource> allImpliedPropertyClasses = null;
+
     public static void refreshResource(Resource newRsrc) {
     	try {
     		URI uri = newRsrc.getURI();
@@ -969,6 +971,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 		// create validator for expressions
 		initializeModelValidator();
+		initializeAllImpliedPropertyClasses();
 		
 		// process rest of parse tree
 		List<SadlModelElement> elements = model.getElements();
@@ -5764,11 +5767,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					}
 				}
 			}
+			addImpliedPropertyClass(inst);
 		}
 		inst.addProperty(prop, value);
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '" + inst.toString() + "'");
 	}
 
+	private void addImpliedPropertyClass(Individual inst) {
+		if(!allImpliedPropertyClasses.contains(inst)) {
+			allImpliedPropertyClasses.add(inst);
+		}
+	}
+	
 	private void addUnittedQuantityAsInstancePropertyValue(Individual inst, OntProperty oprop, OntResource rng, String literalNumber, String unit) {
 		Individual unittedVal;
 		if (rng != null && rng.canAs(OntClass.class)) {
@@ -7721,53 +7731,108 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	public List<ConceptName> getImpliedProperties(com.hp.hpl.jena.rdf.model.Resource cls) {
 		List<ConceptName> retlst = null;
 		if (cls == null) return null;
-		// check superclasses
-		if (cls.canAs(OntClass.class)) {
-			OntClass ontcls = cls.as(OntClass.class);
-			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
-			while (eitr.hasNext()) {
-				OntClass supercls = eitr.next();
-				List<ConceptName> scips = getImpliedProperties(supercls);
-				if (scips != null) {
-					if (retlst == null) {
-						retlst = scips;
-					}
-					else {
-						for (int i = 0; i < scips.size(); i++) {
-							ConceptName cn = scips.get(i);
-							if (!scips.contains(cn)) {
-								retlst.add(scips.get(i));
+		if (!cls.isURIResource()) return null;	// impliedProperties can only be given to a named class
+		if (!cls.canAs(OntClass.class)) {
+			addError("Can't get implied properties of a non-class entity.", null);
+			return null; 
+		}
+		List<OntResource> allImplPropClasses = getAllImpliedPropertyClasses();
+		if (allImplPropClasses != null) {
+			for (OntResource ipcls : allImplPropClasses) {
+				try {
+					if (SadlUtils.classIsSubclassOf(cls.as(OntClass.class), ipcls, true, null)) {
+						StmtIterator sitr = getTheJenaModel().listStatements(ipcls, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
+						if (sitr.hasNext()) {
+							if (retlst == null) {
+								retlst = new ArrayList<ConceptName>();
+							}
+							while (sitr.hasNext()) {
+								RDFNode obj = sitr.nextStatement().getObject();
+								if (obj.isURIResource()) {
+									ConceptName cn = new ConceptName(obj.asResource().getURI());
+									if (!retlst.contains(cn)) {
+										retlst.add(cn);
+									}
+								}
 							}
 						}
 					}
-				}
+				} catch (CircularDependencyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
 			}
 		}
-		StmtIterator sitr = getTheJenaModel().listStatements(cls, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
-		if (sitr.hasNext()) {
-			if (retlst == null) {
-				retlst = new ArrayList<ConceptName>();
-			}
-			while (sitr.hasNext()) {
-				RDFNode obj = sitr.nextStatement().getObject();
-				if (obj.isURIResource()) {
-					ConceptName cn = new ConceptName(obj.asResource().getURI());
-					if (!retlst.contains(cn)) {
-						retlst.add(cn);
-					}
-				}
-			}
-			return retlst;
-		}
-//		if (retlst == null && cls.isURIResource() && cls.getURI().endsWith("#DATA")) {
-////			dumpModel(getTheJenaModel());
-////			StmtIterator stmtitr = cls.listProperties();
-//			StmtIterator stmtitr = getTheJenaModel().listStatements(cls, null, (RDFNode)null);
-//			while (stmtitr.hasNext()) {
-//				System.out.println(stmtitr.next().toString());
+//		// check superclasses
+//		if (cls.canAs(OntClass.class)) {
+//			OntClass ontcls = cls.as(OntClass.class);
+//			ExtendedIterator<OntClass> eitr = ontcls.listSuperClasses();
+//			while (eitr.hasNext()) {
+//				OntClass supercls = eitr.next();
+//				List<ConceptName> scips = getImpliedProperties(supercls);
+//				if (scips != null) {
+//					if (retlst == null) {
+//						retlst = scips;
+//					}
+//					else {
+//						for (int i = 0; i < scips.size(); i++) {
+//							ConceptName cn = scips.get(i);
+//							if (!scips.contains(cn)) {
+//								retlst.add(scips.get(i));
+//							}
+//						}
+//					}
+//				}
 //			}
 //		}
+//		StmtIterator sitr = getTheJenaModel().listStatements(cls, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
+//		if (sitr.hasNext()) {
+//			if (retlst == null) {
+//				retlst = new ArrayList<ConceptName>();
+//			}
+//			while (sitr.hasNext()) {
+//				RDFNode obj = sitr.nextStatement().getObject();
+//				if (obj.isURIResource()) {
+//					ConceptName cn = new ConceptName(obj.asResource().getURI());
+//					if (!retlst.contains(cn)) {
+//						retlst.add(cn);
+//					}
+//				}
+//			}
+//			return retlst;
+//		}
+////		if (retlst == null && cls.isURIResource() && cls.getURI().endsWith("#DATA")) {
+//////			dumpModel(getTheJenaModel());
+//////			StmtIterator stmtitr = cls.listProperties();
+////			StmtIterator stmtitr = getTheJenaModel().listStatements(cls, null, (RDFNode)null);
+////			while (stmtitr.hasNext()) {
+////				System.out.println(stmtitr.next().toString());
+////			}
+////		}
 		return retlst;
+	}
+	
+	private List<OntResource> getAllImpliedPropertyClasses() {
+		return allImpliedPropertyClasses;
+	}
+	
+	protected int initializeAllImpliedPropertyClasses () {
+		int cntr = 0;
+		allImpliedPropertyClasses = new ArrayList<OntResource>();
+		StmtIterator sitr = getTheJenaModel().listStatements(null, getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI), (RDFNode)null);
+		if (sitr.hasNext()) {
+			while (sitr.hasNext()) {
+				com.hp.hpl.jena.rdf.model.Resource subj = sitr.nextStatement().getSubject();
+				if (subj.canAs(OntResource.class)) {
+					OntResource or = subj.as(OntResource.class);
+					if (!allImpliedPropertyClasses.contains(or)) {
+						allImpliedPropertyClasses.add(or);
+					}
+					cntr++;
+				}
+			}
+		}
+		return cntr;
 	}
 	
 	/**
