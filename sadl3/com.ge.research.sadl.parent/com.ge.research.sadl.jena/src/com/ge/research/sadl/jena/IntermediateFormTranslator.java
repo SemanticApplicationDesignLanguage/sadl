@@ -1118,7 +1118,7 @@ public class IntermediateFormTranslator {
 		return patterns;
 	}
 	
-	private List<GraphPatternElement> listToAnd(
+	public List<GraphPatternElement> listToAnd(
 			List<GraphPatternElement> patterns) {
 		GraphPatternElement lhs = patterns.remove(0);
 		if (lhs instanceof List<?>) {
