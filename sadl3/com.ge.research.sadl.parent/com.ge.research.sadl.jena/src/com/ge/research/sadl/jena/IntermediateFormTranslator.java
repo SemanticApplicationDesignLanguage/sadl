@@ -1265,8 +1265,13 @@ public class IntermediateFormTranslator {
 			else {
 				Object realSubj = ((ProxyNode)subj).getProxyFor();
 				Object subjNode = expandProxyNodes(patterns, realSubj, isRuleThen);
-				if (subjNode == null && realSubj instanceof TripleElement && ((TripleElement)realSubj).getObject() instanceof VariableNode) {
-					subjNode = ((TripleElement)realSubj).getObject();
+				if (subjNode == null && realSubj instanceof TripleElement) {
+					if (((TripleElement)realSubj).getObject() instanceof VariableNode) {
+						subjNode = ((TripleElement)realSubj).getObject();
+					}
+					else if (te.getSourceType() != null && te.getSourceType().equals(TripleSourceType.SPV)) {
+						subjNode = ((TripleElement)realSubj).getObject();
+					}
 				}
 				((ProxyNode)subj).setReplacementNode(nodeCheck(subjNode));
 				retiredProxyNodes.put((GraphPatternElement) realSubj, (ProxyNode)subj);

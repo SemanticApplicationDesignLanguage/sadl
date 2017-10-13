@@ -3729,96 +3729,118 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	public Object processExpression(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Expression predicate = expr.getLeft();
 		Expression subject = expr.getRight();
+		Object trSubj = null;
+		Object trPred = null;
 		Node subjNode = null;
 		Node predNode = null;
+		String constantBuiltinName = null;
+		int numBuiltinArgs = 0;
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			String cnstval = ((Constant)predicate).getConstant();
 			if (cnstval.equals("length")) {
-//				throw new TranslationException("Handling 'length of' not yet implemented");
-				addError("'length of' not yet implemented", expr);
-				return null;
+				constantBuiltinName = cnstval;
+				numBuiltinArgs = 1;
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
 			}
 			else if (cnstval.equals("count")) {
+				constantBuiltinName = cnstval;
+				numBuiltinArgs = 2;
 				if (subject instanceof PropOfSubject) {
 					predicate = ((PropOfSubject)subject).getLeft();
 					subject = ((PropOfSubject)subject).getRight();
 				}
-				Object elobj = translate(predicate);
 			}
 			else if (cnstval.endsWith("index")) {
+				constantBuiltinName = cnstval;
+				numBuiltinArgs = 2;
 				if (subject instanceof PropOfSubject) {
 					predicate = ((PropOfSubject)subject).getLeft();
 					subject = ((PropOfSubject)subject).getRight();
 				}
-				Object idxobj = translate(predicate);
 			}
 			else if (cnstval.equals("first element")) {
-//				throw new TranslationException("Handling 'first element of' not yet implemented");
-				addError("'first element of' not yet implemented", expr);
-				return null;
+				constantBuiltinName = "firstElement";
+				numBuiltinArgs = 1;
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
 			}
 			else if (cnstval.equals("last element")) {
-//				throw new TranslationException("Handling 'last element of' not yet implemented");
-				addError("'last element of' not yet implemented", expr);
-				return null;
+				constantBuiltinName = "lastElement";
+				numBuiltinArgs = 1;
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
 			}
-			else if (cnstval.endsWith(" element")) {
-				addError("'" + cnstval + "of' not yet implemented", expr);
-				return null;
+			else if (cnstval.endsWith("element")) {
+				constantBuiltinName = cnstval;
+				numBuiltinArgs = 2;
+				if (subject instanceof PropOfSubject) {
+					predicate = ((PropOfSubject)subject).getLeft();
+					subject = ((PropOfSubject)subject).getRight();
+				}
 			}
 			else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
 			}
 		}
-		else {
-			Object predobj = translate(predicate);
-			if(predobj instanceof Node) {
-				predNode = (Node) predobj;
-			}
-//			else if (predobj instanceof String) {
-//				predNode = new NamedNode((String) predobj);
-//			}
-			else {
-				throw new TranslationException("Predicate '" + predobj.toString() + "' did not translate to Node");
-			}
-		}
 		if (subject != null) {
-			Object sn = translate(subject);
-			if (sn instanceof Node) {
-				subjNode = (Node) sn;
-			}
-			else if (sn instanceof TripleElement) {
-				subjNode = new ProxyNode(sn);
+			trSubj = translate(subject);
+
+		}
+		if (predicate != null) {
+			trPred = translate(predicate);
+
+		}
+		if (constantBuiltinName == null || numBuiltinArgs == 1) {
+			TripleElement returnTriple = null;
+			if (trPred instanceof Node) {
+				predNode = (Node) trPred;
 			}
 			else {
-				throw new TranslationException("Subject '" + (sn != null ? sn.toString() : "<unknown>") + "' did not translate to Node or Triple");
-//				addError(SadlErrorMessages.TRANSLATE_TO_NODE.get(sn.toString()), subject);
+				predNode = new ProxyNode(trPred);
+			}
+			if (trSubj instanceof Node) {
+				subjNode = (Node) trSubj;
+			}
+			else {
+				subjNode = new ProxyNode(trSubj);
+			}
+			if (predNode != null && predNode instanceof Node) {
+				returnTriple = new TripleElement(subjNode, predNode, null);
+				returnTriple.setSourceType(TripleSourceType.PSV);
+				if (constantBuiltinName == null) {
+					return returnTriple;
+				}
+			}
+			if (numBuiltinArgs == 1) {
+				Object bi = createUnaryBuiltin(expr, constantBuiltinName, new ProxyNode(returnTriple) );
+				return bi;
+			}
+			else {
+				predNode = new RDFTypeNode();			
+				Node variable = getVariableNode(expr, null, predNode, subjNode);
+				returnTriple = new TripleElement();
+				returnTriple.setSubject(variable);
+				returnTriple.setPredicate(predNode);
+				returnTriple.setObject(subjNode);
+				if (subjNode instanceof NamedNode && !((NamedNode)subjNode).getNodeType().equals(NodeType.ClassNode)) {
+					addError(SadlErrorMessages.IS_NOT_A.get(subjNode.toString(), "class"), subject);
+				}
+				returnTriple.setSourceType(TripleSourceType.ITC);
+				return returnTriple;
 			}
 		}
-		else {
-			return null;	// this condition will occur during typing as PropOfSubject will be incomplete
-//			throw new TranslationException("Subject of PropOfSubject is null (Resource '" + expr.eResource().getURI() + "')");
+		else {	// none of these create more than 2 arguments
+			Object bi = createBinaryBuiltin(constantBuiltinName, trPred, new ProxyNode(trSubj));
+			return bi;
 		}
-		TripleElement returnTriple = null;
-		if (predNode != null) {
-			returnTriple = new TripleElement(subjNode, predNode, null);
-			returnTriple.setSourceType(TripleSourceType.PSV);
-		}
-		else {
-			predNode = new RDFTypeNode();			
-			Node variable = getVariableNode(expr, null, predNode, subjNode);
-			returnTriple = new TripleElement();
-			returnTriple.setSubject(variable);
-			returnTriple.setPredicate(predNode);
-			returnTriple.setObject(subjNode);
-			if (subjNode instanceof NamedNode && !((NamedNode)subjNode).getNodeType().equals(NodeType.ClassNode)) {
-				addError(SadlErrorMessages.IS_NOT_A.get(subjNode.toString(), "class"), subject);
-			}
-			returnTriple.setSourceType(TripleSourceType.ITC);
-		}
-
-		return returnTriple;
 	}
 	
 	public Node processExpression(SadlResource expr) throws TranslationException {
