@@ -470,7 +470,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return new ProxyNode(nodeObj);
 	}
 
-	private GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(name);
 		if (lobj != null) {
@@ -490,7 +490,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return junction;
 	}
 
-	private Object createUnaryBuiltin(Expression sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object createUnaryBuiltin(Expression sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (sobj instanceof Literal && BuiltinType.getType(name).equals(BuiltinType.Minus)) {
 			Object theVal = ((Literal)sobj).getValue();
 			if (theVal instanceof Integer) {
@@ -779,7 +779,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 	}
 
-	protected NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
+	public static NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
 		if (ct.equals(ConceptType.ONTCLASS)) {
 			return NodeType.ClassNode;
 		}
