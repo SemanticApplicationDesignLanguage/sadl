@@ -7638,7 +7638,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 	}
 	
-	protected String getModelAlias() {
+	public String getModelAlias() {
 		return modelAlias;
 	}
 	

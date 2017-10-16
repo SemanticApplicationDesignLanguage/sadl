@@ -354,6 +354,86 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 	}
 	
 	@Test
+	def void testUnitsOnExpressions() {
+		'''
+			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
+			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
+			 
+			 System is a class described by approved with values of type boolean,
+			 	described by inspection with values of type Result,
+			 	described by publicized with values of type boolean.
+			 	
+			 	past describes System with values of type UnittedQuantity.
+			
+			 Result is a class, can only be one of {Passed, Failed}.
+			 
+			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
+			 
+			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
+			 
+			 SimpleConstant is a class described by cValue with values of type decimal.
+			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 
+			 Rule R1:
+			 	if inspection of System is Passed and past of System is (constantValue of TimingConstant3)
+			 	then approved of System is true.
+			
+			 Rule R1b:
+			 	if inspection of System is Passed and past of System is constantValue of TimingConstant3
+			 	then approved of System is true
+			 	.
+			
+			Rule R1c:
+			 	if inspection of System is Passed and past of System is (cValue of TimingConstant5) seconds
+			 	then approved of System is true .
+			
+			Rule R1d:
+			 	if inspection of System is Passed and past of System is cValue of TimingConstant5 seconds
+			 	then approved of System is true .
+			
+			 Rule R1e:
+			 	if inspection of System is Passed and past of System is 2 seconds + 3 seconds
+			 	then approved of System is true.
+			
+			 Rule R1f:
+			 	if inspection of System is Passed and past of System is (2 seconds + 3 seconds)
+			 	then approved of System is true.
+			
+			 Rule R5:
+			 	if inspection of System is Passed
+			 	then approved of System is true .
+			 
+			 Rule R2:
+			 	if publicized of System is true and past of System is ((constantValue of TimingConstant3) + (3 seconds))
+			 	then inspection of System is Passed.
+			
+			 Rule R2b:
+			 	if publicized of System is true and past of System is ((constantValue of TimingConstant3) + 3 seconds)
+			 	then inspection of System is Passed.
+			
+			 Rule R2c:
+			 	if publicized of System is true and past of System is constantValue of TimingConstant3 + 3 seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R2d:
+			 	if publicized of System is true and past of System is (constantValue of TimingConstant3 + 3) seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R2e:
+			 	if publicized of System is true and past of System is (cValue of TimingConstant5 + 3) seconds
+			 	then inspection of System is Passed. 
+			 	
+			 Rule R3:
+			 	if publicized of System is true and past of System is 3 seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R4:
+			 	if publicized of System is true
+			 	then inspection of System is Passed.
+ 		'''.assertNoErrors
+	}
+	
+	@Test
 	def void testConstants() {
 		'''
 			 uri "http://sadl.org/OntologyWithoutUnittedQuantity.sadl" alias OntologyWithoutUnittedQuantity.
