@@ -499,7 +499,8 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 bar of Foo only has values of type Whimsy List.
 		'''.assertValidatesTo [ jenaModel, issues |
  			assertNotNull(jenaModel)
- 			jenaModel.write(System.out, "N3")
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
  			assertTrue(issues.size == 0)
  			assertNotNull(jenaModel.getOntClass("http://sadl.org/model.sadl#Foo"))
  			val fooclass = jenaModel.getOntClass("http://sadl.org/model.sadl#Foo")

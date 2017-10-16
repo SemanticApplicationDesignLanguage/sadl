@@ -4240,8 +4240,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						e.printStackTrace();
 					}
 					OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
+
+					// before creating the property, determine if the range is a sadllistmodel:List as if it is the property type is actually an owl:ObjectProperty
+					RangeValueType rngValueType = RangeValueType.CLASS_OR_DT;	// default
+					SadlTypeReference rng = ((SadlRangeRestriction)spr2).getRange();
+					if (rng instanceof SadlPrimitiveDataType) {
+						if (((SadlPrimitiveDataType)rng).isList()) {
+							rngValueType = RangeValueType.LIST;
+							propType = OntConceptType.DATATYPE_LIST;
+						}
+					}
+					else if (rng instanceof SadlSimpleTypeReference) {
+						if (((SadlSimpleTypeReference)rng).isList()) {
+							rngValueType = RangeValueType.LIST;
+							propType = OntConceptType.CLASS_LIST;
+						}
+					}
+					
 					OntProperty prop;
-					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+					if (propType.equals(OntConceptType.CLASS_PROPERTY) || rngValueType.equals(RangeValueType.LIST)) {
 						prop = getOrCreateObjectProperty(propUri);
 					}
 					else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)){
@@ -4269,9 +4286,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						throw new JenaProcessorException("What is 'to'?");
 					}
 					
-					RangeValueType rngValueType = RangeValueType.CLASS_OR_DT;	// default
-					SadlTypeReference rng = ((SadlRangeRestriction)spr2).getRange();
-					if (rng instanceof SadlPrimitiveDataType) {
+//					RangeValueType rngValueType = RangeValueType.CLASS_OR_DT;	// default
+//					SadlTypeReference rng = ((SadlRangeRestriction)spr2).getRange();
+					if (rng instanceof SadlPrimitiveDataType && !rngValueType.equals(RangeValueType.LIST)) {
 						String rngName = ((SadlPrimitiveDataType)rng).getPrimitiveType().getName();
 						RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
 						DatatypeProperty prop2 = null;
@@ -4733,7 +4750,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private Property assignRangeToProperty(String propUri, OntConceptType propType, OntResource rngRsrc,
 			RangeValueType rngValueType, SadlTypeReference rng) throws JenaProcessorException {
 		Property retProp;
-		if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+		if (propType.equals(OntConceptType.CLASS_PROPERTY) || propType.equals(OntConceptType.CLASS_LIST) || propType.equals(OntConceptType.DATATYPE_LIST)) {
 			OntClass rngCls = rngRsrc.asClass();
 			ObjectProperty prop = getOrCreateObjectProperty(propUri);
 			addPropertyRange(propType, prop, rngCls, rngValueType, rng);
@@ -4769,24 +4786,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private void addPropertyRange(OntConceptType propType, OntProperty prop, RDFNode rngNode, RangeValueType rngValueType, EObject context) throws JenaProcessorException {
 		OntResource rngResource = null;
-		// Is the range an unnamed List?
-		if (context instanceof SadlSimpleTypeReference && ((SadlSimpleTypeReference)context).isList()) {
-			rngValueType = RangeValueType.LIST;
-		}
-		else if (context instanceof SadlPrimitiveDataType && ((SadlPrimitiveDataType)context).isList()) {
-			rngValueType = RangeValueType.LIST;
-		}
-		// If so create the unnamed List as the range class (rngResource)
-		if (rngValueType.equals(RangeValueType.LIST)) {
-			rngResource = createListSubclass(null, rngNode.toString(), context.eResource());
-			getTheJenaModel().remove(prop,RDF.type, OWL.DatatypeProperty);
-			getTheJenaModel().add(prop, RDF.type, OWL.ObjectProperty);
-			// TODO this should be removed as soon as translators are updated to new List ontology representation
-			AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
-			prop.addProperty(annprop, RangeValueType.LIST.toString());
-			
-		}
-		else if (rngNode instanceof OntClass){
+		if (rngNode instanceof OntClass){
 			rngResource = rngNode.as(OntClass.class);
 			if (prop.isDatatypeProperty()) {
 				// this happens when the range is a union of Lists of primitive types
@@ -4850,8 +4850,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			if (domainAndRangeAsUnionClasses) {
 				// in this case we want to create a union class if necessary
-//				StmtIterator inModelStmtItr = getTheJenaModel().getBaseModel().listStatements(prop, RDFS.range, (RDFNode)null);
-//				if (inModelStmtItr.hasNext()) {
 				if (rangeInThisModel) {
 					// this model (as opposed to imports) already has a range specified
 					addNewRange = false;
@@ -4938,68 +4936,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				}
 				getTheJenaModel().add(prop, RDFS.range, rngNode);
 			}
-//			if (existingRangeAnywhere && existingRangeThisModel) {
-//				// property has existing range known to this model
-//				if (rngNode.isResource() && rngNode.asResource().canAs(OntClass.class)) {
-//					OntClass newRngCls;
-//					if (rngValueType.equals(RangeValueType.LIST)) {
-//						newRngCls = createListSubclass(null, rngNode.toString(), context.eResource());
-//						// TODO this should be removed as soon as translators are updated to new List ontology representation
-//						AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
-//						prop.addProperty(annprop, RangeValueType.LIST.toString());
-//					}
-//					else {
-//						newRngCls = rngNode.asResource().as(OntClass.class);
-//					}
-//					getTheJenaModel().add(prop, RDFS.range, newRngCls);
-//					propOwlType = OWL.ObjectProperty;
-//				}
-//				else {
-//					throw new JenaProcessorException("Unable to convert object property range to a class");
-//				}
-//			}
-//			else {
-//				// no existing range or not using union class for multi-class range--this is a fresh range assignment
-//				if (rngValueType.equals(RangeValueType.LIST)) {
-//					// range is a List
-//					prop.addRange(createListSubclass(null, rngNode.toString(), context.eResource()));
-//					// TODO this should be removed as soon as translators are updated to new List ontology representation
-//					AnnotationProperty annprop = getTheJenaModel().getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY);
-//					prop.addProperty(annprop, RangeValueType.LIST.toString());
-//					propOwlType = OWL.ObjectProperty;
-//				}
-//				else {
-//					// range is not a List
-//					com.hp.hpl.jena.rdf.model.Resource rngrsrc = rngNode.asResource();
-//					if (rngrsrc.hasProperty(RDF.type, RDFS.Datatype)) {
-//						propOwlType = OWL.DatatypeProperty;
-//					}
-//					else if (rngrsrc.canAs(OntClass.class)){
-//						propOwlType = OWL.ObjectProperty;					
-//					}
-//					else {
-//						propOwlType = OWL.DatatypeProperty;
-//					}
-//					if (!domainAndRangeAsUnionClasses && rngrsrc instanceof UnionClass) {
-//						List<com.hp.hpl.jena.rdf.model.Resource> uclsmembers = getUnionClassMemebers((UnionClass)rngrsrc);
-//						for (int i = 0; i < uclsmembers.size(); i++) {
-//							getTheJenaModel().add(prop, RDFS.range, uclsmembers.get(i));
-//							logger.debug("Range '" + uclsmembers.get(i).toString() + "' added to property '" + prop.getURI() + "'");
-//						}
-//					}
-//					else {
-//						getTheJenaModel().add(prop, RDFS.range, rngrsrc);
-//						if (logger.isDebugEnabled()) {
-//							StringBuffer sb = new StringBuffer();
-//							sb.append(rngNode.toString());
-//							if (rngValueType.equals(RangeValueType.LIST)) {
-//								sb.append(" List");
-//							}
-//							logger.debug("Range '" + sb.toString() + "' given to property '" + prop.toString() + "'");
-//						}
-//					}
-//				}
-//			}
 		}
 		if (propType.equals(OntConceptType.RDF_PROPERTY) && propOwlType != null) {
 			getTheJenaModel().add(prop, RDF.type, propOwlType);
