@@ -37,6 +37,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.ontology.Restriction
+import com.hp.hpl.jena.ontology.OntResource
+import com.hp.hpl.jena.vocabulary.RDFS
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -485,6 +488,45 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			}
 		}
 		assertEquals(mismatches, 0)
+	}
+	
+	@Test
+	def void testAllValuesFromUnnamedTypedList() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.			 
+			 Foo is a class described by bar with values of type Whimsy List.	 
+			 bar of Foo only has values of type Whimsy List.
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "N3")
+ 			assertTrue(issues.size == 0)
+ 			assertNotNull(jenaModel.getOntClass("http://sadl.org/model.sadl#Foo"))
+ 			val fooclass = jenaModel.getOntClass("http://sadl.org/model.sadl#Foo")
+ 			val eitr = fooclass.listSuperClasses
+ 			var found = false
+ 			while (eitr.hasNext) {
+ 				val sprcls =eitr.next
+ 				if (sprcls instanceof OntClass) {
+ 					val onprop = (sprcls as OntClass).asRestriction.onProperty
+ 					if (onprop.localName.equals("bar")) {
+ 						if ((sprcls as OntClass).asRestriction.allValuesFromRestriction) {
+ 							val avfcls = (sprcls as OntClass).asRestriction.asAllValuesFromRestriction.allValuesFrom
+ 							assertTrue(avfcls.anon)
+ 							assertTrue(avfcls instanceof OntResource)
+ 							val nitr = (avfcls as OntResource).listPropertyValues(RDFS.subClassOf)
+ 							while (nitr.hasNext) {
+ 								val nd = nitr.next
+ 								if (nd.URIResource && nd.asResource.localName.equals("List")) {
+ 									found = true;
+ 								}
+ 							}
+ 						}
+ 					}
+ 				}
+ 			}
+ 			assertTrue(found)
+ 		]
 	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {

@@ -4383,11 +4383,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 								if (svf != null) {
 									cls.addSuperClass(svf);
 								} else {
-									addError(SadlErrorMessages.UNABLE_TO_CREATE.get("AllValuesFromRestriction", "Unknown reason"), spr2);
+									addError(SadlErrorMessages.UNABLE_TO_CREATE.get("SomeValuesFromRestriction", "Unknown reason"), spr2);
 								}
 							}
 							else {
-								addError(SadlErrorMessages.UNABLE_TO_ADD.get("all values from restriction", "unable to create oneOf class"), domain);
+								addError(SadlErrorMessages.UNABLE_TO_ADD.get("some values from restriction", "unable to create oneOf class"), domain);
 							}
 							retProp = prop;
 						}
@@ -6391,9 +6391,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				throw new JenaProcessorException("Failed to get concept URI of SadlResource in sadlTypeReferenceToObject");
 			}
 			if (ctype.equals(OntConceptType.CLASS)) {
-				rsrc = getTheJenaModel().getOntClass(strSRUri);
-				if (rsrc == null) {
-					return createOntClass(strSRUri, (OntClass)null);
+				if (((SadlSimpleTypeReference) sadlTypeRef).isList()) {
+					rsrc = createListSubclass(null, strSRUri, sadlTypeRef.eResource());				}
+				else {
+					rsrc = getTheJenaModel().getOntClass(strSRUri);
+					if (rsrc == null) {
+						return createOntClass(strSRUri, (OntClass)null);
+					}
 				}
 			}
 			else if (ctype.equals(OntConceptType.CLASS_LIST)) {
