@@ -5353,7 +5353,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					try {
 						StringBuilder error = new StringBuilder();
 						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val, error)) {
-							issueAcceptor.addWarning(error.toString(), propinit);
+							issueAcceptor.addError(error.toString(), propinit);
 						}
 					} catch (DontTypeCheckException e) {
 						// do nothing
