@@ -392,7 +392,7 @@ UnaryExpression<EnabledWith, EnableComma> returns Expression:
 ;
 
 ThereExists : 
-	('there' 'exists' 'a')
+	('there' 'exists') //('there' 'exists' 'a')
 ;
 
 // primary expressions are the atom units of expression in the grammar	

@@ -4014,9 +4014,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				e.printStackTrace();
 			}			
 		}
-		
+		boolean negateTriple = false;
 		if (sobj == null && subj != null) {
-			sobj = translate(subj);
+			if (subj instanceof UnaryExpression && ((UnaryExpression)subj).getOp().equals("not") && pobj != null) {
+				// treat this negation as applying to the whole triple
+				Expression subjexpr = ((UnaryExpression)subj).getExpr();
+				Object subjtr = translate(subjexpr);
+				negateTriple = true;
+				sobj = subjtr;
+			}
+			else {
+				sobj = translate(subj);
+			}
 		}
 		if (oobj == null && obj != null) {
 			oobj = translate(obj);
@@ -4025,6 +4034,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (pobj != null) {
 			returnTriple = new TripleElement(null, nodeCheck(pobj), null);
 			returnTriple.setSourceType(TripleSourceType.SPV);
+			if (negateTriple) {
+				returnTriple.setType(TripleModifierType.Not);
+			}
 		}
 		if (sobj != null) {
 			returnTriple.setSubject(nodeCheck(sobj));
@@ -4058,6 +4070,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	public Object processExpression(UnaryExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Object eobj = translate(expr.getExpr());
+		if (eobj instanceof VariableNode && ((VariableNode)eobj).isCRulesVariable() && ((VariableNode)eobj).getType() != null) {
+			TripleElement trel = new TripleElement((VariableNode)eobj, new RDFTypeNode(), ((VariableNode)eobj).getType());
+			trel.setSourceType(TripleSourceType.SPV);
+			eobj = trel;
+		}
 		String op = expr.getOp();
 		if (eobj instanceof com.ge.research.sadl.model.gp.Literal) {
 			Object val = ((com.ge.research.sadl.model.gp.Literal)eobj).getValue();
@@ -8475,8 +8492,9 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		if (cruleVariables != null) {
 			cruleVariables.clear();
 		}
-		
+		vNum = 0;	// reset system-generated variable name counter
 	}
+	
 	protected void processModelImports(Ontology modelOntology, URI importingResourceUri, SadlModel model) throws OperationCanceledError {
 		EList<SadlImport> implist = model.getImports();
 		Iterator<SadlImport> impitr = implist.iterator();

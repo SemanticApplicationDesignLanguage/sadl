@@ -1698,7 +1698,13 @@ public class IntermediateFormTranslator {
 				}
 			}
 		}
-		patterns.add(be);
+		if (be.getFuncName().equals("there exists")) {
+			patterns.add(patterns.size() - 1, be);
+			returnNode = be.getArguments().get(0);
+		}
+		else {
+			patterns.add(be);
+		}
 		return returnNode;
 	}
 	
