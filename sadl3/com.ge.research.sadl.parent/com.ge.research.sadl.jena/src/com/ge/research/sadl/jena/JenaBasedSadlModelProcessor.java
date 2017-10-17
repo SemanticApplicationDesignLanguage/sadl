@@ -3651,7 +3651,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, pred, false);
 			if (obj != null) {	// rules can have SubjHasProp expressions with null object
 				try {
-					getModelValidator().checkPropertyValueInRange(getTheJenaModel(), subj, pred, obj);
+					getModelValidator().checkPropertyValueInRange(getTheJenaModel(), subj, pred, obj, new StringBuilder());
 				} catch (DontTypeCheckException e) {
 					// don't do anything
 				} catch (Exception e) {
@@ -5354,8 +5354,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			if (val != null) {
 				if (getModelValidator() != null) {
 					try {
-						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val)) {
-							issueAcceptor.addWarning("Type check issue", propinit);
+						StringBuilder error = new StringBuilder();
+						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val, error)) {
+							issueAcceptor.addError(error.toString(), propinit);
 						}
 					} catch (DontTypeCheckException e) {
 						// do nothing

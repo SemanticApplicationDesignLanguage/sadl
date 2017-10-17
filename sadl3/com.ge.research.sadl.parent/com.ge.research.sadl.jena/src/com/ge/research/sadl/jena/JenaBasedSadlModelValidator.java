@@ -3746,7 +3746,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	public boolean checkPropertyValueInRange(OntModel theJenaModel, Expression subj, SadlResource pred, EObject val) throws CircularDefinitionException, DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+	public boolean checkPropertyValueInRange(OntModel theJenaModel, Expression subj, SadlResource pred, EObject val, StringBuilder errorMessageBuilder) throws CircularDefinitionException, DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		TypeCheckInfo predType = getType(pred);
 		if (val == null && isInQuery(pred)) {
 			return true;	// this is OK
@@ -3803,6 +3803,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //			}
 //			return checkDataPropertyValueInRange(theJenaModel, null, prop, val);
 //		}
+		
+		createErrorMessage(errorMessageBuilder, predType, valType, operations.get(0));
+		
 		return false;
 	}
 
