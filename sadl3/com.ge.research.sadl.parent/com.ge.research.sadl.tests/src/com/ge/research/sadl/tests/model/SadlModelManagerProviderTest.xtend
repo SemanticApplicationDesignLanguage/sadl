@@ -51,6 +51,8 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import com.ge.research.sadl.processing.SadlConstants
+import com.hp.hpl.jena.ontology.OntClass
+import com.hp.hpl.jena.ontology.OntResource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
@@ -634,30 +636,28 @@ class SadlModelManagerProviderTest {
 			jenaModel.write(System.out,"N-TRIPLE")
 			assertTrue(issues.size == 0)
 			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
-			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
-			assertTrue(ann.toString().equals("LIST"))
-			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
-			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
-			assertTrue(ann2.toString().equals("LIST"))
-		]
-	}
-	
-	@Test def void myPropertyWithListsDeclarationCase() {
-		'''
-			uri "http://sadl.org/model1" alias m1.
-			Thingy is a class.
-			multiValuedListProperty1 describes Thingy with values of type Thingy List.
-			multiValuedListProperty2 describes Thingy with values of type float List.
-		'''.assertValidatesTo [ jenaModel, issues |
-			// expectations go here
-			assertNotNull(jenaModel)
-			assertTrue(issues.size == 0)
-			var objprop = jenaModel.getObjectProperty("http://sadl.org/model1#multiValuedListProperty1")
-			var ann = objprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
-			assertTrue(ann.toString().equals("LIST"))
-			var dtprop = jenaModel.getDatatypeProperty("http://sadl.org/model1#multiValuedListProperty2")
-			var ann2 = dtprop.getPropertyValue(jenaModel.getAnnotationProperty(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))
-			assertTrue(ann2.toString().equals("LIST"))
+			val rngitr = objprop.listRange
+			while (rngitr.hasNext) {
+				val rng = rngitr.next
+				assertTrue(rng.anon)
+				assertTrue(rng.isClass)
+				assertTrue((rng as OntClass).hasSuperClass(jenaModel.getOntClass(SadlConstants.SADL_LIST_MODEL_LIST_URI)))
+	 			val eitr = (rng as OntClass).listSuperClasses
+	 			while (eitr.hasNext) {
+	 				val sprcls =eitr.next
+	 				if (sprcls instanceof OntClass) {
+	 					if ((sprcls as OntClass).restriction) {
+		 					val onprop = (sprcls as OntClass).asRestriction.onProperty
+		 					if (onprop.URI.equals(SadlConstants.SADL_LIST_MODEL_FIRST_URI)) {
+		 						if ((sprcls as OntClass).asRestriction.allValuesFromRestriction) {
+		 							val avfcls = (sprcls as OntClass).asRestriction.asAllValuesFromRestriction.allValuesFrom
+		 							assertTrue(avfcls.URI.equals("http://sadl.org/model1#Thingy"))
+		 						}
+		 					}
+		 				}
+	 				}
+	 			}
+			}
 		]
 	}
 	
