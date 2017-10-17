@@ -616,9 +616,57 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
  		]
 	}
 
+	@Test
+	def void testAllValuesFromUnnamedTypedList_04() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.	
+			 Mopsy is a class.		 
+			 Foo is a class described by bar with values of type Whimsy List,
+			 				described by rab with values of type Mopsy List,
+			 				described by status with values of type string.	 
+			 bar of Foo only has values of type Whimsy List.
+			 rab of Foo only has values of type Mopsy List.
+			 
+			 Rule R1: if x is a Foo and bar of x = rab of x then status of x is "this should not ever work".
+			 
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 1)
+ 			issues.get(0).message.equals("bar, an object property with range  a List of values of type Whimsy, cannot be compared (=) with rab, an object property with range  a List of values of type Mopsy.")
+ 		]
+	}
+
+	@Test
+	def void testAllValuesFromUnnamedTypedList_05() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.	
+			 WhimsyList is a type of Whimsy List.
+			 Mopsy is a class.		 
+			 MopsyList is a type of Mopsy List.
+			 Foo is a class described by bar with values of type WhimsyList,
+			 				described by rab with values of type MopsyList,
+			 				described by status with values of type string.	 
+			 bar of Foo only has values of type WhimsyList.
+			 rab of Foo only has values of type MopsyList.
+			 
+			 Rule R1: if x is a Foo and bar of x = rab of x then status of x is "this should not ever work".
+			 
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 1)
+ 			issues.get(0).message.equals("bar, an object property with range  a List of values of type WhimsyList, cannot be compared (=) with rab, an object property with range  a List of values of type MopsyList.")
+ 		]
+	}
+
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
-		validationTestHelper.assertNoErrors(model)
+//		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
 		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
