@@ -3871,7 +3871,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			else if (superElementType.equals(OntConceptType.CLASS_LIST) || superElementType.equals(OntConceptType.DATATYPE_LIST)) {
 				for (int i = 0; i < newNames.size(); i++) {
-					rsrcList.add(createListSubclass(newNames.get(i), superSRUri, superSR.eResource()));
+					rsrcList.add(getOrCreateListSubclass(newNames.get(i), superSRUri, superSR.eResource()));
 				}
 			}
 			else if (superElementType.equals(OntConceptType.CLASS_PROPERTY)) {
@@ -3915,7 +3915,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (superElement instanceof SadlPrimitiveDataType) {
 			if (isList) {
 				com.hp.hpl.jena.rdf.model.Resource spdt = getSadlPrimitiveDataTypeResource((SadlPrimitiveDataType) superElement);
-				rsrcList.add(createListSubclass(newNames.get(0), spdt.getURI(), superElement.eResource()));
+				rsrcList.add(getOrCreateListSubclass(newNames.get(0), spdt.getURI(), superElement.eResource()));
 			}
 			else {
 				com.hp.hpl.jena.rdf.model.Resource spdt = processSadlPrimitiveDataType(element, (SadlPrimitiveDataType) superElement, newNames.get(0));
@@ -5237,7 +5237,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					com.hp.hpl.jena.rdf.model.Resource rsrc = sadlTypeReferenceToResource(type);
 					if (isList) {
 						try {
-							cls = createListSubclass(null, rsrc.getURI(), type.eResource());
+							cls = getOrCreateListSubclass(null, rsrc.getURI(), type.eResource());
 						} catch (JenaProcessorException e) {
 							addError(e.getMessage(), type);
 						}
@@ -5252,7 +5252,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						cls = or.asClass();					
 						if (isList) {
 							try {
-								cls = createListSubclass(null, cls.getURI(), type.eResource());
+								cls = getOrCreateListSubclass(null, cls.getURI(), type.eResource());
 							} catch (JenaProcessorException e) {
 								addError(e.getMessage(), type);
 							}
@@ -6083,7 +6083,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return newCls;
 	}
 	
-	private OntClass createListSubclass(String newName, String typeUri, Resource resource) throws JenaProcessorException {
+	private OntClass getOrCreateListSubclass(String newName, String typeUri, Resource resource) throws JenaProcessorException {
 		if (sadlListModel == null) {
 			try {
 				importSadlListModel(resource);
@@ -6093,6 +6093,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 		}
 		OntClass lstcls = getTheJenaModel().getOntClass(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+		ExtendedIterator<OntClass> lscitr = lstcls.listSubClasses();
+		while (lscitr.hasNext()) {
+			OntClass scls = lscitr.next();
+			if (newName != null && scls.isURIResource() && newName.equals(scls.getURI())) {
+				// same class
+				return scls;
+			}
+			if (newName == null && scls.isAnon()) {
+				// both are unnamed, check type (and length restrictions in future)
+				ExtendedIterator<OntClass> spcitr = scls.listSuperClasses(true);
+				while (spcitr.hasNext()) {
+					OntClass spcls = spcitr.next();
+					if (spcls.isRestriction() && spcls.asRestriction().isAllValuesFromRestriction()) {
+						OntProperty onprop = spcls.asRestriction().getOnProperty();
+						if (onprop.isURIResource() && onprop.getURI().equals(SadlConstants.SADL_LIST_MODEL_FIRST_URI)) {
+							com.hp.hpl.jena.rdf.model.Resource avf = spcls.asRestriction().asAllValuesFromRestriction().getAllValuesFrom();
+							if (avf.isURIResource() && avf.getURI().equals(typeUri)) {
+								spcitr.close();
+								lscitr.close();
+								return scls;
+							}
+						}
+					}
+				}
+			}
+		}
 		OntClass newcls =  createOntClass(newName, lstcls);
 		com.hp.hpl.jena.rdf.model.Resource typeResource = getTheJenaModel().getResource(typeUri);
 		Property pfirst = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
@@ -6328,7 +6354,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			if (ctype.equals(OntConceptType.CLASS)) {
 				if (((SadlSimpleTypeReference) sadlTypeRef).isList()) {
-					rsrc = createListSubclass(null, strSRUri, sadlTypeRef.eResource());				}
+					rsrc = getOrCreateListSubclass(null, strSRUri, sadlTypeRef.eResource());				}
 				else {
 					rsrc = getTheJenaModel().getOntClass(strSRUri);
 					if (rsrc == null) {
@@ -6339,13 +6365,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			else if (ctype.equals(OntConceptType.CLASS_LIST)) {
 				rsrc = getTheJenaModel().getOntClass(strSRUri);
 				if (rsrc == null) {
-					return createListSubclass(strSRUri, strSRUri, strSR.eResource());
+					return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource());
 				}
 			}
 			else if (ctype.equals(OntConceptType.DATATYPE_LIST)) {
 				rsrc = getTheJenaModel().getOntClass(strSRUri);
 				if (rsrc == null) {
-					return createListSubclass(strSRUri, strSRUri, strSR.eResource());
+					return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource());
 				}
 			}
 			else if (ctype.equals(OntConceptType.INSTANCE)) {
@@ -6508,7 +6534,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	private com.hp.hpl.jena.rdf.model.Resource processSadlPrimitiveDataType(SadlClassOrPropertyDeclaration element, SadlPrimitiveDataType sadlTypeRef, String newDatatypeUri) throws JenaProcessorException {
 		com.hp.hpl.jena.rdf.model.Resource onDatatype = getSadlPrimitiveDataTypeResource(sadlTypeRef);
 		if (sadlTypeRef.isList()) {
-			onDatatype = createListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource());
+			onDatatype = getOrCreateListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource());
 		}
 		if (newDatatypeUri == null) {
 			return onDatatype;

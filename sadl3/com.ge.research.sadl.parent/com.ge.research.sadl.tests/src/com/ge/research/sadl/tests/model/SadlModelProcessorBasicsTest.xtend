@@ -40,6 +40,7 @@ import static org.junit.Assert.*
 import com.hp.hpl.jena.ontology.Restriction
 import com.hp.hpl.jena.ontology.OntResource
 import com.hp.hpl.jena.vocabulary.RDFS
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -497,6 +498,91 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 Whimsy is a class.			 
 			 Foo is a class described by bar with values of type Whimsy List.	 
 			 bar of Foo only has values of type Whimsy List.
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 0)
+ 			assertNotNull(jenaModel.getOntClass("http://sadl.org/model.sadl#Foo"))
+ 			val fooclass = jenaModel.getOntClass("http://sadl.org/model.sadl#Foo")
+ 			val eitr = fooclass.listSuperClasses
+ 			var found = false
+ 			while (eitr.hasNext) {
+ 				val sprcls =eitr.next
+ 				if (sprcls instanceof OntClass) {
+ 					val onprop = (sprcls as OntClass).asRestriction.onProperty
+ 					if (onprop.localName.equals("bar")) {
+ 						val rng = onprop.range
+ 						if ((sprcls as OntClass).asRestriction.allValuesFromRestriction) {
+ 							val avfcls = (sprcls as OntClass).asRestriction.asAllValuesFromRestriction.allValuesFrom
+ 							assertTrue(avfcls.anon)
+ 							assertTrue(avfcls instanceof OntResource)
+ 							assertTrue(avfcls.equals(rng)		// this is the test to see that only one class of type "Whimsy List" is created
+ 							)
+ 							val nitr = (avfcls as OntResource).listPropertyValues(RDFS.subClassOf)
+ 							while (nitr.hasNext) {
+ 								val nd = nitr.next
+ 								if (nd.URIResource && nd.asResource.localName.equals("List")) {
+ 									found = true;
+ 								}
+ 							}
+ 						}
+ 					}
+ 				}
+ 			}
+ 			assertTrue(found)
+ 		]
+	}
+
+	@Ignore ("This can't pass until the newer grammar is being used so that unnamed typed lists can have length restrictions")
+	@Test
+	def void testAllValuesFromUnnamedTypedList_02() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.			 
+			 Foo is a class described by bar with values of type Whimsy List length 1-4.	 
+			 bar of Foo only has values of type Whimsy List length 1-4.
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 0)
+ 			assertNotNull(jenaModel.getOntClass("http://sadl.org/model.sadl#Foo"))
+ 			val fooclass = jenaModel.getOntClass("http://sadl.org/model.sadl#Foo")
+ 			val eitr = fooclass.listSuperClasses
+ 			var found = false
+ 			while (eitr.hasNext) {
+ 				val sprcls =eitr.next
+ 				if (sprcls instanceof OntClass) {
+ 					val onprop = (sprcls as OntClass).asRestriction.onProperty
+ 					if (onprop.localName.equals("bar")) {
+ 						if ((sprcls as OntClass).asRestriction.allValuesFromRestriction) {
+ 							val avfcls = (sprcls as OntClass).asRestriction.asAllValuesFromRestriction.allValuesFrom
+ 							assertTrue(avfcls.anon)
+ 							assertTrue(avfcls instanceof OntResource)
+ 							val nitr = (avfcls as OntResource).listPropertyValues(RDFS.subClassOf)
+ 							while (nitr.hasNext) {
+ 								val nd = nitr.next
+ 								if (nd.URIResource && nd.asResource.localName.equals("List")) {
+ 									found = true;
+ 								}
+ 							}
+ 						}
+ 					}
+ 				}
+ 			}
+ 			assertTrue(found)
+ 		]
+	}
+
+	@Ignore ("This can't pass until the newer grammar is being used so that unnamed typed lists can have length restrictions")
+	@Test
+	def void testAllValuesFromUnnamedTypedList_03() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.			 
+			 Foo is a class described by bar with values of type Whimsy List length 1-4.	 
+			 bar of Foo only has values of type Whimsy List length 1-*.
 		'''.assertValidatesTo [ jenaModel, issues |
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out, "RDF/XML-ABBREV")
