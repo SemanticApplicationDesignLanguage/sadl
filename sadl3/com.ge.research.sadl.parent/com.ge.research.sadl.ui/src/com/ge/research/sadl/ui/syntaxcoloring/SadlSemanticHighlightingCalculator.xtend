@@ -68,7 +68,7 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 				acceptor.addPosition(node.offset, node.length, SadlHighlightingConfiguration.URI_ID)
 			}
 		}
-		for (element : model.eAllContents.toList) {
+		for (element : model.eAllContents.toList.filter[!SadlASTUtils.isUnit(it)]) {
 			var v = element
 			if (element instanceof Name) {
 				v = element.name
@@ -87,23 +87,21 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}
 				SadlResource : {
-					if (!SadlASTUtils.isUnit(v)) {						
-						var nodes = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME)
-						var highlightingId = switch element {
-							Name case element.isFunction : SadlHighlightingConfiguration.FUNCTION_NAME_ID
-							default : getHighlightingId(v)
-						}
-						val start = nodes.head.offset
-						val end =  nodes.last.offset + nodes.last.length - start
-						acceptor.addPosition(start, end, highlightingId)
+					var nodes = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME)
+					var highlightingId = switch element {
+						Name case element.isFunction : SadlHighlightingConfiguration.FUNCTION_NAME_ID
+						default : getHighlightingId(v)
 					}
+					val start = nodes.head.offset
+					val end =  nodes.last.offset + nodes.last.length - start
+					acceptor.addPosition(start, end, highlightingId)
 				}
 				SadlPropertyCondition : {
 					var highlightingId = getHighlightingId(v.property)
 					acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_CONDITION__PROPERTY, highlightingId)
 				}
 				SadlPropertyInitializer : {
-					if (v.property != null) {
+					if (v.property !== null) {
 						var highlightingId = getHighlightingId(v.property)
 						acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_INITIALIZER__PROPERTY, highlightingId)
 					}

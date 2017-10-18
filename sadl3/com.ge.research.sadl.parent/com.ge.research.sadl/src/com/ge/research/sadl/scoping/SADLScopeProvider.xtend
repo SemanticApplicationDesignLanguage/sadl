@@ -61,6 +61,9 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
+import com.ge.research.sadl.utils.SadlASTUtils
+
+import static extension com.ge.research.sadl.utils.SadlASTUtils.*
 
 /**
  * This class contains custom scoping description.
@@ -208,7 +211,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		val map = newHashMap
 		for (expression : expressions) {
-			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate)
+			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate).filter[!unit]
 			while (iter.hasNext) {
 				val name = iter.next
 				val concreteName = name.concreteName
@@ -445,7 +448,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			canAdd = !obj.inExternalOrLocalEquationStatement
 				&& !obj.inExpression
 				&& !obj.inQueryStatement
-				&& !obj.inRuleStatement;
+				&& !obj.inRuleStatement
+				&& !obj.unit
 		}
 		return canAdd && !scope.containsKey(qn);
 	}

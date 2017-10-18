@@ -4126,12 +4126,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	
 	public Object processExpression(UnitExpression expr) {
 		String unit = expr.getUnit();
-		NumberLiteral value = (NumberLiteral) expr.getLeft();
-		Object valobj = translate(value);
-		if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
-			((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
+		Expression value = expr.getLeft();
+		Object valobj;
+		try {
+			valobj = translate(value);
+			if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
+				((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
+			}
+			return valobj;
+		} catch (TranslationException e) {
+			addError(e.getMessage(), expr);
+		} catch (InvalidNameException e) {
+			addError(e.getMessage(), expr);
+		} catch (InvalidTypeException e) {
+			addError(e.getMessage(), expr);
 		}
-		return valobj;
+		return null;
 	}
 	
 //	public Object processExpression(SubjHasProp expr) {
