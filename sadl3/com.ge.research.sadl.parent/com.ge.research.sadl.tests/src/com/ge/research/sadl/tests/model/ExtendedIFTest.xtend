@@ -434,7 +434,7 @@ class ExtendedIFTest extends AbstractProcessorTest {
 	def void testUnits_09() {
 		'''
 			uri "http://sadl.org/testunits" alias tu.
-			Expr: PI seconds.
+			Expr: PI "seconds".
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
