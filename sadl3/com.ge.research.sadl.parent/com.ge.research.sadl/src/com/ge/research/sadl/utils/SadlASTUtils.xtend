@@ -17,10 +17,15 @@
  ***********************************************************************/
 package com.ge.research.sadl.utils
 
-import com.ge.research.sadl.sADL.SubjHasProp
-import org.eclipse.emf.ecore.EObject
+import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.NumberLiteral
 import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.sADL.SubjHasProp
+import com.ge.research.sadl.sADL.UnitExpression
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.resource.XtextResource
+
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
  * Static utility class for SADL AST elements.
@@ -47,19 +52,22 @@ class SadlASTUtils {
 	 */
 	static def boolean isUnitExpression(EObject it) {
 		if (it instanceof SubjHasProp) {
-			return left instanceof NumberLiteral && right === null /* && prop instanceof SadlResource */; 
+			return left instanceof NumberLiteral && right === null && prop.unit; 
 		}
-		return false;
+		return it instanceof UnitExpression;
 	}
 	
 	/**
-	 * Returns with the unit (as a SADL resource) from the unit expression like argument.
+	 * Returns with the unit from the unit expression like argument as string.
 	 * Returns with {@code null} if the argument is *not* a unit expression, more formally,
 	 * when {@link #isUnitExpression(EObject)} is {@code false}, or the property is {@code null}.
 	 */
-	static def SadlResource getUnit(EObject it) {
+	static def String getUnitAsString(EObject it) {
 		if (unitExpression) {
-			return (it as SubjHasProp).prop;
+			val prop = (it as SubjHasProp).prop;
+			return if (prop === null) null else declarationExtensions.getConcreteName(prop);
+		} else if (it instanceof UnitExpression) {
+			return unit;
 		}
 		return null;
 	}
@@ -69,10 +77,36 @@ class SadlASTUtils {
 	 * like. Otherwise, returns {@code null}.
 	 */
 	static def NumberLiteral getValue(EObject it) {
-		if (unitExpression) {
+		if (it instanceof UnitExpression) {
+			return it.left as NumberLiteral
+		} else if (unitExpression) {
 			return (it as SubjHasProp).left as NumberLiteral;
-		}
+		} 
 		return null;
+	}
+	
+	/**
+	 * {@code true} if the argument is a SADL resource which represents a non-quoted unit in a unit expression like construct.
+	 * Otherwise, {@code false}.
+	 */
+	static def boolean isUnit(EObject it) {
+		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
+			val container = eContainer as SubjHasProp;
+			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.left instanceof NumberLiteral && container.right === null; 
+		}
+		return false;
+	}
+	
+	/**
+	 * Helper for getting the declaration extension in code that does not use Guice.
+	 */
+	private static def getDeclarationExtensions(EObject it) {
+		if (eResource instanceof XtextResource) {
+			val serviceProvider = (eResource as XtextResource).resourceServiceProvider;
+			return serviceProvider.get(DeclarationExtensions);
+		}
+		// LOGGER.warn('''Object «it» is not contained in an «XtextResource.simpleName». Creating and using a new «DeclarationExtensions.simpleName» instance.''');
+		return new DeclarationExtensions();
 	}
 
 }
