@@ -315,9 +315,19 @@ class ExtendedIFTest extends AbstractProcessorTest {
 					print(issue.message + "\n")
 				}
 			}
-			if (rules != null) {
-				for (rule:rules) {
-					print(rule.toString + "\n")
+		]
+	}
+
+	@Test
+	def void testUnits_02() {
+		val sadlModel = '''
+			uri "http://sadl.org/testunits" as tu.
+			Expr: 2 "seconds".
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues |
+ 			assertNotNull(jenaModel)
+	 		if (issues !== null) {
+				for (issue:issues) {
+					print(issue.message + "\n")
 				}
 			}
 		]
