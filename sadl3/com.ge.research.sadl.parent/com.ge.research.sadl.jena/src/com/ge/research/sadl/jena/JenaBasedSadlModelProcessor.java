@@ -5453,35 +5453,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		addValueToList(null, inst, cls, to, values);
 	}
 	
-	private Individual addValueToList(Individual lastInst, Individual inst, OntClass cls, com.hp.hpl.jena.rdf.model.Resource type, 
-			Iterator<SadlExplicitValue> valueIterator) {
-		if (inst == null) {
-			inst = getTheJenaModel().createIndividual(cls);
-		}
-		SadlExplicitValue val = valueIterator.next();
-		if (val instanceof SadlResource) {
-			Individual listInst;
-			try {
-				listInst = createIndividual((SadlResource)val, ((OntResource)type).as(OntClass.class));
-				ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> itr = listInst.listRDFTypes(false);
-				boolean match = false;
-				while (itr.hasNext()) {
-					com.hp.hpl.jena.rdf.model.Resource typ = itr.next();
-					if (typ.equals(type)) {
-						match = true;
-					}
-				}
-				if (!match) {
-					addError("The Instance '" + listInst.toString() + "' doesn't match the List type.", val);
-				}
-				getTheJenaModel().add(inst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI), listInst);
-			} catch (JenaProcessorException e) {
-				addError(e.getMessage(), val);
-			} catch (TranslationException e) {
-				addError(e.getMessage(), val);
-			}
-		}
-		else {
+    private Individual addValueToList(Individual lastInst, Individual inst, OntClass cls, com.hp.hpl.jena.rdf.model.Resource type, Iterator<SadlExplicitValue> valueIterator) {
+    	if (inst == null) {
+    		inst = getTheJenaModel().createIndividual(cls);
+    	}
+    	SadlExplicitValue val = valueIterator.next();
+    	if (val instanceof SadlResource) {
+    		Individual listInst;
+	        try {
+	        	if (type.canAs(OntClass.class)) { 
+	        		listInst = createIndividual((SadlResource)val, type.as(OntClass.class));
+	        		ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> itr = listInst.listRDFTypes(false);
+	        		boolean match = false;
+	                while (itr.hasNext()) {
+	                	com.hp.hpl.jena.rdf.model.Resource typ = itr.next();
+	                    if (typ.equals(type)) {
+	                    	match = true;
+                        }
+	                }
+	                if (!match) {
+	                	addError("The Instance '" + listInst.toString() + "' doesn't match the List type.", val);
+                	}
+	                getTheJenaModel().add(inst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI), listInst);
+	            }
+	            else {
+	            	addError("The type of the list could not be converted to a class.", val);
+	            }
+	        } catch (JenaProcessorException e) {
+	              addError(e.getMessage(), val);
+	        } catch (TranslationException e) {
+	              addError(e.getMessage(), val);
+	        }
+    	}
+    	else {
 			Literal lval;
 			try {
 				lval = sadlExplicitValueToLiteral((SadlExplicitValue)val, type);
