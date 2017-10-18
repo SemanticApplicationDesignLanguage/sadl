@@ -18,6 +18,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
+import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -25,12 +26,10 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SelectExpression
 import com.ge.research.sadl.sADL.TestStatement
+import com.google.inject.Inject
 import org.eclipse.xtext.util.EmfFormatter
 import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
-import com.google.inject.Inject
-import com.ge.research.sadl.model.DeclarationExtensions
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
