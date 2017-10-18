@@ -203,6 +203,7 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
+import com.ge.research.sadl.sADL.UnitExpression;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.utils.PathToFileUriConverter;
@@ -210,6 +211,7 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 //import com.ge.research.sadl.server.SessionNotFoundException;
 //import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.ge.research.sadl.utils.SadlASTUtils;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -1033,7 +1035,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				processStatement((QueryStatement)element);
 			}
 			else if (element instanceof SadlResource) {
-				processStatement((SadlResource)element);
+				if (!SadlASTUtils.isUnit(element)) {
+					processStatement((SadlResource)element);					
+				}
 			}
 			else if (element instanceof TestStatement) {
 				processStatement((TestStatement)element);
@@ -2651,6 +2655,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		else if (expr instanceof ConstructExpression) {
 			return processExpression((ConstructExpression)expr);
 		}
+		else if (expr instanceof UnitExpression) {
+			return processExpression((UnitExpression) expr);
+		}
 		else if (expr != null){
 			throw new TranslationException("Unhandled rule expression type: " + expr.getClass().getCanonicalName());
 		}
@@ -4115,6 +4122,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			throw new TranslationException("Expected node, got '" + eobj.getClass().getCanonicalName() + "'");
 		}
 		return bi;
+	}
+	
+	public Object processExpression(UnitExpression expr) {
+		String unit = expr.getUnit();
+		NumberLiteral value = (NumberLiteral) expr.getLeft();
+		Object valobj = translate(value);
+		if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
+			((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
+		}
+		return valobj;
 	}
 	
 //	public Object processExpression(SubjHasProp expr) {

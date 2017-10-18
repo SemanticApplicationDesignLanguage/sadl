@@ -42,6 +42,7 @@ import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.ui.resource.ProjectByResourceProvider
+import com.ge.research.sadl.utils.SadlASTUtils
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -86,14 +87,16 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}
 				SadlResource : {
-					var nodes = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME)
-					var highlightingId = switch element {
-						Name case element.isFunction : SadlHighlightingConfiguration.FUNCTION_NAME_ID
-						default : getHighlightingId(v)
+					if (!SadlASTUtils.isUnit(v)) {						
+						var nodes = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME)
+						var highlightingId = switch element {
+							Name case element.isFunction : SadlHighlightingConfiguration.FUNCTION_NAME_ID
+							default : getHighlightingId(v)
+						}
+						val start = nodes.head.offset
+						val end =  nodes.last.offset + nodes.last.length - start
+						acceptor.addPosition(start, end, highlightingId)
 					}
-					val start = nodes.head.offset
-					val end =  nodes.last.offset + nodes.last.length - start
-					acceptor.addPosition(start, end, highlightingId)
 				}
 				SadlPropertyCondition : {
 					var highlightingId = getHighlightingId(v.property)
