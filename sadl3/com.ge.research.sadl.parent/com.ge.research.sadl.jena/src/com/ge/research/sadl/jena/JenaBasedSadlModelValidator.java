@@ -76,6 +76,7 @@ import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
+import com.ge.research.sadl.sADL.UnitExpression;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.ge.research.sadl.utils.SadlASTUtils;
@@ -941,6 +942,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo litTci = new TypeCheckInfo(numberLiteralConceptName, litval, ExplicitValueType.VALUE, this, expression); 
 			litTci.setTypeCheckType(numberLiteralConceptName);
 			return litTci;
+		}
+		else if (expression instanceof UnitExpression) {
+			return getType(((UnitExpression) expression).getLeft());
 		}
 		else if(expression instanceof BooleanLiteral || expression instanceof SadlBooleanLiteral){
 			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());

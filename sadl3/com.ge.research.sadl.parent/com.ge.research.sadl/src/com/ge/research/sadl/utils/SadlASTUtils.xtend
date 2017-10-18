@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.resource.XtextResource
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import com.ge.research.sadl.sADL.BinaryOperation
 
 /**
  * Static utility class for SADL AST elements.
@@ -52,7 +53,7 @@ class SadlASTUtils {
 	 */
 	static def boolean isUnitExpression(EObject it) {
 		if (it instanceof SubjHasProp) {
-			return left instanceof NumberLiteral && right === null && prop.unit; 
+			return (left instanceof NumberLiteral || left instanceof BinaryOperation) && right === null && prop.unit; 
 		}
 		return it instanceof UnitExpression;
 	}
@@ -92,7 +93,8 @@ class SadlASTUtils {
 	static def boolean isUnit(EObject it) {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
 			val container = eContainer as SubjHasProp;
-			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.left instanceof NumberLiteral && container.right === null; 
+			val left = container.left;
+			return eContainingFeature === SUBJ_HAS_PROP__PROP && (left instanceof NumberLiteral || left instanceof BinaryOperation) && container.right === null; 
 		}
 		return false;
 	}
