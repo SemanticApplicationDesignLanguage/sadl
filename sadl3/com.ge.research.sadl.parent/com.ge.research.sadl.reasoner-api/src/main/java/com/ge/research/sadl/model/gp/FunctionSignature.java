@@ -24,7 +24,9 @@ public class FunctionSignature {
 			if(!this.getParameterTypes()[i].isEmpty()){
 				sb.append(this.getParameterTypes()[i]);
 				if (!this.getParameterTypes()[i].equals("--")) {
-					sb.append(" X");
+					if (!this.getParameterTypes()[i].equals("...")) {
+						sb.append(" X");
+					}
 					if(i != this.getParameterTypes().length - 1){
 						sb.append(", ");
 					}

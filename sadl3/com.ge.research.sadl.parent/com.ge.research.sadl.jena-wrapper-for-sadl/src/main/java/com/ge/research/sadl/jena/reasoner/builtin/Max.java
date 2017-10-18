@@ -18,21 +18,15 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import java.util.Date;
-
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.impl.LiteralLabelFactory;
 import com.hp.hpl.jena.reasoner.rulesys.BindingEnvironment;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
 import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 import com.hp.hpl.jena.reasoner.rulesys.Util;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.XSD;
 
-public class Max extends BaseBuiltin {
+public class Max extends TypedBaseBuiltin {
 	
 	private int argLength = 0;
 
@@ -55,6 +49,10 @@ public class Max extends BaseBuiltin {
     	argLength = len;
     }
 
+	@Override
+	public String getFunctionSignatureString() {
+		return "max(decimal,decimal,...)decimal";
+	}
     /**
      * This method is invoked when the builtin is called in a rule body.
      * @param args the array of argument values for the builtin, this is an array 

@@ -9,6 +9,7 @@
 package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.scoping.TestScopeProvider
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
 import com.google.common.base.Stopwatch
 import com.google.inject.Inject
 import java.util.concurrent.TimeUnit
@@ -21,7 +22,7 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-class SadlModelProcessorAmbiguousNamesTest extends AbstractProcessorTest {
+class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLParsingTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	

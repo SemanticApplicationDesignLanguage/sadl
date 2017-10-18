@@ -8,6 +8,7 @@
  */
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
 import com.google.inject.Inject
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
@@ -16,7 +17,7 @@ import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
 //@InjectWith(RequirementsInjectorProvider)
-class SadlModelProcessorCircularImportsTest extends AbstractProcessorTest {
+class SadlModelProcessorCircularImportsTest extends AbstractSADLParsingTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	

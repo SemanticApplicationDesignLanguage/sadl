@@ -28,7 +28,6 @@ import com.ge.research.sadl.sADL.ExternalEquationStatement
 import com.ge.research.sadl.sADL.PropOfSubject
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.RuleStatement
-import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 import com.ge.research.sadl.sADL.SadlImport
@@ -36,6 +35,7 @@ import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlMustBeOneOf
 import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
+import com.ge.research.sadl.sADL.SadlNestedInstance
 import com.ge.research.sadl.sADL.SadlParameterDeclaration
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SadlResource
@@ -61,9 +61,8 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
-import com.ge.research.sadl.utils.SadlASTUtils
 
-import static extension com.ge.research.sadl.utils.SadlASTUtils.*
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
  * This class contains custom scoping description.
@@ -72,6 +71,11 @@ import static extension com.ge.research.sadl.utils.SadlASTUtils.*
  * on how and when to use it.
  */
 class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
+	
+	/**
+	 * Flag for enabling additional logging during debugging.
+	 */
+	static val DEBUG_FLAG = Debug.FALSE;
 
 	@Inject protected extension DeclarationExtensions
 	@Inject protected IQualifiedNameConverter converter
@@ -80,65 +84,75 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	boolean ambiguousNameDetection;
 	
-	val LocalScopeProvider localScope_01 = [resource, namespace, parentScope, importScope |
+	val LocalScopeProvider localScope_01 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADLPackage.Literals.SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
-					|| eContainer instanceof SadlProperty && (eContainer as SadlProperty).isPrimaryDeclaration() && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF;
+				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
+					|| eContainer instanceof SadlProperty && (eContainer as SadlProperty).isPrimaryDeclaration() && eContainingFeature == SADL_PROPERTY__NAME_OR_REF;
 					
 			} 
 			return false;
 		];
-	];
+	], '01');
 	
-	val LocalScopeProvider localScope_02 = [resource, namespace, parentScope, importScope |
+	val LocalScopeProvider localScope_02 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_OR_REF
-					|| eContainer instanceof SadlProperty && eContainingFeature == SADLPackage.Literals.SADL_PROPERTY__NAME_DECLARATIONS;
+				return eContainer instanceof SadlProperty && eContainingFeature == SADL_PROPERTY__NAME_OR_REF
+					|| eContainer instanceof SadlProperty && eContainingFeature == SADL_PROPERTY__NAME_DECLARATIONS;
 			} 
 			return false;
 		];
-	];
+	], '02');
 
 	// only if (https://github.com/crapo/sadlos2/issues/215)
-	val LocalScopeProvider localScope_03 = [resource, namespace, parentScope, importScope |
+	val LocalScopeProvider localScope_03 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlNecessaryAndSufficient && eContainingFeature == SADLPackage.Literals.SADL_NECESSARY_AND_SUFFICIENT__OBJECT;
+				return eContainer instanceof SadlNecessaryAndSufficient && eContainingFeature == SADL_NECESSARY_AND_SUFFICIENT__OBJECT;
 			} 
 			return false;
 		];
-	];
+	], '03');
 	
-	val LocalScopeProvider localScope_04 = [resource, namespace, parentScope, importScope |
+	// SADL nested instance support: https://github.com/crapo/sadlos2/issues/250
+	val LocalScopeProvider localScope_04 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlInstance && eContainingFeature == SADLPackage.Literals.SADL_INSTANCE__NAME_OR_REF;
+				return eContainer instanceof SadlNestedInstance && eContainingFeature == SADL_INSTANCE__INSTANCE;
 			} 
 			return false;
 		];
-	];
+	], '04');
+	
+	val LocalScopeProvider localScope_05 = namedScopeProvider([resource, namespace, parentScope, importScope |
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
+			if (it instanceof SadlResource) {
+				return eContainer instanceof SadlInstance && eContainingFeature == SADL_INSTANCE__NAME_OR_REF;
+			} 
+			return false;
+		];
+	], '05');
 
-		val LocalScopeProvider localScope_05 = [resource, namespace, parentScope, importScope |
+	val LocalScopeProvider localScope_06 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				return (eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_MUST_BE_ONE_OF__VALUES) ||
-				(eContainer instanceof SadlCanOnlyBeOneOf && eContainingFeature == SADLPackage.Literals.SADL_CAN_ONLY_BE_ONE_OF__VALUES);
+				return (eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADL_MUST_BE_ONE_OF__VALUES) ||
+				(eContainer instanceof SadlCanOnlyBeOneOf && eContainingFeature == SADL_CAN_ONLY_BE_ONE_OF__VALUES);
 			} 
 			return false;
 		];
-	];
+	], '06');
 	
 	
 	override getScope(EObject context, EReference reference) {
 		val ctxrsrc = context.eResource();
 		setAmbiguousNameDetection(TestScopeProvider.getDetectAmbiguousNames(ctxrsrc));
 		// resolving imports against external models goes directly to the global scope
-		if (reference.EReferenceType === SADLPackage.Literals.SADL_MODEL) {
+		if (reference.EReferenceType === SADL_MODEL) {
 			return super.getGlobalScope(context.eResource, reference)
 		}
-		if (SADLPackage.Literals.SADL_RESOURCE.isSuperTypeOf(reference.EReferenceType)) {
+		if (SADL_RESOURCE.isSuperTypeOf(reference.EReferenceType)) {
 			val result = getSadlResourceScope(context, reference)
 			return result
 		}
@@ -190,7 +204,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 			if (container instanceof BinaryOperation) {
 				if (container.op == 'is' || container.op == '==' || container.op == '=' ||
-					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, SelectExpression) !== null) // we are in the middle of a select expression.
+					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, SelectExpression) !== null) || // we are in the middle of a select expression.
+					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, RuleStatement) !== null)    // we are in the middle of a rule statement (GH-245).
 				) {
 					return true;
 				}
@@ -211,7 +226,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		val map = newHashMap
 		for (expression : expressions) {
-			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate).filter[!unit]
+			val iter = EcoreUtil2.getAllContents(expression, false).filter(SadlResource).filter(predicate)
 			while (iter.hasNext) {
 				val name = iter.next
 				val concreteName = name.concreteName
@@ -239,12 +254,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 			val importScope = newParent;
 			val aliasToUse = alias ?: resource.getAlias
-			val namespace = if (aliasToUse!==null) QualifiedName.create(aliasToUse) else null
+			val namespace = if(aliasToUse !== null) QualifiedName.create(aliasToUse) else null
 			
 			// Get an ordered collection of local scope providers which are used to determine
 			// the precedence of the SADL resources. In other words, which one should be the declarations
 			// which one should be the reference.
 			for (scopeProvider : localScopeProviders) {
+				if (DEBUG) {
+					println('''Processing scope provider: «scopeProvider.name».''');
+				}
 				newParent = scopeProvider.getLocalScope(resource, namespace, newParent, importScope);
 			}
 			
@@ -260,7 +278,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			localScope_02,
 			localScope_03,
 			localScope_04,
-			localScope_05
+			localScope_05,
+			localScope_06
 		);
 	}
 	
@@ -380,7 +399,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		if (importedSymbols.isEmpty) {
 			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl")) {
-				val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
+				val element = getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
 				if (element !== null) {
 					val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 					if (eobject !== null) {
@@ -393,7 +412,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 		if (!resource.URI.toString.endsWith("SadlBuiltinFunctions.sadl")) {
-			val element = getGlobalScope(resource, SADLPackage.Literals.SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
+			val element = getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
 			if (element !== null) {
 				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 				if (eobject !== null) {
@@ -448,8 +467,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			canAdd = !obj.inExternalOrLocalEquationStatement
 				&& !obj.inExpression
 				&& !obj.inQueryStatement
-				&& !obj.inRuleStatement
-				&& !obj.unit
+				&& !obj.inRuleStatement;
 		}
 		return canAdd && !scope.containsKey(qn);
 	}
@@ -486,6 +504,23 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	/**
+	 * Sugar for having a name for the local scope provider. This is only for debugging purposes. 
+	 */
+	protected static def LocalScopeProvider namedScopeProvider(LocalScopeProvider delegate, String theName) {
+		return new LocalScopeProvider() {
+			
+			override getLocalScope(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope) {
+				return delegate.getLocalScope(resource, namespace, parentScope, importScope);
+			}
+			
+			override getName() {
+				return theName;
+			}
+			
+		}
+	}
+	
+	/**
 	 * Local helper that is used to modify the declaration/reference precedences of the SADL resources inside a SADL model.
 	 */
 	protected static interface LocalScopeProvider {
@@ -496,6 +531,30 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		 */
 		def IScope getLocalScope(Resource resource, QualifiedName namespace, IScope parentScope, IScope importScope);
 		
+		/**
+		 * Prints the name of the local scope provider.
+		 * This is just some sugar for debugging.
+		 */
+		def String getName() {
+			return toString;
+		}
+		
+	}
+	
+	//----------------------------------------
+	// Helper things.
+	//----------------------------------------
+	
+	/**
+	 * Hack to have a static flag bug no warnings due to dead code.
+	 */
+	static enum Debug {
+		TRUE,
+		FALSE
+	}
+
+	static def boolean isDEBUG() {
+		return DEBUG_FLAG === Debug.TRUE;
 	}
 	
 }

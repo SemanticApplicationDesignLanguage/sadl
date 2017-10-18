@@ -38,10 +38,11 @@ import com.hp.hpl.jena.ontology.AllValuesFromRestriction
 import com.hp.hpl.jena.ontology.OntClass
 import com.hp.hpl.jena.ontology.OntResource
 import com.hp.hpl.jena.vocabulary.OWL
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorBasicsTest extends AbstractProcessorTest {
+class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 	
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper

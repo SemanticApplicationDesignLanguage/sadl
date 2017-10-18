@@ -27,6 +27,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import javax.inject.Inject;
@@ -243,10 +244,20 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 	    if (downloadUrl != null && !downloadUrl.isEmpty() && !downloadUrl.startsWith("--")) {
 			try {
 				Properties p = System.getProperties();
-				p.put("http.proxyHost", "http-proxy.ae.ge.com");
-				p.put("http.proxyPort", "80");
-				p.put("https.proxyHost", "http-proxy.ae.ge.com");
-				p.put("https.proxyPort", "80");
+				Iterator<Object> pitr = p.keySet().iterator();
+				while (pitr.hasNext()) {
+					Object key = pitr.next();
+					Object prop = p.get(key);
+					System.out.println("Key=" + key.toString() + ", value = " + prop.toString());
+				}
+//				p.put("http.proxyHost", "http-proxy.ae.ge.com");
+//				p.put("http.proxyPort", "80");
+//				p.put("https.proxyHost", "http-proxy.ae.ge.com");
+//				p.put("https.proxyPort", "80");
+				p.put("http.proxyHost", "proxy-src.research.ge.com");
+				p.put("http.proxyPort", "8080");
+				p.put("https.proxyHost", "proxy-src.research.ge.com");
+				p.put("https.proxyPort", "8080");
 				System.setProperties(p);
 				url = new URL(downloadUrl);
 				is = url.openStream(); // throws an IOException

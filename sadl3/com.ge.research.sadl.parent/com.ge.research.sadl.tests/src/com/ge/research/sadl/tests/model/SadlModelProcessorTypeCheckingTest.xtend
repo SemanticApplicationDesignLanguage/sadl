@@ -17,10 +17,11 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Ignore
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorTypeCheckingTest extends AbstractProcessorTest {
+class SadlModelProcessorTypeCheckingTest extends AbstractSADLParsingTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	

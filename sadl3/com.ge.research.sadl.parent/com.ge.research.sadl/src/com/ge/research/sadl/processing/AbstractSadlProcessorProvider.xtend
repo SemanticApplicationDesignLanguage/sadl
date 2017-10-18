@@ -80,7 +80,7 @@ abstract class AbstractSadlProcessorProvider<P, R> {
 				loadFromSpi(processorClass);
 			}
 		builder.putAll(manuallyAddedProcessors);
-		ImmutableSet.copyOf(builder.build.values.map[get]);
+		return ImmutableSet.copyOf(builder.build.values.map[get]);
 	}
 
 	/**

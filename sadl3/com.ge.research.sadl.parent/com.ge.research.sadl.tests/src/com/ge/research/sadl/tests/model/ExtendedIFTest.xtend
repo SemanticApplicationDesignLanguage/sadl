@@ -34,10 +34,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.tests.AbstractSADLParsingTest
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class ExtendedIFTest extends AbstractProcessorTest {
+class ExtendedIFTest extends AbstractSADLParsingTest {
 
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper

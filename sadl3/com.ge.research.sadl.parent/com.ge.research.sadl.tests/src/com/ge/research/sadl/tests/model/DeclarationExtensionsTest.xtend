@@ -197,6 +197,22 @@ class DeclarationExtensionsTest {
 		assertEquals(OntConceptType.CLASS, name2resource.get('Rock').ontConceptType)
 	}
 	
+	@Test def void testGetOntConceptType_08() {
+		val model = '''
+			uri "http://sadl.imp/relationship" alias rel.
+			
+			Person is a class.
+			Pet is a class.
+			
+			relationship of Person to Pet is owns.
+		'''.parse
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		
+		assertEquals(OntConceptType.CLASS, name2resource.get('Person').ontConceptType)
+		assertEquals(OntConceptType.CLASS, name2resource.get('Pet').ontConceptType)
+		assertEquals(OntConceptType.CLASS_PROPERTY, name2resource.get('owns').ontConceptType)
+	}
+	
 	@Test def void testEscapedName() {
 		val model = '''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen. 

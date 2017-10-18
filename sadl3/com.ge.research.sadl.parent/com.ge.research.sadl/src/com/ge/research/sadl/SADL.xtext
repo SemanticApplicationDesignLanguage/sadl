@@ -65,7 +65,7 @@ fragment EquationSignature returns AbstractSadlEquation:
 
 SadlParameterDeclaration:
 		type=SadlPrimaryTypeReference name=SadlResource
-	|  unknown='--'
+	|   unknown='--'
 	|   ellipsis='...'
 ;
 
@@ -339,7 +339,7 @@ AndExpression<EnabledWith, EnableComma> returns Expression:
 
 OpAnd:
 	'and' | '&&';
-
+	
 EqualityExpression<EnabledWith, EnableComma> returns Expression:
 	RelationalExpression<EnabledWith, EnableComma> ({BinaryOperation.left=current} op=InfixOperator right=RelationalExpression<EnabledWith, EnableComma>)*;
 
@@ -396,7 +396,7 @@ UnaryExpression<EnabledWith, EnableComma> returns Expression:
 ;
 
 ThereExists : 
-	('there' 'exists') //('there' 'exists' 'a')
+	('there' 'exists')
 ;
 
 // primary expressions are the atom units of expression in the grammar	

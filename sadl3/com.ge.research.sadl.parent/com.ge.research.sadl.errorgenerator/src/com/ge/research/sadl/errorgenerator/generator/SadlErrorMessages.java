@@ -99,6 +99,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage PROPERTY_RESTRICTIONS = new SadlErrorMessage("property_restrictions");
 /**
+* Controlled variable must have a range of type Boolean or a range of exactly two instances in order to be used with an "Only When" clause.
+**/
+    public static final SadlErrorMessage CONTROL_VARIABLE_INAPPLICABLE_FOR_ONLY_WHEN = new SadlErrorMessage("control_variable_inapplicable_for_only_when");
+/**
 * {0} is undefined. Please define the {1} before referencing it.
 **/
     public static final SadlErrorMessage UNDEFINED = new SadlErrorMessage("undefined");
@@ -235,6 +239,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNEXPECTED_TRIPLE = new SadlErrorMessage("unexpected_triple");
 /**
+* Comparison using {0} cannot have a constant or literal on both sides.
+**/
+    public static final SadlErrorMessage COMPARISON_LITERALS_CONSTANTS = new SadlErrorMessage("comparison_literals_constants");
+/**
 * type checking doesn't handle {0}
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
@@ -250,6 +258,10 @@ public final class SadlErrorMessages {
 * Unhandled {0}: ''{1}''
 **/
     public static final SadlErrorMessage UNHANDLED = new SadlErrorMessage("unhandled");
+/**
+* ''{0}'' is not a property
+**/
+    public static final SadlErrorMessage INVALID_USE_OF_CLASS_AS_PROPERTY = new SadlErrorMessage("invalid_use_of_class_as_property");
 /**
 * {0} is not in domain of property {1} 
 **/

@@ -1202,23 +1202,109 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
-	@Ignore("#215: If possible, the declaration of DATA2 should be as indicated. If not possible, we need to detect error (Andy can do) and provide quick fix to insert previous line into model")
 	@Test
-	def void testOnlyIf() {
+	def void testRuleVariable_1() {
+		'''
+			uri "http://sadl.org/rulevars.sadl" alias rulevars.
+			Person is a class.
+			teaches describes Person with values of type Person.
+			knows describes Person with values of type Person.
+			A relationship of Person to Person is acquaintance. 
+			
+			Rule R1 if [x] is a Person and <x> has teaches [y] then <x> has knows <y>.
+			 
+			Rule R2 if [x] is a Person and <x> has teaches [y] then <x> has acquaintance <y>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testRuleVariable_2() {
+		'''
+			uri "http://sadl.org/RuleDeclSHPvsPofS.sadl" alias RuleDeclSHPvsPofS.
+			 
+			PhysicalThing is a class.
+			
+			Person is a type of PhysicalThing, described by favoriteColor with values of type string, 
+				described by owns with values of type PhysicalThing
+				described by age with values of type float.
+			 
+			Vehicle is a type of PhysicalThing, 
+				described by number_of_wheels with values of type int,
+				described by number_of_seats with values of type int,
+				described by color with values of type string.
+				
+			Unicycle is a type of Vehicle.
+			number_of_wheels of Unicycle always has value 1 .
+			number_of_seats of Unicycle always has value 1 .
+			
+				
+			Bicycle is a type of Vehicle.
+			number_of_wheels of Bicycle always has value 2 .
+			number_of_seats of Bicycle always has value 1 .
+			
+			Car is a type of Vehicle.
+			number_of_wheels of Car always has value 4 .
+			 
+			Rule CarIsFavoriteColor
+			  given [p] is a Person
+			  if <p> has owns [t] and
+			  	 <t> has color [c]
+			  then <p> has favoriteColor <c>.
+			
+			Rule CarIsFavoriteColorAlt
+			  given p is a Person
+			  if p has owns t and
+			  	 t has color [c]
+			  then favoriteColor of p is <c>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testOnlyIf_01() {
 		'''
 			 uri "http://sadl.org/test.sadl" alias test.
 			 
 			 IRS is a class
 			 	described by ground_speed with values of type DATA.
-			 ground_speed of IRS only has values of type DATA. 	
+			 ground_speed of IRS only has values of type DATA.
 			 DATA is a class described by _value with values of type decimal.
 			 
 			 is_ground_speed_of describes DATA with values of type IRS.
 			 is_ground_speed_of is the inverse of ground_speed.
 			 
-«««			 DATA2 is a type of DATA.
 			 A <DATA> is a [DATA2] only if is_ground_speed_of only has values of type IRS.
-			 <DATA2> has expandedProperty _value. 
+			 <DATA2> has expandedProperty _value.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testOnlyIf_02() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 IRS is a class
+			 	described by ground_speed with values of type DATA.
+			 ground_speed of IRS only has values of type DATA.
+			 DATA is a class described by _value with values of type decimal.
+			 
+			 is_ground_speed_of describes DATA with values of type IRS.
+			 is_ground_speed_of is the inverse of ground_speed.
+			 
+			 [DATA2] is a type of DATA.
+			 A <DATA> is a <DATA2> only if is_ground_speed_of only has values of type IRS.
+			 <DATA2> has expandedProperty _value.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testEmbeddedInstanceDeclaration() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 [Person] is a class described by [child] with values of type <Person>.
+			 
+			 [Clyde] is a Person with child (a Person [Nancy]).
+			 <Nancy> has child (a Person [Peter]).
 		'''.assertLinking[sadl]
 	}
 	
