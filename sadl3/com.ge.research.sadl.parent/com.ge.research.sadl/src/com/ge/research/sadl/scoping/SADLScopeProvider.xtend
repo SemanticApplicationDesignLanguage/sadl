@@ -64,6 +64,8 @@ import org.eclipse.xtext.util.OnChangeEvictingCache
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
+import static extension com.ge.research.sadl.utils.SadlASTUtils.*
+
 /**
  * This class contains custom scoping description.
  * 
@@ -467,7 +469,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			canAdd = !obj.inExternalOrLocalEquationStatement
 				&& !obj.inExpression
 				&& !obj.inQueryStatement
-				&& !obj.inRuleStatement;
+				&& !obj.inRuleStatement
+				&& !obj.unit;
 		}
 		return canAdd && !scope.containsKey(qn);
 	}

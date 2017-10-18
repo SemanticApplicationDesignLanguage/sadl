@@ -26,7 +26,6 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -1328,6 +1327,17 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			 Rule R4b: if a Person has knows a second Person then the second Person has knows the first Person.
 			
 			Rule R5: if [x] is a Person and knows of <x> is [y] then knows of <y> is <x>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void noLinkingForUnits() {
+		'''
+		uri "http://sadl.org/testunits" alias tu.
+		Expr: (2 + 3) seconds.
+		[seconds] is a class.
+		
+		B is a type of <seconds>.
 		'''.assertLinking[sadl]
 	}
 }
