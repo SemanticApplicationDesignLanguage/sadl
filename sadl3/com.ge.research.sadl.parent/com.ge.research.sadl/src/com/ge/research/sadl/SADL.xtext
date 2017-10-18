@@ -381,9 +381,13 @@ ElementInList<EnabledWith, EnableComma> returns Expression:
 ;
 
 PropOfSubject<EnabledWith, EnableComma> returns Expression:
-	UnaryExpression<EnabledWith, EnableComma> ->(
+	UnitExpression<EnabledWith, EnableComma> ->(
 		   ({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith, EnableComma>) 
- 	   | ->({SubjHasProp.left=current} (<EnableComma> comma?=',')? (<EnabledWith>'with'|'has')? prop=SadlResource ->right=UnaryExpression<EnabledWith, EnableComma>?)+)?
+ 	   | ->({SubjHasProp.left=current} (<EnableComma> comma?=',')? (<EnabledWith>'with'|'has')? prop=SadlResource ->right=UnitExpression<EnabledWith, EnableComma>?)+)?
+;
+
+UnitExpression<EnabledWith, EnableComma> returns Expression:
+	UnaryExpression<EnabledWith, EnableComma> ({UnitExpression.left=current} unit=STRING)?
 ;
 
 UnaryExpression<EnabledWith, EnableComma> returns Expression:
