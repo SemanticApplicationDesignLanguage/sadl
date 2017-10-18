@@ -5250,13 +5250,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					OntResource or = sadlTypeReferenceToOntResource(type);
 					if (or != null && or.canAs(OntClass.class)){
 						cls = or.asClass();					
-						if (isList) {
-							try {
-								cls = getOrCreateListSubclass(null, cls.getURI(), type.eResource());
-							} catch (JenaProcessorException e) {
-								addError(e.getMessage(), type);
-							}
-						}
 					}
 					else if (or instanceof Individual) {
 						inst = (Individual) or;
