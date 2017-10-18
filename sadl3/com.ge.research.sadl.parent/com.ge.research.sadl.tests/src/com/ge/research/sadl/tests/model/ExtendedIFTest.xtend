@@ -333,6 +333,36 @@ class ExtendedIFTest extends AbstractProcessorTest {
 		]
 	}
 
+	@Test
+	def void testUnits_03() {
+		val sadlModel = '''
+			uri "http://sadl.org/testunits" as tu.
+			Expr: (2 + 3) seconds.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues |
+ 			assertNotNull(jenaModel)
+	 		if (issues !== null) {
+				for (issue:issues) {
+					print(issue.message + "\n")
+				}
+			}
+		]
+	}
+	
+	@Test
+	def void testUnits_04() {
+		val sadlModel = '''
+			uri "http://sadl.org/testunits" as tu.
+			Expr: (2 + 3) "seconds".
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues |
+ 			assertNotNull(jenaModel)
+	 		if (issues !== null) {
+				for (issue:issues) {
+					print(issue.message + "\n")
+				}
+			}
+		]
+	}
+	
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Rule>, List<SadlCommand>, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
 		validationTestHelper.assertNoErrors(model)
