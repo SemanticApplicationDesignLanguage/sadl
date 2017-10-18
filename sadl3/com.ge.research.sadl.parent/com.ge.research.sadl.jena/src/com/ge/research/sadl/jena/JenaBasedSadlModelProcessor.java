@@ -2631,6 +2631,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			return processExpression((StringLiteral)expr);
 		}
 		else if (expr instanceof SubjHasProp) {
+			if (SadlASTUtils.isUnitExpression(expr)) {
+				return null;
+			}
 			return processExpression((SubjHasProp)expr);
 		}
 		else if (expr instanceof SadlResource) {
