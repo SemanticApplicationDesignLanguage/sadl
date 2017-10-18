@@ -5726,13 +5726,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					OntResource or = sadlTypeReferenceToOntResource(type);
 					if (or != null && or.canAs(OntClass.class)){
 						cls = or.asClass();					
-						if (isList) {
-							try {
-								cls = getOrCreateListSubclass(null, cls.getURI(), type.eResource());
-							} catch (JenaProcessorException e) {
-								addError(e.getMessage(), type);
-							}
-						}
 					}
 					else if (or instanceof Individual) {
 						inst = (Individual) or;
@@ -5938,19 +5931,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		if (val instanceof SadlResource) {
 			Individual listInst;
 			try {
-				listInst = createIndividual((SadlResource)val, ((OntResource)type).as(OntClass.class));
-				ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> itr = listInst.listRDFTypes(false);
-				boolean match = false;
-				while (itr.hasNext()) {
-					com.hp.hpl.jena.rdf.model.Resource typ = itr.next();
-					if (typ.equals(type)) {
-						match = true;
+				if (type.canAs(OntClass.class)) { 
+					listInst = createIndividual((SadlResource)val, type.as(OntClass.class));
+					ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> itr = listInst.listRDFTypes(false);
+					boolean match = false;
+					while (itr.hasNext()) {
+						com.hp.hpl.jena.rdf.model.Resource typ = itr.next();
+						if (typ.equals(type)) {
+							match = true;
+						}
 					}
+					if (!match) {
+						addError("The Instance '" + listInst.toString() + "' doesn't match the List type.", val);
+					}
+					getTheJenaModel().add(inst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI), listInst);
 				}
-				if (!match) {
-					addError("The Instance '" + listInst.toString() + "' doesn't match the List type.", val);
+				else {
+					addError("The type of the list could not be converted to a class.", val);
 				}
-				getTheJenaModel().add(inst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI), listInst);
 			} catch (JenaProcessorException e) {
 				addError(e.getMessage(), val);
 			} catch (TranslationException e) {
