@@ -1127,6 +1127,9 @@ public class IntermediateFormTranslator {
 	
 	public List<GraphPatternElement> listToAnd(
 			List<GraphPatternElement> patterns) {
+		if (patterns == null || patterns.size() == 0) {
+			return null;
+		}
 		if (patterns.size() == 1) {
 			return patterns;
 		}

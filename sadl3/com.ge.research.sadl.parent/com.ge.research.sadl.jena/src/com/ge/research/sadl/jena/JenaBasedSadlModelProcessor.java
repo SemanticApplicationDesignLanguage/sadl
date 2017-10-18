@@ -2953,6 +2953,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else if (robj instanceof TripleElement) {
 						// do nothing
 					}
+					else if (robj instanceof ConstantNode) {
+						String cnst = ((ConstantNode)robj).getName();
+						if (cnst.equals("None")) {
+							((TripleElement)lobj).setType(TripleModifierType.None);
+							return lobj;
+						}
+						else {
+							addError(SadlErrorMessages.UNHANDLED.get("triple object is unhandled constant", cnst), container);
+						}
+					}
 					else {
 						addError(SadlErrorMessages.UNHANDLED.get("assignment construct in rule conclusion", " "), container);
 					}
