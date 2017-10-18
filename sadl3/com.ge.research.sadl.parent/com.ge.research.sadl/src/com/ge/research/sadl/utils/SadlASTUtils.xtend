@@ -18,6 +18,8 @@
 package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.Constant
 import com.ge.research.sadl.sADL.NumberLiteral
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
@@ -26,7 +28,6 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.resource.XtextResource
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import com.ge.research.sadl.sADL.BinaryOperation
 
 /**
  * Static utility class for SADL AST elements.
@@ -53,7 +54,7 @@ class SadlASTUtils {
 	 */
 	static def boolean isUnitExpression(EObject it) {
 		if (it instanceof SubjHasProp) {
-			return (left instanceof NumberLiteral || left instanceof BinaryOperation) && right === null && prop.unit; 
+			return left.numericValueLike && right === null && prop.unit; 
 		}
 		return it instanceof UnitExpression;
 	}
@@ -94,9 +95,23 @@ class SadlASTUtils {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
 			val container = eContainer as SubjHasProp;
 			val left = container.left;
-			return eContainingFeature === SUBJ_HAS_PROP__PROP && (left instanceof NumberLiteral || left instanceof BinaryOperation) && container.right === null; 
+			return eContainingFeature === SUBJ_HAS_PROP__PROP && left.numericValueLike && container.right === null; 
 		}
 		return false;
+	}
+	
+	/**
+	 * {@code true} if the argument can be evaluated to a numeric value.
+	 */
+	private static def boolean isNumericValueLike(EObject it) {
+		if (it instanceof Constant || it instanceof NumberLiteral) {
+			return true;
+		} else if (it instanceof BinaryOperation) {
+			val leftIsNumericValueLike = if (left === null) true else left.numericValueLike;
+			val rightIsNumericValueLike = if (right === null) true else right.numericValueLike;
+			return leftIsNumericValueLike && rightIsNumericValueLike;
+		}
+		return false; 
 	}
 	
 	/**
