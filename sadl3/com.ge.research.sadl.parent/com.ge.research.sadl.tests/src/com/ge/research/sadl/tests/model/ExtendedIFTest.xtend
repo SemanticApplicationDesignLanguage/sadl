@@ -18,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.xtext.diagnostics.Severity
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -48,16 +49,16 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Rule R6: if x is a Person and y teaches x then x knows y.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					print(issue.message)
-				}
-			}
-			if (rules !== null) {
-				for (rule : rules) {
-					print(rule.toString + "\n")
-				}
-			}
+//			if (issues !== null) {
+//				for (issue : issues) {
+//					print(issue.message)
+//				}
+//			}
+//			if (rules !== null) {
+//				for (rule : rules) {
+//					print(rule.toString + "\n")
+//				}
+//			}
 			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 7)
 			assertTrue(
@@ -102,16 +103,16 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Rule R3b: if a Person has knows a second Person then the second Person has knows the first Person.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					print(issue.message)
-				}
-			}
-			if (rules !== null) {
-				for (rule : rules) {
-					print(rule.toString + "\n")
-				}
-			}
+//			if (issues !== null) {
+//				for (issue : issues) {
+//					print(issue.message)
+//				}
+//			}
+//			if (rules !== null) {
+//				for (rule : rules) {
+//					print(rule.toString + "\n")
+//				}
+//			}
 			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 2)
 			assertTrue(
@@ -179,16 +180,16 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				the PadFillet has otherFace "Pad Fillet".
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					print(issue.message)
-				}
-			}
-			if (rules !== null) {
-				for (rule : rules) {
-					print(rule.toString)
-				}
-			}
+//			if (issues !== null) {
+//				for (issue : issues) {
+//					print(issue.message)
+//				}
+//			}
+//			if (rules !== null) {
+//				for (rule : rules) {
+//					print(rule.toString)
+//				}
+//			}
 			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 1)
 			assertTrue(
@@ -276,16 +277,16 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				then the third Person has cousin the fourth Person.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					print(issue.message + "\n")
-				}
-			}
-			if (rules !== null) {
-				for (rule : rules) {
-					print(rule.toString + "\n")
-				}
-			}
+//			if (issues !== null) {
+//				for (issue : issues) {
+//					print(issue.message + "\n")
+//				}
+//			}
+//			if (rules !== null) {
+//				for (rule : rules) {
+//					print(rule.toString + "\n")
+//				}
+//			}
 			Assert.assertNotNull(issues)
 			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 9)
@@ -327,8 +328,10 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: 2 seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals("2 \"seconds\"", forTest.get(0).toString())
 		]
 	}
 
@@ -340,6 +343,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals("2 \"seconds\"", forTest.get(0).toString())
 		]
 	}
 
@@ -351,6 +357,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
 		]
 	}
 
@@ -362,6 +371,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
 		]
 	}
 
@@ -373,6 +385,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
 	}
 
@@ -384,6 +399,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
 	}
 
@@ -395,6 +413,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals(forTest.get(0).toString(), "unittedQuantity((+(PI,(+(1,2)))),\"seconds\")")
 		]
 	}
 
@@ -406,20 +427,223 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			val forTest = processor.getIntermediateFormResults(true)
+			assertEquals(forTest.size, 1)
+			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
 	}
 
 	@Test
 	def void testUnits_09() {
-		'''
-			uri "http://sadl.org/testunits" alias tu.
-			Expr: PI seconds.
+		val results = newArrayList(
+"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), is(v0,v1)))]",
+"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), is(v0,v1)))]",
+"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant5, model:cValue, v1), and(unittedQuantity(v1,\"seconds\",v2), is(v0,v2))))]",
+"[and(rdf(model:System, model:past, v0), and(+(2 \"seconds\",3 \"seconds\",v1), is(v0,v1)))]",
+"[and(rdf(model:System, model:past, v0), and(+(2 \"seconds\",3 \"seconds\",v1), is(v0,v1)))]",
+"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), and(+(v1,3 \"seconds\",v2), is(v0,v2))))]",
+"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), and(+(v1,3 \"seconds\",v2), is(v0,v2))))]",
+"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), and(+(v1,3 \"seconds\",v2), is(v0,v2))))]",
+"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant5, model:cValue, v1), and(+(v1,3,v2), and(unittedQuantity(v2,\"seconds\",v3), is(v0,v3)))))]",
+"[and(rdf(model:System, model:past, v0), is(v0,3 \"seconds\"))]")
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
+			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
+			 
+			 System is a class described by approved with values of type boolean,
+			 	described by inspection with values of type Result,
+			 	described by publicized with values of type boolean.
+			 	
+			 	past describes System with values of type UnittedQuantity.
+
+			 Result is a class, can only be one of {Passed, Failed}.
+			 
+			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
+			 
+			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
+			 
+			 SimpleConstant is a class described by cValue with values of type decimal.
+			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 
+			 Expr: past of System is (constantValue of TimingConstant3).
+			 Expr: past of System is constantValue of TimingConstant3.
+			 Expr: past of System is (cValue of TimingConstant5) seconds.
+«««			 Expr: past of System is cValue of TimingConstant5 seconds.
+			 Expr: past of System is 2 seconds + 3 seconds.
+			 Expr: past of System is (2 seconds + 3 seconds).
+			 Expr: past of System is ((constantValue of TimingConstant3) + (3 seconds)).
+			 Expr: past of System is ((constantValue of TimingConstant3) + 3 seconds).
+			 Expr: past of System is constantValue of TimingConstant3 + 3 seconds.
+«««			 Expr: past of System is (constantValue of TimingConstant3 + 3) seconds.
+			 Expr: past of System is (cValue of TimingConstant5 + 3) seconds. 
+			 Expr: past of System is 3 seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
-			assertNotNull(jenaModel)
+ 			assertNotNull(jenaModel)
+// 			jenaModel.write(System.out)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+//			if (issues !== null) {
+//				for (issue : issues) {
+//					println(issue.message)
+//				}
+//			}
+			val forTest = processor.getIntermediateFormResults(false)
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++), t.toString)
+			}
+ 		]
+	}
+	
+	@Test
+	def void testUnits_09b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
+			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
+			 
+			 System is a class described by approved with values of type boolean,
+			 	described by inspection with values of type Result,
+			 	described by publicized with values of type boolean.
+			 	
+			 	past describes System with values of type UnittedQuantity.
+
+			 Result is a class, can only be one of {Passed, Failed}.
+			 
+			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
+			 
+			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
+			 
+			 SimpleConstant is a class described by cValue with values of type decimal.
+			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 
+			 Expr: past of System is cValue of TimingConstant5 seconds.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+// 			jenaModel.write(System.out)
+ 			assertEquals(issues.size, 2)
+ 			for (issue:issues) {
+ 				if (issue.severity.equals(Severity.ERROR)) {
+ 					assertEquals(issue.message,"past, an object property with range  UnittedQuantity, cannot be compared (is) with cValue, a datatype property with range  decimal.")
+ 				}
+ 				if (issue.severity.equals(Severity.WARNING)) {
+  					assertEquals(issue.message,"Units are associated with the subject of this expression; should the expression be in parentheses?")
+ 				}
+ 			}
 		]
 	}
+ 		
+	@Test
+	def void testUnits_09c() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
+			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
+			 
+			 System is a class described by approved with values of type boolean,
+			 	described by inspection with values of type Result,
+			 	described by publicized with values of type boolean.
+			 	
+			 	past describes System with values of type UnittedQuantity.
 
-
+			 Result is a class, can only be one of {Passed, Failed}.
+			 
+			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
+			 
+			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
+			 
+			 SimpleConstant is a class described by cValue with values of type decimal.
+			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 
+			 Expr: past of System is (constantValue of TimingConstant3 + 3) seconds.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+// 			jenaModel.write(System.out)
+ 			assertEquals(issues.size, 1)
+			assertEquals(issues.head.message,"constantValue, an object property with range  UnittedQuantity, cannot operate (+) with int, an RDF datatype  int.")
+		]
+	}
+	
+	@Test
+	def void testUnits_10() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
+			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
+			 
+			 System is a class described by approved with values of type boolean,
+			 	described by inspection with values of type Result,
+			 	described by publicized with values of type boolean.
+			 	
+			 	past describes System with values of type UnittedQuantity.
+			
+			 Result is a class, can only be one of {Passed, Failed}.
+			 
+			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
+			 
+			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
+			 
+			 SimpleConstant is a class described by cValue with values of type decimal.
+			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 
+			 Rule R1:
+			 	if inspection of System is Passed and past of System is (constantValue of TimingConstant3)
+			 	then approved of System is true.
+			
+			 Rule R1b:
+			 	if inspection of System is Passed and past of System is constantValue of TimingConstant3
+			 	then approved of System is true
+			 	.
+			
+			Rule R1c:
+			 	if inspection of System is Passed and past of System is (cValue of TimingConstant5) seconds
+			 	then approved of System is true .
+			
+			Rule R1d:
+			 	if inspection of System is Passed and past of System is cValue of TimingConstant5 seconds
+			 	then approved of System is true .
+			
+			 Rule R1e:
+			 	if inspection of System is Passed and past of System is 2 seconds + 3 seconds
+			 	then approved of System is true.
+			
+			 Rule R1f:
+			 	if inspection of System is Passed and past of System is (2 seconds + 3 seconds)
+			 	then approved of System is true.
+			
+			 Rule R5:
+			 	if inspection of System is Passed
+			 	then approved of System is true .
+			 
+			 Rule R2:
+			 	if publicized of System is true and past of System is ((constantValue of TimingConstant3) + (3 seconds))
+			 	then inspection of System is Passed.
+			
+			 Rule R2b:
+			 	if publicized of System is true and past of System is ((constantValue of TimingConstant3) + 3 seconds)
+			 	then inspection of System is Passed.
+			
+			 Rule R2c:
+			 	if publicized of System is true and past of System is constantValue of TimingConstant3 + 3 seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R2d:
+			 	if publicized of System is true and past of System is (constantValue of TimingConstant3 + 3) seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R2e:
+			 	if publicized of System is true and past of System is (cValue of TimingConstant5 + 3) seconds
+			 	then inspection of System is Passed. 
+			 	
+			 Rule R3:
+			 	if publicized of System is true and past of System is 3 seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R4:
+			 	if publicized of System is true
+			 	then inspection of System is Passed.	
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+// 			assertTrue(issues.size == 0)
+  			assertTrue(rules.size == 14)
+ 		]
+	}
 
 }

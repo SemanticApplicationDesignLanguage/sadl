@@ -156,6 +156,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     															//	range is a union of classes or which is given range in multiple imports
     	
     	private String typeToExprRelationship = "range";		// the relationship between the typeCheckType and the expressionType, e.g., range (the default)
+    															//	for explicit UnittedQuantity this will be the units 
     	
     	public TypeCheckInfo(ConceptIdentifier eType) {
     		setExpressionType(eType);
@@ -948,7 +949,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else {	// SadlNumberLiteral
 				if (((SadlNumberLiteral)expression).getUnit() != null && !getModelProcessor().ignoreUnittedQuantities) {
-					return getUnittedQuantityTypeCheckInfo(expression);
+					return getUnittedQuantityTypeCheckInfo(expression, ((SadlNumberLiteral)expression).getUnit());
 				}
 				String strval = ((SadlNumberLiteral)expression).getLiteralNumber().toPlainString();
 				if (strval.indexOf('.') >= 0) {
@@ -987,7 +988,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return litTci;
 		}
 		else if (expression instanceof UnitExpression) {
-			return getType(((UnitExpression) expression).getLeft());
+			return getUnittedQuantityTypeCheckInfo(((UnitExpression)expression).getLeft(), ((UnitExpression)expression).getUnit());
 		}
 		else if(expression instanceof BooleanLiteral || expression instanceof SadlBooleanLiteral){
 			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
@@ -1023,7 +1024,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getType((PropOfSubject)expression);
 		}
 		else if(expression instanceof SubjHasProp){
-			if (!isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
+			if (SadlASTUtils.isUnitExpression(expression)) {
+				ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+				TypeCheckInfo tci = new TypeCheckInfo(uqcn, uqcn, this, expression);
+				tci.setTypeToExprRelationship(SadlASTUtils.getUnitAsString(expression));
+				return tci;
+			}
+			else if (!isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
 					expression.eContainer() instanceof SelectExpression ||
 					expression.eContainer() instanceof AskExpression ||
 					expression.eContainer() instanceof ConstructExpression) {
@@ -1101,6 +1108,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo binopreturn = combineTypes(operations, ((BinaryOperation) expression).getLeft(), ((BinaryOperation) expression).getRight(), 
 					leftTypeCheckInfo, rightTypeCheckInfo, ImplicitPropertySide.NONE);
 			if (getModelProcessor().isNumericOperator(((BinaryOperation) expression).getOp())) {
+				TypeCheckInfo uqTci = getTypeCompatibleWithOperationOnUnittedQuantities(((BinaryOperation)expression).getOp(), leftTypeCheckInfo, rightTypeCheckInfo);
+				if (uqTci != null) {
+					return uqTci;
+				}
 				if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo) && !isNumericWithImpliedProperty(leftTypeCheckInfo, ((BinaryOperation)expression).getLeft())) {
 					getModelProcessor().addIssueToAcceptor("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
 				}
@@ -1196,6 +1207,38 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
+	private TypeCheckInfo getTypeCompatibleWithOperationOnUnittedQuantities(String op, TypeCheckInfo leftTypeCheckInfo,
+			TypeCheckInfo rightTypeCheckInfo) {
+		if (!modelProcessor.isNumericOperator(op)) {
+			return null;
+		}
+		if (!leftTypeCheckInfo.getTypeCheckType().toString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) ||
+				!rightTypeCheckInfo.getTypeCheckType().toString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+			return null;
+		}
+		if (op.equals("+") || op.equals("-")) {
+			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null &&
+					leftTypeCheckInfo.getTypeToExprRelationship().equals(rightTypeCheckInfo.getTypeToExprRelationship())) {
+				return leftTypeCheckInfo;
+			}
+			if (leftTypeCheckInfo.getTypeToExprRelationship().equals("range") && !rightTypeCheckInfo.getTypeToExprRelationship().equals("range")) {
+				// could issue warning that units may not match
+				return leftTypeCheckInfo;
+			}
+			if (!leftTypeCheckInfo.getTypeToExprRelationship().equals("range") && rightTypeCheckInfo.getTypeToExprRelationship().equals("range")) {
+				// could issue warning that units may not match
+				return rightTypeCheckInfo;
+			}
+		}
+		if (op.equals("/") || op.equals("*") || op.equals("^")) {
+			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null) {
+				leftTypeCheckInfo.setTypeToExprRelationship(leftTypeCheckInfo.getTypeToExprRelationship() + op + rightTypeCheckInfo.getTypeToExprRelationship());
+				return leftTypeCheckInfo;
+			}
+		}
+		return null;
+	}
+
 	protected boolean isDeclaration(EObject expr) {
 		if (expr instanceof SubjHasProp) {
 			return isDeclaration(((SubjHasProp)expr).getLeft());
@@ -1248,17 +1291,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private TypeCheckInfo getUnittedQuantityTypeCheckInfo(EObject expression)
+	private TypeCheckInfo getUnittedQuantityTypeCheckInfo(EObject expression, String unit)
 			throws InvalidTypeException, InvalidNameException {
-		//String unit = ((Unit)expression).getUnit();
 		ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
 		uqcn.setType(ConceptType.ONTCLASS);
 		List<ConceptName> impliedProperties = getImpliedProperties(theJenaModel.getOntResource(uqcn.getUri()));
 		if (impliedProperties != null) {
-			return new TypeCheckInfo(uqcn, uqcn, impliedProperties, this, expression);
+			TypeCheckInfo tci = new TypeCheckInfo(uqcn, uqcn, impliedProperties, this, expression);
+			tci.setTypeToExprRelationship(unit);
+			return tci;
 		}
 		else {
-			return new TypeCheckInfo(uqcn, uqcn, this, expression);
+			TypeCheckInfo tci = new TypeCheckInfo(uqcn, uqcn, this, expression);
+			tci.setTypeToExprRelationship(unit);
+			return tci;
 		}
 	}
 	
@@ -1645,6 +1691,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}else if(validSubject && predicateType != null && predicateType.getTypeCheckType() != null){
 				//add interface range
 				addEffectiveRange(predicateType, subject);
+			}
+			else if (subject instanceof SubjHasProp && SadlASTUtils.isUnitExpression(subject)) {
+				issueAcceptor.addWarning("Units are associated with the subject of this expression; should the expression be in parentheses?", subject);
 			}
 			return predicateType;
 		}

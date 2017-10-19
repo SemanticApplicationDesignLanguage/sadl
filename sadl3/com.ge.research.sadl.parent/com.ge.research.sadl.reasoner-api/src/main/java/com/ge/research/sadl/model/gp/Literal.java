@@ -18,6 +18,7 @@
 
 package com.ge.research.sadl.model.gp;
 
+import org.apache.commons.lang3.StringUtils;
 
 public class Literal extends Node {
 	private Object value = null;
@@ -63,7 +64,14 @@ public class Literal extends Node {
 		if (value instanceof String) {
 			return "\"" + ((String)value).replace("\"", "\\\"") + "\"";
 		}
-		return value != null ? value.toString() : "null";
+		String display = value != null ? value.toString() : "null";
+		String units = getUnits();
+		if (units != null) {
+//			if (!StringUtils.isAlphanumeric(units)) {
+				units = "\"" + units + "\"";
+//			}
+		}
+		return (units != null) ? display + " " + units : display;
 	}
 
 	@Override

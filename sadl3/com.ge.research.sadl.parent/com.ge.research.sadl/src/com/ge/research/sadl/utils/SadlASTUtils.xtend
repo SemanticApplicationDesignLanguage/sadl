@@ -54,7 +54,8 @@ class SadlASTUtils {
 	 */
 	static def boolean isUnitExpression(EObject it) {
 		if (it instanceof SubjHasProp) {
-			return left.numericValueLike && right === null && prop.unit; 
+//			return left.numericValueLike && right === null && prop.unit; 
+			return right === null && prop.unit; 
 		}
 		return it instanceof UnitExpression;
 	}
@@ -95,7 +96,8 @@ class SadlASTUtils {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
 			val container = eContainer as SubjHasProp;
 			val left = container.left;
-			return eContainingFeature === SUBJ_HAS_PROP__PROP && left.numericValueLike && container.right === null; 
+//			return eContainingFeature === SUBJ_HAS_PROP__PROP && left.numericValueLike && container.right === null; 
+			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null; 
 		}
 		return false;
 	}

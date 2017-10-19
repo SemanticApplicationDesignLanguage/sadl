@@ -689,6 +689,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	private List<OntResource> allImpliedPropertyClasses = null;
 
+	private ArrayList<Object> intermediateFormResults = null;
+
     public static void refreshResource(Resource newRsrc) {
     	try {
     		URI uri = newRsrc.getURI();
@@ -1055,7 +1057,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				processStatement((ExternalEquationStatement)element);
 			}
 			else if (element instanceof ExpressionStatement) {
-				processExpression(((ExpressionStatement)element).getExpr());
+				Object rawResult = processExpression(((ExpressionStatement)element).getExpr());
+				if (isSyntheticUri(null, element.eResource())) {
+					// for tests, do not expand; expansion, if desired, will be done upon retrieval
+					addIntermediateFormResult(rawResult);					
+				}
+				else {
+					// for IDE, expand and also add as info marker
+					Object intForm = getIfTranslator().expandProxyNodes(rawResult, false, true);
+					addIntermediateFormResult(intForm);					
+					addInfo(intForm.toString(), element);
+				}
 			}
 			else {
 				throw new JenaProcessorException("onValidate for element of type '" + element.getClass().getCanonicalName() + "' not implemented");
@@ -1077,6 +1089,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			t.printStackTrace();
 		}
 	}
+	
 	private PathToFileUriConverter getUriConverter(Resource resource) {
 		return ((XtextResource) resource).getResourceServiceProvider().get(PathToFileUriConverter.class);
 	}
@@ -2623,6 +2636,42 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return sadlCommands;
 	}
 
+	/**
+	 * Method to obtain results of model processing, e.g., for testing.
+	 */
+	public List<Object>  getIntermediateFormResults(boolean bRaw) {
+		if (bRaw) {
+			return intermediateFormResults;
+		}
+		else if (intermediateFormResults != null){
+			List<Object> cooked = new ArrayList<Object>();
+			for (Object im:intermediateFormResults) {
+				try {
+					getIfTranslator().resetIFTranslator();
+					cooked.add(getIfTranslator().expandProxyNodes(im, false, true));
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidTypeException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			return cooked;
+		}
+		return null;
+	}
+	
+	protected void addIntermediateFormResult(Object result) {
+		if (intermediateFormResults == null) {
+			intermediateFormResults = new ArrayList<Object>();
+		}
+		intermediateFormResults.add(result);
+	}
+
 	public IntermediateFormTranslator getIfTranslator() {
 		if (intermediateFormTranslator == null) {
 			intermediateFormTranslator = new IntermediateFormTranslator(this, getTheJenaModel());
@@ -2662,7 +2711,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		}
 		else if (expr instanceof SubjHasProp) {
 			if (SadlASTUtils.isUnitExpression(expr)) {
-				return null;
+				return processSubjHasPropUnitExpression((SubjHasProp)expr);
 			}
 			return processExpression((SubjHasProp)expr);
 		}
@@ -3930,6 +3979,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return null;
 	}
 	
+	protected Object processSubjHasPropUnitExpression(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Expression valexpr = expr.getLeft();
+		Object valarg = processExpression(valexpr);
+		if (ignoreUnittedQuantities) {
+			return valarg;
+		}
+		String unit = SadlASTUtils.getUnitAsString(expr);
+		if (valarg instanceof com.ge.research.sadl.model.gp.Literal) {
+			((com.ge.research.sadl.model.gp.Literal)valarg).setUnits(unit);
+			return valarg;
+		}
+		com.ge.research.sadl.model.gp.Literal unitLiteral = new com.ge.research.sadl.model.gp.Literal();
+		unitLiteral.setValue(unit);
+		return createBinaryBuiltin("unittedQuantity", valarg, unitLiteral);
+	}
+
+	
 	public Object processExpression(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
 		Expression subj = expr.getLeft();
@@ -4167,24 +4233,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return bi;
 	}
 	
-	public Object processExpression(UnitExpression expr) {
+	public Object processExpression(UnitExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		String unit = expr.getUnit();
 		Expression value = expr.getLeft();
 		Object valobj = null;
-		try {
-			valobj = translate(value);
-			if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
-				((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
-			}
+		valobj = translate(value);
+		if (ignoreUnittedQuantities) {
 			return valobj;
-		} catch (TranslationException e) {
-			addError(e.getMessage(), expr);
-		} catch (InvalidNameException e) {
-			addError(e.getMessage(), expr);
-		} catch (InvalidTypeException e) {
-			addError(e.getMessage(), expr);
 		}
-		return valobj;
+		if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
+			((com.ge.research.sadl.model.gp.Literal)valobj).setUnits(unit);
+			return valobj;
+		}
+		com.ge.research.sadl.model.gp.Literal unitLiteral = new com.ge.research.sadl.model.gp.Literal();
+		unitLiteral.setValue(unit);
+		return createBinaryBuiltin("unittedQuantity", valobj, unitLiteral);
 	}
 	
 //	public Object processExpression(SubjHasProp expr) {
