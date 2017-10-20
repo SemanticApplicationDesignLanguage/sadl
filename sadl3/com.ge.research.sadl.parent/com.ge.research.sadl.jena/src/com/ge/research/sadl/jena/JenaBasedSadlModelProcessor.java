@@ -2639,47 +2639,74 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 
 	/**
 	 * Method to obtain results of model processing, e.g., for testing.
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws InvalidNameException 
+	 * @throws IOException 
+	 * @throws ConfigurationException 
+	 * @throws PrefixNotFoundException 
 	 */
-	public List<Object>  getIntermediateFormResults(boolean bRaw, boolean treatAsConclusion) {
+	public List<Object>  getIntermediateFormResults(boolean bRaw, boolean treatAsConclusion) throws InvalidNameException, InvalidTypeException, TranslationException, IOException, PrefixNotFoundException, ConfigurationException {
 		if (bRaw) {
 			return intermediateFormResults;
 		}
 		else if (intermediateFormResults != null){
 			List<Object> cooked = new ArrayList<Object>();
 			for (Object im:intermediateFormResults) {
-				try {
 					getIfTranslator().resetIFTranslator();
-					Rule rule = null;
-					if (treatAsConclusion) {
-						rule = new Rule("dummy");
-						getIfTranslator().setTarget(rule);
-					}
-					Object expansion = getIfTranslator().expandProxyNodes(im, treatAsConclusion, true);
-					if (treatAsConclusion) {
-						if (expansion instanceof List) {
-							List<GraphPatternElement> ifs = rule.getIfs();
-							if (ifs != null) {
-								ifs.addAll((Collection<? extends GraphPatternElement>) expansion);
-								expansion = getIfTranslator().listToAnd(ifs);
-							}
+				Rule rule = null;
+				if (treatAsConclusion) {
+					rule = new Rule("dummy");
+					getIfTranslator().setTarget(rule);
+				}
+				Object expansion = getIfTranslator().expandProxyNodes(im, treatAsConclusion, true);
+				if (treatAsConclusion) {
+					if (expansion instanceof List) {
+						List<GraphPatternElement> ifs = rule.getIfs();
+						if (ifs != null) {
+							ifs.addAll((Collection<? extends GraphPatternElement>) expansion);
+							expansion = getIfTranslator().listToAnd(ifs);
 						}
 					}
-					cooked.add(expansion);
-					
-				} catch (InvalidNameException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidTypeException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (TranslationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
+				cooked.add(expansion);
 			}
 			return cooked;
 		}
 		return null;
+	}
+	
+	/**
+	 * Call this method to expand all of the ProxyNodes in a single GraphPatternElement or a List<GraphPatternElement>,
+	 * convert any implicit conjunctions to explicit conjunctions, and return the result as a GraphPatternElement
+	 * @param rawIntermediateForm
+	 * @param treatAsConclusion
+	 * @return
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws InvalidNameException 
+	 */
+	public GraphPatternElement expandNodesInIntermediateForm(Object rawIntermediateForm, boolean treatAsConclusion) throws InvalidNameException, InvalidTypeException, TranslationException {
+		getIfTranslator().resetIFTranslator();
+		Rule rule = null;
+		if (treatAsConclusion) {
+			rule = new Rule("dummy");
+			getIfTranslator().setTarget(rule);
+		}
+		Object expansion = getIfTranslator().expandProxyNodes(rawIntermediateForm, treatAsConclusion, true);
+		if (treatAsConclusion) {
+			if (expansion instanceof List) {
+				List<GraphPatternElement> ifs = rule.getIfs();
+				if (ifs != null) {
+					ifs.addAll((Collection<? extends GraphPatternElement>) expansion);
+					expansion = getIfTranslator().listToAnd(ifs);
+				}
+			}
+		}
+		if (expansion instanceof GraphPatternElement) {
+			return (GraphPatternElement) expansion;
+		}
+		else throw new TranslationException("Expansion failed to return a GraphPatternElement (returned '" + expansion.toString() + "')");	
 	}
 	
 	protected void addIntermediateFormResult(Object result) {
