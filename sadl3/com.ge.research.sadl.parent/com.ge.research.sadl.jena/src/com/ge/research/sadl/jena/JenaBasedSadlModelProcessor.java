@@ -37,6 +37,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -2639,7 +2640,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 	/**
 	 * Method to obtain results of model processing, e.g., for testing.
 	 */
-	public List<Object>  getIntermediateFormResults(boolean bRaw) {
+	public List<Object>  getIntermediateFormResults(boolean bRaw, boolean treatAsConclusion) {
 		if (bRaw) {
 			return intermediateFormResults;
 		}
@@ -2648,7 +2649,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			for (Object im:intermediateFormResults) {
 				try {
 					getIfTranslator().resetIFTranslator();
-					cooked.add(getIfTranslator().expandProxyNodes(im, false, true));
+					Rule rule = null;
+					if (treatAsConclusion) {
+						rule = new Rule("dummy");
+						getIfTranslator().setTarget(rule);
+					}
+					Object expansion = getIfTranslator().expandProxyNodes(im, treatAsConclusion, true);
+					if (treatAsConclusion) {
+						if (expansion instanceof List) {
+							List<GraphPatternElement> ifs = rule.getIfs();
+							if (ifs != null) {
+								ifs.addAll((Collection<? extends GraphPatternElement>) expansion);
+								expansion = getIfTranslator().listToAnd(ifs);
+							}
+						}
+					}
+					cooked.add(expansion);
+					
 				} catch (InvalidNameException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -4065,8 +4082,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				if (isSubjVariableDefinition && pobj instanceof NamedNode) {
 					VariableNode var = null;
 					if (subjVariableName != null) {
-						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(subjVariableName.getName()) + "' is defined by domain of property '" + 
-								getDeclarationExtensions().getConceptUri(pred) + "'");
+//						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(subjVariableName.getName()) + "' is defined by domain of property '" + 
+//								getDeclarationExtensions().getConceptUri(pred) + "'");
 						var = createVariable(getDeclarationExtensions().getConceptUri(subjVariableName.getName()));
 					}
 					else {
@@ -4090,8 +4107,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				if (isObjVariableDefinition && pobj instanceof NamedNode) {
 					VariableNode var = null;
 					if (objVariableName != null) {
-						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(objVariableName.getName()) + "' is defined by range of property '" + 
-								getDeclarationExtensions().getConceptUri(pred) + "'");
+//						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(objVariableName.getName()) + "' is defined by range of property '" + 
+//								getDeclarationExtensions().getConceptUri(pred) + "'");
 						var = createVariable(getDeclarationExtensions().getConceptUri(objVariableName.getName()));
 					}
 					else {
@@ -4194,8 +4211,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		String op = expr.getOp();
 		if (eobj instanceof com.ge.research.sadl.model.gp.Literal) {
 			Object val = ((com.ge.research.sadl.model.gp.Literal)eobj).getValue();
-			if (val instanceof Number) {
-				val = -1.0 * ((Number)val).doubleValue();
+			if (op.equals("-") && val instanceof Number) {
+				if (val instanceof BigDecimal) {
+					val = ((BigDecimal)val).negate();
+				}
+				else {
+					val = -1.0 * ((Number)val).doubleValue();
+				}
 				((com.ge.research.sadl.model.gp.Literal)eobj).setValue(val);
 				((com.ge.research.sadl.model.gp.Literal)eobj).setOriginalText(op + ((com.ge.research.sadl.model.gp.Literal)eobj).getOriginalText());
 				return eobj;
@@ -4209,11 +4231,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 					else {
 						((com.ge.research.sadl.model.gp.Literal)eobj).setValue(true);
 					}
+					((com.ge.research.sadl.model.gp.Literal)eobj).setOriginalText(op + " " + ((com.ge.research.sadl.model.gp.Literal)eobj).getOriginalText());
 					return eobj;
 				}
 				catch (Exception e) {
 					
 				}
+			}
+			else {
+				addError("Unhandled unary operator '" + op + "' not processed", expr);
 			}
 		}
 		BuiltinElement bi = new BuiltinElement();

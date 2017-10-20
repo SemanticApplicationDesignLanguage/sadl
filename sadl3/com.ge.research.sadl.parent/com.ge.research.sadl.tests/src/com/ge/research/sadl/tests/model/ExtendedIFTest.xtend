@@ -329,7 +329,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
 		]
@@ -343,7 +343,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
 		]
@@ -357,7 +357,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
 		]
@@ -371,7 +371,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
 		]
@@ -385,7 +385,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
@@ -399,7 +399,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
@@ -413,7 +413,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals(forTest.get(0).toString(), "unittedQuantity((+(PI,(+(1,2)))),\"seconds\")")
 		]
@@ -427,7 +427,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
-			val forTest = processor.getIntermediateFormResults(true)
+			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
@@ -486,7 +486,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //					println(issue.message)
 //				}
 //			}
-			val forTest = processor.getIntermediateFormResults(false)
+			val forTest = processor.getIntermediateFormResults(false, false)
 			var idx = 0
 			for (t:forTest) {
 				assertEquals(results.get(idx++), t.toString)
@@ -563,6 +563,20 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	
 	@Test
 	def void testUnits_10() {
+		val forTest = newArrayList(
+"Rule R1:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), is(v0,v1)))) then rdf(model:System, model:approved, true).",
+"Rule R1b:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v2), and(rdf(model:TimingConstant3, model:constantValue, v3), is(v2,v3)))) then rdf(model:System, model:approved, true).",
+"Rule R1c:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v4), and(rdf(model:TimingConstant5, model:cValue, v5), and(unittedQuantity(v5,\"seconds\",v6), is(v4,v6))))) then rdf(model:System, model:approved, true).",
+"Rule R1e:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v7), and(+(2 \"seconds\",3 \"seconds\",v8), is(v7,v8)))) then rdf(model:System, model:approved, true).",
+"Rule R1f:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v9), and(+(2 \"seconds\",3 \"seconds\",v10), is(v9,v10)))) then rdf(model:System, model:approved, true).",
+"Rule R5:  if rdf(model:System, model:inspection, model:Passed) then rdf(model:System, model:approved, true).",
+"Rule R2:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v11), and(rdf(model:TimingConstant3, model:constantValue, v12), and(+(v12,3 \"seconds\",v13), is(v11,v13))))) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R2b:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v14), and(rdf(model:TimingConstant3, model:constantValue, v15), and(+(v15,3 \"seconds\",v16), is(v14,v16))))) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R2c:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v17), and(rdf(model:TimingConstant3, model:constantValue, v18), and(+(v18,3 \"seconds\",v19), is(v17,v19))))) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R2e:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v20), and(rdf(model:TimingConstant5, model:cValue, v21), and(+(v21,3,v22), and(unittedQuantity(v22,\"seconds\",v23), is(v20,v23)))))) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R3:  if and(rdf(model:System, model:publicized, true), rdf(model:System, model:past, 3 \"seconds\")) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R4:  if rdf(model:System, model:publicized, true) then rdf(model:System, model:inspection, model:Passed)."			
+		)
 		val sadlModel = '''
 			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
 			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
@@ -595,9 +609,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	if inspection of System is Passed and past of System is (cValue of TimingConstant5) seconds
 			 	then approved of System is true .
 			
-			Rule R1d:
-			 	if inspection of System is Passed and past of System is cValue of TimingConstant5 seconds
-			 	then approved of System is true .
+«««			Rule R1d:																									// has errors, tested separately below
+«««			 	if inspection of System is Passed and past of System is cValue of TimingConstant5 seconds
+«««			 	then approved of System is true .
 			
 			 Rule R1e:
 			 	if inspection of System is Passed and past of System is 2 seconds + 3 seconds
@@ -623,9 +637,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	if publicized of System is true and past of System is constantValue of TimingConstant3 + 3 seconds
 			 	then inspection of System is Passed.
 			
-			 Rule R2d:
-			 	if publicized of System is true and past of System is (constantValue of TimingConstant3 + 3) seconds
-			 	then inspection of System is Passed.
+«««			 Rule R2d:																										// has errors, tested separately below
+«««			 	if publicized of System is true and past of System is (constantValue of TimingConstant3 + 3) seconds
+«««			 	then inspection of System is Passed.
 			
 			 Rule R2e:
 			 	if publicized of System is true and past of System is (cValue of TimingConstant5 + 3) seconds
@@ -640,17 +654,30 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	then inspection of System is Passed.	
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
- 			jenaModel.write(System.out)
-// 			assertTrue(issues.size == 0)
-  			assertTrue(rules.size == 14)
+// 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+//			for (issue:issues) {
+//				println(issue.message)
+//			}
+  			assertTrue(rules.size == 12)
+//			for (rule:rules) {
+//				println(rule.toString)
+//			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(rules.get(idx++).toString, t.toString)
+			}
  		]
 	}
 	
 	@Test
 	def void testPrecedence_01() {
-		val rawIF = newArrayList(
+		val forTest = newArrayList(
+"is((rdf(Precedence:Joe, Precedence:age, null)),(rdf((rdf(Precedence:Jane, Precedence:friend, null)), Precedence:age, null)))",
+"rdf(Precedence:Joe, Precedence:age, (rdf((rdf(Precedence:Jane, Precedence:friend, null)), Precedence:age, null)))",
 "+(2,(*(3,4)))",		
 "*((+(2,3)),4)",
+"+(-2,(*(-3,-4)))",
 "-(PI)",
 "-(PI)",
 "+((-(PI)),(*(3,(-(e)))))",
@@ -666,23 +693,57 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 Jane is a Person.
 			 Joe is a Person.
 			 
-«««			 Expr: age of Joe is age of friend of Jane.	// IF is wrong for this one
-«««			 Expr: Joe has age (age of friend of Jane).	// this is correct
+			 Expr: age of Joe is age of friend of Jane.	// IF is wrong for this one
+			 Expr: Joe has age (age of friend of Jane).	// this is correct
 			 
 			 Expr: 2 + 3 * 4.
 			 Expr: (2 + 3) * 4.
-			 
+			 Expr: -2 + -3 * -4.
 			 Expr: -PI.
 			 Expr: -(PI).
 			 Expr: -PI+3*-e.
 			 Expr: -(PI)+3*(-e).
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(true)
-			assertTrue(results.size==6)
-			for (result:results) {
-				println(result.toString)
+			val results = processor.getIntermediateFormResults(true, false)
+//			assertTrue(results.size==7)
+//			for (result:results) {
+//				println(result.toString)
+//			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
 			}
 		]
 	}
 
+	@Test
+	def void testPrecedence_02() {
+		val forTest = newArrayList(
+"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]",
+"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]"
+		)
+		'''
+			 uri "http://sadl.org/Precedence.sadl" alias Precedence.
+			 
+			 Person is a class,
+			 	described by age with values of type int,
+			 	described by friend with values of type Person.
+			 	
+			 Jane is a Person.
+			 Joe is a Person.
+			 
+			 Expr: age of Joe is age of friend of Jane.	// This requires treating as rule conclusion to translate correctly
+			 Expr: Joe has age (age of friend of Jane).	// this is correct
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+//			assertTrue(results.size==7)
+//			for (result:results) {
+//				println(result.toString)
+//			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
+			}
+		]
+	}
 }
