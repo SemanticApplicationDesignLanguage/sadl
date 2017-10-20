@@ -645,5 +645,44 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
   			assertTrue(rules.size == 14)
  		]
 	}
+	
+	@Test
+	def void testPrecedence_01() {
+		val rawIF = newArrayList(
+"+(2,(*(3,4)))",		
+"*((+(2,3)),4)",
+"-(PI)",
+"-(PI)",
+"+((-(PI)),(*(3,(-(e)))))",
+"+((-(PI)),(*(3,(-(e)))))"
+		)
+		'''
+			 uri "http://sadl.org/Precedence.sadl" alias Precedence.
+			 
+			 Person is a class,
+			 	described by age with values of type int,
+			 	described by friend with values of type Person.
+			 	
+			 Jane is a Person.
+			 Joe is a Person.
+			 
+«««			 Expr: age of Joe is age of friend of Jane.	// IF is wrong for this one
+«««			 Expr: Joe has age (age of friend of Jane).	// this is correct
+			 
+			 Expr: 2 + 3 * 4.
+			 Expr: (2 + 3) * 4.
+			 
+			 Expr: -PI.
+			 Expr: -(PI).
+			 Expr: -PI+3*-e.
+			 Expr: -(PI)+3*(-e).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(true)
+			assertTrue(results.size==6)
+			for (result:results) {
+				println(result.toString)
+			}
+		]
+	}
 
 }
