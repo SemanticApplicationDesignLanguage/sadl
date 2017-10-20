@@ -26,6 +26,6 @@ import org.junit.runner.RunWith
  */
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class AbstractSADLModelProcessorTest extends AbstractSADLParsingTest {
+abstract class AbstractSADLModelProcessorTest extends AbstractSADLParsingTest {
 	
 }

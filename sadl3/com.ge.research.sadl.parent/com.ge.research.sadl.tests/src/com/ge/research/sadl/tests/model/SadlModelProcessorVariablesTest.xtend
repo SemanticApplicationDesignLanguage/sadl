@@ -14,7 +14,7 @@ import com.ge.research.sadl.model.gp.SadlCommand
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.tests.AbstractSADLParsingTest
+import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
@@ -36,7 +36,7 @@ import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorVariablesTest extends AbstractSADLParsingTest {
+class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
 	
 	@Inject ParseHelper<SadlModel> parser
 	@Inject ValidationTestHelper validationTestHelper

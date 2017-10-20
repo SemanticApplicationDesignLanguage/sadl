@@ -8,47 +8,26 @@
  */
 package com.ge.research.sadl.tests.model
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
-import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
-import com.google.inject.Inject
-import com.google.inject.Provider
+import com.hp.hpl.jena.ontology.AllValuesFromRestriction
 import com.hp.hpl.jena.ontology.CardinalityRestriction
 import com.hp.hpl.jena.ontology.HasValueRestriction
-import com.hp.hpl.jena.ontology.OntModel
+import com.hp.hpl.jena.ontology.OntClass
 import com.hp.hpl.jena.rdf.model.RDFNode
-import java.util.List
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import com.hp.hpl.jena.rdf.model.Resource
+import com.hp.hpl.jena.vocabulary.OWL
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.testing.util.ParseHelper
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.validation.CheckMode
-import org.eclipse.xtext.validation.Issue
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.hp.hpl.jena.ontology.AllValuesFromRestriction
-import com.hp.hpl.jena.ontology.OntClass
-import com.hp.hpl.jena.ontology.OntResource
-import com.hp.hpl.jena.vocabulary.OWL
-import com.ge.research.sadl.tests.AbstractSADLParsingTest
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
-	
-	@Inject ParseHelper<SadlModel> parser
-	@Inject ValidationTestHelper validationTestHelper
-	@Inject Provider<JenaBasedSadlModelProcessor> processorProvider
-	@Inject IPreferenceValuesProvider preferenceProvider
-	
+class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
+		
 	@Test
 	def void testInstanceDeclaration1() {
 		val sadlModel = '''
@@ -60,7 +39,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 Lassie has owner (a Person Sam with age 32).
 			 Spot has owner (Sonya is a Person age 32).
 			 
- 		'''.assertValidatesTo [ jenaModel, issues |
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out)
  			assertTrue(issues.size == 0)
@@ -84,7 +63,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 uri "http://sadl.org/test.sadl" alias test.
 			 
 			 Person is a class described by age with a single value of type float.
- 		'''.assertValidatesTo [ jenaModel, issues |
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out)
  			assertTrue(issues.size == 0)
@@ -106,7 +85,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 
 			 Person is a class.
 			 age describes Person with a single value of type float.
- 		'''.assertValidatesTo [ jenaModel, issues |
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out)
  			assertTrue(issues.size == 0)
@@ -134,7 +113,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 	described by output4 with values of type boolean,
 			 	described by output5 with values of type int.
 			 output1 of SYSTEM always has value true.
- 		'''.assertValidatesTo [ jenaModel, issues |
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out)
  			assertTrue(issues.size == 0)
@@ -151,18 +130,18 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 	
 	@Test
 	def void testNamedStructureAnnotationsRule() {
-		val implicitModel = '''
-			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-			
-			impliedProperty is a type of annotation.
-			expandedProperty is a type of annotation.
-			UnittedQuantity is a class,
-				described by ^value with values of type decimal,
-				described by unit with values of type string.
-			^Rule is a class.
-			NamedQuery is a class.
-		'''.assertValidatesTo[p1, p2|]
-		
+//		val implicitModel = '''
+//			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+//			
+//			impliedProperty is a type of annotation.
+//			expandedProperty is a type of annotation.
+//			UnittedQuantity is a class,
+//				described by ^value with values of type decimal,
+//				described by unit with values of type string.
+//			^Rule is a class.
+//			NamedQuery is a class.
+//		'''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |]
+//		
 		val sadlModel = '''
 			uri "http://sadl.org/Shapes.sadl" alias Shapes.
 			 
@@ -183,7 +162,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			Ask: area. 	
 			
 «««			Ask: x is a ^Rule.
-		'''.assertValidatesTo[jenaModel, issues |
+		'''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
 				assertNotNull(jenaModel)
 				jenaModel.write(System.out)
 				assertTrue(issues.size == 0)
@@ -204,7 +183,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 Ask: select i where i is a Foo.
 			 Ask: select i where i is a Foo with bar (a Whim with wham "hi").
 			 Ask: select i where i is a Foo and i has bar x and x is a Whim and x has wham "hi".
- 		'''.assertValidatesTo [ jenaModel, issues |
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
   			assertTrue(issues.size == 0)
 		]
@@ -216,7 +195,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 			 uri "http://sadl.org/test.sadl" alias test.
 			 
 			 IntegerList is a type of int List.
- 		'''.assertValidatesTo [ jenaModel, issues |
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out)
  			assertTrue(issues.size == 0)
@@ -232,26 +211,16 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
  				if (sprc.canAs(AllValuesFromRestriction)) {
  					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
  					val obj = opitr.nextStatement.object
- 					if ((obj as com.hp.hpl.jena.rdf.model.Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
+ 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
  						val vitr = jenaModel.listStatements(sprc, OWL.allValuesFrom, null as RDFNode)
  						val v = vitr.nextStatement.object
- 						assertTrue((v as com.hp.hpl.jena.rdf.model.Resource).URI.equals("http://www.w3.org/2001/XMLSchema#int"));
+ 						assertTrue((v as Resource).URI.equals("http://www.w3.org/2001/XMLSchema#int"));
   					}
  				}
  			} while (itr.hasNext)
  			assertTrue(listSubclass)
  					
  		]
-	}
-
-	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		val model = parser.parse(code)
-		validationTestHelper.assertNoErrors(model)
-		val processor = processorProvider.get
-		val List<Issue> issues= newArrayList
-		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
-		assertions.apply(processor.theJenaModel, issues)
-		return model.eResource
 	}
 
 }

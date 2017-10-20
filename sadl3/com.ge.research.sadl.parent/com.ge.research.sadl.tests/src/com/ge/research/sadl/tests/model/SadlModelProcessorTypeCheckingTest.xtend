@@ -8,20 +8,20 @@
  */
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Ignore
-import com.ge.research.sadl.tests.AbstractSADLParsingTest
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
-class SadlModelProcessorTypeCheckingTest extends AbstractSADLParsingTest {
+class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	
