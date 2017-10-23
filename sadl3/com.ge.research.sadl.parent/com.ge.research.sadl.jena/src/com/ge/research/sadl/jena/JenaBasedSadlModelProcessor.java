@@ -687,6 +687,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected boolean ignoreUnittedQuantities;
 	
+	private boolean useArticlesInValidation;
+
 	protected boolean domainAndRangeAsUnionClasses = true;
 
 	private boolean typeCheckingWarningsOnly;
@@ -928,6 +930,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String ignoreUnits = context.getPreferenceValues().getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
 		if (ignoreUnits != null) {
 			ignoreUnittedQuantities = Boolean.parseBoolean(ignoreUnits);
+		}
+		
+		useArticlesInValidation = false;
+		String useArticles = context.getPreferenceValues().getPreference(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION);
+		if (useArticles != null) {
+			useArticlesInValidation = Boolean.parseBoolean(useArticles);
 		}
 		
 		domainAndRangeAsUnionClasses = true;
@@ -2857,6 +2865,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					else if (translatedDefn instanceof List<?>) {
 						var.setDefinition((List<GraphPatternElement>) translatedDefn);
 					}
+					if (translatedDefn instanceof TripleElement && ((TripleElement)translatedDefn).getObject() == null) {
+						// this is a variable definition and the definition is a triple and the triple has no object
+						((TripleElement)translatedDefn).setObject(var);
+						return translatedDefn;
+					}
+					else if (translatedDefn instanceof BuiltinElement) {
+						((BuiltinElement)translatedDefn).addArgument(var);
+						return translatedDefn;
+					}
 					Node defn = new ProxyNode(translatedDefn);
 					GraphPatternElement bi = createBinaryBuiltin("is", var, defn);
 					return bi;
@@ -3701,7 +3718,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String article = expr.getArticle();
 		String ordinal = expr.getOrdinal();
 		Object typenode = processExpression(type);
-		if (article != null && !isDefinitionOfExplicitVariable(expr)) {
+		if (article != null && isInstance(typenode)) {
+			addError("An article (e.g., '" + article + "') should not be used in front of the name of an instance of a class.", expr);
+		}
+		else if (article != null && isVariable(typenode)) {
+			addError("An article (e.g., '" + article + "') should not be used in front of the name of a variable.", expr);
+		}
+		else if (article != null && !isProperty(typenode) && !isDefinitionOfExplicitVariable(expr)) {
 			// article should never be null, otherwise it wouldn't be a declaration
 			int ordNum = 1;
 			if (ordinal != null) {
@@ -3740,7 +3763,46 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError("No type identified", expr);
 			}
 		}
+		else if (useArticlesInValidation && article == null) {
+			if (isClass(typenode)) {
+				addError("A class name should be preceded by either an indefinite (e.g., 'a' or 'an') or a definite (e.g., 'the') article.", expr);
+			}
+		}
 		return typenode;
+	}
+	
+	private boolean isVariable(Object node) {
+		if (node instanceof NamedNode) {
+			if (((NamedNode)node).getNodeType() != null && ((NamedNode)node).getNodeType().equals(NodeType.VariableNode)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isClass(Object node) {
+		if (node instanceof NamedNode) {
+			if (((NamedNode)node).getNodeType() != null && ((NamedNode)node).getNodeType().equals(NodeType.ClassNode)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isInstance(Object node) {
+		if (node instanceof NamedNode) {
+			if (((NamedNode)node).getNodeType() != null && ((NamedNode)node).getNodeType().equals(NodeType.InstanceNode)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isProperty(Object node) {
+		if (node instanceof NamedNode) {
+			return isProperty(((NamedNode) node).getNodeType());
+		}
+		return false;
 	}
 	
 	private boolean isCruleVariableDefinitionPossible(Declaration expr) {
@@ -3923,7 +3985,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		if (subject != null) {
 			trSubj = translate(subject);
-
+			if (useArticlesInValidation && subject instanceof Name && trSubj instanceof NamedNode && ((NamedNode)trSubj).getNodeType().equals(NodeType.ClassNode)) {
+				// we have a class in a PropOfSubject that does not have an article (otherwise it would have been a Declaration)
+				addError("A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.", subject);
+			}
 		}
 		if (predicate != null) {
 			trPred = translate(predicate);

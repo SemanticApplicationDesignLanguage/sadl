@@ -160,6 +160,17 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation", 
+				getFieldEditorParent()) {
+			
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+
+		});
+
 		// addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(),
 				"Type checking issues as warning only", getFieldEditorParent()) {
