@@ -260,7 +260,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
-public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
+public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements IJenaBasedModelProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelProcessor.class);
 
     public final static String XSDNS = XSD.getURI();
@@ -366,6 +366,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return currentResource;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IJenaBasedModelProcessor#onGenerate(org.eclipse.emf.ecore.resource.Resource, org.eclipse.xtext.generator.IFileSystemAccess2, com.ge.research.sadl.processing.IModelProcessor.ProcessorContext)
+	 */
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
 		generationInProgress  = true;
@@ -821,6 +824,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return "sadl".equals(fileExtension);
 	}
 
+    /* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IJenaBasedModelProcessor#onValidate(org.eclipse.emf.ecore.resource.Resource, com.ge.research.sadl.processing.ValidationAcceptor, org.eclipse.xtext.validation.CheckMode, com.ge.research.sadl.processing.IModelProcessor.ProcessorContext)
+	 */
     @Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context) {
     		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
@@ -2637,15 +2643,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return sadlCommands;
 	}
 
-	/**
-	 * Method to obtain results of model processing, e.g., for testing.
-	 * @throws TranslationException 
-	 * @throws InvalidTypeException 
-	 * @throws InvalidNameException 
-	 * @throws IOException 
-	 * @throws ConfigurationException 
-	 * @throws PrefixNotFoundException 
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IJenaBasedModelProcessor#getIntermediateFormResults(boolean, boolean)
 	 */
+	@Override
 	public List<Object>  getIntermediateFormResults(boolean bRaw, boolean treatAsConclusion) throws InvalidNameException, InvalidTypeException, TranslationException, IOException, PrefixNotFoundException, ConfigurationException {
 		if (bRaw) {
 			return intermediateFormResults;
@@ -2676,16 +2677,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		return null;
 	}
 	
-	/**
-	 * Call this method to expand all of the ProxyNodes in a single GraphPatternElement or a List<GraphPatternElement>,
-	 * convert any implicit conjunctions to explicit conjunctions, and return the result as a GraphPatternElement
-	 * @param rawIntermediateForm
-	 * @param treatAsConclusion
-	 * @return
-	 * @throws TranslationException 
-	 * @throws InvalidTypeException 
-	 * @throws InvalidNameException 
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IJenaBasedModelProcessor#expandNodesInIntermediateForm(java.lang.Object, boolean)
 	 */
+	@Override
 	public GraphPatternElement expandNodesInIntermediateForm(Object rawIntermediateForm, boolean treatAsConclusion) throws InvalidNameException, InvalidTypeException, TranslationException {
 		getIfTranslator().resetIFTranslator();
 		Rule rule = null;
@@ -8919,6 +8914,10 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	private void setSadlCommands(List<SadlCommand> sadlCommands) {
 		this.sadlCommands = sadlCommands;
 	}
+	/* (non-Javadoc)
+	 * @see com.ge.research.sadl.jena.IJenaBasedModelProcessor#compareTranslations(java.lang.String, java.lang.String)
+	 */
+	@Override
 	public boolean compareTranslations(String result, String evalTo) {
 		evalTo = removeNewLines(evalTo);
 		evalTo = removeLocation(evalTo);
