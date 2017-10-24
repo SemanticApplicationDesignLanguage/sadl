@@ -141,6 +141,7 @@ import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Constant;
 import com.ge.research.sadl.sADL.ConstructExpression;
 import com.ge.research.sadl.sADL.Declaration;
+import com.ge.research.sadl.sADL.ElementInList;
 import com.ge.research.sadl.sADL.EndWriteStatement;
 import com.ge.research.sadl.sADL.EquationStatement;
 import com.ge.research.sadl.sADL.ExplainStatement;
@@ -2788,6 +2789,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		else if (expr instanceof UnitExpression) {
 			return processExpression((UnitExpression) expr);
 		}
+		else if (expr instanceof ElementInList) {
+			return processExpression((ElementInList) expr);
+		}
 		else if (expr != null){
 			throw new TranslationException("Unhandled rule expression type: " + expr.getClass().getCanonicalName());
 		}
@@ -3770,6 +3774,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		return typenode;
+	}
+	
+	public Object processExpression(ElementInList expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		// create a builtin for this
+		if (expr.getElement() != null) {
+			if (expr.getElement() instanceof PropOfSubject) {
+				Expression predicate = ((PropOfSubject)expr.getElement()).getLeft();
+				Expression subject = ((PropOfSubject)expr.getElement()).getRight();
+				Object lst = processExpression(subject);
+				Object element = processExpression(predicate);
+				BuiltinElement bi = new BuiltinElement();
+				bi.setFuncName("elementInList");
+				bi.addArgument(nodeCheck(lst));
+				bi.addArgument(nodeCheck(element));
+				return bi;
+			}
+			else {
+				throw new TranslationException("Unhandled ElementInList expression");
+			}
+		}
+		return null;
 	}
 	
 	private boolean isVariable(Object node) {

@@ -135,7 +135,6 @@ class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-//					"Rule R1:  if and(rdf(TestArticles:Circle, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y)))) then rdf(TestArticles:Circle, TestArticles:area, Y)."))
 					"Rule R1:  if and(rdf(v0, rdf:type, TestArticles:Circle), and(rdf(v0, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y))))) then rdf(v0, TestArticles:area, Y)."))
 		]
 
