@@ -59,7 +59,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //					print(rule.toString + "\n")
 //				}
 //			}
-			assertTrue(issues.size == 0)
+			assertEquals(0, issues.size)
 			assertEquals(7, rules.size);
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),

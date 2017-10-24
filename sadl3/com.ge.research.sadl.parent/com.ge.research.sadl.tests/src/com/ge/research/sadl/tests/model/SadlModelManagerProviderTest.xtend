@@ -19,12 +19,14 @@ package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
+import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.reasoner.ConfigurationManager
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLNoopModelProcessorsInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
+import com.hp.hpl.jena.ontology.OntClass
 import com.hp.hpl.jena.ontology.OntModel
 import com.hp.hpl.jena.ontology.Ontology
 import com.hp.hpl.jena.query.QueryExecutionFactory
@@ -50,9 +52,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.processing.SadlConstants
-import com.hp.hpl.jena.ontology.OntClass
-import com.hp.hpl.jena.ontology.OntResource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
