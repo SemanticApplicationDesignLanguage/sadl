@@ -169,13 +169,15 @@ abstract class AbstractSadlTest {
 		val validator = resource.resourceServiceProvider.resourceValidator;
 		val issues = validator.validate(resource, CheckMode.FAST_ONLY, CancelIndicator.NullImpl);
 		val ontModel = OntModelProvider.find(resource);
-		var commands = OntModelProvider.getSadlCommands(resource);
-		var others = OntModelProvider.getOtherContent(resource);
+		val processor = ModelProcessorAdapter.findInEmfObject(resource).processor;
+		var rules = (processor as IJenaBasedModelProcessor).rules
+		if (rules === null) {
+			rules = newArrayList();
+		}
+		var commands = (processor as IJenaBasedModelProcessor).sadlCommands
 		if (commands === null) {
 			commands = newArrayList();
 		}
-		val rules = if(others === null) newArrayList() else others.filter(Rule).toList;
-		val processor = ModelProcessorAdapter.findInEmfObject(resource).processor;
 		assertions.apply(ontModel, rules, commands, issues, processor as IJenaBasedModelProcessor);
 		return resource;
 	}

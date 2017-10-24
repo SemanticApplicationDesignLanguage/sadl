@@ -9,6 +9,8 @@ import org.eclipse.xtext.validation.CheckMode;
 
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -22,6 +24,17 @@ public interface IJenaBasedModelProcessor {
 
 	void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode, ProcessorContext context);
 
+	/** Method to obtain the rules in a SADL model in IntermediateForm
+	 * @return-- the Rules of the model
+	 */
+	public List<Rule> getRules();
+	
+	/**
+	 * Method to obtain the sadl commands in a SADL model
+	 * @return -- the SadlCommands of the model
+	 */
+	public List<SadlCommand> getSadlCommands();
+	
 	/**
 	 * Method to obtain results of model processing, e.g., for testing.
 	 * @throws TranslationException 
