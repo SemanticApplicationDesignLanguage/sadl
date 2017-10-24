@@ -7,3 +7,4 @@ DS_Store
 .*._trace
 *.xtendbin
 xtend-gen/
+sadl-ide.log
