@@ -70,6 +70,7 @@ import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlStringLiteral;
 import com.ge.research.sadl.sADL.SadlTypeReference;
+import com.ge.research.sadl.sADL.SadlUnaryExpression;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.SelectExpression;
 import com.ge.research.sadl.sADL.StringLiteral;
@@ -1066,6 +1067,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if(expression instanceof UnaryExpression){
 			return getType(((UnaryExpression) expression).getExpr());
+		}
+		else if (expression instanceof SadlUnaryExpression) {
+			return getType(((SadlUnaryExpression)expression).getValue());
 		}
 		else if(expression instanceof ElementInList){
 			Expression el = ((ElementInList)expression).getElement();

@@ -198,6 +198,7 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlStringLiteral;
 import com.ge.research.sadl.sADL.SadlTypeAssociation;
 import com.ge.research.sadl.sADL.SadlTypeReference;
+import com.ge.research.sadl.sADL.SadlUnaryExpression;
 import com.ge.research.sadl.sADL.SadlUnionType;
 import com.ge.research.sadl.sADL.SadlValueList;
 import com.ge.research.sadl.sADL.SelectExpression;
@@ -7556,6 +7557,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, com.hp.hpl.jena.rdf.model.Resource rng) throws JenaProcessorException {
 		try {
+			if (value instanceof SadlUnaryExpression) {
+				String op = ((SadlUnaryExpression)value).getOperator();
+				if (op.equals("-")) {
+					value = ((SadlUnaryExpression)value).getValue();
+				}
+				else {
+					throw new JenaProcessorException("Unhandled case of unary operator on SadlExplicitValue: " + op);
+				}
+			}
 			if (value instanceof SadlNumberLiteral) {
 				String val = ((SadlNumberLiteral)value).getLiteralNumber().toPlainString();
 				if (rng != null && rng.getURI() != null) {
