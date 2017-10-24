@@ -18,9 +18,8 @@
 package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.model.DeclarationExtensions
-import com.ge.research.sadl.sADL.BinaryOperation
-import com.ge.research.sadl.sADL.Constant
 import com.ge.research.sadl.sADL.NumberLiteral
+import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.ge.research.sadl.sADL.UnitExpression
@@ -28,6 +27,8 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.resource.XtextResource
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+
+import static extension org.eclipse.xtext.EcoreUtil2.getContainerOfType
 
 /**
  * Static utility class for SADL AST elements.
@@ -47,19 +48,18 @@ class SadlASTUtils {
 	static def boolean isCommaSeparatedAbbreviatedExpression(EObject it) {
 		return if(it instanceof SubjHasProp) comma else false;
 	}
-	
+
 	/**
 	 * Returns {@code true} if the argument is a unit expression like. More formally, when the argument is an instance of
 	 * {@link SubjHasProp}, the left hand side is a number literal, and the 
 	 */
 	static def boolean isUnitExpression(EObject it) {
 		if (it instanceof SubjHasProp) {
-//			return left.numericValueLike && right === null && prop.unit; 
-			return right === null && prop.unit; 
+			return right === null && prop.unit;
 		}
 		return it instanceof UnitExpression;
 	}
-	
+
 	/**
 	 * Returns with the unit from the unit expression like argument as string.
 	 * Returns with {@code null} if the argument is *not* a unit expression, more formally,
@@ -68,13 +68,13 @@ class SadlASTUtils {
 	static def String getUnitAsString(EObject it) {
 		if (unitExpression) {
 			val prop = (it as SubjHasProp).prop;
-			return if (prop === null) null else declarationExtensions.getConcreteName(prop);
+			return if(prop === null) null else declarationExtensions.getConcreteName(prop);
 		} else if (it instanceof UnitExpression) {
 			return unit;
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns with the number literal of the argument, if and only if the argument is unit expression
 	 * like. Otherwise, returns {@code null}.
@@ -84,10 +84,10 @@ class SadlASTUtils {
 			return it.left as NumberLiteral
 		} else if (unitExpression) {
 			return (it as SubjHasProp).left as NumberLiteral;
-		} 
+		}
 		return null;
 	}
-	
+
 	/**
 	 * {@code true} if the argument is a SADL resource which represents a non-quoted unit in a unit expression like construct.
 	 * Otherwise, {@code false}.
@@ -95,27 +95,17 @@ class SadlASTUtils {
 	static def boolean isUnit(EObject it) {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
 			val container = eContainer as SubjHasProp;
-			val left = container.left;
-//			return eContainingFeature === SUBJ_HAS_PROP__PROP && left.numericValueLike && container.right === null; 
-			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null; 
+			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
+				!container.inQueryStatement;
 		}
 		return false;
 	}
-	
-	/**
-	 * {@code true} if the argument can be evaluated to a numeric value.
-	 */
-	private static def boolean isNumericValueLike(EObject it) {
-		if (it instanceof Constant || it instanceof NumberLiteral) {
-			return true;
-		} else if (it instanceof BinaryOperation) {
-			val leftIsNumericValueLike = if (left === null) true else left.numericValueLike;
-			val rightIsNumericValueLike = if (right === null) true else right.numericValueLike;
-			return leftIsNumericValueLike && rightIsNumericValueLike;
-		}
-		return false; 
+
+	// TOOD this logic should be much smarter.
+	private static def isInQueryStatement(EObject it) {
+		return getContainerOfType(QueryStatement) !== null;
 	}
-	
+
 	/**
 	 * Helper for getting the declaration extension in code that does not use Guice.
 	 */
