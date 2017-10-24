@@ -17,18 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.preferences.SadlPreferences
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
-import com.google.inject.Inject
-import com.google.inject.Provider
-import com.hp.hpl.jena.ontology.OntModel
-import java.util.List
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.PreferenceKey
-import org.eclipse.xtext.validation.CheckMode
-import org.eclipse.xtext.validation.Issue
 import org.junit.Ignore
 import org.junit.Test
 
@@ -38,9 +28,6 @@ import org.junit.Test
  * @author akos.kitta
  */
 class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
-
-	@Inject
-	Provider<JenaBasedSadlModelProcessor> processorProvider;
 
 	@Test
 	def void testIgnoreUnitsInSadl() {
@@ -60,7 +47,7 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 			
 			George is a Person with age 23 years, with weight 165 lbs.
 			George has height 70 inches, has heightPercentile 50 "%" .
-		''').resource.assertValidatesTo [ jenaModel, issues |
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
 			assertTrue(issues.empty);
 			val ageProperty = jenaModel.getDatatypeProperty("http://sadl.org/OntologyWithUnittedQuantity.sadl#age")
@@ -87,24 +74,12 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 			
 			George is a Person with age 23 years, with weight 165 lbs.
 			George has height 70 inches, has heightPercentile 50 "%" .
-		''').resource.assertValidatesTo [ jenaModel, issues |
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
 			assertTrue(issues.empty)
 			val ageProperty = jenaModel.getObjectProperty("http://sadl.org/OntologyWithUnittedQuantity.sadl#age")
 			assertNotNull(ageProperty);
 		]
-	}
-
-	protected def Resource assertValidatesTo(Resource resource, (OntModel, List<Issue>)=>void assertions) {
-		val issues = newArrayList;
-		issues.addAll(validate(resource));
-		val processor = processorProvider.get
-		val acceptor = new ValidationAcceptorImpl([issues += it]);
-		val preferenceValues = preferenceValuesProvider.getPreferenceValues(resource);
-		val context = new ProcessorContext(cancelIndicator, preferenceValues);
-		processor.onValidate(resource, acceptor, CheckMode.FAST_ONLY, context);
-		assertions.apply(processor.theJenaModel, issues);
-		return resource;
 	}
 
 }

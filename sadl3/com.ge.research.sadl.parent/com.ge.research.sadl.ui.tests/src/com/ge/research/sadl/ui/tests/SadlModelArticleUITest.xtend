@@ -17,27 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.preferences.SadlPreferences
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
-import com.google.inject.Inject
-import com.google.inject.Provider
-import com.hp.hpl.jena.ontology.OntModel
-import java.util.List
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.PreferenceKey
-import org.eclipse.xtext.validation.CheckMode
-import org.eclipse.xtext.validation.Issue
-import org.junit.Ignore
 import org.junit.Test
 
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
-	@Inject
-	Provider<JenaBasedSadlModelProcessor> processorProvider;
-
-	@Ignore('https://github.com/crapo/sadlos2/issues/269')
 	@Test
 	def void testArticles_01() {
 
@@ -62,7 +47,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				Y is X^2*PI
 			then
 				area of Circle is Y.
-		''').resource.assertValidatesTo [ jenaModel, issues |
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
 			issues.map[message].forEach[println(it)];
 			assertEquals(2, issues.size)
@@ -94,24 +79,12 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				Y is X^2*PI
 			then
 				area of Circle is Y.
-		''').resource.assertValidatesTo [ jenaModel, issues |
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
 			issues.map[message].forEach[println(it)];
 			assertEquals(0, issues.size);
 		]
 
-	}
-
-	protected def Resource assertValidatesTo(Resource resource, (OntModel, List<Issue>)=>void assertions) {
-		val issues = newArrayList;
-		issues.addAll(validate(resource));
-		val processor = processorProvider.get
-		val acceptor = new ValidationAcceptorImpl([issues += it]);
-		val preferenceValues = preferenceValuesProvider.getPreferenceValues(resource);
-		val context = new ProcessorContext(cancelIndicator, preferenceValues);
-		processor.onValidate(resource, acceptor, CheckMode.FAST_ONLY, context);
-		assertions.apply(processor.theJenaModel, issues);
-		return resource;
 	}
 
 }

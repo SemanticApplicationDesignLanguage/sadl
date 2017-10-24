@@ -16,10 +16,16 @@
  */
 package com.ge.research.sadl.ui.tests
 
+import com.ge.research.sadl.jena.IJenaBasedModelProcessor
+import com.ge.research.sadl.model.gp.Rule
+import com.ge.research.sadl.model.gp.SadlCommand
+import com.ge.research.sadl.tests.AbstractSadlTest
 import com.ge.research.sadl.ui.OutputStreamStrategy
 import com.google.common.collect.Lists
 import com.google.inject.Inject
+import com.hp.hpl.jena.ontology.OntModel
 import java.util.Arrays
+import java.util.List
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.NullProgressMonitor
@@ -41,11 +47,11 @@ import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
+import org.eclipse.xtext.validation.Issue
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
-import org.junit.Rule
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
 
@@ -64,7 +70,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	val modifiedPreferences = <String>newHashSet();
 
-	@Rule
+	@org.junit.Rule
 	public TestName testName = new TestName;
 
 	@Inject
@@ -258,6 +264,15 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		} else {
 			return emptyList;
 		}
+	}
+	
+	/**
+	 * Validates the resource, asserts the issues.
+	 */
+	protected def Resource assertValidatesTo(Resource resource,
+		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
+
+		return AbstractSadlTest.assertValidatesTo(resource as XtextResource, assertions);
 	}
 
 	/**
