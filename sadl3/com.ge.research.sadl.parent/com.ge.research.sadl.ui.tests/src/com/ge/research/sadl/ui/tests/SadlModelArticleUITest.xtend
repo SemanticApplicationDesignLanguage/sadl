@@ -29,10 +29,9 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
-import org.junit.Ignore
 import org.junit.Test
 
-class SadlModelArticleTest extends AbstractSadlPlatformTest {
+class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 	
 	@Inject
 	Provider<JenaBasedSadlModelProcessor> processorProvider;
