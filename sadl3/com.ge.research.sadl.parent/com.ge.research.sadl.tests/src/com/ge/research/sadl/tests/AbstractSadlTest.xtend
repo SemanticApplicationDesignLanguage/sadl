@@ -18,20 +18,18 @@
 package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.external.ExternalEmfResource
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import com.ge.research.sadl.jena.IJenaBasedModelProcessor
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.gp.Rule
 import com.ge.research.sadl.model.gp.SadlCommand
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.ISadlImplicitModelContentProvider
 import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.processing.SadlConstants
-import com.ge.research.sadl.processing.SadlModelProcessorProvider
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.scoping.TestScopeProvider
 import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
+import com.ge.research.sadl.validation.ModelProcessorAdapter
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.inject.Inject
@@ -41,9 +39,7 @@ import java.util.List
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Accessors
-import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
@@ -76,8 +72,6 @@ abstract class AbstractSadlTest {
 	@Inject protected ParseHelper<SadlModel> parseHelper;
 	@Inject protected Provider<XtextResourceSet> resourceSetProvider;
 	@Inject protected ISadlImplicitModelContentProvider implicitModelContentProvider;
-	@Inject protected SadlModelProcessorProvider processorProvider;
-	@Inject protected IPreferenceValuesProvider preferenceProvider;
 
 	@Accessors(PROTECTED_GETTER)
 	XtextResourceSet currentResourceSet;
@@ -157,22 +151,10 @@ abstract class AbstractSadlTest {
 		return loadResource(seq, uri);
 	}
 
-	protected def validateWithModelProcessors(Resource it) {
-		val processor = processorProvider.getProcessor(it) as JenaBasedSadlModelProcessor;
-		val List<Issue> issues = newArrayList;
-		val context = new ProcessorContext(CancelIndicator.NullImpl, preferenceProvider.getPreferenceValues(it));
-		processor.onValidate(it, new ValidationAcceptorImpl([issues += it]), CheckMode.FAST_ONLY, context);
-		val jeneModel = processor.theJenaModel;
-		return new ValidationResult(jeneModel, processor.rules, processor.sadlCommands, issues, processor);
-	}
-
 	protected def Resource assertValidatesTo(CharSequence code,
-		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, JenaBasedSadlModelProcessor)=>void assertions) {
+		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
 
-		val resource = code.sadl;
-		val it = validateWithModelProcessors(resource);
-		assertions.apply(jenaModel, rules, commands, issues, processor);
-		return resource;
+		return assertValidatesTo(code.sadl, assertions);
 	}
 
 	private def Resource loadResource(CharSequence seq, URI uri) {
@@ -180,14 +162,22 @@ abstract class AbstractSadlTest {
 		resource.load(new StringInputStream(XtendTemplateHelper.unifyEOL(seq)), null);
 		return resource;
 	}
+	
+	static def Resource assertValidatesTo(XtextResource resource,
+		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
 
-	@Data
-	protected static class ValidationResult {
-		val OntModel jenaModel;
-		val List<Rule> rules;
-		val List<SadlCommand> commands;
-		val List<Issue> issues;
-		val JenaBasedSadlModelProcessor processor;
+		val validator = resource.resourceServiceProvider.resourceValidator;
+		val issues = validator.validate(resource, CheckMode.FAST_ONLY, CancelIndicator.NullImpl);
+		val ontModel = OntModelProvider.find(resource);
+		var commands = OntModelProvider.getSadlCommands(resource);
+		var others = OntModelProvider.getOtherContent(resource);
+		if (commands === null) {
+			commands = newArrayList();
+		}
+		val rules = if(others === null) newArrayList() else others.filter(Rule).toList;
+		val processor = ModelProcessorAdapter.findInEmfObject(resource).processor;
+		assertions.apply(ontModel, rules, commands, issues, processor as IJenaBasedModelProcessor);
+		return resource;
 	}
 
 }

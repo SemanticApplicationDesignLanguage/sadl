@@ -60,7 +60,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //				}
 //			}
 			assertTrue(issues.size == 0)
-			assertTrue(rules.size == 7)
+			assertEquals(7, rules.size);
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
 					"Rule R1:  if and(rdf(x, rdf:type, rulevars:Person), rdf(x, rulevars:teaches, y)) then rdf(x, rulevars:knows, y)."))

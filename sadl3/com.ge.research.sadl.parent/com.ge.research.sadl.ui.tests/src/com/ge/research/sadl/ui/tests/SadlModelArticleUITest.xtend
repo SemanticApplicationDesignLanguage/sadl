@@ -17,28 +17,14 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.preferences.SadlPreferences
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
-import com.google.inject.Inject
-import com.google.inject.Provider
-import com.hp.hpl.jena.ontology.OntModel
-import java.util.List
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.PreferenceKey
-import org.eclipse.xtext.validation.CheckMode
-import org.eclipse.xtext.validation.Issue
 import org.junit.Test
 
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
-	
-	@Inject
-	Provider<JenaBasedSadlModelProcessor> processorProvider;
-	
+
 	@Test
 	def void testArticles_01() {
-
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 
@@ -61,21 +47,16 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				Y is X^2*PI
 			then
 				area of Circle is Y.
-		''').resource.assertValidatesTo [ jenaModel, issues |
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					println(issue.message)
-				}
-			}
-			assertTrue(issues.size > 1)
+			issues.map[message].forEach[println(it)];
+			assertEquals(2, issues.size)
 		]
 
 	}
-	
+
 	@Test
 	def void testArticles_02() {
-
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.FALSE.toString));
 
@@ -98,29 +79,12 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				Y is X^2*PI
 			then
 				area of Circle is Y.
-		''').resource.assertValidatesTo [ jenaModel, issues |
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					println(issue.message)
-				}
-			}
-			assertTrue(issues.size == 0)
+			issues.map[message].forEach[println(it)];
+			assertEquals(0, issues.size);
 		]
 
-	}
-
-	
-	protected def Resource assertValidatesTo(Resource resource, (OntModel, List<Issue>)=>void assertions) {
-		val issues = newArrayList;
-		issues.addAll(validate(resource));
-		val processor = processorProvider.get
-		val acceptor = new ValidationAcceptorImpl([issues += it]);
-		val preferenceValues = preferenceValuesProvider.getPreferenceValues(resource);
-		val context = new ProcessorContext(cancelIndicator, preferenceValues);
-		processor.onValidate(resource, acceptor, CheckMode.FAST_ONLY, context);
-		assertions.apply(processor.theJenaModel, issues);
-		return resource;
 	}
 
 }
