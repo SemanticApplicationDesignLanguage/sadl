@@ -29,16 +29,17 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
+import org.junit.Ignore
 import org.junit.Test
 
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
-	
+
 	@Inject
 	Provider<JenaBasedSadlModelProcessor> processorProvider;
-	
+
+	@Ignore('https://github.com/crapo/sadlos2/issues/269')
 	@Test
 	def void testArticles_01() {
-
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 
@@ -63,19 +64,14 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				area of Circle is Y.
 		''').resource.assertValidatesTo [ jenaModel, issues |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					println(issue.message)
-				}
-			}
-			assertTrue(issues.size > 1)
+			issues.map[message].forEach[println(it)];
+			assertEquals(2, issues.size)
 		]
 
 	}
-	
+
 	@Test
 	def void testArticles_02() {
-
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.FALSE.toString));
 
@@ -100,17 +96,12 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				area of Circle is Y.
 		''').resource.assertValidatesTo [ jenaModel, issues |
 			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					println(issue.message)
-				}
-			}
-			assertTrue(issues.size == 0)
+			issues.map[message].forEach[println(it)];
+			assertEquals(0, issues.size);
 		]
 
 	}
 
-	
 	protected def Resource assertValidatesTo(Resource resource, (OntModel, List<Issue>)=>void assertions) {
 		val issues = newArrayList;
 		issues.addAll(validate(resource));
