@@ -6362,8 +6362,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			}
 			else if (ctype.equals(OntConceptType.CLASS_LIST)) {
 				rsrc = getTheJenaModel().getOntClass(strSRUri);
-				if (rsrc == null) {
-					return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource());
+				if(rsrc == null) {
+					SadlResource declResource = getDeclarationExtensions().getDeclaration(strSR);
+					if(declResource.eContainer() instanceof SadlClassOrPropertyDeclaration) {
+						try {
+							List<OntResource> listResources = processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration)declResource.eContainer());
+							eobjectPreprocessed(declResource.eContainer());
+							return listResources.get(0);
+						} catch (TranslationException e) {
+							e.printStackTrace();
+						}
+					} else {
+						return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource());
+					}
 				}
 			}
 			else if (ctype.equals(OntConceptType.DATATYPE_LIST)) {
