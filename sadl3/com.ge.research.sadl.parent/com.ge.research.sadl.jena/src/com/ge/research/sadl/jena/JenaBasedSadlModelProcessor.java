@@ -4712,31 +4712,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 		}
 		if (isList) {
-			// check for list length restrictions
-			SadlDataTypeFacet facet = element.getFacet();
-			if (facet != null) {
-				if (facet.getLen() != null) {
-					int len = Integer.parseInt(facet.getLen());
-					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null,
-							getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI),
-							getTheJenaModel().createTypedLiteral(len));
-					((OntClass) rsrcList.get(0)).addSuperClass(hvr);
-				}
-				if (facet.getMinlen() != null) {
-					int minlen = Integer.parseInt(facet.getMinlen());
-					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null,
-							getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI),
-							getTheJenaModel().createTypedLiteral(minlen));
-					((OntClass) rsrcList.get(0)).addSuperClass(hvr);
-				}
-				if (facet.getMaxlen() != null && !facet.getMaxlen().equals("*")) {
-					int maxlen = Integer.parseInt(facet.getMaxlen());
-					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null,
-							getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI),
-							getTheJenaModel().createTypedLiteral(maxlen));
-					((OntClass) rsrcList.get(0)).addSuperClass(hvr);
-				}
-			}
+			addLengthRestrictionsToList(rsrcList.get(0), element.getFacet());
+
 		}
 		return rsrcList;
 	}
@@ -4969,6 +4946,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					else if (((SadlRangeRestriction)spr2).getTypeonly() == null) {				
 						OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
+						if (rng instanceof SadlSimpleTypeReference && ((SadlSimpleTypeReference)rng).isList()) {
+							addLengthRestrictionsToList(rngRsrc, ((SadlRangeRestriction)spr2).getFacet());
+						}
 						if (rngRsrc == null) {
 							addError(SadlErrorMessages.RANGE_RESOLVE.toString(), rng);
 						}
@@ -5295,6 +5275,33 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addAnnotationsToResource(retProp.as(OntResource.class), sr.getAnnotations());
 		}
 		return retProp;
+	}
+	
+	private void addLengthRestrictionsToList(OntResource rngRsrc, SadlDataTypeFacet facet) {
+		// check for list length restrictions
+		if (facet != null && rngRsrc.canAs(OntClass.class)) {
+			if (facet.getLen() != null) {
+				int len = Integer.parseInt(facet.getLen());
+				HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null,
+						getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI),
+						getTheJenaModel().createTypedLiteral(len));
+				rngRsrc.as(OntClass.class).addSuperClass(hvr);
+			}
+			if (facet.getMinlen() != null) {
+				int minlen = Integer.parseInt(facet.getMinlen());
+				HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null,
+						getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI),
+						getTheJenaModel().createTypedLiteral(minlen));
+				rngRsrc.as(OntClass.class).addSuperClass(hvr);
+			}
+			if (facet.getMaxlen() != null && !facet.getMaxlen().equals("*")) {
+				int maxlen = Integer.parseInt(facet.getMaxlen());
+				HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null,
+						getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI),
+						getTheJenaModel().createTypedLiteral(maxlen));
+				rngRsrc.as(OntClass.class).addSuperClass(hvr);
+			}
+		}
 	}
 	
 	private void addCardinalityRestriction(OntResource cls, Property retProp, int cardinality) {
@@ -8189,21 +8196,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		sb.append("    <rdfs:range rdf:resource=\"http://sadl.org/sadllistmodel#List\"/>\n");
 		sb.append("    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#ObjectProperty\"/>\n");
 		sb.append("  </rdf:Description>\n");
-		sb.append("  <rdf:Description rdf:about=\"http://sadl.org/sadllistmodel#lengthRestriction\">\n");
+		sb.append("  <owl:DatatypeProperty rdf:about=\"http://sadl.org/sadllistmodel#lengthRestriction\">\n");
 		sb.append("    <rdfs:domain rdf:resource=\"http://sadl.org/sadllistmodel#List\"/>\n");
 		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n");
 		sb.append("    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#DatatypeProperty\"/>\n");
-		sb.append("  </rdf:Description>\n");
-		sb.append("  <rdf:Description rdf:about=\"http://sadl.org/sadllistmodel#minLengthRestriction\">\n");
+		sb.append("  </owl:DatatypeProperty>\n");
+		sb.append("  <owl:DatatypeProperty rdf:about=\"http://sadl.org/sadllistmodel#minLengthRestriction\">\n");
 		sb.append("    <rdfs:domain rdf:resource=\"http://sadl.org/sadllistmodel#List\"/>\n");
 		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n");
 		sb.append("    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#DatatypeProperty\"/>\n");
-		sb.append("  </rdf:Description>\n");
-		sb.append("  <rdf:Description rdf:about=\"http://sadl.org/sadllistmodel#maxLengthRestriction\">\n");
+		sb.append("  </owl:DatatypeProperty>\n");
+		sb.append("  <owl:DatatypeProperty rdf:about=\"http://sadl.org/sadllistmodel#maxLengthRestriction\">\n");
 		sb.append("    <rdfs:domain rdf:resource=\"http://sadl.org/sadllistmodel#List\"/>\n");
 		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n");
 		sb.append("    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#DatatypeProperty\"/>\n");
-		sb.append("  </rdf:Description>\n");
+		sb.append("  </owl:DatatypeProperty>\n");
 		sb.append("  <owl:AnnotationProperty rdf:about=\"http://sadl.org/sadllistmodel#listtype\"/>\n");
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();

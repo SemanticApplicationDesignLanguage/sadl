@@ -19,6 +19,14 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
+import com.hp.hpl.jena.ontology.OntClass
+import com.hp.hpl.jena.ontology.Restriction
+import com.ge.research.sadl.processing.SadlConstants
+import com.hp.hpl.jena.ontology.AllValuesFromRestriction
+import com.hp.hpl.jena.ontology.HasValueRestriction
+import com.hp.hpl.jena.util.iterator.ExtendedIterator
+import com.hp.hpl.jena.vocabulary.OWL
+import com.hp.hpl.jena.rdf.model.Resource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -666,6 +674,109 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			for (t:forTest) {
 				assertEquals(rules.get(idx++).toString, t.toString)
 			}
+ 		]
+	}
+	
+	@Test
+	def void testListLength_01() {
+		'''
+			 uri  "http://sadl.org/Test.sadl" alias Test.
+			 
+			 Person is a class described by age with values of type int.
+			 ChildrenList is a type of Person List length 1-*.
+			 children describes Person with values of type ChildrenList.
+			 children of Person has at most 1 value.
+			 
+			 PersonList is a type of Person List.
+			 PersonListList is a type of PersonList List.
+			 
+			 foo describes Person with values of type PersonListList.
+			 bar describes Person with values of type Person List length 1-4.
+			 bar of Person only has values of type Person List.
+			 bar of Person only has values of type Person List length 1-4.
+			 bar of Person has at least one value of type Person List length 1-4.
+			 bar of Person has at least 1 value of type Person List length 1-4.
+			 bar of Person has at most 2 value of type Person List length 1-4.
+			 
+			 testval is an int List.
+			 Rule R1: if x is a Person and
+			 		x has bar y and 
+			 		y is a Person List // length 1-4
+			 then 
+			// 	print("Hurray!"). 
+			 	x has age 50.
+			
+			Grades is a type of int List.
+			
+			Test3Grades is the Grades [95,86,67,99].
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+//			jenaModel.write(System.out, "RDF/XML-ABBREV")
+//			val smitr = jenaModel.listSubModels
+//			while (smitr.hasNext) {
+//				smitr.next.write(System.out, "RDF/XML-ABBREV")
+//			}
+//			for (issue:issues) {
+//				println(issue.message)
+//			}
+ 			issues.assertHasNoIssues;
+ 			val barProp = jenaModel.getOntProperty("http://sadl.org/Test.sadl#bar")
+ 			val rng = barProp.range
+ 			assertTrue(rng.canAs(OntClass))
+ 			val sclitr = (rng.^as(OntClass)).listSuperClasses(true)
+ 			var lstTypeFound = false
+ 			var lstMinLenOK = false
+ 			var lstMaxLenOK = false
+ 			var lstFound = false
+ 			var lstRestFound = false
+  			while (sclitr.hasNext) {
+ 				val sclss = sclitr.next
+				if (sclss.isRestriction && sclss.^as(Restriction).allValuesFromRestriction) {
+					val onprop = sclss.getPropertyValue(OWL.onProperty)
+					if (onprop.isURIResource &&
+						(onprop as Resource).URI.equals(SadlConstants.SADL_LIST_MODEL_FIRST_URI)) {
+						if (sclss.^as(Restriction).^as(AllValuesFromRestriction).allValuesFrom.URI.equals(
+							"http://sadl.org/Test.sadl#Person"))
+							lstTypeFound = true
+					}
+				}	
+ 				else if (sclss.isRestriction && sclss.^as(Restriction).hasValueRestriction) {
+					val onprop = sclss.getPropertyValue(OWL.onProperty)
+					if (onprop.isURIResource) {
+						if ((onprop as Resource).URI.equals(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI)) {
+							if (sclss.^as(Restriction).^as(HasValueRestriction).hasValue.asLiteral.value == 1) {
+								lstMinLenOK = true
+							}
+						} else if ((onprop as Resource).URI.equals(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI)) {
+							if (sclss.^as(Restriction).^as(HasValueRestriction).hasValue.asLiteral.value == 4) {
+								lstMaxLenOK = true
+							}
+						}
+					}
+				} 
+ 				else if (sclss.URIResource && sclss.URI.equals(SadlConstants.SADL_LIST_MODEL_LIST_URI)) {
+					lstFound = true;
+				}
+			 }
+ 			val person = jenaModel.getOntClass("http://sadl.org/Test.sadl#Person")
+ 			val pitr = person.listSuperClasses(true)
+ 			while (pitr.hasNext) {
+ 				val sclss = pitr.next
+ 				if (sclss.isRestriction && sclss.^as(Restriction).onProperty.URI.equals("http://sadl.org/Test.sadl#bar") && sclss.^as(Restriction).allValuesFromRestriction) {
+ 					if (sclss.^as(Restriction).^as(AllValuesFromRestriction).allValuesFrom.equals(rng)) {
+ 						lstRestFound = true
+ 					}
+ 				}
+ 			}
+  			assertTrue(lstTypeFound)
+ 			assertTrue(lstMinLenOK)
+ 			assertTrue(lstMaxLenOK)
+ 			assertTrue(lstFound)
+ 			assertTrue(lstRestFound)
+//			for (rule:rules) {
+//				println(rule.toString)
+//			}
+  			assertTrue(rules.size == 1)
  		]
 	}
 	
