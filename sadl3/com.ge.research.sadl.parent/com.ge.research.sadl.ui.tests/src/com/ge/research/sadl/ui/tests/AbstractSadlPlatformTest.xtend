@@ -19,7 +19,7 @@ package com.ge.research.sadl.ui.tests
 import com.ge.research.sadl.jena.IJenaBasedModelProcessor
 import com.ge.research.sadl.model.gp.Rule
 import com.ge.research.sadl.model.gp.SadlCommand
-import com.ge.research.sadl.tests.AbstractSadlTest
+import com.ge.research.sadl.tests.SadlTestAssertions
 import com.ge.research.sadl.ui.OutputStreamStrategy
 import com.google.common.collect.Lists
 import com.google.inject.Inject
@@ -272,7 +272,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	protected def Resource assertValidatesTo(Resource resource,
 		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
 
-		return AbstractSadlTest.assertValidatesTo(resource as XtextResource, assertions);
+		return SadlTestAssertions.assertValidatesTo(resource as XtextResource, assertions);
 	}
 
 	/**

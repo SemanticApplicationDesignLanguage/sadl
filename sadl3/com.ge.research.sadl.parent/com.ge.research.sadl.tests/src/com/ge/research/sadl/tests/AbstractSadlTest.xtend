@@ -29,7 +29,6 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.scoping.TestScopeProvider
 import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
-import com.ge.research.sadl.validation.ModelProcessorAdapter
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.inject.Inject
@@ -46,9 +45,7 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.StringInputStream
-import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -78,25 +75,21 @@ abstract class AbstractSadlTest {
 
 	private val Supplier<Void> implicitModelSupplier = Suppliers.memoize [
 		val implicitModelUri = URI.createURI(SadlConstants.SADL_IMPLICIT_MODEL_SYNTHETIC_URI);
-		if (!currentResourceSet.resources.map[URI.lastSegment].
-			exists[it == SadlConstants.SADL_IMPLICIT_MODEL_FILENAME]) {
+		if (!currentResourceSet.resources.map[URI.lastSegment].exists[it == SadlConstants.SADL_IMPLICIT_MODEL_FILENAME]) {
 			val resource = loadResource(implicitModelContentProvider.content, implicitModelUri);
 			OntModelProvider.find(resource)
 		}
 		val builtinFunctionsUri = URI.createURI(SadlConstants.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
-		if (!currentResourceSet.resources.map[URI.lastSegment].exists [
-			it == SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME
-		]) {
+		if (!currentResourceSet.resources.map[URI.lastSegment].exists[it == SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME]) {
 			val resource = loadResource(SadlTestHelper.SADL_BUILTIN_FUNCTIONS_CONTENT, builtinFunctionsUri);
 			OntModelProvider.find(resource)
 		}
-
 		return null;
-	]
+	];
 
 	@Before
 	def void initialize() {
-		currentResourceSet = resourceSetProvider.get
+		currentResourceSet = resourceSetProvider.get;
 	}
 
 	protected def getSadlResourcesFrom(Resource it) {
@@ -154,31 +147,12 @@ abstract class AbstractSadlTest {
 	protected def Resource assertValidatesTo(CharSequence code,
 		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
 
-		return assertValidatesTo(code.sadl, assertions);
+		return SadlTestAssertions.assertValidatesTo(code.sadl, assertions);
 	}
 
 	private def Resource loadResource(CharSequence seq, URI uri) {
 		val resource = currentResourceSet.createResource(uri);
 		resource.load(new StringInputStream(XtendTemplateHelper.unifyEOL(seq)), null);
-		return resource;
-	}
-	
-	static def Resource assertValidatesTo(XtextResource resource,
-		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
-
-		val validator = resource.resourceServiceProvider.resourceValidator;
-		val issues = validator.validate(resource, CheckMode.FAST_ONLY, CancelIndicator.NullImpl);
-		val ontModel = OntModelProvider.find(resource);
-		val processor = ModelProcessorAdapter.findInEmfObject(resource).processor;
-		var rules = (processor as IJenaBasedModelProcessor).rules
-		if (rules === null) {
-			rules = newArrayList();
-		}
-		var commands = (processor as IJenaBasedModelProcessor).sadlCommands
-		if (commands === null) {
-			commands = newArrayList();
-		}
-		assertions.apply(ontModel, rules, commands, issues, processor as IJenaBasedModelProcessor);
 		return resource;
 	}
 

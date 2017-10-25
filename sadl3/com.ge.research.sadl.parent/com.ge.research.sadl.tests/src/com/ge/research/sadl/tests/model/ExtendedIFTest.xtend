@@ -10,15 +10,15 @@ package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
-import com.google.common.collect.Iterables
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.xtext.diagnostics.Severity
+
+import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -59,7 +59,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //					print(rule.toString + "\n")
 //				}
 //			}
-			assertEquals(0, issues.size)
+			issues.assertHasNoIssues;
 			assertEquals(7, rules.size);
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -113,7 +113,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //					print(rule.toString + "\n")
 //				}
 //			}
-			assertTrue(issues.size == 0)
+			issues.assertHasNoIssues;
 			assertTrue(rules.size == 2)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -190,7 +190,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //					print(rule.toString)
 //				}
 //			}
-			assertTrue(issues.size == 0)
+			issues.assertHasNoIssues;
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -287,8 +287,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //					print(rule.toString + "\n")
 //				}
 //			}
-			Assert.assertNotNull(issues)
-			assertTrue(issues.size == 0)
+			issues.assertHasNoIssues;
 			assertTrue(rules.size == 9)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -328,7 +327,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: 2 seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
@@ -342,7 +341,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: 2 "seconds".
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
@@ -356,7 +355,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: (2 + 3) seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
@@ -370,7 +369,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: (2 + 3) "seconds".
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
@@ -384,7 +383,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: PI "seconds".
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
@@ -398,7 +397,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: PI seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
@@ -412,7 +411,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: (PI + (1 + 2)) seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals(forTest.get(0).toString(), "unittedQuantity((+(PI,(+(1,2)))),\"seconds\")")
@@ -426,7 +425,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: (PI) seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
@@ -446,7 +445,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 "[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), and(+(v1,3 \"seconds\",v2), is(v0,v2))))]",
 "[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant5, model:cValue, v1), and(+(v1,3,v2), and(unittedQuantity(v2,\"seconds\",v3), is(v0,v3)))))]",
 "[and(rdf(model:System, model:past, v0), is(v0,3 \"seconds\"))]")
-		val sadlModel = '''
+		'''
 			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
 			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
 			 
@@ -480,7 +479,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
-			assertEquals('''Expected no issues. Got: «Iterables.toString(issues)»''', 0, issues.size);
+			issues.assertHasNoIssues;
 //			if (issues !== null) {
 //				for (issue : issues) {
 //					println(issue.message)
@@ -496,7 +495,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	
 	@Test
 	def void testUnits_09b() {
-		val sadlModel = '''
+		'''
 			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
 			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
 			 
@@ -519,7 +518,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
- 			assertEquals(issues.size, 2)
+ 			issues.assertHasIssues(2);
  			for (issue:issues) {
  				if (issue.severity.equals(Severity.ERROR)) {
  					assertEquals(issue.message,"past, an object property with range  UnittedQuantity, cannot be compared (is) with cValue, a datatype property with range  decimal.")
@@ -533,7 +532,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  		
 	@Test
 	def void testUnits_09c() {
-		val sadlModel = '''
+		'''
 			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
 			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
 			 
@@ -556,7 +555,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
- 			assertEquals(issues.size, 1)
+ 			issues.assertHasIssues(1);
 			assertEquals(issues.head.message,"constantValue, an object property with range  UnittedQuantity, cannot operate (+) with int, an RDF datatype  int.")
 		]
 	}
@@ -577,7 +576,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 "Rule R3:  if and(rdf(model:System, model:publicized, true), rdf(model:System, model:past, 3 \"seconds\")) then rdf(model:System, model:inspection, model:Passed).",
 "Rule R4:  if rdf(model:System, model:publicized, true) then rdf(model:System, model:inspection, model:Passed)."			
 		)
-		val sadlModel = '''
+		'''
 			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
 			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
 			 
@@ -655,7 +654,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
- 			assertTrue(issues.size == 0)
+ 			issues.assertHasNoIssues;
 //			for (issue:issues) {
 //				println(issue.message)
 //			}
