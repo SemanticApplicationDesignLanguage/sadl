@@ -29,6 +29,7 @@ import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
+import com.ge.research.sadl.processing.SadlModelProcessor.RulePart;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -467,7 +468,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			boolean dontTypeCheck = false;
 			TypeCheckInfo leftTypeCheckInfo = null;
 			try {
-				leftTypeCheckInfo = getType(leftExpression);
+				if (getModelProcessor().getRulePart().equals(RulePart.PREMISE) &&  getModelProcessor().isBooleanOperator(op)) {
+					// this can be treated as a boolean only (maybe even larger criteria?)
+					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
+					getType(leftExpression);		// this will cause type checking to happen at lower levels
+				}
+				else {
+					leftTypeCheckInfo = getType(leftExpression);
+				}
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
 			}
@@ -477,7 +485,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			
 			TypeCheckInfo rightTypeCheckInfo = null;
 			try {
-				rightTypeCheckInfo = getType(rightExpression);
+				if (getModelProcessor().getRulePart().equals(RulePart.PREMISE) &&  getModelProcessor().isBooleanOperator(op)) {
+					// this can be treated as a boolean only (maybe even larger criteria?)
+					rightTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
+					getType(rightExpression);		// this will cause type checking to happen at lower levels
+				}
+				else {
+					rightTypeCheckInfo = getType(rightExpression);
+				}
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
 			}
@@ -992,9 +1007,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getUnittedQuantityTypeCheckInfo(((UnitExpression)expression).getLeft(), ((UnitExpression)expression).getUnit());
 		}
 		else if(expression instanceof BooleanLiteral || expression instanceof SadlBooleanLiteral){
-			ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
-			booleanLiteralConceptName.setType(ConceptType.RDFDATATYPE);
-			return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, expression);
+			return createBooleanTypeCheckInfo(expression);
 		}
 		else if(expression instanceof Constant){
 			return getType((Constant)expression);
@@ -1098,9 +1111,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			List<String> operations = Arrays.asList(((BinaryOperation) expression).getOp().split("\\s+"));
 			TypeCheckInfo leftTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(((BinaryOperation) expression).getLeft()));
 			TypeCheckInfo rightTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(((BinaryOperation) expression).getRight()));
-			if (leftTypeCheckInfo != null && isVariable(leftTypeCheckInfo) && ((BinaryOperation)expression).getRight() instanceof Declaration) {
-				return rightTypeCheckInfo;
-			}
+//			if (leftTypeCheckInfo != null && isVariable(leftTypeCheckInfo) && ((BinaryOperation)expression).getRight() instanceof Declaration) {
+//				return rightTypeCheckInfo;
+//			}
 			if (((BinaryOperation) expression).getLeft() instanceof PropOfSubject && ((BinaryOperation)expression).getRight() instanceof Declaration) {
 				TypeCheckInfo subjtype = getType(((PropOfSubject)((BinaryOperation) expression).getLeft()).getRight());
 				ConceptIdentifier subject = subjtype.getTypeCheckType();
@@ -1130,10 +1143,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return binopreturn;
 			}
 			else {
-				// by default assume boolean binary operation
-				ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
-				booleanLiteralConceptName.setType(ConceptType.RDFDATATYPE);
-				return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, expression);
+				return createBooleanTypeCheckInfo(expression);
 			}
 		}
 		else if (expression instanceof Sublist) {
@@ -1209,6 +1219,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return null;
+	}
+
+	private TypeCheckInfo createBooleanTypeCheckInfo(EObject expression) {
+		ConceptName booleanLiteralConceptName = new ConceptName(XSD.xboolean.getURI());
+		booleanLiteralConceptName.setType(ConceptType.RDFDATATYPE);
+		return new TypeCheckInfo(booleanLiteralConceptName, booleanLiteralConceptName, this, expression);
 	}
 
 	private TypeCheckInfo getTypeCompatibleWithOperationOnUnittedQuantities(String op, TypeCheckInfo leftTypeCheckInfo,

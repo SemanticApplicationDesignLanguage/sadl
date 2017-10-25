@@ -3673,7 +3673,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return builtin;
 	}
 
-	private Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (nodeObj == null) {
 //			throw new InvalidTypeException("nodeCheck called with null argument; this should not happen.");
 			return null;
@@ -3740,7 +3740,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 
 			if (!isDefiniteArticle(article) && 
-					typenode instanceof NamedNode && ((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode)) {
+					typenode instanceof NamedNode && 
+					(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) || ((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode))) {
 				if (!isCruleVariableDefinitionPossible(expr)) {
 					if (ordinal != null) {
 						addError("Did not expect an indefinite article reference with ordinality in rule conclusion", expr);

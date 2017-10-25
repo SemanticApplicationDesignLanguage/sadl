@@ -949,6 +949,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (octype.equals(OntConceptType.CLASS)){
 			return NodeType.ClassNode;
 		}
+		if (octype.equals(OntConceptType.CLASS_LIST)) {
+			return NodeType.ClassListNode;
+		}
 		if (octype.equals(OntConceptType.CLASS_PROPERTY)) {
 			return NodeType.ObjectProperty;
 		}
@@ -976,6 +979,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		else if (octype.equals(OntConceptType.DATATYPE)) {
 			return NodeType.DataTypeNode;
+		}
+		else if (octype.equals(OntConceptType.DATATYPE_LIST)) {
+			return NodeType.DataTypeListNode;
 		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
 	}
