@@ -30,6 +30,7 @@ import com.google.inject.Inject
 import org.eclipse.xtext.util.EmfFormatter
 import org.junit.Assert
 import org.junit.Test
+import org.junit.Ignore
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
@@ -114,6 +115,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
+	@Ignore ("This is an expected construct: a declared list with facets")
 	@Test
 	def void testListTypes_04() {
 		'''
@@ -296,18 +298,17 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 
 			 // the following all work as PropOfSubject expressions
 			 Test: fprop of MyFoo3 is PI.
-«««			 Test: fprop of MyFoo3 is -PI.
-«««			 Test: fprop of MyFoo3 is (-PI).
+			 Test: fprop of MyFoo3 is -PI.
+			 Test: fprop of MyFoo3 is (-PI).
 			 Test: fprop of MyFoo3 is not PI.
 			 Test: fprop of MyFoo3 is known.
 			 Test: fprop of MyFoo3 is not known.
 			 Test: fprop of MyFoo3 is e.
-«««			 Test: fprop of MyFoo3 is -e.
-«««			 Test: fprop of MyFoo3 is (-e).
+			 Test: fprop of MyFoo3 is -e.
+			 Test: fprop of MyFoo3 is (-e).
 		'''.assertNoErrors
 	}
 	
-//	@Ignore
 	@Test
 	def void testNegatedConstantsSubjHasProp() {
 		'''
@@ -317,17 +318,17 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 
 			 // some of the following do not work as SubjHasPop expressions
 			 Test: MyFoo3 has fprop PI.
-«««			 Test: MyFoo3 has fprop -PI.
-«««			 Test: MyFoo3 has fprop (-PI).
+			 Test: MyFoo3 has fprop -PI.
+			 Test: MyFoo3 has fprop (-PI).
 			 Test: MyFoo3 has fprop (not PI).		
 			 Test: MyFoo3 has fprop known.
 			 Test: MyFoo3 has fprop (not known).	
 			 Test: MyFoo3 has fprop e.
-«««			 Test: MyFoo3 has fprop -e.
-«««			 Test: MyFoo3 has fprop (-e).
-«««			 Test: MyFoo3 has fprop not e.
+			 Test: MyFoo3 has fprop -e.
+			 Test: MyFoo3 has fprop (-e).
+			 Test: MyFoo3 has fprop not e.
 			 Test: MyFoo3 has fprop (not e).		
-«««			 Test: MyFoo3 has fprop (not (-e)).				
+			 Test: MyFoo3 has fprop (not (-e)).				
 		'''.assertNoErrors
 	}
 	
