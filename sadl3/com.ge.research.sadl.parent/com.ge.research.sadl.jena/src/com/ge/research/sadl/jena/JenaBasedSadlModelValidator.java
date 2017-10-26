@@ -468,7 +468,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			boolean dontTypeCheck = false;
 			TypeCheckInfo leftTypeCheckInfo = null;
 			try {
-				if (getModelProcessor().getRulePart().equals(RulePart.PREMISE) &&  getModelProcessor().isBooleanOperator(op)) {
+				if (!getModelProcessor().getRulePart().equals(RulePart.CONCLUSION) &&  getModelProcessor().isBooleanOperator(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
 					getType(leftExpression);		// this will cause type checking to happen at lower levels
@@ -485,7 +485,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			
 			TypeCheckInfo rightTypeCheckInfo = null;
 			try {
-				if (getModelProcessor().getRulePart().equals(RulePart.PREMISE) &&  getModelProcessor().isBooleanOperator(op)) {
+				if (!getModelProcessor().getRulePart().equals(RulePart.CONCLUSION) &&  getModelProcessor().isBooleanOperator(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					rightTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
 					getType(rightExpression);		// this will cause type checking to happen at lower levels
