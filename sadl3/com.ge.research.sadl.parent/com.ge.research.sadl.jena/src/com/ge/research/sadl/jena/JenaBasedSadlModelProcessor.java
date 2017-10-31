@@ -325,6 +325,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private List<SadlCommand> sadlCommands = null;
 	private SadlCommand targetCommand = null;
 	
+	private List<EObject> operationsPullingUp = null;
+	
 	int modelErrorCount = 0;
 	int modelWarningCount = 0;
 	int modelInfoCount = 0;
@@ -698,6 +700,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private List<OntResource> allImpliedPropertyClasses = null;
 
 	private ArrayList<Object> intermediateFormResults = null;
+
+	private EObject hostEObject = null;
 
     public static void refreshResource(Resource newRsrc) {
     	try {
@@ -1658,6 +1662,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	public VariableNode createVariable(SadlResource sr) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
 		VariableNode var = createVariable(getDeclarationExtensions().getConceptUri(sr));
+		if (var.getType() != null) {
+			return var;	// all done
+		}
 		SadlResource decl = getDeclarationExtensions().getDeclaration(sr);
 		EObject defnContainer = decl.eContainer();
 		try {
@@ -1670,11 +1677,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				SadlTypeReference type = ((SadlParameterDeclaration)defnContainer).getType();
 				tci = getModelValidator().getType(type);
 			}
-			else {
-				throw new TranslationException("Unhandled varaible definition");
+			else if (!isContainedBy(sr, QueryStatement.class)) {
+				addError("Unhandled variable definition", sr);
 			}
 			if (tci != null && tci.getTypeCheckType() instanceof ConceptName) {
-				var.setType(conceptNameToNamedNode((ConceptName)tci.getTypeCheckType()));
+				if (var.getType() == null) {
+					var.setType(conceptNameToNamedNode((ConceptName)tci.getTypeCheckType()));
+				}
+				else {
+					if (!var.getType().toFullyQualifiedString().equals(tci.getTypeCheckType().toString())) {
+						addError("Changing type of variable '" + var.getName() + "' from '" + var.getType().toFullyQualifiedString() + "' to '" + tci.getTypeCheckType().toString() + "' not allowed.", sr);
+					}
+				}
 			}
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
@@ -1695,6 +1709,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return var;
 	}
 
+	private boolean isContainedBy(EObject eobj, Class cls) {
+		if (eobj.eContainer() != null) {
+// TODO fix this to be generic
+			if (eobj.eContainer() instanceof QueryStatement) {
+				return true;
+			}
+			else {
+				return isContainedBy(eobj.eContainer(), cls);
+			}
+		}
+		return false;
+	}
+	
 	protected VariableNode createVariable(String name) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
 		Object trgt = getTarget();
 		if (trgt instanceof Rule) {
@@ -2114,7 +2141,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Query processAsk(Expression expr) {
 		Query query = new Query();
 		query.setContext(expr);
-//		setTranslationTarget(query);
+		setTarget(query);
 //		if (parent != null) {
 //			getIfTranslator().setEncapsulatingTarget(parent);
 //		}
@@ -2882,9 +2909,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			NamedNode defnType = null;
 			try {
 				VariableNode var = createVariable(getDeclarationExtensions().getConceptUri(variableName.getName()));
+				if (var == null) {	// this can happen on clean/build when file is open in editor
+					return null;
+				}
 				if (translatedDefn instanceof NamedNode) {
 					defnType = (NamedNode) translatedDefn;
-					var.setType((NamedNode) defnType);
+					if (var.getType() == null) {
+						var.setType((NamedNode) defnType);
+					}
 					TripleElement trel = new TripleElement(var, new RDFTypeNode(), defnType);
 					trel.setSourceType(TripleSourceType.SPV);
 					return trel;
@@ -2896,11 +2928,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else {
 					TypeCheckInfo varType = getModelValidator().getType(variableDefn);
-					if (varType != null && varType.getTypeCheckType() != null && varType.getTypeCheckType() instanceof ConceptName) {
-						defnType = conceptNameToNamedNode((ConceptName) varType.getTypeCheckType());
-						var.setType((NamedNode) defnType);
+					if (varType != null) {
+						if (var.getType() == null) {
+							if (varType.getCompoundTypes() != null) {
+								Object jct = compoundTypeCheckTypeToNode(varType, variableDefn);
+								if (jct != null && jct instanceof Junction) {
+									var.setType(nodeCheck(jct));
+								}
+								else {
+									addError("Compound type check did not process into expected result for variable type", variableDefn);
+								}
+							}
+							else if (varType.getTypeCheckType() != null && varType.getTypeCheckType() instanceof ConceptName) {
+								defnType = conceptNameToNamedNode((ConceptName) varType.getTypeCheckType());
+								var.setType((NamedNode) defnType);
+								if (varType.getRangeValueType().equals(RangeValueType.LIST)) {
+									ConceptName cn = new ConceptName(((NamedNode)defnType).toFullyQualifiedString());
+//									cn.setRangeValueType(RangeValueType.LIST);
+									cn.setType(nodeTypeToConceptType(((NamedNode)defnType).getNodeType()));
+									var.setListType(cn);
+								}
+							}
+						}
 					}
-					if (translatedDefn instanceof GraphPatternElement) {
+					else if (translatedDefn instanceof GraphPatternElement) {
 						if (var.getDefinition() != null) {
 							var.getDefinition().add((GraphPatternElement) translatedDefn);
 						}
@@ -3065,6 +3116,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (lobj instanceof TripleElement) {
 							if (((TripleElement)lobj).getObject() == null) {
 								((TripleElement)lobj).setObject((com.ge.research.sadl.model.gp.Literal)robj);
+								lobj = checkForNegation((TripleElement)lobj, rexpr);
 								return lobj;
 							}
 							else {
@@ -3078,12 +3130,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					else if (robj instanceof VariableNode) {
 						if (((TripleElement)lobj).getObject() == null) {
 							((TripleElement)lobj).setObject((VariableNode) robj);
+							lobj = checkForNegation((TripleElement)lobj, rexpr);
 							return lobj;
 						}
 					}
 					else if (robj instanceof NamedNode) {
 						if (((TripleElement)lobj).getObject() == null) {
 							((TripleElement)lobj).setObject((NamedNode) robj);
+							lobj = checkForNegation((TripleElement)lobj, rexpr);
 							return lobj;
 						}
 					}
@@ -3318,6 +3372,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return createBinaryBuiltin("assign", robj, lobj);
 		}
 		return createBinaryBuiltin(op, lobj, robj);
+	}
+	
+	private TripleElement checkForNegation(TripleElement lobj, Expression rexpr) throws InvalidTypeException {
+		if (isOperationPulingUp(rexpr) && isNegation(rexpr)) {
+			lobj.setType(TripleModifierType.Not);
+			getOperationPullingUp();
+		}
+		return lobj;
+	}
+
+	private boolean isNegation(Expression expr) {
+		if (expr instanceof UnaryExpression && ((UnaryExpression)expr).getOp().equals("not")) {
+			return true;
+		}
+		return false;
 	}
 	
 	private Object replaceDeclarationWithVariableAndAddUseDeclarationAsDefinition(Expression lexpr, Object lobj, Expression rexpr, Object robj) throws TranslationException, InvalidTypeException {
@@ -3764,7 +3833,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				ordNum = 2;
 			}
 
-			if (!isDefiniteArticle(article) && 
+			if (useArticlesInValidation && !isDefiniteArticle(article) && 
 					typenode instanceof NamedNode && 
 					(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) || ((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode))) {
 				if (!isCruleVariableDefinitionPossible(expr)) {
@@ -3776,12 +3845,37 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 				// create a CRule variable
 				String nvar = getNewVar(expr);
-				VariableNode var = addCruleVariable((NamedNode)typenode, ordNum, nvar);
+				VariableNode var = addCruleVariable((NamedNode)typenode, ordNum, nvar, expr, getHostEObject());
 //				System.out.println("Added crule variable: " + typenode.toString() + ", " + ordNum + ", " + var.toString());
 				return var;
 			}
 			else if (typenode != null && typenode instanceof NamedNode) {
-				VariableNode var = getCruleVariable((NamedNode)typenode, ordNum);
+				VariableNode var = null;
+				if (useArticlesInValidation) {
+					var = getCruleVariable((NamedNode)typenode, ordNum);
+				}
+				else {
+					try {
+						String nvar = getNewVar(expr);
+						var = createVariable(nvar);
+						var.setType((NamedNode)typenode);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PrefixNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 				if (var == null) {
 					addError("Did not find crule variable for type '" + ((NamedNode)typenode).toString() + "', definite article, ordinal " + ordNum, expr);
 				}
@@ -3800,6 +3894,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		return typenode;
+	}
+	
+	protected EObject getHostEObject() {
+		return hostEObject ;
+	}
+	
+	protected void setHostEObject(EObject host) {
+		if (hostEObject != null) {
+			clearCruleVariablesForHostObject(hostEObject);
+		}
+		hostEObject = host;
 	}
 	
 	public Object processExpression(ElementInList expr) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -3859,8 +3964,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	private boolean isCruleVariableDefinitionPossible(Declaration expr) {
 		if (getRulePart().equals(RulePart.CONCLUSION) && !isDeclInThereExists(expr)) {
-			// this can't be a crule variable
-			return false;
+			// this can't be a crule variable unless there is no rule body
+			if (getTarget() != null && getTarget() instanceof Rule && 
+					(((Rule)getTarget()).getIfs() != null || ((Rule)getTarget()).getGivens() != null)) {
+				return false;
+			}
 		}
 		if (expr.eContainer() != null && expr.eContainer() instanceof BinaryOperation && isEqualOperator(((BinaryOperation)expr.eContainer()).getOp()) &&
 				!((BinaryOperation)expr.eContainer()).getLeft().equals(expr) && ((BinaryOperation)expr.eContainer()).getLeft() instanceof Declaration) {
@@ -3898,12 +4006,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (ordinal.equals("tenth")) return 10;
 		throw new TranslationException("Unexpected ordinal '" + ordinal + "'; can't handle.");
 	}
+	
+	private String nextOrdinal(int ordinalNumber) throws TranslationException {
+		if (ordinalNumber == 0) return "first";
+		if (ordinalNumber == 1) return"second";
+		if (ordinalNumber == 2) return"third";
+		if (ordinalNumber == 3) return"fourth";
+		if (ordinalNumber == 4) return"fifth";
+		if (ordinalNumber == 5) return"sixth";
+		if (ordinalNumber == 6) return"seventh";
+		if (ordinalNumber == 7) return"eighth";
+		if (ordinalNumber == 8) return"ninth";
+		if (ordinalNumber == 9) return"tenth";
+		throw new TranslationException("Unexpected ordinal number '" + ordinalNumber + "'is larger than is handled at this time.");
+	}
+	
 	private boolean isDefiniteArticle(String article) {
 		if (article != null && article.equalsIgnoreCase("the")) {
 			return true;
 		}
 		return false;
 	}
+	
 	private Object processExpression(SadlTypeReference type) throws TranslationException {
 		if (type instanceof SadlSimpleTypeReference) {
 			return processExpression(((SadlSimpleTypeReference)type).getType());
@@ -4091,7 +4215,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (trSubj instanceof Node) {
 				subjNode = (Node) trSubj;
 			}
-			else {
+			else if (trSubj != null) {
 				subjNode = new ProxyNode(trSubj);
 			}
 			if (predNode != null && predNode instanceof Node) {
@@ -4255,21 +4379,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (subjVariableName != null) {
 //						System.out.println("Variable '" + getDeclarationExtensions().getConcreteName(subjVariableName.getName()) + "' is defined by domain of property '" + 
 //								getDeclarationExtensions().getConceptUri(pred) + "'");
-						var = createVariable(getDeclarationExtensions().getConceptUri(subjVariableName.getName()));
+						var = createVariable(subjVariableName.getName()); //getDeclarationExtensions().getConceptUri(subjVariableName.getName()));
 					}
 					else {
 						sobj = processExpression(subj);
 					}
-					if (var != null) {
+					if (var != null && var.getType() == null) {		// it's a variable and we don't know the type so try to get the type
 						TypeCheckInfo dtci = getModelValidator().getTypeInfoFromDomain(propcn, prop, pred);
-						if (dtci != null && dtci.getTypeCheckType() != null) {
-							ConceptIdentifier tcitype = dtci.getTypeCheckType();
-							if (tcitype instanceof ConceptName) {
-								NamedNode defn = conceptNameToNamedNode((ConceptName)tcitype);
-								var.setType((NamedNode) defn);
+						if (dtci != null) {
+							if (dtci.getCompoundTypes() != null) {
+								Object jct = compoundTypeCheckTypeToNode(dtci, pred);
+								if (jct != null && jct instanceof Junction) {
+									if (var.getType() == null) {
+										var.setType(nodeCheck(jct));
+									}
+								}
+								else {
+									addError("Compound type check did not process into expected result for variable type", pred);
+								}
+							}
+							else if(dtci.getTypeCheckType() != null) {
+								ConceptIdentifier tcitype = dtci.getTypeCheckType();
+								if (tcitype instanceof ConceptName) {
+									NamedNode defn = conceptNameToNamedNode((ConceptName)tcitype);
+									if (var.getType() == null) {
+										var.setType((NamedNode) defn);
+									}
+								}
+								else {
+									addError("Domain type did not return a ConceptName for variable type", pred);
+								}
 							}
 							else {
-								addError("Domain type did not return a ConceptName", pred);
+								addError("Domain type check info doesn't have information to set variable type", pred);
 							}
 						}
 						sobj = var;
@@ -4291,7 +4433,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							ConceptIdentifier tcitype = dtci.getTypeCheckType();
 							if (tcitype instanceof ConceptName) {
 								NamedNode defn = conceptNameToNamedNode((ConceptName)tcitype);
-								var.setType((NamedNode) defn);
+								if (var.getType() == null) {
+									var.setType((NamedNode) defn);
+								}
 							}
 							else {
 								addError("Range type did not return a ConceptName", pred);
@@ -4351,6 +4495,62 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return returnTriple;
 	}
 	
+	private Junction compoundTypeCheckTypeToNode(TypeCheckInfo dtci, EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Iterator<TypeCheckInfo> ctitr = dtci.getCompoundTypes().iterator();
+		Junction last = null;
+		Junction jct = null;
+		while (ctitr.hasNext()) {
+			Object current = null;
+			TypeCheckInfo tci = ctitr.next();
+			if (tci.getCompoundTypes() != null) {
+				current = compoundTypeCheckTypeToNode(tci, expr);
+			}
+			else if (tci.getTypeCheckType() != null) {
+				if (tci.getTypeCheckType() instanceof ConceptName) {
+					current = conceptNameToNamedNode((ConceptName) tci.getTypeCheckType());
+				}
+				else {
+					addError("Type check info doesn't have expected ConceptName type", expr);
+				}
+			}
+			else {
+				addError("Type check info doesn't have valid type", expr);
+			}
+			if (current != null) {
+				if (jct == null) {
+					if (ctitr.hasNext()) {
+						// there is more so new junction
+						jct = new Junction();
+						jct.setJunctionName("or");
+						if (last != null) {
+							// this is a nested junction
+							jct.setLhs(last);
+							jct.setRhs(current);
+						}
+						else {
+							// this is not a nested junction so just set the LHS to current, RHS will be set on next iteration
+							jct.setLhs(current);
+						}
+					}
+					else if (current instanceof Junction){
+						last = (Junction) current;
+					}
+					else {
+						// this shouldn't happen
+						addError("Unexpected non-Junction result of compound type check to Junction", expr);
+					}
+				}
+				else {
+					// this finishes off the RHS of the first junction
+					jct.setRhs(current);
+					last = jct;
+					jct = null;		// there should always be a final RHS that will set last, which is returned
+				}
+			}
+		}
+		return last;
+	}
+	
 	public Object processExpression(Sublist expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Expression list = expr.getList();
 		Expression where = expr.getWhere();
@@ -4393,20 +4593,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				((com.ge.research.sadl.model.gp.Literal)eobj).setOriginalText(op + ((com.ge.research.sadl.model.gp.Literal)eobj).getOriginalText());
 				return eobj;
 			}
-			else if (op.equals("not") && val instanceof Boolean) {
-				try {
-					boolean bval = ((Boolean)val).booleanValue();
-					if (bval) {
-						((com.ge.research.sadl.model.gp.Literal)eobj).setValue(false);
+			else if (op.equals("not")) {
+				if (val instanceof Boolean) {
+					try {
+						boolean bval = ((Boolean)val).booleanValue();
+						if (bval) {
+							((com.ge.research.sadl.model.gp.Literal)eobj).setValue(false);
+						}
+						else {
+							((com.ge.research.sadl.model.gp.Literal)eobj).setValue(true);
+						}
+						((com.ge.research.sadl.model.gp.Literal)eobj).setOriginalText(op + " " + ((com.ge.research.sadl.model.gp.Literal)eobj).getOriginalText());
+						return eobj;
 					}
-					else {
-						((com.ge.research.sadl.model.gp.Literal)eobj).setValue(true);
+					catch (Exception e) {
+						
 					}
-					((com.ge.research.sadl.model.gp.Literal)eobj).setOriginalText(op + " " + ((com.ge.research.sadl.model.gp.Literal)eobj).getOriginalText());
-					return eobj;
 				}
-				catch (Exception e) {
-					
+				else {
+					// this is a not before a non-boolean value so we want to pull the negation up
+					pullOperationUp(expr);
+					return eobj;
 				}
 			}
 			else {
@@ -4422,12 +4629,38 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			bi.addArgument(new ProxyNode(eobj));
 		}
 		else if (eobj == null) {
-			addError("Unary operator '" + op + "' has null argument", expr);
+			addError("Unary operator '" + op + "' has no argument. Perhaps parentheses are needed.", expr);
 		}
 		else {
 			throw new TranslationException("Expected node, got '" + eobj.getClass().getCanonicalName() + "'");
 		}
 		return bi;
+	}
+	
+	private void pullOperationUp(UnaryExpression expr) {
+		if (expr != null) {
+			if (operationsPullingUp == null) {
+				operationsPullingUp = new ArrayList<EObject>();
+			}
+			operationsPullingUp.add(expr);
+		}
+	}
+	
+	private EObject getOperationPullingUp() {
+		if (operationsPullingUp != null && operationsPullingUp.size() > 0) {
+			EObject removed = operationsPullingUp.remove(operationsPullingUp.size() - 1);
+			return removed;
+		}
+		return null;
+	}
+	
+	private boolean isOperationPulingUp(EObject expr) {
+		if (operationsPullingUp != null && operationsPullingUp.size() > 0) {
+			if (operationsPullingUp.get(operationsPullingUp.size() - 1).equals(expr)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public Object processExpression(UnitExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -8738,6 +8971,10 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 	
 	public boolean isNumericType(ConceptName conceptName) {
 		try {
+			if (conceptName.getName().equals("known") && conceptName.getNamespace() == null) {
+				// known matches everything
+				return true;
+			}
 			String uri = conceptName.getUri();
 			return isNumericType(uri);
 		} catch (InvalidNameException e) {
@@ -8898,7 +9135,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 		return null;
 	}
 	
-	protected VariableNode addCruleVariable(NamedNode type, int ordinalNumber, String name) throws TranslationException {
+	protected VariableNode addCruleVariable(NamedNode type, int ordinalNumber, String name, EObject expr, EObject host) throws TranslationException {
 		if (cruleVariables == null) {
 			cruleVariables = new HashMap<NamedNode,List<VariableNode>>();
 		}
@@ -8907,6 +9144,7 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 			VariableNode var = new VariableNode(name);
 			var.setCRulesVariable(true);
 			var.setType(type);
+			var.setHostObject(getHostEObject());
 			newList.add(var);
 			cruleVariables.put(type, newList);
 			return var;
@@ -8924,20 +9162,37 @@ protected void resetProcessorState(SadlModelElement element) throws InvalidTypeE
 				VariableNode var = new VariableNode(name);
 				var.setCRulesVariable(true);
 				var.setType(type);
+				var.setHostObject(getHostEObject());
 				existingList.add(var);
 				return var;
 			}
 			else {
-				throw new TranslationException("Failed to add crule variable, index is out of sequence expected");
+				addError("There is already an implicit variable with ordinality " + ordinalNumber + ". Please use 'a " + nextOrdinal(ordinalNumber) + 
+						"' to create another implicit variable or 'the " + nextOrdinal(ordinalNumber - 1) + "' to refer to the existing implicit variable.", expr);
+				return existingList.get(existingList.size() - 1);
 			}
 		}
 	}
 	
-	private void clearCruleVariables() {
+	protected void clearCruleVariables() {
 		if (cruleVariables != null) {
 			cruleVariables.clear();
 		}
 		vNum = 0;	// reset system-generated variable name counter
+	}
+	
+	protected void clearCruleVariablesForHostObject(EObject host) {
+		if (cruleVariables != null) {
+			Iterator<NamedNode> crvitr = cruleVariables.keySet().iterator();
+			while (crvitr.hasNext()) {
+				List<VariableNode> varsOfType = cruleVariables.get(crvitr.next());
+				for (int i = varsOfType.size() - 1; i >= 0; i--) {
+					if (varsOfType.get(i).getHostObject() != null && varsOfType.get(i).getHostObject().equals(host)) {
+						varsOfType.remove(i);
+					}
+				}
+			}
+		}
 	}
 	
 	protected void processModelImports(Ontology modelOntology, URI importingResourceUri, SadlModel model) throws OperationCanceledError {

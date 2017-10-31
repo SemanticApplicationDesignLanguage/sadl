@@ -20,6 +20,7 @@ package com.ge.research.sadl.model.gp;
 
 import java.util.List;
 
+import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 /**
@@ -28,7 +29,10 @@ import com.ge.research.sadl.reasoner.TranslationException;
  */
 public class VariableNode extends NamedNode {
 	private int references = 0;
-	private NamedNode type = null;
+	private Object hostObject = null;
+	private Node type = null;
+	private ConceptIdentifier listType = null;	// if the variable has a type which is a named List, 
+												// the type will be the named class but this will the type of the elements 
 	private List<GraphPatternElement> definition = null;
 	private boolean isCRulesVariable = false;
 
@@ -42,6 +46,14 @@ public class VariableNode extends NamedNode {
 	
 	public int getNumReferences() {
 		return references;
+	}
+
+	public Object getHostObject() {
+		return hostObject;
+	}
+
+	public void setHostObject(Object host) {
+		hostObject = host;
 	}
 	
 	@Override
@@ -66,11 +78,11 @@ public class VariableNode extends NamedNode {
 		return true;
 	}
 
-	public NamedNode getType() {
+	public Node getType() {
 		return type;
 	}
 
-	public void setType(NamedNode type) throws TranslationException {
+	public void setType(Node type) throws TranslationException {
 		if (this.type != null && 
 				!this.type.equals(type)) {
 			throw new TranslationException("Cannot change the type of a variable. (Attempted change from '" + 
@@ -99,5 +111,17 @@ public class VariableNode extends NamedNode {
 	public String toString() {
 		// a variable need only have the name as the scope is this namespace, often this named structure--it can't be from another namespace.
 		return getName();
+	}
+
+	public ConceptIdentifier getListType() {
+		return listType;
+	}
+
+	public void setListType(ConceptIdentifier listType) {
+		this.listType = listType;
+	}
+
+	public boolean isList() {
+		return listType == null;
 	}
 }
