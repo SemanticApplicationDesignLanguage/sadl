@@ -403,7 +403,11 @@ ThereExists :
 PrimaryExpression<EnabledWith, EnableComma> returns Expression:
 	'(' SelectExpression<EnabledWith, EnableComma> ')'
 	| Name 
-	| {Declaration} article=AnArticle (ordinal=Ordinal)? type=SadlPrimaryTypeReference ('[' arglist+=NestedExpression? (',' arglist+=NestedExpression)* ']')?
+	| {Declaration} article=AnArticle ordinal=Ordinal? type=SadlPrimaryTypeReference
+		(
+			'[' arglist+=NestedExpression? (',' arglist+=NestedExpression)* ']'
+			|'length' len=FacetNumber ->('-' maxlen=(FacetNumber|'*'))?
+		)?
 	| {StringLiteral} value=STRING 
 	| {NumberLiteral} value=AnyNumber
 	| {BooleanLiteral} value=BooleanValue 
