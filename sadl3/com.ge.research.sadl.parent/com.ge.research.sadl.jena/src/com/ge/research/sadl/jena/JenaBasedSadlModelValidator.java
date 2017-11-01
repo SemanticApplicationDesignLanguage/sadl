@@ -475,6 +475,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
 					leftAlternativeTCI = getType(leftExpression);		// this will cause type checking to happen at lower levels
+					leftTypeCheckInfo = leftAlternativeTCI;		// now sure under what conditions we'd want to have boolean????
 				}
 				else {
 					leftTypeCheckInfo = getType(leftExpression);
@@ -493,6 +494,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					rightTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
 					rightAlternativeTCI = getType(rightExpression);		// this will cause type checking to happen at lower levels
+					rightTypeCheckInfo = rightAlternativeTCI;		// now sure under what conditions we'd want to have boolean????
 				}
 				else {
 					rightTypeCheckInfo = getType(rightExpression);
@@ -510,7 +512,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (modelProcessor.isComparisonOperator(op) && (rightExpression instanceof NumberLiteral || 
 					rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getExpr() instanceof NumberLiteral)) {
-				checkNumericRangeLimits(op, leftTypeCheckInfo, rightTypeCheckInfo);
+				checkNumericRangeLimits(op, leftAlternativeTCI, rightAlternativeTCI);
 			}
 			if(!dontTypeCheck && !compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, ImplicitPropertySide.NONE)){
 				if (expression.eContainer() instanceof TestStatement && isQuery(leftExpression)) {
@@ -2849,6 +2851,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						TypeCheckInfo ptci = getType(((BinaryOperation)defContainer).getRight());
 						return ptci;
 					}
+				}
+				else if (((BinaryOperation)defContainer).getLeft() instanceof PropOfSubject && ((BinaryOperation)defContainer).getRight() instanceof Name) {
+					TypeCheckInfo tci = getType(((BinaryOperation)defContainer).getLeft());
+					return tci;
 				}
 				else {
 					issueAcceptor.addError("Unhandled variable container for variable '" + conceptNm + "'.", defContainer);

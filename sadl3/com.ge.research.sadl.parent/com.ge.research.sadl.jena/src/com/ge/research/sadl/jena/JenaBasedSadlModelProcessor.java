@@ -1669,13 +1669,42 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		EObject defnContainer = decl.eContainer();
 		try {
 			TypeCheckInfo tci = null;
-			if (defnContainer instanceof BinaryOperation && ((BinaryOperation)defnContainer).getLeft().equals(decl)) {
-				Expression defn = ((BinaryOperation)defnContainer).getRight();
-				tci = getModelValidator().getType(defn);
+			if (defnContainer instanceof BinaryOperation) {
+				if (((BinaryOperation)defnContainer).getLeft().equals(decl)) {
+					Expression defn = ((BinaryOperation)defnContainer).getRight();
+					tci = getModelValidator().getType(defn);
+				}
+				else if (((BinaryOperation)defnContainer).getLeft() instanceof PropOfSubject) {
+					tci = getModelValidator().getType(((BinaryOperation)defnContainer).getLeft());
+				}
 			}
 			else if (defnContainer instanceof SadlParameterDeclaration) {
 				SadlTypeReference type = ((SadlParameterDeclaration)defnContainer).getType();
 				tci = getModelValidator().getType(type);
+			}
+			else if (defnContainer instanceof SubjHasProp) {
+				if (((SubjHasProp)defnContainer).getLeft().equals(decl)) {
+					// need domain of property
+					Expression pexpr = ((SubjHasProp)defnContainer).getProp();
+					if (pexpr instanceof SadlResource) {
+						String puri = getDeclarationExtensions().getConceptUri((SadlResource)pexpr);
+						OntConceptType ptype = getDeclarationExtensions().getOntConceptType((SadlResource)pexpr);
+						if (isProperty(ptype)) {
+							Property prop = getTheJenaModel().getProperty(puri);
+							tci = getModelValidator().getTypeInfoFromDomain(new ConceptName(puri), prop, defnContainer);
+						}
+						else {
+							addError("Right of SubjHasProp not handled (" + ptype.toString() + ")", defnContainer);
+						}
+					}
+					else {
+						addError("Right of SubjHasProp not a Name (" + pexpr.getClass().toString() + ")", defnContainer);
+					}
+				}
+				else if (((SubjHasProp)defnContainer).getRight().equals(decl)) {
+					// need range of property
+					tci = getModelValidator().getType(((SubjHasProp)defnContainer).getProp());
+				}
 			}
 			else if (!isContainedBy(sr, QueryStatement.class)) {
 				addError("Unhandled variable definition", sr);
