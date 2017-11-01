@@ -30,7 +30,6 @@ import com.google.inject.Inject
 import org.eclipse.xtext.util.EmfFormatter
 import org.junit.Assert
 import org.junit.Test
-import org.junit.Ignore
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
@@ -115,7 +114,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore ("This is an expected construct: a declared list with facets")
 	@Test
 	def void testListTypes_04() {
 		'''
