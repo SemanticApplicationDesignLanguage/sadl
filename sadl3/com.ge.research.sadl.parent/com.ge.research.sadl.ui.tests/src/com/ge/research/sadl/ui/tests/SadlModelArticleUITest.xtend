@@ -88,6 +88,96 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
+	def void testArticles_03() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			 uri "http://sadl.org/TestArticles.sadl" alias TestArticles.
+			
+			Shape is a class described by area with values of type decimal.
+			
+			Rectangle is a type of Shape, described by height with values of type decimal, described by width with values of type decimal.
+			
+			Circle is a type of Shape, described by radius with values of type decimal.
+			
+			ShapeCalculator is a class.
+			MyShapeCalculator is a ShapeCalculator.
+			MyCircle is a Circle.
+			
+			Rule R1: 
+			if X is radius of a Circle and
+				X > 0 and
+				Y is X^2*PI
+			then
+				area of the Circle is Y.
+ 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					print(rule.toString + "\n")
+				}
+			}
+//			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if and(rdf(v0, rdf:type, TestArticles:Circle), and(rdf(v0, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y))))) then rdf(v0, TestArticles:area, Y)."))
+		]
+
+	}
+	
+	@Test
+	def void testArticles_04() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			 uri "http://sadl.org/TestArticles.sadl" alias TestArticles.
+			
+			Shape is a class described by area with values of type decimal.
+			
+			Rectangle is a type of Shape, described by height with values of type decimal, described by width with values of type decimal.
+			
+			Circle is a type of Shape, described by radius with values of type decimal.
+			
+			ShapeCalculator is a class.
+			MyShapeCalculator is a ShapeCalculator.
+			MyCircle is a Circle.
+			
+			Rule R1: 
+			if X is radius of Circle and
+				X > 0 and
+				Y is X^2*PI
+			then
+				area of Circle is Y.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					print(rule.toString + "\n")
+				}
+			}
+//			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if and(rdf(TestArticles:Circle, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y)))) then rdf(TestArticles:Circle, TestArticles:area, Y)."))
+		]
+
+	}
+	
+	@Test
 	def void testCRule_01() {
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
@@ -404,4 +494,63 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
+	@Test
+	def void testVariables_01() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			 uri "http://sadl.org/HasTests.sadl" alias ht.
+			 
+			 Person is a class.
+			 age describes Person with values of type int.		// a "passive" property--a characteristic that a Person has; also a DatatypeProperty
+			 child describes Person with values of type Person.	// another "passive" property, this time an ObjectProperty
+			 A Person is a Parent only if child has at least 1 value.
+			 
+			 teaches describes Person with values of type Person. // an "action" property--something that a Person does
+			 
+			 // Instance declarations
+			 George is a Person.
+			 John is a Person, has age 23, has teaches George.	// this is currently valid SADL grammar but not good English
+			 Julia is a Person, teaches George.	// this does not work but is desired
+			 
+			 Sue is a Person. 
+			 Sue teaches George.	// this works currently, which is good
+			 
+			 Lana is a Parent.
+			 
+			 
+			 knows describes Person with values of type Person.		// an "active" property
+			 The relationship of Person to Person is acquaintance.	// a "passive" property
+			 
+			 Rule R1 if x is a Person and x has teaches y then x has acquaintance y.	// this works
+			 
+			 Rule R2 if x is a Person and x teaches y then x knows y.	// this doesn't but is desired
+
+			 Rule R3: if a Person knows a second Person then the second Person knows the first Person.
+			 Rule R4: if a Person has knows a second Person then the second Person has knows the first Person.
+			 Rule R5: if x knows y then y knows x.
+			 
+			 Rule R6: if x is a Person and knows of x is y then knows of y is x.
+			 
+			 Rule R7: if x is a Parent then there exists a Person and x has teaches the Person.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+ 			if (issues.size > 0) {
+ 				for (issue:issues) {
+ 					print(issue.toString)
+ 				}
+ 			}
+ 			assertTrue(issues.size == 0)
+ 			assertTrue(rules.size == 7)
+ 			assertTrue(processor.compareTranslations(rules.get(0).toString(),"Rule R1:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:acquaintance, y)."))
+ 			assertTrue(processor.compareTranslations(rules.get(1).toString(),"Rule R2:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:knows, y)."))
+ 			assertTrue(processor.compareTranslations(rules.get(2).toString(),"Rule R3:  if and(rdf(v0, rdf:type, ht:Person), and(rdf(v0, ht:knows, v1), and(rdf(v1, rdf:type, ht:Person), !=(v0,v1)))) then rdf(v1, ht:knows, v0)."))
+ 			assertTrue(processor.compareTranslations(rules.get(3).toString(),"Rule R4:  if and(rdf(v0, rdf:type, ht:Person), and(rdf(v0, ht:knows, v1), and(rdf(v1, rdf:type, ht:Person), !=(v0,v1)))) then rdf(v1, ht:knows, v0)."))
+  			assertTrue(processor.compareTranslations(rules.get(4).toString(),"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
+ 			assertTrue(processor.compareTranslations(rules.get(5).toString(),"Rule R6:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:knows, y)) then rdf(y, ht:knows, x)."))
+ 			assertTrue(processor.compareTranslations(rules.get(6).toString(),"Rule R7:  if rdf(x, rdf:type, ht:Parent) then and(there exists(v0), and(rdf(v0, rdf:type, ht:Person), rdf(x, ht:teaches, v0)))."))
+ 		]
+	}
 }

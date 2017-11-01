@@ -1702,7 +1702,12 @@ public class IntermediateFormTranslator {
 			}
 		}
 		if (be.getFuncName().equals("there exists")) {
-			patterns.add(patterns.size() - 1, be);
+			if (patterns.size() == 0) {
+				patterns.add(be);
+			}
+			else {
+				patterns.add(patterns.size() - 1, be);
+			}
 			returnNode = be.getArguments().get(0);
 		}
 		else {

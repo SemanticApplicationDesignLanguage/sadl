@@ -73,13 +73,9 @@ class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
 			 
 			 Rule R2 if x is a Person and x teaches y then x knows y.	// this doesn't but is desired
 
-			 Rule R3: if a Person knows a second Person then the second Person knows the first Person.
-			 Rule R4: if a Person has knows a second Person then the second Person has knows the first Person.
 			 Rule R5: if x knows y then y knows x.
 			 
 			 Rule R6: if x is a Person and knows of x is y then knows of y is x.
-			 
-			 Rule R7: if x is a Parent then there exists a Person and x has teaches the Person.
  		'''.assertValidatesTo [ jenaModel, rules, cmds, issues |
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out, "RDF/XML-ABBREV")
@@ -89,16 +85,12 @@ class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
  				}
  			}
  			assertTrue(issues.size == 0)
- 			assertTrue(rules.size == 7)
+ 			assertTrue(rules.size == 4)
  			assertTrue(processorProvider.get.compareTranslations(rules.get(0).toString(),"Rule R1:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:acquaintance, y)."))
  			assertTrue(processorProvider.get.compareTranslations(rules.get(1).toString(),"Rule R2:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:knows, y)."))
- 			assertTrue(processorProvider.get.compareTranslations(rules.get(2).toString(),"Rule R3:  if and(rdf(v0, rdf:type, ht:Person), and(rdf(v0, ht:knows, v1), and(rdf(v1, rdf:type, ht:Person), !=(v0,v1)))) then rdf(v1, ht:knows, v0)."))
- 			assertTrue(processorProvider.get.compareTranslations(rules.get(3).toString(),"Rule R4:  if and(rdf(v0, rdf:type, ht:Person), and(rdf(v0, ht:knows, v1), and(rdf(v1, rdf:type, ht:Person), !=(v0,v1)))) then rdf(v1, ht:knows, v0)."))
-  			assertTrue(processorProvider.get.compareTranslations(rules.get(4).toString(),"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
- 			assertTrue(processorProvider.get.compareTranslations(rules.get(5).toString(),"Rule R6:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:knows, y)) then rdf(y, ht:knows, x)."))
- 			assertTrue(processorProvider.get.compareTranslations(rules.get(6).toString(),"Rule R7:  if rdf(x, rdf:type, ht:Parent) then and(there exists(v0), and(rdf(v0, rdf:type, ht:Person), rdf(x, ht:teaches, v0)))."))
- 			print(rules.get(5))
- 		]
+   			assertTrue(processorProvider.get.compareTranslations(rules.get(2).toString(),"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(3).toString(),"Rule R6:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:knows, y)) then rdf(y, ht:knows, x)."))
+  		]
 	}
 	
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Rule>, List<SadlCommand>, List<Issue>)=>void assertions) {

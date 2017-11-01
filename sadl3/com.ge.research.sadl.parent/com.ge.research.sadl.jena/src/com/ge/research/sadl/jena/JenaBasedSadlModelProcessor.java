@@ -3400,7 +3400,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				!variableIsBound((Rule)getTarget(), null, (VariableNode)lobj)) {
 			return createBinaryBuiltin("assign", robj, lobj);
 		}
-		return createBinaryBuiltin(op, lobj, robj);
+		if (op.equals("and") || op.equals("or")) {
+			Junction jct = new Junction();
+			jct.setJunctionName(op);
+			jct.setLhs(lobj);
+			jct.setRhs(robj);
+			return jct;
+		}
+		else {
+			return createBinaryBuiltin(op, lobj, robj);
+		}
 	}
 	
 	private TripleElement checkForNegation(TripleElement lobj, Expression rexpr) throws InvalidTypeException {
