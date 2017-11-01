@@ -405,7 +405,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 testval is an int List.
 			 Rule R1: if x is a Person and
 			 		x has bar y and 
-			 		y is a Person List // length 1-4
+			 		y is a Person List length 1-4
 			 then 
 			// 	print("Hurray!"). 
 			 	x has age 50.
