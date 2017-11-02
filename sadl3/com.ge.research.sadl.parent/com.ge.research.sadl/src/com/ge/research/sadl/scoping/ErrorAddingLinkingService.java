@@ -1,6 +1,7 @@
 package com.ge.research.sadl.scoping;
 
 import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ALTERNATIVES;
+import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ERROR;
 import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ISSUE_CODE;
 
 import java.util.Collections;
@@ -53,7 +54,7 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 				logger.debug("after getLinkedObjects: node: '" + crossRefString + "' result: " + eObjectDescription);
 			}
 			if (eObjectDescription != null) {
-				String errorMessage = eObjectDescription.getUserData(AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ERROR);
+				String errorMessage = eObjectDescription.getUserData(AMBIGUOUS_NAME_ERROR);
 				if (errorMessage != null) {
 					createAndAddDiagnostic(context.eResource(), node, errorMessage, eObjectDescription.getUserData(AMBIGUOUS_NAME_ALTERNATIVES));
 				}

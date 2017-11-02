@@ -17,14 +17,18 @@
  ***********************************************************************/
 package com.ge.research.sadl.scoping
 
+import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.SADLPackage
+import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.sADL.SadlResource
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
 import java.util.Collection
 import org.eclipse.xtext.resource.ForwardingEObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
+import org.eclipse.xtext.resource.XtextResource
 
 import static extension com.google.common.collect.Iterables.concat
-import com.ge.research.sadl.sADL.SadlModel
 
 /**
  * EObject description that represents an ambiguous name error with alternatives.
@@ -46,21 +50,6 @@ class AmbiguousNameErrorEObjectDescription extends ForwardingEObjectDescription 
 	 */
 	public static val AMBIGUOUS_NAME_ALTERNATIVES = "ALTERNATIVES";
 
-	/**
-	 * Wraps the ambiguous name description into another by appending the {@code conflicting} argument to
-	 * the {@code alternative}s of the original. Keeps the order.
-	 * Does nothing but returns with the {@code it} argument if the {@code conflicting} is {@code null}.
-	 */
-	static def addConflicting(AmbiguousNameErrorEObjectDescription it, IEObjectDescription conflicting) {
-		if (conflicting === null) {
-			return it;
-		}
-		val copy = new AmbiguousNameErrorEObjectDescription(it);
-		copy.alternatives.addAll(alternatives);
-		copy.alternatives.add(conflicting);
-		return copy;
-	}
-
 	val Collection<IEObjectDescription> alternatives;
 
 	private new(IEObjectDescription delegate) {
@@ -81,8 +70,20 @@ class AmbiguousNameErrorEObjectDescription extends ForwardingEObjectDescription 
 		}
 	}
 
+	/**
+	 * Registers the {@code conflicting} argument among the alternatives. Keeps the order.
+	 * Does nothing but returns with {@code this} argument if the {@code conflicting} is {@code null}. 
+	 */
+	def IEObjectDescription addConflicting(IEObjectDescription conflicting) {
+		if (conflicting !== null) {
+			alternatives.add(conflicting);
+		}
+		return this;
+	}
+
 	protected def getAlternatives() {
-		return allDescriptions.map[name.toString].join(',');
+		// Here, we are in the middle of scoping and linking, hence we cannot resolve the `alias` but the base URI.
+		return allDescriptions.map['''«baseUri» «name»'''].join(',');
 	}
 
 	protected def getMessage() {
@@ -92,9 +93,29 @@ class AmbiguousNameErrorEObjectDescription extends ForwardingEObjectDescription 
 	protected def getAllDescriptions() {
 		return ImmutableSet.of(this).concat(alternatives);
 	}
-	
+
 	protected def getBaseUri(IEObjectDescription it) {
-		return EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri;
+		return model.baseUri;
+	}
+
+	protected def getConcreteName(IEObjectDescription it) {
+		val object = EObjectOrProxy;
+		if (!object.eIsProxy && SADLPackage.Literals.SADL_RESOURCE.isSuperTypeOf(object.eClass)) {
+			return it.declarationExtensions.getConcreteName(object as SadlResource, false);
+		}
+		return name;
+	}
+
+	protected def getDeclarationExtensions(IEObjectDescription it) {
+		val resource = EObjectOrProxy.eResource;
+		if (resource instanceof XtextResource) {
+			return resource.resourceServiceProvider.get(DeclarationExtensions);
+		}
+		return new DeclarationExtensions();
+	}
+
+	protected def getModel(IEObjectDescription it) {
+		return EObjectOrProxy.eResource.allContents.filter(SadlModel).head;
 	}
 
 }

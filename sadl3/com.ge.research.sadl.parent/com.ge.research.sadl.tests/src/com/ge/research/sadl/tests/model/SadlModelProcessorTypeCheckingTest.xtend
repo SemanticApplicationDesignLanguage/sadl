@@ -383,6 +383,54 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLParsingTest {
 	}
 	
 	@Test
+	def void testLocalVsImportedNames_GH_226_15() {
+		'''
+			uri "http://sadl.org/I1.sadl" alias I1.
+			Foo is a class.
+		'''.sadl;
+
+		'''
+			uri "http://sadl.org/I2.sadl" alias I2.
+			Foo is a class.
+		'''.sadl;
+
+		val model_1 = '''
+			uri "http://sadl.org/Current_1.sadl" alias current_1.
+			import "http://sadl.org/I1.sadl" as i1.
+			import "http://sadl.org/I2.sadl" as i2.
+			
+			current_1:Foo is a class.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_1 = validate(model_1);
+		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
+	}
+	
+	@Test
+	def void testLocalVsImportedNames_GH_226_16() {
+		'''
+			uri "http://sadl.org/I1.sadl" alias I1.
+			Foo is a class.
+		'''.sadl;
+
+		'''
+			uri "http://sadl.org/I2.sadl" alias I2.
+			Foo is a class.
+		'''.sadl;
+
+		val model_1 = '''
+			uri "http://sadl.org/Current_1.sadl" alias current_1.
+			import "http://sadl.org/I1.sadl".
+			import "http://sadl.org/I2.sadl".
+			
+			I1:Foo is a class.
+		'''.sadl.enableAmbiguousNameDetection;
+
+		val issues_1 = validate(model_1);
+		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
+	}
+	
+	@Test
 	def void testLocalVsImportedNames_GH_226_x() {
 
 		val model_1 = '''

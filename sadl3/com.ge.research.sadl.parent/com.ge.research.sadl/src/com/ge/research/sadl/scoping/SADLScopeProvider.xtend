@@ -63,8 +63,6 @@ import org.eclipse.xtext.util.OnChangeEvictingCache
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
-import static extension com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.*
-
 /**
  * This class contains custom scoping description.
  * 
@@ -310,10 +308,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 								val resourceInImportScope = importScope.getSingleElement(name1);
 								if (resourceInImportScope !== null) {
 									val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
-									if (name1 == nameWithPrefixes) {
-										ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
-										if (ambiguousProblem !== null) {
-											map.put(name1, ambiguousProblem);
+									if (name1.segmentCount > 1) {
+										if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											if (ambiguousProblem !== null) {
+												map.put(name1, ambiguousProblem);
+											}
+										}
+									} else {										
+										if (name1 == nameWithPrefixes) {
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											if (ambiguousProblem !== null) {
+												map.put(name1, ambiguousProblem);
+											}
 										}
 									}
 								}

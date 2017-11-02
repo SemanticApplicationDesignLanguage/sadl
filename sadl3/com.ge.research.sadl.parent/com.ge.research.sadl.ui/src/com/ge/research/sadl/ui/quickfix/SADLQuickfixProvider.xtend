@@ -18,18 +18,24 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.quickfix
 
+import com.ge.research.sadl.resource.UserDataHelper
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription
 import com.ge.research.sadl.validation.SADLValidator
+import com.google.inject.Inject
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.EOF
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.scoping.IGlobalScopeProvider
 import org.eclipse.xtext.ui.editor.model.edit.IModificationContext
+import org.eclipse.xtext.ui.editor.model.edit.IssueModificationContext
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
 import org.eclipse.xtext.ui.editor.quickfix.Fix
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.validation.Issue
+
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
  * Custom quickfixes.
@@ -38,13 +44,45 @@ import org.eclipse.xtext.validation.Issue
  */
 class SADLQuickfixProvider extends DefaultQuickfixProvider {
 
+	@Inject
+	IssueModificationContext.Factory factory;
+	
+	@Inject
+	IGlobalScopeProvider globalScopeProvider;
+	
+	@Inject
+	UserDataHelper userDataHelper;
+
 	@Fix(AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ISSUE_CODE)
-	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
-		for (alternative: issue.data.head?.split(",").toList.filter[!isEmpty] ?: emptyList) {
-			acceptor.accept(issue, "Change to '"+alternative+"'", "Change to '"+alternative+"'", 'upcase.png') [
-				context |
+	def fixAmbigupusNames(Issue issue, IssueResolutionAcceptor acceptor) {
+		val uri2AliasMap = factory.createModificationContext(issue)?.xtextDocument?.readOnly([
+			// But the current resources into the map.
+			val map = newHashMap();
+			val currentModel = it.contents.head as SadlModel
+			if (!currentModel.alias.nullOrEmpty) {
+				map.put(currentModel.baseUri, currentModel.alias);
+			}
+			// Put all imported resources with the local `as` into the map. Later we will shadow those with the definition site aliases. 
+			map.putAll(newHashMap(currentModel.imports.map[importedResource?.baseUri -> alias].filter [
+				key !== null && value !== null
+			]));
+			globalScopeProvider.getScope(it, SADL_IMPORT__IMPORTED_RESOURCE, [EClass === SADL_MODEL]).allElements.
+				forEach [
+					val alias = userDataHelper.getAlias(it);
+					if (alias.present) {
+						map.put(it.name.toString, alias.get);
+					}
+				];
+			return map;
+		]);
+		for (baseUriWithFqn : issue.data.head?.split(",").toList.filter[!isEmpty] ?: emptyList) {
+			val raw = baseUriWithFqn.split(' ');
+			val baseUri = raw.head;
+			val name = raw.last;
+			val alias = if (uri2AliasMap.containsKey(baseUri)) '''«uri2AliasMap.get(baseUri)»:«name»''' else name;
+			acceptor.accept(issue, "Change to '" + alias + "'", "Change to '" + alias + "'", 'upcase.png') [ context |
 				val xtextDocument = context.xtextDocument
-				xtextDocument.replace(issue.offset, issue.length, alternative)
+				xtextDocument.replace(issue.offset, issue.length, alias)
 			]
 		}
 	}
@@ -58,7 +96,7 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 			val xtextDocument = context.xtextDocument
 			val varNm = xtextDocument.get(issue.offset, issue.length)
 			val cont = element.eContainer
-			if (cont == null) {
+			if (cont === null) {
 				val reqNode = NodeModelUtils.getNode(element)
 				var afterReqLocation = reqNode.endOffset
 				var char ch = xtextDocument.getChar(afterReqLocation)
@@ -87,7 +125,7 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 	}
 
 	def SadlModel getSadlModel(EObject object) {
-		if (object == null) {
+		if (object === null) {
 			return null
 		}
 		val cont = object.eContainer
