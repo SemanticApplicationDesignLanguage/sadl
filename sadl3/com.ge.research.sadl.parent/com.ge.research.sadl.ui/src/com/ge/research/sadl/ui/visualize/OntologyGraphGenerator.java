@@ -10,11 +10,13 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
@@ -130,7 +132,14 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		return rs;
 	}
 
+	@SuppressWarnings("restriction")
 	private void addByStatements(String publicUri, List<GraphSegment> data) throws ConfigurationException, IOException, URISyntaxException, Exception {
+		Boolean graphImplicitElements = Platform.getPreferencesService().getBoolean("com.ge.research.sadl.Sadl", 
+																					SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), 
+																					false, null);
+		Boolean graphImplicitElementInstances = Platform.getPreferencesService().getBoolean("com.ge.research.sadl.Sadl", 
+																							SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), 
+																							false, null);
 		StmtIterator stmtitr = getLocalModel().listStatements();
 		Map<Resource, RDFNode> propertyDomains = null;
 		Map<Resource, RDFNode> propertyRanges = null;
@@ -154,13 +163,16 @@ public class OntologyGraphGenerator extends GraphGenerator {
 					(p.isURIResource() && p.getURI().equals(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))) {
 				continue;
 			}
-			else if (subj.isURIResource() && (subj.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
-					subj.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
-					subj.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) &&
-					(!publicUri.equals(SadlConstants.SADL_BASE_MODEL_URI) && 
-							!publicUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) && 
-							!publicUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI))) {
+			else if (subj.isURIResource() && 
+					(subj.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
+					 subj.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
+					 subj.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) &&
+					(!graphImplicitElements && 
+					 (!publicUri.equals(SadlConstants.SADL_BASE_MODEL_URI) && 
+				      !publicUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) && 
+				      !publicUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)))) {
 				// only show implicit model concepts when graphing the implicit model
+				// or when the option to graph implicit elements has been enabled
 				continue;
 			}
 			else if (obj.isURIResource() && (obj.asResource().equals(OWL.Class) || obj.asResource().equals(OWL.Ontology)
@@ -177,7 +189,13 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			else if (p.equals(RDFS.subClassOf)) {
 				if (subj.canAs(OntClass.class)){ 
 					OntClass classInst = subj.as(OntClass.class);
-					if (obj.canAs(OntClass.class) && !obj.as(OntClass.class).equals(getListClass())) { 
+					if (obj.canAs(OntClass.class) && 
+					    !obj.as(OntClass.class).equals(getListClass()) &&
+						(graphImplicitElementInstances ||
+						 (obj.as(OntClass.class).getNameSpace() != null &&
+						  !obj.as(OntClass.class).getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI) &&
+						  !obj.as(OntClass.class).getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI) &&
+						  !obj.as(OntClass.class).getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)))) { 
 						addIsATypeOfToGraph(publicUri, classInst, obj.as(OntClass.class), data);
 					}
 				}
