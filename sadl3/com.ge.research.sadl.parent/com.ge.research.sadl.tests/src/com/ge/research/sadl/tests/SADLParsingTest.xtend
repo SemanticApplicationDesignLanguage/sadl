@@ -139,7 +139,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 Rule R1: if x is a Person and
 			 		x has bar y and 
 			 		y is a Person List //length 1-4
-			 		y is a Person List length 1-4
+			 		z is a Person List length 1-4
 			 then print("Hurray!"). //x has age 50.
 		'''.assertNoErrors
 	}
@@ -269,7 +269,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-//	@Ignore
 	@Test
 	def void testNegativeNumericConstants() {
 		'''
@@ -546,7 +545,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-//	@Ignore	// this grammar change was backed out because it changed precedence and broke things of the form "p1 of s1 is not p2 of s2"
 	@Test
 	def void testNegationOfObjectTriple() {
 		'''

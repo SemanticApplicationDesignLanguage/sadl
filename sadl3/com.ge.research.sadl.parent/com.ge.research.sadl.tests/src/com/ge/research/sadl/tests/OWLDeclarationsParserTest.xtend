@@ -115,7 +115,10 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
+	@Ignore ("Not implemented in grammar but would be desirable? Should consider a set of multiple instance statements, e.g.,
+				{Tarzan,Jane} are instances of Person.
+				{Tarzan,Jane} have child Mogli.
+				{Tarzan,Jane} have child {Mogli,SomeoneElse}.")
 	@Test def void testMultipleInstances() {
 		'''
 			{John, James, Susan} are instances of Actor.

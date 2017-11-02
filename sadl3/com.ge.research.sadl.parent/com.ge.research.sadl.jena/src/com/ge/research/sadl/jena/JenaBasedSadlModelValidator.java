@@ -469,16 +469,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		try {	
 			boolean dontTypeCheck = false;
 			TypeCheckInfo leftTypeCheckInfo = null;
-			TypeCheckInfo leftAlternativeTCI = null;
 			try {
-				if (!getModelProcessor().getRulePart().equals(RulePart.CONCLUSION) &&  getModelProcessor().isBooleanOperator(op)) {
+				leftTypeCheckInfo = getType(leftExpression);
+				if (getModelProcessor().isConjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
-					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
-					leftAlternativeTCI = getType(leftExpression);		// this will cause type checking to happen at lower levels
-					leftTypeCheckInfo = leftAlternativeTCI;		// now sure under what conditions we'd want to have boolean????
-				}
-				else {
-					leftTypeCheckInfo = getType(leftExpression);
+					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);						
 				}
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
@@ -488,16 +483,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			
 			TypeCheckInfo rightTypeCheckInfo = null;
-			TypeCheckInfo rightAlternativeTCI = null;
 			try {
-				if (!getModelProcessor().getRulePart().equals(RulePart.CONCLUSION) &&  getModelProcessor().isBooleanOperator(op)) {
+				rightTypeCheckInfo = getType(rightExpression);
+				if (getModelProcessor().isConjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					rightTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
-					rightAlternativeTCI = getType(rightExpression);		// this will cause type checking to happen at lower levels
-					rightTypeCheckInfo = rightAlternativeTCI;		// now sure under what conditions we'd want to have boolean????
-				}
-				else {
-					rightTypeCheckInfo = getType(rightExpression);
 				}
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
@@ -512,7 +502,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (modelProcessor.isComparisonOperator(op) && (rightExpression instanceof NumberLiteral || 
 					rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getExpr() instanceof NumberLiteral)) {
-				checkNumericRangeLimits(op, leftAlternativeTCI, rightAlternativeTCI);
+				checkNumericRangeLimits(op, leftTypeCheckInfo, rightTypeCheckInfo);
 			}
 			if(!dontTypeCheck && !compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, ImplicitPropertySide.NONE)){
 				if (expression.eContainer() instanceof TestStatement && isQuery(leftExpression)) {
@@ -530,8 +520,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			//It's possible there may be a local type restriction
-			handleLocalRestriction(leftExpression,rightExpression, (leftAlternativeTCI != null ? leftAlternativeTCI : leftTypeCheckInfo),
-					(rightAlternativeTCI != null ? rightAlternativeTCI : rightTypeCheckInfo));
+			handleLocalRestriction(leftExpression,rightExpression, (leftTypeCheckInfo != null ? leftTypeCheckInfo : leftTypeCheckInfo),
+					(rightTypeCheckInfo != null ? rightTypeCheckInfo : rightTypeCheckInfo));
 			return !errorsFound;
 		} catch (Throwable t) {
 			return handleValidationException(expression, t);
@@ -1948,7 +1938,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				// there was no direct match
 				for (int i = 0; domainList != null && i < domainList.size(); i++) {
 					Resource dmn = domainList.get(i);
-					if ((dmn instanceof OntResource || dmn.canAs(OntResource.class)) && subjType.getTypeCheckType() != null) {
+					if ((dmn instanceof OntResource || dmn.canAs(OntResource.class)) && subjType != null && subjType.getTypeCheckType() != null) {
 						try {
 							for (int j = 0; subjClasses != null && j < subjClasses.size(); j++) {
 								OntClass subj = subjClasses.get(j);

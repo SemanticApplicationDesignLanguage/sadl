@@ -1732,8 +1732,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (PropertyWithoutRangeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			addError("Property does not have a range", defnContainer);
 		}
 		return var;
 	}
@@ -3025,8 +3024,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PropertyWithoutRangeException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				addError("Property does not have a range", variableDefn);
 			} catch (PrefixNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -4169,6 +4167,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	public Object processExpression(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Expression predicate = expr.getLeft();
+		if (predicate == null) {
+			addError("Predicate in expression is null. Are parentheses needed?", expr);
+			return null;
+		}
 		Expression subject = expr.getRight();
 		Object trSubj = null;
 		Object trPred = null;
@@ -4396,6 +4398,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					getModelValidator().checkPropertyValueInRange(getTheJenaModel(), subj, pred, obj, new StringBuilder());
 				} catch (DontTypeCheckException e) {
 					// don't do anything
+				} catch (PropertyWithoutRangeException e) {
+					addError("Property does not have a range", pred);
 				} catch (Exception e) {
 					throw new TranslationException("Error checking value in range", e);
 				} 
@@ -8667,7 +8671,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 	
-protected void resetProcessorState(SadlModelElement element) throws InvalidTypeException {
+	protected boolean isConjunction(String op) {
+		if (op.equals("and")) {
+			return true;
+		}
+		return false;
+	}
+	
+	protected void resetProcessorState(SadlModelElement element) throws InvalidTypeException {
 		try {
 			if (getModelValidator() != null) {
 				getModelValidator().resetValidatorState(element);

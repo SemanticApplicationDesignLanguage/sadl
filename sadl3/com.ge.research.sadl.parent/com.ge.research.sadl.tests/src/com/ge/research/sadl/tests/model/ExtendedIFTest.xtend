@@ -560,4 +560,45 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			}
 		]
 	}
+	
+	@Test
+	def void testPrecedence_03() {
+//		val forTest = newArrayList(
+//"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]",
+//"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]"
+//		)
+		'''
+			  uri  "http://sadl.org/Test.sadl" alias Test.
+			  
+			  Person is a class described by age with values of type int, described by old with values of type boolean.
+			  ChildrenList is a type of Person List length 1-*.
+			  children describes Person with values of type ChildrenList.
+			  children of Person has at most 1 value.
+			  
+			  Rule R2:  if x is a Person and age of (element 1 of children of x) > 20
+			  	then old of x is true. 
+			   	
+			  Rule R2b:  if x is a Person and age of element 1 of children of x > 20
+			  	then old of x is true. 
+			   	
+			  Rule R3:  if x is a Person and age of last element of children of x > 20
+			  	then old of x is true. 
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+//			assertTrue(results.size==7)
+//			for (result:results) {
+//				println(result.toString)
+//			}
+//			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(results.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	
 }

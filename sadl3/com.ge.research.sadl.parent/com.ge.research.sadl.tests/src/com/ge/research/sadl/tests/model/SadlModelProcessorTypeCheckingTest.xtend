@@ -55,8 +55,6 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		Assert.assertEquals(issues.get(1).message, "Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
 	}
 	
-	@Ignore("This test should pass, just like the one following. It should not be necessary to specify the prefix of the current model to reference a SadlResource in the current model, 
-			even if there is an imported SadlResource with the same local name.")
 	@Test
 	def void testUserDefinedEquation1() {
 		val sadlModel = '''
@@ -81,7 +79,8 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			 
 			 External subtractDates(dateTime t1, dateTime t2, string u) returns float : "http://sadl.org/builtins/subtractDates".
 			 
-			 Rule AgeRule: if p is a LivingThing then age of p is subtractDates(now(), dateOfBirth of p, "y"). 		
+			 // to use the locally defined equation, it must be prefixed with the local model alias
+			 Rule AgeRule: if p is a LivingThing then age of p is Test1:subtractDates(now(), dateOfBirth of p, "y"). 		
 		'''.sadl
 		sadlModel.assertNoErrors
 	}

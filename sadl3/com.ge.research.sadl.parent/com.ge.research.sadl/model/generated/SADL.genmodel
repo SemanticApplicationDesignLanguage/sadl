@@ -193,6 +193,10 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDisjointClasses/classes"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlDisjointClasses/types"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//SadlMultipleInstanceDeclaration">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlMultipleInstanceDeclaration/instances"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlMultipleInstanceDeclaration/type"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlNecessaryAndSufficient">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlNecessaryAndSufficient/subject"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlNecessaryAndSufficient/object"/>
