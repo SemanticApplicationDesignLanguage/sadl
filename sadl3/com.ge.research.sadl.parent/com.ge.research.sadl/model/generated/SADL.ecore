@@ -240,12 +240,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
         eType="#//SadlClassOrPropertyDeclaration" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SadlMultipleInstanceDeclaration" eSuperTypes="#//SadlStatement">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="instances" upperBound="-1"
-        eType="#//SadlResource" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
-        containment="true"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlNecessaryAndSufficient" eSuperTypes="#//SadlStatement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="subject" eType="#//SadlTypeReference"
         containment="true"/>

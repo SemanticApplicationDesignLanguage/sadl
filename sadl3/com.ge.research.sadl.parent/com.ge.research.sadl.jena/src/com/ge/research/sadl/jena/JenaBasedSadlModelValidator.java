@@ -1746,7 +1746,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (subject instanceof PropOfSubject) {
 				//TODO figure out how to check local restrictions before general check
 				TypeCheckInfo subjtci = getType(((PropOfSubject)subject).getRight());
-				Object transobj = getModelProcessor().translate(((PropOfSubject)subject).getRight());
+				Object transobj = getModelProcessor().translate(((PropOfSubject)subject));
 				if (transobj != null) {
 					TypeCheckInfo lr = getApplicableLocalRestriction(generateLocalRestrictionKey(transobj));
 					if (lr != null) {

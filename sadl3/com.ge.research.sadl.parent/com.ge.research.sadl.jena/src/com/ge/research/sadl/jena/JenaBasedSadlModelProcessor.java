@@ -938,10 +938,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			ignoreUnittedQuantities = Boolean.parseBoolean(ignoreUnits);
 		}
 		
-		useArticlesInValidation = false;
+		setUseArticlesInValidation(false);
 		String useArticles = context.getPreferenceValues().getPreference(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION);
 		if (useArticles != null) {
-			useArticlesInValidation = Boolean.parseBoolean(useArticles);
+			setUseArticlesInValidation(Boolean.parseBoolean(useArticles));
 		}
 		
 		domainAndRangeAsUnionClasses = true;
@@ -3869,7 +3869,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				ordNum = 2;
 			}
 
-			if (useArticlesInValidation && !isDefiniteArticle(article) && 
+			if (isUseArticlesInValidation() && !isDefiniteArticle(article) && 
 					typenode instanceof NamedNode && 
 					(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) || ((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode))) {
 				if (!isCruleVariableDefinitionPossible(expr)) {
@@ -3887,7 +3887,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			else if (typenode != null && typenode instanceof NamedNode) {
 				VariableNode var = null;
-				if (useArticlesInValidation) {
+				if (isUseArticlesInValidation()) {
 					var = getCruleVariable((NamedNode)typenode, ordNum);
 				}
 				else {
@@ -3924,7 +3924,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError("No type identified", expr);
 			}
 		}
-		else if (useArticlesInValidation && article == null) {
+		else if (isUseArticlesInValidation() && article == null) {
 			if (isClass(typenode)) {
 				addError("A class name should be preceded by either an indefinite (e.g., 'a' or 'an') or a definite (e.g., 'the') article.", expr);
 			}
@@ -4235,7 +4235,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		if (subject != null) {
 			trSubj = translate(subject);
-			if (useArticlesInValidation && subject instanceof Name && trSubj instanceof NamedNode && ((NamedNode)trSubj).getNodeType().equals(NodeType.ClassNode)) {
+			if (isUseArticlesInValidation() && subject instanceof Name && trSubj instanceof NamedNode && ((NamedNode)trSubj).getNodeType().equals(NodeType.ClassNode)) {
 				// we have a class in a PropOfSubject that does not have an article (otherwise it would have been a Declaration)
 				addError("A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.", subject);
 			}
@@ -9428,6 +9428,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			locloc = str.indexOf("location(");
 		}
 		return str;
+	}
+	public boolean isUseArticlesInValidation() {
+		return useArticlesInValidation;
+	}
+	public void setUseArticlesInValidation(boolean useArticlesInValidation) {
+		this.useArticlesInValidation = useArticlesInValidation;
 	}
 
 }

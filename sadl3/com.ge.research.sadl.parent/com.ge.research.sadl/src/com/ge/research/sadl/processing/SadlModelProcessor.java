@@ -452,7 +452,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return false;
 	}
 
-	protected Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	public Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (nodeObj == null) {
 //			throw new InvalidTypeException("nodeCheck called with null argument; this should not happen.");
 			return null;
