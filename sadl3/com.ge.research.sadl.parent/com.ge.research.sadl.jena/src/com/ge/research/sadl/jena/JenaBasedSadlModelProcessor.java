@@ -8100,7 +8100,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return name;
 	}
 
-	protected String getModelNamespace() {
+	public String getModelNamespace() {
 		return modelNamespace;
 	}
 
