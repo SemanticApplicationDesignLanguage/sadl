@@ -1635,6 +1635,21 @@ public class IntermediateFormTranslator {
 			}
 			return null;
 		}
+		else if (target instanceof Rule && be.getFuncType().equals(BuiltinType.Equal)) {
+			if (be.getArguments().size() == 2) {  // this should always be true
+				if (be.getArguments().get(0) instanceof VariableNode && be.getArguments().get(1) instanceof ProxyNode) {
+					Object realArg2 = ((ProxyNode)be.getArguments().get(1)).getProxyFor();
+					if (realArg2 instanceof BuiltinElement) {
+						((BuiltinElement)realArg2).addArgument(be.getArguments().get(0)); // the variable goes to return from arg 2 builtin and this builtin goes away
+						return expandProxyNodes(patterns, realArg2, isRuleThen);
+					}
+					else if (realArg2 instanceof TripleElement && ((TripleElement)realArg2).getObject() == null) {
+						((TripleElement)realArg2).setObject(be.getArguments().get(0));  // the variable goes to the object of the arg 2 triple and this builtin  goes away
+						return expandProxyNodes(patterns, realArg2, isRuleThen);
+					}
+				}
+			}
+		}
 		
 		if (retiredNode != null && retiredNode instanceof ProxyNode) {
 			retiredNode = ((ProxyNode)retiredNode).getReplacementNode();

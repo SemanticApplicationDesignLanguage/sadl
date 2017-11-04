@@ -8,6 +8,7 @@ import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.validation.CheckMode;
 
 import com.ge.research.sadl.model.PrefixNotFoundException;
+import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
@@ -28,6 +29,12 @@ public interface IJenaBasedModelProcessor {
 	 * @return-- the Rules of the model
 	 */
 	public List<Rule> getRules();
+	
+	/**
+	 * Method to obtain the equations in a SADL model in IntermediateForm
+	 * @return
+	 */
+	public List<Equation> getEquations();
 	
 	/**
 	 * Method to obtain the sadl commands in a SADL model

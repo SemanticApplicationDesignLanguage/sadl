@@ -30,7 +30,7 @@ class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 			MyCircle is a Circle.
 			
 			Rule R1: 
-			         	if X is the radius of MyCircle and
+			if X is the radius of MyCircle and
 				X > 0 and
 				Y is X^2*PI
 			then

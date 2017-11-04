@@ -1166,7 +1166,33 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			
 			Equation dateSubtractYears(dateTime x, dateTime y) returns float: x - y.		
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			for (issue:issues) {
+				println(issue.message)
+			}
+			val eqs =processor.equations
+			assertEquals(1, eqs.size)
+			for(eq:eqs) {
+				processor.compareTranslations("float dateSubtractYears(dateTime x,dateTime y): -(x,y)",eq.toString)
+			}
+		]
+	}
+
+	@Test def void EquationTest2() {
+			'''
+			uri "http://com.ge.research.sadl/equations". 
 			
+			Equation PI_Controller(decimal K1, decimal K2, decimal Error) returns decimal:
+			K1*Error + K2*Error^3/abs(Error).		
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			for (issue:issues) {
+				println(issue.message)
+			}
+			val eqs =processor.equations
+			assertEquals(1, eqs.size)
+			for(eq:eqs) {
+				processor.compareTranslations("decimal PI_Controller(decimal K1,decimal K2,decimal Error): +((*(K1,Error)),(/((*(K2,(^(Error,3)))),(builtinfunctions:abs(Error)))))",eq.toString)
+//				println(eq.toString)
+			}
 		]
 	}
 
