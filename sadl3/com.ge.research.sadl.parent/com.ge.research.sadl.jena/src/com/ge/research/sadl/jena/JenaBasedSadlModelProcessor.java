@@ -4261,7 +4261,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 	
 	public Object processExpression(StringLiteral expr) {
-		return processExpression(expr);
+		return super.processExpression(expr);
 	}
 	
 	public Object processExpression(PropOfSubject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
