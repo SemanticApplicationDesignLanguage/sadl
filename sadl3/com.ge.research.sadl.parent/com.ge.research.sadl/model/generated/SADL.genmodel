@@ -306,11 +306,6 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//BinaryOperation/op"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//BinaryOperation/right"/>
     </genClasses>
-    <genClasses ecoreClass="SADL.ecore#//ElementInList">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/before"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/after"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ElementInList/element"/>
-    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//PropOfSubject">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//PropOfSubject/left"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//PropOfSubject/of"/>
@@ -321,6 +316,11 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SubjHasProp/comma"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/prop"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SubjHasProp/right"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//ElementInList">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/before"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ElementInList/after"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ElementInList/element"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//UnitExpression">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UnitExpression/left"/>

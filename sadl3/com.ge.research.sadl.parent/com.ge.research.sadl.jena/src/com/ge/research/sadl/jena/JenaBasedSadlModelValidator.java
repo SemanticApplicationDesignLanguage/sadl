@@ -564,7 +564,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo subjtype = getType(((PropOfSubject)leftExpression).getRight());
 			ConceptIdentifier subject = subjtype.getTypeCheckType();
 			if (subject != null) {
-				String key = generateLocalRestrictionKey(getModelProcessor().translate(leftExpression));
+				String key = generateLocalRestrictionKey(getModelProcessor().processExpression(leftExpression));
 				addLocalRestriction(key, leftTypeCheckInfo, rightTypeCheckInfo, leftExpression.eContainer());
 			}
 		}
@@ -1142,12 +1142,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return listtype;
 		}
 		else {
-			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNHANDLED.get("element type in element in list construct. ", el.getClass().getCanonicalName() + "; please report"), expression);
-			if (metricsProcessor != null) {
-				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_ERROR_URI);
-			}
-			return null;
+			return getType(el);
 		}
+//		else {
+//			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNHANDLED.get("element type in element in list construct. ", el.getClass().getCanonicalName() + "; please report"), expression);
+//			if (metricsProcessor != null) {
+//				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_ERROR_URI);
+//			}
+//			return null;
+//		}
 	}
 
 	private TypeCheckInfo getType(SubjHasProp expression) throws CircularDefinitionException, DontTypeCheckException,
@@ -1205,7 +1208,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				ConceptIdentifier subject = subjtype.getTypeCheckType();
 				if (subject != null) {
 //					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
-					Object keytrans = getModelProcessor().translate(((PropOfSubject)expression.getLeft()));
+					Object keytrans = getModelProcessor().processExpression(((PropOfSubject)expression.getLeft()));
 					if (keytrans != null) {
 						String key = generateLocalRestrictionKey(keytrans);
 						addLocalRestriction(key, leftTypeCheckInfo, rightTypeCheckInfo, expression);
@@ -1687,6 +1690,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
+		else if (predicate instanceof ElementInList) {
+			// this is like the constant "element"
+			TypeCheckInfo subjtype = getType(subject);
+			subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);
+			return subjtype;
+		}
 		if (predicate instanceof Name) {
 			try {
 				OntConceptType predtype = declarationExtensions.getOntConceptType(((Name)predicate).getName());
@@ -1746,7 +1755,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (subject instanceof PropOfSubject) {
 				//TODO figure out how to check local restrictions before general check
 				TypeCheckInfo subjtci = getType(((PropOfSubject)subject).getRight());
-				Object transobj = getModelProcessor().translate(((PropOfSubject)subject));
+				Object transobj = getModelProcessor().processExpression(((PropOfSubject)subject));
 				if (transobj != null) {
 					TypeCheckInfo lr = getApplicableLocalRestriction(generateLocalRestrictionKey(transobj));
 					if (lr != null) {

@@ -79,7 +79,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     @Inject
     private ISadlImplicitModelContentProvider implicitModelContentProvider;
     
-	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
+	public abstract Object processExpression(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
 		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
@@ -362,7 +362,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //		throw new TranslationException("Unhandled type of SadlTypeReference");
 //	}
 
-	protected Object translate(BooleanLiteral expr) {
+	protected Object processExpression(BooleanLiteral expr) {
 		Literal lit = new Literal();
 		String val = expr.getValue();
 		if (val.equals("true")) {
@@ -375,7 +375,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return lit;
 	}
 
-	protected Object translate(NumberLiteral expr) {
+	protected Object processExpression(NumberLiteral expr) {
 		Literal lit = new Literal();
 		BigDecimal val = expr.getValue();
 		lit.setValue(val);
@@ -383,14 +383,14 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return lit;
 	}
 
-	protected Object translate(StringLiteral expr) {
+	protected Object processExpression(StringLiteral expr) {
 		Literal lit = new Literal();
 		lit.setValue(expr.getValue());
 		lit.setOriginalText(expr.getValue());
 		return lit;
 	}
 
-//	protected String translate(Constant expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+//	protected String processExpression(Constant expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		return expr.getConstant();
 //	}
 

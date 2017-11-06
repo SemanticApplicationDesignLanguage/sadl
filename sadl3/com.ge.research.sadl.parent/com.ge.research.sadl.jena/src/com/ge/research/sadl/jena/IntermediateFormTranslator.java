@@ -971,7 +971,9 @@ public class IntermediateFormTranslator {
 					}
 				}
 				else {
-					addError(new IFTranslationError("Disjunction not supported in rules at this time"));
+//					addError(new IFTranslationError("Disjunction not supported in rules at this time"));
+					// leave this error checking for the final translations step--some rules may support disjunction
+					results.add(gpe);
 				}
 			}
 //			else if (gpe instanceof BuiltinElement && 

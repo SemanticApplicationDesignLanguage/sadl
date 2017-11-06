@@ -23,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.ontology.OntResource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -220,6 +221,249 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			} while (itr.hasNext)
  			assertTrue(listSubclass)
  					
+ 		]
+	}
+
+	@Test
+	def void testTypedList2() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Test is a class described by grades with values of type int List length 2-4.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntProperty("http://sadl.org/test.sadl#grades")
+ 			val itr = pcls.listRange()
+ 			assertTrue(itr.hasNext)
+ 			do {
+ 				val rng = itr.next as OntResource
+ 				if (rng.canAs(OntClass)) {
+	  				val itr2 = (rng.^as(OntClass)).listSuperClasses(true)
+	 				assertTrue(itr2.hasNext)
+		 			var listSubclass = false
+		 			do {
+		 				val sprc = itr2.next as OntClass
+		 				if ((sprc as OntClass).URIResource && (sprc as OntClass).URI.equals("http://sadl.org/sadllistmodel#List")) {
+		 					listSubclass = true
+		 				}
+		 				if (sprc.canAs(AllValuesFromRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
+		 						val vitr = jenaModel.listStatements(sprc, OWL.allValuesFrom, null as RDFNode)
+		 						val v = vitr.nextStatement.object
+		 						assertTrue((v as Resource).URI.equals("http://www.w3.org/2001/XMLSchema#int"));
+		  					}
+		 				}
+		 			} while (itr2.hasNext)
+		 			assertTrue(listSubclass)
+		 		}
+ 			} while (itr.hasNext)
+  					
+ 		]
+	}
+
+	@Test
+	def void testTypedList3() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Test is a class.
+			 foo describes Test with values of type Test List length 2-4.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntProperty("http://sadl.org/test.sadl#foo")
+ 			val itr = pcls.listRange()
+ 			assertTrue(itr.hasNext)
+ 			do {
+ 				val rng = itr.next as OntResource
+ 				if (rng.canAs(OntClass)) {
+	  				val itr2 = (rng.^as(OntClass)).listSuperClasses(true)
+	 				assertTrue(itr2.hasNext)
+		 			var listSubclass = false
+		 			var hasLengthRest = false
+		 			do {
+		 				val sprc = itr2.next as OntClass
+		 				if ((sprc as OntClass).URIResource && (sprc as OntClass).URI.equals("http://sadl.org/sadllistmodel#List")) {
+		 					listSubclass = true
+		 				}
+		 				if (sprc.canAs(AllValuesFromRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
+		 						val vitr = jenaModel.listStatements(sprc, OWL.allValuesFrom, null as RDFNode)
+		 						val v = vitr.nextStatement.object
+		 						assertTrue((v as Resource).URI.equals("http://sadl.org/test.sadl#Test"));
+		  					}
+		 				}
+		 				else if (sprc.canAs(HasValueRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 						hasLengthRest = true;
+		 					}
+		 				}
+		 			} while (itr2.hasNext)
+		 			assertTrue(listSubclass)
+		 			assertTrue(hasLengthRest)
+		 		}
+ 			} while (itr.hasNext)
+  					
+ 		]
+	}
+
+	@Test
+	def void testTypedList4() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Test is a class.
+			 grades describes Test with values of type int List length 2-4.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntProperty("http://sadl.org/test.sadl#grades")
+ 			val itr = pcls.listRange()
+ 			assertTrue(itr.hasNext)
+ 			do {
+ 				val rng = itr.next as OntResource
+ 				if (rng.canAs(OntClass)) {
+	  				val itr2 = (rng.^as(OntClass)).listSuperClasses(true)
+	 				assertTrue(itr2.hasNext)
+		 			var listSubclass = false
+		 			var hasLengthRest = false
+		 			do {
+		 				val sprc = itr2.next as OntClass
+		 				if ((sprc as OntClass).URIResource && (sprc as OntClass).URI.equals("http://sadl.org/sadllistmodel#List")) {
+		 					listSubclass = true
+		 				}
+		 				if (sprc.canAs(AllValuesFromRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
+		 						val vitr = jenaModel.listStatements(sprc, OWL.allValuesFrom, null as RDFNode)
+		 						val v = vitr.nextStatement.object
+		 						assertTrue((v as Resource).URI.equals("http://www.w3.org/2001/XMLSchema#int"));
+		  					}
+		 				}
+		 				else if (sprc.canAs(HasValueRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 						hasLengthRest = true;
+		 					}
+		 				}
+		 			} while (itr2.hasNext)
+		 			assertTrue(listSubclass)
+		 			assertTrue(hasLengthRest)
+		 		}
+ 			} while (itr.hasNext)
+  					
+ 		]
+	}
+
+	@Test
+	def void testTypedList5() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Test is a class described by foo with values of type Test List length 2-4.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntProperty("http://sadl.org/test.sadl#foo")
+ 			val itr = pcls.listRange()
+ 			assertTrue(itr.hasNext)
+ 			do {
+ 				val rng = itr.next as OntResource
+ 				if (rng.canAs(OntClass)) {
+	  				val itr2 = (rng.^as(OntClass)).listSuperClasses(true)
+	 				assertTrue(itr2.hasNext)
+		 			var listSubclass = false
+		 			var hasLengthRest = false
+		 			do {
+		 				val sprc = itr2.next as OntClass
+		 				if ((sprc as OntClass).URIResource && (sprc as OntClass).URI.equals("http://sadl.org/sadllistmodel#List")) {
+		 					listSubclass = true
+		 				}
+		 				if (sprc.canAs(AllValuesFromRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
+		 						val vitr = jenaModel.listStatements(sprc, OWL.allValuesFrom, null as RDFNode)
+		 						val v = vitr.nextStatement.object
+		 						assertTrue((v as Resource).URI.equals("http://sadl.org/test.sadl#Test"));
+		  					}
+		 				}
+		 				else if (sprc.canAs(HasValueRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 						hasLengthRest = true;
+		 					}
+		 				}
+		 			} while (itr2.hasNext)
+		 			assertTrue(listSubclass)
+		 			assertTrue(hasLengthRest)
+		 		}
+ 			} while (itr.hasNext)
+  					
+ 		]
+	}
+
+	@Test
+	def void testTypedList6() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Test is a class described by grades with values of type int List length 2-4.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntProperty("http://sadl.org/test.sadl#grades")
+ 			val itr = pcls.listRange()
+ 			assertTrue(itr.hasNext)
+ 			do {
+ 				val rng = itr.next as OntResource
+ 				if (rng.canAs(OntClass)) {
+	  				val itr2 = (rng.^as(OntClass)).listSuperClasses(true)
+	 				assertTrue(itr2.hasNext)
+		 			var listSubclass = false
+		 			var hasLengthRest = false
+		 			do {
+		 				val sprc = itr2.next as OntClass
+		 				if ((sprc as OntClass).URIResource && (sprc as OntClass).URI.equals("http://sadl.org/sadllistmodel#List")) {
+		 					listSubclass = true
+		 				}
+		 				if (sprc.canAs(AllValuesFromRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#first")) {
+		 						val vitr = jenaModel.listStatements(sprc, OWL.allValuesFrom, null as RDFNode)
+		 						val v = vitr.nextStatement.object
+		 						assertTrue((v as Resource).URI.equals("http://www.w3.org/2001/XMLSchema#int"));
+		  					}
+		 				}
+		 				else if (sprc.canAs(HasValueRestriction)) {
+		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
+		 					val obj = opitr.nextStatement.object
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 						hasLengthRest = true;
+		 					}
+		 				}
+		 			} while (itr2.hasNext)
+		 			assertTrue(listSubclass)
+		 			assertTrue(hasLengthRest)
+		 		}
+ 			} while (itr.hasNext)
+  					
  		]
 	}
 
