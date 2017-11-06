@@ -1,5 +1,9 @@
 package com.ge.research.sadl.scoping;
 
+import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ALTERNATIVES;
+import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ERROR;
+import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ISSUE_CODE;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -21,11 +25,6 @@ import org.eclipse.xtext.scoping.IScopeProvider;
 import com.google.inject.Inject;
 
 public class ErrorAddingLinkingService extends DefaultLinkingService {
-
-	public static final String ISSUE_CODE = "ambiguous_import";
-
-	public static final String ERROR = "ERROR";
-	public static final String ALTERNATIVES = "ALTERNATIVES";
 
 	private static final Logger logger = Logger.getLogger(ErrorAddingLinkingService.class);
 	
@@ -55,9 +54,9 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 				logger.debug("after getLinkedObjects: node: '" + crossRefString + "' result: " + eObjectDescription);
 			}
 			if (eObjectDescription != null) {
-				String errorMessage = eObjectDescription.getUserData(ERROR);
+				String errorMessage = eObjectDescription.getUserData(AMBIGUOUS_NAME_ERROR);
 				if (errorMessage != null) {
-					createAndAddDiagnostic(context.eResource(), node, errorMessage, eObjectDescription.getUserData(ALTERNATIVES));
+					createAndAddDiagnostic(context.eResource(), node, errorMessage, eObjectDescription.getUserData(AMBIGUOUS_NAME_ALTERNATIVES));
 				}
 				List<EObject> results = Collections.singletonList(eObjectDescription.getEObjectOrProxy());
 				return results;
@@ -67,7 +66,7 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 	}
 	
 	protected void createAndAddDiagnostic(Resource resource, INode node, String message, String commaSeparatedAlternatives) {
-		resource.getErrors().add(new XtextLinkingDiagnostic(node, message, ISSUE_CODE, commaSeparatedAlternatives));
+		resource.getErrors().add(new XtextLinkingDiagnostic(node, message, AMBIGUOUS_NAME_ISSUE_CODE, commaSeparatedAlternatives));
 	}
 
 	
