@@ -373,17 +373,17 @@ MultiOp :
 ;
 
 Power<EnabledWith, EnableComma> returns Expression:
-	ElementInList<EnabledWith, EnableComma> ({BinaryOperation.left=current} op='^' right=ElementInList<EnabledWith, EnableComma>)*;
-   
-ElementInList<EnabledWith, EnableComma> returns Expression:
-	PropOfSubject<EnabledWith, EnableComma> |
-	{ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith, EnableComma>
-;
+	PropOfSubject<EnabledWith, EnableComma> ({BinaryOperation.left=current} op='^' right=PropOfSubject<EnabledWith, EnableComma>)*;
 
 PropOfSubject<EnabledWith, EnableComma> returns Expression:
-	UnitExpression<EnabledWith, EnableComma> ->(
+	ElementInList<EnabledWith, EnableComma> ->(
 		   ({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith, EnableComma>) 
- 	   | ->({SubjHasProp.left=current} (<EnableComma> comma?=',')? (<EnabledWith>'with'|'has')? prop=SadlResource ->right=UnitExpression<EnabledWith, EnableComma>?)+)?
+ 	   | ->({SubjHasProp.left=current} (<EnableComma> comma?=',')? (<EnabledWith>'with'|'has')? prop=SadlResource ->right=ElementInList<EnabledWith, EnableComma>?)+)?
+;
+
+ElementInList<EnabledWith, EnableComma> returns Expression:
+	UnitExpression<EnabledWith, EnableComma> |
+	{ElementInList} 'element' (before?='before'|after?='after')? element=UnitExpression<EnabledWith, EnableComma>
 ;
 
 UnitExpression<EnabledWith, EnableComma> returns Expression:
