@@ -1158,6 +1158,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (SadlASTUtils.isUnitExpression(expression)) {
 			ConceptName uqcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			uqcn.setType(ConceptType.ONTCLASS);
 			TypeCheckInfo tci = new TypeCheckInfo(uqcn, uqcn, this, expression);
 			tci.setTypeToExprRelationship(SadlASTUtils.getUnitAsString(expression));
 			return tci;

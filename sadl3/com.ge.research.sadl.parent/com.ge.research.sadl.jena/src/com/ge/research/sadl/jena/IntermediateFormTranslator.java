@@ -1632,8 +1632,21 @@ public class IntermediateFormTranslator {
 				((TripleElement)realArgForThen).setObject(nodeCheck(finalIfsVar));
 				patterns.add((TripleElement)realArgForThen);
 			}
+			else if (realArgForThen instanceof BuiltinElement && ((BuiltinElement)realArgForThen).getArguments() != null) {
+				if (((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1) == null) {
+					((BuiltinElement)realArgForThen).getArguments().set(((BuiltinElement)realArgForThen).getArguments().size() - 1, nodeCheck(finalIfsVar));
+				}
+				else if (((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1) instanceof ProxyNode &&
+						((ProxyNode)((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1)).getProxyFor() instanceof TripleElement &&
+						((TripleElement)((ProxyNode)((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1)).getProxyFor()).getObject() == null) {
+					((TripleElement)((ProxyNode)((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1)).getProxyFor()).setObject(nodeCheck(finalIfsVar));
+				}
+				else {
+					throw new TranslationException("Unhandled condition, LHS of Equal in Then isn't a BuiltinElement that needs an argument: " + realArgForThen.toString());
+				}
+			}
 			else {
-				throw new TranslationException("Unhandled condition, LHS of Equal in Then isn't a TripleElement: " + realArgForThen.toString());
+				throw new TranslationException("Unhandled condition, LHS of Equal in Then isn't a TripleElement or BuiltinElement that needs an argument: " + realArgForThen.toString());
 			}
 			return null;
 		}
