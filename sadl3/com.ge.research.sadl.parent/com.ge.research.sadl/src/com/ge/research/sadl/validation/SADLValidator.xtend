@@ -46,6 +46,10 @@ import org.eclipse.xtext.resource.IResourceDescriptionsProvider
 import org.eclipse.xtext.validation.Check
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.nodemodel.INode
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
 
 /**
  * This class contains custom validation rules. 
@@ -125,6 +129,28 @@ class SADLValidator extends AbstractSADLValidator {
 				}
 			}
 		}
+	}
+	
+	def Object[] getEObjectText(EObject po) {
+		val r = po.eResource()
+		if (r instanceof XtextResource) {
+			val root = (r as XtextResource).getParseResult().getRootNode();
+	        for(INode node : root.getAsTreeIterable()) {   
+	        	if (node instanceof CompositeNodeWithSemanticElement) {
+	        		val semElt = (node as CompositeNodeWithSemanticElement).getSemanticElement();
+	        		if (semElt.equals(po)) {
+	        			// this is the one!
+	        			val txt = NodeModelUtils.getTokenText(node);
+	        			var Object[] results = newArrayOfSize(3)
+	        			results.set(0, node.getTotalLength());
+	        			results.set(1, node.getTotalOffset());
+       					results.set(2, txt.trim());
+       					return results;
+	        		}
+	        	}
+	        }
+		}
+		return null;
 	}
 	
 	def trimQuotes(String string) {
