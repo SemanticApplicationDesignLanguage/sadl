@@ -8046,10 +8046,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, com.hp.hpl.jena.rdf.model.Resource rng) throws JenaProcessorException {
 		try {
+			boolean isNegated = false;
 			if (value instanceof SadlUnaryExpression) {
 				String op = ((SadlUnaryExpression)value).getOperator();
 				if (op.equals("-")) {
 					value = ((SadlUnaryExpression)value).getValue();
+					isNegated = true;
 				}
 				else {
 					throw new JenaProcessorException("Unhandled case of unary operator on SadlExplicitValue: " + op);
@@ -8057,6 +8059,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (value instanceof SadlNumberLiteral) {
 				String val = ((SadlNumberLiteral)value).getLiteralNumber().toPlainString();
+				if (isNegated) {
+					val = "-" + val;
+				}
 				if (rng != null && rng.getURI() != null) {
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
@@ -8071,6 +8076,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			else if (value instanceof SadlStringLiteral) {
 				String val = ((SadlStringLiteral)value).getLiteralString();
+				if (isNegated) {
+					val = "-" + val;
+				}
 				if (rng != null) {
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
@@ -8093,15 +8101,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else if (value instanceof SadlConstantLiteral) {
 				String val = ((SadlConstantLiteral)value).getTerm();
 				if (val.equals("PI")) {
-					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), Math.PI);
+					double cv = Math.PI;
+					if (isNegated) {
+						cv = cv*-1.0;
+					}
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), cv);
 				}
 				else if (val.equals("e")) {
-					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), Math.E);					
+					double cv = Math.E;
+					if (isNegated) {
+						cv = cv*-1.0;
+					}
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), cv);					
 				}
 				else if (rng != null) {
+					if (isNegated) {
+						val = "-" + val;
+					}
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
 				}
 				else {
+					if (isNegated) {
+						val = "-" + val;
+					}
 					try {
 						int ival = Integer.parseInt(val);
 						return getTheJenaModel().createTypedLiteral(ival);
