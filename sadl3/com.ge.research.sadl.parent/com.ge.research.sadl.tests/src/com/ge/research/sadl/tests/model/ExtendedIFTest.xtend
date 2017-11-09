@@ -27,6 +27,7 @@ import com.hp.hpl.jena.ontology.HasValueRestriction
 import com.hp.hpl.jena.util.iterator.ExtendedIterator
 import com.hp.hpl.jena.vocabulary.OWL
 import com.hp.hpl.jena.rdf.model.Resource
+import com.hp.hpl.jena.rdf.model.Literal
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -575,6 +576,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			  children describes Person with values of type ChildrenList.
 			  children of Person has at most 1 value.
 			  
+			  fv describes Person with values of type float.
+			  George is a Person with fv -PI, with fv -4.5.
+			  
 			  Rule R2:  if x is a Person and age of (element 1 of children of x) > 20
 			  	then old of x is true. 
 			   	
@@ -584,6 +588,23 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			  Rule R3:  if x is a Person and age of last element of children of x > 20
 			  	then old of x is true. 
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val G = jenaModel.getIndividual("http://sadl.org/Test.sadl#George")
+			val pvitr = G.listPropertyValues(jenaModel.getProperty("http://sadl.org/Test.sadl#fv"))
+			var f1 = false
+			var f2 = false
+			while (pvitr.hasNext) {
+				val nv = pvitr.next
+				if (nv instanceof Literal) {
+					val v = (nv as Literal).value
+					if (v instanceof Float) {
+						val double d1 = (v as Float).doubleValue + 4.5
+						if (d1 < 0.0001) f1 = true
+						val double d2 = (v as Float).doubleValue + Math.PI
+						if (d2 < 0.0001) f2 = true
+					}
+				}
+			}
+			assertTrue(f1 && f2)
 			val results = processor.getIntermediateFormResults(false, true)
 			if (issues !== null) {
 				for (issue:issues) {

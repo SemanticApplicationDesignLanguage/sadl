@@ -6749,6 +6749,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 				else {
+					addError("Invalid value (" + val.getClass().getCanonicalName() + ") for data property", val);
 					throw new JenaProcessorException("unhandled value type for data property");
 				}
 			}
