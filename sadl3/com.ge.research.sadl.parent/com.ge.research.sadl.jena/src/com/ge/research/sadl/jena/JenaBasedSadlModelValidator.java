@@ -2220,7 +2220,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				param = params.get(i);
 			}
 			if (param != null) {
-				validate(arg, param.getType(), "passed argument", sb);
+				validate(arg, param.getType(), "argument", sb);
 				if (sb.length() > 0) {
 					getModelProcessor().addIssueToAcceptor(sb.toString(), expression);
 				}

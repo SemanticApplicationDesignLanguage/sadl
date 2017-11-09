@@ -3196,6 +3196,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected Object processBinaryExpressionByParts(EObject container, String op, Expression lexpr,
 			Expression rexpr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		StringBuilder errorMessage = new StringBuilder();
+		if (lexpr != null && rexpr != null) {
+			if(!getModelValidator().validateBinaryOperationByParts(lexpr.eContainer(), lexpr, rexpr, op, errorMessage)){
+				addError(errorMessage.toString(), lexpr.eContainer());
+			}
+			else {
+				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+				if (ip != null) {
+					Iterator<EObject> ipitr = ip.keySet().iterator();
+					while (ipitr.hasNext()) {
+						EObject eobj = ipitr.next();
+						OntModelProvider.addImpliedProperty(lexpr.eResource(), eobj, ip.get(eobj));
+					}
+					// TODO must add implied properties to rules, tests, etc.
+				}
+			}
+		}
 		BuiltinType optype = BuiltinType.getType(op);
 		Object lobj;
 		if (lexpr != null) {
@@ -4349,9 +4366,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError("A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.", subject);
 			}
 		}
+		boolean isPreviousPredicate = false;
 		if (predicate != null) {
 			trPred = processExpression(predicate);
-
 		}
 		if (constantBuiltinName == null || numBuiltinArgs == 1) {
 			TripleElement returnTriple = null;
