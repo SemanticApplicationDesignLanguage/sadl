@@ -1704,7 +1704,7 @@ public class IntermediateFormTranslator {
 									((TripleElement)realArg).setType(TripleModifierType.Not);
 									return realArg;	// "not" is a unary operator, so it is safe to assume this is the only argument
 								}
-								else if (be.getFuncName().equals("there exists") && ((TripleElement)realArg).getSubject() instanceof VariableNode){
+								else if (be.getFuncName().equals(JenaBasedSadlModelProcessor.THERE_EXISTS) && ((TripleElement)realArg).getSubject() instanceof VariableNode){
 									be.getArguments().set(0, ((TripleElement)realArg).getSubject());
 									patterns.add(patterns.size() - 1, be);
 									return null;
@@ -1731,7 +1731,7 @@ public class IntermediateFormTranslator {
 				}
 			}
 		}
-		if (be.getFuncName().equals("there exists")) {
+		if (be.getFuncName().equals(JenaBasedSadlModelProcessor.THERE_EXISTS)) {
 			if (patterns.size() == 0) {
 				patterns.add(be);
 			}

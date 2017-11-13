@@ -1952,9 +1952,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						try {
 							for (int j = 0; subjClasses != null && j < subjClasses.size(); j++) {
 								OntClass subj = subjClasses.get(j);
-								if ( SadlUtils.classIsSubclassOf(subj, dmn.as(OntResource.class),true, null)) {
-									domainMatched = true;
-									break;
+//								if ( SadlUtils.classIsSubclassOf(subj, dmn.as(OntResource.class),true, null)) {
+								if (dmn.canAs(OntClass.class)) { 
+									if ( SadlUtils.classIsSubclassOf(dmn.as(OntClass.class), subj,true, null)) {
+										domainMatched = true;
+										break;
+									}
 								}
 							}
 						} catch (CircularDependencyException e) {
