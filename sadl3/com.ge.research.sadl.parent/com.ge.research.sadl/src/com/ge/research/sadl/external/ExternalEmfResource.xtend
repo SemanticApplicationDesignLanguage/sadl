@@ -95,14 +95,6 @@ class ExternalEmfResource extends ResourceImpl {
 
 		ontModel.listOntologies.forEach [ ontology |
 			ontology.listImports.forEach [ ontologyImport |
-				if (ontologyImport instanceof Resource) {
-					if (ontologyImport.URIResource) {
-						val importUri = ontologyImport.URI;
-						System.out.println(
-							"[com.ge.research.sadl.external.ExternalEmfResource.doLoad(InputStream, Map<?, ?>)] Importing " +
-								importUri) // TODO remove this or do something with the resource.
-					}
-				}
 				val model = getOrCreateSadlModel(altBaseUri);
 				model.imports += createSadlImport(model, ontologyImport);
 			];
@@ -149,7 +141,12 @@ class ExternalEmfResource extends ResourceImpl {
 	private def getBaseUri(OntModel model, String content) {
 		val baseUri = model.getNsPrefixURI('');
 		if (baseUri === null) {
-			return new XMLHelper().tryReadBaseUri(content).orNull;
+			val fileExtension = fileExtension;
+			return if (fileExtension == 'n3' || fileExtension == 'nt') {
+				model.listOntologies.head?.URI
+			} else {
+				new XMLHelper().tryReadBaseUri(content).orNull
+			}
 		}
 		return baseUri;
 	}
@@ -164,6 +161,14 @@ class ExternalEmfResource extends ResourceImpl {
 			return null;
 		}
 		return if(baseUri.endsWith('#')) baseUri.substring(0, baseUri.length - 1) else baseUri;
+	}
+	
+	/**
+	 * The file extension of the current resource without the leading dot.
+	 * For instance, {@code owl}, {@code n3} but not {@code .nt}.
+	 */
+	private def fileExtension() {
+		return this.URI.fileExtension;
 	}
 
 	private def getOrCreateSadlModel(String baseUri) {

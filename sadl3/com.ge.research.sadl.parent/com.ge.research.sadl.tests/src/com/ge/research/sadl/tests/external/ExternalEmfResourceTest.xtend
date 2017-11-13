@@ -17,7 +17,6 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.external
 
-import com.ge.research.sadl.external.XMLHelper
 import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
@@ -113,35 +112,6 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		'''.owl.assertContents
 	}
 	
-	
-	public static val CONTENT = '''
-	@base <http://sadl.org/test.sadl222> .
-				@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
-				@prefix test:  <http://sadl.org/test.sadl#> .
-				@prefix owl:   <http://www.w3.org/2002/07/owl#> .
-				@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
-				@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-				
-				test:relation1  a    owl:ObjectProperty ;
-				        rdfs:domain  test:Thingy ;
-				        rdfs:range   test:Thingy .
-				
-				test:Thingy  a  owl:Class .
-				
-				test:attribute1  a   owl:DatatypeProperty ;
-				        rdfs:domain  test:Thingy ;
-				        rdfs:range   xsd:int .
-				
-				test:MyThingy  a         test:Thingy ;
-				        test:attribute1  "23"^^xsd:int ;
-				        test:relation1   test:OtherThingy .
-				
-				<>      a             owl:Ontology ;
-				        rdfs:comment  "This ontology was created from a SADL file 'test.sadl' and should not be directly edited."@en ;
-				        owl:imports   <sadlbasemodel> .
-				
-				test:OtherThingy  a  test:Thingy .'''
-	
 	@Test def void testN3Format() {
 		val content = '''
 			@base          <http://sadl.org/test.sadl> .
@@ -175,7 +145,7 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		content.n3.assertContents;
 	}
 	
-	@Test def void gh_201() {
+	@Test def void GH_201() {
 		ExternalResourceContentHelper.getContent('aulo.owl').owl;
 		ExternalResourceContentHelper.getContent('apvf.owl').owl;
 		'''
@@ -192,20 +162,6 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 			FooBar is a type of AcuityController.
 			MyHero is an ArtificialAgent.
 		'''.sadl.assertNoErrors;
-	}
-	
-	@Test def void foo() {
-		val a = '''			<rdf:RDF
-					    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-					    xmlns:owl="http://www.w3.org/2002/07/owl#"
-					    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-					    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-					  xml:base="http://assert/Properties#">
-		«««			  TODO add a fallback logic that parses the base from the XML.
-					  <owl:Class rdf:ID="Foo"/>
-					  <owl:ObjectProperty rdf:ID="myProperty"/>
-					</rdf:RDF>'''
-					new XMLHelper().tryReadBaseUri(a);
 	}
 	
 	protected def void assertContents(Resource resource) {
