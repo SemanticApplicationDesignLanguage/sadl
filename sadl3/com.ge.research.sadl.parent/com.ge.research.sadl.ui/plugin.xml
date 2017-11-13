@@ -523,7 +523,8 @@
   </extension>
   <extension
         id="sadlproblem"
-        point="org.eclipse.core.resources.markers">
+        point="org.eclipse.core.resources.markers"
+        name="Requirements Analysis Problem">
      <super type="org.eclipse.core.resources.problemmarker"/>
      <persistent value="true"/>
      <attribute name="ORIGIN_KEY"/>

@@ -26,10 +26,10 @@ class SadlPreferencesTest extends Assert {
     @Test def void testEclipsePreferenceStore() {
         val key = SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.id
         var store = preferenceStoreAccess.getWritablePreferenceStore()
-        assertEquals(false, store.getBoolean(key))
+        assertEquals(true, store.getBoolean(key))
 
         store.setValue(key, SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.defaultValue)
-        assertEquals(false, store.getBoolean(key))
+        assertEquals(true, store.getBoolean(key))
 
         store.setValue(key, true)
         assertEquals(true, store.getBoolean(key))
@@ -37,11 +37,11 @@ class SadlPreferencesTest extends Assert {
 
     @Test def void testEclipsePreferencesProvider() {
         val id = SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.id
-        assertEquals("false", store.getPreference(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES))
+        assertEquals("true", store.getPreference(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES))
 
         preferenceStoreAccess.getWritablePreferenceStore().setValue(id,
             SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.defaultValue)
-        assertEquals("false", store.getPreference(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES))
+        assertEquals("true", store.getPreference(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES))
 
         preferenceStoreAccess.getWritablePreferenceStore().setValue(id, true)
         assertEquals("true", store.getPreference(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES))

@@ -83,7 +83,13 @@ class SadlMarkerStartup implements IStartup {
 							it 
 						} else {
 							// Otherwise let's create a new copy of the original marker with the model URI from the translator.
-							SadlMarker.copyWithModelUri(it, translator.get.getLocalFragmentNamespace(astNodeName))
+							//AATIM-2050 Get rid of the translator dependency and truncate the fully qualified URI to given from RAE to short name
+							var nodeName = astNodeName
+							if(nodeName === null || !nodeName.contains("/")){
+								SadlMarker.copyWithModelUri(it, null);
+							}else{
+								SadlMarker.copyWithModelUri(it, astNodeName.substring(0, (astNodeName.lastIndexOf("/"))));
+							}						
 						}].groupBy[modelUri].forEach [ modelUri, entries |
 							val resourceUri = modelUri.getResourceUri(project);
 							if (resourceUri !== null) {

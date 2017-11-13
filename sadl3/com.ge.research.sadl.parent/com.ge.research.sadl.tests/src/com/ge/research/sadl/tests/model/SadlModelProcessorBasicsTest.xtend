@@ -37,6 +37,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.hp.hpl.jena.ontology.Restriction
+import com.hp.hpl.jena.ontology.OntResource
+import com.hp.hpl.jena.vocabulary.RDFS
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -284,6 +288,38 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 		}
 		assertEquals(mismatches, 0)
  	}
+ 	
+ 	@Test
+ 	def void testUseOfClassAsProperty() {
+ 		var errs = newArrayList("'THING' is not a property",
+ 			"'THING' is not a property"
+ 		)
+ 		val sadlModel = '''
+ 			 uri "http://sadl.org/ErrorFromCraig.sadl" alias ErrorFromCraig.
+ 			 
+ 			SYSTEM is a class.	// this must have been imported?
+ 			
+ 			THING is a class.
+ 			THING describes SYSTEM.
+ 			THING has exactly 2 values.
+ 			input describes THING with values of type INPUT.
+ 			INPUT is a class.
+ 			stuff describes INPUT with values of type integer.
+ 		'''.sadl
+ 		val issues = validationTestHelper.validate(sadlModel)
+ 		assertNotNull(issues)
+ 		assertEquals(2, issues.size)
+		var errIdx = 0
+		var mismatches = 0
+		for (issue:issues) {
+			val err = errs.get(errIdx++)
+			if (!issue.toString.contains(err)) {
+				System.out.println(issue.toString + " != " + err)
+				mismatches++
+			}
+		}
+		assertEquals(mismatches, 0)
+ 	}
 
 	@Test
 	def void testLiteralOutOfRangeLong() {
@@ -454,10 +490,183 @@ class SadlModelProcessorBasicsTest extends AbstractSADLParsingTest {
 		}
 		assertEquals(mismatches, 0)
 	}
+	
+	@Test
+	def void testAllValuesFromUnnamedTypedList() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.			 
+			 Foo is a class described by bar with values of type Whimsy List.	 
+			 bar of Foo only has values of type Whimsy List.
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 0)
+ 			assertNotNull(jenaModel.getOntClass("http://sadl.org/model.sadl#Foo"))
+ 			val fooclass = jenaModel.getOntClass("http://sadl.org/model.sadl#Foo")
+ 			val eitr = fooclass.listSuperClasses
+ 			var found = false
+ 			while (eitr.hasNext) {
+ 				val sprcls =eitr.next
+ 				if (sprcls instanceof OntClass) {
+ 					val onprop = (sprcls as OntClass).asRestriction.onProperty
+ 					if (onprop.localName.equals("bar")) {
+ 						val rng = onprop.range
+ 						if ((sprcls as OntClass).asRestriction.allValuesFromRestriction) {
+ 							val avfcls = (sprcls as OntClass).asRestriction.asAllValuesFromRestriction.allValuesFrom
+ 							assertTrue(avfcls.anon)
+ 							assertTrue(avfcls instanceof OntResource)
+ 							assertTrue(avfcls.equals(rng)		// this is the test to see that only one class of type "Whimsy List" is created
+ 							)
+ 							val nitr = (avfcls as OntResource).listPropertyValues(RDFS.subClassOf)
+ 							while (nitr.hasNext) {
+ 								val nd = nitr.next
+ 								if (nd.URIResource && nd.asResource.localName.equals("List")) {
+ 									found = true;
+ 								}
+ 							}
+ 						}
+ 					}
+ 				}
+ 			}
+ 			assertTrue(found)
+ 		]
+	}
+
+	@Ignore ("This can't pass until the newer grammar is being used so that unnamed typed lists can have length restrictions")
+	@Test
+	def void testAllValuesFromUnnamedTypedList_02() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.			 
+			 Foo is a class described by bar with values of type Whimsy List length 1-4.	 
+			 bar of Foo only has values of type Whimsy List length 1-4.
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 0)
+ 			assertNotNull(jenaModel.getOntClass("http://sadl.org/model.sadl#Foo"))
+ 			val fooclass = jenaModel.getOntClass("http://sadl.org/model.sadl#Foo")
+ 			val eitr = fooclass.listSuperClasses
+ 			var found = false
+ 			while (eitr.hasNext) {
+ 				val sprcls =eitr.next
+ 				if (sprcls instanceof OntClass) {
+ 					val onprop = (sprcls as OntClass).asRestriction.onProperty
+ 					if (onprop.localName.equals("bar")) {
+ 						if ((sprcls as OntClass).asRestriction.allValuesFromRestriction) {
+ 							val avfcls = (sprcls as OntClass).asRestriction.asAllValuesFromRestriction.allValuesFrom
+ 							assertTrue(avfcls.anon)
+ 							assertTrue(avfcls instanceof OntResource)
+ 							val nitr = (avfcls as OntResource).listPropertyValues(RDFS.subClassOf)
+ 							while (nitr.hasNext) {
+ 								val nd = nitr.next
+ 								if (nd.URIResource && nd.asResource.localName.equals("List")) {
+ 									found = true;
+ 								}
+ 							}
+ 						}
+ 					}
+ 				}
+ 			}
+ 			assertTrue(found)
+ 		]
+	}
+
+	@Ignore ("This can't pass until the newer grammar is being used so that unnamed typed lists can have length restrictions")
+	@Test
+	def void testAllValuesFromUnnamedTypedList_03() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.			 
+			 Foo is a class described by bar with values of type Whimsy List length 1-4.	 
+			 bar of Foo only has values of type Whimsy List length 1-*.
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 0)
+ 			assertNotNull(jenaModel.getOntClass("http://sadl.org/model.sadl#Foo"))
+ 			val fooclass = jenaModel.getOntClass("http://sadl.org/model.sadl#Foo")
+ 			val eitr = fooclass.listSuperClasses
+ 			var found = false
+ 			while (eitr.hasNext) {
+ 				val sprcls =eitr.next
+ 				if (sprcls instanceof OntClass) {
+ 					val onprop = (sprcls as OntClass).asRestriction.onProperty
+ 					if (onprop.localName.equals("bar")) {
+ 						if ((sprcls as OntClass).asRestriction.allValuesFromRestriction) {
+ 							val avfcls = (sprcls as OntClass).asRestriction.asAllValuesFromRestriction.allValuesFrom
+ 							assertTrue(avfcls.anon)
+ 							assertTrue(avfcls instanceof OntResource)
+ 							val nitr = (avfcls as OntResource).listPropertyValues(RDFS.subClassOf)
+ 							while (nitr.hasNext) {
+ 								val nd = nitr.next
+ 								if (nd.URIResource && nd.asResource.localName.equals("List")) {
+ 									found = true;
+ 								}
+ 							}
+ 						}
+ 					}
+ 				}
+ 			}
+ 			assertTrue(found)
+ 		]
+	}
+
+	@Test
+	def void testAllValuesFromUnnamedTypedList_04() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.	
+			 Mopsy is a class.		 
+			 Foo is a class described by bar with values of type Whimsy List,
+			 				described by rab with values of type Mopsy List,
+			 				described by status with values of type string.	 
+			 bar of Foo only has values of type Whimsy List.
+			 rab of Foo only has values of type Mopsy List.
+			 
+			 Rule R1: if x is a Foo and bar of x = rab of x then status of x is "this should not ever work".
+			 
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 1)
+ 			issues.get(0).message.equals("bar, an object property with range  a List of values of type Whimsy, cannot be compared (=) with rab, an object property with range  a List of values of type Mopsy.")
+ 		]
+	}
+
+	@Test
+	def void testAllValuesFromUnnamedTypedList_05() {
+		val sadlModel = '''
+			 uri "http://sadl.org/model.sadl" alias model.
+			 Whimsy is a class.	
+			 WhimsyList is a type of Whimsy List.
+			 Mopsy is a class.		 
+			 MopsyList is a type of Mopsy List.
+			 Foo is a class described by bar with values of type WhimsyList,
+			 				described by rab with values of type MopsyList,
+			 				described by status with values of type string.	 
+			 bar of Foo only has values of type WhimsyList.
+			 rab of Foo only has values of type MopsyList.
+			 
+			 Rule R1: if x is a Foo and bar of x = rab of x then status of x is "this should not ever work".
+			 
+		'''.assertValidatesTo [ jenaModel, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+// 			jenaModel.write(System.out, "N-TRIPLE")
+ 			assertTrue(issues.size == 1)
+ 			issues.get(0).message.equals("bar, an object property with range  a List of values of type WhimsyList, cannot be compared (=) with rab, an object property with range  a List of values of type MopsyList.")
+ 		]
+	}
 
 	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
 		val model = parser.parse(code)
-		validationTestHelper.assertNoErrors(model)
+//		validationTestHelper.assertNoErrors(model)
 		val processor = processorProvider.get
 		val List<Issue> issues= newArrayList
 		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
