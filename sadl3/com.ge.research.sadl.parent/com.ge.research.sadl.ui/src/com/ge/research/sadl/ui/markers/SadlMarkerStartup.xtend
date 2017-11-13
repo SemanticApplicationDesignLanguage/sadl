@@ -19,12 +19,13 @@ package com.ge.research.sadl.ui.markers
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
 import com.ge.research.sadl.markers.SadlMarker
-import com.ge.research.sadl.markers.SadlMarkerConstants
 import com.ge.research.sadl.markers.SadlMarkerDeserializerService
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
+import com.ge.research.sadl.markers.SadlMarkerRefType
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
 import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.google.common.collect.Iterables
 import com.google.inject.Inject
 import java.io.File
 import java.nio.file.Paths
@@ -44,8 +45,11 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.ui.IStartup
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
+import org.eclipse.xtext.util.Strings
+import org.eclipse.xtext.validation.Issue
 
 import static com.ge.research.sadl.jena.UtilsForJena.*
+import static com.ge.research.sadl.markers.SadlMarkerConstants.*
 import static com.ge.research.sadl.reasoner.IConfigurationManager.*
 
 /**
@@ -70,25 +74,13 @@ class SadlMarkerStartup implements IStartup {
 		ws.addResourceChangeListener([ event |
 			val Collection<()=>void> modifications = newArrayList();
 			event?.delta?.accept([
-				if (resource instanceof IFile && resource.fileExtension == SadlMarkerConstants.FILE_EXTENSION) {
+				if (resource instanceof IFile && resource.fileExtension == FILE_EXTENSION) {
 					val markerInfos = deserializerService.deserialize(Paths.get(resource.locationURI));
 					val origin = markerInfos.origin;
 					val project = resource.project;
 					if (project.accessible) {
 						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
-						markerInfos.map[if (isModelUriSet) {
-							// If the model URI is set, then it returns with the identical instance.
-							it 
-						} else {
-							// Otherwise let's create a new copy of the original marker with the model URI from the translator.
-							//AATIM-2050 Get rid of the translator dependency and truncate the fully qualified URI to given from RAE to short name
-							val newModelUri = if (astNodeName === null || !astNodeName.contains('/')) {
-								null
-							} else {
-								astNodeName.substring(0, (astNodeName.lastIndexOf("/")))								
-							}
-							SadlMarker.copyWithModelUri(it, newModelUri);
-						}].groupBy[modelUri].forEach [ modelUri, entries |
+						markerInfos.map[mapModelUri].map[mapRefs(project)].groupBy[modelUri].forEach [ modelUri, entries |
 							val resourceUri = modelUri.getResourceUri(project);
 							if (resourceUri !== null) {
 								val resource = resourceSetProvider.get(project).getResource(resourceUri, true);
@@ -122,9 +114,46 @@ class SadlMarkerStartup implements IStartup {
 						return Status.OK_STATUS;
 					}
 
-				}.schedule
+				}.schedule;
 			}
 		]);
+	}
+	
+	protected def mapModelUri(SadlMarker it) {
+		// If the model URI is set, then it returns with the identical instance.
+		if (modelUriSet) {
+			return it;
+		}
+		// AATIM-2050 Get rid of the translator dependency and truncate the fully qualified URI to given from RAE to short name
+		val newModelUri = if (astNodeName === null || !astNodeName.contains('/')) {
+				null;
+			} else {
+				astNodeName.substring(0, (astNodeName.lastIndexOf("/")));
+			};
+		return SadlMarker.copyWithModelUri(it, newModelUri);
+	}
+	
+	protected def mapRefs(SadlMarker it, IProject project) {
+		val itr = references.iterator;
+		while (itr.hasNext) {
+			val ref = itr.next;
+			if (!ref.resolved) {
+				if (ref.type === SadlMarkerRefType.File) {
+					val projectLocation = Paths.get(project.locationURI);
+					val refLocation = Paths.get(project.getFile(ref.referencedId).locationURI);
+					resolveRef(ref, projectLocation.relativize(refLocation).toString);
+				} else if (ref.type === SadlMarkerRefType.ModelElement) {
+					val uri = ref.referencedId.getResourceUri(project);
+					if (uri === null) {
+						println('TODO: resolve the model element in the other resource.');						
+					}
+					resolveRef(ref, ref.referencedId);
+				} else {
+					throw new IllegalStateException('''Unexpected SADL marker reference type: «ref.type»''');
+				}
+			}
+		}
+		return it;
 	}
 
 	private def getLocationProvider(Resource resource) {
@@ -148,10 +177,10 @@ class SadlMarkerStartup implements IStartup {
 			return null;
 		}
 		val normalizedFilePath = file.toPath.fileName.toString;
-		val owlFileName = Paths.get(normalizedFilePath).toFile.name
+		val owlFileName = Paths.get(normalizedFilePath).toFile.name;
 		var resourceName = owlFileName.substring(0, owlFileName.lastIndexOf("."));
 		if (resourceName.indexOf('.') < 0) {
-			resourceName = resourceName + ".sadl"
+			resourceName = resourceName + ".sadl";
 		}
 		val rn = resourceName;
 		val resourceUri = <URI>newArrayList();
@@ -163,7 +192,7 @@ class SadlMarkerStartup implements IStartup {
 				return false;
 			} else {
 				return true;
-			}
+			};
 		], IResource.DEPTH_INFINITE, false);
 		return resourceUri.head;
 	}
@@ -172,22 +201,28 @@ class SadlMarkerStartup implements IStartup {
 		val markersToDelete = <IMarker>newArrayList();
 		project.accept([
 			markersToDelete +=
-				findMarkers(SadlMarkerConstants.SADL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE).filter [
-					origin == getAttribute(SadlMarkerConstants.ORIGIN_KEY);
+				findMarkers(SADL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE).filter [
+					origin == getAttribute(ORIGIN_KEY);
 				]
 		], IResource.DEPTH_INFINITE, false);
 		markersToDelete.forEach[delete];
 	}
 
 	private def void createMarker(IResource resource, SadlMarker marker, Location location, String origin) {
-		resource.createMarker(SadlMarkerConstants.SADL_PROBLEM_MARKER).setAttributes(resource, marker, location,
+		resource.createMarker(SADL_PROBLEM_MARKER).setAttributes(resource, marker, location,
 			origin);
 	}
 
 	private def setAttributes(IMarker it, IResource resource, SadlMarker marker, Location location, String origin) {
 		setAttribute(IMarker.MESSAGE, marker.message);
 		setAttribute(IMarker.SEVERITY, severityMapper.map(marker.severity));
-		setAttribute(SadlMarkerConstants.ORIGIN_KEY, origin);
+		setAttribute(ORIGIN_KEY, origin);
+		if (!marker.references.nullOrEmpty) {
+			// That has to be attached to the marker to have the quick fixes enabled.
+			setAttribute(Issue.CODE_KEY, SADL_REFS);
+			val refs = Iterables.toArray(marker.references.map['''«type»«SADL_REFS_SEPARATOR»«referencedId»'''], String);
+			setAttribute(Issue.DATA_KEY, Strings.pack(refs));
+		}
 		return setLocation(location);
 	}
 

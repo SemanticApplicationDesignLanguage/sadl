@@ -125,7 +125,7 @@ class SADLUiModule extends AbstractSADLUiModule {
 	}
 	
 	override bindIAnnotationHover() {
-		return  SadlProblemAnnotationHover
+		return SadlProblemAnnotationHover;
 	}
 	
 }

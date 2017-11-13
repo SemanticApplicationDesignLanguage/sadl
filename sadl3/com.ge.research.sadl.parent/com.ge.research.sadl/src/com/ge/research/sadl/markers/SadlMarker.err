@@ -2,9 +2,32 @@
 <MarkerService>
   <Process build="str1234" name="str1234" pn="str1234">
     <Marker msgName="str1234" msgText="str1234" projectMarker="true" time="2012-12-13T12:12:12" markerType="Error" priority="Low">
-      <ObjectID>str1234</ObjectID>
-	  <ObjectID>str1235</ObjectID>
-	  <ObjectID>str1236</ObjectID>
+      <ObjectID>http://sadl.org/A.sadl#Foo</ObjectID>
+      <Reference referencedID="http://sadl.org/B.sadl#Bar" objectID="http://sadl.org/A.sadl#Foo" referenceType="ModelElement" />
+      <Reference referencedID="http://sadl.org/C.sadl#Baz" objectID="http://sadl.org/A.sadl#Foo" referenceType="ModelElement" />
+      <Reference referencedID="/logs/someExternalFile.log" objectID="http://sadl.org/A.sadl#Foo" referenceType="File" />
+      <Reference referencedID="otherLocation/file.log" objectID="http://sadl.org/A.sadl#Foo" referenceType="File" />
+      <Reference referencedID="fileAtRoot.log" objectID="http://sadl.org/A.sadl#Foo" referenceType="File" />
     </Marker>
   </Process>
 </MarkerService>
+
+<!-- A.sadl
+// Example file to have an external marker on `Foo`.
+uri "http://sadl.org/A.sadl".
+
+Foo is a class.
+Bar is a type of Foo.
+-->
+
+<!-- B.sadl
+uri "http://sadl.org/B.sadl".
+
+Bar is a class.
+-->
+
+<!-- C.sadl
+uri "http://sadl.org/C.sadl".
+
+Baz is a class.
+-->

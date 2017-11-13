@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.markers
 
+import com.google.common.collect.HashMultimap
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterators
 import com.google.inject.ImplementedBy
@@ -94,6 +95,11 @@ interface SadlMarkerDeserializerService {
 		 */
 		static val OBJECT_ID_SEPARATOR = "#";
 
+		/**
+		 * The unique ID of the references attached to a particular SADL marker.
+		 */
+		static val REFERENCE_NAME = "Reference";
+
 		override deserialize(Path path) {
 			val origin = '''«path.parent.fileName»/«path.fileName»''';
 			val file = path.toFile;
@@ -103,21 +109,47 @@ interface SadlMarkerDeserializerService {
 
 			val markers = ImmutableList.builder;
 			Jsoup.parse(file, StandardCharsets.UTF_8.name).getElementsByTag(MARKER_NAME).forEach [
+
+				// Marker level attributes.
 				val message = attributes.get(MESSAGE_TEXT_NAME);
 				val severity = attributes.get(MARKER_TYPE_NAME).severityByName;
+				
+				// Zero to many references.
+				val references = HashMultimap.create;
+				getElementsByTag(REFERENCE_NAME).forEach[
+					val objectId = attr("objectID");
+					val refId = attr("referencedID");
+					val type = attr("referenceType").referencedTypeByName;
+					if (!objectId.nullOrEmpty && !refId.nullOrEmpty && type !== null) {
+						references.put(objectId, new SadlMarkerRef(refId, type));
+					}
+				];
+				
+				// Object IDs.
 				getElementsByTag(OBJECT_ID_NAME).forEach [
 					val fqn = text;
 					if (!fqn.nullOrEmpty) {
+						val refs = references.get(fqn).toList;
 						val segments = fqn.split(OBJECT_ID_SEPARATOR);
 						switch (segments.length) {
-							case 1: markers.add(new SadlMarker(null, message, segments.head, severity))
-							case 2: markers.add(new SadlMarker(segments.head, message, segments.last, severity))
+							case 1: markers.add(new SadlMarker(null, message, segments.head, severity, refs))
+							case 2: markers.add(new SadlMarker(segments.head, message, segments.last, severity, refs))
 							default: throw new IllegalArgumentException('''Unexpected FQN: «fqn»''')
 						}
 					}
 				];
+
 			];
+
 			return new SadlMarkerInfos(origin, markers.build);
+		}
+
+		/**
+		 * Gets the SADL marker reference type enumeration by its name.
+		 * This method is case insensitive.
+		 */
+		private def getReferencedTypeByName(String name) {
+			return SadlMarkerConstants.GET_TYPE_REF_BY_NAME.apply(name);
 		}
 
 	}

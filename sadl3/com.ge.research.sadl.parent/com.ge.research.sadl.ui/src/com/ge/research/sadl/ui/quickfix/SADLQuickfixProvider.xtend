@@ -18,6 +18,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.quickfix
 
+import com.ge.research.sadl.markers.SadlMarkerConstants
 import com.ge.research.sadl.resource.UserDataHelper
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription
@@ -36,6 +37,8 @@ import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.validation.Issue
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import static com.ge.research.sadl.markers.SadlMarkerConstants.*
+import com.ge.research.sadl.markers.SadlMarkerRefType
 
 /**
  * Custom quickfixes.
@@ -123,15 +126,32 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 		]);	
 		
 	}
-
-	def SadlModel getSadlModel(EObject object) {
-		if (object === null) {
-			return null
+	
+	@Fix(SadlMarkerConstants.SADL_REFS)
+	def showSadlMarkerRefs(Issue it, IssueResolutionAcceptor acceptor) {
+		if (data !== null) {
+			data.forEach [ dataEntry |
+				val segments = dataEntry.split(SADL_REFS_SEPARATOR);
+				val type = GET_TYPE_REF_BY_NAME.apply(segments.head);
+				// The rest might contain colons (we have a URL), so we need to join them together.
+				val refId = segments.drop(1).join(SADL_REFS_SEPARATOR);
+				if (!refId.nullOrEmpty) {
+					val label = type.getLabel(refId);
+					acceptor.accept(it, label, "Open references", null /* image */ ) [element, context |
+						
+					];
+				}
+			];
 		}
-		val cont = object.eContainer
-		if (cont instanceof SadlModel) {
-			return cont as SadlModel
-		}
-		return getSadlModel(cont)
 	}
+
+	def getLabel(SadlMarkerRefType type, String refId) {
+		return switch (type) {
+			case File: '''Open «refId»'''
+			case ModelElement: {
+				'''Jump to «refId»'''
+			}
+		}
+	}
+
 }
