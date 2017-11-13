@@ -25,7 +25,6 @@ import com.ge.research.sadl.markers.SadlMarkerLocationProvider
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
 import com.ge.research.sadl.reasoner.utils.SadlUtils
-import com.google.common.base.Suppliers
 import com.google.inject.Inject
 import java.io.File
 import java.nio.file.Paths
@@ -77,19 +76,18 @@ class SadlMarkerStartup implements IStartup {
 					val project = resource.project;
 					if (project.accessible) {
 						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
-						val translator = Suppliers.memoize([getConfigurationManager(project).translator]);
 						markerInfos.map[if (isModelUriSet) {
 							// If the model URI is set, then it returns with the identical instance.
 							it 
 						} else {
 							// Otherwise let's create a new copy of the original marker with the model URI from the translator.
 							//AATIM-2050 Get rid of the translator dependency and truncate the fully qualified URI to given from RAE to short name
-							var nodeName = astNodeName
-							if(nodeName === null || !nodeName.contains("/")){
-								SadlMarker.copyWithModelUri(it, null);
-							}else{
-								SadlMarker.copyWithModelUri(it, astNodeName.substring(0, (astNodeName.lastIndexOf("/"))));
-							}						
+							val newModelUri = if (astNodeName === null || !astNodeName.contains('/')) {
+								null
+							} else {
+								astNodeName.substring(0, (astNodeName.lastIndexOf("/")))								
+							}
+							SadlMarker.copyWithModelUri(it, newModelUri);
 						}].groupBy[modelUri].forEach [ modelUri, entries |
 							val resourceUri = modelUri.getResourceUri(project);
 							if (resourceUri !== null) {
