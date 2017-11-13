@@ -51,6 +51,7 @@ import org.eclipse.xtext.validation.Issue
 import static com.ge.research.sadl.jena.UtilsForJena.*
 import static com.ge.research.sadl.markers.SadlMarkerConstants.*
 import static com.ge.research.sadl.reasoner.IConfigurationManager.*
+import org.eclipse.core.runtime.IPath
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -118,34 +119,35 @@ class SadlMarkerStartup implements IStartup {
 			}
 		]);
 	}
-	
+
 	protected def mapModelUri(SadlMarker it) {
 		// If the model URI is set, then it returns with the identical instance.
 		if (modelUriSet) {
 			return it;
 		}
 		// AATIM-2050 Get rid of the translator dependency and truncate the fully qualified URI to given from RAE to short name
-		val newModelUri = if (astNodeName === null || !astNodeName.contains('/')) {
+		val newModelUri = if (astNodeName === null || !astNodeName.contains("/")) {
 				null;
 			} else {
 				astNodeName.substring(0, (astNodeName.lastIndexOf("/")));
 			};
 		return SadlMarker.copyWithModelUri(it, newModelUri);
 	}
-	
+
 	protected def mapRefs(SadlMarker it, IProject project) {
 		val itr = references.iterator;
 		while (itr.hasNext) {
 			val ref = itr.next;
 			if (!ref.resolved) {
 				if (ref.type === SadlMarkerRefType.File) {
-					val projectLocation = Paths.get(project.locationURI);
-					val refLocation = Paths.get(project.getFile(ref.referencedId).locationURI);
-					resolveRef(ref, projectLocation.relativize(refLocation).toString);
+					val projectPath = Paths.get(project.locationURI);
+					val refPath = Paths.get(project.getFile(ref.referencedId).locationURI);
+					val projectRelativePath = '''«project.name»«IPath.SEPARATOR»«projectPath.relativize(refPath)»''';
+					resolveRef(ref, projectRelativePath);
 				} else if (ref.type === SadlMarkerRefType.ModelElement) {
 					val uri = ref.referencedId.getResourceUri(project);
 					if (uri === null) {
-						println('TODO: resolve the model element in the other resource.');						
+						println('TODO: resolve the model element in the other resource.');
 					}
 					resolveRef(ref, ref.referencedId);
 				} else {
@@ -165,7 +167,7 @@ class SadlMarkerStartup implements IStartup {
 		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, RDF_XML_FORMAT);
 	}
 
- 	private def getResourceUri(String modelUri, IProject project) {
+	private def getResourceUri(String modelUri, IProject project) {
 		val configurationManager = project.configurationManager;
 		val owlFilePath = configurationManager.mappings.get(modelUri);
 		if (owlFilePath === null) {
@@ -200,17 +202,15 @@ class SadlMarkerStartup implements IStartup {
 	private def deleteExistingMarkersWithOrigin(IProject project, String origin) {
 		val markersToDelete = <IMarker>newArrayList();
 		project.accept([
-			markersToDelete +=
-				findMarkers(SADL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE).filter [
-					origin == getAttribute(ORIGIN_KEY);
-				]
+			markersToDelete += findMarkers(SADL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE).filter [
+				origin == getAttribute(ORIGIN_KEY);
+			]
 		], IResource.DEPTH_INFINITE, false);
 		markersToDelete.forEach[delete];
 	}
 
 	private def void createMarker(IResource resource, SadlMarker marker, Location location, String origin) {
-		resource.createMarker(SADL_PROBLEM_MARKER).setAttributes(resource, marker, location,
-			origin);
+		resource.createMarker(SADL_PROBLEM_MARKER).setAttributes(resource, marker, location, origin);
 	}
 
 	private def setAttributes(IMarker it, IResource resource, SadlMarker marker, Location location, String origin) {
@@ -220,7 +220,8 @@ class SadlMarkerStartup implements IStartup {
 		if (!marker.references.nullOrEmpty) {
 			// That has to be attached to the marker to have the quick fixes enabled.
 			setAttribute(Issue.CODE_KEY, SADL_REFS);
-			val refs = Iterables.toArray(marker.references.map['''«type»«SADL_REFS_SEPARATOR»«referencedId»'''], String);
+			val refs = Iterables.toArray(marker.references.map['''«type»«SADL_REFS_SEPARATOR»«referencedId»'''],
+				String);
 			setAttribute(Issue.DATA_KEY, Strings.pack(refs));
 		}
 		return setLocation(location);

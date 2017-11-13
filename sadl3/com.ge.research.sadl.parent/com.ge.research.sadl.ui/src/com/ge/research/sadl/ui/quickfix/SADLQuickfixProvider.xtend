@@ -1,4 +1,3 @@
-
 /************************************************************************
  * Copyright 2007-2016 - General Electric Company, All Rights Reserved
  *
@@ -19,15 +18,23 @@
 package com.ge.research.sadl.ui.quickfix
 
 import com.ge.research.sadl.markers.SadlMarkerConstants
+import com.ge.research.sadl.markers.SadlMarkerRefType
 import com.ge.research.sadl.resource.UserDataHelper
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription
 import com.ge.research.sadl.validation.SADLValidator
 import com.google.inject.Inject
+import org.eclipse.core.resources.ResourcesPlugin
+import org.eclipse.core.runtime.Path
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.jface.dialogs.MessageDialog
+import org.eclipse.swt.widgets.Display
+import org.eclipse.ui.PlatformUI
+import org.eclipse.ui.ide.IDE
 import org.eclipse.xtext.EOF
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.scoping.IGlobalScopeProvider
+import org.eclipse.xtext.ui.editor.model.edit.IModification
 import org.eclipse.xtext.ui.editor.model.edit.IModificationContext
 import org.eclipse.xtext.ui.editor.model.edit.IssueModificationContext
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
@@ -36,14 +43,11 @@ import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.validation.Issue
 
-import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 import static com.ge.research.sadl.markers.SadlMarkerConstants.*
-import com.ge.research.sadl.markers.SadlMarkerRefType
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
- * Custom quickfixes.
- *
- * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#quick-fixes
+ * Quick fix provider for SADL.
  */
 class SADLQuickfixProvider extends DefaultQuickfixProvider {
 
@@ -137,9 +141,7 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 				val refId = segments.drop(1).join(SADL_REFS_SEPARATOR);
 				if (!refId.nullOrEmpty) {
 					val label = type.getLabel(refId);
-					acceptor.accept(it, label, "Open references", null /* image */ ) [element, context |
-						
-					];
+					acceptor.accept(it, label, "Open references", null /* image */ , type.getModification(refId));
 				}
 			];
 		}
@@ -152,6 +154,33 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 				'''Jump to «refId»'''
 			}
 		}
+	}
+	
+	def IModification getModification(SadlMarkerRefType type, String refId) {
+		return switch (type) {
+			case File: {
+				[
+					val path = new Path(refId);
+					val file = ResourcesPlugin.workspace.root.getFile(path);
+					if (file.accessible) {
+						val page = PlatformUI.workbench.activeWorkbenchWindow.activePage;
+						IDE.openEditor(page, file, true);
+					} else {
+						val shell = activeShell;
+						val title = "File does not exist";
+						val message = '''File does not exist at «path».''';
+						MessageDialog.openError(shell, title, message);
+					}
+				];
+			}
+			case ModelElement: {
+			}
+		}
+	}
+	
+	def getActiveShell() {
+		val display = if(Display.current === null) Display.^default else Display.current;
+		return display.activeShell;
 	}
 
 }
