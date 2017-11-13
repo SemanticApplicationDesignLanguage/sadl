@@ -466,12 +466,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 			sbmain.append("distinct ");
 		}
 		
-		List<String> vars = query.getVariables();
+		List<VariableNode> vars = query.getVariables();
 		List<GraphPatternElement> elements = query.getPatterns();
 		if (vars != null && vars.size() > 0) {
 			for (int i = 0; i < vars.size(); i++) {
 				if (i > 0) sbmain.append(" ");
-				sbmain.append("?" + vars.get(i));
+				sbmain.append("?" + vars.get(i).getName());
 			}
 		}
 		else {
@@ -1176,7 +1176,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 	private String nodeToString(Node node, TranslationTarget target) throws TranslationException {
 		if (node instanceof NamedNode) {
 			NodeType ntype = ((NamedNode)node).getNodeType();
-			if (ntype.equals(NodeType.VariableNode)) {
+			if (ntype == null) {
+				String msg = "Node '" + node.toFullyQualifiedString() + "' has a null node type.";
+				addError(msg);
+				logger.error(msg);
+			}
+			else if (ntype.equals(NodeType.VariableNode)) {
 				// double-check this; if a concept was declared after reference in a rule or query 
 				//	it may have been parsed as a variable but actually be a defined concept 
 				OntResource r = getTheModel().getOntResource(getModelName() + "#" + ((NamedNode)node).getName());
@@ -1250,6 +1255,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 		if (node.getName().equals("PI")) {
 			Literal lit = new Literal();
 			lit.setValue(Math.PI);
+			lit.setOriginalText(node.getName());
+			return lit;
+		}
+		else if (node.getName().equals("e")) {
+			Literal lit = new Literal();
+			lit.setValue(Math.E);
 			lit.setOriginalText(node.getName());
 			return lit;
 		}

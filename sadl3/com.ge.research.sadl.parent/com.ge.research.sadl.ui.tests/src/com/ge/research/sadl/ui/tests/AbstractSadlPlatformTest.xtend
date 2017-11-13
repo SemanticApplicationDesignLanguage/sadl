@@ -16,10 +16,16 @@
  */
 package com.ge.research.sadl.ui.tests
 
+import com.ge.research.sadl.jena.IJenaBasedModelProcessor
+import com.ge.research.sadl.model.gp.Rule
+import com.ge.research.sadl.model.gp.SadlCommand
+import com.ge.research.sadl.tests.SadlTestAssertions
 import com.ge.research.sadl.ui.OutputStreamStrategy
 import com.google.common.collect.Lists
 import com.google.inject.Inject
+import com.hp.hpl.jena.ontology.OntModel
 import java.util.Arrays
+import java.util.List
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.NullProgressMonitor
@@ -41,16 +47,18 @@ import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
+import org.eclipse.xtext.validation.Issue
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
-import org.junit.Rule
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
 
 import static org.eclipse.core.runtime.IPath.SEPARATOR
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import com.google.common.collect.Iterables
+import org.eclipse.xtext.diagnostics.Severity
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -64,7 +72,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	val modifiedPreferences = <String>newHashSet();
 
-	@Rule
+	@org.junit.Rule
 	public TestName testName = new TestName;
 
 	@Inject
@@ -259,6 +267,15 @@ abstract class AbstractSadlPlatformTest extends Assert {
 			return emptyList;
 		}
 	}
+	
+	/**
+	 * Validates the resource, asserts the issues.
+	 */
+	protected def Resource assertValidatesTo(Resource resource,
+		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
+
+		return SadlTestAssertions.assertValidatesTo(resource as XtextResource, assertions);
+	}
 
 	/**
 	 * Returns with the cancel indicator.
@@ -273,4 +290,22 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	protected def getProjectName() {
 		return '''«class.simpleName»_«testName.methodName»''';
 	}
+
+	/**
+	 * Asserts no validation issues.
+	 */
+	static def void assertHasNoIssues(Iterable<? extends Issue> issues) {
+		doAssertHasIssues(issues, [true], 0);
+	}
+
+	private static def void doAssertHasIssues(Iterable<? extends Issue> issues, (Severity)=>boolean severityPredicate,
+		int expectedCount) {
+		val actualIssues = issues.filter[severityPredicate.apply(severity)];
+		Assert.assertEquals(
+			'''Expected «expectedCount» issues. Got «actualIssues.size» instead. [«Iterables.toString(actualIssues)»]''',
+			expectedCount,
+			actualIssues.size
+		);
+	}
+
 }

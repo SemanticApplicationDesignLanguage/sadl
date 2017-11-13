@@ -44,9 +44,9 @@ public class TripleElement extends GraphPatternElement {
 	
 	public void setSubject(Node subject) {
 		this.subject = subject;
-		if (subject instanceof VariableNode) {
-			((VariableNode)subject).incrementReferences();
-		}
+//		if (subject instanceof VariableNode) {
+//			((VariableNode)subject).incrementReferences();
+//		}
 	}
 	public Node getSubject() {
 		return subject;

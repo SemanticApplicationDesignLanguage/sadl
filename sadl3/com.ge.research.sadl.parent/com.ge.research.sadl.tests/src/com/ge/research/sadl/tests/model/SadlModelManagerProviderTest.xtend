@@ -17,14 +17,13 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.model
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
+import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.reasoner.ConfigurationManager
-import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.tests.SADLNoopModelProcessorsInjectorProvider
-import com.google.inject.Inject
-import com.google.inject.Provider
+import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
+import com.ge.research.sadl.tests.SADLInjectorProvider
+import com.hp.hpl.jena.ontology.OntClass
 import com.hp.hpl.jena.ontology.OntModel
 import com.hp.hpl.jena.ontology.Ontology
 import com.hp.hpl.jena.query.QueryExecutionFactory
@@ -37,11 +36,8 @@ import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.testing.util.ParseHelper
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
@@ -50,30 +46,22 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.processing.SadlConstants
-import com.hp.hpl.jena.ontology.OntClass
-import com.hp.hpl.jena.ontology.OntResource
 
 @RunWith(XtextRunner)
-@InjectWith(SADLNoopModelProcessorsInjectorProvider)
-class SadlModelManagerProviderTest {
-	
-	@Inject ParseHelper<SadlModel> parser
-	@Inject ValidationTestHelper validationTestHelper
-	@Inject Provider<JenaBasedSadlModelProcessor> processorProvider
-	@Inject IPreferenceValuesProvider preferenceProvider
+@InjectWith(SADLInjectorProvider)
+class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 	
 /* Tests that should generate validation errors */	
 	@Test def void testDuplicateUris() {
-		val model = '''
+		'''
 			uri "http://sadl.org.Tests/ModelName" alias foo.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 		]
-		assertValidatesTo(model.resourceSet, '''
+		'''
 			uri "http://sadl.org.Tests/ModelName" alias foo2.
-		''') [ jenaModel2, issues2 |
+		'''.assertValidatesTo[jenaModel2, rules2, cmds2, issues2, processor2 |
 			assertNotNull(jenaModel2)
 			assertTrue(issues2.size == 1)
 			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:This URI is already used in"))
@@ -82,15 +70,15 @@ class SadlModelManagerProviderTest {
 	}
 	
 	@Test def void testDuplicateAliases() {
-		val model = '''
+		'''
 			uri "http://sadl.org.Tests/ModelName1" alias foo.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 		]
-		assertValidatesTo(model.resourceSet, '''
+		 '''
 			uri "http://sadl.org.Tests/ModelName2" alias foo.
-		''') [ jenaModel2, issues2 |
+		'''.assertValidatesTo[jenaModel2, rules2, cmds2, issues2, processor2 |
 			assertNotNull(jenaModel2)
 			assertTrue(issues2.size == 1)
 			assertTrue(issues2.toString(), issues2.get(0).toString().contains("ERROR:The alias 'foo' is already used in "))
@@ -102,7 +90,7 @@ class SadlModelManagerProviderTest {
 	@Test def void modelNameCase() {
 		'''
 			uri "http://sadl.org/model1" alias m1.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -114,7 +102,7 @@ class SadlModelManagerProviderTest {
 	@Test def void modelNameCase2() {
 		'''
 			uri "http://sadl.org/Tests/ModelName" alias mn version "1" (alias "This is an rdfs:label") (note "Note about the Model").		
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -134,16 +122,15 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
-// TODO How should this self-import be tested? This doesn't work because the SADLValidator doesn't get the URI for the import	
-// Also, should this check for import loops that have a larger number of participants?
-	@Ignore	
 	@Test def void testImportSelfError() {
 		'''
 			uri "http://sadl.org/Tests/Import" alias imp.
-			import "http://sadl.org.Tests/ModelName".
-		'''.assertValidatesTo[jenaModel, issues |
-			assertTrue(issues.size == 1)
-			assertTrue(issues.get(0).toString().contains("cannot import self"))
+			import "http://sadl.org/Tests/Import".
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			assertTrue(issues.size == 2)
+			assertTrue(issues.get(0).toString().contains("cannot import itself") ||
+				issues.get(1).toString().contains("cannot import itself")
+			)
 		]
 	}
 	
@@ -151,7 +138,7 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Foo is a class.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -171,7 +158,7 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Season is a class, must be one of {Spring, Summer, Fall, Winter}.
-		'''.assertValidatesTo[jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
 			var itr = jenaModel.listIndividuals().toIterable().iterator
@@ -196,7 +183,7 @@ class SadlModelManagerProviderTest {
 			
 			aqn:MyShape is a aqn:Shape with aqn:area 23 .
 			
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.join(',')[message], issues.size == 0)
@@ -216,7 +203,7 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			Shape is a class described by area with values of type int.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -311,7 +298,7 @@ class SadlModelManagerProviderTest {
 				described by p47 with values of type double,
 				described by p48 with values of type long,
 				described by p49 with values of type boolean.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -341,7 +328,7 @@ class SadlModelManagerProviderTest {
 			uri "http://sadl.org/model1" alias m1.
 			Food is a class.
 			Pizza is a type of Food.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -367,7 +354,7 @@ class SadlModelManagerProviderTest {
 			Food is a class.
 			Drink is a class.
 			Refreshment is a type of {Food or Drink}.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.toString, issues.empty)
@@ -404,7 +391,7 @@ class SadlModelManagerProviderTest {
 			uri "http://sadl.org/model1" alias m1.
 			Person is a class described by child with values of type Person.
 			Parent is a type of {Person and (child has at least 1 value)}.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -444,7 +431,7 @@ class SadlModelManagerProviderTest {
 			Liquid is a class.
 			Consumable is a class.
 			PotableLiquid is a type of {Liquid and Consumable}.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -491,7 +478,7 @@ class SadlModelManagerProviderTest {
 			Clothing is a class described by size with values of type clothingsize.
 			Person is a class described by ssn with values of type SSN.
 			Artifact is a class described by cira with values of type year.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -511,14 +498,13 @@ class SadlModelManagerProviderTest {
 		]
 	}
 	
-//	@Ignore
 	@Test def void myUserDefinedDatatypeUseCase1() {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
 			Airport_Ident is a type of string length 1-4 .
 			Airport is a class, described by ident with values of type Airport_Ident.
 			ALB is an Airport with ident "toolong".
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -540,7 +526,7 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen version "$Revision: 1.1 $ Last modified on   $Date: 2015/02/02 22:11:13 $". 
 			AnyThingGoes is a type of {string or decimal or int or date or time}.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -568,7 +554,7 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			prop is a property.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -589,7 +575,7 @@ class SadlModelManagerProviderTest {
 			objprop is a property with values of type class.
 			dtpropwithlistrng is a property with values of type float List.
 			objpropwithlistrng is a property with values of type Person List.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -617,7 +603,7 @@ class SadlModelManagerProviderTest {
 			prop1 is a property with values of type class.
 			prop2 is a property with values of type class.
 			prop2 is the inverse of prop1.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -630,7 +616,7 @@ class SadlModelManagerProviderTest {
 			Thingy is a class.
 			multiValuedListProperty1 describes Thingy with values of type Thingy List.
 			multiValuedListProperty2 describes Thingy with values of type float List.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			jenaModel.write(System.out,"N-TRIPLE")
@@ -666,7 +652,7 @@ class SadlModelManagerProviderTest {
 			uri "http://sadl.org/model1" alias m1.
 			prop1 is a property with values of type class.
 			prop2 is a type of prop1.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -693,7 +679,7 @@ class SadlModelManagerProviderTest {
 			Drink is a class.
 			Poison is a class.
 			Food and Drink and Poison are disjoint.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -713,7 +699,7 @@ class SadlModelManagerProviderTest {
 			Drink is a class.
 			Poison is a class.
 			{Food, Drink, Poison} are disjoint.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -731,7 +717,7 @@ class SadlModelManagerProviderTest {
 			uri "http://sadl.org/model1" alias m1.
 			Rich is a class.
 			Poor is the same as not Rich.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -757,7 +743,7 @@ class SadlModelManagerProviderTest {
 			Bill is a Person.
 			William is a Person.
 			Bill is the same as William.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -784,7 +770,7 @@ class SadlModelManagerProviderTest {
 			Bill is a Person.
 			Hillary is a Person.
 			Bill is not the same as Hillary.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -816,7 +802,7 @@ class SadlModelManagerProviderTest {
 			Hillary is a Person.
 			Chelsea is a Person.
 			{Bill, Hillary, Chelsea} are not the same.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.filter[severity.name != "WARNING" ].size == 0)
@@ -859,7 +845,7 @@ class SadlModelManagerProviderTest {
 		//	described by owns with values of type {Computer and (manufacturer always has value Apple)}.
 		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
 		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -890,7 +876,7 @@ class SadlModelManagerProviderTest {
 		//	described by owns with values of type {Computer and (manufacturer always has value Apple)}.
 		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
 		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -937,7 +923,7 @@ class SadlModelManagerProviderTest {
 		//	described by owns with values of type {Computer and (manufacturer always has value Apple)}.		
 		A Computer is an AppleComputer only if manufacturer always has value Apple.		// necessary and sufficient conditions
 		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -975,7 +961,7 @@ class SadlModelManagerProviderTest {
 		Computer is a type of Artifact described by manufacturer with values of type Manufacturer.
 		AppleComputer is a type of Computer.
 		manufacturer of AppleComputer always has value Apple.							// hasValue restriction only		
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -1010,7 +996,7 @@ class SadlModelManagerProviderTest {
 			MyClass2 is a class.
 			myProp describes MyClass1 with values of type MyClass2 List.
 			myProp of MyClass1 has at most 10 values. 		
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -1036,7 +1022,7 @@ class SadlModelManagerProviderTest {
 			MyClass2 is a class described by yourProp.
 			myProp describes MyClass1 with values of type MyClass2 List.
 			myProp of MyClass1 has at most 10 values. 		
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -1060,7 +1046,7 @@ class SadlModelManagerProviderTest {
 			uri "http://sadl.org/model1" alias m1.
 			Foo is a class.
 			MyFoo is a Foo.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -1080,7 +1066,7 @@ class SadlModelManagerProviderTest {
 		'''
 			uri "http://sadl.org/model1" alias m1.
 			annprop is a type of annotation.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -1119,7 +1105,7 @@ class SadlModelManagerProviderTest {
 			Box2 is a Box,
 				with lower-left (a Point with x 0, with y 10),
 				with upper-right (a Point with x 5, with y 12).
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
@@ -1165,7 +1151,7 @@ class SadlModelManagerProviderTest {
 			
 			Rule AllThingysConnect: if x is a Thingy and y is a Thingy and x != y then x has connectedTo y .
 			Rule AllThingysAreBlue: if x is a Thingy then color of x is "blue".
-		'''.assertValidatesTo[ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			
 		]
 	}
@@ -1179,8 +1165,34 @@ class SadlModelManagerProviderTest {
 				described by age with a single value of type int.
 			
 			Equation dateSubtractYears(dateTime x, dateTime y) returns float: x - y.		
-		'''.assertValidatesTo[ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			for (issue:issues) {
+				println(issue.message)
+			}
+			val eqs =processor.equations
+			assertEquals(1, eqs.size)
+			for(eq:eqs) {
+				processor.compareTranslations("float dateSubtractYears(dateTime x,dateTime y): -(x,y)",eq.toString)
+			}
+		]
+	}
+
+	@Test def void EquationTest2() {
+			'''
+			uri "http://com.ge.research.sadl/equations". 
 			
+			Equation PI_Controller(decimal K1, decimal K2, decimal Error) returns decimal:
+			K1*Error + K2*Error^3/abs(Error).		
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			for (issue:issues) {
+				println(issue.message)
+			}
+			val eqs =processor.equations
+			assertEquals(1, eqs.size)
+			for(eq:eqs) {
+				processor.compareTranslations("decimal PI_Controller(decimal K1,decimal K2,decimal Error): +((*(K1,Error)),(/((*(K2,(^(Error,3)))),(builtinfunctions:abs(Error)))))",eq.toString)
+//				println(eq.toString)
+			}
 		]
 	}
 
@@ -1195,7 +1207,7 @@ class SadlModelManagerProviderTest {
 				described by lengthRestriction with values of type int,
 				described by minLengthRestriction with values of type int,
 				described by maxLengthRestriction with values of type int. 
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			jenaModel.write(System.out, "TURTLE")
@@ -1212,7 +1224,7 @@ class SadlModelManagerProviderTest {
 			
 			MyChildren is the PersonList [Peter, Eileen, Janet, Sharon, Spencer, Lana].
 			SpousesChildren is the Person List [Peter, Eileen, Janet, Sharon, Spencer, Lana].
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			jenaModel.write(System.out, "TURTLE")
@@ -1229,7 +1241,7 @@ class SadlModelManagerProviderTest {
 			
 			MyGrades is the Grades [87, 43, 98, 100].
 			YourGrades is the int List [87, 43, 98, 100].
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			jenaModel.write(System.out, "TURTLE")
@@ -1244,7 +1256,7 @@ class SadlModelManagerProviderTest {
 			
 			ITEM is a class.
 			MarkerListType is a type of ITEM List length 0-100.
-		'''.assertValidatesTo [ jenaModel, issues |
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
 			jenaModel.write(System.out, "TURTLE")
@@ -1252,14 +1264,13 @@ class SadlModelManagerProviderTest {
 		]
 	}
 
-	@Ignore
 	@Test
 	def void testEquationScope() {
 		'''
 			 uri "http://sadl.org/eq.sadl" alias eq.
 			 External sum(decimal X, decimal X) returns decimal:
 			 "http://sadl.org/builtinfunctions#sum".
-		'''.assertValidatesTo [ jenaModel1, issues1 |
+		'''.assertValidatesTo[jenaModel1, rules1, cmds1, issues1, processor1 |
 			assertNotNull(jenaModel1)
 			assertTrue(issues1.size == 0)
 		]
@@ -1267,13 +1278,12 @@ class SadlModelManagerProviderTest {
 			 uri "http://sadl.org/prop.sadl" alias prop.
 			 import "http://sadl.org/eq.sadl".
 			 Class1 is a class described by X with values of type float.
-		'''.assertValidatesTo [ jenaModel2, issues2 |
+		'''.assertValidatesTo[jenaModel2, rules2, cmds2, issues2, processor2 |
 		assertNotNull(jenaModel2)
 		assertTrue(issues2.size == 0)		// shouldn't be an error
 		]
 	}
 
-	@Ignore
 	@Test
 	def void testEquationScope2() {
 		'''
@@ -1285,8 +1295,8 @@ class SadlModelManagerProviderTest {
 				described by peremiter with values of type float.
 			Rectangle is a type of Shape described by height with values of type float,
 				described by width with values of type float.
-			Rule RectPeremiter if x is a Rectangle then peremiter of x is 2*sum(height of x, width of x).
-		'''.assertValidatesTo [ jenaModel1, issues1 |
+			Rule RectPeremiter if x is a Rectangle then peremiter of x is 2*eq:sum(height of x, width of x). // without eq: prefix would use reasoner builtin and fail
+		'''.assertValidatesTo[jenaModel1, rules1, cmds1, issues1, processor1 |
 			assertNotNull(jenaModel1)
 			assertTrue(issues1.size == 0)
 		]
@@ -1295,7 +1305,7 @@ class SadlModelManagerProviderTest {
 			  import "http://sadl.org/eq.sadl".
 			  Circle is a type of Shape described by radius with values of type float.
 			  Rule CircleArea if x is a Circle then area of x is circleArea(radius of x).
-		'''.assertValidatesTo [ jenaModel2, issues2 |
+		'''.assertValidatesTo[jenaModel2, rules2, cmds2, issues2, processor2 |
 		assertNotNull(jenaModel2)
 		assertTrue(issues2.size == 0)		// shouldn't be an error
 		]
@@ -1304,7 +1314,7 @@ class SadlModelManagerProviderTest {
 //	@Test def void my<younameit>Case() {
 //		'''
 //			// model goes here
-//		'''.assertValidatesTo [ jenaModel, issues |
+//		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 //			// expectations go here
 //			assertNotNull(jenaModel)
 //			assertTrue(issues.size == 0)
@@ -1351,23 +1361,23 @@ class SadlModelManagerProviderTest {
     	return false
 	}
 	
-	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		val model = parser.parse(code)
-		validationTestHelper.assertNoErrors(model)
-		val processor = processorProvider.get
-		val List<Issue> issues= newArrayList
-		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
-		assertions.apply(processor.theJenaModel, issues)
-		return model.eResource
-	}
-
-	protected def Resource assertValidatesTo(ResourceSet resourceSet, CharSequence code, (OntModel, List<Issue>)=>void assertions) {
-		val model = parser.parse(code, resourceSet);
-		val xtextIssues = validationTestHelper.validate(model);
-		val processor = processorProvider.get
-		val List<Issue> issues= new ArrayList(xtextIssues);
-		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
-		assertions.apply(processor.theJenaModel, issues)
-		return model.eResource
-	}
+//	protected def Resource assertValidatesTo(CharSequence code, (OntModel, List<Issue>)=>void assertions) {
+//		val model = parser.parse(code)
+//		validationTestHelper.assertNoErrors(model)
+//		val processor = processorProvider.get
+//		val List<Issue> issues= newArrayList
+//		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+//		assertions.apply(processor.theJenaModel, issues)
+//		return model.eResource
+//	}
+//
+//	protected def Resource assertValidatesTo(ResourceSet resourceSet, CharSequence code, (OntModel, List<Issue>)=>void assertions) {
+//		val model = parser.parse(code, resourceSet);
+//		val xtextIssues = validationTestHelper.validate(model);
+//		val processor = processorProvider.get
+//		val List<Issue> issues= new ArrayList(xtextIssues);
+//		processor.onValidate(model.eResource, new ValidationAcceptorImpl([issues += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(model.eResource)))
+//		assertions.apply(processor.theJenaModel, issues)
+//		return model.eResource
+//	}
 }

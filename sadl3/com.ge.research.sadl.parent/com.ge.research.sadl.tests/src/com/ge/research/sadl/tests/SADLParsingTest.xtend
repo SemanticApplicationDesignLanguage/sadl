@@ -18,6 +18,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests
 
+import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
@@ -25,12 +26,10 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlProperty
 import com.ge.research.sadl.sADL.SelectExpression
 import com.ge.research.sadl.sADL.TestStatement
+import com.google.inject.Inject
 import org.eclipse.xtext.util.EmfFormatter
 import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
-import com.google.inject.Inject
-import com.ge.research.sadl.model.DeclarationExtensions
 
 class SADLParsingTest extends AbstractSADLParsingTest {
 
@@ -114,6 +113,36 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			Test: MyPets is a Pet List.
 		'''.assertNoErrors
 	}
+	
+	@Test
+	def void testListTypes_04() {
+		'''
+			 uri  "http://sadl.org/Test.sadl" alias Test.
+			 
+			 Person is a class described by age with values of type int.
+			 ChildrenList is a type of Person List length 1-*.
+			 children describes Person with values of type ChildrenList.
+			 children of Person has at most 1 value.
+			 
+			 PersonList is a type of Person List.
+			 PersonListList is a type of PersonList List.
+			 
+			 foo describes Person with values of type PersonListList.
+			 bar describes Person with values of type Person List length 1-4.
+			 bar of Person only has values of type Person List.
+			 bar of Person only has values of type Person List length 1-4.
+			 bar of Person has at least one value of type Person List length 1-4.
+			 bar of Person has at least 1 value of type Person List length 1-4.
+			 bar of Person has at most 2 value of type Person List length 1-4.
+			 
+			 
+			 Rule R1: if x is a Person and
+			 		x has bar y and 
+			 		y is a Person List //length 1-4
+			 		z is a Person List length 1-4
+			 then print("Hurray!"). //x has age 50.
+		'''.assertNoErrors
+	}
 
 	@Test 
 	def void testPropertyTypeOnly() {
@@ -138,7 +167,6 @@ class SADLParsingTest extends AbstractSADLParsingTest {
  		'''.assertNoErrors
 	}
 	
-	@Ignore
 	@Test
 	def void testSubjectHasPropSomeMore() {
 		'''
@@ -166,7 +194,151 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 Rule R1 if x is a Person and x has teaches y then x has acquaintance y.	// this works
 			 
 			 Rule R2 if x is a Person and x teaches y then x knows y.	// this doesn't but is desired
+
+			 Rule R3 if x is a Person and x teaches y then x knows y.
+			 
+			 Rule R4: if a Person knows a second Person then the second Person knows the first Person.
+			 Rule R4b: if a Person has knows a second Person then the second Person has knows the first Person.
+			 Rule R4c: if x knows y then y knows x.
+			 
+			 Rule R5: if x is a Person and knows of x is y then knows of y is x.
 		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testGrammarCoverage() {
+		'''
+			 uri "http://sadl.org/GrammarCoverage.sadl" alias GrammarCoverage.
+			 
+			 Person is a class described by age with values of type int, described by friend with values of type Person.
+			 weight describes Person with values of type float.
+			 child describes Person with values of type Person.
+			 son is a type of child.
+			 
+			 Gender is a class, must be one of {Male, Female}.
+			 gender describes Person with values of type Gender.
+			 son of Person only has values of type Male.
+			 
+			 Pet is a class.
+			 The relationship of Person to Pet is owns.
+			 
+			 {Professor, Teacher, Student, Pupil} are types of Person.
+			 relationship of {Professor or Teacher} to {Student or Pupil} is teaches.
+			 
+			 Woman is a type of Person.
+			 
+			 gender of Woman always has value Female.
+			 
+			 Woman is the same as {Person and (gender always has value Female)}.	// this 'has' is part of 'always has value' and is not optional
+			 
+			 Plato is a Student.
+			 Socrates is a Professor, has teaches Plato.  // *** this 'has' should be optional
+			 Socrates is a Professor, teaches Plato.  // *** this 'has' should be optional
+			 Socrates has teaches Plato.				  // this 'has' is already optional, as shown in next statement
+			 	Socrates teaches Plato.
+			 	
+			// A friend of Socrates is Plato.		// OK that this isn't supported, can be said more plainly as:
+			 	Plato has friend Socrates.
+			// Plato is a friend of Socrates. 		// OK that this isn't supported, can be said more plainly as:
+			 	Socrates has friend Plato.
+			// Plato is a friend of a friend of Socrates.	// as a graph pattern (see below), this is OK but as a declarative statement it is ambiguous
+			// The age of a friend of Socrates is 23.	// as a graph bappern (see below), this is OK but as a declarative statement it is ambiguous
+			 
+			 Expr: a friend of a friend of Plato.
+			 Expr: the age of a friend of Plato.
+			 Expr: the age of a friend of Plato is 23.
+			 
+			 Sue is a Professor with friend (a Person with teaches Plato).		// 'with' here is optional, although in English we would say 'who'
+			 	Sue is a Professor, friend (a Person teaches Plato).
+			 
+			 Rule R1: if x is a friend of a friend of Plato then Plato has friend x.	// *** 'has' should be optional
+			 Rule R11: if x is a friend of a friend of Plato then Plato friend x.	// *** 'has' should be optional
+			 Rule R1a: if Plato has friend x and x has friend y then Plato has friend y.	// *** all 3 'has' words should be optional
+			 Rule R1a2: if Plato friend x and x friend y then Plato friend y.	// *** all 3 'has' words should be optional
+			 
+			 Ask: Plato has age x and x > 30 and x < 40.	// 'has' should be optional
+			 Ask: Plato age x and x > 30 and x < 40.	// 'has' should be optional
+			 Ask: x has age y and y > 30 and y < 40.		// 'has' should be optional
+			 Ask: x age y and y > 30 and y < 40.		// 'has' should be optional
+			 
+			 Test: Socrates has teaches Plato.		// 'has' should be optional
+			 Test: Socrates teaches Plato.		// 'has' should be optional
+			 Test: not Socrates has teaches Plato.	// 'has' should be optional
+			 Test: not Socrates teaches Plato.	// 'has' should be optional
+			 Test: teaches of Socrates is not Plato.
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testNegativeNumericConstants() {
+		'''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 MyFoo is a Foo with fprop PI.
+			 MyFoo4 is a Foo with fprop 3.14.
+			 
+			 MyFoo3 is a Foo with fprop -PI.	
+			 MyFoo5 is a Foo with fprop -3.14.
+
+			 MyFoo5 has fprop -e.				
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testNegatedConstantsPropOfSubject() {
+		'''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 // the following all work as PropOfSubject expressions
+			 Test: fprop of MyFoo3 is PI.
+			 Test: fprop of MyFoo3 is -PI.
+			 Test: fprop of MyFoo3 is (-PI).
+			 Test: fprop of MyFoo3 is not PI.
+			 Test: fprop of MyFoo3 is known.
+			 Test: fprop of MyFoo3 is not known.
+			 Test: fprop of MyFoo3 is e.
+			 Test: fprop of MyFoo3 is -e.
+			 Test: fprop of MyFoo3 is (-e).
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testNegatedConstantsSubjHasProp() {
+		'''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 // some of the following do not work as SubjHasPop expressions
+			 Test: MyFoo3 has fprop PI.
+			 Test: MyFoo3 has fprop -PI.
+			 Test: MyFoo3 has fprop (-PI).
+			 Test: MyFoo3 has fprop (not PI).		
+			 Test: MyFoo3 has fprop known.
+			 Test: MyFoo3 has fprop (not known).	
+			 Test: MyFoo3 has fprop e.
+			 Test: MyFoo3 has fprop -e.
+			 Test: MyFoo3 has fprop (-e).
+			 Test: MyFoo3 has fprop not e.
+			 Test: MyFoo3 has fprop (not e).		
+			 Test: MyFoo3 has fprop (not (-e)).				
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testInvalidUseOfConstants() {
+		var errs = newArrayList("mismatched input '*' expecting '.'")
+		assertErrors('''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 MyFoo2 is a Foo with fprop PI * -1 .	// this should not work--it involves a computation 
+		''', errs)
 	}
 	
 	@Test
@@ -175,6 +347,86 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		 
 		 	George has height 70 inches.
 		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testUnitsOnExpressions() {
+		'''
+			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
+			 	(note "Sorry about the two usages of alias--it's there because of lack of foresight long ago.").
+			 
+			 System is a class described by approved with values of type boolean,
+			 	described by inspection with values of type Result,
+			 	described by publicized with values of type boolean.
+			 	
+			 	past describes System with values of type UnittedQuantity.
+			
+			 Result is a class, can only be one of {Passed, Failed}.
+			 
+			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
+			 
+			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
+			 
+			 SimpleConstant is a class described by cValue with values of type decimal.
+			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 
+			 Rule R1:
+			 	if inspection of System is Passed and past of System is (constantValue of TimingConstant3)
+			 	then approved of System is true.
+			
+			 Rule R1b:
+			 	if inspection of System is Passed and past of System is constantValue of TimingConstant3
+			 	then approved of System is true
+			 	.
+			
+			Rule R1c:
+			 	if inspection of System is Passed and past of System is (cValue of TimingConstant5) seconds
+			 	then approved of System is true .
+			
+			Rule R1d:
+			 	if inspection of System is Passed and past of System is cValue of TimingConstant5 seconds
+			 	then approved of System is true .
+			
+			 Rule R1e:
+			 	if inspection of System is Passed and past of System is 2 seconds + 3 seconds
+			 	then approved of System is true.
+			
+			 Rule R1f:
+			 	if inspection of System is Passed and past of System is (2 seconds + 3 seconds)
+			 	then approved of System is true.
+			
+			 Rule R5:
+			 	if inspection of System is Passed
+			 	then approved of System is true .
+			 
+			 Rule R2:
+			 	if publicized of System is true and past of System is ((constantValue of TimingConstant3) + (3 seconds))
+			 	then inspection of System is Passed.
+			
+			 Rule R2b:
+			 	if publicized of System is true and past of System is ((constantValue of TimingConstant3) + 3 seconds)
+			 	then inspection of System is Passed.
+			
+			 Rule R2c:
+			 	if publicized of System is true and past of System is constantValue of TimingConstant3 + 3 seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R2d:
+			 	if publicized of System is true and past of System is (constantValue of TimingConstant3 + 3) seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R2e:
+			 	if publicized of System is true and past of System is (cValue of TimingConstant5 + 3) seconds
+			 	then inspection of System is Passed. 
+			 	
+			 Rule R3:
+			 	if publicized of System is true and past of System is 3 seconds
+			 	then inspection of System is Passed.
+			
+			 Rule R4:
+			 	if publicized of System is true
+			 	then inspection of System is Passed.
+ 		'''.assertNoErrors
 	}
 	
 	@Test
@@ -227,6 +479,26 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 	}
 	
 	@Test
+	def void testAskWithAndWithoutCommas() {
+		'''
+			 uri "http://sadl.org/TestGraphConstruct.sadl" alias TestGraphConstruct.
+			 
+			 Person is a class described by friend with values of type Person,
+			 	described by age with values of type int.
+			 	
+			 George is a Person with friend (a Person Meg).
+			 
+			 Ask: select s p v where s has p v order by s p v.
+			 Ask: select s,p,v where s p v order by s,p,v.
+			 Ask: construct s p v where s has p v .
+			 Ask: construct s p v where s p v .
+			 Ask: construct s,p,v where s p v.
+			 Graph: select s p v where s p v .
+			 Graph: select s, p, v where s has p v .
+		'''.assertNoErrors
+	}
+	
+	@Test
 	def void testNewlineSeparation() {
 		val model = '''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
@@ -273,13 +545,12 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore	// this grammar change was backed out because it changed precedence and broke things of the form "p1 of s1 is not p2 of s2"
 	@Test
 	def void testNegationOfObjectTriple() {
 		'''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 
 			
-			Test: x has color not Red.
+			Test: x has color (not Red).
 			Test: color of x is not Red.
 		'''.assertNoErrors
 	}

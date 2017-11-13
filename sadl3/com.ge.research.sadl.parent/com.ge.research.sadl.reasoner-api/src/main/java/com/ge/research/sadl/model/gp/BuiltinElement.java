@@ -212,9 +212,9 @@ public class BuiltinElement extends GraphPatternElement {
 			arguments = new ArrayList<Node>();
 		}
 		arguments.add(argument);
-		if (argument instanceof VariableNode) {
-			((VariableNode)argument).incrementReferences();
-		}
+//		if (argument instanceof VariableNode) {
+//			((VariableNode)argument).incrementReferences();
+//		}
 		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
 			logger.warn("Added too many arguments to {}", this);
 		}
@@ -234,9 +234,9 @@ public class BuiltinElement extends GraphPatternElement {
 				arguments.add(argument);
 			}
 		}
-		if (argument instanceof VariableNode) {
-			((VariableNode)argument).incrementReferences();
-		}
+//		if (argument instanceof VariableNode) {
+//			((VariableNode)argument).incrementReferences();
+//		}
 		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
 			logger.warn("Added too many arguments to {}", this);
 		}
@@ -265,9 +265,9 @@ public class BuiltinElement extends GraphPatternElement {
 		else {
 			arguments.add(argument);
 		}
-		if (argument instanceof VariableNode) {
-			((VariableNode)argument).incrementReferences();
-		}
+//		if (argument instanceof VariableNode) {
+//			((VariableNode)argument).incrementReferences();
+//		}
 		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
 			logger.warn("Added too many (missing) arguments to {}", this);
 		}

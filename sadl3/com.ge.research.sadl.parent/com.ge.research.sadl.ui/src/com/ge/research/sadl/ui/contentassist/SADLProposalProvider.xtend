@@ -226,7 +226,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				val right = (pm as BinaryOperation).right
 				if (op.equals("is")) {
 					if (left instanceof Name) {
-						val ltype = declarationExtensions.getOntConceptType(left as Name)
+						val ltype = declarationExtensions.getOntConceptType((left as Name).name)
 						if (ltype.equals(OntConceptType.VARIABLE)) {
 							// no restrictions
 							excludeNamespace(SadlConstants.SADL_BASE_MODEL_URI)
@@ -374,7 +374,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 						}
 					} else if ((container as SubjHasProp).right instanceof Name) {
 						val valnm =((container as SubjHasProp).right as Name)
-						if (declarationExtensions.isProperty(valnm)) {
+						if (declarationExtensions.isProperty(valnm.name)) {
 							if (!kval.equals("of")) {
 								return false
 							}
@@ -384,7 +384,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 				}
 			}
 			if (model instanceof Name) {
-				if (declarationExtensions.isProperty(model as Name)) {
+				if (declarationExtensions.isProperty((model as Name).name)) {
 					if (!kval.equals("of")) {
 						return false
 					}

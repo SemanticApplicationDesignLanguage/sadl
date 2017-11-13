@@ -1190,6 +1190,18 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	}
 	
 	@Test
+	def void testQueryVariable_2() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type Whim.
+			 Whim is a class described by wham with values of type string.
+			 Ask: select <i> where [i] is a Foo.
+			 Ask: select <i> where [i] is a Foo with bar (a Whim with wham "hi").
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
 	def void testRuleVariable_1() {
 		'''
 			uri "http://sadl.org/rulevars.sadl" alias rulevars.
@@ -1292,6 +1304,40 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			 
 			 [Clyde] is a Person with child (a Person [Nancy]).
 			 <Nancy> has child (a Person [Peter]).
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testRuleVariables_01() {
+		'''
+			uri "http://sadl.org/rulevars.sadl" alias rulevars.
+						
+			Person is a class.
+			teaches describes Person with values of type Person.
+			knows describes Person with values of type Person.
+			A relationship of Person to Person is acquaintance. 
+			
+			Rule R1 if x is a Person and x has teaches y then x has knows y.
+			 
+			Rule R2 if x is a Person and x has teaches y then x has acquaintance y. 
+			
+			Rule R3 if [x] is a Person and <x> teaches [y] then <x> knows <y>.
+			
+«««			Rule R4: if a Person knows a second Person then the second Person knows the first Person.
+			 Rule R4b: if a Person has knows a second Person then the second Person has knows the first Person.
+			
+			Rule R5: if [x] is a Person and knows of <x> is [y] then knows of <y> is <x>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void noLinkingForUnits() {
+		'''
+		uri "http://sadl.org/testunits" alias tu.
+		Expr: (2 + 3) seconds.
+		[seconds] is a class.
+		
+		B is a type of <seconds>.
 		'''.assertLinking[sadl]
 	}
 }

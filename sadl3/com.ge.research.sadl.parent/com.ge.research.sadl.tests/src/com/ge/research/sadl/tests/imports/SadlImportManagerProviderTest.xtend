@@ -59,8 +59,6 @@ class SadlImportManagerProviderTest {
 	@Inject Provider<JenaBasedSadlImportProcessor> impProcessorProvider
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
-/* Tests that should generate validation errors */	
-	@Ignore
 	@Test def void testDatatypeImports1() {
 		'''
 			<rdf:RDF
