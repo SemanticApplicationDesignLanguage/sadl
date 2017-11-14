@@ -141,9 +141,12 @@ class SadlMarkerStartup implements IStartup {
 			if (!ref.resolved) {
 				if (ref.type === SadlMarkerRefType.File) {
 					val projectPath = Paths.get(project.locationURI);
-					val refPath = Paths.get(project.getFile(ref.referencedId).locationURI);
-					val projectRelativePath = '''«project.name»«IPath.SEPARATOR»«projectPath.relativize(refPath)»''';
-					resolveRef(ref, projectRelativePath);
+					val file = project.getFile(ref.referencedId);
+					if (file.accessible) {
+						val refPath = Paths.get(project.getFile(ref.referencedId).locationURI);
+						val projectRelativePath = '''«project.name»«IPath.SEPARATOR»«projectPath.relativize(refPath)»''';
+						resolveRef(ref, projectRelativePath);
+					}
 				} else if (ref.type === SadlMarkerRefType.ModelElement) {
 					val segments = ref.referencedId.split(SadlMarkerDeserializerService.OBJECT_ID_SEPARATOR);
 					val modelUri = segments.head;
@@ -153,7 +156,8 @@ class SadlMarkerStartup implements IStartup {
 						val astNode = if (astNodeName === null) {
 							resource.sadlModel;
 						} else  {
-							resource.locationProvider.getEObjectByName(astNodeName, resource);
+							val object = resource.locationProvider.getEObjectByName(astNodeName, resource);
+							if (object === null) resource.sadlModel else object;
 						}
 						val astNodeUri = EcoreUtil.getURI(astNode);
 						val model = resource.sadlModel;
