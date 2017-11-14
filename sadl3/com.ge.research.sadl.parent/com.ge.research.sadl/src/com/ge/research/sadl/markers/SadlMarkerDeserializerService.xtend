@@ -36,6 +36,11 @@ import static extension com.ge.research.sadl.markers.SadlMarkerSeverity.getSever
  */
 @ImplementedBy(SadlMarkerDeserializerService.JsoupDeserializer)
 interface SadlMarkerDeserializerService {
+	
+	/**
+	 * Separator for the FQN of the object.
+	 */
+	val OBJECT_ID_SEPARATOR = "#";
 
 	/**
 	 * Deserializes the XML SADL error-marker file.
@@ -89,11 +94,6 @@ interface SadlMarkerDeserializerService {
 		 * The unique object ID that is used to identify the resource where the SADL marker is attached to. 
 		 */
 		static val OBJECT_ID_NAME = "ObjectID";
-
-		/**
-		 * Separator for the FQN of the object.
-		 */
-		static val OBJECT_ID_SEPARATOR = "#";
 
 		/**
 		 * The unique ID of the references attached to a particular SADL marker.

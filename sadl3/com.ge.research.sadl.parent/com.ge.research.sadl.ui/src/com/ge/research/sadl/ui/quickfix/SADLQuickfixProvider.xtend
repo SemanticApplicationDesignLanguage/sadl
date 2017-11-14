@@ -45,6 +45,8 @@ import org.eclipse.xtext.validation.Issue
 
 import static com.ge.research.sadl.markers.SadlMarkerConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import org.eclipse.emf.common.util.URI
+import org.eclipse.xtext.ui.editor.IURIEditorOpener
 
 /**
  * Quick fix provider for SADL.
@@ -59,6 +61,9 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 	
 	@Inject
 	UserDataHelper userDataHelper;
+	
+	@Inject
+	IURIEditorOpener editorOpener;
 
 	@Fix(AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ISSUE_CODE)
 	def fixAmbigupusNames(Issue issue, IssueResolutionAcceptor acceptor) {
@@ -135,7 +140,7 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 	def showSadlMarkerRefs(Issue it, IssueResolutionAcceptor acceptor) {
 		if (data !== null) {
 			data.forEach [ dataEntry |
-				val segments = dataEntry.split(SADL_REFS_SEPARATOR);
+				val segments = dataEntry.split('''\«SADL_REFS_SEPARATOR»''');
 				val type = GET_TYPE_REF_BY_NAME.apply(segments.head);
 				// The rest might contain colons (we have a URL), so we need to join them together.
 				val refId = segments.drop(1).join(SADL_REFS_SEPARATOR);
@@ -151,7 +156,9 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 		return switch (type) {
 			case File: '''Open «refId»'''
 			case ModelElement: {
-				'''Jump to «refId»'''
+				val segments = refId.split('''\«SADL_REFS_SEPARATOR»''');
+				val astNodeName = segments.head;
+				'''Jump to «IF !astNodeName.nullOrEmpty»«astNodeName» in «ENDIF»«segments.get(1)»'''
 			}
 		}
 	}
@@ -174,6 +181,11 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 				];
 			}
 			case ModelElement: {
+				[
+					val segments = refId.split('''\«SADL_REFS_SEPARATOR»''');
+					val uri = URI.createURI(segments.last);
+					editorOpener.open(uri, true);
+				]
 			}
 		}
 	}

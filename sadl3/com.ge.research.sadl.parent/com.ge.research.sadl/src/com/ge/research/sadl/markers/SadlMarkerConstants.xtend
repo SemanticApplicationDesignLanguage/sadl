@@ -55,7 +55,7 @@ abstract class SadlMarkerConstants {
 	/**
 	 * Character for separating multiple SADL references.
 	 */
-	public static val SADL_REFS_SEPARATOR = ":";
+	public static val SADL_REFS_SEPARATOR = "+";
 
 	/**
 	 * Function for getting back the SADL marker reference type by its name.

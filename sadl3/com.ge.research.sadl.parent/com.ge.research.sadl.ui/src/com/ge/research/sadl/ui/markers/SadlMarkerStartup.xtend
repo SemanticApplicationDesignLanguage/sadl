@@ -52,6 +52,8 @@ import static com.ge.research.sadl.jena.UtilsForJena.*
 import static com.ge.research.sadl.markers.SadlMarkerConstants.*
 import static com.ge.research.sadl.reasoner.IConfigurationManager.*
 import org.eclipse.core.runtime.IPath
+import com.ge.research.sadl.sADL.SadlModel
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -82,15 +84,13 @@ class SadlMarkerStartup implements IStartup {
 					if (project.accessible) {
 						modifications.add([project.deleteExistingMarkersWithOrigin(origin)]);
 						markerInfos.map[mapModelUri].map[mapRefs(project)].groupBy[modelUri].forEach [ modelUri, entries |
-							val resourceUri = modelUri.getResourceUri(project);
-							if (resourceUri !== null) {
-								val resource = resourceSetProvider.get(project).getResource(resourceUri, true);
+							val resource = modelUri.getResource(project);
+							if (resource !== null) {
 								val locationProvider = resource.locationProvider;
-								val member = ws.root.findMember(resourceUri.toPlatformString(true));
+								val member = ws.root.findMember(resource.URI.toPlatformString(true));
 								if (member !== null && member.accessible) {
-									val projectLocation = Paths.get(project.locationURI);
 									entries.forEach [ marker |
-										val location = locationProvider.getLocation(marker, resource, projectLocation);
+										val location = locationProvider.getLocation(marker.astNodeName, resource);
 										modifications.add([member.createMarker(marker, location, origin)]);
 									];
 								}
@@ -145,17 +145,44 @@ class SadlMarkerStartup implements IStartup {
 					val projectRelativePath = '''«project.name»«IPath.SEPARATOR»«projectPath.relativize(refPath)»''';
 					resolveRef(ref, projectRelativePath);
 				} else if (ref.type === SadlMarkerRefType.ModelElement) {
-					val uri = ref.referencedId.getResourceUri(project);
-					if (uri === null) {
-						println('TODO: resolve the model element in the other resource.');
+					val segments = ref.referencedId.split(SadlMarkerDeserializerService.OBJECT_ID_SEPARATOR);
+					val modelUri = segments.head;
+					val astNodeName = if (segments.size > 1) segments.last else null;
+					val resource = modelUri.getResource(project);
+					if (resource !== null) {
+						val astNode = if (astNodeName === null) {
+							resource.sadlModel;
+						} else  {
+							resource.locationProvider.getEObjectByName(astNodeName, resource);
+						}
+						val astNodeUri = EcoreUtil.getURI(astNode);
+						val model = resource.sadlModel;
+						val resourceName = '''«IF model.alias.nullOrEmpty»«model.baseUri»«ELSE»«model.alias»«ENDIF»''';
+						val resolvedRefId = '''«IF !astNodeName.nullOrEmpty»«astNodeName»«ENDIF»«SADL_REFS_SEPARATOR»«resourceName»«SADL_REFS_SEPARATOR»«astNodeUri»''';
+						resolveRef(ref, resolvedRefId);
 					}
-					resolveRef(ref, ref.referencedId);
 				} else {
 					throw new IllegalStateException('''Unexpected SADL marker reference type: «ref.type»''');
 				}
 			}
 		}
 		return it;
+	}
+
+	private def getSadlModel(Resource it) {
+		return contents.head as SadlModel;
+	}
+	
+	private def getResource(String modelUri, IProject project) {
+		val resourceUri = modelUri.getResourceUri(project);
+		if (resourceUri === null) {
+			return null;
+		}
+		return resourceUri.getResource(project);
+	} 
+	
+	private def getResource(URI resourceUri, IProject project) {
+		return resourceSetProvider.get(project).getResource(resourceUri, true);
 	}
 
 	private def getLocationProvider(Resource resource) {
@@ -220,7 +247,7 @@ class SadlMarkerStartup implements IStartup {
 		if (!marker.references.nullOrEmpty) {
 			// That has to be attached to the marker to have the quick fixes enabled.
 			setAttribute(Issue.CODE_KEY, SADL_REFS);
-			val refs = Iterables.toArray(marker.references.map['''«type»«SADL_REFS_SEPARATOR»«referencedId»'''],
+			val refs = Iterables.toArray(marker.references.filter[resolved].map['''«type»«SADL_REFS_SEPARATOR»«referencedId»'''],
 				String);
 			setAttribute(Issue.DATA_KEY, Strings.pack(refs));
 		}
