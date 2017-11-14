@@ -100,7 +100,6 @@ SadlPropertyCondition :
 ;
 
 SadlPropertyInitializer:
-//	(','? ('with'|'has'))? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 	 ','? ('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 	|','? 'is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
 	|','? 'of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
@@ -137,7 +136,6 @@ SadlTypeReference returns SadlTypeReference:
 ;
 
 SadlUnionType returns SadlTypeReference:
-//	SadlIntersectionType ({SadlUnionType.left=current} (','|'or') right=SadlIntersectionType)*
 	SadlIntersectionType ({SadlUnionType.left=current} ('or') right=SadlIntersectionType)*
 ;
 
@@ -371,20 +369,6 @@ Multiplication<EnabledWith, EnableComma> returns Expression:
 MultiOp :
 	'*'|'/'|'%'
 ;
-
-//Power<EnabledWith, EnableComma> returns Expression:
-//	ElementInList<EnabledWith, EnableComma> ({BinaryOperation.left=current} op='^' right=ElementInList<EnabledWith, EnableComma>)*;
-//   
-//ElementInList<EnabledWith, EnableComma> returns Expression:
-//	PropOfSubject<EnabledWith, EnableComma> |
-//	{ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith, EnableComma>
-//;
-//
-//PropOfSubject<EnabledWith, EnableComma> returns Expression:
-//	UnitExpression<EnabledWith, EnableComma> ->(
-//		   ({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith, EnableComma>) 
-// 	   | ->({SubjHasProp.left=current} (<EnableComma> comma?=',')? (<EnabledWith>'with'|'has')? prop=SadlResource ->right=UnitExpression<EnabledWith, EnableComma>?)+)?
-//;
 
 Power<EnabledWith, EnableComma> returns Expression:
 	PropOfSubject<EnabledWith, EnableComma> ({BinaryOperation.left=current} op='^' right=PropOfSubject<EnabledWith, EnableComma>)*;

@@ -578,6 +578,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
+			jenaModel.write(System.out)
 			assertTrue(issues.size == 0)
 			var ns = "http://com.ge.research.sadl/proptypeonly#"
 			var p = jenaModel.getProperty(ns+"prop")
@@ -592,7 +593,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			assertNotNull(dtp)
 			var dtpwr = jenaModel.getDatatypeProperty(ns+"dtpropwithrng")
 			assertNotNull(dtpwr)
-			var dtpwlr = jenaModel.getDatatypeProperty(ns+"dtpropwithlistrng")
+			var dtpwlr = jenaModel.getObjectProperty(ns+"dtpropwithlistrng")	// property type of a list range is always owl:ObjectProperty
 			assertNotNull(dtpwlr)
 		]
 	}

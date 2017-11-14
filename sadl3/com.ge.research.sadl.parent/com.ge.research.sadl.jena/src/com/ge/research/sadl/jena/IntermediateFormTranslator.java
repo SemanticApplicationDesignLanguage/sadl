@@ -991,10 +991,13 @@ public class IntermediateFormTranslator {
 	}
 
 	private List<GraphPatternElement> flattenRuleJunction(Junction jct) throws TranslationException {
-		if (!jct.getJunctionType().equals(JunctionType.Conj)) {
-			addError(new IFTranslationError("Disjunction not supported in rules at this time"));
-		}
 		List<GraphPatternElement>results = new ArrayList<GraphPatternElement>();
+		if (!jct.getJunctionType().equals(JunctionType.Conj)) {
+//			addError(new IFTranslationError("Disjunction not supported in rules at this time"));
+			// this is up to the target translator to decide, not the Intermediate Form Translator
+			results.add(jct);
+			return results;
+		}
 		Object lhs = jct.getLhs();
 		if (lhs instanceof Junction) {
 			results.addAll(flattenRuleJunction((Junction)lhs));
@@ -1688,7 +1691,8 @@ public class IntermediateFormTranslator {
 									patterns.remove(patterns.size() - 1);
 								}
 							}
-							else {
+							else if (((BuiltinElement)realArg).getArguments() != null &&
+									getModelProcessor().isBuiltinMissingArgument(((BuiltinElement)realArg).getFuncName(), ((BuiltinElement)realArg).getArguments().size())){
 								Node newNode = getVariableNode((BuiltinElement)realArg);
 								((BuiltinElement)realArg).addArgument(newNode);
 								argNode = newNode;
@@ -1741,11 +1745,31 @@ public class IntermediateFormTranslator {
 			returnNode = be.getArguments().get(0);
 		}
 		else {
+			removeArgsFromPatterns(patterns, be);
 			patterns.add(be);
 		}
 		return returnNode;
 	}
 	
+	private void removeArgsFromPatterns(List<GraphPatternElement> patterns, BuiltinElement be) {
+		if (patterns != null && patterns.size() > 0) {
+			List<Node> args = be.getArguments();
+			if (args != null) {
+				for (Node arg:args) {
+					Object effectiveArg = arg;
+					if (arg instanceof ProxyNode) {
+						effectiveArg = ((ProxyNode)arg).getProxyFor();
+					}
+					if (effectiveArg instanceof GraphPatternElement) {
+						if (patterns.contains((GraphPatternElement)effectiveArg)) {
+							patterns.remove((GraphPatternElement)effectiveArg);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Combine the argument elements with the existing Rule Ifs elements
 	 * @param moveToIfts

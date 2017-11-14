@@ -130,7 +130,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected JenaBasedSadlModelProcessor modelProcessor = null;
 	private List<ConceptName> binaryOpLeftImpliedProperties;
 	private List<ConceptName> binaryOpRightImpliedProperties;
-	protected Object lastSuperCallExpression = null; 
+	protected Object lastSuperCallExpression = null;
+	private List<EObject> eObjectsValidated = null; 
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
@@ -456,6 +457,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Expression rightExpression, String op, StringBuilder errorMessageBuilder) {
 		List<String> operations = Arrays.asList(op.split("\\s+"));
 		boolean errorsFound = false;
+		if (!registerEObjectValidateCalled(expression)) {
+			// if there were errors they were reported on the first call
+			return !errorsFound;
+		}
 		
 		if(skipOperations(operations)){
 			return true;
@@ -528,6 +533,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private boolean registerEObjectValidateCalled(EObject expression) {
+		if (expression == null) return true;	// for ease in debugging--set expression to null to allow multiple passes in debugger
+		if (eObjectsValidated  == null) {
+			eObjectsValidated = new ArrayList<EObject>();
+			eObjectsValidated.add(expression);
+			return true;
+		}
+		if (eObjectsValidated.contains(expression)) {
+			return false;
+		}
+		eObjectsValidated.add(expression);
+		return true;
+	}
+
 	private boolean passLiteralConstantComparisonCheck(EObject expression, Expression leftExpression,
 			Expression rightExpression, String op, StringBuilder errorMessageBuilder) {
 		if (modelProcessor.canBeNumericOperator(op)) {
@@ -1163,6 +1182,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			tci.setTypeToExprRelationship(SadlASTUtils.getUnitAsString(expression));
 			return tci;
 		}
+		else if (expression.isComma() && expression.getRight() == null) {
+			issueAcceptor.addError("Invalid subject-has-property construct with a comma", expression);
+			return null;
+		}
 		else if (!isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
 				expression.eContainer() instanceof SelectExpression ||
 				expression.eContainer() instanceof AskExpression ||
@@ -1252,6 +1275,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo getTypeCompatibleWithOperationOnUnittedQuantities(String op, TypeCheckInfo leftTypeCheckInfo,
 			TypeCheckInfo rightTypeCheckInfo) {
 		if (!modelProcessor.isNumericOperator(op)) {
+			return null;
+		}
+		if (leftTypeCheckInfo == null || rightTypeCheckInfo == null) {
 			return null;
 		}
 		if (!leftTypeCheckInfo.getTypeCheckType().toString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) ||
@@ -2458,6 +2484,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getFunctionType(sr);
 		}
 		else if (conceptType.equals(OntConceptType.CLASS_LIST)) {
+			if (conceptUri != null) {
+				OntClass ontcls = theJenaModel.getOntClass(conceptUri);
+				ConceptName typecn = getListClassType(ontcls);
+				conceptUri = typecn.toFQString();
+			}
+			SadlResource declsr = declarationExtensions.getDeclaration(sr);
 			ConceptName conceptName = new ConceptName(conceptUri);
 			conceptName.setType(ConceptType.ONTCLASS);
 			conceptName.setRangeValueType(RangeValueType.LIST);
@@ -3540,24 +3572,32 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					if (cls != null && cls.canAs(OntClass.class)){
-						ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSuperClasses();
-						while (eitr.hasNext()) {
-							OntClass supercls = eitr.next();
-							if (supercls.isRestriction() && supercls.hasProperty(OWL.onProperty, theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
-								RDFNode avf = supercls.getPropertyValue(OWL.allValuesFrom);
-								if (avf.canAs(Resource.class)) {
-									Resource r = avf.as(Resource.class);
-									if (r.isURIResource()) {
-										eitr.close();
-										return new ConceptName(r.getURI());
-									}
-								}
-							}
+						ConceptName listcn = getListClassType(cls);
+						if (listcn != null) {
+							return listcn;
 						}
 					}
 				} catch (InvalidNameException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+
+	private ConceptName getListClassType(OntResource cls) {
+		ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSuperClasses();
+		while (eitr.hasNext()) {
+			OntClass supercls = eitr.next();
+			if (supercls.isRestriction() && supercls.hasProperty(OWL.onProperty, theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
+				RDFNode avf = supercls.getPropertyValue(OWL.allValuesFrom);
+				if (avf.canAs(Resource.class)) {
+					Resource r = avf.as(Resource.class);
+					if (r.isURIResource()) {
+						eitr.close();
+						return new ConceptName(r.getURI());
+					}
 				}
 			}
 		}

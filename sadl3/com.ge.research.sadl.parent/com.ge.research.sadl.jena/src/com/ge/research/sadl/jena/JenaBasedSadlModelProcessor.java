@@ -1703,7 +1703,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						addError("Right of SubjHasProp not a Name (" + pexpr.getClass().toString() + ")", defnContainer);
 					}
 				}
-				else if (((SubjHasProp)defnContainer).getRight().equals(decl)) {
+				else if (((SubjHasProp)defnContainer).isComma() && ((SubjHasProp)defnContainer).getRight() == null) {
+					addError("This appears to be an unhandled comma-based construct", defnContainer);
+				}
+				else if (((SubjHasProp)defnContainer).getRight() != null && ((SubjHasProp)defnContainer).getRight().equals(decl)) {
 					// need range of property
 					tci = getModelValidator().getType(((SubjHasProp)defnContainer).getProp());
 				}
@@ -3861,7 +3864,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		else {
 			BuiltinElement builtin = new BuiltinElement();
-			builtin.setFuncName(name);
+			builtin.setFuncName(transformOpName(name));
 			if (lobj != null) {
 				builtin.addArgument(nodeCheck(lobj));
 			}
@@ -4478,6 +4481,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	public Object processExpression(SubjHasProp expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		System.out.println("processing " + expr.getClass().getCanonicalName() + ": " + expr.getProp().toString());
+		if (expr.isComma() && expr.getRight() == null) {
+			addError("This is an invalid subject-has-property construct using a comma", expr);
+			return null;
+		}
 		Expression subj = expr.getLeft();
 		SadlResource pred = expr.getProp();
 		Expression obj = expr.getRight();
@@ -4789,7 +4796,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		BuiltinElement bi = new BuiltinElement();
-		bi.setFuncName(transformUnaryOp(op));
+		bi.setFuncName(transformOpName(op));
 		if (eobj instanceof Node) {
 			bi.addArgument((Node) eobj);
 		}
@@ -4805,9 +4812,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return bi;
 	}
 	
-	private String transformUnaryOp(String op) {
+	private String transformOpName(String op) {
 		if (op.equals("there exists")) {
 			return THERE_EXISTS;
+		}
+		else if (op.equals("=") || op.equals("==")) {
+			return "is";
 		}
 		return op;
 	}
@@ -5311,6 +5321,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							rngRsrc = sadlTypeReferenceToOntResource(rng);
 						}
 						retProp = assignRangeToProperty(propUri, propType, rngRsrc, rngValueType, rng);
+					}
+				}
+				else {
+					// this can happen when the range is just specified as "class", creating an owl:ObjectProperty with no range
+					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+						retProp = getOrCreateObjectProperty(propUri);
+					}
+					else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+						retProp = getOrCreateDatatypeProperty(propUri);
+					}
+					else if (propType.equals(OntConceptType.RDF_PROPERTY)) {
+						retProp = getOrCreateRdfProperty(propUri);
 					}
 				}
 				if (((SadlRangeRestriction)spr1).isSingleValued()) {
@@ -6161,6 +6183,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			// get the prefix and if there is one generate qname
 			String prefix = getConfigMgr().getGlobalPrefix(ns);
+			if (prefix == null) {
+				if (ns.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
+					prefix = SadlConstants.SADL_IMPLICIT_MODEL_PREFIX;
+				}
+			}
 			if (prefix != null && prefix.length() > 0) {
 				return prefix + ":" + ln;
 			}
@@ -9621,6 +9648,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	public void setUseArticlesInValidation(boolean useArticlesInValidation) {
 		this.useArticlesInValidation = useArticlesInValidation;
+	}
+	
+	public boolean isBuiltinMissingArgument(String funcName, int size) {
+		if (funcName.equals("is") && size == 2) {
+			return false;
+		}
+		if (funcName.equals("+") || funcName.equals("*") || funcName.equals("+") || 
+				funcName.equals("/") || funcName.equals("-") || funcName.equals("%") || funcName.equals("^")) {
+			if (size == 2) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		if (funcName.equals("unittedQuantity") && size == 2) {
+			return true;
+		}
+		return true;		// default? get from builtinfunction signatures?
 	}
 	
 }

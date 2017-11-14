@@ -55,7 +55,7 @@ class SadlASTUtils {
 	 */
 	static def boolean isUnitExpression(EObject it) {
 		if (it instanceof SubjHasProp) {
-			return right === null && prop.unit;
+			return right === null && !it.comma && prop.unit;
 		}
 		return it instanceof UnitExpression;
 	}
