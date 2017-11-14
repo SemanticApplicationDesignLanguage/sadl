@@ -55,7 +55,6 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.resource.EObjectDescription
-import org.eclipse.xtext.resource.ForwardingEObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
@@ -309,10 +308,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 								val resourceInImportScope = importScope.getSingleElement(name1);
 								if (resourceInImportScope !== null) {
 									val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
-									if (name1 == nameWithPrefixes) {
-										ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
-										if (ambiguousProblem !== null) {
-											map.put(name1, ambiguousProblem);
+									if (name1.segmentCount > 1) {
+										if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											if (ambiguousProblem !== null) {
+												map.put(name1, ambiguousProblem);
+											}
+										}
+									} else {										
+										if (name1 == nameWithPrefixes) {
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											if (ambiguousProblem !== null) {
+												map.put(name1, ambiguousProblem);
+											}
 										}
 									}
 								}
@@ -426,24 +434,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
 	}
 	
-	def private IEObjectDescription checkDuplicate(IEObjectDescription first, IEObjectDescription second) {
-		if (!ambiguousNameDetection || first === null || second === null
-			|| EcoreUtil.getURI(first.EObjectOrProxy) == EcoreUtil.getURI(second.EObjectOrProxy)) {
+	def private IEObjectDescription checkDuplicate(IEObjectDescription existing, IEObjectDescription other) {
+		if (!ambiguousNameDetection || existing === null || other === null ||
+			EcoreUtil.getURI(existing.EObjectOrProxy) == EcoreUtil.getURI(other.EObjectOrProxy)) {
 			return null
 		}
-		val imports = #[first, second].map[EObjectOrProxy.eResource.allContents.filter(SadlModel).head.baseUri]
-		val message = '''Ambiguously imported name '«first.name»' from «imports.map["'"+it+"'"].join(", ")». Please use a prefix to disambiguate name.'''
-		
-		return new ForwardingEObjectDescription(first) {
-			override getUserData(String key) {
-				if (key.equals(ErrorAddingLinkingService.ERROR)) {
-					return message
-				}
-				if (key.equals(ErrorAddingLinkingService.ALTERNATIVES)) {
-					return first.qualifiedName+","+second.qualifiedName
-				}
-				super.getUserData(key)
-			}
+		if (existing instanceof AmbiguousNameErrorEObjectDescription) {
+			return existing.addConflicting(other);
+		} else {
+			return new AmbiguousNameErrorEObjectDescription(existing, other);
 		}
 	}
 

@@ -29,7 +29,7 @@ import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.scoping.IScopeProvider
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import static com.ge.research.sadl.scoping.ErrorAddingLinkingService.ERROR
+import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ERROR
 
 import static extension org.eclipse.xtext.EcoreUtil2.getContainerOfType
 
@@ -86,7 +86,7 @@ class SadlQueryHelper {
 	}
 
 	private def QueryStatement doFindQueryByName(SadlModel it, String name) {
-		return getScope(SADL_RESOURCE__NAME).getElements(name.toQualifiedName).filter[getUserData(ERROR).nullOrEmpty].
+		return getScope(SADL_RESOURCE__NAME).getElements(name.toQualifiedName).filter[getUserData(AMBIGUOUS_NAME_ERROR).nullOrEmpty].
 			map[EObjectOrProxy].map[getContainerOfType(QueryStatement)].filterNull.head;
 	}
 
