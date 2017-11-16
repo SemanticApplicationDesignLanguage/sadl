@@ -193,9 +193,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 					    !obj.as(OntClass.class).equals(getListClass()) &&
 						(graphImplicitElementInstances ||
 						 (obj.as(OntClass.class).getNameSpace() != null &&
-						  !obj.as(OntClass.class).getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI) &&
-						  !obj.as(OntClass.class).getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI) &&
-						  !obj.as(OntClass.class).getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)))) { 
+						  !obj.as(OntClass.class).getNameSpace().contains(SadlConstants.SADL_BASE_MODEL_URI) &&
+						  !obj.as(OntClass.class).getNameSpace().contains(SadlConstants.SADL_IMPLICIT_MODEL_URI) &&
+						  !obj.as(OntClass.class).getNameSpace().contains(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)))) { 
 						addIsATypeOfToGraph(publicUri, classInst, obj.as(OntClass.class), data);
 					}
 				}
@@ -226,7 +226,8 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			}
 			else {
 				if (subj.canAs(Individual.class)){
-					addInstancePropertyToGraph(publicUri, subj.as(Individual.class), p, obj, data);				}
+					addInstancePropertyToGraph(publicUri, subj.as(Individual.class), p, obj, data);				
+				}
 			}
 		}
 		if (propertyDomains != null && propertyRanges != null) {
