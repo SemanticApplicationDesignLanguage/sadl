@@ -86,7 +86,9 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class JenaTranslatorPlugin implements ITranslator {
-    protected static final Logger logger = LoggerFactory.getLogger(JenaTranslatorPlugin.class);
+    private static final String THERE_EXISTS = "thereExists";
+
+	protected static final Logger logger = LoggerFactory.getLogger(JenaTranslatorPlugin.class);
     
     private static final String TranslatorCategory = "Basic_Jena_Translator";
     
@@ -96,7 +98,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	public enum TranslationTarget {RULE_TRIPLE, RULE_BUILTIN, QUERY_TRIPLE, QUERY_FILTER}
     
-    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN}
+    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN, THEREEXISTS}
     
     private enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     
@@ -258,20 +260,65 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 	
 	private String graphPatternElementsToJenaRuleString(List<GraphPatternElement> elements, RulePart rulePart) throws TranslationException {
-		int cnt = 0;
 		if (elements != null && elements.size() > 0) {
 			StringBuilder sb = new StringBuilder();
-			for (int i = 0; elements != null && i < elements.size(); i++) {
-				if (cnt > 0) sb.append(", ");
-				SpecialBuiltin spb = processSpecialBuiltins(elements, i);	// check for special handling required for some built-ins
+			int idx = 0;
+			while(idx < elements.size()) {
+				if (idx > 0) sb.append(", ");
+				SpecialBuiltin spb = processSpecialBuiltins(elements, idx);	// check for special handling required for some built-ins
 				if (spb != null) {
 					// get the triple in question
 					TripleElement trel = null;
-					if (elements.get(i) instanceof TripleElement) {
-						trel = (TripleElement)elements.get(i);
+					if (elements.get(idx) instanceof TripleElement) {
+						trel = (TripleElement)elements.get(idx);
+					}
+					else if (elements.get(idx) instanceof BuiltinElement && ((BuiltinElement)elements.get(idx)).getFuncName().equals(THERE_EXISTS)) {
+						if (((BuiltinElement)elements.get(idx)).getArguments() == null || ((BuiltinElement)elements.get(idx)).getArguments().size() != 1) {
+							logger.error("Function 'thereExists' should have one and only one argument");
+						}
+						if (!(((BuiltinElement)elements.get(idx)).getArguments().get(0) instanceof VariableNode)) {
+							logger.error("Function 'thereExists' should have a variable as argument");
+						}
+						VariableNode thereExistsVar = (VariableNode) ((BuiltinElement)elements.get(idx)).getArguments().get(0);
+						if (thereExistsVar.getType() == null) {
+							logger.error("Function 'thereExists' variable must have a type");
+						}
+						BuiltinElement bi = new BuiltinElement();
+						bi.setFuncName("getInstance");
+						bi.addArgument(thereExistsVar.getType());
+						elements.set(idx, bi);
+						int restIdx = idx + 1;
+						while (restIdx < elements.size()) {
+							// these should all be TripleElement graph patterns 
+							GraphPatternElement gpe = elements.get(restIdx);
+							if (!(gpe instanceof TripleElement)) {
+								logger.error("All rule then elements after a 'thereExists' should be triple patterns");
+							}
+							TripleElement tgpe = (TripleElement) gpe;
+							if (tgpe.getSubject().equals(thereExistsVar) && tgpe.getPredicate().equals(new RDFTypeNode()) && tgpe.getObject().equals(thereExistsVar.getType())) {
+								elements.remove(restIdx);
+							}
+							else if (tgpe.getSubject().equals(thereExistsVar)) {
+								// add arguments for property and then value
+								bi.addArgument(tgpe.getPredicate());
+								bi.addArgument(tgpe.getObject());
+								elements.remove(restIdx);
+							}
+							else if (tgpe.getObject().equals(thereExistsVar)) {
+								// add arguments for subject and then property
+								bi.addArgument(tgpe.getSubject());
+								bi.addArgument(tgpe.getPredicate());
+								elements.remove(restIdx);
+							}
+							else {
+								restIdx++;
+							}
+						}
+						// we now want to process this as if it were this in the first place
+						continue;
 					}
 					else {
-						logger.error("Unhandled graph pattern element detected as special builtin: " + elements.get(i).toString());
+						logger.error("Unhandled graph pattern element detected as special builtin: " + elements.get(idx).toString());
 					}
 					
 					// translate based on type of spb
@@ -291,7 +338,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 							sb.append(createNotOnly(trel, TranslationTarget.RULE_BUILTIN));
 						}
 						else if (spb.equals(SpecialBuiltin.ONLY)) {
-							sb.append(createOnly((TripleElement)elements.get(i), TranslationTarget.RULE_BUILTIN));
+							sb.append(createOnly((TripleElement)elements.get(idx), TranslationTarget.RULE_BUILTIN));
 						}
 						else {
 							logger.error("Unhandled special builtin: " + elements.toString());
@@ -299,9 +346,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 					}
 				}
 				else {
-					sb.append(graphPatternElementToJenaRuleString(elements.get(i), rulePart));
+					sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
 				}
-				cnt++;
+				idx++;
 			}
 			return sb.toString();
 		}
@@ -386,6 +433,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 				((TripleElement)elements.get(index)).setObject(var);
 				return SpecialBuiltin.ISKNOWN;
 			}
+		}
+		else if (elements.get(index) instanceof BuiltinElement && ((BuiltinElement)elements.get(index)).getFuncName().equals(THERE_EXISTS)) {
+			return SpecialBuiltin.THEREEXISTS;
 		}
 		return null;
 	}

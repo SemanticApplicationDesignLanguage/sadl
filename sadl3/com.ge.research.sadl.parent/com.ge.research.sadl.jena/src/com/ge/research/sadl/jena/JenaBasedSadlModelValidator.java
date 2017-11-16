@@ -1186,7 +1186,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			issueAcceptor.addError("Invalid subject-has-property construct with a comma", expression);
 			return null;
 		}
-		else if (!isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
+		else if (!getModelProcessor().isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
 				expression.eContainer() instanceof SelectExpression ||
 				expression.eContainer() instanceof AskExpression ||
 				expression.eContainer() instanceof ConstructExpression) {
@@ -1307,35 +1307,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	protected boolean isDeclaration(EObject expr) {
-		if (expr instanceof SubjHasProp) {
-			return isDeclaration(((SubjHasProp)expr).getLeft());
-		}
-		else if (expr instanceof BinaryOperation) {
-			if (isDeclaration(((BinaryOperation)expr).getLeft())){
-				return true;
-			}
-			if (isDeclaration(((BinaryOperation)expr).getRight())) {
-				return true;
-			}
-		}
-		else if (expr instanceof BinaryOperation) {
-			if (isDeclaration(((BinaryOperation)expr).getLeft())){
-				return true;
-			}
-			if (isDeclaration(((BinaryOperation)expr).getRight())) {
-				return true;
-			}
-		}
-		else if (expr instanceof UnaryExpression && ((UnaryExpression)expr).getExpr() instanceof Declaration) {
-			return true;
-		}
-		else if (expr instanceof Declaration) {
-			return true;
-		}
-		return false;
-	}
-	
 	private Declaration getEmbeddedDeclaration(EObject expr) {
 		if (expr instanceof SubjHasProp) {
 			return getEmbeddedDeclaration(((SubjHasProp)expr).getLeft());
@@ -2876,7 +2847,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else if (defContainer instanceof BinaryOperation) {
 				if (((BinaryOperation)defContainer).getLeft() instanceof Name) { // && !((BinaryOperation)defContainer).getLeft().equals(reference)) {
-					if (isDeclaration(((BinaryOperation)defContainer).getRight())) {
+					if (getModelProcessor().isDeclaration(((BinaryOperation)defContainer).getRight())) {
 						Declaration decl = getEmbeddedDeclaration(defContainer);  // are we in a Declaration (a real declaration--the type is a class)
 						if (decl != null) {
 							return getType(decl);
@@ -2901,7 +2872,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else if (defContainer instanceof BinaryOperation) {
 				if (((BinaryOperation)defContainer).getLeft() instanceof Name) { // && !((BinaryOperation)defContainer).getLeft().equals(expression)) { // this causes failure in some cases awc 9/27/17
-					if (isDeclaration(((BinaryOperation)defContainer).getRight())) {
+					if (getModelProcessor().isDeclaration(((BinaryOperation)defContainer).getRight())) {
 						Declaration decl = getEmbeddedDeclaration(defContainer);  // are we in a Declaration (a real declaration--the type is a class)
 						if (decl != null) {
 							return getType(decl);
@@ -2940,7 +2911,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (refContainer instanceof BinaryOperation) {
 			if (((BinaryOperation)refContainer).getLeft() instanceof Name && !((BinaryOperation)refContainer).getLeft().equals(reference)) {
-				if (isDeclaration(((BinaryOperation)refContainer).getRight())) {
+				if (getModelProcessor().isDeclaration(((BinaryOperation)refContainer).getRight())) {
 					Declaration decl = getEmbeddedDeclaration(refContainer);  // are we in a Declaration (a real declaration--the type is a class)
 					if (decl != null) {
 						return getType(decl);
@@ -3371,7 +3342,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
-		if (isDeclaration(leftExpression) && isDeclaration(rightExpression) && 
+		if (getModelProcessor().isDeclaration(leftExpression) && getModelProcessor().isDeclaration(rightExpression) && 
 				leftTypeCheckInfo.getTypeToExprRelationship().equals("self") && 
 				rightTypeCheckInfo.getTypeToExprRelationship().equals("self")) {
 			// this is a test for class membership to be resolved by the reasoner
@@ -3544,7 +3515,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							return true;
 						}
 					}
-					else if (leftConceptName.getType().equals(ConceptType.VARIABLE) && isDeclaration(rightExpression)) {
+					else if (leftConceptName.getType().equals(ConceptType.VARIABLE) && getModelProcessor().isDeclaration(rightExpression)) {
 						return true;
 					}
 				}

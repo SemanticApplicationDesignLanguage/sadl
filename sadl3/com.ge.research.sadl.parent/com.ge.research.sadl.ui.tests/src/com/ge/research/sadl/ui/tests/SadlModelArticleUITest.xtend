@@ -26,7 +26,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 	@Test
 	def void testArticles_01() {
 
-		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.FALSE.toString));
 
 		createFile('UseArticles.sadl', '''
 			uri "http://sadl.org/TestArticles.sadl" alias TestArticles.

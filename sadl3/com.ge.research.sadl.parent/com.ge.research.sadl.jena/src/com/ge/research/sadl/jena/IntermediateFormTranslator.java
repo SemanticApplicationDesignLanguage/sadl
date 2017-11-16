@@ -858,6 +858,9 @@ public class IntermediateFormTranslator {
 			try {
 				results = expandProxyNodes(givens, false, true);
 				if (results instanceof List<?>) {
+					if (((List<?>)results).size() == 1 && ((List<?>)results).get(0) instanceof Junction) {
+						results = junctionToList((Junction) ((List<?>)results).get(0));
+					}
 					rule.setGivens((List<GraphPatternElement>) results);
 				}
 			} catch (InvalidNameException e) {
@@ -882,6 +885,9 @@ public class IntermediateFormTranslator {
 			try {
 				results = expandProxyNodes(ifs, false, false);
 				if (results instanceof List<?>) {
+					if (((List<?>)results).size() == 1 && ((List<?>)results).get(0) instanceof Junction) {
+						results = junctionToList((Junction) ((List<?>)results).get(0));
+					}
 					rule.setIfs((List<GraphPatternElement>) results);
 				}
 			} catch (InvalidNameException e) {
@@ -903,6 +909,9 @@ public class IntermediateFormTranslator {
 			try {
 				results = expandProxyNodes(thens, true, false);
 				if (results instanceof List<?>) {
+					if (((List<?>)results).size() == 1 && ((List<?>)results).get(0) instanceof Junction) {
+						results = junctionToList((Junction) ((List<?>)results).get(0));
+					}
 					for (int i = 0; i < ((List<?>)results).size(); i++) {
 						GraphPatternElement tgpe = (GraphPatternElement) ((List<?>)results).get(i);
 						results = moveEmbeddedGPEsToIfs(rule, (List<?>) results, tgpe);

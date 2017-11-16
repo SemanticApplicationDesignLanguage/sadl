@@ -945,7 +945,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (useArticles != null) {
 			setUseArticlesInValidation(Boolean.parseBoolean(useArticles));
 		}
-		
 		domainAndRangeAsUnionClasses = true;
 		String domainAndRangeAsUnionClassesStr = context.getPreferenceValues().getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
 		if (domainAndRangeAsUnionClassesStr != null) {
@@ -2947,7 +2946,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (leftTranslatedDefn instanceof NamedNode) {
 					leftDefnType = (NamedNode) leftTranslatedDefn;
 					if (leftVar.getType() == null) {
-						leftVar.setType((NamedNode) leftDefnType);
+						if (isList(leftVariableDefn)) {
+							ConceptName ltcn = new ConceptName(((NamedNode)leftDefnType).toFullyQualifiedString());
+							ltcn.setType(nodeTypeToConceptType(((NamedNode)leftDefnType).getNodeType()));
+							ltcn.setRangeValueType(RangeValueType.LIST);
+							leftVar.setListType(ltcn);
+						}
+						else {
+							leftVar.setType((NamedNode) leftDefnType);
+						}
 					}
 					if (isRightVariableDefinition) {
 						Object rightTranslatedDefn = processExpression(rightVariableDefn);
@@ -3623,7 +3630,49 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 	
-	private boolean containsDeclaration(Object obj) {
+	protected boolean isList(EObject expr) {
+		if (expr instanceof Declaration) {
+			return isList(((Declaration)expr).getType());
+		}
+		if (expr instanceof SadlSimpleTypeReference && ((SadlSimpleTypeReference)expr).isList()) {
+			return true;
+		}
+		if (expr instanceof SubjHasProp) {
+			return isList(((SubjHasProp)expr).getLeft());
+		}
+		return false;
+	}
+	
+	protected boolean isDeclaration(EObject expr) {
+		if (expr instanceof SubjHasProp) {
+			return isDeclaration(((SubjHasProp)expr).getLeft());
+		}
+		else if (expr instanceof BinaryOperation) {
+			if (isDeclaration(((BinaryOperation)expr).getLeft())){
+				return true;
+			}
+			if (isDeclaration(((BinaryOperation)expr).getRight())) {
+				return true;
+			}
+		}
+		else if (expr instanceof BinaryOperation) {
+			if (isDeclaration(((BinaryOperation)expr).getLeft())){
+				return true;
+			}
+			if (isDeclaration(((BinaryOperation)expr).getRight())) {
+				return true;
+			}
+		}
+		else if (expr instanceof UnaryExpression && ((UnaryExpression)expr).getExpr() instanceof Declaration) {
+			return true;
+		}
+		else if (expr instanceof Declaration) {
+			return true;
+		}
+		return false;
+	}
+	
+	protected boolean containsDeclaration(Object obj) {
 		if (obj instanceof BuiltinElement) {
 			Iterator<Node> argitr = ((BuiltinElement)obj).getArguments().iterator();
 			while (argitr.hasNext()) {
@@ -4014,7 +4063,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					try {
 						String nvar = getNewVar(expr);
 						var = createVariable(nvar);
-						var.setType((NamedNode)typenode);
+						if (isList(type)) {
+							ConceptName ltcn = new ConceptName(((NamedNode)typenode).toFullyQualifiedString());
+							ltcn.setType(nodeTypeToConceptType(((NamedNode)typenode).getNodeType()));
+							var.setListType(ltcn);
+						}
+						else {
+							var.setType((NamedNode)typenode);
+						}
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

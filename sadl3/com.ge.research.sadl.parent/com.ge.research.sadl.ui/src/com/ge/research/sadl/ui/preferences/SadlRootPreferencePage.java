@@ -160,10 +160,9 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
-		addField(new BooleanFieldEditor(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation", 
+		addField(new BooleanFieldEditor(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation and translation", 
 				getFieldEditorParent()) {
 			
-
 			@Override
 			protected void doStore() {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
