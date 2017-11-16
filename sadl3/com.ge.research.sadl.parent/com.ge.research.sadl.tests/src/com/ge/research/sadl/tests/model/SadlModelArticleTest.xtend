@@ -51,7 +51,7 @@ class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if and(rdf(TestArticles:MyCircle, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y)))) then rdf(TestArticles:MyCircle, TestArticles:area, Y)."))
+					"Rule R1:  if rdf(TestArticles:MyCircle, TestArticles:radius, X) and >(X,0) and ^(X,2,v0) and *(v0,PI,Y) then rdf(TestArticles:MyCircle, TestArticles:area, Y)."))
 		]
 
 	}
@@ -93,7 +93,7 @@ class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if and(rdf(TestArticles:MyCircle, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y)))) then rdf(TestArticles:MyCircle, TestArticles:area, Y)."))
+					"Rule R1:  if rdf(TestArticles:MyCircle, TestArticles:radius, X) and >(X,0) and ^(X,2,v0) and *(v0,PI,Y) then rdf(TestArticles:MyCircle, TestArticles:area, Y)."))
 		]
 
 	}

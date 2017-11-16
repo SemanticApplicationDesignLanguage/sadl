@@ -50,7 +50,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
 			issues.map[message].forEach[println(it)];
-			assertEquals(2, issues.size)
+			assertEquals(0, issues.size)
 		]
 
 	}
@@ -127,7 +127,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if and(rdf(v0, rdf:type, TestArticles:Circle), and(rdf(v0, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y))))) then rdf(v0, TestArticles:area, Y)."))
+					"Rule R1:  if rdf(v0, rdf:type, TestArticles:Circle) and rdf(v0, TestArticles:radius, X) and >(X,0) and ^(X,2,v0) and *(v0,PI,Y) then rdf(v0, TestArticles:area, Y)."))
 		]
 
 	}
@@ -172,13 +172,22 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if and(rdf(TestArticles:Circle, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y)))) then rdf(TestArticles:Circle, TestArticles:area, Y)."))
+					"Rule R1:  if rdf(TestArticles:Circle, TestArticles:radius, X) and >(X,0) and ^(X,2,v0) and *(v0,PI,Y) then rdf(TestArticles:Circle, TestArticles:area, Y)."))
 		]
 
 	}
 	
 	@Test
 	def void testCRule_01() {
+		val grd = newArrayList(
+"Rule R1:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:teaches, y) then rdf(x, rulevars:knows, y).",
+"Rule R2:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:teaches, y) then rdf(x, rulevars:acquaintance, y).",
+"Rule R3:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:teaches, y) then rdf(x, rulevars:knows, y).",
+"Rule R4:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
+"Rule R4b:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
+"Rule R5:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:knows, y) then rdf(y, rulevars:knows, x).",
+"Rule R5b:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:knows, y) then rdf(y, rulevars:knows, x).",
+"Rule R6:  if rdf(x, rdf:type, rulevars:Person) and rdf(y, rulevars:teaches, x) then rdf(x, rulevars:knows, y).")
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 
@@ -211,41 +220,26 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				}
 			}
 			if (rules !== null) {
-				for (rule : rules) {
-					println(rule.toString)
-				}
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
 			}
 			issues.assertHasNoIssues;
 			assertEquals(8, rules.size);
-			assertTrue(
-				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if and(rdf(x, rdf:type, rulevars:Person), rdf(x, rulevars:teaches, y)) then rdf(x, rulevars:knows, y)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(1).toString(),
-					"Rule R2:  if and(rdf(x, rdf:type, rulevars:Person), rdf(x, rulevars:teaches, y)) then rdf(x, rulevars:acquaintance, y)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(2).toString(),
-					"Rule R3:  if and(rdf(x, rdf:type, rulevars:Person), rdf(x, rulevars:teaches, y)) then rdf(x, rulevars:knows, y)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(3).toString(),
-					"Rule R4:  if and(rdf(v0, rdf:type, rulevars:Person), and(rdf(v0, rulevars:knows, v1), and(rdf(v1, rdf:type, rulevars:Person), !=(v0,v1)))) then rdf(v1, rulevars:knows, v0)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(4).toString(),
-					"Rule R4b:  if and(rdf(v0, rdf:type, rulevars:Person), and(rdf(v0, rulevars:knows, v1), and(rdf(v1, rdf:type, rulevars:Person), !=(v0,v1)))) then rdf(v1, rulevars:knows, v0)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(5).toString(),
-					"Rule R5:  if and(rdf(x, rdf:type, rulevars:Person), rdf(x, rulevars:knows, y)) then rdf(y, rulevars:knows, x)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(6).toString(),
-					"Rule R5b:  if and(rdf(x, rdf:type, rulevars:Person), rdf(x, rulevars:knows, y)) then rdf(y, rulevars:knows, x)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(7).toString(),
-					"Rule R6:  if and(rdf(x, rdf:type, rulevars:Person), rdf(y, rulevars:teaches, x)) then rdf(x, rulevars:knows, y)."))
-		]
+ 			var grdidx = 0
+ 			for (rule:rules) {
+ 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+ 			}
+ 		]
 	}
 
 	@Test
 	def void testCRule_02() {
+		val grd = newArrayList(
+"Rule R1:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:teaches, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v0, rulevars:knows, v1).",
+"Rule R2:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:teaches, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v0, rulevars:acquaintance, v1).",
+"Rule R3:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
+"Rule R3b:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).")
 		
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 		
@@ -265,35 +259,29 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			Rule R3b: if a Person has knows a second Person then the second Person has knows the first Person.
 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
-//			if (issues !== null) {
-//				for (issue : issues) {
-//					print(issue.message)
-//				}
-//			}
-//			if (rules !== null) {
-//				for (rule : rules) {
-//					print(rule.toString + "\n")
-//				}
-//			}
+			if (issues !== null) {
+				for (issue : issues) {
+					print(issue.message)
+				}
+			}
+			if (rules !== null) {
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
+			}
 			issues.assertHasNoIssues;
 			assertTrue(rules.size == 4)
-			assertTrue(
-				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if and(rdf(v0, rdf:type, rulevars:Person), and(rdf(v0, rulevars:teaches, v1), and(rdf(v1, rdf:type, rulevars:Person), !=(v0,v1)))) then rdf(v0, rulevars:knows, v1)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(1).toString(),
-					"Rule R2:  if and(rdf(v0, rdf:type, rulevars:Person), and(rdf(v0, rulevars:teaches, v1), and(rdf(v1, rdf:type, rulevars:Person), !=(v0,v1)))) then rdf(v0, rulevars:acquaintance, v1)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(2).toString(),
-					"Rule R3:  if and(rdf(v0, rdf:type, rulevars:Person), and(rdf(v0, rulevars:knows, v1), and(rdf(v1, rdf:type, rulevars:Person), !=(v0,v1)))) then rdf(v1, rulevars:knows, v0)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(3).toString(),
-					"Rule R3b:  if and(rdf(v0, rdf:type, rulevars:Person), and(rdf(v0, rulevars:knows, v1), and(rdf(v1, rdf:type, rulevars:Person), !=(v0,v1)))) then rdf(v1, rulevars:knows, v0)."))
+ 			var grdidx = 0
+ 			for (rule:rules) {
+ 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+ 			}
 		]
 	}
 
 	@Test
 	def void testCRule_03() {
+		val grd = newArrayList(
+"Rule findPadFillet1:  if rdf(v0, rdf:type, model3:Blending) and rdf(v0, model3:edge, v1) and rdf(v1, rdf:type, model3:Intersection) and rdf(v1, model3:edgeAdjacencyType, model3:TANGENT) and rdf(v0, model3:edge, v2) and rdf(v2, rdf:type, model3:Intersection) and rdf(v2, model3:edgeAdjacencyType, model3:TANGENT) and !=(v2,v1) and rdf(v3, rdf:type, model3:AbstractFace) and rdf(v3, model3:edge, v2) and rdf(v3, model3:concave, false) and rdf(v3, model3:isFloorFace, false) and rdf(v3, rdf:type, model3:Cylindrical) and rdf(v4, rdf:type, model3:AbstractFace) and rdf(v4, model3:edge, v1) and !=(v3,v4) and !=(v0,v4) and rdf(v0, model3:adjacentFace, v5) and rdf(v5, rdf:type, model3:AbstractFace) and !=(v4,v5) and !=(v3,v5) and rdf(v0, model3:facesShareEndPoint, v5) and Not(rdf(v3, model3:facesShareEndPoint, v4)) and rdf(v4, model3:edge, v6) and rdf(v6, rdf:type, model3:AbstractEdge) and rdf(v6, model3:edgeAdjacencyType, model3:CONVEX) and !=(v6,v1) then thereExists(v7) and rdf(v7, rdf:type, model3:PadFillet) and rdf(v7, model3:featureFace, v0) and rdf(v7, model3:otherFace, v4) and rdf(v7, model3:bottomFace, v3) and rdf(v7, model3:bottomEdge, v2) and rdf(v7, model3:otherFace, \"Pad Fillet\").")
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 
@@ -351,26 +339,37 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				the PadFillet has otherFace "Pad Fillet".
 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
-//			if (issues !== null) {
-//				for (issue : issues) {
-//					print(issue.message)
-//				}
-//			}
-//			if (rules !== null) {
-//				for (rule : rules) {
-//					print(rule.toString)
-//				}
-//			}
+			if (issues !== null) {
+				for (issue : issues) {
+					print(issue.message)
+				}
+			}
+			if (rules !== null) {
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
+			}
 			issues.assertHasNoIssues;
 			assertTrue(rules.size == 1)
-			assertTrue(
-				processor.compareTranslations(rules.get(0).toString(),
-					"Rule findPadFillet1:  if and(rdf(v0, rdf:type, model3:Blending), and(rdf(v0, model3:edge, v1), and(rdf(v1, rdf:type, model3:Intersection), and(rdf(v1, model3:edgeAdjacencyType, model3:TANGENT), and(rdf(v0, model3:edge, v2), and(rdf(v2, rdf:type, model3:Intersection), and(rdf(v2, model3:edgeAdjacencyType, model3:TANGENT), and(!=(v2,v1), and(rdf(v3, rdf:type, model3:AbstractFace), and(rdf(v3, model3:edge, v2), and(rdf(v3, model3:concave, false), and(rdf(v3, model3:isFloorFace, false), and(rdf(v3, rdf:type, model3:Cylindrical), and(rdf(v4, rdf:type, model3:AbstractFace), and(rdf(v4, model3:edge, v1), and(!=(v3,v4), and(!=(v0,v4), and(rdf(v0, model3:adjacentFace, v5), and(rdf(v5, rdf:type, model3:AbstractFace), and(!=(v4,v5), and(!=(v3,v5), and(rdf(v0, model3:facesShareEndPoint, v5), and(Not(rdf(v3, model3:facesShareEndPoint, v4)), and(rdf(v4, model3:edge, v6), and(rdf(v6, rdf:type, model3:AbstractEdge), and(rdf(v6, model3:edgeAdjacencyType, model3:CONVEX), !=(v6,v1))))))))))))))))))))))))))) then and(thereExists(v7), and(rdf(v7, rdf:type, model3:PadFillet), and(rdf(v7, model3:featureFace, v0), and(rdf(v7, model3:otherFace, v4), and(rdf(v7, model3:bottomFace, v3), and(rdf(v7, model3:bottomEdge, v2), rdf(v7, model3:otherFace, \"Pad Fillet\")))))))."))
+ 			var grdidx = 0
+ 			for (rule:rules) {
+ 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+ 			}
 		]
 	}
 
 	@Test
 	def void testCRule_04() {
+		val grd = newArrayList(
+"Rule DaughterRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:child, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v1, genealogy:gender, genealogy:Female) then rdf(v0, genealogy:daughter, v1).",
+"Rule SonRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:child, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v1, genealogy:gender, genealogy:Male) then rdf(v0, genealogy:son, v1).",
+"Rule SiblingRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:child, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v0, genealogy:child, v2) and rdf(v2, rdf:type, genealogy:Person) and !=(v1,v2) and !=(v0,v2) then rdf(v1, genealogy:sibling, v2).",
+"Rule GrandparentRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:child, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v1, genealogy:child, v2) and rdf(v2, rdf:type, genealogy:Person) and !=(v1,v2) and !=(v0,v2) then rdf(v0, rdf:type, genealogy:Grandparent) and rdf(v0, genealogy:grandchild, v2).",
+"Rule GranddaughterRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:grandchild, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v1, genealogy:gender, genealogy:Female) then rdf(v0, genealogy:granddaughter, v1).",
+"Rule GrandsonRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:grandchild, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v1, genealogy:gender, genealogy:Male) then rdf(v0, genealogy:grandson, v1).",
+"Rule AuntRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:sibling, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v1, genealogy:gender, genealogy:Female) and rdf(v0, genealogy:child, v2) and rdf(v2, rdf:type, genealogy:Person) and !=(v1,v2) and !=(v0,v2) then rdf(v1, rdf:type, genealogy:Aunt) and rdf(v2, genealogy:aunt, v1).",
+"Rule UncleRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:sibling, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v1, genealogy:gender, genealogy:Male) and rdf(v0, genealogy:child, v2) and rdf(v2, rdf:type, genealogy:Person) and !=(v1,v2) and !=(v0,v2) then rdf(v1, rdf:type, genealogy:Uncle) and rdf(v2, genealogy:uncle, v1).",
+"Rule CousinRule:  if rdf(v0, rdf:type, genealogy:Person) and rdf(v0, genealogy:sibling, v1) and rdf(v1, rdf:type, genealogy:Person) and !=(v0,v1) and rdf(v0, genealogy:child, v2) and rdf(v2, rdf:type, genealogy:Person) and !=(v1,v2) and !=(v0,v2) and rdf(v1, genealogy:child, v3) and rdf(v3, rdf:type, genealogy:Person) and !=(v2,v3) and !=(v1,v3) and !=(v0,v3) then rdf(v2, genealogy:cousin, v3).")
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 
@@ -451,51 +450,36 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				then the third Person has cousin the fourth Person.
 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
-//			if (issues !== null) {
-//				for (issue : issues) {
-//					print(issue.message + "\n")
-//				}
-//			}
-//			if (rules !== null) {
-//				for (rule : rules) {
-//					print(rule.toString + "\n")
-//				}
-//			}
+			if (issues !== null) {
+				for (issue : issues) {
+					print(issue.message + "\n")
+				}
+			}
+			if (rules !== null) {
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
+			}
 			issues.assertHasNoIssues;
 			assertTrue(rules.size == 9)
-			assertTrue(
-				processor.compareTranslations(rules.get(0).toString(),
-					"Rule DaughterRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:child, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), rdf(v1, genealogy:gender, genealogy:Female))))) then rdf(v0, genealogy:daughter, v1)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(1).toString(),
-					"Rule SonRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:child, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), rdf(v1, genealogy:gender, genealogy:Male))))) then rdf(v0, genealogy:son, v1)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(2).toString(),
-					"Rule SiblingRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:child, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), and(rdf(v0, genealogy:child, v2), and(rdf(v2, rdf:type, genealogy:Person), and(!=(v1,v2), !=(v0,v2)))))))) then rdf(v1, genealogy:sibling, v2)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(3).toString(),
-					"Rule GrandparentRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:child, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), and(rdf(v1, genealogy:child, v2), and(rdf(v2, rdf:type, genealogy:Person), and(!=(v1,v2), !=(v0,v2)))))))) then and(rdf(v0, rdf:type, genealogy:Grandparent), rdf(v0, genealogy:grandchild, v2))."))
-			assertTrue(
-				processor.compareTranslations(rules.get(4).toString(),
-					"Rule GranddaughterRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:grandchild, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), rdf(v1, genealogy:gender, genealogy:Female))))) then rdf(v0, genealogy:granddaughter, v1)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(5).toString(),
-					"Rule GrandsonRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:grandchild, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), rdf(v1, genealogy:gender, genealogy:Male))))) then rdf(v0, genealogy:grandson, v1)."))
-			assertTrue(
-				processor.compareTranslations(rules.get(6).toString(),
-					"Rule AuntRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:sibling, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), and(rdf(v1, genealogy:gender, genealogy:Female), and(rdf(v0, genealogy:child, v2), and(rdf(v2, rdf:type, genealogy:Person), and(!=(v1,v2), !=(v0,v2))))))))) then and(rdf(v1, rdf:type, genealogy:Aunt), rdf(v2, genealogy:aunt, v1))."))
-			assertTrue(
-				processor.compareTranslations(rules.get(7).toString(),
-					"Rule UncleRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:sibling, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), and(rdf(v1, genealogy:gender, genealogy:Male), and(rdf(v0, genealogy:child, v2), and(rdf(v2, rdf:type, genealogy:Person), and(!=(v1,v2), !=(v0,v2))))))))) then and(rdf(v1, rdf:type, genealogy:Uncle), rdf(v2, genealogy:uncle, v1))."))
-			assertTrue(
-				processor.compareTranslations(rules.get(8).toString(),
-					"Rule CousinRule:  if and(rdf(v0, rdf:type, genealogy:Person), and(rdf(v0, genealogy:sibling, v1), and(rdf(v1, rdf:type, genealogy:Person), and(!=(v0,v1), and(rdf(v0, genealogy:child, v2), and(rdf(v2, rdf:type, genealogy:Person), and(!=(v1,v2), and(!=(v0,v2), and(rdf(v1, genealogy:child, v3), and(rdf(v3, rdf:type, genealogy:Person), and(!=(v2,v3), and(!=(v1,v3), !=(v0,v3))))))))))))) then rdf(v2, genealogy:cousin, v3)."))
+ 			var grdidx = 0
+ 			for (rule:rules) {
+ 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+ 			}
 		]
 
 	}
 
 	@Test
 	def void testVariables_01() {
+		val grd = newArrayList(
+"Rule R1:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:acquaintance, y).",
+"Rule R2:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:knows, y).",
+"Rule R3:  if rdf(v0, rdf:type, ht:Person) and rdf(v0, ht:knows, v1) and rdf(v1, rdf:type, ht:Person) and !=(v0,v1) then rdf(v1, ht:knows, v0).",
+"Rule R4:  if rdf(v0, rdf:type, ht:Person) and rdf(v0, ht:knows, v1) and rdf(v1, rdf:type, ht:Person) and !=(v0,v1) then rdf(v1, ht:knows, v0).",
+"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x).",
+"Rule R6:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:knows, y) then rdf(y, ht:knows, x).",
+"Rule R7:  if rdf(x, rdf:type, ht:Parent) then thereExists(v0) and rdf(v0, rdf:type, ht:Person) and rdf(x, ht:teaches, v0).")
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 
@@ -544,13 +528,13 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
  			}
  			assertTrue(issues.size == 0)
  			assertTrue(rules.size == 7)
- 			assertTrue(processor.compareTranslations(rules.get(0).toString(),"Rule R1:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:acquaintance, y)."))
- 			assertTrue(processor.compareTranslations(rules.get(1).toString(),"Rule R2:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:knows, y)."))
- 			assertTrue(processor.compareTranslations(rules.get(2).toString(),"Rule R3:  if and(rdf(v0, rdf:type, ht:Person), and(rdf(v0, ht:knows, v1), and(rdf(v1, rdf:type, ht:Person), !=(v0,v1)))) then rdf(v1, ht:knows, v0)."))
- 			assertTrue(processor.compareTranslations(rules.get(3).toString(),"Rule R4:  if and(rdf(v0, rdf:type, ht:Person), and(rdf(v0, ht:knows, v1), and(rdf(v1, rdf:type, ht:Person), !=(v0,v1)))) then rdf(v1, ht:knows, v0)."))
-  			assertTrue(processor.compareTranslations(rules.get(4).toString(),"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
- 			assertTrue(processor.compareTranslations(rules.get(5).toString(),"Rule R6:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:knows, y)) then rdf(y, ht:knows, x)."))
- 			assertTrue(processor.compareTranslations(rules.get(6).toString(),"Rule R7:  if rdf(x, rdf:type, ht:Parent) then and(thereExists(v0), and(rdf(v0, rdf:type, ht:Person), rdf(x, ht:teaches, v0)))."))
+ 			for (rule:rules) {
+ 				println("\"" + rule.toString + "\",")
+ 			}
+ 			var grdidx = 0
+ 			for (rule:rules) {
+ 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+ 			}
  		]
 	}
 }

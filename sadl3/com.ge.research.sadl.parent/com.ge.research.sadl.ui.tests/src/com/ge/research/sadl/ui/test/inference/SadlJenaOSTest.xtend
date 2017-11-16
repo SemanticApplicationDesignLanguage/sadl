@@ -37,7 +37,7 @@ class SadlJenaOSTest extends AbstractSadlPlatformTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule UnnamedChild:  if and(rdf(TestArticles:MyCircle, TestArticles:radius, X), and(>(X,0), and(^(X,2,v0), *(v0,PI,Y)))) then rdf(TestArticles:MyCircle, TestArticles:area, Y)."))
+					"Rule UnnamedChild:  if rdf(v0, rdf:type, sjost:Person) and rdf(v0, rdf:type, sjost:Parent) then thereExists(v1) and rdf(v1, rdf:type, sjost:Person) and rdf(v0, sjost:child, v1)."))
 		]
 
 	}

@@ -86,10 +86,13 @@ class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
  			}
  			assertTrue(issues.size == 0)
  			assertTrue(rules.size == 4)
- 			assertTrue(processorProvider.get.compareTranslations(rules.get(0).toString(),"Rule R1:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:acquaintance, y)."))
- 			assertTrue(processorProvider.get.compareTranslations(rules.get(1).toString(),"Rule R2:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:teaches, y)) then rdf(x, ht:knows, y)."))
+ 			for(rule:rules) {
+ 				println(rule.toString)
+ 			}
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(0).toString(),"Rule R1:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:acquaintance, y)."))
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(1).toString(),"Rule R2:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:knows, y)."))
    			assertTrue(processorProvider.get.compareTranslations(rules.get(2).toString(),"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
- 			assertTrue(processorProvider.get.compareTranslations(rules.get(3).toString(),"Rule R6:  if and(rdf(x, rdf:type, ht:Person), rdf(x, ht:knows, y)) then rdf(y, ht:knows, x)."))
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(3).toString(),"Rule R6:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
   		]
 	}
 	

@@ -276,17 +276,17 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testUnits_10() {
 		val forTest = newArrayList(
-"Rule R1:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), is(v0,v1)))) then rdf(model:System, model:approved, true).",
-"Rule R1b:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v2), and(rdf(model:TimingConstant3, model:constantValue, v3), is(v2,v3)))) then rdf(model:System, model:approved, true).",
-"Rule R1c:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v4), and(rdf(model:TimingConstant5, model:cValue, v5), and(unittedQuantity(v5,\"seconds\",v6), is(v4,v6))))) then rdf(model:System, model:approved, true).",
-"Rule R1e:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v7), and(+(2 \"seconds\",3 \"seconds\",v8), is(v7,v8)))) then rdf(model:System, model:approved, true).",
-"Rule R1f:  if and(rdf(model:System, model:inspection, model:Passed), and(rdf(model:System, model:past, v9), and(+(2 \"seconds\",3 \"seconds\",v10), is(v9,v10)))) then rdf(model:System, model:approved, true).",
+"Rule R1:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(model:TimingConstant3, model:constantValue, v1) and is(v0,v1) then rdf(model:System, model:approved, true).",
+"Rule R1b:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v2) and rdf(model:TimingConstant3, model:constantValue, v3) and is(v2,v3) then rdf(model:System, model:approved, true).",
+"Rule R1c:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v4) and rdf(model:TimingConstant5, model:cValue, v5) and unittedQuantity(v5,\"seconds\",v6) and is(v4,v6) then rdf(model:System, model:approved, true).",
+"Rule R1e:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v7) and +(2 \"seconds\",3 \"seconds\",v8) and is(v7,v8) then rdf(model:System, model:approved, true).",
+"Rule R1f:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v9) and +(2 \"seconds\",3 \"seconds\",v10) and is(v9,v10) then rdf(model:System, model:approved, true).",
 "Rule R5:  if rdf(model:System, model:inspection, model:Passed) then rdf(model:System, model:approved, true).",
-"Rule R2:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v11), and(rdf(model:TimingConstant3, model:constantValue, v12), and(+(v12,3 \"seconds\",v13), is(v11,v13))))) then rdf(model:System, model:inspection, model:Passed).",
-"Rule R2b:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v14), and(rdf(model:TimingConstant3, model:constantValue, v15), and(+(v15,3 \"seconds\",v16), is(v14,v16))))) then rdf(model:System, model:inspection, model:Passed).",
-"Rule R2c:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v17), and(rdf(model:TimingConstant3, model:constantValue, v18), and(+(v18,3 \"seconds\",v19), is(v17,v19))))) then rdf(model:System, model:inspection, model:Passed).",
-"Rule R2e:  if and(rdf(model:System, model:publicized, true), and(rdf(model:System, model:past, v20), and(rdf(model:TimingConstant5, model:cValue, v21), and(+(v21,3,v22), and(unittedQuantity(v22,\"seconds\",v23), is(v20,v23)))))) then rdf(model:System, model:inspection, model:Passed).",
-"Rule R3:  if and(rdf(model:System, model:publicized, true), rdf(model:System, model:past, 3 \"seconds\")) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R2:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, v11) and rdf(model:TimingConstant3, model:constantValue, v12) and +(v12,3 \"seconds\",v13) and is(v11,v13) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R2b:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, v14) and rdf(model:TimingConstant3, model:constantValue, v15) and +(v15,3 \"seconds\",v16) and is(v14,v16) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R2c:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, v17) and rdf(model:TimingConstant3, model:constantValue, v18) and +(v18,3 \"seconds\",v19) and is(v17,v19) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R2e:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, v20) and rdf(model:TimingConstant5, model:cValue, v21) and +(v21,3,v22) and unittedQuantity(v22,\"seconds\",v23) and is(v20,v23) then rdf(model:System, model:inspection, model:Passed).",
+"Rule R3:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, 3 \"seconds\") then rdf(model:System, model:inspection, model:Passed).",
 "Rule R4:  if rdf(model:System, model:publicized, true) then rdf(model:System, model:inspection, model:Passed)."			
 		)
 		'''
