@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -21,13 +23,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.internal.Workbench;
+import org.eclipse.xtext.preferences.IPreferenceValues;
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -35,12 +41,15 @@ import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.ui.SadlConsole;
+import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.ui.visualize.GraphSegment;
 import com.ge.research.sadl.ui.visualize.OntologyGraphGenerator;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.google.inject.Injector;
 
+@SuppressWarnings("restriction")
 public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 
@@ -251,7 +260,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
 			}
 			
-			OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri, monitor);
+			OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri, monitor, getOntologyGraphPreferences());
 			ResultSet oggResults = null;
 			try {
 				oggResults = ogg.generateOntologyResultSet(null, publicUri, UriStrategy.QNAME_IF_IMPORT);
@@ -339,6 +348,34 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 	protected String[] getValidTargetFileTypes(){
 		String[] types = {"owl", "sadl"};
 		return types;
+	}
+	
+	protected Map<String,Boolean> getOntologyGraphPreferences() {
+		Injector sadlInjector = safeGetInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
+		IPreferenceValuesProvider pvp = sadlInjector.getInstance(IPreferenceValuesProvider.class);
+		org.eclipse.emf.ecore.resource.Resource resource = new ResourceImpl();
+		resource.setURI(org.eclipse.emf.common.util.URI.createFileURI("/"));
+	
+		IPreferenceValues preferenceValues = pvp.getPreferenceValues(resource);
+		if (preferenceValues != null) {
+			Map<String, Boolean> map = new HashMap<String, Boolean>();
+			boolean bval = Boolean.parseBoolean(preferenceValues.getPreference(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS));
+			if (bval) {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), true);
+			}
+			else {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), false);
+			}
+			bval = Boolean.parseBoolean(preferenceValues.getPreference(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES));
+			if (bval) {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), true);
+			}
+			else {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), false);
+			}			
+			return map;
+		}
+		return null;
 	}
 
 }
