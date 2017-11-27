@@ -1,3 +1,20 @@
+/************************************************************************
+ * Copyright (c) 2007-2017 - General Electric Company, All Rights Reserved
+ * 
+ * Project: SADL
+ * 
+ * Description: The Semantic Application Design Language (SADL) is a 
+ * language for building semantic models and expressing rules that 
+ * capture additional domain knowledge. The SADL-IDE (integrated 
+ * development environment) is a set of Eclipse plug-ins that 
+ * support the editing and testing of semantic models using the 
+ * SADL language.
+ * 
+ * This software is distributed "AS-IS" without ANY WARRANTIES 
+ * and licensed under the Eclipse Public License - v 1.0 
+ * which is available at http://www.eclipse.org/org/documents/epl-v10.php
+ *
+ ***********************************************************************/
 package com.ge.research.sadl.ui.visualize;
 
 import java.io.IOException;
@@ -10,16 +27,20 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.xtext.preferences.IPreferenceValues;
 
-import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.ui.handlers.SadlActionHandler;
+import com.ge.research.sadl.ui.preferences.SadlPreferencesProvider;
+import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.EnumeratedClass;
@@ -42,7 +63,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  */
 public class OntologyGraphGenerator extends GraphGenerator {
 
-	
+	private Map<String, Boolean> preferenceValues;
 	
 	
 //	public enum Orientation {TD, LR, BD, RL}
@@ -99,6 +120,22 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		super(configMgr, visualizer, project, publicUri, null, monitor);
 		this.setConfigMgr(configMgr);
 	}
+	
+	
+	/**
+	 * Constructor for the OntologyGraphGenerator class with ProgressMonitor for use with a particular input model identified by publicUri
+	 * @param configMgr
+	 * @param visualizer
+	 * @param project
+	 * @param monitor
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 */
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, IProgressMonitor monitor, Map<String,Boolean> prefValues) throws ConfigurationException, IOException {
+		super(configMgr, visualizer, project, publicUri, null, monitor);
+		this.setConfigMgr(configMgr);
+		setPreferenceValues(prefValues);
+	}
 
 	/**
 	 * Method that generates the ontology graph ResultSet, which is fed in to the handler to turn into a 
@@ -130,11 +167,16 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		return rs;
 	}
 
+	@SuppressWarnings("restriction")
 	private void addByStatements(String publicUri, List<GraphSegment> data) throws ConfigurationException, IOException, URISyntaxException, Exception {
+		Boolean graphImplicitElements = getPreferenceValue(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId());
+		Boolean graphImplicitElementInstances = getPreferenceValue(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId());
+		
 		StmtIterator stmtitr = getLocalModel().listStatements();
 		Map<Resource, RDFNode> propertyDomains = null;
 		Map<Resource, RDFNode> propertyRanges = null;
 		Map<Resource, RDFNode> listTypes = null;
+		List<String> implicitInstancesToSkip = new ArrayList<String>();
 		while (stmtitr.hasNext()) {
 			Statement stmt = stmtitr.nextStatement();
 			if (!getTheJenaModel().getBaseModel().contains(stmt)) {
@@ -143,6 +185,34 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			Property p = stmt.getPredicate();
 			Resource subj = stmt.getSubject();
 			RDFNode obj = stmt.getObject();
+			
+			if(!graphImplicitElementInstances) {
+				if(subj.isURIResource()) {	
+					if(implicitInstancesToSkip.contains(subj.getNameSpace())) {
+						continue;
+					}		
+					StmtIterator instanceItr = getLocalModel().listStatements(subj, RDF.type, (RDFNode)null);
+					while(instanceItr.hasNext()) {
+						Statement instanceStmt = instanceItr.next();
+						RDFNode instanceObj = instanceStmt.getObject();
+						if(instanceObj.isURIResource()) {
+							Resource instanceClass = instanceObj.as(Resource.class);
+							if(instanceClass.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
+							   instanceClass.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
+							   instanceClass.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) {
+								//This subj Resource is an instance of a class defined in an implicit resource
+								//All graphing for this Resource should be skipped at this point
+								implicitInstancesToSkip.add(subj.getNameSpace());
+								break;
+							}
+						}
+					}
+					if(implicitInstancesToSkip.contains(subj.getNameSpace())) {
+						continue;
+					}
+				}
+			}
+			
 			if (p.equals(OWL.equivalentClass)) {
 				addEquivalentClass(publicUri, subj, obj, data);
 			}
@@ -154,13 +224,16 @@ public class OntologyGraphGenerator extends GraphGenerator {
 					(p.isURIResource() && p.getURI().equals(SadlConstants.SADL_LIST_MODEL_RANGE_ANNOTATION_PROPERTY))) {
 				continue;
 			}
-			else if (subj.isURIResource() && (subj.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
-					subj.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
-					subj.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) &&
-					(!publicUri.equals(SadlConstants.SADL_BASE_MODEL_URI) && 
-							!publicUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) && 
-							!publicUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI))) {
+			else if (subj.isURIResource() && 
+					(subj.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
+					 subj.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
+					 subj.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) &&
+					 (!graphImplicitElements &&
+					  (!publicUri.equals(SadlConstants.SADL_BASE_MODEL_URI) && 
+				       !publicUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) && 
+				       !publicUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)))) {
 				// only show implicit model concepts when graphing the implicit model
+				// or when the option to graph implicit elements has been enabled
 				continue;
 			}
 			else if (obj.isURIResource() && (obj.asResource().equals(OWL.Class) || obj.asResource().equals(OWL.Ontology)
@@ -208,7 +281,8 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			}
 			else {
 				if (subj.canAs(Individual.class)){
-					addInstancePropertyToGraph(publicUri, subj.as(Individual.class), p, obj, data);				}
+					addInstancePropertyToGraph(publicUri, subj.as(Individual.class), p, obj, data);				
+				}
 			}
 		}
 		if (propertyDomains != null && propertyRanges != null) {
@@ -374,6 +448,21 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		return null;
 	}
 
+	private void setPreferenceValues(Map<String,Boolean> prefValues) {
+		this.preferenceValues = prefValues;
+	}
+	
+	private Boolean getPreferenceValue(String key) {
+		if(this.preferenceValues == null || this.preferenceValues.isEmpty()) {
+			return false;
+		}
+		if(this.preferenceValues.containsKey(key)) {
+			return this.preferenceValues.get(key);
+		}
+		
+		return false;
+	}
+	
 	/**
 	 * Method to get the type of the elements of a typed List from the restriction in the definition
 	 * @param rng
