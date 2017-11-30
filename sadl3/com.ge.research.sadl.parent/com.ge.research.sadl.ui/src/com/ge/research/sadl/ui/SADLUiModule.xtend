@@ -28,6 +28,8 @@ import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.generator.SadlShouldGenerate
+import com.ge.research.sadl.ui.hover.SadlEObjectDocumentationProvider
+import com.ge.research.sadl.ui.hover.SadlEObjectHoverProvider
 import com.ge.research.sadl.ui.markers.EclipseMarkerSeverityMapper
 import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
@@ -38,12 +40,14 @@ import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
 import com.google.inject.Binder
 import com.google.inject.name.Names
 import org.eclipse.ui.plugin.AbstractUIPlugin
+import org.eclipse.xtext.documentation.IEObjectDocumentationProvider
 import org.eclipse.xtext.generator.IShouldGenerate
 import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.contentassist.AbstractJavaBasedContentProposalProvider.ReferenceProposalCreator
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
+import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
@@ -121,6 +125,14 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
 		return SadlContentAssistContextFactory;
+	}
+	
+	def Class<? extends IEObjectHoverProvider> bindIEObjectHoverProvider() {
+		return SadlEObjectHoverProvider;
+	}
+	
+	def Class<? extends IEObjectDocumentationProvider> bindIEObjectDocumentationProvider() {
+		return SadlEObjectDocumentationProvider;
 	}
 	
 }
