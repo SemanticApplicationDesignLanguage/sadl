@@ -2930,6 +2930,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						return combineRest(createBinaryBuiltin(expr.getOp(), leftVar, rightVar), rest);
 					}
+// TODO shouldn't generate triple for type as variable contains all type info.			should just return rest?		
 					TripleElement trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
 					trel.setSourceType(TripleSourceType.SPV);
 					return combineRest(trel, rest);
@@ -3756,7 +3757,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 	
-	private void validateTripleTypes(TripleElement tr, boolean checkrng, Expression expr) throws TranslationException, InvalidTypeException, CircularDependencyException {
+	private void validateTripleTypes(TripleElement tr, Expression expr) throws TranslationException, InvalidTypeException, CircularDependencyException {
 		if (getModelValidator() != null) {
 			String varName = tr.getSubject() instanceof NamedNode ? ((NamedNode)tr.getSubject()).getName() : null;
 			OntResource subj = getOntResource(tr.getSubject());
@@ -3764,8 +3765,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, varName);
 			Node obj = tr.getObject();
 			if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
-				Literal litval = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), pred, ((com.ge.research.sadl.model.gp.Literal)obj).getValue());
-				if (!valueInDatatypePropertyRange(pred, litval, expr)) {
+				try {
+					Literal litval = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), pred, ((com.ge.research.sadl.model.gp.Literal)obj).getValue());
+					if (!valueInDatatypePropertyRange(pred, litval, expr)) {
+						addError("Value '" + nodeToString(tr.getObject()) + "' is not in the range of property '" + rdfNodeToString(pred) + "'", expr);
+					}
+				}
+				catch (Throwable t) {
 					addError("Value '" + nodeToString(tr.getObject()) + "' is not in the range of property '" + rdfNodeToString(pred) + "'", expr);
 				}
 			}
@@ -4877,9 +4883,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new TranslationException("Unable to find object for triple: " + obj.getClass().getCanonicalName());
 			}
 		}
-		boolean checkrng = (tr.getObject() != null);				
 		try {
-			validateTripleTypes(tr, checkrng, expr);
+			validateTripleTypes(tr, expr);
 		} catch (CircularDependencyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
