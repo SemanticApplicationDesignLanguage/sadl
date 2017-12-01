@@ -3759,10 +3759,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	private void validateTripleTypes(TripleElement tr, Expression expr) throws TranslationException, InvalidTypeException, CircularDependencyException {
 		if (getModelValidator() != null) {
+			Node nsubj = tr.getSubject();
+			boolean isCrVar = nsubj instanceof VariableNode ? ((VariableNode)nsubj).isCRulesVariable() : false;
 			String varName = tr.getSubject() instanceof NamedNode ? ((NamedNode)tr.getSubject()).getName() : null;
 			OntResource subj = getOntResource(tr.getSubject());
 			OntProperty pred = getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString());
-			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, varName);
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, isCrVar ? null : varName);
 			Node obj = tr.getObject();
 			if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
 				try {
