@@ -199,6 +199,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //				}
 //			}
 			val forTest = processor.getIntermediateFormResults(false, false)
+			for (t:forTest) {
+				println("\"" + t.toString + "\",")
+			}
 			var idx = 0
 			for (t:forTest) {
 				assertEquals(results.get(idx++), t.toString)
@@ -234,7 +237,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  			issues.assertHasIssues(2);
  			for (issue:issues) {
  				if (issue.severity.equals(Severity.ERROR)) {
- 					assertEquals(issue.message,"past, an object property with range  UnittedQuantity, cannot be compared (is) with cValue, a datatype property with range  decimal.")
+ 					assertEquals(issue.message,"past, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with cValue, a datatype property with range  http://www.w3.org/2001/XMLSchema#decimal.")
  				}
  				if (issue.severity.equals(Severity.WARNING)) {
   					assertEquals(issue.message,"Units are associated with the subject of this expression; should the expression be in parentheses?")
@@ -269,7 +272,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
  			issues.assertHasIssues(1);
-			assertEquals(issues.head.message,"constantValue, an object property with range  UnittedQuantity, cannot operate (+) with int, an RDF datatype  int.")
+			assertEquals(issues.head.message,"constantValue, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot operate (+) with int, an RDF datatype  http://www.w3.org/2001/XMLSchema#int.")
 		]
 	}
 	
@@ -372,9 +375,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //				println(issue.message)
 //			}
   			assertTrue(rules.size == 12)
-//			for (rule:rules) {
-//				println(rule.toString)
-//			}
+			for (rule:rules) {
+				println("\"" + rule.toString + "\",")
+			}
 			var idx = 0
 			for (t:forTest) {
 				assertEquals(rules.get(idx++).toString, t.toString)
@@ -490,7 +493,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		val forTest = newArrayList(
 "is((rdf(Precedence:Joe, Precedence:age, null)),(rdf((rdf(Precedence:Jane, Precedence:friend, null)), Precedence:age, null)))",
 "rdf(Precedence:Joe, Precedence:age, (rdf((rdf(Precedence:Jane, Precedence:friend, null)), Precedence:age, null)))",
-"+(2,(*(3,4)))",		
+"+(2,(*(3,4)))",
 "*((+(2,3)),4)",
 "+(-2,(*(-3,-4)))",
 "-(PI)",
@@ -521,9 +524,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			val results = processor.getIntermediateFormResults(true, false)
 //			assertTrue(results.size==7)
-//			for (result:results) {
-//				println(result.toString)
-//			}
+			for (result:results) {
+				println("\"" + result.toString + "\",")
+			}
 			var idx = 0
 			for (t:forTest) {
 				assertEquals(results.get(idx++).toString, t.toString)
@@ -534,8 +537,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testPrecedence_02() {
 		val forTest = newArrayList(
-"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]",
-"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]"
+"[and(rdf(Precedence:Joe, Precedence:age, v1), and(rdf(Precedence:Jane, Precedence:friend, v0), rdf(v0, Precedence:age, v1)))]",
+"[and(rdf(Precedence:Joe, Precedence:age, v1), and(rdf(Precedence:Jane, Precedence:friend, v0), rdf(v0, Precedence:age, v1)))]"
 		)
 		'''
 			 uri "http://sadl.org/Precedence.sadl" alias Precedence.
@@ -552,9 +555,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			val results = processor.getIntermediateFormResults(false, true)
 //			assertTrue(results.size==7)
-//			for (result:results) {
-//				println(result.toString)
-//			}
+			for (result:results) {
+				println("\"" + result.toString + "\",")
+			}
 			var idx = 0
 			for (t:forTest) {
 				assertEquals(results.get(idx++).toString, t.toString)
@@ -619,6 +622,279 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //			for (t:forTest) {
 //				assertEquals(results.get(idx++).toString, t.toString)
 //			}
+		]
+	}
+	
+	@Test
+	def void testSubjHasProp_01() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1), rdf(v0, SubjHasProp:prop2, SubjHasProp:InstOfClass3))]"
+		)
+		'''
+			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
+			   
+			   Class1 is a class described by prop1 with values of type Class2.
+			   
+			   Class2 is a class described by prop2 with values of type Class3.
+			   
+			   Class3 is a class described by prop3 with values of type Class4.
+			   
+			   Class4 is a class described by prop4 with values of type decimal.
+			   
+			   InstOfClass3 is a Class3.
+			   InstOfClass4 is a Class4.
+			   
+			   Expr: a Class1 with prop1 a Class2 has prop2 InstOfClass3.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+				assertTrue(issues.size == 1)
+			}
+			assertTrue(results.size==1)
+			for (result:results) {
+				println(result.toString)
+			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
+			}
+		]
+	}
+	
+	@Test
+	def void testSubjHasProp_01P() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))]"
+		)
+		'''
+			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
+			   
+			   Class1 is a class described by prop1 with values of type Class2.
+			   
+			   Class2 is a class described by prop2 with values of type Class3.
+			   
+			   Class3 is a class described by prop3 with values of type Class4.
+			   
+			   Class4 is a class described by prop4 with values of type decimal.
+			   
+			   InstOfClass3 is a Class3.
+			   InstOfClass4 is a Class4.
+			   
+			  // Rule R1: if a Class1 with prop1 a Class2 has prop2 InstOfClass3 then print("hi").
+			   Expr: a Class1 with prop1 (a Class2 has prop2 InstOfClass3).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(results.size==1)
+			for (result:results) {
+				println(result.toString)
+			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
+			}
+		]
+	}
+	
+	@Test
+	def void testSubjHasProp_02() {
+		val forTest = newArrayList(
+"[and(rdf(v1, SubjHasProp:prop1, v2), and(rdf(v1, SubjHasProp:prop2, v0), rdf(v1, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))]"
+		)
+		'''
+			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
+			   
+			   Class1 is a class described by prop1 with values of type Class2.
+			   
+			   Class2 is a class described by prop2 with values of type Class3.
+			   
+			   Class3 is a class described by prop3 with values of type Class4.
+			   
+			   Class4 is a class described by prop4 with values of type decimal.
+			   
+			   InstOfClass3 is a Class3.
+			   InstOfClass4 is a Class4.
+			   
+			   Expr: a Class1 with prop1 a Class2 with prop2 a Class3 with prop3 InstOfClass4.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.severity + ": " + issue.message)
+				}
+				assertTrue(issues.size==2)
+			}
+			assertTrue(results.size==1)
+			for (result:results) {
+				println(result.toString)
+			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
+			}
+		]
+	}
+	
+	@Test
+	def void testSubjHasProp_02P() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))]"
+		)
+		'''
+			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
+			   
+			   Class1 is a class described by prop1 with values of type Class2.
+			   
+			   Class2 is a class described by prop2 with values of type Class3.
+			   
+			   Class3 is a class described by prop3 with values of type Class4.
+			   
+			   Class4 is a class described by prop4 with values of type decimal.
+			   
+			   InstOfClass3 is a Class3.
+			   InstOfClass4 is a Class4.
+			   
+			   Expr: a Class1 with prop1 (a Class2 with prop2 (a Class3 with prop3 InstOfClass4)).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+				assertTrue(issues.size==0)
+			}
+			assertTrue(results.size==1)
+			for (result:results) {
+				println(result.toString)
+			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
+			}
+		]
+	}
+	
+	@Test
+	def void testSubjHasProp_03() {
+//		val forTest = newArrayList(
+//"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]",
+//"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]"
+//		)
+		'''
+			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
+			   
+			   Class1 is a class described by prop1 with values of type Class2.
+			   
+			   Class2 is a class described by prop2 with values of type Class3.
+			   
+			   Class3 is a class described by prop3 with values of type Class4.
+			   
+			   Class4 is a class described by prop4 with values of type decimal.
+			   
+			   InstOfClass3 is a Class3.
+			   InstOfClass4 is a Class4.
+			   
+			   Expr: a Class1 with prop1 (a Class2 with prop2 a Class3 with prop3 InstOfClass4, with prop2 InstOfClass3).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(results.size==1)
+			for (result:results) {
+				println(result.toString)
+			}
+//			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(results.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	
+	@Test
+	def void testSubjHasProp_04() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))))]"
+		)
+		'''
+			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
+			   
+			   Class1 is a class described by prop1 with values of type Class2.
+			   
+			   Class2 is a class described by prop2 with values of type Class3.
+			   
+			   Class3 is a class described by prop3 with values of type Class4.
+			   
+			   Class4 is a class described by prop4 with values of type decimal.
+			   
+			   InstOfClass3 is a Class3.
+			   InstOfClass4 is a Class4.
+			   
+			   Expr: a Class1 with prop1 (a Class2 with prop2 (a Class3 with prop3 InstOfClass4), with prop2 InstOfClass3).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(results.size==1)
+			for (result:results) {
+				println(result.toString)
+			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
+			}
+		]
+	}
+	
+	@Test
+	def void testSubjHasProp_05() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3), rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3))))))]"
+		)
+		'''
+			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
+			   
+			   Class1 is a class described by prop1 with values of type Class2.
+			   
+			   Class2 is a class described by prop2 with values of type Class3.
+			   
+			   Class3 is a class described by prop3 with values of type Class4.
+			   
+			   Class4 is a class described by prop4 with values of type decimal.
+			   
+			   InstOfClass3 is a Class3.
+			   AnotherInstOfClass3 is a Class3.
+			   InstOfClass4 is a Class4.
+			   AnotherInstOfClass4 is a Class4.
+			   
+			   Expr: a Class1 with prop1 (a Class2 with prop2 (a Class3 with prop3 InstOfClass4, with prop3 AnotherInstOfClass4), with prop2 InstOfClass3, with prop2 AnotherInstOfClass3).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(results.size==1)
+			for (result:results) {
+				println(result.toString)
+			}
+			var idx = 0
+			for (t:forTest) {
+				assertEquals(results.get(idx++).toString, t.toString)
+			}
 		]
 	}
 	

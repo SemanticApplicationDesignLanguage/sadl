@@ -47,12 +47,15 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			 
 			 Rule R1: if p1 is a Person and p2 is a Pet and p2 has owns p1 then p1 has caredFor true.
  		'''.sadl
-		sadlModel.assertOnlyWarningsOrInfo
 		val issues = validationTestHelper.validate(sadlModel)
+		for (issue:issues) {
+			println(issue.toString)
+		}
 		Assert.assertNotNull(issues)
-		Assert.assertEquals(2, issues.size)
+		Assert.assertEquals(3, issues.size)
 		Assert.assertEquals(issues.get(0).message, "Variable p2 is of type http://sadl.org/Test1.sadl#Pet which is not in domain of property http://sadl.org/Test1.sadl#owns")
-		Assert.assertEquals(issues.get(1).message, "Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
+		Assert.assertEquals(issues.get(1).message, "Class 'http://sadl.org/Test1.sadl#Person' is not in the range of property 'http://sadl.org/Test1.sadl#owns'")
+		Assert.assertEquals(issues.get(2).message, "Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
 	}
 	
 	@Test

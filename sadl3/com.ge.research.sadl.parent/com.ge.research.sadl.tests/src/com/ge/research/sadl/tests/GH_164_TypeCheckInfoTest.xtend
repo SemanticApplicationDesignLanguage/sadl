@@ -28,6 +28,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.ge.research.sadl.model.gp.NamedNode
 
 /**
  * Test to make sure that type check info has a corresponding #hashCode implementation 
@@ -45,7 +46,7 @@ class GH_164_TypeCheckInfoTest extends Assert {
 	@Before
 	def void before() {
 		val id_1 = new ConceptIdentifier;
-		val id_2 = new ConceptIdentifier;
+		val id_2 = new NamedNode;
 		val context = SADLFactory.eINSTANCE.createSadlModel => [
 			alias = "foo";
 			baseUri = "http://sadl.org/Foo.sadl";

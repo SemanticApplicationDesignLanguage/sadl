@@ -1,0 +1,51 @@
+<h1>The SADL Intermediate Form</h1>
+<h6>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/20/2017<!--webbot bot="Timestamp" endspan i-checksum="12510" --> 
+by <a href="mailto:crapo@research.ge.com?subject=Requirements Language">A. W. 
+Crapo</a>.</h6>
+<h2>Introduction</h2>
+<p>The SADL Intermediate Form is an in-memory representation used to capture the 
+semantics of graph patterns and functions used in SADL rules, queries, and 
+tests. This in-memory representation serves several purposes.</p>
+<ol>
+  <li>It serves as the input to target reasoner-specific translators that then 
+  convert rules and queries into the format required by the reasoner. For 
+  example, a Jena-based reasoner requires that rules be expressed in Jena Rule 
+  langiage and that queries be expressed in SPARQL. Hence a compatible 
+  Jena-based translator will translate the intermediate form into Jena Rules and 
+  SPARQL queries.</li>
+  <li>It serves as the mechanism for capturing and preserving tests and other 
+  SADL &quot;commands&quot; during model processing so that they can be processed during 
+  inferencing of a SADL model.</li>
+  <li>Expressions in the Intermediate Form can be serialized for examination by 
+  users (the Explain command) and for automated testing.</li>
+</ol>
+<h2>The Class Hierarchy</h2>
+<p>The in-memory Intermediate Form consists of a set of classes related in 
+sub-class/super-class hierarchies. </p>
+<ul>
+  <li>Node<ul>
+    <li>ConstantNode</li>
+    <li>KnownKnown</li>
+    <li>Literal</li>
+    <li>NamedNode<ul>
+      <li>RDFTypeNode</li>
+      <li>VariableNode</li>
+    </ul>
+    </li>
+    <li>ProxyNode</li>
+    <li>ValueTableNode</li>
+  </ul>
+  </li>
+  <li>GraphPatternElement<ul>
+    <li>BuiltinElement</li>
+    <li>Junction</li>
+    <li>TripleElement</li>
+  </ul>
+  </li>
+</ul>
+<h2>Functions</h2>
+<p>&nbsp;</p>
+<h2>Graph Patterns</h2>
+<h2>Variables</h2>
+<p>&nbsp;</p>

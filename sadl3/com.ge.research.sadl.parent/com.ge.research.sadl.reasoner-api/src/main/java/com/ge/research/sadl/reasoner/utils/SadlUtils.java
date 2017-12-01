@@ -563,7 +563,7 @@ public class SadlUtils {
         String errMsg = null;
         boolean rdfTypeValid = false;
         boolean isNumeric = isNumericRange(rnguri);
-        RDFDatatype rdftype = TypeMapper.getInstance().getSafeTypeByName(rnguri);
+        RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
         if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
         		!rdftype.getURI().equals(XSD.date.getURI()) && 
         		!rdftype.getURI().equals(XSD.dateTime.getURI())) {

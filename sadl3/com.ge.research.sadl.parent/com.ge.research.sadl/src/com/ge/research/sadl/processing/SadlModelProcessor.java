@@ -548,7 +548,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return builtin;
 	}
 
-	private TripleModifierType getTripleModifierType(BuiltinType btype) {
+	protected TripleModifierType getTripleModifierType(BuiltinType btype) {
 		if (btype.equals(BuiltinType.Not) || btype.equals(BuiltinType.NotEqual)) {
 			return TripleModifierType.Not;
 		}
@@ -756,6 +756,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (nt.equals(NodeType.ClassNode)) {
 			return ConceptType.ONTCLASS;
 		}
+		else if (nt.equals(NodeType.ClassListNode)) {
+			return ConceptType.ONTCLASSLIST;
+		}
 		else if (nt.equals(NodeType.InstanceNode)) {
 			return ConceptType.INDIVIDUAL;
 		}
@@ -765,14 +768,23 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		else if (nt.equals(NodeType.ObjectProperty)) {
 			return ConceptType.OBJECTPROPERTY;
 		}
+		else if (nt.equals(NodeType.AnnotationProperty)) {
+			return ConceptType.ANNOTATIONPROPERTY;
+		}
 		else if (nt.equals(NodeType.VariableNode)) {
 			return ConceptType.VARIABLE;
 		}
 		else if (nt.equals(NodeType.DataTypeNode)) {
 			return ConceptType.RDFDATATYPE;
 		}
+		else if (nt.equals(NodeType.DataTypeListNode)) {
+			return ConceptType.RDFDATATYPELIST;
+		}
 		else if (nt.equals(NodeType.PropertyNode)) {
 			return ConceptType.RDFPROPERTY;
+		}
+		else if (nt.equals(NodeType.FunctionNode)) {
+			return ConceptType.FUNCTION_DEFN;
 		}
 		else {
 			throw new TranslationException("NodeType '" + nt.toString() + "' cannot be converted to a ConceptType");
@@ -782,6 +794,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	public static NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
 		if (ct.equals(ConceptType.ONTCLASS)) {
 			return NodeType.ClassNode;
+		}
+		else if (ct.equals(ConceptType.ONTCLASSLIST)) {
+			return NodeType.ClassListNode;
 		}
 		else if (ct.equals(ConceptType.INDIVIDUAL)) {
 			return NodeType.InstanceNode;
@@ -797,6 +812,12 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		else if (ct.equals(ConceptType.RDFDATATYPE)) {
 			return NodeType.DataTypeNode;
+		}
+		else if (ct.equals(ConceptType.RDFDATATYPELIST)) {
+			return NodeType.DataTypeListNode;
+		}
+		else if (ct.equals(ConceptType.FUNCTION_DEFN)) {
+			return NodeType.FunctionNode;
 		}
 		else {
 			throw new TranslationException("ConceptType '" + ct.toString() + "' cannot be converted to a NodeType");
@@ -968,11 +989,11 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			return NodeType.VariableNode;
 		}
 		if (octype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
-			return NodeType.PropertyNode;
+			return NodeType.AnnotationProperty;
 		}
 		else if (octype.equals(OntConceptType.FUNCTION_DEFN)) {
 //			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
-			return NodeType.InstanceNode;
+			return NodeType.FunctionNode;
 		}
 		else if (octype.equals(OntConceptType.STRUCTURE_NAME)) {
 			return NodeType.InstanceNode;
