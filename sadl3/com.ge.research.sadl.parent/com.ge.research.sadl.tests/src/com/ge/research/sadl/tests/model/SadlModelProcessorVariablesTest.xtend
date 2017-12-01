@@ -71,7 +71,7 @@ class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
 			 
 			 Rule R1 if x is a Person and x has teaches y then x has acquaintance y.	// this works
 			 
-			 Rule R2 if x is a Person and x teaches y then x knows y.	// this doesn't but is desired
+			 Rule R2 if x is a Person and x teaches y then x knows y.	// this didn't't but was desired
 
 			 Rule R5: if x knows y then y knows x.
 			 

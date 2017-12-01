@@ -184,9 +184,16 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			 Ask: select i where i is a Foo.
 			 Ask: select i where i is a Foo with bar (a Whim with wham "hi").
 			 Ask: select i where i is a Foo and i has bar x and x is a Whim and x has wham "hi".
+			 Ask: i is a Foo with bar (a Whim with wham "hi").
  		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
+ 			for (issue:issues) {
+ 				println(issue.toString)
+ 			}
   			assertTrue(issues.size == 0)
+  			for (cmd:cmds) {
+  				println(cmd.toString)
+  			}
 		]
  	}
 	

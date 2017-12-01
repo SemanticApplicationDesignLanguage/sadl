@@ -20,7 +20,7 @@ package com.ge.research.sadl.model.gp;
 
 import java.util.List;
 
-import com.ge.research.sadl.model.ConceptIdentifier;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 /**
@@ -30,9 +30,8 @@ import com.ge.research.sadl.reasoner.TranslationException;
 public class VariableNode extends NamedNode {
 	private int references = 0;
 	private Object hostObject = null;
-	private Node type = null;
-	private ConceptIdentifier listType = null;	// if the variable has a type which is a named List, 
-												// the type will be the named class but this will the type of the elements 
+	private Node type = null;			// the type of the variable or if a list the type of the elements of the list 
+	
 	private List<GraphPatternElement> definition = null;
 	private boolean isCRulesVariable = false;
 
@@ -56,6 +55,14 @@ public class VariableNode extends NamedNode {
 		hostObject = host;
 	}
 	
+	@Override
+	public boolean isList() {
+		if (type != null && type instanceof NamedNode) {
+			return ((NamedNode)type).isList();
+		}
+		return super.isList();
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -111,17 +118,5 @@ public class VariableNode extends NamedNode {
 	public String toString() {
 		// a variable need only have the name as the scope is this namespace, often this named structure--it can't be from another namespace.
 		return getName();
-	}
-
-	public ConceptIdentifier getListType() {
-		return listType;
-	}
-
-	public void setListType(ConceptIdentifier listType) {
-		this.listType = listType;
-	}
-
-	public boolean isList() {
-		return listType == null;
 	}
 }
