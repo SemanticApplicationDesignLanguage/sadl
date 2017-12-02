@@ -2961,6 +2961,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}
 							}
 						}
+						if (varType.getTypeCheckType() != null && varType.getTypeCheckType() instanceof NamedNode) {
+							leftDefnType = (NamedNode) varType.getTypeCheckType();
+						}
 					}
 					else if (leftTranslatedDefn instanceof GraphPatternElement) {
 						if (leftVar.getDefinition() != null) {
@@ -2978,7 +2981,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (leftTranslatedDefn instanceof TripleElement && ((TripleElement)leftTranslatedDefn).getObject() == null) {
 						// this is a variable definition and the definition is a triple and the triple has no object
 						((TripleElement)leftTranslatedDefn).setObject(leftVar);
-						addVariableDefinition(leftVar, leftTranslatedDefn);
+						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 						return leftTranslatedDefn;
 					}
 //					else if (leftTranslatedDefn instanceof BuiltinElement) {
@@ -2987,13 +2990,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //					}
 					if (leftTranslatedDefn instanceof TripleElement && ((TripleElement)leftTranslatedDefn).getSubject() instanceof VariableNode) {
 						replaceVariable((TripleElement)leftTranslatedDefn, leftVar);
-						addVariableDefinition(leftVar, leftTranslatedDefn);
+						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 						return leftTranslatedDefn;
 					}
 					else {
 						Node defn = nodeCheck(leftTranslatedDefn);
 						GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
-						addVariableDefinition(leftVar, leftTranslatedDefn);
+						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 						return bi;
 					}
 				}				
@@ -9748,7 +9751,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return true;		// default? get from builtinfunction signatures?
 	}
 	
-	protected boolean addVariableDefinition(VariableNode var, Object defn) {
+	protected boolean addVariableDefinition(VariableNode var, Object defn, NamedNode leftDefnType, EObject expr) {
 		// TODO Auto-generated method stub
 		return false;
 	}

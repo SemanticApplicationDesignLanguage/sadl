@@ -1076,6 +1076,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				numberLiteralConceptName = new ConceptName(XSD.decimal.getURI());
 				litval = theJenaModel.createTypedLiteral(value.doubleValue());
+				tctype = new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode);
 			}
 			numberLiteralConceptName.setType(ConceptType.RDFDATATYPE);
 			TypeCheckInfo litTci;
@@ -3242,7 +3243,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	protected boolean compareTypesRecursively(List<String> operations, EObject leftExpression, EObject rightExpression,
+	public boolean compareTypesRecursively(List<String> operations, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, DontTypeCheckException, InvalidTypeException, TranslationException {
 
 		List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo != null ? leftTypeCheckInfo.getCompoundTypes() : null;
