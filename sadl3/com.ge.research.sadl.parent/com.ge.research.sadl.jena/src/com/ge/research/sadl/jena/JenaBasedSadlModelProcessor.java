@@ -212,6 +212,8 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.google.common.base.Preconditions;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -1073,8 +1075,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				else {
 					// for IDE, expand and also add as info marker
 					Object intForm = getIfTranslator().expandProxyNodes(rawResult, false, true);
-					addIntermediateFormResult(intForm);					
-					addInfo(intForm.toString(), element);
+					if (intForm != null) {
+						if (intForm instanceof List<?>) {
+							if (((List<?>)intForm).size() > 0) {
+								addIntermediateFormResult(intForm);					
+								addInfo(intForm.toString(), element);	
+								return;
+							}
+						}
+					}
+					if (rawResult instanceof VariableNode) {
+						addInfo(((VariableNode)rawResult).toDescriptiveString(), element);
+					}
+					else {
+						addInfo(rawResult.toString(), element);
+					}
 				}
 			}
 			else {
@@ -1633,7 +1648,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							Property prop = getTheJenaModel().getProperty(puri);
 							tci = getModelValidator().getTypeInfoFromDomain(new ConceptName(puri), prop, defnContainer);
 						}
-						else {
+						else if (!isContainedBy(defnContainer, QueryStatement.class)){
 							addError("Right of SubjHasProp not handled (" + ptype.toString() + ")", defnContainer);
 						}
 					}
@@ -3767,6 +3782,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			String varName = tr.getSubject() instanceof NamedNode ? ((NamedNode)tr.getSubject()).getName() : null;
 			OntResource subj = getOntResource(tr.getSubject());
 			OntProperty pred = getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString());
+			if (pred == null) {
+				if (tr.getPredicate() instanceof VariableNode) {
+					if (isContainedBy(expr, QueryStatement.class)) {
+						return; // variables as property in queries is OK
+					}
+					addError("Property '" + ((VariableNode)tr.getPredicate()).toDescriptiveString() + "' is a variable, unable to validate", expr);
+				}
+				else {
+					addError("Unexpected error finding property '" + tr.getPredicate().toDescriptiveString() + "' in ontology, cannot validate", expr);
+				}
+				return;
+			}
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, isCrVar ? null : varName);
 			Node obj = tr.getObject();
 			if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
@@ -3820,54 +3847,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		return getTheJenaModel().getOntResource(node.toFullyQualifiedString());
-	}
-	
-//	private void validateTripleTypes(Expression lexpr, SadlResource pexpr, Expression rexpr, boolean checkrng,
-//			Expression expr) throws TranslationException, InvalidTypeException {
-//		try {
-//			OntConceptType pct = getDeclarationExtensions().getOntConceptType(pexpr);
-//			if (pct.equals(OntConceptType.VARIABLE) && isContainedBy(pexpr, QueryStatement.class)) {
-//				return;
-//			}
-//		} catch (CircularDefinitionException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		if (getModelValidator() != null) {
-//			getModelValidator().checkPropertyDomain(getTheJenaModel(), getSadlResource(lexpr), pexpr, expr, false);
-//			if (checkrng) {
-//				try {
-//					StringBuilder sb = new StringBuilder();
-//					if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), getSadlResource(lexpr), pexpr, rexpr, sb)) {
-//						if (sb.length() > 0) {
-//							addError(sb.toString(), expr);
-//						}
-//					}
-//				} catch (DontTypeCheckException e) {
-//					// don't do anything
-//				} catch (PropertyWithoutRangeException e) {
-//					addError("Property does not have a range", pexpr);
-//				} catch (Exception e) {
-//					throw new TranslationException("Error checking value in range", e);
-//				} 
-//			}
-//		}
-//	}
-//	
-	private SadlResource getSadlResource(Expression expr) {
-		if (expr instanceof SadlResource) {
-			return (SadlResource) expr;
-		}
-		else if (expr instanceof Declaration) {
-			SadlTypeReference typ = ((Declaration)expr).getType();
-			if (typ instanceof SadlSimpleTypeReference) {
-				return ((SadlSimpleTypeReference)typ).getType();
-			}
-		}
-		else if (expr instanceof SubjHasProp) {
-			return getSadlResource(((SubjHasProp)expr).getLeft());
-		}
-		return null;
 	}
 	
 	protected VariableNode declarationToImplicitVariable(Declaration decl) throws TranslationException {
@@ -4701,8 +4680,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return result;
 		}else if (result instanceof List<?>) {
 			return listToSingleJunction(result);
+		} else if (result != null) {
+			// can be null when processing partial expressions
+			throw new TranslationException("Unexpected result in postProcessTranslationResult");
 		}
-		throw new TranslationException("Unexpected result in postProcessTranslationResult");
+		return result;
 	}
 	
 	private Object listToSingleJunction(Object result) {
@@ -4897,7 +4879,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return shpTriples;
 	}
 	
-	private Junction compoundTypeCheckTypeToNode(TypeCheckInfo dtci, EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Junction compoundTypeCheckTypeToNode(TypeCheckInfo dtci, EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Iterator<TypeCheckInfo> ctitr = dtci.getCompoundTypes().iterator();
 		Junction last = null;
 		Junction jct = null;
@@ -4951,6 +4933,61 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		return last;
+	}
+	
+	protected List<Node> disjunctionToNodeList(Junction disjunct) throws TranslationException {
+		List<Node> results = new ArrayList<Node>();
+		if (disjunct.getJunctionType().equals(JunctionType.Disj)) {
+			Object lhs = disjunct.getLhs();
+			if (lhs instanceof Node) {
+				if (!results.contains((Node)lhs)) {
+					results.add((Node)lhs);
+				}
+			}
+			else if (lhs instanceof Junction){
+				results = disjunctionToNodeList((Junction)lhs, results);
+			}
+			Object rhs = disjunct.getRhs();
+			if (rhs instanceof Node) {
+				if (!results.contains((Node)rhs)) {
+					results.add((Node)rhs);
+				}
+			}
+			else if (rhs instanceof Junction){
+				results = disjunctionToNodeList((Junction)rhs, results);
+			}
+			return results;
+		}
+		else {
+			throw new TranslationException("Invalid Junction type encountered converting disjunction of Nodes to list");
+		}
+	}
+	
+	protected List<Node> disjunctionToNodeList(Junction disjunct, List<Node> results) throws TranslationException {
+		if (disjunct.getJunctionType().equals(JunctionType.Disj)) {
+			Object lhs = disjunct.getLhs();
+			if (lhs instanceof Node) {
+				if (!results.contains((Node)lhs)) {
+					results.add((Node)lhs);
+				}
+			}
+			else if (lhs instanceof Junction){
+				results = disjunctionToNodeList((Junction)lhs, results);
+			}
+			Object rhs = disjunct.getRhs();
+			if (rhs instanceof Node) {
+				if (!results.contains((Node)rhs)) {
+					results.add((Node)rhs);
+				}
+			}
+			else if (rhs instanceof Junction){
+				results = disjunctionToNodeList((Junction)rhs, results);
+			}
+			return results;
+		}
+		else {
+			throw new TranslationException("Invalid Junction type encountered converting disjunction of Nodes to list");
+		}
 	}
 	
 	public Object processExpression(Sublist expr) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -7948,6 +7985,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throw new JenaProcessorException("Invalid arguments to createRdfsDatatype");
 		}
 		datatype.addEquivalentClass(equivClass);
+		TypeMapper.getInstance().getSafeTypeByName(newDatatypeUri);
 		return datatype;
 	}
 
@@ -9752,7 +9790,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 	
 	protected boolean addVariableDefinition(VariableNode var, Object defn, NamedNode leftDefnType, EObject expr) {
-		// TODO Auto-generated method stub
+		// This model processor doesn't need to do anything
 		return false;
 	}
 }

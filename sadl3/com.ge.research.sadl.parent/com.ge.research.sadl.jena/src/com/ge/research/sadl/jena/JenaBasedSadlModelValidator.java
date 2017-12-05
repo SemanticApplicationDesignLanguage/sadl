@@ -26,9 +26,11 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlUnionClass;
+import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.ISadlModelValidator;
@@ -151,7 +153,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 																//	used to add an error, warning, or info so that a marker can be placed in the editor
     	private ConceptIdentifier expressionType = null;		// the identity, type, etc. of the concept that determines the type, 
     															//	e.g., the property of a "<property> of <subject>" expression
-    	private Node typeCheckType = null;			// the type of the TypeCheckInfo which must match the other side of the expression,
+    	private Node typeCheckType = null;						// the type of the TypeCheckInfo which must match the other side of the expression,
     															//	e.g., the range of the property of a "<property> of <subject>" expression
     															// Note: this is a ProxyNode can be used for Unions and Intersections
     	private RDFNode explicitValue = null;					// the explicit value that is allowed, as in a hasValue restriction
@@ -777,7 +779,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	protected boolean createErrorMessage(StringBuilder errorMessageBuilder, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, String operation, boolean addToIssueAcceptor, EObject expr) throws InvalidTypeException {
 		Severity specifiedSeverity = null;
-		if (leftTypeCheckInfo.getSeverity() != null) {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getSeverity() != null) {
 			if (leftTypeCheckInfo.getSeverity().equals(Severity.IGNORE)) {
 				return false;
 			}
@@ -785,7 +787,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				specifiedSeverity = leftTypeCheckInfo.getSeverity();
 			}
 		}
-		if (rightTypeCheckInfo.getSeverity() != null) {
+		if (rightTypeCheckInfo != null && rightTypeCheckInfo.getSeverity() != null) {
 			if (rightTypeCheckInfo.getSeverity().equals(Severity.IGNORE)) {
 				return false;
 			}
@@ -1445,7 +1447,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private TypeCheckInfo unifyCompoundTypeCheckInfos(TypeCheckInfo tci) throws CircularDependencyException, InvalidNameException, TranslationException {
+	private TypeCheckInfo unifyCompoundTypeCheckInfos(TypeCheckInfo tci) throws CircularDependencyException, InvalidNameException, TranslationException, InvalidTypeException {
 		// if this is a compound TypeCheckInfo, look to make sure that one isn't a subclass of another and eliminate lower classes
 		if (tci != null && tci.getCompoundTypes() != null) {
 			int size = tci.getCompoundTypes().size();
@@ -2125,16 +2127,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			OntConceptType subjtype = declarationExtensions.getOntConceptType(((Name)subject).getName());
 			if (subjtype.equals(OntConceptType.VARIABLE)) {
 				TypeCheckInfo varTci = getType(((Name)subject).getName());
-				if (varTci != null && varTci.getExpressionType() != null) {
-					ConceptIdentifier varci = varTci.getExpressionType();
-					if (varci instanceof ConceptName) {
-						if (((ConceptName) varci).toString().equals("TODO")) {
+				if (varTci != null && varTci.getTypeCheckType() != null) {
+					Node varci = varTci.getTypeCheckType();
+					if (varci instanceof NamedNode) {
+						if (((NamedNode) varci).toString().equals("TODO")) {
 							return null;
 						}
-						if (((ConceptName) varci).getName() == null || ((ConceptName) varci).getNamespace() == null) {
+						if (((NamedNode) varci).getName() == null || ((NamedNode) varci).getNamespace() == null) {
 							return null;
 						}
-						subjuri = ((ConceptName)varci).getUri();
+						subjuri = ((NamedNode)varci).toFullyQualifiedString();
 					}
 				}
 			}
@@ -2654,7 +2656,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					if (compoundTci != null) {
-						compoundTci.addCompoundType(tci);
+						if (tci.getCompoundTypes() != null) {
+							for (TypeCheckInfo subtci:tci.getCompoundTypes()) {
+								compoundTci.addCompoundType(subtci);
+							}
+						}
+						else {
+							compoundTci.addCompoundType(tci);
+						}
 					}
 				}
 			}
@@ -3294,7 +3303,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return false;
 		}
 		else if(rightConceptIdentifier == null){
-			if (rightTypeCheckInfo != null && rightTypeCheckInfo.getSeverity() != null) {
+			if (rightTypeCheckInfo != null && rightTypeCheckInfo != null && rightTypeCheckInfo.getSeverity() != null) {
 				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.TYPE_COMPARISON.toString(), rightTypeCheckInfo.getSeverity(), rightExpression);
 			}
 			else {
@@ -3899,7 +3908,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			if (matchFound) {
 				stmtitr.close();
-				break;
+				return;
 			}
 		}
 		//Check for super properties

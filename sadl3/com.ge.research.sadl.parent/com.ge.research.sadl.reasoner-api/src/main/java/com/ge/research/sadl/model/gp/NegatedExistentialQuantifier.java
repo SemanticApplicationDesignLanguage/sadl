@@ -27,9 +27,30 @@ public class NegatedExistentialQuantifier extends GraphPatternElement {
 	}
 	
 	public String toString() {
-		return toFullyQualifiedString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("there is no ");
+		for (int i = 0; variables != null && i < variables.size(); i++) {
+			if (i > 0) sb.append(", ");
+			sb.append(variables.get(i));
+		}
+		sb.append(" such that ");
+		sb.append(getQuantified().toString());
+		return sb.toString();
 	}
 
+	@Override
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("there is no ");
+		for (int i = 0; variables != null && i < variables.size(); i++) {
+			if (i > 0) sb.append(", ");
+			sb.append(variables.get(i));
+		}
+		sb.append(" such that ");
+		sb.append(getQuantified().toDescriptiveString());
+		return sb.toString();
+	}
+	
 	public void setVariables(List<String> variables) {
 		this.variables = variables;
 	}
@@ -45,5 +66,5 @@ public class NegatedExistentialQuantifier extends GraphPatternElement {
 	private void setQuantified(GraphPatternElement quantified) {
 		this.quantified = quantified;
 	}
-	
+
 }

@@ -94,4 +94,9 @@ public class Literal extends Node {
 	public void setUnits(String units) {
 		this.units = units;
 	}
+
+	@Override
+	public String toDescriptiveString() {
+		return toString();
+	}
 }
