@@ -73,7 +73,11 @@ public abstract class GraphPatternElement {
 		return isEmbedded;
 	}
 
+	public abstract String toString();
+	
 	public abstract String toFullyQualifiedString();
+	
+	public abstract String toDescriptiveString();
 
 	public PatternFunction getPatternFunction() {
 		return patternFunction;

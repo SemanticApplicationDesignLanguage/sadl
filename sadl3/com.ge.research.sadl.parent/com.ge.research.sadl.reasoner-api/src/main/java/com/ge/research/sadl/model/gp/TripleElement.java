@@ -118,6 +118,27 @@ public class TripleElement extends GraphPatternElement {
 	}
 	
 	@Override
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder("rdf(");
+		sb.append(subject != null ? subject.toDescriptiveString() : "null");
+		sb.append(", ");
+		sb.append(predicate != null ? predicate.toDescriptiveString() : "null");
+		sb.append(", ");
+		sb.append(object != null ? object.toDescriptiveString() : "null");
+		if (getNext() != null) {
+			sb.append(" . ");
+			sb.append(getNext().toDescriptiveString());
+		}
+		if (!getModifierType().equals(TripleModifierType.None)) {
+			sb.insert(0, "(");
+			sb.insert(0, getModifierType().toString());
+			sb.append(")");
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+	
+	@Override
 	public boolean equals(Object other) {
 		if (other == null || !(other instanceof TripleElement)) {
 			return false;

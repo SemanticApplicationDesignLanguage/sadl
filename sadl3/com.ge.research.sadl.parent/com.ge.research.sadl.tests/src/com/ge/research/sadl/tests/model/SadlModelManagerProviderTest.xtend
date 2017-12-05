@@ -507,6 +507,9 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
+			for (issue:issues) {
+				println(issue)
+			}
 			assertTrue(issues.size == 0)
 			var found = false
 			// look for something specific to the model; if found set found true

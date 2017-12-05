@@ -26,6 +26,9 @@ import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
 
@@ -221,6 +224,25 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				getPreferenceStore().putValue(getPreferenceName(), getTextControl().getText());
 			}
 
+		});
+		
+		//Composite for Graphing Options
+		Group booleanFieldGroup = new Group(getFieldEditorParent(), SWT.NONE);
+		booleanFieldGroup.setLayout(new FillLayout(SWT.VERTICAL));
+		booleanFieldGroup.setText("Graphing Options");
+		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), "&Include Implicit Elements", 
+				booleanFieldGroup){
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
+		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), "&Include Instances of Implicit Elements", 
+				booleanFieldGroup){
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
 		});
 	}
 	

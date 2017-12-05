@@ -145,10 +145,6 @@ public class BuiltinElement extends GraphPatternElement {
 			}
 		}
 		sb.append(")");
-		if (getNext() != null) {
-			sb.append(" . ");
-			sb.append(getNext().toString());
-		}
 		return sb.toString();
 	}
 
@@ -180,23 +176,60 @@ public class BuiltinElement extends GraphPatternElement {
 						sb.append(((GraphPatternElement)pfn).toFullyQualifiedString());
 					}
 					else {
-						sb.append(arg.toString());
+						sb.append(arg.toFullyQualifiedString());
 					}
 				}
 				else{
-					sb.append(arg.toString());
+					sb.append(arg.toFullyQualifiedString());
 				}
 			}
 		}
 		sb.append(")");
-		if (getNext() != null) {
-			sb.append(" . ");
-			sb.append(getNext().toFullyQualifiedString());
-		}
 		return sb.toString();
 	}
     
-    public void setFuncName(String name) {
+	@Override
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getFuncName());
+		sb.append("(");
+		for (int i = 0; arguments != null && i < arguments.size(); i++) {
+			if (i > 0) {
+				sb.append(",");
+			}
+			Node arg = arguments.get(i);
+			if (arg instanceof ProxyNode &&
+					(((ProxyNode)arg).getProxyFor().equals(this) ||
+							(((ProxyNode)arg).getProxyFor() instanceof List<?> &&
+									((List<?>)((ProxyNode)arg).getProxyFor()).get(0).equals(this)))) {
+				sb.append("bi arg self-referencing!");
+			}
+			else {
+				if (arg == null){
+					sb.append("null");
+				}
+				else if (arg instanceof NamedNode){
+					sb.append(((NamedNode) arg).toDescriptiveString());
+				}
+				else if (arg instanceof ProxyNode) {
+					Object pfn = ((ProxyNode)arg).getProxyFor();
+					if (pfn instanceof GraphPatternElement) {
+						sb.append(((GraphPatternElement)pfn).toDescriptiveString());
+					}
+					else {
+						sb.append(arg.toDescriptiveString());
+					}
+				}
+				else{
+					sb.append(arg.toDescriptiveString());
+				}
+			}
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+
+	public void setFuncName(String name) {
 		this.funcName = name;
 		this.funcType = BuiltinType.getType(name);
 		if (funcType.isBooleanBuiltin || funcType.isUnaryBuiltin) {
@@ -288,4 +321,5 @@ public class BuiltinElement extends GraphPatternElement {
 	public void setFuncUri(String funcUri) {
 		this.funcUri = funcUri;
 	}
+
 }

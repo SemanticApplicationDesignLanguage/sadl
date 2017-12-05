@@ -136,4 +136,9 @@ public class ValueTableNode extends Node {
 		sb.append("}");
 		return sb.toString();
 	}
+
+	@Override
+	public String toDescriptiveString() {
+		return toString();
+	}
 }

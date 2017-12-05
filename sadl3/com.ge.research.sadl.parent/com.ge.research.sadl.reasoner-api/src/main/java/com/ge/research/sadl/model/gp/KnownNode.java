@@ -37,4 +37,9 @@ public class KnownNode extends Node {
 	public String toFullyQualifiedString() {
 		return toString();
 	}
+
+	@Override
+	public String toDescriptiveString() {
+		return toString();
+	}
 }

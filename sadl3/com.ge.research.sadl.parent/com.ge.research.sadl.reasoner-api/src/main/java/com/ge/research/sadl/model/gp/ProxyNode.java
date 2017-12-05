@@ -95,4 +95,9 @@ public class ProxyNode extends Node {
 			return "(Exception encountered: " + t.getMessage() + ")";
 		}
 	}
+
+	@Override
+	public String toDescriptiveString() {
+		return toString();
+	}
 }

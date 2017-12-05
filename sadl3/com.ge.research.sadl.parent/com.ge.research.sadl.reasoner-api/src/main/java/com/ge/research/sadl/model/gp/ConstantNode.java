@@ -26,4 +26,9 @@ public class ConstantNode extends Node {
 		return name;
 	}
 
+	@Override
+	public String toDescriptiveString() {
+		return toString();
+	}
+
 }

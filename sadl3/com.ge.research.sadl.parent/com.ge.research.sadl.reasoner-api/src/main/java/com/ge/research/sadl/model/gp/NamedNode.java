@@ -120,6 +120,11 @@ public class NamedNode extends Node {
 		return toString();
 	}
 
+	@Override
+	public String toDescriptiveString() {
+		return toString();
+	}
+
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 	}
