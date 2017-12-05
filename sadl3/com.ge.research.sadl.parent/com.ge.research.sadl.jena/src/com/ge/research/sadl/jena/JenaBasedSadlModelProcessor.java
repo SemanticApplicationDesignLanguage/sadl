@@ -55,6 +55,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -1648,7 +1649,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							Property prop = getTheJenaModel().getProperty(puri);
 							tci = getModelValidator().getTypeInfoFromDomain(new ConceptName(puri), prop, defnContainer);
 						}
-						else if (!isContainedBy(defnContainer, QueryStatement.class)){
+						else if (EcoreUtil2.getContainerOfType(defnContainer, QueryStatement.class) == null){
 							addError("Right of SubjHasProp not handled (" + ptype.toString() + ")", defnContainer);
 						}
 					}
@@ -3784,7 +3785,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			OntProperty pred = getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString());
 			if (pred == null) {
 				if (tr.getPredicate() instanceof VariableNode) {
-					if (isContainedBy(expr, QueryStatement.class)) {
+					if (EcoreUtil2.getContainerOfType(expr, QueryStatement.class) != null) {
 						return; // variables as property in queries is OK
 					}
 					addError("Property '" + ((VariableNode)tr.getPredicate()).toDescriptiveString() + "' is a variable, unable to validate", expr);
