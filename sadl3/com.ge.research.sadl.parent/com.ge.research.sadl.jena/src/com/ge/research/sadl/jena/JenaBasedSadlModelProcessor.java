@@ -3795,7 +3795,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				return;
 			}
-			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, isCrVar ? null : varName);
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, isCrVar ?varName : null);
 			Node obj = tr.getObject();
 			if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
 				try {
@@ -4997,7 +4997,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Object lobj = processExpression(list);
 		Object wobj = processExpression(where);
 		
-		addError("Processing of sublist construct not yet implemented: " + lobj.toString() + ", " + wobj.toString(), expr);
+//		addError("Processing of sublist construct not yet implemented: " + lobj.toString() + ", " + wobj.toString(), expr);
 		
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName("sublist");

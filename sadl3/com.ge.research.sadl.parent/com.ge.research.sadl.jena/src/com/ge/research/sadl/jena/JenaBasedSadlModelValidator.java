@@ -1589,9 +1589,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
 					return new TypeCheckInfo(constantConceptName, tctype, this, expression);
 				}
-		else if(constant.contains("element") && (constant.contains("first") || constant.contains("last"))){
+		else if(constant.endsWith("element") && (constant.startsWith("first") || constant.startsWith("last"))){
 			//Handle list types???
-			ConceptName declarationConceptName = new ConceptName("TODO");
+			ConceptName declarationConceptName = new ConceptName(constant);
 			return new TypeCheckInfo(declarationConceptName, null, this, expression);
 		}
 //		else if (constant.endsWith("value")) {
@@ -1601,8 +1601,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				|| ((Constant)expression).getConstant().equals("type"))) {
 			Sublist slexpr = getSublistContainer(expression);
 			if (slexpr != null) {
-				return getType(slexpr.getList());
+				TypeCheckInfo matchTci = getType(slexpr.getList());
+//				matchTci.setRangeValueType(RangeValueType.CLASS_OR_DT);
+				return matchTci;
 			}
+			issueAcceptor.addError("Unable to get sublist type", expression);
 			return getType(expression);
 		}
 		else if (constant.equals("a type")) {
@@ -1731,6 +1734,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		String ofOp = expression.getOf();
 		Expression predicate = expression.getLeft();
 		Expression subject = expression.getRight();
+		boolean isNegated = false;
+		if (predicate instanceof UnaryExpression && ((UnaryExpression)predicate).getOp().equals("not")) {
+			predicate = ((UnaryExpression)predicate).getExpr();
+			isNegated = true;
+		}
 		
 		if (predicate instanceof Constant) {
 			String cnstval = ((Constant)predicate).getConstant();
@@ -3196,6 +3204,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					(((Constant)leftExpression).getConstant().equals("value") || ((Constant)leftExpression).getConstant().equals("type"))) {
 				listTemporarilyDisabled = true;
 				leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
+				Node leftTct = leftTypeCheckInfo.getTypeCheckType();
+				if (leftTct instanceof NamedNode) {
+					if (((NamedNode)leftTct).getNodeType().equals(NodeType.ClassListNode)) {
+						((NamedNode)leftTct).setNodeType(NodeType.ClassNode);
+					}
+					else if (((NamedNode)leftTct).getNodeType().equals(NodeType.DataTypeListNode)) {
+						((NamedNode)leftTct).setNodeType(NodeType.DataTypeNode);
+					}
+				}
 			}
 			
 			//Compare literal types
@@ -3994,9 +4011,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if ( SadlUtils.classIsSubclassOf(subj.as(OntClass.class), obj.as(OntResource.class),true, null)) {
 							return true;
 						}
-						if (obj.canAs(OntClass.class) &&  SadlUtils.classIsSuperClassOf(obj.as(OntClass.class), subj.as(OntClass.class))) {
-							return true;
-						}
+//						if (obj.canAs(OntClass.class) &&  SadlUtils.classIsSuperClassOf(obj.as(OntClass.class), subj.as(OntClass.class))) {
+//							return true;
+//						}
 					} catch (CircularDependencyException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

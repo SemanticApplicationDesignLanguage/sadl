@@ -710,6 +710,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 		if (ruleList == null || ruleList.size() < 1) {
 			throw new TranslationException("No rules provided to rule translation.");
 		}
+		if (prefixes != null) {
+			prefixes.clear();    // don't keep around prefixes from another rule file generation
+		}
 		// Open file and output header and imports
 		File ruleFile = new File(filename);
 		if (ruleFile.exists()) {
