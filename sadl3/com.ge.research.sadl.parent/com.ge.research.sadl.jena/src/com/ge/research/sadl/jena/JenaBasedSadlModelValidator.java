@@ -2368,7 +2368,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNDEFINED_FUNCTION_URI);
 			}
 		}
-		throw new DontTypeCheckException();
+//		throw new DontTypeCheckException();	// we've added an error message (presumably) so why throw exception?
 	}
 	
 	protected TypeCheckInfo getType(SadlResource sr) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
@@ -3014,6 +3014,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 				}
 				else {
+					if (((BinaryOperation)refContainer).getRight().equals(reference)) {
+						// this will be an infinite recursion otherwise
+						return null;
+					}
 					TypeCheckInfo ptci = getType(((BinaryOperation)refContainer).getRight());
 					return ptci;
 				}

@@ -5537,7 +5537,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						rngValueType = RangeValueType.LIST;
 					}
 					OntProperty prop;
-					String rngName;
+					String rngName = null;
 					if (!isList && rng instanceof SadlPrimitiveDataType) {
 						rngName = ((SadlPrimitiveDataType)rng).getPrimitiveType().getName();
 						RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
@@ -5553,7 +5553,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						retProp = prop;
 					}
 					else {
-						rngName = sadlSimpleTypeReferenceToConceptName(rng).toFQString();
+						ConceptName rngcn = sadlSimpleTypeReferenceToConceptName(rng);
+						if (rngcn != null) {
+							rngName = rngcn.toFQString();
+						}
+						else {
+							addError("No range found in statement", rng);
+						}
 						OntResource rngRsrc;
 						if (isList) {
 							rngRsrc = getOrCreateListSubclass(null, rngName, element.eResource());
@@ -5563,7 +5569,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						else {
 							rngRsrc = sadlTypeReferenceToOntResource(rng);
 						}
-						retProp = assignRangeToProperty(propUri, propType, rngRsrc, rngValueType, rng);
+						if (rngRsrc != null) {
+							retProp = assignRangeToProperty(propUri, propType, rngRsrc, rngValueType, rng);
+						}
 					}
 				}
 				else {
