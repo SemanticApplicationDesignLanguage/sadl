@@ -17,18 +17,23 @@
 package com.ge.research.sadl.ui.tests
 
 import com.ge.research.sadl.jena.IJenaBasedModelProcessor
-import com.ge.research.sadl.model.gp.Rule
 import com.ge.research.sadl.model.gp.SadlCommand
+import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
 import com.ge.research.sadl.tests.SadlTestAssertions
 import com.ge.research.sadl.ui.OutputStreamStrategy
+import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Lists
 import com.google.inject.Inject
 import com.hp.hpl.jena.ontology.OntModel
+import java.nio.file.Paths
 import java.util.Arrays
 import java.util.List
+import java.util.Map
 import org.eclipse.core.resources.IFile
+import org.eclipse.core.resources.IMarker
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.NullProgressMonitor
+import org.eclipse.core.runtime.Path
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
@@ -44,6 +49,7 @@ import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.util.Files
 import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
@@ -52,13 +58,17 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Rule
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
 
+import static com.ge.research.sadl.jena.UtilsForJena.*
+import static org.eclipse.core.resources.IMarker.*
+import static org.eclipse.core.resources.IResource.DEPTH_INFINITE
 import static org.eclipse.core.runtime.IPath.SEPARATOR
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
-import com.google.common.collect.Iterables
-import org.eclipse.xtext.diagnostics.Severity
+
+import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.*
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -72,7 +82,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	val modifiedPreferences = <String>newHashSet();
 
-	@org.junit.Rule
+	@Rule
 	public TestName testName = new TestName;
 
 	@Inject
@@ -84,6 +94,10 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	@Inject
 	@Accessors(PROTECTED_GETTER)
 	IPreferenceValuesProvider preferenceValuesProvider;
+
+	@Inject
+	@Accessors(PROTECTED_GETTER)
+	SadlInferenceProcessorProvider inferenceProcessorProvider;
 
 	@BeforeClass
 	static def void assertRunningPlatform() {
@@ -198,6 +212,37 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	}
 
 	/**
+	 * Asserts that the workspace contains no validation errors. Otherwise, throws an exception.
+	 */
+	protected def assertNoErrorsInWorkspace() {
+		val (IMarker)=>String toMarkerString = [
+			val sb = new StringBuilder();
+			val severity = getAttribute(SEVERITY);
+			if (severity !== null) {
+				sb.append('''Severity: «severity»''');
+			}
+			val location = getAttribute(LOCATION);
+			if (location !== null) {
+				if (sb.length > 0) {
+					sb.append(', ');
+				}
+				sb.append('''Location: «location»''');
+			}
+			val message = getAttribute(MESSAGE);
+			if (message !== null) {
+				if (sb.length > 0) {
+					sb.append(', ');
+				}
+				sb.append('''Message: «message»''');
+			}
+			return sb.toString;
+		];
+		val problems = root.findMarkers(PROBLEM, true, DEPTH_INFINITE);
+		val message = '''Expected zero problems. Got «problems.length» instead. «problems.map[toMarkerString.apply(it)].join('; ')»''';
+		assertTrue(message, problems.nullOrEmpty);
+	}
+
+	/**
 	 * Creates a file with the given file name and content. 
 	 */
 	protected def createFile(String fileName, String content) {
@@ -267,12 +312,12 @@ abstract class AbstractSadlPlatformTest extends Assert {
 			return emptyList;
 		}
 	}
-	
+
 	/**
 	 * Validates the resource, asserts the issues.
 	 */
 	protected def Resource assertValidatesTo(Resource resource,
-		(OntModel, List<Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
+		(OntModel, List<com.ge.research.sadl.model.gp.Rule>, List<SadlCommand>, List<Issue>, IJenaBasedModelProcessor)=>void assertions) {
 
 		return SadlTestAssertions.assertValidatesTo(resource as XtextResource, assertions);
 	}
@@ -292,20 +337,79 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	}
 
 	/**
-	 * Asserts no validation issues.
+	 * Asserts the content of a generated file for the given input file.
+	 * Throws an exception, if the generated output file does not exist. 
 	 */
-	static def void assertHasNoIssues(Iterable<? extends Issue> issues) {
-		doAssertHasIssues(issues, [true], 0);
+	protected def assertGeneratedOutputFor(String inputFilePath, GeneratedOutputLocationProvider locationProvider,
+		(String)=>void assert) {
+
+		val file = locationProvider.get(inputFilePath).file;
+		val content = Files.readFileIntoString(Paths.get(file.locationURI).toFile.absolutePath);
+		assert.apply(content);
 	}
 
-	private static def void doAssertHasIssues(Iterable<? extends Issue> issues, (Severity)=>boolean severityPredicate,
-		int expectedCount) {
-		val actualIssues = issues.filter[severityPredicate.apply(severity)];
-		Assert.assertEquals(
-			'''Expected «expectedCount» issues. Got «actualIssues.size» instead. [«Iterables.toString(actualIssues)»]''',
-			expectedCount,
-			actualIssues.size
-		);
+	/**
+	 * Same as {@link Assert#assertEquals(Object expected, Object actual) assertEquals(Object, Object)} but ignores the platform specific line endings.
+	 */
+	protected def void assertEqualsIgnoreEOL(CharSequence expected, CharSequence actual) {
+		assertEquals(expected.toString.unifyEOL, actual.toString.unifyEOL);
+	}
+
+	/**
+	 * Runs the inferences for the give SADL model. Asserts the results.
+	 */
+	protected def void assertInferencer(String inputFilePath, (Object[])=>void assert) {
+		assertInferencer(inputFilePath, ImmutableMap.of, assert);
+	}
+
+	/**
+	 * Runs the inferences for the give SADL model with custom preferences. Asserts the results.
+	 */
+	protected def void assertInferencer(String inputFilePath, Map<String, String> preferences,
+		(Object[])=>void assert) {
+
+		val resource = inputFilePath.file.resource;
+		val inferenceProcessor = inferenceProcessorProvider.getProcessor(resource);
+		val projectPath = Paths.get(project.locationURI);
+		val modelFolderPath = projectPath.resolve(OWL_MODELS_FOLDER_NAME);
+		val modelPath = modelFolderPath.resolve('''«resource.URI.trimFileExtension.lastSegment».owl''').toString;
+		val result = inferenceProcessor.runInference(resource, modelPath, modelFolderPath.toString, preferences);
+		assert.apply(result);
+	}
+
+	/**
+	 * Runs a named query for the given SADL resource and asserts the result.
+	 */
+	protected def void assertNamedQuery(String inputFilePath, String queryName, (Object[])=>void assert) {
+		val resource = inputFilePath.file.resource;
+		val inferenceProcessor = inferenceProcessorProvider.getProcessor(resource);
+		val result = inferenceProcessor.runNamedQuery(resource, queryName);
+		assert.apply(result);
+	}
+
+	/**
+	 * Returns with the file for the given project relative file path. The file path format should be {@code path/to/file.ext}.
+	 * Never returns with a non-accessible file but throws an exception instead.
+	 */
+	protected def IFile getFile(String filePath) {
+		val file = root.getFile(new Path('''«projectName»«SEPARATOR»«filePath»'''));
+		val message = '''The file is not accessible under '«Paths.get(file.locationURI).toString»'. The `filePath` argument was:«filePath»''';
+		assertTrue(message, file.accessible);
+		return file;
+	}
+
+	/**
+	 * Generated output location provider.
+	 */
+	public static interface GeneratedOutputLocationProvider {
+
+		/**
+		 * Returns with the project relative location of the generated output for the given input file path.
+		 * If the input resource is nested in a folder or sub-folders, then the {@code inputFileName} argument should be
+		 * given as a string with the following format: {@code /path/to/the/input/fileName.ext}.
+		 */
+		def String get(String inputFilePath);
+
 	}
 
 }
