@@ -172,7 +172,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			import "http://sadl.org/I2.sadl" as i2.
 			
 			current_1:Foo is a class.
-		'''.sadl.enableAmbiguousNameDetection;
+		'''.sadl;
 
 		val issues_1 = validate(model_1);
 //		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
@@ -196,7 +196,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			import "http://sadl.org/I2.sadl".
 			
 			I1:Foo is a class.
-		'''.sadl.enableAmbiguousNameDetection;
+		'''.sadl;
 
 		val issues_1 = validate(model_1);
 //		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
@@ -213,7 +213,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			Rule R1:
 				if x = 1 and y = builtinfunctions:addOne(x) and z = efb:addOne(x)
 				then print("builtinfunctions:addOne returned ",y," , efb:addOne returned ", z).
-		'''.sadl.enableAmbiguousNameDetection;
+		'''.sadl;
 
 		val issues_1 = validate(model_1);
 //		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);

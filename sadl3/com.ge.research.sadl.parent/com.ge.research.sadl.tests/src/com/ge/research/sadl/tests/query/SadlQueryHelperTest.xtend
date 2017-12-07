@@ -19,7 +19,6 @@ package com.ge.research.sadl.tests.query
 
 import com.ge.research.sadl.query.SadlQueryHelper
 import com.ge.research.sadl.sADL.QueryStatement
-import com.ge.research.sadl.scoping.TestScopeProvider
 import com.ge.research.sadl.tests.AbstractSadlTest
 import com.google.inject.Inject
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
@@ -187,7 +186,6 @@ class SadlQueryHelperTest extends AbstractSadlTest {
 			import "http://sadl.org/Bar.sadl" as b.
 			import "http://sadl.org/Baz.sadl" as c.
 		'''.sadl;
-		TestScopeProvider.registerResource(it, true);
 		val result = findQueryByName('queryName');
 		result.assertNull;
 	}

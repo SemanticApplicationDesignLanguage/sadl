@@ -19,7 +19,6 @@ package com.ge.research.sadl.tests.validation
 
 import com.ge.research.sadl.sADL.SADLPackage
 import com.ge.research.sadl.sADL.SadlModel
-import com.ge.research.sadl.scoping.TestScopeProvider
 import com.ge.research.sadl.tests.SADLNoopModelProcessorsInjectorProvider
 import com.ge.research.sadl.validation.SADLValidator
 import com.google.inject.Inject
@@ -79,7 +78,6 @@ class ValidationTest {
 			MyCar is a Car.
 			
 		'''.sadl
-		TestScopeProvider.registerResource(model, true)
 		val issues = validationTestHelper.validate(model)
 		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use a prefix to disambiguate name.", issues.head.message)
 	}
@@ -108,7 +106,6 @@ class ValidationTest {
 			import "http://sadl.org/NS3.sadl".
 			MyCar is a Car.
 		'''.sadl
-		TestScopeProvider.registerResource(model, true)
 		val issues = validationTestHelper.validate(model)
 		Assert.assertEquals("Ambiguously imported name 'Car' from 'http://sadl.org/NS2.sadl', 'http://sadl.org/NS1.sadl'. Please use a prefix to disambiguate name.", issues.head.message)
 	}
