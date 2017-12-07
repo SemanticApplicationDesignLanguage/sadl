@@ -5,9 +5,21 @@
 			<xs:element name="Process" type="process" minOccurs="1" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
+	<xs:simpleType name="referenceType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ModelElement"/>
+			<xs:enumeration value="File"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="reference">
+		<xs:attribute name="referencedID" use="required" type="xs:string"/>
+		<xs:attribute name="objectID" use="required" type="xs:string"/>
+		<xs:attribute name="referenceType" type="referenceType" default="ModelElement"/>
+	</xs:complexType>
 	<xs:complexType name="marker">
 		<xs:sequence>
 			<xs:element name="ObjectID" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="Reference" type="reference" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="msgName" use="required" type="xs:string"/>
 		<xs:attribute name="msgText" use="required" type="xs:string"/>

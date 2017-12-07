@@ -1,10 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <MarkerService>
   <Process build="str1234" name="str1234" pn="str1234">
-    <Marker msgName="str1234" msgText="str1234" projectMarker="true" time="2012-12-13T12:12:12" markerType="Error" priority="Low">
-      <ObjectID>str1234</ObjectID>
-	  <ObjectID>str1235</ObjectID>
-	  <ObjectID>str1236</ObjectID>
+    <Marker msgName="str1234" msgText="str1234
+
+with some empty lines
+
+and a long long more than 60 characters long text in a line that is not trimmed.
+
+this is the end." projectMarker="true" time="2012-12-13T12:12:12" markerType="Error" priority="Low">
+      <ObjectID>http://sadl.org/A.sadl#Foo</ObjectID>
+
+      <!-- ModelElement reference type -->
+      <!-- Item with model URI. No AST node name. Model has 'alias'. Exist. -->
+      <Reference referencedID="http://sadl.org/A1_Has_Alias.sadl" objectID="http://sadl.org/A.sadl#Foo" referenceType="ModelElement" />
+      <!-- Item with model URI. No AST node name. Model does not have 'alias'. Exist. -->
+      <Reference referencedID="http://sadl.org/A2_No_Alias.sadl" objectID="http://sadl.org/A.sadl#Foo" referenceType="ModelElement" />
+      <!-- Item with model URI. No AST node name. Absent. --> <!-- The 'referenceType' is optional and defaults to 'ModelElement'. -->
+      <Reference referencedID="some_missing_model_URI_1" objectID="http://sadl.org/A.sadl#Foo" />
+      <!-- Item with model URI + AST node name. Model has 'alias'. Exist. -->
+      <Reference referencedID="http://sadl.org/B1_Has_Alias.sadl#B1" objectID="http://sadl.org/A.sadl#Foo" referenceType="ModelElement" />
+      <!-- Item with model URI + AST node name. Model does not have 'alias'. Exist. -->
+      <Reference referencedID="http://sadl.org/B2_No_Alias.sadl#B2" objectID="http://sadl.org/A.sadl#Foo" referenceType="ModelElement" />
+      <!-- Item with model URI + AST node name. Absent. --> <!-- The 'referenceType' is optional and defaults to 'ModelElement'. -->
+      <Reference referencedID="some_missing_model_URI_2#Whatever" objectID="http://sadl.org/A.sadl#Foo" />
+
+      <!-- File reference type -->
+      <!-- Item with file path. Exist. -->
+      <Reference referencedID="otherLocation/exist.log" objectID="http://sadl.org/A.sadl#Foo" referenceType="File" />
+      <!-- Item with file path. Absent. -->
+      <Reference referencedID="otherLocation/absent.log" objectID="http://sadl.org/A.sadl#Foo" referenceType="File" />
     </Marker>
   </Process>
 </MarkerService>
+
+<!-- A1_Has_Alias.sadl
+uri "http://sadl.org/A1_Has_Alias.sadl" alias A1_Has_Alias.
+DoesNotMatter is a class.
+-->
+
+<!-- A2_No_Alias.sadl
+uri "http://sadl.org/A2_No_Alias.sadl".
+DoesNotMatter is a class.
+-->
+
+<!-- B1_Has_Alias.sadl
+uri "http://sadl.org/B1_Has_Alias.sadl" alias B1_Has_Alias.
+B1 is a class.
+-->
+
+<!-- B2_No_Alias.sadl
+uri "http://sadl.org/B2_No_Alias.sadl".
+Foo is a type of B2.
+B2 is a class.
+-->
