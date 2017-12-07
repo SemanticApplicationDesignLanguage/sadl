@@ -19,7 +19,6 @@ package com.ge.research.sadl.ui.syntaxcoloring
 
 import com.ge.research.sadl.model.CircularDefinitionException
 import com.ge.research.sadl.model.DeclarationExtensions
-import com.ge.research.sadl.preferences.SadlPreferences
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SADLPackage
@@ -29,20 +28,17 @@ import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
-import com.ge.research.sadl.scoping.TestScopeProvider
+import com.ge.research.sadl.utils.SadlASTUtils
 import com.google.inject.Inject
-import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.ide.editor.syntaxcoloring.IHighlightedPositionAcceptor
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
-import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.ui.resource.ProjectByResourceProvider
-import com.ge.research.sadl.utils.SadlASTUtils
+import org.eclipse.xtext.util.CancelIndicator
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -54,7 +50,6 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 		if (resource === null || resource.contents.isEmpty())
 			return;
 			
-		TestScopeProvider.registerResource(resource, false);
 		var SadlModel model = resource.contents.head as SadlModel
 		// Highlighting for URI strings
 		for (imp : model.imports) {
@@ -117,12 +112,6 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 			}
 		}
 				
-		// get the SADL preferences from a pseudo SADL resource and apply the preference setting to the current 
-        // resource (so it applies to both SADL and derived types)				
-        val r = new ResourceImpl();
-        r.setURI(URI.createFileURI("/"));
-        val ambiguousnames = getPrefStore(resource).getBoolean(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.id);
-        TestScopeProvider.registerResource(resource, ambiguousnames);
     }
 
     def protected getPrefStore(XtextResource resource) {
