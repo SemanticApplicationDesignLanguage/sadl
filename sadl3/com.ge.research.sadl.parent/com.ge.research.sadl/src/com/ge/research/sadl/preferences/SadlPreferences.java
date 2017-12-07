@@ -53,6 +53,8 @@ public class SadlPreferences {
 	//	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
 	public static final PreferenceKey GENERATE_METRICS_REPORT_ON_CLEAN_BUILD = new PreferenceKey("generateMetricsReport", String.valueOf(false));
 	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
+	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENTS = new PreferenceKey("graphImplicitElements", String.valueOf(false));
+	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENT_INSTANCES = new PreferenceKey("graphImplicitElementInstances", String.valueOf(false));
 	
 	// Don't forget to add new property to the list below
 	
@@ -83,7 +85,9 @@ public class SadlPreferences {
 			CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES,
 //			ENABLE_METRICS_COLLECTION,
 			GENERATE_METRICS_REPORT_ON_CLEAN_BUILD,
-			METRICS_QUERY_FILENAME
+			METRICS_QUERY_FILENAME, 
+			GRAPH_IMPLICIT_ELEMENTS,
+			GRAPH_IMPLICIT_ELEMENT_INSTANCES
 	};
 	
 	public static final List<PreferenceKey> preferences() {

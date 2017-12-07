@@ -27,8 +27,8 @@ abstract class SadlMarkerConstants {
 	/**
 	 * File extension of the SADL error XML.
 	 */
-	public static val FILE_EXTENSION = 'err';
-	
+	public static val FILE_EXTENSION = "err";
+
 	/**
 	 * The error file extension with the {@code '.'}.
 	 */
@@ -45,6 +45,30 @@ abstract class SadlMarkerConstants {
 	 * relative path of the error file resource or anything else unless this is unique.
 	 */
 	public static val ORIGIN_KEY = "ORIGIN_KEY";
+
+	/**
+	 * Key for storing a bunch of ordinary files or SADL model element references serialized as a string.
+	 * These files or references can be opened as quick fixes. 
+	 */
+	public static val SADL_REFS = "SADL_REFS";
+
+	/**
+	 * Character for separating multiple SADL references.
+	 */
+	public static val SADL_REFS_SEPARATOR = "+";
+
+	/**
+	 * Function for getting back the SADL marker reference type by its name.
+	 * This function is case insensitive and falls back to {@link SadlMarkerRefType#ModelElement model element} type.
+	 */
+	public static (String)=>SadlMarkerRefType GET_TYPE_REF_BY_NAME = [ name |
+		val type = SadlMarkerRefType.values.findFirst[name.toLowerCase == it.toString.toLowerCase];
+		// SADL reference type is optional, and the default is `ModelElement`.
+		if (type === null) {
+			return SadlMarkerRefType.ModelElement;
+		}
+		return type;
+	];
 
 	private new() {
 	}

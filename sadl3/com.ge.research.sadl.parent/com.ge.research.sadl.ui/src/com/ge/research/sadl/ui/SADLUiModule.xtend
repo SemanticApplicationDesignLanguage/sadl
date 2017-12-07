@@ -27,6 +27,7 @@ import com.ge.research.sadl.ui.contentassist.SadlOntologyContextProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
+import com.ge.research.sadl.ui.editor.SadlProblemAnnotationHover
 import com.ge.research.sadl.ui.generator.SadlShouldGenerate
 import com.ge.research.sadl.ui.markers.EclipseMarkerSeverityMapper
 import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
@@ -121,6 +122,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 	
 	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
 		return SadlContentAssistContextFactory;
+	}
+	
+	override bindIAnnotationHover() {
+		return SadlProblemAnnotationHover;
 	}
 	
 }
