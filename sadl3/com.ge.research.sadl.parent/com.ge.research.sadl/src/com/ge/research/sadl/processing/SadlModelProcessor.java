@@ -79,7 +79,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     @Inject
     private ISadlImplicitModelContentProvider implicitModelContentProvider;
     
-	public abstract Object processExpression(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
+	public abstract Object processExpression(EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
 		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
@@ -818,6 +818,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		else if (ct.equals(ConceptType.FUNCTION_DEFN)) {
 			return NodeType.FunctionNode;
+		}
+		else if (ct.equals(ConceptType.RDFPROPERTY)) {
+			return NodeType.PropertyNode;
 		}
 		else {
 			throw new TranslationException("ConceptType '" + ct.toString() + "' cannot be converted to a NodeType");
