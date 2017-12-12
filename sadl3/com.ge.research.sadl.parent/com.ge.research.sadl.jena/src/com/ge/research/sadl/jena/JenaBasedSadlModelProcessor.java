@@ -3394,7 +3394,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (lobj instanceof Node && robj instanceof Node) {
 					TripleElement trel = new TripleElement((Node)lobj, new RDFTypeNode(), (Node)robj);
 					trel.setSourceType(TripleSourceType.ITC);
-					return trel;
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
 				}
 				else {
 //					throw new TranslationException("Unhandled binary operation condition: left and right are not both nodes.");
@@ -3402,7 +3402,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
-				TripleElement trel = (TripleElement)robj;
+				TripleElement trel = (TripleElement)robj;		// TODO how do we know this is a TripleElement? What happens to it?
 				while (trel != null) {
 					trel.setSubject((Node) lobj);
 					trel = (TripleElement) trel.getNext();
@@ -3411,32 +3411,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if ((lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal && isSparqlQuery(((com.ge.research.sadl.model.gp.Literal)lobj).toString())))
 					&& !(robj instanceof KnownNode)) {
-//				if (getRulePart().equals(RulePart.CONCLUSION) || getRulePart().equals(RulePart.PREMISE)) {		// added PREMISE--side effects? awc 10/9/17
-//				if (robj instanceof TripleElement && ((TripleElement)lobj).getObject() == null && ((TripleElement)robj).getObject() == null) {
-//					// comparing two triples with null object or assigning one to the other; create common object variable
-//					String nvar = getNewVar(container);
-//					try {
-//						VariableNode var = createVariable(nvar);
-//						((TripleElement)lobj).setObject(var);
-//						((TripleElement)robj).setObject(var);
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					} catch (PrefixNotFoundException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					} catch (ConfigurationException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//				else 
 				if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
 					if (lobj instanceof TripleElement) {
 						if (((TripleElement)lobj).getObject() == null) {
 							((TripleElement)lobj).setObject((com.ge.research.sadl.model.gp.Literal)robj);
 							lobj = checkForNegation((TripleElement)lobj, rexpr);
-							return lobj;
+							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 						}
 						else {
 							addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), container);
@@ -3450,14 +3430,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (((TripleElement)lobj).getObject() == null) {
 						((TripleElement)lobj).setObject((VariableNode) robj);
 						lobj = checkForNegation((TripleElement)lobj, rexpr);
-						return lobj;
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 					}
 				}
 				else if (robj instanceof NamedNode) {
 					if (((TripleElement)lobj).getObject() == null) {
 						((TripleElement)lobj).setObject((NamedNode) robj);
 						lobj = checkForNegation((TripleElement)lobj, rexpr);
-						return lobj;
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 					}
 				}
 				else if (robj instanceof BuiltinElement) {
@@ -3469,10 +3449,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
 						if ( ((BuiltinElement)robj).getArguments().get(0) instanceof com.ge.research.sadl.model.gp.Literal) {
 							((TripleElement)lobj).setObject(nodeCheck(robj));
-							return lobj;
+							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 						}
 						else {
-							return createBinaryBuiltin(((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
+							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, createBinaryBuiltin(((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0)));
 						}
 					}
 				}
@@ -3483,7 +3463,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					String cnst = ((ConstantNode)robj).getName();
 					if (cnst.equals(NONE)) {
 						((TripleElement)lobj).setType(TripleModifierType.None);
-						return lobj;
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 					}
 				}
 				else if (robj instanceof BuiltinElement) {
@@ -3497,10 +3477,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					else if (isComparisonBuiltin(((BuiltinElement)robj).getFuncName())) {
 						if ( ((BuiltinElement)robj).getArguments().get(0) instanceof Literal) {
 							((TripleElement)lobj).setObject(nodeCheck(robj));
-							return lobj;
+							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 						}
 						else {
-							return createBinaryBuiltin(((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0));
+							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, createBinaryBuiltin(((BuiltinElement)robj).getFuncName(), lobj, ((BuiltinElement)robj).getArguments().get(0)));
 						}
 					}
 				}
@@ -3562,7 +3542,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					else if (isComparisonViaBuiltin(robj, lobj)) {
 						BuiltinElement be = (BuiltinElement)((TripleElement)robj).getNext();
 						be.addMissingArgument((Node) lobj);
-						return pattern;
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
 					}
 					else if (pattern instanceof TripleElement){
 						TripleElement lastPattern = (TripleElement)pattern;
@@ -3610,7 +3590,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// in a rule of this type we just want to replace the pivot node variable
 					doVariableSubstitution(((TripleElement)pattern), (VariableNode)((TripleElement)pattern).getSubject(), (VariableNode)assignedNode);
 				}
-				return pattern;
+				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
 			}
 			BuiltinElement bin = null;
 			boolean binOnRight = false;
@@ -3644,7 +3624,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							bin.addArgument(assignedNode);
 						}
 					}
-					return retObj;
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, retObj);
 				}
 				else if (assignedNode instanceof Node && isComparisonBuiltin(bin.getFuncName())) {
 					// this is a comparison with an extra "is"
@@ -3655,7 +3635,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						else {
 							bin.addArgument(assignedNode);
 						}
-						return bin;
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, bin);
 					}
 				}
 			}
@@ -3676,7 +3656,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					gpe = gpe.getNext();
 				}
-				return pattern;
+				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
 			}
 		}
 		// if we get to here we want to actually create a BuiltinElement for the BinaryOpExpression
@@ -3684,7 +3664,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		//	and the VariableNode hasn't already been bound, change from type equal to type assign.
 		if (optype == BuiltinType.Equal && getTarget() instanceof Rule && lobj instanceof VariableNode && robj instanceof com.ge.research.sadl.model.gp.Literal && 
 				!variableIsBound((Rule)getTarget(), null, (VariableNode)lobj)) {
-			return createBinaryBuiltin("assign", robj, lobj);
+			return applyImpliedAndExpandedProperties(container, lexpr, rexpr, createBinaryBuiltin("assign", robj, lobj));
 		}
 		if (op.equals("and") || op.equals("or")) {
 			Junction jct = new Junction();
@@ -3694,8 +3674,76 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return jct;
 		}
 		else {
-			return combineRest(createBinaryBuiltin(op, postProcessTranslationResult(lobj), robj), rest);
+			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, createBinaryBuiltin(op, postProcessTranslationResult(lobj), robj)), rest);
 		}
+	}
+	
+	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe) {
+		try {
+			Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+			if (ip != null) {
+				if (maybeGpe instanceof TripleElement || maybeGpe instanceof BuiltinElement) {
+					Iterator<EObject> ipitr = ip.keySet().iterator();
+					boolean matched = false;
+					while (ipitr.hasNext()) {
+						EObject eobj = ipitr.next();
+						Property implProp = ip.get(eobj);
+						if (eobj.equals(lobj)) {
+							((GraphPatternElement)maybeGpe).setLeftImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							matched = true;
+						}
+						else if (eobj.equals(robj)) {
+							((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							matched = true;
+						}
+					}
+					if (!matched) {
+//						throw new TranslationException("EObject key of impliedProperty is neither left nor right of binary operation for any implied Property");
+						int i = 0;
+					}
+					// TODO must add implied properties to rules, tests, etc.
+				}
+				else {
+					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");
+				}
+				getModelValidator().clearImpliedPropertiesUsed();
+			}
+			
+			Map<EObject, List<String>> ep = getModelValidator().getApplicableExpandedProperties();
+			if (ep != null) {
+				if (maybeGpe instanceof TripleElement || maybeGpe instanceof BuiltinElement) {
+					Iterator<EObject> epitr = ep.keySet().iterator();
+					boolean match = false;
+					while (epitr.hasNext()) {
+						EObject eobj = epitr.next();
+						if (eobj.equals(binobj)) {
+							List<String> propuris = ep.get(eobj);
+							for (String propuri:propuris) {
+								Property prop = getTheJenaModel().getProperty(propuri);
+								if (prop != null) {
+									((GraphPatternElement)maybeGpe).addExpandedPropertyToBeUsed(validateNamedNode(new NamedNode(propuri, NodeType.PropertyNode)));
+									match = true;
+								}
+								else {
+									throw new TranslationException("Expanded property '" + propuri + "' not found in ontology");
+								}
+							}
+						}
+					}
+					if (!match) {
+						int i = 0;
+					}
+				}
+				else {
+					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");
+				}
+				getModelValidator().clearApplicableExpandedProperties();
+			}
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return maybeGpe;
 	}
 	
 	private TripleElement checkForNegation(TripleElement lobj, Expression rexpr) throws InvalidTypeException {
@@ -4466,7 +4514,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (article != null && isInstance(typenode)) {
 			addError("An article (e.g., '" + article + "') should not be used in front of the name of an instance of a class.", expr);
 		}
-		else if (article != null && isVariable(typenode)) {
+		else if (article != null && isVariable(typenode) && EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null) {
 			addError("An article (e.g., '" + article + "') should not be used in front of the name of a variable.", expr);
 		}
 		else if (article != null && !isProperty(typenode) && !isDefinitionOfExplicitVariable(expr)) {

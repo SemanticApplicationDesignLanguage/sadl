@@ -131,6 +131,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
 	private Map<EObject, Property> impliedPropertiesUsed = null;
+	private Map<EObject, List<String>> applicableExpandedProperties = null;
 	
 	private IMetricsProcessor metricsProcessor = null;
 	protected JenaBasedSadlModelProcessor modelProcessor = null;
@@ -577,12 +578,73 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				TripleElement tr = new TripleElement();
 				getModelProcessor().handleLocalRestriction(expression, tr);
 			}
+			if (getModelProcessor().isEqualityInequalityComparisonOperator(op) && !errorsFound) {
+				checkForApplicableExpandedProperties(expression, leftTypeCheckInfo, rightTypeCheckInfo);
+			}
 			return !errorsFound;
 		} catch (Throwable t) {
 			return handleValidationException(expression, t);
 		}
 	}
 	
+	private void checkForApplicableExpandedProperties(EObject expression, TypeCheckInfo leftTypeCheckInfo,
+			TypeCheckInfo rightTypeCheckInfo) {
+		Node type = null;
+		// since type checking has passed to get to this point:
+		//	if either side has no impliedProperties then the type can come from either side
+		if (leftTypeCheckInfo.getImplicitProperties() == null && leftTypeCheckInfo.getTypeCheckType() != null) {
+			type = leftTypeCheckInfo.getTypeCheckType();
+		}
+		else if (rightTypeCheckInfo.getImplicitProperties() == null && rightTypeCheckInfo.getTypeCheckType() != null) {
+			type = rightTypeCheckInfo.getTypeCheckType();
+		}
+		// the other possibility is that both sides have implied properties (which should be the same) so the type is the common type
+		if (leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null 
+				&& leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) {
+			type = leftTypeCheckInfo.getTypeCheckType();
+		}
+		else {
+			try {
+				throw new TranslationException("Unexpected failure to find binary operation type");
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if (type != null && type instanceof NamedNode && 
+				(((NamedNode)type).getNodeType().equals(NodeType.ClassNode) || ((NamedNode)type).getNodeType().equals(NodeType.ClassListNode))) {
+			// expanded properties only apply to classes
+			Resource rsrc = theJenaModel.getResource(((NamedNode)type).toFullyQualifiedString());
+			try {
+				List<String> expProps = getModelProcessor().getExpandedProperties(rsrc);
+				if (expProps != null) {
+					addApplicableExpandedProperties(expression, expProps);
+				}
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void addApplicableExpandedProperties(EObject expression, List<String> expProps) {
+		if (applicableExpandedProperties == null) {
+			applicableExpandedProperties = new HashMap<EObject, List<String>>();
+		}
+		applicableExpandedProperties.put(expression, expProps);
+	}
+	
+	public Map<EObject, List<String>> getApplicableExpandedProperties() {
+		return applicableExpandedProperties;
+	}
+	
+	public void clearApplicableExpandedProperties() {
+		if (applicableExpandedProperties != null) {
+			applicableExpandedProperties.clear();
+		}
+	}
+
 	private boolean registerEObjectValidateCalled(EObject expression) {
 		if (expression == null) return true;	// for ease in debugging--set expression to null to allow multiple passes in debugger
 		if (eObjectsValidated  == null) {
@@ -3865,6 +3927,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	public Map<EObject, Property> getImpliedPropertiesUsed() {
 		return impliedPropertiesUsed;
+	}
+	
+	public boolean clearImpliedPropertiesUsed() {
+		if (impliedPropertiesUsed != null) {
+			impliedPropertiesUsed.clear();
+			return true;
+		}
+		return false;
 	}
 
 	protected boolean addImpliedPropertiesUsed(EObject context, Property impliedPropertyUsed) {

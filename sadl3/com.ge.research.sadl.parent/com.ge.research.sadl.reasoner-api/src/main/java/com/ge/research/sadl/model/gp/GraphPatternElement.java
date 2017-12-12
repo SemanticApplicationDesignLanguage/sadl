@@ -18,6 +18,9 @@
 
 package com.ge.research.sadl.model.gp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class GraphPatternElement {
 	enum PatternFunction {BindsVariable, UsesBoundVariables}
 	private PatternFunction patternFunction;
@@ -26,6 +29,11 @@ public abstract class GraphPatternElement {
 	private int length;
 	private int offset;
 	
+	// These only apply to BuiltinElement and TripleElement
+	private NamedNode leftImpliedPropertyUsed = null;		// an impliedProperty to be used on the left side of a binary operation
+	private NamedNode rightImpliedPropertyUsed = null;		// am impliedProperty to be used on the right side of a binary operation
+	private List<NamedNode> expandedPropertiesToBeUsed = null;	// a list of expandedProperties to be used for a binary operation
+
 	private GraphPatternElement next = null;
 	
 	private boolean isEmbedded = false;	// this will be replaced with use of PatternFunction 
@@ -95,4 +103,39 @@ public abstract class GraphPatternElement {
 		this.locationType = locationType;
 	}
 	
+	public List<NamedNode> getExpandedPropertiesToBeUsed() {
+		return expandedPropertiesToBeUsed;
+	}
+
+	public void setExpandedPropertiesToBeUsed(List<NamedNode> expandedPropertiesToBeUsed) {
+		this.expandedPropertiesToBeUsed = expandedPropertiesToBeUsed;
+	}
+	
+	public boolean addExpandedPropertyToBeUsed(NamedNode expProp) {
+		if (expandedPropertiesToBeUsed == null) {
+			expandedPropertiesToBeUsed = new ArrayList<NamedNode>();
+		}
+		if (!expandedPropertiesToBeUsed.contains(expProp)) {
+			expandedPropertiesToBeUsed.add(expProp);
+			return true;
+		}
+		return false;
+	}
+
+	public NamedNode getRightImpliedPropertyUsed() {
+		return rightImpliedPropertyUsed;
+	}
+
+	public void setRightImpliedPropertyUsed(NamedNode rightImpliedPropertyUsed) {
+		this.rightImpliedPropertyUsed = rightImpliedPropertyUsed;
+	}
+
+	public NamedNode getLeftImpliedPropertyUsed() {
+		return leftImpliedPropertyUsed;
+	}
+
+	public void setLeftImpliedPropertyUsed(NamedNode leftImpliedPropertyUsed) {
+		this.leftImpliedPropertyUsed = leftImpliedPropertyUsed;
+	}
+
 }
