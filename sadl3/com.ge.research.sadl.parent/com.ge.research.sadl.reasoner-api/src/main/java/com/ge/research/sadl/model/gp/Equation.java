@@ -128,6 +128,55 @@ public class Equation {
 		return sb.toString();
 	}
 	
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder();
+		if (getReturnType() != null) {
+			sb.append(getReturnType().toDescriptiveString());
+		}
+		else {
+			sb.append("--");
+		}
+		sb.append(" ");
+		sb.append(getName());
+		sb.append("(");
+		List<Node> args = getArguments();
+		List<Node> argtypes = getArgumentTypes();
+		if (!(args.size() == argtypes.size())) {
+			System.err.println("Error: equation arguments and argument types are not the same size");
+		}
+		else {
+			for (int i = 0; args != null && i < args.size(); i++) {
+				Node n = args.get(i);
+				Node nt = argtypes.get(i);
+				if (i > 0) sb.append(",");
+				sb.append(nt.toDescriptiveString());
+				sb.append(" ");
+				sb.append(n.toDescriptiveString());
+			}
+		}
+		sb.append(")");
+		sb.append(": ");
+		if (isExternal()) {
+			 sb.append("uri(\"");
+			 sb.append(getUri());
+			 sb.append("\")");
+			 if (getLocation() != null) {
+				 sb.append(" location(\"");
+				 sb.append(getLocation());
+				 sb.append("\")");
+			 }
+		}
+		else {
+			List<GraphPatternElement> exprs = getBody();
+			for (int i = 0; exprs != null && i < exprs.size(); i++) {
+				GraphPatternElement expr = exprs.get(i);
+				if (i > 0) sb.append(",");
+				sb.append(expr.toDescriptiveString());
+			}
+		}
+		return sb.toString();
+	}
+	
 	public String toFullyQualifiedString() {
 		StringBuilder sb = new StringBuilder();
 		if (getReturnType() != null) {
