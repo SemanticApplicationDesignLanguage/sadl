@@ -599,7 +599,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			type = rightTypeCheckInfo.getTypeCheckType();
 		}
 		// the other possibility is that both sides have implied properties (which should be the same) so the type is the common type
-		if (leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null 
+		else if (leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null 
 				&& leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) {
 			type = leftTypeCheckInfo.getTypeCheckType();
 		}
