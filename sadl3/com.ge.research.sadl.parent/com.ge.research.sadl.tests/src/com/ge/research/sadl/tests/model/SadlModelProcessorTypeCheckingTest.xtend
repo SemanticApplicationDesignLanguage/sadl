@@ -53,9 +53,9 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		}
 		Assert.assertNotNull(issues)
 		Assert.assertEquals(3, issues.size)
-		Assert.assertEquals(issues.get(0).message, "Variable p2 is of type http://sadl.org/Test1.sadl#Pet which is not in domain of property http://sadl.org/Test1.sadl#owns")
+		Assert.assertEquals(issues.get(0).message, "http://sadl.org/Test1.sadl#Pet is not in domain of property http://sadl.org/Test1.sadl#owns")
 		Assert.assertEquals(issues.get(1).message, "Class 'http://sadl.org/Test1.sadl#Person' is not in the range of property 'http://sadl.org/Test1.sadl#owns'")
-		Assert.assertEquals(issues.get(2).message, "Variable p1 is of type http://sadl.org/Test1.sadl#Person which is not in domain of property http://sadl.org/Test1.sadl#caredFor")
+		Assert.assertEquals(issues.get(2).message, "http://sadl.org/Test1.sadl#Person is not in domain of property http://sadl.org/Test1.sadl#caredFor")
 	}
 	
 	@Test

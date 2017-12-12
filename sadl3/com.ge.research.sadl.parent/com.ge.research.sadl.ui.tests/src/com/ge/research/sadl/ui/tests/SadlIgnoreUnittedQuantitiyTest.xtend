@@ -55,7 +55,6 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 		]
 	}
 
-//	@Ignore("currently only one test case per file is run property, all after first fail")
 	@Test
 	def void testIgnoreUnitsInSadl2() {
 

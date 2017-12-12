@@ -66,7 +66,10 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.FileUtils;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 /**
  * This is a general purpose configuration manager suitable for model deployment environments.
@@ -1015,7 +1018,19 @@ public class ConfigurationManager implements IConfigurationManager {
 			if ((prefix == null || prefix.length() == 0) && uri.endsWith("#")) {
 				prefix = globalPrefixes.get(uri.substring(0, uri.length() - 1));
 			}
-			if (prefix != null && prefix.length() == 0) {
+			if (prefix == null || prefix.length() == 0) {
+				if (uri.equals(RDF.getURI())) {
+					return "rdf";
+				}
+				else if (uri.equals(RDFS.getURI())) {
+					return "rdfs";
+				}
+				else if (uri.equals(OWL.getURI())) {
+					return "owl";
+				}
+				else if (uri.equals(XSD.getURI())) {
+					return "xsd";
+				}
 				return null;
 			}
 			return prefix;
