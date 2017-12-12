@@ -18,6 +18,8 @@
 
 package com.ge.research.sadl.model.gp;
 
+import java.util.Iterator;
+
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 
 public class TripleElement extends GraphPatternElement {
@@ -120,6 +122,33 @@ public class TripleElement extends GraphPatternElement {
 	@Override
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder("rdf(");
+		if (getLeftImpliedPropertyUsed() != null || getRightImpliedPropertyUsed() != null || getExpandedPropertiesToBeUsed() != null) {
+			sb.append("(");
+			boolean needComma = false;
+			if (getLeftImpliedPropertyUsed() != null) {
+				sb.append("leftImpliedProperty ");
+				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			else if (getRightImpliedPropertyUsed() != null) { // only left or right should exist (at most)
+				sb.append("rightImpliedProperty ");
+				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			if (getExpandedPropertiesToBeUsed() != null) {
+				if (needComma) sb.append(",");
+				needComma = false;
+				sb.append("expandedProperties [");
+				Iterator<NamedNode> epitr = getExpandedPropertiesToBeUsed().iterator();
+				while (epitr.hasNext()) {
+					if (needComma) sb.append(",");
+					sb.append(epitr.next().toDescriptiveString());
+					needComma = true;
+				}
+				sb.append("]");
+			}
+			sb.append(")");
+		}
 		sb.append(subject != null ? subject.toDescriptiveString() : "null");
 		sb.append(", ");
 		sb.append(predicate != null ? predicate.toDescriptiveString() : "null");

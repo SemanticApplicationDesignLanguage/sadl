@@ -19,6 +19,7 @@
 package com.ge.research.sadl.model.gp;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -47,6 +48,7 @@ public class BuiltinElement extends GraphPatternElement {
 		public boolean isBinaryBuiltin;
 		public boolean isUnaryBuiltin;
 		private String[] tokens;
+		
 		private BuiltinType setBooleanBuiltin(boolean isBooleanBuiltin) {
 			this.isBooleanBuiltin = isBooleanBuiltin;
 			return this;
@@ -192,6 +194,33 @@ public class BuiltinElement extends GraphPatternElement {
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getFuncName());
+		if (getLeftImpliedPropertyUsed() != null || getRightImpliedPropertyUsed() != null || getExpandedPropertiesToBeUsed() != null) {
+			sb.append("(");
+			boolean needComma = false;
+			if (getLeftImpliedPropertyUsed() != null) {
+				sb.append("leftImpliedProperty ");
+				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			else if (getRightImpliedPropertyUsed() != null) { // only left or right should exist (at most)
+				sb.append("rightImpliedProperty ");
+				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			if (getExpandedPropertiesToBeUsed() != null) {
+				if (needComma) sb.append(",");
+				needComma = false;
+				sb.append("expandedProperties [");
+				Iterator<NamedNode> epitr = getExpandedPropertiesToBeUsed().iterator();
+				while (epitr.hasNext()) {
+					if (needComma) sb.append(",");
+					sb.append(epitr.next().toDescriptiveString());
+					needComma = true;
+				}
+				sb.append("]");
+			}
+			sb.append(")");
+		}
 		sb.append("(");
 		for (int i = 0; arguments != null && i < arguments.size(); i++) {
 			if (i > 0) {
