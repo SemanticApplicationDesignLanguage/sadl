@@ -192,12 +192,12 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
 			issues.assertHasNoIssues;
-//			if (issues !== null) {
-//				for (issue : issues) {
-//					println(issue.message)
-//				}
-//			}
 			val forTest = processor.getIntermediateFormResults(false, false)
 			for (t:forTest) {
 				println("\"" + t.toString + "\",")

@@ -770,7 +770,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true);
 					StringBuilder errorMessageBuilder = new StringBuilder();
-					if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is", errorMessageBuilder)) {
+					if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is", errorMessageBuilder, false)) {
 						context.getAcceptor().add(errorMessageBuilder.toString(), candidate, Severity.ERROR);
 					}
 					return;
@@ -2489,7 +2489,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (getModelValidator() != null) {
 			// check return type against body expression
 			StringBuilder errorMessageBuilder = new StringBuilder();
-			if (!getModelValidator().validateBinaryOperationByParts(element, rtype, bdy, "function return", errorMessageBuilder)) {
+			if (!getModelValidator().validateBinaryOperationByParts(element, rtype, bdy, "function return", errorMessageBuilder, false)) {
 				addIssueToAcceptor(errorMessageBuilder.toString(), bdy);
 			}
 		}
@@ -3117,29 +3117,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				e.printStackTrace();
 			}
 		}
-		//Validate BinaryOperation expression
-		StringBuilder errorMessage = new StringBuilder();
-		if(!isLeftVariableDefinition && getModelValidator() != null) {		// don't type check a variable definition
-			if (!getModelValidator().validate(expr, errorMessage)) {
-				addIssueToAcceptor(errorMessage.toString(), expr);
-				if (isSyntheticUri(null, getCurrentResource())) {
-					if (getMetricsProcessor() != null) {
-						getMetricsProcessor().addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
-					}
-				}
-			}
-			else {
-				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
-				if (ip != null) {
-					Iterator<EObject> ipitr = ip.keySet().iterator();
-					while (ipitr.hasNext()) {
-						EObject eobj = ipitr.next();
-						OntModelProvider.addImpliedProperty(expr.eResource(), eobj, ip.get(eobj));
-					}
-					// TODO must add implied properties to rules, tests, etc.
-				}
-			}
-		}
 		
 		String op = expr.getOp();
 		
@@ -3348,7 +3325,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Expression rexpr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder errorMessage = new StringBuilder();
 		if (lexpr != null && rexpr != null) {
-			if(!getModelValidator().validateBinaryOperationByParts(lexpr.eContainer(), lexpr, rexpr, op, errorMessage)){
+			if(!getModelValidator().validateBinaryOperationByParts(lexpr.eContainer(), lexpr, rexpr, op, errorMessage, false)){
 				addError(errorMessage.toString(), lexpr.eContainer());
 			}
 			else {

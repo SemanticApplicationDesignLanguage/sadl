@@ -202,7 +202,8 @@ public class BuiltinElement extends GraphPatternElement {
 				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
 				needComma = true;
 			}
-			else if (getRightImpliedPropertyUsed() != null) { // only left or right should exist (at most)
+			if (getRightImpliedPropertyUsed() != null) {
+				if (needComma) sb.append(",");
 				sb.append("rightImpliedProperty ");
 				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
 				needComma = true;
