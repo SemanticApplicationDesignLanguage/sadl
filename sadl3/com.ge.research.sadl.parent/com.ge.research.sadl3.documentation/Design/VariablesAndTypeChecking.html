@@ -1,7 +1,7 @@
 <title>Variables and Type Checking</title>
 <h1>Variables and Type Checking</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/28/2017<!--webbot bot="Timestamp" endspan i-checksum="12653" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/15/2017<!--webbot bot="Timestamp" endspan i-checksum="12584" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h4>Table of Contents</h4>
@@ -13,7 +13,7 @@ Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:cr
 </ul>
 <h2><a name="Introduction">Introduction</a></h2>
 <p>A variable in SADL is a name which is not defined in the ontology but is used 
-in expressions, that is in triple patterns or as built-in function arguments, as 
+in expressions (in triple patterns or as built-in function arguments) as 
 a uniquely identified placeholder. (See
 <a href="http://sadl.sourceforge.net/sadl3/FoundationalConcepts.html#Graphs">
 Graph Patterns</a>.) Variables tie together multiple triple patterns and/or 
@@ -34,15 +34,13 @@ Xtext. One such use of Xtext is in cleaner, simpler handling of variables.
 Variables in SADL are local in scope--a variable is only defined within the 
 context of a rule, query, or test. If another rule, query, or test in the same 
 SADL file has a variable of the same name, it is a different, independent 
-variable. Xtext scoping differentiates between the declaration of a concept, 
-including a variable, and references to that concept. This enables the 
-hyperlinking of &quot;Open Declaration&quot; and &quot;Find References&quot; to easily go from 
+variable. Xtext scoping differentiates between the declaration of a name, 
+including a variable, and references to that name. This enables the hyperlinking of &quot;Open Declaration&quot; and &quot;Find References&quot; to easily go from 
 references to declaration and vice versa. Xtext also can identify the type of a 
-name, e.g., class, property, variable, necessary for coloring to work. Variables 
-pink bold. Therefore, Xtext scoping can be leveraged in the model processor to 
-create a SADL VariableNode (class com.ge.research.sadl.model.gp.VariableNode) 
-when the declaring parse tree element is processed. The newly created 
-VariableNode is given, using the Xtext information, a type. Note that no type 
+name, e.g., class, property, variable, necessary for semantic coloring to work. Variables 
+are pink bold. Therefore, Xtext scoping can be leveraged in the model processor to 
+create a SADL VariableNode 
+when the declaring parse tree element is processed. The newly created VariableNode is given, using the Xtext information, a type. Note that no type 
 checking is needed for a variable declaration since the declaration defines the 
 type.</p>
 <p>In addition to a variable's declaration and references, we introduce the 
