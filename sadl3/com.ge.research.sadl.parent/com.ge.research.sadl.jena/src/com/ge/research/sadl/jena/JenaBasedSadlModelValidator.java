@@ -3642,7 +3642,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					cn.setType(ConceptType.RDFPROPERTY);
 				}
 				TypeCheckInfo newrtci = getTypeInfoFromRange(cn, prop, rightExpression);
-				if (compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, newrtci, ImplicitPropertySide.RIGHT)) {
+				if (compareTypesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, newrtci)) {
 					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side" + (opstr != null ? (" of '" + opstr + "'") : "") + ") to pass type check", rightExpression);
 					addImpliedPropertiesUsed(rightExpression, prop);
 					rightSideOK = true;
