@@ -3216,7 +3216,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(booleanLiteralConceptName, tctype, this, binExpr);
 		}
 		else if (getModelProcessor().isNumericOperator(operations)) {
-			if (isNumeric(leftTypeCheckInfo) && isNumeric(rightTypeCheckInfo)) {
+			if (leftTypeCheckInfo != null && isNumeric(leftTypeCheckInfo) && rightTypeCheckInfo != null && isNumeric(rightTypeCheckInfo)) {
 				NamedNode lcn = getTypeCheckInfoType(leftTypeCheckInfo);
 				NamedNode rcn = getTypeCheckInfoType(rightTypeCheckInfo);
 				if (lcn == null || lcn.getNamespace() == null) {
@@ -3235,10 +3235,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else {
 				NamedNode tctype;
-				if (isNumeric(leftTypeCheckInfo)) {
+				if (leftTypeCheckInfo != null && isNumeric(leftTypeCheckInfo)) {
 					tctype = getTypeCheckInfoType(leftTypeCheckInfo);
 				}
-				else if (isNumeric(rightTypeCheckInfo)) {
+				else if (rightTypeCheckInfo != null && isNumeric(rightTypeCheckInfo)) {
 					tctype = getTypeCheckInfoType(rightTypeCheckInfo);
 				}
 				else {
@@ -3369,6 +3369,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						useImpliedPropertyToMatchNumericOperator(rightExpression, rightTypeCheckInfo, "right side of '" + opstr + "'")) {
 					return true;
 				}
+				return false; 	// don't fall through to call below, it doesn't handle BOTH
 			}
 			//Compare implied property types
 			if(compareTypesUsingImpliedPropertiesRecursively(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, side)){
@@ -3589,9 +3590,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean compareTypesUsingImpliedProperties(List<String> operations, EObject leftExpression,
 			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, DontTypeCheckException, InvalidTypeException, TranslationException {
-		
+		if (side.equals(ImplicitPropertySide.BOTH)) {
+			throw new TranslationException("This method does not handle looking for implied properties on BOTH sides");
+		}
+		// There must be a mismatch or we wouldn't have gotten to here, so we know that to pass (return true) we 
+		//	need to find an implied property that fixes the mismatch on one side or the other.
+		// If the side is explicitly specified, then we won't check the other side. Otherwise we will 
+		//	check both sides and if we find a match we should return true.
 		boolean leftSideOK = !side.equals(ImplicitPropertySide.RIGHT) ? false : true;
 		boolean rightSideOK = !side.equals(ImplicitPropertySide.LEFT) ? false : true;
+		
 		String opstr = (operations != null && operations.size() > 0) ? operations.get(0) : null;
 		if (leftTypeCheckInfo != null && !side.equals(ImplicitPropertySide.RIGHT) && leftTypeCheckInfo.getImplicitProperties() != null) {
 			Iterator<ConceptName> litr = leftTypeCheckInfo.getImplicitProperties().iterator();
@@ -3612,10 +3620,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (left side" + (opstr != null ? (" of '" + opstr + "'") : "") + ") to pass type check", leftExpression);
 					addImpliedPropertiesUsed(leftExpression, prop);
 					leftSideOK = true;
+					if (!side.equals(ImplicitPropertySide.BOTH)) {
+						rightSideOK = true;
+					}
 					break;
-				}
-				else {
-					leftSideOK = false;
 				}
 			}
 		}
@@ -3638,10 +3646,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side" + (opstr != null ? (" of '" + opstr + "'") : "") + ") to pass type check", rightExpression);
 					addImpliedPropertiesUsed(rightExpression, prop);
 					rightSideOK = true;
+					if (!side.equals(ImplicitPropertySide.BOTH)) {
+						leftSideOK = true;
+					}
 					break;
-				}
-				else {
-					rightSideOK = false;
 				}
 			}
 		}
