@@ -237,7 +237,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  			issues.assertHasIssues(2);
  			for (issue:issues) {
  				if (issue.severity.equals(Severity.ERROR)) {
- 					assertEquals(issue.message,"past, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with cValue, a datatype property with range  http://www.w3.org/2001/XMLSchema#decimal.")
+ 					assertEquals(issue.message,"past, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with cValue, a datatype property with range  xsd:decimal.")
  				}
  				if (issue.severity.equals(Severity.WARNING)) {
   					assertEquals(issue.message,"Units are associated with the subject of this expression; should the expression be in parentheses?")
@@ -272,7 +272,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
  			issues.assertHasIssues(1);
-			assertEquals(issues.head.message,"constantValue, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot operate (+) with int, an RDF datatype  http://www.w3.org/2001/XMLSchema#int.")
+			assertEquals(issues.head.message,"constantValue, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot operate (+) with int, an RDF datatype  xsd:int.")
 		]
 	}
 	

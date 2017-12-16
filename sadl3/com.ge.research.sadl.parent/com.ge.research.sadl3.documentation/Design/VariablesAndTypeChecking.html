@@ -38,8 +38,8 @@ variable. Xtext scoping differentiates between the declaration of a name,
 including a variable, and references to that name. This enables the hyperlinking of &quot;Open Declaration&quot; and &quot;Find References&quot; to easily go from 
 references to declaration and vice versa. Xtext also can identify the type of a 
 name, e.g., class, property, variable, necessary for semantic coloring to work. Variables 
-are pink bold. Therefore, Xtext scoping can be leveraged in the model processor to 
-create a SADL VariableNode 
+pink bold. Therefore, Xtext scoping can be leveraged in the model processor to 
+create a SADL VariableNode (class com.ge.research.sadl.model.gp.VariableNode) 
 when the declaring parse tree element is processed. The newly created VariableNode is given, using the Xtext information, a type. Note that no type 
 checking is needed for a variable declaration since the declaration defines the 
 type.</p>

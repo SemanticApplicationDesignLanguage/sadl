@@ -1018,22 +1018,21 @@ public class ConfigurationManager implements IConfigurationManager {
 			if ((prefix == null || prefix.length() == 0) && uri.endsWith("#")) {
 				prefix = globalPrefixes.get(uri.substring(0, uri.length() - 1));
 			}
-			if (prefix == null || prefix.length() == 0) {
-				if (uri.equals(RDF.getURI())) {
-					return "rdf";
-				}
-				else if (uri.equals(RDFS.getURI())) {
-					return "rdfs";
-				}
-				else if (uri.equals(OWL.getURI())) {
-					return "owl";
-				}
-				else if (uri.equals(XSD.getURI())) {
-					return "xsd";
-				}
-				return null;
+			if (prefix != null) {
+				return prefix;
 			}
-			return prefix;
+		}
+		if (uri.equals(RDF.getURI())) {
+			return "rdf";
+		}
+		else if (uri.equals(RDFS.getURI())) {
+			return "rdfs";
+		}
+		else if (uri.equals(OWL.getURI())) {
+			return "owl";
+		}
+		else if (uri.equals(XSD.getURI())) {
+			return "xsd";
 		}
 		return null;
 	}

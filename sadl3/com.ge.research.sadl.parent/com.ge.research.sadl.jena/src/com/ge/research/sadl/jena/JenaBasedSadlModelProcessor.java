@@ -1626,7 +1626,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 	
 	public VariableNode createVariable(SadlResource sr) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
-		VariableNode var = createVariable(getDeclarationExtensions().getConceptUri(sr));
+		VariableNode var = createVariable(getDeclarationExtensions().getConceptUri(sr), sr);
 		addVariableNamingEObject(var, sr);
 		if (var.getType() != null) {
 			return var;	// all done
@@ -1712,7 +1712,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 	
-	protected VariableNode createVariable(String name) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
+	protected VariableNode createVariable(String name, EObject context) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
 		Object trgt = getTarget();
 		if (trgt instanceof Rule) {
 			if (((Rule)trgt).getVariable(name) != null) {
@@ -2231,21 +2231,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					names.add(((VariableNode) result));
 				}
 				else {
-					names.add(createVariable(result.toString()));
+					names.add(createVariable(result.toString(), expr));
 				}
 				result = processExpression(((ConstructExpression)expr).getPred());
 				if (result instanceof VariableNode) {
 					names.add((VariableNode) result);
 				}
 				else {
-					names.add(createVariable(result.toString()));
+					names.add(createVariable(result.toString(), expr));
 				}
 				result = processExpression(((ConstructExpression)expr).getObj());
 				if (result instanceof VariableNode) {
 					names.add(((VariableNode) result));
 				}
 				else {
-					names.add(createVariable(result.toString()));
+					names.add(createVariable(result.toString(), expr));
 				}
 				if (names.size() != 3) {
 					addWarning("A 'construct' statement should have 3 variables so as to be able to generate a graph.", expr);
@@ -2893,7 +2893,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		
 		if (isLeftVariableDefinition) {
 			try {
-				VariableNode leftVar = createVariable(getDeclarationExtensions().getConceptUri(leftVariableName.getName()));
+				VariableNode leftVar = createVariable(getDeclarationExtensions().getConceptUri(leftVariableName.getName()), expr);
 				if (leftVar == null) {	// this can happen on clean/build when file is open in editor
 					return null;
 				}
@@ -2926,7 +2926,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (isRightVariableDefinition) {
 						Object rightTranslatedDefn = processExpression(rightVariableDefn);
 						NamedNode rightDefnType = null;
-						VariableNode rightVar = createVariable(getDeclarationExtensions().getConceptUri(rightVariableName.getName()));
+						VariableNode rightVar = createVariable(getDeclarationExtensions().getConceptUri(rightVariableName.getName()), expr);
 						if (rightVar == null) {
 							return null;
 						}
@@ -3041,7 +3041,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			NamedNode rightDefnType = null;
 			VariableNode rightVar;
 			try {
-				rightVar = createVariable(getDeclarationExtensions().getConceptUri(rightVariableName.getName()));
+				rightVar = createVariable(getDeclarationExtensions().getConceptUri(rightVariableName.getName()), expr);
 				if (rightVar == null) {
 					return null;
 				}
@@ -3156,16 +3156,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 	
-	private VariableNode setListTypeInfo(VariableNode var, NamedNode type, TypeCheckInfo varTci) throws TranslationException {
-		var.setType(type);
-		var.setListLength(type.getListLength());
-		var.setMinListLength(type.getMinListLength());
-		var.setMaxListLength(type.getMaxListLength());
-		return var;
-	}
-	
+//	private VariableNode setListTypeInfo(VariableNode var, NamedNode type, TypeCheckInfo varTci) throws TranslationException {
+//		var.setType(type);
+//		var.setListLength(type.getListLength());
+//		var.setMinListLength(type.getMinListLength());
+//		var.setMaxListLength(type.getMaxListLength());
+//		return var;
+//	}
+//	
 	private void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException {
 		// if it hasn't been set before just set it
+		if (vartype instanceof NamedNode) {
+			vartype = validateNamedNode((NamedNode) vartype);
+		}
 		if (var.getType() == null) {
 			if (isList(null, defn)) {
 				var.setType(vartype);
@@ -3210,15 +3213,44 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		for(Node type:typesOfType) {
 			if (isList(null, defn)) {
-				var.setType(type);
 				int[] lenRest = getLengthRestrictions(defn);
+				int len = -1;
+				int minLen = -1;
+				int maxLen = -1;
 				if (lenRest != null) {
 					if (lenRest.length == 1) {
-						var.setListLength(lenRest[0]);
+						len = lenRest[0];
 					}
 					else if (lenRest.length == 2) {
-						var.setMinListLength(lenRest[0]);
-						var.setMaxListLength(lenRest[1]);
+						minLen = lenRest[0];
+						maxLen = lenRest[1];
+					}
+				}
+				
+				if (var.getType().toFullyQualifiedString().equals(type.toFullyQualifiedString()) &&
+						var.getListLength() == len && var.getMinListLength() == minLen && var.getMaxListLength() == maxLen) {
+					return;		//same
+				}
+				else {
+					Node current = var.getType();
+					if (current instanceof NamedNode && type instanceof NamedNode) {
+						if (isNamedNodeSubclassOfNamedNode((NamedNode)current, (NamedNode)type)) {
+							return;		// We're in a loop--OK to return when only one matches? Assumes disjuction?
+						}
+					}
+					else if (current instanceof ProxyNode && ((ProxyNode)current).getProxyFor() instanceof Junction) {
+						Junction jct = (Junction) ((ProxyNode)current).getProxyFor();
+						List<Node> jctnodes = disjunctionToNodeList(jct);
+						for (Node jctnode:jctnodes) {
+							if (jctnode instanceof NamedNode && type instanceof NamedNode) {
+								if (isNamedNodeSubclassOfNamedNode((NamedNode) jctnode, (NamedNode)type)) {
+									return; // We're in a loop--OK to return when only one matches? Assumes disjuction?
+								}
+							}
+						}
+					}
+					else {
+						throw new TranslationException("Unhandled Node type");
 					}
 				}
 			}
@@ -3276,21 +3308,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 	
-	private VariableNode setListTypeInfo(VariableNode var, NamedNode type, Expression variableDefn) throws TranslationException {
-		var.setType(type);
-		int[] lenRest = getLengthRestrictions(variableDefn);
-		if (lenRest != null) {
-			if (lenRest.length == 1) {
-				var.setListLength(lenRest[0]);
-			}
-			else if (lenRest.length == 2) {
-				var.setMinListLength(lenRest[0]);
-				var.setMaxListLength(lenRest[1]);
-			}
-		}
-		return var;
-	}
-	
+//	private VariableNode setListTypeInfo(VariableNode var, NamedNode type, Expression variableDefn) throws TranslationException {
+//		var.setType(type);
+//		int[] lenRest = getLengthRestrictions(variableDefn);
+//		if (lenRest != null) {
+//			if (lenRest.length == 1) {
+//				var.setListLength(lenRest[0]);
+//			}
+//			else if (lenRest.length == 2) {
+//				var.setMinListLength(lenRest[0]);
+//				var.setMaxListLength(lenRest[1]);
+//			}
+//		}
+//		return var;
+//	}
+//	
 	protected boolean isVariableDefinition(Name expr) throws CircularDefinitionException {
 		if (expr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name)expr).getName()).equals(OntConceptType.VARIABLE)) {
 			if (getDeclarationExtensions().getDeclaration(((Name)expr).getName()).equals((Name)expr)) {
@@ -4544,7 +4576,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					try {
 						if (var == null) {
 							String nvar = getNewVar(expr);
-							var = createVariable(nvar);
+							var = createVariable(nvar, expr);
 						}
 						setVarType(var, (NamedNode)typenode, isList((NamedNode)typenode, type), expr);
 					} catch (IOException e) {
@@ -9962,7 +9994,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			List<VariableNode> newList = new ArrayList<VariableNode>();
 			VariableNode var = new VariableNode(name);
 			var.setCRulesVariable(true);
-			var.setType(type);
+			var.setType(validateNamedNode(type));
 			var.setHostObject(getHostEObject());
 			newList.add(var);
 			cruleVariables.put(type, newList);
@@ -9980,7 +10012,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (idx == ordinalNumber - 1) {
 				VariableNode var = new VariableNode(name);
 				var.setCRulesVariable(true);
-				var.setType(type);
+				var.setType(validateNamedNode(type));
 				var.setHostObject(getHostEObject());
 				existingList.add(var);
 				return var;
