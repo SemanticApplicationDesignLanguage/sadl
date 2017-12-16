@@ -125,7 +125,37 @@ public class VariableNode extends NamedNode {
 		sb.append(toString());
 		sb.append(" (a variable of type ");
 		if (isList()) {
-			sb.append(getType() != null ? getType().toString() : "<unknown>");
+			sb.append(getType() != null ? getType().toDescriptiveString() : "<unknown>");
+			sb.append(" List");
+			if (getListLength() >= 0) {
+				sb.append(" length ");
+				sb.append(getListLength());
+			}
+			else if (getMinListLength() >= 0) {
+				sb.append(" length ");
+				sb.append(getMinListLength());
+				sb.append("-");
+				if (getMaxListLength() >= 0) {
+					sb.append(getMaxListLength());
+				}
+				else {
+					sb.append("*");
+				}
+			}
+		}
+		else {
+			sb.append(getType() != null ? getType().toDescriptiveString() : "<unknown>");
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+
+	public String toFullyQualifiedString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(toString());
+		sb.append(" (a variable of type ");
+		if (isList()) {
+			sb.append(getType() != null ? getType().toFullyQualifiedString() : "<unknown>");
 			sb.append(" List");
 			if (getListLength() >= 0) {
 				sb.append(" length ");

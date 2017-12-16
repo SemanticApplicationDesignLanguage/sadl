@@ -1495,7 +1495,7 @@ public class IntermediateFormTranslator {
 					if (tcitype instanceof NamedNode) {
 						NamedNode defn;
 						defn = new NamedNode(((NamedNode)tcitype).toFullyQualifiedString(), ((NamedNode)tcitype).getNodeType());
-						var.setType((NamedNode) defn);
+						var.setType(modelProcessor.validateNamedNode((NamedNode) defn));
 					}
 					else {
 						addError(new IFTranslationError("Domain type did not return a ConceptName."));
@@ -1511,7 +1511,7 @@ public class IntermediateFormTranslator {
 					if (tcitype instanceof NamedNode) {
 						NamedNode defn;
 						defn = new NamedNode(((NamedNode)tcitype).toFullyQualifiedString(), ((NamedNode)tcitype).getNodeType());
-						var.setType((NamedNode) defn);
+						var.setType(modelProcessor.validateNamedNode((NamedNode) defn));
 				}
 					else {
 						addError(new IFTranslationError("Range type did not return a ConceptName."));
