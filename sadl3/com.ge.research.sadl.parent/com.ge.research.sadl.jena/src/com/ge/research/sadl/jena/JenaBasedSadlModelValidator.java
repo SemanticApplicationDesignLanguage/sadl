@@ -1018,9 +1018,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
-		if (expressionsValidated.containsKey(expression)) {
-			return expressionsValidated.get(expression);
-		}
+//		if (expressionsValidated != null && expressionsValidated.containsKey(expression)) {
+//			return expressionsValidated.get(expression);
+//		}
 		TypeCheckInfo returnedTci = null;
 		
 		if(expression instanceof Name){
@@ -1648,7 +1648,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(rdfType, tctype, this, expression);
 		}
 		else if(constant.equals(JenaBasedSadlModelProcessor.NONE)){
-			NamedNode tctype = new NamedNode(constant, NodeType.InstanceNode);
+			NamedNode tctype = new NamedNode(JenaBasedSadlModelProcessor.HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE, NodeType.InstanceNode);
 			ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
 			return new TypeCheckInfo(constantConceptName, tctype, this, expression);
 		}
@@ -2621,6 +2621,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
 			String nm = declarationExtensions.getConcreteName(sr);
 			String uri = declarationExtensions.getConceptUri(sr);
+			if (uri == null) {
+				getModelProcessor().addIssueToAcceptor("Unable to resolve name",reference);
+				return null;
+			}
 			TypeCheckInfo tci = getVariableType(ConceptType.VARIABLE, sr, nm, uri, reference);
 			if (tci != null) {				// will be null on invalid input, e.g., during clean
 				ConceptName et = new ConceptName(uri);
@@ -3325,6 +3329,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, DontTypeCheckException, InvalidTypeException, TranslationException {
 		boolean listTemporarilyDisabled = false;
 		try {
+			boolean isNumericOperator = getModelProcessor().isNumericOperator(operations);
+			boolean isNumericLeft = isNumeric(leftTypeCheckInfo) || isUnittedQuantity(leftTypeCheckInfo);
+			boolean isNumericRight = isNumeric(rightTypeCheckInfo) || isUnittedQuantity(rightTypeCheckInfo);
+			if (!isNumericOperator && (isNumericLeft || isNumericRight)) {
+				isNumericOperator = getModelProcessor().canBeNumericOperator(operations);
+			}
+			// negated expressions have the type of the expression negated
+			if (leftExpression instanceof UnaryExpression && ((UnaryExpression)leftExpression).getOp().equals("not")) {
+				leftExpression = ((UnaryExpression)leftExpression).getExpr();
+			}
+			if (rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getOp().equals("not")) {
+				rightExpression = ((UnaryExpression)rightExpression).getExpr();
+			}
 			if (rightExpression instanceof Constant && ((Constant)rightExpression).getConstant().equals("known")) {
 				//	everything matches "known"
 				return true;
@@ -3333,16 +3350,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				//	everything matches "known"
 				return true;
 			}
+			if (rightExpression instanceof Constant && ((Constant)rightExpression).getConstant().equals("None")) {
+				//	everything matches "None"
+				return true;
+			}
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("None")) {
+				//	everything matches "None"
+				return true;
+			}
+			if (!isNumericOperator) {
+				if (directCompareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, side)) {
+					return true;
+				}
+			}
 			if (leftExpression instanceof Constant && 
 					(((Constant)leftExpression).getConstant().equals("value") || ((Constant)leftExpression).getConstant().equals("type"))) {
 				listTemporarilyDisabled = true;
 				leftTypeCheckInfo = convertListTypeToElementOfListType(leftTypeCheckInfo);
-			}
-			boolean isNumericOperator = getModelProcessor().isNumericOperator(operations);
-			boolean isNumericLeft = isNumeric(leftTypeCheckInfo) || isUnittedQuantity(leftTypeCheckInfo);
-			boolean isNumericRight = isNumeric(rightTypeCheckInfo) || isUnittedQuantity(rightTypeCheckInfo);
-			if (!isNumericOperator && (isNumericLeft || isNumericRight)) {
-				isNumericOperator = getModelProcessor().canBeNumericOperator(operations);
 			}
 			if (isNumericOperator) {
 				if (!isNumericLeft) {
@@ -3376,6 +3400,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return true;
 			}
 				
+			if (directCompareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, side)) {
+				return true;
+			}
 			return false;
 		}
 		finally {
@@ -3385,6 +3412,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private boolean directCompareTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, InvalidTypeException, DontTypeCheckException, TranslationException {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && 
+				rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null) {
+			if (leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) { 
+				return true;
+			}
+			if (compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public boolean compareTypesUsingImpliedPropertiesRecursively(List<String> operations, EObject leftExpression,
 			EObject rightExpression, TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, DontTypeCheckException, InvalidTypeException, TranslationException {
 		List<TypeCheckInfo> ltciCompound = leftTypeCheckInfo != null ? leftTypeCheckInfo.getCompoundTypes() : null;
@@ -3451,8 +3492,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
-		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals(JenaBasedSadlModelProcessor.NONE)) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals(JenaBasedSadlModelProcessor.NONE)) ||
+		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals(JenaBasedSadlModelProcessor.HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE)) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals(JenaBasedSadlModelProcessor.HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE)) ||
 				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
 				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
 			// Can't type-check on "None" as it represents that it doesn't exist.
@@ -4371,6 +4412,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	public boolean checkPropertyValueInRange(OntModel theJenaModel, Expression subj, SadlResource pred, EObject val, StringBuilder errorMessageBuilder) throws CircularDefinitionException, DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		TypeCheckInfo predType = getType(pred);
+		if (predType == null) {
+			return true;	// this is an error which will have already been marked in call to getType
+		}
 		if (val == null && isInQuery(pred)) {
 			return true;	// this is OK
 		}
