@@ -839,7 +839,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 			addError(e1.getMessage(), model);
 			return; // this is a fatal error
 		}
-		getTheJenaModel().setNsPrefix(getModelAlias(), getModelNamespace());
+//		getTheJenaModel().setNsPrefix(getModelAlias(), getModelNamespace());
+		getTheJenaModel().setNsPrefix("", getModelNamespace());
 		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
 		logger.debug("Ontology '" + modelName + "' created");
 		modelOntology.addComment("This ontology was created from a SADL file '"
@@ -899,7 +900,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 				    		}
 					} else if (eResource instanceof ExternalEmfResource) {
 						ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
-						addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getJenaModel());
+						addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getOntModel());
 //						URI importUrl = emfResource.getURI();
 //						String strUrl;
 //						if (importUrl.isPlatform()) {
@@ -1150,7 +1151,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
 					else if (imrsrc instanceof ExternalEmfResource) {
-						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getOntModel();
 					}
 					if (sadlBuiltinFunctionModel == null) {
 						if (imrsrc instanceof XtextResource) {
@@ -1248,7 +1249,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 						sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
 					else if (imrsrc instanceof ExternalEmfResource) {
-						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getOntModel();
 					}
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {
@@ -7453,7 +7454,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		sb.append("	    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
 		sb.append("	    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n");
 		sb.append("	    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
-		sb.append("	    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n");
+		sb.append("	    xmlns=\"http://sadl.org/sadlbasemodel#\"\n");
 		sb.append("	    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
 		sb.append("	    xml:base=\"http://sadl.org/sadlbasemodel\">\n");
 		sb.append("	  <owl:Ontology rdf:about=\"\">\n");
@@ -7485,7 +7486,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor {
 		sb.append("    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
 		sb.append("    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
 		sb.append("    xmlns:base=\"http://sadl.org/sadllistmodel\"\n");
-		sb.append("    xmlns:sadllistmodel=\"http://sadl.org/sadllistmodel#\" > \n");
+		sb.append("    xmlns=\"http://sadl.org/sadllistmodel#\" > \n");
 		sb.append("  <rdf:Description rdf:about=\"http://sadl.org/sadllistmodel#first\">\n");
 		sb.append("    <rdfs:domain rdf:resource=\"http://sadl.org/sadllistmodel#List\"/>\n");
 		sb.append("    <rdf:type rdf:resource=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#Property\"/>\n");

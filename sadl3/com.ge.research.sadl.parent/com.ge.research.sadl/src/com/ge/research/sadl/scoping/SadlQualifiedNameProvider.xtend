@@ -20,6 +20,7 @@ package com.ge.research.sadl.scoping
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
+import com.google.common.base.Preconditions
 import com.google.inject.Inject
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
@@ -28,13 +29,14 @@ import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.naming.QualifiedName
 
-class QualifiedNameProvider implements IQualifiedNameProvider {
+class SadlQualifiedNameProvider implements IQualifiedNameProvider {
 
 	@Inject extension DeclarationExtensions
 	@Inject IQualifiedNameConverter nameConverter
 
 	override getFullyQualifiedName(EObject obj) {
 		if (obj instanceof SadlModel) {
+			Preconditions.checkNotNull(obj.baseUri, '''Base URI was null for SADL model in resource: «obj.eResource.URI».''');
 			return QualifiedName.create(obj.baseUri)
 		}
 		if (obj instanceof SadlResource) {
@@ -50,7 +52,7 @@ class QualifiedNameProvider implements IQualifiedNameProvider {
 			if (concreteName === null) {
 				return null;
 			}
-			if (concreteName.indexOf(':') != -1) {
+			if (concreteName.indexOf(':') !== -1) {
 				return nameConverter.toQualifiedName(concreteName)
 			}
 			val model = EcoreUtil2.getContainerOfType(obj, SadlModel)

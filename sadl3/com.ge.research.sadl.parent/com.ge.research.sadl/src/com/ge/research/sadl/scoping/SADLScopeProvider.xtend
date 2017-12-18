@@ -43,6 +43,7 @@ import com.ge.research.sadl.sADL.SelectExpression
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.ge.research.sadl.sADL.TestStatement
 import com.google.common.base.Predicate
+import com.google.common.collect.ImmutableMap
 import com.google.inject.Inject
 import java.util.List
 import java.util.Map
@@ -61,6 +62,7 @@ import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
 
+import static com.ge.research.sadl.processing.SadlConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
@@ -75,6 +77,12 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	 * Flag for enabling additional logging during debugging.
 	 */
 	static val DEBUG_FLAG = Debug.FALSE;
+
+	/**
+	 * Mapping of implicit/built-in resource file name and the corresponding model URIs.
+	 */	
+	static val IMPLICIT_MODELS = ImmutableMap.of(SADL_IMPLICIT_MODEL_FILENAME, SADL_IMPLICIT_MODEL_URI,
+		SADL_BUILTIN_FUNCTIONS_FILENAME, SADL_BUILTIN_FUNCTIONS_URI);
 
 	@Inject protected extension DeclarationExtensions
 	@Inject protected IQualifiedNameConverter converter
@@ -389,13 +397,13 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		(resource.contents.head as SadlModel).alias
 	}
 	
-	protected def IScope createImportScope(Resource resource, Set<Resource> importedResources) {
+	protected def IScope createImportScope(Resource resource, Set<Resource> visitedResources) {
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
 		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
 			val importedResource = imp.importedResource
 			if (importedResource !== null && !importedResource.eIsProxy) {
-				createResourceScope(importedResource.eResource, imp.alias, importedResources).allElements.forEach[
+				createResourceScope(importedResource.eResource, imp.alias, visitedResources).allElements.forEach[
 					val existing = importedSymbols.put(name, it)
 					val duplicateProblem = checkDuplicate(existing, it)
 					if (duplicateProblem !== null) {
@@ -406,29 +414,20 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				
 		}
 		if (importedSymbols.isEmpty) {
-			if (!resource.URI.toString.endsWith("SadlImplicitModel.sadl")) {
-				val element = getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/sadlimplicitmodel"))
-				if (element !== null) {
-					val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
-					if (eobject !== null) {
-						createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
-							importedSymbols.put(name, it)
-						]
+			IMPLICIT_MODELS.forEach [ fileName, desiredUri |
+				if (!resource.URI.toString.endsWith(fileName)) {
+					val qName = QualifiedName.create(desiredUri);
+					val element = getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(qName)
+					if (element !== null) {
+						val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+						if (eobject !== null) {
+							createResourceScope(eobject.eResource, null, visitedResources).allElements.forEach [
+								importedSymbols.put(name, it)
+							]
+						}
 					}
 				}
-			}
-		}
-		
-		if (!resource.URI.toString.endsWith("SadlBuiltinFunctions.sadl")) {
-			val element = getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(QualifiedName.create("http://sadl.org/builtinfunctions"))
-			if (element !== null) {
-				val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
-				if (eobject !== null) {
-					createResourceScope(eobject.eResource, null, importedResources).allElements.forEach[
-						importedSymbols.put(name, it)
-					]
-				}
-			}
+			];
 		}
 		
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
