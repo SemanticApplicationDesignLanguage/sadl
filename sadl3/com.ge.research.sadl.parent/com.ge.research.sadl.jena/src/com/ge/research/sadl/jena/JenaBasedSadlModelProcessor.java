@@ -269,7 +269,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
     public final static String XSDNS = XSD.getURI();
 
 	protected static final String NONE = "None";
-
+	public static final String HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE = "http://com.ge.research/sadl/constants#None";
+	
     public final static Property xsdProperty( String local )
         { return ResourceFactory.createProperty( XSDNS + local ); }
 
@@ -1675,7 +1676,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					tci = getModelValidator().getType(((SubjHasProp)defnContainer).getProp());
 				}
 			}
-			else if (!isContainedBy(sr, QueryStatement.class)) {
+			else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null) {
 				addError("Unhandled variable definition", sr);
 			}
 			if (tci != null && tci.getTypeCheckType() instanceof NamedNode) {
@@ -3992,7 +3993,72 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void checkTripleRange(EObject subjeo, EObject predeo, EObject objeo, Expression expr,
 			Node subjNode, Node predNode, OntProperty pred, NodeType pnodetype, Node obj, boolean isKnownToBeList)
 			throws InvalidTypeException, TranslationException, CircularDependencyException {
-		if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
+		if (obj instanceof ConstantNode) {
+			String cnstval = ((ConstantNode)obj).getName();
+			double dval = 0;
+			if (cnstval.equals("None")) {
+				// None is ok with any subject and predicate
+				return;
+			}
+			else if (cnstval.equals("PI")) {
+				dval = Math.PI;
+			}
+			else if (cnstval.equals("e")) {
+				dval = Math.E;
+			}
+			if (pnodetype.equals(NodeType.DataTypeProperty)) {
+				try {
+					Literal litval = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), pred, dval);
+					if (!valueInDatatypePropertyRange(pred, litval, expr)) {
+						addError("Value '" + nodeToString(obj) + "' is not in the range of property '" + rdfNodeToString(pred) + "'", expr);
+					}
+				}
+				catch (Throwable t) {
+					addError("Value '" + nodeToString(obj) + "' is not in the range of property '" + rdfNodeToString(pred) + "'", expr);
+				}
+			}
+			else if (predNode instanceof NamedNode && isProperty(((NamedNode)predNode).getNodeType())) {
+				try {
+					TypeCheckInfo ptci = getModelValidator().getTypeInfoFromRange(namedNodeToConceptName((NamedNode) predNode), 
+							getTheJenaModel().getProperty(((NamedNode)predNode).toFullyQualifiedString()), predeo);
+					TypeCheckInfo otci = getModelValidator().getType(objeo);
+					List<String> operations = new ArrayList<String>(1);
+					operations.add("is");
+					if (getModelValidator().compareTypesUsingImpliedPropertiesRecursively(operations , predeo, objeo, ptci, otci, ImplicitPropertySide.LEFT)) {
+						return;
+					}
+				} catch (DontTypeCheckException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (CircularDefinitionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (PropertyWithoutRangeException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else if (predNode instanceof VariableNode) {
+				throw new TranslationException("Unhandled condition");
+			}
+		}
+		else if (obj instanceof KnownNode) {
+			// no type checking for "known"
+			return;
+		}
+		else if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
 			if (pnodetype.equals(NodeType.DataTypeProperty)) {
 				try {
 					Literal litval = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), pred, ((com.ge.research.sadl.model.gp.Literal)obj).getValue());
@@ -4777,12 +4843,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		else if (type instanceof SadlUnionType) {
 			try {
 				Object unionObj = sadlTypeReferenceToObject(type);
-				if (unionObj instanceof Node) {
-					return unionObj;
-				}
-				else {
-					addWarning("Unions not yet handled in this context", type);
-				}
+				return unionObj;
 			} catch (JenaProcessorException e) {
 				throw new TranslationException("Error processing union", e);
 			}
@@ -4790,7 +4851,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		else {
 			throw new TranslationException("Unhandled type of SadlTypeReference: " + type.getClass().getCanonicalName());
 		}
-		return null;
 	}
 	
 	private Object sadlDataTypeToNamedNode(SadlDataType pt) {
@@ -5058,6 +5118,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		if (result instanceof GraphPatternElement) {
 			return (GraphPatternElement) result;
+		}
+		else if (result instanceof Query) {
+			return result;
 		}
 		else if (result instanceof Node) {
 			return result;
