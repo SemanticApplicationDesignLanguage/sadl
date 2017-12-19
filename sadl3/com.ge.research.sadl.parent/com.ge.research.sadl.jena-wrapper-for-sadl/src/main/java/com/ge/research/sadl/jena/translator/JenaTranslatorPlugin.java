@@ -1227,7 +1227,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 
 	private String nodeToString(Node node, TranslationTarget target) throws TranslationException {
-		if (node instanceof NamedNode) {
+		if (node instanceof ConstantNode) {
+			Literal litval = constantToLiteral((ConstantNode)node);
+			return literalValueToString(litval, target);
+		}
+		else if (node instanceof NamedNode) {
 			NodeType ntype = ((NamedNode)node).getNodeType();
 			if (ntype == null) {
 				String msg = "Node '" + node.toFullyQualifiedString() + "' has a null node type.";
@@ -1284,10 +1288,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 					return nts;
 				}
 			}
-		}
-		else if (node instanceof ConstantNode) {
-			Literal litval = constantToLiteral((ConstantNode)node);
-			return literalValueToString(litval, target);
 		}
 		else if (node instanceof Literal) {
 			Object litObj = ((Literal)node).getValue();

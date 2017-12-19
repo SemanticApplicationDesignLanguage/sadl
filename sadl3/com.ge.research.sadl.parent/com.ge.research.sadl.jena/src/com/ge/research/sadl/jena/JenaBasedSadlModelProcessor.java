@@ -268,9 +268,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
     public final static String XSDNS = XSD.getURI();
 
-	protected static final String NONE = "None";
-	public static final String HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE = "http://com.ge.research/sadl/constants#None";
-	
     public final static Property xsdProperty( String local )
         { return ResourceFactory.createProperty( XSDNS + local ); }
 
@@ -3472,7 +3469,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else if (robj instanceof ConstantNode) {
 					String cnst = ((ConstantNode)robj).getName();
-					if (cnst.equals(NONE)) {
+					if (cnst.equals(SadlConstants.CONSTANT_NONE)) {
 						((TripleElement)lobj).setType(TripleModifierType.None);
 						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 					}
@@ -4023,14 +4020,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (obj instanceof ConstantNode) {
 			String cnstval = ((ConstantNode)obj).getName();
 			double dval = 0;
-			if (cnstval.equals("None")) {
+			if (cnstval.equals(SadlConstants.CONSTANT_NONE)) {
 				// None is ok with any subject and predicate
 				return;
 			}
-			else if (cnstval.equals("PI")) {
+			else if (cnstval.equals(SadlConstants.CONSTANT_PI)) {
 				dval = Math.PI;
 			}
-			else if (cnstval.equals("e")) {
+			else if (cnstval.equals(SadlConstants.CONSTANT_E)) {
 				dval = Math.E;
 			}
 			if (pnodetype.equals(NodeType.DataTypeProperty)) {
@@ -4636,19 +4633,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (expr.getConstant().equals("known")) {
 			return new KnownNode();
 		}
-		if (expr.getConstant().equals(NONE)) {
-			return new ConstantNode(HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE);
+		if (expr.getConstant().equals(SadlConstants.CONSTANT_NONE)) {
+			return new ConstantNode(SadlConstants.CONSTANT_NONE);
 		}
-		else if (expr.getConstant().equalsIgnoreCase("PI")) {
-			com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal();
-			litval.setValue(Math.PI);
-			return litval;
-		}
-		else if (expr.getConstant().equalsIgnoreCase("e")) {
-			com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal();
-			litval.setValue(Math.E);
-			return litval;
-		}	
 		return new ConstantNode(expr.getConstant());
 	}
 	
@@ -8884,14 +8871,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			else if (value instanceof SadlConstantLiteral) {
 				String val = ((SadlConstantLiteral)value).getTerm();
-				if (val.equals("PI")) {
+				if (val.equals(SadlConstants.CONSTANT_PI)) {
 					double cv = Math.PI;
 					if (isNegated) {
 						cv = cv*-1.0;
 					}
 					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), cv);
 				}
-				else if (val.equals("e")) {
+				else if (val.equals(SadlConstants.CONSTANT_E)) {
 					double cv = Math.E;
 					if (isNegated) {
 						cv = cv*-1.0;

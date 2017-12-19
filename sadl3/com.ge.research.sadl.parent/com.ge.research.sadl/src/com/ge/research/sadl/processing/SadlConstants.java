@@ -55,6 +55,12 @@ public class SadlConstants {
 	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
 	public static final String SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI = "synthetic://test/SadlBuiltinFunctions.sadl";
 	public static final String SADL_BUILTIN_FUNCTIONS_ALIAS = "builtinfunctions";
+	
+	public static final String CONSTANT_NONE = "None";
+	public static final String CONSTANT_PI = "PI";
+	public static final String CONSTANT_E = "e";
+	public static final String CONSTANT_KNOWN = "known";
+	
 	public static enum SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY{FULL,NAME_ONLY,NONE};
 	
 	public static enum OWL_FLAVOR {OWL_FULL, OWL_DL, OWL_LITE};
