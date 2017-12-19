@@ -25,16 +25,21 @@ import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.framework.Bundle;
 
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.google.common.base.Predicate;
 
 public class ResourceManager {
 
-    private static final String pluginId = "com.ge.research.sadl.ui";
+    private static final String PLUGIN_ID = "com.ge.research.sadl.ui";
 
     public static final String OWLDIR = "OwlModels";
 	public static final String ACUITY_DEFAULTS_URI = "http://research.ge.com/Acuity/defaults.owl";
@@ -50,6 +55,9 @@ public class ResourceManager {
     public static final String SADLEXT = "sadl";
     public static final String SADLEXTWITHPREFIX = ".sadl";
 
+    private static final Predicate<File> MODEL_FOLDER = (File f) -> f.getAbsolutePath().endsWith(OWLDIR) && f.isDirectory();
+    private static final Predicate<URI> IS_SYNTHETIC = (URI uri) -> uri.toString().startsWith("synthetic") || uri.toString().startsWith("__synthetic");
+
 	/**
      * Method to return the absolute path to a bundle resource given its local path
      *
@@ -60,7 +68,7 @@ public class ResourceManager {
      * @throws URISyntaxException
      */
     public static File getAbsoluteBundlePath(String relPath, String file) throws IOException, URISyntaxException {
-        String symbolicName = pluginId;
+        String symbolicName = PLUGIN_ID;
         Bundle bndl = Platform.getBundle(symbolicName);
         if (bndl != null) {
             Enumeration<URL> en = bndl.findEntries(relPath, file, true);
@@ -86,7 +94,84 @@ public class ResourceManager {
         return null;
     }
     
-    public static URI getProjectUri(org.eclipse.emf.ecore.resource.Resource someProjectResource ) {
+	/**
+	 * Locates and returns with the absolute files system path of the model folder
+	 * for the given URI. Checks the current URI, direct descendants and then
+	 * traverses up.
+	 */
+	public static String findModelFolderPath(URI uri) {
+		File file = new File(uri.path());
+		// Check self.
+		if (MODEL_FOLDER.apply(file)) {
+			return file.getAbsolutePath();
+		}
+		// Then direct descendants.
+		File[] children = file.listFiles();
+		if (children != null) {
+			for (File child : children) {
+				if (MODEL_FOLDER.apply(child)) {
+					return child.getAbsolutePath();
+				}
+			}
+		}
+		// Traverse up.
+		if (file.getParentFile() != null) {
+			return findModelFolderPath(uri.trimSegments(1));
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns with the absolute file system path from the EMF URI argument.
+	 * Currently, it handles file and platform resource schemes. 
+	 */
+	public static String toAbsoluteFilePath(URI uri) {
+		if (uri.isFile()) {
+			return new File(uri.toFileString()).getAbsolutePath();
+		} else if (uri.isPlatformResource()) {
+			IWorkspaceRoot root = getWorkspaceRoot();
+			return root.getFile(new Path(uri.toPlatformString(true))).getLocation().toFile().getAbsolutePath();
+		} else if ("synthetic".equals(uri.scheme())) {
+			// This is just a sugar for better feedback on tests.
+			throw new IllegalArgumentException("URI scheme was 'synthetic'. Are you running tests? Try to use the SadlExternalResourceInjectorProvider.");
+		} else {
+			throw new IllegalArgumentException("Unexpected URI scheme: " + uri.scheme() + ".");
+		}
+	}
+ 
+	/**
+	 * {@code true} if the URI argument is synthetic (for testing) and the model folder path name argument is {@code null};
+	 */
+	public static boolean isSyntheticUri(String modelFolderPath, URI uri) {
+		return modelFolderPath == null && IS_SYNTHETIC.apply(uri);
+	}
+
+	/**
+	 * Returns with the EMF URI of the resource given as the absolute FS path string.
+	 * <p>
+	 * If the Eclipse platform is up and available, then creates a platform resource URI,
+	 * otherwise creates an EMF URI with the {@code file} scheme. 
+	 */
+	public static URI toEmfUri(String absoluteFilePath) {
+		if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+			File file = new File(absoluteFilePath);
+			java.nio.file.Path path = Paths.get(file.toURI());
+			java.nio.file.Path relativePath = Paths.get(getWorkspaceRoot().getLocationURI()).relativize(path);
+			return URI.createPlatformResourceURI(relativePath.toString(), true);
+		} else {
+			return URI.createFileURI(absoluteFilePath);
+		}
+	}
+
+	/**
+	 * Returns with the Eclipse workspace root. Assumes a running platform.
+	 * If the platform is not available, returns with {@code null}.
+	 */
+	private static IWorkspaceRoot getWorkspaceRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();			
+	}
+    
+	public static URI getProjectUri(org.eclipse.emf.ecore.resource.Resource someProjectResource ) {
 		URI rsrcuri = someProjectResource.getURI();
 		URI prjuri = null;
 		if (rsrcuri.isPlatform()) {

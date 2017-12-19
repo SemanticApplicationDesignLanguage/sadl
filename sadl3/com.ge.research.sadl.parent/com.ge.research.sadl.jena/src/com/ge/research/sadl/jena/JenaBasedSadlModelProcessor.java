@@ -1161,7 +1161,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
 					else if (imrsrc instanceof ExternalEmfResource) {
-						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						ExternalEmfResource emfResource = (ExternalEmfResource) imrsrc;
+						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getOntModel();
 					}
 					if (sadlBuiltinFunctionModel == null) {
 						if (imrsrc instanceof XtextResource) {
@@ -1259,7 +1260,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						sadlImplicitModel = OntModelProvider.find((XtextResource)imrsrc);
 					}
 					else if (imrsrc instanceof ExternalEmfResource) {
-						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getJenaModel();
+						sadlImplicitModel = ((ExternalEmfResource) imrsrc).getOntModel();
 					}
 					if (sadlImplicitModel == null) {
 						if (imrsrc instanceof XtextResource) {
@@ -1831,12 +1832,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
     private int validateGraphPatternElement(EObject object, GraphPatternElement gpe) {
     	int numErrors = 0;
 		if (gpe instanceof TripleElement) {
-			if (((TripleElement) gpe).getSubject() instanceof NamedNode &&
+			if (((TripleElement) gpe).getSubject() instanceof NamedNode && ((NamedNode)((TripleElement)gpe).getSubject()).getNodeType() != null &&
 					((NamedNode)((TripleElement)gpe).getSubject()).getNodeType().equals(NodeType.PropertyNode)) {
 				addError(SadlErrorMessages.UNEXPECTED_TRIPLE.get(((NamedNode)((TripleElement)gpe).getSubject()).getName()), object);
 				numErrors++;
 			}
-			if (((TripleElement) gpe).getObject() instanceof NamedNode &&
+			if (((TripleElement) gpe).getObject() instanceof NamedNode && ((NamedNode)((TripleElement)gpe).getObject()).getNodeType() != null && 
 					((NamedNode)((TripleElement)gpe).getObject()).getNodeType().equals(NodeType.PropertyNode)) {
 				if (!(((TripleElement)gpe).getPredicate() instanceof NamedNode) || 
 						!((NamedNode)((TripleElement)gpe).getPredicate()).getNamespace().equals(OWL.NAMESPACE.getNameSpace())) {
@@ -1844,7 +1845,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					numErrors++;
 				}
 			}
-			if (((TripleElement) gpe).getPredicate() instanceof NamedNode &&
+			if (((TripleElement) gpe).getPredicate() instanceof NamedNode && ((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType() != null && 
 					!(((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.PropertyNode)) &&
 					!(((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.ObjectProperty)) &&
 					!(((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.DataTypeProperty))) {
@@ -3936,16 +3937,42 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 	
-	private void validateTripleTypes(EObject subjeo, EObject predeo, EObject objeo, TripleElement tr, Expression expr) throws TranslationException, InvalidTypeException, CircularDependencyException {
+	private void validateTripleTypes(EObject subjeo, EObject predeo, EObject objeo, TripleElement tr, Expression expr) throws TranslationException, InvalidTypeException, CircularDependencyException, InvalidNameException {
 		if (getModelValidator() != null) {
 			Node nsubj = tr.getSubject();
+			boolean isCrVar = nsubj instanceof VariableNode ? ((VariableNode)nsubj).isCRulesVariable() : false;
+			String varName = nsubj instanceof NamedNode ? ((NamedNode)nsubj).getName() : null;
+			OntResource subj = null;
 			if (nsubj == null) {
-				addError("Triple as null subject in validation", expr);
+				addError("Triple has null subject in validation", expr);
 				return;
 			}
-			boolean isCrVar = nsubj instanceof VariableNode ? ((VariableNode)nsubj).isCRulesVariable() : false;
-			String varName = tr.getSubject() instanceof NamedNode ? ((NamedNode)tr.getSubject()).getName() : null;
-			OntResource subj = getOntResource(tr.getSubject());
+			else if (nsubj instanceof ProxyNode) {
+				Object pf = ((ProxyNode)nsubj).getProxyFor();
+				if (pf instanceof TripleElement) {
+					Node pfPred = ((TripleElement)pf).getPredicate();
+					if (pfPred instanceof NamedNode) {
+
+						TypeCheckInfo pfpredtci;
+						try {
+							pfpredtci = getModelValidator().getTypeInfoFromRange(namedNodeToConceptName((NamedNode) pfPred), 
+									getTheJenaModel().getProperty(((NamedNode)pfPred).toFullyQualifiedString()), subjeo);
+							if (pfpredtci.getTypeCheckType() != null) {
+								Node pfpredrngtype = pfpredtci.getTypeCheckType();
+								if (pfpredrngtype instanceof NamedNode) {
+									subj = getTheJenaModel().getOntResource(((NamedNode)pfpredrngtype).toFullyQualifiedString());
+								}
+							}
+						} catch (DontTypeCheckException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			else {
+				subj = getOntResource(tr.getSubject());
+			}
 			Node pnode = tr.getPredicate();
 			OntProperty pred = getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString());
 			if (pred == null) {
@@ -3960,7 +3987,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				return;
 			}
-			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, isCrVar ?varName : null);
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true, isCrVar ? varName : null);
 			NodeType pnodetype;
 			if (pnode instanceof NamedNode) {
 				pnodetype = ((NamedNode)pnode).getNodeType();
@@ -4228,7 +4255,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					checkTripleRange(subjeo, predeo, (EObject)null, expr, subjNode, predNode, pred, pnodetype, poNode, poNode.isList());
 				}
 				else {
-					throw new TranslationException("Unexpected error");
+					try {
+						TypeCheckInfo bitci = getModelValidator().getType(objeo);
+						if (bitci != null && bitci.getTypeCheckType() != null) {
+							Node bitype = bitci.getTypeCheckType();
+							if (bitype instanceof NamedNode) {
+								checkTripleRange(subjeo, predeo, objeo, null, subjNode, predNode, pred, pnodetype, bitype, ((NamedNode) bitype).isList());
+							}
+							else {
+								throw new TranslationException("Unexpected error");
+							}
+						}
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDefinitionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			else {
@@ -4577,6 +4636,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (expr.getConstant().equals("known")) {
 			return new KnownNode();
 		}
+		if (expr.getConstant().equals(NONE)) {
+			return new ConstantNode(HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE);
+		}
+		else if (expr.getConstant().equalsIgnoreCase("PI")) {
+			com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal();
+			litval.setValue(Math.PI);
+			return litval;
+		}
+		else if (expr.getConstant().equalsIgnoreCase("e")) {
+			com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal();
+			litval.setValue(Math.E);
+			return litval;
+		}	
 		return new ConstantNode(expr.getConstant());
 	}
 	
@@ -5115,6 +5187,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					result = listToSingleJunction(result);
 				}
 			}
+			else if (((Object[])result)[0] instanceof ProxyNode) {
+				// this node came from rest, return the rest
+				return listToSingleJunction(((Object[])result)[1]);
+			}
 		}
 		if (result instanceof GraphPatternElement) {
 			return (GraphPatternElement) result;
@@ -5266,6 +5342,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				Object subjObj = processExpression(subj);
 				if (subjObj instanceof Node) {
 					tr.setSubject((Node) subjObj);
+					shpTriples.add(tr);
 					subjectFound = true;
 				}
 				else if (subjObj instanceof BuiltinElement && ((BuiltinElement)subjObj).getArguments() != null && ((BuiltinElement)subjObj).getArguments().size() > 0) {
@@ -5276,6 +5353,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else {
 					tr.setSubject(nodeCheck(subjObj));
+					shpTriples.add(tr);
 					subjectFound = true;
 				}
 			}
@@ -10131,7 +10209,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				} else if (eResource instanceof ExternalEmfResource) {
 					ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
-					addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getJenaModel());
+					addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getOntModel());
 				}
 			}
 

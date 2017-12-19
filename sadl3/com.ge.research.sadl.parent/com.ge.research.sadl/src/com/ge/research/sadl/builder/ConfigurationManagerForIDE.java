@@ -24,7 +24,10 @@
 package com.ge.research.sadl.builder;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -61,9 +64,11 @@ import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -947,5 +952,52 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			}
 		}
 		return super.setTranslatorClassName(translatorClassName);
+	}
+
+	@Override
+	public String getBaseUriFromOwlFile(String owlFilename) {
+		OntModel om = loadOntModel(owlFilename);
+		String uriForEmptyString = om.getNsPrefixURI("");
+		if (uriForEmptyString != null && uriForEmptyString.endsWith("#")) {
+			return uriForEmptyString.substring(0, uriForEmptyString.length() - 1);
+		}
+		return uriForEmptyString;
+	}
+
+	@Override
+	public OntModel loadOntModel(String owlFilename) {
+		try {
+			FileInputStream is = new FileInputStream(new File(owlFilename));
+			return initOntModel(is, getOwlFormatFromFile(owlFilename));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		boolean savePI = ontModel.getDocumentManager().getProcessImports();
+		ontModel.getDocumentManager().setProcessImports(false);
+		try {
+			ontModel.read(owlFilename, getOwlFormatFromFile(owlFilename));
+		}
+		finally {
+			ontModel.getDocumentManager().setProcessImports(savePI);
+		}
+		return ontModel;
+	}
+
+	public OntModel initOntModel(InputStream is, String format) {
+		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		ontModel.getDocumentManager().setProcessImports(false);
+		ontModel.read(is, null, format);
+		return ontModel;
+	}
+
+
+	private String getOwlFormatFromFile(String owlFilename) {
+		if (owlFilename.endsWith(".owl")) return "RDF/XML";
+		if (owlFilename.endsWith("nt")) return "N-TRIPLE";
+		if (owlFilename.endsWith("turtle")) return "TURTLE";
+		if (owlFilename.endsWith("n3")) return "N3";
+		return "RDF/XML";
 	}
 }

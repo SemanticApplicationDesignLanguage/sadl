@@ -17,10 +17,12 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtend.lib,
  org.eclipse.emf.common,
  org.eclipse.core.runtime,
+ org.eclipse.core.resources,
  org.apache.log4j,
  com.ge.research.jena,
  com.ge.research.sadl.errorgenerator,
- org.jsoup
+ org.jsoup,
+ org.eclipse.core.net
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl,
