@@ -73,7 +73,7 @@ SadlParameterDeclaration:
 SadlStatement returns SadlStatement:
 	    SadlResource 
 	    	({SadlClassOrPropertyDeclaration.classOrProperty+=current} 'is' 'a' 
-	    		('top-level'? 'class' 
+	    		('top-level'? 'class'
 	    		| 'type' 'of' superElement=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
 				(describedBy+=SadlPropertyDeclarationInClass+ | (','? restrictions+=SadlPropertyRestriction)+)?
 			|{SadlProperty.nameOrRef=current} primaryDeclaration?='is' 'a' 'property' (','? restrictions+=SadlPropertyRestriction)*
@@ -100,7 +100,7 @@ SadlPropertyCondition :
 ;
 
 SadlPropertyInitializer:
-	(','? ('with'|'has'))? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	 ','? ('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 	|','? 'is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
 	|','? 'of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
@@ -136,7 +136,7 @@ SadlTypeReference returns SadlTypeReference:
 ;
 
 SadlUnionType returns SadlTypeReference:
-	SadlIntersectionType ({SadlUnionType.left=current} (','|'or') right=SadlIntersectionType)*
+	SadlIntersectionType ({SadlUnionType.left=current} ('or') right=SadlIntersectionType)*
 ;
 
 SadlIntersectionType returns SadlTypeReference:
@@ -191,7 +191,7 @@ SadlCardinalityCondition :
 	('has'|'with') 
 	('at' operator=('least'|'most') |'exactly')? 
 	cardinality=CardinalityValue ('value'|'values') 
-	('of' 'type' type=SadlPrimaryTypeReference | 'each' 'of' 'types' type=SadlPrimaryTypeReference)?;
+	('of' 'type' type=SadlPrimaryTypeReference)?;
 
 CardinalityValue :
 	NUMBER | 'one'
@@ -246,7 +246,7 @@ QueryStatement returns ExpressionScope :
 
 ConstructExpression returns Expression :
 	{ConstructExpression}
-	'construct' subj=SadlResource pred=SadlResource obj=SadlResource 'where' whereExpression=Expression
+	'construct' subj=SadlResource ','? pred=SadlResource ','? obj=SadlResource 'where' whereExpression=Expression
 ;
 
 AskExpression returns Expression :
@@ -290,7 +290,7 @@ Expression returns Expression: // (1)
 
 SelectExpression<EnabledWith> returns Expression :
 	->({SelectExpression}
-	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (',' selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(',' (orderList+=OrderElement))*)?)
+	'select' distinct?='distinct'? ('*' | selectFrom+=SadlResource (','? selectFrom+=SadlResource)*) 'where' whereExpression=ExpressionParameterized<EnabledWith> (orderby='order' 'by' orderList+=OrderElement ->(','? (orderList+=OrderElement))*)?)
 	| ExpressionParameterized<true>
 ;
 
@@ -354,8 +354,10 @@ Power<EnabledWith> returns Expression:
 
 // PropOfSubject has right associativity: prop1 of prop2 of Subj is equivalent to prop1 of (prop2 of Subj)
 PropOfSubject<EnabledWith> returns Expression: // (17)
-	PrimaryExpression<EnabledWith> ->(({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) |  
-					  (=>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource) right=PrimaryExpression<EnabledWith>?)+)?
+	PrimaryExpression<EnabledWith> ->(
+		({PropOfSubject.left=current} of=('of'|'for'|'in') right=PropOfSubject<EnabledWith>) 
+	|   =>({SubjHasProp.left=current} (<EnabledWith>'with'|'has') prop=SadlResource right=PrimaryExpression<EnabledWith>?)+
+	|   =>({SubjHasProp.left=current} prop=SadlResource right=PrimaryExpression<EnabledWith>)+)?
 |   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PropOfSubject<EnabledWith> // this can be applied to other unitary operations
 |   {ElementInList} 'element' (before?='before'|after?='after')? element=PropOfSubject<EnabledWith>;
 
