@@ -25,6 +25,7 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlUnionClass;
+import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -659,7 +660,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean isLiteralOrConstant(EObject expr) {
 		if ((expr instanceof Constant && 
-				(((Constant)expr).getConstant().equals("PI") || ((Constant)expr).getConstant().equals("e"))) 
+				(((Constant)expr).getConstant().equals(SadlConstants.CONSTANT_PI) || 
+						((Constant)expr).getConstant().equals(SadlConstants.CONSTANT_E))) 
 				|| expr instanceof NumberLiteral) {
 			return true;
 		}
@@ -671,7 +673,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getOp().equals("not")) {
 			rExpr = ((UnaryExpression)rightExpression).getExpr();
 		}
-		if (rExpr instanceof Constant && ((Constant)rExpr).getConstant().equals("known")) {
+		if (rExpr instanceof Constant && ((Constant)rExpr).getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
 			return true;
 		}
 		return false;
@@ -1612,7 +1614,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		//What do we do about the rest of the constants?
 		/*'--' | 'a'? 'type' ;*/
 		String constant = expression.getConstant();	
-		if(constant.equals("PI") || constant.equals("e")){
+		if(constant.equals(SadlConstants.CONSTANT_PI) || constant.equals(SadlConstants.CONSTANT_E)){
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
 			ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
 			return new TypeCheckInfo(constantConceptName, tctype, this, expression);
@@ -1647,9 +1649,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName rdfType = getModelProcessor().namedNodeToConceptName(tctype);
 			return new TypeCheckInfo(rdfType, tctype, this, expression);
 		}
-		else if(constant.equals(JenaBasedSadlModelProcessor.NONE)){
-			NamedNode tctype = new NamedNode(JenaBasedSadlModelProcessor.HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE, NodeType.InstanceNode);
-			ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
+		else if(constant.equals(SadlConstants.CONSTANT_NONE)){
+			ConstantNode tctype = new ConstantNode(SadlConstants.CONSTANT_NONE);
+			ConceptName constantConceptName = new ConceptName(SadlConstants.CONSTANT_NONE);
 			return new TypeCheckInfo(constantConceptName, tctype, this, expression);
 		}
 		else if (constant.equals("known")) {
@@ -1668,10 +1670,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo getType(SadlConstantLiteral expression) throws TranslationException, InvalidNameException, InvalidTypeException {
 		String term = expression.getTerm();
 		Literal litval = null;
-		if (term.equals("PI")) {
+		if (term.equals(SadlConstants.CONSTANT_PI)) {
 			litval = theJenaModel.createTypedLiteral(Math.PI);
 		}
-		else if (term.equals("e")) {
+		else if (term.equals(SadlConstants.CONSTANT_E)) {
 			litval = theJenaModel.createTypedLiteral(Math.E);
 		}
 		else {
@@ -2366,7 +2368,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			catch (DontTypeCheckException e) {
-				getModelProcessor().addIssueToAcceptor("External equation declaration does not provide type information; can't type check.", expression);
+				getModelProcessor().addWarning("External equation declaration does not provide type information; can't type check.", expression);
 				throw e;
 			}
 			handleUndefinedFunctions(expression);
@@ -3492,8 +3494,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
-		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals(JenaBasedSadlModelProcessor.HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE)) || 
-				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals(JenaBasedSadlModelProcessor.HTTP_COM_GE_RESEARCH_SADL_CONSTANTS_NONE)) ||
+		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals(SadlConstants.CONSTANT_NONE)) || 
+				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals(SadlConstants.CONSTANT_NONE)) ||
 				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
 				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals("TODO"))) {
 			// Can't type-check on "None" as it represents that it doesn't exist.
