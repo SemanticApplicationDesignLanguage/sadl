@@ -2368,7 +2368,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			catch (DontTypeCheckException e) {
-				getModelProcessor().addIssueToAcceptor("External equation declaration does not provide type information; can't type check.", expression);
+				getModelProcessor().addWarning("External equation declaration does not provide type information; can't type check.", expression);
 				throw e;
 			}
 			handleUndefinedFunctions(expression);
