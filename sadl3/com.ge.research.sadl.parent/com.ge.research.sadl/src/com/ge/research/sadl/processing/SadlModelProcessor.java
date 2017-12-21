@@ -490,7 +490,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return junction;
 	}
 
-	protected Object createUnaryBuiltin(Expression sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object createUnaryBuiltin(EObject sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (sobj instanceof Literal && BuiltinType.getType(name).equals(BuiltinType.Minus)) {
 			Object theVal = ((Literal)sobj).getValue();
 			if (theVal instanceof Integer) {

@@ -1083,6 +1083,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else {
 					// for IDE, expand and also add as info marker
+					addInfo(rawResult.toString(), element);
 					Object intForm = getIfTranslator().expandProxyNodes(rawResult, false, true);
 					if (intForm != null) {
 						if (intForm instanceof List<?>) {
@@ -3682,7 +3683,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return jct;
 		}
 		else {
-			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, createBinaryBuiltin(op, postProcessTranslationResult(lobj), robj)), rest);
+			boolean isNegated = false;
+			boolean reverseArgs = false;
+			if (op.equals("does not contain")) {
+				isNegated = true;
+				op = "contains";
+			}
+			else if (op.equals("is not unique in")) {
+				isNegated = true;
+				reverseArgs = true;
+				op = "unique";
+			}
+			else if (op.equals("is unique in")) {
+				reverseArgs = true;
+				op = "unique";
+			}
+			GraphPatternElement bi;
+			if (reverseArgs) {
+				bi = createBinaryBuiltin(op, robj, postProcessTranslationResult(lobj));
+			}
+			else {
+				bi = createBinaryBuiltin(op, postProcessTranslationResult(lobj), robj);
+			}
+			if (isNegated) {
+				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
+			}
+			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
 		}
 	}
 	
@@ -4761,7 +4787,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				Object lst = processExpression(subject);
 				Object element = processExpression(predicate);
 				BuiltinElement bi = new BuiltinElement();
-				bi.setFuncName("elementInList");
+				if (expr.isBefore()) {
+					bi.setFuncName("elementBefore");
+				}
+				else if (expr.isAfter()) {
+					bi.setFuncName("elementAfter");
+				}
+				else {
+					bi.setFuncName("elementInList");
+				}
 				bi.addArgument(nodeCheck(lst));
 				bi.addArgument(nodeCheck(element));
 				return bi;
@@ -4993,6 +5027,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Node predNode = null;
 		String constantBuiltinName = null;
 		int numBuiltinArgs = 0;
+		boolean generateTriple = true;
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			String cnstval = ((Constant)predicate).getConstant();
@@ -5047,16 +5082,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
 			}
+			generateTriple = false;	// predicate was really built-in name
 		}
 		else if (predicate instanceof ElementInList) {
+			if (((ElementInList)predicate).isBefore()) {
+				constantBuiltinName = "elementBefore";
+			}
+			else if (((ElementInList)predicate).isAfter()) {
+				constantBuiltinName = "elementAfter";
+			}
+			else {
+				constantBuiltinName = "elementInList";
+			}
+			numBuiltinArgs = 2;
 			trSubj = processExpression(subject);
 			trPred = processExpression(predicate);
-			BuiltinElement bi = new BuiltinElement();
-			bi.setFuncName("elementInList");
-			bi.addArgument(nodeCheck(trSubj));
-			bi.addArgument(nodeCheck(trPred));
-			return bi;
-			
+			generateTriple = false;		// predicate was really built-in name
 		}
 		Object rest = null;
 		if (subject != null) {
@@ -5070,11 +5111,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError("A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.", subject);
 			}
 		}
-		boolean isPreviousPredicate = false;
-		if (predicate != null) {
+		if (trPred == null && predicate != null) {
 			trPred = processExpression(predicate);
 		}
-		if (constantBuiltinName == null || numBuiltinArgs == 1) {
+		if (constantBuiltinName == null || generateTriple) {  //numBuiltinArgs == 1) {
 			TripleElement returnTriple = null;
 			if (trPred instanceof Node) {
 				predNode = (Node) trPred;
@@ -5114,7 +5154,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		else {	// none of these create more than 2 arguments
-			Object bi = createBinaryBuiltin(constantBuiltinName, trPred, nodeCheck(trSubj));
+			GraphPatternElement bi = null;
+			if (numBuiltinArgs == 1) {
+				bi = new BuiltinElement();
+				((BuiltinElement) bi).setFuncName(constantBuiltinName);
+				((BuiltinElement) bi).addArgument(nodeCheck(trSubj));
+			}
+			else {
+				bi = createBinaryBuiltin(constantBuiltinName, nodeCheck(trSubj), trPred);
+			}
 			return combineRest(bi, rest);
 		}
 	}
@@ -5368,7 +5416,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					tr.setObject((Node) objObj);
 					objectFound = true;
 				}
-				else if (objObj instanceof BuiltinElement && ((BuiltinElement)objObj).getArguments() != null && ((BuiltinElement)objObj).getArguments().size() > 0) {
+				else if (objObj instanceof BuiltinElement && ((BuiltinElement)objObj).getFuncType().equals(BuiltinType.Equal) &&
+						((BuiltinElement)objObj).getArguments() != null && ((BuiltinElement)objObj).getArguments().size() == 1) {
 					tr.setObject(nodeCheck(((BuiltinElement)objObj).getArguments().get(0)));
 					objectFound = true;
 				}
@@ -10356,6 +10405,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else {
 				return false;
 			}
+		}
+		if (isComparisonOperator(funcName) && size == 2) {
+			return false;
 		}
 		if (funcName.equals("unittedQuantity") && size == 2) {
 			return true;
