@@ -88,10 +88,9 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		
 	@Inject protected extension DeclarationExtensions
 	@Inject protected IQualifiedNameConverter converter
+	@Inject protected AmbiguousNameHelper ambiguousNameHelper;
 	
 	@Inject OnChangeEvictingCache cache
-	
-	boolean ambiguousNameDetection;
 	
 	val LocalScopeProvider localScope_01 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
@@ -155,8 +154,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	
 	override getScope(EObject context, EReference reference) {
-		val ctxrsrc = context.eResource();
-		setAmbiguousNameDetection(TestScopeProvider.getDetectAmbiguousNames(ctxrsrc));
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADL_MODEL) {
 			return super.getGlobalScope(context.eResource, reference)
@@ -169,10 +166,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			"Couldn't build scope for elements of type " + reference.EReferenceType.name)
 	}
 	
-	def setAmbiguousNameDetection(boolean bval) {
-		ambiguousNameDetection = bval
-	}
-
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
 		val parent = createResourceScope(context.eResource, null, newHashSet)
 		
@@ -301,6 +294,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	protected def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope,
 		IScope importScope, boolean checkAmbiguity, Predicate<EObject> isIncluded) {
 
+		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(resource)
 		val map = <QualifiedName, IEObjectDescription>newHashMap
 		val iter = resource.allContents
 		while (iter.hasNext) {
@@ -320,14 +314,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 									val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
 									if (name1.segmentCount > 1) {
 										if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
-											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it), ambiguousNameDetection);
 											if (ambiguousProblem !== null) {
 												map.put(name1, ambiguousProblem);
 											}
 										}
 									} else {										
 										if (name1 == nameWithPrefixes) {
-											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it), ambiguousNameDetection);
 											if (ambiguousProblem !== null) {
 												map.put(name1, ambiguousProblem);
 											}
@@ -399,15 +393,16 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		(resource.contents.head as SadlModel).alias
 	}
 	
-	protected def IScope createImportScope(Resource resource, Set<Resource> visitedResources) {
+	protected def IScope createImportScope(Resource resource, Set<Resource> importedResources) {
+		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(resource)
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
 		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
 			val importedResource = imp.importedResource
 			if (importedResource !== null && !importedResource.eIsProxy) {
-				createResourceScope(importedResource.eResource, imp.alias, visitedResources).allElements.forEach[
+				createResourceScope(importedResource.eResource, imp.alias, importedResources).allElements.forEach[
 					val existing = importedSymbols.put(name, it)
-					val duplicateProblem = checkDuplicate(existing, it)
+					val duplicateProblem = checkDuplicate(existing, it, ambiguousNameDetection)
 					if (duplicateProblem !== null) {
 						importedSymbols.put(duplicateProblem.name, duplicateProblem)
 					}
@@ -435,7 +430,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
 	}
 	
-	def private IEObjectDescription checkDuplicate(IEObjectDescription existing, IEObjectDescription other) {
+	def private IEObjectDescription checkDuplicate(IEObjectDescription existing, IEObjectDescription other, boolean ambiguousNameDetection) {
 		if (!ambiguousNameDetection || existing === null || other === null ||
 			EcoreUtil.getURI(existing.EObjectOrProxy) == EcoreUtil.getURI(other.EObjectOrProxy)) {
 			return null

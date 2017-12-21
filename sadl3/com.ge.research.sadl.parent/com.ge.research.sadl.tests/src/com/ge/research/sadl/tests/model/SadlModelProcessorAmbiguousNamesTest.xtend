@@ -8,7 +8,6 @@
  */
 package com.ge.research.sadl.tests.model
 
-import com.ge.research.sadl.scoping.TestScopeProvider
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.google.common.base.Stopwatch
 import com.google.inject.Inject
@@ -20,6 +19,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+
+import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
 
 @RunWith(XtextRunner)
 class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLModelProcessorTest {
@@ -74,7 +75,7 @@ class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLModelProcessorTes
 		val models = 2
 		val classesPerModel = 1
 		for (i : 0..<models) {
-			val s = '''
+			'''
 				uri "http://sadl.org/Names«i».sadl" alias Names«i».
 				
 				«FOR z : 0..<i»
@@ -84,8 +85,7 @@ class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLModelProcessorTes
 				«FOR j : 0..<classesPerModel»
 					RClass«i»_«j» is a class.
 				«ENDFOR»
-			''';
-			TestScopeProvider.registerResource(s.sadl, true)
+			'''.sadl;
 		}
 		
 		val sadlModel3 = '''
@@ -103,9 +103,7 @@ class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLModelProcessorTes
 			 
 
 		'''.sadl;
-		TestScopeProvider.registerResource(sadlModel3, true)
-		val issues3 = validationTestHelper.validate(sadlModel3)
-		assertTrue(issues3.nullOrEmpty)
+		validationTestHelper.validate(sadlModel3).assertHasNoIssues
 	}
 
 	@Test
@@ -138,13 +136,9 @@ class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLModelProcessorTes
 		'''.sadl
 		sadlModel1.assertNoErrors
 		sadlModel2.assertNoErrors
-		TestScopeProvider.registerResource(sadlModel3, true)
 		val issues3 = validationTestHelper.validate(sadlModel3)
 		assertNotNull(issues3)
 		assertTrue(issues3.size() > 0)
-		for (issue: issues3) {
-			System.err.println(issue.toString)
-		}
 		sadlModel4.assertNoErrors
 	}
 	
@@ -210,13 +204,8 @@ class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLModelProcessorTes
 		'''.sadl
 		sadlModel1.assertNoErrors
 		sadlModel2.assertNoErrors
-		sadlModel3.assertNoErrors
-		sadlModel4.assertNoErrors
-		val issues3 = validationTestHelper.validate(sadlModel3)
-		assertNotNull(issues3)
-		for (issue: issues3) {
-			System.err.println(issue.toString)
-		}
+		validationTestHelper.validate(sadlModel3).assertHasIssues(12)
+		validationTestHelper.validate(sadlModel4).assertHasIssues(12)
 	}
 	
 }
