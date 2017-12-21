@@ -43,7 +43,7 @@ import static org.eclipse.xtext.validation.CheckMode.*
 abstract class SadlTestAssertions {
 
 	/**
-	 * Validates the Xtext resource then calls the assertion callabck.
+	 * Validates the Xtext resource then calls the assertion callback.
 	 * If the assertion was successful, returns with the argument resource.
 	 */
 	static def Resource assertValidatesTo(XtextResource resource,
@@ -102,9 +102,11 @@ abstract class SadlTestAssertions {
 
 	private static def void doAssertHasIssues(Iterable<? extends Issue> issues, (Severity)=>boolean severityPredicate,
 		int expectedCount) {
+
 		val actualIssues = issues.filter[severityPredicate.apply(severity)];
+		val plural = if(expectedCount === 1) '' else 's'; 
 		Assert.assertEquals(
-			'''Expected «expectedCount» issues. Got «actualIssues.size» instead. [«Iterables.toString(actualIssues)»]''',
+			'''Expected «expectedCount» issue«plural». Got «actualIssues.size» instead. [«Iterables.toString(actualIssues)»]''',
 			expectedCount,
 			actualIssues.size
 		);
