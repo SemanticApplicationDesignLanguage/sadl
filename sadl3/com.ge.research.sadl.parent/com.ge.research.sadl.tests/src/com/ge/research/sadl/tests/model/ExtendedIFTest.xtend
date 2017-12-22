@@ -489,6 +489,113 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	}
 	
 	@Test
+	def void testListBuiltinElements() {
+		'''
+			 uri "http://org.sadl/ListExample" alias listexample version "$Revision: 1.2 $ Last modified on   $Date: 2015/11/10 18:40:29 $". 
+			 
+			 EVENT is a class.
+			 
+			 DELETE_EVENT is a type of EVENT,
+			     described by deleted_item with a single value of type ITEM.
+			 
+			 PUSH_EVENT is a type of EVENT,
+			     described by pushed_item with a single value of type ITEM.
+			 
+			 POP_EVENT is a type of EVENT.
+			 
+			 SELECT_EVENT is a type of EVENT.
+			 
+			 ORDER_EVENT is a type of EVENT.
+			 
+			 INSERT_EVENT is a type of EVENT,
+			     described by existing_item with a single value of type ITEM,
+			     described by inserted_item with a single value of type ITEM.
+			 
+			 ITEM is a class,
+			     described by item_number with a single value of type int,
+			     described by order_number with a single value of type int,
+			     described by name with a single value of type string,
+			     described by var1 with a single value of type boolean,
+			     described by var2 with a single value of type boolean,
+			     described by var3 with a single value of type boolean.
+			 
+			 BlueItem is a type of ITEM.
+			 
+			 System is a class,
+			 //	described by error with a List of values of type string,
+			     described by error with a single value of type string List,
+			     described by list_of_items with values of type ITEM List,
+			     described by restricted_list_of_items with values of type MarkerListType,
+			     described by received with values of type EVENT.
+			 
+			 list_of_items of System only has values of type MarkerListType.
+			 
+			 Marker1 is an ITEM.
+			 Marker2 is an ITEM.
+			 Marker3 is an ITEM.
+			 
+			 List99 is an ITEM List.
+			 
+			 MarkerList is the ITEM List [Marker1, Marker2].
+			 
+			 MarkerListType is a type of ITEM List length 5.
+			 MarkerListType is a type of ITEM List length 0-*.
+			 
+			 MarkerList2 is the MarkerListType [Marker1, Marker2, Marker3].
+			 
+			 Expr: element before Marker1 in MarkerList. 
+			 Expr: element after Marker1 in MarkerList.
+			 Expr: element 3 of MarkerList.
+			 Expr: first element of MarkerList.
+			 Expr: last element of MarkerList.
+			 Expr: length of MarkerList.
+			 Expr: count of Marker1 in MarkerList.
+			 Expr: MarkerList contains Marker1.
+			 Expr: MarkerList does not contain Marker1.
+			 Expr: Marker1 is unique in MarkerList.
+			 Expr: Marker1 is not unique in MarkerList. 
+			 Expr: the sublist of MarkerList matching value is Marker1.
+			 Expr: the sublist of MarkerList matching type is ITEM.
+			 Expr: the sublist of MarkerList matching item_number > 3.
+			 Expr: the sublist of MarkerList matching value is Marker1 and type is ITEM and item_number < 3.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			val grd = newArrayList(
+"elementBefore(listexample:MarkerList,listexample:Marker1)",
+"elementAfter(listexample:MarkerList,listexample:Marker1)",
+"elementInList(listexample:MarkerList,3)",
+"firstElement(listexample:MarkerList)",
+"lastElement(listexample:MarkerList)",
+"length(listexample:MarkerList)",
+"count(listexample:MarkerList,listexample:Marker1)",
+"contains(listexample:MarkerList,listexample:Marker1)",
+"not((contains(listexample:MarkerList,listexample:Marker1)))",
+"unique(listexample:MarkerList,listexample:Marker1)",
+"not((unique(listexample:MarkerList,listexample:Marker1)))",
+"sublist(listexample:MarkerList,(is(value,listexample:Marker1)))",
+"sublist(listexample:MarkerList,(is(type,listexample:ITEM)))",
+"sublist(listexample:MarkerList,(>(listexample:item_number,3)))",
+"sublist(listexample:MarkerList,(and((and((is(value,listexample:Marker1)), (is(type,listexample:ITEM)))), (<(listexample:item_number,3)))))"				
+			)
+ 			assertNotNull(jenaModel)
+//			jenaModel.write(System.out, "RDF/XML-ABBREV")
+//			val smitr = jenaModel.listSubModels
+//			while (smitr.hasNext) {
+//				smitr.next.write(System.out, "RDF/XML-ABBREV")
+//			}
+//			for (issue:issues) {
+//				println(issue.message)
+//			}
+ 			issues.assertHasNoIssues;
+			val ifrs = processor.getIntermediateFormResults(true, false);
+			var idx = 0
+ 			for (ifr:ifrs) {
+// 				println("\"" + ifr.toString + "\",")
+ 				assertTrue(processor.compareTranslations(ifr.toString, grd.get(idx++)))
+ 			}
+ 		]
+	}
+	
+	@Test
 	def void testPrecedence_01() {
 		val forTest = newArrayList(
 "is((rdf(Precedence:Joe, Precedence:age, null)),(rdf((rdf(Precedence:Jane, Precedence:friend, null)), Precedence:age, null)))",
