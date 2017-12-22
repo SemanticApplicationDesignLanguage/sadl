@@ -22,6 +22,7 @@ import com.ge.research.sadl.model.gp.Rule
 import com.ge.research.sadl.model.gp.SadlCommand
 import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.validation.ModelProcessorAdapter
+import com.google.common.collect.Iterables
 import com.hp.hpl.jena.ontology.OntModel
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
@@ -101,9 +102,11 @@ abstract class SadlTestAssertions {
 
 	private static def void doAssertHasIssues(Iterable<? extends Issue> issues, (Severity)=>boolean severityPredicate,
 		int expectedCount) {
+
 		val actualIssues = issues.filter[severityPredicate.apply(severity)];
+		val plural = if(expectedCount === 1) '' else 's'; 
 		Assert.assertEquals(
-			'''Expected «expectedCount» issues. Got «actualIssues.size» instead. [«actualIssues.join('\n')»]''',
+			'''Expected «expectedCount» issue«plural». Got «actualIssues.size» instead. [«Iterables.toString(actualIssues)»]''',
 			expectedCount,
 			actualIssues.size
 		);

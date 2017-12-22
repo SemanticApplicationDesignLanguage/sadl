@@ -27,6 +27,7 @@ import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.scoping.TestScopeProvider
 import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
@@ -48,6 +49,7 @@ import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.validation.Issue
 import org.junit.Before
 import org.junit.runner.RunWith
+import com.ge.research.sadl.scoping.TestScopeProvider
 
 /**
  * Base SADL test class.
@@ -105,6 +107,14 @@ abstract class AbstractSadlTest {
 	 */
 	protected def getSadlModel(Resource it) {
 		return contents.head as SadlModel;
+	}
+
+	/**
+	 * Enables the `ambiguous name detection` on the given resource. Returns with the argument.
+	 */
+	protected def <R extends Resource> R enableAmbiguousNameDetection(R resource) {
+		TestScopeProvider.registerResource(resource, true);
+		return resource;
 	}
 
 	protected def XtextResource sadl(CharSequence seq) {

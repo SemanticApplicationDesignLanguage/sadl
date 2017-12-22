@@ -92,6 +92,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	@Inject OnChangeEvictingCache cache
 	
+	boolean ambiguousNameDetection;
+	
 	val LocalScopeProvider localScope_01 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
 			if (it instanceof SadlResource) {
@@ -154,6 +156,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	
 	override getScope(EObject context, EReference reference) {
+		val ctxrsrc = context.eResource();
+		setAmbiguousNameDetection(TestScopeProvider.getDetectAmbiguousNames(ctxrsrc));
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADL_MODEL) {
 			return super.getGlobalScope(context.eResource, reference)
@@ -166,6 +170,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			"Couldn't build scope for elements of type " + reference.EReferenceType.name)
 	}
 	
+	def setAmbiguousNameDetection(boolean bval) {
+		ambiguousNameDetection = bval
+	}
+
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
 		val parent = createResourceScope(context.eResource, null, newHashSet)
 		
@@ -418,7 +426,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					if (element !== null) {
 						val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 						if (eobject !== null) {
-							createResourceScope(eobject.eResource, null, visitedResources).allElements.forEach [
+							createResourceScope(eobject.eResource, null, importedResources).allElements.forEach [
 								importedSymbols.put(name, it)
 							]
 						}
