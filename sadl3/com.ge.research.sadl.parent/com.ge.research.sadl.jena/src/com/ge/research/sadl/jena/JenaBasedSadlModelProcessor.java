@@ -5027,10 +5027,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Node predNode = null;
 		String constantBuiltinName = null;
 		int numBuiltinArgs = 0;
-		boolean generateTriple = true;
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			String cnstval = ((Constant)predicate).getConstant();
+			predicate = null;
 			if (cnstval.equals("length") || cnstval.equals("the length")) {
 				constantBuiltinName = "length";
 				numBuiltinArgs = 1;
@@ -5082,22 +5082,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
 			}
-			generateTriple = false;	// predicate was really built-in name
 		}
 		else if (predicate instanceof ElementInList) {
-			if (((ElementInList)predicate).isBefore()) {
-				constantBuiltinName = "elementBefore";
-			}
-			else if (((ElementInList)predicate).isAfter()) {
-				constantBuiltinName = "elementAfter";
-			}
-			else {
-				constantBuiltinName = "elementInList";
-			}
-			numBuiltinArgs = 2;
 			trSubj = processExpression(subject);
 			trPred = processExpression(predicate);
-			generateTriple = false;		// predicate was really built-in name
+			BuiltinElement bi = new BuiltinElement();
+			if (((ElementInList)predicate).isBefore()) {
+				bi.setFuncName("elementBefore");
+			}
+			else if (((ElementInList)predicate).isAfter()) {
+				bi.setFuncName("elementAfter");
+			}
+			else {
+				bi.setFuncName("elementInList");
+			}
+			bi.addArgument(nodeCheck(trSubj));
+			bi.addArgument(nodeCheck(trPred));
+			return bi;
+			
 		}
 		Object rest = null;
 		if (subject != null) {
@@ -5111,10 +5113,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError("A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.", subject);
 			}
 		}
-		if (trPred == null && predicate != null) {
+		boolean isPreviousPredicate = false;
+		if (predicate != null) {
 			trPred = processExpression(predicate);
 		}
-		if (constantBuiltinName == null || generateTriple) {  //numBuiltinArgs == 1) {
+		if (trPred != null && (constantBuiltinName == null || numBuiltinArgs == 1)) {
 			TripleElement returnTriple = null;
 			if (trPred instanceof Node) {
 				predNode = (Node) trPred;
