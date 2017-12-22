@@ -88,6 +88,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		
 	@Inject protected extension DeclarationExtensions
 	@Inject protected IQualifiedNameConverter converter
+	@Inject protected AmbiguousNameHelper ambiguousNameHelper;
 	
 	@Inject OnChangeEvictingCache cache
 	
@@ -301,6 +302,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	protected def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope,
 		IScope importScope, boolean checkAmbiguity, Predicate<EObject> isIncluded) {
 
+		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(resource)
 		val map = <QualifiedName, IEObjectDescription>newHashMap
 		val iter = resource.allContents
 		while (iter.hasNext) {
@@ -320,14 +322,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 									val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
 									if (name1.segmentCount > 1) {
 										if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
-											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it), ambiguousNameDetection);
 											if (ambiguousProblem !== null) {
 												map.put(name1, ambiguousProblem);
 											}
 										}
 									} else {										
 										if (name1 == nameWithPrefixes) {
-											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it));
+											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it), ambiguousNameDetection);
 											if (ambiguousProblem !== null) {
 												map.put(name1, ambiguousProblem);
 											}
@@ -399,15 +401,16 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		(resource.contents.head as SadlModel).alias
 	}
 	
-	protected def IScope createImportScope(Resource resource, Set<Resource> visitedResources) {
+	protected def IScope createImportScope(Resource resource, Set<Resource> importedResources) {
+		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(resource)
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
 		val importedSymbols = <QualifiedName, IEObjectDescription>newHashMap
 		for (imp : imports) {
 			val importedResource = imp.importedResource
 			if (importedResource !== null && !importedResource.eIsProxy) {
-				createResourceScope(importedResource.eResource, imp.alias, visitedResources).allElements.forEach[
+				createResourceScope(importedResource.eResource, imp.alias, importedResources).allElements.forEach[
 					val existing = importedSymbols.put(name, it)
-					val duplicateProblem = checkDuplicate(existing, it)
+					val duplicateProblem = checkDuplicate(existing, it, ambiguousNameDetection)
 					if (duplicateProblem !== null) {
 						importedSymbols.put(duplicateProblem.name, duplicateProblem)
 					}
@@ -423,7 +426,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					if (element !== null) {
 						val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 						if (eobject !== null) {
-							createResourceScope(eobject.eResource, null, visitedResources).allElements.forEach [
+							createResourceScope(eobject.eResource, null, importedResources).allElements.forEach [
 								importedSymbols.put(name, it)
 							]
 						}
@@ -435,7 +438,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
 	}
 	
-	def private IEObjectDescription checkDuplicate(IEObjectDescription existing, IEObjectDescription other) {
+	def private IEObjectDescription checkDuplicate(IEObjectDescription existing, IEObjectDescription other, boolean ambiguousNameDetection) {
 		if (!ambiguousNameDetection || existing === null || other === null ||
 			EcoreUtil.getURI(existing.EObjectOrProxy) == EcoreUtil.getURI(other.EObjectOrProxy)) {
 			return null

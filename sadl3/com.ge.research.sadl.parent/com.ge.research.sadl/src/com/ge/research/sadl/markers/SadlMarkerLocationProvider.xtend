@@ -22,7 +22,6 @@ import com.ge.research.sadl.sADL.SadlResource
 import com.google.inject.ImplementedBy
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import java.nio.file.Path
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Data
@@ -68,9 +67,14 @@ interface SadlMarkerLocationProvider {
 	}
 
 	/**
-	 * Returns with the location of the marker argument.
+	 * Returns with the location of the AST node identified with its name from the resource.
 	 */
-	def Location getLocation(SadlMarker marker, Resource resource, Path projectLocation);
+	def Location getLocation(String name, Resource resource);
+
+	/**
+	 * Returns with the AST node identified with its {@code name} argument. If not found, returns {@code null}.
+	 */
+	def EObject getEObjectByName(String name, Resource resource);
 
 	@Singleton
 	static class Default implements SadlMarkerLocationProvider {
@@ -78,24 +82,27 @@ interface SadlMarkerLocationProvider {
 		@Inject
 		extension DeclarationExtensions;
 
-		override getLocation(SadlMarker marker, Resource resource, Path projectLocation) {
-			val eObject = getEObjectForMarker(resource, marker);
+		override getLocation(String name, Resource resource) {
+			val eObject = getEObjectByName(name, resource);
 			if (eObject === null) {
 				return Location.UNKNOWN;
 			}
 			return eObject.location;
 		}
 
-		protected def EObject getEObjectForMarker(Resource resource, SadlMarker marker) {
-			return resource.getAllContents(true).filter(SadlResource).filter[concreteName == marker.astNodeName].head;
+		override def EObject getEObjectByName(String name, Resource resource) {
+			val sadlResources = resource.getAllContents(true).filter(SadlResource);
+			return sadlResources.filter[concreteName == name].map[declaration].filterNull.head;
 		}
-		
+
+		/**
+		 * Transforms the AST node into a location instance.
+		 */
 		protected def Location getLocation(EObject eObject) {
 			val node = NodeModelUtils.getNode(eObject);
 			if (node === null) {
 				return Location.UNKNOWN;
 			}
-
 			return new Location(node.offset, node.offset + node.length, node.startLine);
 		}
 
