@@ -69,6 +69,8 @@ import static org.eclipse.core.runtime.IPath.SEPARATOR
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
 
 import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.*
+import com.google.common.collect.Iterables
+import org.eclipse.xtext.diagnostics.Severity
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -355,6 +357,23 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		assertEquals(expected.toString.unifyEOL, actual.toString.unifyEOL);
 	}
 
+	/**
+	 * Asserts no validation issues.
+	 */
+	static def void assertHasNoIssues(Iterable<? extends Issue> issues) {
+		doAssertHasIssues(issues, [true], 0);
+	}
+
+	private static def void doAssertHasIssues(Iterable<? extends Issue> issues, (Severity)=>boolean severityPredicate,
+		int expectedCount) {
+		val actualIssues = issues.filter[severityPredicate.apply(severity)];
+		Assert.assertEquals(
+			'''Expected «expectedCount» issues. Got «actualIssues.size» instead. [«Iterables.toString(actualIssues)»]''',
+			expectedCount,
+			actualIssues.size
+		);
+	}
+	
 	/**
 	 * Runs the inferences for the give SADL model. Asserts the results.
 	 */

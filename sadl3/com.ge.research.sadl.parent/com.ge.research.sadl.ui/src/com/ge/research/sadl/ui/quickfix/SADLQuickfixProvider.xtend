@@ -194,5 +194,15 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 		val display = if(Display.current === null) Display.^default else Display.current;
 		return display.activeShell;
 	}
-
+	
+	def SadlModel getSadlModel(EObject object) {
+		if (object === null) {
+			return null
+		}
+		val cont = object.eContainer
+		if (cont instanceof SadlModel) {
+			return cont as SadlModel
+		}
+		return getSadlModel(cont)
+	}
 }
