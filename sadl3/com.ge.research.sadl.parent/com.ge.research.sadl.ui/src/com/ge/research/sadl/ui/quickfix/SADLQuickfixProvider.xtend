@@ -1,4 +1,3 @@
-
 /************************************************************************
  * Copyright 2007-2016 - General Electric Company, All Rights Reserved
  *
@@ -18,15 +17,24 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.quickfix
 
+import com.ge.research.sadl.markers.SadlMarkerConstants
+import com.ge.research.sadl.markers.SadlMarkerRefType
 import com.ge.research.sadl.resource.UserDataHelper
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription
 import com.ge.research.sadl.validation.SADLValidator
 import com.google.inject.Inject
+import org.eclipse.core.resources.ResourcesPlugin
+import org.eclipse.core.runtime.Path
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.jface.dialogs.MessageDialog
+import org.eclipse.swt.widgets.Display
+import org.eclipse.ui.PlatformUI
+import org.eclipse.ui.ide.IDE
 import org.eclipse.xtext.EOF
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.scoping.IGlobalScopeProvider
+import org.eclipse.xtext.ui.editor.model.edit.IModification
 import org.eclipse.xtext.ui.editor.model.edit.IModificationContext
 import org.eclipse.xtext.ui.editor.model.edit.IssueModificationContext
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
@@ -35,12 +43,13 @@ import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.validation.Issue
 
+import static com.ge.research.sadl.markers.SadlMarkerConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import org.eclipse.emf.common.util.URI
+import org.eclipse.xtext.ui.editor.IURIEditorOpener
 
 /**
- * Custom quickfixes.
- *
- * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#quick-fixes
+ * Quick fix provider for SADL.
  */
 class SADLQuickfixProvider extends DefaultQuickfixProvider {
 
@@ -52,6 +61,9 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 	
 	@Inject
 	UserDataHelper userDataHelper;
+	
+	@Inject
+	IURIEditorOpener editorOpener;
 
 	@Fix(AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ISSUE_CODE)
 	def fixAmbigupusNames(Issue issue, IssueResolutionAcceptor acceptor) {
@@ -123,7 +135,66 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 		]);	
 		
 	}
+	
+	@Fix(SadlMarkerConstants.SADL_REFS)
+	def showSadlMarkerRefs(Issue it, IssueResolutionAcceptor acceptor) {
+		if (data !== null) {
+			data.forEach [ dataEntry |
+				val segments = dataEntry.split('''\«SADL_REFS_SEPARATOR»''');
+				val type = GET_TYPE_REF_BY_NAME.apply(segments.head);
+				// The rest might contain colons (we have a URL), so we need to join them together.
+				val refId = segments.drop(1).join(SADL_REFS_SEPARATOR);
+				if (!refId.nullOrEmpty) {
+					val label = type.getLabel(refId);
+					acceptor.accept(it, label, "Open references", null /* image */ , type.getModification(refId));
+				}
+			];
+		}
+	}
 
+	def getLabel(SadlMarkerRefType type, String refId) {
+		return switch (type) {
+			case File: '''Open «refId»'''
+			case ModelElement: {
+				val segments = refId.split('''\«SADL_REFS_SEPARATOR»''');
+				val astNodeName = segments.head;
+				'''Jump to «IF !astNodeName.nullOrEmpty»«astNodeName» in «ENDIF»«segments.get(1)»'''
+			}
+		}
+	}
+	
+	def IModification getModification(SadlMarkerRefType type, String refId) {
+		return switch (type) {
+			case File: {
+				[
+					val path = new Path(refId);
+					val file = ResourcesPlugin.workspace.root.getFile(path);
+					if (file.accessible) {
+						val page = PlatformUI.workbench.activeWorkbenchWindow.activePage;
+						IDE.openEditor(page, file, true);
+					} else {
+						val shell = activeShell;
+						val title = "File does not exist";
+						val message = '''File does not exist at «path».''';
+						MessageDialog.openError(shell, title, message);
+					}
+				];
+			}
+			case ModelElement: {
+				[
+					val segments = refId.split('''\«SADL_REFS_SEPARATOR»''');
+					val uri = URI.createURI(segments.last);
+					editorOpener.open(uri, true);
+				]
+			}
+		}
+	}
+	
+	def getActiveShell() {
+		val display = if(Display.current === null) Display.^default else Display.current;
+		return display.activeShell;
+	}
+	
 	def SadlModel getSadlModel(EObject object) {
 		if (object === null) {
 			return null

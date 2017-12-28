@@ -49,6 +49,7 @@ import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.validation.Issue
 import org.junit.Before
 import org.junit.runner.RunWith
+import com.ge.research.sadl.scoping.TestScopeProvider
 
 /**
  * Base SADL test class.

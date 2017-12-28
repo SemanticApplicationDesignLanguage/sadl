@@ -21,6 +21,8 @@ import com.ge.research.sadl.preferences.SadlPreferences
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Test
 
+import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
+
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	@Test
