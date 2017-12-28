@@ -1811,6 +1811,9 @@ public class IntermediateFormTranslator {
 						if (patterns.contains((GraphPatternElement)effectiveArg)) {
 							patterns.remove((GraphPatternElement)effectiveArg);
 						}
+						if (effectiveArg instanceof BuiltinElement) {
+							removeArgsFromPatterns(patterns, (BuiltinElement)effectiveArg);
+						}
 					}
 				}
 			}
