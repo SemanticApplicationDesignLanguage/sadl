@@ -330,7 +330,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	int modelWarningCount = 0;
 	int modelInfoCount = 0;
 
-	private IntermediateFormTranslator intermediateFormTranslator = null;
+	protected IntermediateFormTranslator intermediateFormTranslator = null;
 
 	protected boolean generationInProgress = false;
 
