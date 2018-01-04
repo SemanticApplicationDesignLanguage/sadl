@@ -644,7 +644,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testPrecedence_02() {
 		val forTest = newArrayList(
-"[and(rdf(Precedence:Joe, Precedence:age, v1), and(rdf(Precedence:Jane, Precedence:friend, v0), rdf(v0, Precedence:age, v1)))]",
+"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]",
 "[and(rdf(Precedence:Joe, Precedence:age, v1), and(rdf(Precedence:Jane, Precedence:friend, v0), rdf(v0, Precedence:age, v1)))]"
 		)
 		'''
@@ -657,7 +657,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 Jane is a Person.
 			 Joe is a Person.
 			 
-			 Expr: age of Joe is age of friend of Jane.	// This requires treating as rule conclusion to translate correctly
+			 Expr: age of Joe is age of friend of Jane.	// This requires treating as rule conclusion to translate the same as following?
 			 Expr: Joe has age (age of friend of Jane).	// this is correct
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			val results = processor.getIntermediateFormResults(false, true)

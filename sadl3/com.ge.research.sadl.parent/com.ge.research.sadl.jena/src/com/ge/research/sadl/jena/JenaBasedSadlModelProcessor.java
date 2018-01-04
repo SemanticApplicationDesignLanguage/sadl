@@ -330,7 +330,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	int modelWarningCount = 0;
 	int modelInfoCount = 0;
 
-	private IntermediateFormTranslator intermediateFormTranslator = null;
+	protected IntermediateFormTranslator intermediateFormTranslator = null;
 
 	protected boolean generationInProgress = false;
 
@@ -1081,7 +1081,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// for tests, do not expand; expansion, if desired, will be done upon retrieval
 					addIntermediateFormResult(rawResult);					
 				}
-				else {
+				else if (rawResult != null) {
 					// for IDE, expand and also add as info marker
 					addInfo(rawResult.toString(), element);
 					Object intForm = getIfTranslator().expandProxyNodes(rawResult, false, true);

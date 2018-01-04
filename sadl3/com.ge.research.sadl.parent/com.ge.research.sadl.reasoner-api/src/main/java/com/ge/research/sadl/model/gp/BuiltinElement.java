@@ -173,13 +173,7 @@ public class BuiltinElement extends GraphPatternElement {
 					sb.append(((NamedNode) arg).toFullyQualifiedString());
 				}
 				else if (arg instanceof ProxyNode) {
-					Object pfn = ((ProxyNode)arg).getProxyFor();
-					if (pfn instanceof GraphPatternElement) {
-						sb.append(((GraphPatternElement)pfn).toFullyQualifiedString());
-					}
-					else {
-						sb.append(arg.toFullyQualifiedString());
-					}
+					sb.append(arg.toFullyQualifiedString());
 				}
 				else{
 					sb.append(arg.toFullyQualifiedString());
@@ -242,13 +236,7 @@ public class BuiltinElement extends GraphPatternElement {
 					sb.append(((NamedNode) arg).toDescriptiveString());
 				}
 				else if (arg instanceof ProxyNode) {
-					Object pfn = ((ProxyNode)arg).getProxyFor();
-					if (pfn instanceof GraphPatternElement) {
-						sb.append(((GraphPatternElement)pfn).toDescriptiveString());
-					}
-					else {
-						sb.append(arg.toDescriptiveString());
-					}
+					sb.append(arg.toDescriptiveString());
 				}
 				else{
 					sb.append(arg.toDescriptiveString());
