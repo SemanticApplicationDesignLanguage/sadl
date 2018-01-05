@@ -118,17 +118,47 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 
 	@Test
 	def void checkInferencer() {
+		val grd1 = newArrayList(
+"SADL Command Result:
+  select ?v0 ?v1 where {?v0 <http://sadl.org/Shapes.sadl#area> ?v1}
+  v0, v1
+  http://sadl.org/Shapes.sadl#MyCircle, 28.27433466911316
+  http://sadl.org/Test.sadl#MyRect, 8.0
+",
+"SADL Command Result:
+  select ?v2 ?v3 where {?v2 <http://sadl.org/Shapes.sadl#area> ?v3}
+  v2, v3
+  http://sadl.org/Shapes.sadl#MyCircle, 28.27433466911316
+  http://sadl.org/Test.sadl#MyRect, 8.0
+"			
+		)
+		val grd2 = newArrayList(
+"SADL Command Result:
+  select ?v0 ?v1 where {?v0 <http://sadl.org/Shapes.sadl#area> ?v1}
+  v0, v1
+  http://sadl.org/Shapes.sadl#MyCircle, 28.27433466911316
+  http://sadl.org/Test.sadl#MyRect, 8.0
+"	
+		)
 		createFile('Shapes.sadl', SHAPES);
 		createFile('Polygons.sadl', POLYGONS);
 		createFile('Test.sadl', TEST);
 		assertNoErrorsInWorkspace;
 		assertInferencer('Test.sadl') [
 			// TODO do something with the SADL commands after running the inferencer.
-			println(Arrays.toString(it));
+			var idx = 0
+			for (scr:it) {
+//				println(scr.toString)
+				assertEqualsIgnoreEOL(grd1.get(idx++), scr.toString)
+			}
 		];
 		assertNamedQuery('Test.sadl', 'Q1') [
 			// TODO do something with the SADL commands after running the named query.
-			println(Arrays.toString(it));
+			var idx = 0
+			for (scr:it) {
+//				println(scr.toString)
+				assertEqualsIgnoreEOL(grd2.get(idx++), scr.toString)
+			}
 		];
 	}
 

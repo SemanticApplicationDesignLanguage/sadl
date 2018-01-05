@@ -1332,7 +1332,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath(), format, true);
 			}
 			else {
-				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath() , format, true);
+				configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(getModelFolderPath() , format, false);
 			}
 		}
 		return configMgr;

@@ -36,4 +36,27 @@ public class SadlCommandResult {
 	public void setErrors(List<ModelError> errors) {
 		this.errors = errors;
 	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("SADL Command Result:\n");
+		sb.append("  ");
+		sb.append(getCmd().toString());
+		if (getResults() instanceof ResultSet) {
+			sb.append("\n");
+			sb.append(((ResultSet)getResults()).toStringWithIndent(2));
+		}
+		else {
+			sb.append("\n  ");
+			sb.append(getResults().toString());
+		}
+		if (getErrors() != null) {
+			sb.append("\n  Errors:");
+			for (ModelError err: getErrors()) {
+				sb.append("\n  ");
+				sb.append(err.toString());
+			}
+		}
+		return sb.toString();
+	}
 }
