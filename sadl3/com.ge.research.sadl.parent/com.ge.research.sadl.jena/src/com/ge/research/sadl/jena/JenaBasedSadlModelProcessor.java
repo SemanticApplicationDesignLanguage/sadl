@@ -7241,8 +7241,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// do nothing
 				} catch(PropertyWithoutRangeException e){
 					String propUri = getDeclarationExtensions().getConceptUri(prop);
-					if (!propUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
-						issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(getDeclarationExtensions().getConcreteName(prop)), propinit);
+					if(propUri != null){
+						if (!propUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
+							issueAcceptor.addWarning(SadlErrorMessages.PROPERTY_WITHOUT_RANGE.get(getDeclarationExtensions().getConcreteName(prop)), propinit);
+						}
 					}
 				} catch (Exception e) {
 					throw new JenaProcessorException("Unexpected error checking value in range", e);
