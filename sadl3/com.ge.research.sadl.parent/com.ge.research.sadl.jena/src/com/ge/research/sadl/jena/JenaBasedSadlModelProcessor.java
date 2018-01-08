@@ -1344,11 +1344,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 	
-	private void setProcessorContext(ProcessorContext ctx) {
+	protected void setProcessorContext(ProcessorContext ctx) {
 		processorContext = ctx;
 	}
 	
-	private ProcessorContext getProcessorContext() {
+	protected ProcessorContext getProcessorContext() {
 		return processorContext;
 	}
 	
@@ -5102,9 +5102,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			
 		}
 		
-		//Check for cardinality of property on this particular class hierarchy 
-		checkForExistenceOfCardinality(predicate, subject); 
-		
 		Object rest = null;
 		if (subject != null) {
 			trSubj = processExpression(subject);
@@ -5120,6 +5117,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		boolean isPreviousPredicate = false;
 		if (predicate != null) {
 			trPred = processExpression(predicate);
+			
+			//Check for cardinality of property on this particular class hierarchy 
+			if(constantBuiltinName == null) {
+				if(Boolean.parseBoolean(getProcessorContext().getPreferenceValues().getPreference(SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN))) {
+					checkForExistenceOfCardinality(predicate, subject); 
+				}
+			}
 		}
 		if (trPred != null && (constantBuiltinName == null || numBuiltinArgs == 1)) {
 			TripleElement returnTriple = null;
@@ -5210,8 +5214,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
-		
-		addWarning("This property has no cardinality in this domain", property);
+		String propName = getDeclarationExtensions().getConcreteName((SadlResource)property);
+		String domName = getDeclarationExtensions().getConcreteName((SadlResource)subject);
+		addWarning("This property (" + propName + ") has no cardinality in this domain (" + domName + ")", property);
 	}
 	
 	private boolean checkForSubClassCardinalityExistence(com.hp.hpl.jena.rdf.model.Resource sr, OntClass subjClass, Property prop, SadlResource propResource) throws InvalidTypeException {
