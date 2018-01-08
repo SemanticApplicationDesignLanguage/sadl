@@ -1344,11 +1344,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 	
-	private void setProcessorContext(ProcessorContext ctx) {
+	protected void setProcessorContext(ProcessorContext ctx) {
 		processorContext = ctx;
 	}
 	
-	private ProcessorContext getProcessorContext() {
+	protected ProcessorContext getProcessorContext() {
 		return processorContext;
 	}
 	
@@ -5101,6 +5101,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return bi;
 			
 		}
+		
 		Object rest = null;
 		if (subject != null) {
 			trSubj = processExpression(subject);
@@ -5116,6 +5117,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		boolean isPreviousPredicate = false;
 		if (predicate != null) {
 			trPred = processExpression(predicate);
+			
+			//Check for cardinality of property on this particular class hierarchy 
+			if(constantBuiltinName == null) {
+				if(Boolean.parseBoolean(getProcessorContext().getPreferenceValues().getPreference(SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN))) {
+					checkForExistenceOfCardinality(predicate, subject); 
+				}
+			}
 		}
 		if (trPred != null && (constantBuiltinName == null || numBuiltinArgs == 1)) {
 			TripleElement returnTriple = null;
@@ -5168,6 +5176,88 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return combineRest(bi, rest);
 		}
+	}
+	
+	private void checkForExistenceOfCardinality(Expression property, Expression subject) throws InvalidNameException, InvalidTypeException, TranslationException {
+		if(property == null || subject == null) {
+			return;
+		}
+		
+		if(!(property instanceof SadlResource) || !(subject instanceof SadlResource)) {
+			return;
+		}
+		
+		TypeCheckInfo tci = null;
+		try {
+			tci = getModelValidator().getType((SadlResource)subject);
+		} catch (CircularDependencyException | DontTypeCheckException | CircularDefinitionException | URISyntaxException | IOException | ConfigurationException | PropertyWithoutRangeException e) {
+			e.printStackTrace();
+		}
+		if(tci == null){
+			return;
+		}
+		List<OntClass> subjClasses = getModelValidator().getTypeCheckTypeClasses(tci);
+		
+		String propURI = getDeclarationExtensions().getConceptUri((SadlResource)property);
+		Property prop = getTheJenaModel().getProperty(propURI);
+		StmtIterator sitr = getTheJenaModel().listStatements(null, OWL.onProperty, prop);
+		while(sitr.hasNext()){
+			Statement stmt = sitr.nextStatement();
+			com.hp.hpl.jena.rdf.model.Resource sr = stmt.getSubject();
+			for(OntClass subjClass : subjClasses){
+				if(checkForCardinalityExistence(sr,subjClass,prop,(SadlResource)property)){
+					return;
+				}
+				
+				if(checkForSubClassCardinalityExistence(sr,subjClass,prop,(SadlResource)property)){
+					return;
+				}
+			}
+		}
+		String propName = getDeclarationExtensions().getConcreteName((SadlResource)property);
+		String domName = getDeclarationExtensions().getConcreteName((SadlResource)subject);
+		addWarning("This property (" + propName + ") has no cardinality in this domain (" + domName + ")", property);
+	}
+	
+	private boolean checkForSubClassCardinalityExistence(com.hp.hpl.jena.rdf.model.Resource sr, OntClass subjClass, Property prop, SadlResource propResource) throws InvalidTypeException {
+		ExtendedIterator<OntClass> ei = subjClass.listSubClasses();
+		while(ei.hasNext()){
+			OntClass subClass = ei.next();
+			if(checkForCardinalityExistence(sr,subClass,prop,propResource)){
+				return true;
+			}
+			if(checkForSubClassCardinalityExistence(sr,subClass,prop,propResource)){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean checkForCardinalityExistence(com.hp.hpl.jena.rdf.model.Resource sr, OntClass subjClass, Property prop, SadlResource propResource) throws InvalidTypeException{
+		if (sr.canAs(OntClass.class) && subjClass.as(OntClass.class).hasSuperClass(sr.as(OntClass.class))) {
+			Restriction restriction = sr.as(OntClass.class).asRestriction();
+			
+			if(restriction.isMinCardinalityRestriction()){
+				MinCardinalityRestriction cr = restriction.asMinCardinalityRestriction();
+				if (cr.getOnProperty().equals(prop)) {
+					return true;
+				}
+			}
+			else if(restriction.isCardinalityRestriction()){
+				CardinalityRestriction cr = restriction.asCardinalityRestriction();
+				if (cr.getOnProperty().equals(prop)) {
+					return true;
+				}
+			}else if(restriction.isMaxCardinalityRestriction()) {
+				MaxCardinalityRestriction cr = restriction.asMaxCardinalityRestriction();
+				if(cr.getOnProperty().equals(prop)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	private Object getSubjectOfFirstTriple(Object stuff) {
