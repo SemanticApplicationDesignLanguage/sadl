@@ -163,6 +163,15 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN.getId(), "Check for cardinality of property on specific domain",
+				getFieldEditorParent()) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+
+		});
 		addField(new BooleanFieldEditor(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation and translation", 
 				getFieldEditorParent()) {
 			
