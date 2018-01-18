@@ -6737,8 +6737,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return rsrc;
 		}
 		else {
-			Literal litval = sadlExplicitValueToLiteral(value, prop);
-			return litval;
+			if (prop != null) {
+				StmtIterator rngitr = getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null);
+				while (rngitr.hasNext()) {
+					RDFNode rng = rngitr.nextStatement().getObject();
+					if (rng instanceof com.hp.hpl.jena.rdf.model.Resource) {
+						try {
+							Literal litval = sadlExplicitValueToLiteral(value, (com.hp.hpl.jena.rdf.model.Resource) rng);
+							rngitr.close();
+							return litval;
+						}
+						catch (Exception e) {
+							
+						}
+					}
+				}
+				addWarning("Can't find range of property to create typed Literal", value);
+				return sadlExplicitValueToLiteral(value, null);
+			}
+			else {
+				Literal litval = sadlExplicitValueToLiteral(value, prop);
+				return litval;
+			}
 		}
 	}
 	
