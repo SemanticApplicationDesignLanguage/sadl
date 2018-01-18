@@ -17,7 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests
 
-import java.util.Arrays
+import org.junit.Ignore
 import org.junit.Test
 
 import static com.ge.research.sadl.ui.tests.GeneratedOutputFormat.*
@@ -116,6 +116,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		];
 	}
 
+	@Ignore
 	@Test
 	def void checkInferencer() {
 		val grd1 = newArrayList(

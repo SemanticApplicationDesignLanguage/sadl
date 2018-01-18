@@ -167,15 +167,18 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	described by publicized with values of type boolean.
 			 	
 			 	past describes System with values of type UnittedQuantity.
+			 	past of System has exactly 1 value.
 
 			 Result is a class, can only be one of {Passed, Failed}.
 			 
 			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
 			 
 			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
+			 	constantValue of UnittedConstant has exactly 1 value. 
 			 
 			 SimpleConstant is a class described by cValue with values of type decimal.
 			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 	cValue of SimpleConstant has exactly 1 value. 
 			 
 			 Expr: past of System is (constantValue of TimingConstant3).
 			 Expr: past of System is constantValue of TimingConstant3.
@@ -220,6 +223,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	described by publicized with values of type boolean.
 			 	
 			 	past describes System with values of type UnittedQuantity.
+			 	past of System has exactly 1 value. 
 
 			 Result is a class, can only be one of {Passed, Failed}.
 			 
@@ -257,7 +261,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	described by publicized with values of type boolean.
 			 	
 			 	past describes System with values of type UnittedQuantity.
-
+				past of System has exactly 1 value.
+				
 			 Result is a class, can only be one of {Passed, Failed}.
 			 
 			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
@@ -300,16 +305,23 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	described by inspection with values of type Result,
 			 	described by publicized with values of type boolean.
 			 	
+			 	approved of System has exactly 1 value. 
+			 	inspection of System has exactly 1 value. 
+			 	publicized of System has exactly 1 value. 
+			 	
 			 	past describes System with values of type UnittedQuantity.
+			 	past of System has exactly 1 value. 
 			
 			 Result is a class, can only be one of {Passed, Failed}.
 			 
 			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
+			 constantValue of UnittedConstant has exactly 1 value. 
 			 
 			 TimingConstant3 is a UnittedConstant with constantValue (a UnittedQuantity with ^value 5, with unit "seconds").
 			 
 			 SimpleConstant is a class described by cValue with values of type decimal.
 			 TimingConstant5 is a SimpleConstant with cValue 5.
+			 cValue of SimpleConstant has exactly 1 value. 
 			 
 			 Rule R1:
 			 	if inspection of System is Passed and past of System is (constantValue of TimingConstant3)

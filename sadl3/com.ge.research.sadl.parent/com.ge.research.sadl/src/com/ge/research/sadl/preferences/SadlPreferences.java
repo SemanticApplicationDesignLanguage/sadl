@@ -45,6 +45,7 @@ public class SadlPreferences {
 	public static final PreferenceKey GRAPH_RENDERER_CLASS= new PreferenceKey("graphrendererclass", "");
 	public static final PreferenceKey TABULAR_DATA_IMPORTER_CLASS= new PreferenceKey("tabulardataimporterclass", "");
 	public static final PreferenceKey CHECK_FOR_AMBIGUOUS_NAMES = new PreferenceKey("ambiguousNameCheckOn", String.valueOf(true));
+	public static final PreferenceKey CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN = new PreferenceKey("cardinalityCheck", String.valueOf(false));
 	public static final PreferenceKey P_USE_ARTICLES_IN_VALIDATION= new PreferenceKey("use_articles_in_validation", String.valueOf(false));
 	public static final PreferenceKey TYPE_CHECKING_WARNING_ONLY = new PreferenceKey("typeCheckingWarningOnly", String.valueOf(false));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
@@ -78,6 +79,7 @@ public class SadlPreferences {
 			DEEP_VALIDATION_OFF,
 			GRAPH_RENDERER_CLASS,
 			CHECK_FOR_AMBIGUOUS_NAMES,
+			CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN,
 //			DISABLE_TYPE_CHECKING,
 			TYPE_CHECKING_WARNING_ONLY,
 			IGNORE_UNITTEDQUANTITIES,
