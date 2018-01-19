@@ -251,6 +251,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage NULL_ONT_MODEL = new SadlErrorMessage("null_ont_model");
 /**
+* The {0} type is not compatible with downstream projects for RCE and XLR. 
+**/
+    public static final SadlErrorMessage TYPE_UNSUPPORTED_DOWNSTREAM = new SadlErrorMessage("type_unsupported_downstream");
+/**
 * Variable {0} is of type {1} which is not in domain of property {2}
 **/
     public static final SadlErrorMessage VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("variable_not_in_domain_of_property");
