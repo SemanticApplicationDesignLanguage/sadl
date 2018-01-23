@@ -251,7 +251,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage NULL_ONT_MODEL = new SadlErrorMessage("null_ont_model");
 /**
-* The {0} type is not compatible with downstream projects for RCE and XLR. 
+* The {0} type may not be compatible with downstream projects
 **/
     public static final SadlErrorMessage TYPE_UNSUPPORTED_DOWNSTREAM = new SadlErrorMessage("type_unsupported_downstream");
 /**

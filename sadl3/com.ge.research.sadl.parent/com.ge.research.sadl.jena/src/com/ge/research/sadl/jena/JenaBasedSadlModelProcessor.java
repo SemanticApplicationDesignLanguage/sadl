@@ -384,6 +384,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public Resource getCurrentResource() {
 		return currentResource;
 	}
+	
+	//------ PEFERENCE GETTERS AND SETTERS --------
+	public void setUseArticlesInValidation(boolean useArticlesInValidation) {
+		this.useArticlesInValidation = useArticlesInValidation;
+	}
+	
+	public void setTypeUnsupportedDownstream(boolean useTypeUnsupportedDownstreamWarnings) {
+		this.typeUnsupportedDownstreamWarnings = useTypeUnsupportedDownstreamWarnings;
+	}
+	
+	public void setIncludeImpliedPropertiesInTranslation(boolean useIncludeImpliedPropertiesInTranslation) {
+		this.includeImpliedPropertiesInTranslation = useIncludeImpliedPropertiesInTranslation;
+	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -706,6 +720,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private String reasonerClassName = null;
 	private String translatorClassName = null;
 
+	//------------PEFERENCES ---------------
 	protected boolean ignoreUnittedQuantities;
 
 	private boolean useArticlesInValidation;
@@ -715,6 +730,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private boolean typeCheckingWarningsOnly;
 	
 	private boolean typeUnsupportedDownstreamWarnings;
+	
+	//-----------END PEFERENCES --------------
 
 	private List<OntResource> allImpliedPropertyClasses = null;
 
@@ -4926,7 +4943,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			SadlDataType pt = ((SadlPrimitiveDataType) type).getPrimitiveType();
 			Object typeobj = sadlDataTypeToNamedNode(pt);
 			
-			
+			// control for type unsupported downstream warnings on primitive data types
 			if(typeUnsupportedDownstreamWarnings) {
 				if(!isSupportedByDownstreamProjects(pt)) {
 					issueAcceptor.addWarning(SadlErrorMessages.TYPE_UNSUPPORTED_DOWNSTREAM.get(pt.getLiteral()), type);
@@ -10464,13 +10481,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return useArticlesInValidation;
 	}
 
-	public void setUseArticlesInValidation(boolean useArticlesInValidation) {
-		this.useArticlesInValidation = useArticlesInValidation;
-	}
-	
-	public void setTypeUnsupportedDownstream(boolean usetypeUnsupportedDownstreamWarnings) {
-		this.typeUnsupportedDownstreamWarnings = usetypeUnsupportedDownstreamWarnings;
-	}
+
 
 	public boolean isBuiltinMissingArgument(String funcName, int size) {
 		if (funcName.equals("is") && size == 2) {
