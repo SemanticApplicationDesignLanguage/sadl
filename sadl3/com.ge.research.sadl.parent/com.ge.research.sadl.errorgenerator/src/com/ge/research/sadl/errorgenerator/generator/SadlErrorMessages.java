@@ -243,6 +243,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage COMPARISON_LITERALS_CONSTANTS = new SadlErrorMessage("comparison_literals_constants");
 /**
+* Events cannot occur simultaneously. An event must occur one at a time. 
+**/
+    public static final SadlErrorMessage INVALID_CONJUNCTION = new SadlErrorMessage("invalid_conjunction");
+/**
 * type checking doesn't handle {0}
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
