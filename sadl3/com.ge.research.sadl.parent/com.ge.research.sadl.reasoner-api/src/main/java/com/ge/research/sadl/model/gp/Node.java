@@ -51,4 +51,6 @@ public abstract class Node {
 		}
 		return false;
 	}
+
+	abstract public String toDescriptiveString();
 }

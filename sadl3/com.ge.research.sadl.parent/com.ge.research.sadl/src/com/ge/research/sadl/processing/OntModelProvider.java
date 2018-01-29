@@ -132,7 +132,9 @@ public class OntModelProvider {
 			else {
 				plist = a.impliedPropertiesUsed.get(eobj);
 			}
-			plist.add(impliedProperty);
+			if (!plist.contains(impliedProperty)) {
+				plist.add(impliedProperty);
+			}
 		}
 	}
 	

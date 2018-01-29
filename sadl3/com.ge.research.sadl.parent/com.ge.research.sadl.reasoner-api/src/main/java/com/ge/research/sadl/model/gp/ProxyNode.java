@@ -72,6 +72,9 @@ public class ProxyNode extends Node {
 						if (pfr instanceof Node) {
 							return "(" + ((Node) pfr).toFullyQualifiedString() + ")";					
 						}
+						else if (pfr instanceof GraphPatternElement) {
+							return "(" + ((GraphPatternElement)proxyFor).toFullyQualifiedString() + ")";
+						}
 						else {
 							return "(" +  ((List<?>)proxyFor).get(0).toString() + ")";					
 						}
@@ -80,8 +83,51 @@ public class ProxyNode extends Node {
 						return "(invalid ProxyNode)";
 					}
 				}
-				if (proxyFor instanceof Node) {
+				else if (proxyFor instanceof GraphPatternElement) {
+					return "(" + ((GraphPatternElement)proxyFor).toFullyQualifiedString() + ")";
+				}
+				else if (proxyFor instanceof Node) {
 					return "(" + ((Node) proxyFor).toFullyQualifiedString() + ")";
+				}
+				else {
+					return "(" + proxyFor.toString() + ")";
+					
+				}
+			}
+			return "(null proxy content)";
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			return "(Exception encountered: " + t.getMessage() + ")";
+		}
+	}
+
+	@Override
+	public String toDescriptiveString() {
+		try {
+			if (proxyFor != null) {
+				if (proxyFor instanceof List<?>) {
+					if (((List<?>)proxyFor).size() == 1) {
+						Object pfr = ((List<?>)proxyFor).get(0);
+						if (pfr instanceof Node) {
+							return "(" + ((Node) pfr).toDescriptiveString() + ")";					
+						}
+						else if (pfr instanceof GraphPatternElement) {
+							return "(" + ((GraphPatternElement)proxyFor).toDescriptiveString() + ")";
+						}
+						else {
+							return "(" +  ((List<?>)proxyFor).get(0).toString() + ")";					
+						}
+					}
+					else {
+						return "(invalid ProxyNode)";
+					}
+				}
+				else if (proxyFor instanceof GraphPatternElement) {
+					return "(" + ((GraphPatternElement)proxyFor).toDescriptiveString() + ")";
+				}
+				else if (proxyFor instanceof Node) {
+					return "(" + ((Node) proxyFor).toDescriptiveString() + ")";
 				}
 				else {
 					return "(" + proxyFor.toString() + ")";

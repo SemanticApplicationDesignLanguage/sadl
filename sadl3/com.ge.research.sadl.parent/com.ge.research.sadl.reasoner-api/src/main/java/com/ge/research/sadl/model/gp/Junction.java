@@ -160,4 +160,39 @@ public class Junction extends GraphPatternElement {
 //		}
 		return sb.toString();
 	}
+
+	@Override
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getJunctionName());
+		sb.append("(");
+		if (getLhs() != null) {
+			Object lhs = getLhs();
+			if (lhs instanceof GraphPatternElement) {
+				sb.append(((GraphPatternElement) lhs).toDescriptiveString());
+			}
+			else if (lhs instanceof Node) {
+				sb.append(((Node) lhs).toDescriptiveString());
+			}
+			else {
+				sb.append(lhs.toString());
+			}
+//			sb.append(") ");
+		}
+		sb.append(",");
+		if (getRhs() != null) {
+			Object rhs = getRhs();
+			if (rhs instanceof GraphPatternElement) {
+				sb.append(((GraphPatternElement) rhs).toDescriptiveString());
+			}
+			else if (rhs instanceof Node) {
+				sb.append(((Node) rhs).toDescriptiveString());
+			}
+			else {
+				sb.append(rhs.toString());
+			}
+		}
+		
+		sb.append(")");
+		return sb.toString();	}
 }

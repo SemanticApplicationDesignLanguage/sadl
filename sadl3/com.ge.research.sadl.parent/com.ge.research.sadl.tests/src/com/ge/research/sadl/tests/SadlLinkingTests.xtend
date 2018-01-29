@@ -109,7 +109,6 @@ class SadlLinkingTests {
 			second.elements.filter(SadlClassOrPropertyDeclaration).head.superElement.referencedSadlResources.head)
 	}
 	
-	@Ignore
 	@Test def void testCrossResourceSadlResourceLinks_03() {
 		val first = parse('''
 			uri "http://sadl.org.Tests/ModelName" alias m1.
@@ -120,7 +119,7 @@ class SadlLinkingTests {
 			import "http://sadl.org.Tests/ModelName" as foo.
 			
 			m2:Foo is a class.	// this creates a new class in the current namespace (model) with local name "Foo"
-			Bar is a type of Foo.	// this should reference the class "m2:Foo", the "Foo" in this namespace, not the imported one.
+			Bar is a type of m2:Foo.	// prefix ("m2:Foo") is required for disamgibuation.
 		''', first.eResource.resourceSet)
 		first.assertNoErrors
 		second.assertNoErrors

@@ -525,8 +525,10 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 								bChanged = true;
 							}
 						}
-						subj.addProperty(publicUrlProp, pubv);
-						bChanged = true;
+						else {
+							subj.addProperty(publicUrlProp, pubv);
+							bChanged = true;
+						}
 
 						Statement s3 = subj.getProperty(prefixProp);
 						if (s3 != null) {
@@ -653,10 +655,14 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		}
 		if (altUrl == null) {
 			throw new ConfigurationException("Mapping of publicURI '"
-					+ publicUri + "' can't be to null.");
+					+ publicUri + "' can't be mapped to null.");
 		}
-		getJenaDocumentMgr().addAltEntry(publicUri, altUrl);
-		return true;
+		String existingAltUrl = getJenaDocumentMgr().doAltURLMapping(publicUri);
+		if (existingAltUrl == null || !existingAltUrl.equals(altUrl)) {
+			getJenaDocumentMgr().addAltEntry(publicUri, altUrl);
+			return true;
+		}
+		return false;
 	}
 
 	public synchronized boolean deleteMapping(String publicUri, String altUrl)

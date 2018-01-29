@@ -220,4 +220,10 @@ public class MetricsProcessor implements IMetricsProcessor {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public String getBaseUri() {
+		return baseUri;
+	}
+
 }

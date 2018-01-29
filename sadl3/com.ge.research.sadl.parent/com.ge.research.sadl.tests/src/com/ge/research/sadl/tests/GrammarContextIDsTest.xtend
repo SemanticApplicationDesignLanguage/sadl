@@ -95,7 +95,7 @@ class GrammarContextIDsTest extends Assert {
 	def void check_03() {
 		assertEquals(
 			SADLPROPERTYINITIALIZER_PROPERTY,
-			sadlPropertyInitializerAccess.propertyAssignment_0_1
+			sadlPropertyInitializerAccess.propertyAssignment_0_2
 		);
 	}
 
@@ -119,7 +119,7 @@ class GrammarContextIDsTest extends Assert {
 	def void check_06() {
 		assertEquals(
 			PRIMARYEXPRESSION_VALUE,
-			primaryExpressionAccess.valueAssignment_2_1
+			primaryExpressionAccess.valueAssignment_3_1
 		);
 	}
 
@@ -143,7 +143,7 @@ class GrammarContextIDsTest extends Assert {
 	def void check_09() {
 		assertEquals(
 			SADLPROPERTYINITIALIZER_VALUE,
-			sadlPropertyInitializerAccess.valueAssignment_0_2_0
+			sadlPropertyInitializerAccess.valueAssignment_0_3_0
 		);
 	}
 
@@ -151,7 +151,7 @@ class GrammarContextIDsTest extends Assert {
 	def void check_10() {
 		assertEquals(
 			PROPOFSUBJECT_RIGHT,
-			propOfSubjectAccess.rightAssignment_0_1_0_1_1
+			propOfSubjectAccess.rightAssignment_1_0_1_0_4
 		);
 	}
 
@@ -159,7 +159,7 @@ class GrammarContextIDsTest extends Assert {
 	def void check_11() {
 		assertEquals(
 			PROPOFSUBJECT_PROP,
-			propOfSubjectAccess.propAssignment_0_1_0_1_0_0_2
+			propOfSubjectAccess.propAssignment_1_0_1_0_3
 		);
 	}
 

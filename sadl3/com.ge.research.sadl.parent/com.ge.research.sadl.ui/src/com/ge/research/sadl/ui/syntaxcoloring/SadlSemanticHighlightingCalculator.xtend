@@ -42,6 +42,7 @@ import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.ui.resource.ProjectByResourceProvider
+import com.ge.research.sadl.utils.SadlASTUtils
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -67,7 +68,7 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 				acceptor.addPosition(node.offset, node.length, SadlHighlightingConfiguration.URI_ID)
 			}
 		}
-		for (element : model.eAllContents.toList) {
+		for (element : model.eAllContents.toList.filter[!SadlASTUtils.isUnit(it)]) {
 			var v = element
 			if (element instanceof Name) {
 				v = element.name
@@ -100,7 +101,7 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 					acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_CONDITION__PROPERTY, highlightingId)
 				}
 				SadlPropertyInitializer : {
-					if (v.property != null) {
+					if (v.property !== null) {
 						var highlightingId = getHighlightingId(v.property)
 						acceptor.highlight(element, SADLPackage.Literals.SADL_PROPERTY_INITIALIZER__PROPERTY, highlightingId)
 					}

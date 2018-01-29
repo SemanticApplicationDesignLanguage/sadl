@@ -90,7 +90,9 @@ class SadlMarkerStartup implements IStartup {
 								val member = ws.root.findMember(resource.URI.toPlatformString(true));
 								if (member !== null && member.accessible) {
 									entries.forEach [ marker |
-										val location = locationProvider.getLocation(marker.astNodeName, resource);
+										val segments = marker.astNodeName.split('/');
+										val name = if(segments.length > 0) segments.last else marker.astNodeName;
+										val location = locationProvider.getLocation(name, resource);
 										modifications.add([member.createMarker(marker, location, origin)]);
 									];
 								}
@@ -148,10 +150,10 @@ class SadlMarkerStartup implements IStartup {
 						resolveRef(ref, projectRelativePath);
 					}
 				} else if (ref.type === SadlMarkerRefType.ModelElement) {
-					val segments = ref.referencedId.split(SadlMarkerDeserializerService.OBJECT_ID_SEPARATOR);
-					val modelUri = segments.head;
-					val astNodeName = if (segments.size > 1) segments.last else null;
-					val resource = modelUri.getResource(project);
+					val lastIndexOfSlash = ref.referencedId.lastIndexOf('/');
+					val modelUri = if (lastIndexOfSlash != 0) ref.referencedId.substring(0,lastIndexOfSlash) else null;
+					val astNodeName = if (lastIndexOfSlash != 0) ref.referencedId.substring(lastIndexOfSlash + 1) else null;
+					val resource = modelUri?.getResource(project);
 					if (resource !== null) {
 						val astNode = if (astNodeName === null) {
 							resource.sadlModel;

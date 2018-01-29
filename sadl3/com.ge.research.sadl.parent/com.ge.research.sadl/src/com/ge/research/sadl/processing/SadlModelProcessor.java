@@ -26,6 +26,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.resource.XtextResource;
+
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.OntConceptType;
@@ -73,7 +79,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     @Inject
     private ISadlImplicitModelContentProvider implicitModelContentProvider;
     
-	public abstract Object translate(Expression expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
+	public abstract Object processExpression(EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
 		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
@@ -356,7 +362,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //		throw new TranslationException("Unhandled type of SadlTypeReference");
 //	}
 
-	protected Object translate(BooleanLiteral expr) {
+	protected Object processExpression(BooleanLiteral expr) {
 		Literal lit = new Literal();
 		String val = expr.getValue();
 		if (val.equals("true")) {
@@ -369,7 +375,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return lit;
 	}
 
-	protected Object translate(NumberLiteral expr) {
+	protected Object processExpression(NumberLiteral expr) {
 		Literal lit = new Literal();
 		BigDecimal val = expr.getValue();
 		lit.setValue(val);
@@ -377,14 +383,14 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return lit;
 	}
 
-	protected Object translate(StringLiteral expr) {
+	protected Object processExpression(StringLiteral expr) {
 		Literal lit = new Literal();
 		lit.setValue(expr.getValue());
 		lit.setOriginalText(expr.getValue());
 		return lit;
 	}
 
-//	protected String translate(Constant expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+//	protected String processExpression(Constant expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		return expr.getConstant();
 //	}
 
@@ -446,7 +452,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return false;
 	}
 
-	private Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	public static Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (nodeObj == null) {
 //			throw new InvalidTypeException("nodeCheck called with null argument; this should not happen.");
 			return null;
@@ -464,7 +470,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return new ProxyNode(nodeObj);
 	}
 
-	private GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(name);
 		if (lobj != null) {
@@ -484,7 +490,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return junction;
 	}
 
-	private Object createUnaryBuiltin(Expression sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object createUnaryBuiltin(EObject sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (sobj instanceof Literal && BuiltinType.getType(name).equals(BuiltinType.Minus)) {
 			Object theVal = ((Literal)sobj).getValue();
 			if (theVal instanceof Integer) {
@@ -542,7 +548,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return builtin;
 	}
 
-	private TripleModifierType getTripleModifierType(BuiltinType btype) {
+	protected TripleModifierType getTripleModifierType(BuiltinType btype) {
 		if (btype.equals(BuiltinType.Not) || btype.equals(BuiltinType.NotEqual)) {
 			return TripleModifierType.Not;
 		}
@@ -750,6 +756,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (nt.equals(NodeType.ClassNode)) {
 			return ConceptType.ONTCLASS;
 		}
+		else if (nt.equals(NodeType.ClassListNode)) {
+			return ConceptType.ONTCLASSLIST;
+		}
 		else if (nt.equals(NodeType.InstanceNode)) {
 			return ConceptType.INDIVIDUAL;
 		}
@@ -759,20 +768,35 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		else if (nt.equals(NodeType.ObjectProperty)) {
 			return ConceptType.OBJECTPROPERTY;
 		}
+		else if (nt.equals(NodeType.AnnotationProperty)) {
+			return ConceptType.ANNOTATIONPROPERTY;
+		}
 		else if (nt.equals(NodeType.VariableNode)) {
 			return ConceptType.VARIABLE;
 		}
 		else if (nt.equals(NodeType.DataTypeNode)) {
 			return ConceptType.RDFDATATYPE;
 		}
+		else if (nt.equals(NodeType.DataTypeListNode)) {
+			return ConceptType.RDFDATATYPELIST;
+		}
+		else if (nt.equals(NodeType.PropertyNode)) {
+			return ConceptType.RDFPROPERTY;
+		}
+		else if (nt.equals(NodeType.FunctionNode)) {
+			return ConceptType.FUNCTION_DEFN;
+		}
 		else {
 			throw new TranslationException("NodeType '" + nt.toString() + "' cannot be converted to a ConceptType");
 		}
 	}
 
-	protected NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
+	public static NodeType conceptTypeToNodeType(ConceptType ct) throws TranslationException {
 		if (ct.equals(ConceptType.ONTCLASS)) {
 			return NodeType.ClassNode;
+		}
+		else if (ct.equals(ConceptType.ONTCLASSLIST)) {
+			return NodeType.ClassListNode;
 		}
 		else if (ct.equals(ConceptType.INDIVIDUAL)) {
 			return NodeType.InstanceNode;
@@ -788,6 +812,15 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		else if (ct.equals(ConceptType.RDFDATATYPE)) {
 			return NodeType.DataTypeNode;
+		}
+		else if (ct.equals(ConceptType.RDFDATATYPELIST)) {
+			return NodeType.DataTypeListNode;
+		}
+		else if (ct.equals(ConceptType.FUNCTION_DEFN)) {
+			return NodeType.FunctionNode;
+		}
+		else if (ct.equals(ConceptType.RDFPROPERTY)) {
+			return NodeType.PropertyNode;
 		}
 		else {
 			throw new TranslationException("ConceptType '" + ct.toString() + "' cannot be converted to a NodeType");
@@ -940,6 +973,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (octype.equals(OntConceptType.CLASS)){
 			return NodeType.ClassNode;
 		}
+		if (octype.equals(OntConceptType.CLASS_LIST)) {
+			return NodeType.ClassListNode;
+		}
 		if (octype.equals(OntConceptType.CLASS_PROPERTY)) {
 			return NodeType.ObjectProperty;
 		}
@@ -956,17 +992,20 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			return NodeType.VariableNode;
 		}
 		if (octype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
-			return NodeType.PropertyNode;
+			return NodeType.AnnotationProperty;
 		}
 		else if (octype.equals(OntConceptType.FUNCTION_DEFN)) {
 //			System.err.println("Trying to convert OntConceptType FUNCTION_DEFN to a Node Type; this needs resolution.");
-			return NodeType.InstanceNode;
+			return NodeType.FunctionNode;
 		}
 		else if (octype.equals(OntConceptType.STRUCTURE_NAME)) {
 			return NodeType.InstanceNode;
 		}
 		else if (octype.equals(OntConceptType.DATATYPE)) {
 			return NodeType.DataTypeNode;
+		}
+		else if (octype.equals(OntConceptType.DATATYPE_LIST)) {
+			return NodeType.DataTypeListNode;
 		}
 		throw new TranslationException("OntConceptType '" + octype.toString() + "' not yet mapped to NodeType");
 	}
@@ -994,5 +1033,38 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	protected void setRulePart(RulePart rulePart) {
 		this.rulePart = rulePart;
 	}
+
+	public String getSourceText(EObject po) {
+		INode node = getParserObjectNode(po);
+		if (node != null) {
+			String txt = NodeModelUtils.getTokenText(node);
+			return txt.trim() + ".\n";
+		}
+		return null;
+	}
+
+	protected INode getParserObjectNode(EObject po) {
+		Object r = po.eResource();
+		if (r instanceof XtextResource) {
+			INode root = ((XtextResource) r).getParseResult().getRootNode();
+	        for(INode node : root.getAsTreeIterable()) {   
+	        	if (node instanceof CompositeNodeWithSemanticElement) {
+	        		EObject semElt = ((CompositeNodeWithSemanticElement)node).getSemanticElement();
+	        		if (semElt != null && semElt.equals(po)) {
+	        			// this is the one!
+       					return node;
+	        		}
+	        	}
+	        }
+		}
+		org.eclipse.emf.common.util.TreeIterator<EObject> titr = po.eAllContents();
+		while (titr.hasNext()) {
+			EObject el = titr.next();
+//TODO what's supposed to happen here?
+			int i = 0;
+		}
+		return null;
+	}
+
 
 }

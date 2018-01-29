@@ -57,7 +57,7 @@ class ScopingTest {
 				   then x has connectedTo y .
 		'''.parse
 		model.elements.get(4) as RuleStatement => [
-			val names = EcoreUtil2.getAllContents(ifs).filter(Name).filter[concreteName == 'x'].toList
+			val names = EcoreUtil2.getAllContents(ifs).filter(Name).filter[it.name.concreteName == 'x'].toList
 			val reference = names.get(0)
 			val declaration = names.get(1)
 			assertSame(declaration, reference.name)
@@ -87,7 +87,7 @@ class ScopingTest {
 			val y = names.get(1)
 			assertSame(y, y.name)
 			for (other : names.tail) {
-				if (other.concreteName == 'x') {
+				if (other.name.concreteName == 'x') {
 					assertSame(x, other.name)
 				} else {
 					assertSame(y, other.name)
@@ -101,12 +101,11 @@ class ScopingTest {
 			val x = names.get(0)
 			assertSame(x, x.name)
 			assertFalse(names.get(1).eIsProxy)
-			assertEquals("color", names.get(1).concreteName)
+			assertEquals("color", names.get(1).name.concreteName)
 			assertSame(x, names.get(2).name)
 		]
 	}
 	
-//	@Ignore
 	@Test def void testLocalVariable_03() {
 		val model = '''
 			uri "http://com.ge.research.sadl/Bug3434542" alias Bug3434542. 
@@ -129,7 +128,6 @@ class ScopingTest {
 		
 	}
 		
-//	@Ignore
 	@Test def void testLocalVariable_04() {
 		val model = '''
 			uri "http://com.ge.research.sadl/Bug3434542" alias Bug3434542. 
@@ -167,7 +165,6 @@ class ScopingTest {
 			
 	}
 	
-//	@Ignore
 	@Test def void testLocalVariableRule1() {
 		val model = '''
 			uri "http://sadl.org/TestSadlIde/DateMinMax" alias dtminmax version "$Revision: 1.1 $ Last modified on   $Date: 2015/07/15 12:51:12 $". 

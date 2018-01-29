@@ -24,8 +24,14 @@ public class NamedNode extends Node {
 	private String prefix = null;
 	private String namespace = null;
 	private NodeType nodeType = null;
+	// if the Node represents a List (ClassListNode or DataTypeListNode) then the following may apply: 
+	private int listLength = -1;						// the length restriction, if any (-1 => none)
+	private int minListLength = -1;						// the minimum length restriction, if any (-1 => none)
+	private int maxListLength = -1;						// the maximum length restriction, if any (-1 => none)
 	
-	public static enum NodeType {ClassNode, InstanceNode, DataTypeNode, PropertyNode, DataTypeProperty, ObjectProperty, VariableNode}
+	public static enum NodeType {ClassNode, ClassListNode, InstanceNode, DataTypeNode, DataTypeListNode, 
+									PropertyNode, DataTypeProperty, ObjectProperty, AnnotationProperty, 
+									FunctionNode, VariableNode}
 	
 	public NamedNode() {
 		super();
@@ -114,6 +120,11 @@ public class NamedNode extends Node {
 		return toString();
 	}
 
+	@Override
+	public String toDescriptiveString() {
+		return toString();
+	}
+
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 	}
@@ -137,4 +148,54 @@ public class NamedNode extends Node {
 	public boolean isValidated() {
 		return validated;
 	}
+
+	public int getListLength() {
+		return listLength;
+	}
+
+	public void setListLength(int listLength) {
+		this.listLength = listLength;
+	}
+
+	public int getMinListLength() {
+		return minListLength;
+	}
+
+	public void setMinListLength(int minListLength) {
+		this.minListLength = minListLength;
+	}
+
+	public int getMaxListLength() {
+		return maxListLength;
+	}
+
+	public void setMaxListLength(int maxListLength) {
+		this.maxListLength = maxListLength;
+	}
+
+	public boolean isList() {
+		return nodeType != null && (nodeType.equals(NodeType.ClassListNode) || nodeType.equals(NodeType.DataTypeListNode));
+	}
+
+	public void setList(boolean list) {
+		if (nodeType != null) {
+			if (list) {
+				if (nodeType.equals(NodeType.ClassNode)) {
+					nodeType = NodeType.ClassListNode;
+				}
+				else if (nodeType.equals(NodeType.DataTypeNode)) {
+					nodeType = NodeType.DataTypeListNode;
+				}
+			}
+			else {
+				if (nodeType.equals(NodeType.ClassListNode)) {
+					nodeType = NodeType.ClassNode;
+				}
+				else if (nodeType.equals(NodeType.DataTypeListNode)) {
+					nodeType = NodeType.DataTypeNode;
+				}
+			}
+		}
+	}
+
 }

@@ -243,6 +243,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage COMPARISON_LITERALS_CONSTANTS = new SadlErrorMessage("comparison_literals_constants");
 /**
+* Events cannot occur simultaneously. An event must occur one at a time. 
+**/
+    public static final SadlErrorMessage INVALID_CONJUNCTION = new SadlErrorMessage("invalid_conjunction");
+/**
 * type checking doesn't handle {0}
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
@@ -250,6 +254,10 @@ public final class SadlErrorMessages {
 * 
 **/
     public static final SadlErrorMessage NULL_ONT_MODEL = new SadlErrorMessage("null_ont_model");
+/**
+* The {0} type may not be compatible with downstream projects
+**/
+    public static final SadlErrorMessage TYPE_UNSUPPORTED_DOWNSTREAM = new SadlErrorMessage("type_unsupported_downstream");
 /**
 * Variable {0} is of type {1} which is not in domain of property {2}
 **/
@@ -263,7 +271,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage INVALID_USE_OF_CLASS_AS_PROPERTY = new SadlErrorMessage("invalid_use_of_class_as_property");
 /**
-* {0} is not in domain of property {1} 
+* {0} is not in domain of property {1}
 **/
     public static final SadlErrorMessage SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("subject_not_in_domain_of_property");
 /**

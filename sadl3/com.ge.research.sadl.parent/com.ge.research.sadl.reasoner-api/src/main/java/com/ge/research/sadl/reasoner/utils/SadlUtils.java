@@ -563,7 +563,7 @@ public class SadlUtils {
         String errMsg = null;
         boolean rdfTypeValid = false;
         boolean isNumeric = isNumericRange(rnguri);
-        RDFDatatype rdftype = TypeMapper.getInstance().getSafeTypeByName(rnguri);
+        RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
         if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
         		!rdftype.getURI().equals(XSD.date.getURI()) && 
         		!rdftype.getURI().equals(XSD.dateTime.getURI())) {
@@ -982,7 +982,23 @@ public class SadlUtils {
 					}
 				}
 			}
-
+			// if there is an equivalent class for the subclass which is an intersection and the intersection includes the cls, then return true
+			if (subcls.canAs(OntClass.class )) {
+				ExtendedIterator<OntClass> eqitr = subcls.as(OntClass.class).listEquivalentClasses();
+				while (eqitr.hasNext()) {
+					OntClass eqcls = eqitr.next();
+					if (eqcls.isIntersectionClass()) {
+						ExtendedIterator<? extends OntClass> icitr = eqcls.asIntersectionClass().listOperands();
+						while (icitr.hasNext()) {
+							OntClass icnext = icitr.next();
+//							previousClasses = checkPreviousClassList(previousClasses, eqcls);
+							if (classIsSubclassOf(icnext, cls, false, previousClasses)) {
+								return true;
+							}
+						}
+					}
+				}
+			}
 		} 
 		catch (CircularDependencyException e) {
 			throw e;
@@ -1018,7 +1034,7 @@ public class SadlUtils {
 		return previousClasses;
 	}
 	
-	private boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
+	public static boolean classIsSuperClassOf(OntClass cls, OntClass subcls) {
 		ExtendedIterator<OntClass> eitr = subcls.listSuperClasses();
 		try {
 			while (eitr.hasNext()) {
