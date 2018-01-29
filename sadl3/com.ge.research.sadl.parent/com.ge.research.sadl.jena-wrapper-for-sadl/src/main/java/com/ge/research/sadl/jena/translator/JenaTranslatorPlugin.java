@@ -86,7 +86,9 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class JenaTranslatorPlugin implements ITranslator {
-    protected static final Logger logger = LoggerFactory.getLogger(JenaTranslatorPlugin.class);
+    private static final String THERE_EXISTS = "thereExists";
+
+	protected static final Logger logger = LoggerFactory.getLogger(JenaTranslatorPlugin.class);
     
     private static final String TranslatorCategory = "Basic_Jena_Translator";
     
@@ -96,7 +98,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	public enum TranslationTarget {RULE_TRIPLE, RULE_BUILTIN, QUERY_TRIPLE, QUERY_FILTER}
     
-    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN}
+    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN, THEREEXISTS}
     
     private enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     
@@ -258,20 +260,65 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 	
 	private String graphPatternElementsToJenaRuleString(List<GraphPatternElement> elements, RulePart rulePart) throws TranslationException {
-		int cnt = 0;
 		if (elements != null && elements.size() > 0) {
 			StringBuilder sb = new StringBuilder();
-			for (int i = 0; elements != null && i < elements.size(); i++) {
-				if (cnt > 0) sb.append(", ");
-				SpecialBuiltin spb = processSpecialBuiltins(elements, i);	// check for special handling required for some built-ins
+			int idx = 0;
+			while(idx < elements.size()) {
+				if (idx > 0) sb.append(", ");
+				SpecialBuiltin spb = processSpecialBuiltins(elements, idx);	// check for special handling required for some built-ins
 				if (spb != null) {
 					// get the triple in question
 					TripleElement trel = null;
-					if (elements.get(i) instanceof TripleElement) {
-						trel = (TripleElement)elements.get(i);
+					if (elements.get(idx) instanceof TripleElement) {
+						trel = (TripleElement)elements.get(idx);
+					}
+					else if (elements.get(idx) instanceof BuiltinElement && ((BuiltinElement)elements.get(idx)).getFuncName().equals(THERE_EXISTS)) {
+						if (((BuiltinElement)elements.get(idx)).getArguments() == null || ((BuiltinElement)elements.get(idx)).getArguments().size() != 1) {
+							logger.error("Function 'thereExists' should have one and only one argument");
+						}
+						if (!(((BuiltinElement)elements.get(idx)).getArguments().get(0) instanceof VariableNode)) {
+							logger.error("Function 'thereExists' should have a variable as argument");
+						}
+						VariableNode thereExistsVar = (VariableNode) ((BuiltinElement)elements.get(idx)).getArguments().get(0);
+						if (thereExistsVar.getType() == null) {
+							logger.error("Function 'thereExists' variable must have a type");
+						}
+						BuiltinElement bi = new BuiltinElement();
+						bi.setFuncName("getInstance");
+						bi.addArgument(thereExistsVar.getType());
+						elements.set(idx, bi);
+						int restIdx = idx + 1;
+						while (restIdx < elements.size()) {
+							// these should all be TripleElement graph patterns 
+							GraphPatternElement gpe = elements.get(restIdx);
+							if (!(gpe instanceof TripleElement)) {
+								logger.error("All rule then elements after a 'thereExists' should be triple patterns");
+							}
+							TripleElement tgpe = (TripleElement) gpe;
+							if (tgpe.getSubject().equals(thereExistsVar) && tgpe.getPredicate().equals(new RDFTypeNode()) && tgpe.getObject().equals(thereExistsVar.getType())) {
+								elements.remove(restIdx);
+							}
+							else if (tgpe.getSubject().equals(thereExistsVar)) {
+								// add arguments for property and then value
+								bi.addArgument(tgpe.getPredicate());
+								bi.addArgument(tgpe.getObject());
+								elements.remove(restIdx);
+							}
+							else if (tgpe.getObject().equals(thereExistsVar)) {
+								// add arguments for subject and then property
+								bi.addArgument(tgpe.getSubject());
+								bi.addArgument(tgpe.getPredicate());
+								elements.remove(restIdx);
+							}
+							else {
+								restIdx++;
+							}
+						}
+						// we now want to process this as if it were this in the first place
+						continue;
 					}
 					else {
-						logger.error("Unhandled graph pattern element detected as special builtin: " + elements.get(i).toString());
+						logger.error("Unhandled graph pattern element detected as special builtin: " + elements.get(idx).toString());
 					}
 					
 					// translate based on type of spb
@@ -291,7 +338,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 							sb.append(createNotOnly(trel, TranslationTarget.RULE_BUILTIN));
 						}
 						else if (spb.equals(SpecialBuiltin.ONLY)) {
-							sb.append(createOnly((TripleElement)elements.get(i), TranslationTarget.RULE_BUILTIN));
+							sb.append(createOnly((TripleElement)elements.get(idx), TranslationTarget.RULE_BUILTIN));
 						}
 						else {
 							logger.error("Unhandled special builtin: " + elements.toString());
@@ -299,9 +346,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 					}
 				}
 				else {
-					sb.append(graphPatternElementToJenaRuleString(elements.get(i), rulePart));
+					sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
 				}
-				cnt++;
+				idx++;
 			}
 			return sb.toString();
 		}
@@ -387,6 +434,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 				return SpecialBuiltin.ISKNOWN;
 			}
 		}
+		else if (elements.get(index) instanceof BuiltinElement && ((BuiltinElement)elements.get(index)).getFuncName().equals(THERE_EXISTS)) {
+			return SpecialBuiltin.THEREEXISTS;
+		}
 		return null;
 	}
 	
@@ -466,12 +516,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 			sbmain.append("distinct ");
 		}
 		
-		List<String> vars = query.getVariables();
+		List<VariableNode> vars = query.getVariables();
 		List<GraphPatternElement> elements = query.getPatterns();
 		if (vars != null && vars.size() > 0) {
 			for (int i = 0; i < vars.size(); i++) {
 				if (i > 0) sbmain.append(" ");
-				sbmain.append("?" + vars.get(i));
+				sbmain.append("?" + vars.get(i).getName());
 			}
 		}
 		else {
@@ -659,6 +709,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 	private boolean translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName, String filename) throws TranslationException, IOException {
 		if (ruleList == null || ruleList.size() < 1) {
 			throw new TranslationException("No rules provided to rule translation.");
+		}
+		if (prefixes != null) {
+			prefixes.clear();    // don't keep around prefixes from another rule file generation
 		}
 		// Open file and output header and imports
 		File ruleFile = new File(filename);
@@ -1174,9 +1227,18 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 
 	private String nodeToString(Node node, TranslationTarget target) throws TranslationException {
-		if (node instanceof NamedNode) {
+		if (node instanceof ConstantNode) {
+			Literal litval = constantToLiteral((ConstantNode)node);
+			return literalValueToString(litval, target);
+		}
+		else if (node instanceof NamedNode) {
 			NodeType ntype = ((NamedNode)node).getNodeType();
-			if (ntype.equals(NodeType.VariableNode)) {
+			if (ntype == null) {
+				String msg = "Node '" + node.toFullyQualifiedString() + "' has a null node type.";
+				addError(msg);
+				logger.error(msg);
+			}
+			else if (ntype.equals(NodeType.VariableNode)) {
 				// double-check this; if a concept was declared after reference in a rule or query 
 				//	it may have been parsed as a variable but actually be a defined concept 
 				OntResource r = getTheModel().getOntResource(getModelName() + "#" + ((NamedNode)node).getName());
@@ -1227,10 +1289,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 				}
 			}
 		}
-		else if (node instanceof ConstantNode) {
-			Literal litval = constantToLiteral((ConstantNode)node);
-			return literalValueToString(litval, target);
-		}
 		else if (node instanceof Literal) {
 			Object litObj = ((Literal)node).getValue();
 			return literalValueToString(litObj, target);
@@ -1250,6 +1308,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 		if (node.getName().equals("PI")) {
 			Literal lit = new Literal();
 			lit.setValue(Math.PI);
+			lit.setOriginalText(node.getName());
+			return lit;
+		}
+		else if (node.getName().equals("e")) {
+			Literal lit = new Literal();
+			lit.setValue(Math.E);
 			lit.setOriginalText(node.getName());
 			return lit;
 		}

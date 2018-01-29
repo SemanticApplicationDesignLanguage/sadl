@@ -45,7 +45,8 @@ public class SadlPreferences {
 	public static final PreferenceKey GRAPH_RENDERER_CLASS= new PreferenceKey("graphrendererclass", "");
 	public static final PreferenceKey TABULAR_DATA_IMPORTER_CLASS= new PreferenceKey("tabulardataimporterclass", "");
 	public static final PreferenceKey CHECK_FOR_AMBIGUOUS_NAMES = new PreferenceKey("ambiguousNameCheckOn", String.valueOf(true));
-//	public static final PreferenceKey DISABLE_TYPE_CHECKING = new PreferenceKey("typeCheckingOff", String.valueOf(false));
+	public static final PreferenceKey CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN = new PreferenceKey("cardinalityCheck", String.valueOf(false));
+	public static final PreferenceKey P_USE_ARTICLES_IN_VALIDATION= new PreferenceKey("use_articles_in_validation", String.valueOf(false));
 	public static final PreferenceKey TYPE_CHECKING_WARNING_ONLY = new PreferenceKey("typeCheckingWarningOnly", String.valueOf(false));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
 	public static final PreferenceKey USE_IMPLIED_PROPERTIES_IN_TRANSLATION = new PreferenceKey("impliedPropertiesInTranslation", String.valueOf(true));
@@ -56,6 +57,7 @@ public class SadlPreferences {
 	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENTS = new PreferenceKey("graphImplicitElements", String.valueOf(false));
 	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENT_INSTANCES = new PreferenceKey("graphImplicitElementInstances", String.valueOf(false));
 	
+	public static final PreferenceKey TYPE_UNSUPPORTED_DOWNSTREAM = new PreferenceKey("TypeUnsupportedDownstream",String.valueOf(true));
 	// Don't forget to add new property to the list below
 	
 	private static final PreferenceKey[] allKeys = {
@@ -78,6 +80,7 @@ public class SadlPreferences {
 			DEEP_VALIDATION_OFF,
 			GRAPH_RENDERER_CLASS,
 			CHECK_FOR_AMBIGUOUS_NAMES,
+			CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN,
 //			DISABLE_TYPE_CHECKING,
 			TYPE_CHECKING_WARNING_ONLY,
 			IGNORE_UNITTEDQUANTITIES,
@@ -87,7 +90,8 @@ public class SadlPreferences {
 			GENERATE_METRICS_REPORT_ON_CLEAN_BUILD,
 			METRICS_QUERY_FILENAME, 
 			GRAPH_IMPLICIT_ELEMENTS,
-			GRAPH_IMPLICIT_ELEMENT_INSTANCES
+			GRAPH_IMPLICIT_ELEMENT_INSTANCES,
+			TYPE_UNSUPPORTED_DOWNSTREAM
 	};
 	
 	public static final List<PreferenceKey> preferences() {

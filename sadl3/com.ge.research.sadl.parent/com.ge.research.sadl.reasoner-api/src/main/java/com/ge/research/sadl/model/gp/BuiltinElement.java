@@ -19,6 +19,7 @@
 package com.ge.research.sadl.model.gp;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -47,6 +48,7 @@ public class BuiltinElement extends GraphPatternElement {
 		public boolean isBinaryBuiltin;
 		public boolean isUnaryBuiltin;
 		private String[] tokens;
+		
 		private BuiltinType setBooleanBuiltin(boolean isBooleanBuiltin) {
 			this.isBooleanBuiltin = isBooleanBuiltin;
 			return this;
@@ -145,10 +147,6 @@ public class BuiltinElement extends GraphPatternElement {
 			}
 		}
 		sb.append(")");
-		if (getNext() != null) {
-			sb.append(" . ");
-			sb.append(getNext().toString());
-		}
 		return sb.toString();
 	}
 
@@ -175,28 +173,81 @@ public class BuiltinElement extends GraphPatternElement {
 					sb.append(((NamedNode) arg).toFullyQualifiedString());
 				}
 				else if (arg instanceof ProxyNode) {
-					Object pfn = ((ProxyNode)arg).getProxyFor();
-					if (pfn instanceof GraphPatternElement) {
-						sb.append(((GraphPatternElement)pfn).toFullyQualifiedString());
-					}
-					else {
-						sb.append(arg.toString());
-					}
+					sb.append(arg.toFullyQualifiedString());
 				}
 				else{
-					sb.append(arg.toString());
+					sb.append(arg.toFullyQualifiedString());
 				}
 			}
 		}
 		sb.append(")");
-		if (getNext() != null) {
-			sb.append(" . ");
-			sb.append(getNext().toFullyQualifiedString());
-		}
 		return sb.toString();
 	}
     
-    public void setFuncName(String name) {
+	@Override
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getFuncName());
+		if (getLeftImpliedPropertyUsed() != null || getRightImpliedPropertyUsed() != null || getExpandedPropertiesToBeUsed() != null) {
+			sb.append("(");
+			boolean needComma = false;
+			if (getLeftImpliedPropertyUsed() != null) {
+				sb.append("leftImpliedProperty ");
+				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			if (getRightImpliedPropertyUsed() != null) {
+				if (needComma) sb.append(",");
+				sb.append("rightImpliedProperty ");
+				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			if (getExpandedPropertiesToBeUsed() != null) {
+				if (needComma) sb.append(",");
+				needComma = false;
+				sb.append("expandedProperties [");
+				Iterator<NamedNode> epitr = getExpandedPropertiesToBeUsed().iterator();
+				while (epitr.hasNext()) {
+					if (needComma) sb.append(",");
+					sb.append(epitr.next().toDescriptiveString());
+					needComma = true;
+				}
+				sb.append("]");
+			}
+			sb.append(")");
+		}
+		sb.append("(");
+		for (int i = 0; arguments != null && i < arguments.size(); i++) {
+			if (i > 0) {
+				sb.append(",");
+			}
+			Node arg = arguments.get(i);
+			if (arg instanceof ProxyNode &&
+					(((ProxyNode)arg).getProxyFor().equals(this) ||
+							(((ProxyNode)arg).getProxyFor() instanceof List<?> &&
+									((List<?>)((ProxyNode)arg).getProxyFor()).get(0).equals(this)))) {
+				sb.append("bi arg self-referencing!");
+			}
+			else {
+				if (arg == null){
+					sb.append("null");
+				}
+				else if (arg instanceof NamedNode){
+					sb.append(((NamedNode) arg).toDescriptiveString());
+				}
+				else if (arg instanceof ProxyNode) {
+					sb.append(arg.toDescriptiveString());
+				}
+				else{
+					sb.append(arg.toDescriptiveString());
+				}
+			}
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+
+	public void setFuncName(String name) {
 		this.funcName = name;
 		this.funcType = BuiltinType.getType(name);
 		if (funcType.isBooleanBuiltin || funcType.isUnaryBuiltin) {
@@ -212,9 +263,9 @@ public class BuiltinElement extends GraphPatternElement {
 			arguments = new ArrayList<Node>();
 		}
 		arguments.add(argument);
-		if (argument instanceof VariableNode) {
-			((VariableNode)argument).incrementReferences();
-		}
+//		if (argument instanceof VariableNode) {
+//			((VariableNode)argument).incrementReferences();
+//		}
 		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
 			logger.warn("Added too many arguments to {}", this);
 		}
@@ -234,9 +285,9 @@ public class BuiltinElement extends GraphPatternElement {
 				arguments.add(argument);
 			}
 		}
-		if (argument instanceof VariableNode) {
-			((VariableNode)argument).incrementReferences();
-		}
+//		if (argument instanceof VariableNode) {
+//			((VariableNode)argument).incrementReferences();
+//		}
 		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
 			logger.warn("Added too many arguments to {}", this);
 		}
@@ -265,9 +316,9 @@ public class BuiltinElement extends GraphPatternElement {
 		else {
 			arguments.add(argument);
 		}
-		if (argument instanceof VariableNode) {
-			((VariableNode)argument).incrementReferences();
-		}
+//		if (argument instanceof VariableNode) {
+//			((VariableNode)argument).incrementReferences();
+//		}
 		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
 			logger.warn("Added too many (missing) arguments to {}", this);
 		}
@@ -288,4 +339,5 @@ public class BuiltinElement extends GraphPatternElement {
 	public void setFuncUri(String funcUri) {
 		this.funcUri = funcUri;
 	}
+
 }

@@ -22,6 +22,7 @@ import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
 
+import com.ge.research.sadl.utils.SadlASTUtils;
 import com.google.inject.Inject;
 
 public class ErrorAddingLinkingService extends DefaultLinkingService {
@@ -46,6 +47,9 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 		if (crossRefString != null && !crossRefString.equals("")) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("before getLinkedObjects: node: '" + crossRefString + "'");
+			}
+			if (SadlASTUtils.isUnit(context)) {
+				return Collections.emptyList();
 			}
 			final IScope scope = getScope(context, ref);
 			QualifiedName qualifiedLinkName =  qualifiedNameConverter.toQualifiedName(crossRefString);

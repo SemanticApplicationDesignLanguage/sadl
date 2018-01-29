@@ -1,0 +1,125 @@
+<title>Variables and Type Checking</title>
+<h1>Variables and Type Checking</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/15/2017<!--webbot bot="Timestamp" endspan i-checksum="12584" -->. 
+Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
+
+<h4>Table of Contents</h4>
+
+<ul>
+  <li><a href="#Introduction">Introduction</a></li>
+  <li><a href="#VariablesSADL3">Variables in SADL3</a></li>
+  <li><a href="#CRules">Implicit Variables (CRules)</a></li>
+</ul>
+<h2><a name="Introduction">Introduction</a></h2>
+<p>A variable in SADL is a name which is not defined in the ontology but is used 
+in expressions (in triple patterns or as built-in function arguments) as 
+a uniquely identified placeholder. (See
+<a href="http://sadl.sourceforge.net/sadl3/FoundationalConcepts.html#Graphs">
+Graph Patterns</a>.) Variables tie together multiple triple patterns and/or 
+built-in function patterns to allow complex queries, rules, tests, etc., to be 
+constructed. Note that SADL variables do not exist in the semantic model, the 
+declaration of what exists. Variables only exist in expressions in queries, 
+rules, etc. To illustrate, consider these statements in context.</p>
+<ul>
+  <li>In the ontology, &quot;X is a Person&quot; means that &quot;X&quot; is an instance of the 
+  class &quot;Person&quot;.</li>
+  <li>In a query, &quot;X is a Person&quot;, as in &quot;select X where X is a Person&quot; means 
+  find all possible values for the variable &quot;X&quot; such that &quot;X is a Person&quot; is 
+  true.</li>
+</ul>
+<h2><a name="VariablesSADL3">Variables in SADL 3</a></h2>
+<p>Model processing in SADL 3 makes much greater use of the functionality of 
+Xtext. One such use of Xtext is in cleaner, simpler handling of variables. 
+Variables in SADL are local in scope--a variable is only defined within the 
+context of a rule, query, or test. If another rule, query, or test in the same 
+SADL file has a variable of the same name, it is a different, independent 
+variable. Xtext scoping differentiates between the declaration of a name, 
+including a variable, and references to that name. This enables the hyperlinking of &quot;Open Declaration&quot; and &quot;Find References&quot; to easily go from 
+references to declaration and vice versa. Xtext also can identify the type of a 
+name, e.g., class, property, variable, necessary for semantic coloring to work. Variables 
+pink bold. Therefore, Xtext scoping can be leveraged in the model processor to 
+create a SADL VariableNode (class com.ge.research.sadl.model.gp.VariableNode) 
+when the declaring parse tree element is processed. The newly created VariableNode is given, using the Xtext information, a type. Note that no type 
+checking is needed for a variable declaration since the declaration defines the 
+type.</p>
+<p>In addition to a variable's declaration and references, we introduce the 
+additional concept of a variable's definition. Suppose that &quot;X&quot; is a variable 
+and its declaration is either of the following forms.</p>
+<ol>
+  <li>X is a Person with age 23</li>
+  <li>a Person with age 23 is X</li>
+</ol>
+<p>In either case, the variable &quot;X&quot; is defined to be &quot;a Person with age 23&quot;. In 
+some extension grammars and/or some target translations instances of &quot;X&quot; may be 
+replaced by the definition. For this reason the model processor records such 
+definitions in the VariableNode.</p>
+<p>Information stored in a VariableNode comes from multiple sources and must be 
+maintained in such a way that no information is lost. A variable may be declared 
+in expressions in several ways.</p>
+<ol>
+  <li>In a declaration without any additional information, e.g., &quot;x is a 
+  Person&quot;. This results in creation of a VariableNode instance during 
+  BinaryOperation &quot;is&quot; processing, the variable name on the left and a 
+  Declaration on the right. Here the declaration provides the type of the 
+  variable, e.g., &quot;Person&quot; and the SADL expression provides a definition, &quot;rdf(x, 
+  rdf:type, Person)&quot;.</li>
+  <li>In a declaration with additional information, e.g., &quot;x is a Person with 
+  age 23&quot;. In this case the type of the variable is &quot;Person&quot; but the definition 
+  is more complex: &quot;and(rdf(x, rdf:type, Person), (x, age, 23))&quot;.</li>
+  <li>In a declaration in which the left and right sides of statements such as 
+  those in 1 and 2 are swapped, e.g.,<ul>
+    <li>a Person is x</li>
+    <li>a Person with age 23 is x</li>
+  </ul>
+  </li>
+  <li>By use in a SubjHasProp graph pattern as the subject or as an object, 
+  e.g., &quot;x has age y&quot;. If and only if &quot;x&quot; is not already declared then this is 
+  the declaration of &quot;x&quot; and the type of the VariableNode is obtained from the 
+  ontology, specifically from the domain of &quot;age&quot; although extension languages 
+  could provide additional constraining information about the type of &quot;x&quot;. 
+  Likewise, if and only if &quot;y&quot; has not already been declared, this triple 
+  pattern is the declaration of &quot;y&quot; and the type of the VariableNode is obtained 
+  from the ontology. In this case it could, if &quot;x&quot; was declared elsewhere, come 
+  from a property restriction for property &quot;age&quot; on the class to which &quot;x&quot; may 
+  be bound. At a minimum, the type of &quot;y&quot; might be obtained from the range of 
+  &quot;age&quot;. <b><font color="#FF0000">In any of these cases, is there a definition? 
+  &quot;is(x,rdf(x, age, y))&quot;? &quot;is(y,rdf(x,age,y))&quot;?&nbsp; I think not--no definition 
+  in this case as the variables are simply used and from their usage we get a 
+  type. TBD.</font></b></li>
+  <li>By use in a PropOfSubject graph pattern, e.g., &quot;age of x is y&quot;. In this 
+  case, if and only if &quot;x&quot; is not already declared, the type of &quot;x&quot; is the 
+  domain of &quot;age&quot; and the Variable Node for &quot;x&quot; is created while processing the 
+  PropOfSubject expression. (Again, extension languages might provide local 
+  restrictions that would narrow the type of &quot;x&quot;.) If and only if &quot;y&quot; is not 
+  already declared elsewhere, this statement is the declaration of &quot;y&quot; and the 
+  type of the VariableNode is obtained from the ontology, either from local 
+  restrictions of an extension language, from property restrictions on the class 
+  which is the type of &quot;x&quot;, or from the range of &quot;age&quot;. In this case the 
+  VariableNode for &quot;y&quot; is created while processing the BinaryOperation &quot;is&quot; with 
+  the PropOfSubject on the left and the variable name on the right. <b>
+  <font color="#FF0000">In any of these cases, is there a definition? &quot;is(x,rdf(x, 
+  age, y))&quot;?&nbsp; &quot;is(y,rdf(x,age,y))&quot;?&nbsp; I think not--no definition in 
+  this case as the variables are simply used and from their usage we get a type. 
+  TBD.</font></b></li>
+</ol>
+<p>Translation to Intermediate Form may capture information that seems redundant 
+with VariableNode declaration but is not. If the variable declaration in the 
+SADL model includes a declaration, as in 1, 2, and 3 above, then that definition 
+is stored in the VariableNode for possible use by downstream processing, e.g., 
+for variable substitution. However, it is also stored as triple pattern(s) and 
+functional (built-in) pattern(s) in the Intermediate Form. This is necessary to 
+maintain the order of patterns in the original SADL representation. The model 
+author may have explicitly placed the patterns in a particular order and while 
+an optimizing translator may change that order, the job of the Intermediate Form 
+is to preserve all information, including order. </p>
+<h2><a name="CRules">Implicit Variables (CRules)</a></h2>
+<p>It is possible to use definite and indefinite articles with class names to 
+tie graph patterns together instead of using explicit variables in SADL rules, 
+queries, etc. This is the same way that English makes connections between 
+phrases and sentences. This approach to writing graph patterns is sometimes 
+referred to as Concept Rules or CRules.</p>
+<p>In the Intermediate Form, a triple for the type of the implicit variable is 
+not included because this information is already in the VariableNode and the 
+translator from Intermediate Form to the final representation can add the type 
+triple where it deems appropriate.</p>

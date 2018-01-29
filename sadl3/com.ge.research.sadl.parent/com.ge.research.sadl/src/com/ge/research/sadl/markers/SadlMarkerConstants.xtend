@@ -22,7 +22,7 @@ package com.ge.research.sadl.markers
  * 
  * @author akos.kitta
  */
-abstract class SadlMarkerConstants {
+public abstract class SadlMarkerConstants {
 
 	/**
 	 * File extension of the SADL error XML.

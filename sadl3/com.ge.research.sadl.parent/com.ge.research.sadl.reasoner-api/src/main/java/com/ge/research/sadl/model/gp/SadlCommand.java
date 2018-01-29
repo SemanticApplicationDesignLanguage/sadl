@@ -1,6 +1,6 @@
 package com.ge.research.sadl.model.gp;
 
-public class SadlCommand {
+abstract public class SadlCommand {
 	private int lineNo;
 	private int length;
 	private int offset;

@@ -163,6 +163,25 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN.getId(), "Check for cardinality of property on specific domain",
+				getFieldEditorParent()) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+
+		});
+		addField(new BooleanFieldEditor(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation and translation", 
+				getFieldEditorParent()) {
+			
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+
+		});
+
 		// addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(),
 				"Type checking issues as warning only", getFieldEditorParent()) {
@@ -206,6 +225,13 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.TYPE_UNSUPPORTED_DOWNSTREAM.getId(), "Show type unsupported downstream warnings", 
+				getFieldEditorParent()){
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
 		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ",
 				getFieldEditorParent()) {
 
@@ -215,19 +241,21 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
-		
+		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ",
+				getFieldEditorParent()) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), getTextControl().getText());
+			}
+
+		});
+
 		//Composite for Graphing Options
 		Group booleanFieldGroup = new Group(getFieldEditorParent(), SWT.NONE);
 		booleanFieldGroup.setLayout(new FillLayout(SWT.VERTICAL));
 		booleanFieldGroup.setText("Graphing Options");
 		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), "&Include Implicit Elements", 
-				booleanFieldGroup){
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-		});
-		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), "&Include Instances of Implicit Elements", 
 				booleanFieldGroup){
 			@Override
 			protected void doStore() {

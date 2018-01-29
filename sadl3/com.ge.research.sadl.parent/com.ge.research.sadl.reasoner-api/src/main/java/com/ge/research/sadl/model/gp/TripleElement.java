@@ -18,6 +18,8 @@
 
 package com.ge.research.sadl.model.gp;
 
+import java.util.Iterator;
+
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 
 public class TripleElement extends GraphPatternElement {
@@ -44,9 +46,9 @@ public class TripleElement extends GraphPatternElement {
 	
 	public void setSubject(Node subject) {
 		this.subject = subject;
-		if (subject instanceof VariableNode) {
-			((VariableNode)subject).incrementReferences();
-		}
+//		if (subject instanceof VariableNode) {
+//			((VariableNode)subject).incrementReferences();
+//		}
 	}
 	public Node getSubject() {
 		return subject;
@@ -107,6 +109,54 @@ public class TripleElement extends GraphPatternElement {
 		if (getNext() != null) {
 			sb.append(" . ");
 			sb.append(getNext().toFullyQualifiedString());
+		}
+		if (!getModifierType().equals(TripleModifierType.None)) {
+			sb.insert(0, "(");
+			sb.insert(0, getModifierType().toString());
+			sb.append(")");
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+	
+	@Override
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder("rdf(");
+		if (getLeftImpliedPropertyUsed() != null || getRightImpliedPropertyUsed() != null || getExpandedPropertiesToBeUsed() != null) {
+			sb.append("(");
+			boolean needComma = false;
+			if (getLeftImpliedPropertyUsed() != null) {
+				sb.append("leftImpliedProperty ");
+				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			else if (getRightImpliedPropertyUsed() != null) { // only left or right should exist (at most)
+				sb.append("rightImpliedProperty ");
+				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
+				needComma = true;
+			}
+			if (getExpandedPropertiesToBeUsed() != null) {
+				if (needComma) sb.append(",");
+				needComma = false;
+				sb.append("expandedProperties [");
+				Iterator<NamedNode> epitr = getExpandedPropertiesToBeUsed().iterator();
+				while (epitr.hasNext()) {
+					if (needComma) sb.append(",");
+					sb.append(epitr.next().toDescriptiveString());
+					needComma = true;
+				}
+				sb.append("]");
+			}
+			sb.append(")");
+		}
+		sb.append(subject != null ? subject.toDescriptiveString() : "null");
+		sb.append(", ");
+		sb.append(predicate != null ? predicate.toDescriptiveString() : "null");
+		sb.append(", ");
+		sb.append(object != null ? object.toDescriptiveString() : "null");
+		if (getNext() != null) {
+			sb.append(" . ");
+			sb.append(getNext().toDescriptiveString());
 		}
 		if (!getModifierType().equals(TripleModifierType.None)) {
 			sb.insert(0, "(");

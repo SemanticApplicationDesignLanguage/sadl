@@ -116,7 +116,6 @@ class ValidationTest {
 	@Test def void testLinkingAmbiguousElementsBigger() {
 		'''
 			uri "http://assert/Properties" alias Properties.
-			//import "http://sadl.org/sadlimplicitmodel".
 			reference_class is a type of annotation.
 			reference_property is a type of annotation.
 			reference_range is a type of annotation.

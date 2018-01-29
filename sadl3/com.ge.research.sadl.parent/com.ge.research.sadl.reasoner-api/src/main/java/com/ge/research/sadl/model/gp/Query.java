@@ -39,7 +39,7 @@ import java.util.List;
 public class Query extends SadlCommand {
 	private String fqName;
 	private String keyword = null;
-	private List<String> variables = null;
+	private List<VariableNode> variables = null;
 	private List<GraphPatternElement> patterns = null;
 	private String sparqlQueryString = null;
 	private List<OrderingPair> orderBy = null;
@@ -75,11 +75,34 @@ public class Query extends SadlCommand {
 	public Query() {
 	}
 	
-	public void setVariables(List<String> variables) {
+	public void setVariables(List<VariableNode> variables) {
 		this.variables = variables;
 	}
-	public List<String> getVariables() {
+	
+	public boolean addVariable(VariableNode var) {
+		if (variables == null) {
+			variables = new ArrayList<VariableNode>();
+		}
+		if (!variables.contains(var)) {
+			variables.add(var);
+			return true;
+		}
+		return false;
+	}
+	
+	public List<VariableNode> getVariables() {
 		return variables;
+	}
+	
+	public VariableNode getVariable(String name) {
+		if (variables != null) {
+			for (int i = 0; i < variables.size(); i++) {
+				if (variables.get(i).toFullyQualifiedString().equals(name)) {
+					return variables.get(i);
+				}
+			}
+		}
+		return null;
 	}
 	
 	public void setPatterns(List<GraphPatternElement> _pattern) {

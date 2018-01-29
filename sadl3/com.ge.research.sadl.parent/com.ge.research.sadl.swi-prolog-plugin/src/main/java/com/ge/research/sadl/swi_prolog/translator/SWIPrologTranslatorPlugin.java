@@ -342,7 +342,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		setTheModel(model);
 		
 		StringBuilder sb = new StringBuilder();
-		List<String> vars = query.getVariables();
+		List<VariableNode> vars = query.getVariables();
 		List<GraphPatternElement> patterns = query.getPatterns();
 		String test1 = graphPatternElementsToPrologRuleString(patterns, RulePart.NOT_A_RULE);
 		if (patterns != null) {
@@ -358,10 +358,11 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		}
 
 		if (vars != null && vars.size() > 0) {
+			List<String> prologVars = new ArrayList<String>();
 			StringBuilder sb2 = new StringBuilder("select ");
 			for (int i = 0; i < vars.size(); i++) {
-				vars.set(i, this.sadlVariableToPrologVariable(vars.get(i)));
-				sb2.append(vars.get(i));
+				prologVars.add(sadlVariableToPrologVariable(vars.get(i).getName()));
+				sb2.append(prologVars.get(i));
 				sb2.append(" ");
 			}
 			sb2.append("where ");

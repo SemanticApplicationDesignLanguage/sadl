@@ -7,6 +7,7 @@ com.ge.research.sadl.jena.reasoner.builtin.Average
 com.ge.research.sadl.jena.reasoner.builtin.Ceiling
 com.ge.research.sadl.jena.reasoner.builtin.Cos
 com.ge.research.sadl.jena.reasoner.builtin.Floor
+com.ge.research.sadl.jena.reasoner.builtin.GetInstance
 com.ge.research.sadl.jena.reasoner.builtin.GreaterThan
 com.ge.research.sadl.jena.reasoner.builtin.LessThan
 com.ge.research.sadl.jena.reasoner.builtin.Localname

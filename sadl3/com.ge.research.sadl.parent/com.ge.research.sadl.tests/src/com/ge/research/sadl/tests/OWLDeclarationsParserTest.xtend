@@ -115,7 +115,10 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 		'''.assertNoErrors
 	}
 	
-	@Ignore
+	@Ignore ("Not implemented in grammar but would be desirable? Should consider a set of multiple instance statements, e.g.,
+				{Tarzan,Jane} are instances of Person.
+				{Tarzan,Jane} have child Mogli.
+				{Tarzan,Jane} have child {Mogli,SomeoneElse}.")
 	@Test def void testMultipleInstances() {
 		'''
 			{John, James, Susan} are instances of Actor.
@@ -147,9 +150,9 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 			
 			SomeClass is a top-level class.
 			SomeClass2 is a type of SomeClass.
-			SomeClass3 is a type of {SomeClass, SomeClass2}.
+			SomeClass3 is a type of {SomeClass or SomeClass2}.
 			{^A,B,C} are top-level classes.
-			{A1,B1,C1} are types of {SomeClass, ^A}.
+			{A1,B1,C1} are types of {SomeClass or ^A}.
 		'''.assertNoErrors
 	}
 	
@@ -159,13 +162,13 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 			
 			SomeClass is a top-level class.
 			SomeClass2 is a type of SomeClass.
-			SomeClass3 is a type of {SomeClass, SomeClass2}.		// It would probably be a good idea to remove comma-separated and 
+			SomeClass3 is a type of {SomeClass or SomeClass2}.		// It would probably be a good idea to remove comma-separated and 
 																	//  require explict 'and' or 'or' in intersection or union unnamed
 																	//  classes. The old grammar allowed ',' to be used for 'or'
 																	//  This is a different case from a list, such as a list of
 																	//  instances in the 'must be one of {int1, inst2, ...}'
 			{^A,B,C} are top-level classes.
-			{A1,B1,C1} are types of {SomeClass, ^A}.
+			{A1,B1,C1} are types of {SomeClass or ^A}.
 		'''.assertNoErrors
 	}
 	
@@ -224,7 +227,7 @@ class OWLDeclarationsParserTest extends AbstractSADLParsingTest {
 				described by p1 only with values of type SomeClass,
 				described by p2 always has value 42,
 				described by p3 with at least 42 values of type string,
-				described by p4 with at most 42 values each of types {string, int},
+				described by p4 with at most 42 values of type {string or int},
 				described by p4 with exactly one value.
 				
 		'''.assertNoErrors

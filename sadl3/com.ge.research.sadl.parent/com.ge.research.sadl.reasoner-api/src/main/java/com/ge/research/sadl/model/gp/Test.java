@@ -42,8 +42,8 @@ public class Test extends SadlCommand {
 	private Object rhs = null;
 	private String compName = null;
 	private ComparisonType compType = null;
-	private List<String> lhsVariables = null;
-	private List<String> rhsVariables = null;
+	private List<VariableNode> lhsVariables = null;
+	private List<VariableNode> rhsVariables = null;
 	
 	public static enum ComparisonType {Eq, Neq, IsNot, IsOnly, IsNotOnly, LT, LTE, GT, GTE;		
 	private String[] tokens;
@@ -105,17 +105,17 @@ public class Test extends SadlCommand {
 		return rhs;
 	}
 	
-	public void setLhsVariables(List<String> variables) {
+	public void setLhsVariables(List<VariableNode> variables) {
 		this.lhsVariables = variables;
 	}
-	public List<String> getLhsVariables() {
+	public List<VariableNode> getLhsVariables() {
 		return lhsVariables;
 	}
 	
-	public void setRhsVariables(List<String> variables) {
+	public void setRhsVariables(List<VariableNode> variables) {
 		this.rhsVariables = variables;
 	}
-	public List<String> getRhsVariables() {
+	public List<VariableNode> getRhsVariables() {
 		return rhsVariables;
 	}
 	

@@ -52,8 +52,8 @@ public class ConceptName extends ConceptIdentifier {
 	 * throughout the SADL code
 	 */
 	public enum ConceptType {
-		ANNOTATIONPROPERTY, RDFPROPERTY, DATATYPEPROPERTY, OBJECTPROPERTY, ONTCLASS, INDIVIDUAL, MODELNAME, 
-		RDFDATATYPE, VARIABLE, CONCEPT_NOT_FOUND_IN_MODEL, FUNCTION_DEFN
+		ANNOTATIONPROPERTY, RDFPROPERTY, DATATYPEPROPERTY, OBJECTPROPERTY, ONTCLASS, ONTCLASSLIST, INDIVIDUAL, MODELNAME, 
+		RDFDATATYPE, RDFDATATYPELIST, VARIABLE, CONCEPT_NOT_FOUND_IN_MODEL, FUNCTION_DEFN
 	}
 
 	public enum RangeValueType {CLASS_OR_DT, LIST}
@@ -239,10 +239,9 @@ public class ConceptName extends ConceptIdentifier {
 	}
 
 	public RangeValueType getRangeValueType() {
-		return rangeValueType;
-	}
-
-	public void setRangeValueType(RangeValueType rangeValueType) {
-		this.rangeValueType = rangeValueType;
+		if (type.equals(ConceptType.ONTCLASSLIST) || type.equals(ConceptType.RDFDATATYPELIST))
+			return RangeValueType.LIST;
+		else
+			return RangeValueType.CLASS_OR_DT;
 	}
 }

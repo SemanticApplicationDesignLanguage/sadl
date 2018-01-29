@@ -9,7 +9,7 @@
 package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.scoping.TestScopeProvider
-import com.ge.research.sadl.tests.AbstractSADLParsingTest
+import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.google.common.base.Stopwatch
 import com.google.inject.Inject
 import java.util.concurrent.TimeUnit
@@ -21,8 +21,10 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 
+import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
+
 @RunWith(XtextRunner)
-class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLParsingTest {
+class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLModelProcessorTest {
 	
 	@Inject ValidationTestHelper validationTestHelper
 	
@@ -103,9 +105,7 @@ class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLParsingTest {
 			 
 
 		'''.sadl;
-		TestScopeProvider.registerResource(sadlModel3, true)
-		val issues3 = validationTestHelper.validate(sadlModel3)
-		assertTrue(issues3.nullOrEmpty)
+		validationTestHelper.validate(sadlModel3).assertHasNoIssues
 	}
 
 	@Test
@@ -210,13 +210,8 @@ class SadlModelProcessorAmbiguousNamesTest extends AbstractSADLParsingTest {
 		'''.sadl
 		sadlModel1.assertNoErrors
 		sadlModel2.assertNoErrors
-		sadlModel3.assertNoErrors
-		sadlModel4.assertNoErrors
-		val issues3 = validationTestHelper.validate(sadlModel3)
-		assertNotNull(issues3)
-		for (issue: issues3) {
-			System.err.println(issue.toString)
-		}
+		validationTestHelper.validate(sadlModel3).assertHasIssues(12)
+		validationTestHelper.validate(sadlModel4).assertHasIssues(12)
 	}
 	
 }

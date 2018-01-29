@@ -17,16 +17,19 @@
  ***********************************************************************/
 package com.ge.research.sadl.validation
 
+import com.ge.research.sadl.processing.IModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.service.OperationCanceledError
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.IAcceptor
+import org.eclipse.xtext.util.internal.EmfAdaptable
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
 import org.eclipse.xtext.validation.ResourceValidatorImpl
@@ -52,11 +55,19 @@ class ResourceValidator extends ResourceValidatorImpl {
 	}
 
 	override protected validate(Resource resource, CheckMode mode, CancelIndicator monitor, IAcceptor<Issue> acceptor) {
+		ModelProcessorAdapter.removeFromEmfObject(resource);
 		super.validate(resource, mode, monitor, acceptor);
 		val processor = processorProvider.getProcessor(resource);
 		val delegateAcceptor = new ValidationAcceptorImpl(acceptor);
 		val context = new ProcessorContext(monitor, preferenceProvider.getPreferenceValues(resource));
 		processor.onValidate(resource, delegateAcceptor, mode, context);
+		new ModelProcessorAdapter(processor).attachToEmfObject(resource);
 	}
 
+}
+
+@Data
+@EmfAdaptable
+class ModelProcessorAdapter {
+	val IModelProcessor processor;
 }
