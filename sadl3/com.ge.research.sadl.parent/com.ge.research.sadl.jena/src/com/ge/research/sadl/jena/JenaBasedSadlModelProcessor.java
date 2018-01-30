@@ -3401,7 +3401,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		BuiltinType optype = BuiltinType.getType(op);
-		Object lobj;
+		Object lobj = null;
 		if (lexpr != null) {
 			lobj = applyPulledUpOperations(processExpression(lexpr));
 		} else {
@@ -3421,6 +3421,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 
+		
+		if(lobj != null && robj !=null ) 
+		{	if(lobj instanceof TripleElement && robj instanceof TripleElement) {
+				boolean flag = false;
+				TripleElement tr = (TripleElement)lobj;
+				TripleElement tl = (TripleElement)robj;
+				Node trnode = tr.getObject();
+				Node tlnode = tr.getObject();
+				if(trnode!= null && tlnode !=null) {
+				OntClass subclassl = theJenaModel.getOntClass((trnode).toFullyQualifiedString());
+				OntClass subclassr = theJenaModel.getOntClass((tlnode).toFullyQualifiedString());
+				OntResource suprclass = theJenaModel.getOntResource(SadlConstants.SADL_IMPLICIT_MODEL_EVENT_URI);
+				if(subclassl != null && subclassr != null) {
+			    try {
+					if (SadlUtils.classIsSubclassOf(subclassl, suprclass, true, null) && SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)) {
+					    
+					    try {
+							if (SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)){
+							  flag = true;
+							}
+						} catch (CircularDependencyException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				} catch (CircularDependencyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			    if(flag == true && isConjunction(op)){
+			    	addError(SadlErrorMessages.INVALID_CONJUNCTION.toString(), container);    	
+			    }
+			}
+		 }	
+		}
+	  }
+			
 		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
 			// If we're doing an assignment, we can simplify the pattern.
 			Node assignedNode = null;
@@ -3450,6 +3487,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					&& isSparqlQuery(((com.ge.research.sadl.model.gp.Literal) lobj).toString())))
 					&& !(robj instanceof KnownNode)) {
 				if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
+	
 					if (lobj instanceof TripleElement) {
 						if (((TripleElement) lobj).getObject() == null) {
 							((TripleElement) lobj).setObject((com.ge.research.sadl.model.gp.Literal) robj);
