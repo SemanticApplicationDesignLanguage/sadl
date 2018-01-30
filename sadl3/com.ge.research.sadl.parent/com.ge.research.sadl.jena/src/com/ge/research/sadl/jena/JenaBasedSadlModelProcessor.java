@@ -5401,6 +5401,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		if (result instanceof GraphPatternElement) {
+			List<NamedNode> list = ((GraphPatternElement) result).getExpandedPropertiesToBeUsed();
 			return (GraphPatternElement) result;
 		} else if (result instanceof Query) {
 			return result;

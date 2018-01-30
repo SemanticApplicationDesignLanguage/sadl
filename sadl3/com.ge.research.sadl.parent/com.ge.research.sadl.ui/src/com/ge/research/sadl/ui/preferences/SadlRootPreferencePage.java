@@ -225,13 +225,6 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
-		addField(new BooleanFieldEditor(SadlPreferences.TYPE_UNSUPPORTED_DOWNSTREAM.getId(), "Show type unsupported downstream warnings", 
-				getFieldEditorParent()){
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-		});
 		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ",
 				getFieldEditorParent()) {
 
