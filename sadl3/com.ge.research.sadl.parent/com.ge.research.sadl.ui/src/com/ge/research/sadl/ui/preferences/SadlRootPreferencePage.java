@@ -241,16 +241,6 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
-		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ",
-				getFieldEditorParent()) {
-
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), getTextControl().getText());
-			}
-
-		});
-
 		//Composite for Graphing Options
 		Group booleanFieldGroup = new Group(getFieldEditorParent(), SWT.NONE);
 		booleanFieldGroup.setLayout(new FillLayout(SWT.VERTICAL));
