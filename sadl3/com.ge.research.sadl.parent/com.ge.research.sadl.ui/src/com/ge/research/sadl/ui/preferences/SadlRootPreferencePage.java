@@ -154,6 +154,13 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), "&Include Implicit Elements in Graph", 
+				getFieldEditorParent()){
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
 		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names",
 				getFieldEditorParent()) {
 
@@ -240,17 +247,6 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				getPreferenceStore().putValue(getPreferenceName(), getTextControl().getText());
 			}
 
-		});
-		//Composite for Graphing Options
-		Group booleanFieldGroup = new Group(getFieldEditorParent(), SWT.NONE);
-		booleanFieldGroup.setLayout(new FillLayout(SWT.VERTICAL));
-		booleanFieldGroup.setText("Graphing Options");
-		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), "&Include Implicit Elements", 
-				booleanFieldGroup){
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
 		});
 	}
 	
