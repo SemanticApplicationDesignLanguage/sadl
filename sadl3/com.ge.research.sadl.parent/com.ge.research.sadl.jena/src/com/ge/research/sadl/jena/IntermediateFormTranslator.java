@@ -917,7 +917,60 @@ public class IntermediateFormTranslator {
 			} 		
 		}
 		removeDuplicateElements(rule);
+		rule = addMissingTriplePatterns(rule);
 		return rule;
+	}
+
+	private Rule addMissingTriplePatterns(Rule rule) {
+		// Make sure there aren't any missing triples to connect nodes and edges together
+		List<NamedNode> namedNodeList = getNamedNodeList(null, rule.getGivens());
+		namedNodeList = getNamedNodeList(namedNodeList, rule.getIfs());
+		namedNodeList = getNamedNodeList(namedNodeList, rule.getThens());
+		// for example, given rule: "then ^(spfc:radius,2,v0) and *(PI,v0,v1) and is(spfc:area,v1)."
+		//	we need to generate: "if rdf(v2, spfc:radius,v3), ^(v3,2,v0),*(PI,v0,v1) then rdf(v2,spfc:area, v1)"
+		return null;
+	}
+
+	private List<NamedNode> getNamedNodeList(List<NamedNode> found, List<GraphPatternElement> lst) {
+		if (lst != null) {
+			for (int i = 0; i < lst.size(); i++) {
+				found = getNamedNodeList(found, lst.get(i));
+			}
+		}
+		return found;
+	}
+
+	private List<NamedNode> getNamedNodeList(List<NamedNode> found, GraphPatternElement gpe) {
+		if (gpe instanceof TripleElement) {
+			found = addNamedNode(found, ((TripleElement)gpe).getSubject());
+			found = addNamedNode(found, ((TripleElement)gpe).getObject());
+		}
+		else if (gpe instanceof BuiltinElement) {
+			if (((BuiltinElement)gpe).getArguments() != null) {
+				for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
+					found = addNamedNode(found, ((BuiltinElement)gpe).getArguments().get(i));
+				}
+			}
+		}
+		else if (gpe instanceof Junction) {
+			Object lhs = ((Junction)gpe).getLhs();
+			if (lhs instanceof Node) {
+				found = addNamedNode(found, (Node) lhs);
+			}
+			Object rhs = ((Junction)gpe).getRhs();
+			if (rhs instanceof Node) {
+				found = addNamedNode(found, (Node) rhs);
+			}
+		}
+		return found;
+	}
+
+	private List<NamedNode> addNamedNode(List<NamedNode> found, Node node) {
+		if (node instanceof NamedNode && !(node instanceof VariableNode)) {
+			if (found == null) found = new ArrayList<NamedNode>();
+			found.add((NamedNode)node);
+		}
+		return found;
 	}
 
 	private List<GraphPatternElement> decorateCRuleVariables(List<GraphPatternElement> gpes, boolean isRuleThen) {

@@ -93,6 +93,7 @@ import com.ge.research.sadl.sADL.impl.ExternalEquationStatementImpl;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
@@ -107,6 +108,7 @@ import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
@@ -1020,9 +1022,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
-//		if (expressionsValidated != null && expressionsValidated.containsKey(expression)) {
-//			return expressionsValidated.get(expression);
-//		}
+		if (expressionsValidated != null && expressionsValidated.containsKey(expression)) {
+			return expressionsValidated.get(expression);
+		}
 		TypeCheckInfo returnedTci = null;
 		
 		if(expression instanceof Name){
@@ -2852,32 +2854,64 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		TypeCheckInfo tci = null;
 		if (domain.canAs(UnionClass.class)){
 			UnionClass ucls = domain.as(UnionClass.class);
-			try {
-				ExtendedIterator<? extends OntClass> eitr = ucls.listOperands();
-				if (eitr.hasNext()) {
-					tci = new TypeCheckInfo(propConceptName, this, expression);
-					while (eitr.hasNext()) {
-						OntClass uclsmember = eitr.next();
-						if (uclsmember.isURIResource()) {
-							TypeCheckInfo utci = createTypeCheckInfoForPropertyDomain(uclsmember, propConceptName, expression);
-							tci.addCompoundType(utci);
-						}
-						else {
-							TypeCheckInfo utci = createTypeCheckInfoForNonUriPropertyDomain(uclsmember, propConceptName, expression);
-							tci.addCompoundType(utci);
-						}
-					}
-				}
-			}
-			catch (Exception e) {
-				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNEXPECTED_TYPE_CHECK_ERROR.get("union range", e.getMessage() ), getDefaultContext());
-			}
+			tci = createTypeCheckInfoForUnion(propConceptName, ucls, true, expression);
 		}
 		else if (domain.canAs(IntersectionClass.class)){
 			issueAcceptor.addWarning(SadlErrorMessages.TYPE_CHECK_HANDLE_WARNING.get("intersections"), expression);
 		}
 		else {
 			issueAcceptor.addError("Unhandled type of non-URI domain", expression);
+		}
+		return tci;
+	}
+
+	private TypeCheckInfo createTypeCheckInfoForUnion(ConceptName propConceptName, UnionClass ucls, boolean isDomain,
+			EObject expression) throws InvalidTypeException {
+		TypeCheckInfo tci = null;
+		try {
+			ExtendedIterator<? extends OntClass> eitr = ucls.listOperands();
+			if (eitr.hasNext()) {
+				tci = new TypeCheckInfo(propConceptName, this, expression);
+				while (eitr.hasNext()) {
+					try {
+						OntClass uclsmember = eitr.next();
+						if (uclsmember.isURIResource()) {
+							if (isDomain) {
+								TypeCheckInfo utci = createTypeCheckInfoForPropertyDomain(uclsmember, propConceptName, expression);
+								tci.addCompoundType(utci);
+							}
+							else {
+								TypeCheckInfo utci = createTypeCheckInfoForPropertyRange(uclsmember, propConceptName, expression, propConceptName.getType());
+								tci.addCompoundType(utci);
+							}
+						}
+						else {
+							if (isDomain) {
+								TypeCheckInfo utci = createTypeCheckInfoForNonUriPropertyDomain(uclsmember, propConceptName, expression);
+								tci.addCompoundType(utci);
+							}
+							else {
+								TypeCheckInfo utci = createTypeCheckInfoForNonUriPropertyRange(uclsmember, propConceptName, expression, propConceptName.getType());
+								tci.addCompoundType(utci);
+							}
+						}
+					}
+					catch (Exception e) {
+						RDFNode uv = ucls.getPropertyValue(OWL.unionOf);
+						if (ucls.canAs(RDFList.class)) {
+							RDFList uclsr = ucls.as(RDFList.class);
+							List<RDFNode> jlst = uclsr.asJavaList();
+							for (int i = 0; jlst != null && i < jlst.size(); i++) {
+								System.out.println(jlst.get(i).toString());
+							}
+						}
+						
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNEXPECTED_TYPE_CHECK_ERROR.get("union range", e.getMessage() ), getDefaultContext());
 		}
 		return tci;
 	}
@@ -2959,10 +2993,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				// this is a user-defined datatype
 				RDFNode rngEC = range.listPropertyValues(OWL.equivalentClass).next();
 				if (rngEC != null && rngEC.canAs(OntResource.class)) {
-					RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.onDatatype).next();
-					if (baseType != null && baseType.isURIResource()) {
-						NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(baseType.asResource().getURI(), NodeType.DataTypeNode));
-						tci = new TypeCheckInfo(propConceptName, tctype, this, expression);
+					try {
+						RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.onDatatype).next();
+						if (baseType != null && baseType.isURIResource()) {
+							NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(baseType.asResource().getURI(), NodeType.DataTypeNode));
+							tci = new TypeCheckInfo(propConceptName, tctype, this, expression);
+						}
+					}
+					catch (Exception e) {
+						// didn't have a OWL2.onDataType property
+						OntResource rngOC = rngEC.as(OntResource.class);
+						if (rngOC.canAs(OntClass.class)) {
+							OntClass rmgOntC = rngOC.as(OntClass.class);
+							if (rmgOntC.isUnionClass()) {
+								tci = createTypeCheckInfoForUnion(propConceptName, rmgOntC.asUnionClass(), false, expression);
+							}
+						}
 					}
 				}
 			}
@@ -4075,6 +4121,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (impliedPropertiesUsed != null) {
 			impliedPropertiesUsed.clear();
 			return true;
+		}
+		return false;
+	}
+
+	public boolean removeImpliedPropertyUsed(EObject obj) {
+		if (impliedPropertiesUsed != null) {
+			if (impliedPropertiesUsed.containsKey(obj)) {
+				impliedPropertiesUsed.remove(obj);
+				return true;
+			}
 		}
 		return false;
 	}

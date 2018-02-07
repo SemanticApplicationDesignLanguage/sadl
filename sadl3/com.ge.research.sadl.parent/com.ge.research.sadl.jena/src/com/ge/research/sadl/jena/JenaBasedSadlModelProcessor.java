@@ -3357,8 +3357,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Expression rexpr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder errorMessage = new StringBuilder();
 		if (lexpr != null && rexpr != null) {
-			if(!getModelValidator().validateBinaryOperationByParts(lexpr.eContainer(), lexpr, rexpr, op, errorMessage, false)){
-				addError(errorMessage.toString(), lexpr.eContainer());
+			if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
+				addError(errorMessage.toString(), container);
 			}
 			else {
 				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
@@ -3715,6 +3715,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe) {
 		try {
 			Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+			List<EObject> toBeRemoved = null;
 			if (ip != null) {
 				if (maybeGpe instanceof TripleElement || maybeGpe instanceof BuiltinElement) {
 					Iterator<EObject> ipitr = ip.keySet().iterator();
@@ -3725,10 +3726,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (eobj.equals(lobj)) {
 							((GraphPatternElement)maybeGpe).setLeftImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
 							matched = true;
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<EObject>();
+							}
+							toBeRemoved.add(lobj);
 						}
 						else if (eobj.equals(robj)) {
 							((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
 							matched = true;
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<EObject>();
+							}
 						}
 					}
 					if (!matched) {
@@ -3740,7 +3748,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				else {
 					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");
 				}
-				getModelValidator().clearImpliedPropertiesUsed();
+			}
+			if (toBeRemoved != null) {
+				for (int i = 0; i < toBeRemoved.size(); i++) {
+					getModelValidator().removeImpliedPropertyUsed(toBeRemoved.get(i));
+				}
 			}
 			
 			Map<EObject, List<String>> ep = getModelValidator().getApplicableExpandedProperties();
