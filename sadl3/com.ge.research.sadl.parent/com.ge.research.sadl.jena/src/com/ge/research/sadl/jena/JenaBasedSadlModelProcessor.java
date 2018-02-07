@@ -3428,7 +3428,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				TripleElement tr = (TripleElement)lobj;
 				TripleElement tl = (TripleElement)robj;
 				Node trnode = tr.getObject();
-				Node tlnode = tr.getObject();
+				Node tlnode = tl.getObject();
 				if(trnode!= null && tlnode !=null) {
 				OntClass subclassl = theJenaModel.getOntClass((trnode).toFullyQualifiedString());
 				OntClass subclassr = theJenaModel.getOntClass((tlnode).toFullyQualifiedString());
