@@ -67,7 +67,8 @@ class SADLValidator extends AbstractSADLValidator {
 	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
 	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
 	public static final String INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION = "INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION"
-	public static final String CYCLIC_DEPENDENCY = "CYCLIC_DEPENDENCY" 
+	public static final String CYCLIC_DEPENDENCY = "CYCLIC_DEPENDENCY"
+	public static final String RULE_MUST_HAVE_A_THEN = "RULE_MUST_HAVE_A_THEN" 
 	 
 	@Inject DeclarationExtensions declarationExtensions
 	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
@@ -282,6 +283,15 @@ class SADLValidator extends AbstractSADLValidator {
 		if (cycle.present) {
 			val message = SadlErrorMessages.CIRCULAR_IMPORT.get('''Dependency cycle was detected: «cycle.get.prettyPrint[baseUri]».''');
 			error(message, model, SADL_MODEL__IMPORTS, CYCLIC_DEPENDENCY);
+		}
+	}
+	
+	@Check
+	def checkRule(RuleStatement it) {
+		// https://github.com/crapo/sadlos2/issues/284
+		if (thens.nullOrEmpty && !ifs.nullOrEmpty) {
+			val message = '''A rule statement must have a 'then' part if it has any 'given' or 'if' expressions.''';
+			error(message, it, RULE_STATEMENT__NAME, RULE_MUST_HAVE_A_THEN);	
 		}
 	}
 
