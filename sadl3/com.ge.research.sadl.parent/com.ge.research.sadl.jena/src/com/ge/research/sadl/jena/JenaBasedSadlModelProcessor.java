@@ -4980,14 +4980,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (type instanceof SadlPrimitiveDataType) {
 			SadlDataType pt = ((SadlPrimitiveDataType) type).getPrimitiveType();
 			Object typeobj = sadlDataTypeToNamedNode(pt);
-			
-			// control for type unsupported downstream warnings on primitive data types
-			if(typeUnsupportedDownstreamWarnings) {
-				if(!isSupportedByDownstreamProjects(pt)) {
-					issueAcceptor.addWarning(SadlErrorMessages.TYPE_UNSUPPORTED_DOWNSTREAM.get(pt.getLiteral()), type);
-				}
-			}
-
+				
+			// Show an warning if primitive type is not compatible with downstream projects
+			if(!isSupportedByDownstreamProjects(pt)) {
+				issueAcceptor.addWarning(SadlErrorMessages.TYPE_UNSUPPORTED_DOWNSTREAM.get(pt.getLiteral()), type);
+			}	
 			
 			if (((SadlPrimitiveDataType) type).isList()) {
 				if (typeobj instanceof NamedNode) {
@@ -5058,15 +5055,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 */
 	private boolean isSupportedByDownstreamProjects(SadlDataType primitiveType) {
 		
-		String typeStr = primitiveType.getLiteral();
-		List<String> legalDownstreamTypes = Arrays.asList("boolean", "int", "integer", "decimal","float", "double");
-		for(int i = 0; i < legalDownstreamTypes.size(); i++){
-			if(typeStr.equals(legalDownstreamTypes.get(i))) {
+		// get the current translator for the resource
+		ITranslator translator = null;
+		try {
+			translator = getConfigMgr(getCurrentResource(), null).getTranslator();
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			return true;
+		}
+
+		// check the supported data types of the translator against the primitive type
+		if(translator != null) {
+			int numDataTypes = translator.getSupportedDataTypes().size();
+			
+			/* if no specific data types have been declared supported we assume all 
+			 types are supported, waiting on supported data types to be implemented
+			 by responsible parties */
+			if(numDataTypes == 0) {
 				return true;
 			}
+			
+			String typeStr = primitiveType.getLiteral();
+			for(int i = 0; i < numDataTypes; i++){
+				if(typeStr.equals(translator.getSupportedDataTypes().get(i))) {
+					return true;
+				}
+			}
+			// primitive type is not supported by the translator
+			return false;
 		}
-		return false;
+		// no available translator so don't show a warning
+		return true;
+			
 	}
+	
 
 	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
 		if (expr.isFunction()) {
@@ -5401,7 +5423,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		if (result instanceof GraphPatternElement) {
-			List<NamedNode> list = ((GraphPatternElement) result).getExpandedPropertiesToBeUsed();
 			return (GraphPatternElement) result;
 		} else if (result instanceof Query) {
 			return result;
