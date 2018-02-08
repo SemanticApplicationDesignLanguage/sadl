@@ -28,6 +28,7 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Assert
 import org.junit.runner.RunWith
+import java.util.Arrays
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
@@ -57,7 +58,7 @@ abstract class AbstractSADLParsingTest extends AbstractSadlTest {
 					found = true
 				}
 			}
-			Assert.assertTrue(found)
+			Assert.assertTrue('''Expected: «Arrays.toString(errPartials)». Message was: «issues.head.message»''', found)
 		}
 	}
 
