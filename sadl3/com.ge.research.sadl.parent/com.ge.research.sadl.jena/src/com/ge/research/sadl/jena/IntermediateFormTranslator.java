@@ -1085,19 +1085,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		List<GraphPatternElement> gvns = rule.getGivens();
 		if (gvns != null) {
 			addImpliedAndExpandedProperties(gvns);
-			expandProxyNodes(gvns, false, clearPreviouslyRetired);
 			clearPreviouslyRetired = false;
 		}
 		List<GraphPatternElement> ifs = rule.getIfs();
 		if (ifs != null) {
 			addImpliedAndExpandedProperties(ifs);
-			expandProxyNodes(ifs, false, clearPreviouslyRetired);
 			clearPreviouslyRetired = false;
 		}
 		List<GraphPatternElement> thens = rule.getThens();
 		if (thens != null) {
 			addImpliedAndExpandedProperties(thens);
-//			expandProxyNodes(thens, true, clearPreviouslyRetired);
 		}
 		return rule;
 	}
