@@ -645,6 +645,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (eObjectsValidated.contains(expression)) {
 			return false;
 		}
+		if (expressionsValidated != null && expressionsValidated.containsKey(expression)) {
+			return false;
+		}
 		eObjectsValidated.add(expression);
 		return true;
 	}

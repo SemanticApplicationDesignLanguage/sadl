@@ -2748,6 +2748,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addNamedStructureAnnotations(rl, annotations);
 			}
 		}
+//		rule = getIfTranslator().cook(rule);
 		setTarget(null);
 	}
 
@@ -4881,7 +4882,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private boolean isProperty(Object node) {
+	public boolean isProperty(Object node) {
 		if (node instanceof NamedNode) {
 			return isProperty(((NamedNode) node).getNodeType());
 		}
