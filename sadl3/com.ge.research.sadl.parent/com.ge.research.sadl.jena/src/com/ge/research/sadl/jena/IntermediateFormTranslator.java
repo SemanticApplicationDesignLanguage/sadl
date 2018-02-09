@@ -1069,17 +1069,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return nullSubjects;
 	}
 
-	public Rule cook(Rule rule) {
-		try {
-			rule = addImpliedAndExpandedProperties(rule);
-			rule = addMissingTriplePatterns(rule);
-		} catch (Exception e) {
-			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ")while 'cooking' IntermediateForm."));
-			e.printStackTrace();
-		} 
-		return rule;
-	}
-
 	private Rule addImpliedAndExpandedProperties(Rule rule) throws InvalidNameException, InvalidTypeException, TranslationException {
 		boolean clearPreviouslyRetired = true;	// must clear on first call
 		List<GraphPatternElement> gvns = rule.getGivens();
@@ -2837,9 +2826,20 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	@Override
-	public Object cook(Object obj) {
-		// TODO Auto-generated method stub
+	public Object cook(Object obj) throws TranslationException {
 		return null;
 	}
+	
+	public Rule cook(Rule rule) {
+		try {
+			rule = addImpliedAndExpandedProperties(rule);
+			rule = addMissingTriplePatterns(rule);
+		} catch (Exception e) {
+			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ")while 'cooking' IntermediateForm."));
+			e.printStackTrace();
+		} 
+		return rule;
+	}
 
-}
+	
+}	

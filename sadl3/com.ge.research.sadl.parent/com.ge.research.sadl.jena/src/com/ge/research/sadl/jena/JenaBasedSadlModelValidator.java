@@ -132,7 +132,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected DeclarationExtensions declarationExtensions = null;
 	private EObject defaultContext;
 	
-	protected Map<EObject, TypeCheckInfo> expressionsValidated = new HashMap<EObject,TypeCheckInfo>();
+	protected Map<EObject, TypeCheckInfo> expressionsTypeCheckCache = new HashMap<EObject,TypeCheckInfo>();
 	private Map<EObject, Property> impliedPropertiesUsed = null;
 	private Map<EObject, List<String>> applicableExpandedProperties = null;
 	
@@ -570,7 +570,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				checkForApplicableExpandedProperties(expression, leftTypeCheckInfo, rightTypeCheckInfo);
 			}
 			TypeCheckInfo binopTci = combineBinaryOperationTypes(operations, expression, leftTypeCheckInfo, rightTypeCheckInfo);
-			expressionsValidated.put(expression, binopTci);
+			expressionsTypeCheckCache.put(expression, binopTci);
 			return !errorsFound;
 		} catch (Throwable t) {
 			return handleValidationException(expression, t);
@@ -643,9 +643,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return true;
 		}
 		if (eObjectsValidated.contains(expression)) {
-			return false;
-		}
-		if (expressionsValidated != null && expressionsValidated.containsKey(expression)) {
 			return false;
 		}
 		eObjectsValidated.add(expression);
@@ -1025,8 +1022,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
-		if (expressionsValidated != null && expressionsValidated.containsKey(expression)) {
-			return expressionsValidated.get(expression);
+		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression)) {
+			return expressionsTypeCheckCache.get(expression);
 		}
 		TypeCheckInfo returnedTci = null;
 		
@@ -1186,7 +1183,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			throw new TranslationException("Unhandled expression type: " + expression.getClass().getCanonicalName());
 		}
-		expressionsValidated.put(expression, returnedTci);
+		expressionsTypeCheckCache.put(expression, returnedTci);
 		return returnedTci;
 	}
 

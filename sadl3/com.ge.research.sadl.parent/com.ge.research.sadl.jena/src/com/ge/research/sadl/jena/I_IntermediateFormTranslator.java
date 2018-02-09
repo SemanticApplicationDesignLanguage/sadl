@@ -5,6 +5,7 @@ import java.util.List;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface I_IntermediateFormTranslator {
 
@@ -13,7 +14,7 @@ public interface I_IntermediateFormTranslator {
 
 	List<IFTranslationError> getErrors();
 
-	Object cook(Object toCookObj);
+	abstract Object cook(Object toCookObj) throws TranslationException;
 
 	List<GraphPatternElement> listToAnd(List<GraphPatternElement> patterns);
 
