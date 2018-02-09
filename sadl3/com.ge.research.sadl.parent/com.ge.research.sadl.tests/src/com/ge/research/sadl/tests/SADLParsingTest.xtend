@@ -642,7 +642,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			uri "http://sadl.org/foo.sadl".
 			Person is a class described by age with values of type int.
 			Rule R: .
-		'''.assertNoErrors;
+		'''.assertErrors(newArrayList("mismatched input '.' expecting 'then'"));
 	}
 
 	@Test
@@ -656,7 +656,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 				if 
 					p is a Person and p has age > 30.
 		'''.assertErrors(
-			newArrayList('''A rule statement must have a 'then' part if it has any 'given' or 'if' expressions.'''));
+			newArrayList("mismatched input '.' expecting 'then'"));
 	}
 
 	@Test
@@ -668,7 +668,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 				if 
 					p is a Person and p has age > 30.
 		'''.assertErrors(
-			newArrayList('''A rule statement must have a 'then' part if it has any 'given' or 'if' expressions.'''));
+			newArrayList("mismatched input '.' expecting 'then'"));
 	}
 
 	@Test
@@ -680,7 +680,7 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 				given
 					p is a Person.
 		'''.assertErrors(
-			newArrayList('''A rule statement must have a 'then' part if it has any 'given' or 'if' expressions.'''));
+			newArrayList("mismatched input '.' expecting 'then'"));
 	}
 
 }
