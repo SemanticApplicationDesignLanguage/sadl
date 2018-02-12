@@ -877,7 +877,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (givens != null) {
 			Object results;
 			try {
-//				addImpliedAndExpandedProperties(givens);
 				results = expandProxyNodes(givens, false, true);
 				if (results instanceof List<?>) {
 					if (((List<?>)results).size() == 1 && ((List<?>)results).get(0) instanceof Junction) {
@@ -905,7 +904,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (ifs != null) {
 			Object results;
 			try {
-//				addImpliedAndExpandedProperties(ifs);
 				results = expandProxyNodes(ifs, false, false);
 				if (results instanceof List<?>) {
 					if (((List<?>)results).size() == 1 && ((List<?>)results).get(0) instanceof Junction) {
@@ -930,7 +928,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (thens != null) {
 			Object results;
 			try {
-//				addImpliedAndExpandedProperties(thens);
 				results = expandProxyNodes(thens, true, false);
 				if (results instanceof List<?>) {
 					if (((List<?>)results).size() == 1 && ((List<?>)results).get(0) instanceof Junction) {
@@ -1088,7 +1085,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
-	private void addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected void addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
 //		List<GraphPatternElement> fgpes = flattenLinkedList(gpes);
 		for (int i = 0; i < fgpes.size(); i++) {
 			addImpliedAndExpandedProperties(fgpes.get(i));
