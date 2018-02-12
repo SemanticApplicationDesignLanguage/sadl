@@ -2748,6 +2748,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addNamedStructureAnnotations(rl, annotations);
 			}
 		}
+//		rule = getIfTranslator().cook(rule);
 		setTarget(null);
 	}
 
@@ -3385,10 +3386,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder errorMessage = new StringBuilder();
 		if (lexpr != null && rexpr != null) {
-			if (!getModelValidator().validateBinaryOperationByParts(lexpr.eContainer(), lexpr, rexpr, op, errorMessage,
-					false)) {
-				addError(errorMessage.toString(), lexpr.eContainer());
-			} else {
+			if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
+				addError(errorMessage.toString(), container);
+			}
+			else {
 				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
 				if (ip != null) {
 					Iterator<EObject> ipitr = ip.keySet().iterator();
@@ -3768,6 +3769,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe) {
 		try {
 			Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+			List<EObject> toBeRemoved = null;
 			if (ip != null) {
 				if (maybeGpe instanceof TripleElement || maybeGpe instanceof BuiltinElement) {
 					Iterator<EObject> ipitr = ip.keySet().iterator();
@@ -3779,10 +3781,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							((GraphPatternElement) maybeGpe).setLeftImpliedPropertyUsed(
 									validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
 							matched = true;
-						} else if (eobj.equals(robj)) {
-							((GraphPatternElement) maybeGpe).setRightImpliedPropertyUsed(
-									validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<EObject>();
+							}
+							toBeRemoved.add(lobj);
+						}
+						else if (eobj.equals(robj)) {
+							((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
 							matched = true;
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<EObject>();
+							}
+							toBeRemoved.add(robj);
 						}
 					}
 					if (!matched) {
@@ -3794,7 +3804,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else {
 					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");
 				}
-				getModelValidator().clearImpliedPropertiesUsed();
+			}
+			if (toBeRemoved != null) {
+				for (int i = 0; i < toBeRemoved.size(); i++) {
+					getModelValidator().removeImpliedPropertyUsed(toBeRemoved.get(i));
+				}
 			}
 
 			Map<EObject, List<String>> ep = getModelValidator().getApplicableExpandedProperties();
@@ -4868,7 +4882,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private boolean isProperty(Object node) {
+	public boolean isProperty(Object node) {
 		if (node instanceof NamedNode) {
 			return isProperty(((NamedNode) node).getNodeType());
 		}
@@ -6848,9 +6862,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			String uri = getDeclarationExtensions().getConceptUri((SadlResource) value);
 			com.hp.hpl.jena.rdf.model.Resource rsrc = getTheJenaModel().getResource(uri);
 			return rsrc;
-		} else {
-			Literal litval = sadlExplicitValueToLiteral(value, prop);
-			return litval;
+		}
+		else {
+			if (prop != null) {
+				StmtIterator rngitr = getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null);
+				while (rngitr.hasNext()) {
+					RDFNode rng = rngitr.nextStatement().getObject();
+					if (rng instanceof com.hp.hpl.jena.rdf.model.Resource) {
+						try {
+							Literal litval = sadlExplicitValueToLiteral(value, (com.hp.hpl.jena.rdf.model.Resource) rng);
+							rngitr.close();
+							return litval;
+						}
+						catch (Exception e) {
+							
+						}
+					}
+				}
+				addWarning("Can't find range of property to create typed Literal", value);
+				return sadlExplicitValueToLiteral(value, null);
+			}
+			else {
+				Literal litval = sadlExplicitValueToLiteral(value, prop);
+				return litval;
+			}
 		}
 	}
 
