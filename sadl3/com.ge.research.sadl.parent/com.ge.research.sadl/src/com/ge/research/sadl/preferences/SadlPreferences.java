@@ -57,7 +57,6 @@ public class SadlPreferences {
 	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENTS = new PreferenceKey("graphImplicitElements", String.valueOf(false));
 	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENT_INSTANCES = new PreferenceKey("graphImplicitElementInstances", String.valueOf(false));
 	
-	public static final PreferenceKey TYPE_UNSUPPORTED_DOWNSTREAM = new PreferenceKey("TypeUnsupportedDownstream",String.valueOf(true));
 	// Don't forget to add new property to the list below
 	
 	private static final PreferenceKey[] allKeys = {
@@ -90,8 +89,7 @@ public class SadlPreferences {
 			GENERATE_METRICS_REPORT_ON_CLEAN_BUILD,
 			METRICS_QUERY_FILENAME, 
 			GRAPH_IMPLICIT_ELEMENTS,
-			GRAPH_IMPLICIT_ELEMENT_INSTANCES,
-			TYPE_UNSUPPORTED_DOWNSTREAM
+			GRAPH_IMPLICIT_ELEMENT_INSTANCES
 	};
 	
 	public static final List<PreferenceKey> preferences() {
