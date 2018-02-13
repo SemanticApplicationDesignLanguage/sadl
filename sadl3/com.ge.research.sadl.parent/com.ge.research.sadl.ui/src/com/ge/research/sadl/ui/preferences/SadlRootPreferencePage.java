@@ -161,6 +161,13 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), "&Include Implicit Element Instances in Graph", 
+				getFieldEditorParent()){
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
 		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names",
 				getFieldEditorParent()) {
 
@@ -224,16 +231,16 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
-		// addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
-		addField(new BooleanFieldEditor(SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(),
-				"Generate metrics report during project clean/build", getFieldEditorParent()) {
+		addField(new BooleanFieldEditor(SadlPreferences.TYPE_UNSUPPORTED_DOWNSTREAM.getId(), "Show type unsupported downstream warnings", 
+				getFieldEditorParent()){
 			@Override
 			protected void doStore() {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
-		addField(new BooleanFieldEditor(SadlPreferences.TYPE_UNSUPPORTED_DOWNSTREAM.getId(), "Show type unsupported downstream warnings", 
-				getFieldEditorParent()){
+		// addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
+		addField(new BooleanFieldEditor(SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(),
+				"Generate metrics report during project clean/build", getFieldEditorParent()) {
 			@Override
 			protected void doStore() {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
