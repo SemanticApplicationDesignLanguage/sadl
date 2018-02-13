@@ -154,6 +154,20 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), "&Include Implicit Elements in Graph", 
+				getFieldEditorParent()){
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
+		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), "&Include Implicit Element Instances in Graph", 
+				getFieldEditorParent()){
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
 		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names",
 				getFieldEditorParent()) {
 
