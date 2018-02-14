@@ -10187,8 +10187,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public boolean isNumericType(String uri) {
+		//uri is exactly a numeric type
 		if (uri.equals(XSD.decimal.getURI()) || uri.equals(XSD.integer.getURI()) || uri.equals(XSD.xdouble.getURI())
 				|| uri.equals(XSD.xfloat.getURI()) || uri.equals(XSD.xint.getURI()) || uri.equals(XSD.xlong.getURI())) {
+			return true;
+		}
+		//If Unitted Quantities are ignored then they are also considered a numeric type
+		if(this.ignoreUnittedQuantities && uri.equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 			return true;
 		}
 		return false;
