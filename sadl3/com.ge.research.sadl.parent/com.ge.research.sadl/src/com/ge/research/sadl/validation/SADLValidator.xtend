@@ -67,7 +67,7 @@ class SADLValidator extends AbstractSADLValidator {
 	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
 	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
 	public static final String INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION = "INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION"
-	public static final String CYCLIC_DEPENDENCY = "CYCLIC_DEPENDENCY" 
+	public static final String CYCLIC_DEPENDENCY = "CYCLIC_DEPENDENCY"
 	 
 	@Inject DeclarationExtensions declarationExtensions
 	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
@@ -284,7 +284,7 @@ class SADLValidator extends AbstractSADLValidator {
 			error(message, model, SADL_MODEL__IMPORTS, CYCLIC_DEPENDENCY);
 		}
 	}
-
+	
 	/**
 	 * This method initializes this instance of this validator class for use on a specified Resource
 	 */

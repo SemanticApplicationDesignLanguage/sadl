@@ -2748,6 +2748,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addNamedStructureAnnotations(rl, annotations);
 			}
 		}
+//		rule = getIfTranslator().cook(rule);
 		setTarget(null);
 	}
 
@@ -3385,10 +3386,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder errorMessage = new StringBuilder();
 		if (lexpr != null && rexpr != null) {
-			if (!getModelValidator().validateBinaryOperationByParts(lexpr.eContainer(), lexpr, rexpr, op, errorMessage,
-					false)) {
-				addError(errorMessage.toString(), lexpr.eContainer());
-			} else {
+			if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
+				addError(errorMessage.toString(), container);
+			}
+			else {
 				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
 				if (ip != null) {
 					Iterator<EObject> ipitr = ip.keySet().iterator();
@@ -3428,7 +3429,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				TripleElement tr = (TripleElement)lobj;
 				TripleElement tl = (TripleElement)robj;
 				Node trnode = tr.getObject();
-				Node tlnode = tr.getObject();
+				Node tlnode = tl.getObject();
 				if(trnode!= null && tlnode !=null) {
 				OntClass subclassl = theJenaModel.getOntClass((trnode).toFullyQualifiedString());
 				OntClass subclassr = theJenaModel.getOntClass((tlnode).toFullyQualifiedString());
@@ -3768,6 +3769,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe) {
 		try {
 			Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+			List<EObject> toBeRemoved = null;
 			if (ip != null) {
 				if (maybeGpe instanceof TripleElement || maybeGpe instanceof BuiltinElement) {
 					Iterator<EObject> ipitr = ip.keySet().iterator();
@@ -3779,10 +3781,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							((GraphPatternElement) maybeGpe).setLeftImpliedPropertyUsed(
 									validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
 							matched = true;
-						} else if (eobj.equals(robj)) {
-							((GraphPatternElement) maybeGpe).setRightImpliedPropertyUsed(
-									validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<EObject>();
+							}
+							toBeRemoved.add(lobj);
+						}
+						else if (eobj.equals(robj)) {
+							((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
 							matched = true;
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<EObject>();
+							}
+							toBeRemoved.add(robj);
 						}
 					}
 					if (!matched) {
@@ -3794,7 +3804,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else {
 					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");
 				}
-				getModelValidator().clearImpliedPropertiesUsed();
+			}
+			if (toBeRemoved != null) {
+				for (int i = 0; i < toBeRemoved.size(); i++) {
+					getModelValidator().removeImpliedPropertyUsed(toBeRemoved.get(i));
+				}
 			}
 
 			Map<EObject, List<String>> ep = getModelValidator().getApplicableExpandedProperties();
@@ -4868,7 +4882,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private boolean isProperty(Object node) {
+	public boolean isProperty(Object node) {
 		if (node instanceof NamedNode) {
 			return isProperty(((NamedNode) node).getNodeType());
 		}
@@ -4980,14 +4994,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (type instanceof SadlPrimitiveDataType) {
 			SadlDataType pt = ((SadlPrimitiveDataType) type).getPrimitiveType();
 			Object typeobj = sadlDataTypeToNamedNode(pt);
-			
-			// control for type unsupported downstream warnings on primitive data types
-			if(typeUnsupportedDownstreamWarnings) {
-				if(!isSupportedByDownstreamProjects(pt)) {
-					issueAcceptor.addWarning(SadlErrorMessages.TYPE_UNSUPPORTED_DOWNSTREAM.get(pt.getLiteral()), type);
-				}
-			}
-
+				
+			// Show an warning if primitive type is not compatible with downstream projects
+			if(!isSupportedByDownstreamProjects(pt)) {
+				issueAcceptor.addWarning(SadlErrorMessages.TYPE_UNSUPPORTED_DOWNSTREAM.get(pt.getLiteral()), type);
+			}	
 			
 			if (((SadlPrimitiveDataType) type).isList()) {
 				if (typeobj instanceof NamedNode) {
@@ -5058,15 +5069,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 */
 	private boolean isSupportedByDownstreamProjects(SadlDataType primitiveType) {
 		
-		String typeStr = primitiveType.getLiteral();
-		List<String> legalDownstreamTypes = Arrays.asList("boolean", "int", "integer", "decimal","float", "double");
-		for(int i = 0; i < legalDownstreamTypes.size(); i++){
-			if(typeStr.equals(legalDownstreamTypes.get(i))) {
+		// get the current translator for the resource
+		ITranslator translator = null;
+		try {
+			translator = getConfigMgr(getCurrentResource(), null).getTranslator();
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			return true;
+		}
+
+		// check the supported data types of the translator against the primitive type
+		if(translator != null) {
+			int numDataTypes = translator.getSupportedDataTypes().size();
+			
+			/* if no specific data types have been declared supported we assume all 
+			 types are supported, waiting on supported data types to be implemented
+			 by responsible parties */
+			if(numDataTypes == 0) {
 				return true;
 			}
+			
+			String typeStr = primitiveType.getLiteral();
+			for(int i = 0; i < numDataTypes; i++){
+				if(typeStr.equals(translator.getSupportedDataTypes().get(i))) {
+					return true;
+				}
+			}
+			// primitive type is not supported by the translator
+			return false;
 		}
-		return false;
+		// no available translator so don't show a warning
+		return true;
+			
 	}
+	
 
 	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
 		if (expr.isFunction()) {
@@ -6848,9 +6884,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			String uri = getDeclarationExtensions().getConceptUri((SadlResource) value);
 			com.hp.hpl.jena.rdf.model.Resource rsrc = getTheJenaModel().getResource(uri);
 			return rsrc;
-		} else {
-			Literal litval = sadlExplicitValueToLiteral(value, prop);
-			return litval;
+		}
+		else {
+			if (prop != null) {
+				StmtIterator rngitr = getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null);
+				while (rngitr.hasNext()) {
+					RDFNode rng = rngitr.nextStatement().getObject();
+					if (rng instanceof com.hp.hpl.jena.rdf.model.Resource) {
+						try {
+							Literal litval = sadlExplicitValueToLiteral(value, (com.hp.hpl.jena.rdf.model.Resource) rng);
+							rngitr.close();
+							return litval;
+						}
+						catch (Exception e) {
+							
+						}
+					}
+				}
+				addWarning("Can't find range of property to create typed Literal", value);
+				return sadlExplicitValueToLiteral(value, null);
+			}
+			else {
+				Literal litval = sadlExplicitValueToLiteral(value, prop);
+				return litval;
+			}
 		}
 	}
 
@@ -10130,8 +10187,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public boolean isNumericType(String uri) {
+		//uri is exactly a numeric type
 		if (uri.equals(XSD.decimal.getURI()) || uri.equals(XSD.integer.getURI()) || uri.equals(XSD.xdouble.getURI())
 				|| uri.equals(XSD.xfloat.getURI()) || uri.equals(XSD.xint.getURI()) || uri.equals(XSD.xlong.getURI())) {
+			return true;
+		}
+		//If Unitted Quantities are ignored then they are also considered a numeric type
+		if(this.ignoreUnittedQuantities && uri.equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 			return true;
 		}
 		return false;

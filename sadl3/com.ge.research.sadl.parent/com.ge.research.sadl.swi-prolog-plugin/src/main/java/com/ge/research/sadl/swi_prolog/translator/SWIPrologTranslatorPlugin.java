@@ -1761,4 +1761,21 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		throw new ConfigurationException("getLocalFragmentNamespace not implemented in this translator");
 	}
 
+	
+	/**
+	 * Returns supported data types for the project to show a warning for RCE that 
+	 * a declared data type within .sreq files may not be compatible with downstream projects 
+	 * @return supportedDataTypes string list of the projects supported data types
+	 */
+	@Override
+	public List<String> getSupportedDataTypes() {
+		List<String> supportedDataTypes = new ArrayList<String>();
+		
+		// Add support primitive types here as strings
+		// ie. supportedDataTypes.add("int");
+		// ie. supportedDataTypes.add("string");
+		
+		return supportedDataTypes;
+	}
+
 }

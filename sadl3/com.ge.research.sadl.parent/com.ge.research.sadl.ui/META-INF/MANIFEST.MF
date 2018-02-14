@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ui
 Bundle-Vendor: My Company
-Bundle-Version: 3.1.0.qualifier
+Bundle-Version: 3.2.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl,

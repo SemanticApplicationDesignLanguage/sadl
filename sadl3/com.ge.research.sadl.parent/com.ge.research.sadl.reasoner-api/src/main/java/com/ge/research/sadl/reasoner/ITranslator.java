@@ -242,4 +242,11 @@ public interface ITranslator {
 	 * @throws ConfigurationException
 	 */
 	public String getLocalFragmentNamespace(String localFragmentName) throws InvalidNameException, ConfigurationException;
+	
+	/**
+	 * Returns supported data types for the project to show a warning for RCE that 
+	 * a declared data type within .sreq files may not be compatible with downstream projects 
+	 * @return supportedDataTypes string list of the projects supported data types
+	 */
+	public List<String> getSupportedDataTypes();
 }
