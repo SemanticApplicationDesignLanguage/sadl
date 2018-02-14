@@ -583,5 +583,104 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		Assert.assertEquals("value", psr.nameDeclarations.head.concreteName)
 		Assert.assertEquals("LatticeToTree:value", psr.nameDeclarations.head.conceptQualifiedName)
 	}
+	
+	@Test
+	def void testThen_01() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: 
+				given
+					p is a Person
+				if 
+					p is a Person and p has age > 30
+				then
+					print("hi").
+		'''.assertNoErrors;
+	}
+
+	@Test
+	def void testThen_02() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: 
+				if 
+					p is a Person and p has age > 30
+				then
+					print("hi").
+		'''.assertNoErrors;
+	}
+
+	@Test
+	def void testThen_03() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: 
+				given
+					p is a Person
+				then
+					print("hi").
+		'''.assertNoErrors;
+	}
+
+	@Test
+	def void testThen_04() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: 
+				then
+					print("hi").
+		'''.assertNoErrors;
+	}
+
+	@Test
+	def void testThen_05() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: .
+		'''.assertErrors(newArrayList("mismatched input '.' expecting 'then'"));
+	}
+
+	@Test
+	def void testThen_06() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: 
+				given
+					p is a Person
+				if 
+					p is a Person and p has age > 30.
+		'''.assertErrors(
+			newArrayList("mismatched input '.' expecting 'then'"));
+	}
+
+	@Test
+	def void testThen_07() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: 
+				if 
+					p is a Person and p has age > 30.
+		'''.assertErrors(
+			newArrayList("mismatched input '.' expecting 'then'"));
+	}
+
+	@Test
+	def void testThen_08() {
+		'''
+			uri "http://sadl.org/foo.sadl".
+			Person is a class described by age with values of type int.
+			Rule R: 
+				given
+					p is a Person.
+		'''.assertErrors(
+			newArrayList("mismatched input '.' expecting 'then'"));
+	}
 
 }

@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.junit.Assert
 import static org.junit.Assert.*
 import org.junit.Test
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -96,6 +97,34 @@ class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 					"Rule R1:  if rdf(TestArticles:MyCircle, TestArticles:radius, X) and >(X,0) and ^(X,2,v0) and *(v0,PI,Y) then rdf(TestArticles:MyCircle, TestArticles:area, Y)."))
 		]
 
+	}
+	
+	@Ignore
+	@Test
+	def void testMissingClass() {
+		val sadlModel = '''
+			  uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			  
+			  Shape is a class described by area with values of type UnittedQuantity.
+			  
+			  Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			  
+			  Rule AreaOfCircle: then area is PI*radius^2.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+// 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+ 			if (issues.size > 0) {
+ 				for (issue:issues) {
+ 					println(issue.toString)
+ 				}
+ 			}
+ 			assertTrue(issues.size == 0)
+ 			assertTrue(rules.size == 1)
+ 			for(rule:rules) {
+ 				println(rule.toString)
+ 			}
+ 			assertTrue(processor.compareTranslations(rules.get(0).toString(),"Rule R1:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:acquaintance, y)."))
+  		]
 	}
 	
 }
