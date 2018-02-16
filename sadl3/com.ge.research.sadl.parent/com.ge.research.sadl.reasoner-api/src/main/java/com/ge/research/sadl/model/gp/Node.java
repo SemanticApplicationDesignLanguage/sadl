@@ -28,6 +28,7 @@ public abstract class Node {
 	// For a NamedNode, the value type is the class to which the node belongs if an instance.
 	private List<Node> nodeValueTypes;
 	public abstract String toFullyQualifiedString();
+	private ProxyNode missingTripleReplacement = null;
 	
 	public List<Node> getNodeValueTypes() {
 		return nodeValueTypes;
@@ -53,4 +54,11 @@ public abstract class Node {
 	}
 
 	abstract public String toDescriptiveString();
+	
+	public ProxyNode getMissingTripleReplacement() {
+		return missingTripleReplacement;
+	}
+	public void setMissingTripleReplacement(ProxyNode missingTripleReplacement) {
+		this.missingTripleReplacement = missingTripleReplacement;
+	}
 }
