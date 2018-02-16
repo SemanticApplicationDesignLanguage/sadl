@@ -61,7 +61,6 @@ import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
-import org.eclipse.xtext.preferences.IPreferenceValues;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
@@ -124,7 +123,6 @@ import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorExt;
-import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -132,9 +130,6 @@ import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
-import com.ge.research.sadl.reasoner.QueryCancelledException;
-import com.ge.research.sadl.reasoner.QueryParseException;
-import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -219,7 +214,6 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.google.common.base.Preconditions;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -2748,7 +2742,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addNamedStructureAnnotations(rl, annotations);
 			}
 		}
-//		rule = getIfTranslator().cook(rule);
+//		try {
+//			checkForMissingGraphPatterns(rule, element);
+//		} catch (CircularDependencyException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		setTarget(null);
 	}
 
@@ -10612,5 +10611,357 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Method to check a Rule for missing triple patterns.
+	 * @param rule
+	 * @param element
+	 * @throws CircularDependencyException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 */
+	private void checkForMissingGraphPatterns(Rule rule, RuleStatement element) throws CircularDependencyException, InvalidTypeException, TranslationException {
+		// Make sure there aren't any missing triples to connect nodes and edges together. 
+		// This means that all of the nodes are linked to a common root, although that root may be implied rather than explicit.
+		// Concepts can be subjects or properties in triples. If a concept is the object of a triple it is already linked to a "higher"
+		//	 level closer to the root.
+		// If only a property if references, e.g., in a builtin, then the domain of the property (or tighter restriction?) will be the
+		//	 next level up.
+		// For a property chain, the subject of the last property in the chain, or if no subject the domain of the last property
+		//	 (or tighter restriction?) is the next higher level and the rest of the chain can be ignored.
+		// Intersections of different paths up toward an unknown root must take into account the class hierarchy. If path one's 
+		//	 highest class is A and path two's highest class is B, and B is a subclass of A, then they can be considered to 
+		//	 intersect at B (e.g., area -> Shape, radius -> Circle, so common root is Circle)
+		// The only "tighter restrictions" would be from the Context? Property restrictions only restrict the range of a property on a class.
+		//
+		// This can be done pair-wise. Start with two concepts and find a common root. Then add another and see if it shares the root. If it
+		//	 does then that concept is OK. If it doesn't then search for a node common to the 3rd concept an the first root, etc.
+		// What do ambiguities look like? Probably more than one common root following multiple paths? How far do we need to look?
+		Map<GraphPatternElement, Map<TripleElement, NamedNode>> searchResults = new HashMap<GraphPatternElement, Map<TripleElement, NamedNode>>();
+		List<GraphPatternElement> thens = rule.getThens();
+		if (thens != null) {
+			searchGraphPatternElementListForTriplesOfInterest(searchResults, thens);
+		}
+		processTriplesOfInterestForMissingPatterns(searchResults, null, element);
+	}
+
+	/**
+	 * Method to look through a list of GraphPatternElements for TripleElements of interest.
+	 * Triples of interest may be added in the course of this processing, e.g., a lone property
+	 * name as a built-in argument will cause a triple with that property as prediate to be
+	 * created and associated with the node.
+	 * @param searchResults
+	 * @param gpes
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 */
+	protected void searchGraphPatternElementListForTriplesOfInterest(Map<GraphPatternElement, Map<TripleElement, NamedNode>> searchResults, List<GraphPatternElement> gpes)
+			throws InvalidTypeException, TranslationException {
+				for (int i = 0; i < gpes.size(); i++) {
+					GraphPatternElement gpe = gpes.get(i);
+					List<TripleElement> triplesOfInterest = new ArrayList<TripleElement>();
+					triplesOfInterest = getTriplesOfInterestList(triplesOfInterest, gpe);
+					for (int j = 0; triplesOfInterest != null && j < triplesOfInterest.size(); j++) {
+						Map<TripleElement, NamedNode> innerMap = null;
+						TripleElement tripleOfInterest = triplesOfInterest.get(j);
+						Node sn = tripleOfInterest.getSubject();
+						if (sn == null) {
+							Node pn = tripleOfInterest.getPredicate();
+							if (pn instanceof NamedNode && isProperty(((NamedNode)pn).getNodeType())) {
+								StmtIterator dmnitr = getTheJenaModel().listStatements(getTheJenaModel().getProperty(pn.toFullyQualifiedString()), RDFS.domain, (RDFNode)null);
+								int idx = j;
+								while (dmnitr.hasNext()) {
+									RDFNode dmnn = dmnitr.nextStatement().getObject();
+									if (dmnn.isURIResource()) {
+										NamedNode dmnnn = new NamedNode(dmnn.asResource().getURI());
+										dmnnn.setNodeType(NodeType.ClassNode);
+										if (idx == j) {
+											innerMap = searchResults.get(gpe);
+											if (innerMap == null) {
+												innerMap = new HashMap<TripleElement, NamedNode>();
+												searchResults.put(gpe,  innerMap);
+											}
+											innerMap.put(tripleOfInterest, dmnnn);
+										}
+										else {
+											System.err.println("Unhandled union domain");
+										}
+									}
+								}
+							}
+							else {
+								throw new TranslationException("Predicate isn't a NamedNode property--shouldn't happen");
+							}
+						}
+						else if (sn instanceof NamedNode){
+							innerMap = searchResults.get(gpe);
+							if (innerMap == null) {
+								innerMap = new HashMap<TripleElement, NamedNode>();
+								searchResults.put(gpe,  innerMap);
+							}
+							innerMap.put(tripleOfInterest, (NamedNode) sn);
+						}
+						else {
+//							throw new TranslationException("Subject isn't a NamedNode--shouldn't happen");
+							System.err.println("Subject isn't a NamedNode--shouldn't happen");
+						}
+					}
+				}
+			}
+
+	/**
+	 * Method to process triples of interest and add [additional] missing patterns as needed.
+	 * Approach:
+	 *   The contained map (Map<TripleElement, NamedNode>) contains all of the triples of interest from a high-level construct, e.g., a Rule. 
+	 *   For each TripleElement, the NamedNode is the node in the ontology graph that is the lower "anchor" for searching upward in the graph
+	 *     for a common root shared by all triples in the high-level construct. 
+	 *   If, for any lower anchor, there is more than one path upward to the common root, then the structure is ambiguous and an error should
+	 *     be generated. However, the constraints passed in, if any, should first have been applied to remove ambiguities. If there is no common root 
+	 *     an error should also be generated. Any error messages are associated with the context.
+	 * Methodology:
+	 *   The approach is somewhat similar to Tarjan's off-line lowest common ancestors algorithm
+	 *     (https://en.wikipedia.org/wiki/Tarjan%27s_off-line_lowest_common_ancestors_algorithm).
+	 *   From each lowest NamedNode, an inverse tree of steps (node-edge-node) is created that goes up (against the direction of the edges of the DAG).
+	 *     An index is maintained keyed to the graph node at the bottom of each step, facilitating the identification of intersections of inverse trees.
+	 *       Note that an intersection occurs whenever a node in one inverse tree is a subclass of another inverse tree, the identified intersection being
+	 *       the subclass node.
+	 *   The inverse trees are maintained in the model processor for the duration of it's processing as it is ontology-based and will not change as long
+	 *     as the ontology does not change.
+	 *   Pairwise intersections for each pair of lower anchors are recorded and from that point upward the pair has a common upward path. The ultimate 
+	 *     common root, if it exists, is where all upward paths converge.  
+	 * Supporting Structure:
+	 *   Each upward step is captured in a PathTriple with subject, predicate, and object being Jena OntModel Resources. The object is the "lower" end
+	 *     the subject the "upper" end. Each PathTriple has a pointer to the next upward step(s). Each is also placed in a HashMap keyed by the "lower" end.
+	 *   The pair-wise intersections are captured in triples (<base1>, <base2>, <intersectionNode>). Valid resolution of the high-level construct 
+	 *     occurs when there is one and only one intersection shared by all pair-wise intersections. Then each triple of interest is expanded up to 
+	 *     the common intersection point.
+	 * 
+	 * @param triplesOfInterestByRootGraphPatternElement
+	 * @param constraints
+	 * @param context
+	 * @throws CircularDependencyException 
+	 */
+	protected void processTriplesOfInterestForMissingPatterns(Map<GraphPatternElement, Map<TripleElement, NamedNode>> triplesOfInterestByRootGraphPatternElement,
+			List<TripleElement> constraints, EObject context) throws CircularDependencyException {
+		Iterator<GraphPatternElement> sritr = triplesOfInterestByRootGraphPatternElement.keySet().iterator();
+		TripleElement lastTriple = null;
+		NamedNode lastNamedNode = null;
+		while (sritr.hasNext()) {
+			GraphPatternElement host = sritr.next();
+			System.out.println("For host triple: " + host.toDescriptiveString());
+			Map<TripleElement, NamedNode> toBeExpanded = triplesOfInterestByRootGraphPatternElement.get(host);
+			Iterator<TripleElement> inneritr = toBeExpanded.keySet().iterator();
+			while (inneritr.hasNext()) {
+				TripleElement innertr = inneritr.next();
+				NamedNode innerNode = toBeExpanded.get(innertr);
+				System.out.println("   Triple '" + innertr.toDescriptiveString() + "' has node '" + innerNode.toDescriptiveString() + "' to be traced upward to common root");
+				if (lastTriple != null) {
+					if (isSubClass(innerNode, lastNamedNode)) {
+						toBeExpanded.put(lastTriple, innerNode);
+					}
+					else if (isSubClass(lastNamedNode, innerNode)) {
+						toBeExpanded.put(innertr, lastNamedNode);
+					}
+				}
+				lastTriple = innertr;
+				lastNamedNode = innerNode;
+			}
+		}
+
+		System.out.println("After processing:");
+		boolean commonRootAcheived = true;
+		NamedNode lastRoot = null;
+		sritr = triplesOfInterestByRootGraphPatternElement.keySet().iterator();
+		while(sritr.hasNext()) {
+			GraphPatternElement host = sritr.next();
+			Map<TripleElement, NamedNode> toBeExpanded = triplesOfInterestByRootGraphPatternElement.get(host);
+			Iterator<TripleElement> inneritr = toBeExpanded.keySet().iterator();
+			while (inneritr.hasNext()) {
+				TripleElement innertr = inneritr.next();
+				NamedNode innerNode = toBeExpanded.get(innertr);
+				System.out.println("   Triple '" + innertr.toDescriptiveString() + "' has node '" + innerNode.toDescriptiveString() + "' to be traced upward to common root");
+				if (lastRoot != null) {
+					List<NamedNode> commonRoots = lookForCommonAncestor(lastRoot, innerNode);
+				}
+				lastRoot = innerNode;
+			}
+			if (commonRootAcheived) {
+				System.out.println("There is the Common Root '" + lastRoot.toDescriptiveString() + "'.");
+			}
+		}
+	}
+
+	private List<NamedNode> lookForCommonAncestor(NamedNode lastRoot, NamedNode innerNode) {
+		 boolean commonRootAcheived = false;
+		 List<NamedNode> commonRoots = null;
+		 if (!lastRoot.equals(innerNode)) {
+			OntClass cls1 = getTheJenaModel().getOntClass(lastRoot.toFullyQualifiedString());
+			OntClass cls2 = getTheJenaModel().getOntClass(innerNode.toFullyQualifiedString());
+			commonRoots = lookForCommonAncestor(cls1, cls2);
+		}
+		return commonRoots;
+	}
+	
+	private List<TripleElement> getPossiblePathsUp(OntClass cls) {
+		
+		return null;
+	}
+
+	private List<NamedNode>  lookForCommonAncestor(OntClass cls1, OntClass cls2) {
+		List<NamedNode> commonRoots = null;
+		ExtendedIterator<ObjectProperty> opitr = getTheJenaModel().listObjectProperties();
+		while (opitr.hasNext()) {
+			ObjectProperty op = opitr.next();
+			NamedNode opnn = null;
+			List<TripleElement> possiblePathsUp = null;
+			ExtendedIterator<Restriction> restrictitr = op.listReferringRestrictions();
+			while (restrictitr.hasNext()) {
+				Restriction rest = restrictitr.next();
+				if (rest.isAllValuesFromRestriction()) {
+					com.hp.hpl.jena.rdf.model.Resource avf = rest.asAllValuesFromRestriction().getAllValuesFrom();
+					if (avf.equals(cls1)) {
+						opnn = new NamedNode(op.getURI());
+						opnn.setNodeType(NodeType.ObjectProperty);
+						NamedNode cls1nn = new NamedNode(cls1.getURI());
+						cls1nn.setNodeType(NodeType.ClassNode);
+						TripleElement newtr = new TripleElement(null, opnn, cls1nn);
+						if (possiblePathsUp == null) {
+							possiblePathsUp = new ArrayList<TripleElement>();
+						}
+						possiblePathsUp.add(newtr);
+					}
+				}
+			}
+			ExtendedIterator<? extends OntResource> rngitr = op.listRange();
+			while (rngitr.hasNext()) {
+				OntResource rng = rngitr.next();
+				OntClass matchingClass = null;
+				OntClass nonMatchingClass = null;
+				if (rng.isURIResource()) {
+					if (rng.equals(cls1)) {
+						System.out.println("Property '" + op.getURI() + "' goes up from '" + cls1.getURI());
+						matchingClass = cls1;
+						nonMatchingClass = cls2;
+					}
+					else if (rng.equals(cls2)) {
+						System.out.println("Property '" + op.getURI() + "' goes up from '" + cls2.getURI());
+						nonMatchingClass = cls1;
+						matchingClass = cls2;
+					}
+				}
+				else if (rng.canAs(OntClass.class)&& rng.as(OntClass.class).isUnionClass()) {
+					UnionClass ucls = rng.as(OntClass.class).asUnionClass();
+					ExtendedIterator<? extends OntClass> ummbrs = ucls.listOperands();
+					while (ummbrs.hasNext()) {
+						OntClass ummbr = ummbrs.next();
+						if (ummbr.equals(cls1)) {
+							System.out.println("Property '" + op.getURI() + "' goes up from '" + cls1.getURI());
+							matchingClass = cls1;
+							nonMatchingClass = cls2;
+						}
+						if (ummbr.equals(cls2)) {
+							System.out.println("Property '" + op.getURI() + "' goes up from '" + cls2.getURI());
+							nonMatchingClass = cls1;
+							matchingClass = cls2;
+						}
+					}
+				}
+				if (matchingClass != null) {
+					StmtIterator stmtitr = getTheJenaModel().listStatements(op, RDFS.domain, (RDFNode)null);
+					while (stmtitr.hasNext()) {
+						RDFNode obj = stmtitr.nextStatement().getObject();
+						if (obj.isResource()) {
+							if (obj.asResource().isURIResource()) {
+								System.out.println("    to '" + obj.asResource().getURI() + "'");
+								if (obj.asResource().canAs(OntClass.class)) {
+//									lookForCommonAncestor(nonMatchingClass, obj.asResource().as(OntClass.class));
+								}
+							}
+							else if (obj.canAs(OntClass.class) && obj.as(OntClass.class).isUnionClass()) {
+								ExtendedIterator<? extends OntClass> ummbrs = obj.as(OntClass.class).asUnionClass().listOperands();
+								while (ummbrs.hasNext()) {
+									OntClass ummbr = ummbrs.next();
+									if (ummbr.equals(cls1)) {
+										System.out.println("   to '" + cls1.getURI());
+										lookForCommonAncestor(nonMatchingClass, ummbr);
+									}
+									if (ummbr.equals(cls2)) {
+										System.out.println("    to '" + cls2.getURI());
+										lookForCommonAncestor(nonMatchingClass, ummbr);
+									}
+								}	
+							}
+						}
+					}
+				}
+			}
+		}
+		return commonRoots;
+	}
+
+	private boolean isSubClass(NamedNode nn1, NamedNode nn2) throws CircularDependencyException {
+		OntClass or1 = getTheJenaModel().getOntClass(nn1.toFullyQualifiedString());
+		OntClass or2 = getTheJenaModel().getOntClass(nn2.toFullyQualifiedString());
+		if (SadlUtils.classIsSubclassOf(or1, or2, true, null)) {
+			return true;
+		}
+		return false;
+	}
+
+	private List<TripleElement> getTriplesOfInterestList(List<TripleElement> found, GraphPatternElement gpe) throws InvalidTypeException {
+		if (gpe instanceof TripleElement) {
+			if (((TripleElement)gpe).getSubject() != null) {
+				found = addTripleElement(found, (TripleElement)gpe);
+				if (((TripleElement)gpe).getSubject() instanceof ProxyNode) {
+					found = addTripleOfInterest(found, ((TripleElement)gpe).getSubject());
+				}
+			}
+		}
+		else if (gpe instanceof BuiltinElement) {
+			if (((BuiltinElement)gpe).getArguments() != null) {
+				for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
+					found = addTripleOfInterest(found, ((BuiltinElement)gpe).getArguments().get(i));
+				}
+			}
+		}
+		else if (gpe instanceof Junction) {
+			Object lhs = ((Junction)gpe).getLhs();
+			if (lhs instanceof Node) {
+				found = addTripleOfInterest(found, (Node) lhs);
+			}
+			Object rhs = ((Junction)gpe).getRhs();
+			if (rhs instanceof Node) {
+				found = addTripleOfInterest(found, (Node) rhs);
+			}
+		}
+		return found;
+	}
+
+	private List<TripleElement> addTripleElement(List<TripleElement> found, TripleElement tr) {
+		found.add(tr);
+		return found;
+	}
+
+	private List<TripleElement> addTripleOfInterest(List<TripleElement> found, Node node) throws InvalidTypeException {
+		if (node instanceof NamedNode && !(node instanceof VariableNode)) {
+			if (isProperty((NamedNode)node)) {
+				TripleElement newtr = new TripleElement(null, node, null);
+				node.setMissingTripleReplacement(new ProxyNode(newtr));
+				found.add(newtr);
+			}
+			else if (node instanceof NamedNode && ((NamedNode)node).getNodeType().equals(NodeType.InstanceNode)) {
+				// do nothing?
+			}
+			else {
+				TripleElement newtr = new TripleElement(node, null, null);
+				node.setMissingTripleReplacement(new ProxyNode(newtr));
+				found.add(newtr);
+			}
+		}
+		else if (node instanceof ProxyNode) {
+			found = getTriplesOfInterestList(found, (GraphPatternElement) ((ProxyNode) node).getProxyFor());
+		}
+		return found;
 	}
 }
