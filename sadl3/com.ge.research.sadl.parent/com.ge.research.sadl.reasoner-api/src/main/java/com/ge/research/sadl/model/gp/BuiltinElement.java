@@ -340,4 +340,29 @@ public class BuiltinElement extends GraphPatternElement {
 		this.funcUri = funcUri;
 	}
 
+	@Override 
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		
+		BuiltinElement be = (BuiltinElement) obj;
+		if(funcName != be.getFuncName()) {
+			return false;
+		}
+		if(funcUri != be.getFuncUri()) {
+			return false;
+		}
+		if(!funcType.equals(be.getFuncType())) {
+			return false;
+		}
+		if(!arguments.containsAll(be.getArguments())) {
+			return false;
+		}
+		
+		return true;
+	}
 }

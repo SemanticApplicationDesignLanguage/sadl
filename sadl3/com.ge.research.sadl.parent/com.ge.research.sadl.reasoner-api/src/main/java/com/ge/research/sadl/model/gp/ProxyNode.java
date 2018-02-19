@@ -156,8 +156,7 @@ public class ProxyNode extends Node {
 				return false;
 		} else if (!proxyFor.equals(other.proxyFor))
 			return false;
-		if (replacementNode != other.replacementNode)
-			return false;
+
 		return true;
 	}
 }
