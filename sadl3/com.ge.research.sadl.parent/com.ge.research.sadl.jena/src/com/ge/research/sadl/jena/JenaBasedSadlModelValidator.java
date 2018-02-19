@@ -1955,6 +1955,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						addEffectiveRangeUnit(className, predicateType);
 					}
 				}
+				else if (subject instanceof Declaration) {
+					SadlTypeReference str = ((Declaration)subject).getType();
+					if (str instanceof SadlSimpleTypeReference) {
+						String className = declarationExtensions.getConceptUri(((SadlSimpleTypeReference)str).getType());
+						addEffectiveRangeUnit(className, predicateType);
+					}
+				}
 				else if (subject instanceof ElementInList) {
 					TypeCheckInfo tci = getType(((ElementInList)subject));
 					addEffectiveRangeByTypeCheckInfo(predicateType, tci);
