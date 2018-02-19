@@ -5120,7 +5120,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				&& ((BinaryOperation) expr.eContainer()).getRight() != null
 				&& ((BinaryOperation) expr.eContainer()).getRight().equals(qnm)) {
 			addError("It appears that '" + nm + "' is not defined.", expr);
-		} else {
+		}
+			
+		  else if (qnm.equals(expr) && expr.eContainer() instanceof BinaryOperation
+				      && ((BinaryOperation) expr.eContainer()).getLeft() != null
+				    && ((BinaryOperation) expr.eContainer()).getLeft().equals(qnm)) {
+				    addError("It appears that '" + nm + "' is not defined.", expr);
+				  }
+			
+			
+		 else {
 			return processExpression(qnm);
 		}
 		return null;
