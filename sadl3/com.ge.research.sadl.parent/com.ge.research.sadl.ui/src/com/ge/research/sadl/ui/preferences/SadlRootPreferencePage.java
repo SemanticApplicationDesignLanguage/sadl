@@ -215,14 +215,6 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
-		addField(new BooleanFieldEditor(SadlPreferences.USE_IMPLIED_PROPERTIES_IN_TRANSLATION.getId(),
-				"Include implied properties in translation", getFieldEditorParent()) {
-
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-		});
 		addField(new BooleanFieldEditor(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(),
 				"Translate multiple-class domain or range as union class (owl:unionOf)", getFieldEditorParent()) {
 

@@ -200,6 +200,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			for(Method m :  classInstance.getClass().getMethods()){
 				if(m.getName().equals(methodName)){
 					graphingMethod = m;
+					break;
 				}
 			}
 			if(graphingMethod != null){

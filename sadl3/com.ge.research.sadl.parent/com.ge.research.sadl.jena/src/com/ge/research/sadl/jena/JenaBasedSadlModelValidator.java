@@ -560,10 +560,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			//It's possible there may be a local type restriction
-//			handleLocalRestriction(leftExpression,rightExpression, (leftTypeCheckInfo != null ? leftTypeCheckInfo : leftTypeCheckInfo),
-//					(rightTypeCheckInfo != null ? rightTypeCheckInfo : rightTypeCheckInfo));
-			if (1 == 0) {
-				TripleElement tr = new TripleElement();
+			if (isLocalTypeRestriction(op, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				TypeCheckInfo tciSubjSubj = getType(((PropOfSubject)leftExpression).getRight());
+				Node propOfSubjSubj = tciSubjSubj.getTypeCheckType();
+				NamedNode propnn = getModelProcessor().conceptNameToNamedNode((ConceptName) leftTypeCheckInfo.getExpressionType());
+				NamedNode restrictedTo = (NamedNode) rightTypeCheckInfo.getTypeCheckType();
+				TripleElement tr = new TripleElement(propOfSubjSubj, propnn, restrictedTo);
 				getModelProcessor().handleLocalRestriction(expression, tr);
 			}
 			if (getModelProcessor().isEqualityInequalityComparisonOperator(op) && !errorsFound) {
@@ -577,6 +579,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private boolean isLocalTypeRestriction(String op, EObject leftExpression, EObject rightExpression,
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidTypeException {
+		if (getModelProcessor().isEqualOperator(op) && leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
+			if (leftTypeCheckInfo.getExpressionType() instanceof ConceptName && rightTypeCheckInfo.getTypeCheckType() instanceof NamedNode) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void checkForApplicableExpandedProperties(EObject expression, TypeCheckInfo leftTypeCheckInfo,
 			TypeCheckInfo rightTypeCheckInfo) {
 		Node type = null;
@@ -1311,20 +1323,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //				return rightTypeCheckInfo;
 //			}
 // TODO not sure if it's necessary to add local restrictions here? awc 12/11/2017
-//		if (expression.getLeft() instanceof PropOfSubject && ((BinaryOperation)expression).getRight() instanceof Declaration) {
-//			TypeCheckInfo subjtype = getType(((PropOfSubject)expression.getLeft()).getRight());
-//			if (subjtype != null) {
-//				Node subject = subjtype.getTypeCheckType();
-//				if (subject != null) {
-////					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
+		if (expression.getLeft() instanceof PropOfSubject && ((BinaryOperation)expression).getRight() instanceof Declaration) {
+			TypeCheckInfo subjtype = getType(((PropOfSubject)expression.getLeft()).getRight());
+			if (subjtype != null) {
+				Node subject = subjtype.getTypeCheckType();
+				if (subject != null) {
+//					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
 //					Object keytrans = getModelProcessor().processExpression(((PropOfSubject)expression.getLeft()));
 //					if (keytrans != null) {
 //						String key = generateLocalRestrictionKey(keytrans);
-////						addLocalRestriction(key, leftTypeCheckInfo, rightTypeCheckInfo, expression);
+					TripleElement tr = new TripleElement(subject, leftTypeCheckInfo.getTypeCheckType(), null);
+					getModelProcessor().handleLocalRestriction(expression, tr);
+//						addLocalRestriction(key, leftTypeCheckInfo, rightTypeCheckInfo, expression);
 //					}
-//				}
-//			}
-//		}
+				}
+			}
+		}
 
 		TypeCheckInfo binopreturn = combineBinaryOperationTypesWithComparison(operations, expression, expression.getLeft(), expression.getRight(), 
 				leftTypeCheckInfo, rightTypeCheckInfo, ImplicitPropertySide.NONE);
@@ -1848,7 +1862,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		boolean validSubject = true;
-		if (subject instanceof Name) {
+		if (subject instanceof Name || subject instanceof Declaration) {
 			// check for applicable local restriction first
 			TypeCheckInfo predicateType = null;
 			try {
@@ -1903,17 +1917,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		if (predicate != null) {
 			TypeCheckInfo predicateType = getType(predicate);
-			if (subject instanceof PropOfSubject) {
-//				TypeCheckInfo possubjtci = getType(subject);
-//				//TODO figure out how to check local restrictions before general check
-//				TypeCheckInfo subjtci = getType(((PropOfSubject)subject).getRight());
-////				Object transobj = getModelProcessor().processExpression(((PropOfSubject)subject));
-////				if (transobj != null && transobj instanceof TripleElement) {
-////					List<Node> lrs = getApplicableLocalRestrictions((TripleElement)transobj);
-////					if (lrs != null) {
-////						
-////					}
-////				}
+			if (subject instanceof PropOfSubject && predicateType.getExpressionType() instanceof ConceptName) {
 				checkEmbeddedPropOfSubject(subject, predicate);	
 				return predicateType;
 			}else if(validSubject && predicateType != null && predicateType.getTypeCheckType() != null){
@@ -1948,6 +1952,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					else {
 	//					cls = ((Name)subject).getName();
+						addEffectiveRangeUnit(className, predicateType);
+					}
+				}
+				else if (subject instanceof Declaration) {
+					SadlTypeReference str = ((Declaration)subject).getType();
+					if (str instanceof SadlSimpleTypeReference) {
+						String className = declarationExtensions.getConceptUri(((SadlSimpleTypeReference)str).getType());
 						addEffectiveRangeUnit(className, predicateType);
 					}
 				}
@@ -2035,7 +2046,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return "(null)";
 	}
 
-	protected List<Node> getApplicableLocalRestriction(Expression subject, Expression predicate) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
+	protected List<Node> getApplicableLocalRestriction(Expression subject, Expression predicate) throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException, CircularDefinitionException {
 		return null;
 	}
 
@@ -2088,6 +2099,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 				}
 			}
+			boolean possibleMatch = false;
 			if (!domainMatched) {
 				// there was no direct match
 				for (int i = 0; domainList != null && i < domainList.size() && !domainMatched; i++) {
@@ -2106,8 +2118,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									 * However, sometimes the range R2 isn't really a range but rather a local restriction, and in this case D1 may not be a subclass of R2,
 									 *    but it will then be the case that 
 									 */
-									if ( SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null)) {
-//									if ( SadlUtils.classIsSubclassOf(dmn.as(OntClass.class), subj, true, null)) {
+									if (SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null)) {
 										domainMatched = true;
 										break;
 									}
@@ -2117,6 +2128,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 											domainMatched = true;
 											break;
 										}
+									}
+									else if (SadlUtils.classIsSubclassOf(dmn.as(OntClass.class), subj, true, null)) {
+										// this could match but isn't guaranteed to do so; generate a warning
+										possibleMatch = true;
 									}
 								}
 							}
@@ -2161,7 +2176,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							}
 						}
 					}
-					createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, subjType, "chained property", true, predicate);
+					if (possibleMatch) {
+						StringBuilder warningMessageBuilder = new StringBuilder();
+						createErrorMessage(warningMessageBuilder, leftTypeCheckInfo, subjType, "chained property", false, predicate);
+						int idx = warningMessageBuilder.indexOf("cannot operate");
+						warningMessageBuilder.replace(idx, idx + 14, "may, but is not guaranteed (because of broader range), to operate");
+						issueAcceptor.addWarning(warningMessageBuilder.toString(), predicate);
+					}
+					else {
+						createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, subjType, "chained property", true, predicate);
+					}
 				} catch (CircularDefinitionException e) {
 					e.printStackTrace();
 				}
@@ -4173,7 +4197,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						OntConceptType stype = declarationExtensions.getOntConceptType((SadlResource)subject);
 						String subjuri = declarationExtensions.getConceptUri((SadlResource) subject);
 						String preduri = declarationExtensions.getConceptUri(predicate);
-						List<Node> lrs = getApplicableLocalRestrictions(subjuri, preduri);
+						NamedNode subjnn = new NamedNode(subjuri);
+						subjnn.setNodeType(NodeType.ClassNode);
+						NamedNode prednn = new NamedNode(preduri);
+						prednn.setNodeType(getModelProcessor().ontConceptTypeToNodeType(ptype));
+						List<Node> lrs = getApplicableLocalRestrictions(subjnn, prednn);
 						
 						OntResource subj = null;
 						String varName = null;
@@ -4689,7 +4717,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	protected List<Node> getApplicableLocalRestrictions(String subjuri, String propuri)
+	protected List<Node> getApplicableLocalRestrictions(NamedNode subj, NamedNode prop)
 			throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException,
 			TranslationException, ConfigurationException {
 		// TODO Auto-generated method stub
@@ -4699,7 +4727,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private List<Node> getApplicableLocalRestrictions(TripleElement tr) {
 		if (tr.getSubject() instanceof NamedNode && tr.getPredicate() instanceof NamedNode) {
 			try {
-				return getApplicableLocalRestrictions(((NamedNode)tr.getSubject()).toFullyQualifiedString(), ((NamedNode)tr.getPredicate()).toFullyQualifiedString());
+				return getApplicableLocalRestrictions((NamedNode)tr.getSubject(), (NamedNode)tr.getPredicate());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
