@@ -49,7 +49,6 @@ public class SadlPreferences {
 	public static final PreferenceKey P_USE_ARTICLES_IN_VALIDATION= new PreferenceKey("use_articles_in_validation", String.valueOf(false));
 	public static final PreferenceKey TYPE_CHECKING_WARNING_ONLY = new PreferenceKey("typeCheckingWarningOnly", String.valueOf(false));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
-	public static final PreferenceKey USE_IMPLIED_PROPERTIES_IN_TRANSLATION = new PreferenceKey("impliedPropertiesInTranslation", String.valueOf(true));
 	public static final PreferenceKey CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES = new PreferenceKey("domainAndRangeAsUnionClasses", String.valueOf(true));
 	//	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
 	public static final PreferenceKey GENERATE_METRICS_REPORT_ON_CLEAN_BUILD = new PreferenceKey("generateMetricsReport", String.valueOf(false));
@@ -83,7 +82,6 @@ public class SadlPreferences {
 //			DISABLE_TYPE_CHECKING,
 			TYPE_CHECKING_WARNING_ONLY,
 			IGNORE_UNITTEDQUANTITIES,
-			USE_IMPLIED_PROPERTIES_IN_TRANSLATION,
 			CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES,
 //			ENABLE_METRICS_COLLECTION,
 			GENERATE_METRICS_REPORT_ON_CLEAN_BUILD,
