@@ -7772,6 +7772,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (val instanceof SadlResource) {
 					String uri = getDeclarationExtensions().getConceptUri((SadlResource) val);
 					rsrcval = getTheJenaModel().getResource(uri);
+					OntConceptType valueType = getDeclarationExtensions().getOntConceptType((SadlResource)val);
+			          if(propuri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#reference_class") && valueType.equals(OntConceptType.VARIABLE)) 
+			          {
+			            addError("Undefined class", val);
+			              
+			          }
 				} else if (val instanceof SadlInstance) {
 					rsrcval = processSadlInstance((SadlInstance) val);
 				} else if (val instanceof SadlExplicitValue) {
