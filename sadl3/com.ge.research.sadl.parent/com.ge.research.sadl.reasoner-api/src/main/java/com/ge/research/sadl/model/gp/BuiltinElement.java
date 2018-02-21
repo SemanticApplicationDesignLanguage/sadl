@@ -29,6 +29,7 @@ public class BuiltinElement extends GraphPatternElement {
     private static final Logger logger = LoggerFactory.getLogger(BuiltinElement.class);
 	private String funcName = null;
 	private String funcUri = null;	// URI of function if given
+	private String funcPrefix = null;  // QName prefix if given
 	private BuiltinType funcType = null;
 	private List<Node> arguments = null;
 	private int expectedArgCount = 0;
@@ -338,6 +339,14 @@ public class BuiltinElement extends GraphPatternElement {
 
 	public void setFuncUri(String funcUri) {
 		this.funcUri = funcUri;
+	}
+
+	public String getFuncPrefix() {
+		return funcPrefix;
+	}
+
+	public void setFuncPrefix(String funcPrefix) {
+		this.funcPrefix = funcPrefix;
 	}
 
 }

@@ -189,7 +189,12 @@ class SADLValidator extends AbstractSADLValidator {
 				}
 				if (!foundInBody) {
 					var errMsg = "Rule conclusion contains variable '" + declarationExtensions.getConcreteName(name.name) + "' which is not bound in the rule premises."
+					if (name.eContainer instanceof Name && (name.eContainer as Name).function) {
+						warning(errMsg,  RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+					}
+					else {
 					error(errMsg, RULE_STATEMENT__THENS, UNBOUND_VARIABLE_IN_RULE_HEAD);
+					}
 				}
 			}
 		}

@@ -10,6 +10,8 @@ com.ge.research.sadl.jena.reasoner.builtin.Floor
 com.ge.research.sadl.jena.reasoner.builtin.GetInstance
 com.ge.research.sadl.jena.reasoner.builtin.GreaterThan
 com.ge.research.sadl.jena.reasoner.builtin.LessThan
+com.ge.research.sadl.jena.reasoner.builtin.List
+com.ge.research.sadl.jena.reasoner.builtin.ListToString
 com.ge.research.sadl.jena.reasoner.builtin.Localname
 com.ge.research.sadl.jena.reasoner.builtin.Max
 com.ge.research.sadl.jena.reasoner.builtin.Min

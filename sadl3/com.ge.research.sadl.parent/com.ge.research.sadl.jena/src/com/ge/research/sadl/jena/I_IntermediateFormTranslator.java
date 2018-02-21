@@ -5,6 +5,8 @@ import java.util.List;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface I_IntermediateFormTranslator {
@@ -16,13 +18,13 @@ public interface I_IntermediateFormTranslator {
 
 	abstract Object cook(Object toCookObj) throws TranslationException;
 
-	List<GraphPatternElement> listToAnd(List<GraphPatternElement> patterns);
+	List<GraphPatternElement> listToAnd(List<GraphPatternElement> patterns) throws InvalidNameException, InvalidTypeException, TranslationException;
 
 	void setStartingVariableNumber(int vn);
 
 	int getVariableNumber();
 
-	void flattenJunction(Junction element);
+	void flattenJunction(Junction element) throws InvalidNameException, InvalidTypeException, TranslationException;
 
 	void setEncapsulatingTarget(Object _encapsulatingTarget);
 

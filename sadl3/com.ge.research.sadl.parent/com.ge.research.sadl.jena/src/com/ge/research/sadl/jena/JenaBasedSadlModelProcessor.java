@@ -1704,8 +1704,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// need range of property
 					tci = getModelValidator().getType(((SubjHasProp) defnContainer).getProp());
 				}
+			} else if (sr.eContainer() instanceof Name && ((Name)sr.eContainer()).isFunction()) {
+				addWarning("Variable '" + var.getName() + "' is not defined", sr);
 			} else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null) {
-				addError("Unhandled variable definition", sr);
+				addError("Variable '" + var.getName() + "' is not defined", sr);
 			}
 			if (tci != null && tci.getTypeCheckType() instanceof NamedNode) {
 				setVarType(var, tci.getTypeCheckType(), tci.getRangeValueType().equals(RangeValueType.LIST), sr);
@@ -2742,12 +2744,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addNamedStructureAnnotations(rl, annotations);
 			}
 		}
-//		try {
-//			checkForMissingGraphPatterns(rule, element);
-//		} catch (CircularDependencyException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		try {
+			checkForMissingGraphPatterns(rule, element);
+		} catch (CircularDependencyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		setTarget(null);
 	}
 
@@ -4459,19 +4461,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		EList<Expression> arglist = expr.getArglist();
 		Node fnnode = processExpression(expr.getName());
-		String funcname = null;
-		if (fnnode instanceof VariableNode) {
-			funcname = ((VariableNode) fnnode).getName();
+		BuiltinElement builtin = new BuiltinElement();
+		if (fnnode instanceof NamedNode) {
+			builtin.setFuncName(((NamedNode) fnnode).getName());
+			builtin.setFuncPrefix(((NamedNode)fnnode).getPrefix());
+			builtin.setFuncUri(((NamedNode)fnnode).toFullyQualifiedString());
 		} else if (fnnode == null) {
 			addError("Function not found", expr);
 			return null;
 		} else {
-			funcname = fnnode.toString();
-		}
-		BuiltinElement builtin = new BuiltinElement();
-		builtin.setFuncName(funcname);
-		if (fnnode instanceof NamedNode && ((NamedNode) fnnode).getNamespace() != null) {
-			builtin.setFuncUri(fnnode.toFullyQualifiedString());
+			builtin.setFuncName(fnnode.toString());
 		}
 		if (arglist != null && arglist.size() > 0) {
 			List<Object> args = new ArrayList<Object>();
@@ -5403,6 +5402,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (gpe instanceof Node) {
 			Object[] result = new Object[2];
 			result[0] = gpe;
+			if (rest instanceof List<?>) {
+				if (((List<?>)rest).size() == 1) {
+					rest = ((List<?>)rest).get(0);
+				}
+				else {
+					rest = listToSingleJunction(rest);
+				}
+			}
 			result[1] = rest;
 			return result;
 		}
@@ -5423,7 +5430,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return jct;
 	}
 
-	protected Object postProcessTranslationResult(Object result) throws TranslationException {
+	protected Object postProcessTranslationResult(Object result) throws TranslationException, InvalidNameException, InvalidTypeException {
 		if (result instanceof Object[] && ((Object[]) result).length == 2) {
 			if (((Object[]) result)[0] instanceof NamedNode) {
 				result = ((Object[]) result)[1];
@@ -5450,7 +5457,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return result;
 	}
 
-	private Object listToSingleJunction(Object result) {
+	private Object listToSingleJunction(Object result) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (((List<?>) result).size() == 1) {
 			result = ((List<?>) result).get(0);
 		} else {
@@ -10651,6 +10658,61 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		processTriplesOfInterestForMissingPatterns(searchResults, null, element);
 	}
 
+	protected class InvertedTreePathStep {
+		com.hp.hpl.jena.rdf.model.Resource lowerNode;
+		Property edgeClimbed;
+		com.hp.hpl.jena.rdf.model.Resource upperNode;
+		private List<InvertedTreePathStep> above;
+		
+		public InvertedTreePathStep(com.hp.hpl.jena.rdf.model.Resource upper, Property prop, com.hp.hpl.jena.rdf.model.Resource lower) {
+			lowerNode = lower;
+			edgeClimbed = prop;
+			upperNode = upper;
+		}
+		public List<InvertedTreePathStep> getAbove() {
+			return above;
+		}
+		public void setAbove(List<InvertedTreePathStep> above) {
+			this.above = above;
+		}
+		public void addAbove(InvertedTreePathStep itps) {
+			if (getAbove() == null) {
+				above = new ArrayList<InvertedTreePathStep>();
+			}
+			above.add(itps);
+		}
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("rdf(");
+			if (upperNode != null) {
+				sb.append(upperNode.toString());
+			}
+			else {
+				sb.append("null");
+			}
+			sb.append(",");
+			sb.append(edgeClimbed.toString());
+			sb.append(",");
+			if (lowerNode != null) {
+				sb.append(lowerNode.toString());
+			}
+			else {
+				sb.append("null");
+			}
+			sb.append(")");
+			if (above != null) {
+				for (int i = 0; i < above.size(); i++) {
+					sb.append("\n   linked to above: ");
+					sb.append(above.get(i).toString());
+				}
+			}
+			return sb.toString();
+		}
+	}
+	
+	protected Map<com.hp.hpl.jena.rdf.model.Resource, InvertedTreePathStep> invertedTreesByLowerNode = new HashMap<com.hp.hpl.jena.rdf.model.Resource, InvertedTreePathStep>();
+	protected List<OntClass> loneClassNodes = new ArrayList<OntClass>();
+	
 	/**
 	 * Method to look through a list of GraphPatternElements for TripleElements of interest.
 	 * Triples of interest may be added in the course of this processing, e.g., a lone property
@@ -10663,57 +10725,173 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 */
 	protected void searchGraphPatternElementListForTriplesOfInterest(Map<GraphPatternElement, Map<TripleElement, NamedNode>> searchResults, List<GraphPatternElement> gpes)
 			throws InvalidTypeException, TranslationException {
+				InvertedTreePathStep below = null;
 				for (int i = 0; i < gpes.size(); i++) {
 					GraphPatternElement gpe = gpes.get(i);
-					List<TripleElement> triplesOfInterest = new ArrayList<TripleElement>();
-					triplesOfInterest = getTriplesOfInterestList(triplesOfInterest, gpe);
-					for (int j = 0; triplesOfInterest != null && j < triplesOfInterest.size(); j++) {
-						Map<TripleElement, NamedNode> innerMap = null;
-						TripleElement tripleOfInterest = triplesOfInterest.get(j);
-						Node sn = tripleOfInterest.getSubject();
-						if (sn == null) {
-							Node pn = tripleOfInterest.getPredicate();
-							if (pn instanceof NamedNode && isProperty(((NamedNode)pn).getNodeType())) {
-								StmtIterator dmnitr = getTheJenaModel().listStatements(getTheJenaModel().getProperty(pn.toFullyQualifiedString()), RDFS.domain, (RDFNode)null);
-								int idx = j;
-								while (dmnitr.hasNext()) {
-									RDFNode dmnn = dmnitr.nextStatement().getObject();
-									if (dmnn.isURIResource()) {
-										NamedNode dmnnn = new NamedNode(dmnn.asResource().getURI());
-										dmnnn.setNodeType(NodeType.ClassNode);
-										if (idx == j) {
-											innerMap = searchResults.get(gpe);
-											if (innerMap == null) {
-												innerMap = new HashMap<TripleElement, NamedNode>();
-												searchResults.put(gpe,  innerMap);
-											}
-											innerMap.put(tripleOfInterest, dmnnn);
-										}
-										else {
-											System.err.println("Unhandled union domain");
-										}
-									}
-								}
-							}
-							else {
-								throw new TranslationException("Predicate isn't a NamedNode property--shouldn't happen");
-							}
-						}
-						else if (sn instanceof NamedNode){
-							innerMap = searchResults.get(gpe);
-							if (innerMap == null) {
-								innerMap = new HashMap<TripleElement, NamedNode>();
-								searchResults.put(gpe,  innerMap);
-							}
-							innerMap.put(tripleOfInterest, (NamedNode) sn);
-						}
-						else {
-//							throw new TranslationException("Subject isn't a NamedNode--shouldn't happen");
-							System.err.println("Subject isn't a NamedNode--shouldn't happen");
-						}
+//					List<TripleElement> triplesOfInterest = new ArrayList<TripleElement>();
+					below = buildInvertedTrees(gpe, below);
+//					triplesOfInterest = getTriplesOfInterestList(triplesOfInterest, gpe);
+//					for (int j = 0; triplesOfInterest != null && j < triplesOfInterest.size(); j++) {
+//						Map<TripleElement, NamedNode> innerMap = null;
+//						TripleElement tripleOfInterest = triplesOfInterest.get(j);
+//						Node sn = tripleOfInterest.getSubject();
+//						if (sn == null) {
+//							Node pn = tripleOfInterest.getPredicate();
+//							if (pn instanceof NamedNode && isProperty(((NamedNode)pn).getNodeType())) {
+//								StmtIterator dmnitr = getTheJenaModel().listStatements(getTheJenaModel().getProperty(pn.toFullyQualifiedString()), RDFS.domain, (RDFNode)null);
+//								int idx = j;
+//								while (dmnitr.hasNext()) {
+//									RDFNode dmnn = dmnitr.nextStatement().getObject();
+//									if (dmnn.isURIResource()) {
+//										NamedNode dmnnn = new NamedNode(dmnn.asResource().getURI());
+//										dmnnn.setNodeType(NodeType.ClassNode);
+//										if (idx == j) {
+//											innerMap = searchResults.get(gpe);
+//											if (innerMap == null) {
+//												innerMap = new HashMap<TripleElement, NamedNode>();
+//												searchResults.put(gpe,  innerMap);
+//											}
+//											innerMap.put(tripleOfInterest, dmnnn);
+//										}
+//										else {
+//											System.err.println("Unhandled union domain");
+//										}
+//									}
+//								}
+//							}
+//							else {
+//								throw new TranslationException("Predicate isn't a NamedNode property--shouldn't happen");
+//							}
+//						}
+//						else if (sn instanceof NamedNode){
+//							innerMap = searchResults.get(gpe);
+//							if (innerMap == null) {
+//								innerMap = new HashMap<TripleElement, NamedNode>();
+//								searchResults.put(gpe,  innerMap);
+//							}
+//							innerMap.put(tripleOfInterest, (NamedNode) sn);
+//						}
+//						else {
+////							throw new TranslationException("Subject isn't a NamedNode--shouldn't happen");
+//							System.err.println("Subject isn't a NamedNode--shouldn't happen");
+//						}
+//					}
+				}
+			}
+
+	private InvertedTreePathStep buildInvertedTrees(GraphPatternElement gpe, InvertedTreePathStep below) {
+		InvertedTreePathStep top = below;
+		if (gpe instanceof TripleElement) {
+			Node subj =((TripleElement)gpe).getSubject();
+			Node pred = ((TripleElement)gpe).getPredicate();
+			Node obj = ((TripleElement)gpe).getObject();
+			if (subj instanceof VariableNode) {
+				subj = ((VariableNode)subj).getType();
+			}
+			else if (subj instanceof ProxyNode) {
+				top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)subj).getProxyFor(), below);
+			}
+			if (subj instanceof NamedNode) {
+				top = processNamedNodeInGraphPattern(top, below, subj, pred, obj);
+			}
+		}
+		else if (gpe instanceof BuiltinElement) {
+			if (((BuiltinElement)gpe).getArguments() != null) {
+				for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
+					Node arg = ((BuiltinElement)gpe).getArguments().get(i);
+					if (arg instanceof ProxyNode) {
+						top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)arg).getProxyFor(), below);
+					}
+					else if (arg instanceof NamedNode) {
+						top = processNamedNodeInGraphPattern(top, below, arg, null, null);
 					}
 				}
 			}
+		}
+		else if (gpe instanceof Junction) {
+			Object lhs = ((Junction)gpe).getLhs();
+			if (lhs instanceof ProxyNode) {
+				top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)lhs).getProxyFor(), below);
+			}
+			Object rhs = ((Junction)gpe).getRhs();
+			if (rhs instanceof ProxyNode) {
+				top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)rhs).getProxyFor(), below);
+			}
+		}
+		return top;
+	}
+
+	private InvertedTreePathStep processNamedNodeInGraphPattern(InvertedTreePathStep top, InvertedTreePathStep below,
+			Node subj, Node pred, Node obj) {
+		if (subj instanceof VariableNode) {
+			subj = ((VariableNode)subj).getType();
+		}
+		if (isProperty(((NamedNode)subj).getNodeType())) {
+			Property op = getTheJenaModel().getProperty(((NamedNode)subj).toFullyQualifiedString());
+			StmtIterator stmtitr = getTheJenaModel().listStatements(op, RDFS.domain, (RDFNode)null);
+			while (stmtitr.hasNext()) {
+				RDFNode objNode = stmtitr.nextStatement().getObject();
+				if (objNode.isResource()) {
+					if (objNode.asResource().isURIResource()) {
+						if (objNode.asResource().canAs(OntClass.class)) {
+							InvertedTreePathStep itps = new InvertedTreePathStep(null, op, (com.hp.hpl.jena.rdf.model.Resource) objNode);
+							invertedTreesByLowerNode.put(op, itps);
+							if (below != null) {
+								below.addAbove(itps);
+							}
+							top = itps;
+						}
+					}
+					else if (objNode.canAs(OntClass.class) && objNode.as(OntClass.class).isUnionClass()) {
+						ExtendedIterator<? extends OntClass> ummbrs = objNode.as(OntClass.class).asUnionClass().listOperands();
+						while (ummbrs.hasNext()) {
+							OntClass ummbr = ummbrs.next();
+							if (ummbr.isURIResource()) {
+								
+							}
+						}	
+					}
+				}
+			}
+
+		}
+		else if (((NamedNode)subj).getNodeType().equals(NodeType.ClassNode)) {
+			com.hp.hpl.jena.rdf.model.Resource sn = getTheJenaModel().getResource(((NamedNode)subj).toFullyQualifiedString());
+			if (pred == null) {
+				if (sn.canAs(OntClass.class)) {
+					if (!loneClassNodes.contains(sn.as(OntClass.class ))) {
+						loneClassNodes.add(sn.as(OntClass.class));
+					}
+				}
+			}
+			else if (pred instanceof NamedNode) {
+				Property op = getTheJenaModel().getProperty(((NamedNode)pred).toFullyQualifiedString());
+				if (obj != null) {
+					if (obj instanceof NamedNode) {
+						if (obj instanceof VariableNode && ((VariableNode)obj).getType() instanceof NamedNode) {
+							obj = ((VariableNode)obj).getType();
+						}
+						OntClass objcls = getTheJenaModel().getOntClass(((NamedNode)obj).toFullyQualifiedString());
+						InvertedTreePathStep itps = new InvertedTreePathStep(objcls, op, sn);
+						invertedTreesByLowerNode.put(op, itps);
+						if (below != null) {
+							below.addAbove(itps);
+						}
+						top = itps;
+					}
+				}
+				else {
+					InvertedTreePathStep itps = new InvertedTreePathStep(null, op, sn);
+					invertedTreesByLowerNode.put(op, itps);
+					if (below != null) {
+						below.addAbove(itps);
+					}
+					top = itps;
+				}
+			}
+		}
+		return top;
+	}
 
 	/**
 	 * Method to process triples of interest and add [additional] missing patterns as needed.
