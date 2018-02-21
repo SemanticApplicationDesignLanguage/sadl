@@ -148,15 +148,15 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testUnits_09() {
 		val results = newArrayList(
-"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), is(v0,v1)))]",
-"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), is(v0,v1)))]",
-"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant5, model:cValue, v1), and(unittedQuantity(v1,\"seconds\",v2), is(v0,v2))))]",
-"[and(rdf(model:System, model:past, v0), and(+(2 \"seconds\",3 \"seconds\",v1), is(v0,v1)))]",
-"[and(rdf(model:System, model:past, v0), and(+(2 \"seconds\",3 \"seconds\",v1), is(v0,v1)))]",
-"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), and(+(v1,3 \"seconds\",v2), is(v0,v2))))]",
-"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), and(+(v1,3 \"seconds\",v2), is(v0,v2))))]",
-"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant3, model:constantValue, v1), and(+(v1,3 \"seconds\",v2), is(v0,v2))))]",
-"[and(rdf(model:System, model:past, v0), and(rdf(model:TimingConstant5, model:cValue, v1), and(+(v1,3,v2), and(unittedQuantity(v2,\"seconds\",v3), is(v0,v3)))))]",
+"[and((rdf(model:System, model:past, v0)), (and((rdf(model:TimingConstant3, model:constantValue, v1)), (is(v0,v1)))))]",
+"[and((rdf(model:System, model:past, v0)), (and((rdf(model:TimingConstant3, model:constantValue, v1)), (is(v0,v1)))))]",
+"[and((rdf(model:System, model:past, v0)), (and((rdf(model:TimingConstant5, model:cValue, v1)), (and((unittedQuantity(v1,\"seconds\",v2)), (is(v0,v2)))))))]",
+"[and((rdf(model:System, model:past, v0)), (and((+(2 \"seconds\",3 \"seconds\",v1)), (is(v0,v1)))))]",
+"[and((rdf(model:System, model:past, v0)), (and((+(2 \"seconds\",3 \"seconds\",v1)), (is(v0,v1)))))]",
+"[and((rdf(model:System, model:past, v0)), (and((rdf(model:TimingConstant3, model:constantValue, v1)), (and((+(v1,3 \"seconds\",v2)), (is(v0,v2)))))))]",
+"[and((rdf(model:System, model:past, v0)), (and((rdf(model:TimingConstant3, model:constantValue, v1)), (and((+(v1,3 \"seconds\",v2)), (is(v0,v2)))))))]",
+"[and((rdf(model:System, model:past, v0)), (and((rdf(model:TimingConstant3, model:constantValue, v1)), (and((+(v1,3 \"seconds\",v2)), (is(v0,v2)))))))]",
+"[and((rdf(model:System, model:past, v0)), (and((rdf(model:TimingConstant5, model:cValue, v1)), (and((+(v1,3,v2)), (and((unittedQuantity(v2,\"seconds\",v3)), (is(v0,v3)))))))))]",
 "[rdf(model:System, model:past, 3 \"seconds\")]")
 		'''
 			 uri "http://sadl.org/model.sadl" alias model (alias "This isn't the model prefix, this is an rdfs:label on the ontology") 
@@ -656,8 +656,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testPrecedence_02() {
 		val forTest = newArrayList(
-"[and(rdf(Precedence:Jane, Precedence:friend, v0), and(rdf(v0, Precedence:age, v1), rdf(Precedence:Joe, Precedence:age, v1)))]",
-"[and(rdf(Precedence:Joe, Precedence:age, v1), and(rdf(Precedence:Jane, Precedence:friend, v0), rdf(v0, Precedence:age, v1)))]"
+"[and((rdf(Precedence:Jane, Precedence:friend, v0)), (and((rdf(v0, Precedence:age, v1)), (rdf(Precedence:Joe, Precedence:age, v1)))))]",
+"[and((rdf(Precedence:Joe, Precedence:age, v1)), (and((rdf(Precedence:Jane, Precedence:friend, v0)), (rdf(v0, Precedence:age, v1)))))]"
 		)
 		'''
 			 uri "http://sadl.org/Precedence.sadl" alias Precedence.
@@ -727,12 +727,12 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				}
 			}
 			assertTrue(f1 && f2)
-			val results = processor.getIntermediateFormResults(false, true)
-			if (issues !== null) {
-				for (issue:issues) {
-					println(issue.message)
-				}
-			}
+//			val results = processor.getIntermediateFormResults(false, true)
+//			if (issues !== null) {
+//				for (issue:issues) {
+//					println(issue.message)
+//				}
+//			}
 //			assertTrue(results.size==7)
 //			for (result:results) {
 //				println(result.toString)
@@ -747,7 +747,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_01() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), rdf(v0, SubjHasProp:prop2, SubjHasProp:InstOfClass3))]"
+"[and((rdf(v0, SubjHasProp:prop1, v1)), (rdf(v0, SubjHasProp:prop2, SubjHasProp:InstOfClass3)))]"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -786,7 +786,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_01P() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))]"
+"[and((rdf(v0, SubjHasProp:prop1, v1)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)))]"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -825,7 +825,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_02() {
 		val forTest = newArrayList(
-"[and(rdf(v1, SubjHasProp:prop1, v2), and(rdf(v1, SubjHasProp:prop2, v0), rdf(v1, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))]"
+"[and((rdf(v1, SubjHasProp:prop1, v2)), (and((rdf(v1, SubjHasProp:prop2, v0)), (rdf(v1, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))))]"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -864,7 +864,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_02P() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))]"
+"[and((rdf(v0, SubjHasProp:prop1, v1)), (and((rdf(v1, SubjHasProp:prop2, v2)), (rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))))]"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -942,7 +942,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_04() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))))]"
+"[and((rdf(v0, SubjHasProp:prop1, v1)), (and((rdf(v1, SubjHasProp:prop2, v2)), (and((rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)))))))]"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -980,7 +980,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_05() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3), rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3))))))]"
+"[and((rdf(v0, SubjHasProp:prop1, v1)), (and((rdf(v1, SubjHasProp:prop2, v2)), (and((rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), (and((rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), (and((rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
