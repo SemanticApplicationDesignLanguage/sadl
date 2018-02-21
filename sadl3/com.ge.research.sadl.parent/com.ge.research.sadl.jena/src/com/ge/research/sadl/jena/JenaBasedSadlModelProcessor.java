@@ -10826,15 +10826,53 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (subj instanceof VariableNode) {
 			subj = ((VariableNode)subj).getType();
 		}
-		if (isProperty(((NamedNode)subj).getNodeType())) {
-			Property op = getTheJenaModel().getProperty(((NamedNode)subj).toFullyQualifiedString());
-			StmtIterator stmtitr = getTheJenaModel().listStatements(op, RDFS.domain, (RDFNode)null);
-			while (stmtitr.hasNext()) {
-				RDFNode objNode = stmtitr.nextStatement().getObject();
-				if (objNode.isResource()) {
-					if (objNode.asResource().isURIResource()) {
-						if (objNode.asResource().canAs(OntClass.class)) {
-							InvertedTreePathStep itps = new InvertedTreePathStep(null, op, (com.hp.hpl.jena.rdf.model.Resource) objNode);
+		if (subj != null) {
+			if (isProperty(((NamedNode)subj).getNodeType())) {
+				Property op = getTheJenaModel().getProperty(((NamedNode)subj).toFullyQualifiedString());
+				StmtIterator stmtitr = getTheJenaModel().listStatements(op, RDFS.domain, (RDFNode)null);
+				while (stmtitr.hasNext()) {
+					RDFNode objNode = stmtitr.nextStatement().getObject();
+					if (objNode.isResource()) {
+						if (objNode.asResource().isURIResource()) {
+							if (objNode.asResource().canAs(OntClass.class)) {
+								InvertedTreePathStep itps = new InvertedTreePathStep(null, op, (com.hp.hpl.jena.rdf.model.Resource) objNode);
+								invertedTreesByLowerNode.put(op, itps);
+								if (below != null) {
+									below.addAbove(itps);
+								}
+								top = itps;
+							}
+						}
+						else if (objNode.canAs(OntClass.class) && objNode.as(OntClass.class).isUnionClass()) {
+							ExtendedIterator<? extends OntClass> ummbrs = objNode.as(OntClass.class).asUnionClass().listOperands();
+							while (ummbrs.hasNext()) {
+								OntClass ummbr = ummbrs.next();
+								if (ummbr.isURIResource()) {
+									
+								}
+							}	
+						}
+					}
+				}
+			}
+			else if (((NamedNode)subj).getNodeType().equals(NodeType.ClassNode)) {
+				com.hp.hpl.jena.rdf.model.Resource sn = getTheJenaModel().getResource(((NamedNode)subj).toFullyQualifiedString());
+				if (pred == null) {
+					if (sn.canAs(OntClass.class)) {
+						if (!loneClassNodes.contains(sn.as(OntClass.class ))) {
+							loneClassNodes.add(sn.as(OntClass.class));
+						}
+					}
+				}
+				else if (pred instanceof NamedNode) {
+					Property op = getTheJenaModel().getProperty(((NamedNode)pred).toFullyQualifiedString());
+					if (obj != null) {
+						if (obj instanceof NamedNode) {
+							if (obj instanceof VariableNode && ((VariableNode)obj).getType() instanceof NamedNode) {
+								obj = ((VariableNode)obj).getType();
+							}
+							OntClass objcls = getTheJenaModel().getOntClass(((NamedNode)obj).toFullyQualifiedString());
+							InvertedTreePathStep itps = new InvertedTreePathStep(objcls, op, sn);
 							invertedTreesByLowerNode.put(op, itps);
 							if (below != null) {
 								below.addAbove(itps);
@@ -10842,51 +10880,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							top = itps;
 						}
 					}
-					else if (objNode.canAs(OntClass.class) && objNode.as(OntClass.class).isUnionClass()) {
-						ExtendedIterator<? extends OntClass> ummbrs = objNode.as(OntClass.class).asUnionClass().listOperands();
-						while (ummbrs.hasNext()) {
-							OntClass ummbr = ummbrs.next();
-							if (ummbr.isURIResource()) {
-								
-							}
-						}	
-					}
-				}
-			}
-
-		}
-		else if (((NamedNode)subj).getNodeType().equals(NodeType.ClassNode)) {
-			com.hp.hpl.jena.rdf.model.Resource sn = getTheJenaModel().getResource(((NamedNode)subj).toFullyQualifiedString());
-			if (pred == null) {
-				if (sn.canAs(OntClass.class)) {
-					if (!loneClassNodes.contains(sn.as(OntClass.class ))) {
-						loneClassNodes.add(sn.as(OntClass.class));
-					}
-				}
-			}
-			else if (pred instanceof NamedNode) {
-				Property op = getTheJenaModel().getProperty(((NamedNode)pred).toFullyQualifiedString());
-				if (obj != null) {
-					if (obj instanceof NamedNode) {
-						if (obj instanceof VariableNode && ((VariableNode)obj).getType() instanceof NamedNode) {
-							obj = ((VariableNode)obj).getType();
-						}
-						OntClass objcls = getTheJenaModel().getOntClass(((NamedNode)obj).toFullyQualifiedString());
-						InvertedTreePathStep itps = new InvertedTreePathStep(objcls, op, sn);
+					else {
+						InvertedTreePathStep itps = new InvertedTreePathStep(null, op, sn);
 						invertedTreesByLowerNode.put(op, itps);
 						if (below != null) {
 							below.addAbove(itps);
 						}
 						top = itps;
 					}
-				}
-				else {
-					InvertedTreePathStep itps = new InvertedTreePathStep(null, op, sn);
-					invertedTreesByLowerNode.put(op, itps);
-					if (below != null) {
-						below.addAbove(itps);
-					}
-					top = itps;
 				}
 			}
 		}
