@@ -198,6 +198,54 @@ public class Query extends SadlCommand {
 		}
 		return toString(true);
 	}
+	
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder();
+		if (variables != null) {
+			sb.append(getKeyword());
+			if (isDistinct()) {
+				sb.append(" distinct");
+			}
+			if (variables.size() > 0) {
+				for (int i = 0; i < variables.size(); i++) {
+					sb.append(" ");
+					sb.append(variables.get(i).toDescriptiveString());
+				}
+			}
+			else {
+				sb.append(" *");
+			}
+			sb.append(" where ");
+		}
+		if (patterns != null) {
+			for (int i = 0; i < patterns.size(); i++) {
+				if (i > 0) {
+					sb.append(" . ");
+				}
+				sb.append(patterns.get(i).toDescriptiveString());
+			}
+		}
+		if (getOrderBy() != null) {
+			sb.append(" order by ");
+			List<OrderingPair> ops = getOrderBy();
+			for (int i = 0; i < ops.size(); i++) {
+				OrderingPair op = ops.get(i);
+				if (i > 0) {
+					sb.append(", ");
+				}
+				if (op.getOrder() != null) {
+					if (op.getOrder().equals(Order.DESC)) {
+						sb.append(" desc ");
+					}
+					else {
+						sb.append(" asc ");
+					}
+				}
+				sb.append(op.getVariable());
+			}
+		}
+		return sb.toString();
+	}
 
 	public void setSparqlQueryString(String sparqlQueryString) {
 		this.sparqlQueryString = sparqlQueryString;

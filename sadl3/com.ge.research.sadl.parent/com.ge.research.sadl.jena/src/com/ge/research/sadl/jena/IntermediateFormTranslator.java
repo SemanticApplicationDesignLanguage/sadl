@@ -1072,7 +1072,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			else if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int i = 0; i < args.size(); i++) {
+				for (int i = 0; args != null && i < args.size(); i++) {
 					if (args.get(i) instanceof ProxyNode) {
 						nullSubjects = getNullSubjectTriples(nullSubjects, (GraphPatternElement)((ProxyNode)args.get(i)).getProxyFor());
 					}
@@ -1125,7 +1125,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (!processed) {
 			if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int i = 0; i < args.size(); i++ ) {
+				for (int i = 0; args != null && i < args.size(); i++ ) {
 					Node arg = args.get(i);
 					if (arg instanceof ProxyNode) {
 						addImpliedAndExpandedProperties((GraphPatternElement)((ProxyNode)arg).getProxyFor());
