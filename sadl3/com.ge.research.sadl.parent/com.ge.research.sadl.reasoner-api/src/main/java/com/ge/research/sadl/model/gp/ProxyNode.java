@@ -141,4 +141,22 @@ public class ProxyNode extends Node {
 			return "(Exception encountered: " + t.getMessage() + ")";
 		}
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ProxyNode other = (ProxyNode) obj;
+		if (proxyFor == null) {
+			if (other.proxyFor != null)
+				return false;
+		} else if (!proxyFor.equals(other.proxyFor))
+			return false;
+
+		return true;
+	}
 }

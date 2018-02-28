@@ -963,12 +963,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e.printStackTrace();
 		}
 
-		String impPropDW = context.getPreferenceValues()
-				.getPreference(SadlPreferences.USE_IMPLIED_PROPERTIES_IN_TRANSLATION);
-		if (impPropDW != null) {
-			includeImpliedPropertiesInTranslation = Boolean.parseBoolean(impPropDW);
-		}
-
 		setTypeCheckingWarningsOnly(true);
 		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.TYPE_CHECKING_WARNING_ONLY);
 		if (typechecking != null) {
@@ -5119,7 +5113,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				&& ((BinaryOperation) expr.eContainer()).getRight() != null
 				&& ((BinaryOperation) expr.eContainer()).getRight().equals(qnm)) {
 			addError("It appears that '" + nm + "' is not defined.", expr);
-		} else {
+		}
+			
+		  else if (qnm.equals(expr) && expr.eContainer() instanceof BinaryOperation
+				      && ((BinaryOperation) expr.eContainer()).getLeft() != null
+				    && ((BinaryOperation) expr.eContainer()).getLeft().equals(qnm)) {
+				    addError("It appears that '" + nm + "' is not defined.", expr);
+				  }
+			
+			
+		 else {
 			return processExpression(qnm);
 		}
 		return null;
@@ -7776,6 +7779,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (val instanceof SadlResource) {
 					String uri = getDeclarationExtensions().getConceptUri((SadlResource) val);
 					rsrcval = getTheJenaModel().getResource(uri);
+					OntConceptType valueType = getDeclarationExtensions().getOntConceptType((SadlResource)val);
+			          if(propuri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#reference_class") && valueType.equals(OntConceptType.VARIABLE)) 
+			          {
+			            addError("Undefined class", val);
+			              
+			          }
 				} else if (val instanceof SadlInstance) {
 					rsrcval = processSadlInstance((SadlInstance) val);
 				} else if (val instanceof SadlExplicitValue) {

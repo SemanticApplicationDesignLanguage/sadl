@@ -194,5 +194,32 @@ public class Junction extends GraphPatternElement {
 		}
 		
 		sb.append(")");
-		return sb.toString();	}
+		return sb.toString();	
+	}
+	
+	@Override 
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		
+		Junction junction = (Junction)obj;
+		if(junctionName != junction.getJunctionName()) {
+			return false;
+		}
+		if(!junctionType.equals(junction.getJunctionType())) {
+			return false;
+		}
+		if(!lhs.equals(junction.getLhs())) {
+			return false;
+		}
+		if(!rhs.equals(junction.getRhs())) {
+			return false;
+		}
+		
+		return true;
+	}
 }
