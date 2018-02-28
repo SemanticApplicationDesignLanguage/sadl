@@ -1698,8 +1698,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// need range of property
 					tci = getModelValidator().getType(((SubjHasProp) defnContainer).getProp());
 				}
+			} else if (sr.eContainer() instanceof Name && ((Name)sr.eContainer()).isFunction()) {
+				addWarning("Variable '" + var.getName() + "' is not defined", sr);
 			} else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null) {
-				addError("Unhandled variable definition", sr);
+				addError("Variable '" + var.getName() + "' is not defined", sr);
 			}
 			if (tci != null && tci.getTypeCheckType() instanceof NamedNode) {
 				setVarType(var, tci.getTypeCheckType(), tci.getRangeValueType().equals(RangeValueType.LIST), sr);
@@ -3857,7 +3859,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private Object replaceDeclarationWithVariableAndAddUseDeclarationAsDefinition(Expression lexpr, Object lobj,
-			Expression rexpr, Object robj) throws TranslationException, InvalidTypeException {
+			Expression rexpr, Object robj) throws TranslationException, InvalidTypeException, InvalidNameException {
 		if (lobj instanceof VariableNode) {
 			Object[] declAndTrans = getDeclarationAndTranslation(rexpr);
 			if (declAndTrans != null) {
@@ -4234,10 +4236,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						objrsrc = listtype.as(OntResource.class);
 						classInObjectTypePropertyRange(pred, objrsrc, isList, expr);
 					} else {
-						throw new TranslationException("Unexpected error");
+						throw new TranslationException("Unexpected error: the list type of object list '" + ((NamedNode)obj).toFullyQualifiedString() + "' cannot be morphed to an OntResource");
 					}
 				} else {
-					throw new TranslationException("Unexpected error");
+					throw new TranslationException("Unexpected error: the object list '" + ((NamedNode)obj).toFullyQualifiedString() + "' cannot be morphed to an OntClass");
 				}
 			} else if (objtype.equals(NodeType.DataTypeNode)) {
 				datatypeInDatatypePropertyRange(pred, obj, isList, expr);
@@ -4253,10 +4255,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						objrsrc = listtype.as(OntResource.class);
 						datatypeInDatatypePropertyRange(pred, objrsrc, isList, expr);
 					} else {
-						throw new TranslationException("Unexpected error");
+						throw new TranslationException("Unexpected error: the list type of data list '" + ((NamedNode)obj).toFullyQualifiedString() + "' cannot be morphed to an OntResource");
 					}
 				} else {
-					throw new TranslationException("Unexpected error");
+					throw new TranslationException("Unexpected error: the data list '" + ((NamedNode)obj).toFullyQualifiedString() + "' cannot be morphed to an OntClass");
 				}
 			} else if (objtype.equals(NodeType.InstanceNode)) {
 				instanceInObjectTypePropertyRange(pred, obj, isList, expr);
@@ -4271,7 +4273,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					throw new TranslationException("Unexpected error, disagreement between objtype and actual obj");
 				}
 			} else {
-				throw new TranslationException("Unexpected error");
+				throw new TranslationException("Unexpected error: the type of '" + ((NamedNode)obj).toFullyQualifiedString() + "' (" + objtype.toString() + ") is not handled.");
 			}
 		} else if (obj instanceof ProxyNode) {
 			Object pf = ((ProxyNode) obj).getProxyFor();
@@ -4294,7 +4296,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								checkTripleRange(subjeo, predeo, (EObject) null, expr, subjNode, predNode, pred,
 										pnodetype, (NamedNode) rngnn, isList);
 							} else {
-								throw new TranslationException("Unexpected error");
+								throw new TranslationException("Unexpected error: range of property '" + ((NamedNode)pfpn).toFullyQualifiedString() + "' is not a named node (unions are not yet handled)");
 							}
 						} catch (DontTypeCheckException e) {
 							// TODO Auto-generated catch block
@@ -4304,7 +4306,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							e.printStackTrace();
 						}
 					} else {
-						throw new TranslationException("Unexpected error");
+						throw new TranslationException("Unexpected error: property in triple is not a named node.");
 					}
 				}
 			} else if (pf instanceof BuiltinElement) {
@@ -4329,7 +4331,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								checkTripleRange(subjeo, predeo, objeo, null, subjNode, predNode, pred, pnodetype,
 										bitype, ((NamedNode) bitype).isList());
 							} else {
-								throw new TranslationException("Unexpected error");
+								throw new TranslationException("Unexpected error: the return type of the builtin '" + ((BuiltinElement)pf).getFuncName() + "' isn't a NamedNode.");
 							}
 						}
 					} catch (InvalidNameException e) {
@@ -4356,10 +4358,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			} else {
-				throw new TranslationException("Unexpected error");
+				throw new TranslationException("Unexpected error: the object of the triple is a ProxyNode but the proxyFor type isn't handled (" + pf.getClass().getCanonicalName() + ")");
 			}
 		} else {
-			throw new TranslationException("Unexpected error");
+			throw new TranslationException("Unexpected error: the object of the triple is not a node of known type ('" + obj.getClass().getCanonicalName() + ")");
 		}
 	}
 
@@ -4453,19 +4455,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		EList<Expression> arglist = expr.getArglist();
 		Node fnnode = processExpression(expr.getName());
-		String funcname = null;
-		if (fnnode instanceof VariableNode) {
-			funcname = ((VariableNode) fnnode).getName();
+		BuiltinElement builtin = new BuiltinElement();
+		if (fnnode instanceof NamedNode) {
+			builtin.setFuncName(((NamedNode) fnnode).getName());
+			builtin.setFuncPrefix(((NamedNode)fnnode).getPrefix());
+			builtin.setFuncUri(((NamedNode)fnnode).toFullyQualifiedString());
 		} else if (fnnode == null) {
 			addError("Function not found", expr);
 			return null;
 		} else {
-			funcname = fnnode.toString();
-		}
-		BuiltinElement builtin = new BuiltinElement();
-		builtin.setFuncName(funcname);
-		if (fnnode instanceof NamedNode && ((NamedNode) fnnode).getNamespace() != null) {
-			builtin.setFuncUri(fnnode.toFullyQualifiedString());
+			builtin.setFuncName(fnnode.toString());
 		}
 		if (arglist != null && arglist.size() > 0) {
 			List<Object> args = new ArrayList<Object>();
@@ -4669,11 +4668,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	protected Junction createJunction(Expression expr, String name, Object lobj, Object robj) {
+	protected Junction createJunction(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Junction junction = new Junction();
 		junction.setJunctionName(name);
-		junction.setLhs(lobj);
-		junction.setRhs(robj);
+		junction.setLhs(nodeCheck(lobj));
+		junction.setRhs(nodeCheck(robj));
 		return junction;
 	}
 
@@ -4980,7 +4979,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (typeobj instanceof NamedNode) {
 					((NamedNode) typeobj).setList(true);
 				} else {
-					throw new TranslationException("Unhandled case");
+					throw new TranslationException("Unhandled case: type returned from simple type reference is '" + typeobj.getClass().getCanonicalName() + "'");
 				}
 			}
 			return typeobj;
@@ -4997,7 +4996,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (typeobj instanceof NamedNode) {
 					((NamedNode) typeobj).setList(true);
 				} else {
-					throw new TranslationException("Unhandled case");
+					throw new TranslationException("Unhandled case: type returned from primitive data type List is '" + typeobj.getClass().getCanonicalName() + "'");
 				}
 			}
 			return typeobj;
@@ -5406,6 +5405,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (gpe instanceof Node) {
 			Object[] result = new Object[2];
 			result[0] = gpe;
+			if (rest instanceof List<?>) {
+				if (((List<?>)rest).size() == 1) {
+					rest = ((List<?>)rest).get(0);
+				}
+				else {
+					rest = listToSingleJunction(rest);
+				}
+			}
 			result[1] = rest;
 			return result;
 		}
@@ -5426,7 +5433,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return jct;
 	}
 
-	protected Object postProcessTranslationResult(Object result) throws TranslationException {
+	protected Object postProcessTranslationResult(Object result) throws TranslationException, InvalidNameException, InvalidTypeException {
 		if (result instanceof Object[] && ((Object[]) result).length == 2) {
 			if (((Object[]) result)[0] instanceof NamedNode) {
 				result = ((Object[]) result)[1];
@@ -5453,7 +5460,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return result;
 	}
 
-	private Object listToSingleJunction(Object result) {
+	private Object listToSingleJunction(Object result) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (((List<?>) result).size() == 1) {
 			result = ((List<?>) result).get(0);
 		} else {
@@ -7362,10 +7369,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (type instanceof SadlPrimitiveDataType) {
 					com.hp.hpl.jena.rdf.model.Resource rsrc = sadlTypeReferenceToResource(type);
 					if (isList) {
-						try {
-							cls = getOrCreateListSubclass(null, rsrc.getURI(), type.eResource());
-						} catch (JenaProcessorException e) {
-							addError(e.getMessage(), type);
+						if (rsrc instanceof OntClass) {
+							// List subclass already created
+							cls = (OntClass)rsrc;
+						}
+						else {
+							try {
+								cls = getOrCreateListSubclass(null, rsrc.getURI(), type.eResource());
+							} catch (JenaProcessorException e) {
+								addError(e.getMessage(), type);
+							}
 						}
 					} else {
 						// AATIM-2306 If not list, generate error when creating instances of primitive
@@ -10627,6 +10640,72 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
+	protected class InvertedTreePathStep {
+		com.hp.hpl.jena.rdf.model.Resource lowerNode;
+		Property edgeClimbed;
+		private com.hp.hpl.jena.rdf.model.Resource upperNode;
+		private List<InvertedTreePathStep> above;
+		
+		public InvertedTreePathStep(com.hp.hpl.jena.rdf.model.Resource upper, Property prop, com.hp.hpl.jena.rdf.model.Resource lower) {
+			lowerNode = lower;
+			edgeClimbed = prop;
+			setUpperNode(upper);
+		}
+		public List<InvertedTreePathStep> getAbove() {
+			return above;
+		}
+		public void setAbove(List<InvertedTreePathStep> above) {
+			this.above = above;
+		}
+		public void addAbove(InvertedTreePathStep itps) {
+			if (getAbove() == null) {
+				above = new ArrayList<InvertedTreePathStep>();
+			}
+			above.add(itps);
+		}
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("rdf(");
+			if (getUpperNode() != null) {
+				sb.append(getUpperNode().toString());
+			}
+			else {
+				sb.append("null");
+			}
+			sb.append(",");
+			sb.append(edgeClimbed.toString());
+			sb.append(",");
+			if (lowerNode != null) {
+				sb.append(lowerNode.toString());
+			}
+			else {
+				sb.append("null");
+			}
+			sb.append(")");
+			if (above != null) {
+				for (int i = 0; i < above.size(); i++) {
+					sb.append("\n   linked to above: ");
+					sb.append(above.get(i).toString());
+				}
+			}
+			return sb.toString();
+		}
+		public com.hp.hpl.jena.rdf.model.Resource getUpperNode() {
+			return upperNode;
+		}
+		public void setUpperNode(com.hp.hpl.jena.rdf.model.Resource upperNode) {
+			this.upperNode = upperNode;
+		}
+	}
+	
+	protected Map<com.hp.hpl.jena.rdf.model.Resource, InvertedTreePathStep> invertedTreesByLowerNode = new HashMap<com.hp.hpl.jena.rdf.model.Resource, InvertedTreePathStep>();
+	protected List<OntClass> loneClassNodes = new ArrayList<OntClass>();
+	protected Map<OntClass, List<TripleElement>> triplesToAnchor =null;
+
+
+	protected Map<NamedNode, List<GraphPatternElement>> nodesToInvestigateWithContext = null;
+	
+
 	/**
 	 * Method to check a Rule for missing triple patterns.
 	 * @param rule
@@ -10652,12 +10731,282 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// This can be done pair-wise. Start with two concepts and find a common root. Then add another and see if it shares the root. If it
 		//	 does then that concept is OK. If it doesn't then search for a node common to the 3rd concept an the first root, etc.
 		// What do ambiguities look like? Probably more than one common root following multiple paths? How far do we need to look?
-		Map<GraphPatternElement, Map<TripleElement, NamedNode>> searchResults = new HashMap<GraphPatternElement, Map<TripleElement, NamedNode>>();
-		List<GraphPatternElement> thens = rule.getThens();
-		if (thens != null) {
-			searchGraphPatternElementListForTriplesOfInterest(searchResults, thens);
+//		Map<GraphPatternElement, Map<TripleElement, NamedNode>> searchResults = new HashMap<GraphPatternElement, Map<TripleElement, NamedNode>>();
+		initializeMissingGraphPatternCheck();
+		searchForRootsAndPartials(rule.getThens());
+		searchForRootsAndPartials(rule.getGivens());
+		searchForRootsAndPartials(rule.getIfs());
+//		processTriplesOfInterestForMissingPatterns(searchResults, null, element);
+		investigateNodes(rule.getIfs());
+		anchorUnanchoredTriples(element);
+	}
+
+	protected void initializeMissingGraphPatternCheck() {
+		if (invertedTreesByLowerNode != null) {
+			invertedTreesByLowerNode.clear();
 		}
-		processTriplesOfInterestForMissingPatterns(searchResults, null, element);
+		if (loneClassNodes != null) {
+			loneClassNodes.clear();
+		}
+		if (triplesToAnchor != null) {
+			triplesToAnchor.clear();
+		}
+	}
+	
+	protected void searchForRootsAndPartials(List<GraphPatternElement> gpes) {
+		if (gpes != null) {
+			for (int i = 0; i < gpes.size(); i++) {
+				searchForRootsAndPartials(gpes.get(i));
+			}
+		}
+		
+	}
+
+	private void searchForRootsAndPartials(GraphPatternElement gpe) {
+		if (gpe instanceof Junction) {
+			searchForRootsAndPartials(gpe, (Node)((Junction)gpe).getLhs());
+			searchForRootsAndPartials(gpe, (Node)((Junction)gpe).getRhs());
+		}
+		else if (gpe instanceof TripleElement) {
+			TripleElement tr = (TripleElement) gpe;
+			if (tr.getSubject() != null) {
+				searchForRootsAndPartials(tr, tr.getSubject());
+			}
+			else {
+				searchForRootsAndPartials(tr, tr.getPredicate());
+			}
+		}
+		else if (gpe instanceof BuiltinElement) {
+			List<Node> args = ((BuiltinElement)gpe).getArguments();
+			for (int i = 0; args != null && i < args.size(); i++) {
+				searchForRootsAndPartials(gpe, args.get(i));
+			}
+		}
+	}
+
+	private void searchForRootsAndPartials(GraphPatternElement container, Node node) {
+		if (node instanceof ProxyNode) {
+			searchForRootsAndPartials((GraphPatternElement)((ProxyNode)node).getProxyFor());
+		}
+		else if (node instanceof NamedNode) {
+			if (container instanceof TripleElement) {
+				if (isProperty(((NamedNode)node).getNodeType())) {
+					if (((TripleElement)container).getSubject() == null && node.equals(((TripleElement)container).getPredicate()) && isProperty(((NamedNode)node).getNodeType())) {
+						System.out.println("Need to investigate property '" + ((NamedNode)node).getName() + "' in the context of container '" + container.toDescriptiveString() + "'");
+						addNodeAndContainerToBeInvestigated((NamedNode) node, container);
+					}
+				}
+				else if (node.equals(((TripleElement)container).getSubject()) && node instanceof VariableNode && ((VariableNode)node).getType() == null) {
+					// this needs to be investigated
+					System.out.println("Need to investigate '" + ((VariableNode)node).getName() + "' in the context of container '" + container.toDescriptiveString() + "'");
+					addNodeAndContainerToBeInvestigated((NamedNode) node, container);
+				}
+			}
+			else if (container instanceof BuiltinElement) {
+				if (isProperty(((NamedNode)node).getNodeType())) {
+					System.out.println("Need to investigate property '" + ((NamedNode)node).getName() + "' in the context of container '" + container.toDescriptiveString() + "'");
+					addNodeAndContainerToBeInvestigated((NamedNode) node, container);
+				}
+			}
+		}
+	}
+	
+	private void addNodeAndContainerToBeInvestigated(NamedNode node, GraphPatternElement container) {
+		if (nodesToInvestigateWithContext == null) {
+			nodesToInvestigateWithContext = new HashMap<NamedNode, List<GraphPatternElement>>();
+			List<GraphPatternElement> newList = new ArrayList<GraphPatternElement>();
+			newList.add(container);
+			nodesToInvestigateWithContext.put(node, newList);
+		}
+		else {
+			if (nodesToInvestigateWithContext.containsKey(node)) {
+				nodesToInvestigateWithContext.get(node).add(container);
+			}
+			else {
+				List<GraphPatternElement> newList = new ArrayList<GraphPatternElement>();
+				newList.add(container);
+				nodesToInvestigateWithContext.put(node, newList);
+			}
+		}
+	}
+	
+	private void addDomainAndTripleToTriplesToAnchor(OntClass lowestIntersectionClass, TripleElement container) {
+		if (triplesToAnchor == null) {
+			triplesToAnchor = new HashMap<OntClass, List<TripleElement>>();
+			List<TripleElement> newList = new ArrayList<TripleElement>();
+			newList.add(container);
+			triplesToAnchor.put(lowestIntersectionClass, newList);
+		}
+		else {
+			if (triplesToAnchor.containsKey(lowestIntersectionClass)) {
+				triplesToAnchor.get(lowestIntersectionClass).add(container);
+			}
+			else {
+				List<TripleElement> newList = new ArrayList<TripleElement>();
+				newList.add(container);
+				triplesToAnchor.put(lowestIntersectionClass, newList);
+			}
+		}
+	}
+
+	protected void investigateNodes(List<GraphPatternElement> list) {
+		if (nodesToInvestigateWithContext != null) {
+			Iterator<NamedNode> keyitr = nodesToInvestigateWithContext.keySet().iterator();
+			while (keyitr.hasNext()) {
+				NamedNode key = keyitr.next();
+				List<GraphPatternElement> value = nodesToInvestigateWithContext.get(key);
+				investigateNode(key, value, true);
+			}
+			keyitr = nodesToInvestigateWithContext.keySet().iterator();
+			while (keyitr.hasNext()) {
+				NamedNode key = keyitr.next();
+				List<GraphPatternElement> value = nodesToInvestigateWithContext.get(key);
+				investigateNode(key, value, false);
+			}
+		}
+	}
+
+	private void investigateNode(NamedNode key, List<GraphPatternElement> value, boolean builtinsOnly) {
+		if (value.size() > 1) {
+			System.out.println("Investigating node '" + key.getName() + "', which has multiple contexts:");
+			OntClass lowestIntersectionClass = null;
+			for (int i = 0; i < value.size(); i++) {
+				GraphPatternElement container = value.get(i);
+				System.out.println("   " + container.toDescriptiveString());
+				if (isProperty(key.getNodeType())) {
+					Property op = getTheJenaModel().getProperty(((NamedNode)key).toFullyQualifiedString());
+					lowestIntersectionClass = findLowestIntersectionClass(op, lowestIntersectionClass);
+				}
+				else if (key instanceof VariableNode) {
+					if (container instanceof TripleElement && !builtinsOnly) {
+						Node pred = ((TripleElement)container).getPredicate();
+						if (pred instanceof NamedNode) {
+							Property op = getTheJenaModel().getProperty(pred.toFullyQualifiedString());
+							lowestIntersectionClass = findLowestIntersectionClass(op, lowestIntersectionClass);
+						}
+					}
+				}
+				if (lowestIntersectionClass != null && !builtinsOnly && container instanceof TripleElement && ((TripleElement)container).getSubject() == null) {
+					System.out.println("Need to find common root of this triple with similar triples (no subject): " + container.toDescriptiveString());
+					addDomainAndTripleToTriplesToAnchor(lowestIntersectionClass, (TripleElement)container);
+				}
+			}
+			if (lowestIntersectionClass != null) {
+				if (key instanceof VariableNode) {
+					NamedNode lic = new NamedNode(lowestIntersectionClass.getURI());
+					lic.setNodeType(NodeType.ClassNode);
+					key.addNodeValueType(lic);
+					try {
+						((VariableNode)key).setType(lic);
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else if (builtinsOnly) {
+					System.err.println("Unhandled multiple containers but not variable (" + key.getName() + ")");
+				}
+			}
+		}
+		else {
+			// only one container
+			if(isProperty(key.getNodeType())) {
+				if (value.get(0) instanceof BuiltinElement) {
+					// this is property used directly as argument to builtin
+					List<Node> args = ((BuiltinElement)value.get(0)).getArguments();
+					for (int i = 0; i < args.size(); i++) {
+						Node arg = args.get(i);
+						if (arg.equals(key)) {
+							TripleElement tr = new TripleElement(null, key, null);
+							try {
+								args.set(i, nodeCheck(tr));
+								ArrayList<GraphPatternElement> newList = new ArrayList<GraphPatternElement>();
+								newList.add(tr);
+								if (builtinsOnly) {
+//									investigateNode((NamedNode) arg, newList, builtinsOnly);
+									addNodeAndContainerToBeInvestigated(key, tr);
+								}
+								else {
+									System.err.println("This shouldn't happen--trying to add a new triple to investigate when not builtinOnly processing");
+								}
+							} catch (InvalidNameException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (InvalidTypeException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (TranslationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+				else {
+					System.err.println("Unhandled container");
+				}
+			}
+		}
+	}
+
+
+	private OntClass findLowestIntersectionClass(Property op, OntClass lowestIntersectionClass) {
+		StmtIterator stmtitr = getTheJenaModel().listStatements(op, RDFS.domain, (RDFNode)null);
+		while (stmtitr.hasNext()) {
+			RDFNode objNode = stmtitr.nextStatement().getObject();
+			if (objNode.isResource()) {
+				if (objNode.asResource().isURIResource()) {
+					if (objNode.asResource().canAs(OntClass.class)) {
+						if (lowestIntersectionClass == null) {								
+							lowestIntersectionClass = objNode.as(OntClass.class);
+						}
+						else {
+							OntClass lower;
+							try {
+								lower = findLowestIntersection(lowestIntersectionClass, objNode.as(OntClass.class));
+								if (lower != null) {
+									lowestIntersectionClass = lower;
+								}
+							} catch (CircularDependencyException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+				else if (objNode.canAs(OntClass.class) && objNode.as(OntClass.class).isUnionClass()) {
+				ExtendedIterator<? extends OntClass> ummbrs = objNode.as(OntClass.class).asUnionClass().listOperands();
+						while (ummbrs.hasNext()) {
+						OntClass ummbr = ummbrs.next();
+						if (ummbr.isURIResource()) {
+							if (ummbr.canAs(OntClass.class)) {
+								OntClass lower;
+								try {
+									lower = findLowestIntersection(lowestIntersectionClass, ummbr.as(OntClass.class));
+									if (lower != null) {
+										lowestIntersectionClass = lower;
+									}
+								} catch (CircularDependencyException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						}	
+					}
+				}
+			}
+		}
+		return lowestIntersectionClass;
+	}
+
+	private OntClass findLowestIntersection(OntClass cls1, OntClass cls2) throws CircularDependencyException {
+		if (SadlUtils.classIsSubclassOf(cls1, cls2, true, null)) {
+			return cls1;
+		}
+		else if (SadlUtils.classIsSubclassOf(cls2, cls1, true, null)) {
+			return cls2;
+		}
+		return null;
 	}
 
 	/**
@@ -10670,59 +11019,226 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
 	 */
-	protected void searchGraphPatternElementListForTriplesOfInterest(Map<GraphPatternElement, Map<TripleElement, NamedNode>> searchResults, List<GraphPatternElement> gpes)
+	protected void searchGraphPatternElementListForTriplesOfInterest(List<GraphPatternElement> gpes)
 			throws InvalidTypeException, TranslationException {
-				for (int i = 0; i < gpes.size(); i++) {
-					GraphPatternElement gpe = gpes.get(i);
-					List<TripleElement> triplesOfInterest = new ArrayList<TripleElement>();
-					triplesOfInterest = getTriplesOfInterestList(triplesOfInterest, gpe);
-					for (int j = 0; triplesOfInterest != null && j < triplesOfInterest.size(); j++) {
-						Map<TripleElement, NamedNode> innerMap = null;
-						TripleElement tripleOfInterest = triplesOfInterest.get(j);
-						Node sn = tripleOfInterest.getSubject();
-						if (sn == null) {
-							Node pn = tripleOfInterest.getPredicate();
-							if (pn instanceof NamedNode && isProperty(((NamedNode)pn).getNodeType())) {
-								StmtIterator dmnitr = getTheJenaModel().listStatements(getTheJenaModel().getProperty(pn.toFullyQualifiedString()), RDFS.domain, (RDFNode)null);
-								int idx = j;
-								while (dmnitr.hasNext()) {
-									RDFNode dmnn = dmnitr.nextStatement().getObject();
-									if (dmnn.isURIResource()) {
-										NamedNode dmnnn = new NamedNode(dmnn.asResource().getURI());
-										dmnnn.setNodeType(NodeType.ClassNode);
-										if (idx == j) {
-											innerMap = searchResults.get(gpe);
-											if (innerMap == null) {
-												innerMap = new HashMap<TripleElement, NamedNode>();
-												searchResults.put(gpe,  innerMap);
-											}
-											innerMap.put(tripleOfInterest, dmnnn);
-										}
-										else {
-											System.err.println("Unhandled union domain");
-										}
-									}
+		InvertedTreePathStep below = null;
+		for (int i = 0; i < gpes.size(); i++) {
+			GraphPatternElement gpe = gpes.get(i);
+			below = buildInvertedTrees(gpe, below);
+		}
+	}
+
+	private InvertedTreePathStep buildInvertedTrees(GraphPatternElement gpe, InvertedTreePathStep below) {
+		InvertedTreePathStep top = below;
+		if (gpe instanceof TripleElement) {
+			Node subj =((TripleElement)gpe).getSubject();
+			Node pred = ((TripleElement)gpe).getPredicate();
+			Node obj = ((TripleElement)gpe).getObject();
+			if (subj instanceof VariableNode) {
+				subj = ((VariableNode)subj).getType();
+			}
+			else if (subj instanceof ProxyNode) {
+				top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)subj).getProxyFor(), below);
+			}
+			if (subj instanceof NamedNode) {
+				top = processNamedNodeInGraphPattern(top, below, subj, pred, obj);
+			}
+		}
+		else if (gpe instanceof BuiltinElement) {
+			if (((BuiltinElement)gpe).getArguments() != null) {
+				for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
+					Node arg = ((BuiltinElement)gpe).getArguments().get(i);
+					if (arg instanceof ProxyNode) {
+						top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)arg).getProxyFor(), below);
+					}
+					else if (arg instanceof NamedNode) {
+						top = processNamedNodeInGraphPattern(top, below, arg, null, null);
+					}
+				}
+			}
+		}
+		else if (gpe instanceof Junction) {
+			Object lhs = ((Junction)gpe).getLhs();
+			if (lhs instanceof ProxyNode) {
+				top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)lhs).getProxyFor(), below);
+			}
+			Object rhs = ((Junction)gpe).getRhs();
+			if (rhs instanceof ProxyNode) {
+				top = buildInvertedTrees((GraphPatternElement) ((ProxyNode)rhs).getProxyFor(), below);
+			}
+		}
+		return top;
+	}
+
+	private InvertedTreePathStep processNamedNodeInGraphPattern(InvertedTreePathStep top, InvertedTreePathStep below,
+			Node subj, Node pred, Node obj) {
+		if (subj instanceof VariableNode) {
+			subj = ((VariableNode)subj).getType();
+		}
+		if (subj != null) {
+			if (isProperty(((NamedNode)subj).getNodeType())) {
+				Property op = getTheJenaModel().getProperty(((NamedNode)subj).toFullyQualifiedString());
+				StmtIterator stmtitr = getTheJenaModel().listStatements(op, RDFS.domain, (RDFNode)null);
+				while (stmtitr.hasNext()) {
+					RDFNode objNode = stmtitr.nextStatement().getObject();
+					if (objNode.isResource()) {
+						if (objNode.asResource().isURIResource()) {
+							if (objNode.asResource().canAs(OntClass.class)) {
+								InvertedTreePathStep itps = new InvertedTreePathStep((com.hp.hpl.jena.rdf.model.Resource) objNode, op, null);
+								invertedTreesByLowerNode.put(op, itps);
+								if (below != null) {
+									below.addAbove(itps);
 								}
-							}
-							else {
-								throw new TranslationException("Predicate isn't a NamedNode property--shouldn't happen");
+								top = itps;
 							}
 						}
-						else if (sn instanceof NamedNode){
-							innerMap = searchResults.get(gpe);
-							if (innerMap == null) {
-								innerMap = new HashMap<TripleElement, NamedNode>();
-								searchResults.put(gpe,  innerMap);
-							}
-							innerMap.put(tripleOfInterest, (NamedNode) sn);
-						}
-						else {
-//							throw new TranslationException("Subject isn't a NamedNode--shouldn't happen");
-							System.err.println("Subject isn't a NamedNode--shouldn't happen");
+						else if (objNode.canAs(OntClass.class) && objNode.as(OntClass.class).isUnionClass()) {
+							ExtendedIterator<? extends OntClass> ummbrs = objNode.as(OntClass.class).asUnionClass().listOperands();
+							while (ummbrs.hasNext()) {
+								OntClass ummbr = ummbrs.next();
+								if (ummbr.isURIResource()) {
+									
+								}
+							}	
 						}
 					}
 				}
 			}
+			else if (((NamedNode)subj).getNodeType().equals(NodeType.ClassNode)) {
+				com.hp.hpl.jena.rdf.model.Resource sn = getTheJenaModel().getResource(((NamedNode)subj).toFullyQualifiedString());
+				if (pred == null) {
+					if (sn.canAs(OntClass.class)) {
+						if (!loneClassNodes.contains(sn.as(OntClass.class ))) {
+							loneClassNodes.add(sn.as(OntClass.class));
+						}
+					}
+				}
+				else if (pred instanceof NamedNode) {
+					Property op = getTheJenaModel().getProperty(((NamedNode)pred).toFullyQualifiedString());
+					if (obj != null) {
+						if (obj instanceof NamedNode) {
+							if (obj instanceof VariableNode && ((VariableNode)obj).getType() instanceof NamedNode) {
+								obj = ((VariableNode)obj).getType();
+							}
+							OntClass objcls = getTheJenaModel().getOntClass(((NamedNode)obj).toFullyQualifiedString());
+							InvertedTreePathStep itps = new InvertedTreePathStep(objcls, op, sn);
+							invertedTreesByLowerNode.put(op, itps);
+							if (below != null) {
+								below.addAbove(itps);
+							}
+							top = itps;
+						}
+					}
+					else {
+						InvertedTreePathStep itps = new InvertedTreePathStep(null, op, sn);
+						invertedTreesByLowerNode.put(op, itps);
+						if (below != null) {
+							below.addAbove(itps);
+						}
+						top = itps;
+					}
+				}
+			}
+		}
+		return top;
+	}
+
+	protected void anchorUnanchoredTriples(EObject context) {
+		if (triplesToAnchor != null) {
+			// These are all triples without subjects along with the domain class(key) for the triple's predicate. 
+			//	The question is	whether there exists some common "parent" node found by going "up-graph" from each domain class.
+			//	Any keys that have a common "parent" should have nested triples inserted into their associated triple(s) 
+			//		up to that common "parent",	each deepest triple having is a new shared variable subject whose type is 
+			//		the type of the common "parent". 
+			//	The rest of the triples should have their own unique new variable whose type is the domain class (key).
+			Map<Long, NamedNode> intersectionsByPair = new HashMap<Long, NamedNode>();
+			Set<OntClass> ks = triplesToAnchor.keySet();
+			List<OntClass> list = new ArrayList<OntClass>(ks);
+			for (int i = 0; i < list .size(); i++) {
+			    for (int j = i + 1; j < list .size(); j++) {
+			    	OntClass cls1 = list.get(i);
+			    	OntClass cls2 = list.get(j);
+			    	OntClass lowestIntersection = null;
+					try {
+						lowestIntersection = findLowestIntersection(cls1, cls2);
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			    	if (lowestIntersection != null) {
+			    		ArrayList<NamedNode> newList = new ArrayList<NamedNode>();
+			    		NamedNode newNN = new NamedNode(lowestIntersection.getURI());
+			    		newNN.setNodeType(NodeType.ClassNode);
+			    		long idx = i*1000+j;
+			    		intersectionsByPair.put(idx, newNN);
+			    	}
+			    	else {
+			    		List<NamedNode> commonRoots = lookForCommonAncestor(cls1, cls2);
+			    		if (commonRoots != null && commonRoots.size() > 1) {
+			    			// is this an ambiguity? an error?
+			    		}
+			    		else if (commonRoots == null || commonRoots.size() == 0) {
+			    			// there is no intersection of this pair but one of them might intersect with another class
+			    
+			    		}
+			    		else {
+				    		long idx = i*1000+j;
+				    		intersectionsByPair.put(idx, commonRoots.get(0));
+			    		}
+			    	}
+			    }
+			}
+			if (intersectionsByPair.size() > 0) {
+				System.out.println(intersectionsByPair);
+				Iterator<Long> keyitr = intersectionsByPair.keySet().iterator();
+				while (keyitr.hasNext()) {
+					int i = 0;
+					int j = 0;
+					Long key = keyitr.next();
+					String keystr = key.toString();
+					if (key > 1000) {
+						i = Integer.parseInt(keystr.substring(0,keystr.length() - 3));
+					}
+					String jstr = keystr.length() > 3 ? keystr.substring(keystr.length() - 3) : keystr;
+					j = Integer.parseInt(jstr);
+					OntClass clsi = list.get(i);
+					OntClass clsj = list.get(j);
+					List<TripleElement> triplesi = triplesToAnchor.get(clsi);
+					List<TripleElement> triplesj = triplesToAnchor.get(clsj);
+					NamedNode varType = intersectionsByPair.get(key);
+					String nvar = getNewVar(context);
+					try {
+						VariableNode var = createVariable(nvar, context);
+						var.setType(varType);
+						for (int k = 0; k < triplesi.size(); k++) {
+							triplesi.get(k).setSubject(var);
+						}
+						for (int k = 0; k < triplesj.size(); k++) {
+							triplesj.get(k).setSubject(var);
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PrefixNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Method to process triples of interest and add [additional] missing patterns as needed.
