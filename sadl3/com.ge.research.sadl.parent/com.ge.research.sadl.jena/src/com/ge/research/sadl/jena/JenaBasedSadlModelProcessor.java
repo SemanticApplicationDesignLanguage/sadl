@@ -2738,12 +2738,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addNamedStructureAnnotations(rl, annotations);
 			}
 		}
-		try {
-			checkForMissingGraphPatterns(rule, element);
-		} catch (CircularDependencyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			checkForMissingGraphPatterns(rule, element);
+//		} catch (CircularDependencyException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		setTarget(null);
 	}
 
