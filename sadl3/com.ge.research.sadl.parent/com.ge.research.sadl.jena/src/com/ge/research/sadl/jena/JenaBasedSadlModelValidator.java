@@ -14,6 +14,8 @@ import java.util.Objects;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.diagnostics.Severity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.model.CircularDefinitionException;
@@ -146,6 +148,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
    	public enum ImplicitPropertySide {LEFT, RIGHT, NONE, BOTH}
+   	
+    private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelValidator.class);
 
 	/**
 	 * This inner class captures the information about the left or right hand side of an expression that is subject
@@ -1759,22 +1763,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
-		TypeCheckInfo tci = getType(expression.getType());
-		if (expression.isList()) {
-			tci.setRangeValueType(RangeValueType.LIST);
-			int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
-			Node tctype = tci.getTypeCheckType();
-			if (lenRest != null && tctype instanceof NamedNode) {
-				if (lenRest.length == 1) {
-					((NamedNode)tctype).setListLength(lenRest[0]);
-				}
-				else if (lenRest.length == 2) {
-					((NamedNode)tctype).setMinListLength(lenRest[0]);
-					((NamedNode)tctype).setMaxListLength(lenRest[1]);
+		try{
+			TypeCheckInfo tci = getType(expression.getType());
+			if (expression.isList()) {
+				tci.setRangeValueType(RangeValueType.LIST);
+				int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
+				Node tctype = tci.getTypeCheckType();
+				if (lenRest != null && tctype instanceof NamedNode) {
+					if (lenRest.length == 1) {
+						((NamedNode)tctype).setListLength(lenRest[0]);
+					}
+					else if (lenRest.length == 2) {
+						((NamedNode)tctype).setMinListLength(lenRest[0]);
+						((NamedNode)tctype).setMaxListLength(lenRest[1]);
+					}
 				}
 			}
+			return tci;
+		} catch(Exception e) {
+			logger.error("Unhandled Error", e);
+			return null;
 		}
-		return tci;
 	}
 
 	private TypeCheckInfo getType(SadlUnionType expression) {

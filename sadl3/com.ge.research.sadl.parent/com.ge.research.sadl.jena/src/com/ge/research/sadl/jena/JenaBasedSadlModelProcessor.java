@@ -4979,7 +4979,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (typeobj instanceof NamedNode) {
 					((NamedNode) typeobj).setList(true);
 				} else {
-					throw new TranslationException("Unhandled case: type returned from simple type reference is '" + typeobj.getClass().getCanonicalName() + "'");
+					logger.debug("Unhandled case",  new TranslationException("Type returned from simple type reference is not NamedNode"));
 				}
 			}
 			return typeobj;
