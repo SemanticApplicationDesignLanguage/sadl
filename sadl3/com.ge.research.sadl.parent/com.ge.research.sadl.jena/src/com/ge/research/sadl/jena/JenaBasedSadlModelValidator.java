@@ -1195,7 +1195,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			throw new TranslationException("Unhandled expression type: " + expression.getClass().getCanonicalName());
 		}
-		expressionsTypeCheckCache.put(expression, returnedTci);
+		if (returnedTci != null) {
+			expressionsTypeCheckCache.put(expression, returnedTci);
+		}
 		return returnedTci;
 	}
 
@@ -1563,29 +1565,33 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean isNumeric(TypeCheckInfo tci) throws InvalidTypeException {
 		Node ci;
-		if (tci.getTypeCheckType() != null) {
-			ci = tci.getTypeCheckType();
-			if (ci instanceof NamedNode) {
-				return getModelProcessor().isNumericType(((NamedNode)ci).toFullyQualifiedString());
+		if (tci != null) {
+			if (tci.getTypeCheckType() != null) {
+				ci = tci.getTypeCheckType();
+				if (ci instanceof NamedNode) {
+					return getModelProcessor().isNumericType(((NamedNode)ci).toFullyQualifiedString());
+				}
 			}
-		}
-		else if (tci.getExplicitValueType() != null) {
-//TODO this is incomplete; more examples needed AWC 12/19/2016				
-			ExplicitValueType evt = tci.getExplicitValueType();
-			if (evt.equals(ExplicitValueType.RESTRICTION)) {
-				issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
-			}
-			else if (tci.getExpressionType() instanceof ConceptName){
-				return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
+			else if (tci.getExplicitValueType() != null) {
+	//TODO this is incomplete; more examples needed AWC 12/19/2016				
+				ExplicitValueType evt = tci.getExplicitValueType();
+				if (evt.equals(ExplicitValueType.RESTRICTION)) {
+					issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
+				}
+				else if (tci.getExpressionType() instanceof ConceptName){
+					return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
+				}
 			}
 		}
 		return false;
 	}
 
 	private boolean isUnittedQuantity(TypeCheckInfo tci) {
-		Node tctn = tci.getTypeCheckType();
-		if (tctn instanceof NamedNode && ((NamedNode)tctn).toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-			return true;
+		if (tci != null) {
+			Node tctn = tci.getTypeCheckType();
+			if (tctn instanceof NamedNode && ((NamedNode)tctn).toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+				return true;
+			}
 		}
 		return false;
 	}

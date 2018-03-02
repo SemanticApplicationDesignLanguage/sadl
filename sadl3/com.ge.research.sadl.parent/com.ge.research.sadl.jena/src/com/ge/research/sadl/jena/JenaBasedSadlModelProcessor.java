@@ -4652,8 +4652,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				|| name.equals(JunctionType.OR_ALPHA) || name.equals(JunctionType.OR_SYMBOL)) {
 			Junction jct = new Junction();
 			jct.setJunctionName(name);
-			jct.setLhs(lobj);
-			jct.setRhs(robj);
+			jct.setLhs(nodeCheck(lobj));
+			jct.setRhs(nodeCheck(robj));
 			return jct;
 		} else {
 			BuiltinElement builtin = new BuiltinElement();
