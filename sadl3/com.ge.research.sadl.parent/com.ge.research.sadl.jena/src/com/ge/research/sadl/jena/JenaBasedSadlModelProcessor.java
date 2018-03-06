@@ -963,28 +963,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e.printStackTrace();
 		}
 
-		setTypeCheckingWarningsOnly(true);
-		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.TYPE_CHECKING_WARNING_ONLY);
-		if (typechecking != null) {
-			setTypeCheckingWarningsOnly(Boolean.parseBoolean(typechecking));
-		}
-		ignoreUnittedQuantities = true;
-		String ignoreUnits = context.getPreferenceValues().getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
-		if (ignoreUnits != null) {
-			ignoreUnittedQuantities = Boolean.parseBoolean(ignoreUnits);
-		}
-
-		setUseArticlesInValidation(false);
-		String useArticles = context.getPreferenceValues().getPreference(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION);
-		if (useArticles != null) {
-			setUseArticlesInValidation(Boolean.parseBoolean(useArticles));
-		}
-		domainAndRangeAsUnionClasses = true;
-		String domainAndRangeAsUnionClassesStr = context.getPreferenceValues()
-				.getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
-		if (domainAndRangeAsUnionClassesStr != null) {
-			domainAndRangeAsUnionClasses = Boolean.parseBoolean(domainAndRangeAsUnionClassesStr);
-		}
+		initializePreferences(context);
 
 		// create validator for expressions
 		initializeModelValidator();
@@ -1053,6 +1032,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	@Override
+	public void initializePreferences(ProcessorContext context) {
+		setTypeCheckingWarningsOnly(true);
+		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.TYPE_CHECKING_WARNING_ONLY);
+		if (typechecking != null) {
+			setTypeCheckingWarningsOnly(Boolean.parseBoolean(typechecking));
+		}
+		ignoreUnittedQuantities = true;
+		String ignoreUnits = context.getPreferenceValues().getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
+		if (ignoreUnits != null) {
+			ignoreUnittedQuantities = Boolean.parseBoolean(ignoreUnits);
+		}
+
+		setUseArticlesInValidation(false);
+		String useArticles = context.getPreferenceValues().getPreference(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION);
+		if (useArticles != null) {
+			setUseArticlesInValidation(Boolean.parseBoolean(useArticles));
+		}
+		domainAndRangeAsUnionClasses = true;
+		String domainAndRangeAsUnionClassesStr = context.getPreferenceValues()
+				.getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
+		if (domainAndRangeAsUnionClassesStr != null) {
+			domainAndRangeAsUnionClasses = Boolean.parseBoolean(domainAndRangeAsUnionClassesStr);
 		}
 	}
 
