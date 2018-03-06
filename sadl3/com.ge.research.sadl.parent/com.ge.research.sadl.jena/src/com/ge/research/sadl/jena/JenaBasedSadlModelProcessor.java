@@ -403,6 +403,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 */
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
+				
 		generationInProgress = true;
 		setProcessorContext(context);
 		List<String[]> newMappings = new ArrayList<String[]>();
@@ -875,6 +876,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	@Override
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode,
 			ProcessorContext context) {
+
 		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate'
@@ -4979,7 +4981,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (typeobj instanceof NamedNode) {
 					((NamedNode) typeobj).setList(true);
 				} else {
-					logger.debug("Unhandled case",  new TranslationException("Type returned from simple type reference is not NamedNode"));
+                    logger.error("Error:", new TranslationException("Unhandled case: type returned from simple type reference is not type NamedNode"));
+                    return null;
 				}
 			}
 			return typeobj;

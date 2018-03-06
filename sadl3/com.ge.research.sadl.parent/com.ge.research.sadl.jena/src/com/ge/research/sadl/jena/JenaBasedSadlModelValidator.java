@@ -1763,27 +1763,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
-		try{
-			TypeCheckInfo tci = getType(expression.getType());
-			if (expression.isList()) {
-				tci.setRangeValueType(RangeValueType.LIST);
-				int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
-				Node tctype = tci.getTypeCheckType();
-				if (lenRest != null && tctype instanceof NamedNode) {
-					if (lenRest.length == 1) {
-						((NamedNode)tctype).setListLength(lenRest[0]);
-					}
-					else if (lenRest.length == 2) {
-						((NamedNode)tctype).setMinListLength(lenRest[0]);
-						((NamedNode)tctype).setMaxListLength(lenRest[1]);
-					}
+		TypeCheckInfo tci = getType(expression.getType());
+		if (expression.isList()) {
+			tci.setRangeValueType(RangeValueType.LIST);
+			int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
+			Node tctype = tci.getTypeCheckType();
+			if (lenRest != null && tctype instanceof NamedNode) {
+				if (lenRest.length == 1) {
+					((NamedNode)tctype).setListLength(lenRest[0]);
+				}
+				else if (lenRest.length == 2) {
+					((NamedNode)tctype).setMinListLength(lenRest[0]);
+					((NamedNode)tctype).setMaxListLength(lenRest[1]);
 				}
 			}
-			return tci;
-		} catch(Exception e) {
-			logger.error("Unhandled Error", e);
-			return null;
 		}
+		return tci;
 	}
 
 	private TypeCheckInfo getType(SadlUnionType expression) {
