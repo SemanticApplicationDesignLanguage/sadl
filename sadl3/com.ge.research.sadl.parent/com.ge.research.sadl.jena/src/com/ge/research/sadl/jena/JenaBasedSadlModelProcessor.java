@@ -947,7 +947,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e1.printStackTrace();
 		}
 
-		processModelImports(modelOntology, resource.getURI(), model);
+		if (!processModelImports(modelOntology, resource.getURI(), model)) {
+			System.err.println("Unable to import models. Is project build enabled?");
+		}
 
 		boolean enableMetricsCollection = true; // no longer a preference
 		try {
@@ -10439,8 +10441,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	protected void processModelImports(Ontology modelOntology, URI importingResourceUri, SadlModel model)
+	protected boolean processModelImports(Ontology modelOntology, URI importingResourceUri, SadlModel model)
 			throws OperationCanceledError {
+		boolean failure = false;
 		EList<SadlImport> implist = model.getImports();
 		Iterator<SadlImport> impitr = implist.iterator();
 		while (impitr.hasNext()) {
@@ -10465,9 +10468,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
 					addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getOntModel());
 				}
+				else {
+					failure = true;
+				}
 			}
-
+			else {
+				failure = true;
+			}
 		}
+		return !failure;
 	}
 
 	// protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value,
