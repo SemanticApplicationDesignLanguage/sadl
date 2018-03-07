@@ -2941,6 +2941,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (leftTranslatedDefn instanceof Object[] && ((Object[]) leftTranslatedDefn).length == 2) {
 					rest = ((Object[]) leftTranslatedDefn)[1];
 					if (((Object[]) leftTranslatedDefn)[0].equals(leftVar)) {
+						Node vtype = leftVar.getType();
+						if (vtype instanceof NamedNode) {
+							addVariableDefinition(leftVar, rest, (NamedNode) vtype, expr);
+						}
 						return rest;
 					}
 					leftTranslatedDefn = ((Object[]) leftTranslatedDefn)[0];
