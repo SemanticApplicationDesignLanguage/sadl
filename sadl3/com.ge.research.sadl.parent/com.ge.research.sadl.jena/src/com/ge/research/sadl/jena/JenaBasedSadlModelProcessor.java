@@ -4362,6 +4362,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						e.printStackTrace();
 					}
 				}
+			} else if (pf instanceof Junction) {
+				// the type of any Junction is boolean
+				String pseudoObj = XSD.xboolean.getURI();
+				NamedNode poNode = new NamedNode(pseudoObj);
+				poNode.setNodeType(NodeType.DataTypeNode);
+				checkTripleRange(subjeo, predeo, (EObject) null, expr, subjNode, predNode, pred, pnodetype, poNode,
+						poNode.isList());		
 			} else {
 				throw new TranslationException("Unexpected error: the object of the triple is a ProxyNode but the proxyFor type isn't handled (" + pf.getClass().getCanonicalName() + ")");
 			}
@@ -4385,8 +4392,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void datatypeInDatatypePropertyRange(OntProperty pred, Node obj, boolean isList, Expression expr)
 			throws TranslationException, CircularDependencyException {
 		if (obj instanceof NamedNode) {
-			datatypeInDatatypePropertyRange(pred,
-					getTheJenaModel().getOntResource(((NamedNode) obj).toFullyQualifiedString()), isList, expr);
+			OntResource objrsrc = getTheJenaModel().getOntResource(((NamedNode) obj).toFullyQualifiedString());
+			if (objrsrc != null) {
+				datatypeInDatatypePropertyRange(pred, objrsrc, isList, expr);
+			}
+			else {
+				addError("'" + obj.toString() + "' is not in range of property '" + pred.getLocalName() + "'", expr);
+			}
 		}
 	}
 
