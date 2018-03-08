@@ -8249,8 +8249,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					OntClass spcls = spcitr.next();
 					if (spcls.isRestriction()) {
 						Restriction restriction = spcls.asRestriction();
+						OntProperty onprop = restriction.getOnProperty();
 						if(restriction.isAllValuesFromRestriction()) {	
-							OntProperty onprop = restriction.getOnProperty();
 							if (onprop.isURIResource() && onprop.getURI().equals(SadlConstants.SADL_LIST_MODEL_FIRST_URI)) {
 								com.hp.hpl.jena.rdf.model.Resource avf = restriction.asAllValuesFromRestriction().getAllValuesFrom();
 								if(avf.isURIResource()) {
@@ -8259,16 +8259,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 						}
 						if(restriction.isHasValueRestriction()) {
-							ExtendedIterator<OntModel> eitr = getTheJenaModel().listSubModels();
-							while(eitr.hasNext()) {
-								OntModel model = eitr.next();
-								model.write(System.out);
-							}
-							StmtIterator sitr = restriction.listProperties();
-							while (sitr.hasNext()) {
-								System.out.println(sitr.next().toString());
-							}
-							OntProperty onprop = restriction.getOnProperty();
 							RDFNode hasValue = restriction.asHasValueRestriction().getHasValue();
 							if(onprop.isURIResource() && onprop.getURI().equals(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI)) {
 								lengthRestriction = hasValue.asLiteral().getInt();

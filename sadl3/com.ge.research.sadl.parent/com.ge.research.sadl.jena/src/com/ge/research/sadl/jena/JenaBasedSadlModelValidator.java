@@ -97,6 +97,7 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
+import com.hp.hpl.jena.ontology.HasValueRestriction;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.IntersectionClass;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -2947,6 +2948,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
 			List<ConceptName> impliedProperties = null;		// don't impute implied properties when the range is a List
 			NamedNode tctype = new NamedNode(avf.getURI());
+			tctype.setListLength(getSadlTypedListLengthRestriction(lst));
+			tctype.setMaxListLength(getSadlTypedListMaxLengthRestriction(lst));
+			tctype.setMinListLength(getSadlTypedListMinLengthRestriction(lst));
 			if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 				tctype.setNodeType(NodeType.DataTypeListNode);
 			}
@@ -2987,6 +2991,57 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return null;
+	}
+	
+	public int getSadlTypedListLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+	
+	public int getSadlTypedListMaxLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+	
+	public int getSadlTypedListMinLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
 	}
 	
 	private TypeCheckInfo createTypeCheckInfoForPropertyDomain(Resource domain, ConceptName propConceptName, EObject expression) throws DontTypeCheckException, InvalidTypeException {
