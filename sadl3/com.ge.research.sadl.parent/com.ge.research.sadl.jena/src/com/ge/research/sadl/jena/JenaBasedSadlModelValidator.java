@@ -14,6 +14,8 @@ import java.util.Objects;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.diagnostics.Severity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.model.CircularDefinitionException;
@@ -147,6 +149,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
    	public enum ImplicitPropertySide {LEFT, RIGHT, NONE, BOTH}
+   	
+    private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelValidator.class);
 
 	/**
 	 * This inner class captures the information about the left or right hand side of an expression that is subject
