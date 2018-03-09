@@ -97,6 +97,7 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
+import com.hp.hpl.jena.ontology.HasValueRestriction;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.IntersectionClass;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -944,7 +945,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (typeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) || 
 						(typeCheckInfo.getTypeCheckType() instanceof NamedNode && ((NamedNode)typeCheckInfo.getTypeCheckType()).isList())) {
 					if (sb2 == null) sb2 = new StringBuilder();
-					sb2.append("a List of values of type ");
+					String lengthOrRange = getListLengthAsString((NamedNode)typeCheckInfo.getTypeCheckType());
+					sb2.append("a List " + lengthOrRange + "of values of type ");
 				}
 				if (sb2 != null && typeCheckInfo.getTypeCheckType() != null) {
 					sb2.append(getModelProcessor().nodeToString(typeCheckInfo.getTypeCheckType()));
@@ -1008,6 +1010,33 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //			leftRange = sb.toString();
 //		}
 //		return null;
+	}
+
+	private String getListLengthAsString(NamedNode node) {
+		StringBuilder sb = new StringBuilder();	
+		int length = node.getListLength();
+		int minLength = node.getMinListLength();
+		int maxLength = node.getMaxListLength();
+		if(length != -1 || minLength != -1 || maxLength != -1) {		
+			sb.append("length ");
+			if(minLength != -1 || maxLength != -1) {
+				if(minLength == -1) {
+					sb.append("0");
+				}else {
+					sb.append(minLength);
+				}
+				sb.append("-");
+				if(maxLength == -1) {
+					sb.append("*");
+				}else {
+					sb.append(maxLength);
+				}
+			}else {
+				sb.append(length);
+			}
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 
 	private boolean rdfPropertyTypeCheckInfoHasRange(TypeCheckInfo typeCheckInfo) {
@@ -2981,6 +3010,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
 			List<ConceptName> impliedProperties = null;		// don't impute implied properties when the range is a List
 			NamedNode tctype = new NamedNode(avf.getURI());
+			tctype.setListLength(getSadlTypedListLengthRestriction(lst));
+			tctype.setMaxListLength(getSadlTypedListMaxLengthRestriction(lst));
+			tctype.setMinListLength(getSadlTypedListMinLengthRestriction(lst));
 			if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 				tctype.setNodeType(NodeType.DataTypeListNode);
 			}
@@ -3021,6 +3053,57 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return null;
+	}
+	
+	public int getSadlTypedListLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+	
+	public int getSadlTypedListMaxLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+	
+	public int getSadlTypedListMinLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
 	}
 	
 	private TypeCheckInfo createTypeCheckInfoForPropertyDomain(Resource domain, ConceptName propConceptName, EObject expression) throws DontTypeCheckException, InvalidTypeException {
@@ -3841,6 +3924,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return true;
 				}
 				return false;
+			}
+		}
+		
+		if(leftTypeCheckInfo.getRangeValueType() != null && leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) &&
+		   rightTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
+			if(leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null &&
+			   leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString())){
+				ConceptName leftConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+				ConceptName rightConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
+				if(leftConceptName.getType().equals(rightConceptName.getType())){
+					return leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType());
+				}
 			}
 		}
 		
