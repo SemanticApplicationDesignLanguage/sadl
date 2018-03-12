@@ -310,7 +310,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		 				else if (sprc.canAs(HasValueRestriction)) {
 		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
 		 					val obj = opitr.nextStatement.object
-		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#maxLengthRestriction")) {
 		 						hasLengthRest = true;
 		 					}
 		 				}
@@ -361,7 +361,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		 				else if (sprc.canAs(HasValueRestriction)) {
 		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
 		 					val obj = opitr.nextStatement.object
-		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#maxLengthRestriction")) {
 		 						hasLengthRest = true;
 		 					}
 		 				}
@@ -411,7 +411,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		 				else if (sprc.canAs(HasValueRestriction)) {
 		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
 		 					val obj = opitr.nextStatement.object
-		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#maxLengthRestriction")) {
 		 						hasLengthRest = true;
 		 					}
 		 				}
@@ -461,7 +461,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		 				else if (sprc.canAs(HasValueRestriction)) {
 		 					val opitr = jenaModel.listStatements(sprc, OWL.onProperty, null as RDFNode)
 		 					val obj = opitr.nextStatement.object
-		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#lengthMaxRestriction")) {
+		 					if ((obj as Resource).URI.equals("http://sadl.org/sadllistmodel#maxLengthRestriction")) {
 		 						hasLengthRest = true;
 		 					}
 		 				}

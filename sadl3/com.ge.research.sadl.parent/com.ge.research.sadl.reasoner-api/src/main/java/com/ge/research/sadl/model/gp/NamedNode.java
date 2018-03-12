@@ -95,6 +95,18 @@ public class NamedNode extends Node {
 			return false;
 		if (nodeType != other.nodeType)
 			return false;
+		if(isList() && !other.isList())
+			return false;
+		if(!isList() && other.isList())
+			return false;
+		if(isList() && other.isList()) {
+			if(getListLength() != other.getListLength())
+				return false;
+			if(getMaxListLength() != other.getMaxListLength())
+				return false;
+			if(getMinListLength() != other.getMinListLength())
+				return false;
+		}
 		return true;
 	}
 
