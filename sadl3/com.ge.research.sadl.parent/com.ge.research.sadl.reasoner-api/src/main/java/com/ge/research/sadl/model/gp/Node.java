@@ -66,18 +66,35 @@ public abstract class Node {
 		this.missingTripleReplacement = missingTripleReplacement;
 	}
 	
+	/**
+	 * Method to get the local name, if any of the node.
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * Method to get the namespace, if any, of the node.
+	 * @return
+	 */
 	public String getNamespace() {
 		return namespace;
 	}
 	
+	/**
+	 * Method to get the prefix, if any, to be used in the qualified name of the node.
+	 * @return
+	 */
 	public String getPrefix() {
 		return prefix;
 	}
 	
+	/**
+	 * Method to the the URI (Universal Resource Identifier), if any, which is the unique 
+	 * identifier of this node.
+	 * @return
+	 */
 	public String getURI() {
 		if (namespace != null) {
 			return namespace + name;
