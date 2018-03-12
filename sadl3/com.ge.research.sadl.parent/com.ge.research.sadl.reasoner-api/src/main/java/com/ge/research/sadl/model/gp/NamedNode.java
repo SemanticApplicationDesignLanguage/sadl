@@ -20,9 +20,6 @@ package com.ge.research.sadl.model.gp;
 
 public class NamedNode extends Node {
 	private boolean validated = false;
-	private String name = null;
-	private String prefix = null;
-	private String namespace = null;
 	private NodeType nodeType = null;
 	// if the Node represents a List (ClassListNode or DataTypeListNode) then the following may apply: 
 	private int listLength = -1;						// the length restriction, if any (-1 => none)
@@ -63,10 +60,6 @@ public class NamedNode extends Node {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public void setNodeType(NodeType nodeType) {
@@ -129,16 +122,8 @@ public class NamedNode extends Node {
 		this.namespace = namespace;
 	}
 
-	public String getNamespace() {
-		return namespace;
-	}
-
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
-	}
-
-	public String getPrefix() {
-		return prefix;
 	}
 
 	public void setValidated(boolean validated) {
