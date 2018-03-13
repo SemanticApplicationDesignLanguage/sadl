@@ -428,11 +428,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return builtin;
 	}
 	
-	private Junction createJunction(Expression expr, String name, Object lobj, Object robj) {
+	private Junction createJunction(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Junction junction = new Junction();
 		junction.setJunctionName(name);
-		junction.setLhs(lobj);
-		junction.setRhs(robj);
+		junction.setLhs(nodeCheck(lobj));
+		junction.setRhs(nodeCheck(robj));
 		return junction;
 	}
 
@@ -463,8 +463,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (lhs instanceof Literal && rhs instanceof Literal) {
 				lhs = createUnaryBuiltin(sexpr, name, lhs);
 				rhs = createUnaryBuiltin(sexpr, name, rhs);
-				junc.setLhs(lhs);
-				junc.setRhs(rhs);
+				junc.setLhs(nodeCheck(lhs));
+				junc.setRhs(nodeCheck(rhs));
 			}
 			return junc;
 		}
@@ -666,149 +666,154 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param object 
 	 */
 	public void postProcessTest(Test test, TestStatement object) {
-		Object lhs = test.getLhs();
-		if (lhs instanceof List<?> && ((List<?>)lhs).size() > 0) {
-			if (((List<?>)lhs).get(0) instanceof GraphPatternElement) {
-				flattenLinkedList((List<GraphPatternElement>)lhs);
-			}
-			if (lhs instanceof List<?>) {
-				if (((List<?>)lhs).size() == 1) {
-					lhs = ((List<?>)lhs).get(0);
-					test.setLhs(lhs);
+		try {
+			Object lhs = test.getLhs();
+			if (lhs instanceof List<?> && ((List<?>)lhs).size() > 0) {
+				if (((List<?>)lhs).get(0) instanceof GraphPatternElement) {
+					flattenLinkedList((List<GraphPatternElement>)lhs);
 				}
-				else if (((List<?>)lhs).size() == 2 && ((List<?>)lhs).get(1) instanceof BuiltinElement &&
-						((BuiltinElement)((List<?>)lhs).get(1)).isCreatedFromInterval()) {
-					test.setLhs(((List<?>)lhs).get(0));
-					test.setCompName(((BuiltinElement)((List<?>)lhs).get(1)).getFuncType());
-					test.setRhs(((BuiltinElement)((List<?>)lhs).get(1)).getArguments().get(1));
+				if (lhs instanceof List<?>) {
+					if (((List<?>)lhs).size() == 1) {
+						lhs = ((List<?>)lhs).get(0);
+						test.setLhs(lhs);
+					}
+					else if (((List<?>)lhs).size() == 2 && ((List<?>)lhs).get(1) instanceof BuiltinElement &&
+							((BuiltinElement)((List<?>)lhs).get(1)).isCreatedFromInterval()) {
+						test.setLhs(((List<?>)lhs).get(0));
+						test.setCompName(((BuiltinElement)((List<?>)lhs).get(1)).getFuncType());
+						test.setRhs(((BuiltinElement)((List<?>)lhs).get(1)).getArguments().get(1));
+					}
 				}
 			}
-		}
-		else if (lhs instanceof GraphPatternElement && ((GraphPatternElement)lhs).getNext() != null) {
-			boolean done = false;
-			if ((((GraphPatternElement)lhs).getNext() instanceof  BuiltinElement)) {
-				// there is a builtin next
-				BuiltinElement be = (BuiltinElement) ((GraphPatternElement)lhs).getNext();
-				if (isComparisonBuiltin(be.getFuncName())) {
-					((GraphPatternElement)lhs).setNext(null);
-					if (be.getArguments().size() > 1) {
-						if (be.getArguments().get(0) instanceof VariableNode) {
-							test.setRhs(be.getArguments().get(1));
+			else if (lhs instanceof GraphPatternElement && ((GraphPatternElement)lhs).getNext() != null) {
+				boolean done = false;
+				if ((((GraphPatternElement)lhs).getNext() instanceof  BuiltinElement)) {
+					// there is a builtin next
+					BuiltinElement be = (BuiltinElement) ((GraphPatternElement)lhs).getNext();
+					if (isComparisonBuiltin(be.getFuncName())) {
+						((GraphPatternElement)lhs).setNext(null);
+						if (be.getArguments().size() > 1) {
+							if (be.getArguments().get(0) instanceof VariableNode) {
+								test.setRhs(be.getArguments().get(1));
+							}
+							else {
+								// this is of the form V is P of S so comparison must be reversed
+								reverseBuiltinComparisonDirection(be);
+								test.setRhs(be.getArguments().get(0));
+							}
 						}
 						else {
-							// this is of the form V is P of S so comparison must be reversed
-							reverseBuiltinComparisonDirection(be);
-							test.setRhs(be.getArguments().get(0));
+							addError(new IFTranslationError("A BuiltinElement in a Test is a comparison (" + be.getFuncName() + ") but has less than two arguemnts (" + be.toString() + ")"));
 						}
+						test.setCompName(be.getFuncName());
+						done = true;
 					}
-					else {
-						addError(new IFTranslationError("A BuiltinElement in a Test is a comparison (" + be.getFuncName() + ") but has less than two arguemnts (" + be.toString() + ")"));
-					}
-					test.setCompName(be.getFuncName());
-					done = true;
+				}
+				if (!done) {
+					List<GraphPatternElement> newLhs = new ArrayList<GraphPatternElement>();
+					newLhs.add((GraphPatternElement) lhs);
+					test.setLhs(flattenLinkedList(newLhs));
 				}
 			}
-			if (!done) {
-				List<GraphPatternElement> newLhs = new ArrayList<GraphPatternElement>();
-				newLhs.add((GraphPatternElement) lhs);
-				test.setLhs(flattenLinkedList(newLhs));
-			}
-		}
-		else if (lhs instanceof BuiltinElement && isModifiedTriple(((BuiltinElement)lhs).getFuncType())) {
-			List<Node> args = ((BuiltinElement)lhs).getArguments();
-			if (args != null && args.size() == 2) {
-				test.setLhs(args.get(1));
-				test.setRhs(args.get(0));
-				test.setCompName(((BuiltinElement)lhs).getFuncName());
-			}
-		}
-		if (test.getRhs() instanceof ProxyNode) {
-			test.setRhs(((ProxyNode)test.getRhs()).getProxyFor());
-		}
-		Object rhs = test.getRhs();
-		if (rhs instanceof List<?> && ((List<?>)rhs).size() > 0) {
-			if (((List<?>)rhs).get(0) instanceof GraphPatternElement) {
-				flattenLinkedList((List<GraphPatternElement>)rhs);
-			}
-		}
-		else if (rhs instanceof GraphPatternElement && ((GraphPatternElement)rhs).getNext() != null) {
-			boolean done = false;
-			if ((((GraphPatternElement)rhs).getNext() instanceof BuiltinElement)) {
-				BuiltinElement be = (BuiltinElement) ((GraphPatternElement)rhs).getNext();
-				if (isComparisonBuiltin(be.getFuncName())) {
-					((GraphPatternElement)rhs).setNext(null);
-					test.setLhs(be.getArguments().get(1));
-					test.setCompName(be.getFuncName());
-					done = true;
+			else if (lhs instanceof BuiltinElement && isModifiedTriple(((BuiltinElement)lhs).getFuncType())) {
+				List<Node> args = ((BuiltinElement)lhs).getArguments();
+				if (args != null && args.size() == 2) {
+					test.setLhs(args.get(1));
+					test.setRhs(args.get(0));
+					test.setCompName(((BuiltinElement)lhs).getFuncName());
 				}
 			}
-			if (!done) {
-				List<GraphPatternElement> newRhs = new ArrayList<GraphPatternElement>();
-				newRhs.add((GraphPatternElement) rhs);
-				test.setRhs(flattenLinkedList(newRhs));
+			if (test.getRhs() instanceof ProxyNode) {
+				test.setRhs(((ProxyNode)test.getRhs()).getProxyFor());
 			}
-		}
-
-		if (test.getLhs() instanceof ProxyNode) {
-			test.setLhs(((ProxyNode)test.getLhs()).getProxyFor());
-		}
-		if (test.getCompType() != null && test.getCompType().equals(ComparisonType.Eq) 
-				&& test.getLhs() != null && test.getRhs() != null 
-				&& test.getLhs() instanceof NamedNode && test.getRhs() instanceof List<?>) {
-			if (test.getRhsVariables() != null && test.getRhsVariables().size() == 1) {
-				String rhsvar = test.getRhsVariables().get(0).getName();
-				List<?> rhslist = (List<?>) test.getRhs();
-				boolean allPass = true;
-				for (int i = 0; i < rhslist.size(); i++) {
-					Object anrhs = rhslist.get(i);
-					if (!(anrhs instanceof TripleElement)) {
-						allPass = false;
-						break;
+			Object rhs = test.getRhs();
+			if (rhs instanceof List<?> && ((List<?>)rhs).size() > 0) {
+				if (((List<?>)rhs).get(0) instanceof GraphPatternElement) {
+					flattenLinkedList((List<GraphPatternElement>)rhs);
+				}
+			}
+			else if (rhs instanceof GraphPatternElement && ((GraphPatternElement)rhs).getNext() != null) {
+				boolean done = false;
+				if ((((GraphPatternElement)rhs).getNext() instanceof BuiltinElement)) {
+					BuiltinElement be = (BuiltinElement) ((GraphPatternElement)rhs).getNext();
+					if (isComparisonBuiltin(be.getFuncName())) {
+						((GraphPatternElement)rhs).setNext(null);
+						test.setLhs(be.getArguments().get(1));
+						test.setCompName(be.getFuncName());
+						done = true;
 					}
-					else {
-						Node subj = ((TripleElement)anrhs).getSubject();
-						if (!(subj instanceof VariableNode) || !(((VariableNode)subj).getName().equals(rhsvar))) {
+				}
+				if (!done) {
+					List<GraphPatternElement> newRhs = new ArrayList<GraphPatternElement>();
+					newRhs.add((GraphPatternElement) rhs);
+					test.setRhs(flattenLinkedList(newRhs));
+				}
+			}
+	
+			if (test.getLhs() instanceof ProxyNode) {
+				test.setLhs(((ProxyNode)test.getLhs()).getProxyFor());
+			}
+			if (test.getCompType() != null && test.getCompType().equals(ComparisonType.Eq) 
+					&& test.getLhs() != null && test.getRhs() != null 
+					&& test.getLhs() instanceof NamedNode && test.getRhs() instanceof List<?>) {
+				if (test.getRhsVariables() != null && test.getRhsVariables().size() == 1) {
+					String rhsvar = test.getRhsVariables().get(0).getName();
+					List<?> rhslist = (List<?>) test.getRhs();
+					boolean allPass = true;
+					for (int i = 0; i < rhslist.size(); i++) {
+						Object anrhs = rhslist.get(i);
+						if (!(anrhs instanceof TripleElement)) {
 							allPass = false;
 							break;
 						}
+						else {
+							Node subj = ((TripleElement)anrhs).getSubject();
+							if (!(subj instanceof VariableNode) || !(((VariableNode)subj).getName().equals(rhsvar))) {
+								allPass = false;
+								break;
+							}
+						}
+					}
+					if (allPass) {
+						for (int i = 0; i < rhslist.size(); i++) {
+							TripleElement triple = (TripleElement) rhslist.get(i);
+							triple.setSubject((Node) test.getLhs());
+						}
+						test.setLhs(test.getRhs());
+						test.setRhs(null);
+						test.setRhsVariables(null);
+						test.setCompName((String)null);
 					}
 				}
-				if (allPass) {
-					for (int i = 0; i < rhslist.size(); i++) {
-						TripleElement triple = (TripleElement) rhslist.get(i);
-						triple.setSubject((Node) test.getLhs());
+			}
+			
+			// this is a validity checking section
+			TripleElement singleTriple = null;
+			if (test.getLhs() instanceof TripleElement && test.getRhs() == null && ((TripleElement)test.getLhs()).getNext() == null) {
+				singleTriple = (TripleElement) test.getLhs();
+			}
+			else if (test.getRhs() instanceof TripleElement && test.getLhs() == null && ((TripleElement)test.getRhs()).getNext() == null) {
+				singleTriple = (TripleElement) test.getRhs();
+			}
+			if (singleTriple != null) {
+				// a single triple test should not have any variables in it
+				if (singleTriple.getSubject() instanceof VariableNode || 
+						singleTriple.getPredicate() instanceof VariableNode ||
+						singleTriple.getObject() instanceof VariableNode) {
+					addError(new IFTranslationError("Test is a single triple to be matched; should not contain variables.", object));
+				}
+				else {
+					try {
+	//					modelManager.validateStatement(singleTriple.getSubject(), singleTriple.getPredicate(), singleTriple.getObject());
 					}
-					test.setLhs(test.getRhs());
-					test.setRhs(null);
-					test.setRhsVariables(null);
-					test.setCompName((String)null);
+					catch (Throwable t) {
+						// try to validate but don't do anything on Exception
+					}
 				}
 			}
 		}
-		
-		// this is a validity checking section
-		TripleElement singleTriple = null;
-		if (test.getLhs() instanceof TripleElement && test.getRhs() == null && ((TripleElement)test.getLhs()).getNext() == null) {
-			singleTriple = (TripleElement) test.getLhs();
-		}
-		else if (test.getRhs() instanceof TripleElement && test.getLhs() == null && ((TripleElement)test.getRhs()).getNext() == null) {
-			singleTriple = (TripleElement) test.getRhs();
-		}
-		if (singleTriple != null) {
-			// a single triple test should not have any variables in it
-			if (singleTriple.getSubject() instanceof VariableNode || 
-					singleTriple.getPredicate() instanceof VariableNode ||
-					singleTriple.getObject() instanceof VariableNode) {
-				addError(new IFTranslationError("Test is a single triple to be matched; should not contain variables.", object));
-			}
-			else {
-				try {
-//					modelManager.validateStatement(singleTriple.getSubject(), singleTriple.getPredicate(), singleTriple.getObject());
-				}
-				catch (Throwable t) {
-					// try to validate but don't do anything on Exception
-				}
-			}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -950,7 +955,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				e.printStackTrace();
 			} 		
 		}
-		removeDuplicateElements(rule);
+		try {
+			removeDuplicateElements(rule);
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return rule;
 	}
 	
@@ -1056,7 +1072,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			else if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int i = 0; i < args.size(); i++) {
+				for (int i = 0; args != null && i < args.size(); i++) {
 					if (args.get(i) instanceof ProxyNode) {
 						nullSubjects = getNullSubjectTriples(nullSubjects, (GraphPatternElement)((ProxyNode)args.get(i)).getProxyFor());
 					}
@@ -1109,7 +1125,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (!processed) {
 			if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int i = 0; i < args.size(); i++ ) {
+				for (int i = 0; args != null && i < args.size(); i++ ) {
 					Node arg = args.get(i);
 					if (arg instanceof ProxyNode) {
 						addImpliedAndExpandedProperties((GraphPatternElement)((ProxyNode)arg).getProxyFor());
@@ -1369,9 +1385,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param results
 	 * @param tgpe
 	 * @return
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws InvalidNameException 
 	 */
 	private List<?> moveEmbeddedGPEsToIfs(Rule rule, List<?> results,
-			GraphPatternElement tgpe) {
+			GraphPatternElement tgpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (tgpe.isEmbedded()) {
 			results.remove(tgpe);
 			rule.getIfs().add(tgpe);			
@@ -1398,9 +1417,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param rule
 	 * @param tgpe
 	 * @return
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws InvalidNameException 
 	 */
 	private GraphPatternElement moveEmbeddedFromJunction(Rule rule,
-			Junction tgpe) {
+			Junction tgpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		boolean lhsRemoved = false;
 		boolean rhsRemoved = false;
 		Object lhs = ((Junction)tgpe).getLhs();
@@ -1428,8 +1450,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (rhsRemoved) {
 			return (GraphPatternElement) lhs;
 		}
-		tgpe.setLhs(lhs);
-		tgpe.setRhs(rhs);
+		tgpe.setLhs(nodeCheck(lhs));
+		tgpe.setRhs(nodeCheck(rhs));
 		return tgpe;
 	}
 
@@ -1479,7 +1501,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	@Override
 	public List<GraphPatternElement> listToAnd(
-			List<GraphPatternElement> patterns) {
+			List<GraphPatternElement> patterns) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (patterns == null || patterns.size() == 0) {
 			return null;
 		}
@@ -1492,7 +1514,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		Junction jand = new Junction();
 		jand.setJunctionName("and");
-		jand.setLhs(lhs);
+		jand.setLhs(nodeCheck(lhs));
 		if (patterns.size() > 1) {
 			patterns = listToAnd(patterns);
 		}
@@ -1500,7 +1522,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (rhs instanceof List<?>) {
 			rhs = listToAnd((List<GraphPatternElement>) rhs).get(0);
 		}
-		jand.setRhs(rhs);
+		jand.setRhs(nodeCheck(rhs));
 		patterns.set(0, jand);
 		return patterns;
 	}
@@ -1545,18 +1567,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				lhsbe.setFuncName("==");
 				lhsbe.setCreatedFromInterval(true);
 				lhsbe.addArgument(nodeCheck(lhs));
-				((Junction)pattern).setLhs(lhsbe);
+				((Junction)pattern).setLhs(nodeCheck(lhsbe));
 			}
 			else {
 				expandProxyNodes(lhsPatterns, lhs, isRuleThen);
 				if (lhsPatterns.size() == 1) {
-					((Junction)pattern).setLhs(lhsPatterns.get(0));
+					((Junction)pattern).setLhs(nodeCheck(lhsPatterns.get(0)));
 				}
 				else if (lhsPatterns.size() < 1) {
-					((Junction)pattern).setLhs(lhs);
+					((Junction)pattern).setLhs(nodeCheck(lhs));
 				}
 				else {
-					((Junction)pattern).setLhs(listToAnd(lhsPatterns).get(0));
+					((Junction)pattern).setLhs(nodeCheck(listToAnd(lhsPatterns).get(0)));
 	//				throw new TranslationException("LHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
@@ -1566,18 +1588,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				rhsbe.setFuncName("==");
 				rhsbe.setCreatedFromInterval(true);
 				rhsbe.addArgument(nodeCheck(rhs));
-				((Junction)pattern).setRhs(rhsbe);
+				((Junction)pattern).setRhs(nodeCheck(rhsbe));
 			}
 			else {
 				expandProxyNodes(rhsPatterns, rhs, isRuleThen);
 				if (rhsPatterns.size() == 1) {
-					((Junction)pattern).setRhs(rhsPatterns.get(0));
+					((Junction)pattern).setRhs(nodeCheck(rhsPatterns.get(0)));
 				}
 				else if (rhsPatterns.size() < 1) {
-					((Junction)pattern).setRhs(rhs);
+					((Junction)pattern).setRhs(nodeCheck(rhs));
 				}
 				else {
-					((Junction)pattern).setRhs(listToAnd(rhsPatterns).get(0));
+					((Junction)pattern).setRhs(nodeCheck(listToAnd(rhsPatterns).get(0)));
 	//				throw new TranslationException("RHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
@@ -2293,8 +2315,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * 
 	 * @param list - input GraphPatternElement List that may have chained elements inside it
 	 * @return - the transformed list
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws InvalidNameException 
 	 */
-	private List<GraphPatternElement> flattenLinkedList(List<GraphPatternElement> list) {
+	private List<GraphPatternElement> flattenLinkedList(List<GraphPatternElement> list) throws InvalidNameException, InvalidTypeException, TranslationException {
 		// go backwards through list so that the i index will remain valid
 		for (int i = list.size() -1; i >= 0; i--) {
 			GraphPatternElement element = list.get(i);
@@ -2317,24 +2342,24 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @see com.ge.research.sadl.jena.I_IntermediateFormTranslator#flattenJunction(com.ge.research.sadl.model.gp.Junction)
 	 */
 	@Override
-	public void flattenJunction(Junction element) {
+	public void flattenJunction(Junction element) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Object lhs = element.getLhs();
 		if (lhs instanceof Junction) {
 			flattenJunction((Junction)lhs);
 		}
 		else if (lhs instanceof GraphPatternElement && ((GraphPatternElement)lhs).getNext() != null) {
-			element.setLhs(flattenJunctionSide((GraphPatternElement) lhs));
+			element.setLhs(nodeCheck(flattenJunctionSide((GraphPatternElement) lhs)));
 		}
 		Object rhs = element.getRhs();
 		if (rhs instanceof Junction) {
 			flattenJunction((Junction)rhs);
 		}
 		else if (rhs instanceof GraphPatternElement && ((GraphPatternElement)rhs).getNext() != null) {
-			element.setRhs(flattenJunctionSide((GraphPatternElement) rhs));
+			element.setRhs(nodeCheck(flattenJunctionSide((GraphPatternElement) rhs)));
 		}
 	}
 	
-	private Object flattenJunctionSide(GraphPatternElement gpe) {
+	private Object flattenJunctionSide(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (gpe.getNext() != null) {
 			List<GraphPatternElement> lst = new ArrayList<GraphPatternElement>();
 			lst.add(gpe);
@@ -2344,7 +2369,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return gpe;
 	}
 	
-	private void removeDuplicateElements(Rule rule) {
+	private void removeDuplicateElements(Rule rule) throws InvalidNameException, InvalidTypeException, TranslationException {
 		List<GraphPatternElement> givens = rule.getGivens();
 		List<GraphPatternElement> ifs = rule.getIfs();
 		List<GraphPatternElement> thens = rule.getThens();
@@ -2362,8 +2387,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param list1
 	 * @param list2
 	 * @param bRetainFirst -- true if same lists; if same lists leave first occurance
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws InvalidNameException 
 	 */
-	private int removeDuplicates(List<GraphPatternElement> list1, List<GraphPatternElement> list2, boolean bRetainFirst) {
+	private int removeDuplicates(List<GraphPatternElement> list1, List<GraphPatternElement> list2, boolean bRetainFirst) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (list1 == null || list2 == null || list1.size() < 1 || list2.size() < 1) {
 			return 0;
 		}
@@ -2407,7 +2435,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return removalCnt;
 	}
 	
-	private Object[] removeJunctionDuplicates(Junction gpe, GraphPatternElement gpeToMatch, boolean bRetainFirst, boolean foundFirst, int removalCnt) {
+	private Object[] removeJunctionDuplicates(Junction gpe, GraphPatternElement gpeToMatch, boolean bRetainFirst, boolean foundFirst, int removalCnt) throws InvalidNameException, InvalidTypeException, TranslationException {
 		boolean lhsDuplicate = false;
 		boolean rhsDuplicate = false;
 		Object lhs = gpe.getLhs();
@@ -2423,7 +2451,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			foundFirst = ((Boolean)lhsResults[1]).booleanValue();
 			removalCnt = ((Integer)lhsResults[2]).intValue();
 			if (!newLhs.equals(lhs)) {
-				gpe.setLhs(newLhs);
+				gpe.setLhs(nodeCheck(newLhs));
 			}
 		}
 		Object rhs = gpe.getRhs();
@@ -2439,7 +2467,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			foundFirst = ((Boolean)rhsResults[1]).booleanValue();
 			removalCnt = ((Integer)rhsResults[2]).intValue();
 			if (!newrhs.equals(rhs)) {
-				gpe.setRhs(newrhs);
+				gpe.setRhs(nodeCheck(newrhs));
 			}
 		}
 		Object[] results = new Object[3];
@@ -2485,6 +2513,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	protected List<GraphPatternElement> junctionToList(Junction gpe) {
 		List<GraphPatternElement> results = null;
 		Object lhs = gpe.getLhs();
+		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
 		if (lhs instanceof Junction && ((Junction)lhs).getJunctionType().equals(JunctionType.Conj)) {
 			results = junctionToList((Junction)lhs);
 		}
@@ -2493,6 +2522,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			results.add((GraphPatternElement) lhs);
 		}
 		Object rhs = gpe.getRhs();
+		if (rhs instanceof ProxyNode) rhs = ((ProxyNode)rhs).getProxyFor();
 		if (rhs instanceof Junction && ((Junction)rhs).getJunctionType().equals(JunctionType.Conj)) {
 			if (results != null) {
 				results.addAll(junctionToList((Junction)rhs));

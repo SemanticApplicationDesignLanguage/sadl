@@ -1,6 +1,6 @@
 <h1>The SADL Intermediate Form</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->01/04/2018<!--webbot bot="Timestamp" endspan i-checksum="12559" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->02/20/2018<!--webbot bot="Timestamp" endspan i-checksum="12513" --> 
 by <a href="mailto:crapo@research.ge.com?subject=Requirements Language">A. W. 
 Crapo</a>.</h6>
 <h2>Table of Contents</h2>
@@ -14,6 +14,7 @@ Crapo</a>.</h6>
   <li><a href="#BI2">Additional BuiltinElements</a></li>
   <li><a href="#SC1">SADL Commands (SadlCommand)</a></li>
   <li><a href="#SR1">SADL Rules</a></li>
+  <li><a href="#Equations">SADL Equations</a></li>
 </ul>
 <h2><a name="Introduction">Introduction</a></h2>
 <p>The SADL Intermediate Form is an in-memory representation used to capture the 
@@ -45,6 +46,8 @@ use, and maintain their models. SadlCommands are primarily used in the
 development environment rather than becoming part of the delivered knowledge 
 base, named queries being an exception. The &quot;Rule&quot; class captures if-then logic 
 used by target reasoners and is an important part of most knowledge bases.</p>
+<p>These classes are in the <i>com.ge.reasoner.sadl.reasoner-api</i> project, in 
+the <i>com.ge.research.sadl.model.gp</i> package.</p>
 <ul>
   <li>Node<ul>
     <li>ConstantNode</li>
@@ -76,6 +79,7 @@ used by target reasoners and is an important part of most knowledge bases.</p>
 </ul>
   </li>
   <li>Rule</li>
+  <li>Equation</li>
 </ul>
 <p>Instances of these classes have serializations to allow one to &quot;see&quot; 
 their contents, but the serializations are not meant for persistence. That is, 
@@ -336,3 +340,9 @@ does &quot;fire&quot;. SADL Rules have unique names and those names can be refer
 where in models, e.g., in a Query. Rules are an important mechanism for 
 capturing knowledge and are translated into a form that can be processed by the 
 target reasoner. They form part of a deployed knowledge base.</p>
+<h2><a name="Equations">SADL Equations</a></h2>
+<p>The SADL &quot;Equation&quot; and the SADL &quot;External&quot; statements both result in an 
+Equation in the Intermediate Form. In either case, the name must be unique 
+within the namespace. The signature of the Equation is captured as VariableNode 
+instances containing both the name and the type of the arguments. In the case of 
+a SADL &quot;Equation&quot; statement, the body is also capture as GraphPatternElements.</p>

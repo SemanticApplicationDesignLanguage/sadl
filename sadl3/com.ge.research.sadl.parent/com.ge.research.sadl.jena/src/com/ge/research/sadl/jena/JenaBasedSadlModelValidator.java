@@ -14,6 +14,8 @@ import java.util.Objects;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.diagnostics.Severity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.model.CircularDefinitionException;
@@ -97,6 +99,7 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
+import com.hp.hpl.jena.ontology.HasValueRestriction;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.IntersectionClass;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -146,6 +149,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
    	public enum ImplicitPropertySide {LEFT, RIGHT, NONE, BOTH}
+   	
+    private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelValidator.class);
 
 	/**
 	 * This inner class captures the information about the left or right hand side of an expression that is subject
@@ -944,7 +949,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (typeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) || 
 						(typeCheckInfo.getTypeCheckType() instanceof NamedNode && ((NamedNode)typeCheckInfo.getTypeCheckType()).isList())) {
 					if (sb2 == null) sb2 = new StringBuilder();
-					sb2.append("a List of values of type ");
+					String lengthOrRange = getListLengthAsString((NamedNode)typeCheckInfo.getTypeCheckType());
+					sb2.append("a List " + lengthOrRange + "of values of type ");
 				}
 				if (sb2 != null && typeCheckInfo.getTypeCheckType() != null) {
 					sb2.append(getModelProcessor().nodeToString(typeCheckInfo.getTypeCheckType()));
@@ -1008,6 +1014,33 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //			leftRange = sb.toString();
 //		}
 //		return null;
+	}
+
+	private String getListLengthAsString(NamedNode node) {
+		StringBuilder sb = new StringBuilder();	
+		int length = node.getListLength();
+		int minLength = node.getMinListLength();
+		int maxLength = node.getMaxListLength();
+		if(length != -1 || minLength != -1 || maxLength != -1) {		
+			sb.append("length ");
+			if(minLength != -1 || maxLength != -1) {
+				if(minLength == -1) {
+					sb.append("0");
+				}else {
+					sb.append(minLength);
+				}
+				sb.append("-");
+				if(maxLength == -1) {
+					sb.append("*");
+				}else {
+					sb.append(maxLength);
+				}
+			}else {
+				sb.append(length);
+			}
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 
 	private boolean rdfPropertyTypeCheckInfoHasRange(TypeCheckInfo typeCheckInfo) {
@@ -1195,7 +1228,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			throw new TranslationException("Unhandled expression type: " + expression.getClass().getCanonicalName());
 		}
-		expressionsTypeCheckCache.put(expression, returnedTci);
+		if (returnedTci != null) {
+			expressionsTypeCheckCache.put(expression, returnedTci);
+		}
 		return returnedTci;
 	}
 
@@ -1319,23 +1354,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		List<String> operations = Arrays.asList(expression.getOp().split("\\s+"));
 		TypeCheckInfo leftTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(expression.getLeft()));
 		TypeCheckInfo rightTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(expression.getRight()));
-//			if (leftTypeCheckInfo != null && isVariable(leftTypeCheckInfo) && expression.getRight() instanceof Declaration) {
-//				return rightTypeCheckInfo;
-//			}
-// TODO not sure if it's necessary to add local restrictions here? awc 12/11/2017
 		if (expression.getLeft() instanceof PropOfSubject && ((BinaryOperation)expression).getRight() instanceof Declaration) {
 			TypeCheckInfo subjtype = getType(((PropOfSubject)expression.getLeft()).getRight());
 			if (subjtype != null) {
 				Node subject = subjtype.getTypeCheckType();
 				if (subject != null) {
-//					addLocalRestriction(subjtype.getTypeCheckType().toString(), leftTypeCheckInfo, rightTypeCheckInfo);
-//					Object keytrans = getModelProcessor().processExpression(((PropOfSubject)expression.getLeft()));
-//					if (keytrans != null) {
-//						String key = generateLocalRestrictionKey(keytrans);
-					TripleElement tr = new TripleElement(subject, leftTypeCheckInfo.getTypeCheckType(), null);
-					getModelProcessor().handleLocalRestriction(expression, tr);
-//						addLocalRestriction(key, leftTypeCheckInfo, rightTypeCheckInfo, expression);
-//					}
+					ConceptIdentifier ltcetype = leftTypeCheckInfo.getExpressionType();
+					if (ltcetype instanceof ConceptName) {
+						NamedNode pred = getModelProcessor().conceptNameToNamedNode((ConceptName) ltcetype);
+						TripleElement tr = new TripleElement(subject, pred, rightTypeCheckInfo.getTypeCheckType());
+						getModelProcessor().handleLocalRestriction(expression, tr);
+					}
 				}
 			}
 		}
@@ -1563,29 +1592,33 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean isNumeric(TypeCheckInfo tci) throws InvalidTypeException {
 		Node ci;
-		if (tci.getTypeCheckType() != null) {
-			ci = tci.getTypeCheckType();
-			if (ci instanceof NamedNode) {
-				return getModelProcessor().isNumericType(((NamedNode)ci).toFullyQualifiedString());
+		if (tci != null) {
+			if (tci.getTypeCheckType() != null) {
+				ci = tci.getTypeCheckType();
+				if (ci instanceof NamedNode) {
+					return getModelProcessor().isNumericType(((NamedNode)ci).toFullyQualifiedString());
+				}
 			}
-		}
-		else if (tci.getExplicitValueType() != null) {
-//TODO this is incomplete; more examples needed AWC 12/19/2016				
-			ExplicitValueType evt = tci.getExplicitValueType();
-			if (evt.equals(ExplicitValueType.RESTRICTION)) {
-				issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
-			}
-			else if (tci.getExpressionType() instanceof ConceptName){
-				return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
+			else if (tci.getExplicitValueType() != null) {
+	//TODO this is incomplete; more examples needed AWC 12/19/2016				
+				ExplicitValueType evt = tci.getExplicitValueType();
+				if (evt.equals(ExplicitValueType.RESTRICTION)) {
+					issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
+				}
+				else if (tci.getExpressionType() instanceof ConceptName){
+					return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
+				}
 			}
 		}
 		return false;
 	}
 
 	private boolean isUnittedQuantity(TypeCheckInfo tci) {
-		Node tctn = tci.getTypeCheckType();
-		if (tctn instanceof NamedNode && ((NamedNode)tctn).toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-			return true;
+		if (tci != null) {
+			Node tctn = tci.getTypeCheckType();
+			if (tctn instanceof NamedNode && ((NamedNode)tctn).toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -1821,6 +1854,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				String article = cnstval.substring(0, cnstval.indexOf(" "));
 				subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
+				if (subjtype.getTypeCheckType() instanceof NamedNode) {
+					if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.ClassListNode)) {
+						((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.ClassNode);
+					}
+					else {
+						throw new TranslationException("unhandled element of list type check type, NamedNode but not ClassListNode");
+					}
+				}
+				else {
+					throw new TranslationException("unhandled element of list type, type check type not a NamedNode");
+				}
 				return subjtype;
 			
 			}
@@ -1918,7 +1962,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (predicate != null) {
 			TypeCheckInfo predicateType = getType(predicate);
 			if (subject instanceof PropOfSubject && predicateType.getExpressionType() instanceof ConceptName) {
-				checkEmbeddedPropOfSubject(subject, predicate);	
+				predicateType = checkEmbeddedPropOfSubject(subject, predicate, predicateType);	
 				return predicateType;
 			}else if(validSubject && predicateType != null && predicateType.getTypeCheckType() != null){
 				//add interface range
@@ -2023,6 +2067,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		String propertyName = predicateType.getExpressionType().toString();
 		String rangeStr = predicateType.getTypeCheckType().toString();
 		boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
+		metricsProcessor.addControlledOrMonitoredProperty(null, propertyName);
 		metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
 	}
 	
@@ -2075,17 +2120,39 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private void checkEmbeddedPropOfSubject(Expression subject, Expression predicate) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+	private TypeCheckInfo checkEmbeddedPropOfSubject(Expression subject, Expression predicate, TypeCheckInfo predicateType) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (predicate instanceof Name) {
 			String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 			OntConceptType oct = declarationExtensions.getOntConceptType(((Name)predicate).getName());
 			if (oct.equals(OntConceptType.ANNOTATION_PROPERTY)) {
 				issueAcceptor.addWarning(SadlErrorMessages.DOMAIN_MATCHING.get("annotation property"), predicate);
-				return;
+				return predicateType;
 			}
 			Property prop = theJenaModel.getProperty(propuri);
 			TypeCheckInfo subjType = getType(subject);
 			List<OntClass> subjClasses = subjType != null ? getTypeCheckTypeClasses(subjType) : null;
+			try {
+				List<Node> lrs = getApplicableLocalRestriction(subject, predicate);
+				if (lrs != null) {
+					for (int i = 0; i < lrs.size(); i++) {
+						if (lrs.size() > 1) {
+							throw new TranslationException("More than one matching local restriction found; this shouldn't happen");
+						}
+						if (!(lrs.get(0) instanceof NamedNode)) {
+							throw new TranslationException("Local restriction isn't instance of NamedNode; this shouldn't happen");
+						}
+						predicateType.setTypeCheckType((NamedNode)lrs.get(0));
+						predicateType.setTypeToExprRelationship(RESTRICTED_TO);
+						if (predicateType.getTypeCheckType() != null){
+							addEffectiveRangeByTypeCheckInfo(predicateType, subjType);
+						}
+						return predicateType;
+					}
+				}
+			} catch (PrefixNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			StmtIterator domainItr = prop.listProperties(RDFS.domain);
 			boolean domainMatched = false;
 			List<Resource> domainList = new ArrayList<Resource>();
@@ -2191,6 +2258,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
+		return predicateType;
 	}
 	
 	protected boolean checkDomain(List<OntClass> subjClasses, Resource dmn, List<Resource> domainList) {
@@ -2946,6 +3014,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
 			List<ConceptName> impliedProperties = null;		// don't impute implied properties when the range is a List
 			NamedNode tctype = new NamedNode(avf.getURI());
+			tctype.setListLength(getSadlTypedListLengthRestriction(lst));
+			tctype.setMaxListLength(getSadlTypedListMaxLengthRestriction(lst));
+			tctype.setMinListLength(getSadlTypedListMinLengthRestriction(lst));
 			if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 				tctype.setNodeType(NodeType.DataTypeListNode);
 			}
@@ -2986,6 +3057,57 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return null;
+	}
+	
+	public int getSadlTypedListLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+	
+	public int getSadlTypedListMaxLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+	
+	public int getSadlTypedListMinLengthRestriction(OntClass lstcls) {
+		ExtendedIterator<OntClass> eitr = ((OntClass)lstcls.as(OntClass.class)).listSuperClasses(true);
+		while (eitr.hasNext()) {
+			OntClass cls = eitr.next();
+			if (cls.isRestriction()) {
+				if (cls.canAs(HasValueRestriction.class)) {
+					if (((HasValueRestriction)cls.as(HasValueRestriction.class)).onProperty(theJenaModel.getProperty(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI))) {
+						int length = ((HasValueRestriction)cls.as(HasValueRestriction.class)).getHasValue().asLiteral().getInt();
+						eitr.close();
+						return length;
+					}
+				}
+			}
+		}
+		return -1;
 	}
 	
 	private TypeCheckInfo createTypeCheckInfoForPropertyDomain(Resource domain, ConceptName propConceptName, EObject expression) throws DontTypeCheckException, InvalidTypeException {
@@ -3806,6 +3928,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return true;
 				}
 				return false;
+			}
+		}
+		
+		if(leftTypeCheckInfo.getRangeValueType() != null && leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) &&
+		   rightTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
+			if(leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null &&
+			   leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString())){
+				ConceptName leftConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
+				ConceptName rightConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
+				if(leftConceptName.getType().equals(rightConceptName.getType())){
+					return leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType());
+				}
 			}
 		}
 		

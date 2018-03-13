@@ -480,9 +480,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 			GraphPatternElement gpe1 = query.getPatterns().get(0);
 			if (gpe1 instanceof Junction) {
 				Object gperhs = ((Junction)gpe1).getRhs();
+				if (gperhs instanceof ProxyNode) gperhs = ((ProxyNode)gperhs).getProxyFor();
 				if (gperhs instanceof BuiltinElement && ((BuiltinElement)gperhs).getFuncName().equalsIgnoreCase("eval")) {
 					isEval = true;
 					Object gpelhs = ((Junction)gpe1).getLhs();
+					if (gpelhs instanceof ProxyNode) gpelhs = ((ProxyNode)gpelhs).getProxyFor();
 					if (gpelhs instanceof GraphPatternElement) {
 						query.getPatterns().set(0, (GraphPatternElement) gpelhs);
 						query.setToBeEvaluated(true);
@@ -608,7 +610,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 		boolean lhsFilter = false;
 		boolean rhsFilter = false;
 		Object lhsobj = ((Junction)gpe).getLhs();
+		if (lhsobj instanceof ProxyNode) lhsobj = ((ProxyNode)lhsobj).getProxyFor();
 		Object rhsobj = ((Junction)gpe).getRhs();
+		if (rhsobj instanceof ProxyNode) rhsobj = ((ProxyNode)rhsobj).getProxyFor();
 		if (lhsobj instanceof BuiltinElement) {
 			lhsFilter = true;
 		}
