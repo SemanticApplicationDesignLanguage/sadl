@@ -68,5 +68,11 @@ public interface IJenaBasedModelProcessor {
 			throws InvalidNameException, InvalidTypeException, TranslationException;
 
 	boolean compareTranslations(String result, String evalTo);
-
+	
+	/**
+	 * Method to initialize preferences for model processor. Because this is called in onValidate, any extension classes should also call the super class method.
+	 * @param context
+	 */
+	public void initializePreferences(ProcessorContext context);
+	
 }

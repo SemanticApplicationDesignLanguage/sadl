@@ -37,7 +37,8 @@ public class SadlReadFailureHandler implements ReadFailureHandler {
 		try {
 			throw e2;
 		} catch (IOException e1) {
-			e1.printStackTrace();
+//			e1.printStackTrace();
+			System.err.println(e1.getMessage());
 		}
 	}
 

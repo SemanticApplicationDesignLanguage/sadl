@@ -8,8 +8,16 @@
  */
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
+import com.hp.hpl.jena.ontology.AllValuesFromRestriction
+import com.hp.hpl.jena.ontology.HasValueRestriction
+import com.hp.hpl.jena.ontology.OntClass
+import com.hp.hpl.jena.ontology.Restriction
+import com.hp.hpl.jena.rdf.model.Literal
+import com.hp.hpl.jena.rdf.model.Resource
+import com.hp.hpl.jena.vocabulary.OWL
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -19,15 +27,7 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
-import com.hp.hpl.jena.ontology.OntClass
-import com.hp.hpl.jena.ontology.Restriction
-import com.ge.research.sadl.processing.SadlConstants
-import com.hp.hpl.jena.ontology.AllValuesFromRestriction
-import com.hp.hpl.jena.ontology.HasValueRestriction
-import com.hp.hpl.jena.util.iterator.ExtendedIterator
-import com.hp.hpl.jena.vocabulary.OWL
-import com.hp.hpl.jena.rdf.model.Resource
-import com.hp.hpl.jena.rdf.model.Literal
+import com.ge.research.sadl.model.gp.Rule
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -71,7 +71,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
-			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
+			assertEquals("unittedQuantity(+(2,3),\"seconds\")", forTest.get(0).toString())
 		]
 	}
 
@@ -85,7 +85,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
-			assertEquals("unittedQuantity((+(2,3)),\"seconds\")", forTest.get(0).toString())
+			assertEquals("unittedQuantity(+(2,3),\"seconds\")", forTest.get(0).toString())
 		]
 	}
 
@@ -127,7 +127,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			issues.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults(true, false)
 			assertEquals(forTest.size, 1)
-			assertEquals(forTest.get(0).toString(), "unittedQuantity((+(PI,(+(1,2)))),\"seconds\")")
+			assertEquals(forTest.get(0).toString(), "unittedQuantity(+(PI,+(1,2)),\"seconds\")")
 		]
 	}
 
@@ -580,13 +580,13 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 "length(listexample:MarkerList)",
 "count(listexample:MarkerList,listexample:Marker1)",
 "contains(listexample:MarkerList,listexample:Marker1)",
-"not((contains(listexample:MarkerList,listexample:Marker1)))",
+"not(contains(listexample:MarkerList,listexample:Marker1))",
 "unique(listexample:MarkerList,listexample:Marker1)",
-"not((unique(listexample:MarkerList,listexample:Marker1)))",
-"sublist(listexample:MarkerList,(is(value,listexample:Marker1)))",
-"sublist(listexample:MarkerList,(is(type,listexample:ITEM)))",
-"sublist(listexample:MarkerList,(>(listexample:item_number,3)))",
-"sublist(listexample:MarkerList,(and((and((is(value,listexample:Marker1)), (is(type,listexample:ITEM)))), (<(listexample:item_number,3)))))"				
+"not(unique(listexample:MarkerList,listexample:Marker1))",
+"sublist(listexample:MarkerList,is(value,listexample:Marker1))",
+"sublist(listexample:MarkerList,is(type,listexample:ITEM))",
+"sublist(listexample:MarkerList,>(listexample:item_number,3))",
+"sublist(listexample:MarkerList,and(and(is(value,listexample:Marker1),is(type,listexample:ITEM)), <(listexample:item_number,3)))"				
 			)
  			assertNotNull(jenaModel)
 //			jenaModel.write(System.out, "RDF/XML-ABBREV")
@@ -610,15 +610,15 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testPrecedence_01() {
 		val forTest = newArrayList(
-"is((rdf(Precedence:Joe, Precedence:age, null)),(rdf((rdf(Precedence:Jane, Precedence:friend, null)), Precedence:age, null)))",
-"rdf(Precedence:Joe, Precedence:age, (rdf((rdf(Precedence:Jane, Precedence:friend, null)), Precedence:age, null)))",
-"+(2,(*(3,4)))",
-"*((+(2,3)),4)",
-"+(-2,(*(-3,-4)))",
+"is(rdf(Precedence:Joe, Precedence:age, null),rdf(rdf(Precedence:Jane, Precedence:friend, null), Precedence:age, null))",
+"rdf(Precedence:Joe, Precedence:age, rdf(rdf(Precedence:Jane, Precedence:friend, null), Precedence:age, null))",
+"+(2,*(3,4))",
+"*(+(2,3),4)",
+"+(-2,*(-3,-4))",
 "-(PI)",
 "-(PI)",
-"+((-(PI)),(*(3,(-(e)))))",
-"+((-(PI)),(*(3,(-(e)))))"
+"+(-(PI),*(3,-(e)))",
+"+(-(PI),*(3,-(e)))"
 		)
 		'''
 			 uri "http://sadl.org/Precedence.sadl" alias Precedence.
@@ -727,12 +727,12 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				}
 			}
 			assertTrue(f1 && f2)
-			val results = processor.getIntermediateFormResults(false, true)
-			if (issues !== null) {
-				for (issue:issues) {
-					println(issue.message)
-				}
-			}
+//			val results = processor.getIntermediateFormResults(false, true)
+//			if (issues !== null) {
+//				for (issue:issues) {
+//					println(issue.message)
+//				}
+//			}
 //			assertTrue(results.size==7)
 //			for (result:results) {
 //				println(result.toString)
@@ -980,7 +980,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_05() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3), rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3))))))]"
+"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4),and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3), rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3))))))]"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -1012,8 +1012,267 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			}
 			var idx = 0
 			for (t:forTest) {
-				assertEquals(results.get(idx++).toString, t.toString)
+				processor.compareTranslations(results.get(idx++).toString, t.toString)
 			}
+		]
+	}
+	
+	@Test
+	def void testRuleNoArticles() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
+		)
+		'''
+			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			    
+			    UnittedQuantity has impliedProperty ^value.
+
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    
+			    Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			    
+			    Rule AreaOfCircle: then area is PI*radius^2.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+//			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(rules.size==1)
+			for (rule:rules) {
+				println(rule.toString)
+			}
+			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(rules.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	
+	@Test
+	def void testRuleDefiniteArticles() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
+		)
+		'''
+			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			    
+			    UnittedQuantity has impliedProperty ^value.
+			    
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    
+			    Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			    
+			    Rule AreaOfCircle2: then the area is PI* the radius^2.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(rules.size==1)
+			for (rule:rules) {
+				println(rule.toString)
+			}
+			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(rules.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	@Test
+	def void testRuleIndefiniteArticles() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
+		)
+		'''
+			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			    
+			    UnittedQuantity has impliedProperty ^value.
+			    
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    
+			    Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			    
+			    Rule AreaOfCircle: then area is PI*radius^2.
+			    Rule AreaOfCircle2: then the area is PI* the radius^2.
+			    Rule AreaOfCircle3: then an area is PI* a radius^2.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+//			assertTrue(rules.size==1)
+			for (rule:rules) {
+				println(rule.toString)
+			}
+//			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(results.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	
+	@Test
+	def void testRuleHLR340NoArticles() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
+		)
+		val sadlmodel1 ='''
+		    uri "http://com.ge.research/sadl/BaseConcepts" alias baseconcepts version "$Revision: 1.1 $ Last modified on   $Date: 2015/01/27 22:39:45 $". 
+		    
+		    System is a top-level class.
+		    Subsystem is a type of System. 
+		    
+		    Component is a type of Subsystem.
+		    component describes System with values of type System.     
+		    component is transitive.
+		'''.sadl
+		'''
+			uri "http://sadl.org/LateralSteering/LateralSteering" alias latsteer version "$Revision: 1.1 $ Last modified on   $Date: 2015/01/27 22:39:45 $". 
+			
+			import "http://com.ge.research/sadl/BaseConcepts". 
+			 
+			// Subsystems related to HLRs
+			Aircraft is a type of System.
+			AircraftStatus is a class, must be one of {On_Ground, In_Air}.
+			Air_Ground describes Aircraft with values of type AircraftStatus.
+			
+			{FMS (alias "Flight Management System"),
+				GuidanceFunction,
+				LateralSteeringFunction,
+				FlightPlanManager,
+				AutoFlightDirectorSystem, 
+				NavigationFunction} are types of Subsystem.	
+					
+			// Structure of Subsystems	
+			component of Aircraft has exactly 2 value of type FMS.
+			component of FMS has exactly 1 values of type GuidanceFunction.
+			component of FMS has exactly 1 value of type FlightPlanManager.
+			component of FMS has exactly 1 value of type AutoFlightDirectorSystem.
+			component of GuidanceFunction has exactly 1 value of type LateralSteeringFunction.
+			
+			SteeringCommand is a class.
+			{RollCommand, PitchCommand, ThrustCommand} are types of SteeringCommand.
+			
+			Localizer_Capture_State_Type is a class, 
+				must be one of {Uninitialized, Inactive, Straight_In, Intercept, Loc_Active, Missed_Capture, Canceled, Wait_For_Retrigger_State}.
+				
+			rollAngle describes RollCommand with values of type float.
+			LNAV_Valid describes RollCommand with values of type boolean.
+			SpeedCategories is a class, must be one of {Low, High} .
+			mSpeed describes RollCommand with values of type SpeedCategories.
+			
+			cFlag1 describes RollCommand with values of type boolean.
+			cFlag2 describes RollCommand with values of type boolean.
+			
+				
+			generates describes LateralSteeringFunction with values of type RollCommand.	
+			generates of LateralSteeringFunction has at least one value of type RollCommand.	
+			
+			Active_Plan_Exists describes FlightPlanManager with values of type boolean.
+			System_State.Is_Valid describes NavigationFunction with values of type boolean.
+			Course_Is_Capturable describes LateralSteeringFunction with values of type boolean.
+			Ref_Path_Available describes LateralSteeringFunction with values of type boolean.
+			LNAV_TO_Capable describes AutoFlightDirectorSystem with values of type boolean.
+			localizer_Capture_State_Type describes LateralSteeringFunction with values of type Localizer_Capture_State_Type.
+			
+			Rule HRL340: if Air_Ground is In_Air and LNAV_TO_Capable is true then LNAV_Valid is true.
+			Rule FQ340: if Air_Ground of Aircraft is In_Air and LNAV_TO_Capable of component of Aircraft is true 
+				then LNAV_Valid of generates of component of component of Aircraft is true.
+			Rule FQ340b: 
+			  if x is an Aircraft and Air_Ground of x is In_Air and 
+			    v0 is a FMS and v0 is component of x and
+			    v1 is a AutoFlightDirectorSystem and v1 is component of v0 and v1 has LNAV_TO_Capable true and 
+			    v2 is a GuidanceFunction and v2 is component of x and 
+				v3 is a LateralSteeringFunction and v3 is component of v2 and 
+				v4 is a RollCommand and v3 generates v4
+			  then v4 has LNAV_Valid true. 
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(rules.size==3)
+			for (rule:rules) {
+				println(rule.toDescriptiveString)
+			}
+//			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(rules.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	
+	@Test
+	def void testRuleHLR340DefiniteArticles() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
+		)
+		'''
+			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			    
+			    UnittedQuantity has impliedProperty ^value.
+			    
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    
+			    Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			    
+			    Rule AreaOfCircle2: then the area is PI* the radius^2.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(rules.size==1)
+			for (rule:rules) {
+				println(rule.toString)
+			}
+			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(rules.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	@Test
+	def void testRuleHLR340IndefiniteArticles() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
+		)
+		'''
+			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			    
+			    UnittedQuantity has impliedProperty ^value.
+			    
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    
+			    Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			    
+			    Rule AreaOfCircle: then area is PI*radius^2.
+			    Rule AreaOfCircle2: then the area is PI* the radius^2.
+			    Rule AreaOfCircle3: then an area is PI* a radius^2.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults(false, true)
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+//			assertTrue(rules.size==1)
+			for (rule:rules) {
+				println(rule.toString)
+			}
+//			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(results.get(idx++).toString, t.toString)
+//			}
 		]
 	}
 	

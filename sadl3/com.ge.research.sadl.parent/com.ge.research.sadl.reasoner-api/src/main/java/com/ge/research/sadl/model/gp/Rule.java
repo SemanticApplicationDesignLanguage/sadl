@@ -143,6 +143,35 @@ public class Rule {
 		sb.append(".");
 		return sb.toString();
 	}
+	
+	public String toDescriptiveString() {
+		StringBuilder sb = new StringBuilder("Rule ");
+		sb.append(getRuleName());
+		sb.append(": ");
+		for (int i = 0; givens != null && i < givens.size(); i++) {
+			if (i == 0) {
+				sb.append("given ");				
+			}
+			if (i > 0) sb.append(" and ");
+			sb.append(givens.get(i).toDescriptiveString());
+		}
+		for (int i = 0; ifs != null && i < ifs.size(); i++) {
+			if (i == 0) {
+				sb.append(" if ");				
+			}
+			if (i > 0) sb.append(" and ");
+			sb.append(ifs.get(i).toDescriptiveString());
+		}
+		for (int i = 0; thens != null && i < thens.size(); i++) {
+			if (i == 0) {
+				sb.append(" then ");				
+			}
+			if (i > 0) sb.append(" and ");
+			sb.append(thens.get(i).toDescriptiveString());
+		}
+		sb.append(".");
+		return sb.toString();
+	}
 
 	private void setRuleName(String ruleName) {
 		this.ruleName = ruleName;
