@@ -9046,7 +9046,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						+ typersrc.toString() + "'");
 				retval = svf;
 			} else {
-				// cardinality restrictioin
+				// cardinality restriction
 				int cardNum = Integer.parseInt(cardinality);
 				String op = ((SadlCardinalityCondition) cond).getOperator();
 				if (op == null) {
