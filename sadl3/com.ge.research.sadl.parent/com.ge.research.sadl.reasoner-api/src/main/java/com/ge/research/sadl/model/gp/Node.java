@@ -29,6 +29,9 @@ public abstract class Node {
 	private List<Node> nodeValueTypes;
 	public abstract String toFullyQualifiedString();
 	private ProxyNode missingTripleReplacement = null;
+	protected String name = null;
+	protected String prefix = null;
+	protected String namespace = null;
 	
 	public List<Node> getNodeValueTypes() {
 		return nodeValueTypes;
@@ -58,7 +61,44 @@ public abstract class Node {
 	public ProxyNode getMissingTripleReplacement() {
 		return missingTripleReplacement;
 	}
+	
 	public void setMissingTripleReplacement(ProxyNode missingTripleReplacement) {
 		this.missingTripleReplacement = missingTripleReplacement;
+	}
+	
+	/**
+	 * Method to get the local name, if any of the node.
+	 * @return
+	 */
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * Method to get the namespace, if any, of the node.
+	 * @return
+	 */
+	public String getNamespace() {
+		return namespace;
+	}
+	
+	/**
+	 * Method to get the prefix, if any, to be used in the qualified name of the node.
+	 * @return
+	 */
+	public String getPrefix() {
+		return prefix;
+	}
+	
+	/**
+	 * Method to the the URI (Universal Resource Identifier), if any, which is the unique 
+	 * identifier of this node.
+	 * @return
+	 */
+	public String getURI() {
+		if (namespace != null) {
+			return namespace + name;
+		}
+		return null;
 	}
 }
