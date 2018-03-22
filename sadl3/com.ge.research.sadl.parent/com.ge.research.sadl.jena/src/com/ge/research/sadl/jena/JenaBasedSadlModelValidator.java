@@ -2427,14 +2427,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return modelProcessor.getTypedListType(node);
 	}
 
-	private boolean isTypedListSubclass(RDFNode rest) {
-		if (rest.isResource()) {
-			Resource lstcls = theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
-			if (lstcls != null && rest.asResource().hasProperty(RDFS.subClassOf, lstcls)) {	// if there are no lists the list model will not have been imported
-				return true;
-			}
-		}
-		return false;
+	private boolean isTypedListSubclass(RDFNode node) {
+		return modelProcessor.isTypedListSubclass(node);
 	}
 
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
