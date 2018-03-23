@@ -127,6 +127,9 @@ public class NamedNode extends Node {
 
 	@Override
 	public String toDescriptiveString() {
+		if (getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode)) {
+			return toString() + " List";
+		}
 		return toString();
 	}
 

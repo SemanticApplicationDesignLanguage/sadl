@@ -2113,7 +2113,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 					}
 					if (triplesToAdd == null && implicitObject) {
-						query.getVariables().add(((VariableNode) obj));
+						query.addVariable((VariableNode) obj);
 					}
 				}
 			}
@@ -2817,6 +2817,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		intermediateFormResults.add(result);
 	}
 
+	@Override
 	public IntermediateFormTranslator getIfTranslator() {
 		if (intermediateFormTranslator == null) {
 			intermediateFormTranslator = new IntermediateFormTranslator(this, getTheJenaModel());
@@ -7498,6 +7499,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return owlFlavor;
 	}
 
+	@Override
 	public NamedNode getTypedListType(RDFNode node) throws TranslationException {
 		if (node.isResource()) {
 			StmtIterator sitr = theJenaModel.listStatements(node.asResource(), RDFS.subClassOf, (RDFNode) null);
@@ -9046,7 +9048,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						+ typersrc.toString() + "'");
 				retval = svf;
 			} else {
-				// cardinality restrictioin
+				// cardinality restriction
 				int cardNum = Integer.parseInt(cardinality);
 				String op = ((SadlCardinalityCondition) cond).getOperator();
 				if (op == null) {
@@ -10325,6 +10327,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
+	@Override
 	public boolean isTypedListSubclass(RDFNode node) {
 		if (node != null && node.isResource()) {
 			com.hp.hpl.jena.rdf.model.Resource lstcls = theJenaModel

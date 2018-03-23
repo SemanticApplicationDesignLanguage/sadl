@@ -2510,7 +2510,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return list;
 	}
 	
-	protected List<GraphPatternElement> junctionToList(Junction gpe) {
+	public List<GraphPatternElement> junctionToList(Junction gpe) {
 		List<GraphPatternElement> results = null;
 		Object lhs = gpe.getLhs();
 		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
