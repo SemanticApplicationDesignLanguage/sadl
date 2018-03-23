@@ -599,14 +599,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		Node type = null;
 		// since type checking has passed to get to this point:
 		//	if either side has no impliedProperties then the type can come from either side
-		if (leftTypeCheckInfo.getImplicitProperties() == null && leftTypeCheckInfo.getTypeCheckType() != null) {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getImplicitProperties() == null && leftTypeCheckInfo.getTypeCheckType() != null) {
 			type = leftTypeCheckInfo.getTypeCheckType();
 		}
-		else if (rightTypeCheckInfo.getImplicitProperties() == null && rightTypeCheckInfo.getTypeCheckType() != null) {
+		else if (rightTypeCheckInfo != null && rightTypeCheckInfo.getImplicitProperties() == null && rightTypeCheckInfo.getTypeCheckType() != null) {
 			type = rightTypeCheckInfo.getTypeCheckType();
 		}
 		// the other possibility is that both sides have implied properties (which should be the same) so the type is the common type
-		else if (leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null 
+		else if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null 
 				&& leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) {
 			type = leftTypeCheckInfo.getTypeCheckType();
 		}
@@ -692,11 +692,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getOp().equals("not")) {
 			rExpr = ((UnaryExpression)rightExpression).getExpr();
 		}
-		if (rExpr instanceof Constant && ((Constant)rExpr).getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
+		if (rExpr instanceof Constant && isSkippedConstant((Constant)rExpr)) {
 			return true;
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean isSkippedConstant(Constant expr) {
+		if (expr.getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
+			return true;
+		}
+		return false;
+	}
+	
 	private boolean useImpliedProperties(String op) {
 		if (op.equals("contains") || op.equals("does not contain")) {
 			return false;
