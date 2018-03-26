@@ -1635,7 +1635,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo convertListTypeToElementOfListType(TypeCheckInfo listtype) {
 		Node tctype = listtype.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
-			((NamedNode)tctype).setList(false);
+			try {
+				NamedNode clonedNode = (NamedNode) tctype.clone();
+				clonedNode.setList(false);
+				listtype.setTypeCheckType(clonedNode);
+			} catch (CloneNotSupportedException e) {
+				logger.error(e.getMessage());
+			}
 		}
 		listtype.setRangeValueType(RangeValueType.CLASS_OR_DT);
 		
@@ -1653,7 +1659,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo convertElementOfListToListType(TypeCheckInfo elementtype) {
 		Node tctype = elementtype.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
-			((NamedNode)tctype).setList(true);
+			try {
+				NamedNode clonedNode = (NamedNode) tctype.clone();
+				clonedNode.setList(true);
+				elementtype.setTypeCheckType(clonedNode);
+			} catch (CloneNotSupportedException e) {
+				logger.error(e.getMessage());
+			}
 		}
 		elementtype.setRangeValueType(RangeValueType.LIST);
 		
