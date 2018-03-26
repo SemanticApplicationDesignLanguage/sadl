@@ -96,7 +96,6 @@ import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
-import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
@@ -1893,7 +1892,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (gpe instanceof BuiltinElement) {
 			if (((BuiltinElement) gpe).getFuncType().equals(BuiltinType.Not)) {
 				List<Node> args = ((BuiltinElement) gpe).getArguments();
-				if (args != null && args.size() == 1 && args.get(0) instanceof KnownNode) {
+				if (args != null && args.size() == 1 && ITranslator.isKnownNode(args.get(0))) {
 					addError(SadlErrorMessages.PHRASE_NOT_KNOWN.toString(), object);
 					addError("Phrase 'not known' is not a valid graph pattern; did you mean 'is not known'?", object);
 				}
@@ -1904,7 +1903,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return numErrors;
 	}
-
+	
 	private void processStatement(ExplainStatement element)
 			throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		String ruleName = element.getRulename() != null ? declarationExtensions.getConcreteName(element.getRulename())
@@ -3489,7 +3488,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if ((lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal
 					&& isSparqlQuery(((com.ge.research.sadl.model.gp.Literal) lobj).toString())))
-					&& !(robj instanceof KnownNode)) {
+					&& !(ITranslator.isKnownNode(robj))) {
 				if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
 	
 					if (lobj instanceof TripleElement) {
@@ -4169,7 +4168,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (predNode instanceof VariableNode) {
 				throw new TranslationException("Unhandled condition");
 			}
-		} else if (obj instanceof KnownNode) {
+		} else if (ITranslator.isKnownNode(obj)) {
 			// no type checking for "known"
 			return;
 		} else if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
@@ -4716,7 +4715,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// System.out.println("processing " + expr.getClass().getCanonicalName() + ": "
 		// + expr.getConstant());
 		if (expr.getConstant().equals("known")) {
-			return new KnownNode();
+			return new ConstantNode("known");
 		}
 		if (expr.getConstant().equals(SadlConstants.CONSTANT_NONE)) {
 			return new ConstantNode(SadlConstants.CONSTANT_NONE);

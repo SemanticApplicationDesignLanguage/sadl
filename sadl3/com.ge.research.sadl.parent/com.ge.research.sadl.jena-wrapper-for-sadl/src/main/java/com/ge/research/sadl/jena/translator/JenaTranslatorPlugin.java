@@ -21,8 +21,6 @@ package com.ge.research.sadl.jena.translator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +42,6 @@ import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
-import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -58,8 +55,8 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
-import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -366,7 +363,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			if (!((TripleElement)elements.get(index)).getModifierType().equals(TripleModifierType.None)) {
 				TripleElement trel = (TripleElement)elements.get(index);
 				if (trel.getModifierType().equals(TripleModifierType.Not)) {
-					if (trel.getObject() instanceof KnownNode) {
+					if (ITranslator.isKnownNode(trel.getObject())) {
 						return SpecialBuiltin.NOVALUE;
 					}
 					else {
@@ -395,7 +392,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 						&& ((NamedNode)biarg1).getName().equals(((NamedNode)trobj).getName())) {	
 					if (bt.equals(BuiltinType.NotEqual) && args.size() == 2) {
 						Node arg2 = args.get(1);
-						if (arg2 instanceof KnownNode) {
+						if (ITranslator.isKnownNode(arg2)) {
 							// this case: (x pred y), !=(y, known)
 							// 	just drop the i+1 builtin
 							elements.remove(index + 1);
@@ -428,7 +425,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 					}
 				}
 			}
-			else if (((TripleElement)elements.get(index)).getObject() instanceof KnownNode) {
+			else if (ITranslator.isKnownNode(((TripleElement)elements.get(index)).getObject())) {
 				Node var = new VariableNode("v" + System.currentTimeMillis());
 				((TripleElement)elements.get(index)).setObject(var);
 				return SpecialBuiltin.ISKNOWN;
@@ -816,7 +813,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 				Node pn = ((TripleElement)gpe).getPredicate();
 				checkPredicateSpecial(pn);
 				sb.append(nodeToString(pn, TranslationTarget.RULE_BUILTIN));
-				if (!(((TripleElement)gpe).getObject() instanceof KnownNode)) {
+				if (!ITranslator.isKnownNode((((TripleElement)gpe).getObject()))) {
 					sb.append(", ");
 					sb.append(nodeToString(((TripleElement)gpe).getObject(), TranslationTarget.RULE_BUILTIN));
 				}
@@ -949,7 +946,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 		else {
 			if (rulePart.equals(RulePart.NOT_A_RULE)) {
-				if (obj instanceof KnownNode) {
+				if (ITranslator.isKnownNode(obj)) {
 					newVar = "?" + getNewVariableForQuery();
 					if (gpe.getModifierType().equals(TripleModifierType.Not)) {
 						sb.append(newVar);
@@ -1297,7 +1294,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			Object litObj = ((Literal)node).getValue();
 			return literalValueToString(litObj, target);
 		}
-		else if (node instanceof KnownNode) {
+		else if (ITranslator.isKnownNode(node)) {
 			return "?" + getNewVariableForRule();
 		}
 		else if (node == null) {
