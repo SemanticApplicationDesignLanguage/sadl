@@ -249,4 +249,17 @@ public interface ITranslator {
 	 * @return supportedDataTypes string list of the projects supported data types
 	 */
 	public List<String> getSupportedDataTypes();
+	
+	/**
+	 * Method to determine if a constant is "known"
+	 * @param obj --  the ConstantNode (or not)
+	 * @return -- true if node is a ConstantNode with name "known"
+	 */
+	public static boolean isKnownNode(Object obj) {
+		if (obj instanceof ConstantNode && ((ConstantNode)obj).getName().equals("known")) {
+			return true;
+		}
+		return false;
+	}
+
 }
