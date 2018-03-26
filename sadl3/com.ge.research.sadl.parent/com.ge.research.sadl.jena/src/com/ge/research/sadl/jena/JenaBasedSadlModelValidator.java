@@ -1612,7 +1612,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	//TODO this is incomplete; more examples needed AWC 12/19/2016				
 				ExplicitValueType evt = tci.getExplicitValueType();
 				if (evt.equals(ExplicitValueType.RESTRICTION)) {
-					issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
+					issueAcceptor.addWarning("Explicit value type is RESTRICTION, which isn't yet handled. Please report with use case.", tci.context);
 				}
 				else if (tci.getExpressionType() instanceof ConceptName){
 					return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
