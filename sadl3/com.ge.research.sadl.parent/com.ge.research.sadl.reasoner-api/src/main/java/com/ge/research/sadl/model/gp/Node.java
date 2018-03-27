@@ -21,7 +21,7 @@ package com.ge.research.sadl.model.gp;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Node {
+public abstract class Node implements Cloneable{
 	// The value types of a variable node will be determined by its use as subject or object
 	//	of a predicate in RDF triples and come from the domain or range. As such, the value
 	//	types could be a union of classes (for an ObjectProperty)--hence the list.
@@ -100,5 +100,14 @@ public abstract class Node {
 			return namespace + name;
 		}
 		return null;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+	    return super.clone();
 	}
 }

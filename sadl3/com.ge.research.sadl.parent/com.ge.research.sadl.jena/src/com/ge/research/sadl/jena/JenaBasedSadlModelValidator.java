@@ -1612,7 +1612,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	//TODO this is incomplete; more examples needed AWC 12/19/2016				
 				ExplicitValueType evt = tci.getExplicitValueType();
 				if (evt.equals(ExplicitValueType.RESTRICTION)) {
-					issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
+					issueAcceptor.addWarning("Explicit value type is RESTRICTION, which isn't yet handled. Please report with use case.", tci.context);
 				}
 				else if (tci.getExpressionType() instanceof ConceptName){
 					return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
@@ -1635,7 +1635,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo convertListTypeToElementOfListType(TypeCheckInfo listtype) {
 		Node tctype = listtype.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
-			((NamedNode)tctype).setList(false);
+			try {
+				NamedNode clonedNode = (NamedNode) tctype.clone();
+				clonedNode.setList(false);
+				listtype.setTypeCheckType(clonedNode);
+			} catch (CloneNotSupportedException e) {
+				logger.error(e.getMessage());
+			}
 		}
 		listtype.setRangeValueType(RangeValueType.CLASS_OR_DT);
 		
@@ -1653,7 +1659,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo convertElementOfListToListType(TypeCheckInfo elementtype) {
 		Node tctype = elementtype.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
-			((NamedNode)tctype).setList(true);
+			try {
+				NamedNode clonedNode = (NamedNode) tctype.clone();
+				clonedNode.setList(true);
+				elementtype.setTypeCheckType(clonedNode);
+			} catch (CloneNotSupportedException e) {
+				logger.error(e.getMessage());
+			}
 		}
 		elementtype.setRangeValueType(RangeValueType.LIST);
 		
