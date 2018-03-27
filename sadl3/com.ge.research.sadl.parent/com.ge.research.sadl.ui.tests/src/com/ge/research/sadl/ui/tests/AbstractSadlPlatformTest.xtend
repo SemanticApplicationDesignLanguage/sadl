@@ -71,6 +71,10 @@ import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
 import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.*
 import com.google.common.collect.Iterables
 import org.eclipse.xtext.diagnostics.Severity
+import com.ge.research.sadl.reasoner.ConfigurationItem
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -391,6 +395,25 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		val inferenceProcessor = inferenceProcessorProvider.getProcessor(resource);
 		val projectPath = Paths.get(project.locationURI);
 		val modelFolderPath = projectPath.resolve(OWL_MODELS_FOLDER_NAME);
+		val modelPath = modelFolderPath.resolve('''«resource.URI.trimFileExtension.lastSegment».owl''').toString;
+		val result = inferenceProcessor.runInference(resource, modelPath, modelFolderPath.toString, preferences);
+		assert.apply(result);
+	}
+
+	protected def void assertInferencer(String inputFilePath, Map<String, String> preferences, List<ConfigurationItem> configItems,
+		(Object[])=>void assert) {
+
+		val resource = inputFilePath.file.resource;
+		val inferenceProcessor = inferenceProcessorProvider.getProcessor(resource);
+		val projectPath = Paths.get(project.locationURI);
+		val modelFolderPath = projectPath.resolve(OWL_MODELS_FOLDER_NAME);
+		val su = new SadlUtils
+		val cm = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(su.fileUrlToFileName(modelFolderPath.toFile.absolutePath), "RDF/XML") as IConfigurationManagerForIDE
+		if (configItems !== null) {
+			for (ci : configItems) {
+				cm.addConfiguration(ci)
+			}
+		}
 		val modelPath = modelFolderPath.resolve('''«resource.URI.trimFileExtension.lastSegment».owl''').toString;
 		val result = inferenceProcessor.runInference(resource, modelPath, modelFolderPath.toString, preferences);
 		assert.apply(result);

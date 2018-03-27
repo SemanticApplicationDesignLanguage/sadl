@@ -1347,7 +1347,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	private void setModelFolderPath(String modelFolderPath) {
-		this.modelFolderPath = modelFolderPath;
+		this.modelFolderPath = modelFolderPath.replace('\\', '/');
 	}
 
 	private String getModelName() {
