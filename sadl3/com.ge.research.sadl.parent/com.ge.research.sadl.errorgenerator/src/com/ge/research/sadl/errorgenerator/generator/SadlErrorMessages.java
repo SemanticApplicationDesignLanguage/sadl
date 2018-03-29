@@ -215,6 +215,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage ATPT_CTP_NOT_FOUND = new SadlErrorMessage("atpt_ctp_not_found");
 /**
+* A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.
+**/
+    public static final SadlErrorMessage NEEDS_ARTICLE = new SadlErrorMessage("needs_article");
+/**
 * {0} should not be null.
 **/
     public static final SadlErrorMessage INVALID_NULL = new SadlErrorMessage("invalid_null");
