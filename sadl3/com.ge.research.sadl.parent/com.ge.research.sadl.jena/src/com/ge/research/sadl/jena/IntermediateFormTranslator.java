@@ -2510,6 +2510,13 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return list;
 	}
 	
+	/**
+	 * Method to convert a Junction to a List<GraphPatternElement>. Note that this method will either handle
+	 * conjunction or disjunction at the top level but once the type is set the other type will not be converted
+	 * to a list as if both were converted the results would be non-functional.
+	 * @param gpe
+	 * @return
+	 */
 	public List<GraphPatternElement> junctionToList(Junction gpe) {
 		List<GraphPatternElement> results = null;
 		Object lhs = gpe.getLhs();
@@ -2537,6 +2544,38 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return results;
 	}
 	
+
+	public List<GraphPatternElement> disjunctionToList(Junction gpe) throws TranslationException {
+		List<GraphPatternElement> results = null;
+		Object lhs = gpe.getLhs();
+		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
+		if (!(lhs instanceof Junction || !((Junction)lhs).getJunctionType().equals(JunctionType.Disj))) {
+			throw new TranslationException("Top-level left of Junction is not a disjunction; use junctionToList. (Disjunction");
+		}
+		if (lhs instanceof Junction && ((Junction)lhs).getJunctionType().equals(JunctionType.Conj)) {
+			results = junctionToList((Junction)lhs);
+		}
+		else {
+//			results = new ArrayList<GraphPatternElement>();
+//			results.add((GraphPatternElement) lhs);
+			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
+		}
+		Object rhs = gpe.getRhs();
+		if (rhs instanceof ProxyNode) rhs = ((ProxyNode)rhs).getProxyFor();
+		if (rhs instanceof Junction && ((Junction)rhs).getJunctionType().equals(JunctionType.Conj)) {
+			if (results != null) {
+				results.addAll(junctionToList((Junction)rhs));
+			}
+			else {
+				results = junctionToList((Junction)rhs);
+			}
+		}
+		else if (rhs instanceof GraphPatternElement){
+//			results.add((GraphPatternElement) rhs);
+			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
+		}
+		return results;
+	}
 
 	/**
 	 * This method returns true only if all variables in the element are bound in other rule elements
