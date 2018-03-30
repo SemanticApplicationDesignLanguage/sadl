@@ -58,6 +58,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.SadlModelProcessor;
+import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -152,7 +153,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
      * @param modmgr
      */
     public IntermediateFormTranslator(OntModel ontModel) {
-    	theJenaModel = ontModel;
+    	setTheJenaModel(ontModel);
     }
     
 	/**
@@ -162,7 +163,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
      */
     public IntermediateFormTranslator(JenaBasedSadlModelProcessor processor, OntModel ontModel) {
     	setModelProcessor(processor);
-    	theJenaModel = ontModel;
+    	setTheJenaModel(ontModel);
     }
     
     // the target can be a Test, a Query, or a Rule instance
@@ -865,7 +866,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			// now do this before any null subjects that are the same variable get replaced with different variables.
 			addMissingCommonVariables(rule);
 			// now add other missing patterns, if needed
-			addMissingTriplePatterns(rule);
+//			addMissingTriplePatterns(rule);
 		} catch (InvalidNameException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -987,8 +988,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			for (int i = 0; i < nullSubjects.size(); i++) {
 				Node prop = nullSubjects.get(i).getPredicate();
 				if (prop instanceof NamedNode) {
-					Property p = theJenaModel.getProperty(((NamedNode)prop).toFullyQualifiedString());
-					StmtIterator dmnitr = theJenaModel.listStatements(p, RDFS.domain, (RDFNode)null);
+					Property p = getTheJenaModel().getProperty(((NamedNode)prop).toFullyQualifiedString());
+					StmtIterator dmnitr = getTheJenaModel().listStatements(p, RDFS.domain, (RDFNode)null);
 					if (dmnitr.hasNext()) {
 						List<Resource> dmnclses = new ArrayList<Resource>();
 						while (dmnitr.hasNext()) {
@@ -1192,25 +1193,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private void applyExpandedProperties(GraphPatternElement gpe) {
 		List<NamedNode> eps = gpe.getExpandedPropertiesToBeUsed();
 		int i = 0;
-	}
-
-	private Rule addMissingTriplePatterns(Rule rule) {
-		// Make sure there aren't any missing triples to connect nodes and edges together
-		List<NamedNode> namedNodeList = getNamedNodeList(null, rule.getGivens());
-		namedNodeList = getNamedNodeList(namedNodeList, rule.getIfs());
-		namedNodeList = getNamedNodeList(namedNodeList, rule.getThens());
-		// for example, given rule: "then ^(spfc:radius,2,v0) and *(PI,v0,v1) and is(spfc:area,v1)."
-		//	we need to generate: "if rdf(v2, spfc:radius,v3), ^(v3,2,v0),*(PI,v0,v1) then rdf(v2,spfc:area, v1)"
-		return null;
-	}
-
-	private List<NamedNode> getNamedNodeList(List<NamedNode> found, List<GraphPatternElement> lst) {
-		if (lst != null) {
-			for (int i = 0; i < lst.size(); i++) {
-				found = getNamedNodeList(found, lst.get(i));
-			}
-		}
-		return found;
 	}
 
 	private List<NamedNode> getNamedNodeList(List<NamedNode> found, GraphPatternElement gpe) {
@@ -1808,7 +1790,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			return var;
 		}
 		var = new VariableNode(getNewVar());
-		Property prop = this.theJenaModel.getProperty(predicate.toFullyQualifiedString());
+		Property prop = this.getTheJenaModel().getProperty(predicate.toFullyQualifiedString());
 		try {
 			ConceptName propcn = new ConceptName(predicate.toFullyQualifiedString());
 			propcn.setType(ConceptType.RDFPROPERTY);  	// assume the most general
@@ -2883,7 +2865,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 
-	private JenaBasedSadlModelProcessor getModelProcessor() {
+	protected JenaBasedSadlModelProcessor getModelProcessor() {
 		return modelProcessor;
 	}
 
@@ -2892,19 +2874,49 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	@Override
-	public Object cook(Object obj) throws TranslationException {
-		return null;
+	public Object cook(Object obj) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if (obj instanceof Rule) {
+			return cook((Rule)obj);
+		}
+		resetIFTranslator();
+		setStartingVariableNumber(getVariableNumber() + getModelProcessor().getVariableNumber());
+		return expandProxyNodes(obj, false, true);
+	}
+	
+	@Override
+	public Object cook(Object obj, boolean treatAsConclusion) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if (obj instanceof Rule) {
+			return cook((Rule)obj);
+		}
+		resetIFTranslator();
+		setStartingVariableNumber(getVariableNumber() + getModelProcessor().getVariableNumber());
+		return expandProxyNodes(obj, treatAsConclusion, true);
 	}
 	
 	public Rule cook(Rule rule) {
 		try {
 			rule = addImpliedAndExpandedProperties(rule);
-			rule = addMissingTriplePatterns(rule);
+//			rule = addMissingTriplePatterns(rule);
 		} catch (Exception e) {
 			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ")while 'cooking' IntermediateForm."));
 			e.printStackTrace();
 		} 
 		return rule;
+	}
+
+	@Override
+	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions,
+			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance)
+			throws CircularDependencyException, InvalidTypeException, TranslationException {
+		throw new TranslationException("This method is not supported at this time in this translator (" + this.getClass().getCanonicalName() + ").");
+	}
+
+	protected OntModel getTheJenaModel() {
+		return theJenaModel;
+	}
+
+	protected void setTheJenaModel(OntModel theJenaModel) {
+		this.theJenaModel = theJenaModel;
 	}
 
 	

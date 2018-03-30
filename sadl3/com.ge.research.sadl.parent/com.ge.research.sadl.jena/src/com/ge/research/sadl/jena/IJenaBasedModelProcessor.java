@@ -53,14 +53,13 @@ public interface IJenaBasedModelProcessor {
 	 * @throws ConfigurationException 
 	 * @throws PrefixNotFoundException 
 	 */
-	List<Object> getIntermediateFormResults(boolean bRaw, boolean treatAsConclusion) throws InvalidNameException,
+	List<Object> getIntermediateFormResults() throws InvalidNameException,
 			InvalidTypeException, TranslationException, IOException, PrefixNotFoundException, ConfigurationException;
 
 	/**
-	 * Call this method to expand all of the ProxyNodes in a single GraphPatternElement or a List<GraphPatternElement>,
-	 * convert any implicit conjunctions to explicit conjunctions, and return the result as a GraphPatternElement
-	 * @param rawIntermediateForm
-	 * @param treatAsConclusion
+	 * Method to compare two strings ignoring white space and whatever else an implementation wishes to ignore
+	 * @param result
+	 * @param evalTo
 	 * @return
 	 * @throws TranslationException 
 	 * @throws InvalidTypeException 
