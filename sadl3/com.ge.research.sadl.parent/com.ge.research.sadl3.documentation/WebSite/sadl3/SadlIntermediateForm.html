@@ -1,6 +1,6 @@
 <h1>The SADL Intermediate Form</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->02/20/2018<!--webbot bot="Timestamp" endspan i-checksum="12513" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->03/30/2018<!--webbot bot="Timestamp" endspan i-checksum="12523" --> 
 by <a href="mailto:crapo@research.ge.com?subject=Requirements Language">A. W. 
 Crapo</a>.</h6>
 <h2>Table of Contents</h2>
@@ -15,6 +15,7 @@ Crapo</a>.</h6>
   <li><a href="#SC1">SADL Commands (SadlCommand)</a></li>
   <li><a href="#SR1">SADL Rules</a></li>
   <li><a href="#Equations">SADL Equations</a></li>
+  <li><a href="#Generation">Intermediate Form Generation</a></li>
 </ul>
 <h2><a name="Introduction">Introduction</a></h2>
 <p>The SADL Intermediate Form is an in-memory representation used to capture the 
@@ -51,7 +52,6 @@ the <i>com.ge.research.sadl.model.gp</i> package.</p>
 <ul>
   <li>Node<ul>
     <li>ConstantNode</li>
-    <li>KnownNode</li>
     <li>Literal</li>
     <li>NamedNode<ul>
       <li>RDFTypeNode</li>
@@ -181,11 +181,12 @@ in the cooked form. The third argument is the variable which is bound to the
 results of performing the addition on the first two arguments.</p>
 <h2><a name="IF3">Other Node Sub-classes in the Intermediate Form</a></h2>
 <p>An instance of the Junction class can be conjunctive (&quot;and&quot;) or disjunctive 
-(&quot;or&quot;). The KnownNode is a special node corresponding to the &quot;known&quot; keyword in 
+(&quot;or&quot;). The ConstantNode captures constants such as 
+the mathematical values &quot;PI&quot;, &quot;e&quot;, and &quot;known&quot;. The 
+ConstantNode with value &quot;known&quot; corresponds to the &quot;known&quot; keyword in 
 the SADL grammar. The exact meaning of &quot;known&quot; is determined by the translator, 
 but the general sense is that of &quot;any value&quot; when by itself and &quot;no value 
-exists&quot; when negated (&quot;not known&quot;). The ConstantNode captures constants such as 
-the mathematical values &quot;PI&quot; and &quot;e&quot;. It is also used for the keyword &quot;None&quot;, 
+exists&quot; when negated (&quot;not known&quot;). A ConstantNode is also used for the keyword &quot;None&quot;, 
 whose meaning is also determined by the translator although the general sense is 
 that of not being and thereby similar to &quot;not known&quot;.</p>
 <p>The RDFTypeNode captures the ontology property &quot;rdf:type&quot;, which is the 
@@ -346,3 +347,47 @@ Equation in the Intermediate Form. In either case, the name must be unique
 within the namespace. The signature of the Equation is captured as VariableNode 
 instances containing both the name and the type of the arguments. In the case of 
 a SADL &quot;Equation&quot; statement, the body is also capture as GraphPatternElements.</p>
+<h2><a name="Generation">Intermediate Form Generation</a></h2>
+<p>The SADL IntermediateFormTranslator class provides several methods to 
+accomplish the functionality described above. They include the following.</p>
+<ol>
+  <li><i>Rule cook(Rule rule)</i><br>
+  where<br>
+  <ol type="a">
+    <li><i>rule</i> is the Rule (com.ge.research.sadl.model.gp.Rule)</li>
+  </ol>
+  If there are missing patterns to be added, a call to <i>addMissingPatterns</i> 
+  to accomplish this should have been made before this call is made.<br>
+  This method inserts implied and expanded properties, inserts missing patterns, 
+  and expands ProxyNodes to flatten the Requirement into a sequence of 
+  GraphPatternElements connected by variables.</li>
+  <li><i>Object cook(Object obj)</i><br>
+  where<br>
+  <ol type="a">
+    <li><i>obj</i> is Rule, in which case the specific <i>cook</i> method is 
+    called; if not an Exception is thrown</li>
+  </ol>
+  This is the method identified in the Interface class 
+  I_IntermediateFormTranslator.</li>
+  <li><i>Object cook(Object obj, boolean treatAsConclusion)</i><br>
+  where<br>
+  <ol type="a">
+    <li><i>obj</i> is an Object; if a Rule call <i>cook(Rule)</i> expand 
+    ProxyNodes of Object if possible</li>
+    <li><i>treatAsConclusion</i> -- if true expand ProxyNodes as if the 
+    expressions were in a Rule conclusion</li>
+  </ol>
+  This is the method identified in the Interface class 
+  I_IntermediateFormTranslator.</li>
+  <li><i>List&lt;IFTranslationError&gt; getErrors( )</i><br>
+  This method retrieves a list of errors generated during translation.</li>
+  <li><i>void setStartingVariableNumber(int vn)</i><br>
+  where<br>
+  <ol type="a">
+    <li><i>vn</i> is the starting system-generated variable sequence number to 
+    be used in translation; this reflects how many variables were created during 
+    model processing</li>
+  </ol>
+  This is a method identified in the Interface class I_IntermediateFormTranslator.</li>
+</ol>
+&nbsp;<p>&nbsp;</p>
