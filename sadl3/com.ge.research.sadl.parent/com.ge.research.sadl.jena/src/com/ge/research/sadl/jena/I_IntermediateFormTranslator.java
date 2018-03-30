@@ -95,9 +95,10 @@ public interface I_IntermediateFormTranslator {
 	 * @throws CircularDependencyException
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
+	 * @throws InvalidNameException 
 	 */
 	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions, 
 			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance) 
-					throws CircularDependencyException, InvalidTypeException, TranslationException;
+					throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException;
 
 }
