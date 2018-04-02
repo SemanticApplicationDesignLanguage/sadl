@@ -2773,22 +2773,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * (boolean, boolean)
 	 */
 	@Override
-	public List<Object> getIntermediateFormResults(boolean bRaw, boolean treatAsConclusion) throws InvalidNameException,
+	public List<Object> getIntermediateFormResults() throws InvalidNameException,
 			InvalidTypeException, TranslationException, IOException, PrefixNotFoundException, ConfigurationException {
-		if (bRaw) {
-			return intermediateFormResults;
-		} else if (intermediateFormResults != null) {
-			List<Object> cooked = new ArrayList<Object>();
-			for (Object im : intermediateFormResults) {
-				getIfTranslator().resetIFTranslator();
-				getIfTranslator()
-						.setStartingVariableNumber(getIfTranslator().getVariableNumber() + getVariableNumber());
-				Object expansion = getIfTranslator().expandProxyNodes(im, treatAsConclusion, true);
-				cooked.add(expansion);
-			}
-			return cooked;
-		}
-		return null;
+		return intermediateFormResults;
 	}
 
 	/*
@@ -10674,7 +10661,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public boolean isBuiltinMissingArgument(String funcName, int size) {
-		if (funcName.equals("is") && size == 2) {
+		if ((funcName.equals("is") || funcName.equals("assign")) && size == 2) {
 			return false;
 		}
 		if (funcName.equals("+") || funcName.equals("*") || funcName.equals("+") || funcName.equals("/")

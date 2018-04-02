@@ -41,7 +41,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
 		]
@@ -55,7 +55,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
 		]
@@ -69,7 +69,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(+(2,3),\"seconds\")", forTest.get(0).toString())
 		]
@@ -83,7 +83,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(+(2,3),\"seconds\")", forTest.get(0).toString())
 		]
@@ -97,7 +97,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
@@ -111,7 +111,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
@@ -125,7 +125,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals(forTest.get(0).toString(), "unittedQuantity(+(PI,+(1,2)),\"seconds\")")
 		]
@@ -139,7 +139,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(true, false)
+			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
 		]
@@ -201,13 +201,14 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				}
 			}
 			issues.assertHasNoIssues;
-			val forTest = processor.getIntermediateFormResults(false, false)
+			val forTest = processor.getIntermediateFormResults()
 			for (t:forTest) {
 				println("\"" + t.toString + "\",")
 			}
 			var idx = 0
 			for (t:forTest) {
-				assertEquals(results.get(idx++), t.toString)
+				val t2 = processor.ifTranslator.cook(t)
+				assertEquals(results.get(idx++), t2.toString)
 			}
  		]
 	}
@@ -598,7 +599,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //				println(issue.message)
 //			}
  			issues.assertHasNoIssues;
-			val ifrs = processor.getIntermediateFormResults(true, false);
+			val ifrs = processor.getIntermediateFormResults();
 			var idx = 0
  			for (ifr:ifrs) {
 // 				println("\"" + ifr.toString + "\",")
@@ -641,7 +642,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 Expr: -PI+3*-e.
 			 Expr: -(PI)+3*(-e).
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(true, false)
+			val results = processor.getIntermediateFormResults()
 //			assertTrue(results.size==7)
 			for (result:results) {
 				println("\"" + result.toString + "\",")
@@ -672,14 +673,15 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 Expr: age of Joe is age of friend of Jane.	// This requires treating as rule conclusion to translate the same as following?
 			 Expr: Joe has age (age of friend of Jane).	// this is correct
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 //			assertTrue(results.size==7)
 			for (result:results) {
 				println("\"" + result.toString + "\",")
 			}
 			var idx = 0
 			for (t:forTest) {
-				assertEquals(results.get(idx++).toString, t.toString)
+				val t2 = processor.ifTranslator.cook(results.get(idx++), true)
+				assertEquals(t2.toString, t.toString)
 			}
 		]
 	}
@@ -727,7 +729,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				}
 			}
 			assertTrue(f1 && f2)
-//			val results = processor.getIntermediateFormResults(false, true)
+//			val results = processor.getIntermediateFormResults()
 //			if (issues !== null) {
 //				for (issue:issues) {
 //					println(issue.message)
@@ -747,7 +749,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_01() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), rdf(v0, SubjHasProp:prop2, SubjHasProp:InstOfClass3))]"
+"and(rdf(v0, SubjHasProp:prop1, v1), rdf(v0, SubjHasProp:prop2, SubjHasProp:InstOfClass3))"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -765,7 +767,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			   
 			   Expr: a Class1 with prop1 a Class2 has prop2 InstOfClass3.
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -786,7 +788,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_01P() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))]"
+"and(rdf(v0, SubjHasProp:prop1, v1), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -805,7 +807,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			  // Rule R1: if a Class1 with prop1 a Class2 has prop2 InstOfClass3 then print("hi").
 			   Expr: a Class1 with prop1 (a Class2 has prop2 InstOfClass3).
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -825,7 +827,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_02() {
 		val forTest = newArrayList(
-"[and(rdf(v1, SubjHasProp:prop1, v2), and(rdf(v1, SubjHasProp:prop2, v0), rdf(v1, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))]"
+"and(rdf(v1, SubjHasProp:prop1, v2), and(rdf(v1, SubjHasProp:prop2, v0), rdf(v1, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -843,7 +845,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			   
 			   Expr: a Class1 with prop1 a Class2 with prop2 a Class3 with prop3 InstOfClass4.
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.severity + ": " + issue.message)
@@ -864,7 +866,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_02P() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))]"
+"and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)))"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -882,7 +884,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			   
 			   Expr: a Class1 with prop1 (a Class2 with prop2 (a Class3 with prop3 InstOfClass4)).
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -922,7 +924,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			   
 			   Expr: a Class1 with prop1 (a Class2 with prop2 a Class3 with prop3 InstOfClass4, with prop2 InstOfClass3).
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -942,7 +944,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_04() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))))]"
+"and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3))))"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -960,7 +962,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			   
 			   Expr: a Class1 with prop1 (a Class2 with prop2 (a Class3 with prop3 InstOfClass4), with prop2 InstOfClass3).
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -980,7 +982,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testSubjHasProp_05() {
 		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4),and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3), rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3))))))]"
+"and(rdf(v0, SubjHasProp:prop1, v1), and(rdf(v1, SubjHasProp:prop2, v2), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4),and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3), rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3))))))"
 		)
 		'''
 			   uri "http://sadl.org/SubjHasProp.sadl" alias SubjHasProp.
@@ -1000,7 +1002,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			   
 			   Expr: a Class1 with prop1 (a Class2 with prop2 (a Class3 with prop3 InstOfClass4, with prop3 AnotherInstOfClass4), with prop2 InstOfClass3, with prop2 AnotherInstOfClass3).
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -1033,7 +1035,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			    
 			    Rule AreaOfCircle: then area is PI*radius^2.
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-//			val results = processor.getIntermediateFormResults(false, true)
+//			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -1066,7 +1068,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			    
 			    Rule AreaOfCircle2: then the area is PI* the radius^2.
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -1100,7 +1102,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			    Rule AreaOfCircle2: then the area is PI* the radius^2.
 			    Rule AreaOfCircle3: then an area is PI* a radius^2.
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -1225,7 +1227,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			    
 			    Rule AreaOfCircle2: then the area is PI* the radius^2.
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)
@@ -1259,7 +1261,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			    Rule AreaOfCircle2: then the area is PI* the radius^2.
 			    Rule AreaOfCircle3: then an area is PI* a radius^2.
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
-			val results = processor.getIntermediateFormResults(false, true)
+			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
 					println(issue.message)

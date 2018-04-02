@@ -1936,6 +1936,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (predicate instanceof Name) {
 						String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 						ConceptName pcn = new ConceptName(propuri);
+						pcn.setType(getModelProcessor().nodeTypeToConceptType(getModelProcessor().ontConceptTypeToNodeType(declarationExtensions.getOntConceptType(((Name)predicate).getName()))));
 						TypeCheckInfo lastTci = null;
 						for (int i = 0; i < lrs.size(); i++) {
 							TypeCheckInfo lrtci = new TypeCheckInfo(pcn, lrs.get(i), this, expression);
