@@ -5235,8 +5235,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					&& ((NamedNode) trSubj).getNodeType().equals(NodeType.ClassNode)) {
 				// we have a class in a PropOfSubject that does not have an article (otherwise
 				// it would have been a Declaration)
-				addError("A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.",
-						subject);
+				addError(SadlErrorMessages.NEEDS_ARTICLE.get(),subject);
 			}
 		}
 		boolean isPreviousPredicate = false;
@@ -10651,7 +10650,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return useArticlesInValidation;
 	}
 
-
+	protected void checkForArticleForNameInTriple(Expression value, Object triple) {
+		if(triple instanceof TripleElement) {
+			Node tripleObject = ((TripleElement)triple).getObject();
+			if (isUseArticlesInValidation() && value instanceof Name && tripleObject instanceof NamedNode
+					&& ((NamedNode) tripleObject).getNodeType().equals(NodeType.ClassNode)) {
+				addError(SadlErrorMessages.NEEDS_ARTICLE.get(), value);
+			}
+		}
+	}
 
 	public boolean isBuiltinMissingArgument(String funcName, int size) {
 		if ((funcName.equals("is") || funcName.equals("assign")) && size == 2) {
