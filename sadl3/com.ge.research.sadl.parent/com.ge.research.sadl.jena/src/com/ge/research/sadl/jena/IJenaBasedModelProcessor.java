@@ -10,6 +10,7 @@ import org.eclipse.xtext.validation.CheckMode;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.processing.ValidationAcceptor;
@@ -18,6 +19,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 
 public interface IJenaBasedModelProcessor {
 
@@ -51,14 +53,13 @@ public interface IJenaBasedModelProcessor {
 	 * @throws ConfigurationException 
 	 * @throws PrefixNotFoundException 
 	 */
-	List<Object> getIntermediateFormResults(boolean bRaw, boolean treatAsConclusion) throws InvalidNameException,
+	List<Object> getIntermediateFormResults() throws InvalidNameException,
 			InvalidTypeException, TranslationException, IOException, PrefixNotFoundException, ConfigurationException;
 
 	/**
-	 * Call this method to expand all of the ProxyNodes in a single GraphPatternElement or a List<GraphPatternElement>,
-	 * convert any implicit conjunctions to explicit conjunctions, and return the result as a GraphPatternElement
-	 * @param rawIntermediateForm
-	 * @param treatAsConclusion
+	 * Method to compare two strings ignoring white space and whatever else an implementation wishes to ignore
+	 * @param result
+	 * @param evalTo
 	 * @return
 	 * @throws TranslationException 
 	 * @throws InvalidTypeException 
@@ -74,5 +75,26 @@ public interface IJenaBasedModelProcessor {
 	 * @param context
 	 */
 	public void initializePreferences(ProcessorContext context);
+	
+	/**
+	 * Method to obtain an IntermediateForm Translator appropriate for the given model processor
+	 * @return
+	 */
+	public IntermediateFormTranslator getIfTranslator();
+
+	/**
+	 * Method to determine if an RDFNode is a typed list class
+	 * @param node -- the typed list class
+	 * @return type of the typed list
+	 * @throws TranslationException
+	 */
+	NamedNode getTypedListType(RDFNode node) throws TranslationException;
+
+	/**
+	 * Method to determine the type of an RDFNode that is a typed list class
+	 * @param node the node that might be a typed list class
+	 * @return true if a typed list else false
+	 */
+	boolean isTypedListSubclass(RDFNode node);
 	
 }

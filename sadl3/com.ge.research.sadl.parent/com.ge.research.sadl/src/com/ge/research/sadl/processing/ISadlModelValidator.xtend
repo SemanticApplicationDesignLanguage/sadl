@@ -18,6 +18,7 @@
 package com.ge.research.sadl.processing
 
 import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.Constant
 
 /**
  * Generic hook for 3rd party validators to participate in the processing of SADL resources
@@ -25,4 +26,5 @@ import com.ge.research.sadl.sADL.BinaryOperation
  */
 interface ISadlModelValidator {
 	def boolean validate(BinaryOperation expression, StringBuilder errorMessageBuilder)
+	def boolean isSkippedConstant(Constant expr)
 }

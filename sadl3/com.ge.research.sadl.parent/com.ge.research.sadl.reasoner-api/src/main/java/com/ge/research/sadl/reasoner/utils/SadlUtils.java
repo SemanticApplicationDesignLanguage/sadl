@@ -132,7 +132,7 @@ public class SadlUtils {
 	 */
 	public String fileUrlToFileName(String url) throws MalformedURLException {
 		if (!url.startsWith(FILE_SHORT_PREFIX)) {
-			return url;
+			return url.replace('\\', '/');
 		}
 		if (url.indexOf('\\') > 0) {
 			// this appears to be needed on Windows

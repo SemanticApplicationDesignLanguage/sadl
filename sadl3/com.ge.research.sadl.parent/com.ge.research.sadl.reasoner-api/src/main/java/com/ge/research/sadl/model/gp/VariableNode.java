@@ -20,7 +20,6 @@ package com.ge.research.sadl.model.gp;
 
 import java.util.List;
 
-import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 /**
@@ -36,7 +35,7 @@ public class VariableNode extends NamedNode {
 	private boolean isCRulesVariable = false;
 
 	public VariableNode(String name) {
-		super(name, NamedNode.NodeType.VariableNode);
+		super(name, NodeType.VariableNode);
 	}
 
 	public void incrementReferences() {

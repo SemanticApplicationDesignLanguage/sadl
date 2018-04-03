@@ -33,6 +33,7 @@ public abstract class GraphPatternElement {
 	private NamedNode leftImpliedPropertyUsed = null;		// an impliedProperty to be used on the left side of a binary operation
 	private NamedNode rightImpliedPropertyUsed = null;		// am impliedProperty to be used on the right side of a binary operation
 	private List<NamedNode> expandedPropertiesToBeUsed = null;	// a list of expandedProperties to be used for a binary operation
+	private List<GraphPatternElement> missingPatterns = null;  // a list of patterns found to be missing from the graph patterns
 
 	private GraphPatternElement next = null;
 	
@@ -138,4 +139,18 @@ public abstract class GraphPatternElement {
 		this.leftImpliedPropertyUsed = leftImpliedPropertyUsed;
 	}
 
+	public List<GraphPatternElement> getMissingPatterns() {
+		return missingPatterns;
+	}
+
+	public void setMissingPatterns(List<GraphPatternElement> missingPatterns) {
+		this.missingPatterns = missingPatterns;
+	}
+
+	public void addMissingPattern(GraphPatternElement missingPattern) {
+		if (this.missingPatterns == null) {
+			missingPatterns = new ArrayList<GraphPatternElement>();
+		}
+		missingPatterns.add(missingPattern);
+	}
 }

@@ -26,7 +26,7 @@ package com.ge.research.sadl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ge.research.sadl.model.gp.KnownNode;
+import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
@@ -211,17 +211,17 @@ public class ResultSet {
 	}
 
 	/**
-	 * Static method to compare two object values that supports KnownNode
+	 * Static method to compare two object values that supports ConstantNode "known"
 	 * 
 	 * @param lhval
 	 * @param rhval
 	 * @return
 	 */
 	public static synchronized boolean valuesMatch(Object lhval, Object rhval) {
-		if (lhval instanceof KnownNode && rhval != null) {
+		if (ITranslator.isKnownNode(lhval) && rhval != null) {
 			return true;
 		}
-		if (rhval instanceof KnownNode && lhval != null) {
+		if (ITranslator.isKnownNode(rhval) && lhval != null) {
 			return true;
 		}
 		if (lhval instanceof Number && rhval instanceof Number) {
@@ -321,10 +321,10 @@ public class ResultSet {
 	 * @return
 	 */
 	public static synchronized boolean valuesMatchExactly(Object lhval, Object rhval) {
-		if (lhval instanceof KnownNode && rhval != null) {
+		if (ITranslator.isKnownNode(lhval) && rhval != null) {
 			return true;
 		}
-		if (rhval instanceof KnownNode && lhval != null) {
+		if (ITranslator.isKnownNode(rhval) && lhval != null) {
 			return true;
 		}
 		if (lhval instanceof Number && rhval instanceof Number) {
