@@ -117,6 +117,10 @@ public class ConfigurationItem {
 		setCategoryHierarchy(categoryTree);
 	}
 	
+	public void addNameValuePair(String name, String value) {
+		addNameValuePair(new NameValuePair(name, value));
+	}
+	
 	public void addNameValuePair(NameValuePair nvp) {
 		nameValuePairs.add(nvp);
 	}

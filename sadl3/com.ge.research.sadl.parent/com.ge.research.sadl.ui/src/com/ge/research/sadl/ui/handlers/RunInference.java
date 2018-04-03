@@ -153,6 +153,9 @@ public class RunInference extends SadlActionHandler {
 					SadlConsole.writeToConsole(MessageType.INFO, "Testing of suite '" +  trgtFile.getFullPath().toPortableString() + "' requested. Not Yet Implemented.\n");
 				}
 			}
+			else {
+				SadlConsole.writeToConsole(MessageType.ERROR, "No currently selected file; can't test model.\n");
+			}
 		}
 		catch (Exception e) {
 			SadlConsole.writeToConsole(MessageType.ERROR, e.getMessage() + "\n");

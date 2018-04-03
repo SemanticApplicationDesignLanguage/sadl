@@ -14,14 +14,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.preferences.IPreferenceValues;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 import org.eclipse.xtext.resource.XtextResource;
-import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.IAcceptor;
-import org.eclipse.xtext.validation.CheckMode;
-import org.eclipse.xtext.validation.Issue;
-import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +30,7 @@ import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
-import com.ge.research.sadl.model.gp.KnownNode;
+import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
@@ -53,16 +47,11 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
-import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.preferences.SadlPreferences;
-import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.OntModelProvider;
-import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.SadlModelProcessor;
-import com.ge.research.sadl.processing.ValidationAcceptor;
-import com.ge.research.sadl.processing.ValidationAcceptorImpl;
 import com.ge.research.sadl.query.SadlQueryHelper;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -82,13 +71,11 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.QueryStatement;
-import com.ge.research.sadl.sADL.SadlModel;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor {
@@ -414,7 +401,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			if (type != null
 					&& (type.equals(ComparisonType.IsNot) || type
 							.equals(ComparisonType.Neq))
-					&& ((lhobj == null && (rhobj instanceof KnownNode || rhobj != null)) || (rhobj == null && (lhobj instanceof KnownNode || lhobj != null)))) {
+					&& ((lhobj == null && (ITranslator.isKnownNode(rhobj) || rhobj != null)) || 
+							(rhobj == null && (ITranslator.isKnownNode(lhobj) || lhobj != null)))) {
 				testResult = new TestResult(true);
 
 			} else if (lhobj != null && rhobj != null
@@ -622,7 +610,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				TestResult testResult = new TestResult();
 				if (on instanceof com.ge.research.sadl.model.gp.Literal
 						|| on instanceof ValueTableNode
-						|| on instanceof KnownNode) {
+						|| ITranslator.isKnownNode(on)) {
 					int rcnt;
 					if (rs != null && (rcnt = rs.getRowCount()) > 0) {
 						// see if we can get a match on the literal
@@ -740,8 +728,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	private boolean compareObjects(Object lval, Object objVal,
 			OntResource rngrsrc) {
-		if ((lval instanceof KnownNode && objVal != null)
-				|| (objVal instanceof KnownNode && lval != null)) {
+		if ((ITranslator.isKnownNode(lval) && objVal != null)
+				|| (ITranslator.isKnownNode(objVal) && lval != null)) {
 			return true;
 		}
 		if (lval instanceof String && objVal instanceof String
@@ -864,7 +852,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				}
 			}
 			return obj;
-		} else if (obj instanceof KnownNode) {
+		} else if (ITranslator.isKnownNode(obj)) {
 			return obj;
 		} else {
 			throw new TranslationException("Conversion of '" + obj.toString()
@@ -1029,8 +1017,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		if ((type.equals(ComparisonType.IsNot) || type
 				.equals(ComparisonType.Neq))) {
-			if ((rhval instanceof KnownNode && lhval == null)
-					|| (lhval instanceof KnownNode && rhval == null)) {
+			if ((ITranslator.isKnownNode(rhval) && lhval == null)
+					|| (ITranslator.isKnownNode(lhval) && rhval == null)) {
 				return new TestResult(true);
 			}
 			if ((lhval instanceof ResultSet && rhval == null)
@@ -1128,7 +1116,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			// TODO
 		} else if (obj instanceof NamedNode) {
 			return ((NamedNode) obj).toFullyQualifiedString();
-		} else if (obj instanceof KnownNode) {
+		} else if (ITranslator.isKnownNode(obj)) {
 			return obj;
 		}
 		return obj;
@@ -1359,7 +1347,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	private void setModelFolderPath(String modelFolderPath) {
-		this.modelFolderPath = modelFolderPath;
+		this.modelFolderPath = modelFolderPath.replace('\\', '/');
 	}
 
 	private String getModelName() {

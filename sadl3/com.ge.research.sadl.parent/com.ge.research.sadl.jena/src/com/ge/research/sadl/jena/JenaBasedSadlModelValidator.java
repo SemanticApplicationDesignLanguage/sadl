@@ -599,14 +599,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		Node type = null;
 		// since type checking has passed to get to this point:
 		//	if either side has no impliedProperties then the type can come from either side
-		if (leftTypeCheckInfo.getImplicitProperties() == null && leftTypeCheckInfo.getTypeCheckType() != null) {
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getImplicitProperties() == null && leftTypeCheckInfo.getTypeCheckType() != null) {
 			type = leftTypeCheckInfo.getTypeCheckType();
 		}
-		else if (rightTypeCheckInfo.getImplicitProperties() == null && rightTypeCheckInfo.getTypeCheckType() != null) {
+		else if (rightTypeCheckInfo != null && rightTypeCheckInfo.getImplicitProperties() == null && rightTypeCheckInfo.getTypeCheckType() != null) {
 			type = rightTypeCheckInfo.getTypeCheckType();
 		}
 		// the other possibility is that both sides have implied properties (which should be the same) so the type is the common type
-		else if (leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null 
+		else if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null 
 				&& leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) {
 			type = leftTypeCheckInfo.getTypeCheckType();
 		}
@@ -692,11 +692,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (rightExpression instanceof UnaryExpression && ((UnaryExpression)rightExpression).getOp().equals("not")) {
 			rExpr = ((UnaryExpression)rightExpression).getExpr();
 		}
-		if (rExpr instanceof Constant && ((Constant)rExpr).getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
+		if (rExpr instanceof Constant && isSkippedConstant((Constant)rExpr)) {
 			return true;
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean isSkippedConstant(Constant expr) {
+		if (expr.getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
+			return true;
+		}
+		return false;
+	}
+	
 	private boolean useImpliedProperties(String op) {
 		if (op.equals("contains") || op.equals("does not contain")) {
 			return false;
@@ -1603,7 +1612,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	//TODO this is incomplete; more examples needed AWC 12/19/2016				
 				ExplicitValueType evt = tci.getExplicitValueType();
 				if (evt.equals(ExplicitValueType.RESTRICTION)) {
-					issueAcceptor.addWarning("Explicit value type is RESTRICITON, which isn't yet handled. Please report with use case.", tci.context);
+					issueAcceptor.addWarning("Explicit value type is RESTRICTION, which isn't yet handled. Please report with use case.", tci.context);
 				}
 				else if (tci.getExpressionType() instanceof ConceptName){
 					return getModelProcessor().isNumericType((ConceptName) tci.getExpressionType());
@@ -1626,7 +1635,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo convertListTypeToElementOfListType(TypeCheckInfo listtype) {
 		Node tctype = listtype.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
-			((NamedNode)tctype).setList(false);
+			try {
+				NamedNode clonedNode = (NamedNode) tctype.clone();
+				clonedNode.setList(false);
+				listtype.setTypeCheckType(clonedNode);
+			} catch (CloneNotSupportedException e) {
+				logger.error(e.getMessage());
+			}
 		}
 		listtype.setRangeValueType(RangeValueType.CLASS_OR_DT);
 		
@@ -1644,7 +1659,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo convertElementOfListToListType(TypeCheckInfo elementtype) {
 		Node tctype = elementtype.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
-			((NamedNode)tctype).setList(true);
+			try {
+				NamedNode clonedNode = (NamedNode) tctype.clone();
+				clonedNode.setList(true);
+				elementtype.setTypeCheckType(clonedNode);
+			} catch (CloneNotSupportedException e) {
+				logger.error(e.getMessage());
+			}
 		}
 		elementtype.setRangeValueType(RangeValueType.LIST);
 		
@@ -1915,6 +1936,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (predicate instanceof Name) {
 						String propuri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 						ConceptName pcn = new ConceptName(propuri);
+						pcn.setType(getModelProcessor().nodeTypeToConceptType(getModelProcessor().ontConceptTypeToNodeType(declarationExtensions.getOntConceptType(((Name)predicate).getName()))));
 						TypeCheckInfo lastTci = null;
 						for (int i = 0; i < lrs.size(); i++) {
 							TypeCheckInfo lrtci = new TypeCheckInfo(pcn, lrs.get(i), this, expression);
@@ -2427,14 +2449,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return modelProcessor.getTypedListType(node);
 	}
 
-	private boolean isTypedListSubclass(RDFNode rest) {
-		if (rest.isResource()) {
-			Resource lstcls = theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
-			if (lstcls != null && rest.asResource().hasProperty(RDFS.subClassOf, lstcls)) {	// if there are no lists the list model will not have been imported
-				return true;
-			}
-		}
-		return false;
+	private boolean isTypedListSubclass(RDFNode node) {
+		return modelProcessor.isTypedListSubclass(node);
 	}
 
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {

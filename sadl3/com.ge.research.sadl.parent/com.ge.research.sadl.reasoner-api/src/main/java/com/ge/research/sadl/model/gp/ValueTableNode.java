@@ -78,7 +78,7 @@ public class ValueTableNode extends Node {
 			List<Node> row = rows.get(irow);
 			for (int icol = 0; icol < row.size(); icol++) {
 				Node nval = row.get(icol);
-				if (nval instanceof KnownNode) {
+				if (nval instanceof ConstantNode && ((ConstantNode)nval).getName().equals("known")) {
 					rsTable[irow][icol] = nval;
 				}
 				else if (nval instanceof com.ge.research.sadl.model.gp.Literal) {

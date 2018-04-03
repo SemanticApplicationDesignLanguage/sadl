@@ -16,11 +16,9 @@ import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.Equation;
-import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
-import com.ge.research.sadl.model.gp.KnownNode;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -32,8 +30,8 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
-import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
@@ -43,11 +41,8 @@ import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
-import com.ge.research.sadl.reasoner.QueryCancelledException;
-import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.swi_prolog.fileinterface.FileInterface;
 //import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
@@ -1091,7 +1086,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			}
 			else {
 				if (rulePart.equals(RulePart.NOT_A_RULE)) {
-					if (obj instanceof KnownNode) {
+					if (ITranslator.isKnownNode(obj)) {
 						newVar = "PV" + getNewVariableForQuery();
 						if (gpe.getModifierType().equals(TripleModifierType.Not)) {
 							sb.append(newVar);
@@ -1186,7 +1181,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			if (!((TripleElement)elements.get(index)).getModifierType().equals(TripleModifierType.None)) {
 				TripleElement trel = (TripleElement)elements.get(index);
 				if (trel.getModifierType().equals(TripleModifierType.Not)) {
-					if (trel.getObject() instanceof KnownNode) {
+					if (ITranslator.isKnownNode(trel.getObject())) {
 						return SpecialBuiltin.NOVALUE;
 					}
 					else {
@@ -1215,7 +1210,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 						&& ((NamedNode)biarg1).getName().equals(((NamedNode)trobj).getName())) {	
 					if (bt.equals(BuiltinType.NotEqual) && args.size() == 2) {
 						Node arg2 = args.get(1);
-						if (arg2 instanceof KnownNode) {
+						if (ITranslator.isKnownNode(arg2)) {
 							// this case: (x pred y), !=(y, known)
 							// 	just drop the i+1 builtin
 							elements.remove(index + 1);
@@ -1248,7 +1243,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 					}
 				}
 			}
-			else if (((TripleElement)elements.get(index)).getObject() instanceof KnownNode) {
+			else if (ITranslator.isKnownNode(((TripleElement)elements.get(index)).getObject())) {
 				Node var = new VariableNode("v" + System.currentTimeMillis());
 				((TripleElement)elements.get(index)).setObject(var);
 				return SpecialBuiltin.ISKNOWN;
@@ -1425,7 +1420,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			}
 			return singleQuoteString(literalValueToString(litObj, target));
 		}
-		else if (node instanceof KnownNode) {
+		else if (ITranslator.isKnownNode(node)) {
 			return "PV" + getNewVariableForRule();
 		}
 		else if (node == null) {
