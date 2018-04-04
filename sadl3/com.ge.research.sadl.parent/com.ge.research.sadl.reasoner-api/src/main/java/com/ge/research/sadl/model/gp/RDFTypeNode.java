@@ -18,6 +18,11 @@
 
 package com.ge.research.sadl.model.gp;
 
+/**
+ * Class representing rdf:type, or "is a" in SADL
+ * @author 200005201
+ *
+ */
 public class RDFTypeNode extends NamedNode {
 
 	public RDFTypeNode() {

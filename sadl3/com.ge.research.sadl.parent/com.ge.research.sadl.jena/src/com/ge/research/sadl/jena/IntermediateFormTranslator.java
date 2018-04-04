@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
-import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -65,15 +64,12 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.TestStatement;
-import com.google.common.collect.Sets;
-import com.hp.hpl.jena.graph.GetTriple;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.reasoner.rulesys.Builtin;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
