@@ -23,6 +23,11 @@
 
 package com.ge.research.sadl.model.gp;
 
+/**
+ * Class to capture conjunction or disjunction as a pattern
+ * @author 200005201
+ *
+ */
 public class Junction extends GraphPatternElement {
 	private String junctionName = null;
 	private JunctionType junctionType = null;
@@ -30,6 +35,11 @@ public class Junction extends GraphPatternElement {
 	private Object lhs = null;
 	private Object rhs = null;
 
+	/**
+	 * Representation of the Junction's type, including different possible symbols that can be used
+	 * @author 200005201
+	 *
+	 */
 	public static enum JunctionType {
 		Conj, Disj;
 		public static final String OR_SYMBOL = "||";
@@ -68,38 +78,73 @@ public class Junction extends GraphPatternElement {
 		}
 	}
 
+	/**
+	 * Null argument constructor
+	 */
 	public Junction() {
 	}
 
+	/**
+	 * Set the Junction name, which will also set its JunctionType
+	 * @param name
+	 */
 	public void setJunctionName(String name) {
 		this.junctionName = name;
 		this.junctionType = JunctionType.getType(name);
 	}
 	
+	/**
+	 * Get the Junction name
+	 * @return
+	 */
 	public String getJunctionName() {
 		return junctionName;
 	}
 
+	/**
+	 * Get the Junction type
+	 * @return
+	 */
 	public JunctionType getJunctionType() {
 		return junctionType;
 	}
 
+	/**
+	 * Set Junction's left-hand side (should be a Node)
+	 * @param lhs
+	 */
 	public void setLhs(Object lhs) {
 		this.lhs = lhs;
 	}
 
+	/**
+	 * Get the Junction's left-hand side (should be a Node)
+	 * @return
+	 */
 	public Object getLhs() {
 		return lhs;
 	}
 
+	/**
+	 * Set Junction's right-hand side (should be a Node)
+	 * @param lhs
+	 */
 	public void setRhs(Object rhs) {
 		this.rhs = rhs;
 	}
 
+	/**
+	 * Get the Junction's right-hand side (should be a Node)
+	 * @return
+	 */
 	public Object getRhs() {
 		return rhs;
 	}
 
+	/**
+	 * Default method to convert the Junction to a string
+	 */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getJunctionName());
@@ -121,6 +166,11 @@ public class Junction extends GraphPatternElement {
 		return sb.toString();
 	}
 
+	/**
+	 * Convert this Junction to a string in which each named concept from the ontology 
+	 * is identified by a complete URI
+	 * @return
+	 */
 	@Override
 	public String toFullyQualifiedString() {
 		StringBuilder sb = new StringBuilder();
@@ -161,6 +211,10 @@ public class Junction extends GraphPatternElement {
 		return sb.toString();
 	}
 
+	/**
+	 * Convert this Junction to the most descriptive string available
+	 * @return
+	 */
 	@Override
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
@@ -197,6 +251,10 @@ public class Junction extends GraphPatternElement {
 		return sb.toString();	
 	}
 	
+	/**
+	 * Method to compare Junction with another Object 
+	 * @return -- true if obj is a Junction and they have the same name, same left and right hand sides
+	 */
 	@Override 
 	public boolean equals(Object obj) {
 		if (this == obj)

@@ -23,33 +23,53 @@ import java.util.List;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 /**
- * Keeps track of whether a connective variable (explicitly specified or 
- * generated automatically) has been used in another triple element. 
+ * Class to represent a variable in the SADL grammar (explicitly specified) or 
+ * a connective variable (implicit, generated automatically when nested GraphPatternElements 
+ * are expanded). 
  */
 public class VariableNode extends NamedNode {
 	private int references = 0;
 	private Object hostObject = null;
 	private Node type = null;			// the type of the variable or if a list the type of the elements of the list 
 	
-	private List<GraphPatternElement> definition = null;
-	private boolean isCRulesVariable = false;
+	private List<GraphPatternElement> definition = null;	// definition(s) of the variable
+	private boolean isCRulesVariable = false;		// generated from a Declaration (article before class name)
 
+	/**
+	 * Constructor taking variable name as argument
+	 * @param name
+	 */
 	public VariableNode(String name) {
 		super(name, NodeType.VariableNode);
 	}
 
+	/**
+	 * {@link Deprecated}
+	 */
 	public void incrementReferences() {
 		references += 1;
 	}
 	
+	/**
+	 * {@link Deprecated}
+	 * @return
+	 */
 	public int getNumReferences() {
 		return references;
 	}
 
+	/**
+	 * The EObject in the SADL grammar from which this VariableNode was created
+	 * @return
+	 */
 	public Object getHostObject() {
 		return hostObject;
 	}
 
+	/**
+	 * Set the EObject in the SADL grammar from which this VariableNode was created
+	 * @param host
+	 */
 	public void setHostObject(Object host) {
 		hostObject = host;
 	}
@@ -84,10 +104,19 @@ public class VariableNode extends NamedNode {
 		return true;
 	}
 
+	/**
+	 * Get the type of the VariableNode (will be a class node)
+	 * @return
+	 */
 	public Node getType() {
 		return type;
 	}
 
+	/**
+	 * Set the type of the VariableNode (should be a class node)
+	 * @param type
+	 * @throws TranslationException
+	 */
 	public void setType(Node type) throws TranslationException {
 		if (this.type != null && 
 				!this.type.equals(type)) {
@@ -97,18 +126,34 @@ public class VariableNode extends NamedNode {
 		this.type = type;
 	}
 
+	/**
+	 * Get the definition(s) of the VariableNode
+	 * @return
+	 */
 	public List<GraphPatternElement> getDefinition() {
 		return definition;
 	}
 
+	/**
+	 * Set the definition(s) of the VariableNode
+	 * @param definition
+	 */
 	public void setDefinition(List<GraphPatternElement> definition) {
 		this.definition = definition;
 	}
 
+	/**
+	 * Is this VariableNode created from a Declaration (article followed by class name)?
+	 * @return
+	 */
 	public boolean isCRulesVariable() {
 		return isCRulesVariable;
 	}
 
+	/**
+	 * Set true if this VariableNode created from a Declaration (article followed by class name)
+	 * @param isCRulesVariable
+	 */
 	public void setCRulesVariable(boolean isCRulesVariable) {
 		this.isCRulesVariable = isCRulesVariable;
 	}
@@ -119,6 +164,7 @@ public class VariableNode extends NamedNode {
 		return getName();
 	}
 	
+	@Override
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(toString());
@@ -149,6 +195,7 @@ public class VariableNode extends NamedNode {
 		return sb.toString();
 	}
 
+	@Override
 	public String toFullyQualifiedString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(toString());

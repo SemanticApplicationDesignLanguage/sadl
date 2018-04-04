@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright \u00a9 2007-2010 - General Electric Company, All Rights Reserved
+ * Copyright \u00a9 2007-2018 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -22,21 +22,35 @@ import java.util.Iterator;
 
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 
+/**
+ * Class to capture the content of an RDF triple
+ * @author 200005201
+ *
+ */
 public class TripleElement extends GraphPatternElement {
 	private Node subject = null;
 	private Node predicate = null;
 	private Node object = null;
 	
-	public enum TripleModifierType {None, Not, Only, NotOnly}
+	public enum TripleModifierType {None, Not, Only, NotOnly}	// special kinds of triples
 	private TripleModifierType modifierType = TripleModifierType.None;		// default
 
-	public enum TripleSourceType {SPV, PSnewV, PSV, VPS, ITC, SCofC}
+	public enum TripleSourceType {SPV, PSnewV, PSV, VPS, ITC, SCofC}	// type of source
 	private TripleSourceType sourceType;	// what kind of triple was this translated from?
 	
+	/**
+	 * Null argument constructor
+	 */
 	public TripleElement() {
 		super();
 	}
 	
+	/**
+	 * Constructor with subject, predicate, and object as arguments
+	 * @param subj
+	 * @param pred
+	 * @param obj
+	 */
 	public TripleElement(Node subj, Node pred, Node obj) {
 		super();
 		setSubject(subj);
@@ -44,30 +58,59 @@ public class TripleElement extends GraphPatternElement {
 		setObject(obj);
 	}
 	
+	/**
+	 * Set the TripleElement's subject
+	 * @param subject
+	 */
 	public void setSubject(Node subject) {
 		this.subject = subject;
-//		if (subject instanceof VariableNode) {
-//			((VariableNode)subject).incrementReferences();
-//		}
 	}
+	
+	/**
+	 * Get the TripleElement's subject
+	 * @return
+	 */
 	public Node getSubject() {
 		return subject;
 	}
 
+	/**
+	 * Set the TripleElement's predicate
+	 * @param predicate
+	 */
 	public void setPredicate(Node predicate) {
 		this.predicate = predicate;
 	}
+	
+	/**
+	 * Get the TripleElement's predicate
+	 * @return
+	 */
 	public Node getPredicate() {
 		return predicate;
 	}
 
+	/**
+	 * Set the TripleElement's object
+	 * @param object
+	 */
 	public void setObject(Node object) {
 		this.object = object;
 	}
+	
+	/**
+	 * Get the TripleElement's object
+	 * @return
+	 */
 	public Node getObject() {
 		return object;
 	}
 	
+	/**
+	 * Set the TripleModifierType for a special TripleElement type
+	 * @param _type
+	 * @throws InvalidTypeException
+	 */
 	public void setType(TripleModifierType _type) throws InvalidTypeException {
 		if (_type == null) {
 			throw new InvalidTypeException("Triple modifier type cannot be null!");
@@ -75,10 +118,15 @@ public class TripleElement extends GraphPatternElement {
 		this.modifierType = _type;
 	}
 
+	/**
+	 * Get the TripleModifierType for the TripleElement
+	 * @return
+	 */
 	public TripleModifierType getModifierType() {
 		return modifierType;
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("rdf(");
 		sb.append(subject != null ? subject.toString() : "null");
@@ -99,6 +147,7 @@ public class TripleElement extends GraphPatternElement {
 		return sb.toString();
 	}
 	
+	@Override
 	public String toFullyQualifiedString() {
 		StringBuilder sb = new StringBuilder("rdf(");
 		sb.append(subject != null ? subject.toFullyQualifiedString() : "null");
