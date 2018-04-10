@@ -32,7 +32,7 @@ public class TripleElement extends GraphPatternElement {
 	private Node predicate = null;
 	private Node object = null;
 	
-	public enum TripleModifierType {None, Not, Only, NotOnly}	// special kinds of triples
+	public enum TripleModifierType {None, Not, Only, NotOnly, Assignment}	// special kinds of triples
 	private TripleModifierType modifierType = TripleModifierType.None;		// default
 
 	public enum TripleSourceType {SPV, PSnewV, PSV, VPS, ITC, SCofC}	// type of source

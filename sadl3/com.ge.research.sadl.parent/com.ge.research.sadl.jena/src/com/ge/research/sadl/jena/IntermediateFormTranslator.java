@@ -2059,6 +2059,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				if (!patterns.contains((TripleElement)realArgForThen)) {
 					patterns.add((TripleElement)realArgForThen);
 				}
+				if (be.getFuncName().equals("assign")) {
+					((TripleElement)realArgForThen).setType(TripleModifierType.Assignment);
+				}
 //				applyExpandedAndImpliedProperties(patterns, be, realArgForThen, moveToIfts, finalIfsVar);
 			}
 			else if (realArgForThen instanceof BuiltinElement && ((BuiltinElement)realArgForThen).getArguments() != null) {
