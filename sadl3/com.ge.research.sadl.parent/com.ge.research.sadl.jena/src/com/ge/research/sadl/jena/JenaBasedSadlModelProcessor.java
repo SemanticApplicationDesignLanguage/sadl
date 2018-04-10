@@ -10446,14 +10446,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				existingList.add(var);
 				return var;
 			} else {
-				addError(
+				if (!isInDisjunctiveContainer(expr)) {
+					// it would be ok, in some circumstances, to have a conjunctive variable definition, each different
+					addError(
 						"There is already an implicit variable with ordinality " + ordinalNumber + ". Please use 'a "
 								+ nextOrdinal(ordinalNumber) + "' to create another implicit variable or 'the "
 								+ nextOrdinal(ordinalNumber - 1) + "' to refer to the existing implicit variable.",
 						expr);
+				}
 				return existingList.get(existingList.size() - 1);
 			}
 		}
+	}
+
+	private boolean isInDisjunctiveContainer(EObject expr) {
+		if (expr instanceof BinaryOperation && ((BinaryOperation)expr).getOp().equals("or")) {
+			return true;
+		}
+		else if (expr.eContainer() != null) {
+			return isInDisjunctiveContainer(expr.eContainer());
+		}
+		return false;
 	}
 
 	protected void clearCruleVariables() {

@@ -131,7 +131,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
     private static final Logger logger = LoggerFactory.getLogger(IntermediateFormTranslator.class);
     private int vNum = 0;	// used to create unique variables
     private List<IFTranslationError> errors = null;
-    protected Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
+    private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
     private Object encapsulatingTarget = null;	// when a query is in a test
     private GraphPatternElement firstOfPhrase = null;
     
@@ -171,6 +171,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
     	target = _target;
     }
     
+	@Override
+	public Object getTarget() {
+		return target;
+	}
+
 	/**
 	 * Reset the translator for a new translation task
 	 */
@@ -179,7 +184,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (errors != null) {
 			errors.clear();
 		}
-		target = null;
+		setTarget(null);
 		encapsulatingTarget = null;
 		setFirstOfPhrase(null);
 	}
@@ -1467,7 +1472,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		if (patterns.size() > 0) {
 			patterns = decorateCRuleVariables((List<GraphPatternElement>) patterns, isRuleThen);
-			if (!(target instanceof Test) && patterns.size() > 1) {
+			if (!(getTarget() instanceof Test) && patterns.size() > 1) {
 				patterns = listToAnd(patterns);
 			}
 		}
@@ -1515,7 +1520,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
 	 */
-	private Object expandProxyNodes(List<GraphPatternElement> patterns, Object pattern, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object expandProxyNodes(List<GraphPatternElement> patterns, Object pattern, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (pattern instanceof ProxyNode) {
 			return expandProxyNodes(patterns, ((ProxyNode)pattern).getProxyFor(), isRuleThen);
 		}
@@ -1600,7 +1605,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
 	 */
-	private Object expandProxyNodes(List<GraphPatternElement> patterns, TripleElement te, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object expandProxyNodes(List<GraphPatternElement> patterns, TripleElement te, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Node returnNode = null;
 		Node retiredNode = findMatchingElementInRetiredProxyNodes(te);
 		if (retiredNode != null && retiredNode instanceof ProxyNode) {
@@ -1711,7 +1716,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			te.setObject(obj);
 			if (!patterns.contains(te)) {
-				if (target instanceof Rule) {
+				if (getTarget() instanceof Rule) {
 					patterns.add(te);
 				}
 				else {
@@ -1763,7 +1768,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @return
 	 */
 	protected VariableNode getVariableNode(BuiltinElement bltin) {
-		if (target != null) {
+		if (getTarget() != null) {
 			
 		}
 		return new VariableNode(getNewVar());
@@ -1839,16 +1844,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	
 	protected VariableNode findVariableInTargetForReuse(Node subject, Node predicate, Node object) {
 		// Note: when we find a match we still create a new VariableNode with the same name in order to have the right reference counts for the new VariableNode
-		if (target instanceof Rule) {
-			VariableNode var = findVariableInTripleForReuse(((Rule)target).getGivens(), subject, predicate, object);
+		if (getTarget() instanceof Rule) {
+			VariableNode var = findVariableInTripleForReuse(((Rule)getTarget()).getGivens(), subject, predicate, object);
 			if (var != null) {
 				return var;
 			}
-			var = findVariableInTripleForReuse(((Rule)target).getIfs(), subject, predicate, object);
+			var = findVariableInTripleForReuse(((Rule)getTarget()).getIfs(), subject, predicate, object);
 			if (var != null) {
 				return var;
 			}
-			var = findVariableInTripleForReuse(((Rule)target).getThens(), subject, predicate, object);
+			var = findVariableInTripleForReuse(((Rule)getTarget()).getThens(), subject, predicate, object);
 			if (var != null) {
 				return var;
 			}
@@ -2077,7 +2082,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			return null;
 		}
-		else if (target instanceof Rule && be.getFuncType().equals(BuiltinType.Equal)) {
+		else if (getTarget() instanceof Rule && be.getFuncType().equals(BuiltinType.Equal)) {
 			if (be.getArguments().size() == 2) {  // this should always be true
 				if (be.getArguments().get(0) instanceof VariableNode && be.getArguments().get(1) instanceof ProxyNode) {
 					Object realArg2 = ((ProxyNode)be.getArguments().get(1)).getProxyFor();
@@ -2089,6 +2094,13 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						((TripleElement)realArg2).setObject(be.getArguments().get(0));  // the variable goes to the object of the arg 2 triple and this builtin  goes away
 						return expandProxyNodes(patterns, realArg2, isRuleThen);
 					}
+				}
+				else if (be.getArguments().get(1) instanceof Literal && be.getArguments().get(0) instanceof ProxyNode && 
+						((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof TripleElement &&
+						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
+					((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+					patterns.add(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()));
+					return null;
 				}
 			}
 		}
@@ -2274,10 +2286,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param moveToIfts
 	 */
 	protected boolean addToPremises(List<GraphPatternElement> moveToIfts) {
-		if (target instanceof Rule) {
-			List<GraphPatternElement> ifts = ((Rule)target).getIfs();
+		if (getTarget() instanceof Rule) {
+			List<GraphPatternElement> ifts = ((Rule)getTarget()).getIfs();
 			if (ifts == null) {
-				((Rule)target).setIfs(moveToIfts);
+				((Rule)getTarget()).setIfs(moveToIfts);
 			}
 			else {
 				ifts.addAll(moveToIfts);
@@ -2369,7 +2381,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws InvalidTypeException 
 	 * @throws InvalidNameException 
 	 */
-	private int removeDuplicates(List<GraphPatternElement> list1, List<GraphPatternElement> list2, boolean bRetainFirst) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected int removeDuplicates(List<GraphPatternElement> list1, List<GraphPatternElement> list2, boolean bRetainFirst) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (list1 == null || list2 == null || list1.size() < 1 || list2.size() < 1) {
 			return 0;
 		}
@@ -2495,7 +2507,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param gpe
 	 * @return
 	 */
-	public List<GraphPatternElement> junctionToList(Junction gpe) {
+	public static List<GraphPatternElement> junctionToList(Junction gpe) {
 		List<GraphPatternElement> results = null;
 		Object lhs = gpe.getLhs();
 		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
@@ -2900,12 +2912,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
-	@Override
-	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions,
-			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance)
-			throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException {
-		throw new TranslationException("This method is not supported at this time in this translator (" + this.getClass().getCanonicalName() + ").");
-	}
+//	@Override
+//	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions,
+//			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance)
+//			throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException {
+//		throw new TranslationException("This method is not supported at this time in this translator (" + this.getClass().getCanonicalName() + ").");
+//	}
 
 	protected OntModel getTheJenaModel() {
 		return theJenaModel;
@@ -2914,6 +2926,5 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	protected void setTheJenaModel(OntModel theJenaModel) {
 		this.theJenaModel = theJenaModel;
 	}
-
 	
 }	

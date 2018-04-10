@@ -84,6 +84,8 @@ public interface I_IntermediateFormTranslator {
 	 * @param _encapsulatingTarget
 	 */
 	void setEncapsulatingTarget(Object _encapsulatingTarget);
+
+	Object getTarget();
 	
 	/**
 	 * Method to add missing patterns
@@ -97,8 +99,8 @@ public interface I_IntermediateFormTranslator {
 	 * @throws TranslationException
 	 * @throws InvalidNameException 
 	 */
-	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions, 
-			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance) 
-					throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException;
+//	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions, 
+//			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance) 
+//					throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException;
 
 }
