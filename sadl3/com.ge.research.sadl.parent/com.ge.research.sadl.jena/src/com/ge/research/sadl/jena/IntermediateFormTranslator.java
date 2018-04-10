@@ -1520,7 +1520,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
 	 */
-	private Object expandProxyNodes(List<GraphPatternElement> patterns, Object pattern, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object expandProxyNodes(List<GraphPatternElement> patterns, Object pattern, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (pattern instanceof ProxyNode) {
 			return expandProxyNodes(patterns, ((ProxyNode)pattern).getProxyFor(), isRuleThen);
 		}
