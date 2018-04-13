@@ -3571,15 +3571,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				//	everything matches "known"
 				return true;
 			}
-			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("known")) {
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
 				//	everything matches "known"
 				return true;
 			}
-			if (rightExpression instanceof Constant && ((Constant)rightExpression).getConstant().equals("None")) {
+			if (rightExpression instanceof Constant && ((Constant)rightExpression).getConstant().equals(SadlConstants.CONSTANT_NONE)) {
 				//	everything matches "None"
 				return true;
 			}
-			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("None")) {
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals(SadlConstants.CONSTANT_NONE)) {
 				//	everything matches "None"
 				return true;
 			}

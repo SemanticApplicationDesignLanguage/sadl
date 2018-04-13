@@ -103,4 +103,10 @@ public interface I_IntermediateFormTranslator {
 //			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance) 
 //					throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException;
 
+	/**
+	 * Method to determine if a GraphPatternElement can only be in the conclusions of the target
+	 * @param gpe
+	 * @return
+	 */
+	boolean graphPatternElementMustBeInConclusions(GraphPatternElement gpe);
 }

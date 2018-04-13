@@ -266,7 +266,6 @@ public abstract class GraphPatternElement {
 
 	/**
 	 * Add a GrpahPatternElement to the list of missing GraphPatternElements to be applied at the location of this GraphPatternElement
-
 	 * @param missingPattern
 	 */
 	public void addMissingPattern(GraphPatternElement missingPattern) {
@@ -274,5 +273,18 @@ public abstract class GraphPatternElement {
 			missingPatterns = new ArrayList<GraphPatternElement>();
 		}
 		missingPatterns.add(missingPattern);
+	}
+
+	/**
+	 * Add a GrpahPatternElement to the list of missing GraphPatternElements to be applied at the location of this GraphPatternElement
+	 * at the indicated location in the list
+	 * @param idx
+	 * @param missingPattern
+	 */
+	public void addMissingPattern(int idx, GraphPatternElement missingPattern) {
+		if (this.missingPatterns == null) {
+			missingPatterns = new ArrayList<GraphPatternElement>();
+		}
+		missingPatterns.add(idx, missingPattern);
 	}
 }

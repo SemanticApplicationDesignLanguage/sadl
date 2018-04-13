@@ -128,7 +128,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  *
  */
 public class IntermediateFormTranslator implements I_IntermediateFormTranslator {
-    private static final Logger logger = LoggerFactory.getLogger(IntermediateFormTranslator.class);
+    protected static final Logger logger = LoggerFactory.getLogger(IntermediateFormTranslator.class);
     private int vNum = 0;	// used to create unique variables
     private List<IFTranslationError> errors = null;
     private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
@@ -1156,6 +1156,13 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			((BuiltinElement)gpe).setLeftImpliedPropertyUsed(null);
 		}
+		else if (gpe instanceof TripleElement) {
+			Node origSubjNode = ((TripleElement)gpe).getSubject();
+			Node origPredNode = ((TripleElement)gpe).getPredicate();
+			TripleElement newTriple = new TripleElement(origSubjNode, origPredNode, null);
+			((TripleElement) gpe).setSubject(nodeCheck(newTriple));
+			((TripleElement) gpe).setPredicate(lip);
+		}
 		else {
 			throw new TranslationException("Unexpected non-BuiltinElement encountered applying implied property");
 		}
@@ -1180,6 +1187,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			((BuiltinElement)gpe).setRightImpliedPropertyUsed(null);
 		}
+//		else if (gpe instanceof TripleElement) {
+		// need a use case to see how this should go awc 4/11/2018
+//			Node origSubjNode = ((TripleElement)gpe).getSubject();
+//			Node origPredNode = ((TripleElement)gpe).getPredicate();
+//			Node origObjNode = ((TripleElement)gpe).getObject();
+//			TripleElement newTriple = new TripleElement(origSubjNode, origPredNode, null);
+//			((TripleElement) gpe).setSubject(nodeCheck(newTriple));
+//			((TripleElement) gpe).setPredicate(rip);
+//		}
 		else {
 			throw new TranslationException("Unexpected non-BuiltinElement encountered applying implied property");
 		}
@@ -2287,8 +2303,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	/**
 	 * Combine the argument elements with the existing Rule Ifs elements
 	 * @param moveToIfts
+	 * @throws TranslationException 
 	 */
-	protected boolean addToPremises(List<GraphPatternElement> moveToIfts) {
+	protected boolean addToPremises(List<GraphPatternElement> moveToIfts) throws TranslationException {
 		if (getTarget() instanceof Rule) {
 			List<GraphPatternElement> ifts = ((Rule)getTarget()).getIfs();
 			if (ifts == null) {
@@ -2478,7 +2495,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return results;
 	}
 
-	private List<GraphPatternElement> getAllGPEs(List<GraphPatternElement> list) {
+	private List<GraphPatternElement> getAllGPEs(List<GraphPatternElement> list) throws TranslationException {
 		List<GraphPatternElement> results = null;
 		for (int i = 0; list != null && i < list.size(); i++) {
 			GraphPatternElement gpe = list.get(i);
@@ -2509,8 +2526,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * to a list as if both were converted the results would be non-functional.
 	 * @param gpe
 	 * @return
+	 * @throws TranslationException 
 	 */
-	public static List<GraphPatternElement> junctionToList(Junction gpe) {
+	public static List<GraphPatternElement> junctionToList(Junction gpe) throws TranslationException {
+		if (gpe.getJunctionType().equals(JunctionType.Disj)) {
+			return disjunctionToList(gpe);
+		}
 		List<GraphPatternElement> results = null;
 		Object lhs = gpe.getLhs();
 		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
@@ -2538,36 +2559,65 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 	
 
-	public List<GraphPatternElement> disjunctionToList(Junction gpe) throws TranslationException {
-		List<GraphPatternElement> results = null;
+	public static List<GraphPatternElement> disjunctionToList(Junction gpe) throws TranslationException {
+		if (!gpe.getJunctionType().equals(JunctionType.Disj)) {
+			throw new TranslationException("disjunctionToList called for Junction which is not disjunction");
+		}
 		Object lhs = gpe.getLhs();
-		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
-		if (!(lhs instanceof Junction || !((Junction)lhs).getJunctionType().equals(JunctionType.Disj))) {
-			throw new TranslationException("Top-level left of Junction is not a disjunction; use junctionToList. (Disjunction");
-		}
-		if (lhs instanceof Junction && ((Junction)lhs).getJunctionType().equals(JunctionType.Conj)) {
-			results = junctionToList((Junction)lhs);
-		}
-		else {
-//			results = new ArrayList<GraphPatternElement>();
-//			results.add((GraphPatternElement) lhs);
-			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
+		if (lhs instanceof ProxyNode) {
+			if (((ProxyNode)lhs).getProxyFor() instanceof Junction) {
+				List<GraphPatternElement> lgpe = junctionToList((Junction) ((ProxyNode)lhs).getProxyFor());
+				if (lgpe instanceof List<?> && ((List<?>)lgpe).size() == 1) {
+					((ProxyNode)lhs).setProxyFor(((List<?>)lgpe).get(0));
+				}
+				else {
+					((ProxyNode)lhs).setProxyFor(lgpe);
+				}
+			}
 		}
 		Object rhs = gpe.getRhs();
-		if (rhs instanceof ProxyNode) rhs = ((ProxyNode)rhs).getProxyFor();
-		if (rhs instanceof Junction && ((Junction)rhs).getJunctionType().equals(JunctionType.Conj)) {
-			if (results != null) {
-				results.addAll(junctionToList((Junction)rhs));
-			}
-			else {
-				results = junctionToList((Junction)rhs);
+		if (rhs instanceof ProxyNode) {
+			if (((ProxyNode)rhs).getProxyFor() instanceof Junction) {
+				List<GraphPatternElement> rgpe = junctionToList((Junction) ((ProxyNode)rhs).getProxyFor());
+				if (rgpe instanceof List<?> && ((List<?>)rgpe).size() == 1) {
+					((ProxyNode)rhs).setProxyFor(((List<?>)rgpe).get(0));
+				}
+				else {
+					((ProxyNode)rhs).setProxyFor(rgpe);
+				}
 			}
 		}
-		else if (rhs instanceof GraphPatternElement){
-//			results.add((GraphPatternElement) rhs);
-			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
-		}
+		
+		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>(1);
+		results.add(gpe);
 		return results;
+		
+//		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
+//		if (!(lhs instanceof Junction || !((Junction)lhs).getJunctionType().equals(JunctionType.Disj))) {
+//			throw new TranslationException("Top-level left of Junction is not a disjunction; use junctionToList. (Disjunction");
+//		}
+//		if (lhs instanceof Junction && ((Junction)lhs).getJunctionType().equals(JunctionType.Conj)) {
+//			results = junctionToList((Junction)lhs);
+//		}
+//		else {
+////			results = new ArrayList<GraphPatternElement>();
+////			results.add((GraphPatternElement) lhs);
+//			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
+//		}
+//		if (rhs instanceof ProxyNode) rhs = ((ProxyNode)rhs).getProxyFor();
+//		if (rhs instanceof Junction && ((Junction)rhs).getJunctionType().equals(JunctionType.Conj)) {
+//			if (results != null) {
+//				results.addAll(junctionToList((Junction)rhs));
+//			}
+//			else {
+//				results = junctionToList((Junction)rhs);
+//			}
+//		}
+//		else if (rhs instanceof GraphPatternElement){
+////			results.add((GraphPatternElement) rhs);
+//			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
+//		}
+//		return results;
 	}
 
 	/**
@@ -2928,6 +2978,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	protected void setTheJenaModel(OntModel theJenaModel) {
 		this.theJenaModel = theJenaModel;
+	}
+
+	@Override
+	public boolean graphPatternElementMustBeInConclusions(GraphPatternElement gpe) {
+		if (gpe instanceof BuiltinElement && ((BuiltinElement)gpe).getFuncName().equals("assign")) {
+			return true;
+		}
+		return false;
 	}
 	
 }	

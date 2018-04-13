@@ -97,4 +97,11 @@ public interface IJenaBasedModelProcessor {
 	 */
 	boolean isTypedListSubclass(RDFNode node);
 	
+	/**
+	 * Method to fill in prefix if missing
+	 * @param namedNode
+	 * @return
+	 */
+	public NamedNode validateNamedNode(NamedNode namedNode);
+	
 }
