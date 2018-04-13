@@ -2911,6 +2911,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				isRightVariableDefinition = true;
 				rightVariableName = (Name) expr.getRight();
 				rightVariableDefn = expr.getLeft();
+				
+				if (EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null
+						&& EcoreUtil2.getContainerOfType(expr, RuleStatement.class) == null) {
+
+					addError("Variable definition on right is not supported at this time", expr);
+				}
+
 			}
 		} catch (CircularDefinitionException e) {
 			// TODO Auto-generated catch block
