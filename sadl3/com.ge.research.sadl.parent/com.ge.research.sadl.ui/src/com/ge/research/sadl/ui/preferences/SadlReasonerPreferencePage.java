@@ -112,6 +112,12 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	protected Button editTranslator;
 	protected ITranslator checkedTranslator;
 	protected List<ITranslator> translators = null;
+	
+	// default reasoner and translators used for the 'restore defaults button'
+	protected String mDefaultReasoner = "Jena";
+	protected String mDefaultTranslator = "Basic_Jena_Translator";
+	protected String mDefaultReasonerSimpleName = "JenaReasonerPlugin";
+	protected String mDefaultTranslatorSimpleName = "JenaTranslatorPlugin";
 
 	class ReasonerContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object inputElement) {
@@ -381,6 +387,8 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 				if (translatorTableViewer != null) {
 					translatorTableViewer.refresh(true, false);
 				}
+				//Turns off the 'ok' and 'apply' buttons when a reasoner has been selected without a translator
+				setValid(false);
 			}
 		});
 
@@ -513,7 +521,9 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 			public void checkStateChanged(CheckStateChangedEvent e) {
 				checkNewDefaultTranslator(e.getElement());
 				checkedTranslator = (ITranslator) e.getElement();
-				}
+				// Turns on the 'ok' and 'apply' buttons when a translator has been selected with a reasoner
+				setValid(true);
+			}
 		});
 
 		IStructuredSelection selet = ((IStructuredSelection) translatorTableViewer.getSelection());
@@ -585,29 +595,45 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	 * pressed.
 	 */
 	protected void performDefaults() {
-		String reasonerName = null;
-		try {
-			reasonerName = configurationManager.getReasonerClassName();
-		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		checkedReasoner = null;
-		Object[] obj = tableViewer.getCheckedElements();
-		for (int i=0; i<obj.length; i++) {
-			tableViewer.setChecked(obj, false);
-			if (reasonerName != null &&
-				((IReasoner)obj[i]).getClass().getName().equals(reasonerName)) {
-				checkedReasoner = (IReasoner) obj[i];
-				break;
+		
+		// get a list of all the available reasoners and reset them to unchecked, then check the default
+		// which set to "Jena"
+		 TableItem[] availabeReasoners = tableViewer.getTable().getItems();
+		 for(int i=0; i< availabeReasoners.length;i++) {
+			 TableItem item = availabeReasoners[i];
+				if(item.getText().equals(mDefaultReasoner)){
+					item.setChecked(true);
+					checkedReasoner = (IReasoner) item.getData();
+				}else {
+					item.setChecked(false);
+				}
+		 }
+		 
+		 //Update the translators table based on selected reasoner
+		 translators = getAvailableTranslatorsForReasoner(checkedReasoner);
+		 if (translatorTableViewer != null) {
+			 translatorTableViewer.refresh(true, false);
+		 }
+			
+		// make sure the default translator is checked  which is set to "Jena_Basic_Translator"
+		// and everything else is not
+		 TableItem[] availabeTranslators = translatorTableViewer.getTable().getItems();
+		 for(int i=0; i< availabeTranslators.length;i++) {
+			TableItem item = availabeTranslators[i];
+			if(item.getText().equals(mDefaultTranslator)){
+				item.setChecked(true);
+				checkedTranslator = (ITranslator) item.getData();
+			}else {
+				item.setChecked(false);
 			}
 		}
-		if (checkedReasoner != null)
-			tableViewer.setChecked(checkedReasoner, true);
-		else {
-			Object o = tableViewer.getElementAt(0);
-			if (o != null)
-				tableViewer.setChecked(o, true);
+		
+		// double check to make sure the page is valid, jena reasoner and translator should be selected	
+		if(checkedReasoner.getClass().getSimpleName().equals(mDefaultReasonerSimpleName) &&
+				checkedTranslator.getClass().getSimpleName().equals(mDefaultTranslatorSimpleName)) {
+			setValid(true);
+		} else {
+			setValid(false);
 		}
 		
 		super.performDefaults();
