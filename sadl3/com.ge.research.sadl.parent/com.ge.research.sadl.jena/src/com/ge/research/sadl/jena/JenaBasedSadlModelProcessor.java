@@ -3299,7 +3299,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				+ vartype.toString() + "' not allowed.", defn);
 	}
 
-	protected NamedNode validateNamedNode(NamedNode namedNode) {
+	public NamedNode validateNamedNode(NamedNode namedNode) {
 		if (namedNode.getPrefix() == null) {
 			namedNode.setPrefix(getConfigMgr().getGlobalPrefix(namedNode.getNamespace()));
 		}
@@ -5880,7 +5880,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	private boolean isOperationPullingUp(EObject expr) {
+	protected boolean isOperationPullingUp(EObject expr) {
 		if (operationsPullingUp != null && operationsPullingUp.size() > 0) {
 			if (operationsPullingUp.get(operationsPullingUp.size() - 1).equals(expr)) {
 				return true;
@@ -10663,9 +10663,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return useArticlesInValidation;
 	}
 
-	protected void checkForArticleForNameInTriple(Expression value, Object triple) {
+	protected void checkForArticleForNameInTriple(Expression value, Object triple) throws InvalidNameException {
 		if(triple instanceof TripleElement) {
 			Node tripleObject = ((TripleElement)triple).getObject();
+			if (tripleObject == null && ((TripleElement)triple).getModifierType().equals(TripleModifierType.None)) {
+				tripleObject = new ConstantNode(SadlConstants.CONSTANT_NONE);
+				((TripleElement)triple).setObject(tripleObject);
+			}
 			if (isUseArticlesInValidation() && value instanceof Name && tripleObject instanceof NamedNode
 					&& ((NamedNode) tripleObject).getNodeType().equals(NodeType.ClassNode)) {
 				addError(SadlErrorMessages.NEEDS_ARTICLE.get(), value);
