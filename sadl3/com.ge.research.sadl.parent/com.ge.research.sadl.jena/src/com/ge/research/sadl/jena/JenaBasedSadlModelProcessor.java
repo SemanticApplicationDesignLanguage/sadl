@@ -44,9 +44,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.EMFPlugin;
@@ -1180,13 +1182,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else {
 			java.nio.file.Path implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
 			if (implfn != null) {
-				final URI uri = getUri(resource, implfn);
-				Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 				if (sadlBuiltinFunctionModel == null) {
+					final URI uri = getUri(resource, implfn);
+					Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 					if (imrsrc instanceof XtextResource) {
 						sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource) imrsrc);
 					} else if (imrsrc instanceof ExternalEmfResource) {
-						ExternalEmfResource emfResource = (ExternalEmfResource) imrsrc;
 						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getOntModel();
 					}
 					if (sadlBuiltinFunctionModel == null) {
@@ -1230,11 +1231,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private URI getUri(Resource anyResource, java.nio.file.Path resourcePath) {
 		Preconditions.checkArgument(anyResource instanceof XtextResource,
 				"Expected an Xtext resource. Got: " + anyResource);
+		final String resourceFileName = resourcePath.getFileName().toString();
+		Preconditions.checkArgument(
+				resourceFileName.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)
+				|| resourceFileName.equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME),
+				"Expected the resource path of either the implicit model or the built-in function model. Got " + resourcePath + " instead.");
+
 		if (EMFPlugin.IS_ECLIPSE_RUNNING) {
 			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-			java.nio.file.Path workspaceRootPath = Paths.get(workspaceRoot.getLocationURI());
-			java.nio.file.Path relativePath = workspaceRootPath.relativize(resourcePath);
-			Path relativeResourcePath = new Path(relativePath.toString());
+			java.nio.file.Path containerProjectPath = resourcePath.getParent().getParent();
+			IProject containerProject = Arrays.stream(workspaceRoot.getProjects())
+				.filter(p -> p.isAccessible())
+				.filter((p -> Paths.get(p.getLocationURI()).equals(containerProjectPath)))
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("Cannot locate container project for " + resourcePath + "."));
+			IPath relativeResourcePath = new Path(containerProject.getName()).append(containerProjectPath.relativize(resourcePath).toString());
 			return URI.createPlatformResourceURI(relativeResourcePath.toOSString(), true);
 		} else {
 			final PathToFileUriConverter uriConverter = getUriConverter(anyResource);
@@ -1288,9 +1299,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else {
 			java.nio.file.Path implfn = checkImplicitSadlModelExistence(resource, context);
 			if (implfn != null) {
-				final URI uri = getUri(resource, implfn);
-				Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 				if (sadlImplicitModel == null) {
+					final URI uri = getUri(resource, implfn);
+					Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 					if (imrsrc instanceof XtextResource) {
 						sadlImplicitModel = OntModelProvider.find((XtextResource) imrsrc);
 					} else if (imrsrc instanceof ExternalEmfResource) {
@@ -2900,6 +2911,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				isRightVariableDefinition = true;
 				rightVariableName = (Name) expr.getRight();
 				rightVariableDefn = expr.getLeft();
+				
+				if (EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null
+						&& EcoreUtil2.getContainerOfType(expr, RuleStatement.class) == null) {
+
+					addError("Variable definition on right is not supported at this time", expr);
+				}
+
 			}
 		} catch (CircularDefinitionException e) {
 			// TODO Auto-generated catch block
