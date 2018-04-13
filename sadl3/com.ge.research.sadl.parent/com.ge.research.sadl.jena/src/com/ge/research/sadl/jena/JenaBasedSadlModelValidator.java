@@ -4186,34 +4186,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
-	public boolean isControlVariableBooleanForOnlyWhenClause(EObject Expression) throws InvalidNameException, InvalidTypeException {
-		  ConceptIdentifier ci = null;
-		  TypeCheckInfo TypeCheckInfo = null;
-		  try {
-		    TypeCheckInfo = getType(Expression);
-		  } catch (TranslationException | URISyntaxException | IOException | ConfigurationException
-		      | DontTypeCheckException | CircularDefinitionException | CircularDependencyException
-		      | PropertyWithoutRangeException e1) {
-		    // TODO Auto-generated catch block
-		    e1.printStackTrace();
-		  }
-		  try {
-		    ci = getConceptIdentifierFromTypeCheckInfo(TypeCheckInfo);
-		  } catch (TranslationException e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		  }
-		  if (ci == null) {
-		    return true;
-		  }
-		  ConceptName cn = (ConceptName) ci;
-		  OntClass cnClass = theJenaModel.getOntClass(cn.getUri());
-		  if (cnClass == null && !cn.getUri().equals(XSD.xboolean.getURI())) {
-		    return false;
-		  }
-		  return true;
-		}
-	
 	private boolean isCompatibleListTypes(List<String> operations, TypeCheckInfo leftTypeCheckInfo,
 			TypeCheckInfo rightTypeCheckInfo) {
 		// TODO Auto-generated method stub
