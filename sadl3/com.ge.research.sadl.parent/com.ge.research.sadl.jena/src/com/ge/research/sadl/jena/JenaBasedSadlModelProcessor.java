@@ -1504,18 +1504,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						&& IntermediateFormTranslator.isComparisonBuiltin(((BuiltinElement) testtrans).getFuncName())) {
 					List<Node> args = ((BuiltinElement) testtrans).getArguments();
 					if (args != null && args.size() == 2) {
-						test.setCompName(((BuiltinElement) testtrans).getFuncType());
-						Object lhsObj = getIfTranslator().expandProxyNodes(args.get(0), false, true);
-						Object rhsObj = getIfTranslator().expandProxyNodes(args.get(1), false, true);
-						test.setLhs(
-								(lhsObj != null && lhsObj instanceof List<?> && ((List<?>) lhsObj).size() > 0) ? lhsObj
-										: args.get(0));
-						test.setRhs(
-								(rhsObj != null && rhsObj instanceof List<?> && ((List<?>) rhsObj).size() > 0) ? rhsObj
-										: args.get(1));
-						generatedTests = new Test[1];
-						generatedTests[0] = test;
-						done = true;
+						if (((BuiltinElement)testtrans).getFuncType().equals(BuiltinType.Equal) && 
+								args.get(0) instanceof NamedNode && ((NamedNode)args.get(0)).getNodeType().equals(NodeType.InstanceNode) &&
+								args.get(1) instanceof VariableNode && ((VariableNode)args.get(1)).getType() instanceof NamedNode &&
+								((NamedNode)((VariableNode)args.get(1)).getType()).getNodeType().equals(NodeType.ClassNode)) {
+							TripleElement testtriple = new TripleElement((NamedNode)args.get(0), new RDFTypeNode(), ((VariableNode)args.get(1)).getType());
+							test.setLhs(testtriple);
+							generatedTests = new Test[1];
+							generatedTests[0] = test;
+							done = true;
+						}
+						else {
+							test.setCompName(((BuiltinElement) testtrans).getFuncType());
+							Object lhsObj = getIfTranslator().expandProxyNodes(args.get(0), false, true);
+							Object rhsObj = getIfTranslator().expandProxyNodes(args.get(1), false, true);
+							test.setLhs(
+									(lhsObj != null && lhsObj instanceof List<?> && ((List<?>) lhsObj).size() > 0) ? lhsObj
+											: args.get(0));
+							test.setRhs(
+									(rhsObj != null && rhsObj instanceof List<?> && ((List<?>) rhsObj).size() > 0) ? rhsObj
+											: args.get(1));
+							generatedTests = new Test[1];
+							generatedTests[0] = test;
+							done = true;
+						}
 					}
 				} else if (testtrans instanceof TripleElement) {
 					if (((TripleElement) testtrans).getModifierType() != null
@@ -1927,7 +1939,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (result instanceof GraphPatternElement) {
 				Explain cmd = new Explain((GraphPatternElement) result);
 				addSadlCommand(cmd);
-			} else {
+			} else if (result != null) {
 				throw new TranslationException("Unhandled ExplainStatement: " + result.toString());
 			}
 		}
@@ -3541,6 +3553,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					String cnst = ((ConstantNode) robj).getName();
 					if (cnst.equals(SadlConstants.CONSTANT_NONE)) {
 						((TripleElement) lobj).setType(TripleModifierType.None);
+						((TripleElement) lobj).setObject((Node) robj);
 						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 					}
 				} else if (robj instanceof BuiltinElement) {
@@ -5485,10 +5498,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private Object listToSingleJunction(Object result) throws InvalidNameException, InvalidTypeException, TranslationException {
-		if (((List<?>) result).size() == 1) {
-			result = ((List<?>) result).get(0);
-		} else {
-			result = ((List<?>) getIfTranslator().listToAnd((List<GraphPatternElement>) result)).get(0);
+		if (result instanceof List<?>) {
+			if (((List<?>) result).size() == 1) {
+				result = ((List<?>) result).get(0);
+			} else {
+				result = ((List<?>) getIfTranslator().listToAnd((List<GraphPatternElement>) result)).get(0);
+			}
 		}
 		return result;
 	}

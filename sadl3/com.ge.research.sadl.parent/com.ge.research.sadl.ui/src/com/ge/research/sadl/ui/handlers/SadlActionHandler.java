@@ -301,10 +301,10 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	protected Map<String,String> getPreferences() {
 		Injector reqInjector = safeGetInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
 		IPreferenceValuesProvider pvp = reqInjector.getInstance(IPreferenceValuesProvider.class);
-		org.eclipse.emf.ecore.resource.Resource resource = new ResourceImpl();
-		resource.setURI(org.eclipse.emf.common.util.URI.createFileURI("/"));
+//		org.eclipse.emf.ecore.resource.Resource resource = new ResourceImpl();
+//		resource.setURI(org.eclipse.emf.common.util.URI.createFileURI("foo.sadl"));
 	
-		IPreferenceValues preferenceValues = pvp.getPreferenceValues(resource);
+		IPreferenceValues preferenceValues = pvp.getPreferenceValues(new XtextResource(URI.createFileURI("foo.sadl")));
 		if (preferenceValues != null) {
 			Map<String, String> map = new HashMap<String, String>();
 			boolean bval = Boolean.parseBoolean(preferenceValues.getPreference(SadlPreferences.SHOW_TIMING_INFORMATION));
