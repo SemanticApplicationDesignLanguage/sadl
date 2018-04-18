@@ -10731,7 +10731,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return true; // default? get from builtinfunction signatures?
 	}
 
-	protected boolean addVariableDefinition(VariableNode var, Object defn, NamedNode leftDefnType, EObject expr) {
+	protected boolean addVariableDefinition(VariableNode var, Object defn, NamedNode leftDefnType, EObject expr) throws TranslationException {
 		// This model processor doesn't need to do anything
 		return false;
 	}
