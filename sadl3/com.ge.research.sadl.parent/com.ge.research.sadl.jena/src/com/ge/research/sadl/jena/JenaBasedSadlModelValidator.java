@@ -95,7 +95,6 @@ import com.ge.research.sadl.sADL.impl.ExternalEquationStatementImpl;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
@@ -606,9 +605,30 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			type = rightTypeCheckInfo.getTypeCheckType();
 		}
 		// the other possibility is that both sides have implied properties (which should be the same) so the type is the common type
-		else if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null 
-				&& leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) {
-			type = leftTypeCheckInfo.getTypeCheckType();
+		else if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null) {
+			Node ltct = leftTypeCheckInfo.getTypeCheckType();
+			Node rtct = rightTypeCheckInfo.getTypeCheckType();
+			if (ltct.equals(rtct)) {
+				type = ltct;
+			}
+			else {
+				if (ltct instanceof NamedNode && rtct instanceof NamedNode) {
+					OntClass loc = theJenaModel.getOntClass(ltct.toFullyQualifiedString());
+					OntClass roc = theJenaModel.getOntClass(rtct.toFullyQualifiedString());
+					try {
+						if (SadlUtils.classIsSubclassOf(roc, loc, true, null)) {
+							type = ltct;
+						}
+						else if (SadlUtils.classIsSubclassOf(loc, roc, true, null)) {
+							type = rtct;
+						}
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+			}
 		}
 		else {
 			try {
@@ -2281,11 +2301,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					if (possibleMatch) {
-						StringBuilder warningMessageBuilder = new StringBuilder();
-						createErrorMessage(warningMessageBuilder, leftTypeCheckInfo, subjType, "chained property", false, predicate);
-						int idx = warningMessageBuilder.indexOf("cannot operate");
-						warningMessageBuilder.replace(idx, idx + 14, "may, but is not guaranteed (because of broader range), to operate");
-						issueAcceptor.addWarning(warningMessageBuilder.toString(), predicate);
+						String warningMessage = createSuperClassOnRightWarning(predicate, subjType,
+								leftTypeCheckInfo, "chained property");
+						issueAcceptor.addWarning(warningMessage, predicate);
 					}
 					else {
 						createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, subjType, "chained property", true, predicate);
@@ -2296,6 +2314,41 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return predicateType;
+	}
+
+	/**
+	 * Method to generate a warning message (rather than an error message) when the assignment value on the right side is
+	 * a superclass of what is expected by the left side.
+	 * @param expr
+	 * @param rightTypeCheckInfo
+	 * @param leftTypeCheckInfo
+	 * @param operation
+	 * @return
+	 * @throws InvalidTypeException
+	 */
+	private String createSuperClassOnRightWarning(EObject expr, TypeCheckInfo rightTypeCheckInfo,
+			TypeCheckInfo leftTypeCheckInfo, String operation) throws InvalidTypeException {
+		StringBuilder warningMessageBuilder = new StringBuilder();
+		createErrorMessage(warningMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, operation, false, expr);
+		int len = 0;
+		int idx = warningMessageBuilder.indexOf("cannot operate");
+		if (idx > 0) {
+			len = 14;
+		}
+		else {
+			idx = warningMessageBuilder.indexOf("cannot be compared");
+			if (idx > 0) {
+				len = 18;
+			}
+			int idx2 = warningMessageBuilder.indexOf("is", idx);
+			if (idx2 > 0) {
+				len = 3 + idx2 - idx;
+			}
+		}
+		if (idx > 0) {
+			warningMessageBuilder.replace(idx, idx + len, "may, but is not guaranteed to (because it is broader), operate");
+		}
+		return warningMessageBuilder.toString();
 	}
 	
 	protected boolean checkDomain(List<OntClass> subjClasses, Resource dmn, List<Resource> domainList) {
@@ -4122,9 +4175,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							OntClass subcls = theJenaModel.getOntClass(leftConceptName.getUri());
 							OntResource supercls = theJenaModel.getOntResource(rightConceptName.getUri());
 							if (SadlUtils.classIsSubclassOf(subcls, supercls, true, null)) {
+								if (getModelProcessor().isAssignment(leftExpression.eContainer())) {
+									String wmsg = createSuperClassOnRightWarning(leftExpression.eContainer(), leftTypeCheckInfo, rightTypeCheckInfo, operations.get(0));
+									issueAcceptor.addWarning(wmsg, leftExpression.eContainer());
+								}
 								return true;
 							}
-							if (SadlUtils.classIsSubclassOf(theJenaModel.getOntClass(rightConceptName.getUri()), theJenaModel.getOntResource(leftConceptName.getUri()), true, null)) {
+							if (SadlUtils.classIsSubclassOf(supercls.as(OntClass.class), subcls, true, null)) {
 								return true;
 							}
 		// TODO handle equivalent classes.					
