@@ -5240,7 +5240,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		} else if (predicate instanceof ElementInList) {
 			trSubj = processExpression(subject);
-			trPred = processExpression(predicate);
+//			trPred = processExpression(predicate);
+			Expression element = ((ElementInList)predicate).getElement();
+			Object elObj = processExpression(element);
 			BuiltinElement bi = new BuiltinElement();
 			if (((ElementInList) predicate).isBefore()) {
 				bi.setFuncName("elementBefore");
@@ -5250,7 +5252,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				bi.setFuncName("elementInList");
 			}
 			bi.addArgument(nodeCheck(trSubj));
-			bi.addArgument(nodeCheck(trPred));
+			bi.addArgument(nodeCheck(elObj));
 			return bi;
 
 		}
@@ -10800,5 +10802,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			found = getTriplesOfInterestList(found, (GraphPatternElement) ((ProxyNode) node).getProxyFor());
 		}
 		return found;
+	}
+
+	public boolean isAssignment(EObject expr) {
+		// TODO make this smarter
+		return false;
 	}
 }
