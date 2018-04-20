@@ -2104,8 +2104,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		String propertyName = predicateType.getExpressionType().toString();
 		String rangeStr = predicateType.getTypeCheckType().toString();
 		boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
-		metricsProcessor.addControlledOrMonitoredProperty(null, propertyName);
-		metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
+		if (metricsProcessor != null) {
+			metricsProcessor.addControlledOrMonitoredProperty(null, propertyName);
+			metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
+		}
+
 	}
 	
 	private String getTypeCheckTypeString(TypeCheckInfo tci) {
@@ -2166,7 +2169,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return predicateType;
 			}
 			Property prop = theJenaModel.getProperty(propuri);
+			boolean firstprop = false;
+			if (modelProcessor.isLookingForFirstProperty()) {
+				firstprop = true;
+			}
+			modelProcessor.setLookingForFirstProperty(false);
 			TypeCheckInfo subjType = getType(subject);
+			if (firstprop) {
+				modelProcessor.setLookingForFirstProperty(true);
+			}
+		
 			List<OntClass> subjClasses = subjType != null ? getTypeCheckTypeClasses(subjType) : null;
 			try {
 				List<Node> lrs = getApplicableLocalRestriction(subject, predicate);
@@ -2185,6 +2197,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 						return predicateType;
 					}
+				}
+				
+				else {
+					if (subjType != null && predicate != null && predicateType.getTypeCheckType() != null) {
+						addEffectiveRangeByTypeCheckInfo(predicateType, subjType);
+					}
+
 				}
 			} catch (PrefixNotFoundException e1) {
 				// TODO Auto-generated catch block
