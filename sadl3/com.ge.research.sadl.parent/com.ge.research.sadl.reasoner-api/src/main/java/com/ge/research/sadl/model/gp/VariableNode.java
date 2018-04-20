@@ -18,6 +18,7 @@
 
 package com.ge.research.sadl.model.gp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -140,6 +141,13 @@ public class VariableNode extends NamedNode {
 	 */
 	public void setDefinition(List<GraphPatternElement> definition) {
 		this.definition = definition;
+	}
+	
+	public void addDefinition(GraphPatternElement definition) {
+		if (this.definition == null) {
+			this.definition = new ArrayList<GraphPatternElement>();
+		}
+		this.definition.add(definition);
 	}
 
 	/**

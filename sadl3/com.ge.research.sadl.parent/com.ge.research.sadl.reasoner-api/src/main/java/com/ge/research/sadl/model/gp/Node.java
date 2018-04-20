@@ -96,6 +96,24 @@ public abstract class Node implements Cloneable{
 	 */
 	abstract public String toDescriptiveString();
 	
+	protected String missingTripleReplacementToDescriptiveString() {
+		StringBuilder sb = new StringBuilder(" (has missing triple replacement '");
+		Object pf = getMissingTripleReplacement().getProxyFor();
+		if (pf instanceof GraphPatternElement) {
+			ProxyNode saveAndRestore = null;
+			if (pf instanceof TripleElement && ((TripleElement)pf).getPredicate().getMissingTripleReplacement() != null) {
+				saveAndRestore = ((TripleElement)pf).getPredicate().getMissingTripleReplacement();
+				((TripleElement)pf).getPredicate().setMissingTripleReplacement(null);
+			}
+			sb.append(((GraphPatternElement)pf).toDescriptiveString());
+			if (saveAndRestore != null) {
+				((TripleElement)pf).getPredicate().setMissingTripleReplacement(saveAndRestore);
+			}
+			sb.append("')");
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Get the ProxyNode representing a replacement (if any) for this Node
 	 * @return

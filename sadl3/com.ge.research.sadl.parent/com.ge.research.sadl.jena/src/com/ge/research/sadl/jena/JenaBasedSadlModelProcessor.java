@@ -3026,14 +3026,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (varType.getTypeCheckType() != null && varType.getTypeCheckType() instanceof NamedNode) {
 							leftDefnType = (NamedNode) varType.getTypeCheckType();
 						}
+						leftVar.addDefinition((GraphPatternElement) leftTranslatedDefn);
 					} else if (leftTranslatedDefn instanceof GraphPatternElement) {
-						if (leftVar.getDefinition() != null) {
-							leftVar.getDefinition().add((GraphPatternElement) leftTranslatedDefn);
-						} else {
-							List<GraphPatternElement> defnLst = new ArrayList<GraphPatternElement>(1);
-							defnLst.add((GraphPatternElement) leftTranslatedDefn);
-							leftVar.setDefinition(defnLst);
-						}
+						leftVar.addDefinition((GraphPatternElement) leftTranslatedDefn);
 					} else if (leftTranslatedDefn instanceof List<?>) {
 						leftVar.setDefinition((List<GraphPatternElement>) leftTranslatedDefn);
 					}

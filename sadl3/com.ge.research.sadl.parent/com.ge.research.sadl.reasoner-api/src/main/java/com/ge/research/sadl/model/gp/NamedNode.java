@@ -161,7 +161,11 @@ public class NamedNode extends Node {
 		if (getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode)) {
 			return toString() + " List";
 		}
-		return toString();
+		String ts = toString();
+		if (getMissingTripleReplacement() != null) {
+			return ts + missingTripleReplacementToDescriptiveString();
+		}
+		return ts;
 	}
 
 	/**
