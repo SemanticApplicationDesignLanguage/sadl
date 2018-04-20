@@ -197,6 +197,9 @@ public class TripleElement extends GraphPatternElement {
 				sb.append("]");
 			}
 			sb.append(")");
+			if (getMissingPatterns() != null) {
+				sb.append(missingPatternsToDescriptiveString());
+			}
 		}
 		sb.append(subject != null ? subject.toDescriptiveString() : "null");
 		sb.append(", ");

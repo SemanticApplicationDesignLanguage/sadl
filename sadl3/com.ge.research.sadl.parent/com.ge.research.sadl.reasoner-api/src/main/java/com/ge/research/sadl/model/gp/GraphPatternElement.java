@@ -150,6 +150,21 @@ public abstract class GraphPatternElement {
 	 * @return
 	 */
 	public abstract String toDescriptiveString();
+	
+	protected String missingPatternsToDescriptiveString() {
+		StringBuilder sb = new StringBuilder(" (has missing triple patterns: [");
+		List<GraphPatternElement> mps = getMissingPatterns();
+		int cntr = 0;
+		for (GraphPatternElement mp : mps) {
+			if (cntr > 0) sb.append(", ");
+			sb.append("'");
+			sb.append(mp.toDescriptiveString());
+			sb.append("'");
+			cntr++;
+		}
+		sb.append("])");
+		return sb.toString();
+	}
 
 	/**
 	 * {@link Deprecated}
