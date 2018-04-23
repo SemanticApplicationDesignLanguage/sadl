@@ -18,7 +18,17 @@
 
 package com.ge.research.sadl.model.gp;
 
+/**
+ * Class to capture a named concept (SadlResource) in the SADL grammar
+ * @author 200005201
+ *
+ */
 public class NamedNode extends Node {
+	// Possible types that a NamedNode can be.
+	public static enum NodeType {ClassNode, ClassListNode, InstanceNode, DataTypeNode, DataTypeListNode, 
+		PropertyNode, DataTypeProperty, ObjectProperty, AnnotationProperty, 
+		FunctionNode, VariableNode}
+
 	private boolean validated = false;
 	private NodeType nodeType = null;
 	// if the Node represents a List (ClassListNode or DataTypeListNode) then the following may apply: 
@@ -26,14 +36,17 @@ public class NamedNode extends Node {
 	private int minListLength = -1;						// the minimum length restriction, if any (-1 => none)
 	private int maxListLength = -1;						// the maximum length restriction, if any (-1 => none)
 	
-	public static enum NodeType {ClassNode, ClassListNode, InstanceNode, DataTypeNode, DataTypeListNode, 
-									PropertyNode, DataTypeProperty, ObjectProperty, AnnotationProperty, 
-									FunctionNode, VariableNode}
-	
+	/**
+	 * Null argument constructor
+	 */
 	public NamedNode() {
 		super();
 	}
 	
+	/**
+	 * Constructor taking name of new NamedNode (preferably a URI)
+	 * @param name
+	 */
 	public NamedNode(String name) {
 		int hash = name.indexOf('#');
 		if (hash > 0 && hash < name.length() - 1) {
@@ -53,19 +66,36 @@ public class NamedNode extends Node {
 		}
 	}
 	
+	/**
+	 * Constructor taking both name and NodeType of new NamedNode
+	 * @param name
+	 * @param type
+	 */
 	public NamedNode(String name, NodeType type) {
 		this(name);
 		setNodeType(type);
 	}
 
+	/**
+	 * Set the name of the NamedNode
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Set the NodeType of the NamedNode
+	 * @param nodeType
+	 */
 	public void setNodeType(NodeType nodeType) {
 		this.nodeType = nodeType;
 	}
 
+	/**
+	 * Get the NodeType of the NamedNode
+	 * @return
+	 */
 	public NodeType getNodeType() {
 		return nodeType;
 	}
@@ -118,6 +148,7 @@ public class NamedNode extends Node {
 		return name;
 	}
 	
+	@Override
 	public String toFullyQualifiedString() {
 		if (namespace != null) {
 			return namespace + name;
@@ -130,53 +161,105 @@ public class NamedNode extends Node {
 		if (getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode)) {
 			return toString() + " List";
 		}
-		return toString();
+		String ts = toString();
+		if (getMissingTripleReplacement() != null) {
+			return ts + missingTripleReplacementToDescriptiveString();
+		}
+		return ts;
 	}
 
+	/**
+	 * Set the namespace of the NamedNode
+	 * @param namespace
+	 */
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 	}
 
+	/**
+	 * Get the QName prefix of the NamedNode
+	 * @param prefix
+	 */
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
 
+	/**
+	 * Set validated for NamedNode
+	 * @param validated
+	 */
 	public void setValidated(boolean validated) {
 		this.validated = validated;
 	}
 
+	/**
+	 * Is NamedNode validated?
+	 * @return
+	 */
 	public boolean isValidated() {
 		return validated;
 	}
 
+	/**
+	 * If NamedNode is a List, does it have a list length restriction?
+	 * @return
+	 */
 	public int getListLength() {
 		return listLength;
 	}
 
+	/**
+	 * If NamedNode is a List, set the list length restriction
+	 * @param listLength
+	 */
 	public void setListLength(int listLength) {
 		this.listLength = listLength;
 	}
 
+	/**
+	 * If NamedNode is a List, does it have a min list length restriction?
+	 * @return
+	 */
 	public int getMinListLength() {
 		return minListLength;
 	}
 
+	/**
+	 * If NamedNode is a List, set the min list length restriction
+	 * @param minListLength
+	 */
 	public void setMinListLength(int minListLength) {
 		this.minListLength = minListLength;
 	}
 
+	/**
+	 * If NamedNode is a List, does it have a max list length restriction?
+	 * @return
+	 */
 	public int getMaxListLength() {
 		return maxListLength;
 	}
 
+	/**
+	 * If NamedNode is a List, set the max list length restriction
+	 * @param maxListLength
+	 */
 	public void setMaxListLength(int maxListLength) {
 		this.maxListLength = maxListLength;
 	}
 
+	/**
+	 * Is the NamedNode a list?
+	 * @return
+	 */
 	public boolean isList() {
 		return nodeType != null && (nodeType.equals(NodeType.ClassListNode) || nodeType.equals(NodeType.DataTypeListNode));
 	}
 
+	/**
+	 * Set the NamedNode to be a list
+	 * @param list
+	 */
 	public void setList(boolean list) {
 		if (nodeType != null) {
 			if (list) {

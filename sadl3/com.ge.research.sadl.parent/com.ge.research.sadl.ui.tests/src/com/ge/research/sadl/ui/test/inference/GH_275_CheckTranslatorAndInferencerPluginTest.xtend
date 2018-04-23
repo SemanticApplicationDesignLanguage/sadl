@@ -23,6 +23,8 @@ import org.junit.Test
 import static com.ge.research.sadl.ui.tests.GeneratedOutputFormat.*
 import java.util.List
 import com.ge.research.sadl.reasoner.ConfigurationItem
+import org.eclipse.xtext.preferences.PreferenceKey
+import com.ge.research.sadl.preferences.SadlPreferences
 
 /**
  * Test that demonstrate how to make assertions on the generated translator outputs, plus runs the inferencer too.
@@ -113,7 +115,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		 // this will pass with OWL_MEM_MINI_RULE selected as Jena Spec Model.
 		 Test: BalstonSpa locatedIn USA.
 	'''
-
+	
 	@Test
 	def void checkTranslatorOutput() {
 		createFile('Shapes.sadl', SHAPES);
@@ -231,4 +233,62 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 			}
 		];
 	}
+	
+	@Test
+	def void testPreferredTimingInfo() {
+		updatePreferences(new PreferenceKey(SadlPreferences.SHOW_TIMING_INFORMATION.id, Boolean.TRUE.toString));
+//		createFile('apvf.owl', '''
+//			<?xml version="1.0"?>
+//			<rdf:RDF
+//			    xmlns="http://research.ge.com/Acuity/apvf.owl#"
+//			    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+//			    xmlns:dc="http://purl.org/dc/elements/1.1/"
+//			    xmlns:default="http://research.ge.com/Acuity/ERP/aerpData_Defaults.owl#"
+//			    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+//			    xmlns:owl="http://www.w3.org/2002/07/owl#"
+//			    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+//			  xml:base="http://research.ge.com/Acuity/apvf.owl">
+//			  <owl:Ontology rdf:about="">
+//			    <owl:imports rdf:resource="http://research.ge.com/Acuity/aulo.owl"/>
+//			  </owl:Ontology>
+//			  <owl:Class rdf:ID="Person">
+//			  </owl:Class>
+//			</rdf:RDF>
+//			''')
+		createFile('UseArticles.sadl', '''
+			 uri "http://sadl.imp/test_import_apvf" version "$Revision: 1.6 $ Last modified on $Date: 2015/06/30 21:27:34 $".
+			 
+«««			 import "http://research.ge.com/Acuity/aulo.owl" as aulo.
+			 Person is a class.
+			 
+			 Genius is a type of Person.
+			 iq describes Person has values of type string. 
+			 iq of Person must be one of {"low", "average", "high"}.
+			 
+			 a Person is a Genius only if iq always has value "high".
+			 
+			 //Rule GeniusRule: if p is a Person and p has iq "high" then p is a Genius.
+			 
+			 George is a Person, has iq "high".
+			 
+			 Print: "This test will pass only if OWL entailments are enabled in the reasoner.".
+			 Test: George is a Genius.
+			''')
+//		assertNoErrorsInWorkspace;
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+		configItems.add(ci)
+		assertInferencer('UseArticles.sadl', null, configItems) [
+			// TODO do something with the SADL commands after running the inferencer.
+			for (scr:it) {
+				println(scr.toString)
+			}
+		];
+
+	}
+	
+	
 }

@@ -67,6 +67,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage ATPT_NO_XML_SELECTED = new SadlErrorMessage("atpt_no_xml_selected");
 /**
+* No single ctp file or batch ctp folder has been selected for processing
+**/
+    public static final SadlErrorMessage ATPT_NO_FILE_OR_FOLDER_SELECTED = new SadlErrorMessage("atpt_no_file_or_folder_selected");
+/**
 * Cannot assign {0}: property ''{1}'' already has {0} assigned to ''{2}''.
 **/
     public static final SadlErrorMessage CANNOT_ASSIGN_EXISTING = new SadlErrorMessage("cannot_assign_existing");
@@ -254,6 +258,10 @@ public final class SadlErrorMessages {
 * type checking doesn't handle {0}
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
+/**
+* Operating mode of ''{0}'' is unknown.
+**/
+    public static final SadlErrorMessage UNKNOWN_OPERATING_MODE = new SadlErrorMessage("unknown_operating_mode");
 /**
 * 
 **/

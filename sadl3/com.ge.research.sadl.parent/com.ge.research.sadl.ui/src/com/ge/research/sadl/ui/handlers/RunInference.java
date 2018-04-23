@@ -1,7 +1,6 @@
 package com.ge.research.sadl.ui.handlers;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +12,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.validation.Issue;
 
-import com.ge.research.sadl.ui.SadlConsole;
-import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.model.Explanation;
@@ -29,6 +26,8 @@ import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlCommandResult;
+import com.ge.research.sadl.ui.SadlConsole;
+import com.ge.research.sadl.utils.ResourceManager;
 
 public class RunInference extends SadlActionHandler {
 
@@ -49,8 +48,8 @@ public class RunInference extends SadlActionHandler {
 				if (target.length > 2) trgtFile = (IFile) target[2];
 			}
 
-			Map<String,String> prefMap = getPreferences();
 			if (trgtFile != null) {
+				Map<String,String> prefMap = getPreferences(trgtFile);
 				if (trgtFile.getFileExtension().equals("sadl")) {
 					// run inference on this model
 					Resource res = prepareActionHandler(project, trgtFile);

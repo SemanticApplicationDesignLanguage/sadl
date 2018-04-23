@@ -22,14 +22,26 @@ import java.util.List;
 
 import com.ge.research.sadl.reasoner.ResultSet;
 
-
+/**
+ * Class representing a ValueTable, consisting of a list (rows) of lists (columns in each row) of Nodes
+ * @author 200005201
+ *
+ */
 public class ValueTableNode extends Node {
-	private List<List<Node>> rows = null;
+	private List<List<Node>> rows = null;		// contents of ValueTable
 
+	/**
+	 * Set the content of the ValueTable
+	 * @param rows
+	 */
 	public void setRows(List<List<Node>> rows) {
 		this.rows = rows;
 	}
 
+	/**
+	 * Get the content of the ValueTable
+	 * @return
+	 */
 	public List<List<Node>> getRows() {
 		return rows;
 	}
