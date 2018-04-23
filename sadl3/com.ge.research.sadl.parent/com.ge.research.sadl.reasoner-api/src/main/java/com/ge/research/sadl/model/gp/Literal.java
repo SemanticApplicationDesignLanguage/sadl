@@ -18,18 +18,29 @@
 
 package com.ge.research.sadl.model.gp;
 
-import org.apache.commons.lang3.StringUtils;
-
+/**
+ * Class to capture a literal in the SADL grammar
+ * @author 200005201
+ *
+ */
 public class Literal extends Node {
 	private Object value = null;
 	private String units = null;
 	
 	private String originalText = null;
 
+	/**
+	 * Set the value of the Literal
+	 * @param value
+	 */
 	public void setValue(Object value) {
 		this.value = value;
 	}
 
+	/**
+	 * Get the value of the Literal
+	 * @return
+	 */
 	public Object getValue() {
 		return value;
 	}
@@ -79,24 +90,41 @@ public class Literal extends Node {
 		return toString();
 	}
 
-	public String getOriginalText() {
-		return originalText;
-	}
-
-	public void setOriginalText(String originalText) {
-		this.originalText = originalText;
-	}
-
-	public String getUnits() {
-		return units;
-	}
-
-	public void setUnits(String units) {
-		this.units = units;
-	}
-
 	@Override
 	public String toDescriptiveString() {
 		return toString();
 	}
+
+	/**
+	 * Get the original text (in the SADL file) of the Literal
+	 * @return
+	 */
+	public String getOriginalText() {
+		return originalText;
+	}
+
+	/**
+	 * Set the original text (in the SADL file) of the Literal
+	 * @param originalText
+	 */
+	public void setOriginalText(String originalText) {
+		this.originalText = originalText;
+	}
+
+	/**
+	 * Get units, if any, of the Literal
+	 * @return
+	 */
+	public String getUnits() {
+		return units;
+	}
+
+	/**
+	 * Set units of the Literal
+	 * @param units
+	 */
+	public void setUnits(String units) {
+		this.units = units;
+	}
+
 }

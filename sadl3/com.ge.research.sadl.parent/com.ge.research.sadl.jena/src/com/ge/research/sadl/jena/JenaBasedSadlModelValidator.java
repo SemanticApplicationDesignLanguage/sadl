@@ -95,7 +95,6 @@ import com.ge.research.sadl.sADL.impl.ExternalEquationStatementImpl;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
@@ -606,9 +605,30 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			type = rightTypeCheckInfo.getTypeCheckType();
 		}
 		// the other possibility is that both sides have implied properties (which should be the same) so the type is the common type
-		else if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null 
-				&& leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) {
-			type = leftTypeCheckInfo.getTypeCheckType();
+		else if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null) {
+			Node ltct = leftTypeCheckInfo.getTypeCheckType();
+			Node rtct = rightTypeCheckInfo.getTypeCheckType();
+			if (ltct.equals(rtct)) {
+				type = ltct;
+			}
+			else {
+				if (ltct instanceof NamedNode && rtct instanceof NamedNode) {
+					OntClass loc = theJenaModel.getOntClass(ltct.toFullyQualifiedString());
+					OntClass roc = theJenaModel.getOntClass(rtct.toFullyQualifiedString());
+					try {
+						if (SadlUtils.classIsSubclassOf(roc, loc, true, null)) {
+							type = ltct;
+						}
+						else if (SadlUtils.classIsSubclassOf(loc, roc, true, null)) {
+							type = rtct;
+						}
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+			}
 		}
 		else {
 			try {
@@ -955,7 +975,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			else {
-				if (typeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) || 
+				if (typeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) && 
 						(typeCheckInfo.getTypeCheckType() instanceof NamedNode && ((NamedNode)typeCheckInfo.getTypeCheckType()).isList())) {
 					if (sb2 == null) sb2 = new StringBuilder();
 					String lengthOrRange = getListLengthAsString((NamedNode)typeCheckInfo.getTypeCheckType());
@@ -1984,11 +2004,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (predicate != null) {
 			TypeCheckInfo predicateType = getType(predicate);
 			if (subject instanceof PropOfSubject && predicateType.getExpressionType() instanceof ConceptName) {
-				predicateType = checkEmbeddedPropOfSubject(subject, predicate, predicateType);	
-				return predicateType;
-			}else if(validSubject && predicateType != null && predicateType.getTypeCheckType() != null){
-				//add interface range
-				addEffectiveRange(predicateType, subject);
+				predicateType = checkEmbeddedPropOfSubject(subject, predicate, predicateType);
+				getType(subject);
+			} else if (validSubject && predicateType != null) {
+
+				if (subject instanceof Name && predicate instanceof Name) {
+					Property p = theJenaModel.getProperty(declarationExtensions.getConceptUri((Name) predicate));
+					OntResource s = null;
+					s = theJenaModel.getOntResource(declarationExtensions.getConceptUri((Name) subject));
+
+					if (s != null && p != null) {
+						checkPropertyDomain(theJenaModel, s, p, expression, true, null);
+					}
+
+				}
+
+				// add interface range
+
+				if (predicateType.getTypeCheckType() != null) {
+					addEffectiveRange(predicateType, subject);
+				}
 			}
 			else if (subject instanceof SubjHasProp && SadlASTUtils.isUnitExpression(subject)) {
 				issueAcceptor.addWarning("Units are associated with the subject of this expression; should the expression be in parentheses?", subject);
@@ -2089,8 +2124,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		String propertyName = predicateType.getExpressionType().toString();
 		String rangeStr = predicateType.getTypeCheckType().toString();
 		boolean isList = predicateType.getRangeValueType().equals(RangeValueType.LIST);
-		metricsProcessor.addControlledOrMonitoredProperty(null, propertyName);
-		metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
+		if (metricsProcessor != null) {
+			metricsProcessor.addControlledOrMonitoredProperty(null, propertyName);
+			metricsProcessor.addEffectiveRangeAndDomain(null, className, propertyName, rangeStr, isList);
+		}
+
 	}
 	
 	private String getTypeCheckTypeString(TypeCheckInfo tci) {
@@ -2151,7 +2189,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return predicateType;
 			}
 			Property prop = theJenaModel.getProperty(propuri);
+			boolean firstprop = false;
+			if (modelProcessor.isLookingForFirstProperty()) {
+				firstprop = true;
+			}
+			modelProcessor.setLookingForFirstProperty(false);
 			TypeCheckInfo subjType = getType(subject);
+			if (firstprop) {
+				modelProcessor.setLookingForFirstProperty(true);
+			}
+		
 			List<OntClass> subjClasses = subjType != null ? getTypeCheckTypeClasses(subjType) : null;
 			try {
 				List<Node> lrs = getApplicableLocalRestriction(subject, predicate);
@@ -2170,6 +2217,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 						return predicateType;
 					}
+				}
+				
+				else {
+					if (subjType != null && predicate != null && predicateType.getTypeCheckType() != null) {
+						addEffectiveRangeByTypeCheckInfo(predicateType, subjType);
+					}
+
 				}
 			} catch (PrefixNotFoundException e1) {
 				// TODO Auto-generated catch block
@@ -2266,11 +2320,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					if (possibleMatch) {
-						StringBuilder warningMessageBuilder = new StringBuilder();
-						createErrorMessage(warningMessageBuilder, leftTypeCheckInfo, subjType, "chained property", false, predicate);
-						int idx = warningMessageBuilder.indexOf("cannot operate");
-						warningMessageBuilder.replace(idx, idx + 14, "may, but is not guaranteed (because of broader range), to operate");
-						issueAcceptor.addWarning(warningMessageBuilder.toString(), predicate);
+						String warningMessage = createSuperClassOnRightWarning(predicate, subjType,
+								leftTypeCheckInfo, "chained property");
+						issueAcceptor.addWarning(warningMessage, predicate);
 					}
 					else {
 						createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, subjType, "chained property", true, predicate);
@@ -2281,6 +2333,41 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return predicateType;
+	}
+
+	/**
+	 * Method to generate a warning message (rather than an error message) when the assignment value on the right side is
+	 * a superclass of what is expected by the left side.
+	 * @param expr
+	 * @param rightTypeCheckInfo
+	 * @param leftTypeCheckInfo
+	 * @param operation
+	 * @return
+	 * @throws InvalidTypeException
+	 */
+	private String createSuperClassOnRightWarning(EObject expr, TypeCheckInfo rightTypeCheckInfo,
+			TypeCheckInfo leftTypeCheckInfo, String operation) throws InvalidTypeException {
+		StringBuilder warningMessageBuilder = new StringBuilder();
+		createErrorMessage(warningMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, operation, false, expr);
+		int len = 0;
+		int idx = warningMessageBuilder.indexOf("cannot operate");
+		if (idx > 0) {
+			len = 14;
+		}
+		else {
+			idx = warningMessageBuilder.indexOf("cannot be compared");
+			if (idx > 0) {
+				len = 18;
+			}
+			int idx2 = warningMessageBuilder.indexOf("is", idx);
+			if (idx2 > 0) {
+				len = 3 + idx2 - idx;
+			}
+		}
+		if (idx > 0) {
+			warningMessageBuilder.replace(idx, idx + len, "may, but is not guaranteed to (because it is broader), operate");
+		}
+		return warningMessageBuilder.toString();
 	}
 	
 	protected boolean checkDomain(List<OntClass> subjClasses, Resource dmn, List<Resource> domainList) {
@@ -3556,15 +3643,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				//	everything matches "known"
 				return true;
 			}
-			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("known")) {
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
 				//	everything matches "known"
 				return true;
 			}
-			if (rightExpression instanceof Constant && ((Constant)rightExpression).getConstant().equals("None")) {
+			if (rightExpression instanceof Constant && ((Constant)rightExpression).getConstant().equals(SadlConstants.CONSTANT_NONE)) {
 				//	everything matches "None"
 				return true;
 			}
-			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals("None")) {
+			if (leftExpression instanceof Constant && ((Constant)leftExpression).getConstant().equals(SadlConstants.CONSTANT_NONE)) {
 				//	everything matches "None"
 				return true;
 			}
@@ -3624,9 +3711,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	private boolean directCompareTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, InvalidTypeException, DontTypeCheckException, TranslationException {
-		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && 
-				rightTypeCheckInfo != null && rightTypeCheckInfo.getTypeCheckType() != null) {
-			if (leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) { 
+		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null
+				&& rightTypeCheckInfo.getTypeCheckType() != null) {
+			if (leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType())) {
+				if (!leftTypeCheckInfo.getRangeValueType().equals(rightTypeCheckInfo.getRangeValueType())) {
+					return false;
+
+				}
+
 				return true;
 			}
 			if (compatibleTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo)) {
@@ -3935,8 +4027,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean compatibleTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
 									TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, InvalidTypeException, DontTypeCheckException, TranslationException{
-		
-		if ((leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) || 
+				if ((leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) || 
 			(leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null) ||
 			(leftTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType() != null && !(leftTypeCheckInfo.getRangeValueType().equals(rightTypeCheckInfo.getRangeValueType())))) {
 			if (!isQualifyingListOperation(operations, leftTypeCheckInfo, rightTypeCheckInfo)) {
@@ -3967,10 +4058,32 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		
 		ConceptIdentifier leftConceptIdentifier = getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
-		ConceptIdentifier rightConceptIdentifier = getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
+		ConceptIdentifier rightConceptIdentifier = getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);	
 		if (leftConceptIdentifier == null || rightConceptIdentifier == null) {
 			return false;
 		}
+		
+		if (leftConceptIdentifier instanceof ConceptName && rightConceptIdentifier instanceof ConceptName) {
+			ConceptName leftCName = (ConceptName) leftConceptIdentifier;
+			if (leftCName.getType().equals(ConceptType.ONTCLASS)
+					&& leftTypeCheckInfo.getExpressionType() instanceof ConceptName
+					&& rightTypeCheckInfo.getExpressionType() instanceof ConceptName) {
+
+				if (((ConceptName) rightTypeCheckInfo.getExpressionType()).getType().equals(ConceptType.INDIVIDUAL)
+						&& ((ConceptName) leftTypeCheckInfo.getExpressionType()).getType()
+								.equals(ConceptType.RDFPROPERTY)) {
+
+					ConceptName rexpr = (ConceptName) rightTypeCheckInfo.getExpressionType();
+
+					if (!instanceBelongsToClass(theJenaModel.getIndividual(rexpr.getUri()),
+							theJenaModel.getOntClass(leftCName.getUri()))) {
+						return false;
+					}
+				}
+
+			}
+		}
+				
 		List<ConceptIdentifier> leftCIs = null;
 		if (leftConceptIdentifier instanceof SadlUnionClass) {
 			leftCIs = ((SadlUnionClass)leftConceptIdentifier).getClasses();
@@ -4056,6 +4169,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							return true;
 						}
 					}
+					
 					else if (leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
 							rightConceptName.getType().equals(ConceptType.ONTCLASS)) {
 						if (partOfTest(leftExpression, rightExpression)) {
@@ -4066,6 +4180,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if(leftConceptName.getUri().equals(rightConceptName.getUri())){
 							return true;
 						}
+						
 						// these next two ifs are a little loose, but not clear how to determine which way the comparison should be? May need tightening... AWC 5/11/2016
 						try {
 //							if (rightTypeCheckInfo.getExpressionType() instanceof ConceptName && ((ConceptName)rightTypeCheckInfo.getExpressionType()).getType().equals(ConceptType.INDIVIDUAL)) {
@@ -4079,9 +4194,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							OntClass subcls = theJenaModel.getOntClass(leftConceptName.getUri());
 							OntResource supercls = theJenaModel.getOntResource(rightConceptName.getUri());
 							if (SadlUtils.classIsSubclassOf(subcls, supercls, true, null)) {
+								if (getModelProcessor().isAssignment(leftExpression.eContainer())) {
+									String wmsg = createSuperClassOnRightWarning(leftExpression.eContainer(), leftTypeCheckInfo, rightTypeCheckInfo, operations.get(0));
+									issueAcceptor.addWarning(wmsg, leftExpression.eContainer());
+								}
 								return true;
 							}
-							if (SadlUtils.classIsSubclassOf(theJenaModel.getOntClass(rightConceptName.getUri()), theJenaModel.getOntResource(leftConceptName.getUri()), true, null)) {
+							if (SadlUtils.classIsSubclassOf(supercls.as(OntClass.class), subcls, true, null)) {
 								return true;
 							}
 		// TODO handle equivalent classes.					
@@ -4121,11 +4240,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							return true;
 						}
 					}
+					
 					else if ((leftConceptName.getType().equals(ConceptType.ONTCLASS) && rightConceptName.getType().equals(ConceptType.INDIVIDUAL))){
 						if (instanceBelongsToClass(theJenaModel.getIndividual(rightConceptName.getUri()), theJenaModel.getOntClass(leftConceptName.getUri()))) {
 							return true;
 						}
 					}
+									
 					else if ((leftConceptName.getType().equals(ConceptType.INDIVIDUAL) && rightConceptName.getType().equals(ConceptType.INDIVIDUAL))){
 						// TODO Is this the right way to compare for two individuals? 
 						if (instancesHaveCommonType(theJenaModel.getIndividual(leftConceptName.getUri()), theJenaModel.getIndividual(rightConceptName.getUri()))) {

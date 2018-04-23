@@ -14,8 +14,14 @@ import com.ge.research.sadl.reasoner.InvalidTypeException;
  */
 public class ProxyNode extends Node {
 	
+	private Object proxyFor = null;
 	private Node replacementNode = null;
 	
+	/**
+	 * Constructor with single argument for the Object for which it is proxy
+	 * @param _proxyObj
+	 * @throws InvalidTypeException
+	 */
 	public ProxyNode(Object _proxyObj) throws InvalidTypeException {
 		if (_proxyObj == null) {
 			throw new InvalidTypeException("ProxyNode constructor called with null argument; this should not happen.");
@@ -23,16 +29,39 @@ public class ProxyNode extends Node {
 		setProxyFor(_proxyObj);
 	}
 	
-	private Object proxyFor = null;
-
+	/**
+	 * Set the Object for which this ProxyNode is proxy
+	 * @param _proxyObj
+	 */
 	public void setProxyFor(Object _proxyObj) {
 		proxyFor = _proxyObj;
 	}
 
+	/**
+	 * Get the Object for which this ProxyNode is proxy
+	 * @return
+	 */
 	public Object getProxyFor() {
 		return proxyFor;
 	}
 	
+	/**
+	 * Node to replace this ProxyNode, if any
+	 * @param replacementNode
+	 */
+	public void setReplacementNode(Node replacementNode) {
+		this.replacementNode = replacementNode;
+	}
+
+	/**
+	 * Get ProxyNode replacement Node
+	 * @return
+	 */
+	public Node getReplacementNode() {
+		return replacementNode;
+	}
+
+	@Override
 	public String toString() {
 		try {
 			if (proxyFor != null) {
@@ -52,14 +81,6 @@ public class ProxyNode extends Node {
 			t.printStackTrace();
 			return "(Exception encountered: " + t.getMessage() + ")";
 		}
-	}
-
-	public void setReplacementNode(Node replacementNode) {
-		this.replacementNode = replacementNode;
-	}
-
-	public Node getReplacementNode() {
-		return replacementNode;
 	}
 
 	@Override
