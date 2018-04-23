@@ -328,10 +328,6 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return null;
 	}
 
-	protected Map<String,String> getPreferences() {
-		return getPreferences(URI.createFileURI("foo.sadl"));
-	}
-	
 	protected final Injector safeGetInjector(String name){
 		final AtomicReference<Injector> i = new AtomicReference<Injector>();
 		Display.getDefault().syncExec(new Runnable(){
@@ -391,9 +387,8 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return null;
 	}
 
-	protected IGraphVisualizer getVisualizer(IConfigurationManagerForEditing configMgr) {
+	protected IGraphVisualizer getVisualizer(IConfigurationManagerForEditing configMgr, Map<String,String> prefMap) {
 		if (visualizer == null) {
-			Map<String,String> prefMap = getPreferences();
 			String renderClass = prefMap.get(SadlPreferences.GRAPH_RENDERER_CLASS.getId());
 			
 			List<IGraphVisualizer> visualizers = configMgr.getAvailableGraphRenderers();
@@ -463,14 +458,15 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		iGraphVisualizer.graphResultSetData(rs);
 	}
 	
-	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName, Orientation orientation)
+	protected void resultSetToGraph(IProject project, IFile trgtFile, ResultSet rs, String desc, String baseFileName, 
+			Orientation orientation, Map<String,String> prefMap)
 			throws ConfigurationException, IOException {
 		if (rs.getColumnCount() >= 3) {
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
 			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 	
-			IGraphVisualizer visualizer = getVisualizer(configMgr);
+			IGraphVisualizer visualizer = getVisualizer(configMgr, prefMap);
 			if (visualizer != null) {
 				graphResultSet(visualizer, project, baseFileName, baseFileName, null, desc, rs, orientation, true);
 			}

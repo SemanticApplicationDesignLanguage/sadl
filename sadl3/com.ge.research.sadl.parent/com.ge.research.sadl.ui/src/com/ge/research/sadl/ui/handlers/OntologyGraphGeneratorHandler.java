@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionService;
@@ -120,7 +121,8 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 						Job.getJobManager().join(GRAPH_JOB,monitor);
 						
 						if (imports.size() > 0) {
-							IGraphVisualizer visualizer = getVisualizer(getConfigMgr());
+							Map<String,String> prefMap = getPreferences(URI.createFileURI(sbmr.getFullPath().toPortableString()));
+							IGraphVisualizer visualizer = getVisualizer(getConfigMgr(), prefMap);
 							GraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project);
 							IFile trgtFile = null;
 							String baseFileName = "Project";
@@ -247,7 +249,8 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 	private void generateOntologyFileGraph(String ontfilename, String owlFileName, IProgressMonitor monitor, boolean graphImports, boolean openGraph)
 			throws ConfigurationException, URISyntaxException, IOException, Exception {
-		visualizer = getVisualizer(getConfigMgr());
+		Map<String,String> prefMap = getPreferences(URI.createFileURI(ontfilename));
+		visualizer = getVisualizer(getConfigMgr(), prefMap);
 		if (visualizer != null) {
 			String fullFileName = modelFolderUri + "/" + owlFileName;
 			String publicUri;
