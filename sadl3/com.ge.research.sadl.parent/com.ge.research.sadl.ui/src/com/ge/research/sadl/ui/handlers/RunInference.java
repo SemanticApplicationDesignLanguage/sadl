@@ -87,7 +87,7 @@ public class RunInference extends SadlActionHandler {
 	        							if (desc == null) desc = "Cmd " + (idx + 1) + "  (Graph)";
 	        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + idx; 
 	        							baseFileName = baseFileName.replace(".", "_");
-		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
+		        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null, prefMap);
 	        						}
 	        						else {
 //		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");

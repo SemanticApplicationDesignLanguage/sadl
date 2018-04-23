@@ -98,6 +98,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 //			SadlConsole.writeToConsole(MessageType.INFO, "Generating graph of '" + trgtFile.getName() + "' requested.\n");
 
+			Map<String,String> prefMap = getPreferences(trgtFile);
 			boolean derivedFN = false;
 			if (trgtFile.getName().endsWith("owl")) {
 				owlFileName = trgtFile.getFullPath().lastSegment();
@@ -125,7 +126,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 
-			IGraphVisualizer visualizer = getVisualizer(configMgr);
+			IGraphVisualizer visualizer = getVisualizer(configMgr, prefMap);
 			if (visualizer != null) {
 				String publicUri;
 				String prefix = null;

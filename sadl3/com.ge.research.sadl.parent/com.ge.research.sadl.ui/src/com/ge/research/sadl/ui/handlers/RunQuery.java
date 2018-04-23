@@ -120,8 +120,8 @@ public class RunQuery extends SadlActionHandler {
 			}
 			String owlFileName = null;
 
-			Map<String,String> prefMap = getPreferences();
 			if (trgtFile != null) {
+				Map<String,String> prefMap = getPreferences(trgtFile);
 				if (trgtFile.getFileExtension().equals("sadl")) {
 					// run query on this model
 	//				Resource res = prepareActionHandler(target[2]);
@@ -245,7 +245,7 @@ public class RunQuery extends SadlActionHandler {
 										if (currentQuery.toLowerCase().startsWith("construct")) {
 											String desc = "Adhoc query Graph";
 		        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + System.currentTimeMillis(); 							
-			        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null);
+			        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null, prefMap);
 										}
 										else {
 											SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
