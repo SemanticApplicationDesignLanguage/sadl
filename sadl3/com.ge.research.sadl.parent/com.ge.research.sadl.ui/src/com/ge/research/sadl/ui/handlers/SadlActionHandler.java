@@ -36,6 +36,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
@@ -297,14 +298,16 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			}
 			throw new ExecutionException("No project window selected");
 		}
-
-	protected Map<String,String> getPreferences() {
+	
+	protected Map<String, String> getPreferences(IFile file) {
+		final URI uri = URI.createPlatformResourceURI(file.getFullPath().toString(), true);
+		return getPreferences(uri);
+	}
+	
+	protected Map<String, String> getPreferences(URI uri) {
 		Injector reqInjector = safeGetInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
 		IPreferenceValuesProvider pvp = reqInjector.getInstance(IPreferenceValuesProvider.class);
-//		org.eclipse.emf.ecore.resource.Resource resource = new ResourceImpl();
-//		resource.setURI(org.eclipse.emf.common.util.URI.createFileURI("foo.sadl"));
-	
-		IPreferenceValues preferenceValues = pvp.getPreferenceValues(new XtextResource(URI.createFileURI("foo.sadl")));
+		IPreferenceValues preferenceValues = pvp.getPreferenceValues(new XtextResource(uri));
 		if (preferenceValues != null) {
 			Map<String, String> map = new HashMap<String, String>();
 			boolean bval = Boolean.parseBoolean(preferenceValues.getPreference(SadlPreferences.SHOW_TIMING_INFORMATION));
@@ -323,6 +326,10 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			}			return map;
 		}
 		return null;
+	}
+
+	protected Map<String,String> getPreferences() {
+		return getPreferences(URI.createFileURI("foo.sadl"));
 	}
 	
 	protected final Injector safeGetInjector(String name){
