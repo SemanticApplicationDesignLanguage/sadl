@@ -3500,34 +3500,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				return robj;
 			}
+			/*
 			if ((lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal
 					&& isSparqlQuery(((com.ge.research.sadl.model.gp.Literal) lobj).toString())))
 					&& !(ITranslator.isKnownNode(robj))) {
-				if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
-	
-					if (lobj instanceof TripleElement) {
-						if (((TripleElement) lobj).getObject() == null) {
-							((TripleElement) lobj).setObject((com.ge.research.sadl.model.gp.Literal) robj);
-							lobj = checkForNegation((TripleElement) lobj, rexpr);
-							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-						} else {
-							addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), container);
-						}
-					} else {
-						addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", ""), container);
-					}
-				} else if (robj instanceof VariableNode) {
+//				if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
+//	
+//					if (lobj instanceof TripleElement) {
+//						if (((TripleElement) lobj).getObject() == null) {
+//							((TripleElement) lobj).setObject((com.ge.research.sadl.model.gp.Literal) robj);
+//							lobj = checkForNegation((TripleElement) lobj, rexpr);
+//							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
+//						} else {
+//							addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), container);
+//						}
+//					} else {
+//						addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", ""), container);
+//					}
+//				} else 
+				if (robj instanceof VariableNode) {
 					if (((TripleElement) lobj).getObject() == null) {
 						((TripleElement) lobj).setObject((VariableNode) robj);
 						lobj = checkForNegation((TripleElement) lobj, rexpr);
 						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
 					}
-				} else if (robj instanceof NamedNode) {
-					if (((TripleElement) lobj).getObject() == null) {
-						((TripleElement) lobj).setObject((NamedNode) robj);
-						lobj = checkForNegation((TripleElement) lobj, rexpr);
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-					}
+//				} else if (robj instanceof NamedNode) {
+//					if (((TripleElement) lobj).getObject() == null) {
+//						((TripleElement) lobj).setObject((NamedNode) robj);
+//						lobj = checkForNegation((TripleElement) lobj, rexpr);
+//						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
+//					}
 				} else if (robj instanceof BuiltinElement) {
 					if (isModifiedTriple(((BuiltinElement) robj).getFuncType())) {
 						assignedNode = ((BuiltinElement) robj).getArguments().get(0);
@@ -3546,13 +3548,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				} else if (robj instanceof TripleElement) {
 					// do nothing
-				} else if (robj instanceof ConstantNode) {
-					String cnst = ((ConstantNode) robj).getName();
-					if (cnst.equals(SadlConstants.CONSTANT_NONE)) {
-						((TripleElement) lobj).setType(TripleModifierType.None);
-						((TripleElement) lobj).setObject((Node) robj);
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-					}
+//				} else if (robj instanceof ConstantNode) {
+//					String cnst = ((ConstantNode) robj).getName();
+//					if (cnst.equals(SadlConstants.CONSTANT_NONE)) {
+//						((TripleElement) lobj).setType(TripleModifierType.None);
+//						((TripleElement) lobj).setObject((Node) robj);
+//						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
+//					}
 				} else if (robj instanceof BuiltinElement) {
 					if (isModifiedTriple(((BuiltinElement) robj).getFuncType())) {
 						if (((BuiltinElement) robj).getArguments() != null
@@ -3576,12 +3578,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// addError(SadlErrorMessages.UNHANDLED.get("assignment construct in rule
 				// conclusion", " "), container);
 				// }
-			} else if (lobj instanceof Node && robj instanceof TripleElement) {
+			} else 
+				*/
+			if (lobj instanceof Node && robj instanceof TripleElement) {
 				assignedNode = validateNode((Node) lobj);
 				pattern = (TripleElement) robj;
-			} else if (robj instanceof Node && lobj instanceof TripleElement) {
-				assignedNode = validateNode((Node) robj);
-				pattern = (TripleElement) lobj;
+//			} else if (robj instanceof Node && lobj instanceof TripleElement) {
+//				assignedNode = validateNode((Node) robj);
+//				pattern = (TripleElement) lobj;
 			}
 			if (assignedNode != null && pattern != null) {
 				// We're expressing the type of a named thing.

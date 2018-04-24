@@ -14,7 +14,7 @@ import org.junit.Ignore
 @InjectWith(SADLInjectorProvider)
 class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 	
-	
+	@Ignore
 	@Test
 	def void testArticles_01() {
 		'''
@@ -57,6 +57,7 @@ class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 
 	}
 	
+	@Ignore
 	@Test
 	def void testArticles_02() {
 		'''
