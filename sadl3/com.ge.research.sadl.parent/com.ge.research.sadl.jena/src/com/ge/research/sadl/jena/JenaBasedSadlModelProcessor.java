@@ -3170,7 +3170,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression lexpr = expr.getLeft();
 		Expression rexpr = expr.getRight();
 
-		return processBinaryExpressionByParts(expr, op, lexpr, rexpr);
+		Object result = processBinaryExpressionByParts(expr, op, lexpr, rexpr);
+		checkForArticleForNameInTriple(lexpr, result);
+		checkForArticleForNameInTriple(rexpr, result);
+		return result;
 	}
 
 	private void setVariableInDefinition(EObject decl, VariableNode var) {
