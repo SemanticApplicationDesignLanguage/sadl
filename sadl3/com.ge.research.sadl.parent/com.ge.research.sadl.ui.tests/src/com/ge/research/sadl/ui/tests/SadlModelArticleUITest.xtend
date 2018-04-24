@@ -22,6 +22,7 @@ import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Test
 
 import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
+import org.junit.Ignore
 
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
@@ -89,6 +90,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
+	@Ignore
 	@Test
 	def void testArticles_03() {
 
@@ -134,6 +136,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 	
+	@Ignore
 	@Test
 	def void testArticles_04() {
 
@@ -179,6 +182,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 	
+	@Ignore
 	@Test
 	def void testCRule_01() {
 		val grd = newArrayList(
@@ -472,6 +476,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
+	@Ignore
 	@Test
 	def void testVariables_01() {
 		val grd = newArrayList(
