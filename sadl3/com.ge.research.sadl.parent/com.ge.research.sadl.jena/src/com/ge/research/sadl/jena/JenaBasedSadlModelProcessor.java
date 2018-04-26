@@ -10790,7 +10790,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (node instanceof NamedNode && !(node instanceof VariableNode)) {
 			if (isProperty((NamedNode)node)) {
 				TripleElement newtr = new TripleElement(null, node, null);
-				node.setMissingTripleReplacement(new ProxyNode(newtr));
+				((NamedNode) node).setMissingTripleReplacement(new ProxyNode(newtr));
 				found.add(newtr);
 			}
 			else if (node instanceof NamedNode && ((NamedNode)node).getNodeType().equals(NodeType.InstanceNode)) {
@@ -10798,7 +10798,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			else {
 				TripleElement newtr = new TripleElement(node, null, null);
-				node.setMissingTripleReplacement(new ProxyNode(newtr));
+				((NamedNode) node).setMissingTripleReplacement(new ProxyNode(newtr));
 				found.add(newtr);
 			}
 		}

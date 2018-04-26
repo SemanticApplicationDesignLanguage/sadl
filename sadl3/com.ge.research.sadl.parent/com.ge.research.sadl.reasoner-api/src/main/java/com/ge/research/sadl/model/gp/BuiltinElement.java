@@ -358,9 +358,6 @@ public class BuiltinElement extends GraphPatternElement {
 			}
 			sb.append(")");
 		}
-		if (getMissingPatterns() != null) {
-			sb.append(missingPatternsToDescriptiveString());
-		}
 		sb.append("(");
 		for (int i = 0; arguments != null && i < arguments.size(); i++) {
 			if (i > 0) {

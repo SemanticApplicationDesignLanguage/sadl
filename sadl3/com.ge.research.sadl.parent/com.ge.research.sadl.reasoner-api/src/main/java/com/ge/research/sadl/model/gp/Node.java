@@ -32,7 +32,6 @@ public abstract class Node implements Cloneable{
 	//	types could be a union of classes (for an ObjectProperty)--hence the list.
 	// For a NamedNode, the value type is the class to which the node belongs if an instance.
 	private List<Node> nodeValueTypes;
-	private ProxyNode missingTripleReplacement = null;
 	protected String name = null;
 	protected String prefix = null;
 	protected String namespace = null;
@@ -96,41 +95,6 @@ public abstract class Node implements Cloneable{
 	 */
 	abstract public String toDescriptiveString();
 	
-	protected String missingTripleReplacementToDescriptiveString() {
-		StringBuilder sb = new StringBuilder(" (has missing triple replacement '");
-		Object pf = getMissingTripleReplacement().getProxyFor();
-		if (pf instanceof GraphPatternElement) {
-			ProxyNode saveAndRestore = null;
-			if (pf instanceof TripleElement && ((TripleElement)pf).getPredicate().getMissingTripleReplacement() != null) {
-				saveAndRestore = ((TripleElement)pf).getPredicate().getMissingTripleReplacement();
-				((TripleElement)pf).getPredicate().setMissingTripleReplacement(null);
-			}
-			sb.append(((GraphPatternElement)pf).toDescriptiveString());
-			if (saveAndRestore != null) {
-				((TripleElement)pf).getPredicate().setMissingTripleReplacement(saveAndRestore);
-			}
-			sb.append("')");
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * Get the ProxyNode representing a replacement (if any) for this Node
-	 * @return
-	 */
-	public ProxyNode getMissingTripleReplacement() {
-		return missingTripleReplacement;
-	}
-	
-	/**
-	 * Set the ProxyNode representing a replacement for this Node
-	 * (Occurs when Node is a lone property in an incomplete property chain) 
-	 * @param missingTripleReplacement
-	 */
-	public void setMissingTripleReplacement(ProxyNode missingTripleReplacement) {
-		this.missingTripleReplacement = missingTripleReplacement;
-	}
-	
 	/**
 	 * Method to get the local name, if any of the node.
 	 * @return
@@ -175,4 +139,5 @@ public abstract class Node implements Cloneable{
 	public Object clone() throws CloneNotSupportedException {
 	    return super.clone();
 	}
+
 }
