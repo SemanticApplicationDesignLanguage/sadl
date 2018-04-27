@@ -3097,13 +3097,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
-//	@Override
-//	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions,
-//			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance)
-//			throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException {
-//		throw new TranslationException("This method is not supported at this time in this translator (" + this.getClass().getCanonicalName() + ").");
-//	}
-
 	protected OntModel getTheJenaModel() {
 		return theJenaModel;
 	}
