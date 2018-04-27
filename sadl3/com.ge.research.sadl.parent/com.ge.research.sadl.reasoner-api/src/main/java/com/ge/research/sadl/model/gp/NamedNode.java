@@ -382,7 +382,15 @@ public class NamedNode extends Node {
 		for (GraphPatternElement mp : mps) {
 			if (cntr > 0) sb.append(", ");
 			sb.append("'");
-			sb.append(mp.toDescriptiveString());
+			if (mp instanceof TripleElement && 
+					(((TripleElement)mp).getSubject() == null || !((TripleElement)mp).getSubject().equals(this)) &&
+					(((TripleElement)mp).getPredicate() == null || !((TripleElement)mp).getPredicate().equals(this)) &&
+					(((TripleElement)mp).getObject() == null || !((TripleElement)mp).getObject().equals(this))) {
+				sb.append(mp.toDescriptiveString());
+			}
+			else {
+				sb.append(mp.toString());
+			}
 			sb.append("'");
 			cntr++;
 		}

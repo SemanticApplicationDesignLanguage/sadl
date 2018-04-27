@@ -2208,8 +2208,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				moveToIfts.addAll(lst);
 				patterns.add(last);
 			}
-			else {
-				throw new TranslationException("Unhandled condition, LHS of Equal in Then isn't a TripleElement or BuiltinElement or Junction that needs an argument: " + realArgForThen.toString());
+			else if (realArgForThen instanceof GraphPatternElement){
+				moveToIfts.add((GraphPatternElement) realArgForThen);
 			}
 			if (!addToPremises(moveToIfts)) {
 				patterns.addAll(patternsSize, moveToIfts);
