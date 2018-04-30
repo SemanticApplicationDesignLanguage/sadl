@@ -1891,6 +1891,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else if (subjtype != null && (cnstval.endsWith(" element"))) {
 				if (subjtype != null && (cnstval.equals("first element") || cnstval.equals("last element")) ) {
 					subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
+					if (subjtype.getTypeCheckType() instanceof NamedNode) {
+						if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.ClassListNode)) {
+							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.ClassNode);
+						}
+						else {
+							throw new TranslationException("unhandled element of list type check type, NamedNode but not ClassListNode");
+						}
+					}
+					else {
+						throw new TranslationException("unhandled element of list type, type check type not a NamedNode");
+					}
 					return subjtype;
 				}
 				String article = cnstval.substring(0, cnstval.indexOf(" "));
