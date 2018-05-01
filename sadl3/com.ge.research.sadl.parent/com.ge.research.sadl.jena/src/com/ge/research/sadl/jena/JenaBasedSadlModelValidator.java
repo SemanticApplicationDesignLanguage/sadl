@@ -1880,8 +1880,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				
 			}
 			else if (constantFollowedByElementThenList(cnstval)) {
-				subjtype = getType(subject);
-				
+                Expression element = null;
+                Expression list = null;
+                if(subject instanceof PropOfSubject) {
+                    element = ((PropOfSubject)subject).getLeft();
+                    list = ((PropOfSubject)subject).getRight();            
+                }
+                
+                // Special processing for the parse tree since it is abnormal in this case
+                // ie. count/index of input16a of REQ16 in outputList16 of REQ16 = input16b of REQ16.
+                if(element != null && list != null) {
+                    if (element instanceof Name && list instanceof PropOfSubject) {
+                        Expression innerSubject = ((PropOfSubject)list).getRight();    
+                        if(innerSubject != null) {
+                            subject = innerSubject;
+                        }
+                    }
+                }
+                
+                subjtype = getType(subject);
 			}
 			if (cnstval.endsWith("length") || cnstval.equals("count") || cnstval.endsWith("index")) {
 				NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xint.getURI(), NodeType.DataTypeNode));
