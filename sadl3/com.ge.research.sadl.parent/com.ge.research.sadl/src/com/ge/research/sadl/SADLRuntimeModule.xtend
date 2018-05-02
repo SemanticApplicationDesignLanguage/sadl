@@ -21,6 +21,8 @@
 package com.ge.research.sadl
 
 import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
+import com.ge.research.sadl.model.SadlEObjectDocumentationProvider
+import com.ge.research.sadl.resource.SadlResourceDescriptionManager
 import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy
 import com.ge.research.sadl.scoping.ErrorAddingLinkingService
 import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
@@ -30,6 +32,7 @@ import com.ge.research.sadl.validation.ResourceValidator
 import com.ge.research.sadl.validation.SoftLinkingMessageProvider
 import java.io.IOException
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.documentation.IEObjectDocumentationProvider
 import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.linking.impl.DefaultLinkingService
@@ -38,6 +41,7 @@ import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
 import org.eclipse.xtext.parsetree.reconstr.ITokenStream
+import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionManager
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
 import org.eclipse.xtext.validation.ResourceValidatorImpl
 
@@ -79,6 +83,10 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 		return SadlResourceDescriptionStrategy;
 	}
 	
+	def Class<? extends DefaultResourceDescriptionManager> bindDefaultResourceDescriptionManager() {
+		return SadlResourceDescriptionManager;
+	}
+	
 	def Class<? extends DefaultLinkingService> bindDefaultLinkingService() {
 		return ErrorAddingLinkingService;
 	}
@@ -89,6 +97,10 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	
 	def Class<? extends ImportedNamesAdapter> bindImportedNamesAdapter() {
 		return SilencedImportedNamesAdapter; 
+	}
+	
+	def Class<? extends IEObjectDocumentationProvider> bindIEObjectDocumentationProvider() {
+		return SadlEObjectDocumentationProvider;
 	}
 	
 	static class NoImplParseTreeConstructor implements IParseTreeConstructor {

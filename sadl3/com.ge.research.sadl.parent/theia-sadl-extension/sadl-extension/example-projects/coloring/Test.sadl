@@ -1,0 +1,12 @@
+uri "http://sadl.org/Test.sadl".
+
+import "http://sadl.org/Circle.sadl".
+import "http://sadl.org/Rectangle.sadl".
+
+MyCircle is a Circle with radius 4.5.
+MyRect is a Rectangle with height 2.5, with width 5.5.
+
+Ask: "select ?sh ?ar where {?sh <area> ?ar}".
+
+Test: area of MyCircle is 63.61.
+Test: area of MyCircle is 53.51.

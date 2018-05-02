@@ -204,6 +204,15 @@
 			</activeWhen>
 		</handler>
 	</extension>
+	<extension point="org.eclipse.core.contenttype.contentTypes">
+		<content-type
+			base-type="org.eclipse.core.runtime.text"
+			file-extensions="sadl"
+			id="com.ge.research.sadl.SADL.contenttype"
+			name="SADL File"
+			priority="normal">
+		</content-type>
+	</extension>
 	<!-- adding resource factories -->
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
@@ -239,6 +248,15 @@
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.expensive"/>
 		<persistent value="true"/>
+	</extension>
+	<extension point="org.eclipse.ui.preferencePages">
+		<page
+			category="com.ge.research.sadl.SADL"
+			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
+			id="com.ge.research.sadl.SADL.validator.preferencePage"
+			name="Errors/Warnings">
+			<keywordReference id="com.ge.research.sadl.ui.keyword_SADL"/>
+		</page>
 	</extension>
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
@@ -388,12 +406,18 @@
 			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="sadl">
 		</viewer>
+		<contentTypeBinding
+			contentTypeId="com.ge.research.sadl.SADL.contenttype"
+			contentViewerId="com.ge.research.sadl.SADL.compare.contentViewers" />
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
 		<viewer id="com.ge.research.sadl.SADL.compare.contentMergeViewers"
 			class="com.ge.research.sadl.ui.SADLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="sadl" label="SADL Compare">
 		</viewer>
+		<contentTypeBinding
+			contentTypeId="com.ge.research.sadl.SADL.contenttype"
+			contentMergeViewerId="com.ge.research.sadl.SADL.compare.contentMergeViewers" />
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
 		<provider id="com.ge.research.sadl.SADL.editors.documentProviders"

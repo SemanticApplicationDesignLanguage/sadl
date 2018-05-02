@@ -1,0 +1,7 @@
+node_modules
+.browser_modules
+lib
+bin
+*.log
+*-app/*
+!*-app/package.json

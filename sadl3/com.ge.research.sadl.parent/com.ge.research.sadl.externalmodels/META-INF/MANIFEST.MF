@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.swt,
  com.ge.research.sadl,
  org.eclipse.emf.ecore,
- com.ge.research.jena
+ com.ge.research.jena,
+ com.ge.research.sadl.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.ge.research.sadl.reasoner.utils

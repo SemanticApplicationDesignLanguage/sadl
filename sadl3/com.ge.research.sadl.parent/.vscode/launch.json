@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible Node.js debug attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Start Browser Backend",
+            "program": "${workspaceRoot}/theia-sadl-extension/browser-app/src-gen/backend/main.js",
+            "args": [
+                "--loglevel=debug",
+                "--port=3000",
+                "--no-cluster"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/theia-sadl-extension/node_modules/@theia/*/lib/**/*.js",
+                "${workspaceRoot}/theia-sadl-extension/browser-app/lib/**/*.js",
+                "${workspaceRoot}/theia-sadl-extension/browser-app/src-gen/**/*.js"
+            ],
+            "smartStep": true,
+            "internalConsoleOptions": "openOnSessionStart",
+            "outputCapture": "std"
+        }
+    ]
+}

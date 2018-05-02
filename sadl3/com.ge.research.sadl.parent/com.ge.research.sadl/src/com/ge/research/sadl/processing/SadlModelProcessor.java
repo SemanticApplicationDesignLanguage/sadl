@@ -60,6 +60,7 @@ import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.StringLiteral;
+import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.inject.Inject;
 
 
@@ -73,6 +74,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     
     @Inject
     private ISadlImplicitModelContentProvider implicitModelContentProvider;
+    
+    @Inject
+    protected SadlProjectHelper projectHelper;
     
 	public abstract Object processExpression(EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	

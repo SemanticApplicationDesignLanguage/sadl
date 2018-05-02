@@ -20,6 +20,7 @@ package com.ge.research.sadl.validation
 import com.ge.research.sadl.processing.IModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.IModelProcessorProvider
+import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
@@ -60,7 +61,11 @@ class ResourceValidator extends ResourceValidatorImpl {
 		val processor = processorProvider.getProcessor(resource);
 		val delegateAcceptor = new ValidationAcceptorImpl(acceptor);
 		val context = new ProcessorContext(monitor, preferenceProvider.getPreferenceValues(resource));
-		processor.onValidate(resource, delegateAcceptor, mode, context);
+		processor.doValidate(resource, delegateAcceptor, mode, context);
+	}
+	
+	protected def doValidate(IModelProcessor processor, Resource resource, ValidationAcceptor acceptor, CheckMode mode, ProcessorContext context) {
+		processor.onValidate(resource, acceptor, mode, context);
 		new ModelProcessorAdapter(processor).attachToEmfObject(resource);
 	}
 

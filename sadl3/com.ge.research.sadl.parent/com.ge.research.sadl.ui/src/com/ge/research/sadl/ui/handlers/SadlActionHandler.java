@@ -71,9 +71,9 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.ge.research.sadl.utils.SadlConsole;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -87,6 +87,8 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	protected SadlInferenceProcessorProvider processorProvider;
 	@Inject
 	protected IPreferenceValuesProvider preferenceProvider;
+	@Inject
+	protected SadlConsole console;
 	
 	protected ISadlInferenceProcessor processor;
 	
@@ -109,7 +111,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	    		IWorkbenchPage page =  window.getActivePage();
 	    		IEditorPart editorPart = page.getActiveEditor();
 	    		if (editorPart.isDirty()) {
-	    		    SadlConsole.writeToConsole(MessageType.ERROR, "Model has unsaved changes. Please save before running tests.\n");
+	    		    console.print(MessageType.ERROR, "Model has unsaved changes. Please save before running tests.\n");
 	    		    return null;
 	    		}
 	    		IEditorInput iei = editorPart.getEditorInput();
@@ -155,7 +157,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
     		    					selectedConcept = selectedObject;
     		    				}
     		    				else {
-	    		        			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find a concept with name '" + seltxt + "'");
+    		    					console.error("Unable to find a concept with name '" + seltxt + "'");
     		    				}
 	    		        	}
 	    				}
@@ -437,11 +439,11 @@ public abstract class SadlActionHandler extends AbstractHandler {
 									IDE.openEditorOnFileStore(page, fileStore);
 								}
 								catch (Throwable t) {
-									SadlConsole.writeToConsole(MessageType.ERROR, "Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
+									console.error("Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
 								}
 							}
 							else if (fileToOpen != null) {
-								SadlConsole.writeToConsole(MessageType.ERROR, "Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+								console.error("Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
 							}
 						}
 					}
@@ -480,11 +482,11 @@ public abstract class SadlActionHandler extends AbstractHandler {
 				graphResultSet(visualizer, project, baseFileName, baseFileName, null, desc, rs, orientation, true);
 			}
 			else {
-				SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph for query.\n");
+				console.error("Unable to find an instance of IGraphVisualizer to render graph for query.\n");
 			}
 		}
 		else {
-			SadlConsole.writeToConsole(MessageType.ERROR, "Unable to render graph for query; ResultSet has less than 3 columns.\n");
+			console.error("Unable to render graph for query; ResultSet has less than 3 columns.\n");
 		}
 	}
 
