@@ -5193,6 +5193,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Node predNode = null;
 		String constantBuiltinName = null;
 		int numBuiltinArgs = 0;
+		boolean specialCntIdxProcessing = false;
+		
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			String cnstval = ((Constant) predicate).getConstant();
@@ -5211,6 +5213,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					predicate = ((PropOfSubject) subject).getLeft();
 					subject = ((PropOfSubject) subject).getRight();
 				}
+
+				//Check if we need to do special processing
+				if (expr instanceof PropOfSubject && ((PropOfSubject) expr).getOf() != "in") {
+					specialCntIdxProcessing = true;
+				}
+
 			} else if (cnstval.endsWith("index")) {
 				constantBuiltinName = cnstval;
 				numBuiltinArgs = 2;
@@ -5218,6 +5226,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					predicate = ((PropOfSubject) subject).getLeft();
 					subject = ((PropOfSubject) subject).getRight();
 				}
+				
+				//Check if we need to do special processing
+				if (expr instanceof PropOfSubject && ((PropOfSubject) expr).getOf() != "in") {
+					specialCntIdxProcessing = true;
+				}
+				
 			} else if (cnstval.equals("first element")) {
 				constantBuiltinName = "firstElement";
 				numBuiltinArgs = 1;
@@ -5331,7 +5345,48 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else {
 				bi = createBinaryBuiltin(constantBuiltinName, nodeCheck(trSubj), trPred);
 			}
+			
+			// special processing for index/count on <> of <> in <> of <> 
+			if(specialCntIdxProcessing) {
+				
+				// de-construct the elements from the previous builtinElement
+				// then build correctly formed builtinElement
+				List<Node> larguements = ((BuiltinElement) bi).getArguments();
+				if(larguements.size() < 2) {
+					// form is not what we are expecting, return old buildinElement
+					return combineRest(bi, rest);
+				}
+				
+				Object arguement1 = larguements.get(0);
+				if(arguement1 instanceof ProxyNode) {
+					ProxyNode leftBi = (ProxyNode) arguement1;
+					Object baseObject = leftBi.getProxyFor();
+					
+					if(baseObject != null && baseObject instanceof TripleElement) {
+						TripleElement baseObjectTe = (TripleElement) baseObject;
+						
+						if(baseObjectTe.getSubject() != null && baseObjectTe.getSubject() instanceof ProxyNode) {
+							// build the left and right sides of the new builtinElement
+							ProxyNode modifiedSubject = (ProxyNode) baseObjectTe.getSubject();
+							TripleElement modifiedPredicate = new TripleElement();
+	
+							NamedNode rObjectSubject = (NamedNode) baseObjectTe.getPredicate();						
+							((TripleElement) modifiedPredicate).setSubject(rObjectSubject);
+							
+							NamedNode rObjectPredicate = (NamedNode) larguements.get(1);
+							((TripleElement) modifiedPredicate).setPredicate(rObjectPredicate);
+							
+							// create and returned the correctly formed builtinElement
+							GraphPatternElement formedBi = createBinaryBuiltin(constantBuiltinName, nodeCheck(modifiedSubject), 
+									nodeCheck(modifiedPredicate));
+							return combineRest(formedBi, rest);
+						}
+					}
+				}
+			}
+			
 			return combineRest(bi, rest);
+
 		}
 	}
 
