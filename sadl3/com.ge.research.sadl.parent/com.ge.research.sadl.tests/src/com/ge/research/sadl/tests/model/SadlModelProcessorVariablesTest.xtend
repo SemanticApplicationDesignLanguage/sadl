@@ -33,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -43,6 +44,7 @@ class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
 	@Inject Provider<JenaBasedSadlModelProcessor> processorProvider
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
+	@Ignore
 	@Test
 	def void testVariables_01() {
 		val sadlModel = '''

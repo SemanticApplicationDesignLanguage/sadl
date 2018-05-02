@@ -36,7 +36,7 @@ public class TripleElement extends GraphPatternElement {
 	private TripleModifierType modifierType = TripleModifierType.None;		// default
 
 	public enum TripleSourceType {SPV, PSnewV, PSV, VPS, ITC, SCofC}	// type of source
-	private TripleSourceType sourceType;	// what kind of triple was this translated from?
+	private TripleSourceType sourceType;	// what was the source of this TripleElement?
 	
 	/**
 	 * Null argument constructor
@@ -56,6 +56,21 @@ public class TripleElement extends GraphPatternElement {
 		setSubject(subj);
 		setPredicate(pred);
 		setObject(obj);
+	}
+	
+	/**
+	 * Constructor with subject, predicate, and object as arguments
+	 * @param subj
+	 * @param pred
+	 * @param obj
+	 * @throws InvalidTypeException 
+	 */
+	public TripleElement(Node subj, Node pred, Node obj, TripleSourceType type) throws InvalidTypeException {
+		super();
+		setSubject(subj);
+		setPredicate(pred);
+		setObject(obj);
+		setSourceType(type);;
 	}
 	
 	/**
@@ -138,7 +153,7 @@ public class TripleElement extends GraphPatternElement {
 			sb.append(" . ");
 			sb.append(getNext().toString());
 		}
-		if (!getModifierType().equals(TripleModifierType.None)) {
+		if (!getModifierType().equals(TripleModifierType.None) && !getModifierType().equals(TripleModifierType.Assignment)) {
 			sb.insert(0, "(");
 			sb.insert(0, getModifierType().toString());
 			sb.append(")");
@@ -159,7 +174,7 @@ public class TripleElement extends GraphPatternElement {
 			sb.append(" . ");
 			sb.append(getNext().toFullyQualifiedString());
 		}
-		if (!getModifierType().equals(TripleModifierType.None)) {
+		if (!getModifierType().equals(TripleModifierType.None) && !getModifierType().equals(TripleModifierType.Assignment)) {
 			sb.insert(0, "(");
 			sb.insert(0, getModifierType().toString());
 			sb.append(")");
@@ -197,15 +212,27 @@ public class TripleElement extends GraphPatternElement {
 				sb.append("]");
 			}
 			sb.append(")");
-			if (getMissingPatterns() != null) {
-				sb.append(missingPatternsToDescriptiveString());
-			}
 		}
-		sb.append(subject != null ? subject.toDescriptiveString() : "null");
+		if (subject instanceof NamedNode && ((NamedNode)subject).getMissingTripleReplacement() != null) {
+			sb.append(subject.toString());
+		}
+		else {
+			sb.append(subject != null ? subject.toDescriptiveString() : "null");
+		}
 		sb.append(", ");
-		sb.append(predicate != null ? predicate.toDescriptiveString() : "null");
+		if (predicate instanceof NamedNode && ((NamedNode)predicate).getMissingTripleReplacement() != null) {
+			sb.append(predicate.toString());
+		}
+		else {
+			sb.append(predicate != null ? predicate.toDescriptiveString() : "null");
+		}
 		sb.append(", ");
-		sb.append(object != null ? object.toDescriptiveString() : "null");
+		if (object instanceof NamedNode && ((NamedNode)object).getMissingTripleReplacement() != null) {
+			sb.append(object.toString());
+		}
+		else {
+			sb.append(object != null ? object.toDescriptiveString() : "null");
+		}
 		if (getNext() != null) {
 			sb.append(" . ");
 			sb.append(getNext().toDescriptiveString());
