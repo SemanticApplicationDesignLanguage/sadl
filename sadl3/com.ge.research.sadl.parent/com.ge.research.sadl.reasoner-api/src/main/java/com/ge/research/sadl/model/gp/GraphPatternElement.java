@@ -38,8 +38,6 @@ public abstract class GraphPatternElement {
 	private NamedNode leftImpliedPropertyUsed = null;		// an impliedProperty to be used on the left side of a binary operation
 	private NamedNode rightImpliedPropertyUsed = null;		// am impliedProperty to be used on the right side of a binary operation
 	private List<NamedNode> expandedPropertiesToBeUsed = null;	// a list of expandedProperties to be used on both sides of a binary operation
-	private List<GraphPatternElement> missingPatterns = null;  // a list of patterns found to be missing from the graph patterns, and which 
-															   //   should be added at the location of this GraphPatternElement 
 
 	private GraphPatternElement next = null;
 	
@@ -151,21 +149,6 @@ public abstract class GraphPatternElement {
 	 */
 	public abstract String toDescriptiveString();
 	
-	protected String missingPatternsToDescriptiveString() {
-		StringBuilder sb = new StringBuilder(" (has missing triple patterns: [");
-		List<GraphPatternElement> mps = getMissingPatterns();
-		int cntr = 0;
-		for (GraphPatternElement mp : mps) {
-			if (cntr > 0) sb.append(", ");
-			sb.append("'");
-			sb.append(mp.toDescriptiveString());
-			sb.append("'");
-			cntr++;
-		}
-		sb.append("])");
-		return sb.toString();
-	}
-
 	/**
 	 * {@link Deprecated}
 	 * @return
@@ -263,43 +246,4 @@ public abstract class GraphPatternElement {
 		this.leftImpliedPropertyUsed = leftImpliedPropertyUsed;
 	}
 
-	/**
-	 * Get the list of missing GraphPatternElements to be applied at the location of this GraphPatternElement
-	 * @return
-	 */
-	public List<GraphPatternElement> getMissingPatterns() {
-		return missingPatterns;
-	}
-
-	/**
-	 * Set the list of missing GraphPatternElements to be applied at the location of this GraphPatternElement
-	 * @param missingPatterns
-	 */
-	public void setMissingPatterns(List<GraphPatternElement> missingPatterns) {
-		this.missingPatterns = missingPatterns;
-	}
-
-	/**
-	 * Add a GrpahPatternElement to the list of missing GraphPatternElements to be applied at the location of this GraphPatternElement
-	 * @param missingPattern
-	 */
-	public void addMissingPattern(GraphPatternElement missingPattern) {
-		if (this.missingPatterns == null) {
-			missingPatterns = new ArrayList<GraphPatternElement>();
-		}
-		missingPatterns.add(missingPattern);
-	}
-
-	/**
-	 * Add a GrpahPatternElement to the list of missing GraphPatternElements to be applied at the location of this GraphPatternElement
-	 * at the indicated location in the list
-	 * @param idx
-	 * @param missingPattern
-	 */
-	public void addMissingPattern(int idx, GraphPatternElement missingPattern) {
-		if (this.missingPatterns == null) {
-			missingPatterns = new ArrayList<GraphPatternElement>();
-		}
-		missingPatterns.add(idx, missingPattern);
-	}
 }

@@ -18,6 +18,12 @@
 
 package com.ge.research.sadl.model.gp;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
+import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
+
 /**
  * Class to capture a named concept (SadlResource) in the SADL grammar
  * @author 200005201
@@ -36,6 +42,11 @@ public class NamedNode extends Node {
 	private int minListLength = -1;						// the minimum length restriction, if any (-1 => none)
 	private int maxListLength = -1;						// the maximum length restriction, if any (-1 => none)
 	
+	private ProxyNode missingTripleReplacement = null;
+	private List<TripleElement> missingPatterns = null;  // a list of patterns found to be missing from the higher-level structure
+														 // e.g, Rule, and which should be added before the GraphPatternElement
+														 // containing this Node
+
 	/**
 	 * Null argument constructor
 	 */
@@ -161,11 +172,14 @@ public class NamedNode extends Node {
 		if (getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode)) {
 			return toString() + " List";
 		}
-		String ts = toString();
+		StringBuilder sb = new StringBuilder(toString());
 		if (getMissingTripleReplacement() != null) {
-			return ts + missingTripleReplacementToDescriptiveString();
+			sb.append(missingTripleReplacementToDescriptiveString());
 		}
-		return ts;
+		if (getMissingPatterns() != null) {
+			sb.append(missingPatternsToDescriptiveString());
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -279,6 +293,109 @@ public class NamedNode extends Node {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get the ProxyNode representing a replacement (if any) for this Node
+	 * @return
+	 */
+	public ProxyNode getMissingTripleReplacement() {
+		return missingTripleReplacement;
+	}
+	
+	/**
+	 * Set the ProxyNode representing a replacement for this Node
+	 * (Occurs when Node is a lone property in an incomplete property chain) 
+	 * @param missingTripleReplacement
+	 */
+	public void setMissingTripleReplacement(ProxyNode missingTripleReplacement) {
+		this.missingTripleReplacement = missingTripleReplacement;
+	}
+	
+	protected String missingTripleReplacementToDescriptiveString() {
+		StringBuilder sb = new StringBuilder(" (has missing triple replacement '");
+		Object pf = getMissingTripleReplacement().getProxyFor();
+		if (pf instanceof TripleElement) {
+			sb.append(((TripleElement)pf).toDescriptiveString());
+			sb.append("')");
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Get the list of missing TripleElements to be applied to this Node
+	 * Note that the list is ordered top-down, in the direction of the directed graph
+	 * @return
+	 */
+	public List<TripleElement> getMissingPatterns() {
+		return missingPatterns;
+	}
+
+	/**
+	 * Set the list of missing TripleElements to be applied to this Node
+	 * @param missingPatterns
+	 */
+	public void setMissingPatterns(List<TripleElement> missingPatterns) {
+		this.missingPatterns = missingPatterns;
+	}
+
+	/**
+	 * Add a GrpahPatternElement to the list of missing TripleElements to be applied to this Node
+	 * @param missingPattern
+	 */
+	public boolean addMissingPattern(TripleElement missingPattern) {
+		if (this.missingPatterns == null) {
+			missingPatterns = new ArrayList<TripleElement>();
+		}
+		if (!missingPatterns.contains(missingPattern)) {
+			missingPatterns.add(missingPattern);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Add a GrpahPatternElement to the list of missing TripleElements to be applied to this Node
+	 * at the indicated location in the list
+	 * @param idx
+	 * @param missingPattern
+	 */
+	public boolean addMissingPattern(int idx, TripleElement missingPattern) {
+		if (this.missingPatterns == null) {
+			missingPatterns = new ArrayList<TripleElement>();
+		}
+		if (!missingPatterns.contains(missingPattern)) {
+			missingPatterns.add(idx, missingPattern);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Method to serialize missing patterns descriptively
+	 * @return
+	 */
+	protected String missingPatternsToDescriptiveString() {
+		StringBuilder sb = new StringBuilder(" (has missing triple patterns: [");
+		List<TripleElement> mps = getMissingPatterns();
+		int cntr = 0;
+		for (GraphPatternElement mp : mps) {
+			if (cntr > 0) sb.append(", ");
+			sb.append("'");
+			if (mp instanceof TripleElement && 
+					(((TripleElement)mp).getSubject() == null || !((TripleElement)mp).getSubject().equals(this)) &&
+					(((TripleElement)mp).getPredicate() == null || !((TripleElement)mp).getPredicate().equals(this)) &&
+					(((TripleElement)mp).getObject() == null || !((TripleElement)mp).getObject().equals(this))) {
+				sb.append(mp.toDescriptiveString());
+			}
+			else {
+				sb.append(mp.toString());
+			}
+			sb.append("'");
+			cntr++;
+		}
+		sb.append("])");
+		return sb.toString();
 	}
 
 }

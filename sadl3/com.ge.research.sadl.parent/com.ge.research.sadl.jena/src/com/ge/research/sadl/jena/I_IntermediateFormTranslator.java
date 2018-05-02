@@ -88,22 +88,6 @@ public interface I_IntermediateFormTranslator {
 	Object getTarget();
 	
 	/**
-	 * Method to add missing patterns
-	 * @param model
-	 * @param conditions
-	 * @param conclusions
-	 * @param guidance
-	 * @return
-	 * @throws CircularDependencyException
-	 * @throws InvalidTypeException
-	 * @throws TranslationException
-	 * @throws InvalidNameException 
-	 */
-//	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions, 
-//			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance) 
-//					throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException;
-
-	/**
 	 * Method to determine if a GraphPatternElement can only be in the conclusions of the target
 	 * @param gpe
 	 * @return

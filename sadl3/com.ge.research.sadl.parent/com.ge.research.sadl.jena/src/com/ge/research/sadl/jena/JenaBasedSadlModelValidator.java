@@ -1880,8 +1880,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				
 			}
 			else if (constantFollowedByElementThenList(cnstval)) {
-				subjtype = getType(subject);
-				
+                Expression element = null;
+                Expression list = null;
+                if(subject instanceof PropOfSubject) {
+                    element = ((PropOfSubject)subject).getLeft();
+                    list = ((PropOfSubject)subject).getRight();            
+                }
+                
+                // Special processing for the parse tree since it is abnormal in this case
+                // ie. count/index of input16a of REQ16 in outputList16 of REQ16 = input16b of REQ16.
+                if(element != null && list != null) {
+                    if (element instanceof Name && list instanceof PropOfSubject) {
+                        Expression innerSubject = ((PropOfSubject)list).getRight();    
+                        if(innerSubject != null) {
+                            subject = innerSubject;
+                        }
+                    }
+                }
+                
+                subjtype = getType(subject);
 			}
 			if (cnstval.endsWith("length") || cnstval.equals("count") || cnstval.endsWith("index")) {
 				NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xint.getURI(), NodeType.DataTypeNode));
@@ -1891,6 +1908,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else if (subjtype != null && (cnstval.endsWith(" element"))) {
 				if (subjtype != null && (cnstval.equals("first element") || cnstval.equals("last element")) ) {
 					subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
+					if (subjtype.getTypeCheckType() instanceof NamedNode) {
+						if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.ClassListNode)) {
+							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.ClassNode);
+						}
+						else {
+							throw new TranslationException("unhandled element of list type check type, NamedNode but not ClassListNode");
+						}
+					}
+					else {
+						throw new TranslationException("unhandled element of list type, type check type not a NamedNode");
+					}
 					return subjtype;
 				}
 				String article = cnstval.substring(0, cnstval.indexOf(" "));

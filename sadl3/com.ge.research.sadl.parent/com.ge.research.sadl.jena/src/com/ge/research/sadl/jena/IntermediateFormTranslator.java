@@ -1654,6 +1654,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			return pattern;
 		}
 		else if (pattern instanceof Junction) {
+			Object retval = null;
 			// remember what we have so far and create a new pattern list for each side of the Junction
 			List<GraphPatternElement> existingPatterns = patterns;
 			List<GraphPatternElement> lhsPatterns = new ArrayList<GraphPatternElement>();
@@ -1691,10 +1692,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				rhsbe.setFuncName("==");
 				rhsbe.setCreatedFromInterval(true);
 				rhsbe.addArgument(nodeCheck(rhs));
-				((Junction)pattern).setRhs(nodeCheck(rhsbe));
+				retval = nodeCheck(rhsbe);
+				((Junction)pattern).setRhs(retval);
 			}
 			else {
-				expandProxyNodes(rhsPatterns, rhs, isRuleThen);
+				retval = expandProxyNodes(rhsPatterns, rhs, isRuleThen);
 				if (rhsPatterns.size() == 1) {
 					((Junction)pattern).setRhs(nodeCheck(rhsPatterns.get(0)));
 				}
@@ -1708,7 +1710,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			patterns = existingPatterns;
 			patterns.add((Junction)pattern);
-			return null;
+			return retval;
 		}
 		return patterns;
 	}
@@ -2146,7 +2148,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		int patternsSize = patterns != null ? patterns.size() : 0;
 		Node returnNode = null;
 		Node retiredNode = findMatchingElementInRetiredProxyNodes(be);
-		if (isRuleThen && be.getFuncType().equals(BuiltinType.Equal)
+		if (isRuleThen && (be.getFuncType().equals(BuiltinType.Equal) || be.getFuncType().equals(BuiltinType.Assign))
 				&& be.getArguments() != null && be.getArguments().size() == 2
 				&& be.getArguments().get(0) instanceof ProxyNode && be.getArguments().get(1) instanceof ProxyNode) {
 			ProxyNode arg1PN = (ProxyNode) be.getArguments().get(0);
@@ -2200,15 +2202,21 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					throw new TranslationException("Unhandled condition, LHS of Equal in Then isn't a BuiltinElement that needs an argument: " + realArgForThen.toString());
 				}
 			}
-			else {
-				throw new TranslationException("Unhandled condition, LHS of Equal in Then isn't a TripleElement or BuiltinElement that needs an argument: " + realArgForThen.toString());
+			else if (realArgForThen instanceof Junction) {
+				List<GraphPatternElement> lst = junctionToList((Junction)realArgForThen);
+				GraphPatternElement last = lst.remove(lst.size() - 1);
+				moveToIfts.addAll(lst);
+				patterns.add(last);
+			}
+			else if (realArgForThen instanceof GraphPatternElement){
+				moveToIfts.add((GraphPatternElement) realArgForThen);
 			}
 			if (!addToPremises(moveToIfts)) {
 				patterns.addAll(patternsSize, moveToIfts);
 			}
 			return null;
 		}
-		else if (getTarget() instanceof Rule && be.getFuncType().equals(BuiltinType.Equal)) {
+		else if (getTarget() instanceof Rule && (be.getFuncType().equals(BuiltinType.Equal) || be.getFuncType().equals(BuiltinType.Assign))) {
 			if (be.getArguments().size() == 2) {  // this should always be true
 				if (be.getArguments().get(0) instanceof VariableNode && be.getArguments().get(1) instanceof ProxyNode) {
 					Object realArg2 = ((ProxyNode)be.getArguments().get(1)).getProxyFor();
@@ -2221,7 +2229,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						return expandProxyNodes(patterns, realArg2, isRuleThen);
 					}
 				}
-				else if (be.getArguments().get(1) instanceof Literal && be.getArguments().get(0) instanceof ProxyNode && 
+				else if ((be.getArguments().get(1) instanceof Literal || be.getArguments().get(1) instanceof ConstantNode || 
+						(be.getArguments().get(1) instanceof NamedNode && ((NamedNode)be.getArguments().get(1)).getNodeType().equals(NodeType.InstanceNode))) && 
+						be.getArguments().get(0) instanceof ProxyNode && 
 						((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof TripleElement &&
 						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
 					((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
@@ -3086,13 +3096,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		} 
 		return rule;
 	}
-
-//	@Override
-//	public boolean addMissingPatterns(OntModel model, List<GraphPatternElement> conditions,
-//			List<GraphPatternElement> conclusions, List<GraphPatternElement> guidance)
-//			throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException {
-//		throw new TranslationException("This method is not supported at this time in this translator (" + this.getClass().getCanonicalName() + ").");
-//	}
 
 	protected OntModel getTheJenaModel() {
 		return theJenaModel;
