@@ -9906,6 +9906,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return false;
 	}
+	
+	protected boolean isDisjunction(String aOp) {
+		if("or".equals(aOp)) {
+			return true;
+		}
+		return false;
+	}
 
 	protected void resetProcessorState(SadlModelElement element) throws InvalidTypeException {
 		try {

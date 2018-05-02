@@ -508,7 +508,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo leftTypeCheckInfo = null;
 			try {
 				leftTypeCheckInfo = getType(leftExpression);
-				if (getModelProcessor().isConjunction(op)) {
+				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);						
 				}
@@ -525,9 +525,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo rightTypeCheckInfo = null;
 			try {
 				rightTypeCheckInfo = getType(rightExpression);
-				if (getModelProcessor().isConjunction(op)) {
+				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
-					rightTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);
+					rightTypeCheckInfo = createBooleanTypeCheckInfo(rightExpression);
 				}
 				else if (getModelProcessor().elementIdentificationOperation(op)) {
 					rightTypeCheckInfo = convertListTypeToElementOfListType(rightTypeCheckInfo);
