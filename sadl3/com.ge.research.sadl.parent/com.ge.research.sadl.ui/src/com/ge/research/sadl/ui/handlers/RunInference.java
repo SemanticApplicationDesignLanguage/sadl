@@ -1,14 +1,24 @@
 package com.ge.research.sadl.ui.handlers;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.activation.DataSource;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.validation.Issue;
 
@@ -24,6 +34,7 @@ import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.TestResult;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlCommandResult;
 import com.ge.research.sadl.ui.SadlConsole;
@@ -145,6 +156,17 @@ public class RunInference extends SadlActionHandler {
 	        					}
 		        			}
 		        		}
+		        		if (result.getTimingInfo() != null) {
+		        			SadlConsole.writeToConsole(MessageType.INFO, "Timing info:\n");
+		        			for (ReasonerTiming tinfo : result.getTimingInfo()) {
+		        				SadlConsole.writeToConsole(MessageType.INFO, "   " + tinfo.toString() + "\n");
+		        			}
+		        			SadlConsole.writeToConsole(MessageType.INFO, "\n");
+		        		}
+		        		if (result.getDerivations() != null) {
+		        			DataSource ds = result.getDerivations();
+		        			SadlConsole.writeToConsole(MessageType.INFO, writeDerivationsToFile(project, trgtFile, ds));
+		        		}
 		        	}
 				}
 				else if (trgtFile.getFileExtension().equals("test")) {
@@ -164,6 +186,30 @@ public class RunInference extends SadlActionHandler {
 		}
 
 		return event;
+	}
+	
+	private String writeDerivationsToFile(IProject project, IFile trgtFile, DataSource ds) throws CoreException, IOException {
+		String tempFolderPath = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").toOSString());
+		String baseName = trgtFile.getName();
+		if (baseName.endsWith(ResourceManager.SADLEXT)) {
+			baseName = baseName.substring(0,
+					baseName.length() - 5);
+		}
+		String outputfilename = tempFolderPath + File.separator + baseName + ".Derivations.log";
+		String msg = "Derivations written to '" + outputfilename + "'\n";
+		File f = new File(outputfilename);
+		f.createNewFile();
+		OutputStream os = new FileOutputStream(f);
+		InputStream is = ds.getInputStream();
+		byte[] buf = new byte[1024];
+		int i = 0;
+		while ((i = is.read(buf)) != -1) {
+			os.write(buf, 0, i);
+		}
+		is.close();
+		os.close();
+		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+		return msg;
 	}
 
 	private void consoleOutput(List<?> explanations) {

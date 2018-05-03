@@ -153,10 +153,16 @@ public class NamedNode extends Node {
 
 	@Override
 	public String toString() {
+		StringBuilder sb = new StringBuilder();
 		if (prefix != null && prefix.length() > 0) {
-			return prefix + ":" + name;
+			sb.append(prefix);
+			sb.append(":");
 		}
-		return name;
+		sb.append(name);
+		if (getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode)) {
+			sb.append(" List");
+		}
+		return sb.toString();
 	}
 	
 	@Override
@@ -169,9 +175,6 @@ public class NamedNode extends Node {
 
 	@Override
 	public String toDescriptiveString() {
-		if (getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode)) {
-			return toString() + " List";
-		}
 		StringBuilder sb = new StringBuilder(toString());
 		if (getMissingTripleReplacement() != null) {
 			sb.append(missingTripleReplacementToDescriptiveString());

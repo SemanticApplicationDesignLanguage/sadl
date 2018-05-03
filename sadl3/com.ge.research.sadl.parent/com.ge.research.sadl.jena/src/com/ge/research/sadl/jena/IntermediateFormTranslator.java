@@ -2247,7 +2247,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		List<Node> args = be.getArguments();
 		for (int i = 0; args != null && i < args.size(); i++) {
 			Node arg = args.get(i);
-			if (arg instanceof ProxyNode) {
+			if (arg == null) {
+				VariableNode var = new VariableNode(getNewVar());
+				args.set(i, var);
+				returnNode = var;
+			}
+			else if (arg instanceof ProxyNode) {
 				if (retiredNode != null) {
 					args.set(i, retiredNode);
 				}
@@ -3058,7 +3063,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 
-	protected JenaBasedSadlModelProcessor getModelProcessor() {
+	@Override
+	public JenaBasedSadlModelProcessor getModelProcessor() {
 		return modelProcessor;
 	}
 
@@ -3112,5 +3118,56 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		return false;
 	}
-	
+
+	/** 
+	 * Method to return the type of element returned by a list element extraction built-in
+	 * @param bi
+	 * @return
+	 */
+	public NamedNode listElementIdentifierListType(BuiltinElement bi) {
+		if (bi.getFuncName().equals("lastElement") ||
+				bi.getFuncName().equals("firstElement") ||
+				bi.getFuncName().equals("elementBefore") ||
+				bi.getFuncName().equals("elementAfter") ||
+				bi.getFuncName().equals("elementInList") ||
+				bi.getFuncName().equals("sublist")) {
+			Node listArg = bi.getArguments().get(0);
+			if (listArg instanceof NamedNode) {
+				return (NamedNode) listArg;
+			}
+			else if (listArg instanceof ProxyNode) {
+				Object pf = ((ProxyNode)listArg).getProxyFor();
+				if (pf instanceof TripleElement) {
+					Node pred = ((TripleElement) pf).getPredicate();
+					if (pred instanceof NamedNode) {
+						Property p = theJenaModel.getProperty(((NamedNode)pred).toFullyQualifiedString());
+						try {
+							ConceptName pcn = getModelProcessor().namedNodeToConceptName((NamedNode)pred);
+							TypeCheckInfo tci = getModelValidator().getTypeInfoFromRange(pcn, p, null);
+							Node lsttype = tci.getTypeCheckType();
+							if (lsttype instanceof NamedNode) {
+								return (NamedNode) lsttype;
+							}
+						} catch (DontTypeCheckException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InvalidTypeException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (TranslationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InvalidNameException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			return null;
+		}
+		return null;
+	}
+
+
 }	

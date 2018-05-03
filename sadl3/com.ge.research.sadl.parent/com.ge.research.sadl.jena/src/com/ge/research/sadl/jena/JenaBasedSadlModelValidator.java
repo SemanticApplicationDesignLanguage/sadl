@@ -2487,7 +2487,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 	
-	protected TypeCheckInfo getTypeFromRestriction(Resource subj, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException, TranslationException {
+	public TypeCheckInfo getTypeFromRestriction(Resource subj, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException, TranslationException {
 		if (subj != null && subj.canAs(OntClass.class)){ 
 			Property prop = theJenaModel.getProperty(propuri);
 			// look for restrictions on "range"
