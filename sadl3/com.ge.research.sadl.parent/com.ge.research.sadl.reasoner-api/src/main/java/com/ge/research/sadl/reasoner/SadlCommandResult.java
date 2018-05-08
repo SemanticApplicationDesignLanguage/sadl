@@ -2,12 +2,16 @@ package com.ge.research.sadl.reasoner;
 
 import java.util.List;
 
+import javax.activation.DataSource;
+
 import com.ge.research.sadl.model.gp.SadlCommand;
 
 public class SadlCommandResult {
 	private SadlCommand cmd;
 	private Object results;
 	private List<ModelError> errors;
+	private List<ReasonerTiming> timingInfo;
+	private DataSource derivations;
 	
 	public SadlCommandResult(SadlCommand cmd) {
 		this.cmd = cmd;
@@ -58,5 +62,21 @@ public class SadlCommandResult {
 			}
 		}
 		return sb.toString();
+	}
+
+	public List<ReasonerTiming> getTimingInfo() {
+		return timingInfo;
+	}
+
+	public void setTimingInfo(List<ReasonerTiming> timingInfo) {
+		this.timingInfo = timingInfo;
+	}
+
+	public DataSource getDerivations() {
+		return derivations;
+	}
+
+	public void setDerivations(DataSource derivations) {
+		this.derivations = derivations;
 	}
 }

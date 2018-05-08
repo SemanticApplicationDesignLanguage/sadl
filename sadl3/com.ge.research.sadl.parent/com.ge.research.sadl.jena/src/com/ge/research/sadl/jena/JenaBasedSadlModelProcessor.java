@@ -10556,6 +10556,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (importedOntModel == null) {
 						logger.debug("JenaBasedSadlModelProcessor failed to resolve null OntModel for Resource '"
 								+ importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
+						addError("Unable to import model with URI '" + importUri + "'", simport);
 					} else {
 						addImportToJenaModel(modelName, importUri, importPrefix, importedOntModel);
 					}
