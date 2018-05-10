@@ -143,7 +143,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private List<ConceptName> binaryOpLeftImpliedProperties;
 	private List<ConceptName> binaryOpRightImpliedProperties;
 	protected Object lastSuperCallExpression = null;
-	private List<EObject> eObjectsValidated = null; 
+	private Map<EObject,Boolean> mEObjectsValidated = null; 
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
@@ -489,7 +489,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			EObject rightExpression, String op, StringBuilder errorMessageBuilder, boolean forceValidation) {
 		List<String> operations = Arrays.asList(op.split("\\s+"));
 		boolean errorsFound = false;
-		if (!forceValidation && !registerEObjectValidateCalled(expression)) {
+		if (!registerEObjectValidateCalled(expression) && !forceValidation) {
 			// if there were errors they were reported on the first call
 			return !errorsFound;
 		}
@@ -559,6 +559,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //						leftTypeCheckInfo.setRangeValueType(RangeValueType.CLASS_OR_DT);
 					}
 					if (createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, effectiveOp, false, null)) {
+						setEObjectInError(expression);
 						return false;
 					}
 				}
@@ -672,18 +673,46 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
-	private boolean registerEObjectValidateCalled(EObject expression) {
-		if (expression == null) return true;	// for ease in debugging--set expression to null to allow multiple passes in debugger
-		if (eObjectsValidated  == null) {
-			eObjectsValidated = new ArrayList<EObject>();
-			eObjectsValidated.add(expression);
+	/*
+	 * Register EObject being type-checked to Validator.
+	 */
+	private boolean registerEObjectValidateCalled(EObject aExpression) {
+		if (aExpression == null) return true;	// for ease in debugging--set expression to null to allow multiple passes in debugger
+		if (mEObjectsValidated  == null) {
+			mEObjectsValidated = new HashMap<EObject,Boolean>();
+			mEObjectsValidated.put(aExpression,false);
 			return true;
 		}
-		if (eObjectsValidated.contains(expression)) {
+		if (mEObjectsValidated.containsKey(aExpression)) {
 			return false;
 		}
-		eObjectsValidated.add(expression);
+		mEObjectsValidated.put(aExpression,false);
 		return true;
+	}
+	
+	/*
+	 * Returns true if the Expression has a type-checking error
+	 */
+	public boolean isEObjectInError(EObject aExpression) {
+		if(mEObjectsValidated == null) {
+			return false;
+		}
+		Boolean lError = mEObjectsValidated.get(aExpression);
+		if(lError == null) {
+			return false;
+		}
+		return lError;
+	}
+	
+	/*
+	 * Sets EObject to an "in error" state but only if EObject has already been 
+	 * registered by the type-checking algorithm.
+	 */
+	private void setEObjectInError(EObject aExpression) {
+		if (mEObjectsValidated  == null) {
+			return;
+		}
+		mEObjectsValidated.replace(aExpression,true);
 	}
 
 	private boolean passLiteralConstantComparisonCheck(EObject expression, EObject leftExpression,
