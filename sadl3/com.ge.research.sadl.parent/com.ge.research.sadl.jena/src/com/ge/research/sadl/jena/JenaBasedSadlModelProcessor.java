@@ -3503,92 +3503,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				return robj;
 			}
-			/*
-			if ((lobj instanceof TripleElement || (lobj instanceof com.ge.research.sadl.model.gp.Literal
-					&& isSparqlQuery(((com.ge.research.sadl.model.gp.Literal) lobj).toString())))
-					&& !(ITranslator.isKnownNode(robj))) {
-//				if (robj instanceof com.ge.research.sadl.model.gp.Literal) {
-//	
-//					if (lobj instanceof TripleElement) {
-//						if (((TripleElement) lobj).getObject() == null) {
-//							((TripleElement) lobj).setObject((com.ge.research.sadl.model.gp.Literal) robj);
-//							lobj = checkForNegation((TripleElement) lobj, rexpr);
-//							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-//						} else {
-//							addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", " "), container);
-//						}
-//					} else {
-//						addError(SadlErrorMessages.UNHANDLED.get("rule conclusion construct ", ""), container);
-//					}
-//				} else 
-				if (robj instanceof VariableNode) {
-					if (((TripleElement) lobj).getObject() == null) {
-						((TripleElement) lobj).setObject((VariableNode) robj);
-						lobj = checkForNegation((TripleElement) lobj, rexpr);
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-					}
-//				} else if (robj instanceof NamedNode) {
-//					if (((TripleElement) lobj).getObject() == null) {
-//						((TripleElement) lobj).setObject((NamedNode) robj);
-//						lobj = checkForNegation((TripleElement) lobj, rexpr);
-//						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-//					}
-				} else if (robj instanceof BuiltinElement) {
-					if (isModifiedTriple(((BuiltinElement) robj).getFuncType())) {
-						assignedNode = ((BuiltinElement) robj).getArguments().get(0);
-						optype = ((BuiltinElement) robj).getFuncType();
-						pattern = lobj;
-					} else if (isComparisonBuiltin(((BuiltinElement) robj).getFuncName())) {
-						if (((BuiltinElement) robj).getArguments()
-								.get(0) instanceof com.ge.research.sadl.model.gp.Literal) {
-							((TripleElement) lobj).setObject(nodeCheck(robj));
-							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-						} else {
-							return applyImpliedAndExpandedProperties(container, lexpr, rexpr,
-									createBinaryBuiltin(((BuiltinElement) robj).getFuncName(), lobj,
-											((BuiltinElement) robj).getArguments().get(0)));
-						}
-					}
-				} else if (robj instanceof TripleElement) {
-					// do nothing
-//				} else if (robj instanceof ConstantNode) {
-//					String cnst = ((ConstantNode) robj).getName();
-//					if (cnst.equals(SadlConstants.CONSTANT_NONE)) {
-//						((TripleElement) lobj).setType(TripleModifierType.None);
-//						((TripleElement) lobj).setObject((Node) robj);
-//						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-//					}
-				} else if (robj instanceof BuiltinElement) {
-					if (isModifiedTriple(((BuiltinElement) robj).getFuncType())) {
-						if (((BuiltinElement) robj).getArguments() != null
-								&& ((BuiltinElement) robj).getArguments().size() > 0) {
-							assignedNode = ((BuiltinElement) robj).getArguments().get(0);
-						}
-						optype = ((BuiltinElement) robj).getFuncType();
-						pattern = lobj;
-					} else if (isComparisonBuiltin(((BuiltinElement) robj).getFuncName())) {
-						if (((BuiltinElement) robj).getArguments().get(0) instanceof Literal) {
-							((TripleElement) lobj).setObject(nodeCheck(robj));
-							return applyImpliedAndExpandedProperties(container, lexpr, rexpr, lobj);
-						} else {
-							return applyImpliedAndExpandedProperties(container, lexpr, rexpr,
-									createBinaryBuiltin(((BuiltinElement) robj).getFuncName(), lobj,
-											((BuiltinElement) robj).getArguments().get(0)));
-						}
-					}
-				}
-				// else {
-				// addError(SadlErrorMessages.UNHANDLED.get("assignment construct in rule
-				// conclusion", " "), container);
-				// }
-			} else 
-				*/
 			if (lobj instanceof Node && robj instanceof TripleElement) {
 				assignedNode = validateNode((Node) lobj);
 				pattern = (TripleElement) robj;
-//			} else if (robj instanceof Node && lobj instanceof TripleElement) {
-//				assignedNode = validateNode((Node) robj);
-//				pattern = (TripleElement) lobj;
 			}
 			if (assignedNode != null && pattern != null) {
 				// We're expressing the type of a named thing.
@@ -3686,6 +3603,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			boolean binOnRight = false;
 			Object retObj = null;
 			if (lobj instanceof Node && robj instanceof BuiltinElement) {
+				
+				//Check to "pull up" not operator for Node Objects and rebuild "is" object
+				BuiltinElement right = (BuiltinElement) robj;
+                if(right.getFuncName() == "not") {
+                	//Pull up the not to the outside operator with the "is" operator nested     			
+                	Node right_arg = right.getArguments().get(0);
+                	GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg);     			
+    				Object ubi = createUnaryBuiltin(container, "not", bi);
+    				return combineRest(ubi, rest);
+                }
+                
 				assignedNode = validateNode((Node) lobj);
 				bin = (BuiltinElement) robj;
 				retObj = robj;
@@ -3724,6 +3652,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			}
+			
+			//Check to "pull up" not operator for TripleElements and rebuild "is" object
+            if( lobj instanceof TripleElement && robj instanceof BuiltinElement) {
+                BuiltinElement right = (BuiltinElement) robj;
+                if(right.getFuncName() == "not") {
+                	Node arg = right.getArguments().get(0);
+                	//Pull up the not to the outside operator with the "is" operator nested     			
+                    TripleElement left = (TripleElement) lobj;
+                	GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
+    				Object ubi = createUnaryBuiltin(container, "not", bi);
+    				return combineRest(ubi, rest);
+                }
+            }
+
+            
 			// We're describing a thing with a graph pattern.
 			Set<VariableNode> vars = pattern instanceof TripleElement ? getSelectVariables(((TripleElement) pattern))
 					: null;
@@ -5193,6 +5136,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Node predNode = null;
 		String constantBuiltinName = null;
 		int numBuiltinArgs = 0;
+		
+        boolean specialCntIdxProcessing = false;
+
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			String cnstval = ((Constant) predicate).getConstant();
@@ -5211,6 +5157,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					predicate = ((PropOfSubject) subject).getLeft();
 					subject = ((PropOfSubject) subject).getRight();
 				}
+				
+                //Check if we need to do special processing
+                if (expr instanceof PropOfSubject && ((PropOfSubject) expr).getOf() != "in") {
+                    specialCntIdxProcessing = true;
+                }
+
 			} else if (cnstval.endsWith("index")) {
 				constantBuiltinName = cnstval;
 				numBuiltinArgs = 2;
@@ -5218,6 +5170,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					predicate = ((PropOfSubject) subject).getLeft();
 					subject = ((PropOfSubject) subject).getRight();
 				}
+				
+                //Check if we need to do special processing
+                if (expr instanceof PropOfSubject && ((PropOfSubject) expr).getOf() != "in") {
+                    specialCntIdxProcessing = true;
+                }
+
 			} else if (cnstval.equals("first element")) {
 				constantBuiltinName = "firstElement";
 				numBuiltinArgs = 1;
@@ -5331,6 +5289,47 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else {
 				bi = createBinaryBuiltin(constantBuiltinName, nodeCheck(trSubj), trPred);
 			}
+            
+            // special processing for index/count on <> of <> in <> of <> 
+            if(specialCntIdxProcessing) {
+                
+                // de-construct the elements from the previous builtinElement
+                // then build correctly formed builtinElement
+                List<Node> larguements = ((BuiltinElement) bi).getArguments();
+                if(larguements.size() < 2) {
+                    // form is not what we are expecting, return old buildinElement
+                    return combineRest(bi, rest);
+                }
+                
+                Object arguement1 = larguements.get(0);
+                if(arguement1 instanceof ProxyNode) {
+                    ProxyNode leftBi = (ProxyNode) arguement1;
+                    Object baseObject = leftBi.getProxyFor();
+                    
+                    if(baseObject != null && baseObject instanceof TripleElement) {
+                        TripleElement baseObjectTe = (TripleElement) baseObject;
+                        
+                        if(baseObjectTe.getSubject() != null && baseObjectTe.getSubject() instanceof ProxyNode) {
+                            // build the left and right sides of the new builtinElement
+                            ProxyNode modifiedSubject = (ProxyNode) baseObjectTe.getSubject();
+                            TripleElement modifiedPredicate = new TripleElement();
+    
+                            NamedNode rObjectSubject = (NamedNode) baseObjectTe.getPredicate();                        
+                            ((TripleElement) modifiedPredicate).setSubject(rObjectSubject);
+                            
+                            NamedNode rObjectPredicate = (NamedNode) larguements.get(1);
+                            ((TripleElement) modifiedPredicate).setPredicate(rObjectPredicate);
+                            
+                            // create and returned the correctly formed builtinElement
+                            GraphPatternElement formedBi = createBinaryBuiltin(constantBuiltinName, nodeCheck(modifiedSubject), 
+                                    nodeCheck(modifiedPredicate));
+                            return combineRest(formedBi, rest);
+                        }
+                    }
+                }
+            }
+
+			
 			return combineRest(bi, rest);
 		}
 	}
