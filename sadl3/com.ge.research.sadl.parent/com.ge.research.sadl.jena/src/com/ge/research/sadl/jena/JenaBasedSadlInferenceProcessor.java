@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,7 @@ import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.query.SadlQueryHelper;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
@@ -65,10 +67,13 @@ import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlCommandResult;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
+import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.QueryStatement;
 import com.google.inject.Inject;
@@ -138,6 +143,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		
 		try {
 			checkIfExplanationNeeded(cmds);
+			applyPreferences();
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -149,6 +155,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		StartWrite writeInEffect = null;
 		StringBuilder writeAccumulator = null;
 		List<SadlCommandResult> results = new ArrayList<SadlCommandResult>();
+		int timingInfoPreviousSize = 0;
 		for (int cmdIndex = 0; cmdIndex < cmds.size(); cmdIndex++) {
 			SadlCommand cmd =cmds.get(cmdIndex);
 			try {
@@ -199,10 +206,54 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			} catch (Throwable t) {
 				results.add(convertCmdExceptionToSadlCommandError(cmd, t));
 			} 
-		}
+			
+			try {
+				List<ReasonerTiming> latestTimingInfo = getInitializedReasoner().getTimingInformation();
+				if (latestTimingInfo != null) {
+					if (latestTimingInfo.size() > timingInfoPreviousSize) {
+						// new timing info for last command
+						SadlCommandResult lastResult = results.get(results.size() - 1);
+						List<ReasonerTiming> newTimingInfo = new ArrayList<ReasonerTiming>();
+						for (int ti = timingInfoPreviousSize; ti < latestTimingInfo.size(); ti++) {
+							newTimingInfo.add(latestTimingInfo.get(ti));
+						}
+						lastResult.setTimingInfo(newTimingInfo);
+					}
+					timingInfoPreviousSize = latestTimingInfo.size();
+				}
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ReasonerNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}		
 		return results.toArray(new SadlCommandResult[results.size()]);
 	}
 	
+	private void applyPreferences() throws ConfigurationException, ReasonerNotFoundException {
+		if (preferenceMap != null) {
+//			if (preferenceMap.containsKey(SadlPreferences.VALIDATE_BEFORE_TEST.getId())) {
+//				
+//			}
+			if (collectTimingInfo()) {
+				getInitializedReasoner().collectTimingInformation(true);
+			}
+		}
+	}
+	
+	private boolean collectTimingInfo() {
+		if (preferenceMap != null) {
+			if (preferenceMap.containsKey(SadlPreferences.SHOW_TIMING_INFORMATION.getId())) {
+				String stimeinfostr = preferenceMap.get(SadlPreferences.SHOW_TIMING_INFORMATION.getId());
+				boolean showTI = Boolean.parseBoolean(stimeinfostr.trim());
+				return showTI;
+			}
+		}
+		return false;
+	}
+
 	protected ITabularDataImporter getTabularDataImporter(IConfigurationManagerForEditing configMgr) {
 		String tabularImporterClass = preferenceMap.get(SadlPreferences.TABULAR_DATA_IMPORTER_CLASS.getId());
 		

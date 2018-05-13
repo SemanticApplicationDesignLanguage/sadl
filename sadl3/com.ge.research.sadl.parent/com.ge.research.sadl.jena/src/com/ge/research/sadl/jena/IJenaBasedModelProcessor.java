@@ -7,6 +7,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.validation.CheckMode;
 
+import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -77,6 +78,13 @@ public interface IJenaBasedModelProcessor {
 	public void initializePreferences(ProcessorContext context);
 	
 	/**
+	 * Method to return the validator for this model processor
+	 * @return
+	 * @throws TranslationException 
+	 */
+	public JenaBasedSadlModelValidator getModelValidator() throws TranslationException;
+	
+	/**
 	 * Method to obtain an IntermediateForm Translator appropriate for the given model processor
 	 * @return
 	 */
@@ -103,5 +111,14 @@ public interface IJenaBasedModelProcessor {
 	 * @return
 	 */
 	public NamedNode validateNamedNode(NamedNode namedNode);
+
+	/**
+	 * Method to convert a NamedNode to a ConceptName
+	 * @param pred
+	 * @return
+	 * @throws InvalidNameException 
+	 * @throws TranslationException 
+	 */
+	public ConceptName namedNodeToConceptName(NamedNode pred) throws TranslationException, InvalidNameException;
 	
 }
