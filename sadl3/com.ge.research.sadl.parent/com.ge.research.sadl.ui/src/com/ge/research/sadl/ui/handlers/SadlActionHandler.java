@@ -323,7 +323,9 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			}
 			else {
 				map.put(SadlPreferences.VALIDATE_BEFORE_TEST.getId(), "false");
-			}			return map;
+			}
+//			preferenceValues.getPreference(SadlPreferences.)
+			return map;
 		}
 		return null;
 	}
