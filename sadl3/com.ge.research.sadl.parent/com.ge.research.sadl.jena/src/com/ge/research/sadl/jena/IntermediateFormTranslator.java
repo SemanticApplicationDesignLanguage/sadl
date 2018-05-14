@@ -3169,5 +3169,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return null;
 	}
 
+	@Override
+	public void reset() {
+		// nothing needed in this class
+	}
+
 
 }	
