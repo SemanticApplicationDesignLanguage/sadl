@@ -84,6 +84,11 @@ public interface I_IntermediateFormTranslator {
 	void flattenJunction(Junction element) throws InvalidNameException, InvalidTypeException, TranslationException;
 
 	/**
+	 * Method to reset the translator for a new Xtext Resource
+	 */
+	public void reset();
+	
+	/**
 	 * Method to set an encapsulating target, e.g., when a Query is inside a Test, the Test is the encapsulating target
 	 * @param _encapsulatingTarget
 	 */
