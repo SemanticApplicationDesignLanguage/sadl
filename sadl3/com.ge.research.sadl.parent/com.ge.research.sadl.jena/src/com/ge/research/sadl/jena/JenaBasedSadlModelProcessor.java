@@ -948,8 +948,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e1.printStackTrace();
 		}
 
-		if (!processModelImports(modelOntology, resource.getURI(), model)) {
-			System.err.println("Unable to import models. Is project build enabled?");
+		if(!processModelImports(modelOntology, resource.getURI(), model)) {
+			return;
 		}
 
 		boolean enableMetricsCollection = true; // no longer a preference
@@ -1008,19 +1008,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			try {
 				if (!resource.getURI().lastSegment().equals("SadlImplicitModel.sadl")
 						&& !resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-					// System.out.println("Metrics for '" + resource.getURI().lastSegment() + "':");
-					if (acceptor.getErrorCount() > 0) {
-						String msg = "    Model totals: " + countPlusLabel(acceptor.getErrorCount(), "error") + ", "
-								+ countPlusLabel(acceptor.getWarningCount(), "warning") + ", "
-								+ countPlusLabel(acceptor.getInfoCount(), "info");
-						// System.out.flush();
-						System.err.println("No OWL model output generated for '" + resource.getURI() + "'.");
-						System.err.println(msg);
-						System.err.flush();
-					}
-					// else {
-					// System.out.println(msg);
-					// }
 					if (!isSyntheticUri(null, resource)) {
 						// don't do metrics on JUnit tests
 						if (getMetricsProcessor() != null) {
