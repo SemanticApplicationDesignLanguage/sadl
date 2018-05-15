@@ -3171,8 +3171,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression rexpr = expr.getRight();
 
 		Object result = processBinaryExpressionByParts(expr, op, lexpr, rexpr);
-		checkForArticleForNameInTriple(lexpr, result);
-		checkForArticleForNameInTriple(rexpr, result);
+		if(result instanceof TripleElement) {
+			checkForArticleForNameInTriple(lexpr, result);
+			checkForArticleForNameInTriple(rexpr, result);
+		}else if(result instanceof BuiltinElement) {
+			checkForArticleForNameInBuiltinElement(lexpr, result);
+			checkForArticleForNameInBuiltinElement(rexpr, result);
+		}
 		return result;
 	}
 
@@ -10719,6 +10724,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isUseArticlesInValidation() && value instanceof Name && tripleObject instanceof NamedNode
 					&& ((NamedNode) tripleObject).getNodeType().equals(NodeType.ClassNode)) {
 				addError(SadlErrorMessages.NEEDS_ARTICLE.get(), value);
+			}
+		}
+	}
+	
+	protected void checkForArticleForNameInBuiltinElement(Expression aValue, Object aBuiltinElement) throws InvalidNameException {
+		if(aBuiltinElement instanceof BuiltinElement) {
+			List<Node> lNodeList = ((BuiltinElement) aBuiltinElement).getArguments();
+			if(lNodeList.size() == 2) {
+				Node lNode = lNodeList.get(1);
+				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode) {
+					addError(SadlErrorMessages.NEEDS_ARTICLE.get(), aValue);
+				}
 			}
 		}
 	}
