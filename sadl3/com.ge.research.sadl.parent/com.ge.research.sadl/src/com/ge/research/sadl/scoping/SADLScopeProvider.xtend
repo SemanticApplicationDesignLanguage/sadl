@@ -306,7 +306,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val IScope importScope;
 		val boolean checkAmbiguity;
 		val Map<QualifiedName, IEObjectDescription> map;
+		val Predicate<EObject> isIncluded;
 		val TreeIterator<EObject> iter;
+		def ScopeContext wrap(EObject otherObj) {
+			return new ScopeContext(otherObj, namespace, parentScope, importScope, checkAmbiguity, map, isIncluded, iter);
+		}
 	}
 
 	protected def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope,
@@ -317,26 +321,16 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		while (iter.hasNext) {
 			val it = iter.next
 			if (isIncluded.apply(it)) {
-				val context = new ScopeContext(it, namespace, parentScope, importScope, checkAmbiguity, map, iter);
-				switch it {
-					EObject case doSwitch(context) !== null: {
-						doSwitch(context).apply(context);	
-					}
-					SadlResource case concreteName !== null: {
-						handleSadlResource(context);
-					}
-					EquationStatement: {
-						val name = converter.toQualifiedName(it.name.concreteName)
-						map.addElement(name, it.name)
-						if (name.segmentCount > 1) {
-							map.addElement(name.skipFirst(1), it.name)
-						} else if (namespace !== null) {
-							map.addElement(namespace.append(name), it.name)
+				val context = new ScopeContext(it, namespace, parentScope, importScope, checkAmbiguity, map, isIncluded, iter);
+				val objSwitch = doSwitch(context);
+				if (objSwitch !== null) {
+					objSwitch.apply(context);
+				} else {
+					switch it {
+						SadlResource case concreteName !== null: {
+							handleSadlResource(context);
 						}
-					}
-					QueryStatement: {
-						// Ignore `anonymous` query statements. Nothing to put into the scope.
-						if (name?.concreteName !== null) {
+						EquationStatement: {
 							val name = converter.toQualifiedName(it.name.concreteName)
 							map.addElement(name, it.name)
 							if (name.segmentCount > 1) {
@@ -344,29 +338,41 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 							} else if (namespace !== null) {
 								map.addElement(namespace.append(name), it.name)
 							}
-							// Make sure we do not expose the parameters from the query expression to the scope.
-							// Stop processing the subtree of the current AST element by pruning the iterator.
-							// For instance, we do not let `c` into the scope. 
-							// `C is a class. Ask myQuery: select c where c is a C.` 
 						}
-						iter.prune // variables from a query expression w/o a name should not leave the variable scope. 
-					}
-					RuleStatement: {
-						if (name?.concreteName !== null) {
-							val name = converter.toQualifiedName(it.name.concreteName)
-							map.addElement(name, it.name)
-							if (name.segmentCount > 1) {
-								map.addElement(name.skipFirst(1), it.name)
+						QueryStatement: {
+							// Ignore `anonymous` query statements. Nothing to put into the scope.
+							if (name?.concreteName !== null) {
+								val name = converter.toQualifiedName(it.name.concreteName)
+								map.addElement(name, it.name)
+								if (name.segmentCount > 1) {
+									map.addElement(name.skipFirst(1), it.name)
+								} else if (namespace !== null) {
+									map.addElement(namespace.append(name), it.name)
+								}
+								// Make sure we do not expose the parameters from the query expression to the scope.
+								// Stop processing the subtree of the current AST element by pruning the iterator.
+								// For instance, we do not let `c` into the scope. 
+								// `C is a class. Ask myQuery: select c where c is a C.` 
 							}
-							else if (namespace !== null) {
-								map.addElement(namespace.append(name), it.name)
-							}
+							iter.prune // variables from a query expression w/o a name should not leave the variable scope. 
 						}
-						iter.prune
-					}
-					default: {
-						if (pruneScope(it)) {
+						RuleStatement: {
+							if (name?.concreteName !== null) {
+								val name = converter.toQualifiedName(it.name.concreteName)
+								map.addElement(name, it.name)
+								if (name.segmentCount > 1) {
+									map.addElement(name.skipFirst(1), it.name)
+								}
+								else if (namespace !== null) {
+									map.addElement(namespace.append(name), it.name)
+								}
+							}
 							iter.prune
+						}
+						default: {
+							if (pruneScope(it)) {
+								iter.prune
+							}
 						}
 					}
 				}
@@ -384,7 +390,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val map = context.map;
 
 		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(eResource)
-		val name1 = converter.toQualifiedName(concreteName)
+		val name1 = getName(it);
 		val resourceInParentScope = parentScope.getSingleElement(name1);
 		var ambiguousProblem = null as IEObjectDescription;
 		if (resourceInParentScope === null) {
@@ -393,7 +399,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			if (checkAmbiguity) {
 				val resourceInImportScope = importScope.getSingleElement(name1);
 				if (resourceInImportScope !== null) {
-					val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
+					val nameWithPrefixes = getName(it, false);
 					if (name1.segmentCount > 1) {
 						if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
 							ambiguousProblem = checkDuplicate(resourceInParentScope,
@@ -418,6 +424,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		if (name2 !== null && parentScope.getSingleElement(name2) === null && ambiguousProblem === null) {
 			map.addElement(name2, it)
 		}
+	}
+	
+	protected def QualifiedName getName(SadlResource it) {
+		return getName(it, false);
+	}
+	
+	protected def QualifiedName getName(SadlResource it, boolean trimPrefix) {
+		return converter.toQualifiedName(getConcreteName(it, trimPrefix));
 	}
 	
 	/**
@@ -448,9 +462,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					if (duplicateProblem !== null) {
 						importedSymbols.put(duplicateProblem.name, duplicateProblem)
 					}
-				]
+				];
 			}
-				
 		}
 		if (importedSymbols.isEmpty) {
 			IMPLICIT_MODELS.forEach [ fileName, desiredUri |

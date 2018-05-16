@@ -23,7 +23,8 @@ package com.ge.research.sadl
 import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
 import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy
 import com.ge.research.sadl.scoping.ErrorAddingLinkingService
-import com.ge.research.sadl.scoping.QualifiedNameConverter
+import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
+import com.ge.research.sadl.scoping.SadlQualifiedNameProvider
 import com.ge.research.sadl.scoping.SilencedImportedNamesAdapter
 import com.ge.research.sadl.validation.ResourceValidator
 import com.ge.research.sadl.validation.SoftLinkingMessageProvider
@@ -39,7 +40,6 @@ import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
 import org.eclipse.xtext.parsetree.reconstr.ITokenStream
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
 import org.eclipse.xtext.validation.ResourceValidatorImpl
-import com.ge.research.sadl.scoping.SadlQualifiedNameProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -64,7 +64,7 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	}
 	
 	def Class<? extends IQualifiedNameConverter> bindIQualifiedNameCoverter() {
-		return QualifiedNameConverter;
+		return SadlQualifiedNameConverter;
 	}
 	
 	def Class<? extends LinkingDiagnosticMessageProvider> bindILinkingDiagnosticMessageProvider() {

@@ -20,7 +20,7 @@ package com.ge.research.sadl.scoping
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
 
-class QualifiedNameConverter implements IQualifiedNameConverter {
+class SadlQualifiedNameConverter implements IQualifiedNameConverter {
 	
 	public static val SEGMENT_SEPARATOR = ':';
 	
