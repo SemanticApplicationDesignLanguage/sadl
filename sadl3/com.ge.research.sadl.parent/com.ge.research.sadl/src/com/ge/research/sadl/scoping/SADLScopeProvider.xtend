@@ -43,14 +43,18 @@ import com.ge.research.sadl.sADL.SelectExpression
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.ge.research.sadl.sADL.TestStatement
 import com.google.common.base.Predicate
+import com.google.common.base.Predicates
+import com.google.common.collect.ImmutableMap
 import com.google.inject.Inject
 import java.util.List
 import java.util.Map
 import java.util.Set
+import org.eclipse.emf.common.util.TreeIterator
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.naming.QualifiedName
@@ -65,7 +69,6 @@ import static com.ge.research.sadl.processing.SadlConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
-import com.google.common.collect.ImmutableMap
 
 /**
  * This class contains custom scoping description.
@@ -91,8 +94,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	@Inject protected AmbiguousNameHelper ambiguousNameHelper;
 	
 	@Inject OnChangeEvictingCache cache
-	
-	boolean ambiguousNameDetection;
 	
 	val LocalScopeProvider localScope_01 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
@@ -156,8 +157,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	
 	
 	override getScope(EObject context, EReference reference) {
-		val ctxrsrc = context.eResource();
-		setAmbiguousNameDetection(TestScopeProvider.getDetectAmbiguousNames(ctxrsrc));
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADL_MODEL) {
 			return super.getGlobalScope(context.eResource, reference)
@@ -170,10 +169,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			"Couldn't build scope for elements of type " + reference.EReferenceType.name)
 	}
 	
-	def setAmbiguousNameDetection(boolean bval) {
-		ambiguousNameDetection = bval
-	}
-
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
 		val parent = createResourceScope(context.eResource, null, newHashSet)
 		
@@ -227,7 +222,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			};
 			return false
 		]
-		return doGetLocalVariableScope(expressions, newParent)[true];
+		return doGetLocalVariableScope(expressions, newParent, [true]);
 	}
 	
 	protected def IScope doGetLocalVariableScope(Iterable<Expression> expressions, IScope parent, Predicate<SadlResource> predicate) {
@@ -252,6 +247,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
+		return createResourceScope(resource, alias, importedResources, Predicates.alwaysTrue); 
+	}
+	
+	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources, Predicate<EObject> isIncluded) {
 		return cache.get('resource_scope' -> alias, resource) [
 			val shouldWrap = importedResources.empty
 			if (!importedResources.add(resource)) {
@@ -277,7 +276,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			}
 			
 			// finally all the rest
-			newParent = internalGetLocalResourceScope(resource, namespace, newParent, importScope) [true]
+			newParent = internalGetLocalResourceScope(resource, namespace, newParent, importScope, isIncluded)
 			return newParent
 		]
 	}
@@ -299,50 +298,32 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		internalGetLocalResourceScope(resource, namespace, parentScope, importScope, false, isIncluded);
 	}
 
+	@Data
+	protected static class ScopeContext {
+		val EObject obj;
+		val QualifiedName namespace;
+		val IScope parentScope;
+		val IScope importScope;
+		val boolean checkAmbiguity;
+		val Map<QualifiedName, IEObjectDescription> map;
+		val TreeIterator<EObject> iter;
+	}
+
 	protected def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope,
 		IScope importScope, boolean checkAmbiguity, Predicate<EObject> isIncluded) {
 
-		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(resource)
 		val map = <QualifiedName, IEObjectDescription>newHashMap
 		val iter = resource.allContents
 		while (iter.hasNext) {
 			val it = iter.next
 			if (isIncluded.apply(it)) {
+				val context = new ScopeContext(it, namespace, parentScope, importScope, checkAmbiguity, map, iter);
 				switch it {
+					EObject case doSwitch(context) !== null: {
+						doSwitch(context).apply(context);	
+					}
 					SadlResource case concreteName !== null: {
-						val name1 = converter.toQualifiedName(concreteName)
-						val resourceInParentScope = parentScope.getSingleElement(name1);
-						var ambiguousProblem = null as IEObjectDescription;
-						if (resourceInParentScope === null) {
-							map.addElement(name1, it)
-						} else {
-							if (checkAmbiguity) {
-								val resourceInImportScope = importScope.getSingleElement(name1);
-								if (resourceInImportScope !== null) {
-									val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
-									if (name1.segmentCount > 1) {
-										if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
-											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it), ambiguousNameDetection);
-											if (ambiguousProblem !== null) {
-												map.put(name1, ambiguousProblem);
-											}
-										}
-									} else {										
-										if (name1 == nameWithPrefixes) {
-											ambiguousProblem = checkDuplicate(resourceInParentScope, EObjectDescription.create(name1, it), ambiguousNameDetection);
-											if (ambiguousProblem !== null) {
-												map.put(name1, ambiguousProblem);
-											}
-										}
-									}
-								}
-							}
-						}
-						val name2 = if(name1.segments.size == 1) namespace?.append(name1) else name1.skipFirst(1)
-						if (name2 !== null && parentScope.getSingleElement(name2) === null &&
-							ambiguousProblem === null) {
-							map.addElement(name2, it)
-						}
+						handleSadlResource(context);
 					}
 					EquationStatement: {
 						val name = converter.toQualifiedName(it.name.concreteName)
@@ -383,14 +364,67 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						}
 						iter.prune
 					}
-					default :
+					default: {
 						if (pruneScope(it)) {
 							iter.prune
 						}
+					}
 				}
 			}
 		}
 		return MapBasedScope.createScope(parentScope, map.values)
+	}
+		
+	protected def handleSadlResource(ScopeContext context) {
+		val it = context.obj as SadlResource;
+		val parentScope = context.parentScope;
+		val importScope = context.importScope;
+		val checkAmbiguity = context.checkAmbiguity;
+		val namespace = context.namespace;
+		val map = context.map;
+
+		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(eResource)
+		val name1 = converter.toQualifiedName(concreteName)
+		val resourceInParentScope = parentScope.getSingleElement(name1);
+		var ambiguousProblem = null as IEObjectDescription;
+		if (resourceInParentScope === null) {
+			map.addElement(name1, it)
+		} else {
+			if (checkAmbiguity) {
+				val resourceInImportScope = importScope.getSingleElement(name1);
+				if (resourceInImportScope !== null) {
+					val nameWithPrefixes = converter.toQualifiedName(getConcreteName(it, false));
+					if (name1.segmentCount > 1) {
+						if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
+							ambiguousProblem = checkDuplicate(resourceInParentScope,
+								EObjectDescription.create(name1, it), ambiguousNameDetection);
+							if (ambiguousProblem !== null) {
+								map.put(name1, ambiguousProblem);
+							}
+						}
+					} else {
+						if (name1 == nameWithPrefixes) {
+							ambiguousProblem = checkDuplicate(resourceInParentScope,
+								EObjectDescription.create(name1, it), ambiguousNameDetection);
+							if (ambiguousProblem !== null) {
+								map.put(name1, ambiguousProblem);
+							}
+						}
+					}
+				}
+			}
+		}
+		val name2 = if(name1.segments.size == 1) namespace?.append(name1) else name1.skipFirst(1)
+		if (name2 !== null && parentScope.getSingleElement(name2) === null && ambiguousProblem === null) {
+			map.addElement(name2, it)
+		}
+	}
+	
+	/**
+	 * Clients may override to handle anything before visiting the contents of the resource for the internal resource scope.
+	 */
+	protected def (ScopeContext)=>void doSwitch(ScopeContext context) {
+		return null;
 	}
 	
 	protected def pruneScope(EObject object) {
