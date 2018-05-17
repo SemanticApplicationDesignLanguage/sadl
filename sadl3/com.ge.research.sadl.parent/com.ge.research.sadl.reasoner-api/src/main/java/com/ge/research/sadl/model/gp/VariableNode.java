@@ -33,8 +33,8 @@ public class VariableNode extends NamedNode {
 	private Object hostObject = null;
 	private Node type = null;			// the type of the variable or if a list the type of the elements of the list 
 	
-	private List<GraphPatternElement> definition = null;	// definition(s) of the variable
-	private boolean isCRulesVariable = false;		// generated from a Declaration (article before class name)
+	private List<Node> definition = null;	// definition(s) of the variable
+	private boolean isCRulesVariable = false;		// generated from a Declaration with an article before class name
 
 	/**
 	 * Constructor taking variable name as argument
@@ -131,7 +131,7 @@ public class VariableNode extends NamedNode {
 	 * Get the definition(s) of the VariableNode
 	 * @return
 	 */
-	public List<GraphPatternElement> getDefinition() {
+	public List<Node> getDefinitions() {
 		return definition;
 	}
 
@@ -139,13 +139,17 @@ public class VariableNode extends NamedNode {
 	 * Set the definition(s) of the VariableNode
 	 * @param definition
 	 */
-	public void setDefinition(List<GraphPatternElement> definition) {
+	public void setDefinitions(List<Node> definition) {
 		this.definition = definition;
 	}
 	
-	public void addDefinition(GraphPatternElement definition) {
+	/**
+	 * Add a definition to the VariableNode
+	 * @param definition
+	 */
+	public void addDefinition(Node definition) {
 		if (this.definition == null) {
-			this.definition = new ArrayList<GraphPatternElement>();
+			this.definition = new ArrayList<Node>();
 		}
 		this.definition.add(definition);
 	}
@@ -179,7 +183,7 @@ public class VariableNode extends NamedNode {
 		sb.append(" (a variable of type ");
 		if (isList()) {
 			sb.append(getType() != null ? getType().toDescriptiveString() : "<unknown>");
-			sb.append(" List");
+//			sb.append(" List");
 			if (getListLength() >= 0) {
 				sb.append(" length ");
 				sb.append(getListLength());
@@ -210,7 +214,7 @@ public class VariableNode extends NamedNode {
 		sb.append(" (a variable of type ");
 		if (isList()) {
 			sb.append(getType() != null ? getType().toFullyQualifiedString() : "<unknown>");
-			sb.append(" List");
+//			sb.append(" List");
 			if (getListLength() >= 0) {
 				sb.append(" length ");
 				sb.append(getListLength());

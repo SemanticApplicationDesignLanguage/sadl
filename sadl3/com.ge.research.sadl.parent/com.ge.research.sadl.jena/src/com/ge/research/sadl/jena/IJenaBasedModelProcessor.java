@@ -7,6 +7,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.validation.CheckMode;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.gp.Equation;
@@ -120,5 +121,5 @@ public interface IJenaBasedModelProcessor {
 	 * @throws TranslationException 
 	 */
 	public ConceptName namedNodeToConceptName(NamedNode pred) throws TranslationException, InvalidNameException;
-	
+
 }

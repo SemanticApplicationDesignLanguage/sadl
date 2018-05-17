@@ -49,7 +49,6 @@ import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
-import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -60,10 +59,6 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.NumberLiteral;
-import com.ge.research.sadl.sADL.SadlDataType;
-import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
-import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
-import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.google.inject.Inject;
 
@@ -460,14 +455,15 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		if (nodeObj instanceof Node) {
 			return (Node) nodeObj; 
 		}
-		else if (nodeObj instanceof TripleElement) {
-			if (((TripleElement)nodeObj).getPredicate() == null 
+		else if (nodeObj instanceof TripleElement && ((TripleElement)nodeObj).getPredicate() == null 
 					&& ((TripleElement)nodeObj).getObject() == null
 					&& ((TripleElement)nodeObj).getSubject() != null) {
-				return ((TripleElement)nodeObj).getSubject();
-			}
+			return ((TripleElement)nodeObj).getSubject();
 		}
-		return new ProxyNode(nodeObj);
+		else if (nodeObj instanceof GraphPatternElement) {
+			return new ProxyNode((GraphPatternElement) nodeObj);
+		}
+		throw new TranslationException("nodeCheck called with non-Node, non-GraphPatternElement argument: " + nodeObj.getClass().getCanonicalName());
 	}
 
 	protected GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -726,7 +722,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	 * @throws InvalidNameException 
 	 * @throws TranslationException 
 	 */
-	protected Node validateNode(Node node) throws InvalidNameException, TranslationException {
+	public Node validateNode(Node node) throws InvalidNameException, TranslationException {
 		if (node instanceof NamedNode) {
 			if (!((NamedNode)node).isValidated()) {
 				if (node instanceof VariableNode) {
@@ -746,11 +742,14 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //			    		userDefinedVariables.add(((NamedNode) node).getName());
 			    	}
 				}
+				validateNamedNode((NamedNode)node);
 				((NamedNode)node).setValidated(true);
 			}
 		}
 		return node;
 	}
+	
+	public abstract NamedNode validateNamedNode(NamedNode node);
 
 	public ConceptType nodeTypeToConceptType(NodeType nt) throws TranslationException {
 		if (nt.equals(NodeType.ClassNode)) {
