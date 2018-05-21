@@ -36,6 +36,7 @@ import org.junit.Assert
 import org.junit.runner.RunWith
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
+import com.ge.research.sadl.sADL.SadlRangeRestriction
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -59,6 +60,7 @@ abstract class AbstractLinkingTest extends AbstractSadlTest {
 				updateActual(markerFile, decl.value, decl.region, obj, obj.property)
 			} else if (obj instanceof QueryStatement) {
 //				updateActual(markerFile, decl.value, decl.region, obj, obj.expr)
+			} else if (obj instanceof SadlRangeRestriction) {
 			} else {
 				Assert.fail("unexpected node "+obj)
 			}

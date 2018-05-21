@@ -948,8 +948,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e1.printStackTrace();
 		}
 
-		if (!processModelImports(modelOntology, resource.getURI(), model)) {
-			System.err.println("Unable to import models. Is project build enabled?");
+		if(!processModelImports(modelOntology, resource.getURI(), model)) {
+			return;
 		}
 
 		boolean enableMetricsCollection = true; // no longer a preference
@@ -1008,19 +1008,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			try {
 				if (!resource.getURI().lastSegment().equals("SadlImplicitModel.sadl")
 						&& !resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-					// System.out.println("Metrics for '" + resource.getURI().lastSegment() + "':");
-					if (acceptor.getErrorCount() > 0) {
-						String msg = "    Model totals: " + countPlusLabel(acceptor.getErrorCount(), "error") + ", "
-								+ countPlusLabel(acceptor.getWarningCount(), "warning") + ", "
-								+ countPlusLabel(acceptor.getInfoCount(), "info");
-						// System.out.flush();
-						System.err.println("No OWL model output generated for '" + resource.getURI() + "'.");
-						System.err.println(msg);
-						System.err.flush();
-					}
-					// else {
-					// System.out.println(msg);
-					// }
 					if (!isSyntheticUri(null, resource)) {
 						// don't do metrics on JUnit tests
 						if (getMetricsProcessor() != null) {
@@ -3190,8 +3177,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression rexpr = expr.getRight();
 
 		Object result = processBinaryExpressionByParts(expr, op, lexpr, rexpr);
-		checkForArticleForNameInTriple(lexpr, result);
-		checkForArticleForNameInTriple(rexpr, result);
+		if(result instanceof TripleElement) {
+			checkForArticleForNameInTriple(lexpr, result);
+			checkForArticleForNameInTriple(rexpr, result);
+		}else if(result instanceof BuiltinElement) {
+			checkForArticleForNameInBuiltinElement(lexpr, result);
+			checkForArticleForNameInBuiltinElement(rexpr, result);
+		}
 		return result;
 	}
 
@@ -10764,6 +10756,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isUseArticlesInValidation() && value instanceof Name && tripleObject instanceof NamedNode
 					&& ((NamedNode) tripleObject).getNodeType().equals(NodeType.ClassNode)) {
 				addError(SadlErrorMessages.NEEDS_ARTICLE.get(), value);
+			}
+		}
+	}
+	
+	protected void checkForArticleForNameInBuiltinElement(Expression aValue, Object aBuiltinElement) throws InvalidNameException {
+		if(aBuiltinElement instanceof BuiltinElement) {
+			List<Node> lNodeList = ((BuiltinElement) aBuiltinElement).getArguments();
+			if(lNodeList.size() == 2) {
+				Node lNode = lNodeList.get(1);
+				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode) {
+					addError(SadlErrorMessages.NEEDS_ARTICLE.get(), aValue);
+				}
 			}
 		}
 	}
