@@ -3689,6 +3689,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (!isNumericOperator && (isNumericLeft || isNumericRight)) {
 				isNumericOperator = getModelProcessor().canBeNumericOperator(operations);
 			}
+			if(!isNumericOperator) {
+				isNumericOperator = getModelProcessor().isNumericComparisonOperator(operations);
+			}
 			// negated expressions have the type of the expression negated
 			if (leftExpression instanceof UnaryExpression && ((UnaryExpression)leftExpression).getOp().equals("not")) {
 				leftExpression = ((UnaryExpression)leftExpression).getExpr();

@@ -10218,6 +10218,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return false;
 	}
+	
+	public boolean isNumericComparisonOperator(List<String> aOperations) {
+		for(String lOperator : aOperations) {
+			if(isNumericOperator(lOperator)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public boolean isEqualityInequalityComparisonOperator(String operation) {
 		if (equalityInequalityComparisonOperators.contains(operation)) {
