@@ -2978,14 +2978,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					if (vtype instanceof NamedNode) {
 						leftVar.setType(vtype);
-						rest = leftTranslatedDefn;
+//						rest = leftTranslatedDefn;
 						checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
-						addVariableDefinition(leftVar, rest, (NamedNode) vtype, expr);
+//						addVariableDefinition(leftVar, leftTranslatedDefn, (NamedNode) vtype, expr);
 					}
 					else {
 						throw new TranslationException("This shouldn't happen!");
 					}
-					return rest;
+//					return rest;
 				}
 				NamedNode leftDefnType = null;
 				if (leftTranslatedDefn instanceof NamedNode) {
