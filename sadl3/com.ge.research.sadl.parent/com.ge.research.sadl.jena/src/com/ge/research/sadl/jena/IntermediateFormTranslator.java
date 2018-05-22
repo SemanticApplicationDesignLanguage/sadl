@@ -2674,15 +2674,17 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (!gpe.getJunctionType().equals(JunctionType.Disj)) {
 			throw new TranslationException("disjunctionToList called for Junction which is not disjunction");
 		}
+		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>(1);
 		Object lhs = gpe.getLhs();
 		if (lhs instanceof ProxyNode) {
 			if (((ProxyNode)lhs).getProxyFor() instanceof Junction) {
 				List<GraphPatternElement> lgpe = junctionToList((Junction) ((ProxyNode)lhs).getProxyFor());
-				if (lgpe instanceof List<?> && ((List<?>)lgpe).size() == 1) {
-					((ProxyNode)lhs).setProxyFor((GraphPatternElement) ((List<?>)lgpe).get(0));
+				if (lgpe.size() == 1) {
+					((ProxyNode)lhs).setProxyFor(lgpe.get(0));
+					results.add(gpe);
 				}
 				else {
-					((ProxyNode)lhs).setProxyFor((GraphPatternElement) lgpe);
+					results.addAll(lgpe);
 				}
 			}
 		}
@@ -2690,45 +2692,17 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (rhs instanceof ProxyNode) {
 			if (((ProxyNode)rhs).getProxyFor() instanceof Junction) {
 				List<GraphPatternElement> rgpe = junctionToList((Junction) ((ProxyNode)rhs).getProxyFor());
-				if (rgpe instanceof List<?> && ((List<?>)rgpe).size() == 1) {
-					((ProxyNode)rhs).setProxyFor((GraphPatternElement) ((List<?>)rgpe).get(0));
+				if (rgpe.size() == 1) {
+					((ProxyNode)rhs).setProxyFor(rgpe.get(0));
+					results.add(gpe);
 				}
 				else {
-					((ProxyNode)rhs).setProxyFor((GraphPatternElement) rgpe);
+					results.addAll(rgpe);
 				}
 			}
 		}
 		
-		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>(1);
-		results.add(gpe);
 		return results;
-		
-//		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
-//		if (!(lhs instanceof Junction || !((Junction)lhs).getJunctionType().equals(JunctionType.Disj))) {
-//			throw new TranslationException("Top-level left of Junction is not a disjunction; use junctionToList. (Disjunction");
-//		}
-//		if (lhs instanceof Junction && ((Junction)lhs).getJunctionType().equals(JunctionType.Conj)) {
-//			results = junctionToList((Junction)lhs);
-//		}
-//		else {
-////			results = new ArrayList<GraphPatternElement>();
-////			results.add((GraphPatternElement) lhs);
-//			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
-//		}
-//		if (rhs instanceof ProxyNode) rhs = ((ProxyNode)rhs).getProxyFor();
-//		if (rhs instanceof Junction && ((Junction)rhs).getJunctionType().equals(JunctionType.Conj)) {
-//			if (results != null) {
-//				results.addAll(junctionToList((Junction)rhs));
-//			}
-//			else {
-//				results = junctionToList((Junction)rhs);
-//			}
-//		}
-//		else if (rhs instanceof GraphPatternElement){
-////			results.add((GraphPatternElement) rhs);
-//			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
-//		}
-//		return results;
 	}
 
 	/**
