@@ -159,7 +159,8 @@ public class NamedNode extends Node {
 			sb.append(":");
 		}
 		sb.append(name);
-		if (getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode)) {
+		if (getNodeType() != null && 
+				(getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode))) {
 			sb.append(" List");
 		}
 		return sb.toString();
