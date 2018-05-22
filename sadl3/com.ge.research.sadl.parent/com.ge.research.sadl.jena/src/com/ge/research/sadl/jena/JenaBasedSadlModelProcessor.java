@@ -3007,31 +3007,34 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					TripleElement trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
 					trel.setSourceType(TripleSourceType.SPV);
 					return combineRest(trel, rest);
-				} else if (leftVariableDefnTripleMissingObject) {
-					// this is just like a SubjHasProp only the order is reversed
-					((TripleElement) leftTranslatedDefn).setObject(leftVar);
-					return leftTranslatedDefn;
+//				} else if (leftVariableDefnTripleMissingObject) {
+//					// this is just like a SubjHasProp only the order is reversed
+//					((TripleElement) leftTranslatedDefn).setObject(leftVar);
+//					addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+//					return leftTranslatedDefn;
 				} else {
-					TypeCheckInfo varType = getModelValidator().getType(leftVariableDefn);
-					if (varType != null) {
+					if (leftVariableDefnTci == null) {
+						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
+					}
+					if (leftVariableDefnTci != null) {
 						if (leftVar.getType() == null) {
-							if (varType.getCompoundTypes() != null) {
-								Object jct = compoundTypeCheckTypeToNode(varType, leftVariableDefn);
+							if (leftVariableDefnTci.getCompoundTypes() != null) {
+								Object jct = compoundTypeCheckTypeToNode(leftVariableDefnTci, leftVariableDefn);
 								if (jct != null && jct instanceof Junction) {
-									setVarType(leftVar, nodeCheck(jct), varType.isList(), leftVariableDefn);
+									setVarType(leftVar, nodeCheck(jct), leftVariableDefnTci.isList(), leftVariableDefn);
 								} else {
 									addError(
 											"Compound type check did not process into expected result for variable type",
 											leftVariableDefn);
 								}
-							} else if (varType.getTypeCheckType() != null
-									&& varType.getTypeCheckType() instanceof NamedNode) {
-								leftDefnType = (NamedNode) varType.getTypeCheckType();
-								setVarType(leftVar, leftDefnType, varType.isList(), leftVariableDefn);
+							} else if (leftVariableDefnTci.getTypeCheckType() != null
+									&& leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
+								leftDefnType = (NamedNode) leftVariableDefnTci.getTypeCheckType();
+								setVarType(leftVar, leftDefnType, leftVariableDefnTci.isList(), leftVariableDefn);
 							}
 						}
-						if (varType.getTypeCheckType() != null && varType.getTypeCheckType() instanceof NamedNode) {
-							leftDefnType = (NamedNode) varType.getTypeCheckType();
+						if (leftVariableDefnTci.getTypeCheckType() != null && leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
+							leftDefnType = (NamedNode) leftVariableDefnTci.getTypeCheckType();
 						}
 						if (leftTranslatedDefn instanceof GraphPatternElement) {
 							leftVar.addDefinition(nodeCheck((GraphPatternElement) leftTranslatedDefn));
@@ -3042,10 +3045,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //						leftVar.setDefinition((List<GraphPatternElement>) leftTranslatedDefn);
 						throw new TranslationException("This shouldn't happen!");
 					}
-					if (leftTranslatedDefn instanceof TripleElement
-							&& ((TripleElement) leftTranslatedDefn).getObject() == null) {
+					if (leftVariableDefnTripleMissingObject) {
 						// this is a variable definition and the definition is a triple and the triple
-						// has no object
+						// had no object
 						((TripleElement) leftTranslatedDefn).setObject(leftVar);
 						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 						return leftTranslatedDefn;
