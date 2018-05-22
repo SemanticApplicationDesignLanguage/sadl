@@ -3223,8 +3223,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	protected void addVariableNamingEObject(VariableNode leftVar, SadlResource name) {
-		// TODO Auto-generated method stub
+	protected void addVariableNamingEObject(VariableNode var, SadlResource name) {
+		var.setHostObject(name);
 	}
 
 	protected boolean replaceVariable(TripleElement triple, VariableNode var)
