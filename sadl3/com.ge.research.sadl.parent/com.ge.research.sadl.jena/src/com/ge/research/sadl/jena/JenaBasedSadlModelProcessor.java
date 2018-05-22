@@ -2893,6 +2893,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		boolean isLeftVariableDefinition = false;
 		Name leftVariableName = null;
 		Expression leftVariableDefn = null;
+		TypeCheckInfo leftVariableDefnTci = null;
+		boolean leftVariableDefnTripleMissingObject = false;
 
 		// math operations can be a variable on each side of operand
 		boolean isRightVariableDefinition = false;
@@ -2945,7 +2947,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (((Object[]) leftTranslatedDefn)[0].equals(leftVar)) {
 						Node vtype = leftVar.getType();
 						if (vtype instanceof NamedNode) {
-							checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+							leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 							addVariableDefinition(leftVar, rest, (NamedNode) vtype, expr);
 						}
 						return rest;
@@ -2955,9 +2957,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				else {
 					Node vtype = leftVar.getType();
 					if (vtype == null) {
-						TypeCheckInfo defnTci = getModelValidator().getType(leftVariableDefn);
-						if (defnTci != null && defnTci.getTypeCheckType() != null) {
-							vtype = defnTci.getTypeCheckType();
+						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
+						if (leftVariableDefnTci != null && leftVariableDefnTci.getTypeCheckType() != null) {
+							vtype = leftVariableDefnTci.getTypeCheckType();
 							if (vtype != null) {
 								validateNode(vtype);
 							}
@@ -2965,14 +2967,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					if (vtype instanceof NamedNode) {
 						leftVar.setType(vtype);
-//						rest = leftTranslatedDefn;
-						checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
-//						addVariableDefinition(leftVar, leftTranslatedDefn, (NamedNode) vtype, expr);
+						leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 					}
 					else {
 						throw new TranslationException("This shouldn't happen!");
 					}
-//					return rest;
 				}
 				NamedNode leftDefnType = null;
 				if (leftTranslatedDefn instanceof NamedNode) {
@@ -3008,9 +3007,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					TripleElement trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
 					trel.setSourceType(TripleSourceType.SPV);
 					return combineRest(trel, rest);
-				} else if (expr.getRight().equals(leftVariableName) && expr.getLeft() instanceof PropOfSubject
-						&& leftTranslatedDefn instanceof TripleElement
-						&& ((TripleElement) leftTranslatedDefn).getObject() == null) {
+				} else if (leftVariableDefnTripleMissingObject) {
 					// this is just like a SubjHasProp only the order is reversed
 					((TripleElement) leftTranslatedDefn).setObject(leftVar);
 					return leftTranslatedDefn;
