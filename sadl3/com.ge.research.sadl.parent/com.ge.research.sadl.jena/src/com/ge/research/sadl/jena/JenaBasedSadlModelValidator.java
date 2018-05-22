@@ -322,10 +322,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else {
 				StringBuffer sb = new StringBuffer("TypeCheckInfo(");
-				if (getRangeValueType() != null && !getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) {
-					sb.append(getRangeValueType().toString());
-					sb.append(" of values of type, ");
-				}
+//				if (getRangeValueType() != null && !getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) {
+//					sb.append(getRangeValueType().toString());
+//					sb.append(" of values of type, ");
+//				}
 				sb.append(expressionType.toString());
 				sb.append(", ");
 				sb.append(typeCheckType != null ? typeCheckType.toString() : "unknown type");
@@ -1941,8 +1941,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.ClassListNode)) {
 							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.ClassNode);
 						}
+						else if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.DataTypeListNode)) {
+							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.DataTypeNode);
+						}
 						else {
-							throw new TranslationException("unhandled element of list type check type, NamedNode but not ClassListNode");
+							issueAcceptor.addError("Expected a list for list element function", expression);
 						}
 					}
 					else {
@@ -3949,15 +3952,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return null;
 		}
 		if (tcttype instanceof ProxyNode) {
-			if (((ProxyNode)tcttype).getProxyFor() instanceof ConceptIdentifier) {
-				return (ConceptIdentifier) ((ProxyNode)tcttype).getProxyFor();
-			}
-			else if (((ProxyNode)tcttype).getProxyFor() instanceof Junction) {
+			if (((ProxyNode)tcttype).getProxyFor() instanceof Junction) {
 				// convert Junction (or) to SadlUnionClass
 				return junctionToSadlUntionClass((Junction)((ProxyNode)tcttype).getProxyFor());
 			}
 		}
-		return getModelProcessor().namedNodeToConceptName((NamedNode) tci.getTypeCheckType());
+		return getModelProcessor().namedNodeToConceptName((NamedNode)tcttype);
 	}
 
 	private ConceptIdentifier junctionToSadlUntionClass(Junction proxyFor) throws TranslationException, InvalidNameException, InvalidTypeException {

@@ -38,10 +38,10 @@ public class ProxyNode extends Node {
 	}
 
 	/**
-	 * Get the Object for which this ProxyNode is proxy
+	 * Get the GraphPatternElement for which this ProxyNode is proxy
 	 * @return
 	 */
-	public Object getProxyFor() {
+	public GraphPatternElement getProxyFor() {
 		return proxyFor;
 	}
 	
