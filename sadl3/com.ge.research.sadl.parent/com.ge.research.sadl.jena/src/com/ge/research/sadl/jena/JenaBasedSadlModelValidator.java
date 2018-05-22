@@ -3180,6 +3180,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
 				tctype.setNodeType(NodeType.DataTypeListNode);
 			}
+			else if (tctype.getNamespace().equals(XSD.getURI())) {
+				tctype.setNodeType(NodeType.DataTypeListNode);
+			}
 			else {
 				tctype.setNodeType(NodeType.ClassListNode);
 			}
