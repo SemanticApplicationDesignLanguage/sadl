@@ -1163,14 +1163,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
 				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
 			}
-			Node arg0 = ((BuiltinElement)gpe).getArguments().get(0);
-			if (arg0 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg0))) {
-				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg0);
-				arg0 = SadlModelProcessor.nodeCheck(newTriple);
+			Node arg1 = ((BuiltinElement)gpe).getArguments().get(1);
+			if (arg1 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg1))) {
+				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg1);
+				arg1 = SadlModelProcessor.nodeCheck(newTriple);
 			}
-			TripleElement newTriple = new TripleElement(arg0, rip, null);
-			arg0 = SadlModelProcessor.nodeCheck(newTriple);
-			((BuiltinElement)gpe).getArguments().set(0, arg0);			
+			TripleElement newTriple = new TripleElement(arg1, rip, null);
+			arg1 = SadlModelProcessor.nodeCheck(newTriple);
+			((BuiltinElement)gpe).getArguments().set(1, arg1);			
 			for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
 				Node agi = ((BuiltinElement)gpe).getArguments().get(i);
 				if (agi instanceof ProxyNode && ((ProxyNode)agi).getProxyFor() instanceof BuiltinElement) {
