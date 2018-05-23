@@ -62,6 +62,7 @@ import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
+import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
 import com.ge.research.sadl.sADL.SadlConstantLiteral;
 import com.ge.research.sadl.sADL.SadlDataType;
@@ -2824,6 +2825,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					else if (qnmDecl.eContainer() instanceof SadlMustBeOneOf) {
+						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {
+							return getType(((SadlClassOrPropertyDeclaration)qnmDecl.eContainer().eContainer()).getClassOrProperty().get(0));
+						}
+					}else if(qnmDecl.eContainer() instanceof SadlCanOnlyBeOneOf) {
 						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {
 							return getType(((SadlClassOrPropertyDeclaration)qnmDecl.eContainer().eContainer()).getClassOrProperty().get(0));
 						}
