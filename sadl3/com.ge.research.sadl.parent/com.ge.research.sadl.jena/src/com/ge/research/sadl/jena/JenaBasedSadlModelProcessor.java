@@ -5280,7 +5280,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				predNode = new ProxyNode((GraphPatternElement) trPred);
 			}
 			else {
-				throw new TranslationException("Predicate is neither Node nor GraphPatternElement: " + predNode.getClass().getCanonicalName());
+				throw new TranslationException("Predicate is neither Node nor GraphPatternElement: " + trPred.getClass().getCanonicalName());
 			}
 			if (trSubj instanceof Node) {
 				subjNode = (Node) trSubj;
