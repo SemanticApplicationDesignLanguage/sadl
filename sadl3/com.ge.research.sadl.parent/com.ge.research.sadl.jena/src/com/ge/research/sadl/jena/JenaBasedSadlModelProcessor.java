@@ -2956,7 +2956,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else {
 					Node vtype = leftVar.getType();
-					if (vtype == null) {
+					if (vtype == null && leftVariableDefn != null) {
 						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
 						if (leftVariableDefnTci != null && leftVariableDefnTci.getTypeCheckType() != null) {
 							vtype = leftVariableDefnTci.getTypeCheckType();
@@ -2969,7 +2969,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						leftVar.setType(vtype);
 						leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 					}
-					else {
+					else if (vtype != null) {
 						throw new TranslationException("This shouldn't happen!");
 					}
 				}
