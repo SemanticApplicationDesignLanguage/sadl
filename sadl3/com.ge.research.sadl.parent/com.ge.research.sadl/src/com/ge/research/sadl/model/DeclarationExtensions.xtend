@@ -44,7 +44,7 @@ import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
-import com.ge.research.sadl.scoping.QualifiedNameConverter
+import com.google.common.base.Supplier
 import com.google.inject.Inject
 import java.util.HashSet
 import java.util.Set
@@ -52,10 +52,22 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
+import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
+import org.eclipse.emf.ecore.resource.Resource
 
 class DeclarationExtensions {
 	
 	@Inject ValueConverterService.QNameConverter converter
+	
+	/**
+	 * Returns with the concrete name of the SADL resource argument. Any leading prefixes will be removed
+	 * from the name.
+	 * <p>
+	 * This method is equivalent with calling {@link getConcreteName(SadlResource, true)}.
+	 */
+	def String getConcreteName(SadlResource it) {
+		return getConcreteName(it, true);
+	}
 	
 	/**
 	 * Unlike {@link #getConcreteName(SadlResource)} this can be configured, whether the any leading prefixes
@@ -83,19 +95,27 @@ class DeclarationExtensions {
 			return getExternalResourceAdapter.concreteName;
 		}
 		val resource = it.eResource as XtextResource
-		val ()=>String nameSupplyer = [
+		val nameSupplier = getConcreteNameSupplier(it, resource, trimPrefix);
+		if (resource === null) {
+			return nameSupplier.get;
+		}
+		return resource.cache.get(it -> '''concreteName[trimPrefix«trimPrefix»]''', eResource, [nameSupplier.get])
+	}
+	
+	protected def Supplier<String> getConcreteNameSupplier(SadlResource it, Resource resource, boolean trimPrefix) {
+		return [
 			val nodes = findNamedNodes;
 			var name = nodes.map[NodeModelUtils.getTokenText(it)].join('').trim;
 			if (name.isNullOrEmpty) {
 				return null;
 			}
 			if (trimPrefix) {				
-				val index = name.lastIndexOf(QualifiedNameConverter.SEGMENT_SEPARATOR);
+				val index = name.lastIndexOf(SadlQualifiedNameConverter.SEGMENT_SEPARATOR);
 				if (index !== -1) {
 					val ()=>String aliasSupplier = [
 						EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;	
 					];
-					val alias = if (resource !== null) {
+					val alias = if (resource instanceof XtextResource) {
 						resource.cache.get(it -> 'alias', resource, aliasSupplier);
 					} else {
 						aliasSupplier.apply;
@@ -112,21 +132,7 @@ class DeclarationExtensions {
 			}
 			return converter.toValue(name, null);
 		];
-		if (resource === null) {
-			return nameSupplyer.apply;
-		}
-		return resource.cache.get(it -> '''concreteName[trimPrefix«trimPrefix»]''', eResource, nameSupplyer)
-	}
-	
-	/**
-	 * Returns with the concrete name of the SADL resource argument. Any leading prefixes will be removed
-	 * from the name.
-	 * <p>
-	 * This method is equivalent with calling {@link getConcreteName(SadlResource, true)}.
-	 */
-	def String getConcreteName(SadlResource it) {
-		return getConcreteName(it, true);
-	}
+	} 
 
 	private def dispatch findNamedNodes(SadlResource it) {
 		return NodeModelUtils.findNodesForFeature(it, SADLPackage.Literals.SADL_RESOURCE__NAME);
@@ -207,7 +213,7 @@ class DeclarationExtensions {
 		return null
 	}
 	
-	private ThreadLocal<Set<SadlResource>> recursionDetection = new ThreadLocal<Set<SadlResource>>();
+	ThreadLocal<Set<SadlResource>> recursionDetection = new ThreadLocal<Set<SadlResource>>();
 	
 	def OntConceptType getOntConceptType(SadlResource resource) throws CircularDefinitionException {
 		if (resource.isExternal) {
@@ -387,12 +393,12 @@ class DeclarationExtensions {
 		|| (typeRef !== null && typeRef.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE])
 	}
 	
-	public def boolean isExternal(SadlResource resource) {
+	def boolean isExternal(SadlResource resource) {
 		if (resource === null) return false
 		return resource.eResource instanceof ExternalEmfResource
 	}
 	
-	public def boolean isProperty(SadlResource resource) {
+	def boolean isProperty(SadlResource resource) {
 		if (resource instanceof Name && !(resource as Name).name.equals(resource)) {
 			return isProperty((resource as Name).name)
 		}
@@ -407,7 +413,7 @@ class DeclarationExtensions {
 		return false;
 	}
 	
-	public def ExternalResourceAdapter getExternalResourceAdapter(SadlResource resource) {
+	def ExternalResourceAdapter getExternalResourceAdapter(SadlResource resource) {
 		ExternalResourceAdapter.findInEmfObject(resource)
 	}
 }

@@ -62,6 +62,7 @@ import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
+import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
 import com.ge.research.sadl.sADL.SadlConstantLiteral;
 import com.ge.research.sadl.sADL.SadlDataType;
@@ -322,10 +323,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else {
 				StringBuffer sb = new StringBuffer("TypeCheckInfo(");
-				if (getRangeValueType() != null && !getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) {
-					sb.append(getRangeValueType().toString());
-					sb.append(" of values of type, ");
-				}
+//				if (getRangeValueType() != null && !getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) {
+//					sb.append(getRangeValueType().toString());
+//					sb.append(" of values of type, ");
+//				}
 				sb.append(expressionType.toString());
 				sb.append(", ");
 				sb.append(typeCheckType != null ? typeCheckType.toString() : "unknown type");
@@ -1941,8 +1942,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.ClassListNode)) {
 							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.ClassNode);
 						}
+						else if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.DataTypeListNode)) {
+							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.DataTypeNode);
+						}
 						else {
-							throw new TranslationException("unhandled element of list type check type, NamedNode but not ClassListNode");
+							issueAcceptor.addError("Expected a list for list element function", expression);
 						}
 					}
 					else {
@@ -2824,6 +2828,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {
 							return getType(((SadlClassOrPropertyDeclaration)qnmDecl.eContainer().eContainer()).getClassOrProperty().get(0));
 						}
+					}else if(qnmDecl.eContainer() instanceof SadlCanOnlyBeOneOf) {
+						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {
+							return getType(((SadlClassOrPropertyDeclaration)qnmDecl.eContainer().eContainer()).getClassOrProperty().get(0));
+						}
 					}
 				}
 				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNIDENTIFIED.toString(), reference);
@@ -3178,6 +3186,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			tctype.setMaxListLength(getSadlTypedListMaxLengthRestriction(lst));
 			tctype.setMinListLength(getSadlTypedListMinLengthRestriction(lst));
 			if (propertyType != null && propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+				tctype.setNodeType(NodeType.DataTypeListNode);
+			}
+			else if (tctype.getNamespace().equals(XSD.getURI())) {
 				tctype.setNodeType(NodeType.DataTypeListNode);
 			}
 			else {
@@ -3689,6 +3700,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (!isNumericOperator && (isNumericLeft || isNumericRight)) {
 				isNumericOperator = getModelProcessor().canBeNumericOperator(operations);
 			}
+			if(!isNumericOperator) {
+				isNumericOperator = getModelProcessor().isNumericComparisonOperator(operations);
+			}
 			// negated expressions have the type of the expression negated
 			if (leftExpression instanceof UnaryExpression && ((UnaryExpression)leftExpression).getOp().equals("not")) {
 				leftExpression = ((UnaryExpression)leftExpression).getExpr();
@@ -3946,15 +3960,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return null;
 		}
 		if (tcttype instanceof ProxyNode) {
-			if (((ProxyNode)tcttype).getProxyFor() instanceof ConceptIdentifier) {
-				return (ConceptIdentifier) ((ProxyNode)tcttype).getProxyFor();
-			}
-			else if (((ProxyNode)tcttype).getProxyFor() instanceof Junction) {
+			if (((ProxyNode)tcttype).getProxyFor() instanceof Junction) {
 				// convert Junction (or) to SadlUnionClass
 				return junctionToSadlUntionClass((Junction)((ProxyNode)tcttype).getProxyFor());
 			}
 		}
-		return getModelProcessor().namedNodeToConceptName((NamedNode) tci.getTypeCheckType());
+		return getModelProcessor().namedNodeToConceptName((NamedNode)tcttype);
 	}
 
 	private ConceptIdentifier junctionToSadlUntionClass(Junction proxyFor) throws TranslationException, InvalidNameException, InvalidTypeException {

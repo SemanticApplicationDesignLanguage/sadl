@@ -14,15 +14,15 @@ import com.ge.research.sadl.reasoner.InvalidTypeException;
  */
 public class ProxyNode extends Node {
 	
-	private Object proxyFor = null;
+	private GraphPatternElement proxyFor = null;
 	private Node replacementNode = null;
 	
 	/**
-	 * Constructor with single argument for the Object for which it is proxy
+	 * Constructor with single argument for the GraphPatternElement for which it is proxy
 	 * @param _proxyObj
 	 * @throws InvalidTypeException
 	 */
-	public ProxyNode(Object _proxyObj) throws InvalidTypeException {
+	public ProxyNode(GraphPatternElement _proxyObj) throws InvalidTypeException {
 		if (_proxyObj == null) {
 			throw new InvalidTypeException("ProxyNode constructor called with null argument; this should not happen.");
 		}
@@ -30,18 +30,18 @@ public class ProxyNode extends Node {
 	}
 	
 	/**
-	 * Set the Object for which this ProxyNode is proxy
+	 * Set the GraphPatternElement for which this ProxyNode is proxy
 	 * @param _proxyObj
 	 */
-	public void setProxyFor(Object _proxyObj) {
+	public void setProxyFor(GraphPatternElement _proxyObj) {
 		proxyFor = _proxyObj;
 	}
 
 	/**
-	 * Get the Object for which this ProxyNode is proxy
+	 * Get the GraphPatternElement for which this ProxyNode is proxy
 	 * @return
 	 */
-	public Object getProxyFor() {
+	public GraphPatternElement getProxyFor() {
 		return proxyFor;
 	}
 	
@@ -107,9 +107,9 @@ public class ProxyNode extends Node {
 				else if (proxyFor instanceof GraphPatternElement) {
 					return ((GraphPatternElement)proxyFor).toFullyQualifiedString();
 				}
-				else if (proxyFor instanceof Node) {
-					return ((Node) proxyFor).toFullyQualifiedString();
-				}
+//				else if (proxyFor instanceof Node) {
+//					return ((Node) proxyFor).toFullyQualifiedString();
+//				}
 				else {
 					return proxyFor.toString();
 					
@@ -147,9 +147,9 @@ public class ProxyNode extends Node {
 				else if (proxyFor instanceof GraphPatternElement) {
 					return ((GraphPatternElement)proxyFor).toDescriptiveString();
 				}
-				else if (proxyFor instanceof Node) {
-					return ((Node) proxyFor).toDescriptiveString();
-				}
+//				else if (proxyFor instanceof Node) {
+//					return ((Node) proxyFor).toDescriptiveString();
+//				}
 				else {
 					return proxyFor.toString();
 					
