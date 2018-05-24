@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -26,7 +27,7 @@ public interface I_IntermediateFormTranslator {
 	 * Method to obtain a model processor
 	 * @return
 	 */
-	abstract JenaBasedSadlModelProcessor getModelProcessor();
+	abstract SadlModelProcessor getModelProcessor();
 	
 	/**
 	 * Method to transform an Object from the raw form to the "cooked" form, generally meaning that the graph patterns are flattened

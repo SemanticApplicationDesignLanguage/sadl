@@ -424,10 +424,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(name);
 		if (lobj != null) {
-			builtin.addArgument(nodeCheck(lobj));
+			builtin.addArgument(SadlModelProcessor.nodeCheck(lobj));
 		}
 		if (robj != null) {
-			builtin.addArgument(nodeCheck(robj));
+			builtin.addArgument(SadlModelProcessor.nodeCheck(robj));
 		}
 		return builtin;
 	}
@@ -435,8 +435,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private Junction createJunction(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Junction junction = new Junction();
 		junction.setJunctionName(name);
-		junction.setLhs(nodeCheck(lobj));
-		junction.setRhs(nodeCheck(robj));
+		junction.setLhs(SadlModelProcessor.nodeCheck(lobj));
+		junction.setRhs(SadlModelProcessor.nodeCheck(robj));
 		return junction;
 	}
 
@@ -467,8 +467,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (lhs instanceof Literal && rhs instanceof Literal) {
 				lhs = createUnaryBuiltin(sexpr, name, lhs);
 				rhs = createUnaryBuiltin(sexpr, name, rhs);
-				junc.setLhs(nodeCheck(lhs));
-				junc.setRhs(nodeCheck(rhs));
+				junc.setLhs(SadlModelProcessor.nodeCheck(lhs));
+				junc.setRhs(SadlModelProcessor.nodeCheck(rhs));
 			}
 			return junc;
 		}
@@ -493,7 +493,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 		}
 		if (sobj != null) {
-			builtin.addArgument(nodeCheck(sobj));
+			builtin.addArgument(SadlModelProcessor.nodeCheck(sobj));
 		}
 		return builtin;
 	}
@@ -525,24 +525,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return pattern;
 	}
 	
-	protected Node nodeCheck(Object nodeObj) throws InvalidNameException, InvalidTypeException, TranslationException {
-		if (nodeObj == null) {
-//			throw new InvalidTypeException("nodeCheck called with null argument; this should not happen.");
-			return null;
-		}
-		if (nodeObj instanceof Node) {
-			return (Node) nodeObj; 
-		}
-		else if (nodeObj instanceof TripleElement) {
-			if (((TripleElement)nodeObj).getPredicate() == null 
-					&& ((TripleElement)nodeObj).getObject() == null
-					&& ((TripleElement)nodeObj).getSubject() != null) {
-				return ((TripleElement)nodeObj).getSubject();
-			}
-		}
-		return new ProxyNode(nodeObj);
-	}
-
 	/**
 	 * Method to find all of the variables in a graph pattern that might be the implied select variables of a query
 	 * @param pattern
@@ -1181,14 +1163,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
 				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
 			}
-			Node arg0 = ((BuiltinElement)gpe).getArguments().get(0);
-			if (arg0 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg0))) {
-				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg0);
-				arg0 = SadlModelProcessor.nodeCheck(newTriple);
+			Node arg1 = ((BuiltinElement)gpe).getArguments().get(1);
+			if (arg1 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg1))) {
+				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg1);
+				arg1 = SadlModelProcessor.nodeCheck(newTriple);
 			}
-			TripleElement newTriple = new TripleElement(arg0, rip, null);
-			arg0 = SadlModelProcessor.nodeCheck(newTriple);
-			((BuiltinElement)gpe).getArguments().set(0, arg0);			
+			TripleElement newTriple = new TripleElement(arg1, rip, null);
+			arg1 = SadlModelProcessor.nodeCheck(newTriple);
+			((BuiltinElement)gpe).getArguments().set(1, arg1);			
 			for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
 				Node agi = ((BuiltinElement)gpe).getArguments().get(i);
 				if (agi instanceof ProxyNode && ((ProxyNode)agi).getProxyFor() instanceof BuiltinElement) {
@@ -1537,8 +1519,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (rhsRemoved) {
 			return (GraphPatternElement) lhs;
 		}
-		tgpe.setLhs(nodeCheck(lhs));
-		tgpe.setRhs(nodeCheck(rhs));
+		tgpe.setLhs(SadlModelProcessor.nodeCheck(lhs));
+		tgpe.setRhs(SadlModelProcessor.nodeCheck(rhs));
 		return tgpe;
 	}
 
@@ -1601,7 +1583,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		Junction jand = new Junction();
 		jand.setJunctionName("and");
-		jand.setLhs(nodeCheck(lhs));
+		jand.setLhs(SadlModelProcessor.nodeCheck(lhs));
 		if (patterns.size() > 1) {
 			patterns = listToAnd(patterns);
 		}
@@ -1609,7 +1591,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (rhs instanceof List<?>) {
 			rhs = listToAnd((List<GraphPatternElement>) rhs).get(0);
 		}
-		jand.setRhs(nodeCheck(rhs));
+		jand.setRhs(SadlModelProcessor.nodeCheck(rhs));
 		patterns.set(0, jand);
 		return patterns;
 	}
@@ -1624,9 +1606,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		GraphPatternElement lhs = patterns.remove(0);
 		Junction jor = new Junction();
 		jor.setJunctionName("or");
-		jor.setLhs(nodeCheck(lhs));
+		jor.setLhs(SadlModelProcessor.nodeCheck(lhs));
 		GraphPatternElement rhs = listToOr(patterns);
-		jor.setRhs(nodeCheck(rhs));
+		jor.setRhs(SadlModelProcessor.nodeCheck(rhs));
 		return jor;
 	}
 
@@ -1670,19 +1652,19 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				BuiltinElement lhsbe = new BuiltinElement();
 				lhsbe.setFuncName("==");
 				lhsbe.setCreatedFromInterval(true);
-				lhsbe.addArgument(nodeCheck(lhs));
-				((Junction)pattern).setLhs(nodeCheck(lhsbe));
+				lhsbe.addArgument(SadlModelProcessor.nodeCheck(lhs));
+				((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(lhsbe));
 			}
 			else {
 				expandProxyNodes(lhsPatterns, lhs, isRuleThen);
 				if (lhsPatterns.size() == 1) {
-					((Junction)pattern).setLhs(nodeCheck(lhsPatterns.get(0)));
+					((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(lhsPatterns.get(0)));
 				}
 				else if (lhsPatterns.size() < 1) {
-					((Junction)pattern).setLhs(nodeCheck(lhs));
+					((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(lhs));
 				}
 				else {
-					((Junction)pattern).setLhs(nodeCheck(listToAnd(lhsPatterns).get(0)));
+					((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(listToAnd(lhsPatterns).get(0)));
 	//				throw new TranslationException("LHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
@@ -1691,20 +1673,20 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				BuiltinElement rhsbe = new BuiltinElement();
 				rhsbe.setFuncName("==");
 				rhsbe.setCreatedFromInterval(true);
-				rhsbe.addArgument(nodeCheck(rhs));
-				retval = nodeCheck(rhsbe);
+				rhsbe.addArgument(SadlModelProcessor.nodeCheck(rhs));
+				retval = SadlModelProcessor.nodeCheck(rhsbe);
 				((Junction)pattern).setRhs(retval);
 			}
 			else {
 				retval = expandProxyNodes(rhsPatterns, rhs, isRuleThen);
 				if (rhsPatterns.size() == 1) {
-					((Junction)pattern).setRhs(nodeCheck(rhsPatterns.get(0)));
+					((Junction)pattern).setRhs(SadlModelProcessor.nodeCheck(rhsPatterns.get(0)));
 				}
 				else if (rhsPatterns.size() < 1) {
-					((Junction)pattern).setRhs(nodeCheck(rhs));
+					((Junction)pattern).setRhs(SadlModelProcessor.nodeCheck(rhs));
 				}
 				else {
-					((Junction)pattern).setRhs(nodeCheck(listToAnd(rhsPatterns).get(0)));
+					((Junction)pattern).setRhs(SadlModelProcessor.nodeCheck(listToAnd(rhsPatterns).get(0)));
 	//				throw new TranslationException("RHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
@@ -1756,9 +1738,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						subjNode = ((TripleElement)realSubj).getSubject();
 					}
 				}
-				((ProxyNode)subj).setReplacementNode(nodeCheck(subjNode));
+				((ProxyNode)subj).setReplacementNode(SadlModelProcessor.nodeCheck(subjNode));
 				retiredProxyNodes.put((GraphPatternElement) realSubj, (ProxyNode)subj);
-				subj = nodeCheck(subjNode);
+				subj = SadlModelProcessor.nodeCheck(subjNode);
 				if (realSubj instanceof TripleElement && ((TripleElement)realSubj).getSourceType() != null && 
 						((TripleElement)realSubj).getSourceType().equals(TripleSourceType.ITC)) {
 					returnNode = subj;
@@ -1831,10 +1813,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				if (objNode == null) {
 					addError(new IFTranslationError("Translation to Intermediate Form failed: " + te.toString()));
 				}
-				((ProxyNode)obj).setReplacementNode(nodeCheck(objNode));
+				((ProxyNode)obj).setReplacementNode(SadlModelProcessor.nodeCheck(objNode));
 // TODO this has a problem, run on 	TestSadlIde/Sandbox/UnionClassInRule.sadl			
 				retiredProxyNodes.put((GraphPatternElement) ((ProxyNode)obj).getProxyFor(), (ProxyNode)obj);
-				obj = nodeCheck(objNode);
+				obj = SadlModelProcessor.nodeCheck(objNode);
 			}
 			te.setObject(obj);
 			if (!patterns.contains(te)) {
@@ -1926,7 +1908,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						if (tcitype instanceof NamedNode) {
 							NamedNode defn;
 							defn = new NamedNode(((NamedNode)tcitype).toFullyQualifiedString(), ((NamedNode)tcitype).getNodeType());
-							var.setType(modelProcessor.validateNamedNode((NamedNode) defn));
+							var.setType(modelProcessor.validateNode(defn));
 						}
 						else {
 							addError(new IFTranslationError("Domain type did not return a ConceptName."));
@@ -1942,7 +1924,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						if (tcitype instanceof NamedNode) {
 							NamedNode defn;
 							defn = new NamedNode(((NamedNode)tcitype).toFullyQualifiedString(), ((NamedNode)tcitype).getNodeType());
-							var.setType(modelProcessor.validateNamedNode((NamedNode) defn));
+							var.setType(modelProcessor.validateNode(defn));
 						}
 						else {
 							addError(new IFTranslationError("Range type did not return a ConceptName."));
@@ -2175,28 +2157,27 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				Node newNode = getVariableNode((BuiltinElement)realArgForIfs);
 				((BuiltinElement)realArgForIfs).addArgument(newNode);
 				finalIfsVar = newNode;
-				((ProxyNode)arg1PN).setReplacementNode(nodeCheck(finalIfsVar));
+				((ProxyNode)arg1PN).setReplacementNode(SadlModelProcessor.nodeCheck(finalIfsVar));
 				retiredProxyNodes.put((GraphPatternElement) realArgForIfs, arg1PN);
 			}
 			if (realArgForThen instanceof TripleElement && ((TripleElement)realArgForThen).getObject() == null) {
 				Object finalThensVar = expandProxyNodes(patterns, realArgForThen, isRuleThen);
-				((TripleElement)realArgForThen).setObject(nodeCheck(finalIfsVar));
+				((TripleElement)realArgForThen).setObject(SadlModelProcessor.nodeCheck(finalIfsVar));
 				if (!patterns.contains((TripleElement)realArgForThen)) {
 					patterns.add((TripleElement)realArgForThen);
 				}
 				if (be.getFuncName().equals("assign")) {
 					((TripleElement)realArgForThen).setType(TripleModifierType.Assignment);
 				}
-//				applyExpandedAndImpliedProperties(patterns, be, realArgForThen, moveToIfts, finalIfsVar);
 			}
 			else if (realArgForThen instanceof BuiltinElement && ((BuiltinElement)realArgForThen).getArguments() != null) {
 				if (((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1) == null) {
-					((BuiltinElement)realArgForThen).getArguments().set(((BuiltinElement)realArgForThen).getArguments().size() - 1, nodeCheck(finalIfsVar));
+					((BuiltinElement)realArgForThen).getArguments().set(((BuiltinElement)realArgForThen).getArguments().size() - 1, SadlModelProcessor.nodeCheck(finalIfsVar));
 				}
 				else if (((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1) instanceof ProxyNode &&
 						((ProxyNode)((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1)).getProxyFor() instanceof TripleElement &&
 						((TripleElement)((ProxyNode)((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1)).getProxyFor()).getObject() == null) {
-					((TripleElement)((ProxyNode)((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1)).getProxyFor()).setObject(nodeCheck(finalIfsVar));
+					((TripleElement)((ProxyNode)((BuiltinElement)realArgForThen).getArguments().get(((BuiltinElement)realArgForThen).getArguments().size() - 1)).getProxyFor()).setObject(SadlModelProcessor.nodeCheck(finalIfsVar));
 				}
 				else {
 					throw new TranslationException("Unhandled condition, LHS of Equal in Then isn't a BuiltinElement that needs an argument: " + realArgForThen.toString());
@@ -2273,9 +2254,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 								Node newNode = getVariableNode((BuiltinElement)realArg);
 								((BuiltinElement)realArg).addArgument(newNode);
 								argNode = newNode;
-								((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
+								((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
 								retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
-								args.set(i, nodeCheck(argNode));
+								args.set(i, SadlModelProcessor.nodeCheck(argNode));
 							}
 						}
 						else if (realArg instanceof TripleElement) {
@@ -2300,21 +2281,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						}
 					}
 					else {
-						((ProxyNode)arg).setReplacementNode(nodeCheck(argNode));
+						((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
 						if (realArg instanceof GraphPatternElement) {
 							retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
 						}
 						else {
 							throw new TranslationException("Expected GraphPatternElement in ProxyNode but got " + realArg.getClass().getCanonicalName());
 						}
-						List<GraphPatternElement> moveToIfts = new ArrayList<GraphPatternElement>();
-//						Object replacementArg = applyExpandedAndImpliedProperties(patterns, be, realArg, moveToIfts, argNode);
-//						if (replacementArg != null) {
-//							args.set(i,  nodeCheck(replacementArg));
-//						}
-//						else {
-							args.set(i, nodeCheck(argNode));
-//						}
+						args.set(i, SadlModelProcessor.nodeCheck(argNode));
 					}
 				}
 			}
@@ -2357,10 +2331,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						newVar = getVariableNode(be);
 					}
 				}
-				TripleElement epTriple = new TripleElement(nodeCheck(thereExistsVar), ep, newVar);
+				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(thereExistsVar), ep, newVar);
 				patterns.add(epTriple);
 				if (createTriple) {
-					TripleElement epTriple2 = new TripleElement(nodeCheck(finalIfsVar), ep, newVar);
+					TripleElement epTriple2 = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), ep, newVar);
 					moveToIfts.add(epTriple2);
 				}
 			}
@@ -2376,7 +2350,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 			if (createTriple) {
-				TripleElement epTriple = new TripleElement(nodeCheck(finalIfsVar), nodeCheck(be.getLeftImpliedPropertyUsed()), newVar);
+				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), SadlModelProcessor.nodeCheck(be.getLeftImpliedPropertyUsed()), newVar);
 				patterns.add(epTriple);
 			}
 			return newVar;
@@ -2392,7 +2366,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 			if (createTriple) {
-				TripleElement epTriple = new TripleElement(nodeCheck(finalIfsVar), nodeCheck(be.getRightImpliedPropertyUsed()), newVar);
+				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), SadlModelProcessor.nodeCheck(be.getRightImpliedPropertyUsed()), newVar);
 				moveToIfts.add(epTriple);
 			}
 			return newVar;
@@ -2480,14 +2454,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			flattenJunction((Junction)lhs);
 		}
 		else if (lhs instanceof GraphPatternElement && ((GraphPatternElement)lhs).getNext() != null) {
-			element.setLhs(nodeCheck(flattenJunctionSide((GraphPatternElement) lhs)));
+			element.setLhs(SadlModelProcessor.nodeCheck(flattenJunctionSide((GraphPatternElement) lhs)));
 		}
 		Object rhs = element.getRhs();
 		if (rhs instanceof Junction) {
 			flattenJunction((Junction)rhs);
 		}
 		else if (rhs instanceof GraphPatternElement && ((GraphPatternElement)rhs).getNext() != null) {
-			element.setRhs(nodeCheck(flattenJunctionSide((GraphPatternElement) rhs)));
+			element.setRhs(SadlModelProcessor.nodeCheck(flattenJunctionSide((GraphPatternElement) rhs)));
 		}
 	}
 	
@@ -2583,7 +2557,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			foundFirst = ((Boolean)lhsResults[1]).booleanValue();
 			removalCnt = ((Integer)lhsResults[2]).intValue();
 			if (!newLhs.equals(lhs)) {
-				gpe.setLhs(nodeCheck(newLhs));
+				gpe.setLhs(SadlModelProcessor.nodeCheck(newLhs));
 			}
 		}
 		Object rhs = gpe.getRhs();
@@ -2599,7 +2573,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			foundFirst = ((Boolean)rhsResults[1]).booleanValue();
 			removalCnt = ((Integer)rhsResults[2]).intValue();
 			if (!newrhs.equals(rhs)) {
-				gpe.setRhs(nodeCheck(newrhs));
+				gpe.setRhs(SadlModelProcessor.nodeCheck(newrhs));
 			}
 		}
 		Object[] results = new Object[3];
@@ -2700,15 +2674,17 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (!gpe.getJunctionType().equals(JunctionType.Disj)) {
 			throw new TranslationException("disjunctionToList called for Junction which is not disjunction");
 		}
+		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>(1);
 		Object lhs = gpe.getLhs();
 		if (lhs instanceof ProxyNode) {
 			if (((ProxyNode)lhs).getProxyFor() instanceof Junction) {
 				List<GraphPatternElement> lgpe = junctionToList((Junction) ((ProxyNode)lhs).getProxyFor());
-				if (lgpe instanceof List<?> && ((List<?>)lgpe).size() == 1) {
-					((ProxyNode)lhs).setProxyFor(((List<?>)lgpe).get(0));
+				if (lgpe.size() == 1) {
+					((ProxyNode)lhs).setProxyFor(lgpe.get(0));
+					results.add(gpe);
 				}
 				else {
-					((ProxyNode)lhs).setProxyFor(lgpe);
+					results.addAll(lgpe);
 				}
 			}
 		}
@@ -2716,45 +2692,17 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (rhs instanceof ProxyNode) {
 			if (((ProxyNode)rhs).getProxyFor() instanceof Junction) {
 				List<GraphPatternElement> rgpe = junctionToList((Junction) ((ProxyNode)rhs).getProxyFor());
-				if (rgpe instanceof List<?> && ((List<?>)rgpe).size() == 1) {
-					((ProxyNode)rhs).setProxyFor(((List<?>)rgpe).get(0));
+				if (rgpe.size() == 1) {
+					((ProxyNode)rhs).setProxyFor(rgpe.get(0));
+					results.add(gpe);
 				}
 				else {
-					((ProxyNode)rhs).setProxyFor(rgpe);
+					results.addAll(rgpe);
 				}
 			}
 		}
 		
-		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>(1);
-		results.add(gpe);
 		return results;
-		
-//		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
-//		if (!(lhs instanceof Junction || !((Junction)lhs).getJunctionType().equals(JunctionType.Disj))) {
-//			throw new TranslationException("Top-level left of Junction is not a disjunction; use junctionToList. (Disjunction");
-//		}
-//		if (lhs instanceof Junction && ((Junction)lhs).getJunctionType().equals(JunctionType.Conj)) {
-//			results = junctionToList((Junction)lhs);
-//		}
-//		else {
-////			results = new ArrayList<GraphPatternElement>();
-////			results.add((GraphPatternElement) lhs);
-//			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
-//		}
-//		if (rhs instanceof ProxyNode) rhs = ((ProxyNode)rhs).getProxyFor();
-//		if (rhs instanceof Junction && ((Junction)rhs).getJunctionType().equals(JunctionType.Conj)) {
-//			if (results != null) {
-//				results.addAll(junctionToList((Junction)rhs));
-//			}
-//			else {
-//				results = junctionToList((Junction)rhs);
-//			}
-//		}
-//		else if (rhs instanceof GraphPatternElement){
-////			results.add((GraphPatternElement) rhs);
-//			throw new TranslationException("Unexpected disjunction encountered in Junction; use disjunctionToList");
-//		}
-//		return results;
 	}
 
 	/**

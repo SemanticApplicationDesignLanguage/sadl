@@ -948,8 +948,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e1.printStackTrace();
 		}
 
-		if (!processModelImports(modelOntology, resource.getURI(), model)) {
-			System.err.println("Unable to import models. Is project build enabled?");
+		if(!processModelImports(modelOntology, resource.getURI(), model)) {
+			return;
 		}
 
 		boolean enableMetricsCollection = true; // no longer a preference
@@ -1008,19 +1008,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			try {
 				if (!resource.getURI().lastSegment().equals("SadlImplicitModel.sadl")
 						&& !resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-					// System.out.println("Metrics for '" + resource.getURI().lastSegment() + "':");
-					if (acceptor.getErrorCount() > 0) {
-						String msg = "    Model totals: " + countPlusLabel(acceptor.getErrorCount(), "error") + ", "
-								+ countPlusLabel(acceptor.getWarningCount(), "warning") + ", "
-								+ countPlusLabel(acceptor.getInfoCount(), "info");
-						// System.out.flush();
-						System.err.println("No OWL model output generated for '" + resource.getURI() + "'.");
-						System.err.println(msg);
-						System.err.flush();
-					}
-					// else {
-					// System.out.println(msg);
-					// }
 					if (!isSyntheticUri(null, resource)) {
 						// don't do metrics on JUnit tests
 						if (getMetricsProcessor() != null) {
@@ -2906,6 +2893,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		boolean isLeftVariableDefinition = false;
 		Name leftVariableName = null;
 		Expression leftVariableDefn = null;
+		TypeCheckInfo leftVariableDefnTci = null;
+		boolean leftVariableDefnTripleMissingObject = false;
 
 		// math operations can be a variable on each side of operand
 		boolean isRightVariableDefinition = false;
@@ -2958,11 +2947,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (((Object[]) leftTranslatedDefn)[0].equals(leftVar)) {
 						Node vtype = leftVar.getType();
 						if (vtype instanceof NamedNode) {
+							leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 							addVariableDefinition(leftVar, rest, (NamedNode) vtype, expr);
 						}
 						return rest;
 					}
 					leftTranslatedDefn = ((Object[]) leftTranslatedDefn)[0];
+				}
+				else {
+					Node vtype = leftVar.getType();
+					if (vtype == null) {
+						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
+						if (leftVariableDefnTci != null && leftVariableDefnTci.getTypeCheckType() != null) {
+							vtype = leftVariableDefnTci.getTypeCheckType();
+							if (vtype != null) {
+								validateNode(vtype);
+							}
+						}
+					}
+					if (vtype instanceof NamedNode) {
+						leftVar.setType(vtype);
+						leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+					}
+					else {
+						throw new TranslationException("This shouldn't happen!");
+					}
 				}
 				NamedNode leftDefnType = null;
 				if (leftTranslatedDefn instanceof NamedNode) {
@@ -2998,46 +3007,47 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					TripleElement trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
 					trel.setSourceType(TripleSourceType.SPV);
 					return combineRest(trel, rest);
-				} else if (expr.getRight().equals(leftVariableName) && expr.getLeft() instanceof PropOfSubject
-						&& leftTranslatedDefn instanceof TripleElement
-						&& ((TripleElement) leftTranslatedDefn).getObject() == null) {
-					// this is just like a SubjHasProp only the order is reversed
-					((TripleElement) leftTranslatedDefn).setObject(leftVar);
-					return leftTranslatedDefn;
+//				} else if (leftVariableDefnTripleMissingObject) {
+//					// this is just like a SubjHasProp only the order is reversed
+//					((TripleElement) leftTranslatedDefn).setObject(leftVar);
+//					addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+//					return leftTranslatedDefn;
 				} else {
-					TypeCheckInfo varType = getModelValidator().getType(leftVariableDefn);
-					if (varType != null) {
+					if (leftVariableDefnTci == null) {
+						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
+					}
+					if (leftVariableDefnTci != null) {
 						if (leftVar.getType() == null) {
-							if (varType.getCompoundTypes() != null) {
-								Object jct = compoundTypeCheckTypeToNode(varType, leftVariableDefn);
+							if (leftVariableDefnTci.getCompoundTypes() != null) {
+								Object jct = compoundTypeCheckTypeToNode(leftVariableDefnTci, leftVariableDefn);
 								if (jct != null && jct instanceof Junction) {
-									setVarType(leftVar, nodeCheck(jct), varType.isList(), leftVariableDefn);
+									setVarType(leftVar, nodeCheck(jct), leftVariableDefnTci.isList(), leftVariableDefn);
 								} else {
 									addError(
 											"Compound type check did not process into expected result for variable type",
 											leftVariableDefn);
 								}
-							} else if (varType.getTypeCheckType() != null
-									&& varType.getTypeCheckType() instanceof NamedNode) {
-								leftDefnType = (NamedNode) varType.getTypeCheckType();
-								setVarType(leftVar, leftDefnType, varType.isList(), leftVariableDefn);
+							} else if (leftVariableDefnTci.getTypeCheckType() != null
+									&& leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
+								leftDefnType = (NamedNode) leftVariableDefnTci.getTypeCheckType();
+								setVarType(leftVar, leftDefnType, leftVariableDefnTci.isList(), leftVariableDefn);
 							}
 						}
-						if (varType.getTypeCheckType() != null && varType.getTypeCheckType() instanceof NamedNode) {
-							leftDefnType = (NamedNode) varType.getTypeCheckType();
+						if (leftVariableDefnTci.getTypeCheckType() != null && leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
+							leftDefnType = (NamedNode) leftVariableDefnTci.getTypeCheckType();
 						}
 						if (leftTranslatedDefn instanceof GraphPatternElement) {
-							leftVar.addDefinition((GraphPatternElement) leftTranslatedDefn);
+							leftVar.addDefinition(nodeCheck((GraphPatternElement) leftTranslatedDefn));
 						}
 					} else if (leftTranslatedDefn instanceof GraphPatternElement) {
-						leftVar.addDefinition((GraphPatternElement) leftTranslatedDefn);
+						leftVar.addDefinition(nodeCheck((GraphPatternElement) leftTranslatedDefn));
 					} else if (leftTranslatedDefn instanceof List<?>) {
-						leftVar.setDefinition((List<GraphPatternElement>) leftTranslatedDefn);
+//						leftVar.setDefinition((List<GraphPatternElement>) leftTranslatedDefn);
+						throw new TranslationException("This shouldn't happen!");
 					}
-					if (leftTranslatedDefn instanceof TripleElement
-							&& ((TripleElement) leftTranslatedDefn).getObject() == null) {
+					if (leftVariableDefnTripleMissingObject) {
 						// this is a variable definition and the definition is a triple and the triple
-						// has no object
+						// had no object
 						((TripleElement) leftTranslatedDefn).setObject(leftVar);
 						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 						return leftTranslatedDefn;
@@ -3120,15 +3130,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 						}
 					} else if (rightTranslatedDefn instanceof GraphPatternElement) {
-						if (rightVar.getDefinition() != null) {
-							rightVar.getDefinition().add((GraphPatternElement) rightTranslatedDefn);
-						} else {
-							List<GraphPatternElement> defnLst = new ArrayList<GraphPatternElement>(1);
-							defnLst.add((GraphPatternElement) rightTranslatedDefn);
-							rightVar.setDefinition(defnLst);
-						}
+						rightVar.addDefinition(nodeCheck((GraphPatternElement) rightTranslatedDefn));
 					} else if (rightTranslatedDefn instanceof List<?>) {
-						rightVar.setDefinition((List<GraphPatternElement>) rightTranslatedDefn);
+//						rightVar.setDefinition((List<GraphPatternElement>) rightTranslatedDefn);
+						throw new TranslationException("This shouldn't happen!");
 					}
 				}
 				Object lobj = processExpression(expr.getLeft());
@@ -3171,9 +3176,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression rexpr = expr.getRight();
 
 		Object result = processBinaryExpressionByParts(expr, op, lexpr, rexpr);
-		checkForArticleForNameInTriple(lexpr, result);
-		checkForArticleForNameInTriple(rexpr, result);
+		if(result instanceof TripleElement) {
+			checkForArticleForNameInTriple(lexpr, result);
+			checkForArticleForNameInTriple(rexpr, result);
+		}else if(result instanceof BuiltinElement) {
+			checkForArticleForNameInBuiltinElement(lexpr, result);
+			checkForArticleForNameInBuiltinElement(rexpr, result);
+		}
 		return result;
+	}
+
+	/**
+	 * Method to set the object of a defining triple to the variable being defined when appropriate
+	 * @param var
+	 * @param defn
+	 * @param defnExpr
+	 * @return
+	 */
+	private boolean checkForMissingVariableInTriple(VariableNode var, Object defn,
+			Expression defnExpr) {
+		if (defnExpr instanceof PropOfSubject && defn instanceof TripleElement && ((TripleElement)defn).getObject() == null) {
+			((TripleElement)defn).setObject(var);
+			return true;
+		}
+		return false;
 	}
 
 	private void setVariableInDefinition(EObject decl, VariableNode var) {
@@ -3196,8 +3222,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	protected void addVariableNamingEObject(VariableNode leftVar, SadlResource name) {
-		// TODO Auto-generated method stub
+	protected void addVariableNamingEObject(VariableNode var, SadlResource name) {
+		var.setHostObject(name);
 	}
 
 	protected boolean replaceVariable(TripleElement triple, VariableNode var)
@@ -3216,10 +3242,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	// return var;
 	// }
 	//
-	private void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException {
+	private void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException {
 		// if it hasn't been set before just set it
 		if (vartype instanceof NamedNode) {
-			vartype = validateNamedNode((NamedNode) vartype);
+			vartype = validateNode(vartype);
 		}
 		if (var.getType() == null) {
 			if (isList(null, defn)) {
@@ -3329,6 +3355,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				+ vartype.toString() + "' not allowed.", defn);
 	}
 
+	@Override
 	public NamedNode validateNamedNode(NamedNode namedNode) {
 		if (namedNode.getPrefix() == null) {
 			namedNode.setPrefix(getConfigMgr().getGlobalPrefix(namedNode.getNamespace()));
@@ -3877,7 +3904,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private Object[] getDeclarationAndTranslation(Expression expr) throws TranslationException {
+	private Object[] getDeclarationAndTranslation(Expression expr) throws TranslationException, InvalidNameException {
 		Declaration decl = getLeftDeclaration(expr);
 		if (decl != null) {
 			Object declprocessed = processExpression(decl);
@@ -4400,7 +4427,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return getTheJenaModel().getOntResource(node.toFullyQualifiedString());
 	}
 
-	protected VariableNode declarationToImplicitVariable(Declaration decl) throws TranslationException {
+	protected VariableNode declarationToImplicitVariable(Declaration decl) throws TranslationException, InvalidNameException {
 		Object var = processExpression(decl);
 		if (var instanceof VariableNode) {
 			return (VariableNode) var;
@@ -4688,7 +4715,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return new ConstantNode(expr.getConstant());
 	}
 
-	public Object processExpression(Declaration expr) throws TranslationException {
+	public Object processExpression(Declaration expr) throws TranslationException, InvalidNameException {
 		// String nn = expr.getNewName();
 		SadlTypeReference type = expr.getType();
 		String article = expr.getArticle();
@@ -5249,13 +5276,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			TripleElement returnTriple = null;
 			if (trPred instanceof Node) {
 				predNode = (Node) trPred;
-			} else {
-				predNode = new ProxyNode(trPred);
+			} else if (trPred instanceof GraphPatternElement){
+				predNode = new ProxyNode((GraphPatternElement) trPred);
+			}
+			else {
+				throw new TranslationException("Predicate is neither Node nor GraphPatternElement: " + trPred.getClass().getCanonicalName());
 			}
 			if (trSubj instanceof Node) {
 				subjNode = (Node) trSubj;
-			} else if (trSubj != null) {
-				subjNode = new ProxyNode(trSubj);
+			} else if (trSubj instanceof GraphPatternElement) {
+				subjNode = new ProxyNode((GraphPatternElement) trSubj);
+			}
+			else if (subjNode != null) {
+				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
 			}
 			if (predNode != null && predNode instanceof Node) {
 				returnTriple = new TripleElement(subjNode, predNode, null);
@@ -5883,7 +5916,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (eobj instanceof Node) {
 			bi.addArgument((Node) eobj);
 		} else if (eobj instanceof GraphPatternElement) {
-			bi.addArgument(new ProxyNode(eobj));
+			bi.addArgument(new ProxyNode((GraphPatternElement) eobj));
 		} else if (eobj == null) {
 			addError("Unary operator '" + op + "' has no argument. Perhaps parentheses are needed.", expr);
 		} else {
@@ -6073,6 +6106,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		else if (superElement instanceof SadlSimpleTypeReference) {
 			SadlResource superSR = ((SadlSimpleTypeReference) superElement).getType();
 			String superSRUri = getDeclarationExtensions().getConceptUri(superSR);
+			if (superSR != null && superSRUri == null) {
+				addError("Unable to find superclass of in the ontology", superElement);
+			}
 			OntConceptType superElementType;
 			try {
 				superElementType = getDeclarationExtensions().getOntConceptType(superSR);
@@ -6184,7 +6220,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		EList<SadlPropertyRestriction> restrictions = element.getRestrictions();
-		if (restrictions != null) {
+		if (restrictions != null && rsrcList != null && rsrcList.size() > 0) {
 			Iterator<SadlPropertyRestriction> ritr = restrictions.iterator();
 			while (ritr.hasNext()) {
 				SadlPropertyRestriction rest = ritr.next();
@@ -10226,6 +10262,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return false;
 	}
+	
+	public boolean isNumericComparisonOperator(List<String> aOperations) {
+		for(String lOperator : aOperations) {
+			if(isNumericComparisonOperator(lOperator)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public boolean isEqualityInequalityComparisonOperator(String operation) {
 		if (equalityInequalityComparisonOperators.contains(operation)) {
@@ -10461,7 +10506,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected VariableNode addCruleVariable(NamedNode type, int ordinalNumber, String name, EObject expr, EObject host)
-			throws TranslationException {
+			throws TranslationException, InvalidNameException {
 		if (cruleVariables == null) {
 			cruleVariables = new HashMap<NamedNode, List<VariableNode>>();
 		}
@@ -10469,7 +10514,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			List<VariableNode> newList = new ArrayList<VariableNode>();
 			VariableNode var = new VariableNode(name);
 			var.setCRulesVariable(true);
-			var.setType(validateNamedNode(type));
+			var.setType(validateNode(type));
 			var.setHostObject(getHostEObject());
 			newList.add(var);
 			cruleVariables.put(type, newList);
@@ -10486,7 +10531,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (idx == ordinalNumber - 1) {
 				VariableNode var = new VariableNode(name);
 				var.setCRulesVariable(true);
-				var.setType(validateNamedNode(type));
+				var.setType(validateNode(type));
 				var.setHostObject(getHostEObject());
 				existingList.add(var);
 				return var;
@@ -10719,6 +10764,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isUseArticlesInValidation() && value instanceof Name && tripleObject instanceof NamedNode
 					&& ((NamedNode) tripleObject).getNodeType().equals(NodeType.ClassNode)) {
 				addError(SadlErrorMessages.NEEDS_ARTICLE.get(), value);
+			}
+		}
+	}
+	
+	protected void checkForArticleForNameInBuiltinElement(Expression aValue, Object aBuiltinElement) throws InvalidNameException {
+		if(aBuiltinElement instanceof BuiltinElement) {
+			List<Node> lNodeList = ((BuiltinElement) aBuiltinElement).getArguments();
+			if(lNodeList.size() == 2) {
+				Node lNode = lNodeList.get(1);
+				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode) {
+					addError(SadlErrorMessages.NEEDS_ARTICLE.get(), aValue);
+				}
 			}
 		}
 	}
