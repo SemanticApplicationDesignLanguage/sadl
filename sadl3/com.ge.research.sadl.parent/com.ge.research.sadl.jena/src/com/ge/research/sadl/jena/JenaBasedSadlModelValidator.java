@@ -4260,16 +4260,24 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //								}
 //							}
 							OntClass subcls = theJenaModel.getOntClass(leftConceptName.getUri());
-							OntResource supercls = theJenaModel.getOntResource(rightConceptName.getUri());
-							if (SadlUtils.classIsSubclassOf(subcls, supercls, true, null)) {
-								if (getModelProcessor().isAssignment(leftExpression.eContainer())) {
-									String wmsg = createSuperClassOnRightWarning(leftExpression.eContainer(), leftTypeCheckInfo, rightTypeCheckInfo, operations.get(0));
-									issueAcceptor.addWarning(wmsg, leftExpression.eContainer());
-								}
-								return true;
+							if (subcls == null) {
+								issueAcceptor.addError("Concept '" + leftConceptName.getUri() + "' not found", leftExpression);
 							}
-							if (SadlUtils.classIsSubclassOf(supercls.as(OntClass.class), subcls, true, null)) {
-								return true;
+							OntResource supercls = theJenaModel.getOntResource(rightConceptName.getUri());
+							if (supercls == null) {
+								issueAcceptor.addError("Concept '" + rightConceptName.getUri() + "' not found", rightExpression);
+							}
+							if (subcls != null && supercls != null) {
+								if (SadlUtils.classIsSubclassOf(subcls, supercls, true, null)) {
+									if (getModelProcessor().isAssignment(leftExpression.eContainer())) {
+										String wmsg = createSuperClassOnRightWarning(leftExpression.eContainer(), leftTypeCheckInfo, rightTypeCheckInfo, operations.get(0));
+										issueAcceptor.addWarning(wmsg, leftExpression.eContainer());
+									}
+									return true;
+								}
+								if (SadlUtils.classIsSubclassOf(supercls.as(OntClass.class), subcls, true, null)) {
+									return true;
+								}
 							}
 		// TODO handle equivalent classes.					
 		//					StmtIterator sitr = theJenaModel.listStatements(theJenaModel.getOntClass(rightConceptName.getUri()), OWL.equivalentClass, (RDFNode)null);

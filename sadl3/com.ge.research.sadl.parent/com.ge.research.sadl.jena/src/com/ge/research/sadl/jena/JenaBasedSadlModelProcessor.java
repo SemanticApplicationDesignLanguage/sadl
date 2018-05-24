@@ -5314,6 +5314,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return combineRest(returnTriple, rest);
 			}
 		} else { // none of these create more than 2 arguments
+			if (constantBuiltinName == null) {
+//				addError("Unable to process predicate name", predicate);
+				return null;
+			}
 			GraphPatternElement bi = null;
 			if (numBuiltinArgs == 1) {
 				bi = new BuiltinElement();
