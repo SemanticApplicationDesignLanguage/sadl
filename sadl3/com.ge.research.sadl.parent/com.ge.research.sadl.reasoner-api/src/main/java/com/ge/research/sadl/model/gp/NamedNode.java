@@ -35,6 +35,8 @@ public class NamedNode extends Node {
 		PropertyNode, DataTypeProperty, ObjectProperty, AnnotationProperty, 
 		FunctionNode, VariableNode}
 
+	private Node mLocalizedType = null;
+	
 	private boolean validated = false;
 	private NodeType nodeType = null;
 	// if the Node represents a List (ClassListNode or DataTypeListNode) then the following may apply: 
@@ -95,6 +97,21 @@ public class NamedNode extends Node {
 		this.name = name;
 	}
 
+	/*
+	 * Sets locally restricted type of Node, usually range
+	 * @param Node
+	 */
+	public void setLocalizedType(Node aNode) {
+		this.mLocalizedType = aNode;
+	}
+	
+	/*
+	 * Gets locally restricted type
+	 */
+	public Node getLocalizedType() {
+		return this.mLocalizedType;
+	}
+	
 	/**
 	 * Set the NodeType of the NamedNode
 	 * @param nodeType

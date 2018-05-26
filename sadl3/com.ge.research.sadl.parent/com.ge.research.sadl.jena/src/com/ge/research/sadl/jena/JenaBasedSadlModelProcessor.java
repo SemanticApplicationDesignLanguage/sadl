@@ -2956,7 +2956,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else {
 					Node vtype = leftVar.getType();
-					if (vtype == null) {
+					if (vtype == null && leftVariableDefn != null) {
 						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
 						if (leftVariableDefnTci != null && leftVariableDefnTci.getTypeCheckType() != null) {
 							vtype = leftVariableDefnTci.getTypeCheckType();
@@ -2969,7 +2969,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						leftVar.setType(vtype);
 						leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 					}
-					else {
+					else if (vtype != null) {
 						throw new TranslationException("This shouldn't happen!");
 					}
 				}
@@ -5157,6 +5157,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 		Expression subject = expr.getRight();
+		
+		TypeCheckInfo lTci = null; 
+		try {
+			lTci = getModelValidator().getType(expr);
+		} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+				| CircularDefinitionException | CircularDependencyException | PropertyWithoutRangeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Object trSubj = null;
 		Object trPred = null;
 		Node subjNode = null;
@@ -5291,6 +5301,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
 			}
 			if (predNode != null && predNode instanceof Node) {
+				addLocalizedTypeToNode(predNode,lTci);
 				returnTriple = new TripleElement(subjNode, predNode, null);
 				returnTriple.setSourceType(TripleSourceType.PSV);
 				if (constantBuiltinName == null) {
@@ -5314,6 +5325,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return combineRest(returnTriple, rest);
 			}
 		} else { // none of these create more than 2 arguments
+			if (constantBuiltinName == null) {
+//				addError("Unable to process predicate name", predicate);
+				return null;
+			}
 			GraphPatternElement bi = null;
 			if (numBuiltinArgs == 1) {
 				bi = new BuiltinElement();
@@ -5364,6 +5379,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 			
 			return combineRest(bi, rest);
+		}
+	}
+
+	private void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
+		if(predNode instanceof NamedNode) {
+			((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
 		}
 	}
 

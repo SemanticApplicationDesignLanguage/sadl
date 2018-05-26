@@ -68,10 +68,12 @@ import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -982,6 +984,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							if (dmn.isURIResource()) {
 								dmnclses.add((Resource) dmn);
 							}
+							else if (dmn.canAs(OntClass.class)&& dmn.as(OntClass.class).isUnionClass()) {
+								dmnclses.addAll(getUnionClassMembers(dmn.as(OntClass.class).asUnionClass()));
+							}
 							else {
 								throw new TranslationException("Unhandled case");
 							}
@@ -1034,6 +1039,21 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 
 		}
+	}
+
+	private List<OntClass> getUnionClassMembers(UnionClass unionClass) {
+		List<OntClass> members = new ArrayList<OntClass>();
+		ExtendedIterator<? extends OntClass> ucitr = unionClass.listOperands();
+		while (ucitr.hasNext()) {
+			OntClass uccls = ucitr.next();
+			if (uccls.isURIResource()) {
+				members.add(uccls);
+			}
+			else if (uccls.isUnionClass()) {
+				members.addAll(getUnionClassMembers(uccls.asUnionClass()));
+			}
+		}
+		return members;
 	}
 
 	private List<TripleElement> getNullSubjectTriples(List<GraphPatternElement> gpes,
@@ -2211,12 +2231,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 				else if ((be.getArguments().get(1) instanceof Literal || be.getArguments().get(1) instanceof ConstantNode || 
-						(be.getArguments().get(1) instanceof NamedNode && ((NamedNode)be.getArguments().get(1)).getNodeType().equals(NodeType.InstanceNode))) && 
+						(be.getArguments().get(1) instanceof NamedNode && ((NamedNode)be.getArguments().get(1)).getNodeType().equals(NodeType.InstanceNode)) ||
+						be.getArguments().get(1) instanceof VariableNode) && 
 						be.getArguments().get(0) instanceof ProxyNode && 
 						((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof TripleElement &&
 						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
 					((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
 					patterns.add(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()));
+					if (be.getFuncName().equals("assign")) {
+						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setType(TripleModifierType.Assignment);
+					}
 					return null;
 				}
 			}
