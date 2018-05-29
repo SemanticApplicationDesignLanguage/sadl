@@ -1718,7 +1718,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			} else if (sr.eContainer() instanceof Name && ((Name)sr.eContainer()).isFunction()) {
 				addWarning("Variable '" + var.getName() + "' is not defined", sr);
-			} else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null) {
+			} else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null
+					&& EcoreUtil2.getContainerOfType(sr, RuleStatement.class) == null) {
 				addError("Variable '" + var.getName() + "' is not defined", sr);
 			}
 			if (tci != null && tci.getTypeCheckType() instanceof NamedNode) {
@@ -4725,7 +4726,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError("An article (e.g., '" + article
 					+ "') should not be used in front of the name of an instance of a class.", expr);
 		} else if (article != null && isVariable(typenode)
-				&& EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null) {
+				&& EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null
+				&& EcoreUtil2.getContainerOfType(expr, RuleStatement.class) == null) {
 			addError("An article (e.g., '" + article + "') should not be used in front of the name of a variable.",
 					expr);
 		} else if (article != null && !isProperty(typenode) && !isDefinitionOfExplicitVariable(expr)) {
@@ -6885,7 +6887,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private void addCardinalityRestriction(OntResource cls, Property retProp, int cardinality) {
-		if (cls != null && cls.canAs(OntClass.class)) {
+		if (cls != null && cls.canAs(OntClass.class) && retProp != null) {
 			CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, retProp, cardinality);
 			cls.as(OntClass.class).addSuperClass(cr);
 		}
