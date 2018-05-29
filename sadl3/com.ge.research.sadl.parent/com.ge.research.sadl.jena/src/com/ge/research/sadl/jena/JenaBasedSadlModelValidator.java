@@ -2590,6 +2590,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
+		
+		StmtIterator itr2 = theJenaModel.listStatements(subj, RDFS.subClassOf, (RDFNode)null);
+		while(itr2.hasNext()) {
+			Statement stmt = itr2.next();
+			RDFNode rdfNode= stmt.getObject();
+			if(rdfNode.canAs(OntClass.class)) {
+				TypeCheckInfo tci = getTypeFromRestriction(rdfNode.asResource(), propuri, proptype, predicate);
+				if(tci != null) {
+					return tci;
+				}
+			}
+		}
+		
 		return null;
 	}
 	
