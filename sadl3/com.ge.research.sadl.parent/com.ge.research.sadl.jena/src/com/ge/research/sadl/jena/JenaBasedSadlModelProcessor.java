@@ -5159,6 +5159,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 		Expression subject = expr.getRight();
+		
+		TypeCheckInfo lTci = null; 
+		try {
+			lTci = getModelValidator().getType(expr);
+		} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+				| CircularDefinitionException | CircularDependencyException | PropertyWithoutRangeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Object trSubj = null;
 		Object trPred = null;
 		Node subjNode = null;
@@ -5293,6 +5303,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
 			}
 			if (predNode != null && predNode instanceof Node) {
+				addLocalizedTypeToNode(predNode,lTci);
 				returnTriple = new TripleElement(subjNode, predNode, null);
 				returnTriple.setSourceType(TripleSourceType.PSV);
 				if (constantBuiltinName == null) {
@@ -5370,6 +5381,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 			
 			return combineRest(bi, rest);
+		}
+	}
+
+	private void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
+		if(predNode instanceof NamedNode) {
+			((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
 		}
 	}
 
