@@ -1971,9 +1971,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			
 			}
 			else if (cnstval.equals("a type")) {
+				subjtype = getType(subject);
 				NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(RDFS.subClassOf.getURI(), NodeType.ClassNode));
 				ConceptName rdfType = getModelProcessor().namedNodeToConceptName(tctype);
-				return new TypeCheckInfo(rdfType, tctype, this, expression);
+				subjtype.setExpressionType(rdfType);
+//				return new TypeCheckInfo(rdfType, tctype, this, expression);
+				return subjtype;
 			}
 			else {
 				getModelProcessor().addIssueToAcceptor(SadlErrorMessages.UNHANDLED.get("Constant Property", cnstval), expression);
@@ -4843,6 +4846,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		if (binaryOpRightImpliedProperties != null) {
 			binaryOpRightImpliedProperties.clear();
+		}
+		if (expressionsTypeCheckCache != null) {
+			expressionsTypeCheckCache.clear();
 		}
 	}
 

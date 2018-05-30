@@ -1759,12 +1759,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			InvalidNameException, InvalidTypeException, TranslationException, ConfigurationException {
 		Object trgt = getTarget();
 		if (trgt instanceof Rule) {
-			if (((Rule) trgt).getVariable(name) != null) {
-				return ((Rule) trgt).getVariable(name);
+			if (((Rule) trgt).getVariable(variableNameToUri(name)) != null) {
+				return ((Rule) trgt).getVariable(variableNameToUri(name));
 			}
 		} else if (trgt instanceof Query) {
-			if (((Query) trgt).getVariable(name) != null) {
-				return ((Query) trgt).getVariable(name);
+			if (((Query) trgt).getVariable(variableNameToUri(name)) != null) {
+				return ((Query) trgt).getVariable(variableNameToUri(name));
 			}
 		} else if (trgt instanceof Test) {
 			// TODO
@@ -2896,6 +2896,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression leftVariableDefn = null;
 		TypeCheckInfo leftVariableDefnTci = null;
 		boolean leftVariableDefnTripleMissingObject = false;
+		boolean leftVariableDefnTripleMissingSubject = false;
 
 		// math operations can be a variable on each side of operand
 		boolean isRightVariableDefinition = false;
@@ -2948,7 +2949,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (((Object[]) leftTranslatedDefn)[0].equals(leftVar)) {
 						Node vtype = leftVar.getType();
 						if (vtype instanceof NamedNode) {
-							leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+							leftVariableDefnTripleMissingObject = checkForMissingObjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+							if (!leftVariableDefnTripleMissingObject) {
+								leftVariableDefnTripleMissingSubject = checkForMissingSubjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+							}
 							addVariableDefinition(leftVar, rest, (NamedNode) vtype, expr);
 						}
 						return rest;
@@ -2968,7 +2972,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					if (vtype instanceof NamedNode) {
 						leftVar.setType(vtype);
-						leftVariableDefnTripleMissingObject = checkForMissingVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+						leftVariableDefnTripleMissingObject = checkForMissingObjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+						if (!leftVariableDefnTripleMissingObject) {
+							leftVariableDefnTripleMissingSubject = checkForMissingSubjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+						}
 					}
 					else if (vtype != null) {
 						throw new TranslationException("This shouldn't happen!");
@@ -3049,8 +3056,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (leftVariableDefnTripleMissingObject) {
 						// this is a variable definition and the definition is a triple and the triple
 						// had no object
-						((TripleElement) leftTranslatedDefn).setObject(leftVar);
-						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+//						((TripleElement) leftTranslatedDefn).setObject(leftVar);
+//						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+						return leftTranslatedDefn;
+					} else if (leftVariableDefnTripleMissingSubject) {
 						return leftTranslatedDefn;
 					} else if (leftTranslatedDefn instanceof BuiltinElement) {
 						int eArgCnt = ((BuiltinElement) leftTranslatedDefn).getExpectedArgCount();
@@ -3194,10 +3203,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @param defnExpr
 	 * @return
 	 */
-	private boolean checkForMissingVariableInTriple(VariableNode var, Object defn,
+	private boolean checkForMissingObjectVariableInTriple(VariableNode var, Object defn,
 			Expression defnExpr) {
 		if (defnExpr instanceof PropOfSubject && defn instanceof TripleElement && ((TripleElement)defn).getObject() == null) {
 			((TripleElement)defn).setObject(var);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Method to set the subject of a defining triple to the variable being defined when appropriate
+	 * @param var
+	 * @param defn
+	 * @param defnExpr
+	 * @return
+	 */
+	private boolean checkForMissingSubjectVariableInTriple(VariableNode var, Object defn,
+			Expression defnExpr) {
+		if (defnExpr instanceof PropOfSubject && defn instanceof TripleElement && ((TripleElement)defn).getSubject() == null) {
+			((TripleElement)defn).setSubject(var);
 			return true;
 		}
 		return false;
@@ -3534,6 +3559,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (lobj instanceof Node && robj instanceof TripleElement) {
 				assignedNode = validateNode((Node) lobj);
 				pattern = (TripleElement) robj;
+			}
+			else if (lobj instanceof TripleElement && robj instanceof Node) {
+				assignedNode = validateNode((Node) robj);
+				pattern = (TripleElement) lobj;
 			}
 			if (assignedNode != null && pattern != null) {
 				// We're expressing the type of a named thing.
@@ -5236,6 +5265,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					predicate = ((PropOfSubject) subject).getLeft();
 					subject = ((PropOfSubject) subject).getRight();
 				}
+			} else if (cnstval.equals("a type")) {
+				trSubj = processExpression(subject);
+				trPred = new RDFTypeNode();
+				return new TripleElement((Node)null, (Node)trPred, (Node)trSubj);
 			} else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
 			}
@@ -10711,14 +10744,37 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return results;
 	}
 
-	public VariableNode getVariable(String name) {
+	public VariableNode getVariable(String name) throws TranslationException {
 		Object trgt = getTarget();
 		if (trgt instanceof Rule) {
-			return ((Rule) trgt).getVariable(name);
+			return ((Rule) trgt).getVariable(variableNameToUri(name));
 		} else if (trgt instanceof Query) {
-			return ((Query) trgt).getVariable(name);
+			return ((Query) trgt).getVariable(variableNameToUri(name));
 		}
 		return null;
+	}
+
+	private String variableNameToUri(String name) throws TranslationException {
+		if (name.contains("#")) {
+			// must be a complete URI
+			return name;
+		}
+		else if (!name.contains(":")) {
+			// must be a local name only
+			return getModelNamespace() + name;
+		}
+		else {
+			// by elimination, must be a QName but this should not happen?
+			int sep = name.lastIndexOf(':');
+			if (sep > 0) {
+				String prefix = name.substring(0, sep);
+				String ln = name.substring(sep + 1);
+				if (prefix.equals(getModelAlias())) {
+					return getModelNamespace() + ln;
+				}
+			}
+		}
+		throw new TranslationException("Invalid variable name '" + name + "'");
 	}
 
 	private void setSadlCommands(List<SadlCommand> sadlCommands) {
