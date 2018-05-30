@@ -5059,7 +5059,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (typeStr.equals("short")) {
 			return validateNamedNode(new NamedNode(XSD.xshort.getURI(), NodeType.DataTypeNode));
 		}
-		return validateNamedNode(new NamedNode(XSD.getURI() + "#" + typeStr, NodeType.DataTypeNode));
+		return validateNamedNode(new NamedNode(XSD.getURI() + typeStr, NodeType.DataTypeNode));
 	}
 	
 	/**
