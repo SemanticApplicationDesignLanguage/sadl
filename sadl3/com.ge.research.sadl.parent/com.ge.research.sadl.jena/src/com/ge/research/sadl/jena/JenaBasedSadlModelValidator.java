@@ -1937,13 +1937,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else if (subjtype != null && (cnstval.endsWith(" element"))) {
 				if (subjtype != null && (cnstval.equals("first element") || cnstval.equals("last element")) ) {
-					subjtype.setRangeValueType(RangeValueType.CLASS_OR_DT);   	// keep type but change from List to reflect this is an element of the list
 					if (subjtype.getTypeCheckType() instanceof NamedNode) {
 						if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.ClassListNode)) {
-							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.ClassNode);
+							NamedNode lTcType = getModelProcessor().validateNamedNode(new NamedNode(((NamedNode)subjtype.getTypeCheckType()).toFullyQualifiedString(), NodeType.ClassNode));
+							ConceptName lCN = getModelProcessor().namedNodeToConceptName(lTcType);
+							TypeCheckInfo lTCI = new TypeCheckInfo(lCN, lTcType, this, expression);
+							lTCI.setRangeValueType(RangeValueType.CLASS_OR_DT);
+							return lTCI;
 						}
 						else if (((NamedNode)subjtype.getTypeCheckType()).getNodeType().equals(NodeType.DataTypeListNode)) {
-							((NamedNode)subjtype.getTypeCheckType()).setNodeType(NodeType.DataTypeNode);
+							NamedNode lTcType = getModelProcessor().validateNamedNode(new NamedNode(((NamedNode)subjtype.getTypeCheckType()).toFullyQualifiedString(), NodeType.DataTypeNode));
+							ConceptName lCN = getModelProcessor().namedNodeToConceptName(lTcType);
+							TypeCheckInfo lTCI = new TypeCheckInfo(lCN, lTcType, this, expression);
+							lTCI.setRangeValueType(RangeValueType.CLASS_OR_DT);
+							return lTCI;
 						}
 						else {
 							issueAcceptor.addError("Expected a list for list element function", expression);
