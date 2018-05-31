@@ -265,6 +265,11 @@ class SADLValidator extends AbstractSADLValidator {
 				t.printStackTrace
 			}
 		}
+		else {
+			if (nm.contains(':')) {
+				error("Invalid declaration of new concept with a QName from another namespace", SADL_RESOURCE__NAME)
+			}
+		}
 	}
 	
 	@Check
