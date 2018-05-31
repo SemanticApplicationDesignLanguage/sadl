@@ -3384,6 +3384,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	@Override
 	public NamedNode validateNamedNode(NamedNode namedNode) {
 		if (namedNode.getPrefix() == null) {
+			if (namedNode.getNamespace() == null) {
+				namedNode.setNamespace(getModelNamespace());
+			}
 			namedNode.setPrefix(getConfigMgr().getGlobalPrefix(namedNode.getNamespace()));
 		}
 		return namedNode;
@@ -3536,6 +3539,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Node assignedNode = null;
 			Object pattern = null;
 			if (lobj instanceof VariableNode && robj instanceof VariableNode &&
+					(!((VariableNode)lobj).isCRulesVariable() || !((VariableNode)robj).isCRulesVariable()) &&
 					lexpr instanceof Declaration && rexpr instanceof Declaration) {
 				// this is a narrower type declaration; the left is a variable, the right is a type
 				assignedNode = validateNode((Node)lobj);
