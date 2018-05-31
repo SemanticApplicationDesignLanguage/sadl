@@ -3395,7 +3395,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private boolean isNamedNodeSubclassOfNamedNode(NamedNode cls, NamedNode subcls) {
 		OntResource curCls = getTheJenaModel().getOntResource(((NamedNode) cls).toFullyQualifiedString());
 		OntResource newCls = getTheJenaModel().getOntResource(((NamedNode) subcls).toFullyQualifiedString());
-		if (curCls.canAs(OntClass.class) && newCls.canAs(OntClass.class)) {
+		if (curCls != null && newCls != null && curCls.canAs(OntClass.class) && newCls.canAs(OntClass.class)) {
 			try {
 				if (SadlUtils.classIsSubclassOf(newCls.as(OntClass.class), curCls.as(OntClass.class), true, null)) {
 					return true; // OK if subclass
