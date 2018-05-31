@@ -3494,48 +3494,54 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 
-		
-		if(lobj != null && robj !=null ) 
-		{	if(lobj instanceof TripleElement && robj instanceof TripleElement) {
+
+		if(lobj != null && robj !=null ) {
+			if(lobj instanceof TripleElement && robj instanceof TripleElement) {
 				boolean flag = false;
 				TripleElement tr = (TripleElement)lobj;
 				TripleElement tl = (TripleElement)robj;
 				Node trnode = tr.getObject();
 				Node tlnode = tl.getObject();
 				if(trnode!= null && tlnode !=null) {
-				OntClass subclassl = theJenaModel.getOntClass((trnode).toFullyQualifiedString());
-				OntClass subclassr = theJenaModel.getOntClass((tlnode).toFullyQualifiedString());
-				OntResource suprclass = theJenaModel.getOntResource(SadlConstants.SADL_IMPLICIT_MODEL_EVENT_URI);
-				if(subclassl != null && subclassr != null) {
-			    try {
-					if (SadlUtils.classIsSubclassOf(subclassl, suprclass, true, null) && SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)) {
-					    
-					    try {
-							if (SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)){
-							  flag = true;
+					OntClass subclassl = theJenaModel.getOntClass((trnode).toFullyQualifiedString());
+					OntClass subclassr = theJenaModel.getOntClass((tlnode).toFullyQualifiedString());
+					OntResource suprclass = theJenaModel.getOntResource(SadlConstants.SADL_IMPLICIT_MODEL_EVENT_URI);
+					if(subclassl != null && subclassr != null) {
+						try {
+							if (SadlUtils.classIsSubclassOf(subclassl, suprclass, true, null) && SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)) {
+
+								try {
+									if (SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)){
+										flag = true;
+									}
+								} catch (CircularDependencyException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							}
 						} catch (CircularDependencyException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						if(flag == true && isConjunction(op)){
+							addError(SadlErrorMessages.INVALID_CONJUNCTION.toString(), container);    	
+						}
 					}
-				} catch (CircularDependencyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			    if(flag == true && isConjunction(op)){
-			    	addError(SadlErrorMessages.INVALID_CONJUNCTION.toString(), container);    	
-			    }
+				}	
 			}
-		 }	
 		}
-	  }
-			
+
 		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
 			// If we're doing an assignment, we can simplify the pattern.
 			Node assignedNode = null;
 			Object pattern = null;
-			if (rexpr instanceof Declaration && !(robj instanceof VariableNode)) {
+			if (lobj instanceof VariableNode && robj instanceof VariableNode &&
+					lexpr instanceof Declaration && rexpr instanceof Declaration) {
+				// this is a narrower type declaration; the left is a variable, the right is a type
+				assignedNode = validateNode((Node)lobj);
+				pattern = new TripleElement(assignedNode, new RDFTypeNode(), ((VariableNode) robj).getType());
+			}
+			else if (rexpr instanceof Declaration && !(robj instanceof VariableNode)) {
 				if (lobj instanceof Node && robj instanceof Node) {
 					TripleElement trel = new TripleElement((Node) lobj, new RDFTypeNode(), (Node) robj);
 					trel.setSourceType(TripleSourceType.ITC);
@@ -3549,7 +3555,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
 				TripleElement trel = (TripleElement) robj; // TODO how do we know this is a TripleElement? What happens
-															// to it?
+				// to it?
 				while (trel != null) {
 					trel.setSubject((Node) lobj);
 					trel = (TripleElement) trel.getNext();
@@ -3589,7 +3595,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					else if (getRulePart().equals(RulePart.CONCLUSION)) {
 						((TripleElement)pattern).setType(TripleModifierType.Assignment);
 					}
-				} else if (pattern instanceof TripleElement
+				} else if (pattern instanceof TripleElement && ((TripleElement)pattern).getSourceType() != null
 						&& ((TripleElement) pattern).getSourceType().equals(TripleSourceType.SPV)
 						&& assignedNode instanceof NamedNode
 						&& getProxyWithNullSubject(((TripleElement) pattern)) != null) {
@@ -3601,9 +3607,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else if (isModifiedTriple(optype)
 						|| (optype.equals(BuiltinType.Equal) && pattern instanceof TripleElement
 								&& (((TripleElement) pattern).getObject() == null
-										|| ((TripleElement) pattern).getObject() instanceof NamedNode
-										|| ((TripleElement) pattern)
-												.getObject() instanceof com.ge.research.sadl.model.gp.Literal))) {
+								|| ((TripleElement) pattern).getObject() instanceof NamedNode
+								|| ((TripleElement) pattern)
+								.getObject() instanceof com.ge.research.sadl.model.gp.Literal))) {
 					if (pattern instanceof TripleElement && isModifiedTripleViaBuitin(robj)) {
 						optype = ((BuiltinElement) ((TripleElement) pattern).getNext()).getFuncType();
 						((TripleElement) pattern).setObject(assignedNode);
@@ -3633,7 +3639,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							((Test) getTarget()).setCompName(optype);
 							((TripleElement) pattern).setType(TripleModifierType.None);
 							optype = BuiltinType.Equal;
-						} else {
+						} else if (lastPattern.getObject() == null) {
 							lastPattern.setObject(assignedNode);
 						}
 						if (!optype.equals(BuiltinType.Equal)) {
@@ -3663,17 +3669,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			boolean binOnRight = false;
 			Object retObj = null;
 			if (lobj instanceof Node && robj instanceof BuiltinElement) {
-				
+
 				//Check to "pull up" not operator for Node Objects and rebuild "is" object
 				BuiltinElement right = (BuiltinElement) robj;
-                if(right.getFuncName() == "not") {
-                	//Pull up the not to the outside operator with the "is" operator nested     			
-                	Node right_arg = right.getArguments().get(0);
-                	GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg);     			
-    				Object ubi = createUnaryBuiltin(container, "not", bi);
-    				return combineRest(ubi, rest);
-                }
-                
+				if(right.getFuncName() == "not") {
+					//Pull up the not to the outside operator with the "is" operator nested     			
+					Node right_arg = right.getArguments().get(0);
+					GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg);     			
+					Object ubi = createUnaryBuiltin(container, "not", bi);
+					return combineRest(ubi, rest);
+				}
+
 				assignedNode = validateNode((Node) lobj);
 				bin = (BuiltinElement) robj;
 				retObj = robj;
@@ -3712,21 +3718,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			}
-			
-			//Check to "pull up" not operator for TripleElements and rebuild "is" object
-            if( lobj instanceof TripleElement && robj instanceof BuiltinElement) {
-                BuiltinElement right = (BuiltinElement) robj;
-                if(right.getFuncName() == "not") {
-                	Node arg = right.getArguments().get(0);
-                	//Pull up the not to the outside operator with the "is" operator nested     			
-                    TripleElement left = (TripleElement) lobj;
-                	GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
-    				Object ubi = createUnaryBuiltin(container, "not", bi);
-    				return combineRest(ubi, rest);
-                }
-            }
 
-            
+			//Check to "pull up" not operator for TripleElements and rebuild "is" object
+			if( lobj instanceof TripleElement && robj instanceof BuiltinElement) {
+				BuiltinElement right = (BuiltinElement) robj;
+				if(right.getFuncName() == "not") {
+					Node arg = right.getArguments().get(0);
+					//Pull up the not to the outside operator with the "is" operator nested     			
+					TripleElement left = (TripleElement) lobj;
+					GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
+					Object ubi = createUnaryBuiltin(container, "not", bi);
+					return combineRest(ubi, rest);
+				}
+			}
+
+
 			// We're describing a thing with a graph pattern.
 			Set<VariableNode> vars = pattern instanceof TripleElement ? getSelectVariables(((TripleElement) pattern))
 					: null;
