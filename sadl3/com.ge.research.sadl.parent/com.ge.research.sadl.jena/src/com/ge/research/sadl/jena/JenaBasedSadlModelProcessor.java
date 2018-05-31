@@ -3586,6 +3586,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (optype != BuiltinType.Equal) {
 						((TripleElement) pattern).setType(getTripleModifierType(optype));
 					}
+					else if (getRulePart().equals(RulePart.CONCLUSION)) {
+						((TripleElement)pattern).setType(TripleModifierType.Assignment);
+					}
 				} else if (pattern instanceof TripleElement
 						&& ((TripleElement) pattern).getSourceType().equals(TripleSourceType.SPV)
 						&& assignedNode instanceof NamedNode
