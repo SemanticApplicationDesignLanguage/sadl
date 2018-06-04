@@ -2972,6 +2972,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					if (vtype instanceof NamedNode) {
 						leftVar.setType(vtype);
+						checkForFreeVariable(leftVar, leftTranslatedDefn);
 						leftVariableDefnTripleMissingObject = checkForMissingObjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 						if (!leftVariableDefnTripleMissingObject) {
 							leftVariableDefnTripleMissingSubject = checkForMissingSubjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
@@ -3194,6 +3195,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			checkForArticleForNameInBuiltinElement(rexpr, result);
 		}
 		return result;
+	}
+
+	/*
+	 * Should be extended for RequirementVariables
+	 */
+	protected void checkForFreeVariable(VariableNode leftVar, Object leftTranslatedDefn) {
 	}
 
 	/**
