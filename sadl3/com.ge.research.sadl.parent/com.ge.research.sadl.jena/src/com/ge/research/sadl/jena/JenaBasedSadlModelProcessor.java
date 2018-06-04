@@ -5341,7 +5341,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (predNode != null && predNode instanceof Node) {
 				try {
-					TypeCheckInfo lTci = getModelValidator().getType(predicate);
+					TypeCheckInfo lTci = getModelValidator().getType(expr);
 					addLocalizedTypeToNode(predNode,lTci);
 				} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
 						| CircularDefinitionException | CircularDependencyException | PropertyWithoutRangeException e) {
