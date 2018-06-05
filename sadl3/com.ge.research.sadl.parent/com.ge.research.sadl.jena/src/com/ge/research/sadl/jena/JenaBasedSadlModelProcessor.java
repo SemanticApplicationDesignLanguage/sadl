@@ -3268,7 +3268,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	// return var;
 	// }
 	//
-	private void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException {
+	private void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		// if it hasn't been set before just set it
 		if (vartype instanceof NamedNode) {
 			vartype = validateNode(vartype);
@@ -3293,17 +3293,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return;
 		}
-
+		else if (vartype.equals(var.getType())) {
+			return;
+		}
 		// it has been set before so we need to do some type checking
 		List<Node> typesOfType = new ArrayList<Node>();
-		if (vartype instanceof NamedNode && ((NamedNode) vartype).getNodeType().equals(NodeType.InstanceNode)) {
-			Individual typeInst = getTheJenaModel().getIndividual(((NamedNode) vartype).toFullyQualifiedString());
-			ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> typeitr = typeInst.listRDFTypes(false);
-			while (typeitr.hasNext()) {
-				com.hp.hpl.jena.rdf.model.Resource typ = typeitr.next();
-				if (typ.isURIResource()) {
-					typesOfType.add(validateNamedNode(new NamedNode(typ.getURI(), NodeType.ClassNode)));
+		if (vartype instanceof NamedNode) {
+			if (((NamedNode) vartype).getNodeType().equals(NodeType.InstanceNode)) {
+				Individual typeInst = getTheJenaModel().getIndividual(((NamedNode) vartype).toFullyQualifiedString());
+				ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> typeitr = typeInst.listRDFTypes(false);
+				while (typeitr.hasNext()) {
+					com.hp.hpl.jena.rdf.model.Resource typ = typeitr.next();
+					if (typ.isURIResource()) {
+						typesOfType.add(validateNamedNode(new NamedNode(typ.getURI(), NodeType.ClassNode)));
+					}
 				}
+			}
+			else if (isProperty(((NamedNode)vartype).getNodeType())) {
+				TypeCheckInfo ptci = getModelValidator().getTypeInfoFromRange(namedNodeToConceptName((NamedNode)vartype), 
+						getTheJenaModel().getProperty(((NamedNode) vartype).toFullyQualifiedString()), defn);
+				typesOfType.add(ptci.getTypeCheckType());
 			}
 		} else if (vartype instanceof ProxyNode && ((ProxyNode) vartype).getProxyFor() instanceof Junction) {
 			Junction jct = (Junction) ((ProxyNode) vartype).getProxyFor();
@@ -4836,6 +4845,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (DontTypeCheckException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -10862,7 +10874,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			List<Node> lNodeList = ((BuiltinElement) aBuiltinElement).getArguments();
 			if(lNodeList.size() == 2) {
 				Node lNode = lNodeList.get(1);
-				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode) {
+				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode && !(lNode instanceof VariableNode)) {
 					addError(SadlErrorMessages.NEEDS_ARTICLE.get(), aValue);
 				}
 			}
