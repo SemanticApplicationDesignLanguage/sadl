@@ -304,6 +304,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		protected void setContext(JenaBasedSadlModelValidator validator, EObject ctx) {
 			this.context = ctx;
 		}
+		
+		public EObject getContext() {
+			return context;
+		}
 
 		public void setRangeValueType(RangeValueType rangeValueType) {
 			this.rangeValueType = rangeValueType;
@@ -1682,52 +1686,54 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private TypeCheckInfo convertListTypeToElementOfListType(TypeCheckInfo listtype) {
-		Node tctype = listtype.getTypeCheckType();
+	private TypeCheckInfo convertListTypeToElementOfListType(TypeCheckInfo aListType) {
+		TypeCheckInfo lElementType = new TypeCheckInfo(aListType.getExpressionType(), this, aListType.getContext());
+		Node tctype = aListType.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
 			try {
 				NamedNode clonedNode = (NamedNode) tctype.clone();
 				clonedNode.setList(false);
-				listtype.setTypeCheckType(clonedNode);
+				lElementType.setTypeCheckType(clonedNode);
 			} catch (CloneNotSupportedException e) {
 				logger.error(e.getMessage());
 			}
 		}
-		listtype.setRangeValueType(RangeValueType.CLASS_OR_DT);
+		lElementType.setRangeValueType(RangeValueType.CLASS_OR_DT);
 		
-		if(listtype.getCompoundTypes() != null){
+		if(aListType.getCompoundTypes() != null){
 			// compound
-			  Iterator<TypeCheckInfo> tci_iter = listtype.getCompoundTypes().iterator();
+			  Iterator<TypeCheckInfo> tci_iter = aListType.getCompoundTypes().iterator();
 			  while(tci_iter.hasNext()){
-				  convertListTypeToElementOfListType(tci_iter.next());
+				 lElementType.addCompoundType(convertListTypeToElementOfListType(tci_iter.next()));
 			  }
 		}
 		
-		return listtype;
+		return lElementType;
 	}
 	
-	private TypeCheckInfo convertElementOfListToListType(TypeCheckInfo elementtype) {
-		Node tctype = elementtype.getTypeCheckType();
+	private TypeCheckInfo convertElementOfListToListType(TypeCheckInfo aElementType) {
+		TypeCheckInfo lListType = new TypeCheckInfo(aElementType.getExpressionType(), this, aElementType.getContext());
+		Node tctype = aElementType.getTypeCheckType();
 		if (tctype instanceof NamedNode) {
 			try {
 				NamedNode clonedNode = (NamedNode) tctype.clone();
 				clonedNode.setList(true);
-				elementtype.setTypeCheckType(clonedNode);
+				lListType.setTypeCheckType(clonedNode);
 			} catch (CloneNotSupportedException e) {
 				logger.error(e.getMessage());
 			}
 		}
-		elementtype.setRangeValueType(RangeValueType.LIST);
+		lListType.setRangeValueType(RangeValueType.LIST);
 		
-		if(elementtype.getCompoundTypes() != null){
+		if(aElementType.getCompoundTypes() != null){
 			// compound
-			  Iterator<TypeCheckInfo> tci_iter = elementtype.getCompoundTypes().iterator();
+			  Iterator<TypeCheckInfo> tci_iter = aElementType.getCompoundTypes().iterator();
 			  while(tci_iter.hasNext()){
-				  convertListTypeToElementOfListType(tci_iter.next());
+				  lListType.addCompoundType(convertListTypeToElementOfListType(tci_iter.next()));
 			  }
 		}
 		
-		return elementtype;
+		return lListType;
 	}
 
 	protected TypeCheckInfo getType(Constant expression) throws DontTypeCheckException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
@@ -1995,9 +2001,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (predicate instanceof ElementInList) {
 			// this is like the constant "element"
 			TypeCheckInfo subjtype = getType(subject);
-			subjtype = convertListTypeToElementOfListType(subjtype);
-			subjtype.setAdditionalInformation("element of");
-			return subjtype;
+			TypeCheckInfo lElementType = convertListTypeToElementOfListType(subjtype);
+			lElementType.setAdditionalInformation("element of");
+			return lElementType;
 		}
 		boolean isElementInListConstruct = false;
 		if (predicate instanceof Name) {
@@ -2574,8 +2580,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							TypeCheckInfo avftci =  new TypeCheckInfo(createTypedConceptName(propuri, proptype), tctype, this, predicate);
 							avftci.setTypeToExprRelationship(RESTRICTED_TO);
 							return avftci;
-						}
-						else if (avf.isURIResource()){
+						}else if (avf.isURIResource()){
 							List<ConceptName> impliedProperties = getImpliedProperties(avf);
 							NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(avf.getURI(), NodeType.ClassNode));
 							TypeCheckInfo avftci = new TypeCheckInfo(createTypedConceptName(propuri, proptype), tctype, impliedProperties, this, predicate);
@@ -2584,6 +2589,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								avftci.setTypeCheckType(getTypedListType(avf));
 								avftci.setRangeValueType(RangeValueType.LIST);
 							}
+							return avftci;
+						}else if(isTypedListSubclass(avf)) {
+							NamedNode tctype = getTypedListType(avf);
+							TypeCheckInfo avftci =  new TypeCheckInfo(createTypedConceptName(propuri, proptype), tctype, this, predicate);
+							avftci.setTypeToExprRelationship(RESTRICTED_TO);
+							avftci.setRangeValueType(RangeValueType.LIST);
 							return avftci;
 						}
 					}
