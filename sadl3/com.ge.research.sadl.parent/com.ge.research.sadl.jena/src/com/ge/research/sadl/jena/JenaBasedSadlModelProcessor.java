@@ -8920,10 +8920,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			onDatatype = XSD.xint;
 		else if (typeStr.equals(XSD.xlong.getLocalName()))
 			onDatatype = XSD.xlong;
+		else if (typeStr.equals(XSD.xshort.getLocalName()))
+			onDatatype = XSD.xshort;
 		else if (typeStr.equals(XSD.anyURI.getLocalName()))
 			onDatatype = XSD.anyURI;
 		else if (typeStr.equals(XSD.anyURI.getLocalName()))
 			onDatatype = XSD.anyURI;
+		else if (typeStr.equals(XSD.positiveInteger.getLocalName()))
+			onDatatype = XSD.positiveInteger;
+		else if (typeStr.equals(XSD.negativeInteger.getLocalName()))
+			onDatatype = XSD.negativeInteger;
+		else if (typeStr.equals(XSD.nonPositiveInteger.getLocalName()))
+			onDatatype = XSD.nonPositiveInteger;
+		else if (typeStr.equals(XSD.nonNegativeInteger.getLocalName()))
+			onDatatype = XSD.nonNegativeInteger;
+		else if (typeStr.equals(XSD.normalizedString.getLocalName()))
+			onDatatype = XSD.normalizedString;
+		else if (typeStr.equals(XSD.unsignedByte.getLocalName())) 
+			onDatatype = XSD.unsignedByte;
+		else if (typeStr.equals(XSD.unsignedInt.getLocalName()))
+			onDatatype = XSD.unsignedInt;
+		else if (typeStr.equals(XSD.unsignedLong.getLocalName()))
+			onDatatype = XSD.unsignedLong;
+		else if (typeStr.equals(XSD.unsignedShort.getLocalName()))
+			onDatatype = XSD.unsignedShort;
+		else if (typeStr.equals(XSD.language.getLocalName()))
+			onDatatype = XSD.language;
 		else {
 			throw new JenaProcessorException("Unexpected primitive data type: " + typeStr);
 		}
