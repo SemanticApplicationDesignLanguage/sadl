@@ -2010,8 +2010,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				else if (!predtype.equals(OntConceptType.CLASS_PROPERTY) && !predtype.equals(OntConceptType.DATATYPE_PROPERTY) && 
 						!predtype.equals(OntConceptType.RDF_PROPERTY) && !predtype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+//					String preduri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 					getModelProcessor().addIssueToAcceptor(SadlErrorMessages.EXPECTED_A.get("property in property chain"), predicate);
-					//String preduri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 				}
 			} catch (CircularDefinitionException e) {
 				e.printStackTrace();
