@@ -3268,7 +3268,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	// return var;
 	// }
 	//
-	private void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException, DontTypeCheckException, InvalidTypeException {
+	public void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		// if it hasn't been set before just set it
 		if (vartype instanceof NamedNode) {
 			vartype = validateNode(vartype);
@@ -3294,6 +3294,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return;
 		}
 		else if (vartype.equals(var.getType())) {
+			return;
+		}
+		else if (vartype instanceof NamedNode && var.getType() instanceof NamedNode && 
+				isNamedNodeSubclassOfNamedNode((NamedNode)var.getType(), (NamedNode)vartype)) {
 			return;
 		}
 		// it has been set before so we need to do some type checking
