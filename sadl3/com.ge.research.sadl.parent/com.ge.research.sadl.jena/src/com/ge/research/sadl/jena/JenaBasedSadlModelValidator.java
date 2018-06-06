@@ -2546,7 +2546,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 	
-	protected TypeCheckInfo getTypeFromRestriction(String subjuri, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException, TranslationException {
+	protected TypeCheckInfo getTypeFromRestriction(String subjuri, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException, TranslationException, InvalidNameException {
 		Resource subj = theJenaModel.getResource(subjuri);
 		if (subj != null) {
 			if (!(subj instanceof OntClass || subj.canAs(OntClass.class)) && subj.canAs(Individual.class)) {
@@ -2564,7 +2564,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 	
-	public TypeCheckInfo getTypeFromRestriction(Resource subj, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException, TranslationException {
+	public TypeCheckInfo getTypeFromRestriction(Resource subj, String propuri, OntConceptType proptype, Expression predicate) throws InvalidTypeException, TranslationException, InvalidNameException {
 		if (subj != null && subj.canAs(OntClass.class)){ 
 			Property prop = theJenaModel.getProperty(propuri);
 			// look for restrictions on "range"
@@ -2591,10 +2591,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							}
 							return avftci;
 						}else if(isTypedListSubclass(avf)) {
-							NamedNode tctype = getTypedListType(avf);
-							TypeCheckInfo avftci =  new TypeCheckInfo(createTypedConceptName(propuri, proptype), tctype, this, predicate);
+							ConceptName cn = createTypedConceptName(propuri, proptype);
+							TypeCheckInfo avftci = getSadlTypedListTypeCheckInfo(avf.as(OntClass.class), cn, predicate, cn.getType());
 							avftci.setTypeToExprRelationship(RESTRICTED_TO);
-							avftci.setRangeValueType(RangeValueType.LIST);
 							return avftci;
 						}
 					}

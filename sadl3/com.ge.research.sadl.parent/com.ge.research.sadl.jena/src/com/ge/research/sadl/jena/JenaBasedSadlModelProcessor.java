@@ -5226,9 +5226,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		int numBuiltinArgs = 0;
 		
         boolean specialCntIdxProcessing = false;
-
+        boolean lIsConstantExpression = false;
+        
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
+			lIsConstantExpression = true;
 			String cnstval = ((Constant) predicate).getConstant();
 			predicate = null;
 			if (cnstval.equals("length") || cnstval.equals("the length")) {
@@ -5356,8 +5358,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
 			}
 			if (predNode != null && predNode instanceof Node) {
+				//Add range information to predNode based on domain restriction
 				try {
-					TypeCheckInfo lTci = getModelValidator().getType(expr);
+					EObject lTciExpression = expr;
+					if(lIsConstantExpression) {
+						lTciExpression = expr.getRight();
+					}
+					TypeCheckInfo lTci = getModelValidator().getType(lTciExpression);
 					addLocalizedTypeToNode(predNode,lTci);
 				} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
 						| CircularDefinitionException | CircularDependencyException | PropertyWithoutRangeException e) {
