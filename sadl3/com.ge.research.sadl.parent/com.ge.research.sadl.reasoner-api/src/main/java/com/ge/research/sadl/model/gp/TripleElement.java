@@ -38,6 +38,7 @@ public class TripleElement extends GraphPatternElement {
 	public enum TripleSourceType {SPV, PSnewV, PSV, VPS, ITC, SCofC}	// type of source
 	private TripleSourceType sourceType;	// what was the source of this TripleElement?
 	
+	
 	/**
 	 * Null argument constructor
 	 */
@@ -186,17 +187,20 @@ public class TripleElement extends GraphPatternElement {
 	@Override
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder("rdf(");
-		if (getLeftImpliedPropertyUsed() != null || getRightImpliedPropertyUsed() != null || getExpandedPropertiesToBeUsed() != null) {
+		NamedNode leftImpliedPropertyUsed = ((NamedNode) getPredicate()).getImpliedPropertyNode();
+		NamedNode rightImpliedPropertyUsed = ((NamedNode) getObject()).getImpliedPropertyNode();
+
+		if (leftImpliedPropertyUsed != null || rightImpliedPropertyUsed != null || getExpandedPropertiesToBeUsed() != null) {
 			sb.append("(");
 			boolean needComma = false;
-			if (getLeftImpliedPropertyUsed() != null) {
+			if (leftImpliedPropertyUsed != null) {
 				sb.append("leftImpliedProperty ");
-				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
+				sb.append(leftImpliedPropertyUsed.toDescriptiveString());
 				needComma = true;
 			}
-			else if (getRightImpliedPropertyUsed() != null) { // only left or right should exist (at most)
+			else if (rightImpliedPropertyUsed != null) { // only left or right should exist (at most)
 				sb.append("rightImpliedProperty ");
-				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
+				sb.append(rightImpliedPropertyUsed.toDescriptiveString());
 				needComma = true;
 			}
 			if (getExpandedPropertiesToBeUsed() != null) {
@@ -276,4 +280,5 @@ public class TripleElement extends GraphPatternElement {
 	public TripleSourceType getSourceType() {
 		return sourceType;
 	}
+	
 }

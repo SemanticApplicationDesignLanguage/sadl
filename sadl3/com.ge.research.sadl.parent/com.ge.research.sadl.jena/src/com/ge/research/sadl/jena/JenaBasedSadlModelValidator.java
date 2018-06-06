@@ -4165,9 +4165,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean compatibleTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
 									TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, InvalidTypeException, DontTypeCheckException, TranslationException{
-				if ((leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) || 
-			(leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null) ||
-			(leftTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType() != null && !(leftTypeCheckInfo.getRangeValueType().equals(rightTypeCheckInfo.getRangeValueType())))) {
+		boolean lCond1 = leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT);		
+		boolean lCond2 = leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null; 
+		boolean lCond3 = leftTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType() != null && !(leftTypeCheckInfo.getRangeValueType().equals(rightTypeCheckInfo.getRangeValueType()));
+		if ( lCond1 || lCond2 || lCond3) {
 			if (!isQualifyingListOperation(operations, leftTypeCheckInfo, rightTypeCheckInfo)) {
 				if (isCompatibleListTypes(operations, leftTypeCheckInfo, rightTypeCheckInfo)) {
 					return true;
@@ -4176,10 +4177,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		
-		if(leftTypeCheckInfo.getRangeValueType() != null && leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) &&
-		   rightTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
-			if(leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null &&
-			   leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString())){
+		boolean lCond4 = leftTypeCheckInfo.getRangeValueType() != null && leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST);
+		boolean lCond5 = rightTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST);
+		
+		if( lCond4 && lCond5) {
+			
+			boolean lCond6 = leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null;
+			boolean lCond7 =  leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString());
+			if( lCond6 && lCond7){
 				ConceptName leftConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
 				ConceptName rightConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
 				if(leftConceptName.getType().equals(rightConceptName.getType())){
@@ -4407,11 +4412,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		return false;
 	}
+
 	
 	private boolean isCompatibleListTypes(List<String> operations, TypeCheckInfo leftTypeCheckInfo,
-			TypeCheckInfo rightTypeCheckInfo) {
-		// TODO Auto-generated method stub
-		return false;
+			TypeCheckInfo rightTypeCheckInfo) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if(leftTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType() != null &&
+				leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) && rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)){
+			return getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo).equals(getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo));
+		}else {
+			return false;
+		}
 	}
 
 	private ConceptName getListType(TypeCheckInfo tci) throws TranslationException, InvalidTypeException {

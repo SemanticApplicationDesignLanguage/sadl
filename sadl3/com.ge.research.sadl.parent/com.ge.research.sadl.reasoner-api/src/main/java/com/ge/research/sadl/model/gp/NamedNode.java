@@ -48,6 +48,9 @@ public class NamedNode extends Node {
 	private List<TripleElement> missingPatterns = null;  // a list of patterns found to be missing from the higher-level structure
 														 // e.g, Rule, and which should be added before the GraphPatternElement
 														 // containing this Node
+	
+	private NamedNode mImpliedPropertyNode = null;		// contains the implied property information of the named node
+	
 
 	/**
 	 * Null argument constructor
@@ -417,6 +420,22 @@ public class NamedNode extends Node {
 		}
 		sb.append("])");
 		return sb.toString();
+	}
+	
+	/**
+	 * get the node's implied property
+	 * @return mImpliedPropertyNode
+	 */
+	public NamedNode getImpliedPropertyNode() {
+		return mImpliedPropertyNode;
+	}
+	
+	/**
+	 * set the node's implied property
+	 * @return mImpliedPropertyNode
+	 */
+	public void setImpliedPropertyNode(NamedNode mImpliedPropertyNode) {
+		this.mImpliedPropertyNode = mImpliedPropertyNode;
 	}
 
 }

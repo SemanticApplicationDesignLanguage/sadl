@@ -3820,7 +3820,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		try {
 			Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
 			List<EObject> toBeRemoved = null;
-			if (ip != null) {
+			if (ip != null && ip.size() > 0) {
 				if (maybeGpe instanceof TripleElement || maybeGpe instanceof BuiltinElement) {
 					Iterator<EObject> ipitr = ip.keySet().iterator();
 					boolean matched = false;
@@ -3828,8 +3828,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						EObject eobj = ipitr.next();
 						Property implProp = ip.get(eobj);
 						if (eobj.equals(lobj)) {
-							((GraphPatternElement) maybeGpe).setLeftImpliedPropertyUsed(
-									validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							//((GraphPatternElement) maybeGpe).setLeftImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							//set the implied property node for the underlying named node
+							if(maybeGpe instanceof TripleElement) {
+								NamedNode predicate = (NamedNode) ((TripleElement) maybeGpe).getPredicate();
+								predicate.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+							}else {
+								//left is the first argument of a BuildinElement
+								List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
+								((NamedNode) args.get(0)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+							}
+							
 							matched = true;
 							if (toBeRemoved == null) {
 								toBeRemoved = new ArrayList<EObject>();
@@ -3837,7 +3846,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							toBeRemoved.add(lobj);
 						}
 						else if (eobj.equals(robj)) {
-							((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							//((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+							//set the implied property node for the underlying named node
+
+							if(maybeGpe instanceof TripleElement) {
+								NamedNode object = (NamedNode) ((TripleElement) maybeGpe).getObject();
+								object.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));						
+							}else {
+								//right is the second argument of a BuildinElement
+								List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
+								((NamedNode) args.get(1)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));					
+							}
+							
+							
 							matched = true;
 							if (toBeRemoved == null) {
 								toBeRemoved = new ArrayList<EObject>();
