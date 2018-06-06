@@ -2324,7 +2324,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			else {
 				patterns.add(patterns.size() - 1, be);
 			}
-			returnNode = be.getArguments().get(0);
+			returnNode = be.getArguments() != null ? be.getArguments().get(0) : null;	// this can occur during editing
 		}
 		else {
 			removeArgsFromPatterns(patterns, be);
