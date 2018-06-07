@@ -3268,7 +3268,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	// return var;
 	// }
 	//
-	private void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException {
+	public void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		// if it hasn't been set before just set it
 		if (vartype instanceof NamedNode) {
 			vartype = validateNode(vartype);
@@ -3293,17 +3293,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return;
 		}
-
+		else if (vartype.equals(var.getType())) {
+			return;
+		}
+		else if (vartype instanceof NamedNode && var.getType() instanceof NamedNode && 
+				isNamedNodeSubclassOfNamedNode((NamedNode)var.getType(), (NamedNode)vartype)) {
+			return;
+		}
 		// it has been set before so we need to do some type checking
 		List<Node> typesOfType = new ArrayList<Node>();
-		if (vartype instanceof NamedNode && ((NamedNode) vartype).getNodeType().equals(NodeType.InstanceNode)) {
-			Individual typeInst = getTheJenaModel().getIndividual(((NamedNode) vartype).toFullyQualifiedString());
-			ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> typeitr = typeInst.listRDFTypes(false);
-			while (typeitr.hasNext()) {
-				com.hp.hpl.jena.rdf.model.Resource typ = typeitr.next();
-				if (typ.isURIResource()) {
-					typesOfType.add(validateNamedNode(new NamedNode(typ.getURI(), NodeType.ClassNode)));
+		if (vartype instanceof NamedNode) {
+			if (((NamedNode) vartype).getNodeType().equals(NodeType.InstanceNode)) {
+				Individual typeInst = getTheJenaModel().getIndividual(((NamedNode) vartype).toFullyQualifiedString());
+				ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> typeitr = typeInst.listRDFTypes(false);
+				while (typeitr.hasNext()) {
+					com.hp.hpl.jena.rdf.model.Resource typ = typeitr.next();
+					if (typ.isURIResource()) {
+						typesOfType.add(validateNamedNode(new NamedNode(typ.getURI(), NodeType.ClassNode)));
+					}
 				}
+			}
+			else if (isProperty(((NamedNode)vartype).getNodeType())) {
+				TypeCheckInfo ptci = getModelValidator().getTypeInfoFromRange(namedNodeToConceptName((NamedNode)vartype), 
+						getTheJenaModel().getProperty(((NamedNode) vartype).toFullyQualifiedString()), defn);
+				typesOfType.add(ptci.getTypeCheckType());
 			}
 		} else if (vartype instanceof ProxyNode && ((ProxyNode) vartype).getProxyFor() instanceof Junction) {
 			Junction jct = (Junction) ((ProxyNode) vartype).getProxyFor();
@@ -4838,6 +4851,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					} catch (ConfigurationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 				if (var == null) {
@@ -5210,9 +5226,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		int numBuiltinArgs = 0;
 		
         boolean specialCntIdxProcessing = false;
-
+        boolean lIsConstantExpression = false;
+        
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
+			lIsConstantExpression = true;
 			String cnstval = ((Constant) predicate).getConstant();
 			predicate = null;
 			if (cnstval.equals("length") || cnstval.equals("the length")) {
@@ -5340,8 +5358,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
 			}
 			if (predNode != null && predNode instanceof Node) {
+				//Add range information to predNode based on domain restriction
 				try {
-					TypeCheckInfo lTci = getModelValidator().getType(predicate);
+					EObject lTciExpression = expr;
+					if(lIsConstantExpression) {
+						lTciExpression = expr.getRight();
+					}
+					TypeCheckInfo lTci = getModelValidator().getType(lTciExpression);
 					addLocalizedTypeToNode(predNode,lTci);
 				} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
 						| CircularDefinitionException | CircularDependencyException | PropertyWithoutRangeException e) {
@@ -8904,10 +8927,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			onDatatype = XSD.xint;
 		else if (typeStr.equals(XSD.xlong.getLocalName()))
 			onDatatype = XSD.xlong;
+		else if (typeStr.equals(XSD.xshort.getLocalName()))
+			onDatatype = XSD.xshort;
 		else if (typeStr.equals(XSD.anyURI.getLocalName()))
 			onDatatype = XSD.anyURI;
 		else if (typeStr.equals(XSD.anyURI.getLocalName()))
 			onDatatype = XSD.anyURI;
+		else if (typeStr.equals(XSD.positiveInteger.getLocalName()))
+			onDatatype = XSD.positiveInteger;
+		else if (typeStr.equals(XSD.negativeInteger.getLocalName()))
+			onDatatype = XSD.negativeInteger;
+		else if (typeStr.equals(XSD.nonPositiveInteger.getLocalName()))
+			onDatatype = XSD.nonPositiveInteger;
+		else if (typeStr.equals(XSD.nonNegativeInteger.getLocalName()))
+			onDatatype = XSD.nonNegativeInteger;
+		else if (typeStr.equals(XSD.normalizedString.getLocalName()))
+			onDatatype = XSD.normalizedString;
+		else if (typeStr.equals(XSD.unsignedByte.getLocalName())) 
+			onDatatype = XSD.unsignedByte;
+		else if (typeStr.equals(XSD.unsignedInt.getLocalName()))
+			onDatatype = XSD.unsignedInt;
+		else if (typeStr.equals(XSD.unsignedLong.getLocalName()))
+			onDatatype = XSD.unsignedLong;
+		else if (typeStr.equals(XSD.unsignedShort.getLocalName()))
+			onDatatype = XSD.unsignedShort;
+		else if (typeStr.equals(XSD.language.getLocalName()))
+			onDatatype = XSD.language;
 		else {
 			throw new JenaProcessorException("Unexpected primitive data type: " + typeStr);
 		}
@@ -10862,7 +10907,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			List<Node> lNodeList = ((BuiltinElement) aBuiltinElement).getArguments();
 			if(lNodeList.size() == 2) {
 				Node lNode = lNodeList.get(1);
-				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode) {
+				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode && !(lNode instanceof VariableNode)) {
 					addError(SadlErrorMessages.NEEDS_ARTICLE.get(), aValue);
 				}
 			}
